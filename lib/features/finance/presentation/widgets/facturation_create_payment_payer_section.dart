@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -28,7 +28,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const nameInputFormatters = [FirstLetterUppercaseTextInputFormatter()];
+    const nameInputFormatters = [WordCapitalizationInputFormatter()];
 
     final lastName = FinanceTextFormField(
       controller: lastNameController,

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validated_year_selector.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -90,7 +89,6 @@ class PreviousYearFields extends StatelessWidget {
             required: true,
             errorText: prevSchoolError,
             readOnly: !isEditable,
-            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
         // Cycle — cascade : désactivé tant que l'année est vide.

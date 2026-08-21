@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/bi_mode_search_form.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Carte de recherche bi-mode de la Pré-inscription — recherche par nom OU par
@@ -28,7 +27,6 @@ class PreRegistrationSearchForm extends StatelessWidget {
 
     return BiModeSearchForm(
       isLoading: isLoading,
-      nameInputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
       helpPill: l10n.preRegistrationSearchHelpPill,
       helpPillIcon: Icons.school_outlined,
       options: options,

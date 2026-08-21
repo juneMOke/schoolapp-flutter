@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -8,7 +7,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Par quoi l'utilisateur cherche un tuteur déjà connu.
@@ -185,10 +183,6 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
       );
     }
 
-    const nameFormatters = <TextInputFormatter>[
-      FirstLetterUppercaseTextInputFormatter(),
-    ];
-
     return Wrap(
       spacing: AppDimensions.spacingM,
       runSpacing: AppDimensions.spacingM,
@@ -199,7 +193,6 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
             label: l10n.lastName,
             controller: _lastNameController,
             required: true,
-            inputFormatters: nameFormatters,
             textInputAction: TextInputAction.next,
             onSubmitted: (_) => _submit(),
           ),
@@ -209,7 +202,6 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
           child: EteeloTextInput(
             label: l10n.surname,
             controller: _surnameController,
-            inputFormatters: nameFormatters,
             textInputAction: TextInputAction.next,
             onSubmitted: (_) => _submit(),
           ),
@@ -220,7 +212,6 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
             label: l10n.firstName,
             controller: _firstNameController,
             required: true,
-            inputFormatters: nameFormatters,
             textInputAction: TextInputAction.search,
             onSubmitted: (_) => _submit(),
           ),

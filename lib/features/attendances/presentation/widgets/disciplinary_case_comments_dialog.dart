@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
@@ -220,6 +221,8 @@ class _AddField extends StatelessWidget {
                 controller: controller,
                 minLines: 1,
                 maxLines: 3,
+                inputFormatters: const [SentenceCapitalizationInputFormatter()],
+                textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSubmit(),
                 decoration: InputDecoration(

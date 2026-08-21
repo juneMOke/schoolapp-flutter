@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -139,9 +138,6 @@ class TargetYearFields extends StatelessWidget {
                 controller: targetOptionController,
                 label: l10n.optionLabel,
                 readOnly: !isEditable,
-                inputFormatters: const [
-                  FirstLetterUppercaseTextInputFormatter(),
-                ],
               ),
             ),
           ],

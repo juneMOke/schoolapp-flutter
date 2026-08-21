@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/bi_mode_search_form.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Option « cycle + niveau » proposée à la recherche de réinscription.
@@ -41,7 +40,6 @@ class ReRegistrationSearchForm extends StatelessWidget {
 
     return BiModeSearchForm(
       isLoading: isLoading,
-      nameInputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
       helpPill: l10n.reRegistrationSearchHelpPill,
       helpPillIcon: Icons.school_outlined,
       options: options

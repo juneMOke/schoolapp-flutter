@@ -9,7 +9,6 @@ import 'package:school_app_flutter/core/components/search/search_two_groups_layo
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_filter_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -202,7 +201,6 @@ class _FirstRegistrationSearchFormState
         lastNameLabel: l10n.lastName,
         surnameLabel: l10n.surname,
         enabled: !widget.isLoading,
-        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: _onNameChanged,
       ),
     );

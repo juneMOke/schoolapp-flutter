@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
 /// Grille de recherche des classes en composants design-system Eteelo.
 ///
@@ -118,7 +117,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
           controller: lastNameController,
           label: lastNameLabel,
           onChanged: onLastNameChanged,
-          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           textInputAction: TextInputAction.next,
         ),
       ),
@@ -128,7 +126,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
           controller: surnameController,
           label: surnameLabel,
           onChanged: onSurnameChanged,
-          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           textInputAction: TextInputAction.next,
         ),
       ),
@@ -138,7 +135,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
           controller: firstNameController,
           label: firstNameLabel,
           onChanged: onFirstNameChanged,
-          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           textInputAction: TextInputAction.done,
         ),
       ),

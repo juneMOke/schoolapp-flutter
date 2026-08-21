@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_filter_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -69,21 +68,18 @@ class _SearchFormState extends State<SearchForm> {
         controller: _firstNameController,
         label: l10n.firstName,
         placeholder: l10n.firstNameExample,
-        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
       EteeloTextInput(
         controller: _lastNameController,
         label: l10n.lastName,
         placeholder: l10n.lastNameExample,
-        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
       EteeloTextInput(
         controller: _surnameController,
         label: l10n.surname,
         placeholder: l10n.surnameExample,
-        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
       EteeloDateInput(

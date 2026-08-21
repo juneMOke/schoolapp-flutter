@@ -3,7 +3,6 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
@@ -81,9 +80,6 @@ class PersonalInfoStepBody extends StatelessWidget {
                   required: true,
                   errorText: firstNameError,
                   readOnly: !isEditable,
-                  inputFormatters: const [
-                    FirstLetterUppercaseTextInputFormatter(),
-                  ],
                 ),
               ),
               WizardGridField(
@@ -93,9 +89,6 @@ class PersonalInfoStepBody extends StatelessWidget {
                   required: true,
                   errorText: lastNameError,
                   readOnly: !isEditable,
-                  inputFormatters: const [
-                    FirstLetterUppercaseTextInputFormatter(),
-                  ],
                 ),
               ),
               WizardGridField(
@@ -105,9 +98,6 @@ class PersonalInfoStepBody extends StatelessWidget {
                   required: true,
                   errorText: surnameError,
                   readOnly: !isEditable,
-                  inputFormatters: const [
-                    FirstLetterUppercaseTextInputFormatter(),
-                  ],
                 ),
               ),
               WizardGridField(
@@ -135,9 +125,6 @@ class PersonalInfoStepBody extends StatelessWidget {
                   required: true,
                   errorText: birthPlaceError,
                   readOnly: !isEditable,
-                  inputFormatters: const [
-                    FirstLetterUppercaseTextInputFormatter(),
-                  ],
                 ),
               ),
               WizardGridField(
