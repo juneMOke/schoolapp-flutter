@@ -95,7 +95,8 @@ abstract class FinanceOfflineRepository {
 
   /// Position des élèves [studentIds] sur le frais [feeCode] : attendu, payé
   /// (miroir + encaissements non remontés) et reste composé.
-  Future<Either<Failure, List<LocalFeeChargeAggregate>>> getFeeChargeAggregates({
+  Future<Either<Failure, List<LocalFeeChargeAggregate>>>
+  getFeeChargeAggregates({
     required String academicYearId,
     required String feeCode,
     required List<String> studentIds,

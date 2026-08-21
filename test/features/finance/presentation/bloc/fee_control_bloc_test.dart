@@ -250,9 +250,9 @@ void main() {
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
           ),
         ).thenAnswer((_) async => const Right(<LocalFeeTariff>[]));
-        when(() => hasFeeGrid(any())).thenAnswer(
-          (_) async => const Left(StorageFailure('base illisible')),
-        );
+        when(
+          () => hasFeeGrid(any()),
+        ).thenAnswer((_) async => const Left(StorageFailure('base illisible')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -448,9 +448,7 @@ void main() {
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
             schoolLevelId: any(named: 'schoolLevelId'),
           ),
-        ).thenAnswer(
-          (_) async => const Left(StorageFailure('base illisible')),
-        );
+        ).thenAnswer((_) async => const Left(StorageFailure('base illisible')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -473,9 +471,7 @@ void main() {
             feeCode: any(named: 'feeCode'),
             studentIds: any(named: 'studentIds'),
           ),
-        ).thenAnswer(
-          (_) async => const Left(StorageFailure('base illisible')),
-        );
+        ).thenAnswer((_) async => const Left(StorageFailure('base illisible')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -534,10 +530,7 @@ void main() {
         ),
       ),
       verify: (bloc) {
-        expect(bloc.state.rows.map((r) => r.summary.student.id), [
-          's1',
-          's3',
-        ]);
+        expect(bloc.state.rows.map((r) => r.summary.student.id), ['s1', 's3']);
         expect(bloc.state.studentsInScope, 2);
       },
     );
@@ -572,9 +565,7 @@ void main() {
             classroomId: any(named: 'classroomId'),
             query: any(named: 'query'),
           ),
-        ).thenAnswer(
-          (_) async => const Left(StorageFailure('base illisible')),
-        );
+        ).thenAnswer((_) async => const Left(StorageFailure('base illisible')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(

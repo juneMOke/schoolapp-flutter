@@ -137,9 +137,8 @@ class _FeeControlDataTableState extends State<FeeControlDataTable> {
         FeeControlSortColumn.firstName => a.summary.student.firstName.compareTo(
           b.summary.student.firstName,
         ),
-        FeeControlSortColumn.remaining => a.aggregate.remainingInCents.compareTo(
-          b.aggregate.remainingInCents,
-        ),
+        FeeControlSortColumn.remaining =>
+          a.aggregate.remainingInCents.compareTo(b.aggregate.remainingInCents),
         FeeControlSortColumn.status => a.status.index.compareTo(b.status.index),
       };
       return _sortAscending ? cmp : -cmp;

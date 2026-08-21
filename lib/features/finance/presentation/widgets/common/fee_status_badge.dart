@@ -14,11 +14,7 @@ class FeeStatusBadge extends StatelessWidget {
   final String label;
   final FeeStatusVisuals visuals;
 
-  const FeeStatusBadge({
-    super.key,
-    required this.label,
-    required this.visuals,
-  });
+  const FeeStatusBadge({super.key, required this.label, required this.visuals});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +33,10 @@ class FeeStatusBadge extends StatelessWidget {
         children: [
           Icon(visuals.icon, size: 14, color: visuals.color),
           const SizedBox(width: AppDimensions.spacingXS),
-          Text(label, style: AppTextStyles.badge.copyWith(color: visuals.color)),
+          Text(
+            label,
+            style: AppTextStyles.badge.copyWith(color: visuals.color),
+          ),
         ],
       ),
     );

@@ -170,7 +170,10 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
     return widgets;
   }
 
-  TextStyle _resolveCellStyle(DataTableCellTextVariant variant, [Color? color]) {
+  TextStyle _resolveCellStyle(
+    DataTableCellTextVariant variant, [
+    Color? color,
+  ]) {
     final style = switch (variant) {
       DataTableCellTextVariant.strong => EteeloDataTableTheme.cellStrongStyle,
       DataTableCellTextVariant.mono => EteeloDataTableTheme.cellMonoStyle,

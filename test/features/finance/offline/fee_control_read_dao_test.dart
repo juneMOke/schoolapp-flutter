@@ -107,10 +107,7 @@ void main() {
         schoolLevelGroupId: 'grp-1',
       );
 
-      expect(
-        tariffs.map((t) => t.feeCode).toSet(),
-        {'TUITION', 'INSCRIPTION'},
-      );
+      expect(tariffs.map((t) => t.feeCode).toSet(), {'TUITION', 'INSCRIPTION'});
     });
 
     test('sans cycle fourni, seuls les tarifs du niveau exact', () async {
@@ -167,44 +164,41 @@ void main() {
       expect(rows.single.expectedInCents, 100000);
     });
 
-    test(
-      'le payé COMPOSÉ additionne le miroir serveur et les paiements non '
-      'remontés — PENDING_SYNC comme SYNC_ERROR',
-      () async {
-        await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 20000);
-        await insertPaymentWithAllocation(
-          paymentId: 'p-pending',
-          chargeId: 'c1',
-          amount: 30000,
-          syncStatus: 'PENDING_SYNC',
-        );
-        await insertPaymentWithAllocation(
-          paymentId: 'p-error',
-          chargeId: 'c1',
-          amount: 10000,
-          syncStatus: 'SYNC_ERROR',
-        );
-        // Déjà remonté : compté par le miroir, jamais deux fois.
-        await insertPaymentWithAllocation(
-          paymentId: 'p-synced',
-          chargeId: 'c1',
-          amount: 5000,
-          syncStatus: 'SYNCED',
-        );
+    test('le payé COMPOSÉ additionne le miroir serveur et les paiements non '
+        'remontés — PENDING_SYNC comme SYNC_ERROR', () async {
+      await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 20000);
+      await insertPaymentWithAllocation(
+        paymentId: 'p-pending',
+        chargeId: 'c1',
+        amount: 30000,
+        syncStatus: 'PENDING_SYNC',
+      );
+      await insertPaymentWithAllocation(
+        paymentId: 'p-error',
+        chargeId: 'c1',
+        amount: 10000,
+        syncStatus: 'SYNC_ERROR',
+      );
+      // Déjà remonté : compté par le miroir, jamais deux fois.
+      await insertPaymentWithAllocation(
+        paymentId: 'p-synced',
+        chargeId: 'c1',
+        amount: 5000,
+        syncStatus: 'SYNCED',
+      );
 
-        final rows = await dao.getFeeChargeAggregates(
-          academicYearId: 'ay-1',
-          feeCode: 'TUITION',
-          studentIds: const ['s1'],
-        );
+      final rows = await dao.getFeeChargeAggregates(
+        academicYearId: 'ay-1',
+        feeCode: 'TUITION',
+        studentIds: const ['s1'],
+      );
 
-        final row = rows.single;
-        expect(row.paidMirrorInCents, 20000);
-        expect(row.paidPendingInCents, 40000);
-        expect(row.paidTotalInCents, 60000);
-        expect(row.remainingInCents, 40000);
-      },
-    );
+      final row = rows.single;
+      expect(row.paidMirrorInCents, 20000);
+      expect(row.paidPendingInCents, 40000);
+      expect(row.paidTotalInCents, 60000);
+      expect(row.remainingInCents, 40000);
+    });
 
     test('le reste est borné à zéro sur un trop-perçu', () async {
       await insertCharge('c1', 's1', 'TUITION', expected: 50000, paid: 80000);
@@ -231,20 +225,23 @@ void main() {
       expect(rows.map((r) => r.studentId), ['s1']);
     });
 
-    test('deux créances du même frais sont sommées, pas tirées au sort', () async {
-      await insertCharge('c1', 's1', 'TUITION', expected: 60000, paid: 10000);
-      await insertCharge('c2', 's1', 'TUITION', expected: 40000, paid: 5000);
+    test(
+      'deux créances du même frais sont sommées, pas tirées au sort',
+      () async {
+        await insertCharge('c1', 's1', 'TUITION', expected: 60000, paid: 10000);
+        await insertCharge('c2', 's1', 'TUITION', expected: 40000, paid: 5000);
 
-      final rows = await dao.getFeeChargeAggregates(
-        academicYearId: 'ay-1',
-        feeCode: 'TUITION',
-        studentIds: const ['s1'],
-      );
+        final rows = await dao.getFeeChargeAggregates(
+          academicYearId: 'ay-1',
+          feeCode: 'TUITION',
+          studentIds: const ['s1'],
+        );
 
-      expect(rows.length, 1);
-      expect(rows.single.expectedInCents, 100000);
-      expect(rows.single.paidMirrorInCents, 15000);
-    });
+        expect(rows.length, 1);
+        expect(rows.single.expectedInCents, 100000);
+        expect(rows.single.paidMirrorInCents, 15000);
+      },
+    );
 
     test('découpe en lots au-delà de la limite de variables SQLite', () async {
       const total = 1200;

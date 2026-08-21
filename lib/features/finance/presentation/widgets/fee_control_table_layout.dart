@@ -102,70 +102,75 @@ class FeeControlTableLayout {
     required bool wide,
     required ValueChanged<FeeControlRow> onViewRequested,
   }) {
-    return rows.map((row) {
-      final student = row.summary.student;
-      final aggregate = row.aggregate;
-      final expected = money(aggregate.expectedInCents, aggregate.currency);
-      final paid = money(aggregate.paidTotalInCents, aggregate.currency);
-      final remaining = money(aggregate.remainingInCents, aggregate.currency);
-      final statusCell = DataTableCellSpec(
-        child: FeeStatusBadge(
-          label: row.status.localizedLabel(l10n),
-          visuals: row.status.visuals,
-        ),
-      );
+    return rows
+        .map((row) {
+          final student = row.summary.student;
+          final aggregate = row.aggregate;
+          final expected = money(aggregate.expectedInCents, aggregate.currency);
+          final paid = money(aggregate.paidTotalInCents, aggregate.currency);
+          final remaining = money(
+            aggregate.remainingInCents,
+            aggregate.currency,
+          );
+          final statusCell = DataTableCellSpec(
+            child: FeeStatusBadge(
+              label: row.status.localizedLabel(l10n),
+              visuals: row.status.visuals,
+            ),
+          );
 
-      final paidColor = _paidColor(aggregate.paidTotalInCents);
-      final remainingColor = _remainingColor(aggregate.remainingInCents);
+          final paidColor = _paidColor(aggregate.paidTotalInCents);
+          final remainingColor = _remainingColor(aggregate.remainingInCents);
 
-      return DataTableRowSpec(
-        // L'identité de ligne est l'ÉLÈVE : un candidat sans dossier porte un
-        // `enrollmentId` vide, qui ferait collisionner plusieurs lignes.
-        id: student.id,
-        displayName: '${student.lastName} ${student.firstName}',
-        leading: core_avatar.StudentAvatar(
-          firstName: student.firstName,
-          lastName: student.lastName,
-          studentId: student.id,
-          size: core_avatar.AvatarSize.sm,
-        ),
-        cells: wide
-            ? [
-                DataTableCellSpec(
-                  text: student.lastName,
-                  variant: DataTableCellTextVariant.strong,
-                ),
-                DataTableCellSpec(text: student.surname),
-                DataTableCellSpec(text: student.firstName),
-                // L'attendu reste neutre : c'est la référence, pas un verdict.
-                _amount(expected),
-                _amount(paid, color: paidColor),
-                _amount(remaining, color: remainingColor),
-                statusCell,
-              ]
-            : [
-                DataTableCellSpec(
-                  text: '${student.lastName} ${student.firstName}',
-                  variant: DataTableCellTextVariant.strong,
-                  secondaryText: student.surname,
-                ),
-                DataTableCellSpec(
-                  text: remaining,
-                  variant: DataTableCellTextVariant.mono,
-                  color: remainingColor,
-                  secondaryText: '$paid / $expected',
-                  secondaryVariant: DataTableCellTextVariant.mono,
-                  secondaryColor: paidColor,
-                ),
-                statusCell,
-              ],
-        trailing: DataTableTrailingSpec(
-          type: DataTableTrailingType.eye,
-          tooltip: l10n.feeControlViewDetailLabel,
-          onTap: () => onViewRequested(row),
-        ),
-      );
-    }).toList(growable: false);
+          return DataTableRowSpec(
+            // L'identité de ligne est l'ÉLÈVE : un candidat sans dossier porte un
+            // `enrollmentId` vide, qui ferait collisionner plusieurs lignes.
+            id: student.id,
+            displayName: '${student.lastName} ${student.firstName}',
+            leading: core_avatar.StudentAvatar(
+              firstName: student.firstName,
+              lastName: student.lastName,
+              studentId: student.id,
+              size: core_avatar.AvatarSize.sm,
+            ),
+            cells: wide
+                ? [
+                    DataTableCellSpec(
+                      text: student.lastName,
+                      variant: DataTableCellTextVariant.strong,
+                    ),
+                    DataTableCellSpec(text: student.surname),
+                    DataTableCellSpec(text: student.firstName),
+                    // L'attendu reste neutre : c'est la référence, pas un verdict.
+                    _amount(expected),
+                    _amount(paid, color: paidColor),
+                    _amount(remaining, color: remainingColor),
+                    statusCell,
+                  ]
+                : [
+                    DataTableCellSpec(
+                      text: '${student.lastName} ${student.firstName}',
+                      variant: DataTableCellTextVariant.strong,
+                      secondaryText: student.surname,
+                    ),
+                    DataTableCellSpec(
+                      text: remaining,
+                      variant: DataTableCellTextVariant.mono,
+                      color: remainingColor,
+                      secondaryText: '$paid / $expected',
+                      secondaryVariant: DataTableCellTextVariant.mono,
+                      secondaryColor: paidColor,
+                    ),
+                    statusCell,
+                  ],
+            trailing: DataTableTrailingSpec(
+              type: DataTableTrailingType.eye,
+              tooltip: l10n.feeControlViewDetailLabel,
+              onTap: () => onViewRequested(row),
+            ),
+          );
+        })
+        .toList(growable: false);
   }
 
   static DataTableCellSpec _amount(String text, {Color? color}) =>
@@ -189,8 +194,5 @@ class FeeControlTableLayout {
       : StudentChargeStatus.paid.badgeColor;
 
   static String money(int cents, String currency) =>
-      formatMonetaryAmountWithCurrency(
-        amount: cents / 100,
-        currency: currency,
-      );
+      formatMonetaryAmountWithCurrency(amount: cents / 100, currency: currency);
 }

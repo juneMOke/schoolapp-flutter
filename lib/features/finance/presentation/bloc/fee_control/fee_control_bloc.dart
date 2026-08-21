@@ -261,83 +261,80 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     if (query.classroomId != null) {
       final roster = await _getRoster(classroomId: query.classroomId!);
       if (generation != _loadGeneration) return;
-      final failed = roster.fold((failure) {
-        _emitFailure(emit, failure);
-        return true;
-      }, (members) {
-        classroomStudentIds = members.map((m) => m.studentId).toSet();
-        return false;
-      });
+      final failed = roster.fold(
+        (failure) {
+          _emitFailure(emit, failure);
+          return true;
+        },
+        (members) {
+          classroomStudentIds = members.map((m) => m.studentId).toSet();
+          return false;
+        },
+      );
       if (failed) return;
     }
 
-    await enrolled.fold(
-      (failure) async => _emitFailure(emit, failure),
-      (items) async {
-        final scoped = classroomStudentIds == null
-            ? items
-            : items
-                  .where((i) => classroomStudentIds!.contains(i.studentId))
-                  .toList(growable: false);
-        final summaries = EnrollmentLocalListProjector.project(
-          scoped,
-          firstName: query.firstName,
-          lastName: query.lastName,
-          surname: query.surname,
-        );
-        if (summaries.isEmpty) {
-          _cache = const <FeeControlRow>[];
-          emit(
-            state.withPage(
-              query: query,
-              page: ClientSidePaginator.paginate(
-                const <FeeControlRow>[],
-                page: 0,
-                size: query.size,
-              ),
-              studentsInScope: 0,
-              breakdown: const FeeControlBreakdown(),
-              classroomRosterSize: classroomStudentIds?.length,
+    await enrolled.fold((failure) async => _emitFailure(emit, failure), (
+      items,
+    ) async {
+      final scoped = classroomStudentIds == null
+          ? items
+          : items
+                .where((i) => classroomStudentIds!.contains(i.studentId))
+                .toList(growable: false);
+      final summaries = EnrollmentLocalListProjector.project(
+        scoped,
+        firstName: query.firstName,
+        lastName: query.lastName,
+        surname: query.surname,
+      );
+      if (summaries.isEmpty) {
+        _cache = const <FeeControlRow>[];
+        emit(
+          state.withPage(
+            query: query,
+            page: ClientSidePaginator.paginate(
+              const <FeeControlRow>[],
+              page: 0,
+              size: query.size,
             ),
-          );
-          return;
-        }
-
-        final aggregates = await _getAggregates(
-          academicYearId: query.academicYearId,
-          feeCode: query.feeCode,
-          studentIds: summaries
-              .map((s) => s.student.id)
-              .toList(growable: false),
+            studentsInScope: 0,
+            breakdown: const FeeControlBreakdown(),
+            classroomRosterSize: classroomStudentIds?.length,
+          ),
         );
-        if (generation != _loadGeneration) return;
+        return;
+      }
 
-        aggregates.fold(
-          (failure) => _emitFailure(emit, failure),
-          (list) {
-            final join = FeeControlProjector.join(
-              summaries: summaries,
-              aggregates: list,
-              filter: query.statusFilter,
-            );
-            _cache = join.filtered;
-            emit(
-              state.withPage(
-                query: query,
-                page: ClientSidePaginator.paginate(
-                  join.filtered,
-                  page: query.page,
-                  size: query.size,
-                ),
-                studentsInScope: summaries.length,
-                breakdown: join.breakdown,
-                classroomRosterSize: classroomStudentIds?.length,
-              ),
-            );
-          },
+      final aggregates = await _getAggregates(
+        academicYearId: query.academicYearId,
+        feeCode: query.feeCode,
+        studentIds: summaries.map((s) => s.student.id).toList(growable: false),
+      );
+      if (generation != _loadGeneration) return;
+
+      aggregates.fold((failure) => _emitFailure(emit, failure), (list) {
+        final join = FeeControlProjector.join(
+          summaries: summaries,
+          aggregates: list,
+          filter: query.statusFilter,
         );
-      },
-    );
+        _cache = join.filtered;
+        emit(
+          state.withPage(
+            query: query,
+            page: ClientSidePaginator.paginate(
+              join.filtered,
+              page: query.page,
+              size: query.size,
+            ),
+            studentsInScope: summaries.length,
+            breakdown: join.breakdown,
+            classroomRosterSize: classroomStudentIds?.length,
+          ),
+        );
+      });
+    });
   }
 
   /// Purge aussi le cache : l'écran d'erreur remplace la liste, et une

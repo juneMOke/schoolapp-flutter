@@ -39,10 +39,7 @@ void main() {
   test('une taille nulle ou négative retombe sur 1', () {
     expect(ClientSidePaginator.paginate(items, page: 0, size: 0).size, 1);
     expect(ClientSidePaginator.paginate(items, page: 0, size: -5).size, 1);
-    expect(
-      ClientSidePaginator.paginate(items, page: 3, size: 0).content,
-      [3],
-    );
+    expect(ClientSidePaginator.paginate(items, page: 3, size: 0).content, [3]);
   });
 
   test('une page négative est ramenée à la première', () {
