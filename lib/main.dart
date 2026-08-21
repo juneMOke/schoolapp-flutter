@@ -118,11 +118,41 @@ class _MyAppState extends State<MyApp> {
   /// seule source d'amorçage d'un brouillon, une purge sans rembobinage rendrait
   /// ses lignes définitivement inatteignables.
   ///
-  /// Déclenché AVANT le cycle de pull ci-dessous : la garde ne fait que lire
-  /// `sync_meta` et, le cas échéant, vider une table, quand le pull attend le
-  /// réseau. L'ordre inverse ne serait pas faux pour autant — la purge
-  /// rembobinant tout le flux, une page arrivée trop tôt est effacée avec son
-  /// curseur, et redescend intégralement au cycle suivant.
+  /// Déclenché AVANT le cycle de pull, et **réellement avant** : les deux
+  /// partaient en `unawaited`, l'un derrière l'autre, ce qui n'ordonne rien.
+  ///
+  /// ⚠️ La docstring affirmait ici que l'ordre inverse « ne serait pas faux
+  /// pour autant », au motif que la purge rembobine tout le flux. Le
+  /// raisonnement tient pour un pull qui aurait fini ; il tombe pour un pull
+  /// qui s'entrelace. La purge est en deux temps — vider la table, puis
+  /// rembobiner — et un cycle de préinscriptions qui insère ses lignes juste
+  /// avant le premier temps, puis écrit son curseur keyset juste après le
+  /// second, laisse exactement ce que la garde existe à interdire : une table
+  /// vide derrière un curseur avancé. Le serveur répond « rien de neuf » pour
+  /// toujours, et `ref_pre_enrollments` étant depuis la bascule dure la seule
+  /// source d'amorçage d'un brouillon PRE, ces préinscriptions ne reviennent
+  /// jamais.
+  ///
+  /// La fenêtre est étroite — quelques opérations SQLite locales contre un
+  /// aller-retour réseau — mais elle s'est élargie avec le lot précédent : la
+  /// garde purge désormais aussi quand le marqueur d'école est ABSENT, c'est-à-
+  /// dire au premier démarrage de tout le parc après cette mise à jour, et non
+  /// plus sur la seule tablette réaffectée.
+  Future<void> _guardPreEnrollmentsSchoolThenSync() async {
+    await _guardPreEnrollmentsSchool();
+    // Jetons frais ou repli offline : dans les deux cas, pousse l'outbox en
+    // attente et recalcule la pastille de synchro (D-05, réconciliation
+    // silencieuse au retour réseau si offline) — puis TIRE (ADR-015 F0).
+    //
+    // Le cycle de pull n'avait qu'un seul déclencheur, la transition hors-ligne
+    // → en ligne : une tablette allumée le matin dans une école déjà couverte
+    // en Wi-Fi n'exécutait aucun cycle de coordinateur de toute la journée.
+    // Arme aussi le battement de la file (lot 2) : la cadence est portée par
+    // `syncOnLogin` lui-même, pour qu'il n'y ait qu'un seul fil de session à ne
+    // pas oublier ici.
+    await _syncStatusCubit.syncOnLogin();
+  }
+
   Future<void> _guardPreEnrollmentsSchool() async {
     try {
       await getIt<PreEnrollmentsSchoolGuard>().onSessionOpened();
@@ -175,27 +205,17 @@ class _MyAppState extends State<MyApp> {
                 _academicYearContextBloc.add(
                   const AcademicYearContextRequested(),
                 );
-                // AVANT le cycle : une école qui a changé efface le vivier de
-                // préinscriptions et rembobine son flux, faute de quoi le
-                // nouveau guichet chercherait dans les candidats de l'ancien
-                // (`ref_pre_enrollments` n'a pas de colonne `school_id`).
-                unawaited(_guardPreEnrollmentsSchool());
-                // Jetons frais ou repli offline : dans les deux cas, pousse
-                // l'outbox en attente et recalcule la pastille de synchro
-                // (D-05, réconciliation silencieuse au retour réseau si
-                // offline) — puis TIRE (ADR-015 F0).
+                // La garde du vivier de préinscriptions PUIS le cycle, dans
+                // cet ordre et jamais en parallèle : lancés tous deux sans
+                // attente, ils s'entrelaçaient, et l'entrelacement perdait des
+                // préinscriptions pour de bon (cf.
+                // `_guardPreEnrollmentsSchoolThenSync`).
                 //
-                // Le cycle de pull n'avait qu'un seul déclencheur, la
-                // transition hors-ligne → en ligne : une tablette allumée le
-                // matin dans une école déjà couverte en Wi-Fi n'exécutait
-                // aucun cycle de coordinateur de toute la journée. En
-                // `unawaited` : la porte de navigation ne dépend que du
-                // contexte académique demandé juste au-dessus, et rien de
-                // réseau ne doit la retarder.
-                // Arme aussi le battement de la file (lot 2) : la cadence est
-                // portée par `syncOnLogin` lui-même, pour qu'il n'y ait qu'un
-                // seul fil de session à ne pas oublier ici.
-                unawaited(_syncStatusCubit.syncOnLogin());
+                // L'ensemble reste en `unawaited` : la porte de navigation ne
+                // dépend que du contexte académique demandé juste au-dessus, et
+                // rien — ni disque ni réseau — ne doit la retarder. Ce qui est
+                // ordonné, c'est la paire, pas son rapport à l'écran.
+                unawaited(_guardPreEnrollmentsSchoolThenSync());
                 // Entretien du cache de restitution éditique (ADR-012 D-7) :
                 // réclame les fichiers chiffrés qu'aucune ligne d'index ne
                 // désigne plus. Une purge d'école interrompue en laisse — des

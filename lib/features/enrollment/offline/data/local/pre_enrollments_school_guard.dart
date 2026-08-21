@@ -34,6 +34,17 @@ const String kPreEnrollmentsSchoolResource =
 /// [preEnrollmentsCursorKey]) fait bien descendre les préinscriptions de la
 /// nouvelle école, mais n'efface pas celles de l'ancienne : il faut les deux.
 ///
+/// ## Trois états, et l'absence n'est pas la continuité
+///
+/// Le marqueur d'école répond à trois choses, pas à deux : « c'est la même
+/// école » (on garde), « c'en est une autre » (on purge), et « on ne sait pas »
+/// — marqueur jamais posé. Ce troisième cas se lisait comme le premier, et
+/// c'était l'erreur : la garde adoptait le disque à la première session, donc
+/// précisément sur la tablette déjà réaffectée avant l'installation de ce lot.
+/// Il se lit désormais comme le second. Même patron que le tri-état des
+/// permissions et que celui du plan de synchro — l'absence d'information n'est
+/// jamais une information rassurante.
+///
 /// ## Pourquoi à l'ouverture, et pas à la fermeture
 ///
 /// À la fermeture, le contexte courant est déjà vidé et la seule école
@@ -98,9 +109,26 @@ class PreEnrollmentsSchoolGuard {
       final previousSchool = await _syncMetaDao.getCursor(
         kPreEnrollmentsSchoolResource,
       );
-      // Première session de cette tablette : rien à comparer, donc rien à
-      // purger. On se contente d'installer le repère.
-      if (previousSchool != null && previousSchool != school) {
+      // ⚠️ **Un marqueur absent vaut « école inconnue », pas « rien à
+      // purger ».** C'est la seule lecture compatible avec le défaut fermé que
+      // cette classe défend : un vivier qu'on ne sait attribuer à personne est
+      // exactement ce qu'il ne faut pas servir au guichet suivant. Adopter le
+      // disque sur cette base rendait la garde inopérante là où elle comptait
+      // le plus — à la PREMIÈRE session, celle qui suit la mise à jour, la
+      // seule que voit une tablette déjà réaffectée. Les candidats de l'école A
+      // restaient alors lisibles par B pour toujours : ni
+      // `searchPreEnrollmentCandidates` ni `findPreEnrollmentById` n'ont de
+      // prédicat `school_id`, faute de colonne.
+      //
+      // Le prix est un rebootstrap unique par tablette au premier démarrage
+      // après ce lot — table vidée, flux rembobiné, vivier redescendu au cycle
+      // suivant. Sur une installation neuve il ne coûte rien : la table est
+      // déjà vide et aucun curseur n'existe.
+      final sameSchool =
+          previousSchool != null &&
+          previousSchool.isNotEmpty &&
+          previousSchool == school;
+      if (!sameSchool) {
         await _purge();
         await _rememberSchool(school);
         return true;

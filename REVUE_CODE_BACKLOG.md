@@ -4,9 +4,9 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Neuf sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, et M-4 ; **plus aucun défaut « haut » n'est
-ouvert**. **Douze restent ouverts** et sont listés ici (B-9 compris, ouvert hors revue par la passe « clavier ») ;
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Onze sont corrigés** — le #13
+(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble ; **plus aucun défaut « haut » n'est
+ouvert**. **Dix restent ouverts** et sont listés ici (B-9 compris, ouvert hors revue par la passe « clavier ») ;
 aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
@@ -29,40 +29,6 @@ réseau avant d'afficher un grand-livre déjà présent en base. Seul défaut du
 ---
 
 ## 🟠 Moyen
-
-### M-5 · La garde d'école des préinscriptions est inopérante au premier démarrage
-
-`lib/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart:103`
-
-Rien n'amorce `kPreEnrollmentsSchoolResource` : la première session après mise à jour prend donc toujours le chemin «
-rien à purger » et **adopte** ce qui est sur le disque. Une tablette qui portait le vivier de l'école A, réaffectée à B,
-garde les candidats de A indéfiniment — `searchPreEnrollmentCandidates` et
-`findPreEnrollmentById` n'ont aucun prédicat `school_id` (la colonne n'existe pas), donc le guichet de B peut lister et
-amorcer des brouillons depuis les lignes de A.
-
-Un vivier non attribuable est le cas « fermé par défaut » que la docstring de la classe défend elle-même.
-
-**À faire** — traiter le marqueur absent comme « inconnu ⇒ purger ».
-
----
-
-### M-6 · La garde de préinscriptions court contre le cycle de login
-
-`lib/main.dart:182`
-
-La garde et `syncOnLogin()` sont toutes deux en `unawaited`, alors que le commentaire affirme un ordre (« AVANT le
-cycle »). Si l'insert +
-`setCursor` du pull des préinscriptions atterrit entre le
-`deleteAllPreEnrollments()` et le `deleteCursorsOf` de la garde, les lignes fraîchement tirées sont effacées **derrière
-un curseur keyset avancé** : le serveur répond « rien de neuf » pour toujours et ces préinscriptions deviennent
-inatteignables, `ref_pre_enrollments` étant désormais la seule source d'amorçage.
-
-Fenêtre étroite (SQLite local contre mint + flush + révocation + deux pulls réseau), mais elle n'existait pas avant ce
-PR.
-
-**À faire** — `await` la garde avant de lancer le cycle.
-
----
 
 ### M-7 · Le verrou de tarifs mute sans reconstruire
 
@@ -340,6 +306,47 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~M-5 + M-6 · Le vivier de préinscriptions : une garde qui n'a jamais gardé, et une purge qui court contre le pull~~ — corrigés
+
+Traités ensemble parce que le premier **arme** le second : tant que la garde ne purgeait qu'au
+changement d'école constaté, la course de M-6 ne concernait qu'une tablette réaffectée ; depuis M-5 elle
+purge aussi sur marqueur absent, c'est-à-dire au premier démarrage de **tout le parc** après ce lot.
+Corriger M-5 seul aurait donc généralisé la fenêtre de M-6.
+
+**M-5 — l'absence n'est pas la continuité.** Rien n'amorce `kPreEnrollmentsSchoolResource` : la première
+session prenait toujours le chemin « rien à comparer, rien à purger » et **adoptait** le disque. Or la
+première session est aussi celle qui suit la mise à jour — la seule que voit une tablette réaffectée
+avant que cette garde n'existe. Les candidats de l'école A restaient lisibles par B pour toujours : ni
+`searchPreEnrollmentCandidates` ni `findPreEnrollmentById` n'ont de prédicat `school_id`, faute de
+colonne. Le marqueur répond désormais à **trois** choses et non deux — même école (on garde), autre
+école (on purge), **inconnue (on purge)** — comme le tri-état des permissions et celui du plan de synchro.
+Prix : un rebootstrap unique par tablette ; nul sur une installation neuve, où la table est déjà vide.
+
+**M-6 — deux `unawaited` n'ordonnent rien.** La garde et `syncOnLogin()` partaient l'un sous l'autre,
+et le commentaire affirmait un ordre que le code n'établissait pas. La purge étant en deux temps — vider
+la table, puis rembobiner le curseur — un cycle de préinscriptions qui insère ses lignes juste avant le
+premier et écrit son curseur keyset juste après le second laisse exactement ce que la garde existe à
+interdire : **une table vide derrière un curseur avancé**. Le serveur répond « rien de neuf »
+indéfiniment, et `ref_pre_enrollments` étant la seule source d'amorçage d'un brouillon PRE, ces
+préinscriptions ne reviennent jamais. Les deux gestes sont maintenant une **séquence** —
+`_guardPreEnrollmentsSchoolThenSync()` — elle-même lancée en `unawaited` : ce qui est ordonné, c'est la
+paire, pas son rapport à l'écran. La porte de navigation ne dépend toujours que du contexte académique.
+
+⚠️ **La docstring qui disait « l'ordre inverse ne serait pas faux pour autant » a été retirée** — c'est
+elle qui a laissé passer le défaut. Son raisonnement (« la purge rembobine tout le flux, une page
+arrivée trop tôt redescend ») vaut pour un pull qui a fini, pas pour un pull qui s'entrelace.
+
+Tests. Côté garde : le test « première session → aucune purge » est **inversé** (avec la note qui dit
+pourquoi), plus deux cas neufs — le rebootstrap ne se répète pas à la session suivante, et sur une base
+vierge la purge ne coûte rien. Côté ordre, un test **de source** (`test/core/session/`) : le motif
+`unawaited(syncOnLogin())` ne doit pas revenir, la garde doit précéder le cycle, et le cycle n'être
+appelé qu'une fois. Le dépôt a le même genre de garde-fou pour le manifeste Android — la panne ne se
+voit qu'en production, et un test qui tenterait de reproduire l'entrelacement échouerait une fois sur
+mille. **C'est une garantie structurelle, pas comportementale, et c'est assumé.** Les deux lots sont
+vérifiés par mutation.
 
 ---
 

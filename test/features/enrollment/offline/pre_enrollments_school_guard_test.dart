@@ -57,20 +57,72 @@ void main() {
 
   group('PreEnrollmentsSchoolGuard.onSessionOpened', () {
     test(
-      'première session : rien à comparer → aucune purge, repère posé',
+      'marqueur ABSENT : école inconnue, donc on purge — et on pose le repère',
       () async {
+        // ⚠️ L'attente s'est INVERSÉE, et c'est le correctif d'un défaut réel.
+        //
+        // Ce test figeait « première session = rien à comparer = rien à
+        // purger ». Mais rien n'amorce ce marqueur : la première session est
+        // aussi celle qui suit la mise à jour, sur une tablette qui a pu être
+        // réaffectée AVANT que cette garde n'existe. Elle adoptait alors le
+        // vivier trouvé sur le disque, définitivement — `ref_pre_enrollments`
+        // n'a pas de colonne `school_id`, donc plus rien ensuite ne distingue
+        // les candidats de l'école A de ceux de B.
+        //
+        // Un vivier non attribuable est exactement le cas « fermé par défaut »
+        // que la classe défend. Le prix est un rebootstrap unique par tablette.
         await seedPreEnrollment('pre-1');
+        await syncMeta.setCursor(
+          preEnrollmentsCursorKey('school-1'),
+          cursor: 'WM-S1',
+          syncedAt: 1,
+        );
 
         final purged = await guardFor('school-1').onSessionOpened();
 
-        expect(purged, isFalse);
-        expect(await countPreEnrollments(), 1);
+        expect(purged, isTrue);
+        expect(await countPreEnrollments(), 0);
+        // Purger sans rembobiner rendrait ces lignes inatteignables : le
+        // serveur répondrait « rien de neuf » sur une table vide.
+        expect(
+          await syncMeta.getCursor(preEnrollmentsCursorKey('school-1')),
+          isNull,
+        );
         expect(
           await syncMeta.getCursor(kPreEnrollmentsSchoolResource),
           'school-1',
         );
       },
     );
+
+    test(
+      'et le rebootstrap ne se répète pas : la session suivante ne purge plus',
+      () async {
+        // Sans le repère posé au passage, le vivier serait vidé à CHAQUE
+        // ouverture — le parc entier retéléchargerait ses préinscriptions tous
+        // les matins.
+        await guardFor('school-1').onSessionOpened();
+        await seedPreEnrollment('pre-1');
+
+        final purgedAgain = await guardFor('school-1').onSessionOpened();
+
+        expect(purgedAgain, isFalse);
+        expect(await countPreEnrollments(), 1);
+      },
+    );
+
+    test('installation NEUVE : la purge ne coûte rien', () async {
+      // Le contre-poids du test ci-dessus : sur une base vierge, « purger par
+      // défaut » n'efface rien et ne rembobine rien qui existe.
+      final purged = await guardFor('school-1').onSessionOpened();
+
+      expect(purged, isTrue);
+      expect(await countPreEnrollments(), 0);
+      expect(
+        await syncMeta.getCursor(kPreEnrollmentsSchoolResource),
+        'school-1',
+      );
+    });
 
     test(
       'même école : le guichet garde le vivier qu\'il détenait la veille',
