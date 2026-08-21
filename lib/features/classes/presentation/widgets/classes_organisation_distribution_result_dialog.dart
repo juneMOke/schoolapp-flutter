@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -190,24 +191,25 @@ class _ClassesOrganisationDistributionResultDialogState
         boxShadow: AppElevation.shadowCard,
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _ResultHeader(
-            levelName: widget.levelName,
-            // Pas de fermeture pendant le traitement.
-            onClose: _phase == _Phase.processing ? null : _close,
-          ),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.spacingL),
-              child: _phase == _Phase.processing
-                  ? const _ProcessingBody()
-                  : _SuccessBody(onClose: _close),
-            ),
-          ),
-        ],
+      // Coquille commune (B-9) — cf. `EteeloDialogBody`. Aucun champ ici non
+      // plus, mais la modale s'ouvre depuis l'organisation des classes, où un
+      // clavier peut rester levé : l'en-tête sombre déborderait seul.
+      child: EteeloDialogBody(
+        // En-tête sombre Kuba seul, sans pied : une seule zone à loger.
+        minPinnedHeight: 220,
+        header: _ResultHeader(
+          levelName: widget.levelName,
+          // Pas de fermeture pendant le traitement.
+          onClose: _phase == _Phase.processing ? null : _close,
+        ),
+        bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
+        footer: const [],
+        body: SizedBox(
+          width: double.infinity,
+          child: _phase == _Phase.processing
+              ? const _ProcessingBody()
+              : _SuccessBody(onClose: _close),
+        ),
       ),
     );
   }

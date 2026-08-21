@@ -1447,6 +1447,8 @@
   "feeControlEmptyRosterMissing": "La liste des élèves de cette classe n'est pas encore descendue sur cet appareil. Synchronisez, puis relancez le contrôle.",
   "feeControlEmptyNoLocalEnrollment": "Aucun élève de cette classe n'a de dossier d'inscription local sur cette année. Synchronisez les inscriptions, puis relancez le contrôle.",
   "feeControlNoChargeDescription": "Aucun élève de cette classe ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne s'applique pas à ce niveau.",
+  "feeControlEmptyNoEnrollmentForLevel": "Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d'être saisies ailleurs, synchronisez puis relancez le contrôle.",
+  "feeControlNoChargeForLevelDescription": "Aucun élève de ce niveau ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne leur est pas applicable.",
   "feeControlCriteriaFee": "Frais : {label}",
   "@feeControlCriteriaFee": {
     "description": "Puce de critère rappelant le frais contrôlé.",

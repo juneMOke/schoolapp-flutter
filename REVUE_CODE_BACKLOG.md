@@ -4,13 +4,17 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Dix-neuf sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5, B-6 et B-8 (B-7 clos sans changement), enfin B-1, B-2 et B-3 ; **il ne reste plus aucun défaut
-« haut » ni « moyen »**. **Deux restent ouverts** — B-4 et B-9, tous deux « bas », et sont listés ici (B-9 compris, ouvert hors revue
-par la passe « clavier ») ; aucun n'est traité.
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement, plus deux signalés hors
+revue (M-8 et H-4). **Tous sont clos** — dix-neuf corrigés, un tranché sans changement (B-7, faute d'un
+harnais qui l'observe), et le dernier corrigé autrement que ce que sa fiche prescrivait (B-9, dont la
+modale d'éditique ne pouvait pas recevoir la coquille commune).
 
-S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
-de l'encaissement, des deux modales de discipline et de la recherche de parent.
+**Ce fichier n'est plus une liste de travail** : c'est la mémoire de ce qui a été trouvé, tranché, et
+parfois refusé. Les fiches ci-dessous gardent leur ⚠️ — ce sont les pièges à ne pas réintroduire, et
+plusieurs disent aussi ce que la fiche d'origine annonçait de travers.
+
+L'ordre des lots : #13 (`5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2+M-3, M-4, M-5+M-6, M-7, B-5+B-6
+(B-7 tranché), B-8, B-1+B-2+B-3, et enfin B-4 puis B-9.
 
 S'y ajoutait **H-4**, hors revue : signalé à l'usage le 2026-08-20 — en Facturation, un élève trouvé par
 **recherche d'identité** ouvrait une fiche vide, « contexte de détail indisponible » à la place du
@@ -27,61 +31,6 @@ réseau avant d'afficher un grand-livre déjà présent en base. Seul défaut du
 > se manifeste que sur une transition rare.
 
 ---
-
-## 🟠 Moyen
-
-*Aucun défaut « moyen » ouvert.*
-
-## 🟡 Bas
-
-### B-4 · La recherche par niveau n'a pas d'état « inscriptions pas encore synchronisées »
-
-`lib/features/finance/presentation/widgets/fee_control_results_view.dart:161`
-
-`feeControlEmptyNoLocalEnrollment` n'est atteignable que si
-`lastQuery.classroomId != null`. Sur « toutes les classes du niveau », une tablette fraîchement hydratée dont le pull
-Inscription n'a pas atterri tombe sur « Aucun élève ne correspond à ces critères. Modifiez le formulaire » — on envoie
-l'opérateur corriger des critères qui n'y peuvent rien.
-
-**À faire** — rendre l'état atteignable sur les deux formes de recherche.
-
----
-
-## 🟡 Bas — issu de la passe « clavier » (2026-08-19)
-
-### B-9 · Sept modales de lecture n'ont pas reçu la coquille sûre au clavier
-
-`lib/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart:277`
-`lib/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart:136`
-`lib/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart:176`
-`lib/features/documents/presentation/widgets/editique_document_dialog.dart:359`
-`lib/features/academics/presentation/widgets/detail/cours_releve_modal.dart:40`
-`lib/features/classes/presentation/widgets/classes_organisation_distribution_result_dialog.dart:129`
-`lib/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart:101`
-
-Ces modales partagent la forme qui débordait ailleurs — en-tête et pied ancrés autour d'un corps défilant — mais
-**aucune ne porte de champ de saisie** : le clavier ne monte pas devant elles, et aucun débordement n'y a été constaté.
-La passe les a donc laissées en l'état plutôt que d'ouvrir un large diff sur des écrans d'argent sans défaut prouvé
-(arbitrage explicite du 2026-08-19).
-
-Elles restent exposées à un seul scénario : s'ouvrir alors que le clavier est **déjà** monté sur l'écran d'en dessous.
-
-**À faire** — les faire passer par `EteeloDialogBody`
-(`lib/core/components/dialogs/eteelo_dialog_body.dart`) le jour où l'une d'elles gagne un champ, ou si le scénario
-ci-dessus se manifeste. Le seuil
-`minPinnedHeight` se règle au-dessus de la hauteur incompressible de l'en-tête et du pied — c'est elle qui déborde.
-
-⚠️ Ne pas confondre avec le plafond `MediaQuery.sizeOf(context).height * 0.88`
-que ces fichiers calculent : il n'a jamais été la cause. `ConstrainedBox` borne déjà ses propres contraintes à celles du
-parent (`BoxConstraints.enforce`), donc un plafond trop haut est inoffensif. Ce qui déborde, ce sont les zones
-**figées**
-quand la hauteur offerte passe sous leur hauteur cumulée.
-
----
-
-## 🟡 Bas — issus de la revue adversariale du battement (2026-08-19)
-
-*Les quatre sont clos : B-5, B-6 et B-8 corrigés, B-7 tranché sans changement.*
 
 ## ✅ Traité
 
@@ -193,6 +142,64 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~B-4 · La recherche par niveau n'a pas d'état « inscriptions pas encore synchronisées »~~ — corrigé
+
+Les trois messages de vide écrits jusqu'ici disaient tous « de cette classe ». Une recherche « toutes les
+classes du niveau » ne pouvait donc qu'échouer vers « Aucun élève ne correspond à ces critères. Modifiez
+le formulaire » — on envoyait l'opérateur corriger des critères qui n'y peuvent rien, alors que sa
+tablette n'avait simplement aucune inscription pour ce niveau.
+
+La maille décide désormais du **vocabulaire** autant que des causes. Deux messages neufs pour la maille
+niveau, et la cascade est réécrite par maille plutôt que par cause.
+
+⚠️ **Ce que la maille niveau ne peut PAS trancher, et que le message ne prétend donc pas savoir** : à
+l'échelle d'une classe, le roster départage « pas descendu » de « aucun dossier local » ; à l'échelle du
+niveau, rien ne distingue « ce niveau n'a réellement aucun élève » de « le flux Inscription n'a pas
+atterri ». Le message dit donc ce qui est vrai des deux côtés — « sur cet appareil » — et n'offre le
+geste qu'en condition (« si des inscriptions viennent d'être saisies ailleurs »). Inventer une certitude
+aurait refait le défaut dans l'autre sens.
+
+Le « modifiez le formulaire » subsiste, et c'est maintenant le seul cas où il est juste : des élèves
+portent bien ce frais, et c'est le filtre de statut ou les noms qui n'ont rien laissé passer. Le
+décompte qui le décide est mesuré **avant** le filtre (`FeeControlProjector.join`), donc il dit « personne
+n'est concerné », jamais « le filtre a tout écarté ».
+
+Tests : trois cas de maille niveau, dont la contre-épreuve du seul vide qui relève vraiment de la saisie.
+Vérifié par mutation.
+
+---
+
+### ~~B-9 · Sept modales de lecture n'ont pas reçu la coquille sûre au clavier~~ — corrigé
+
+L'arbitrage du 2026-08-19 était de ne pas ouvrir un large diff sur des écrans d'argent sans défaut
+prouvé. Le défaut est désormais **prouvé** : forcer la disposition ancrée sur l'une d'elles, téléphone en
+paysage clavier levé, fait déborder de **106 px** — la mesure est dans le test.
+
+Six des sept passent par `EteeloDialogBody`. Les seuils sont posés au-dessus de la hauteur incompressible
+réelle de chacune, et non recopiés : 300 pour les modales à en-tête sombre et pied à deux actions, 320
+pour la confirmation d'encaissement (son bandeau d'étapes est plus épais), 220 pour les deux qui n'ont
+qu'un en-tête.
+
+⚠️ **La modale d'éditique ne passe PAS par la coquille, et ce n'est pas un oubli.** Son corps n'est pas
+un document qui coule : c'est `PdfPreview`, une fenêtre qui gère son propre défilement et exige une
+hauteur **bornée**. La disposition défilante lui offrirait une hauteur infinie — exception de layout, ou
+défilement dans un défilement, la pathologie même que ce socle documente. Son exposition est donc fermée
+à la source : on **abaisse le clavier** avant d'ouvrir. C'est aussi ce qu'attend l'utilisateur d'une
+pièce à lire, et le champ qui avait le focus le reprend d'un tap — là où une pièce illisible ne se
+rattrape pas.
+
+⚠️ **La modale de réaffectation est la seule dont le corps est une LISTE**, et elle est passée
+`shrinkWrap: true` **+** `NeverScrollableScrollPhysics`. Une liste laissée maîtresse de son défilement
+gagne l'arène des gestes en tant que `Scrollable` le plus intérieur sans avoir rien à faire défiler : le
+doigt ne déplace alors plus rien. `ScrollView` fige son `physics` dans son constructeur — impossible de
+la museler depuis la coquille.
+
+Tests : un cas « téléphone en paysage, clavier déjà levé » par modale migrée, six en tout. Le relevé par
+élève n'avait **aucun** test : il en reçoit deux, au moment où on le touche. Vérifié par mutation
+(`minPinnedHeight: 0` rétablit la disposition ancrée et fait ressortir le débordement de 106 px).
 
 ---
 

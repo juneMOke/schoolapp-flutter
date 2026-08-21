@@ -2764,6 +2764,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.';
 
   @override
+  String get feeControlEmptyNoEnrollmentForLevel =>
+      'No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.';
+
+  @override
+  String get feeControlNoChargeForLevelDescription =>
+      'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.';
+
+  @override
   String feeControlCriteriaFee(String label) {
     return 'Fee: $label';
   }

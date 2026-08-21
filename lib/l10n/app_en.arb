@@ -1490,6 +1490,8 @@
   "feeControlEmptyRosterMissing": "This class's student list has not reached this device yet. Sync, then run the control again.",
   "feeControlEmptyNoLocalEnrollment": "No student in this class has a local enrollment record for this year. Sync enrollments, then run the control again.",
   "feeControlNoChargeDescription": "No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.",
+  "feeControlEmptyNoEnrollmentForLevel": "No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.",
+  "feeControlNoChargeForLevelDescription": "No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.",
   "feeControlCriteriaFee": "Fee: {label}",
   "@feeControlCriteriaFee": {
     "description": "Criteria chip recalling the controlled fee.",

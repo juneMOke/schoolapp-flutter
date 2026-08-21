@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
@@ -205,5 +206,23 @@ void main() {
     await openDialog(tester, transferIntent);
 
     expect(tester.takeException(), isNull);
+  });
+
+  // B-9 — même scénario, et la seule du lot dont le corps est une LISTE : elle
+  // doit être rendue inerte (`shrinkWrap` + `NeverScrollableScrollPhysics`),
+  // sinon elle gagne l'arène des gestes en tant que `Scrollable` le plus
+  // intérieur sans avoir rien à faire défiler, et le doigt ne déplace plus rien.
+  testWidgets('téléphone en PAYSAGE, clavier déjà levé : rien ne déborde', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(731, 411);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.reset);
+
+    await openDialog(tester, transferIntent);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(EteeloDialogBody), findsOneWidget);
   });
 }

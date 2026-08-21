@@ -188,6 +188,20 @@ Future<void> showEditiqueRestitutionDialog(
 ///
 /// Hors ligne, aucune pièce ne peut être produite — le repository le tranche en
 /// pré-garde et la modale affiche l'anatomie réseau sans attente.
+///
+/// ⚠️ **Cette visionneuse ne passe PAS par `EteeloDialogBody`, contrairement aux
+/// six autres modales du même lot (B-9), et ce n'est pas un oubli.** Son corps
+/// n'est pas un document qui coule : c'est `PdfPreview`, une fenêtre qui gère
+/// son propre défilement et exige une hauteur BORNÉE. La disposition défilante
+/// du socle lui offrirait une hauteur infinie — soit une exception de layout,
+/// soit un défilement dans un défilement, la pathologie même que ce socle
+/// documente.
+///
+/// Le scénario auquel B-9 l'expose — s'ouvrir alors qu'un clavier est déjà levé
+/// — est donc fermé à la source : on **abaisse le clavier** avant d'ouvrir.
+/// C'est aussi ce qu'attend l'utilisateur, une pièce à lire n'ayant rien à
+/// saisir. Et cela n'enlève rien à personne : le champ qui avait le focus le
+/// reprend d'un tap, là où une pièce illisible ne se rattrape pas.
 Future<void> _showEditiqueDocumentDialog(
   BuildContext context, {
   required String title,
@@ -195,6 +209,7 @@ Future<void> _showEditiqueDocumentDialog(
   EditiqueDocumentBloc? bloc,
   bool dispatchOnOpen = true,
 }) {
+  FocusManager.instance.primaryFocus?.unfocus();
   return showDialog<void>(
     context: context,
     barrierDismissible: true,

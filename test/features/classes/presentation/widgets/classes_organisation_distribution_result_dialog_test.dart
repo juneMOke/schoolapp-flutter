@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
@@ -180,5 +181,26 @@ void main() {
 
     // Dispatch initial + relance = 2 fois.
     verify(() => bloc.add(request)).called(2);
+  });
+
+  // B-9 — aucune de ces modales n'a de champ, donc le clavier ne monte jamais
+  // devant elles. Elles peuvent en revanche s'ouvrir alors qu'il est DÉJÀ levé
+  // sur l'écran du dessous : `Dialog` ajoute les `viewInsets` à son
+  // `insetPadding`, et il ne reste qu'une poignée de dp pour des zones figées
+  // qui en réclament trois cents. C'est le seul scénario qui les faisait
+  // déborder — mesuré à 106 px sur celle-ci avant la coquille.
+  testWidgets('téléphone en PAYSAGE, clavier déjà levé : rien ne déborde', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(731, 411);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.reset);
+
+    await pumpDialog(tester);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(EteeloDialogBody), findsOneWidget);
   });
 }

@@ -319,6 +319,88 @@ void main() {
     },
   );
 
+  // B-4 — les trois messages écrits jusqu'ici disaient tous « de cette
+  // classe ». Une recherche « toutes les classes du niveau » ne pouvait donc
+  // qu'échouer vers « modifiez le formulaire et relancez » : on envoyait
+  // l'opérateur corriger des critères qui n'y peuvent rien, alors que sa
+  // tablette n'avait simplement aucune inscription pour ce niveau.
+  group('maille NIVEAU : le vide a ses propres causes', () {
+    testWidgets('aucune inscription locale → le dit, sans accuser la saisie', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 0,
+          // Aucune classe choisie : `classroomRosterSize` reste nul, et c'est
+          // précisément ce qui rendait l'état inatteignable.
+          lastQuery: tQuery,
+        ),
+      );
+
+      expect(
+        find.textContaining('Aucun élève inscrit à ce niveau'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Modifiez le formulaire'),
+        findsNothing,
+        reason: 'les critères n\'y sont pour rien',
+      );
+    });
+
+    testWidgets('des élèves mais aucun ne porte ce frais → le dit AU NIVEAU', (
+      tester,
+    ) async {
+      // Le message de classe (« de cette classe ») affirmait une maille que
+      // l'opérateur n'avait pas choisie.
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 30,
+          breakdown: FeeControlBreakdown(),
+          lastQuery: tQuery,
+        ),
+      );
+
+      expect(find.textContaining('Aucun élève de ce niveau'), findsOneWidget);
+      expect(find.textContaining('de cette classe'), findsNothing);
+    });
+
+    testWidgets('CONTRE-ÉPREUVE : des élèves concernés → là, c\'est la saisie', (
+      tester,
+    ) async {
+      // Le seul cas où « modifiez le formulaire » est un bon conseil : des
+      // élèves portent bien ce frais, et c'est le filtre de statut ou les noms
+      // qui n'ont rien laissé passer. Le décompte est mesuré AVANT le filtre.
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 30,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: tQuery,
+        ),
+      );
+
+      expect(find.textContaining('Modifiez le formulaire'), findsOneWidget);
+    });
+  });
+
   testWidgets('échec → écran d\'erreur partagé', (tester) async {
     tester.view.physicalSize = const Size(1400, 1200);
     tester.view.devicePixelRatio = 1.0;

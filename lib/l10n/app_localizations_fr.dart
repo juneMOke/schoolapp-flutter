@@ -2782,6 +2782,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève de cette classe ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne s\'applique pas à ce niveau.';
 
   @override
+  String get feeControlEmptyNoEnrollmentForLevel =>
+      'Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d\'être saisies ailleurs, synchronisez puis relancez le contrôle.';
+
+  @override
+  String get feeControlNoChargeForLevelDescription =>
+      'Aucun élève de ce niveau ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne leur est pas applicable.';
+
+  @override
   String feeControlCriteriaFee(String label) {
     return 'Frais : $label';
   }

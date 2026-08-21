@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -159,61 +160,56 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
           maxWidth: AppDimensions.facturationModalMaxWidth,
           maxHeight: maxHeight,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EteeloDialogDarkHeader(
-              eyebrow: l10n.facturationChargeDetailHeroTitle,
-              title: intent.feeCode.localizedFeeLabel(l10n),
-              trailing: _StatusPill(
-                status: status,
-                label: status.localizedLabel(l10n),
-              ),
-              onClose: () => _close(context),
+        // Coquille commune (B-9) — cf. `EteeloDialogBody`. Sans champ de saisie,
+        // le clavier ne monte pas devant cette modale ; il peut en revanche
+        // être déjà levé quand elle s'ouvre.
+        child: EteeloDialogBody(
+          // En-tête sombre + pastille de statut (~86) + liseré + filet + pied
+          // deux actions, qui s'empile en colonne sur écran étroit.
+          minPinnedHeight: 300,
+          header: EteeloDialogDarkHeader(
+            eyebrow: l10n.facturationChargeDetailHeroTitle,
+            title: intent.feeCode.localizedFeeLabel(l10n),
+            trailing: _StatusPill(
+              status: status,
+              label: status.localizedLabel(l10n),
             ),
-            const EteeloDialogGoldDivider(),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.spacingM),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ProgressBar(progress: _progress, fill: status.badgeColor),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    FinanceKeyValueRows(
-                      rows: [
-                        FinanceKeyValueRow(
-                          icon: Icons.request_quote_outlined,
-                          label:
-                              l10n.facturationChargeDetailExpectedAmountLabel,
-                          value: _format(
-                            intent.expectedAmountInCents,
-                            intent.currency,
-                          ),
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.payments_outlined,
-                          label: l10n.facturationDetailHeaderKpiAlreadyPaid,
-                          value: _format(
-                            intent.amountPaidInCents,
-                            intent.currency,
-                          ),
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.account_balance_wallet_outlined,
-                          label:
-                              l10n.facturationChargeDetailRemainingAmountLabel,
-                          value: _format(remaining, intent.currency),
-                        ),
-                      ],
+            onClose: () => _close(context),
+          ),
+          headerDividers: const [EteeloDialogGoldDivider()],
+          bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _ProgressBar(progress: _progress, fill: status.badgeColor),
+              const SizedBox(height: AppDimensions.spacingM),
+              FinanceKeyValueRows(
+                rows: [
+                  FinanceKeyValueRow(
+                    icon: Icons.request_quote_outlined,
+                    label: l10n.facturationChargeDetailExpectedAmountLabel,
+                    value: _format(
+                      intent.expectedAmountInCents,
+                      intent.currency,
                     ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    allocations,
-                  ],
-                ),
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.payments_outlined,
+                    label: l10n.facturationDetailHeaderKpiAlreadyPaid,
+                    value: _format(intent.amountPaidInCents, intent.currency),
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: l10n.facturationChargeDetailRemainingAmountLabel,
+                    value: _format(remaining, intent.currency),
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(height: AppDimensions.spacingM),
+              allocations,
+            ],
+          ),
+          footer: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
               secondaryLabel: l10n.facturationPrintStatementsLabel,

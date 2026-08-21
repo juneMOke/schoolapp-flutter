@@ -4766,6 +4766,18 @@ abstract class AppLocalizations {
   /// **'No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.'**
   String get feeControlNoChargeDescription;
 
+  /// No description provided for @feeControlEmptyNoEnrollmentForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.'**
+  String get feeControlEmptyNoEnrollmentForLevel;
+
+  /// No description provided for @feeControlNoChargeForLevelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.'**
+  String get feeControlNoChargeForLevelDescription;
+
   /// Criteria chip recalling the controlled fee.
   ///
   /// In en, this message translates to:

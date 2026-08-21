@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -76,65 +77,64 @@ class _ReleveContentState extends State<_ReleveContent> {
     final bucket = widget.bucket;
     final entries = _entries();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Header(
-          eyebrow: '${widget.brancheNom} · ${widget.classroomName}',
-          title: l10n.courseDetailReleveTitle(widget.label),
-        ),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _KpiRow(bucket: bucket),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SegmentedTabFilter<_ReleveSort>(
-                        expand: true,
-                        selected: _sort,
-                        onSelected: (s) => setState(() => _sort = s),
-                        options: [
-                          SegmentedTabOption(
-                            label: l10n.courseDetailSortRanking,
-                            value: _ReleveSort.ranking,
-                          ),
-                          SegmentedTabOption(
-                            label: l10n.courseDetailSortAlpha,
-                            value: _ReleveSort.alpha,
-                          ),
-                        ],
-                      ),
+    // Coquille commune (B-9) — cf. `EteeloDialogBody`. Ce relevé n'a aucun
+    // champ, mais il s'ouvre depuis le détail d'un cours, où un clavier peut
+    // être levé : sans coquille, l'en-tête figé déborde de la hauteur restante.
+    return EteeloDialogBody(
+      // En-tête seul (pas de pied) : le seuil peut être bas, il n'y a qu'une
+      // zone incompressible à loger.
+      minPinnedHeight: 220,
+      header: _Header(
+        eyebrow: '${widget.brancheNom} · ${widget.classroomName}',
+        title: l10n.courseDetailReleveTitle(widget.label),
+      ),
+      bodyPadding: const EdgeInsets.all(AppSpacing.lg),
+      footer: const [],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _KpiRow(bucket: bucket),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: SegmentedTabFilter<_ReleveSort>(
+                  expand: true,
+                  selected: _sort,
+                  onSelected: (s) => setState(() => _sort = s),
+                  options: [
+                    SegmentedTabOption(
+                      label: l10n.courseDetailSortRanking,
+                      value: _ReleveSort.ranking,
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      l10n.myCoursesStudentCount(bucket.moyennesEleves.length),
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.textMuted,
-                      ),
+                    SegmentedTabOption(
+                      label: l10n.courseDetailSortAlpha,
+                      value: _ReleveSort.alpha,
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (entries.isEmpty)
-                  _Empty(label: l10n.courseDetailReleveEmpty)
-                else
-                  _ReleveList(
-                    entries: entries,
-                    showRank: _sort == _ReleveSort.ranking,
-                  ),
-                const SizedBox(height: AppSpacing.md),
-                _MethodNote(text: l10n.courseDetailReleveMethod),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                l10n.myCoursesStudentCount(bucket.moyennesEleves.length),
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+          if (entries.isEmpty)
+            _Empty(label: l10n.courseDetailReleveEmpty)
+          else
+            _ReleveList(
+              entries: entries,
+              showRank: _sort == _ReleveSort.ranking,
+            ),
+          const SizedBox(height: AppSpacing.md),
+          _MethodNote(text: l10n.courseDetailReleveMethod),
+        ],
+      ),
     );
   }
 

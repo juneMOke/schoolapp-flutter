@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -295,105 +296,105 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
           maxWidth: AppDimensions.facturationModalMaxWidth,
           maxHeight: maxHeight,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EteeloDialogDarkHeader(
-              eyebrow: l10n.facturationPaymentDetailHeroTitle,
-              title: amount,
-              onClose: () => _close(context),
-            ),
-            const EteeloDialogGoldDivider(),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.spacingM),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _PayerBlock(
-                      payerLabel: l10n.facturationPaymentPayerLabel,
-                      payerName: _payerFullName(l10n),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    FinanceKeyValueRows(
-                      rows: [
-                        FinanceKeyValueRow(
-                          icon: Icons.payments_outlined,
-                          label: l10n.facturationPaymentAmountPaidLabel,
-                          value: amount,
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.calendar_today_outlined,
-                          label: l10n.facturationPaymentPaidAtLabel,
-                          value: date,
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.account_balance_wallet_outlined,
-                          label: l10n.facturationPaymentMethodLabel,
-                          value: l10n.facturationPaymentMethodCash,
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.person_outline_rounded,
-                          label: l10n.facturationPaymentCollectedByLabel,
-                          // Vide pour tout versement venu d'un autre guichet :
-                          // le nom n'est stampé que par le poste qui encaisse,
-                          // et aucun contrat de synchronisation ne le
-                          // transporte. La ligne garde alors son tiret, comme
-                          // les autres champs inconnus de cette modale.
-                          value: intent.cashierFullName ?? '',
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.school_outlined,
-                          label: l10n.facturationPaymentStudentLabel,
-                          value: _studentFullName(l10n),
-                        ),
-                        FinanceKeyValueRow(
-                          icon: Icons.receipt_long_outlined,
-                          label: l10n.facturationPaymentReceiptLabel,
-                          value: _receiptNumberValue(l10n),
-                          isStruckThrough: cancelledReceipt != null,
-                        ),
-                      ],
-                    ),
-                    if (_cancellationNotice(context, l10n) case final notice?)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: AppDimensions.spacingS,
-                        ),
-                        // Jamais la seule rature ni la seule couleur : l'icône
-                        // et la phrase disent ce que le trait ne peut pas dire.
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.cancel_outlined,
-                              size: 16,
-                              color: AppColors.warning,
-                            ),
-                            const SizedBox(width: AppDimensions.spacingXS),
-                            Expanded(
-                              child: Text(
-                                notice,
-                                style: AppTextStyles.body.copyWith(
-                                  color: AppColors.warning,
-                                ),
-                              ),
-                            ),
-                          ],
+        // Coquille commune (B-9) : l'en-tête et le pied restent ancrés tant que
+        // la hauteur offerte le permet, et rejoignent le défilement en dessous.
+        // Cette modale n'a aucun champ, donc le clavier ne monte pas DEVANT
+        // elle — mais elle peut s'ouvrir alors qu'il est déjà levé sur l'écran
+        // du dessous, et c'est le seul scénario qui la faisait déborder.
+        child: EteeloDialogBody(
+          // En-tête sombre (~86) + liseré + filet + pied deux actions, qui
+          // s'empile en colonne sous 420 dp de large.
+          minPinnedHeight: 300,
+          header: EteeloDialogDarkHeader(
+            eyebrow: l10n.facturationPaymentDetailHeroTitle,
+            title: amount,
+            onClose: () => _close(context),
+          ),
+          headerDividers: const [EteeloDialogGoldDivider()],
+          bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PayerBlock(
+                payerLabel: l10n.facturationPaymentPayerLabel,
+                payerName: _payerFullName(l10n),
+              ),
+              const SizedBox(height: AppDimensions.spacingM),
+              FinanceKeyValueRows(
+                rows: [
+                  FinanceKeyValueRow(
+                    icon: Icons.payments_outlined,
+                    label: l10n.facturationPaymentAmountPaidLabel,
+                    value: amount,
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.calendar_today_outlined,
+                    label: l10n.facturationPaymentPaidAtLabel,
+                    value: date,
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: l10n.facturationPaymentMethodLabel,
+                    value: l10n.facturationPaymentMethodCash,
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.person_outline_rounded,
+                    label: l10n.facturationPaymentCollectedByLabel,
+                    // Vide pour tout versement venu d'un autre guichet :
+                    // le nom n'est stampé que par le poste qui encaisse,
+                    // et aucun contrat de synchronisation ne le
+                    // transporte. La ligne garde alors son tiret, comme
+                    // les autres champs inconnus de cette modale.
+                    value: intent.cashierFullName ?? '',
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.school_outlined,
+                    label: l10n.facturationPaymentStudentLabel,
+                    value: _studentFullName(l10n),
+                  ),
+                  FinanceKeyValueRow(
+                    icon: Icons.receipt_long_outlined,
+                    label: l10n.facturationPaymentReceiptLabel,
+                    value: _receiptNumberValue(l10n),
+                    isStruckThrough: cancelledReceipt != null,
+                  ),
+                ],
+              ),
+              if (_cancellationNotice(context, l10n) case final notice?)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppDimensions.spacingS),
+                  // Jamais la seule rature ni la seule couleur : l'icône
+                  // et la phrase disent ce que le trait ne peut pas dire.
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.cancel_outlined,
+                        size: 16,
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: AppDimensions.spacingXS),
+                      Expanded(
+                        child: Text(
+                          notice,
+                          style: AppTextStyles.body.copyWith(
+                            color: AppColors.warning,
+                          ),
                         ),
                       ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    allocations,
-                    // Rattrapage d'un ticket jamais sorti. Sous la répartition
-                    // parce qu'il porte sur le versement entier, et pas au pied
-                    // — un bouton qui n'apparaît que parfois ne dit pas
-                    // pourquoi il est là.
-                    ?ticketPrint,
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              const SizedBox(height: AppDimensions.spacingM),
+              allocations,
+              // Rattrapage d'un ticket jamais sorti. Sous la répartition
+              // parce qu'il porte sur le versement entier, et pas au pied
+              // — un bouton qui n'apparaît que parfois ne dit pas
+              // pourquoi il est là.
+              ?ticketPrint,
+            ],
+          ),
+          footer: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
               secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,

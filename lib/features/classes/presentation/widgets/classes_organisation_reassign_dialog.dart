@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -116,35 +117,45 @@ class _ReassignDialogState extends State<_ReassignDialog> {
           maxWidth: AppDimensions.classesReassignModalMaxWidth,
           maxHeight: maxHeight,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(l10n),
-            const Divider(height: 1, color: AppColors.border),
-            Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(AppDimensions.spacingL),
-                itemCount: widget.options.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(height: AppDimensions.spacingS),
-                itemBuilder: (context, index) {
-                  final option = widget.options[index];
-                  final isCurrent =
-                      widget.intent.classroomId != null &&
-                      option.id == widget.intent.classroomId;
-                  return _ClassChoiceTile(
-                    option: option,
-                    isCurrent: isCurrent,
-                    selected: _selectedId == option.id,
-                    onSelect: (isCurrent || option.isFull)
-                        ? null
-                        : () => setState(() => _selectedId = option.id),
-                  );
-                },
-              ),
-            ),
+        // Coquille commune (B-9) — cf. `EteeloDialogBody`. Aucun champ, mais
+        // cette modale s'ouvre depuis un écran où un clavier peut être levé, et
+        // ses deux zones figées (en-tête + pied à deux actions) sont exactement
+        // ce qui déborde alors.
+        child: EteeloDialogBody(
+          // En-tête (~90) + deux filets + pied à deux actions, empilé en
+          // colonne sous 420 dp de large.
+          minPinnedHeight: 300,
+          header: _buildHeader(l10n),
+          headerDividers: const [Divider(height: 1, color: AppColors.border)],
+          bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
+          // ⚠️ Liste **inerte** : le socle fournit le défilement dans les deux
+          // dispositions, et `ScrollView` fige son `physics` dans son
+          // constructeur — une liste laissée maîtresse gagnerait l'arène des
+          // gestes en tant que `Scrollable` le plus intérieur sans avoir rien à
+          // faire défiler, et le doigt ne déplacerait plus rien.
+          body: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: widget.options.length,
+            separatorBuilder: (_, _) =>
+                const SizedBox(height: AppDimensions.spacingS),
+            itemBuilder: (context, index) {
+              final option = widget.options[index];
+              final isCurrent =
+                  widget.intent.classroomId != null &&
+                  option.id == widget.intent.classroomId;
+              return _ClassChoiceTile(
+                option: option,
+                isCurrent: isCurrent,
+                selected: _selectedId == option.id,
+                onSelect: (isCurrent || option.isFull)
+                    ? null
+                    : () => setState(() => _selectedId = option.id),
+              );
+            },
+          ),
+          footer: [
             const Divider(height: 1, color: AppColors.border),
             _buildFooter(l10n),
           ],
