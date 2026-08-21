@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
@@ -97,5 +98,29 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('Imprimer les relevés'), findsOneWidget);
     expect(find.text('Fermer'), findsOneWidget);
+  });
+
+  // B-9 — cette modale n'a aucun champ, donc le clavier ne monte jamais devant
+  // elle. Elle peut en revanche s'ouvrir alors qu'il est DÉJÀ levé sur l'écran
+  // du dessous : `Dialog` ajoute alors les `viewInsets` à son `insetPadding`,
+  // et il ne reste qu'une poignée de dp pour un en-tête et un pied qui en
+  // réclament trois cents. C'est le seul scénario qui la faisait déborder.
+  testWidgets('téléphone en PAYSAGE, clavier déjà levé : rien ne déborde', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(731, 411);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(() {
+      tester.view.reset();
+    });
+
+    await _pump(tester, onPrint: () {});
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    // Le contenu reste ATTEIGNABLE : la coquille rend l'ensemble défilable au
+    // lieu de rogner l'en-tête et le pied.
+    expect(find.byType(EteeloDialogBody), findsOneWidget);
   });
 }

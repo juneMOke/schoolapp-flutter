@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
@@ -151,9 +150,6 @@ class AddressFormContent extends StatelessWidget {
                 errorText: additionalAddressErrorText,
                 placeholder: l10n.addressComplementaryPlaceholder,
                 readOnly: !isEditable,
-                inputFormatters: const [
-                  FirstLetterUppercaseTextInputFormatter(),
-                ],
               ),
               fullWidth: true,
             ),

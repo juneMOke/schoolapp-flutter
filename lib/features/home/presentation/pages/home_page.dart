@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart' show listEquals;
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -20,6 +23,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/re_reg
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -49,7 +53,10 @@ class HomePage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
       create: (context) {
-        final bloc = NavigationBloc(l10n);
+        final bloc = NavigationBloc(
+          l10n,
+          permissions: context.read<AuthBloc>().state.permissions,
+        );
         final initialSubMenuId = this.initialSubMenuId?.trim();
         if (initialSubMenuId == null || initialSubMenuId.isEmpty) {
           return bloc;
@@ -72,7 +79,22 @@ class HomePage extends StatelessWidget {
 
         return bloc;
       },
-      child: const _HomePageView(),
+      // Le refresh est le seul canal par lequel un changement de droits
+      // redescend (ADR-014 §4), et il se produit en arrière-plan : sans ce
+      // relais, l'arborescence resterait celle du login jusqu'au prochain
+      // démarrage. `listenWhen` sur l'ensemble seul — le reste des transitions
+      // d'auth n'a pas à reconstruire le menu.
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (previous, current) =>
+            !listEquals(previous.permissions, current.permissions),
+        listener: (context, state) => context.read<NavigationBloc>().add(
+          NavigationPermissionsChanged(
+            l10n: l10n,
+            permissions: state.permissions,
+          ),
+        ),
+        child: const _HomePageView(),
+      ),
     );
   }
 }
@@ -164,6 +186,7 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
+        state.selectedSubMenuId == MenuConstants.feeControlId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
@@ -297,8 +320,22 @@ class _HomePageView extends StatelessWidget {
           key: ValueKey(MenuConstants.premiereInscriptionId),
           child: FirstRegistrationPage(),
         );
+      // Key distinct par sous-menu : sans elle, Flutter réutilise le même
+      // Element `FinanceFeatureScope` (même type, même emplacement dans le
+      // switch) en basculant entre Facturation et Contrôle des frais. Son State
+      // n'est alors jamais remonté, donc `initState` — et les pulls Finance +
+      // Inscription qu'il déclenche pour hydrater le cache local, sa raison
+      // d'être — ne rejouent pas en entrant sur le second écran.
       case MenuConstants.facturationsId:
-        return const FinanceFeatureScope(child: FacturationPage());
+        return const FinanceFeatureScope(
+          key: ValueKey(MenuConstants.facturationsId),
+          child: FacturationPage(),
+        );
+      case MenuConstants.feeControlId:
+        return const FinanceFeatureScope(
+          key: ValueKey(MenuConstants.feeControlId),
+          child: FeeControlPage(),
+        );
       case MenuConstants.documentsStudentId:
         return const DocumentsFeatureScope(
           key: ValueKey(MenuConstants.documentsStudentId),

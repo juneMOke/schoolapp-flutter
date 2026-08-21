@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -79,17 +81,20 @@ class SaisieSaveBar extends StatelessWidget {
               ),
               // Gel READ_ONLY (ADR-010) : rien ne persiste sans ce bouton — le
               // geler suffit (la grille de saisie reste un brouillon volatil).
-              SessionWriteGate(
-                child: EteeloButton.primary(
-                  label: isSaving
-                      ? l10n.evalSaveButtonSaving
-                      : l10n.evalSaveButton,
-                  icon: isSaving ? null : Icons.check_rounded,
-                  isLoading: isSaving,
-                  loadingLabel: l10n.evalSaveButtonSaving,
-                  size: EteeloButtonSize.regular,
-                  fullWidth: false,
-                  onPressed: canSave ? onSave : null,
+              PermissionGate(
+                requires: const [Perm.academicsGradeWrite],
+                child: SessionWriteGate(
+                  child: EteeloButton.primary(
+                    label: isSaving
+                        ? l10n.evalSaveButtonSaving
+                        : l10n.evalSaveButton,
+                    icon: isSaving ? null : Icons.check_rounded,
+                    isLoading: isSaving,
+                    loadingLabel: l10n.evalSaveButtonSaving,
+                    size: EteeloButtonSize.regular,
+                    fullWidth: false,
+                    onPressed: canSave ? onSave : null,
+                  ),
                 ),
               ),
             ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -383,29 +385,38 @@ class _AdvanceAction extends StatelessWidget {
       );
     }
 
-    // Gel READ_ONLY (ADR-010) : avancer/classer un cas est une écriture métier.
-    return SessionWriteGate(
-      child: Wrap(
-        spacing: AppDimensions.spacingS,
-        runSpacing: AppDimensions.spacingXS,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          PrimaryButton(
-            label: label,
-            icon: target.getIcon(),
-            fullWidth: false,
-            onPressed: onAdvance,
-          ),
-          if (status.canDismiss && onDismiss != null)
-            TextButton.icon(
-              onPressed: onDismiss,
-              icon: const Icon(Icons.block_rounded, size: 16),
-              label: Text(l10n.disciplinaryAdvanceDismiss),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-              ),
+    // Avancer ou classer part par le MÊME agrégat que la création
+    // (`POST /sync/disciplinary-cases`, gardé `discipline.write`) : sans cette
+    // enveloppe, un profil en lecture produisait une écriture rejetée en 403
+    // TERMINAL, laissant la base locale afficher un cas « classé » que le
+    // serveur tient pour ouvert — et l'état est terminal côté UI, donc
+    // irréparable sans wipe. Le libellé d'état terminal, lui, reste ouvert :
+    // c'est de la lecture.
+    return PermissionGate.access(
+      kDisciplineInstructAccess,
+      child: SessionWriteGate(
+        child: Wrap(
+          spacing: AppDimensions.spacingS,
+          runSpacing: AppDimensions.spacingXS,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            PrimaryButton(
+              label: label,
+              icon: target.getIcon(),
+              fullWidth: false,
+              onPressed: onAdvance,
             ),
-        ],
+            if (status.canDismiss && onDismiss != null)
+              TextButton.icon(
+                onPressed: onDismiss,
+                icon: const Icon(Icons.block_rounded, size: 16),
+                label: Text(l10n.disciplinaryAdvanceDismiss),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

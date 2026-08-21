@@ -40,7 +40,13 @@ const TableSchema authLocalUserTable = TableSchema(
       -- session ne brûle pas la fenêtre de travail offline) et n'est effacée
       -- que sur révocation (D-09) — NULL = reconnexion online exigée. Jamais
       -- avancée offline : le temps ne peut que dégrader (règle d'or D-08).
-      refresh_expires_at    INTEGER
+      refresh_expires_at    INTEGER,
+      -- Permissions effectives du compte (ADR-014 §4), en JSON. Elles ne
+      -- voyagent que sur login/refresh, jamais sur les pages de sync : sans
+      -- copie durable ici, un login offline repartirait sans aucun droit. Elle
+      -- survit au logout (comme la borne offline) et n'est réécrite qu'à un
+      -- contact serveur. NULL = aucune permission connue (fail-closed).
+      permissions           TEXT
     )
   ''',
   createIndexSql: [

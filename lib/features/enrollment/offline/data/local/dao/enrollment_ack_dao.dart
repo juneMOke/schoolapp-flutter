@@ -11,7 +11,7 @@ class EnrollmentAckDao {
   const EnrollmentAckDao(this._db);
 
   /// Applique la réponse canonique du commit (201/200) dans une transaction :
-  /// matricule/email, parent provisoire→canonique dans `parents` ET
+  /// matricule, parent provisoire→canonique dans `parents` ET
   /// `student_parent`, document PROV→DEFINITIVE, sync_status=SYNCED.
   /// [enrollmentId] = id client poussé (corrélation ; absent du corps de réponse).
   Future<void> applyEnrollmentAck(
@@ -20,7 +20,7 @@ class EnrollmentAckDao {
     required int nowMs,
   }) async {
     await _db.transaction((txn) async {
-      // Élève : matricule + email + SYNCED.
+      // Élève : matricule + SYNCED.
       await _studentAck(txn, enrollmentId, response, nowMs);
 
       // Parents : remap provisoire → canonique dans parents ET student_parent.
@@ -144,7 +144,10 @@ class EnrollmentAckDao {
       {
         if (response.student.matriculationNumber != null)
           'matriculation_number': response.student.matriculationNumber,
-        if (response.student.email != null) 'email': response.student.email,
+        // L'e-mail attribué à l'ACK n'est plus recopié (ADR-015 F8, schéma v27) :
+        // personne ne le relisait — contrairement au matricule juste au-dessus,
+        // qui remonte jusqu'au ticket imprimé. Une colonne restée NULL, c'est
+        // exactement l'état voulu.
         'sync_status': SyncState.synced.dbValue,
         'synced_at': nowMs,
       },

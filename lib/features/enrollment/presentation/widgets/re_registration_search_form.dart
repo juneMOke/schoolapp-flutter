@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/bi_mode_search_form.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Option « cycle + niveau » proposée à la recherche de réinscription.
@@ -41,9 +40,6 @@ class ReRegistrationSearchForm extends StatelessWidget {
 
     return BiModeSearchForm(
       isLoading: isLoading,
-      nameInputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
-      helpPill: l10n.reRegistrationSearchHelpPill,
-      helpPillIcon: Icons.school_outlined,
       options: options
           .map(
             (o) => SearchLevelOption(
@@ -65,20 +61,9 @@ class ReRegistrationSearchForm extends StatelessWidget {
       labels: BiModeSearchLabels(
         title: l10n.reRegistrationSearchTitle,
         helpBanner: l10n.reRegistrationSearchHint,
-        byStudentGroup: l10n.reRegistrationSearchByNameGroup,
-        byClassGroup: l10n.reRegistrationSearchByLevelGroup,
-        orSeparator: l10n.reRegistrationSearchOrSeparator,
-        activeModeLabel: l10n.reRegistrationSearchActiveModeLabel,
-        studentBadge: l10n.reRegistrationSearchModeNameBadge,
-        classBadge: l10n.reRegistrationSearchModeLevelBadge,
         cycleLabel: l10n.targetCycleLabel,
         levelLabel: l10n.targetLevelLabel,
         levelPlaceholder: l10n.reRegistrationSearchLevelPlaceholder,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        searchLabel: l10n.search,
-        clearLabel: l10n.clear,
       ),
     );
   }

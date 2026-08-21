@@ -17,9 +17,7 @@ class StudentLocalModel {
   final String? municipality;
   final String? neighborhood;
   final String? address;
-  final String? phoneNumber;
   final String? matriculationNumber;
-  final String? email;
   final String syncStatus;
   final String? syncError;
   final int? syncedAt;
@@ -39,9 +37,7 @@ class StudentLocalModel {
     this.municipality,
     this.neighborhood,
     this.address,
-    this.phoneNumber,
     this.matriculationNumber,
-    this.email,
     this.syncStatus = 'PENDING_SYNC',
     this.syncError,
     this.syncedAt,
@@ -62,9 +58,7 @@ class StudentLocalModel {
     'municipality': municipality,
     'neighborhood': neighborhood,
     'address': address,
-    'phone_number': phoneNumber,
     'matriculation_number': matriculationNumber,
-    'email': email,
     'sync_status': syncStatus,
     'sync_error': syncError,
     'synced_at': syncedAt,
@@ -86,9 +80,7 @@ class StudentLocalModel {
         municipality: m['municipality'] as String?,
         neighborhood: m['neighborhood'] as String?,
         address: m['address'] as String?,
-        phoneNumber: m['phone_number'] as String?,
         matriculationNumber: m['matriculation_number'] as String?,
-        email: m['email'] as String?,
         syncStatus: (m['sync_status'] as String?) ?? 'PENDING_SYNC',
         syncError: m['sync_error'] as String?,
         syncedAt: m['synced_at'] as int?,
@@ -109,9 +101,7 @@ class StudentLocalModel {
     municipality: municipality,
     neighborhood: neighborhood,
     address: address,
-    phoneNumber: phoneNumber,
     matriculationNumber: matriculationNumber,
-    email: email,
     syncState: SyncState.fromDbValue(syncStatus),
   );
 }

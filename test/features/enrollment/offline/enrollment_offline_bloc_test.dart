@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/pull_run_report.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -813,12 +814,12 @@ void main() {
     blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
       'EnrollmentPullRequested : silencieux (aucun état), délègue au usecase',
       setUp: () {
+        // Depuis le repli F6, le use case rend le rapport du coordinateur —
+        // le bilan maison `EnrollmentPullsReport` a disparu avec les gardes
+        // qu'il agrégeait.
         when(() => syncPulls()).thenAnswer(
-          (_) async => const EnrollmentPullsReport(
-            updated: 2,
-            notModified: 2,
-            failed: 0,
-          ),
+          (_) async =>
+              const PullRunReport(updated: 2, notModified: 2, failed: 0),
         );
       },
       build: buildBloc,

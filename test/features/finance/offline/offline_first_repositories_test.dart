@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -273,6 +275,92 @@ void main() {
           allocations: const [],
         );
         expect(online.createCalled, isTrue);
+      },
+    );
+  });
+
+  // ── M-8 : la lecture ne dépend plus du réseau ─────────────────────────────
+  // Le défaut se manifestait dans le chemin NOMINAL : les deux repos awaitaient
+  // le rafraîchissement ciblé avant de toucher au DAO, donc le détail élève
+  // tenait un skeleton jusqu'à ~22 s en réseau dégradé pour afficher des lignes
+  // déjà en base. Un seam qui ne rend JAMAIS la main est le seul montage qui
+  // distingue vraiment « lancé » de « attendu » : sans le `timeout`, une
+  // régression ferait pendre le test au lieu de le faire échouer.
+  group('lecture servie sans attendre la revalidation', () {
+    test(
+      'créances : rend le local même si la revalidation ne revient pas',
+      () async {
+        await insertCharge(
+          'c1',
+          's1',
+          'TUITION',
+          expected: 100000,
+          paid: 40000,
+        );
+        final neverReturns = Completer<void>();
+        var kicked = 0;
+        final repo = StudentChargesOfflineFirstRepository(
+          dao: dao,
+          refresh: (_, _) {
+            kicked++;
+            return neverReturns.future;
+          },
+          online: _FakeStudentChargesOnline(),
+        );
+
+        final result = await repo
+            .getStudentChargesByAcademicYear(
+              studentId: 's1',
+              academicYearId: 'ay-1',
+            )
+            .timeout(const Duration(seconds: 5));
+
+        expect(result.getOrElse(() => []), hasLength(1));
+        expect(kicked, 1, reason: 'la revalidation part quand même, en fond');
+        neverReturns.complete();
+      },
+    );
+
+    test(
+      'paiements : rend le local même si la revalidation ne revient pas',
+      () async {
+        await dao.recordPayment(
+          payment: const PaymentLocalModel(
+            id: 'p1',
+            clientUuid: 'p1',
+            studentId: 's1',
+            academicYearId: 'ay-1',
+            amountInCents: 30000,
+            currency: 'USD',
+            paidAt: '2026-08-19T09:00:00Z',
+            payerFirstName: 'Sarah',
+            payerLastName: 'Moke',
+          ),
+          allocations: const [],
+          outboxEntryId: 'ob-swr',
+          nowMs: 1000,
+        );
+        final neverReturns = Completer<void>();
+        var kicked = 0;
+        final repo = PaymentsOfflineFirstRepository(
+          dao: dao,
+          refresh: (_, _) {
+            kicked++;
+            return neverReturns.future;
+          },
+          online: _FakePaymentsOnline(),
+        );
+
+        final result = await repo
+            .getPaymentsByStudentAndAcademicYear(
+              studentId: 's1',
+              academicYearId: 'ay-1',
+            )
+            .timeout(const Duration(seconds: 5));
+
+        expect(result.getOrElse(() => []), hasLength(1));
+        expect(kicked, 1, reason: 'la revalidation part quand même, en fond');
+        neverReturns.complete();
       },
     );
   });

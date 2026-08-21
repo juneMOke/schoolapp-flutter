@@ -62,6 +62,10 @@ void main() {
       // Base v10 = academics/schedule déjà matérialisées (v8/v9), contaminées
       // par un pull antérieur non scopé enseignant.
       await migrateOfflineDatabase(db, 7, buildOfflineSchema());
+      // `ref_cours_notation` a disparu du schéma en v27 : le montage ci-dessus
+      // la supprime au passage. On la recrée dans sa forme d'époque pour que la
+      // base ressemble vraiment à une v10.
+      await _createLegacySkeleton(db);
 
       await db.insert('ref_cours', {
         'id': 'co-other-teacher',
@@ -150,9 +154,18 @@ void main() {
         'synced_at': 1,
       });
 
-      await migrateOfflineDatabase(db, 10, buildOfflineSchema());
+      // ⚠️ Borné à `newVersion: 11`. Sans la borne, la v27 supprimerait
+      // `ref_cours_notation` et l'attente sur son contenu passerait sans que la
+      // purge v11 ait rien fait.
+      await migrateOfflineDatabase(
+        db,
+        10,
+        buildOfflineSchema(),
+        newVersion: 11,
+      );
 
       expect(await db.query('ref_cours'), isEmpty);
+      expect(await _hasSkeleton(db), isTrue);
       expect(await db.query('ref_cours_notation'), isEmpty);
       expect(await db.query('evaluation'), isEmpty);
       expect(await db.query('note_evaluation'), isEmpty);
@@ -308,3 +321,26 @@ void main() {
     },
   );
 }
+
+/// Reconstitue `ref_cours_notation` dans sa forme d'époque (v9→v26).
+///
+/// Écrite en dur : la table ne figure plus dans `buildOfflineSchema()`, et un
+/// test de migration doit décrire le passé — le lire dans le schéma vivant le
+/// ferait mentir au premier changement.
+Future<void> _createLegacySkeleton(Database db) => db.execute('''
+  CREATE TABLE IF NOT EXISTS ref_cours_notation (
+    cours_id TEXT PRIMARY KEY,
+    classroom_id TEXT,
+    branche_nom TEXT,
+    effectif INTEGER NOT NULL DEFAULT 0,
+    periodes_json TEXT NOT NULL,
+    server_updated_at INTEGER,
+    synced_at INTEGER NOT NULL
+  )
+''');
+
+Future<bool> _hasSkeleton(Database db) async => (await db.query(
+  'sqlite_master',
+  where: 'type = ? AND name = ?',
+  whereArgs: ['table', 'ref_cours_notation'],
+)).isNotEmpty;

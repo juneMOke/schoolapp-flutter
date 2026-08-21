@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_pull_repository.dart';
 
@@ -12,6 +13,13 @@ class AttendancePullHandler implements PullHandler {
 
   @override
   String get resource => AttendancePullRepositoryImpl.resource;
+
+  /// GET /sync/attendance — gardé sur `attendance.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.attendanceRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async {

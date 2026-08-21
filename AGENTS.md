@@ -408,6 +408,80 @@ les chaînes i18n (titre/message/action) et câble les callbacks
 - L'erreur s'affiche **en place** (pas de snackbar redondant pour un échec de
   chargement).
 
+## Formulaires de recherche
+
+### Bascule de mode (recherche bi-mode)
+
+Une carte qui offre **deux façons de trouver la même chose** (toute une classe
+ou un élève précis) porte une **bascule**, jamais deux blocs concurrents reliés
+par un « OU ». Les modes s'**excluent** : chercher par classe ET par nom ne
+remonterait que les élèves où les deux concordent, alors que chaque critère seul
+suffisait.
+
+| Brique | Fichier | Rôle |
+|---|---|---|
+| `SearchMode` + `SearchModeSwitch` | `lib/core/components/search/search_mode_switch.dart` | Enum (`level`, `identity`) et bascule : annonce « Rechercher par », onglets pleine largeur (`SegmentedTabFilter`, `expand: true`), aide du mode actif. |
+| `SearchHintPill` | `lib/core/components/search/search_hint_pill.dart` | Bandeau d'aide (icône + texte). Sert à l'aide de mode **et** à la pastille propre à une feature. |
+| `BiModeSearchForm` | `lib/core/components/search/bi_mode_search_form.dart` | Carte complète clé en main : bascule, champs du mode actif, actions. Utilisée par Documents, Facturation, Ré- et Pré-inscription. |
+| `SearchLevelCascade` / `SearchNameFields` | `lib/core/components/search/` | Les champs de chacun des deux modes. |
+| `SearchLevelModeFields` | `lib/core/components/search/search_level_mode_fields.dart` | Le mode « Par classe » au complet : la cascade **plus** l'affinage par nom. |
+| `SearchRefineNameField` | `lib/core/components/search/search_refine_name_field.dart` | Affinage **facultatif** par nom, mode classe uniquement. Rapprochement partiel et insensible aux accents, sur la colonne « Nom ». |
+
+Règles :
+
+- **`level` est le premier mode**, `identity` le second — l'entrée par la classe
+  est la plus courante.
+- Seuls les critères du **mode actif** partent dans la requête ; ceux de l'autre
+  restent **saisis** (y revenir ne coûte pas de tout retaper) mais ne voyagent
+  jamais. Sans cela une classe entière serait réduite en douce à un nom oublié
+  dans un champ replié.
+- L'exclusivité porte sur le critère qui **ouvre** la recherche, pas sur tout
+  critère. Le mode classe garde un **affinage par nom facultatif** : la classe
+  ouvre, le nom restreint — sinon retrouver quelqu'un dans une classe de
+  soixante obligerait à connaître ses trois noms. Il n'arme jamais la recherche
+  à lui seul.
+- Sans référentiel (`options` vide), la carte **ouvre sur l'identité** : « Par
+  classe » n'y offrirait que deux listes grisées. Le mode par défaut suit le
+  référentiel tant que l'utilisateur n'a rien engagé, jamais après.
+- Le bouton « Rechercher » n'est armé que par le mode actif.
+- Les libellés de la bascule et ses aides sont **partagés** (`searchModeByClass`,
+  `searchModeByIdentity`, `searchModeClassHint`, `searchModeIdentityHint`…) : un
+  même geste ne s'appelle pas autrement d'un module à l'autre. Une feature ne
+  fournit que son titre, son sous-titre et les libellés de sa cascade.
+- L'aide du mode actif **nomme l'autre mode** : c'est la porte de sortie de qui
+  est entré par la mauvaise.
+- Un formulaire dont les deux modes sont **additifs** (Résultats : le mode élève
+  a besoin de la classe et de la période pour calculer) garde sa propre bascule
+  et n'entre pas dans `BiModeSearchForm`.
+
+### Formatage des champs texte
+
+La capitalisation est le **défaut** d'`EteeloTextInput` : c'est l'exception qui
+se déclare, pas la règle (`lib/core/formatters/text_capitalization_formatters.dart`).
+
+| Règle | Formatter | Pour |
+|---|---|---|
+| Chaque mot | `WordCapitalizationInputFormatter` | Identités et lieux — « Jean-Pierre Mokili ». Le trait d'union et l'apostrophe ouvrent un mot. |
+| Première lettre | `SentenceCapitalizationInputFormatter` | Textes libres — « Absence non justifiée ». La première **lettre**, pas le premier caractère. |
+
+`EteeloTextInput.capitalization` vaut `auto` par défaut et se résout sur la
+**forme réelle** du champ : `email` / `phone` / `number` → rien ; `multiline`
+**ou toute hauteur > 1 ligne** → phrase ; le reste → mot par mot. La hauteur
+compte autant que le type de clavier, sans quoi un `maxLines: 4` oublié rendrait
+« Absence Non Justifiée ». Un champ qui ne doit rien capitaliser (matricule,
+code, référence) le déclare avec `EteeloTextCapitalization.none`.
+
+⚠️ Les formatters s'appliquent à **chaque frappe** : une lettre rabaissée à la
+main est re-capitalisée au caractère suivant. « de Souza » redevient « De
+Souza », « van der Berg » est inatteignable. Comportement historique du champ
+nom, conservé ; un champ qui doit accepter une particule passe en `none`.
+
+Les deux formatters ne posent **que** des majuscules : ils ne rabaissent jamais
+une capitale saisie à la main (sigles, particules corrigées). Les
+`inputFormatters` de l'appelant sont conservés et passent **avant** la
+capitalisation. Pour un champ qui n'est pas un `EteeloTextInput` (`TextField` /
+`TextFormField` brut), passer le formatter explicitement.
+
 ## Common Workflows
 
 ### Creating a New Feature

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
@@ -12,6 +14,10 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+
+/// Sentinelle du `copyWith` de [AuthState] : distingue « ne touche pas au
+/// champ » de « pose `null` », désormais une valeur significative.
+const Object _unchanged = Object();
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase _loginUseCase;
@@ -101,6 +107,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _sessionManager.primeCurrentUser(
           session.user.id,
           schoolId: session.user.schoolId,
+          // Amorce aussi l'ensemble effectif : la boucle de synchro démarre
+          // avant tout tick de fraîcheur, et sans lui elle tirerait des
+          // ressources que ce compte n'a pas le droit de lire.
+          permissions: session.permissions,
         );
         // Session valide en storage : dériver le mode de dégradation courant.
         final eval = await _sessionManager.evaluateFreshness();
@@ -114,11 +124,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             status: AuthStatus.authenticated,
             user: session.user,
             sessionMode: eval?.mode ?? SessionMode.normal,
+            permissions: await _effectivePermissions(session),
           ),
         );
         _startFreshnessTimer();
       },
     );
+  }
+
+  /// Ensemble à afficher pour cette session : celui de la réponse s'il a été
+  /// COMMUNIQUÉ, sinon la copie durable du compte.
+  ///
+  /// Applique à l'écran la règle « absent ≠ vide » que toutes les couches de
+  /// persistance appliquent déjà (`recordOnlineLogin` fusionne avec l'existant,
+  /// `updatePermissions` et `updateTokens` ne font rien sur `null`). Sans elle,
+  /// une réponse qui omet le champ vidait la grille de modules et faisait
+  /// rediriger toutes les routes de la coquille vers l'accueil, jusqu'à ce que
+  /// le tick de fraîcheur relise la base — jusqu'à cinq minutes plus tard.
+  ///
+  /// Un `null` qui SURVIT à ce repli dit « jamais renseigné », et se propage
+  /// tel quel : c'est l'état tri-état attendu (ADR-014), pas un retrait.
+  Future<List<String>?> _effectivePermissions(AuthSession session) async {
+    final communicated = session.permissions;
+    if (communicated != null) return communicated;
+    return _sessionManager.currentPermissions();
   }
 
   /// Plancher d'affichage du spinner de connexion (spec Connexion §07).
@@ -139,7 +168,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (failure) => _handleOnlineLoginFailure(event, failure, emit),
       (session) async {
-        emit(AuthState(status: AuthStatus.authenticated, user: session.user));
+        emit(
+          AuthState(
+            status: AuthStatus.authenticated,
+            user: session.user,
+            permissions: await _effectivePermissions(session),
+          ),
+        );
         _startFreshnessTimer();
       },
     );
@@ -198,6 +233,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             user: snapshot.session.user,
             sessionMode: snapshot.mode,
             isOffline: true,
+            permissions: snapshot.session.permissions,
           ),
         );
         _startFreshnessTimer();
@@ -282,11 +318,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // (resynchronisation silencieuse post-déconsignation, V1.1) n'est plus
     // « hors ligne » : le bandeau tombe. Seul un contact réel l'éteint (D-08).
     final clearOffline = state.isOffline && eval.hadServerContact;
-    if (eval.mode != state.sessionMode || clearOffline) {
+    // Les permissions ne descendent qu'au login et au refresh (ADR-014 §4) : le
+    // refresh se produit en arrière-plan, sans rien émettre ici. Sans cette
+    // relecture, un changement de droits n'atteindrait l'écran qu'au prochain
+    // démarrage.
+    //
+    // `evaluateFreshness` a déjà rendu la main plus haut s'il n'y a pas de
+    // session locale : à ce point, un `null` vient donc de la COLONNE, et dit
+    // « jamais renseigné » — un état à propager tel quel, puisque l'écran qui
+    // en découle (« reconnectez-vous ») n'est pas celui du retrait de droits.
+    final permissions = await _sessionManager.currentPermissions();
+    final permissionsChanged = !listEquals(permissions, state.permissions);
+    if (eval.mode != state.sessionMode || clearOffline || permissionsChanged) {
       emit(
         state.copyWith(
           sessionMode: eval.mode,
           isOffline: clearOffline ? false : null,
+          permissions: permissionsChanged ? permissions : _unchanged,
         ),
       );
     }

@@ -1,7 +1,13 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -286,6 +292,14 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         errors.add(
           'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.phoneNumberLabel)}',
         );
+      } else if (!ParentItemValue.isPhoneAcceptable(
+        value.phoneNumber,
+        initialPhone: parent.phoneNumber,
+      )) {
+        errors.add(
+          'Gardien ${i + 1}: '
+          '${l10n.phoneNumberInvalidError(PhoneCountry.congoDrc.nationalLength)}',
+        );
       }
       if (value.email.trim().isNotEmpty &&
           !ParentItemValue.isEmailValid(value.email)) {
@@ -326,6 +340,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// Écrit tous les tuteurs saisis dans le brouillon local (sémantique
   /// « remplace l'ensemble » — pas de create/update/unlink individuel).
   void _dispatchDraftGuardians() {
+    // Ceinture : seul point de passage des trois chemins d'écriture (save,
+    // rattachement, suppression). Un CTA futur qui rappellerait cette méthode
+    // reste fermé sans avoir à y penser.
+    if (!_canWrite(context)) return;
     final studentId = widget.studentId.trim();
     if (studentId.isEmpty) {
       AppSnackBar.showError(
@@ -580,6 +598,19 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
+  /// Vrai si la session peut écrire ce dossier. Les CTA « Ajouter » /
+  /// « Rechercher un parent » et la corbeille écrivent le brouillon SANS
+  /// attendre le bouton « Enregistrer » du pied — lequel est, lui, gardé. Sans
+  /// cette composition, un profil en lecture voyait « Enregistrer » masqué mais
+  /// mutait quand même la composition des tuteurs ; la mutation partait ensuite
+  /// dans l'agrégat finalisé par quelqu'un d'autre, donc acceptée par le
+  /// serveur et attribuée au mauvais auteur.
+  bool _canWrite(BuildContext context) => PermissionGate.allows(
+    context,
+    kEnrollmentSubmitAccess.requires,
+    requiresAll: kEnrollmentSubmitAccess.requiresAll,
+  );
+
   @override
   Widget build(BuildContext context) {
     return EnrollmentDraftStepSaveListener(
@@ -588,24 +619,49 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       onSaved: _onDraftSaved,
       onError: _onDraftError,
       onGuardianPhoneConflict: _onGuardianPhoneConflict,
-      child: GuardianInfoStepBody(
-        parentDetails: _editableParentDetails,
-        onItemStateChanged: _onParentItemStateChanged,
-        onItemValueChanged: _onParentItemValueChanged,
-        onAddParent: _onAddGuardian,
-        onSearchParent: _onSearchParent,
-        onRemoveParent: _onRemoveGuardianRequested,
-        onOpenParent: _onOpenParent,
-        onPrimaryParentChanged: _onPrimaryParentChanged,
-        expandedParentId: _expandedParentId,
-        primaryParentId: _primaryParentId,
-        isLoading: _isBatchSaving,
-        canSave: _canSave,
-        showInlineSaveButton: widget.showInlineSaveButton,
-        onSave: _onSave,
-        isEditable: widget.isEditable,
-        identityLockedParentIds: _linkedFromSearchParentIds,
-      ),
+      child: _rebuiltOnPermissionChange(_buildBody),
+    );
+  }
+
+  /// Rejoue [builder] quand l'ensemble des droits change.
+  ///
+  /// `_canWrite` est une lecture ponctuelle — [PermissionGate.allows] ne
+  /// s'abonne à rien. Lue dans `build`, elle est donc juste à chaque
+  /// reconstruction… mais rien ne reconstruisait cette étape sur une émission
+  /// de l'`AuthBloc` : un droit accordé ou retiré par un refresh en arrière-plan
+  /// laissait les champs et la corbeille dans l'état du montage.
+  ///
+  /// Transparent sans `AuthBloc` dans l'arbre — même convention que le gate.
+  Widget _rebuiltOnPermissionChange(WidgetBuilder builder) {
+    final authBloc = PermissionGate.maybeBlocOf(context);
+    if (authBloc == null) return builder(context);
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      bloc: authBloc,
+      buildWhen: (prev, curr) =>
+          !listEquals(prev.permissions, curr.permissions),
+      builder: (context, _) => builder(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return GuardianInfoStepBody(
+      parentDetails: _editableParentDetails,
+      onItemStateChanged: _onParentItemStateChanged,
+      onItemValueChanged: _onParentItemValueChanged,
+      onAddParent: _onAddGuardian,
+      onSearchParent: _onSearchParent,
+      onRemoveParent: _onRemoveGuardianRequested,
+      onOpenParent: _onOpenParent,
+      onPrimaryParentChanged: _onPrimaryParentChanged,
+      expandedParentId: _expandedParentId,
+      primaryParentId: _primaryParentId,
+      isLoading: _isBatchSaving,
+      canSave: _canSave,
+      showInlineSaveButton: widget.showInlineSaveButton,
+      onSave: _onSave,
+      isEditable: widget.isEditable && _canWrite(context),
+      identityLockedParentIds: _linkedFromSearchParentIds,
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -253,17 +255,21 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
           return const SizedBox.shrink();
         }
         final detail = state.detail!;
-        // Gel READ_ONLY (ADR-010) : la création d'évaluation est une écriture.
-        return SessionWriteGate(
-          child: FloatingActionButton.extended(
-            // Pas de hero : la coquille bascule entre plusieurs Scaffolds
-            // (liste ↔ cours ↔ saisie) via AnimatedSwitcher.
-            heroTag: null,
-            onPressed: () => _openCreateModal(detail),
-            backgroundColor: AppColors.terreCuite,
-            foregroundColor: AppColors.textOnDark,
-            icon: const Icon(Icons.add_rounded),
-            label: Text(l10n.evalCreateTitle),
+        // Le détail d'un cours s'ouvre en lecture (`academics.grade.read`) :
+        // créer une évaluation exige l'écriture des notes.
+        return PermissionGate(
+          requires: const [Perm.academicsGradeWrite],
+          child: SessionWriteGate(
+            child: FloatingActionButton.extended(
+              // Pas de hero : la coquille bascule entre plusieurs Scaffolds
+              // (liste ↔ cours ↔ saisie) via AnimatedSwitcher.
+              heroTag: null,
+              onPressed: () => _openCreateModal(detail),
+              backgroundColor: AppColors.terreCuite,
+              foregroundColor: AppColors.textOnDark,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.evalCreateTitle),
+            ),
           ),
         );
       },
@@ -348,8 +354,15 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
               label: bucketLabel(l10n, bucket),
               bucket: bucket,
             ),
-            onOpenEval: (eval) =>
-                _openEvalSaisie(eval, periode, bucket, detail),
+            // La grille de saisie est NOMINATIVE : elle exige le droit de
+            // lire les notes, que la porte d'entrée soit « Mes cours » ou
+            // l'emploi du temps (ADR-015 §6-B). Sans lui, les évaluations
+            // restent listées mais la ligne n'ouvre rien — l'affordance est
+            // retirée, pas remplacée par un refus au dernier moment.
+            onOpenEval:
+                PermissionGate.allows(context, const [Perm.academicsGradeRead])
+                ? (eval) => _openEvalSaisie(eval, periode, bucket, detail)
+                : null,
           ),
       ],
     );

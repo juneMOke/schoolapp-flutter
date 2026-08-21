@@ -231,6 +231,93 @@ void main() {
     },
   );
 
+  test(
+    'v23→v26 : colonne permissions ajoutée, NULL sur les comptes existants',
+    () async {
+      final db = await _openLegacyDb();
+      addTearDown(db.close);
+
+      // Base v23 : `auth_local_user` au format m4 (avec `refresh_expires_at`)
+      // mais SANS `permissions`.
+      await db.execute('''
+        CREATE TABLE auth_local_user (
+          user_id               TEXT PRIMARY KEY,
+          email                 TEXT NOT NULL UNIQUE COLLATE NOCASE,
+          first_name            TEXT NOT NULL,
+          last_name             TEXT NOT NULL,
+          role                  TEXT NOT NULL,
+          school_id             TEXT NOT NULL,
+          password_verifier     TEXT NOT NULL,
+          verifier_salt         TEXT NOT NULL,
+          user_version          INTEGER NOT NULL,
+          first_online_login_at INTEGER NOT NULL,
+          last_server_seen_at   INTEGER NOT NULL,
+          session_started_at    INTEGER,
+          refresh_expires_at    INTEGER
+        )
+      ''');
+      await db.insert('auth_local_user', {
+        'user_id': 'u1',
+        'email': 'a@ecole.cd',
+        'first_name': 'A',
+        'last_name': 'K',
+        'role': 'TEACHER',
+        'school_id': 'sch-1',
+        'password_verifier': 'v',
+        'verifier_salt': 's',
+        'user_version': 0,
+        'first_online_login_at': 100,
+        'last_server_seen_at': 100,
+        'refresh_expires_at': 777777,
+      });
+
+      await migrateOfflineDatabase(db, 23, buildOfflineSchema());
+
+      // Aucun backfill possible : un compte déjà connu n'a jamais reçu
+      // d'ensemble. NULL dit « aucune permission connue » jusqu'au prochain
+      // contact serveur — et la borne offline du compte n'a pas bougé.
+      final users = await db.query('auth_local_user');
+      expect(users.single['permissions'], isNull);
+      expect(users.single['refresh_expires_at'], 777777);
+
+      // Rejeu : la garde `_hasColumn` évite le `duplicate column name`.
+      await migrateOfflineDatabase(db, 23, buildOfflineSchema());
+      expect((await db.query('auth_local_user')).single['permissions'], isNull);
+    },
+  );
+
+  test(
+    'v6→v26 : la table naît du DDL canonique, l\'ALTER v26 ne double pas',
+    () async {
+      final db = await _openLegacyDb();
+      addTearDown(db.close);
+
+      // Une base pré-v7 traverse le palier v7, qui crée `auth_local_user`
+      // depuis le DDL canonique — donc AVEC `permissions`. Sans la garde, le
+      // palier v26 échouerait ensuite sur `duplicate column name`.
+      await migrateOfflineDatabase(db, 6, buildOfflineSchema());
+
+      await db.insert('auth_local_user', {
+        'user_id': 'u1',
+        'email': 'a@ecole.cd',
+        'first_name': 'A',
+        'last_name': 'K',
+        'role': 'TEACHER',
+        'school_id': 'sch-1',
+        'password_verifier': 'v',
+        'verifier_salt': 's',
+        'user_version': 0,
+        'first_online_login_at': 100,
+        'last_server_seen_at': 100,
+        'permissions': '["attendance.read"]',
+      });
+      expect(
+        (await db.query('auth_local_user')).single['permissions'],
+        '["attendance.read"]',
+      );
+    },
+  );
+
   test('auth_local_session applique la contrainte de mode', () async {
     final db = await _openLegacyDb();
     addTearDown(db.close);

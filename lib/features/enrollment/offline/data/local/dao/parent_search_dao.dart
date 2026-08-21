@@ -1,4 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/database/phone_number_sql.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -41,7 +43,20 @@ class ParentSearchDao {
     addLike('first_name', firstName);
     addLike('last_name', lastName);
     addLike('surname', surname);
-    addLike('phone_number', phoneNumber);
+    // Le critère arrive en E.164 (`+2438169`) tandis que les fiches en base
+    // peuvent porter des formats hérités (`0816939060`, `+243 81 693 90
+    // 60`) : on cherche donc la partie NATIONALE dans les chiffres de la
+    // colonne, sans quoi un tuteur enregistré autrement serait introuvable —
+    // et l'utilisateur en recréerait un doublon.
+    final nationalPhone = PhoneNumberFormat.nationalPartOf(
+      phoneNumber?.trim() ?? '',
+    );
+    if (nationalPhone.isNotEmpty) {
+      clauses.add(
+        "${PhoneNumberSql.digitsOnly('phone_number')} LIKE ? ESCAPE '\\'",
+      );
+      args.add('%${_escapeLike(nationalPhone)}%');
+    }
     if (clauses.isEmpty) return const <LocalParent>[];
 
     final rows = await _db.query(

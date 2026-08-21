@@ -182,28 +182,17 @@ const TableSchema noteEvaluationTable = TableSchema(
   ],
 );
 
-/// `ref_cours_notation` — **RETIRÉE (v12)** : squelette du détail de notation
-/// d'un cours (arbre période → sous-période + statut, workaround alimenté en
-/// réutilisant un endpoint ONLINE), remplacé par le bundle `grades-referential`
-/// (`ref_periode`/`ref_sous_periode`, 100% local — cf. `CourseOfflineRepositoryImpl.
-/// getCoursNotationDetail`). Définition **conservée** pour que l'étape de
-/// migration `v8→v9` (qui la crée pour les bases pré-v9) reste rejouable ; la
-/// table reste présente mais inerte, purgée par la migration `v11→v12`. Aucun
-/// DAO ne la lit/l'écrit plus.
-const TableSchema refCoursNotationTable = TableSchema(
-  name: 'ref_cours_notation',
-  createTableSql: '''
-    CREATE TABLE ref_cours_notation (
-      cours_id TEXT PRIMARY KEY,
-      classroom_id TEXT,
-      branche_nom TEXT,
-      effectif INTEGER NOT NULL DEFAULT 0,
-      periodes_json TEXT NOT NULL,
-      server_updated_at INTEGER,
-      synced_at INTEGER NOT NULL
-    )
-  ''',
-);
+// `ref_cours_notation` — **SUPPRIMÉE (v27)**. Squelette du détail de notation
+// d'un cours (arbre période → sous-période + statut), alimenté par un workaround
+// qui réutilisait un endpoint ONLINE. Le bundle `grades-referential`
+// (`ref_periode`/`ref_sous_periode`, 100% local) l'a remplacée dès la v12 — cf.
+// `CourseOfflineRepositoryImpl.getCoursNotationDetail`.
+//
+// Sa définition avait survécu quinze paliers pour une raison qui n'existe plus :
+// l'étape v8→v9 la lisait ici par `schema.firstWhere` pour la créer sur les bases
+// anciennes. Ce DDL est maintenant inliné dans l'étape v9 (`app_database.dart`),
+// où il décrit le passé et n'a plus à suivre le schéma vivant. La v27 fait le
+// `DROP` ; les bases neuves ne la créent plus.
 
 /// `ref_branche` — branche académique (bundle `grades-referential`, réf,
 /// lecture seule). Remplacement d'ensemble à chaque pull (pas de delta), **par
@@ -328,7 +317,6 @@ const List<TableSchema> academicsOfflineTables = [
   refCoursTable,
   evaluationTable,
   noteEvaluationTable,
-  refCoursNotationTable,
   refBrancheTable,
   refLigneBaremeTable,
   refChapitreTable,

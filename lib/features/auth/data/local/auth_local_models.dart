@@ -2,6 +2,7 @@
 /// mapping SQLite ↔ Dart, sans logique métier.
 library;
 
+import 'package:school_app_flutter/features/auth/data/session_permissions.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 
 export 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart'
@@ -28,6 +29,15 @@ class AuthLocalUserRecord {
   /// (D-09). `null` = pas de fenêtre → reconnexion online exigée.
   final int? refreshExpiresAt;
 
+  /// Permissions effectives du compte au dernier contact serveur (ADR-014 §4).
+  /// Copie durable : elle survit au logout pour que le login offline rouvre une
+  /// session avec les droits connus.
+  ///
+  /// **Nullable, et la colonne l'est aussi** : la migration v24 l'a ajoutée
+  /// sans backfill, donc tout compte connu avant cette version a légitimement
+  /// `null` — « jamais renseigné », surtout pas « dépouillé ».
+  final List<String>? permissions;
+
   const AuthLocalUserRecord({
     required this.userId,
     required this.email,
@@ -42,6 +52,7 @@ class AuthLocalUserRecord {
     required this.lastServerSeenAt,
     this.sessionStartedAt,
     this.refreshExpiresAt,
+    this.permissions,
   });
 
   factory AuthLocalUserRecord.fromMap(Map<String, Object?> map) {
@@ -59,6 +70,9 @@ class AuthLocalUserRecord {
       lastServerSeenAt: map['last_server_seen_at'] as int,
       sessionStartedAt: map['session_started_at'] as int?,
       refreshExpiresAt: map['refresh_expires_at'] as int?,
+      permissions: SessionPermissions.decodeOrNull(
+        map['permissions'] as String?,
+      ),
     );
   }
 
@@ -76,6 +90,10 @@ class AuthLocalUserRecord {
     'last_server_seen_at': lastServerSeenAt,
     'session_started_at': sessionStartedAt,
     'refresh_expires_at': refreshExpiresAt,
+    // `null` s'écrit NULL : la colonne porte la même distinction que le champ.
+    'permissions': permissions == null
+        ? null
+        : SessionPermissions.encode(permissions!),
   };
 }
 

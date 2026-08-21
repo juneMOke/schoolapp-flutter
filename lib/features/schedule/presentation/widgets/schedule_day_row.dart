@@ -89,11 +89,16 @@ class ScheduleDayRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textMuted,
-                ),
+                // Un chevron promet une destination : il ne s'affiche que si
+                // la rangée est réellement ouvrable (même règle que
+                // `CoursEvalRow`).
+                if (onTap != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textMuted,
+                  ),
+                ],
               ],
             ),
           ),

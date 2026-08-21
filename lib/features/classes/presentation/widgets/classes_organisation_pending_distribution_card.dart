@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -109,47 +111,51 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           SizedBox(
             width: double.infinity,
-            // Gel READ_ONLY (ADR-010) : la distribution affecte les élèves.
-            child: SessionWriteGate(
-              child: FilledButton(
-                onPressed:
-                    (isDistributing ||
-                        isLoadingOverview ||
-                        isOverviewFailure ||
-                        isOffline)
-                    ? null
-                    : onDistributionRequested,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.terreCuite,
-                  foregroundColor: AppColors.blancCasse,
-                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.spacingM,
-                  ),
-                  shape: const StadiumBorder(),
-                ),
-                // Bouton pleine largeur + libellé flexible : sur très petit
-                // écran le texte passe sur 2 lignes plutôt que de déborder.
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isDistributing)
-                      const SizedBox(
-                        width: AppDimensions.detailMiniIconSize,
-                        height: AppDimensions.detailMiniIconSize,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    else
-                      const Icon(Icons.auto_awesome_outlined),
-                    const SizedBox(width: AppDimensions.spacingS),
-                    Flexible(
-                      child: Text(
-                        l10n.classesOrganisationDistributeByGenderAction,
-                        textAlign: TextAlign.center,
-                      ),
+            // L'écran d'organisation s'ouvre avec `classroom.read` : répartir
+            // des élèves exige l'écriture du domaine.
+            child: PermissionGate(
+              requires: const [Perm.classroomWrite],
+              child: SessionWriteGate(
+                child: FilledButton(
+                  onPressed:
+                      (isDistributing ||
+                          isLoadingOverview ||
+                          isOverviewFailure ||
+                          isOffline)
+                      ? null
+                      : onDistributionRequested,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.terreCuite,
+                    foregroundColor: AppColors.blancCasse,
+                    minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.spacingM,
                     ),
-                  ],
+                    shape: const StadiumBorder(),
+                  ),
+                  // Bouton pleine largeur + libellé flexible : sur très petit
+                  // écran le texte passe sur 2 lignes plutôt que de déborder.
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isDistributing)
+                        const SizedBox(
+                          width: AppDimensions.detailMiniIconSize,
+                          height: AppDimensions.detailMiniIconSize,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      else
+                        const Icon(Icons.auto_awesome_outlined),
+                      const SizedBox(width: AppDimensions.spacingS),
+                      Flexible(
+                        child: Text(
+                          l10n.classesOrganisationDistributeByGenderAction,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

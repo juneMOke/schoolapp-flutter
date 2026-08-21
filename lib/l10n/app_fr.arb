@@ -64,6 +64,34 @@
   "splashErrorTitle": "Connexion impossible",
   "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
   "splashErrorRetry": "Réessayer",
+  "accueilUnknownRightsTitle": "Droits non connus",
+  "@accueilUnknownRightsTitle": {
+    "description": "Titre de l'accueil quand aucun ensemble de permissions n'a jamais été communiqué pour ce compte sur cet appareil (ADR-014, état inconnu)"
+  },
+  "accueilUnknownRightsMessage": "Vos droits ne sont pas encore connus sur cet appareil. Reconnectez-vous en ligne pour les récupérer.",
+  "@accueilUnknownRightsMessage": {
+    "description": "Message de l'état inconnu — une reconnexion suffit, inutile de solliciter l'administration"
+  },
+  "accueilNoAccessTitle": "Aucun module accessible",
+  "@accueilNoAccessTitle": {
+    "description": "Titre de l'accueil quand l'ensemble effectif des permissions ne débloque aucun module (ADR-014 fail-closed)"
+  },
+  "accueilNoAccessMessage": "Votre compte ne donne accès à aucun module. Contactez l'administrateur de votre école pour qu'il ajuste vos droits.",
+  "@accueilNoAccessMessage": {
+    "description": "Message quand le serveur a bien communiqué les droits et qu'ils sont vides"
+  },
+  "accueilNoAccessOfflineMessage": "Votre session a été ouverte hors ligne et aucun droit n'est connu pour ce compte. Reconnectez-vous en ligne dès que le réseau est disponible.",
+  "@accueilNoAccessOfflineMessage": {
+    "description": "Message quand la session vient de la copie durable locale — une reconnexion en ligne peut rafraîchir les droits"
+  },
+  "splashForbiddenTitle": "Accès non autorisé",
+  "@splashForbiddenTitle": {
+    "description": "Titre de l'écran d'amorçage quand le compte n'a pas la permission de charger le référentiel (403)"
+  },
+  "splashForbiddenMessage": "Votre compte ne dispose pas des droits nécessaires pour ouvrir l'application. Contactez l'administrateur de votre école.",
+  "@splashForbiddenMessage": {
+    "description": "Message de l'écran d'amorçage en 403 — aucun réessai possible, seul un changement de droits y remédie"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
@@ -151,6 +179,7 @@
   "subMenuReRegistrations": "Réinscriptions",
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
+  "subMenuFeeControl": "Contrôle des frais",
   "subMenuOrganization": "Composition\ndes classes",
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
@@ -842,14 +871,7 @@
   "searchStudents": "Rechercher des élèves",
   "searchFormSubtitleFirstRegistration": "Filtrez la liste des inscriptions",
   "reRegistrationSearchHint": "Retrouvez un élève ou une classe de l'année précédente à réinscrire",
-  "reRegistrationSearchHelpPill": "Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.",
   "reRegistrationSearchTitle": "Rechercher un élève",
-  "reRegistrationSearchByNameGroup": "Par nom",
-  "reRegistrationSearchByLevelGroup": "Par cycle / niveau",
-  "reRegistrationSearchOrSeparator": "OU",
-  "reRegistrationSearchActiveModeLabel": "Recherche active par :",
-  "reRegistrationSearchModeNameBadge": "Nom",
-  "reRegistrationSearchModeLevelBadge": "Cycle / niveau",
   "reRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "reRegistrationAcademicInfoHelp": "Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.",
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
@@ -858,23 +880,10 @@
   "reRegistrationSearchInvitationTitle": "Lancez une recherche de re-inscription",
   "reRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.",
   "preRegistrationSearchHint": "Retrouvez une pré-inscription par élève ou par cycle/niveau souhaité",
-  "preRegistrationSearchHelpPill": "Retrouvez une demande précise (nom + post-nom + prénom) ou toutes les demandes d'un cycle/niveau souhaité. Vous pouvez aussi combiner les deux.",
   "preRegistrationSearchTitle": "Rechercher une pré-inscription",
-  "preRegistrationSearchByNameGroup": "Par nom",
-  "preRegistrationSearchByLevelGroup": "Par cycle / niveau",
-  "preRegistrationSearchOrSeparator": "OU",
-  "preRegistrationSearchActiveModeLabel": "Recherche active par :",
-  "preRegistrationSearchModeNameBadge": "Nom",
-  "preRegistrationSearchModeLevelBadge": "Cycle / niveau",
   "preRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "preRegistrationSearchInvitationTitle": "Lancez une recherche de pré-inscription",
   "preRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les demandes.",
-  "firstRegistrationSearchByStudentGroup": "Par élève",
-  "firstRegistrationSearchByLevelGroup": "Par niveau visé",
-  "firstRegistrationSearchOrSeparator": "OU",
-  "firstRegistrationSearchActiveModeLabel": "Recherche active par :",
-  "firstRegistrationSearchModeStudentBadge": "Élève",
-  "firstRegistrationSearchModeLevelBadge": "Niveau",
   "firstRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "firstName": "Prénom",
   "lastName": "Nom",
@@ -882,6 +891,14 @@
   "dateOfBirth": "Date de Naissance",
   "search": "Rechercher",
   "clear": "Effacer",
+  "searchModeSwitchLabel": "Rechercher par",
+  "searchModeSemantics": "Mode de recherche",
+  "searchModeByClass": "Par classe",
+  "searchModeByIdentity": "Par identité",
+  "searchModeClassHint": "Choisissez un cycle puis un niveau pour lister toute la classe ; un nom, même partiel, y restreint la liste. Pour retrouver un élève sans connaître sa classe, basculez sur « Par identité ».",
+  "searchModeIdentityHint": "Renseignez le nom, le post-nom et le prénom de l'élève. Pour lister toute une classe, basculez sur « Par classe ».",
+  "searchRefineByNameLabel": "Affiner par nom (facultatif)",
+  "searchRefineByNamePlaceholder": "Nom de l'élève, même partiel",
   "viewDetails": "Voir les détails",
   "editEnrollment": "Modifier",
   "exportData": "Exporter",
@@ -1013,7 +1030,13 @@
   },
   "guardianSearchAction": "Rechercher un parent",
   "guardianSearchDialogTitle": "Rechercher un parent existant",
-  "guardianSearchHint": "Renseignez au moins un critère (nom ou téléphone)",
+  "guardianSearchDialogEyebrow": "Tuteurs",
+  "guardianSearchModeSemantics": "Mode de recherche",
+  "guardianSearchModeByPhone": "Par numéro",
+  "guardianSearchModeByIdentity": "Par identité",
+  "guardianSearchPhoneHint": "Le numéro suffit, même partiel : « 8169 » remonte tous les tuteurs concernés.",
+  "guardianSearchIdentityHint": "Nom et prénom sont requis. Le postnom affine la recherche s'il est connu.",
+  "guardianSearchResultsPlaceholder": "Les tuteurs correspondants s'afficheront ici.",
   "guardianSearchEmptyTitle": "Aucun parent trouvé",
   "guardianSearchEmptyDescription": "Aucun parent ne correspond à ces critères. Vérifiez la saisie ou ajoutez-le comme nouveau tuteur.",
   "guardianSearchAlreadyAddedError": "Ce parent est déjà ajouté à cette inscription.",
@@ -1114,6 +1137,15 @@
   "identificationNumberHelp": "Numéro d'identification officiel.",
   "phoneNumberLabel": "Téléphone",
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
+  "phoneNumberCountryCodeLabel": "Indicatif pays",
+  "phoneNumberInvalidError": "Numéro de téléphone invalide ({expectedDigits} chiffres attendus après l'indicatif).",
+  "@phoneNumberInvalidError": {
+    "placeholders": {
+      "expectedDigits": {
+        "type": "int"
+      }
+    }
+  },
   "emailLabel": "Email",
   "emailLabelHelp": "Adresse email du tuteur.",
   "relationshipFather": "Père",
@@ -1286,6 +1318,14 @@
   "studentChargesLoading": "Chargement des charges de l'élève...",
   "studentChargesRetry": "Réessayer",
   "studentChargesEmpty": "Aucune charge disponible pour cet élève.",
+  "studentChargesFeeGridUnavailable": "La grille tarifaire n'est pas disponible sur cet appareil pour cette année. Synchronisez avant de poursuivre.",
+  "@studentChargesFeeGridUnavailable": {
+    "description": "Étape Frais : la grille est absente du référentiel local, quel que soit le droit du compte courant — une synchronisation suffit, contrairement au cas du droit manquant"
+  },
+  "studentChargesTariffsWithheld": "Les frais ne peuvent pas être calculés : votre compte n'a pas accès à la grille tarifaire. Demandez à un compte habilité de synchroniser cet appareil.",
+  "@studentChargesTariffsWithheld": {
+    "description": "Étape Frais du wizard quand le serveur a retiré la grille tarifaire du référentiel faute de finance.grid.read (ADR-014) — à ne pas confondre avec « aucune charge »"
+  },
   "studentChargesUnavailable": "Impossible de charger les charges sans élève ou niveau cible.",
   "studentChargesAmountColumn": "Montant",
   "studentChargesLabelColumn": "Libellé",
@@ -1349,17 +1389,75 @@
   "facturationViewChargesLabel": "Voir les charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
+  "facturationEmptyEnrollmentWithheld": "La liste des élèves relève du module Inscription, auquel ce profil n'a pas accès : aucun élève ne peut être affiché ici, quels que soient les critères. Votre administrateur peut ouvrir cet accès.",
   "facturationEmptyTitle": "Aucun élève trouvé",
-  "facturationSearchHelpBanner": "Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.",
-  "facturationSearchByStudentGroup": "Par élève",
-  "facturationSearchByClassGroup": "Par classe",
-  "facturationSearchOrSeparator": "OU",
-  "facturationSearchActiveModeLabel": "Recherche active par :",
-  "facturationSearchModeStudentBadge": "Élève",
-  "facturationSearchModeClassBadge": "Classe",
+  "facturationSearchHelpBanner": "Recherchez toute une classe (cycle + niveau), ou un élève précis (nom + post-nom + prénom).",
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Niveau",
   "facturationSearchLevelPlaceholder": "Choisissez un cycle",
+  "feeControlSearchTitle": "Contrôler un frais",
+  "feeControlSearchHelpBanner": "Choisissez la classe puis le frais à contrôler. Le statut de paiement porte sur ce frais uniquement.",
+  "feeControlSearchClassGroupTitle": "Classe et frais",
+  "feeControlSearchStudentGroupTitle": "Affiner par élève",
+  "feeControlSearchStudentGroupHint": "Facultatif",
+  "feeControlSearchCycleLabel": "Cycle",
+  "feeControlSearchLevelLabel": "Niveau",
+  "feeControlSearchLevelPlaceholder": "Choisissez un cycle",
+  "feeControlClassroomLabel": "Classe",
+  "feeControlClassroomPlaceholder": "Choisissez un niveau",
+  "feeControlClassroomAll": "Toutes les classes du niveau",
+  "feeControlClassroomEmptyForLevel": "Aucune classe n'est composée pour ce niveau : le contrôle porte sur tout le niveau.",
+  "feeControlClassroomWithheld": "Les classes relèvent d'un module auquel ce profil n'a pas accès : le contrôle porte sur tout le niveau.",
+  "feeControlFeeLabel": "Frais",
+  "feeControlFeePlaceholder": "Choisissez un niveau",
+  "feeControlFeeEmptyForLevel": "Aucun frais n'est défini pour ce niveau.",
+  "feeControlFeeGridMissing": "La grille tarifaire n'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.",
+  "feeControlFeeGridWithheld": "La grille tarifaire relève d'un module auquel ce profil n'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.",
+  "feeControlFeeLoadFailed": "La liste des frais de ce niveau n'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l'application.",
+  "feeControlFeeLoadRetry": "Réessayer",
+  "feeControlPaymentStatusLabel": "Statut de paiement",
+  "feeControlPaymentStatusAll": "Tous",
+  "feeControlViewDetailLabel": "Voir la fiche financière",
+  "feeControlSummaryA11yLabel": "Synthèse du contrôle des frais",
+  "feeControlSummaryStudents": "Élèves concernés",
+  "feeControlInvitationTitle": "Aucun contrôle en cours",
+  "feeControlInvitationMessage": "Choisissez une classe puis un frais ci-dessus pour voir qui l'a réglé.",
+  "feeControlEmptyTitle": "Aucun élève trouvé",
+  "feeControlNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
+  "feeControlEmptyEnrollmentWithheld": "Les élèves relèvent du module Inscription, auquel ce profil n'a pas accès : le contrôle ne peut porter sur personne, quels que soient les critères. Votre administrateur peut ouvrir cet accès.",
+  "feeControlEmptyClassroomWithheld": "La composition des classes relève d'un module auquel ce profil n'a pas accès : le contrôle par classe est impossible. Relancez sans filtrer par classe pour porter sur tout le niveau.",
+  "feeControlEmptyRosterMissing": "La liste des élèves de cette classe n'est pas encore descendue sur cet appareil. Synchronisez, puis relancez le contrôle.",
+  "feeControlEmptyNoLocalEnrollment": "Aucun élève de cette classe n'a de dossier d'inscription local sur cette année. Synchronisez les inscriptions, puis relancez le contrôle.",
+  "feeControlNoChargeDescription": "Aucun élève de cette classe ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne s'applique pas à ce niveau.",
+  "feeControlEmptyNoEnrollmentForLevel": "Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d'être saisies ailleurs, synchronisez puis relancez le contrôle.",
+  "feeControlNoChargeForLevelDescription": "Aucun élève de ce niveau ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne leur est pas applicable.",
+  "feeControlCriteriaFee": "Frais : {label}",
+  "@feeControlCriteriaFee": {
+    "description": "Puce de critère rappelant le frais contrôlé.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaClassroom": "Classe : {label}",
+  "@feeControlCriteriaClassroom": {
+    "description": "Puce de critère rappelant la classe contrôlée.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaStatus": "Statut : {label}",
+  "@feeControlCriteriaStatus": {
+    "description": "Puce de critère rappelant le statut de paiement demandé.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "facturationBalanceDuePill": "{amount} dû",
   "@facturationBalanceDuePill": {
     "description": "Pastille AppBar facturation lorsque le solde est dû.",
@@ -1451,6 +1549,8 @@
   "facturationDetailCollectPaymentAction": "Encaisser un paiement",
   "facturationDetailPaymentsRetry": "Réessayer",
   "facturationDetailPaymentsEmpty": "Aucun paiement n'a été enregistré pour cet élève.",
+  "facturationDetailPaymentsWithheldSubtitle": "Suivi tenu par la caisse.",
+  "facturationDetailPaymentsWithheld": "Le détail des encaissements relève de la caisse : il n'est pas affiché sur ce profil. Le total déjà payé, en haut de la fiche, reste exact.",
   "facturationDetailPaymentPayerColumn": "Payeur",
   "facturationDetailPaymentPaidAtColumn": "Date",
   "facturationDetailPaymentAmountColumn": "Montant",
@@ -1471,6 +1571,10 @@
   "facturationPaymentReceiptLabel": "Reçu n°",
   "facturationPaymentStudentLabel": "Élève",
   "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",
+  "facturationPaymentReceiptForbiddenHint": "Vous n'avez pas le droit d'émettre cette pièce.",
+  "@facturationPaymentReceiptForbiddenHint": {
+    "description": "Motif affiché sous le bouton de reçu éteint faute de la permission editique.write (ADR-014) — à ne pas confondre avec l'attente de synchronisation"
+  },
   "facturationPaymentReceiptPendingSyncHint": "Le reçu sera disponible une fois le paiement synchronisé.",
   "facturationPaymentReceiptNumberPending": "En attente de synchronisation",
   "facturationPaymentCloseLabel": "Fermer",
@@ -1534,6 +1638,7 @@
   "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Total alloué",
   "facturationChargeDetailAllocationsEmpty": "Aucune allocation n'a été trouvée pour cette charge.",
+  "facturationChargeDetailAllocationsWithheld": "L'imputation des versements relève de la caisse : elle n'est pas détaillée sur ce profil. Le montant déjà payé, ci-dessus, reste exact.",
   "facturationChargeDetailAllocationsRetry": "Réessayer",
   "facturationChargeDetailAllocationsNetworkError": "Impossible de charger les allocations. Vérifiez votre connexion internet.",
   "facturationChargeDetailAllocationsNotFound": "Aucune allocation trouvée pour cette charge.",
@@ -1570,6 +1675,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Ajouter une allocation",
   "facturationCreatePaymentAllChargesPaid": "Toutes les charges de cet élève sont déjà réglées.",
   "facturationCreatePaymentChargesUnavailable": "Aucune charge disponible. Revenez à la liste et recommencez.",
+  "facturationCollectPreflightMessage": "Vérification des encaissements récents\u2026",
   "facturationCreatePaymentChargeDropdownHint": "Sélectionnez une charge",
   "facturationCreatePaymentAmountLabel": "Montant à payer",
   "facturationCreatePaymentAmountHint": "Ex : 5000",
@@ -2142,6 +2248,7 @@
   "statusAbsentJustified": "Justifié",
   "statusAbsentUnjustified": "Absent",
   "statusSynced": "À jour",
+  "statusPartiallySynced": "Partiellement à jour",
   "statusSyncing": "Synchro…",
   "statusOffline": "Hors ligne",
   "statusPendingUpload": "À envoyer",
@@ -2174,6 +2281,18 @@
         "type": "int"
       }
     }
+  },
+  "syncRowSynced": "Synchronisé avec le serveur",
+  "@syncRowSynced": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (coche verte) : l'écriture a été acquittée par le serveur."
+  },
+  "syncRowPending": "En attente de synchronisation",
+  "@syncRowPending": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (sablier orangé) : l'écriture est dans la file d'envoi et repartira toute seule."
+  },
+  "syncRowError": "Refusée par le serveur — ne repartira pas d'elle-même",
+  "@syncRowError": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (triangle rouge) : rejet définitif du serveur, aucune nouvelle tentative automatique."
   },
   "syncErrorsTitle": "Écritures en échec",
   "syncErrorsSubtitle": "Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d'eux-mêmes.",
@@ -2929,6 +3048,12 @@
     }
   },
   "syncErrorsForeignEntryAnonymous": "Écriture d'un autre compte — elle devra être reprise depuis sa propre session.",
+  "syncSheetStatusTitle": "État de la synchronisation",
+  "syncSheetStatusSubtitle": "Ce que cette tablette n'a pas reçu, et les écritures que le serveur a refusées — celles-ci ne repartiront pas d'elles-mêmes.",
+  "syncIncompleteReadTitle": "Certaines données ne descendent pas",
+  "syncIncompleteReadDescription": "La dernière mise à jour n'a pas tout ramené. Des écrans peuvent donc paraître vides sans l'être vraiment. Rien de ce que vous avez saisi n'est perdu. Si cela dure, votre administrateur peut vérifier les accès de votre compte.",
+  "syncIncompleteReadRetriableDescription": "La dernière mise à jour s'est interrompue avant d'avoir tout ramené. Des écrans peuvent donc paraître vides sans l'être vraiment. Rien de ce que vous avez saisi n'est perdu.",
+  "syncIncompleteReadRetry": "Réessayer",
   "syncErrorsHeldTitle": "En attente",
   "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
   "editiqueViewerReceiptTitle": "Reçu de paiement",
@@ -2986,12 +3111,6 @@
   "subMenuDocumentsStudent": "Documents de l'élève",
   "documentsSearchTitle": "Documents de l'élève",
   "documentsSearchHelpBanner": "Recherchez un élève précis, ou toute une classe, puis ouvrez son catalogue de pièces.",
-  "documentsSearchByStudentGroup": "Par élève",
-  "documentsSearchByClassGroup": "Par classe",
-  "documentsSearchOrSeparator": "OU",
-  "documentsSearchActiveModeLabel": "Mode actif",
-  "documentsSearchModeStudentBadge": "Élève",
-  "documentsSearchModeClassBadge": "Classe",
   "documentsSearchCycleLabel": "Cycle",
   "documentsSearchLevelLabel": "Niveau",
   "documentsSearchLevelPlaceholder": "Choisissez d'abord un cycle",
@@ -3053,6 +3172,7 @@
   "ticketKeepNotice": "Conservez ce ticket jusqu'à la remise de votre reçu définitif.",
   "ticketPrintLabel": "Imprimer le ticket de perception",
   "ticketPrintFailed": "Impression indisponible : le ticket n'a pas pu être produit.",
+  "ticketRefusedUnknownStudent": "Impression refusée : le nom de l'élève n'est pas connu de cette tablette. Le versement est bien enregistré — réimprimez après la prochaine synchronisation.",
   "ticketCutNotice": "Découpez le long du cadre.",
   "ticketPrinterPickerTitle": "Choisir l'imprimante",
   "ticketPrinterUnnamed": "Imprimante sans nom",

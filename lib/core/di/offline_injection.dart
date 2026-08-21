@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -10,11 +11,16 @@ import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/sync/data/datasources/sync_plan_api.dart';
+import 'package:school_app_flutter/features/sync/data/repositories/sync_plan_repository_impl.dart';
 import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -78,6 +84,11 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   // chemins offline pour estampiller `authorId` sur les payloads `/sync`.
   getIt.registerLazySingleton<CurrentUserContext>(() => CurrentUserContext());
 
+  // Ensemble effectif des permissions (ADR-014 §4) : alimenté par l'auth, lu
+  // par la boucle de pull pour sauter les ressources que ce compte n'a pas le
+  // droit de lire — sans quoi chaque cycle collectionnerait des 403.
+  getIt.registerLazySingleton<CurrentPermissions>(() => CurrentPermissions());
+
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<ConnectivityService>(
     () => ConnectivityService(getIt<Connectivity>()),
@@ -106,10 +117,46 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   // AVANT le coordinateur, qui le consomme.
   getIt.registerLazySingleton<PullCompletionBus>(() => PullCompletionBus());
 
+  // Porteur du plan de synchronisation : mémo, single-flight, péremption sur
+  // changement de droits (ADR-015 F5/F9). Vit dans le socle avec le coordinateur
+  // qui le consomme ; son REPOSITORY, lui, est une implémentation de branche
+  // (`features/sync`) enregistrée dans `registerOfflineModules` — résolu
+  // paresseusement, comme `AuthSessionManager` ci-dessus.
+  //
+  // Abonné à `CurrentPermissions`, qui ne notifie que sur un changement RÉEL
+  // d'ensemble : cela couvre du même coup les six chemins qui alimentent cet
+  // ensemble, dont la bascule de compte — et un ensemble redevenu inconnu
+  // (logout, wipe) fait OUBLIER le plan plutôt que le marquer périmé. Sous F5,
+  // un plan survivant ne décide plus d'un affichage mais de ce que le compte
+  // suivant TIRE.
+  getIt.registerLazySingleton<SyncPlanHolder>(
+    () => SyncPlanHolder(
+      repository: getIt<SyncPlanRepository>(),
+      permissions: getIt<CurrentPermissions>(),
+    ),
+  );
+
   getIt.registerLazySingleton<PullCoordinator>(
     () => PullCoordinator(
       connectivity: getIt<ConnectivityService>(),
       completionBus: getIt<PullCompletionBus>(),
+      permissions: getIt<CurrentPermissions>(),
+      // Gate crédentiels (ADR-010 V1.1, ADR-015 F6). Les cinq use cases
+      // d'hydratation le portaient chacun tant qu'ils tiraient hors
+      // coordinateur ; il remonte ici avec eux. **Sans cette ligne le gate est
+      // fail-open pour tout le monde** : le paramètre est optionnel, et cinq
+      // gardes auraient été retirées pour n'en rétablir aucune — une session
+      // rouverte hors ligne sans jetons repartirait taper le réseau à chaque
+      // montage d'écran, dix 401 par ouverture de la Facturation.
+      // Lazy comme `SyncEngine` ci-dessus : `AuthSessionManager` est enregistré
+      // plus tard dans `configureDependencies()`, résolu au premier cycle.
+      credentialsProbe: getIt<AuthSessionManager>(),
+      // Autorité de périmètre (ADR-015 F5). Résolu paresseusement : le porteur
+      // dépend du repository du plan, enregistré plus loin dans
+      // `registerOfflineModules`. Sans lui, le coordinateur voit un plan
+      // « inconnu » en permanence et retombe sur `requiredPermissions` —
+      // c'est-à-dire exactement le comportement d'avant ce lot.
+      planHolder: getIt<SyncPlanHolder>(),
     ),
   );
 
@@ -160,8 +207,36 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
 /// Appelé en fin de `configureDependencies()` (après les features online, dont
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
+  _registerSyncPlan(getIt);
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
+}
+
+/// Plan de synchronisation par profil (ADR-015 F2).
+///
+/// Enregistré ici plutôt que dans `registerOfflineCore` : celui-ci s'exécute
+/// **avant** que `Dio` et la map d'extras d'authentification ne soient dans le
+/// conteneur. Tout est de toute façon résolu depuis l'intérieur de la closure —
+/// même précaution que `SyncEngine` avec `AuthSessionManager`.
+///
+/// Depuis le lot F5, le plan est l'**autorité de périmètre** du pull : consommé
+/// par le `SyncPlanHolder` enregistré dans `registerOfflineCore`, que
+/// `PullCoordinator` interroge à chaque cycle. Sur un plan connu,
+/// `requiredPermissions` cesse d'être l'autorité et ne filtre plus que le mode
+/// dégradé — il se **substitue**, il ne s'ajoute jamais.
+///
+/// Il ne gouverne toujours pas l'**ordre** : le coordinateur tire dans l'ordre
+/// d'enregistrement, et `PullSequencer` reste dormant.
+void _registerSyncPlan(GetIt getIt) {
+  getIt.registerLazySingleton<SyncPlanApi>(() => SyncPlanApi(getIt<Dio>()));
+  getIt.registerLazySingleton<SyncPlanRepository>(
+    () => SyncPlanRepositoryImpl(
+      api: getIt<SyncPlanApi>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
 }

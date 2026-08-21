@@ -3,8 +3,11 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
@@ -73,13 +76,6 @@ const tClassroomMember = ClassroomMember(
   studentGender: ClassroomMemberGender.male,
 );
 
-const tSyncOutcome = ClassroomSyncOutcome(
-  classroomsUpserted: 3,
-  membersUpserted: 40,
-  notModified: false,
-  syncedAt: 1720000000000,
-);
-
 const tUnassignedEnrollment = EnrollmentSummary(
   enrollmentId: 'enrollment-9',
   enrollmentCode: 'MAT-9',
@@ -134,38 +130,71 @@ void main() {
     assignEnrollment: mockAssignEnrollment,
   );
 
+  // Depuis ADR-015 F6 le pull passe par le `PullCoordinator` : le use case rend
+  // un bilan de cycle, pas un `Either`. Le BLoC ne demande donc plus « le cycle
+  // s'est-il bien passé ? » — un cycle complet répondrait pour des flux
+  // étrangers à cet écran — mais « MES deux ressources sont-elles passées ? ».
   group('ClassroomsSyncRequested', () {
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
-      'emits [loading, success] et dérive la fraîcheur du syncedAt',
+      'emits [loading, success] quand les DEUX ressources sont tirées',
       setUp: () {
-        when(
-          () => mockSyncClassrooms(academicYearId: tAcademicYearId),
-        ).thenAnswer((_) async => const Right(tSyncOutcome));
+        when(() => mockSyncClassrooms()).thenAnswer(
+          (_) async => const PullRunReport(
+            updated: 1,
+            notModified: 1,
+            outcomes: {
+              kClassroomsResource: PullResult.updated,
+              kClassroomMembersResource: PullResult.notModified,
+            },
+          ),
+        );
       },
       build: buildBloc,
-      act: (bloc) => bloc.add(
-        const ClassroomsSyncRequested(academicYearId: tAcademicYearId),
-      ),
+      act: (bloc) => bloc.add(const ClassroomsSyncRequested()),
       expect: () => const [
         ClassroomOfflineState(syncStatus: ClassroomStatus.loading),
-        ClassroomOfflineState(
-          syncStatus: ClassroomStatus.success,
-          freshness: 1720000000000,
-        ),
+        ClassroomOfflineState(syncStatus: ClassroomStatus.success),
       ],
     );
 
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
-      'emits [loading, failure] on NetworkFailure',
+      'emits [loading, failure] quand une seule des deux est tirée',
+      // Le roster en échec avec les classes à jour est le pire des deux
+      // mondes affichables : des classes fraîches et des effectifs périmés.
+      // Annoncer « synchronisé » là-dessus serait un mensonge.
       setUp: () {
-        when(
-          () => mockSyncClassrooms(academicYearId: tAcademicYearId),
-        ).thenAnswer((_) async => const Left(NetworkFailure('offline')));
+        when(() => mockSyncClassrooms()).thenAnswer(
+          (_) async => const PullRunReport(
+            updated: 1,
+            failed: 1,
+            outcomes: {
+              kClassroomsResource: PullResult.updated,
+              kClassroomMembersResource: PullResult.error,
+            },
+          ),
+        );
       },
       build: buildBloc,
-      act: (bloc) => bloc.add(
-        const ClassroomsSyncRequested(academicYearId: tAcademicYearId),
-      ),
+      act: (bloc) => bloc.add(const ClassroomsSyncRequested()),
+      expect: () => const [
+        ClassroomOfflineState(syncStatus: ClassroomStatus.loading),
+        ClassroomOfflineState(syncStatus: ClassroomStatus.failure),
+      ],
+    );
+
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'emits [loading, failure] hors-ligne : un cycle sans issue n\'est pas '
+      'un succès',
+      // `PullRunReport.offline()` ne porte AUCUNE issue : `succeeded` rend
+      // `false` pour les deux ressources — sautées, jamais tentées. Sans cette
+      // lecture, un `failed == 0` ferait passer un cache froid pour à jour.
+      setUp: () {
+        when(
+          () => mockSyncClassrooms(),
+        ).thenAnswer((_) async => const PullRunReport.offline());
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(const ClassroomsSyncRequested()),
       expect: () => const [
         ClassroomOfflineState(syncStatus: ClassroomStatus.loading),
         ClassroomOfflineState(syncStatus: ClassroomStatus.failure),

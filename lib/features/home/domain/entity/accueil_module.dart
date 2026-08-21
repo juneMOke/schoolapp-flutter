@@ -72,4 +72,18 @@ class AccueilModule {
 
   /// Nombre de pages annoncé sous le titre de la carte.
   int get pageCount => subModules.length;
+
+  /// Utilisé par la fabrique pour restreindre la carte aux sous-modules
+  /// autorisés (ADR-014). [pageCount] et [entry] suivent : une carte filtrée
+  /// annonce le nombre de pages réellement offertes et s'ouvre sur la première
+  /// que l'utilisateur peut atteindre.
+  AccueilModule copyWith({List<AccueilSubModule>? subModules}) => AccueilModule(
+    id: id,
+    title: title,
+    description: description,
+    icon: icon,
+    accent: accent,
+    softBackground: softBackground,
+    subModules: subModules ?? this.subModules,
+  );
 }

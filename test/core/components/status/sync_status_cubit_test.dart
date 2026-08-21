@@ -2,11 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -24,7 +29,35 @@ class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
 
 class MockReauthenticator extends Mock implements SessionReauthenticator {}
 
+class MockRevocationEvaluator extends Mock implements RevocationEvaluator {}
+
 class MockSyncMetaDao extends Mock implements SyncMetaDao {}
+
+/// Handler qui bloque sur un [Completer] — patron repris de
+/// `test/core/offline/pull_coordinator_test.dart`. Sert ici à tenir un cycle
+/// de pull *ouvert* le temps d'observer ce que fait un second déclencheur.
+class SlowPullHandler implements PullHandler {
+  SlowPullHandler(this.gate);
+
+  final Completer<void> gate;
+  int calls = 0;
+
+  @override
+  String get resource => 'slow';
+
+  @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
+  bool get isBaseline => false;
+
+  @override
+  Future<PullOutcome> pull() async {
+    calls++;
+    await gate.future;
+    return const PullOutcome.updated();
+  }
+}
 
 void main() {
   late MockOutboxDao outbox;
@@ -291,6 +324,382 @@ void main() {
     );
   });
 
+  group('lecture incomplète (ADR-015 F1)', () {
+    late MockPullCoordinator pull;
+
+    setUp(() {
+      pull = MockPullCoordinator();
+    });
+
+    SyncStatusCubit buildWithPull() => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+    );
+
+    test('pull dégradé (une ressource refusée) → partiallySynced', () async {
+      when(
+        () => pull.pullAll(),
+      ).thenAnswer((_) async => const PullRunReport(updated: 2, forbidden: 1));
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+      statusController.add(true); // retour réseau → cycle complet
+      await pumpEventQueue();
+
+      expect(cubit.state.status, SyncStatus.partiallySynced);
+      expect(cubit.state.hasIncompleteRead, isTrue);
+      await cubit.close();
+    });
+
+    // B-2 — ce cubit vit aussi longtemps que l'application, et ces drapeaux ne
+    // sont réécrits que par un cycle qui a réellement observé quelque chose. Le
+    // compte A pose « partiellement à jour », A se déconnecte, B se connecte —
+    // et si le cycle de B s'arrête tôt (hors ligne, sans jetons, mint refusé),
+    // B porte la pastille de A sans rien pour la corriger. Sur la tablette en
+    // Wi-Fi permanent que ce chantier vise, la transition réseau qui
+    // rattraperait n'arrive jamais.
+    test(
+      'la fermeture de session efface les drapeaux du compte qui part',
+      () async {
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(updated: 2, failed: 1));
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        expect(cubit.state.hasRetriableRead, isTrue);
+
+        cubit.onSessionClosed();
+
+        expect(
+          cubit.state.hasIncompleteRead,
+          isFalse,
+          reason: 'la dégradation appartenait au compte qui vient de partir',
+        );
+        expect(cubit.state.hasRetriableRead, isFalse);
+        await cubit.close();
+      },
+    );
+
+    test('pull sain → synced, aucun drapeau levé', () async {
+      when(() => pull.pullAll()).thenAnswer(
+        (_) async => const PullRunReport(updated: 3, notModified: 4),
+      );
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      expect(cubit.state.status, SyncStatus.synced);
+      expect(cubit.state.hasIncompleteRead, isFalse);
+      await cubit.close();
+    });
+
+    test(
+      'le drapeau est MÉMORISÉ, pas recalculé : une écriture locale ne l\'éteint pas',
+      () async {
+        // Test central du lot. `notifyLocalWrite` ne fait AUCUN pull : s'il
+        // recalculait la dégradation au lieu de la mémoriser, le drapeau
+        // s'éteindrait à la première écriture de l'utilisateur — quelques
+        // secondes après s'être allumé — et « Partiellement à jour » ne
+        // survivrait jamais assez longtemps pour être lu.
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(forbidden: 2));
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+
+        await cubit.notifyLocalWrite();
+        await pumpEventQueue();
+
+        // Aucun pull n'a eu lieu depuis : rien n'a pu infirmer la dégradation.
+        verify(() => pull.pullAll()).called(1);
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'un rapport skipped puis offline n\'ÉCRASENT PAS un drapeau déjà levé',
+      () async {
+        // Un cycle déjà en vol (`skipped`) ou sans radio (`offline`) n'a rien
+        // observé : le prendre pour « sain » effacerait une dégradation bien
+        // réelle, et la pastille repasserait « À jour » sans qu'aucune lecture
+        // n'ait rien ramené de plus.
+        final reports = <PullRunReport>[
+          const PullRunReport(failed: 1),
+          const PullRunReport.skipped(),
+          const PullRunReport.offline(),
+        ];
+        var call = 0;
+        when(() => pull.pullAll()).thenAnswer((_) async {
+          final report = reports[call.clamp(0, reports.length - 1)];
+          call++;
+          return report;
+        });
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+
+        statusController.add(true); // cycle 1 : dégradé
+        await pumpEventQueue();
+        expect(cubit.state.hasIncompleteRead, isTrue);
+
+        statusController.add(true); // cycle 2 : skipped
+        await pumpEventQueue();
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+
+        statusController.add(true); // cycle 3 : offline
+        await pumpEventQueue();
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+
+        await cubit.close();
+      },
+    );
+
+    test('un pull sain postérieur ÉTEINT le drapeau', () async {
+      // Symétrique du test précédent : seul un cycle qui a réellement observé
+      // quelque chose écrit le drapeau — dans les deux sens. Sans cette
+      // extinction, `partiallySynced` serait un état absorbant dont une
+      // reprise de droits ne sortirait jamais.
+      final reports = <PullRunReport>[
+        const PullRunReport(forbidden: 1),
+        const PullRunReport(updated: 5),
+      ];
+      var call = 0;
+      when(() => pull.pullAll()).thenAnswer((_) async {
+        final report = reports[call.clamp(0, reports.length - 1)];
+        call++;
+        return report;
+      });
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+
+      statusController.add(true);
+      await pumpEventQueue();
+      expect(cubit.state.status, SyncStatus.partiallySynced);
+
+      statusController.add(true);
+      await pumpEventQueue();
+      expect(cubit.state.status, SyncStatus.synced);
+      expect(cubit.state.hasIncompleteRead, isFalse);
+
+      await cubit.close();
+    });
+
+    test(
+      'sans coordinateur injecté : jamais dégradé, jamais d\'exception',
+      () async {
+        // `pullCoordinator` est optionnel (tests, plateformes partielles) :
+        // l'absence de rapport ne doit ni lever ni inventer une dégradation.
+        final cubit = build();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+
+        expect(cubit.state.status, SyncStatus.synced);
+        expect(cubit.state.hasIncompleteRead, isFalse);
+        await cubit.close();
+      },
+    );
+
+    test(
+      '« À envoyer » PRIME sur « partiellement à jour », le drapeau reste porté',
+      () async {
+        // Le travail en attente est actionnable, la lecture incomplète ne
+        // l'est pas : le statut affiche le premier. Mais le drapeau reste dans
+        // l'état — c'est exactement pourquoi il est porté à part du statut :
+        // la feuille doit rester atteignable et expliquer les deux.
+        when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(forbidden: 1));
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+
+        expect(cubit.state.status, SyncStatus.pendingUpload);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        await cubit.close();
+      },
+    );
+
+    // La cause décide s'il existe un geste à offrir. Confondre les deux, c'est
+    // soit promettre une reprise qui ne lève rien (droit manquant), soit
+    // verrouiller un simple timeout jusqu'au redémarrage de l'application.
+    test('échec de transport (failed) → dégradé ET rattrapable', () async {
+      when(
+        () => pull.pullAll(),
+      ).thenAnswer((_) async => const PullRunReport(updated: 2, failed: 1));
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      expect(cubit.state.status, SyncStatus.partiallySynced);
+      expect(cubit.state.hasIncompleteRead, isTrue);
+      // Un nouvel essai peut aboutir : le bandeau a le droit d'offrir le geste.
+      expect(cubit.state.hasRetriableRead, isTrue);
+      await cubit.close();
+    });
+
+    test(
+      'droit manquant seul (forbidden) → dégradé mais JAMAIS rattrapable',
+      () async {
+        // LE test du correctif. Une ressource refusée est sautée à l'identique
+        // à chaque cycle : offrir « Réessayer » serait exactement le mensonge
+        // que ce lot corrige ailleurs — un geste qui promet de lever une
+        // condition qu'il ne touche pas.
+        when(() => pull.pullAll()).thenAnswer(
+          (_) async => const PullRunReport(updated: 2, forbidden: 1),
+        );
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        expect(cubit.state.hasRetriableRead, isFalse);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'syncNow() déclenche un cycle complet — le chemin de reprise',
+      () async {
+        // Ni ouverture de session, ni retour de radio : les deux seuls autres
+        // déclencheurs, dont une tablette posée sur le Wi-Fi de l'école ne voit
+        // aucun de la journée. Sans ce point d'entrée public, un échec de
+        // transport resterait verrouillé jusqu'au redémarrage.
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(updated: 1));
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+
+        await cubit.syncNow();
+        await pumpEventQueue();
+
+        verify(() => syncEngine.flush()).called(1);
+        verify(() => pull.pullAll()).called(1);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'après un cycle sain relancé par syncNow(), les DEUX drapeaux retombent',
+      () async {
+        // La reprise doit pouvoir éteindre la pastille, sinon elle ne sert à
+        // rien : un bandeau qui reste affiché après un rattrapage réussi
+        // apprend à l'utilisateur à ne plus le lire.
+        final reports = <PullRunReport>[
+          const PullRunReport(updated: 1, failed: 2),
+          const PullRunReport(updated: 4),
+        ];
+        var call = 0;
+        when(() => pull.pullAll()).thenAnswer((_) async {
+          final report = reports[call.clamp(0, reports.length - 1)];
+          call++;
+          return report;
+        });
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true); // cycle 1 : transport coupé
+        await pumpEventQueue();
+        expect(cubit.state.status, SyncStatus.partiallySynced);
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        expect(cubit.state.hasRetriableRead, isTrue);
+
+        await cubit.syncNow(); // cycle 2 : reprise à la demande
+        await pumpEventQueue();
+
+        expect(cubit.state.status, SyncStatus.synced);
+        expect(cubit.state.hasIncompleteRead, isFalse);
+        expect(cubit.state.hasRetriableRead, isFalse);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'syncOnLogin = syncNow + armement : même cycle, même état, une cadence en plus',
+      () async {
+        // Le CYCLE doit rester indiscernable — sinon l'une des deux entrées
+        // dérive, et la reprise cesse de valoir l'ouverture de session.
+        //
+        // Ce qui les sépare est explicite et vérifié plus bas : seule
+        // l'ouverture de session arme le battement. La différence n'apparaît
+        // dans AUCUN `SyncStatusState`, donc comparer les états ne l'aurait
+        // jamais attrapée — c'est exactement ainsi qu'une divergence passe
+        // inaperçue.
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(updated: 1, failed: 1));
+
+        final viaLogin = buildWithPull();
+        await pumpEventQueue();
+        await viaLogin.syncOnLogin();
+        await pumpEventQueue();
+        final stateViaLogin = viaLogin.state;
+        expect(viaLogin.isHeartbeatActive, isTrue);
+        await viaLogin.close();
+
+        final viaNow = buildWithPull();
+        await pumpEventQueue();
+        await viaNow.syncNow();
+        await pumpEventQueue();
+
+        expect(viaNow.state, stateViaLogin);
+        expect(viaNow.state.hasRetriableRead, isTrue);
+        // La seule divergence, nommée : la reprise à la demande (bouton
+        // « Réessayer » de la feuille de synchro) ne doit pas armer de cadence,
+        // et l'ouverture de session doit en armer une.
+        expect(viaNow.isHeartbeatActive, isFalse);
+        await viaNow.close();
+      },
+    );
+
+    test('syncNow() hors ligne ne tente rien', () async {
+      // La pré-garde de connectivité est partagée par les deux entrées : la
+      // reprise à la demande ne doit pas devenir le trou par lequel une session
+      // sans radio part quand même en 401.
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+
+      await cubit.syncNow();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.offline);
+      await cubit.close();
+    });
+  });
+
   group('gate crédentiels (V1.1 — session offline sans jetons)', () {
     late MockCredentialsProbe probe;
 
@@ -481,12 +890,896 @@ void main() {
       await cubit.notifyLocalWrite();
       await pumpEventQueue();
 
-      // Chemin emprunté par `main.dart` à la transition `authenticated` — donc
-      // celui d'un login offline, typiquement avec un access vide à renouveler.
+      // Chemin du *write-path* : emprunté par les repositories après chaque
+      // écriture locale réussie. (`main.dart` ne passe plus par là à la
+      // transition `authenticated` — il appelle désormais `syncOnLogin`.) Le
+      // mint reste exigé en tête : une écriture peut suivre de peu un login
+      // offline, donc porter un access vide à renouveler.
       verifyInOrder([
         () => reauth.ensureFreshAccess(),
         () => syncEngine.flush(),
       ]);
+      await cubit.close();
+    });
+  });
+
+  // ADR-015 F0 — jusqu'ici le cycle de coordinateur n'avait qu'UN déclencheur,
+  // la transition hors-ligne → en ligne. Une tablette allumée le matin dans une
+  // école déjà couverte en Wi-Fi n'en exécutait donc aucun de la journée : son
+  // cache n'était hydraté que par les pulls lancés écran par écran.
+  group('syncOnLogin — cycle à l\'ouverture de session', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+    late MockRevocationEvaluator revocation;
+    late MockPullCoordinator pull;
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      revocation = MockRevocationEvaluator();
+      pull = MockPullCoordinator();
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => revocation.evaluateRevocation(),
+      ).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    });
+
+    SyncStatusCubit buildLogin() => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      revocationEvaluator: revocation,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+    );
+
+    test('un cycle à l\'authentification : le pull a bien lieu', () async {
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      expect(cubit.state.status, SyncStatus.synced);
+      await cubit.close();
+    });
+
+    test('ordre du cycle : mint → flush → pull', () async {
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      // Même séquence que le retour réseau (ADR-010 D-11) : le jeton est
+      // rafraîchi AVANT tout appel authentifié, l'outbox est drainée avant
+      // qu'on ne tire — le travail saisi hors ligne part en premier.
+      verifyInOrder([
+        () => reauth.ensureFreshAccess(),
+        () => syncEngine.flush(),
+        () => pull.pullAll(),
+      ]);
+      await cubit.close();
+    });
+
+    test('aucun cycle si la session est ouverte hors ligne', () async {
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      verifyNever(() => pull.pullAll());
+      verifyNever(() => syncEngine.flush());
+      expect(cubit.state.status, SyncStatus.offline);
+      await cubit.close();
+    });
+
+    test('session sans jetons : aucun flush, aucun pull', () async {
+      // Session rouverte hors connexion puis réseau revenu, mais consigne
+      // brûlée : flusher ne ferait que consommer une tentative par entrée en
+      // 401, jusqu'au poison SYNC_ERROR.
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.authRequired);
+      await cubit.close();
+    });
+
+    test('mint impossible : aucun flush, aucun pull', () async {
+      // LE cas du login offline « radio allumée, serveur injoignable » : la
+      // pré-garde de connectivité de `syncOnLogin` ne lit que l'état RADIO et
+      // laisse donc passer. Seule cette garde-ci arrête le cycle — sans elle,
+      // chaque entrée de la file partirait avec un access mort.
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => false);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      // La session reste ouverte, la file intacte : le prochain cycle retentera.
+      expect(cubit.state.status, SyncStatus.pendingUpload);
+      await cubit.close();
+    });
+
+    test('révocation détectée : le flush a lieu, le pull non', () async {
+      // Ordre `flush → evaluate → pull` (ADR-010 D-11) : le travail légitime
+      // saisi hors ligne est drainé AVANT qu'on ne constate la révocation —
+      // wiper la session ne détruit jamais l'outbox. Mais on ne tire plus rien
+      // dans un cache dont la session vient d'être invalidée.
+      when(() => revocation.evaluateRevocation()).thenAnswer((_) async => true);
+
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('l\'heure serveur du rapport avance et persiste la date', () async {
+      when(() => pull.pullAll()).thenAnswer(
+        (_) async => const PullRunReport(updated: 2, latestServerTimeMs: 9000),
+      );
+
+      final cubit = buildLogin();
+      await pumpEventQueue();
+
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      expect(cubit.state.lastSyncAtMs, 9000);
+      verify(
+        () => syncMetaDao.setCursor(
+          '__global_last_sync__',
+          cursor: null,
+          syncedAt: 9000,
+        ),
+      ).called(1);
+      await cubit.close();
+    });
+
+    test(
+      'pas de second cycle si la connectivité oscille au démarrage',
+      () async {
+        // Deux déclencheurs coexistent désormais (login + retour réseau) et
+        // peuvent se chevaucher à la seconde près au démarrage. Ce qui protège,
+        // c'est le verrou `_pulling` du coordinateur — d'où un VRAI
+        // `PullCoordinator` ici, un mock ne dirait rien de cette garantie.
+        final gate = Completer<void>();
+        final slow = SlowPullHandler(gate);
+        final coordinator = PullCoordinator(connectivity: connectivity)
+          ..registerHandler(slow);
+        final cubit = SyncStatusCubit(
+          outbox: outbox,
+          connectivity: connectivity,
+          syncEngine: syncEngine,
+          syncMetaDao: syncMetaDao,
+          pullCoordinator: coordinator,
+          revocationEvaluator: revocation,
+          credentialsProbe: probe,
+          reauthenticator: reauth,
+        );
+        await pumpEventQueue();
+
+        // Le cycle de login part et reste bloqué DANS le pull.
+        unawaited(cubit.syncOnLogin());
+        await pumpEventQueue();
+        expect(coordinator.isPulling, isTrue);
+
+        // La radio bascule à online dans la foulée : second déclencheur.
+        statusController.add(true);
+        await pumpEventQueue();
+
+        // Le second cycle a bel et bien tourné jusqu'au pull (il a poussé) :
+        // la garantie vérifiée juste après n'est pas vacante.
+        verify(() => syncEngine.flush()).called(2);
+        // Il est rendu `skipped` : une seule descente de données, pas deux
+        // passes concurrentes sur la même ressource.
+        expect(slow.calls, 1);
+
+        gate.complete();
+        await pumpEventQueue();
+        expect(coordinator.isPulling, isFalse);
+        await cubit.close();
+      },
+    );
+  });
+
+  // Troisième déclencheur global : le retour de l'application au premier plan.
+  // Rien n'étant périodique dans cette boucle, un backoff ou une dépendance qui
+  // repousse une entrée ne fait que la rendre *éligible* — sans ce crochet,
+  // personne ne la reprend avant la prochaine écriture de l'utilisateur.
+  group('syncOnResume — reprise de l\'application', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+    late MockRevocationEvaluator revocation;
+    late MockPullCoordinator pull;
+    late int nowMs;
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      revocation = MockRevocationEvaluator();
+      pull = MockPullCoordinator();
+      nowMs = 1000;
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => revocation.evaluateRevocation(),
+      ).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    });
+
+    SyncStatusCubit buildResume() => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      revocationEvaluator: revocation,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+      now: () => nowMs,
+    );
+
+    test('première reprise, aucun cycle avant : cycle complet', () async {
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('reprise rapprochée : on pousse, on ne re-tire pas', () async {
+      // Le cas de l'utilisateur qui bascule vers sa calculatrice et revient :
+      // relancer la pagination de dix-neuf ressources à chaque aller-retour
+      // mettrait la connexion de l'école à genoux. Sa file, elle, mérite
+      // toujours un geste — c'est elle qui porte l'argent saisi.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      nowMs += 60000; // une minute plus tard
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(2);
+      verify(() => pull.pullAll()).called(1); // celui du login, pas un de plus
+      await cubit.close();
+    });
+
+    test('reprise espacée : cycle complet, pull compris', () async {
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      nowMs += SyncStatusCubit.kResumeFullCycleMinIntervalMs;
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(2);
+      await cubit.close();
+    });
+
+    test('un cycle ARRÊTÉ compte aussi pour l\'anti-rafale', () async {
+      // Le cycle de login est arrêté net par un mint impossible (serveur
+      // injoignable) : il ne flushe ni ne tire rien. Il a pourtant bien eu
+      // lieu, et l'estampille est posée AVANT les gardes — sinon chaque reprise
+      // le retenterait, et c'est exactement le cycle qui échoue qu'il ne faut
+      // pas relancer dix fois par minute.
+      //
+      // Le mint ne redevient possible qu'ENSUITE : sans quoi les deux chemins
+      // s'arrêteraient au même endroit et ce test ne distinguerait rien.
+      var mintable = false;
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => mintable);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verifyNever(() => syncEngine.flush());
+
+      mintable = true;
+      nowMs += 1000;
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      // Chemin court : la file part (c'est elle qui porte l'argent), le pull
+      // non. Sans estampille, ce serait un cycle complet et `pullAll` aurait
+      // été appelé.
+      verify(() => syncEngine.flush()).called(1);
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('reprise hors ligne : rien n\'est tenté', () async {
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.offline);
+      await cubit.close();
+    });
+
+    test('reprise sans jetons utilisables : aucun flush', () async {
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 3);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.authRequired);
+      await cubit.close();
+    });
+
+    test('une horloge qui recule ne tue pas le déclencheur', () async {
+      // L'horloge est celle du device : un NTP qui corrige une dérive de RTC,
+      // ou une date changée à la main, laisse l'estampille dans le futur.
+      // Comparé naïvement, l'écart resterait sous le seuil à jamais et le seul
+      // déclencheur qui revient plusieurs fois par jour serait mort en silence
+      // pour toute la vie du processus.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      nowMs -= 86400000; // l'horloge recule d'un jour
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('le chemin court ne repousse PAS la fenêtre', () async {
+      // Si une reprise rapprochée réarmait l'anti-rafale, une tablette qu'on
+      // reprend toutes les deux minutes n'exécuterait plus jamais de cycle
+      // complet — la panne même que ce déclencheur existe à réparer. La
+      // fenêtre se mesure donc depuis le dernier CYCLE, jamais depuis le
+      // dernier passage.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1); // consommé : la suite est nette
+
+      nowMs += 200000; // < seuil → chemin court
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      nowMs += 150000; // 350 s depuis le CYCLE (et non depuis la reprise)
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      await cubit.close();
+    });
+  });
+
+  // Quatrième déclencheur, et le premier qui ne dépende d'AUCUN geste : les
+  // trois autres sont des événements (on écrit, le réseau revient, on rouvre
+  // l'application), or aucun ne survient pendant qu'une entrée attend la fin de
+  // son backoff ou la levée de sa dépendance.
+  group('battement de la file', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+    late MockRevocationEvaluator revocation;
+    late MockPullCoordinator pull;
+    late int nowMs;
+
+    OutboxEntry anEntry() => const OutboxEntry(
+      id: 'e1',
+      aggregateType: 'ENROLLMENT',
+      aggregateId: 'a1',
+      operation: OutboxOperation.create,
+      payload: '{}',
+      createdAt: 1,
+    );
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      revocation = MockRevocationEvaluator();
+      pull = MockPullCoordinator();
+      nowMs = 1000;
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => revocation.evaluateRevocation(),
+      ).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => []);
+    });
+
+    SyncStatusCubit buildBeating({
+      Duration interval = SyncStatusCubit.kDefaultHeartbeatInterval,
+    }) => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      revocationEvaluator: revocation,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+      now: () => nowMs,
+      heartbeatInterval: interval,
+    );
+
+    /// Ouvre une session et consomme le cycle qu'elle déclenche : c'est l'état
+    /// réel dans lequel le battement démarre en production, le seul fil qui
+    /// l'arme étant `syncOnLogin`. Avance ensuite l'horloge d'une période, pour
+    /// que le tic qui suit ne soit pas celui du cycle d'ouverture.
+    Future<SyncStatusCubit> beatingAfterLogin({
+      Duration interval = SyncStatusCubit.kDefaultHeartbeatInterval,
+    }) async {
+      final cubit = buildBeating(interval: interval);
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => syncEngine.flush()).called(1);
+      verify(() => pull.pullAll()).called(1);
+      verify(() => revocation.evaluateRevocation()).called(1);
+      nowMs += 45000;
+      return cubit;
+    }
+
+    test('armé seulement quand session ouverte ET premier plan', () async {
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      expect(cubit.isHeartbeatActive, isFalse); // aucune session encore
+
+      // Par le MÊME fil que le cycle d'ouverture de session : c'est le seul
+      // que la racine ait à ne pas oublier.
+      await cubit.syncOnLogin();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      cubit.onBackground();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      cubit.onForeground();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      cubit.onSessionClosed();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      // Revenir au premier plan sans session ne rallume rien : c'est LA
+      // condition qui garde l'écran de connexion silencieux.
+      cubit.onForeground();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      await cubit.close();
+    });
+
+    test('le battement ne survit pas à la fermeture du cubit', () async {
+      final cubit = await beatingAfterLogin();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      await cubit.close();
+
+      expect(cubit.isHeartbeatActive, isFalse);
+    });
+
+    test('hors ligne, le tic ne fait RIEN — même cache périmé', () async {
+      // Garde en TÊTE, et c'est ce qui la rend porteuse : sans elle, le cache
+      // est toujours réputé périmé hors ligne (aucun cycle ne peut l'avoir
+      // rafraîchi), donc chaque tic partait sur la branche chère pour
+      // redécouvrir l'absence de réseau — deux appels de plateforme et trois
+      // `COUNT` toutes les 45 s, une journée durant.
+      final cubit = await beatingAfterLogin();
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => outbox.pendingReady(any(), limit: any(named: 'limit')));
+      verifyNever(() => pull.pullAll());
+      verifyNever(() => syncEngine.flush());
+      await cubit.close();
+    });
+
+    test('rien de PRÊT à partir : le tic ne fait rien du tout', () async {
+      // La condition d'entrée est `pendingReady`, jamais `pendingCount` : une
+      // file pleine d'entrées encore en backoff ferait sinon partir un push
+      // toutes les 45 s pour rien.
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 4);
+      final cubit = await beatingAfterLogin();
+      final emitted = <SyncStatus>[];
+      final sub = cubit.stream.listen((s) => emitted.add(s.status));
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(emitted, isEmpty);
+      await sub.cancel();
+      await cubit.close();
+    });
+
+    test('le push du tic est MUET — aucune pastille ne clignote', () async {
+      // Le moteur repousse de 5 s une écriture retenue (autre compte,
+      // dépendance non satisfaite) sans toucher son statut : elle est donc de
+      // nouveau « prête » à CHAQUE tic, indéfiniment. Annoncer ce push ferait
+      // clignoter `syncing` → `pendingUpload` toutes les 45 s, toute la
+      // journée, pour une entrée qui ne peut pas partir.
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 1);
+      final cubit = await beatingAfterLogin();
+      await pumpEventQueue();
+      final emitted = <SyncStatus>[];
+      final sub = cubit.stream.listen((s) => emitted.add(s.status));
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      expect(emitted, isNot(contains(SyncStatus.syncing)));
+      await sub.cancel();
+      await cubit.close();
+    });
+
+    test('une entrée prête : le tic pousse, sans tirer', () async {
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = await beatingAfterLogin();
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('un flush déjà en vol : le tic s\'efface', () async {
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = await beatingAfterLogin();
+      when(() => syncEngine.isFlushing).thenReturn(true);
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      await cubit.close();
+    });
+
+    test('cache périmé ET flush en vol : le cycle attend son tour', () async {
+      // `flush()` rend `skipped` IMMÉDIATEMENT quand le moteur travaille — il
+      // ne se sérialise donc pas. Passer outre ferait tourner révocation et
+      // pull par-dessus un push en cours : une session wipée au milieu d'un lot
+      // envoie les entrées restantes sans `Authorization`, et un 403 sur un
+      // paiement est TERMINAL. Le cycle est reporté d'un tic, pas perdu.
+      final cubit = await beatingAfterLogin();
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      when(() => syncEngine.isFlushing).thenReturn(true);
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => pull.pullAll());
+      verifyNever(() => revocation.evaluateRevocation());
+
+      // Le push terminé, le tic suivant fait le cycle.
+      when(() => syncEngine.isFlushing).thenReturn(false);
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      await cubit.close();
+    });
+
+    test('base indisponible : le tic ne remonte pas d\'exception', () async {
+      // Un `Timer` n'a personne pour attraper ce qu'il lève.
+      final cubit = await beatingAfterLogin();
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenThrow(StateError('base fermée'));
+
+      await expectLater(cubit.heartbeatTick(), completes);
+
+      await cubit.close();
+    });
+
+    test('le tic est bien CÂBLÉ au timer, pas seulement armé', () async {
+      // Une garde peut être implémentée, testée, et jamais branchée : ici,
+      // `isHeartbeatActive` pourrait dire vrai sur un timer qui n'appelle rien.
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = await beatingAfterLogin(
+        interval: const Duration(milliseconds: 20),
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(greaterThan(0));
+      await cubit.close();
+    });
+
+    test('arrêté en arrière-plan, le timer ne tire plus', () async {
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = await beatingAfterLogin(
+        interval: const Duration(milliseconds: 20),
+      );
+      cubit.onBackground();
+
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      await cubit.close();
+    });
+
+    test(
+      'un tic renonce si la session se ferme pendant qu\'il tourne',
+      () async {
+        // `dispose()` et `sessionClosed()` coupent le timer, mais rien
+        // n'interrompt un tic déjà parti. Sans relecture entre deux étapes, un
+        // cycle lancé deux secondes avant un logout continuerait d'écrire
+        // référentiel et curseurs pour une session que la racine a déclarée
+        // close, l'écran de connexion affiché.
+        final cubit = await beatingAfterLogin();
+        nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+        // Posée APRÈS le cycle d'ouverture, qui lit lui aussi la radio.
+        final gate = Completer<void>();
+        when(() => connectivity.isOnline()).thenAnswer((_) async {
+          await gate.future;
+          return true;
+        });
+
+        final tick = cubit.heartbeatTick();
+        await pumpEventQueue();
+        cubit.onSessionClosed(); // logout pendant que le tic attend la radio
+        gate.complete();
+        await tick;
+        await pumpEventQueue();
+
+        verifyNever(() => pull.pullAll());
+        await cubit.close();
+      },
+    );
+
+    // ── Lot 3 : le battement finit par TIRER ────────────────────────────────
+    //
+    // Une tablette allumée le matin dans une école déjà en Wi-Fi ouvre sa
+    // session, exécute son cycle, et n'en voit plus jamais : ni transition
+    // réseau, ni reprise si elle reste posée sur le même écran. Elle
+    // travaillait la journée entière sur le cache du matin.
+
+    test('cache vieilli : le tic tire, file vide ou non', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      // La file est vide — sous la seule règle du lot 2, ce tic n'aurait rien
+      // fait, et le référentiel serait resté figé sur celui du matin.
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('le cycle du battement n\'ÉVALUE PAS la révocation', () async {
+      // Elle peut wiper la session et renvoyer à l'écran de connexion. Les
+      // trois autres déclencheurs surviennent quand l'utilisateur ne saisit
+      // rien ; un timer, lui, tombe au milieu d'un formulaire. Le verdict n'est
+      // pas perdu — il est rendu au prochain de ces trois moments.
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      verifyNever(() => revocation.evaluateRevocation());
+      await cubit.close();
+    });
+
+    test('cache frais : le tic ne tire pas', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs - 46000;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('un cycle tiré repousse l\'échéance du suivant', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      // Sans ré-estampillage, CHAQUE tic suivant repartirait en cycle complet :
+      // dix-neuf ressources toutes les 45 s sur la connexion d'une école.
+      nowMs += 45000;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      await cubit.close();
+    });
+
+    test('un cycle tiré par AILLEURS repousse aussi l\'échéance', () async {
+      // Ce qui compte est l'âge du cache, jamais l'identité de qui l'a
+      // rafraîchi : une reprise d'application vaut un tic.
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs - 1000;
+      await cubit.syncOnResume(); // > 5 min : cycle complet
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      nowMs += 1000; // l'échéance du battement serait franchie sans cela
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      await cubit.close();
+    });
+
+    test('un cycle qui n\'a RIEN tiré ne rajeunit pas le cache', () async {
+      // Le piège des deux mesures confondues. L'estampille de TENTATIVE est
+      // posée avant les gardes (anti-rafale de la reprise) ; s'en servir pour
+      // l'âge du cache laissait un portail captif déclarer le référentiel frais
+      // pour un quart d'heure de plus, à chaque cycle raté — soit exactement la
+      // panne que ce lot existe à réparer.
+      final cubit = await beatingAfterLogin();
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => false);
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick(); // tente, échoue au mint, ne tire rien
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      // Le réseau revient. Le plancher de reprise franchi, le tic retente —
+      // et il n'aurait jamais retenté si l'échec avait compté pour un pull.
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      nowMs += SyncStatusCubit.kFailedCycleRetryMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('un cycle SAUTÉ ne rajeunit pas le cache non plus', () async {
+      // `skipped` = un pull était déjà en vol ailleurs. Il ne dit rien de
+      // l'âge du cache local.
+      final cubit = await beatingAfterLogin();
+      when(
+        () => pull.pullAll(),
+      ).thenAnswer((_) async => const PullRunReport.skipped());
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+      nowMs += SyncStatusCubit.kFailedCycleRetryMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('cycles ratés : espacés par le plancher, pas par le tic', () async {
+      // Sans plancher, un portail captif — cache éternellement périmé —
+      // relancerait un cycle complet toutes les 45 s. Le cycle part, ne ramène
+      // rien (`offline` : la radio ment, le serveur est injoignable), et l'âge
+      // du cache reste donc franchi au tic suivant.
+      final cubit = await beatingAfterLogin();
+      when(
+        () => pull.pullAll(),
+      ).thenAnswer((_) async => const PullRunReport.offline());
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      nowMs += 45000; // un tic plus tard : trop tôt pour retenter
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      nowMs += SyncStatusCubit.kFailedCycleRetryMs; // plancher franchi
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      await cubit.close();
+    });
+
+    test('session ouverte HORS LIGNE : le premier tic tire', () async {
+      // `syncOnLogin` s'arrête à la pré-garde de connectivité, donc aucune
+      // estampille. Sans réseau qui revient ni reprise, ce tic est le seul
+      // rattrapage — d'où « âge inconnu ⇒ tirer », comme pour l'horloge qui
+      // recule.
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      when(() => connectivity.isOnline()).thenAnswer((_) async => true);
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('horloge qui recule : le tic tire au lieu de se figer', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs -= 86400000;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
       await cubit.close();
     });
   });

@@ -2,11 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 enum EteeloTextInputType { text, phone, email, number, multiline }
+
+/// Règle de capitalisation appliquée pendant la frappe.
+///
+/// Le formatage est le comportement PAR DÉFAUT de tout champ texte : c'est
+/// l'exception qui se déclare, pas la règle. Un champ qui ne doit rien
+/// capitaliser (matricule, code, référence saisie telle quelle) le dit avec
+/// [none].
+enum EteeloTextCapitalization {
+  /// Déduite du type de clavier : chaque mot pour du texte (identités, lieux),
+  /// première lettre pour du multiligne (motifs, commentaires), et rien du tout
+  /// pour un email, un numéro ou un nombre.
+  auto,
+
+  /// Chaque mot : « Jean-Pierre Mokili ».
+  words,
+
+  /// Première lettre du champ : « Absence non justifiée ».
+  sentence,
+
+  /// Aucune — la saisie part telle quelle.
+  none,
+}
 
 class EteeloTextInput extends StatefulWidget {
   final TextEditingController controller;
@@ -28,6 +51,15 @@ class EteeloTextInput extends StatefulWidget {
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
 
+  /// Règle de capitalisation ; [EteeloTextCapitalization.auto] par défaut.
+  final EteeloTextCapitalization capitalization;
+
+  /// Bloc affiché À L'INTÉRIEUR du cadre, collé au bord gauche, avant la
+  /// zone de saisie (ex. la case indicatif d'un [EteeloPhoneInput]). Il
+  /// occupe toute la hauteur du champ et gère son propre rembourrage : le
+  /// padding gauche du cadre passe donc à zéro quand il est fourni.
+  final Widget? prefix;
+
   const EteeloTextInput({
     super.key,
     required this.controller,
@@ -48,6 +80,8 @@ class EteeloTextInput extends StatefulWidget {
     this.minLines,
     this.maxLines = 1,
     this.inputFormatters,
+    this.capitalization = EteeloTextCapitalization.auto,
+    this.prefix,
   });
 
   @override
@@ -147,6 +181,57 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
     EteeloTextInputType.multiline => TextInputType.multiline,
     EteeloTextInputType.text => TextInputType.text,
   };
+
+  /// Règle effective : `auto` se résout sur la forme réelle du champ.
+  ///
+  /// La hauteur compte autant que le type de clavier : un champ à plusieurs
+  /// lignes est un texte libre même quand l'appelant n'a pas pensé à déclarer
+  /// `EteeloTextInputType.multiline` — et « Absence Non Justifiée » serait le
+  /// prix de cet oubli.
+  EteeloTextCapitalization get _resolvedCapitalization {
+    if (widget.capitalization != EteeloTextCapitalization.auto) {
+      return widget.capitalization;
+    }
+    return switch (widget.keyboardType) {
+      EteeloTextInputType.text =>
+        _isSingleLine
+            ? EteeloTextCapitalization.words
+            : EteeloTextCapitalization.sentence,
+      EteeloTextInputType.multiline => EteeloTextCapitalization.sentence,
+      EteeloTextInputType.email ||
+      EteeloTextInputType.phone ||
+      EteeloTextInputType.number => EteeloTextCapitalization.none,
+    };
+  }
+
+  /// Les formatters de l'appelant, suivis de la capitalisation.
+  ///
+  /// La capitalisation passe EN DERNIER : elle s'applique au texte déjà filtré
+  /// (un formatter qui refuse les espaces produit « JeanPierre », pas
+  /// « Jeanpierre »), et un appelant ne perd jamais son propre filtrage.
+  List<TextInputFormatter>? get _effectiveInputFormatters {
+    final capitalizer = switch (_resolvedCapitalization) {
+      EteeloTextCapitalization.words =>
+        const WordCapitalizationInputFormatter(),
+      EteeloTextCapitalization.sentence =>
+        const SentenceCapitalizationInputFormatter(),
+      EteeloTextCapitalization.none || EteeloTextCapitalization.auto => null,
+    };
+    if (capitalizer == null) {
+      return widget.inputFormatters;
+    }
+    return [...?widget.inputFormatters, capitalizer];
+  }
+
+  /// Même règle portée au clavier logiciel, pour que la touche majuscule
+  /// s'arme d'elle-même au lieu de corriger après coup.
+  TextCapitalization get _keyboardCapitalization =>
+      switch (_resolvedCapitalization) {
+        EteeloTextCapitalization.words => TextCapitalization.words,
+        EteeloTextCapitalization.sentence => TextCapitalization.sentences,
+        EteeloTextCapitalization.none ||
+        EteeloTextCapitalization.auto => TextCapitalization.none,
+      };
 
   String get _semanticLabel =>
       widget.required ? '${widget.label}, obligatoire' : widget.label;
@@ -265,7 +350,8 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
       },
       textInputAction: widget.textInputAction,
       autofillHints: widget.autofillHints,
-      inputFormatters: widget.inputFormatters,
+      inputFormatters: _effectiveInputFormatters,
+      textCapitalization: _keyboardCapitalization,
       minLines: widget.minLines,
       maxLines: widget.maxLines,
       textAlignVertical: TextAlignVertical.center,
@@ -305,9 +391,11 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
           minHeight: _fieldHeight,
           maxHeight: _isSingleLine ? _fieldHeight : double.infinity,
         ),
-        padding: EdgeInsets.symmetric(
-          horizontal: _horizontalPadding(),
-          vertical: _isSingleLine ? 0 : AppSpacing.md - 1,
+        padding: EdgeInsets.only(
+          left: widget.prefix == null ? _horizontalPadding() : 0,
+          right: _horizontalPadding(),
+          top: _isSingleLine ? 0 : AppSpacing.md - 1,
+          bottom: _isSingleLine ? 0 : AppSpacing.md - 1,
         ),
         decoration: BoxDecoration(
           color: _backgroundColor(),
@@ -318,8 +406,42 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
           ),
           boxShadow: [if (_focusRing() != null) _focusRing()!],
         ),
-        alignment: _isSingleLine ? Alignment.centerLeft : Alignment.topLeft,
-        child: field,
+        // Un [prefix] a son propre fond, collé au bord : sans découpe, ses
+        // angles droits dépasseraient du cadre arrondi.
+        clipBehavior: widget.prefix == null ? Clip.none : Clip.antiAlias,
+        // Sans alignement, le contenu reçoit la hauteur pleine du cadre :
+        // c'est ce qui permet au séparateur du [prefix] de filer de bord à
+        // bord. On ne s'en prive que là où la hauteur est libre (multiligne).
+        alignment: widget.prefix != null && _isSingleLine
+            ? null
+            : (_isSingleLine ? Alignment.centerLeft : Alignment.topLeft),
+        child: widget.prefix == null
+            ? field
+            : Row(
+                // stretch : le bloc préfixe reçoit la hauteur pleine du
+                // cadre, sinon son séparateur ne toucherait pas les bords.
+                crossAxisAlignment: _isSingleLine
+                    ? CrossAxisAlignment.stretch
+                    : CrossAxisAlignment.start,
+                children: [
+                  // Le préfixe occupe une bonne part du cadre : sans ce
+                  // relais, taper dessus n'ouvrirait pas le clavier alors
+                  // que tout le cadre était la zone de saisie auparavant.
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.enabled ? _focusNode.requestFocus : null,
+                    child: widget.prefix!,
+                  ),
+                  // La saisie garde sa hauteur naturelle et se centre :
+                  // étirée comme le préfixe, elle se collerait en haut du
+                  // cadre.
+                  Expanded(
+                    child: _isSingleLine
+                        ? Align(alignment: Alignment.centerLeft, child: field)
+                        : field,
+                  ),
+                ],
+              ),
       ),
     );
   }

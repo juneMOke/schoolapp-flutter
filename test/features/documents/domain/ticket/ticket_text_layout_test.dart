@@ -21,6 +21,7 @@ const _labels = TicketLabels(
 );
 
 TicketReceiptModel _model({
+  String studentFullName = 'Mbala Kasa Amina',
   String? matriculationNumber = 'MAT-0042',
   String? classroomName = '5e primaire A',
   String? cashierFullName = 'Jean Kabeya',
@@ -32,7 +33,7 @@ TicketReceiptModel _model({
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   schoolMunicipality: 'Kinshasa · Ngaliema',
-  studentFullName: 'Mbala Kasa Amina',
+  studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
   classroomName: classroomName,
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
@@ -226,6 +227,89 @@ void main() {
 
       expect(out, isNot(contains('Répartition')));
       expect(out, contains('Montant reçu'));
+    });
+
+    /// ⚠️ Tests de CARACTÉRISATION — ils figent le comportement actuel, ils ne
+    /// demandent PAS de le corriger.
+    ///
+    /// Le gabarit est le contrat partagé des deux sorties (ESC/POS et PDF), et
+    /// l'identité de leur rendu est verrouillée par le critère d'acceptation de
+    /// l'ADR-012 (« deux rendus du même modèle sont identiques », plus bas). Y
+    /// glisser une ligne de garde — un « élève inconnu », une ligne blanche —
+    /// changerait le papier des DEUX sorties et se lirait comme une donnée que
+    /// l'établissement affirme, alors que c'est une donnée qui manque.
+    ///
+    /// C'est pourquoi le refus vit en AMONT, dans
+    /// `provisional_ticket_print_flow.dart` : on ne rend pas le trou joli, on
+    /// n'imprime pas. Ce qui suit existe pour qu'un lecteur futur voie
+    /// exactement ce que ce papier dirait, et ne « corrige » pas le gabarit en
+    /// croyant bien faire.
+    group('nom d\'élève vide — ce que la garde amont évite', () {
+      /// Vrai si deux lignes de séparation pleine largeur se suivent.
+      bool touchingRules(List<String> lines, int width) {
+        final rule = '-' * width;
+        for (var i = 0; i + 1 < lines.length; i++) {
+          if (lines[i] == rule && lines[i + 1] == rule) return true;
+        }
+        return false;
+      }
+
+      test('ne produit pas une ligne blanche : il ne produit AUCUNE ligne', () {
+        final lines = TicketTextLayout.render(
+          _model(
+            studentFullName: '',
+            matriculationNumber: null,
+            classroomName: null,
+          ),
+          columns: 48,
+        );
+
+        // `_wrapped('')` rend une liste VIDE : la zone Z2 ne laisse pas de
+        // trace, pas même une ligne d'espaces. Les deux séparateurs qui
+        // l'encadraient se retrouvent collés, juste sous le bandeau.
+        final banner = lines.indexWhere((l) => l.contains('PROVISOIRE'));
+        final rule = '-' * 48;
+        expect(lines[banner + 1], rule);
+        expect(lines[banner + 2], rule);
+        expect(touchingRules(lines, 48), isTrue);
+        // Rien, sur ce papier, ne signale qu'un nom manque.
+        expect(_flat(lines), isNot(contains('MBALA')));
+      });
+
+      test('le ticket sort quand même, entier et cohérent', () {
+        final out = _flat(
+          TicketTextLayout.render(
+            _model(
+              studentFullName: '',
+              matriculationNumber: null,
+              classroomName: null,
+            ),
+          ),
+        );
+
+        // Voilà le vrai danger : rien ne casse. Le gabarit ne lève pas, le
+        // bandeau, le montant et la phrase de conservation sont là — le papier
+        // a toute l'apparence d'un justificatif, sauf qu'il n'atteste personne.
+        expect(out, contains('PROVISOIRE'));
+        expect(out, contains('Montant reçu'));
+        expect(out, contains('Conservez ce ticket'));
+      });
+
+      /// La nuance qui explique la forme exacte de la garde amont : elle porte
+      /// sur `studentFullName` SEUL, jamais sur « la zone Z2 est vide ».
+      test('une classe hydratée sans le nom : les rules ne se touchent pas', () {
+        final lines = TicketTextLayout.render(
+          _model(studentFullName: '', matriculationNumber: null),
+          columns: 48,
+        );
+
+        // « ---- / Classe : … / ---- » : la zone Z2 n'est pas vide, le ticket
+        // a même l'air normal. Il reste anonyme. Une garde qui aurait testé le
+        // bloc entier laisserait donc passer ce cas-là.
+        expect(touchingRules(lines, 48), isFalse);
+        expect(_flat(lines), contains('Classe : 5e primaire A'));
+        expect(_flat(lines), isNot(contains('MBALA')));
+      });
     });
   });
 

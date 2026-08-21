@@ -7,23 +7,32 @@ class AcademicYearContextState extends Equatable {
   final AcademicYearContext? context;
   final String? errorMessage;
 
-  /// Un échec d'authentification (401/403) sur le pull référentiel signifie
-  /// que la session n'est plus valide côté serveur → `main.dart` déclenchera
-  /// un logout (même rôle que l'ex-`BootstrapState.sessionExpired`).
+  /// Un **401** sur le pull référentiel signifie que la session n'est plus
+  /// valide côté serveur → `main.dart` déclenchera un logout (même rôle que
+  /// l'ex-`BootstrapState.sessionExpired`).
+  ///
+  /// Le 403 en est exclu depuis ADR-014 : voir [insufficientPermissions].
   final bool sessionExpired;
+
+  /// Un **403** sur le pull référentiel : le compte est authentifié mais ne
+  /// détient pas la permission exigée (ADR-014 §4). Rien à réessayer et rien à
+  /// déconnecter — seul un changement de droits côté serveur y remédie.
+  final bool insufficientPermissions;
 
   const AcademicYearContextState({
     required this.status,
     this.context,
     this.errorMessage,
     this.sessionExpired = false,
+    this.insufficientPermissions = false,
   });
 
   const AcademicYearContextState.initial()
     : status = AcademicYearContextLoadStatus.initial,
       context = null,
       errorMessage = null,
-      sessionExpired = false;
+      sessionExpired = false,
+      insufficientPermissions = false;
 
   bool get hasData => context != null;
 
@@ -42,6 +51,7 @@ class AcademicYearContextState extends Equatable {
     Object? context = const Object(),
     Object? errorMessage = const Object(),
     bool? sessionExpired,
+    bool? insufficientPermissions,
   }) {
     return AcademicYearContextState(
       status: status ?? this.status,
@@ -52,9 +62,17 @@ class AcademicYearContextState extends Equatable {
           ? this.errorMessage
           : errorMessage as String?,
       sessionExpired: sessionExpired ?? this.sessionExpired,
+      insufficientPermissions:
+          insufficientPermissions ?? this.insufficientPermissions,
     );
   }
 
   @override
-  List<Object?> get props => [status, context, errorMessage, sessionExpired];
+  List<Object?> get props => [
+    status,
+    context,
+    errorMessage,
+    sessionExpired,
+    insufficientPermissions,
+  ];
 }

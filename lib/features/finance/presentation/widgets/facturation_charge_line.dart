@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -130,41 +131,8 @@ class _Header extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppDimensions.spacingS),
-        _StatusBadge(statusLabel: statusLabel, visuals: visuals),
+        FeeStatusBadge(label: statusLabel, visuals: visuals),
       ],
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String statusLabel;
-  final FeeStatusVisuals visuals;
-
-  const _StatusBadge({required this.statusLabel, required this.visuals});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: visuals.soft,
-        borderRadius: AppRadius.brPill,
-        border: Border.all(color: visuals.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(visuals.icon, size: 14, color: visuals.color),
-          const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            statusLabel,
-            style: AppTextStyles.badge.copyWith(color: visuals.color),
-          ),
-        ],
-      ),
     );
   }
 }

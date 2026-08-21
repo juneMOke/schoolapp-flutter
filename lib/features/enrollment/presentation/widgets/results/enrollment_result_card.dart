@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/components/status/sync_state_icon.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
@@ -88,30 +89,33 @@ class EnrollmentResultCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      statusPill: isReEnrollment
-          ? StatusBadge.enrollmentReEnrollment(
-              label: pillLabel,
-              style: StatusBadgeStyle.filled,
-            )
-          : isPreEnrollment
-          ? (status == EnrollmentStatus.completed
-                ? StatusBadge.enrollmentCompleted(
-                    label: pillLabel,
-                    style: StatusBadgeStyle.filled,
-                  )
-                : StatusBadge.enrollmentInProgress(
-                    label: pillLabel,
-                    style: StatusBadgeStyle.filled,
-                  ))
-          : isReCandidate
-          ? StatusBadge.enrollmentPending(
-              label: l10n.enrollmentReenrollmentCandidateBadge,
-              style: StatusBadgeStyle.filled,
-            )
-          : EnrollmentStatusBadge(
-              status: status,
-              style: StatusBadgeStyle.filled,
-            ),
+      statusPill: _withSyncIcon(
+        enrollment,
+        isReEnrollment
+            ? StatusBadge.enrollmentReEnrollment(
+                label: pillLabel,
+                style: StatusBadgeStyle.filled,
+              )
+            : isPreEnrollment
+            ? (status == EnrollmentStatus.completed
+                  ? StatusBadge.enrollmentCompleted(
+                      label: pillLabel,
+                      style: StatusBadgeStyle.filled,
+                    )
+                  : StatusBadge.enrollmentInProgress(
+                      label: pillLabel,
+                      style: StatusBadgeStyle.filled,
+                    ))
+            : isReCandidate
+            ? StatusBadge.enrollmentPending(
+                label: l10n.enrollmentReenrollmentCandidateBadge,
+                style: StatusBadgeStyle.filled,
+              )
+            : EnrollmentStatusBadge(
+                status: status,
+                style: StatusBadgeStyle.filled,
+              ),
+      ),
       chips: [
         // Brouillon local repris depuis le listing : badge « Brouillon » borné
         // (le Wrap des chips impose des contraintes non bornées → le `Flexible`
@@ -128,6 +132,22 @@ class EnrollmentResultCard extends StatelessWidget {
           icon: Icons.cake_outlined,
           label: _formatDate(enrollment.student.dateOfBirth),
         ),
+      ],
+    );
+  }
+
+  /// Accole le picto d'état de synchro à la pastille de statut métier — même
+  /// grammaire que la vue tableau (statut métier d'abord, axe synchro ensuite).
+  /// Renvoie la pastille telle quelle quand la ligne n'a pas d'axe synchro
+  /// (brouillon, candidat du vivier) : pas de `Row` ni d'espacement inutiles.
+  Widget _withSyncIcon(EnrollmentSummary enrollment, Widget pill) {
+    if (!SyncStateIcon.isVisible(enrollment.syncState)) return pill;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: pill),
+        const SizedBox(width: AppSpacing.xs),
+        SyncStateIcon(state: enrollment.syncState),
       ],
     );
   }

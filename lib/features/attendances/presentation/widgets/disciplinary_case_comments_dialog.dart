@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
@@ -59,25 +63,34 @@ class _DisciplinaryCaseCommentsDialogState
         constraints: const BoxConstraints(maxWidth: 480, maxHeight: 600),
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.spacingL),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.caseData.title,
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: AppColors.textPrimary,
+          child: EteeloDialogBody(
+            // Titres + champ de saisie + bouton ≈ 210 dp incompressibles. En
+            // dessous de ce seuil — téléphone en paysage, clavier ouvert — ils
+            // rejoignent le défilement au lieu de déborder (mesuré à 189 dp de
+            // débordement sur 731×411).
+            minPinnedHeight: 260,
+            header: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.caseData.title,
+                  style: AppTextStyles.sectionTitle.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                l10n.disciplinaryCommentsDialogTitle,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
+                const SizedBox(height: AppDimensions.spacingXS),
+                Text(
+                  l10n.disciplinaryCommentsDialogTitle,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Flexible(child: _CommentsList(caseId: widget.caseData.id)),
+                const SizedBox(height: AppDimensions.spacingM),
+              ],
+            ),
+            body: _CommentsList(caseId: widget.caseData.id),
+            footer: [
               const SizedBox(height: AppDimensions.spacingM),
               _AddField(controller: _controller, onSubmit: _submit),
               const SizedBox(height: AppDimensions.spacingS),
@@ -123,6 +136,11 @@ class _CommentsList extends StatelessWidget {
             );
           }
           return ListView.separated(
+            // Inerte : c'est [EteeloDialogBody] qui porte le défilement, dans
+            // ses deux dispositions. Laissée maîtresse du sien, la liste
+            // gagnerait l'arène des gestes sans avoir rien à faire défiler, et
+            // le doigt de l'utilisateur ne déplacerait plus rien.
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: state.comments.length,
             separatorBuilder: (_, _) =>
@@ -189,34 +207,40 @@ class _AddField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Gel READ_ONLY (ADR-010) : tout le champ d'ajout (la saisie soumet aussi
-    // via onSubmitted) — la CONSULTATION des commentaires reste ouverte.
-    return SessionWriteGate(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 3,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSubmit(),
-              decoration: InputDecoration(
-                hintText: l10n.disciplinaryCommentAddHint,
-                isDense: true,
+    // Même agrégat, même point d'entrée que l'avancement : le champ d'AJOUT est
+    // gardé, la CONSULTATION du fil reste ouverte (elle ne relève que de
+    // `discipline.read`, qui a ouvert l'onglet).
+    return PermissionGate.access(
+      kDisciplineInstructAccess,
+      child: SessionWriteGate(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                minLines: 1,
+                maxLines: 3,
+                inputFormatters: const [SentenceCapitalizationInputFormatter()],
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSubmit(),
+                decoration: InputDecoration(
+                  hintText: l10n.disciplinaryCommentAddHint,
+                  isDense: true,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
+            const SizedBox(width: AppDimensions.spacingS),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
+              onPressed: onSubmit,
+              child: Text(l10n.disciplinaryCommentAddAction),
             ),
-            onPressed: onSubmit,
-            child: Text(l10n.disciplinaryCommentAddAction),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

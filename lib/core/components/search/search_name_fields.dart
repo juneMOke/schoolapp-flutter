@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 
 /// Grille auto-fit des trois champs Nom / Post-nom / Prénom (EteeloTextInput).
+///
+/// La capitalisation des identités est le défaut d'[EteeloTextInput] : aucun
+/// formatter à passer ici, et aucun champ d'identité ne peut plus l'oublier.
 ///
 /// Les champs s'adaptent à la largeur disponible : 3 colonnes si la place le
 /// permet, sinon ils repassent à la ligne (1 colonne quand le groupe est
@@ -17,7 +19,6 @@ class SearchNameFields extends StatelessWidget {
   final String surnameLabel;
   final ValueChanged<String> onChanged;
   final bool enabled;
-  final List<TextInputFormatter>? inputFormatters;
   final double spacing;
   final double minFieldWidth;
 
@@ -31,7 +32,6 @@ class SearchNameFields extends StatelessWidget {
     required this.surnameLabel,
     required this.onChanged,
     this.enabled = true,
-    this.inputFormatters,
     this.spacing = AppDimensions.searchFieldGap,
     this.minFieldWidth = AppDimensions.searchFieldMinWidth,
   });
@@ -57,7 +57,6 @@ class SearchNameFields extends StatelessWidget {
                 label: lastNameLabel,
                 enabled: enabled,
                 onChanged: onChanged,
-                inputFormatters: inputFormatters,
                 textInputAction: TextInputAction.next,
               ),
             ),
@@ -68,7 +67,6 @@ class SearchNameFields extends StatelessWidget {
                 label: surnameLabel,
                 enabled: enabled,
                 onChanged: onChanged,
-                inputFormatters: inputFormatters,
                 textInputAction: TextInputAction.next,
               ),
             ),
@@ -79,7 +77,6 @@ class SearchNameFields extends StatelessWidget {
                 label: firstNameLabel,
                 enabled: enabled,
                 onChanged: onChanged,
-                inputFormatters: inputFormatters,
                 textInputAction: TextInputAction.done,
               ),
             ),

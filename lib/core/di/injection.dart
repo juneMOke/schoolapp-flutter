@@ -86,6 +86,7 @@ import 'package:school_app_flutter/features/auth/data/repositories/auth_reposito
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
@@ -116,6 +117,7 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
@@ -170,6 +172,11 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
@@ -391,6 +398,7 @@ Future<void> configureDependencies({
       verifier: getIt<PasswordVerifierService>(),
       revocationBus: getIt<SessionRevocationBus>(),
       currentUser: getIt<CurrentUserContext>(),
+      currentPermissions: getIt<CurrentPermissions>(),
       sharedDocumentCache: getIt<SharedDocumentCache>(),
     ),
   );
@@ -810,6 +818,7 @@ Future<void> configureDependencies({
       // Frais du wizard — résolu paresseusement, enregistré par
       // registerOfflineModules avant toute création de bloc.
       initializeChargesUseCase: getIt<InitializeChargesUseCase>(),
+      hasFeeGridUseCase: getIt<HasFeeGridUseCase>(),
     ),
   );
 
@@ -818,6 +827,19 @@ Future<void> configureDependencies({
       getPaymentsUseCase: getIt<GetPaymentsUseCase>(),
       createPaymentUseCase: getIt<CreatePaymentUseCase>(),
       getPaymentAllocationsUseCase: getIt<GetPaymentAllocationsUseCase>(),
+    ),
+  );
+
+  // Contrôle des frais — lecture 100 % locale (module offline), résolue
+  // paresseusement comme les autres dépendances offline.
+  getIt.registerFactory<FeeControlBloc>(
+    () => FeeControlBloc(
+      search: getIt<SearchLocalEnrollmentsUseCase>(),
+      getAggregates: getIt<GetFeeChargeAggregatesUseCase>(),
+      getTariffs: getIt<GetFeeTariffsForLevelUseCase>(),
+      hasFeeGrid: getIt<HasFeeGridUseCase>(),
+      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
+      getRoster: getIt<GetOfflineRosterUseCase>(),
     ),
   );
 

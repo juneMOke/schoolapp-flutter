@@ -293,6 +293,34 @@ void main() {
     expect(rendered, contains('PROVISOIRE'));
   });
 
+  /// La CAUSE, ancrée côté données, du refus posé dans
+  /// `provisional_ticket_print_flow.dart`. Le symptôme s'observe à l'écran ; il
+  /// vient d'ici : le repository fait `student?.fullName ?? ''`, donc une ligne
+  /// `students` ABSENTE ne se distingue en rien d'un élève réellement anonyme —
+  /// le modèle sort valide, avec un nom vide, et le gabarit l'imprime.
+  ///
+  /// Cette absence est le cas NORMAL sur une tablette de caisse : `students`
+  /// n'est hydratée que par le pull d'Inscription, gardé sur `enrollment.read`.
+  test('sans ligne `students`, le nom composé est VIDE, pas absent', () async {
+    await seedPayment();
+    await db.delete('students', where: 'id = ?', whereArgs: ['s-1']);
+
+    final result = await repository.buildForPayment(
+      paymentId: 'p-1',
+      labels: _labels,
+    );
+    final model = result.getOrElse(() => throw StateError('échec'));
+
+    // Pas un `Left`, pas un `null` : une chaîne vide. Rien en aval ne peut
+    // distinguer ce cas d'un nom légitimement absent, d'où la garde en amont.
+    expect(model.studentFullName, isEmpty);
+    expect(model.matriculationNumber, isNull);
+    // Le reste du ticket est intact — c'est bien un papier complet et anonyme
+    // qui sortirait, pas un rendu cassé.
+    expect(model.amountReceivedInCents, 150000);
+    expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
+  });
+
   test('refuse d imprimer un encaissement introuvable', () async {
     final result = await repository.buildForPayment(
       paymentId: 'inconnu',

@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -26,6 +27,16 @@ class _FakeLedgerFreshnessCubit extends Cubit<int?>
 
   @override
   Future<void> load(String studentId) async {}
+}
+
+/// La légende de fraîcheur se recharge aussi sur ce signal (un cycle de
+/// rafraîchissement abouti), pas seulement sur une lecture de créances.
+class _FakeLedgerRevalidationCubit extends Cubit<int>
+    implements LedgerRevalidationCubit {
+  _FakeLedgerRevalidationCubit() : super(0);
+
+  @override
+  void watch(String studentId) {}
 }
 
 class _FakeEditiqueEligibilityCubit extends Cubit<EditiqueEligibilityState>
@@ -78,6 +89,9 @@ Future<void> _pump(
             ),
             BlocProvider<LedgerFreshnessCubit>(
               create: (_) => _FakeLedgerFreshnessCubit(),
+            ),
+            BlocProvider<LedgerRevalidationCubit>(
+              create: (_) => _FakeLedgerRevalidationCubit(),
             ),
             BlocProvider<EditiqueEligibilityCubit>(
               create: (_) => _FakeEditiqueEligibilityCubit(

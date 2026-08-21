@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
@@ -149,6 +150,18 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   }
 
   @override
+  Future<Either<Failure, bool>> hasFeeGridForYear(String academicYearId) async {
+    try {
+      return Right(await _dao.hasAnyTariffForYear(academicYearId));
+    } catch (_) {
+      // Base illisible : on ne prétend pas savoir. L'appelant traite l'échec
+      // comme « grille absente » (fail-closed : mieux vaut bloquer que
+      // d'annoncer un montant qu'on ne peut pas justifier).
+      return const Left(StorageFailure('Failed to probe fee grid'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<LocalStudentCharge>>> initializeCharges({
     required String studentId,
     required String academicYearId,
@@ -189,6 +202,33 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   Future<Either<Failure, LocalGeneratedDocument?>> getPaymentReceipt(
     String paymentId,
   ) => _guard(() => _dao.getPaymentReceipt(paymentId));
+
+  @override
+  Future<Either<Failure, List<LocalFeeTariff>>> getFeeTariffsForLevel({
+    required String academicYearId,
+    required String schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _guard(
+    () => _dao.getTariffsForLevel(
+      academicYearId: academicYearId,
+      schoolLevelId: schoolLevelId,
+      schoolLevelGroupId: schoolLevelGroupId,
+    ),
+  );
+
+  @override
+  Future<Either<Failure, List<LocalFeeChargeAggregate>>>
+  getFeeChargeAggregates({
+    required String academicYearId,
+    required String feeCode,
+    required List<String> studentIds,
+  }) => _guard(
+    () => _dao.getFeeChargeAggregates(
+      academicYearId: academicYearId,
+      feeCode: feeCode,
+      studentIds: studentIds,
+    ),
+  );
 
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {

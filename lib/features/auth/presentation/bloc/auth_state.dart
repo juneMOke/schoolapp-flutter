@@ -46,6 +46,23 @@ class AuthState extends Equatable {
   /// local, sans contact serveur). Diagnostic UX (bandeau).
   final bool isOffline;
 
+  /// Permissions effectives de la session (ADR-014 §4). **Projection
+  /// d'affichage, jamais une autorité** : le serveur re-dérive l'autorisation à
+  /// chaque requête — masquer un module ici n'en interdit pas l'accès, et le
+  /// laisser visible ne l'autorise pas. Ensemble OUVERT : toute valeur inconnue
+  /// de cette version de l'application est ignorée en silence.
+  ///
+  /// **Trois états.** `null` = ensemble inconnu — session ouverte avant que
+  /// l'application ne sache lire les permissions, ou réponse serveur sans le
+  /// champ ; liste vide = aucun droit, ce que le serveur a dit ; liste peuplée
+  /// = droits connus. Les deux premiers ferment l'interface mais ne disent pas
+  /// la même chose à l'utilisateur : « reconnectez-vous » n'est pas
+  /// « contactez l'administrateur ».
+  ///
+  /// L'ensemble ne descend qu'au login et au refresh ; il est réévalué au tick
+  /// de fraîcheur.
+  final List<String>? permissions;
+
   const AuthState({
     required this.status,
     this.user,
@@ -53,7 +70,14 @@ class AuthState extends Equatable {
     this.errorKind,
     this.sessionMode = SessionMode.normal,
     this.isOffline = false,
+    this.permissions,
   });
+
+  /// Vrai si la session porte [permission]. Unique point de lecture : les
+  /// appelants ne doivent pas refaire le `contains` eux-mêmes, sous peine de
+  /// diverger le jour où l'ensemble gagnera une hiérarchie (`a.*`).
+  bool hasPermission(String permission) =>
+      permissions?.contains(permission) ?? false;
 
   factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
 
@@ -68,6 +92,7 @@ class AuthState extends Equatable {
     Object? errorKind = _undefined,
     SessionMode? sessionMode,
     bool? isOffline,
+    Object? permissions = _undefined,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -82,6 +107,9 @@ class AuthState extends Equatable {
           : errorKind as AuthErrorKind?,
       sessionMode: sessionMode ?? this.sessionMode,
       isOffline: isOffline ?? this.isOffline,
+      permissions: identical(permissions, _undefined)
+          ? this.permissions
+          : permissions as List<String>?,
     );
   }
 
@@ -93,5 +121,6 @@ class AuthState extends Equatable {
     errorKind,
     sessionMode,
     isOffline,
+    permissions,
   ];
 }

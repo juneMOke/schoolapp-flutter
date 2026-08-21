@@ -77,20 +77,9 @@ class DocumentsSearchForm extends StatelessWidget {
       labels: BiModeSearchLabels(
         title: l10n.documentsSearchTitle,
         helpBanner: l10n.documentsSearchHelpBanner,
-        byStudentGroup: l10n.documentsSearchByStudentGroup,
-        byClassGroup: l10n.documentsSearchByClassGroup,
-        orSeparator: l10n.documentsSearchOrSeparator,
-        activeModeLabel: l10n.documentsSearchActiveModeLabel,
-        studentBadge: l10n.documentsSearchModeStudentBadge,
-        classBadge: l10n.documentsSearchModeClassBadge,
         cycleLabel: l10n.documentsSearchCycleLabel,
         levelLabel: l10n.documentsSearchLevelLabel,
         levelPlaceholder: l10n.documentsSearchLevelPlaceholder,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        searchLabel: l10n.search,
-        clearLabel: l10n.clear,
       ),
     );
   }

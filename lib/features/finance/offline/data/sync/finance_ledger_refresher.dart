@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -19,6 +22,15 @@ typedef LedgerRefresh =
 ///
 /// Renvoie `true` si le cycle a abouti : la fraîcheur affichée en dépend, elle
 /// ne doit pas couvrir un historique qu'on n'a pas réussi à tirer.
+///
+/// ⚠️ **Ce que la DI branche derrière ce seam passe par le coordinateur**
+/// (`CoordinatorPaymentsSync`), et ce n'est pas un détail de câblage. Ce flux-ci
+/// est global : il porte la clé de plan `finance.payments` et un handler
+/// enregistré. Seule l'AUTRE jambe de ce refresher — le point read scopé
+/// `finance_ledger:<studentId>` — est légitimement exemptée du coordinateur, sa
+/// clé étant dynamique par élève. Rebrancher ce seam en direct sur
+/// `FinancePullRepository.syncPayments()` rouvrirait une porte dérobée : le pull
+/// redeviendrait plus large que le plan du profil.
 typedef PaymentsSync = Future<bool> Function();
 
 /// Rafraîchissement CIBLÉ des créances d'un élève (FRONT §2.1 fin / §6 step 2)
@@ -30,6 +42,16 @@ typedef PaymentsSync = Future<bool> Function();
 ///   cache tel quel (jamais d'erreur remontée depuis une lecture).
 /// - **Déduppé** : un guard in-flight par (élève, année) garantit un seul appel
 ///   même si les sections Créances et Paiements le déclenchent en parallèle.
+/// - **Non attendu par les LECTURES** : les repos offline-first servent le
+///   grand-livre local d'abord et laissent ce cycle courir derrière eux. Quand
+///   il aboutit, [revalidated] le dit et l'écran relit — sans repasser par un
+///   skeleton. L'attente n'a été gardée QUE devant l'encaissement, là où
+///   `FACTURATION_OFFLINE_PLAN.md` §13 la plaçait, et elle y est bornée par le
+///   `deadline` que l'appelant passe. Devant chaque *lecture*, elle coûtait
+///   jusqu'à ~22 s de skeleton en réseau dégradé pour des lignes déjà en base.
+/// - **Amorti par un TTL** : un cycle abouti depuis moins de `readMaxAge` fait
+///   de [refresh] un no-op. Sans lui, chaque ouverture ET réouverture de la
+///   fiche — y compris le retour de la modale d'encaissement — rejouait tout.
 /// - **Point read sur les créances** : ne touche PAS le curseur du pull de
 ///   masse ; il ne fait qu'UPSERT les créances autoritaires de l'élève et
 ///   bumper `synced_at` (la fraîcheur affichée, ADR-002).
@@ -53,12 +75,30 @@ class FinanceLedgerRefresher {
   final int Function() _now;
   final Map<String, Future<void>> _inFlight = {};
 
+  /// Epoch ms du dernier cycle ABOUTI, par (élève, année). Mémoire de session
+  /// seulement : un démarrage à froid doit retirer, quel que soit le TTL.
+  ///
+  /// Volontairement non purgée au logout : sur tablette partagée, le compte
+  /// suivant peut hériter d'un amortissement, mais borné par le TTL et sans
+  /// conséquence — la lecture sert le local et la légende affiche l'heure
+  /// réelle. Purger demanderait un crochet de session pour ce seul gain.
+  final Map<String, int> _completedAt = {};
+
+  /// Voir [revalidated].
+  final StreamController<String> _revalidated =
+      StreamController<String>.broadcast();
+  late final Stream<String> _revalidatedStream = _revalidated.stream;
+
   static const int _pageLimit = 100;
 
   /// Temps maximal qu'une LECTURE accepte d'attendre le cycle global des
   /// paiements. Au-delà, l'écran sert le local (offline-first) et le cycle
   /// poursuit en tâche de fond.
   final Duration _paymentsDeadline;
+
+  /// Âge au-delà duquel un cycle abouti n'est plus considéré comme frais. En
+  /// deçà, [refresh] rend la main sans toucher au réseau.
+  final Duration _readMaxAge;
 
   FinanceLedgerRefresher({
     required FinancePullApi api,
@@ -69,6 +109,7 @@ class FinanceLedgerRefresher {
     required Map<String, dynamic> extras,
     PaymentsSync? syncPayments,
     Duration paymentsDeadline = const Duration(seconds: 4),
+    Duration readMaxAge = const Duration(seconds: 120),
     int Function() now = systemClock,
   }) : _api = api,
        _dao = dao,
@@ -78,6 +119,7 @@ class FinanceLedgerRefresher {
        _extras = extras,
        _syncPayments = syncPayments,
        _paymentsDeadline = paymentsDeadline,
+       _readMaxAge = readMaxAge,
        _now = now;
 
   static String _resource(String studentId) => 'finance_ledger:$studentId';
@@ -97,9 +139,58 @@ class FinanceLedgerRefresher {
   Future<int?> lastSyncedAt(String studentId) =>
       _syncMetaDao.getSyncedAt(_resource(studentId));
 
-  Future<void> refresh(String studentId, String academicYearId) {
+  /// Ferme le canal [revalidated]. En production ce refresher est un singleton
+  /// d'application et vit autant que le process ; ce point de sortie existe
+  /// pour que les tests ne laissent pas traîner un contrôleur ouvert.
+  @visibleForTesting
+  Future<void> dispose() => _revalidated.close();
+
+  /// Émet l'`studentId` chaque fois qu'un cycle ABOUTIT — les deux faces du
+  /// grand-livre à jour, fraîcheur estampillée.
+  ///
+  /// C'est la contrepartie du `await` retiré des lectures : l'écran sert le
+  /// local tout de suite, puis relit **sur ce signal**. Sans lui, une tablette
+  /// neuve afficherait « Aucun frais » (base vide) et n'en sortirait jamais —
+  /// ce qui est pire que le skeleton qu'on vient de supprimer.
+  ///
+  /// Diffusé même quand rien n'a bougé : les états BLoC sont `Equatable`, une
+  /// relecture identique n'émet pas et ne reconstruit rien.
+  ///
+  /// Vue mémorisée : `StreamController.stream` rend un NOUVEL objet à chaque
+  /// appel, ce qui rendrait indémontrable — par identité — que l'écran écoute
+  /// bien le canal de CE refresher (`offline_core_wiring_test.dart`).
+  Stream<String> get revalidated => _revalidatedStream;
+
+  /// Lance (ou rejoint) le cycle de rafraîchissement de cet élève.
+  ///
+  /// - `maxAge` — âge maximal accepté du dernier cycle abouti ; en deçà, no-op
+  ///   immédiat. Défaut : `readMaxAge` du constructeur. L'encaissement passe une
+  ///   valeur bien plus courte : ce qu'il borne, c'est un risque d'argent.
+  /// - `deadline` — temps maximal que l'APPELANT accepte d'attendre. Passé ce
+  ///   délai on rend la main, **sans annuler** le cycle : il poursuit en tâche
+  ///   de fond, garde son entrée in-flight (donc reste sérialisé) et annoncera
+  ///   son aboutissement sur [revalidated]. Sans `deadline`, on n'attend pas du
+  ///   tout — c'est le régime des lectures, qui ne l'awaitent pas.
+  ///
+  /// La borne vit ici, chez l'appelant, et non dans `_refreshCharges` : y
+  /// poser un timeout ferait retirer l'entrée in-flight pendant que la
+  /// pagination tourne encore, et un second cycle concurrent partirait sur le
+  /// même élève.
+  Future<void> refresh(
+    String studentId,
+    String academicYearId, {
+    Duration? deadline,
+    Duration? maxAge,
+  }) {
     final key = '$studentId|$academicYearId';
-    return _inFlight[key] ??= _run(studentId, academicYearId, key);
+    final completedAt = _completedAt[key];
+    if (completedAt != null &&
+        _now() - completedAt < (maxAge ?? _readMaxAge).inMilliseconds) {
+      return Future<void>.value();
+    }
+    final cycle = _inFlight[key] ??= _run(studentId, academicYearId, key);
+    if (deadline == null) return cycle;
+    return cycle.timeout(deadline, onTimeout: () {});
   }
 
   Future<void> _run(String studentId, String academicYearId, String key) async {
@@ -129,6 +220,11 @@ class FinanceLedgerRefresher {
         cursor: null,
         syncedAt: now,
       );
+      // Cycle abouti : on retient l'instant (TTL) et on l'annonce. Les lectures
+      // ne l'ont pas attendu — ce signal est le seul moyen qu'elles ont de
+      // savoir qu'il y a peut-être du neuf à relire.
+      _completedAt[key] = _now();
+      if (!_revalidated.isClosed) _revalidated.add(studentId);
     } catch (_) {
       // Filet ultime : une LECTURE ne remonte JAMAIS d'erreur de synchro. Les
       // deux pulls avalent déjà les leurs, mais `isOnline()` et le `setCursor`
@@ -202,6 +298,22 @@ class FinanceLedgerRefresher {
   /// prochaine lecture. On renvoie alors `false` — l'historique n'est pas
   /// garanti à jour, donc aucune fraîcheur ne sera affichée : borner la latence
   /// ne doit pas devenir un mensonge.
+  /// La seule jambe PAIEMENTS, exposée pour que le **câblage** soit éprouvable.
+  ///
+  /// Ce n'est pas du confort de test. Ce seam a été la treizième porte dérobée
+  /// du lot F6 : il tirait le flux global en direct sur le repository, hors du
+  /// plan. Le refermer, c'est une ligne de DI — et une ligne de DI est
+  /// exactement ce que ce chantier a appris à ne jamais supposer branché : cinq
+  /// gardes ont déjà été écrites, testées, et jamais injectées, la suite entière
+  /// restant verte.
+  ///
+  /// Prouver que `CoordinatorPaymentsSync` est *enregistré* ne prouve pas que
+  /// c'est LUI qu'on appelle ici. Seul ce point d'entrée permet de le vérifier
+  /// sur le conteneur réel, sans que le point read des créances ne parte taper
+  /// le réseau (cf. `offline_pull_registration_order_test.dart`).
+  @visibleForTesting
+  Future<bool> debugPullPaymentsOnly() => _pullPaymentsBestEffort();
+
   Future<bool> _pullPaymentsBestEffort() async {
     final sync = _syncPayments;
     if (sync == null) return true; // pas de seam câblé : rien à attendre

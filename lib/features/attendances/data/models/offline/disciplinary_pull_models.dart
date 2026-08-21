@@ -5,6 +5,7 @@
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_comment_row.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/offline_disciplinary_case_row.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 
 /// Mappe une liste serveur en **tolérant les lignes malformées** : une ligne
@@ -45,13 +46,38 @@ int? _isoToMs(String? iso) {
   return utc.millisecondsSinceEpoch;
 }
 
+/// Normalise le `studentGender` du wire sur l'enum du contrat.
+///
+/// Renvoie `null` dès que le serveur **n'a rien dit** : champ absent, non
+/// textuel, ou valeur hors enum. Ce `null` est porteur — il distingue « le
+/// serveur affirme OTHER » de « le serveur se tait », ce qui décide si l'on
+/// écrase ou non un genre déjà en base (voir [PulledDisciplinaryCase]).
+String? _serverGender(Object? raw) {
+  if (raw is! String) return null;
+  final upper = raw.trim().toUpperCase();
+  final known = StudentGender.values.map((g) => g.toApiValue());
+  return known.contains(upper) ? upper : null;
+}
+
 /// Agrégat local prêt à appliquer : le cas + ses commentaires (déjà résolus en
 /// lignes locales SYNCED). L'id du cas est l'uuid honoré (idempotence).
 class PulledDisciplinaryCase {
   final OfflineDisciplinaryCaseRow caseRow;
   final List<DisciplinaryCommentRow> comments;
 
-  const PulledDisciplinaryCase({required this.caseRow, required this.comments});
+  /// Genre **tel que le serveur l'a dit**, ou `null` s'il ne l'a pas dit
+  /// (`studentGender` est hors `required` au contrat). [caseRow] porte, lui,
+  /// la valeur déjà repliée sur `OTHER` — utilisable seulement à l'insertion
+  /// d'un cas inconnu. Pour une ligne déjà en base, seul un genre **affirmé**
+  /// autorise la réécriture : un repli écraserait le genre exact posé ici à la
+  /// création hors-ligne.
+  final String? serverStudentGender;
+
+  const PulledDisciplinaryCase({
+    required this.caseRow,
+    required this.comments,
+    this.serverStudentGender,
+  });
 }
 
 /// Un commentaire imbriqué dans un cas pullé (append-only).
@@ -92,15 +118,20 @@ class DisciplinaryCommentDeltaDto {
 
 /// Un cas pullé (racine d'agrégat) avec ses commentaires imbriqués.
 ///
-/// ⚠ Le delta **ne porte pas** `studentGender` (résolu à la création ; le back
-/// ne le renvoie pas en lecture) → défaut `OTHER` en local. `content` peut être
-/// nul (visibilité par rôle serveur, différée) → défaut `''` (colonne NOT NULL).
+/// ⚠ Le delta **porte** `studentGender` (contrat `DisciplinaryCaseDelta`, enum
+/// MALE/FEMALE/OTHER) mais **hors `required`** : le contrat le déclare, il ne
+/// garantit pas que le serveur le peuple. `null` ici = rien dit → repli `OTHER`
+/// à l'insertion, et aucune réécriture d'une ligne existante. `content` peut
+/// être nul (visibilité par rôle serveur, différée) → défaut `''` (NOT NULL).
 class DisciplinaryCaseDeltaDto {
   final String id;
   final String studentId;
   final String? studentFirstName;
   final String? studentLastName;
   final String? studentMiddleName;
+
+  /// `MALE` / `FEMALE` / `OTHER`, ou `null` si le serveur ne l'a pas dit.
+  final String? studentGender;
   final String academicYearId;
   final String category;
   final String severity;
@@ -119,6 +150,7 @@ class DisciplinaryCaseDeltaDto {
     this.studentFirstName,
     this.studentLastName,
     this.studentMiddleName,
+    this.studentGender,
     required this.academicYearId,
     required this.category,
     required this.severity,
@@ -139,6 +171,7 @@ class DisciplinaryCaseDeltaDto {
         studentFirstName: j['studentFirstName'] as String?,
         studentLastName: j['studentLastName'] as String?,
         studentMiddleName: j['studentMiddleName'] as String?,
+        studentGender: _serverGender(j['studentGender']),
         academicYearId: j['academicYearId'] as String,
         category: (j['category'] as String?) ?? 'DISRUPTIVE_BEHAVIOR',
         severity: (j['severity'] as String?) ?? 'MINOR',
@@ -164,7 +197,10 @@ class DisciplinaryCaseDeltaDto {
         studentFirstName: studentFirstName ?? '',
         studentLastName: studentLastName ?? '',
         studentMiddleName: studentMiddleName,
-        studentGender: 'OTHER',
+        // Repli : la colonne est NOT NULL, un delta muet ne peut pas laisser
+        // le champ vide. Le repli n'est PAS une affirmation du serveur — il ne
+        // vaut qu'à l'insertion d'un cas inconnu (cf. `serverStudentGender`).
+        studentGender: studentGender ?? StudentGender.other.toApiValue(),
         academicYearId: academicYearId,
         disciplinaryCaseDate: disciplinaryCaseDate,
         title: title,
@@ -181,6 +217,7 @@ class DisciplinaryCaseDeltaDto {
       comments: comments
           .map((c) => c.toLocalRow(caseId: id, syncedAt: syncedAt))
           .toList(growable: false),
+      serverStudentGender: studentGender,
     );
   }
 }

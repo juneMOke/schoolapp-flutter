@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 
@@ -52,12 +53,31 @@ class ParentItemValue extends Equatable {
     );
   }
 
-  bool get isValid {
+  /// Validité de la fiche TELLE QU'ELLE A ÉTÉ CHARGÉE : sert au premier
+  /// rendu, avant toute édition.
+  bool get isValid => isValidAgainst(this);
+
+  /// [initial] : la fiche au chargement. Un téléphone hérité non conforme
+  /// n'est bloquant que si l'utilisateur y a touché — sur une fiche
+  /// rattachée par « Rechercher un parent », les champs d'identité sont en
+  /// lecture seule, et exiger un format qu'aucun champ ne permet de corriger
+  /// figerait l'inscription.
+  bool isValidAgainst(ParentItemValue? initial) {
     final normalizedEmail = email.trim();
     return firstName.trim().isNotEmpty &&
         lastName.trim().isNotEmpty &&
-        phoneNumber.trim().isNotEmpty &&
+        isPhoneAcceptable(phoneNumber, initialPhone: initial?.phoneNumber) &&
         isEmailValid(normalizedEmail);
+  }
+
+  /// Un téléphone est obligatoire ET complet : un numéro tronqué partirait
+  /// en base et vers le backend en E.164 invalide, sans moyen de rappeler le
+  /// tuteur. Seule exception, ci-dessus : la valeur héritée intacte.
+  static bool isPhoneAcceptable(String rawPhone, {String? initialPhone}) {
+    final normalized = rawPhone.trim();
+    if (normalized.isEmpty) return false;
+    if (PhoneNumberFormat.isValid(normalized)) return true;
+    return initialPhone != null && normalized == initialPhone.trim();
   }
 
   static bool isEmailValid(String rawEmail) {

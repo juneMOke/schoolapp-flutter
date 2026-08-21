@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -226,148 +230,146 @@ class _DisciplinaryCaseCreateDialogState
     // reduced-motion : les transitions du formulaire deviennent instantanées.
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        _buildHeader(context, l10n, isLoading),
-        // Content
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimensions.spacingM),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildStatusBlock(l10n),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  _buildCategoryField(l10n, isLoading),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  _buildSeverityField(l10n),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  Text(
-                    l10n.disciplinaryCaseCreateDialogTitleField,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXS),
-                  TextFormField(
-                    controller: _titleController,
-                    enabled: !isLoading,
-                    decoration: _inputDecoration(
-                      hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n
-                            .disciplinaryCaseCreateDialogRequiredFieldError;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  Text(
-                    l10n.disciplinaryCaseCreateDialogContentField,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXS),
-                  TextFormField(
-                    controller: _contentController,
-                    enabled: !isLoading,
-                    decoration: _inputDecoration(
-                      hintText: l10n.disciplinaryCaseCreateDialogContentHint,
-                    ),
-                    minLines: 3,
-                    maxLines: 5,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n
-                            .disciplinaryCaseCreateDialogRequiredFieldError;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  Text(
-                    l10n.disciplinaryCaseCreateDialogCaseDateField,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXS),
-                  AnimatedOpacity(
-                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                    curve: AppMotion.outCurve,
-                    opacity: isLoading ? 0.65 : 1,
-                    child: InkWell(
-                      onTap: isLoading ? null : () => _selectDate(context),
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.spacingM,
-                      ),
-                      child: AnimatedContainer(
-                        duration: reduceMotion
-                            ? Duration.zero
-                            : AppMotion.medium,
-                        curve: AppMotion.outCurve,
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(AppDimensions.spacingM),
-                        decoration: BoxDecoration(
-                          color: AppColors.disciplinaryDetailAccentSoft,
-                          borderRadius: BorderRadius.circular(
-                            AppDimensions.spacingM,
-                          ),
-                          border: Border.all(
-                            color: AppColors.disciplinaryDetailAccent
-                                .withValues(alpha: isLoading ? 0.12 : 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today_outlined,
-                              size: AppDimensions.detailMiniIconSize,
-                              color: AppColors.disciplinaryDetailAccent,
-                            ),
-                            const SizedBox(width: AppDimensions.spacingS),
-                            Expanded(
-                              child: AnimatedSwitcher(
-                                duration: reduceMotion
-                                    ? Duration.zero
-                                    : AppMotion.fast,
-                                switchInCurve: AppMotion.outCurve,
-                                switchOutCurve: AppMotion.inCurve,
-                                child: Text(
-                                  _formatSelectedDate(context),
-                                  key: ValueKey(_selectedDate),
-                                  style: AppTextStyles.bodyStrong.copyWith(
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const Icon(
-                              Icons.expand_more_rounded,
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  _buildSanctionField(l10n, isLoading),
-                ],
+    return EteeloDialogBody(
+      // En-tête + pied à boutons ≈ 210 dp incompressibles. Au-dessus de ce
+      // seuil ils tiennent et restent ancrés ; en dessous — téléphone en
+      // paysage, clavier ouvert — ils rejoignent le défilement au lieu de
+      // déborder (mesuré : 149 dp de débordement sur 640×360, 129 sur
+      // 760×380, 98 sur 731×411).
+      minPinnedHeight: 260,
+      // Le formulaire occupait déjà toute la hauteur offerte : on la garde.
+      pinnedMainAxisSize: MainAxisSize.max,
+      header: _buildHeader(context, l10n, isLoading),
+      bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStatusBlock(l10n),
+            const SizedBox(height: AppDimensions.spacingM),
+            _buildCategoryField(l10n, isLoading),
+            const SizedBox(height: AppDimensions.spacingM),
+            _buildSeverityField(l10n),
+            const SizedBox(height: AppDimensions.spacingM),
+            Text(
+              l10n.disciplinaryCaseCreateDialogTitleField,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ),
+            const SizedBox(height: AppDimensions.spacingXS),
+            TextFormField(
+              controller: _titleController,
+              enabled: !isLoading,
+              inputFormatters: const [SentenceCapitalizationInputFormatter()],
+              textCapitalization: TextCapitalization.sentences,
+              decoration: _inputDecoration(
+                hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            Text(
+              l10n.disciplinaryCaseCreateDialogContentField,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingXS),
+            TextFormField(
+              controller: _contentController,
+              enabled: !isLoading,
+              inputFormatters: const [SentenceCapitalizationInputFormatter()],
+              textCapitalization: TextCapitalization.sentences,
+              decoration: _inputDecoration(
+                hintText: l10n.disciplinaryCaseCreateDialogContentHint,
+              ),
+              minLines: 3,
+              maxLines: 5,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            Text(
+              l10n.disciplinaryCaseCreateDialogCaseDateField,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingXS),
+            AnimatedOpacity(
+              duration: reduceMotion ? Duration.zero : AppMotion.fast,
+              curve: AppMotion.outCurve,
+              opacity: isLoading ? 0.65 : 1,
+              child: InkWell(
+                onTap: isLoading ? null : () => _selectDate(context),
+                borderRadius: BorderRadius.circular(AppDimensions.spacingM),
+                child: AnimatedContainer(
+                  duration: reduceMotion ? Duration.zero : AppMotion.medium,
+                  curve: AppMotion.outCurve,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppDimensions.spacingM),
+                  decoration: BoxDecoration(
+                    color: AppColors.disciplinaryDetailAccentSoft,
+                    borderRadius: BorderRadius.circular(AppDimensions.spacingM),
+                    border: Border.all(
+                      color: AppColors.disciplinaryDetailAccent.withValues(
+                        alpha: isLoading ? 0.12 : 0.2,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: AppDimensions.detailMiniIconSize,
+                        color: AppColors.disciplinaryDetailAccent,
+                      ),
+                      const SizedBox(width: AppDimensions.spacingS),
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : AppMotion.fast,
+                          switchInCurve: AppMotion.outCurve,
+                          switchOutCurve: AppMotion.inCurve,
+                          child: Text(
+                            _formatSelectedDate(context),
+                            key: ValueKey(_selectedDate),
+                            style: AppTextStyles.bodyStrong.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.expand_more_rounded,
+                        color: AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            _buildSanctionField(l10n, isLoading),
+          ],
         ),
-        // Footer
+      ),
+      footer: [
         Container(
           padding: const EdgeInsets.all(AppDimensions.spacingM),
           decoration: const BoxDecoration(
@@ -394,62 +396,66 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                 ),
               ),
-              // Gel READ_ONLY (ADR-010) : le dialog peut être ouvert au moment
-              // où le tick de fraîcheur bascule le mode — le submit doit être
-              // gaté comme le CTA d'entrée.
-              SessionWriteGate(
-                child: Semantics(
-                  label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                  button: true,
-                  enabled: !isLoading,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.disciplinaryDetailAccent,
-                      foregroundColor: AppColors.surface,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.spacingM,
-                        vertical: AppDimensions.spacingS,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.spacingM,
+              // Le dialog peut rester ouvert quand la permission redescend en
+              // cours de session (refresh) : garder la porte ne suffit pas, il
+              // faut garder le geste. Même raison que pour le gel READ_ONLY,
+              // dont le raisonnement est ici étendu aux droits.
+              PermissionGate.access(
+                kDisciplineInstructAccess,
+                child: SessionWriteGate(
+                  child: Semantics(
+                    label: l10n.disciplinaryCaseCreateDialogSubmitAction,
+                    button: true,
+                    enabled: !isLoading,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.disciplinaryDetailAccent,
+                        foregroundColor: AppColors.surface,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.spacingM,
+                          vertical: AppDimensions.spacingS,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.spacingM,
+                          ),
                         ),
                       ),
-                    ),
-                    onPressed: isLoading ? null : () => _submit(context),
-                    icon: AnimatedSwitcher(
-                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: isLoading
-                          ? const SizedBox(
-                              key: ValueKey('loading-icon'),
-                              width: AppDimensions
-                                  .disciplinaryCreateSubmitSpinnerSize,
-                              height: AppDimensions
-                                  .disciplinaryCreateSubmitSpinnerSize,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.surface,
+                      onPressed: isLoading ? null : () => _submit(context),
+                      icon: AnimatedSwitcher(
+                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                        switchInCurve: AppMotion.outCurve,
+                        switchOutCurve: AppMotion.inCurve,
+                        child: isLoading
+                            ? const SizedBox(
+                                key: ValueKey('loading-icon'),
+                                width: AppDimensions
+                                    .disciplinaryCreateSubmitSpinnerSize,
+                                height: AppDimensions
+                                    .disciplinaryCreateSubmitSpinnerSize,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.surface,
+                                  ),
                                 ),
+                              )
+                            : const Icon(
+                                Icons.add_task_outlined,
+                                key: ValueKey('submit-icon'),
                               ),
-                            )
-                          : const Icon(
-                              Icons.add_task_outlined,
-                              key: ValueKey('submit-icon'),
-                            ),
-                    ),
-                    label: AnimatedSwitcher(
-                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: Text(
-                        isLoading
-                            ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                            : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                        key: ValueKey(isLoading),
-                        style: AppTextStyles.action,
+                      ),
+                      label: AnimatedSwitcher(
+                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                        switchInCurve: AppMotion.outCurve,
+                        switchOutCurve: AppMotion.inCurve,
+                        child: Text(
+                          isLoading
+                              ? l10n.disciplinaryCaseCreateDialogCreatingMessage
+                              : l10n.disciplinaryCaseCreateDialogSubmitAction,
+                          key: ValueKey(isLoading),
+                          style: AppTextStyles.action,
+                        ),
                       ),
                     ),
                   ),

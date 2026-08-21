@@ -16,6 +16,42 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/l
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 
+/// Nom de ressource du flux des préinscriptions — identité du `PullHandler`
+/// devant le `PullCoordinator` et le plan de synchro (`kSyncPlanAliases`).
+///
+/// **Ce n'est PAS la clé du curseur.** Le curseur, lui, est scopé par école —
+/// voir [preEnrollmentsCursorKey]. La distinction est la même que pour
+/// l'éditique : le coordinateur nomme un flux, `sync_meta` mémorise où en est
+/// une école dans ce flux.
+const String kEnrollmentPreEnrollmentsResource = 'enrollment_pre_enrollments';
+
+/// Clé `sync_meta` du curseur keyset des préinscriptions, **scopée par école**.
+/// Le séparateur `@` est la convention du dépôt pour une ressource scopée.
+///
+/// Le flux est cadré par l'école du jeton, et `ref_pre_enrollments` n'a aucune
+/// colonne `school_id` : un curseur unique sur une tablette réaffectée faisait
+/// reprendre le second établissement au point où le premier s'était arrêté. Le
+/// serveur répondait « rien de neuf », et les préinscriptions de la nouvelle
+/// école ne descendaient jamais — exactement le défaut que la migration v18 a dû
+/// corriger pour les caches cadrés enseignant (partition par compte).
+///
+/// ⚠️ **Cette clé orpheline la clé héritée non scopée**
+/// (`enrollment_pre_enrollments`, écrite par toutes les versions antérieures) :
+/// la ligne reste dans `sync_meta`, plus jamais lue, et chaque tablette du parc
+/// rebootstrape ce flux au premier cycle qui suit la montée de version. C'est
+/// **voulu** — c'est même le seul comportement correct, puisque rien ne permet
+/// de savoir à quelle école ce curseur hérité appartenait. Le coût est borné
+/// (le vivier des préinscriptions pèse quelques centaines de Ko) et il est payé
+/// une fois.
+///
+/// Aucune purge de migration ne vise cette ancienne clé (les seules suppressions
+/// dans `sync_meta` d'`app_database.dart` visent `academics_*`, `schedule_*` et
+/// `classrooms`) : la ligne héritée survit donc à la montée de version, inerte.
+/// Elle est en revanche balayée par [SyncMetaDao.deleteCursorsOf], dont le
+/// prédicat couvre `<prefix>` autant que `<prefix>@…`.
+String preEnrollmentsCursorKey(String schoolId) =>
+    '$kEnrollmentPreEnrollmentsResource@$schoolId';
+
 /// Pulls Inscription — miroir *lecture* de `openApi.yaml` (section Sync,
 /// ADR-008/009). Trois régimes :
 ///  - **référentiel** ([syncReferential]) : bundle full always-200, curseur =
@@ -50,8 +86,12 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   /// Clés de curseur/fraîcheur dans `sync_meta` (une par ressource).
   static const String referentialResource = 'enrollment_referential';
   static const String cohortResource = 'enrollment_reenrollment_cohort';
-  static const String preEnrollmentsResource = 'enrollment_pre_enrollments';
   static const String deltaResource = 'enrollments';
+
+  /// Nom de ressource des préinscriptions — **pas** la clé de son curseur, qui
+  /// est scopée par école ([preEnrollmentsCursorKey]).
+  static const String preEnrollmentsResource =
+      kEnrollmentPreEnrollmentsResource;
 
   /// Curseur du pull HYDRATANT — distinct du delta maigre (`deltaResource`) :
   /// les deux flux avancent indépendamment (le hydratant crée les lignes, le
@@ -171,29 +211,103 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   }
 
   @override
-  Future<Either<Failure, EnrollmentPullOutcome>> syncPreEnrollments() =>
-      _keysetPull<PreEnrollmentDto, PreEnrollmentsPageDto>(
-        resource: preEnrollmentsResource,
-        request: (cursor) =>
-            api.pullPreEnrollments(requiredAuth, cursor, pageLimit),
-        apply: (items, syncedAt) =>
-            seedDao.upsertPreEnrollments(items, syncedAt: syncedAt),
-      );
+  Future<Either<Failure, EnrollmentPullOutcome>> syncPreEnrollments() async {
+    // École inconnue → NI appel réseau, NI écriture (même forme que la garde
+    // d'hydratation du delta ci-dessous). Se rabattre ici sur la clé plate
+    // rétablirait mot pour mot le défaut que ce scope ferme : un curseur qu'une
+    // AUTRE école héritera. Et `ref_pre_enrollments` n'ayant pas de colonne
+    // `school_id`, des lignes descendues sans école connue seraient
+    // inattribuables — donc ni distinguables, ni purgeables par le changement
+    // d'école. Mieux vaut un vivier vide qu'un vivier mélangé.
+    final schoolId = currentUser.schoolId;
+    if (schoolId == null || schoolId.isEmpty) {
+      return Right(EnrollmentPullOutcome.notModifiedAt(now(), null));
+    }
+    return _keysetPull<PreEnrollmentDto, PreEnrollmentsPageDto>(
+      cursorKey: preEnrollmentsCursorKey(schoolId),
+      request: (cursor) =>
+          api.pullPreEnrollments(requiredAuth, cursor, pageLimit),
+      apply: (items, syncedAt) =>
+          seedDao.upsertPreEnrollments(items, syncedAt: syncedAt),
+    );
+  }
 
   @override
-  Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentDelta() =>
-      _keysetPull<EnrollmentDeltaDto, EnrollmentDeltaPageDto>(
-        resource: deltaResource,
-        request: (cursor) =>
-            api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
-        apply: (items, syncedAt) =>
-            reconciliationDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
-      );
+  Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentDelta() async {
+    // ⚠️ LE DELTA NE PART PAS SUR UNE BASE JAMAIS HYDRATÉE — il y brûlerait son
+    // backlog, en silence.
+    //
+    // Le delta est maigre : `applyEnrollmentDelta` ne fait qu'UPDATE des lignes
+    // que seul l'hydratant INSERT. Sans hydratation, chaque page ne met à jour
+    // rien du tout — mais `_keysetPull` mémorise le jeton à CHAQUE page, sans
+    // jamais regarder `upserted`. Le backlog serveur est donc consommé et le
+    // curseur avancé au-delà de dossiers que plus rien ne redemandera : les
+    // modifications de cette fenêtre sont perdues jusqu'à un rebootstrap.
+    //
+    // Et l'incident est invisible : zéro ligne appliquée est replié en
+    // `notModified` par `_outcome`, exactement comme un cycle sain. Pas
+    // d'erreur, pas de compteur, aucun événement de bus — rien à quoi
+    // s'accrocher pour comprendre pourquoi des dossiers sont figés.
+    //
+    // La garde vit ICI, dans le repository, et non dans le `PullHandler`.
+    //
+    // ⚠️ Sa justification d'origine est PÉRIMÉE et ne doit pas être ressortie :
+    // elle disait que `SyncEnrollmentPullsUseCase` appelait ces méthodes EN
+    // DIRECT au montage des FeatureScope Inscription, Facturation et Documents,
+    // hors de tout handler. Ce n'est plus vrai depuis le repli F6 — ce use case
+    // ne fait plus que demander un sous-ensemble au `PullCoordinator`, et tout
+    // passe donc par les handlers.
+    //
+    // La garde reste néanmoins nécessaire, et à cette place : le coordinateur
+    // tire aussi le delta seul (`pullSubset` d'un écran qui ne demanderait que
+    // lui, ou un plan de synchro qui n'accorderait que ce flux), et le
+    // repository est le seul niveau où la question « cette base a-t-elle jamais
+    // été hydratée ? » se pose sans dupliquer le curseur de l'hydratant.
+    //
+    // Le curseur de l'hydratant fait office de témoin : il n'existe qu'après
+    // une première page appliquée. Ce n'est pas un drapeau de bootstrap
+    // COMPLET — cette paire n'en a pas, contrairement à `attendance` ou
+    // `schedule` — mais il suffit à distinguer « jamais hydraté » du reste, qui
+    // est le seul cas où le delta détruit.
+    //
+    // Dans un cycle normal l'ordre d'enregistrement fait passer l'hydratant en
+    // premier : au moment où le delta s'exécute, le curseur est déjà posé et la
+    // garde laisse passer. Elle ne mord donc que sur un ordre inversé, ou sur
+    // un chemin qui tirerait le delta seul.
+    final hydrated = await _hasEverHydrated();
+    if (!hydrated) {
+      // NI appel réseau, NI écriture : surtout pas de `setCursor`, qui
+      // bumperait la fraîcheur et ferait lire « à jour » à une ressource qu'on
+      // vient délibérément de ne pas demander.
+      return Right(EnrollmentPullOutcome.notModifiedAt(now(), null));
+    }
+    return _keysetPull<EnrollmentDeltaDto, EnrollmentDeltaPageDto>(
+      cursorKey: deltaResource,
+      request: (cursor) =>
+          api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
+      apply: (items, syncedAt) =>
+          reconciliationDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
+    );
+  }
+
+  /// L'hydratant a-t-il déjà posé son curseur ?
+  ///
+  /// Défensif comme le reste de la couche : une base indisponible rend `true`,
+  /// pour que la garde ne puisse jamais devenir elle-même la cause d'un flux
+  /// qui ne descend plus. Le pire qu'elle risque alors est de laisser passer un
+  /// delta qu'elle aurait retenu — le comportement d'avant cette garde.
+  Future<bool> _hasEverHydrated() async {
+    try {
+      return await syncMetaDao.getCursor(snapshotsResource) != null;
+    } catch (_) {
+      return true;
+    }
+  }
 
   @override
   Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentSnapshots() =>
       _keysetPull<EnrollmentAggregateSnapshotDto, EnrollmentSnapshotPageDto>(
-        resource: snapshotsResource,
+        cursorKey: snapshotsResource,
         request: (cursor) =>
             api.pullEnrollmentSnapshots(requiredAuth, cursor, null, pageLimit),
         apply: (items, syncedAt) => reconciliationDao.upsertEnrollmentSnapshots(
@@ -208,15 +322,19 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   /// tant que `hasMore` (reprise en cas d'interruption), puis `nextWatermark` en
   /// fin de cycle (Δ appliqué). Le 304 (rien de neuf) arrive en [DioException] :
   /// fraîcheur bumpée, curseur conservé. Ne lève pas.
+  ///
+  /// [cursorKey] est une clé `sync_meta`, **pas** un nom de ressource de
+  /// coordinateur : les préinscriptions y passent une clé scopée par école
+  /// ([preEnrollmentsCursorKey]) alors que leur handler garde le nom plat.
   Future<Either<Failure, EnrollmentPullOutcome>>
   _keysetPull<I, P extends KeysetPageDto<I>>({
-    required String resource,
+    required String cursorKey,
     required Future<HttpResponse<P>> Function(String? cursor) request,
     required Future<int> Function(List<I> items, int syncedAt) apply,
   }) async {
     final syncedAt = now();
     try {
-      var cursor = await syncMetaDao.getCursor(resource); // null = bootstrap
+      var cursor = await syncMetaDao.getCursor(cursorKey); // null = bootstrap
       var upserted = 0;
       String? lastServerTime;
       while (true) {
@@ -233,7 +351,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         final nextToken = env.cursorToPersist;
         if (nextToken != null) cursor = nextToken;
         await syncMetaDao.setCursor(
-          resource,
+          cursorKey,
           cursor: cursor,
           syncedAt: syncedAt,
         );
@@ -249,9 +367,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 304) {
-        final previous = await syncMetaDao.getCursor(resource);
+        final previous = await syncMetaDao.getCursor(cursorKey);
         await syncMetaDao.setCursor(
-          resource,
+          cursorKey,
           cursor: previous,
           syncedAt: syncedAt,
         );
@@ -279,16 +397,26 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       syncedAt: syncedAt,
       schoolId: currentUser.schoolId ?? '',
     );
-    final allTariffs = [
-      ...body.current.feeTariffs,
-      ...?body.previous?.feeTariffs,
+    // Portion réservée (ADR-014 §4) : le serveur envoie `feeTariffs: null` —
+    // et non `[]` — quand l'appelant n'a pas `finance.grid.read`. `null` dit
+    // « je ne te la montre pas », jamais « cette école n'a pas de tarifs ».
+    // Replier l'un sur l'autre ferait lire à la purge scopée un ordre de tout
+    // supprimer : la purge ne connaît que l'année, pas le compte, donc sur une
+    // tablette partagée un pull sans ce droit effacerait la grille dont dépend
+    // l'inscription hors ligne d'un autre poste. On ne purge donc QUE les
+    // années dont le bundle a réellement porté sa section — une section
+    // présente mais vide reste, elle, un ordre de purge légitime.
+    final tariffBundles = <ReferentialYearBundleDto>[
+      if (body.current.feeTariffs != null) body.current,
+      if (body.previous?.feeTariffs != null) body.previous!,
     ];
+    if (tariffBundles.isEmpty) return upserted;
+
+    final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
     final yearIds = <String>{
-      body.current.academicYear.id,
-      if (body.previous != null) body.previous!.academicYear.id,
-      for (final g in body.current.schoolLevelGroups) g.academicYearId,
-      if (body.previous != null)
-        for (final g in body.previous!.schoolLevelGroups) g.academicYearId,
+      for (final b in tariffBundles) b.academicYear.id,
+      for (final b in tariffBundles)
+        for (final g in b.schoolLevelGroups) g.academicYearId,
       for (final t in allTariffs) t.academicYearId,
     }.toList(growable: false);
     await replaceTariffs(

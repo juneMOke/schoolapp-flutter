@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
@@ -41,6 +42,13 @@ class AuthSessionManager
   final PasswordVerifierService _verifier;
   final SessionRevocationBus? _revocationBus;
   final CurrentUserContext? _currentUser;
+
+  /// Ensemble effectif des permissions de la session (ADR-014 §4), tenu à
+  /// jour aux MÊMES points que [_currentUser] : les consommateurs hors arbre
+  /// de widgets — la boucle de synchronisation d'abord — n'ont pas d'autre
+  /// source. Un point d'alimentation oublié se paierait en ressources
+  /// sautées à tort, pas en droits accordés à tort.
+  final CurrentPermissions? _currentPermissions;
   final WallClock _now;
 
   /// Purge des pièces déposées en clair par le partage système. Optionnel : sans
@@ -65,6 +73,7 @@ class AuthSessionManager
     required PasswordVerifierService verifier,
     SessionRevocationBus? revocationBus,
     CurrentUserContext? currentUser,
+    CurrentPermissions? currentPermissions,
     SharedDocumentCache? sharedDocumentCache,
     WallClock now = _systemWallClock,
   }) : _tokenStorage = tokenStorage,
@@ -72,6 +81,7 @@ class AuthSessionManager
        _verifier = verifier,
        _revocationBus = revocationBus,
        _currentUser = currentUser,
+       _currentPermissions = currentPermissions,
        _sharedDocumentCache = sharedDocumentCache,
        _now = now;
 
@@ -100,6 +110,9 @@ class AuthSessionManager
     final refreshExpiresAt =
         session.refreshExpiresAt ?? nowMs + _defaultRefreshTtlMs;
     final existing = await _authLocalDao.getUser(uid);
+    // Un ensemble vide COMMUNIQUÉ écrase (retrait de droits) ; un ensemble
+    // absent laisse la copie durable en place.
+    final permissions = session.permissions ?? existing?.permissions;
     await _authLocalDao.upsertUser(
       AuthLocalUserRecord(
         userId: uid,
@@ -115,6 +128,18 @@ class AuthSessionManager
         lastServerSeenAt: nowMs,
         sessionStartedAt: nowMs,
         refreshExpiresAt: refreshExpiresAt,
+        // Copie durable des permissions (ADR-014 §4) : elle survit au logout
+        // pour que le login offline suivant rouvre la session avec les droits
+        // du dernier contact serveur, et non avec zéro droit.
+        //
+        // `upsertUser` REMPLACE la ligne entière : un ensemble absent de la
+        // réponse y écrirait NULL, alors qu'il ne dit rien de ce compte. Même
+        // règle que sur le chemin refresh (`updatePermissions`, `updateTokens`)
+        // — deux chemins sur trois la respectaient, celui-ci l'enfreignait.
+        // C'est cette colonne que le tick de fraîcheur relit pour rouvrir
+        // l'écran : l'effacer ferme la boucle sur l'utilisateur, dont la seule
+        // action offerte (se reconnecter) rejouerait l'effacement.
+        permissions: permissions,
       ),
     );
     await _authLocalDao.upsertSession(
@@ -129,6 +154,7 @@ class AuthSessionManager
     _clockTampered = false;
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(uid, schoolId: session.user.schoolId);
+    _currentPermissions?.set(permissions);
 
     // Des jetons frais rendent la consigne de CE compte obsolète. Celle d'un
     // AUTRE compte survit (slot partagé : elle attend son propriétaire).
@@ -146,8 +172,17 @@ class AuthSessionManager
   /// version) : sans cet amorçage, une écriture offline partirait avec un
   /// `authorId` null → 403 terminal (D-05). `uid` vide = pas d'amorçage
   /// (session héritée sans claim `uid`).
-  void primeCurrentUser(String? uid, {String? schoolId}) =>
-      _currentUser?.set(uid, schoolId: schoolId);
+  /// [permissions] amorce du même coup l'ensemble effectif : au cold-start,
+  /// il vient de la session restaurée du token store — `null` le laisse
+  /// inconnu plutôt que vide, la nuance décidant si la synchro filtre ou non.
+  void primeCurrentUser(
+    String? uid, {
+    String? schoolId,
+    List<String>? permissions,
+  }) {
+    _currentUser?.set(uid, schoolId: schoolId);
+    _currentPermissions?.set(permissions);
+  }
 
   // ── Login offline (D-01/D-02) ────────────────────────────────────────────────
 
@@ -228,7 +263,15 @@ class AuthSessionManager
     final stored = await _tokenStorage.readAuthSession();
     final AuthSession session;
     if (stored != null && stored.user.id == user.userId) {
-      var reused = stored.copyWith(userVersion: user.userVersion);
+      // Les permissions d'une session ouverte HORS LIGNE viennent toujours de
+      // la copie durable du compte (ADR-014 §4), jamais du secure storage : les
+      // deux sont écrites au même contact serveur, mais seule la copie durable
+      // survit à un logout — une seule source évite qu'elles divergent selon la
+      // branche empruntée ici.
+      var reused = stored.copyWith(
+        userVersion: user.userVersion,
+        permissions: user.permissions,
+      );
       // État partiel (crash du `clearAuthSession` au logout, deletes non
       // ordonnés) : access présent mais refresh ABSENT alors que la consigne
       // du compte existe. Sans réinjection, le premier 401 n'aurait aucun
@@ -275,6 +318,7 @@ class AuthSessionManager
           refreshToken: parked.refreshToken,
           refreshExpiresAt: bound,
           userVersion: user.userVersion,
+          permissions: user.permissions,
           user: _userFromRecord(user),
         );
         await _tokenStorage.saveAuthSession(session);
@@ -285,6 +329,7 @@ class AuthSessionManager
           tokenType: 'Bearer',
           expiresIn: 0,
           userVersion: user.userVersion,
+          permissions: user.permissions,
           user: _userFromRecord(user),
         );
       }
@@ -292,6 +337,7 @@ class AuthSessionManager
 
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(user.userId, schoolId: user.schoolId);
+    _currentPermissions?.set(user.permissions);
     return Right(
       AuthSessionSnapshot(session: session, mode: mode, isOffline: true),
     );
@@ -310,6 +356,7 @@ class AuthSessionManager
     // existe mais le contexte mémoire est vide) — nécessaire pour estampiller
     // authorId (D-05) et scoper le référentiel par école.
     _currentUser?.set(user.userId, schoolId: user.schoolId);
+    _currentPermissions?.set(user.permissions);
 
     final nowMs = _now();
     final eval = SessionFreshness.evaluate(
@@ -334,6 +381,16 @@ class AuthSessionManager
     );
   }
 
+  /// Permissions du compte de la session courante (ADR-014 §4), lues sur la
+  /// copie durable — la seule que le refresh tient à jour. `null` s'il n'y a
+  /// pas de session locale : rien à dire, l'appelant garde ce qu'il a (ne PAS
+  /// confondre avec l'ensemble vide, qui est un retrait de droits réel).
+  ///
+  /// Volontairement séparée de [evaluateFreshness] : la dégradation temporelle
+  /// et l'ensemble des droits sont deux axes sans rapport.
+  Future<List<String>?> currentPermissions() async =>
+      (await _authLocalDao.getSessionUser())?.permissions;
+
   // ── Refresh rotatif (D-07/§7.2) ──────────────────────────────────────────────
 
   /// Applique une paire fraîche issue d'un refresh réussi : réécrit les jetons
@@ -357,6 +414,22 @@ class AuthSessionManager
     final generation = _wipeGeneration;
     final user = await _authLocalDao.getSessionUser();
     if (user == null) return;
+
+    // Filtre d'identité (même discipline que `recordServerContact`) : la garde
+    // anti-résurrection ci-dessus ne couvre que la fenêtre lecture→écriture,
+    // jamais le VOL RÉSEAU du refresh. Sur tablette partagée, A se déconnecte,
+    // B ouvre sa session, et la réponse tardive de A arrive : sans ce test elle
+    // écrirait les jetons de A dans le slot actif de B, réécrirait durablement
+    // les permissions de B, et poserait le `userVersion` de A — que le guardian
+    // comparerait au baseline de B, brûlant sa fenêtre offline. Ensuite chaque
+    // écriture de B partirait sous le Bearer de A : 403 par item, classé
+    // TERMINAL, encaissements perdus.
+    //
+    // On abandonne sans rien nettoyer : la session de B est saine, ce sont les
+    // jetons de A qui n'ont plus de destinataire.
+    final refreshedUid = session.user.id;
+    if (refreshedUid.isEmpty || refreshedUid != user.userId) return;
+
     await _tokenStorage.updateTokens(session);
     if (generation != _wipeGeneration) {
       // Wipe survenu entre la lecture et l'écriture (TOCTOU) : on annule.
@@ -365,6 +438,18 @@ class AuthSessionManager
     }
     final nowMs = _now();
     await _authLocalDao.updateLastServerSeen(user.userId, nowMs);
+    // Le refresh est le SEUL canal par lequel un changement de droits redescend
+    // (ADR-014 §4) : la copie durable suit, ensemble vide compris. Contrairement
+    // à `user_version`, il n'y a rien à blanchir ici — les permissions ne sont
+    // qu'une projection d'affichage, jamais l'autorité.
+    await _authLocalDao.updatePermissions(user.userId, session.permissions);
+    // Même règle que la ligne au-dessus, qui ne fait rien sur `null` : un
+    // ensemble ABSENT ne dit rien et ne doit pas reposer l'état « inconnu » en
+    // mémoire, sinon le holder et la copie durable se contredisent — le premier
+    // cesse de filtrer la boucle de synchro pendant que la seconde sait encore.
+    if (session.permissions != null) {
+      _currentPermissions?.set(session.permissions);
+    }
     _observedUserVersion = session.userVersion;
 
     final sessionRow = await _authLocalDao.getSession();
@@ -519,6 +604,7 @@ class AuthSessionManager
     }
     _observedUserVersion = null;
     _currentUser?.clear();
+    _currentPermissions?.clear();
 
     // Les pièces partagées vivent EN CLAIR dans le cache de l'application, hors
     // de la base chiffrée : elles doivent partir avec la session (ADR-012 D-7).

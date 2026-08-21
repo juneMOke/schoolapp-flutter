@@ -32,6 +32,17 @@ class DataTableCellSpec {
   final String? secondaryText;
   final DataTableCellTextVariant secondaryVariant;
 
+  /// Teinte du texte, quand la valeur elle-même porte un sens (un reste dû, un
+  /// montant encaissé). `null` → couleur du variant, comportement historique.
+  ///
+  /// Passe par le style plutôt que par [child] : une cellule à `child` est
+  /// alignée à gauche et mise à l'échelle par un `FittedBox`, ce qui casserait
+  /// l'alignement à droite et l'ellipse des colonnes de montant.
+  final Color? color;
+
+  /// Teinte de la ligne secondaire. `null` → couleur du variant.
+  final Color? secondaryColor;
+
   const DataTableCellSpec({
     this.text = '',
     this.child,
@@ -39,6 +50,8 @@ class DataTableCellSpec {
     this.textAlign = TextAlign.start,
     this.secondaryText,
     this.secondaryVariant = DataTableCellTextVariant.regular,
+    this.color,
+    this.secondaryColor,
   });
 }
 

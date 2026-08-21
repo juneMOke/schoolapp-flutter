@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -49,7 +51,15 @@ class DocumentsCatalogActionButton extends StatelessWidget {
         // n'exige aucun jeton : la geler priverait le guichet de ses documents
         // au moment précis où il en a le plus besoin — une session en lecture
         // seule est une session hors ligne depuis trois semaines.
-        return action.isRestitution ? button : SessionWriteGate(child: button);
+        // Même partage que ci-dessus pour la permission : ressortir une copie
+        // déjà émise relève de `editique.read`, qui a ouvert le catalogue.
+        // Produire une pièce neuve exige `editique.write`.
+        return action.isRestitution
+            ? button
+            : PermissionGate(
+                requires: const [Perm.editiqueWrite],
+                child: SessionWriteGate(child: button),
+              );
       },
     );
   }

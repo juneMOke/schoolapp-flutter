@@ -51,7 +51,6 @@ class ConfirmEnrollmentDraft {
   final String? municipality;
   final String? neighborhood;
   final String? address;
-  final String? phoneNumber;
   final String? matriculationNumber; // non-null en RE (cohorte)
 
   final String enrollmentType; // NEW_ENROLLMENT|RE_ENROLLMENT|PRE_ENROLLMENT
@@ -96,7 +95,6 @@ class ConfirmEnrollmentDraft {
     this.municipality,
     this.neighborhood,
     this.address,
-    this.phoneNumber,
     this.matriculationNumber,
     required this.enrollmentType,
     required this.status,
@@ -172,6 +170,11 @@ abstract class EnrollmentOfflineRepository {
   });
 
   /// Étape Adresse : UPDATE partiel de l'élève DRAFT (colonnes non-null).
+  ///
+  /// Pas de téléphone : `students.phone_number` est inerte depuis la v27
+  /// (ADR-015 F8). Le paramètre existait, aucune étape ne le passait, et le
+  /// payload de push n'a jamais porté de téléphone d'élève — il n'aurait donc
+  /// fait qu'écrire de la donnée personnelle dans une colonne sans lecteur.
   Future<Either<Failure, Unit>> saveDraftAddress({
     required String studentId,
     String? city,
@@ -179,7 +182,6 @@ abstract class EnrollmentOfflineRepository {
     String? municipality,
     String? neighborhood,
     String? address,
-    String? phoneNumber,
   });
 
   /// Étape Antécédents : UPDATE partiel de l'inscription DRAFT (previous_*).

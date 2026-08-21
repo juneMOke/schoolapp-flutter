@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 
 /// [PullHandler] du catalogue des pièces scellées. Enregistré sur le
@@ -16,6 +17,13 @@ class EditiqueDocumentPullHandler implements PullHandler {
 
   @override
   String get resource => resourceName;
+
+  /// GET /sync/editique-documents — gardé sur `editique.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.editiqueRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async {

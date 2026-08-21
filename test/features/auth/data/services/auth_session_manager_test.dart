@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -20,6 +21,7 @@ AuthSession _session({
   required String uid,
   int userVersion = 0,
   int? refreshExpiresAt,
+  List<String>? permissions,
 }) => AuthSession(
   accessToken: 'jwt',
   tokenType: 'Bearer',
@@ -27,6 +29,7 @@ AuthSession _session({
   refreshToken: 'refresh',
   refreshExpiresAt: refreshExpiresAt,
   userVersion: userVersion,
+  permissions: permissions,
   user: AuthenticatedUser(
     id: uid,
     email: 'prof@ecole.cd',
@@ -755,5 +758,440 @@ void main() {
     );
 
     await expectLater(manager.wipeSession(), completes);
+  });
+
+  // ── Permissions (ADR-014 §4) ───────────────────────────────────────────────
+  // Elles ne descendent qu'au login et au refresh. La copie de session (secure
+  // storage) meurt au logout ; c'est la copie durable par compte qui doit
+  // permettre à un login OFFLINE de rouvrir la session avec des droits.
+  group('permissions', () {
+    test('persistOnlineLogin écrit la copie durable du compte', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const ['attendance.read', 'classroom.read'],
+        ),
+        'MotDePasse123',
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, <String>[
+        'attendance.read',
+        'classroom.read',
+      ]);
+    });
+
+    test('applyRefresh met à jour la copie durable', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read', 'finance.write'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      await manager.applyRefresh(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const ['attendance.read'],
+        ),
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, <String>[
+        'attendance.read',
+      ]);
+    });
+
+    test('applyRefresh propage un RETRAIT total de droits', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      // Ensemble vide EXPLICITE : le serveur a retiré les droits, la copie
+      // durable doit suivre. Un champ ABSENT, lui, ne toucherait à rien —
+      // couvert par le test suivant.
+      await manager.applyRefresh(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const [],
+        ),
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, isEmpty);
+    });
+
+    // Miroir exact du refresh, sur le chemin login : deux chemins sur trois
+    // respectaient déjà la règle, celui-ci l'enfreignait.
+    test(
+      'persistOnlineLogin sans permissions (null) préserve la copie durable',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['enrollment.read', 'finance.charge.read'],
+          ),
+          'MotDePasse123',
+        );
+
+        // Reconnexion contre une instance qui n'émet pas le champ (rollback,
+        // canari, passerelle qui filtre) : elle ne dit rien de ce compte.
+        await manager.persistOnlineLogin(
+          _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+          'MotDePasse123',
+        );
+
+        expect((await dao.getUser('u1'))?.permissions, [
+          'enrollment.read',
+          'finance.charge.read',
+        ]);
+        // Colonne et holder ne doivent pas diverger.
+        expect(holder.permissions, ['enrollment.read', 'finance.charge.read']);
+        // Et le tick de fraîcheur a de quoi rouvrir l'écran.
+        expect(await manager.currentPermissions(), isNotNull);
+      },
+    );
+
+    // Symétrique indispensable : sans lui, on rouvrirait le trou inverse.
+    test('persistOnlineLogin avec un ensemble VIDE explicite écrase', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const ['enrollment.read'],
+        ),
+        'MotDePasse123',
+      );
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const <String>[],
+        ),
+        'MotDePasse123',
+      );
+
+      final stored = (await dao.getUser('u1'))?.permissions;
+      expect(stored, isNotNull);
+      expect(stored, isEmpty);
+    });
+
+    test('applyRefresh sans permissions (null) préserve la copie durable', () {
+      return () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        await manager.applyRefresh(
+          _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+        );
+
+        expect((await dao.getUser('u1'))?.permissions, ['attendance.read']);
+      }();
+    });
+
+    // Le pendant EN MÉMOIRE du test ci-dessus. `updatePermissions` ne fait rien
+    // sur `null` ; si le holder, lui, repose l'état « inconnu », les deux se
+    // contredisent : la boucle de synchro cesse de filtrer (repli documenté,
+    // donc sans perte de donnée) pendant que la base sait encore.
+    test(
+      'applyRefresh sans permissions (null) ne vide pas le holder mémoire',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        await manager.applyRefresh(
+          _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+        );
+
+        expect(holder.permissions, ['attendance.read']);
+        expect((await dao.getUser('u1'))?.permissions, ['attendance.read']);
+      },
+    );
+
+    // Symétrique : un ensemble VIDE communiqué au refresh est un retrait, il
+    // doit atteindre le holder comme il atteint la colonne.
+    test('applyRefresh avec un ensemble VIDE vide aussi le holder', () async {
+      final holder = CurrentPermissions();
+      final manager = AuthSessionManager(
+        tokenStorage: tokenStorage,
+        authLocalDao: dao,
+        verifier: const PasswordVerifierService(),
+        currentPermissions: holder,
+        now: () => clock,
+      );
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      await manager.applyRefresh(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const <String>[],
+        ),
+      );
+
+      expect(holder.permissions, isEmpty);
+      expect((await dao.getUser('u1'))?.permissions, isEmpty);
+    });
+
+    test(
+      'loginOffline après logout rouvre la session AVEC les droits',
+      () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read', 'classroom.read'],
+          ),
+          'MotDePasse123',
+        );
+        await manager.wipeSession(); // logout : la copie de session est effacée
+        when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+          (_) async =>
+              const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+        );
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, <String>[
+            'attendance.read',
+            'classroom.read',
+          ]);
+        });
+      },
+    );
+
+    test(
+      'loginOffline sur session réutilisée : la copie durable fait foi',
+      () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        // Jetons de CE compte encore actifs en storage, mais porteurs d'un
+        // ensemble périmé : la copie durable (dernier contact serveur) gagne.
+        when(() => tokenStorage.readAuthSession()).thenAnswer(
+          (_) async => _session(
+            uid: 'u1',
+            permissions: const ['finance.write', 'attendance.read'],
+          ),
+        );
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, <String>['attendance.read']);
+        });
+      },
+    );
+
+    // La boucle de synchro vit hors de l'arbre de widgets : ce holder est sa
+    // seule source. Un point d'alimentation oublié se paierait en ressources
+    // sautées à tort — le filtre du PullCoordinator ne verrait rien.
+    test(
+      'le holder mémoire suit login, refresh, login offline et wipe',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        // Inconnu tant qu'aucune session n'est résolue — et non « vide », qui
+        // couperait la synchro.
+        expect(holder.permissions, isNull);
+
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        expect(holder.permissions, ['attendance.read']);
+
+        await manager.applyRefresh(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 2000000,
+            permissions: const ['attendance.read', 'classroom.read'],
+          ),
+        );
+        expect(holder.permissions, ['attendance.read', 'classroom.read']);
+
+        await manager.wipeSession();
+        expect(holder.permissions, isNull);
+
+        // Login offline : la copie durable réalimente le holder.
+        when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+          (_) async =>
+              const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+        );
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        expect(res.isRight(), isTrue);
+        expect(holder.permissions, ['attendance.read', 'classroom.read']);
+      },
+    );
+
+    // Filtre d'identité (revue adversariale) : la garde anti-résurrection ne
+    // couvre que la fenêtre lecture→écriture, pas le vol réseau. Sur tablette
+    // partagée, la réponse tardive d'un AUTRE compte ne doit rien écrire.
+    test(
+      'applyRefresh ignore une réponse qui n\'appartient pas à la session',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        // B est la session active.
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'uB',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasseB',
+        );
+
+        // Réponse tardive du refresh de A, parti avant que B ne se connecte.
+        await manager.applyRefresh(
+          _session(
+            uid: 'uA',
+            userVersion: 99,
+            refreshExpiresAt: clock + 999999,
+            permissions: const ['finance.payment.write', 'editique.write'],
+          ),
+        );
+
+        // Rien n'a bougé : ni les jetons, ni les droits durables, ni le holder.
+        verifyNever(() => tokenStorage.updateTokens(any()));
+        expect((await dao.getUser('uB'))?.permissions, ['attendance.read']);
+        expect(holder.permissions, ['attendance.read']);
+        // Et surtout : le userVersion de A n'a pas été observé, sinon le
+        // guardian brûlerait la fenêtre offline de B.
+        expect(await manager.evaluateRevocation(), isFalse);
+        expect((await dao.getUser('uB'))?.refreshExpiresAt, isNotNull);
+      },
+    );
+
+    test('applyRefresh ignore une réponse sans uid (contrat hérité)', () async {
+      final manager = build();
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+
+      await manager.applyRefresh(
+        _session(uid: '', refreshExpiresAt: clock + 999999),
+      );
+
+      verifyNever(() => tokenStorage.updateTokens(any()));
+    });
+
+    test(
+      'compte migré (jamais revu online) → droits INCONNUS, pas vides',
+      () async {
+        // Après la migration v24 la colonne est NULL, et c'est tout ce qu'elle
+        // dit. La confondre avec un retrait de droits fermerait l'application
+        // ET couperait la synchronisation de tout le parc à la montée de
+        // version — l'écran dira « reconnectez-vous », la synchro continuera.
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+          'MotDePasse123',
+        );
+        await db.update('auth_local_user', {'permissions': null});
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, isNull);
+        });
+      },
+    );
   });
 }

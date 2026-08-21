@@ -426,11 +426,7 @@ void main() {
         ),
       ).thenAnswer((_) async {});
 
-      final result = await repo.saveDraftAddress(
-        studentId: 's1',
-        city: 'Goma',
-        phoneNumber: '+243900',
-      );
+      final result = await repo.saveDraftAddress(studentId: 's1', city: 'Goma');
 
       expect(result, const Right<Failure, Unit>(unit));
       final columns =
@@ -442,7 +438,10 @@ void main() {
                 ),
               ).captured.single
               as Map<String, Object?>;
-      expect(columns, {'city': 'Goma', 'phone_number': '+243900'});
+      // Plus de `phone_number` : le paramètre a été retiré de bout en bout
+      // (ADR-015 F8). Aucune étape du wizard ne le passait, et le payload de
+      // push n'a jamais porté de téléphone d'élève.
+      expect(columns, {'city': 'Goma'});
     });
   });
 

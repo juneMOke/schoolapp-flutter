@@ -35,11 +35,16 @@ class ClassroomOfflineState extends Equatable {
   final ClassroomErrorType rosterErrorType;
 
   // ── Pull delta (CF2) ──
+  //
+  // Il n'y a plus de champ `freshness` ici. Il portait le `syncedAt` (horloge
+  // device) du bilan de pull, que `PullRunReport` ne porte pas — et **aucun
+  // widget ne le lisait** : la « pastille de fraîcheur » des Classes n'a jamais
+  // existé à l'écran, seul l'état la transportait. Le jour où on la voudra, elle
+  // se lira dans `sync_meta`, comme le font déjà Discipline
+  // (`GetDisciplinaryFreshnessOfflineUseCase`) et Facturation
+  // (`LedgerFreshnessCubit`) — jamais du rapport de cycle, qui ne connaît que
+  // l'horloge serveur et se tait sur un 304 (ADR-015 F6).
   final ClassroomStatus syncStatus;
-
-  /// Horodatage epoch ms de la dernière synchro (fraîcheur ADR-002), dérivé du
-  /// `syncedAt` du bilan de pull.
-  final int? freshness;
 
   // ── Rosters composés du niveau (CF4, affichage optimiste) ──
   final ClassroomStatus levelRostersStatus;
@@ -89,7 +94,6 @@ class ClassroomOfflineState extends Equatable {
     this.roster = const [],
     this.rosterErrorType = ClassroomErrorType.none,
     this.syncStatus = ClassroomStatus.initial,
-    this.freshness,
     this.levelRostersStatus = ClassroomStatus.initial,
     this.levelRosters = const {},
     this.levelUnassignedStatus = ClassroomStatus.initial,
@@ -116,7 +120,6 @@ class ClassroomOfflineState extends Equatable {
     List<ClassroomMember>? roster,
     ClassroomErrorType? rosterErrorType,
     ClassroomStatus? syncStatus,
-    Object? freshness = _undefined,
     ClassroomStatus? levelRostersStatus,
     Map<String, List<ClassroomMember>>? levelRosters,
     ClassroomStatus? levelUnassignedStatus,
@@ -142,9 +145,6 @@ class ClassroomOfflineState extends Equatable {
     roster: roster ?? this.roster,
     rosterErrorType: rosterErrorType ?? this.rosterErrorType,
     syncStatus: syncStatus ?? this.syncStatus,
-    freshness: identical(freshness, _undefined)
-        ? this.freshness
-        : freshness as int?,
     levelRostersStatus: levelRostersStatus ?? this.levelRostersStatus,
     levelRosters: levelRosters ?? this.levelRosters,
     levelUnassignedStatus: levelUnassignedStatus ?? this.levelUnassignedStatus,
@@ -174,7 +174,6 @@ class ClassroomOfflineState extends Equatable {
     roster,
     rosterErrorType,
     syncStatus,
-    freshness,
     levelRostersStatus,
     levelRosters,
     levelUnassignedStatus,
@@ -190,5 +189,3 @@ class ClassroomOfflineState extends Equatable {
     assignRePullFailed,
   ];
 }
-
-const _undefined = Object();

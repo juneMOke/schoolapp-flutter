@@ -59,9 +59,7 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
         context.context,
         context.l10n.completedEnrollmentRedirecting,
       );
-      EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
-        context.context,
-      );
+      EnrollmentNavigationHelper.leaveWizardToListing(context.context);
       return const StepSubmitResult.completed(consumeNavigation: true);
     }
 
@@ -142,9 +140,11 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
       return const StepSubmitResult.blocked();
     }
 
-    EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
-      buildContext,
-    );
+    // Retour au listing : on dépile quand le wizard a été ouvert par `push`
+    // (reprise d'un brouillon / candidat RE-PRE) — sans quoi la redirection
+    // vers l'accueil serait inerte et le listing resterait figé sur l'état
+    // d'AVANT la finalisation (dossier encore badgé « Brouillon »).
+    EnrollmentNavigationHelper.leaveWizardToListing(buildContext);
     return const StepSubmitResult.completed(consumeNavigation: true);
   }
 

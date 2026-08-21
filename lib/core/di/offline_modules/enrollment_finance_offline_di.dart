@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -15,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
@@ -62,6 +64,9 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/payment_ou
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
@@ -85,7 +90,10 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/refresh_ledger_before_collection_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/watch_ledger_revalidation_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 
 /// DI de la branche offline A (Inscription + Facturation).
 ///
@@ -116,6 +124,18 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<EnrollmentReconciliationDao>(
     () => EnrollmentReconciliationDao(getIt<Database>()),
+  );
+  // ── Ce qu'une ouverture de session décide du vivier de préinscriptions ──
+  // `ref_pre_enrollments` n'a pas de colonne `school_id` : une tablette
+  // réaffectée continuait de proposer les candidats de l'établissement
+  // précédent. La garde efface le vivier ET rembobine le flux — jamais l'un
+  // sans l'autre, cette table étant la seule source d'amorçage d'un brouillon.
+  getIt.registerLazySingleton<PreEnrollmentsSchoolGuard>(
+    () => PreEnrollmentsSchoolGuard(
+      seedDao: getIt<EnrollmentSeedDao>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
   // Recherche de tuteur existant (popin "Rechercher un parent", étape
   // Tuteurs) : lecture seule, DAO dédié (nouvelle responsabilité).
@@ -172,6 +192,14 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // impls offline-first : lecture du grand-livre LOCAL (reste composé, FRONT §5)
   // + rafraîchissement ciblé best-effort (§6 step 2). Admin/create délégués à
   // l'online. `unregister` sûr : lazy singletons pas encore résolus à ce stade.
+  // Enregistré plutôt qu'instancié dans la fermeture ci-dessous : c'est ce qui
+  // le rend adressable, donc éprouvable sur le conteneur RÉEL
+  // (`offline_core_wiring_test.dart`). Une fermeture anonyme aurait le même
+  // effet et aucune preuve — le défaut le plus cher de ce chantier a été une
+  // garde écrite, testée, et jamais branchée.
+  getIt.registerLazySingleton<CoordinatorPaymentsSync>(
+    () => CoordinatorPaymentsSync(getIt<PullCoordinator>()),
+  );
   getIt.registerLazySingleton<FinanceLedgerRefresher>(
     () => FinanceLedgerRefresher(
       api: getIt<FinancePullApi>(),
@@ -182,10 +210,19 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       extras: getIt<Map<String, dynamic>>(),
       // Le contrat n'a pas d'endpoint paiements scopé élève : la fraîcheur de
       // l'historique (et donc du « total payé » affiché) passe par le cycle
-      // global. Résolu paresseusement — `FinancePullRepository` est enregistré
-      // juste après.
-      syncPayments: () async =>
-          (await getIt<FinancePullRepository>().syncPayments()).isRight(),
+      // GLOBAL des paiements.
+      //
+      // ⚠️ Et parce qu'il est global, il passe par le COORDINATEUR — jamais en
+      // direct sur le repository. C'était la treizième porte dérobée du lot F6 :
+      // l'exemption accordée à Finance visait `finance_ledger:<studentId>`, dont
+      // la clé est dynamique par élève ; celui-ci porte la clé de plan
+      // `finance.payments` et un handler enregistré comme les autres. Appelé en
+      // direct, il échappait à l'autorité du plan (F5), au filtre de droits et à
+      // la diffusion sur le bus.
+      //
+      // Résolution paresseuse : les handlers sont enregistrés plus bas dans ce
+      // même fichier, et `FinancePullRepository` juste après ce bloc.
+      syncPayments: () => getIt<CoordinatorPaymentsSync>()(),
     ),
   );
   getIt.registerLazySingleton<FinancePullRepository>(
@@ -329,19 +366,16 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetPreEnrollmentUseCase>(
     () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
   );
+  // Hydratation au montage des scopes : une seule dépendance, le coordinateur
+  // (ADR-015 F6). Gardes, ordre, permissions et diffusion sont partis dans le
+  // socle ; ces use cases ne portent plus que la liste des ressources dont leur
+  // écran a besoin. Résolution paresseuse du `PullCoordinator` : les handlers
+  // sont enregistrés en bas de cette fonction, bien après ces deux lignes.
   getIt.registerFactory<SyncEnrollmentPullsUseCase>(
-    () => SyncEnrollmentPullsUseCase(
-      getIt<EnrollmentPullRepository>(),
-      getIt<AuthSessionManager>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncEnrollmentPullsUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<SyncFinancePullsUseCase>(
-    () => SyncFinancePullsUseCase(
-      getIt<FinancePullRepository>(),
-      getIt<AuthSessionManager>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncFinancePullsUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<SaveDraftIdentityUseCase>(
     () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),
@@ -377,11 +411,27 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetLocalPaymentsUseCase>(
     () => GetLocalPaymentsUseCase(getIt<FinanceOfflineRepository>()),
   );
+  getIt.registerFactory<HasFeeGridUseCase>(
+    () => HasFeeGridUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeTariffsForLevelUseCase>(
+    () => GetFeeTariffsForLevelUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeChargeAggregatesUseCase>(
+    () => GetFeeChargeAggregatesUseCase(getIt<FinanceOfflineRepository>()),
+  );
+
   getIt.registerFactory<InitializeChargesUseCase>(
     () => InitializeChargesUseCase(getIt<FinanceOfflineRepository>()),
   );
   getIt.registerFactory<GetLedgerFreshnessUseCase>(
     () => GetLedgerFreshnessUseCase(getIt<FinanceLedgerRefresher>()),
+  );
+  getIt.registerFactory<WatchLedgerRevalidationUseCase>(
+    () => WatchLedgerRevalidationUseCase(getIt<FinanceLedgerRefresher>()),
+  );
+  getIt.registerFactory<RefreshLedgerBeforeCollectionUseCase>(
+    () => RefreshLedgerBeforeCollectionUseCase(getIt<FinanceLedgerRefresher>()),
   );
   getIt.registerFactory<GetPaymentReceiptDocumentUseCase>(
     () => GetPaymentReceiptDocumentUseCase(getIt<FinanceOfflineRepository>()),
@@ -429,6 +479,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       recordPayment: getIt<RecordPaymentUseCase>(),
     ),
   );
+  getIt.registerFactory<LedgerRevalidationCubit>(
+    () => LedgerRevalidationCubit(getIt<WatchLedgerRevalidationUseCase>()),
+  );
   getIt.registerFactory<LedgerFreshnessCubit>(
     () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),
   );
@@ -468,7 +521,13 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // PORTEUR pour la paire snapshots/delta : le pull HYDRATANT (snapshots) INSÈRE
   // les lignes que le delta MAIGRE ne fait qu'UPDATE — snapshots DOIT donc
   // précéder enrollmentDelta (le coordinateur exécute dans l'ordre
-  // d'enregistrement). Cf. la même liste dans SyncEnrollmentPullsUseCase.
+  // d'enregistrement).
+  //
+  // Depuis le repli F6, cet ordre n'est plus recopié nulle part : c'est la SEULE
+  // déclaration. `SyncEnrollmentPullsUseCase` ne donne qu'un ENSEMBLE de
+  // ressources au coordinateur, qui itère ce registre-ci — les accolades du use
+  // case n'ordonnent rien. L'arête est verrouillée par
+  // `test/core/di/offline_pull_registration_order_test.dart`.
   final pullRepository = getIt<EnrollmentPullRepository>();
   getIt<PullCoordinator>()
     ..registerHandler(EnrollmentPullHandler.referential(pullRepository))

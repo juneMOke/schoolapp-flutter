@@ -55,26 +55,40 @@ void main() {
     expect(enrollmentFinanceOfflineTables, hasLength(16));
   });
 
-  test('index F2/FF1 présents (phone, sync_status, client_uuid…)', () async {
-    final rows = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type = 'index'",
-    );
-    final indexes = rows.map((r) => r['name'] as String).toSet();
-    expect(
-      indexes,
-      containsAll([
-        'idx_students_phone',
-        'idx_enrollments_sync_status',
-        'idx_parents_phone',
-        'idx_parents_names',
-        'idx_student_charges_student_fee',
-        'idx_payments_client_uuid',
-        // Tables de référence Inscription (RE/PRE)
-        'idx_ref_previous_year_students_matricule',
-        'idx_ref_pre_enrollments_phone',
-      ]),
-    );
-  });
+  test(
+    'index F2/FF1 présents (sync_status, client_uuid, phones tuteur…)',
+    () async {
+      final rows = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'index'",
+      );
+      final indexes = rows.map((r) => r['name'] as String).toSet();
+      expect(
+        indexes,
+        containsAll([
+          'idx_enrollments_sync_status',
+          'idx_parents_phone',
+          'idx_parents_names',
+          'idx_student_charges_student_fee',
+          'idx_payments_client_uuid',
+          // Tables de référence Inscription (RE/PRE)
+          'idx_ref_previous_year_students_matricule',
+          'idx_ref_pre_enrollments_phone',
+        ]),
+      );
+      // `idx_students_phone` a été retiré en v27 : il indexait une colonne
+      // qu'aucune requête n'interrogeait — du coût d'écriture pur à chaque élève.
+      // L'absence est affirmée, pas seulement non-testée : un index n'emporte
+      // aucune donnée, mais son retour signalerait qu'une écriture a été
+      // rebranchée — personne n'indexe une colonne toujours NULL.
+      expect(indexes, isNot(contains('idx_students_phone')));
+      // Les téléphones TUTEUR restent indexés : eux servent, ce sont les clés
+      // d'unicité applicative du rapprochement RE/PRE.
+      expect(
+        indexes,
+        containsAll(['idx_parents_phone', 'idx_ref_pre_enrollments_phone']),
+      );
+    },
+  );
 
   test(
     'cohorte RE : ref_previous_year_students round-trip (student_id + cents)',

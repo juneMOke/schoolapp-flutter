@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
@@ -201,6 +202,8 @@ class _AttendanceAbsenceNoteFieldState
       enabled: widget.enabled,
       minLines: 1,
       maxLines: 2,
+      inputFormatters: const [SentenceCapitalizationInputFormatter()],
+      textCapitalization: TextCapitalization.sentences,
       onChanged: widget.onChanged,
       style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
       decoration: InputDecoration(

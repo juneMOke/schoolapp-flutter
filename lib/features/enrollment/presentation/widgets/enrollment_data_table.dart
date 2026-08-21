@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/components/status/sync_state_icon.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -276,6 +277,13 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
                 size: StatusBadgeSize.small,
               ),
             ),
+          ],
+          // Axe synchro (picto seul, appui long pour le libellé) : coche verte
+          // = acquitté, sablier orange = en file, triangle rouge = refusé et
+          // non rejoué. Rien pour un brouillon ni pour un candidat du vivier.
+          if (SyncStateIcon.isVisible(enrollment.syncState)) ...[
+            const SizedBox(width: AppSpacing.xs),
+            SyncStateIcon(state: enrollment.syncState),
           ],
         ],
       ),

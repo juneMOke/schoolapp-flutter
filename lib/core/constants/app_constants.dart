@@ -180,6 +180,11 @@ class AppConstants {
   static const String userRoleKey = 'user_role';
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
+  // ADR-014 §4 — permissions effectives de la session ACTIVE, en JSON. Copie de
+  // travail : elle est effacée au logout comme le reste de la session. La copie
+  // durable par compte vit dans `auth_local_user.permissions` (elle, survit au
+  // logout pour servir le login offline).
+  static const String userPermissionsKey = 'user_permissions';
 
   static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
@@ -363,7 +368,42 @@ class AppConstants {
   // expliquer pourquoi il n'a plus cours. Deux `ALTER` nullables, sans backfill
   // — une pièce déjà en cache n'a jamais connu son annulation, et le prochain
   // cycle la lui apprendra.
-  static const int offlineDbSchemaVersion = 25;
+  // v24 : NUMÉRO BRÛLÉ, aucune migration ne le porte. Il avait été réservé aux
+  // permissions, livrées d'abord sous ce numéro ; l'impression (v25) ayant
+  // fusionné en premier, elles ont renuméroté en v26. Ne jamais le réattribuer :
+  // des tablettes de dev portent une base estampillée 24, un palier posé là leur
+  // serait invisible.
+  // v25 (2026-08-11) : Impression thermique (ADR-013) — `payments
+  // .ticket_printed_at`. Colonne strictement LOCALE, jamais poussée ni
+  // descendue : « ce poste a sorti le papier » est un fait d'appareil. Sans
+  // elle, aucune trace d'impression pour un encaissement pas encore scellé,
+  // donc pas de rattrapage possible sans rouvrir la réimpression qu'interdit
+  // l'ADR-013.
+  // v26 (2026-08-10, renumérotée depuis la v24 au rebase) : Auth (ADR-014 §4) —
+  // `auth_local_user.permissions`. L'ensemble des permissions arrive au
+  // login/refresh et ne repasse jamais par les pages de sync ; sans copie
+  // durable par compte, un login OFFLINE reconstruit une session sans aucun
+  // droit (fail-closed) et l'agent ne voit plus un seul module hors ligne. Un
+  // `ALTER` nullable, sans backfill — les comptes déjà connus n'ont jamais reçu
+  // d'ensemble, et NULL vaut exactement « aucune permission connue » jusqu'au
+  // prochain contact serveur.
+  // v27 (2026-08-15) : hygiène (ADR-015 F8), deux gestes sans rapport réunis —
+  // aucun ne justifie seul de faire monter tout le parc.
+  //   1. `students.phone_number`/`email` remis à NULL + `idx_students_phone`
+  //      supprimé. De la PII qui descendait du pull hydratant, qu'aucune requête
+  //      ne lisait et que le mapper vers l'écran abandonnait (`StudentDetail` ne
+  //      les déclare pas) : elle dormait sur chaque tablette. Les DAO cessent de les écrire au même commit — sans
+  //      cet effacement, seul le flux futur aurait maigri, et les tablettes déjà
+  //      en service auraient gardé leurs numéros indéfiniment. `UPDATE`, jamais
+  //      `DROP COLUMN` : `students` est la source de Facturation, du Contrôle des
+  //      frais, de Documents et du ticket imprimé (tout y arrive par
+  //      `JOIN students`), et SQLite ne retire pas une colonne sans reconstruire
+  //      la table. Les colonnes restent déclarées, inertes.
+  //   2. `DROP TABLE ref_cours_notation` — squelette de notation remplacé par le
+  //      bundle `grades-referential` dès la v12, mais toujours CRÉÉ sur chaque
+  //      base neuve. Son DDL est désormais inliné dans l'étape v9, qui le lisait
+  //      dans le schéma vivant.
+  static const int offlineDbSchemaVersion = 27;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -433,6 +473,16 @@ class AppConstants {
   // Le pull HYDRATANT (agrégats complets, tablette neuve) est servi à part par
   // `syncEnrollmentSnapshotsEndpoint` (/api/v1/sync/enrollments/snapshots).
 
+  /// Plan de synchronisation du porteur de session (ADR-015 D-03) : quels flux
+  /// tirer, dans quel ordre, et pourquoi. GET /api/v1/sync/plan.
+  ///
+  /// Authentifiée mais **sans permission, et jamais 403** — la garder serait
+  /// circulaire : il faudrait un droit pour savoir à quoi on a droit. Un compte
+  /// sans aucune permission reçoit 200 et le socle : le plan n'est jamais vide.
+  /// **Aucun ETag** délibérément — un bump de `userVersion` efface la session au
+  /// lieu de déclencher une relecture.
+  static const String syncPlanEndpoint = '/api/v1/sync/plan';
+
   /// Pull du socle référentiel (années, cycles, niveaux, tarifs) — bundle
   /// conditionnel ETag/304. GET /api/v1/sync/referential.
   static const String syncReferentialEndpoint = '/api/v1/sync/referential';
@@ -457,9 +507,9 @@ class AppConstants {
   static const String syncEnrollmentSnapshotsEndpoint =
       '/api/v1/sync/enrollments/snapshots';
 
-  /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
-  static const String syncFinanceTariffsEndpoint =
-      '/api/v1/sync/finance/tariffs';
+  // `syncFinanceTariffsEndpoint` — **RETIRÉ (ADR-015 F8)**. Aucun appelant : la
+  // grille tarifaire descend par le bundle référentiel d'Inscription, qui écrit
+  // la même table locale `fee_tariffs`.
 
   /// Pull KEYSET des créances élèves (le plus gros volume ; paginé, résumable,
   /// jeton `cursor` opaque base64url, 304 applicatif). Contrat openapi_billing_sync.

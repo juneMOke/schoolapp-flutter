@@ -80,6 +80,42 @@ void main() {
     expect(results.single.id, 'p1');
   });
 
+  test('le critère E.164 du champ retrouve les fiches en format hérité — '
+      'sans quoi un tuteur déjà connu serait recréé en doublon', () async {
+    await insertParent(
+      id: 'p1',
+      firstName: 'Sarah',
+      lastName: 'Moke',
+      phoneNumber: '0816939060', // fiche héritée, plan national
+    );
+    await insertParent(
+      id: 'p2',
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      phoneNumber: '+243 81 693 90 61', // fiche héritée, séparateurs
+    );
+    await insertParent(
+      id: 'p3',
+      firstName: 'Alice',
+      lastName: 'Kabila',
+      phoneNumber: '+243999888777',
+    );
+
+    // Numéro complet tel que le champ le produit désormais.
+    final exact = await dao.search(phoneNumber: '+243816939060');
+    expect(exact, hasLength(1));
+    expect(exact.single.id, 'p1');
+
+    final formatted = await dao.search(phoneNumber: '+243816939061');
+    expect(formatted, hasLength(1));
+    expect(formatted.single.id, 'p2');
+
+    // Bribe : le champ préfixe la saisie "8169" en "+2438169".
+    final partial = await dao.search(phoneNumber: '+2438169');
+    expect(partial.map((p) => p.id), containsAll(<String>['p1', 'p2']));
+    expect(partial.map((p) => p.id), isNot(contains('p3')));
+  });
+
   test('combinaison de critères en ET', () async {
     await insertParent(
       id: 'p1',

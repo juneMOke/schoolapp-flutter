@@ -6,12 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
@@ -107,6 +109,58 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  /// Ce qu'une ouverture de session décide du vivier de préinscriptions.
+  ///
+  /// `ref_pre_enrollments` ne porte pas de colonne `school_id` : sur une
+  /// tablette réaffectée, la recherche PRE continuait de proposer les candidats
+  /// de l'établissement précédent. La garde efface le vivier ET rembobine le
+  /// flux — cette table étant, depuis la bascule dure du seed vers le local, la
+  /// seule source d'amorçage d'un brouillon, une purge sans rembobinage rendrait
+  /// ses lignes définitivement inatteignables.
+  ///
+  /// Déclenché AVANT le cycle de pull, et **réellement avant** : les deux
+  /// partaient en `unawaited`, l'un derrière l'autre, ce qui n'ordonne rien.
+  ///
+  /// ⚠️ La docstring affirmait ici que l'ordre inverse « ne serait pas faux
+  /// pour autant », au motif que la purge rembobine tout le flux. Le
+  /// raisonnement tient pour un pull qui aurait fini ; il tombe pour un pull
+  /// qui s'entrelace. La purge est en deux temps — vider la table, puis
+  /// rembobiner — et un cycle de préinscriptions qui insère ses lignes juste
+  /// avant le premier temps, puis écrit son curseur keyset juste après le
+  /// second, laisse exactement ce que la garde existe à interdire : une table
+  /// vide derrière un curseur avancé. Le serveur répond « rien de neuf » pour
+  /// toujours, et `ref_pre_enrollments` étant depuis la bascule dure la seule
+  /// source d'amorçage d'un brouillon PRE, ces préinscriptions ne reviennent
+  /// jamais.
+  ///
+  /// La fenêtre est étroite — quelques opérations SQLite locales contre un
+  /// aller-retour réseau — mais elle s'est élargie avec le lot précédent : la
+  /// garde purge désormais aussi quand le marqueur d'école est ABSENT, c'est-à-
+  /// dire au premier démarrage de tout le parc après cette mise à jour, et non
+  /// plus sur la seule tablette réaffectée.
+  Future<void> _guardPreEnrollmentsSchoolThenSync() async {
+    await _guardPreEnrollmentsSchool();
+    // Jetons frais ou repli offline : dans les deux cas, pousse l'outbox en
+    // attente et recalcule la pastille de synchro (D-05, réconciliation
+    // silencieuse au retour réseau si offline) — puis TIRE (ADR-015 F0).
+    //
+    // Le cycle de pull n'avait qu'un seul déclencheur, la transition hors-ligne
+    // → en ligne : une tablette allumée le matin dans une école déjà couverte
+    // en Wi-Fi n'exécutait aucun cycle de coordinateur de toute la journée.
+    // Arme aussi le battement de la file (lot 2) : la cadence est portée par
+    // `syncOnLogin` lui-même, pour qu'il n'y ait qu'un seul fil de session à ne
+    // pas oublier ici.
+    await _syncStatusCubit.syncOnLogin();
+  }
+
+  Future<void> _guardPreEnrollmentsSchool() async {
+    try {
+      await getIt<PreEnrollmentsSchoolGuard>().onSessionOpened();
+    } catch (_) {
+      // Base indisponible : sans conséquence sur la session.
+    }
+  }
+
   @override
   void dispose() {
     _academicYearContextBloc.close();
@@ -151,11 +205,17 @@ class _MyAppState extends State<MyApp> {
                 _academicYearContextBloc.add(
                   const AcademicYearContextRequested(),
                 );
-                // Jetons frais ou repli offline : dans les deux cas, pousse
-                // l'outbox en attente et recalcule la pastille de synchro
-                // (D-05, réconciliation silencieuse au retour réseau si
-                // offline).
-                _syncStatusCubit.notifyLocalWrite();
+                // La garde du vivier de préinscriptions PUIS le cycle, dans
+                // cet ordre et jamais en parallèle : lancés tous deux sans
+                // attente, ils s'entrelaçaient, et l'entrelacement perdait des
+                // préinscriptions pour de bon (cf.
+                // `_guardPreEnrollmentsSchoolThenSync`).
+                //
+                // L'ensemble reste en `unawaited` : la porte de navigation ne
+                // dépend que du contexte académique demandé juste au-dessus, et
+                // rien — ni disque ni réseau — ne doit la retarder. Ce qui est
+                // ordonné, c'est la paire, pas son rapport à l'écran.
+                unawaited(_guardPreEnrollmentsSchoolThenSync());
                 // Entretien du cache de restitution éditique (ADR-012 D-7) :
                 // réclame les fichiers chiffrés qu'aucune ligne d'index ne
                 // désigne plus. Une purge d'école interrompue en laisse — des
@@ -173,6 +233,14 @@ class _MyAppState extends State<MyApp> {
                 unawaited(_schoolIdentityCubit.load());
                 return;
               }
+
+              // TOUTE autre issue coupe le battement, pas seulement
+              // `unauthenticated` : un logout dont le nettoyage local échoue
+              // émet `failure` alors que les jetons sont DÉJÀ effacés, et le
+              // routeur affiche la connexion. Ne fermer que sur
+              // `unauthenticated` laissait le battement tourner toute la vie du
+              // processus contre une session morte, sans aucun chemin de retour.
+              _syncStatusCubit.onSessionClosed();
 
               if (state.status == AuthStatus.unauthenticated) {
                 _academicYearContextBloc.add(
@@ -209,31 +277,56 @@ class _MyAppState extends State<MyApp> {
             },
           ),
         ],
-        child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          scrollBehavior: const AppScrollBehavior(),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          locale: const Locale('fr'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          title: 'ETEELO CONNECT',
-          theme: AppTheme.light,
-          routerConfig: _router,
-          // Bandeau global au-dessus de toutes les routes : dégradation de
-          // session offline (ADR-010 D-08). Le bandeau « données en cache »
-          // de l'ex-bootstrap est retiré (plus de distinction local/distant
-          // séparée à ce niveau) — le statut réseau global reste signalé par
-          // le `SyncIndicator` de la top bar.
-          // Deux bandeaux globaux, empilés du plus contraignant au moins :
-          // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
-          // dégradation de session (informative, ADR-010).
-          builder: (context, child) => PaymentAnomalyBanner(
-            child: SessionDegradationBanner(
-              child: child ?? const SizedBox.shrink(),
+        // Troisième déclencheur global de la boucle de synchro (les deux
+        // autres événementiels : ouverture de session et retour réseau ; le
+        // quatrième est le battement). Aucun délai du moteur ne relance quoi
+        // que ce soit — un backoff ou une dépendance qui repousse une entrée ne
+        // fait que la rendre *éligible* — et une tablette posée sur le Wi-Fi de
+        // l'école ne voit jamais de transition réseau. La reprise au premier
+        // plan est le signal qui rattrape le retard immédiatement, sans
+        // attendre le prochain tic.
+        //
+        // Gardé sur la session : sur l'écran de connexion il n'y a ni jetons ni
+        // file à pousser. Le cubit s'en garderait de lui-même (sonde de
+        // crédentiels), mais un cycle qu'on sait vide ne mérite pas d'être
+        // lancé. L'anti-rafale, elle, est dans le cubit — c'est sa politique,
+        // pas celle de la racine.
+        child: SyncLifecycleObserver(
+          onResume: () {
+            // Le battement d'abord : il ne dépend pas de la session (le cubit
+            // réconcilie les deux conditions lui-même) et un cycle de reprise
+            // qui échoue ne doit pas laisser la file sans relance périodique.
+            _syncStatusCubit.onForeground();
+            if (_authBloc.state.status != AuthStatus.authenticated) return;
+            unawaited(_syncStatusCubit.syncOnResume());
+          },
+          onPause: _syncStatusCubit.onBackground,
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            scrollBehavior: const AppScrollBehavior(),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            locale: const Locale('fr'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            title: 'ETEELO CONNECT',
+            theme: AppTheme.light,
+            routerConfig: _router,
+            // Bandeau global au-dessus de toutes les routes : dégradation de
+            // session offline (ADR-010 D-08). Le bandeau « données en cache »
+            // de l'ex-bootstrap est retiré (plus de distinction local/distant
+            // séparée à ce niveau) — le statut réseau global reste signalé par
+            // le `SyncIndicator` de la top bar.
+            // Deux bandeaux globaux, empilés du plus contraignant au moins :
+            // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
+            // dégradation de session (informative, ADR-010).
+            builder: (context, child) => PaymentAnomalyBanner(
+              child: SessionDegradationBanner(
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         ),

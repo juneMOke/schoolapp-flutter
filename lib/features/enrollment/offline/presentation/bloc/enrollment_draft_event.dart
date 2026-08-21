@@ -82,7 +82,6 @@ class SaveDraftAddressRequested extends EnrollmentOfflineEvent {
   final String? municipality;
   final String? neighborhood;
   final String? address;
-  final String? phoneNumber;
 
   const SaveDraftAddressRequested({
     required this.studentId,
@@ -91,7 +90,6 @@ class SaveDraftAddressRequested extends EnrollmentOfflineEvent {
     this.municipality,
     this.neighborhood,
     this.address,
-    this.phoneNumber,
   });
 
   @override
@@ -102,7 +100,6 @@ class SaveDraftAddressRequested extends EnrollmentOfflineEvent {
     municipality,
     neighborhood,
     address,
-    phoneNumber,
   ];
 }
 

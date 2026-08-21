@@ -274,7 +274,6 @@ class EnrollmentOfflineBloc
       municipality: event.municipality,
       neighborhood: event.neighborhood,
       address: event.address,
-      phoneNumber: event.phoneNumber,
     );
     _emitStep(result, emit);
   }

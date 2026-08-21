@@ -146,6 +146,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashErrorRetry => 'Réessayer';
 
   @override
+  String get accueilUnknownRightsTitle => 'Droits non connus';
+
+  @override
+  String get accueilUnknownRightsMessage =>
+      'Vos droits ne sont pas encore connus sur cet appareil. Reconnectez-vous en ligne pour les récupérer.';
+
+  @override
+  String get accueilNoAccessTitle => 'Aucun module accessible';
+
+  @override
+  String get accueilNoAccessMessage =>
+      'Votre compte ne donne accès à aucun module. Contactez l\'administrateur de votre école pour qu\'il ajuste vos droits.';
+
+  @override
+  String get accueilNoAccessOfflineMessage =>
+      'Votre session a été ouverte hors ligne et aucun droit n\'est connu pour ce compte. Reconnectez-vous en ligne dès que le réseau est disponible.';
+
+  @override
+  String get splashForbiddenTitle => 'Accès non autorisé';
+
+  @override
+  String get splashForbiddenMessage =>
+      'Votre compte ne dispose pas des droits nécessaires pour ouvrir l\'application. Contactez l\'administrateur de votre école.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }
@@ -279,6 +304,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subMenuBilling => 'Facturations';
+
+  @override
+  String get subMenuFeeControl => 'Contrôle des frais';
 
   @override
   String get subMenuOrganization => 'Composition\ndes classes';
@@ -1371,29 +1399,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Retrouvez un élève ou une classe de l\'année précédente à réinscrire';
 
   @override
-  String get reRegistrationSearchHelpPill =>
-      'Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l\'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.';
-
-  @override
   String get reRegistrationSearchTitle => 'Rechercher un élève';
-
-  @override
-  String get reRegistrationSearchByNameGroup => 'Par nom';
-
-  @override
-  String get reRegistrationSearchByLevelGroup => 'Par cycle / niveau';
-
-  @override
-  String get reRegistrationSearchOrSeparator => 'OU';
-
-  @override
-  String get reRegistrationSearchActiveModeLabel => 'Recherche active par :';
-
-  @override
-  String get reRegistrationSearchModeNameBadge => 'Nom';
-
-  @override
-  String get reRegistrationSearchModeLevelBadge => 'Cycle / niveau';
 
   @override
   String get reRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
@@ -1427,29 +1433,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Retrouvez une pré-inscription par élève ou par cycle/niveau souhaité';
 
   @override
-  String get preRegistrationSearchHelpPill =>
-      'Retrouvez une demande précise (nom + post-nom + prénom) ou toutes les demandes d\'un cycle/niveau souhaité. Vous pouvez aussi combiner les deux.';
-
-  @override
   String get preRegistrationSearchTitle => 'Rechercher une pré-inscription';
-
-  @override
-  String get preRegistrationSearchByNameGroup => 'Par nom';
-
-  @override
-  String get preRegistrationSearchByLevelGroup => 'Par cycle / niveau';
-
-  @override
-  String get preRegistrationSearchOrSeparator => 'OU';
-
-  @override
-  String get preRegistrationSearchActiveModeLabel => 'Recherche active par :';
-
-  @override
-  String get preRegistrationSearchModeNameBadge => 'Nom';
-
-  @override
-  String get preRegistrationSearchModeLevelBadge => 'Cycle / niveau';
 
   @override
   String get preRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
@@ -1461,24 +1445,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get preRegistrationSearchInvitationMessage =>
       'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les demandes.';
-
-  @override
-  String get firstRegistrationSearchByStudentGroup => 'Par élève';
-
-  @override
-  String get firstRegistrationSearchByLevelGroup => 'Par niveau visé';
-
-  @override
-  String get firstRegistrationSearchOrSeparator => 'OU';
-
-  @override
-  String get firstRegistrationSearchActiveModeLabel => 'Recherche active par :';
-
-  @override
-  String get firstRegistrationSearchModeStudentBadge => 'Élève';
-
-  @override
-  String get firstRegistrationSearchModeLevelBadge => 'Niveau';
 
   @override
   String get firstRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
@@ -1500,6 +1466,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get clear => 'Effacer';
+
+  @override
+  String get searchModeSwitchLabel => 'Rechercher par';
+
+  @override
+  String get searchModeSemantics => 'Mode de recherche';
+
+  @override
+  String get searchModeByClass => 'Par classe';
+
+  @override
+  String get searchModeByIdentity => 'Par identité';
+
+  @override
+  String get searchModeClassHint =>
+      'Choisissez un cycle puis un niveau pour lister toute la classe ; un nom, même partiel, y restreint la liste. Pour retrouver un élève sans connaître sa classe, basculez sur « Par identité ».';
+
+  @override
+  String get searchModeIdentityHint =>
+      'Renseignez le nom, le post-nom et le prénom de l\'élève. Pour lister toute une classe, basculez sur « Par classe ».';
+
+  @override
+  String get searchRefineByNameLabel => 'Affiner par nom (facultatif)';
+
+  @override
+  String get searchRefineByNamePlaceholder => 'Nom de l\'élève, même partiel';
 
   @override
   String get viewDetails => 'Voir les détails';
@@ -1743,8 +1735,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianSearchDialogTitle => 'Rechercher un parent existant';
 
   @override
-  String get guardianSearchHint =>
-      'Renseignez au moins un critère (nom ou téléphone)';
+  String get guardianSearchDialogEyebrow => 'Tuteurs';
+
+  @override
+  String get guardianSearchModeSemantics => 'Mode de recherche';
+
+  @override
+  String get guardianSearchModeByPhone => 'Par numéro';
+
+  @override
+  String get guardianSearchModeByIdentity => 'Par identité';
+
+  @override
+  String get guardianSearchPhoneHint =>
+      'Le numéro suffit, même partiel : « 8169 » remonte tous les tuteurs concernés.';
+
+  @override
+  String get guardianSearchIdentityHint =>
+      'Nom et prénom sont requis. Le postnom affine la recherche s\'il est connu.';
+
+  @override
+  String get guardianSearchResultsPlaceholder =>
+      'Les tuteurs correspondants s\'afficheront ici.';
 
   @override
   String get guardianSearchEmptyTitle => 'Aucun parent trouvé';
@@ -2010,6 +2022,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
+
+  @override
+  String get phoneNumberCountryCodeLabel => 'Indicatif pays';
+
+  @override
+  String phoneNumberInvalidError(int expectedDigits) {
+    return 'Numéro de téléphone invalide ($expectedDigits chiffres attendus après l\'indicatif).';
+  }
 
   @override
   String get emailLabel => 'Email';
@@ -2378,6 +2398,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargesEmpty => 'Aucune charge disponible pour cet élève.';
 
   @override
+  String get studentChargesFeeGridUnavailable =>
+      'La grille tarifaire n\'est pas disponible sur cet appareil pour cette année. Synchronisez avant de poursuivre.';
+
+  @override
+  String get studentChargesTariffsWithheld =>
+      'Les frais ne peuvent pas être calculés : votre compte n\'a pas accès à la grille tarifaire. Demandez à un compte habilité de synchroniser cet appareil.';
+
+  @override
   String get studentChargesUnavailable =>
       'Impossible de charger les charges sans élève ou niveau cible.';
 
@@ -2564,29 +2592,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
 
   @override
+  String get facturationEmptyEnrollmentWithheld =>
+      'La liste des élèves relève du module Inscription, auquel ce profil n\'a pas accès : aucun élève ne peut être affiché ici, quels que soient les critères. Votre administrateur peut ouvrir cet accès.';
+
+  @override
   String get facturationEmptyTitle => 'Aucun élève trouvé';
 
   @override
   String get facturationSearchHelpBanner =>
-      'Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.';
-
-  @override
-  String get facturationSearchByStudentGroup => 'Par élève';
-
-  @override
-  String get facturationSearchByClassGroup => 'Par classe';
-
-  @override
-  String get facturationSearchOrSeparator => 'OU';
-
-  @override
-  String get facturationSearchActiveModeLabel => 'Recherche active par :';
-
-  @override
-  String get facturationSearchModeStudentBadge => 'Élève';
-
-  @override
-  String get facturationSearchModeClassBadge => 'Classe';
+      'Recherchez toute une classe (cycle + niveau), ou un élève précis (nom + post-nom + prénom).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';
@@ -2596,6 +2610,145 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get feeControlSearchTitle => 'Contrôler un frais';
+
+  @override
+  String get feeControlSearchHelpBanner =>
+      'Choisissez la classe puis le frais à contrôler. Le statut de paiement porte sur ce frais uniquement.';
+
+  @override
+  String get feeControlSearchClassGroupTitle => 'Classe et frais';
+
+  @override
+  String get feeControlSearchStudentGroupTitle => 'Affiner par élève';
+
+  @override
+  String get feeControlSearchStudentGroupHint => 'Facultatif';
+
+  @override
+  String get feeControlSearchCycleLabel => 'Cycle';
+
+  @override
+  String get feeControlSearchLevelLabel => 'Niveau';
+
+  @override
+  String get feeControlSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get feeControlClassroomLabel => 'Classe';
+
+  @override
+  String get feeControlClassroomPlaceholder => 'Choisissez un niveau';
+
+  @override
+  String get feeControlClassroomAll => 'Toutes les classes du niveau';
+
+  @override
+  String get feeControlClassroomEmptyForLevel =>
+      'Aucune classe n\'est composée pour ce niveau : le contrôle porte sur tout le niveau.';
+
+  @override
+  String get feeControlClassroomWithheld =>
+      'Les classes relèvent d\'un module auquel ce profil n\'a pas accès : le contrôle porte sur tout le niveau.';
+
+  @override
+  String get feeControlFeeLabel => 'Frais';
+
+  @override
+  String get feeControlFeePlaceholder => 'Choisissez un niveau';
+
+  @override
+  String get feeControlFeeEmptyForLevel =>
+      'Aucun frais n\'est défini pour ce niveau.';
+
+  @override
+  String get feeControlFeeGridMissing =>
+      'La grille tarifaire n\'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.';
+
+  @override
+  String get feeControlFeeGridWithheld =>
+      'La grille tarifaire relève d\'un module auquel ce profil n\'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.';
+
+  @override
+  String get feeControlFeeLoadFailed =>
+      'La liste des frais de ce niveau n\'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l\'application.';
+
+  @override
+  String get feeControlFeeLoadRetry => 'Réessayer';
+
+  @override
+  String get feeControlPaymentStatusLabel => 'Statut de paiement';
+
+  @override
+  String get feeControlPaymentStatusAll => 'Tous';
+
+  @override
+  String get feeControlViewDetailLabel => 'Voir la fiche financière';
+
+  @override
+  String get feeControlSummaryA11yLabel => 'Synthèse du contrôle des frais';
+
+  @override
+  String get feeControlSummaryStudents => 'Élèves concernés';
+
+  @override
+  String get feeControlInvitationTitle => 'Aucun contrôle en cours';
+
+  @override
+  String get feeControlInvitationMessage =>
+      'Choisissez une classe puis un frais ci-dessus pour voir qui l\'a réglé.';
+
+  @override
+  String get feeControlEmptyTitle => 'Aucun élève trouvé';
+
+  @override
+  String get feeControlNoResultsDescription =>
+      'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
+
+  @override
+  String get feeControlEmptyEnrollmentWithheld =>
+      'Les élèves relèvent du module Inscription, auquel ce profil n\'a pas accès : le contrôle ne peut porter sur personne, quels que soient les critères. Votre administrateur peut ouvrir cet accès.';
+
+  @override
+  String get feeControlEmptyClassroomWithheld =>
+      'La composition des classes relève d\'un module auquel ce profil n\'a pas accès : le contrôle par classe est impossible. Relancez sans filtrer par classe pour porter sur tout le niveau.';
+
+  @override
+  String get feeControlEmptyRosterMissing =>
+      'La liste des élèves de cette classe n\'est pas encore descendue sur cet appareil. Synchronisez, puis relancez le contrôle.';
+
+  @override
+  String get feeControlEmptyNoLocalEnrollment =>
+      'Aucun élève de cette classe n\'a de dossier d\'inscription local sur cette année. Synchronisez les inscriptions, puis relancez le contrôle.';
+
+  @override
+  String get feeControlNoChargeDescription =>
+      'Aucun élève de cette classe ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne s\'applique pas à ce niveau.';
+
+  @override
+  String get feeControlEmptyNoEnrollmentForLevel =>
+      'Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d\'être saisies ailleurs, synchronisez puis relancez le contrôle.';
+
+  @override
+  String get feeControlNoChargeForLevelDescription =>
+      'Aucun élève de ce niveau ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne leur est pas applicable.';
+
+  @override
+  String feeControlCriteriaFee(String label) {
+    return 'Frais : $label';
+  }
+
+  @override
+  String feeControlCriteriaClassroom(String label) {
+    return 'Classe : $label';
+  }
+
+  @override
+  String feeControlCriteriaStatus(String label) {
+    return 'Statut : $label';
+  }
 
   @override
   String facturationBalanceDuePill(String amount) {
@@ -2742,6 +2895,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun paiement n\'a été enregistré pour cet élève.';
 
   @override
+  String get facturationDetailPaymentsWithheldSubtitle =>
+      'Suivi tenu par la caisse.';
+
+  @override
+  String get facturationDetailPaymentsWithheld =>
+      'Le détail des encaissements relève de la caisse : il n\'est pas affiché sur ce profil. Le total déjà payé, en haut de la fiche, reste exact.';
+
+  @override
   String get facturationDetailPaymentPayerColumn => 'Payeur';
 
   @override
@@ -2801,6 +2962,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationPaymentDownloadReceiptLabel => 'Télécharger le reçu';
+
+  @override
+  String get facturationPaymentReceiptForbiddenHint =>
+      'Vous n\'avez pas le droit d\'émettre cette pièce.';
 
   @override
   String get facturationPaymentReceiptPendingSyncHint =>
@@ -3019,6 +3184,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune allocation n\'a été trouvée pour cette charge.';
 
   @override
+  String get facturationChargeDetailAllocationsWithheld =>
+      'L\'imputation des versements relève de la caisse : elle n\'est pas détaillée sur ce profil. Le montant déjà payé, ci-dessus, reste exact.';
+
+  @override
   String get facturationChargeDetailAllocationsRetry => 'Réessayer';
 
   @override
@@ -3151,6 +3320,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get facturationCreatePaymentChargesUnavailable =>
       'Aucune charge disponible. Revenez à la liste et recommencez.';
+
+  @override
+  String get facturationCollectPreflightMessage =>
+      'Vérification des encaissements récents…';
 
   @override
   String get facturationCreatePaymentChargeDropdownHint =>
@@ -4347,6 +4520,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusSynced => 'À jour';
 
   @override
+  String get statusPartiallySynced => 'Partiellement à jour';
+
+  @override
   String get statusSyncing => 'Synchro…';
 
   @override
@@ -4399,6 +4575,16 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get syncRowSynced => 'Synchronisé avec le serveur';
+
+  @override
+  String get syncRowPending => 'En attente de synchronisation';
+
+  @override
+  String get syncRowError =>
+      'Refusée par le serveur — ne repartira pas d\'elle-même';
 
   @override
   String get syncErrorsTitle => 'Écritures en échec';
@@ -5675,6 +5861,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'Écriture d\'un autre compte — elle devra être reprise depuis sa propre session.';
 
   @override
+  String get syncSheetStatusTitle => 'État de la synchronisation';
+
+  @override
+  String get syncSheetStatusSubtitle =>
+      'Ce que cette tablette n\'a pas reçu, et les écritures que le serveur a refusées — celles-ci ne repartiront pas d\'elles-mêmes.';
+
+  @override
+  String get syncIncompleteReadTitle => 'Certaines données ne descendent pas';
+
+  @override
+  String get syncIncompleteReadDescription =>
+      'La dernière mise à jour n\'a pas tout ramené. Des écrans peuvent donc paraître vides sans l\'être vraiment. Rien de ce que vous avez saisi n\'est perdu. Si cela dure, votre administrateur peut vérifier les accès de votre compte.';
+
+  @override
+  String get syncIncompleteReadRetriableDescription =>
+      'La dernière mise à jour s\'est interrompue avant d\'avoir tout ramené. Des écrans peuvent donc paraître vides sans l\'être vraiment. Rien de ce que vous avez saisi n\'est perdu.';
+
+  @override
+  String get syncIncompleteReadRetry => 'Réessayer';
+
+  @override
   String get syncErrorsHeldTitle => 'En attente';
 
   @override
@@ -5822,24 +6029,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentsSearchHelpBanner =>
       'Recherchez un élève précis, ou toute une classe, puis ouvrez son catalogue de pièces.';
-
-  @override
-  String get documentsSearchByStudentGroup => 'Par élève';
-
-  @override
-  String get documentsSearchByClassGroup => 'Par classe';
-
-  @override
-  String get documentsSearchOrSeparator => 'OU';
-
-  @override
-  String get documentsSearchActiveModeLabel => 'Mode actif';
-
-  @override
-  String get documentsSearchModeStudentBadge => 'Élève';
-
-  @override
-  String get documentsSearchModeClassBadge => 'Classe';
 
   @override
   String get documentsSearchCycleLabel => 'Cycle';
@@ -6038,6 +6227,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ticketPrintFailed =>
       'Impression indisponible : le ticket n\'a pas pu être produit.';
+
+  @override
+  String get ticketRefusedUnknownStudent =>
+      'Impression refusée : le nom de l\'élève n\'est pas connu de cette tablette. Le versement est bien enregistré — réimprimez après la prochaine synchronisation.';
 
   @override
   String get ticketCutNotice => 'Découpez le long du cadre.';

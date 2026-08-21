@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -214,6 +215,18 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     // retombe sur son état vide/erreur, et le bouton Réessayer du seed est
     // lui aussi neutralisé par ce même garde au rejeu.
     if (SessionWriteGate.blocksWritesOf(context)) return;
+    // Même raison, autre cause : le seed est le premier geste d'écriture du
+    // dossier, et son chemin de poussée (`POST /sync/enrollments`) exige aussi
+    // `editique.write` — il scelle une attestation en inscrivant. Sans les deux
+    // droits, laisser créer le brouillon fabriquerait une écriture que le
+    // serveur rejettera définitivement au flush.
+    if (!PermissionGate.allows(
+      context,
+      kEnrollmentSubmitAccess.requires,
+      requiresAll: kEnrollmentSubmitAccess.requiresAll,
+    )) {
+      return;
+    }
     final yearId = academicYearContext?.academicYear.id;
     if (yearId == null || yearId.trim().isEmpty) return;
     _seededIntent = _effectiveIntent;
@@ -618,13 +631,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   }
 
   void _leaveJourney() {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    // Wizard ouvert via `go` (pile déclarative remplacée) : retour au listing
-    // Première inscription — même atterrissage que le chemin de succès.
-    EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(context);
+    // Dépile si le wizard a été ouvert par `push` (le listing est dessous),
+    // sinon — ouvert via `go`, pile déclarative remplacée — retour au listing
+    // Première inscription : même atterrissage que le chemin de succès.
+    EnrollmentNavigationHelper.leaveWizardToListing(context);
   }
 
   /// Enveloppe le flux brouillon dans un [PopScope] : le retour SYSTÈME

@@ -33,7 +33,14 @@ class TopBarActions extends StatelessWidget {
             // (dépendance non satisfaite, écriture d'un autre compte) : sinon
             // « À envoyer » est un cul-de-sac symétrique, où l'explication de
             // l'attente existe en base mais n'est atteignable par aucun geste.
-            onTap: state.status == SyncStatus.syncConflict || state.hasHeldWork
+            //
+            // Et quand la LECTURE est incomplète (ADR-015 F1) : « Partiellement
+            // à jour » serait le troisième cul-de-sac de la série, celui qui
+            // annonce un manque sans jamais dire lequel.
+            onTap:
+                state.status == SyncStatus.syncConflict ||
+                    state.hasHeldWork ||
+                    state.hasIncompleteRead
                 ? () => showSyncErrorsSheet(context)
                 : null,
           ),

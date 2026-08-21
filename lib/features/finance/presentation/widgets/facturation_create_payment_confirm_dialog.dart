@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -195,39 +197,41 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
               maxWidth: AppDimensions.facturationCollectModalMaxWidth,
               maxHeight: maxHeight,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            // Coquille commune (B-9) — cf. `EteeloDialogBody`. Modale de
+            // confirmation d'encaissement : aucun champ, mais elle s'ouvre
+            // par-dessus une saisie, donc typiquement clavier levé.
+            child: EteeloDialogBody(
+              // Bandeau d'étapes (~96) + liseré + pied à deux actions empilées
+              // sur écran étroit. Plus haut que les deux modales de lecture :
+              // l'en-tête de progression est plus épais qu'un titre.
+              minPinnedHeight: 320,
               // stretch : le corps occupe toute la largeur de la modale, donc
               // le contenu (médaillon/textes de l'étape résultat) est bien
               // centré et l'étape 1 n'est plus tassée à gauche.
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CollectStepHeader(
-                  resultActive: resultActive,
-                  confirmLabel: l10n.facturationCollectStepConfirm,
-                  resultLabel: l10n.facturationCollectStepResult,
-                  onClose: _closeAction(),
-                ),
-                const FinanceModalGoldDivider(),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppDimensions.spacingM),
-                    child: _phase == _Phase.confirm
-                        ? _ConfirmBody(
-                            totalLabel: widget.totalLabel,
-                            studentName: widget.studentName,
-                            payerName: widget.payerName,
-                            allocations: widget.allocations,
-                          )
-                        : _ResultBody(
-                            phase: _phase,
-                            totalLabel: widget.totalLabel,
-                            incidentCode: _incidentCode,
-                          ),
-                  ),
-                ),
-                _buildFooter(l10n),
-              ],
+              header: CollectStepHeader(
+                resultActive: resultActive,
+                confirmLabel: l10n.facturationCollectStepConfirm,
+                resultLabel: l10n.facturationCollectStepResult,
+                onClose: _closeAction(),
+              ),
+              headerDividers: const [EteeloDialogGoldDivider()],
+              bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
+              body: SizedBox(
+                width: double.infinity,
+                child: _phase == _Phase.confirm
+                    ? _ConfirmBody(
+                        totalLabel: widget.totalLabel,
+                        studentName: widget.studentName,
+                        payerName: widget.payerName,
+                        allocations: widget.allocations,
+                      )
+                    : _ResultBody(
+                        phase: _phase,
+                        totalLabel: widget.totalLabel,
+                        incidentCode: _incidentCode,
+                      ),
+              ),
+              footer: [_buildFooter(l10n)],
             ),
           ),
         ),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -46,107 +50,156 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BlocConsumer<PaymentsBloc, PaymentsState>(
-            listenWhen: (prev, curr) =>
-                prev.status != curr.status || prev.errorType != curr.errorType,
-            listener: (context, state) {
-              if (state.status != PaymentsStatus.failure) {
-                return;
-              }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorType.localizedMessage(l10n))),
-              );
-            },
-            buildWhen: (prev, curr) =>
-                prev.status != curr.status ||
-                prev.payments != curr.payments ||
-                prev.errorType != curr.errorType,
-            builder: (context, state) {
-              final totalPaidInCents = state.payments.fold<int>(
-                0,
-                (sum, payment) => sum + payment.amountInCents,
-              );
-              final currency = state.payments.isNotEmpty
-                  ? state.payments.first.currency
-                  : '';
-              final subtitle = state.status == PaymentsStatus.success
-                  ? l10n.facturationDetailPaymentsRecordedWithTotal(
-                      state.payments.length,
-                      formatMonetaryAmountWithCurrency(
-                        amount: totalPaidInCents / 100,
-                        currency: currency,
+          // Séparation charge / caisse (ADR-014) : le secrétariat lit ce qu'un
+          // élève DOIT sans avoir le droit de voir les encaissements. La
+          // section ne doit alors pas affirmer « aucun versement » — elle n'en
+          // sait rien. Elle se tait (ADR-015 §6-C).
+          //
+          // ⚠️ **Tri-état, et abonné.** `PermissionGate.allows` répond `false`
+          // sur un ensemble INCONNU — l'état de tout le parc jusqu'au premier
+          // refresh suivant la migration v24. Un caissier qui détient
+          // `finance.payment.read` se voyait donc refuser l'historique sur
+          // l'écran même où il décide s'il faut encaisser : le pire endroit
+          // pour se taire, puisque le silence y fait réencaisser. On ne se tait
+          // que sur `missing`, c'est-à-dire quand on SAIT que le droit manque.
+          //
+          // Abonné, parce que lu une seule fois le verdict resterait figé : les
+          // permissions arrivent en cours de session, et rien d'autre ne
+          // reconstruit cette section.
+          PermissionHoldingBuilder(
+            requires: const [Perm.financePaymentRead],
+            builder: (context, holding) =>
+                BlocConsumer<PaymentsBloc, PaymentsState>(
+                  listenWhen: (prev, curr) =>
+                      prev.status != curr.status ||
+                      prev.errorType != curr.errorType,
+                  listener: (context, state) {
+                    if (state.status != PaymentsStatus.failure) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errorType.localizedMessage(l10n)),
                       ),
-                    )
-                  : l10n.facturationDetailPaymentsSectionSubtitle;
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionHeader(
-                    title: l10n.facturationDetailPaymentsSectionTitle,
-                    subtitle: subtitle,
-                    actionLabel: l10n.facturationDetailCollectPaymentAction,
-                    onActionPressed: onCreatePaymentRequested,
-                  ),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  const Divider(height: 1, color: AppColors.border),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  AnimatedSwitcher(
-                    duration: FinanceMotion.standard,
-                    switchInCurve: FinanceMotion.outCurve,
-                    switchOutCurve: FinanceMotion.inCurve,
-                    child: () {
-                      if (state.status == PaymentsStatus.loading) {
-                        return const Center(
-                          key: ValueKey('payments-loading'),
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-
-                      if (state.status == PaymentsStatus.failure) {
-                        return StateCard(
-                          key: const ValueKey('payments-error'),
-                          message: state.errorType.localizedMessage(l10n),
-                          icon: Icons.error_outline,
-                          accent: AppColors.warning,
-                          accentSoft: AppColors.financeDetailWarningSoft,
-                          actionLabel: l10n.facturationDetailPaymentsRetry,
-                          onAction: () => _retry(context),
-                        );
-                      }
-
-                      if (state.payments.isEmpty) {
-                        return StateCard(
-                          key: const ValueKey('payments-empty'),
-                          message: l10n.facturationDetailPaymentsEmpty,
-                          icon: Icons.inbox_outlined,
-                          accent: AppColors.textSecondary,
-                          accentSoft: AppColors.surfaceAlt,
-                        );
-                      }
-
-                      final sorted = [...state.payments]
-                        ..sort((a, b) => b.paidAt.compareTo(a.paidAt));
-
-                      return Column(
-                        key: const ValueKey('payments-list'),
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (var i = 0; i < sorted.length; i++) ...[
-                            FacturationPaymentLine(
-                              payment: sorted[i],
-                              onTap: () => onViewPaymentRequested(sorted[i]),
+                    );
+                  },
+                  buildWhen: (prev, curr) =>
+                      prev.status != curr.status ||
+                      prev.payments != curr.payments ||
+                      prev.errorType != curr.errorType,
+                  builder: (context, state) {
+                    final canReadPayments =
+                        holding != PermissionHolding.missing;
+                    final totalPaidInCents = state.payments.fold<int>(
+                      0,
+                      (sum, payment) => sum + payment.amountInCents,
+                    );
+                    final currency = state.payments.isNotEmpty
+                        ? state.payments.first.currency
+                        : '';
+                    final String subtitle;
+                    if (!canReadPayments) {
+                      subtitle = l10n.facturationDetailPaymentsWithheldSubtitle;
+                    } else if (state.status == PaymentsStatus.success) {
+                      subtitle = l10n
+                          .facturationDetailPaymentsRecordedWithTotal(
+                            state.payments.length,
+                            formatMonetaryAmountWithCurrency(
+                              amount: totalPaidInCents / 100,
+                              currency: currency,
                             ),
-                            if (i < sorted.length - 1)
-                              const SizedBox(height: AppDimensions.spacingS),
-                          ],
-                        ],
-                      );
-                    }(),
-                  ),
-                ],
-              );
-            },
+                          );
+                    } else {
+                      subtitle = l10n.facturationDetailPaymentsSectionSubtitle;
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SectionHeader(
+                          title: l10n.facturationDetailPaymentsSectionTitle,
+                          subtitle: subtitle,
+                          actionLabel:
+                              l10n.facturationDetailCollectPaymentAction,
+                          onActionPressed: onCreatePaymentRequested,
+                        ),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        const Divider(height: 1, color: AppColors.border),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        AnimatedSwitcher(
+                          duration: FinanceMotion.standard,
+                          switchInCurve: FinanceMotion.outCurve,
+                          switchOutCurve: FinanceMotion.inCurve,
+                          child: () {
+                            // En premier : la lecture n'a pas eu lieu, il n'y
+                            // a rien à relancer. Un vide honnête, pas un vide
+                            // affirmatif.
+                            if (!canReadPayments) {
+                              return StateCard(
+                                key: const ValueKey('payments-withheld'),
+                                message: l10n.facturationDetailPaymentsWithheld,
+                                icon: Icons.lock_outline,
+                                accent: AppColors.textSecondary,
+                                accentSoft: AppColors.surfaceAlt,
+                              );
+                            }
+
+                            if (state.status == PaymentsStatus.loading) {
+                              return const Center(
+                                key: ValueKey('payments-loading'),
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            if (state.status == PaymentsStatus.failure) {
+                              return StateCard(
+                                key: const ValueKey('payments-error'),
+                                message: state.errorType.localizedMessage(l10n),
+                                icon: Icons.error_outline,
+                                accent: AppColors.warning,
+                                accentSoft: AppColors.financeDetailWarningSoft,
+                                actionLabel:
+                                    l10n.facturationDetailPaymentsRetry,
+                                onAction: () => _retry(context),
+                              );
+                            }
+
+                            if (state.payments.isEmpty) {
+                              return StateCard(
+                                key: const ValueKey('payments-empty'),
+                                message: l10n.facturationDetailPaymentsEmpty,
+                                icon: Icons.inbox_outlined,
+                                accent: AppColors.textSecondary,
+                                accentSoft: AppColors.surfaceAlt,
+                              );
+                            }
+
+                            final sorted = [...state.payments]
+                              ..sort((a, b) => b.paidAt.compareTo(a.paidAt));
+
+                            return Column(
+                              key: const ValueKey('payments-list'),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (var i = 0; i < sorted.length; i++) ...[
+                                  FacturationPaymentLine(
+                                    payment: sorted[i],
+                                    onTap: () =>
+                                        onViewPaymentRequested(sorted[i]),
+                                  ),
+                                  if (i < sorted.length - 1)
+                                    const SizedBox(
+                                      height: AppDimensions.spacingS,
+                                    ),
+                                ],
+                              ],
+                            );
+                          }(),
+                        ),
+                      ],
+                    );
+                  },
+                ),
           ),
         ],
       ),
@@ -175,13 +228,22 @@ class _SectionHeader extends StatelessWidget {
         // qu'il y a la place (desktop, 2 colonnes, tablette) ; il ne passe sous
         // le titre que sur petit téléphone.
         final compact = constraints.maxWidth < AppBreakpoints.dataTablePhoneMax;
-        // Gel READ_ONLY (ADR-010) : l'encaissement est une écriture métier.
-        final button = SessionWriteGate(
-          child: EteeloButton.primary(
-            label: actionLabel,
-            icon: Icons.add,
-            onPressed: onActionPressed,
-            fullWidth: false,
+        // Deux gardes superposées, deux causes distinctes : la permission
+        // MASQUE (ADR-014, « pas vous »), le mode de session GÈLE (ADR-010,
+        // « pas maintenant »). La conjonction est celle du chemin de POUSSÉE :
+        // `POST /sync/payments` exige aussi `editique.write`, parce qu'il scelle
+        // le reçu en encaissant. Offrir le bouton sans ce droit produirait une
+        // écriture d'outbox rejetée en 403 TERMINAL — l'argent saisi serait
+        // perdu, pas rejoué.
+        final button = PermissionGate.access(
+          kPaymentCollectAccess,
+          child: SessionWriteGate(
+            child: EteeloButton.primary(
+              label: actionLabel,
+              icon: Icons.add,
+              onPressed: onActionPressed,
+              fullWidth: false,
+            ),
           ),
         );
 

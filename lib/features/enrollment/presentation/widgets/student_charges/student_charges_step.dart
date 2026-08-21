@@ -1,5 +1,10 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
@@ -53,11 +58,40 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   bool get _canFetch =>
       widget.studentId.trim().isNotEmpty && widget.levelId.trim().isNotEmpty;
 
+  /// Le compte peut-il voir la grille tarifaire (ADR-014) ? Le serveur retire
+  /// cette portion du référentiel à qui n'a pas `finance.grid.read`, si bien
+  /// que rien ne peut être calculé localement — et une liste vide cesse de
+  /// vouloir dire « cet élève ne doit rien ».
+  ///
+  /// Résolu dans [didChangeDependencies] plutôt qu'à la volée : la validité de
+  /// l'étape en dépend, et elle se recalcule hors `build`.
+  bool _tariffsWithheld = false;
+
   bool get _canEditAmounts =>
       widget.isEditable &&
       widget.enrollmentStatus == EnrollmentStatus.inProgress;
 
   void submitForm() => _onSave();
+
+  /// Les champs de l'état dont l'étape dépend — pour reconstruire le corps
+  /// **et** pour rejouer `_recomputeFormState`. Un seul prédicat pour les deux :
+  /// `listenWhen` et `buildWhen` en portaient chacun une copie, et c'est
+  /// précisément cette duplication qui a laissé passer l'oubli ci-dessous.
+  ///
+  /// `feeGridUnavailable` en fait partie et ne va pas de soi : il arrive dans un
+  /// **second** `emit` qui ne touche à rien d'autre — le statut vaut déjà
+  /// `success`, la liste de créances est la même instance, le type d'erreur est
+  /// inchangé. L'omettre revient à ne jamais l'afficher ET à ne jamais
+  /// recalculer la validité de l'étape : le secrétariat validait alors à 0 F sur
+  /// une grille absente, ce que la garde était censée bloquer.
+  static bool shouldReactTo(
+    StudentChargesState prev,
+    StudentChargesState curr,
+  ) =>
+      prev.status != curr.status ||
+      prev.studentCharges != curr.studentCharges ||
+      prev.errorType != curr.errorType ||
+      prev.feeGridUnavailable != curr.feeGridUnavailable;
 
   @override
   void initState() {
@@ -77,6 +111,65 @@ class StudentChargesStepState extends State<StudentChargesStep> {
     });
 
     widget.stepController?.bind(submitForm);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncTariffsWithheld();
+  }
+
+  /// Relit le droit sur la grille et, s'il a changé, recalcule la validité.
+  ///
+  /// Appelé au montage **et** à chaque changement de droits : un refresh en
+  /// arrière-plan peut accorder ou retirer `finance.grid.read` pendant que le
+  /// wizard est ouvert. [PermissionGate.allows] ne s'abonne à rien (lecture
+  /// ponctuelle), et la valeur vit hors `build` puisque la validité de l'étape
+  /// en dépend — sans l'abonnement posé par [_withPermissionWatch], le verdict
+  /// restait celui du montage.
+  ///
+  /// ⚠️ **Ne reconstruit pas lui-même**, et c'est réservé à l'appel depuis
+  /// [didChangeDependencies] : celui-ci précède immédiatement un `build`, et un
+  /// `setState` y marquerait dirty un élément déjà en cours de construction.
+  /// L'autre appelant — le listener de droits, hors phase de build — passe par
+  /// [_onPermissionsChanged], qui reconstruit.
+  void _syncTariffsWithheld() {
+    final withheld = !PermissionGate.allows(context, const [
+      Perm.financeGridRead,
+    ]);
+    if (withheld == _tariffsWithheld) return;
+    _tariffsWithheld = withheld;
+    _recomputeFormState(notifyParent: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _emitStepState();
+    });
+  }
+
+  /// Les droits ont changé **en séance** : relire ne suffit pas, il faut
+  /// reconstruire.
+  ///
+  /// `_syncTariffsWithheld` s'en remettait à `_recomputeFormState` pour appeler
+  /// `setState` — or celui-ci ne reconstruit que si la **validité** de l'étape
+  /// bascule, et le droit sur la grille n'y entre que par
+  /// `blocked = (tariffsWithheld || feeGridUnavailable) && charges.isEmpty`.
+  /// Dès que des créances sont chargées, c'est-à-dire dans le cas normal, le
+  /// verdict de droit changeait sans que rien ne reconstruise : le corps
+  /// continuait de recevoir celui du montage jusqu'à ce qu'un changement
+  /// d'état sans rapport le rafraîchisse.
+  ///
+  /// Rien ne s'en voyait à l'écran — avec une liste non vide, le corps affiche
+  /// les créances quel que soit le droit — et c'est bien ce qui a laissé passer
+  /// le défaut : le rebuild n'était garanti que par une **coïncidence**, celle
+  /// des cas où l'affichage dépend du droit étant exactement ceux où la
+  /// validité bascule. Le contrat est rétabli ici, et les deux widgets frères
+  /// du même lot reconstruisent déjà inconditionnellement
+  /// (`disciplinary_student_detail_page.dart`).
+  void _onPermissionsChanged() {
+    if (!mounted) return;
+    final before = _tariffsWithheld;
+    _syncTariffsWithheld();
+    if (_tariffsWithheld != before) setState(() {});
   }
 
   @override
@@ -188,6 +281,8 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       canEditAmounts: _canEditAmounts,
       currentStatus: _studentChargesBloc.state.status,
       parseAmount: _parseAmount,
+      tariffsWithheld: _tariffsWithheld,
+      feeGridUnavailable: _studentChargesBloc.state.feeGridUnavailable,
     );
 
     if (changed) {
@@ -252,13 +347,30 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    return _withPermissionWatch(child: _buildStep(context, l10n));
+  }
+
+  /// Rebranche [_onPermissionsChanged] sur les changements de droits. Absent de
+  /// l'arbre en test, l'[AuthBloc] rend l'enveloppe transparente — même
+  /// convention que `PermissionGate`.
+  Widget _withPermissionWatch({required Widget child}) {
+    final authBloc = PermissionGate.maybeBlocOf(context);
+    if (authBloc == null) return child;
+
+    return BlocListener<AuthBloc, AuthState>(
+      bloc: authBloc,
+      listenWhen: (prev, curr) =>
+          !listEquals(prev.permissions, curr.permissions),
+      listener: (_, _) => _onPermissionsChanged(),
+      child: child,
+    );
+  }
+
+  Widget _buildStep(BuildContext context, AppLocalizations l10n) {
     return BlocProvider<StudentChargesBloc>.value(
       value: _studentChargesBloc,
       child: BlocConsumer<StudentChargesBloc, StudentChargesState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status ||
-            prev.studentCharges != curr.studentCharges ||
-            prev.errorType != curr.errorType,
+        listenWhen: shouldReactTo,
         listener: (context, state) {
           final l10n = AppLocalizations.of(context)!;
 
@@ -300,10 +412,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
             _recomputeFormState();
           }
         },
-        buildWhen: (prev, curr) =>
-            prev.status != curr.status ||
-            prev.studentCharges != curr.studentCharges ||
-            prev.errorType != curr.errorType,
+        buildWhen: shouldReactTo,
         builder: (context, state) {
           return StudentChargesStepBody(
             l10n: l10n,
@@ -318,6 +427,8 @@ class StudentChargesStepState extends State<StudentChargesStep> {
             unavailableMessage: _canFetch
                 ? null
                 : l10n.studentChargesUnavailable,
+            tariffsWithheld: _tariffsWithheld,
+            feeGridUnavailable: state.feeGridUnavailable,
           );
         },
       ),

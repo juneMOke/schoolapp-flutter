@@ -123,6 +123,132 @@ void main() {
       expect(parent['phoneNumber'], '+243111');
       expect(parent['surname'], 'Moke'); // repli surname → lastName
     });
+
+    // Régression : la moyenne (`previousRate`) a longtemps été saisie, stockée
+    // et gelée dans l'outbox mais JAMAIS sérialisée ici — nullable au contrat,
+    // donc pushee sans erreur et perdue en silence. Tout le bloc « antécédents
+    // scolaires » est vérifié champ par champ, pas seulement la moyenne.
+    test(
+      'antécédents scolaires : le bloc part en entier (moyenne comprise)',
+      () {
+        const historyCommand = EnrollmentCommand(
+          enrollment: EnrollmentPayload(
+            id: 'e3',
+            enrollmentType: 'NEW_ENROLLMENT',
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-1',
+            enrollmentDate: '2026-07-06',
+            previousSchoolName: 'EP Lumière',
+            previousAcademicYear: '2024-2025',
+            previousSchoolLevelGroup: 'Primaire',
+            previousSchoolLevel: '5e année',
+            previousRate: 72.5,
+            previousRank: 3,
+            validatedPreviousYear: true,
+            transferReason: 'Déménagement',
+          ),
+          student: StudentPayload(
+            id: 's1',
+            firstName: 'Amina',
+            lastName: 'Moke',
+            surname: 'Junior',
+            gender: 'FEMALE',
+            dateOfBirth: '2015-04-02',
+            birthPlace: 'Kinshasa',
+            nationality: 'CD',
+          ),
+          parents: [],
+        );
+
+        final enrollment =
+            const EnrollmentAggregateRequest(
+                  historyCommand,
+                ).toJson()['enrollment']
+                as Map<String, dynamic>;
+
+        expect(enrollment['previousSchoolName'], 'EP Lumière');
+        expect(enrollment['previousAcademicYear'], '2024-2025');
+        expect(enrollment['previousSchoolLevelGroup'], 'Primaire');
+        expect(enrollment['previousSchoolLevel'], '5e année');
+        expect(enrollment['previousRate'], 72.5);
+        expect(enrollment['previousRank'], 3);
+        expect(enrollment['validatedPreviousYear'], isTrue);
+        expect(enrollment['transferReason'], 'Déménagement');
+      },
+    );
+
+    // Verrou de clés : c'est l'absence de ce test qui a laissé passer l'oubli de
+    // `previousRate`. Les trois blocs sont construits clé par clé à la main, donc
+    // un champ ajouté au payload outbox sans être relayé ici part silencieusement
+    // à la poubelle. Toute divergence casse ici, jamais en production.
+    test('clés envoyées figées sur le contrat (enrollment/student/parents)', () {
+      final json = const EnrollmentAggregateRequest(tCommand).toJson();
+
+      // Miroir exact de `EnrollmentInput` (back, dto/sync/EnrollmentInput.java).
+      expect(
+        (json['enrollment'] as Map<String, dynamic>).keys,
+        unorderedEquals(<String>[
+          'id',
+          'studentId',
+          'schoolLevelId',
+          'schoolLevelGroupId',
+          'academicYearId',
+          'enrollmentType',
+          'status',
+          'enrollmentDate',
+          'firstName',
+          'lastName',
+          'surname',
+          'dateOfBirth',
+          'gender',
+          'previousSchoolName',
+          'previousAcademicYear',
+          'previousSchoolLevelGroup',
+          'previousSchoolLevel',
+          'transferReason',
+          'previousRate',
+          'previousRank',
+          'validatedPreviousYear',
+          'sourceRef',
+        ]),
+      );
+
+      // Pas de matricule/email (générés serveur) ; niveau visé recopié.
+      expect(
+        (json['student'] as Map<String, dynamic>).keys,
+        unorderedEquals(<String>[
+          'id',
+          'firstName',
+          'lastName',
+          'surname',
+          'gender',
+          'dateOfBirth',
+          'birthPlace',
+          'nationality',
+          'city',
+          'district',
+          'municipality',
+          'neighborhood',
+          'address',
+          'schoolLevelId',
+          'schoolLevelGroupId',
+        ]),
+      );
+
+      // `clientId` est renommé `id` (id provisoire remappé dans la réponse).
+      expect(
+        ((json['parents'] as List).single as Map<String, dynamic>).keys,
+        unorderedEquals(<String>[
+          'id',
+          'firstName',
+          'lastName',
+          'surname',
+          'phoneNumber',
+          'relationshipType',
+          'email',
+        ]),
+      );
+    });
   });
 
   group(

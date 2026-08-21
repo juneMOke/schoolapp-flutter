@@ -89,9 +89,13 @@ void main() {
     serverTime: serverTime,
   );
 
+  /// [withheldTariffs] simule la portion retirée par le serveur (ADR-014 §4) :
+  /// `feeTariffs: null`, à ne pas confondre avec `tariffs: const []` qui, lui,
+  /// dit que l'école n'a réellement aucun tarif.
   ReferentialBundleDto bundle({
     List<RefFeeTariffDto>? tariffs,
     ReferentialYearBundleDto? previous,
+    bool withheldTariffs = false,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     current: ReferentialYearBundleDto(
@@ -102,19 +106,20 @@ void main() {
       ),
       schoolLevelGroups: const [],
       schoolLevels: const [],
-      feeTariffs:
-          tariffs ??
-          const [
-            RefFeeTariffDto(
-              id: 'tar-1',
-              feeCode: 'INSCRIPTION',
-              schoolLevelGroupId: 'grp-1',
-              schoolLevelId: 'lvl-1',
-              amountInCents: 5000,
-              currency: 'USD',
-              academicYearId: 'ay-1',
-            ),
-          ],
+      feeTariffs: withheldTariffs
+          ? null
+          : tariffs ??
+                const [
+                  RefFeeTariffDto(
+                    id: 'tar-1',
+                    feeCode: 'INSCRIPTION',
+                    schoolLevelGroupId: 'grp-1',
+                    schoolLevelId: 'lvl-1',
+                    amountInCents: 5000,
+                    currency: 'USD',
+                    academicYearId: 'ay-1',
+                  ),
+                ],
     ),
     previous: previous,
     serverTime: '2026-07-08T10:00:00Z',
@@ -206,7 +211,6 @@ void main() {
       surname: 'Divine',
       gender: 'FEMALE',
       dateOfBirth: '2015-05-05',
-      email: 'grace@school.local',
     ),
     parents: parents,
     serverUpdatedAt: serverUpdatedAt,
@@ -298,6 +302,88 @@ void main() {
         expect(capturedTariffs, hasLength(2));
         expect(capturedYears, containsAll(['ay-1', 'ay-0']));
         expect(await db.query('ref_academic_years'), hasLength(2));
+      },
+    );
+
+    // ADR-014 §4 — la grille tarifaire est retirée du bundle pour qui n'a pas
+    // `finance.grid.read`. La purge scopée ne connaît que l'année, jamais le
+    // compte : la déclencher sur une portion absente effacerait, sur une
+    // tablette partagée, la grille dont dépend l'inscription hors ligne d'un
+    // autre poste.
+    test(
+      'portion tarifaire retirée (null) → aucune purge, le reste s\'applique',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle(withheldTariffs: true)));
+
+        final result = await repo.syncReferential();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.upserted, 2); // 1 école + 1 année, aucun tarif
+        expect(capturedTariffs, isEmpty);
+        // Le point qui compte : `replaceTariffs` n'est pas appelé du tout.
+        expect(capturedYears, isEmpty);
+        // École, années et niveaux s'appliquent normalement — l'amorçage de
+        // l'application ne dépend pas de la portion réservée.
+        expect(await db.query('ref_school'), hasLength(1));
+        expect(await db.query('ref_academic_years'), hasLength(1));
+      },
+    );
+
+    test(
+      'portion présente mais vide ([]) → purge légitime de l\'année',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle(tariffs: const [])));
+
+        final result = await repo.syncReferential();
+
+        expect(result.isRight(), isTrue);
+        expect(capturedTariffs, isEmpty);
+        // « Cette école n'a plus aucun tarif » est une information : les
+        // lignes locales de l'année doivent disparaître.
+        expect(capturedYears, ['ay-1']);
+      },
+    );
+
+    test(
+      'portion retirée sur `current` seulement → seule l\'année de `previous` '
+      'est purgée',
+      () async {
+        when(() => api.pullReferential(any())).thenAnswer(
+          (_) async => httpOk(
+            bundle(
+              withheldTariffs: true,
+              previous: const ReferentialYearBundleDto(
+                academicYear: RefAcademicYearDto(
+                  id: 'ay-0',
+                  name: '2025',
+                  isCurrent: false,
+                ),
+                schoolLevelGroups: [],
+                schoolLevels: [],
+                feeTariffs: [
+                  RefFeeTariffDto(
+                    id: 'tar-0',
+                    feeCode: 'INSCRIPTION',
+                    schoolLevelGroupId: 'grp-0',
+                    schoolLevelId: 'lvl-0',
+                    amountInCents: 4500,
+                    currency: 'USD',
+                    academicYearId: 'ay-0',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await repo.syncReferential();
+
+        expect(capturedTariffs, hasLength(1));
+        expect(capturedYears, ['ay-0']);
       },
     );
 
@@ -666,12 +752,13 @@ void main() {
   });
 
   group('syncPreEnrollments (keyset)', () {
+    // Le curseur des préinscriptions vit sous une clé SCOPÉE PAR ÉCOLE — le
+    // nom de ressource plat, lui, ne sert plus qu'à nommer le flux devant le
+    // coordinateur. Le `repo` du `setUp` est monté sur `school-1`.
+    final preKey = preEnrollmentsCursorKey('school-1');
+
     test('page terminale → upsert + curseur = nextWatermark', () async {
-      await syncMeta.setCursor(
-        EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-        cursor: 'CUR-PREV',
-        syncedAt: 1,
-      );
+      await syncMeta.setCursor(preKey, cursor: 'CUR-PREV', syncedAt: 1);
       when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
         (_) async => httpOk(
           PreEnrollmentsPageDto(
@@ -692,12 +779,7 @@ void main() {
       );
       // Curseur mémorisé renvoyé verbatim en `cursor`.
       verify(() => api.pullPreEnrollments(auth, 'CUR-PREV', limit)).called(1);
-      expect(
-        await syncMeta.getCursor(
-          EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-        ),
-        'WM-PRE',
-      );
+      expect(await syncMeta.getCursor(preKey), 'WM-PRE');
     });
 
     test(
@@ -717,11 +799,7 @@ void main() {
     test(
       'page vide de fin (sans watermark) → notModified, curseur conservé',
       () async {
-        await syncMeta.setCursor(
-          EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-          cursor: 'CUR-KEEP',
-          syncedAt: 1,
-        );
+        await syncMeta.setCursor(preKey, cursor: 'CUR-KEEP', syncedAt: 1);
         when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
           (_) async =>
               httpOk(PreEnrollmentsPageDto(items: const [], page: env())),
@@ -732,9 +810,7 @@ void main() {
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.notModified, isTrue);
         expect(
-          await syncMeta.getCursor(
-            EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-          ),
+          await syncMeta.getCursor(preKey),
           'CUR-KEEP', // pas de watermark → curseur inchangé
         );
       },
@@ -758,19 +834,13 @@ void main() {
 
       expect(result.isRight(), isTrue);
       expect(
-        await syncMeta.getCursor(
-          EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-        ),
+        await syncMeta.getCursor(preKey),
         'WM-PRE', // curseur avancé : plus de rejeu infini de la page empoisonnée
       );
     });
 
     test('304 → notModified, curseur conservé', () async {
-      await syncMeta.setCursor(
-        EnrollmentPullRepositoryImpl.preEnrollmentsResource,
-        cursor: 'CUR-304',
-        syncedAt: 1,
-      );
+      await syncMeta.setCursor(preKey, cursor: 'CUR-304', syncedAt: 1);
       when(
         () => api.pullPreEnrollments(any(), any(), any()),
       ).thenThrow(notModified304());
@@ -780,17 +850,143 @@ void main() {
       final outcome = result.getOrElse(() => throw StateError('left'));
       expect(outcome.notModified, isTrue);
       expect(outcome.serverTimeMs, isNull);
+      expect(await syncMeta.getCursor(preKey), 'CUR-304');
+    });
+  });
+
+  // ── Le scope école du curseur des préinscriptions ─────────────────────────
+  //
+  // LE CURSEUR NE FRANCHIT JAMAIS CE QUI N'A PAS ÉTÉ GARDÉ. La clé était plate
+  // (`enrollment_pre_enrollments`) : sur une tablette réaffectée, le second
+  // établissement héritait du curseur du premier, le serveur répondait « rien
+  // de neuf », et ses propres préinscriptions ne descendaient JAMAIS.
+  group('syncPreEnrollments — scope école du curseur', () {
+    /// Un second repository, même base, mais monté sur une AUTRE école : c'est
+    /// la tablette réaffectée.
+    EnrollmentPullRepositoryImpl repoOfSchool(String schoolId) =>
+        EnrollmentPullRepositoryImpl(
+          api: api,
+          referentialDao: EnrollmentReferentialDao(db),
+          seedDao: EnrollmentSeedDao(db),
+          reconciliationDao: EnrollmentReconciliationDao(db),
+          replaceTariffs: (_, _) async {},
+          syncMetaDao: syncMeta,
+          requiredAuth: auth,
+          currentUser: CurrentUserContext()..set('u2', schoolId: schoolId),
+          now: () => clock,
+        );
+
+    test('la clé du curseur porte l\'école courante', () async {
+      when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
+        (_) async => httpOk(
+          PreEnrollmentsPageDto(
+            items: [preItem()],
+            page: env(nextWatermark: 'WM-S1'),
+          ),
+        ),
+      );
+
+      await repo.syncPreEnrollments();
+
+      expect(
+        await syncMeta.getCursor(preEnrollmentsCursorKey('school-1')),
+        'WM-S1',
+      );
+      // La clé plate héritée n'est plus jamais écrite.
       expect(
         await syncMeta.getCursor(
           EnrollmentPullRepositoryImpl.preEnrollmentsResource,
         ),
-        'CUR-304',
+        isNull,
       );
     });
+
+    test('la tablette réaffectée : la seconde école ne reprend pas le curseur '
+        'de la première, elle bootstrape', () async {
+      // Bout à bout, sans poser le curseur à la main : c'est le pull de
+      // l'école 1 qui l'écrit, là où l'implémentation décide de l'écrire. Une
+      // clé plate ferait donc bien hériter l'école 2 — ce test tomberait.
+      when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
+        (_) async => httpOk(
+          PreEnrollmentsPageDto(
+            items: [preItem()],
+            page: env(nextWatermark: 'WM-S1'),
+          ),
+        ),
+      );
+      await repo.syncPreEnrollments(); // école 1, cycle complet
+      clearInteractions(api);
+
+      // La tablette est réaffectée : nouveau porteur, nouvelle école.
+      when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
+        (_) async =>
+            httpOk(PreEnrollmentsPageDto(items: const [], page: env())),
+      );
+      await repoOfSchool('school-2').syncPreEnrollments();
+
+      // Avant le scope : `WM-S1` repartait au serveur, qui répondait « rien de
+      // neuf » — et l'école 2 ne voyait JAMAIS ses préinscriptions.
+      verify(() => api.pullPreEnrollments(auth, null, limit)).called(1);
+      // Le jeton de l'école 1 est intact : chaque école avance pour son compte.
+      expect(
+        await syncMeta.getCursor(preEnrollmentsCursorKey('school-1')),
+        'WM-S1',
+      );
+    });
+
+    test('le curseur hérité sous la clé plate n\'est jamais relu', () async {
+      // Le parc migre avec cette ligne en base : elle doit être ignorée, pas
+      // adoptée — rien ne dit à quelle école elle appartenait.
+      await syncMeta.setCursor(
+        EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+        cursor: 'WM-HERITE',
+        syncedAt: 1,
+      );
+      when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
+        (_) async =>
+            httpOk(PreEnrollmentsPageDto(items: const [], page: env())),
+      );
+
+      await repo.syncPreEnrollments();
+
+      // Rebootstrap assumé : c'est le seul comportement correct.
+      verify(() => api.pullPreEnrollments(auth, null, limit)).called(1);
+    });
+
+    test(
+      'aucune école courante → ni appel réseau ni écriture de curseur',
+      () async {
+        // `set` traite une chaîne vide comme absente : schoolId reste `null`.
+        final result = await repoOfSchool('').syncPreEnrollments();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.notModified, isTrue);
+        expect(outcome.cursor, isNull);
+        verifyNever(() => api.pullPreEnrollments(any(), any(), any()));
+        // Surtout : aucune ligne `sync_meta`. Se rabattre sur la clé plate
+        // rétablirait mot pour mot le défaut refermé ici.
+        expect(await syncMeta.getCursor(preEnrollmentsCursorKey('')), isNull);
+        expect(
+          await syncMeta.getCursor(
+            EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+          ),
+          isNull,
+        );
+      },
+    );
   });
 
   group('syncEnrollmentDelta (keyset, UPDATE-only)', () {
     setUp(() async {
+      // PRÉCONDITION DU DELTA : la base a déjà été hydratée. Le curseur de
+      // l'hydratant en est le témoin, et le delta refuse désormais de partir
+      // sans lui — sans quoi il consommerait son backlog sur une base vide,
+      // en silence (cf. le groupe « garde d'hydratation » plus bas).
+      await syncMeta.setCursor(
+        EnrollmentPullRepositoryImpl.snapshotsResource,
+        cursor: 'WM-SNAP',
+        syncedAt: 1000,
+      );
       await db.insert('enrollments', {
         'id': 'e1',
         'student_id': 'stu-1',
@@ -896,6 +1092,86 @@ void main() {
     });
   });
 
+  // Le delta est maigre : il ne fait qu'UPDATE des lignes que seul l'hydratant
+  // INSERT. Sur une base jamais hydratée il n'est donc pas seulement inutile —
+  // il est DESTRUCTEUR : `_keysetPull` mémorise le jeton à chaque page sans
+  // regarder `upserted`, donc le backlog serveur est consommé et le curseur
+  // avancé au-delà de dossiers que plus rien ne redemandera. Et zéro ligne
+  // appliquée est replié en `notModified`, exactement comme un cycle sain :
+  // aucune erreur, aucun compteur, rien qui trahisse la perte.
+  group('syncEnrollmentDelta — garde d\'hydratation', () {
+    test('base jamais hydratée : aucun appel réseau', () async {
+      final result = await repo.syncEnrollmentDelta();
+
+      verifyNever(() => api.pullEnrollmentDelta(any(), any(), any(), any()));
+      expect(result.isRight(), isTrue);
+    });
+
+    test('base jamais hydratée : le curseur du delta NE BOUGE PAS — c\'est '
+        'l\'invariant du lot, tout le reste n\'est que confort', () async {
+      await syncMeta.setCursor(
+        EnrollmentPullRepositoryImpl.deltaResource,
+        cursor: 'CUR-INTACT',
+        syncedAt: 500,
+      );
+
+      await repo.syncEnrollmentDelta();
+
+      expect(
+        await syncMeta.getCursor(EnrollmentPullRepositoryImpl.deltaResource),
+        'CUR-INTACT',
+      );
+      // Ni la fraîcheur : bumper `syncedAt` ferait lire « à jour » à une
+      // ressource qu'on vient délibérément de ne pas demander.
+      expect(
+        await syncMeta.getSyncedAt(EnrollmentPullRepositoryImpl.deltaResource),
+        500,
+      );
+    });
+
+    test(
+      'base jamais hydratée : rend notModified, jamais une erreur',
+      () async {
+        final result = await repo.syncEnrollmentDelta();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.notModified, isTrue);
+        expect(outcome.upserted, 0);
+        // Pas d'échec : le cycle qui hydrate tourne dans la même passe, et
+        // compter ceci en panne ferait virer la pastille de synchro au motif
+        // d'une précondition qui se lèvera d'elle-même.
+        expect(outcome.serverTimeMs, isNull);
+      },
+    );
+
+    test(
+      'CONTRE-ÉPREUVE — dès que l\'hydratant a posé son curseur, le delta part',
+      () async {
+        await syncMeta.setCursor(
+          EnrollmentPullRepositoryImpl.snapshotsResource,
+          cursor: 'WM-SNAP',
+          syncedAt: 1000,
+        );
+        when(
+          () => api.pullEnrollmentDelta(any(), any(), any(), any()),
+        ).thenAnswer(
+          (_) async => httpOk(
+            EnrollmentDeltaPageDto(
+              items: const [],
+              page: env(nextWatermark: 'WM-DELTA'),
+            ),
+          ),
+        );
+
+        await repo.syncEnrollmentDelta();
+
+        verify(
+          () => api.pullEnrollmentDelta(any(), any(), any(), any()),
+        ).called(1);
+      },
+    );
+  });
+
   group('syncEnrollmentSnapshots (keyset, hydratant)', () {
     test(
       'base vide → hydrate enrollment+student+parents SYNCED + watermark',
@@ -919,7 +1195,11 @@ void main() {
         final s = (await db.query('students')).single;
         expect(s['sync_status'], 'SYNCED');
         expect(s['matriculation_number'], 'KIN-2026-0001');
-        expect(s['email'], 'grace@school.local');
+        // Le snapshot porte bien un e-mail, et il n'est PLUS recopié (ADR-015
+        // F8) : l'attente s'inverse volontairement. Le matricule juste au-dessus
+        // reste écrit — lui remonte jusqu'au ticket imprimé.
+        expect(s['email'], isNull);
+        expect(s['phone_number'], isNull);
         expect(await db.query('parents'), hasLength(1));
         final link = (await db.query('student_parent')).single;
         expect(link['relationship_type'], 'FATHER');

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_response_model.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 
 void main() {
   group('LoginResponseModel', () {
@@ -11,6 +12,12 @@ void main() {
       'refreshToken': 'test_refresh_token',
       'refreshExpiresIn': 7776000,
       'userVersion': 2,
+      'permissions': <String>[
+        'attendance.read',
+        'attendance.write',
+        'classroom.read',
+        'academics.grade.write',
+      ],
       'user': <String, dynamic>{
         'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         'email': 'user@example.com',
@@ -37,6 +44,65 @@ void main() {
       expect(model.user.lastName, 'Doe');
       expect(model.user.role, 'ADMIN');
       expect(model.user.schoolId, '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20');
+      expect(model.permissions, <String>[
+        'attendance.read',
+        'attendance.write',
+        'classroom.read',
+        'academics.grade.write',
+      ]);
+    });
+
+    test('fromJson conserve les permissions inconnues (ensemble ouvert)', () {
+      final model = LoginResponseModel.fromJson(<String, dynamic>{
+        ...tJson,
+        'permissions': <String>['module.futur.read'],
+      });
+      expect(model.permissions, <String>['module.futur.read']);
+    });
+
+    // Champ absent ≠ ensemble vide : le premier ne dit rien, le second est une
+    // décision du serveur. Les confondre dépouillerait l'agent au premier
+    // contact d'un backend qui ignore encore ADR-014.
+    test('fromJson : permissions absent → inconnu (null)', () {
+      final json = Map<String, dynamic>.from(tJson)..remove('permissions');
+      expect(LoginResponseModel.fromJson(json).permissions, isNull);
+    });
+
+    test('fromJson : permissions à null → inconnu', () {
+      final model = LoginResponseModel.fromJson(<String, dynamic>{
+        ...tJson,
+        'permissions': null,
+      });
+      expect(model.permissions, isNull);
+    });
+
+    test('fromJson : permissions à [] → ensemble vide, pas inconnu', () {
+      final model = LoginResponseModel.fromJson(<String, dynamic>{
+        ...tJson,
+        'permissions': <dynamic>[],
+      });
+      expect(model.permissions, isNotNull);
+      expect(model.permissions, isEmpty);
+    });
+
+    test('fromJson écarte entrées non-chaînes, vides et doublons', () {
+      final model = LoginResponseModel.fromJson(<String, dynamic>{
+        ...tJson,
+        'permissions': <dynamic>[
+          'attendance.read',
+          '  attendance.write  ',
+          'attendance.read',
+          '',
+          '   ',
+          42,
+          null,
+          <String, dynamic>{'nope': true},
+        ],
+      });
+      expect(model.permissions, <String>[
+        'attendance.read',
+        'attendance.write',
+      ]);
     });
 
     test('fromJson tolère un contrat hérité (sans refresh/userVersion)', () {
@@ -76,6 +142,59 @@ void main() {
       expect(session.user.lastName, 'Doe');
       expect(session.user.role, 'ADMIN');
       expect(session.user.schoolId, '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20');
+      expect(session.permissions, <String>[
+        'attendance.read',
+        'attendance.write',
+        'classroom.read',
+        'academics.grade.write',
+      ]);
+    });
+
+    test('toAuthSession propage l\'état inconnu tel quel', () {
+      final json = Map<String, dynamic>.from(tJson)..remove('permissions');
+      final session = LoginResponseModel.fromJson(
+        json,
+      ).toAuthSession(nowMs: 1_000_000);
+
+      // L'interface se fermera quand même — mais elle dira « reconnectez-vous »
+      // et non « contactez l'administrateur », et la synchro continuera de
+      // tirer plutôt que de s'arrêter net.
+      expect(session.permissions, isNull);
+    });
+  });
+
+  // ADR-014 — `copyWith` doit pouvoir POSER `null` : son appelant, le login
+  // offline, affirme que les droits d'une session hors ligne viennent de la
+  // copie durable du compte et jamais du secure storage. Un `??` faisait
+  // exactement parler le storage quand la copie durable disait « inconnu ».
+  group('AuthSession.copyWith — permissions', () {
+    const base = AuthSession(
+      accessToken: 'jwt',
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+      permissions: ['attendance.read'],
+      user: AuthenticatedUser(
+        id: 'u1',
+        email: 'p@e.cd',
+        firstName: 'A',
+        lastName: 'K',
+        role: 'TEACHER',
+        schoolId: 's1',
+      ),
+    );
+
+    test('omis → inchangé', () {
+      expect(base.copyWith(expiresIn: 60).permissions, ['attendance.read']);
+    });
+
+    test('null explicite → inconnu', () {
+      expect(base.copyWith(permissions: null).permissions, isNull);
+    });
+
+    test('vide explicite → vide, pas inchangé', () {
+      final copie = base.copyWith(permissions: const <String>[]);
+      expect(copie.permissions, isNotNull);
+      expect(copie.permissions, isEmpty);
     });
   });
 }

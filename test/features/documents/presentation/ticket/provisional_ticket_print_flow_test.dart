@@ -279,6 +279,80 @@ void main() {
     expect(printing.laidOut, isEmpty);
     expect(port.sentTo, isEmpty);
   });
+
+  /// La seule exception assumée à AM-11 (« le parent repart avec un papier »).
+  ///
+  /// Elle est du côté de la doctrine, pas contre elle : AM-11 protège la
+  /// **preuve d'un versement**, or un ticket qui ne nomme personne n'en est pas
+  /// une. Et le gabarit n'imprime pas une ligne blanche pour un nom vide — il
+  /// n'émet AUCUNE ligne (cf. `ticket_text_layout_test.dart`, groupe « ce que
+  /// le local ne sait pas ») : le papier sortirait avec deux séparateurs qui se
+  /// touchent, sans rien qui signale le trou.
+  ///
+  /// Le refus porte donc sur les DEUX sorties, et les deux assertions comptent :
+  /// `printing.laidOut` prouve que le PDF n'est pas parti, `port.sentTo` que la
+  /// thermique non plus. Replier sur le PDF ne ferait que produire le même
+  /// papier anonyme par l'autre chemin — les deux sorties partent du même
+  /// gabarit.
+  group('zone élève vide', () {
+    const refus =
+        'Impression refusée : le nom de l\'élève n\'est pas connu de cette '
+        'tablette. Le versement est bien enregistré — réimprimez après la '
+        'prochaine synchronisation.';
+
+    testWidgets('nom inconnu : le motif est dit, et rien ne sort', (
+      tester,
+    ) async {
+      // `students` non hydratée : le pull d'Inscription est gardé sur
+      // `enrollment.read`, qu'un caissier n'a pas.
+      repository.studentFullName = '';
+
+      await run(tester);
+
+      // Le motif dit quoi ATTENDRE, plutôt que d'accuser l'imprimante : le
+      // caissier n'a rien à réparer côté matériel.
+      expect(find.text(refus), findsOne);
+      expect(printing.laidOut, isEmpty);
+      expect(port.sentTo, isEmpty);
+    });
+
+    testWidgets('un nom fait d\'espaces est refusé comme un nom vide', (
+      tester,
+    ) async {
+      // D'où le `.trim()` de la garde : une ligne `students` présente mais aux
+      // colonnes blanches compose un nom d'espaces, qui n'imprime pas
+      // davantage — `_wrapped` coupe sur les espaces et n'en retient rien.
+      repository.studentFullName = '   ';
+
+      await run(tester);
+
+      expect(find.text(refus), findsOne);
+      expect(printing.laidOut, isEmpty);
+      expect(port.sentTo, isEmpty);
+    });
+
+    /// Le refus ne coûte que du papier : le versement est déjà écrit
+    /// localement. Il ne doit surtout pas consommer le rattrapage d'impression,
+    /// sans quoi le caissier perdrait le seul chemin qui lui reste vers un
+    /// ticket une fois la donnée descendue.
+    testWidgets('le rattrapage reste OUVERT après un refus', (tester) async {
+      repository.studentFullName = '';
+
+      await run(tester);
+
+      expect(repository.marked, isZero);
+      expect(await repository.awaitsTicketPrint('pay-1'), isTrue);
+    });
+
+    /// Non-régression : la garde ne doit fermer que la zone élève vide.
+    testWidgets('un nom présent imprime toujours normalement', (tester) async {
+      await run(tester);
+
+      expect(port.sentTo, equals([_netum.macAddress]));
+      expect(find.text(refus), findsNothing);
+      expect(repository.printed, contains('pay-1'));
+    });
+  });
 }
 
 class _FakePort implements ThermalPrinterPort {
@@ -340,13 +414,18 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
   Either<Failure, TicketReceiptModel>? result;
   int builds = 0;
 
+  /// Le nom tel que la composition le rend. Une chaîne VIDE, jamais `null` :
+  /// le repository fait `student?.fullName ?? ''`, donc une table `students`
+  /// non hydratée ne se distingue en rien d'un élève réellement anonyme.
+  String studentFullName = 'Mbala Kasa Amina';
+
   @override
   Future<Either<Failure, TicketReceiptModel>> buildForPayment({
     required String paymentId,
     required TicketLabels labels,
   }) async {
     builds++;
-    return result ?? Right(_model(labels));
+    return result ?? Right(_model(labels, studentFullName));
   }
 
   int marked = 0;
@@ -366,15 +445,16 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
       !printed.contains(paymentId);
 }
 
-TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
-  schoolName: 'Complexe scolaire La Colombe',
-  studentFullName: 'Mbala Kasa Amina',
-  provisionalReference: 'PROV-TAB1-0001',
-  paidAt: DateTime(2026, 8, 12, 9, 30),
-  amountReceivedInCents: 2500000,
-  currency: 'CDF',
-  labels: labels,
-);
+TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
+    TicketReceiptModel(
+      schoolName: 'Complexe scolaire La Colombe',
+      studentFullName: studentFullName,
+      provisionalReference: 'PROV-TAB1-0001',
+      paidAt: DateTime(2026, 8, 12, 9, 30),
+      amountReceivedInCents: 2500000,
+      currency: 'CDF',
+      labels: labels,
+    );
 
 class _FakePrinting extends PrintingPlatform {
   final List<Uint8List> laidOut = [];

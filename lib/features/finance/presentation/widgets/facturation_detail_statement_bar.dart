@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -135,14 +137,17 @@ class _StatementAction extends StatelessWidget {
                 // Émettre une pièce numérotée avance une séquence comptable côté
                 // serveur : c'est une écriture, elle est gelée en session
                 // lecture seule au même titre qu'un encaissement.
-                SessionWriteGate(
-                  child: EteeloButton.secondary(
-                    label: l10n.facturationDetailStatementLabel,
-                    icon: Icons.description_outlined,
-                    onPressed: enabled ? () => _onPressed(context) : null,
-                    // Hors colonne pleine largeur : sans cela le thème étirerait
-                    // le bouton sur toute la ligne.
-                    fullWidth: false,
+                PermissionGate(
+                  requires: const [Perm.editiqueWrite],
+                  child: SessionWriteGate(
+                    child: EteeloButton.secondary(
+                      label: l10n.facturationDetailStatementLabel,
+                      icon: Icons.description_outlined,
+                      onPressed: enabled ? () => _onPressed(context) : null,
+                      // Hors colonne pleine largeur : sans cela le thème
+                      // étirerait le bouton sur toute la ligne.
+                      fullWidth: false,
+                    ),
                   ),
                 ),
                 if (_hint(l10n, eligibility, isOffline, state)

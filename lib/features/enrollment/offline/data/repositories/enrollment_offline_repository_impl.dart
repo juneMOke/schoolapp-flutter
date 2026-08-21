@@ -100,7 +100,6 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
           municipality: seed.municipality,
           neighborhood: seed.neighborhood,
           address: seed.address,
-          phoneNumber: seed.phoneNumber,
           matriculationNumber: seed.matriculationNumber,
           updatedAt: now,
         ),
@@ -216,7 +215,6 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? municipality,
     String? neighborhood,
     String? address,
-    String? phoneNumber,
   }) => _guardUnit(
     () => _draftDao.updateDraftStudentColumns(studentId, <String, Object?>{
       'city': ?city,
@@ -224,7 +222,6 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
       'municipality': ?municipality,
       'neighborhood': ?neighborhood,
       'address': ?address,
-      'phone_number': ?phoneNumber,
     }, nowMs: _now()),
   );
 

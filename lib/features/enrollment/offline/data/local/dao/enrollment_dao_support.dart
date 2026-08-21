@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/database/phone_number_sql.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -11,13 +13,6 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 /// résolution des tuteurs, projection des payloads et
 /// mise en file de l'agrégat outbox. Regroupées ici pour éviter la duplication
 /// dans `EnrollmentDraftDao` (confirmation one-shot retirée à l'étape c).
-
-/// Expression SQL normalisant un numéro de téléphone pour comparaison
-/// (espaces/tirets/parenthèses retirés) — [expr] peut être un nom de colonne
-/// ou un placeholder `?`. N'affecte jamais la valeur stockée, uniquement la
-/// comparaison au moment de la requête.
-String _normalizedPhoneSql(String expr) =>
-    "REPLACE(REPLACE(REPLACE(REPLACE($expr, ' ', ''), '-', ''), '(', ''), ')', '')";
 
 /// Draft d'un tuteur à confirmer : le modèle (id provisoire) + le lien de parenté.
 class ParentDraft {
@@ -37,6 +32,41 @@ class ParentDraft {
   });
 }
 
+/// Id du tuteur portant [rawPhone], quelle que soit l'écriture du numéro en
+/// base — `null` si aucun.
+///
+/// Deux temps, parce qu'aucun des deux ne suffit seul : SQL pré-filtre sur
+/// les derniers chiffres (tolérant aux séparateurs et à l'indicatif), Dart
+/// tranche sur la forme canonique (qui, elle, distingue `+242…` de `+243…`).
+/// Un numéro vide ne rapproche jamais : deux tuteurs sans téléphone ne sont
+/// pas la même personne.
+Future<String?> findParentIdByPhone(
+  DatabaseExecutor txn,
+  String rawPhone, {
+  String? excludedId,
+  String? whereSuffix,
+  List<Object?> suffixArgs = const [],
+}) async {
+  final key = PhoneNumberSql.matchKeyOf(rawPhone);
+  if (key.isEmpty) return null;
+
+  final rows = await txn.rawQuery(
+    'SELECT id, phone_number FROM parents WHERE '
+    '${whereSuffix == null ? '' : '$whereSuffix AND '}'
+    '${PhoneNumberSql.matchKey('phone_number')} = ?'
+    '${excludedId == null ? '' : ' AND id != ?'} LIMIT 10',
+    [...suffixArgs, key, ?excludedId],
+  );
+
+  for (final row in rows) {
+    final candidate = (row['phone_number'] as String?) ?? '';
+    if (PhoneNumberFormat.sameNumber(candidate, rawPhone)) {
+      return row['id'] as String;
+    }
+  }
+  return null;
+}
+
 /// Get-or-create local d'un parent par `phone_number` (dédup fratrie sur la
 /// tablette). Renvoie l'id résolu (existant réutilisé, ou provisoire inséré).
 ///
@@ -48,15 +78,12 @@ Future<String> upsertParentByPhone(
   ParentLocalModel p, {
   required bool asDraft,
 }) async {
-  final existing = await txn.query(
-    'parents',
-    columns: ['id'],
-    where: 'phone_number = ?',
-    whereArgs: [p.phoneNumber],
-    limit: 1,
-  );
-  if (existing.isNotEmpty) {
-    final id = existing.first['id'] as String;
+  // Rapprochement insensible au format d'écriture : une fiche héritée
+  // ("0816939060") et la saisie du jour ("+243816939060") désignent le même
+  // tuteur, sans quoi la dédup fratrie créerait un doublon.
+  final existingId = await findParentIdByPhone(txn, p.phoneNumber);
+  if (existingId != null) {
+    final id = existingId;
     await txn.update(
       'parents',
       {
@@ -125,21 +152,19 @@ Future<String> upsertDraftGuardianParent(
     // normal (conflit + upsert) pour la recréer.
   }
 
-  // Comparaison normalisée (espaces/tirets/parenthèses ignorés) : un même
-  // numéro saisi "+243 111 222 333" puis "+243111222333" ne doit pas
-  // échapper à la garde d'unicité pour une simple différence de mise en
-  // forme. La valeur STOCKÉE n'est jamais modifiée, seule la comparaison
-  // l'est — s'applique aussi aux lignes historiques déjà en base.
-  final conflict = await txn.rawQuery(
-    'SELECT id FROM parents WHERE ${_normalizedPhoneSql('phone_number')} = '
-    '${_normalizedPhoneSql('?')} AND id != ? LIMIT 1',
-    [p.phoneNumber, p.id],
+  // Comparaison normalisée (indicatif, 0 du plan national et séparateurs
+  // ignorés) : un même numéro saisi "+243 111 222 333", "0111222333" puis
+  // "+243111222333" ne doit pas échapper à la garde d'unicité pour une
+  // simple différence de mise en forme. La valeur STOCKÉE n'est jamais
+  // modifiée, seule la comparaison l'est — s'applique aussi aux lignes
+  // historiques déjà en base.
+  final conflictId = await findParentIdByPhone(
+    txn,
+    p.phoneNumber,
+    excludedId: p.id,
   );
-  if (conflict.isNotEmpty) {
-    throw ParentPhoneConflictException(
-      p.phoneNumber,
-      conflict.first['id'] as String,
-    );
+  if (conflictId != null) {
+    throw ParentPhoneConflictException(p.phoneNumber, conflictId);
   }
 
   final existing = await txn.query(

@@ -108,4 +108,43 @@ void main() {
 
     expect(selected, Weekday.tue);
   });
+
+  // ADR-015 §6-B — un chevron promet une destination. Quand la porte vers le
+  // détail du cours est fermée (profil sans `academics.course.read`), la rangée
+  // ne reçoit pas de `onOpenCell` : elle ne doit plus la promettre.
+  testWidgets('rangée ouvrable : le chevron est affiché', (tester) async {
+    final timetable = _timetable();
+    await tester.pumpWidget(
+      host(
+        ScheduleDayView(
+          timetable: timetable,
+          palette: ScheduleClassPalette.fromTimetable(timetable),
+          today: Weekday.mon,
+          selectedDay: Weekday.mon,
+          onDaySelected: (_) {},
+          onOpenCell: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+  });
+
+  testWidgets('rangée non ouvrable : aucun chevron', (tester) async {
+    final timetable = _timetable();
+    await tester.pumpWidget(
+      host(
+        ScheduleDayView(
+          timetable: timetable,
+          palette: ScheduleClassPalette.fromTimetable(timetable),
+          today: Weekday.mon,
+          selectedDay: Weekday.mon,
+          onDaySelected: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.text('Mathématiques'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsNothing);
+  });
 }

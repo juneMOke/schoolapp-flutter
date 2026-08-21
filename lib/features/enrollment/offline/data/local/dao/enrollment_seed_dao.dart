@@ -93,6 +93,23 @@ class EnrollmentSeedDao {
     return items.length;
   }
 
+  /// Vide `ref_pre_enrollments` **en entier**. Rend le nombre de lignes ôtées.
+  ///
+  /// Le seul appelant légitime est le changement d'école
+  /// (`PreEnrollmentsSchoolGuard`), et l'effacement y est **total** : la table
+  /// ne porte pas de colonne `school_id`, donc rien ici ne permet de ne retirer
+  /// que les lignes de l'établissement sortant.
+  ///
+  /// ⚠️ Ne JAMAIS purger par âge ni par ancienneté. Depuis la bascule dure du
+  /// seed vers le local, cette table est la **seule** source d'amorçage d'un
+  /// brouillon de préinscription — il n'existe plus aucun repli GET serveur. Une
+  /// ligne ôtée sans que le curseur keyset soit rembobiné dans le même geste
+  /// devient définitivement inatteignable : le curseur est en avance sur elle,
+  /// le serveur répondra « rien de neuf », et plus rien ne la redemandera.
+  /// Purge et `SyncMetaDao.deleteCursorsOf` vont donc ensemble, ou la purge
+  /// ampute.
+  Future<int> deleteAllPreEnrollments() => _db.delete('ref_pre_enrollments');
+
   // ── Lectures (seed RE/PRE depuis le local) ──────────────────────────────────
 
   /// `id` de l'année académique **courante** (`is_current = 1`) telle que

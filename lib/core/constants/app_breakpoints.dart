@@ -47,6 +47,14 @@ class AppBreakpoints {
   static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
+  // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
+  // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
+  // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
+  //
+  // ⚠️ Plafond dur : `AppPageBackground` borne son contenu à
+  // `AppDimensions.detailContentMaxWidth` (1180) — un seuil au-delà rendrait la
+  // disposition large **inatteignable**, quelle que soit la taille de l'écran.
+  static const double feeControlTableWideMin = financeDetailTwoColMin; // 1024
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.
@@ -78,4 +86,19 @@ class AppBreakpoints {
   // en mode Jour : la grille hebdomadaire (5 jours) y est trop serrée. Au-delà,
   // mode Semaine. L'utilisateur peut toujours basculer via la barre.
   static const double scheduleWeekDefaultMin = dataTableCardsMax; // 600
+
+  // ---------------------------------------------------------------------------
+  // Seuils de HAUTEUR (les seuls du fichier — tous les autres portent sur la
+  // largeur). Le clavier logiciel n'ouvre pas un panneau par-dessus l'écran :
+  // il retire sa hauteur au body (`resizeToAvoidBottomInset`). En paysage il ne
+  // reste qu'une centaine de dp au parcours d'inscription, quand sa barre
+  // d'étapes, ses marges et son pied en coûtent près de deux cents.
+  // ---------------------------------------------------------------------------
+
+  // Parcours d'inscription — au-dessus, chrome complet (barre d'étapes avec
+  // chips et libellés, marges pleines).
+  static const double wizardStepperFullChromeMinHeight = 420.0;
+  // En deçà, même la barre réduite à sa progression prend la place du champ en
+  // cours de saisie : elle disparaît et seul le pied d'actions subsiste.
+  static const double wizardStepperBreadcrumbMinHeight = 150.0;
 }

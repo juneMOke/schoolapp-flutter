@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -87,11 +89,14 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
       description: l10n.disciplinaryCasesEmptyDescription,
       secondaryAction: onCreateCase == null
           ? null
-          : SessionWriteGate(
-              child: OutlinedButton.icon(
-                onPressed: onCreateCase,
-                icon: const Icon(Icons.add_rounded, size: 16),
-                label: Text(l10n.disciplinaryCaseCreateAction),
+          : PermissionGate.access(
+              kDisciplineInstructAccess,
+              child: SessionWriteGate(
+                child: OutlinedButton.icon(
+                  onPressed: onCreateCase,
+                  icon: const Icon(Icons.add_rounded, size: 16),
+                  label: Text(l10n.disciplinaryCaseCreateAction),
+                ),
               ),
             ),
       fullWidthCard: true,

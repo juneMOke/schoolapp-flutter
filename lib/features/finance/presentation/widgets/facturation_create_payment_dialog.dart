@@ -1,5 +1,7 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -15,7 +17,6 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charge_allocation_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
@@ -322,38 +323,38 @@ class _FacturationCreatePaymentDialogViewState
                 maxWidth: AppDimensions.facturationCreatePaymentModalMaxWidth,
                 maxHeight: maxHeight,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FinanceModalDarkHeader(
-                    eyebrow: l10n.facturationDetailCollectPaymentAction,
-                    title: _studentFullName(l10n),
-                    onClose: () => Navigator.of(context).maybePop(),
-                  ),
-                  const FinanceModalGoldDivider(),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppDimensions.spacingM),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FacturationCreatePaymentPayerSection(
-                            lastNameController: _lastNameController,
-                            firstNameController: _firstNameController,
-                            middleNameController: _middleNameController,
-                            readOnly: isLoading,
-                          ),
-                          const SizedBox(height: AppDimensions.spacingL),
-                          _ChargesToSettle(
-                            entries: _entries,
-                            onToggle: isLoading ? null : _onToggle,
-                            onSettleAll: isLoading ? null : _onSettleAll,
-                          ),
-                        ],
-                      ),
+              child: EteeloDialogBody(
+                // Zones figées mesurées à ~230 dp (en-tête 86 + liserés 3 +
+                // bande de total + bouton). Au-dessus de ce seuil elles tiennent
+                // et restent ancrées ; en dessous — téléphone en paysage,
+                // clavier ouvert, il ne reste qu'une douzaine de dp — elles
+                // rejoignent le défilement au lieu de déborder.
+                minPinnedHeight: 300,
+                header: EteeloDialogDarkHeader(
+                  eyebrow: l10n.facturationDetailCollectPaymentAction,
+                  title: _studentFullName(l10n),
+                  onClose: () => Navigator.of(context).maybePop(),
+                ),
+                headerDividers: const [EteeloDialogGoldDivider()],
+                bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
+                body: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FacturationCreatePaymentPayerSection(
+                      lastNameController: _lastNameController,
+                      firstNameController: _firstNameController,
+                      middleNameController: _middleNameController,
+                      readOnly: isLoading,
                     ),
-                  ),
+                    const SizedBox(height: AppDimensions.spacingL),
+                    _ChargesToSettle(
+                      entries: _entries,
+                      onToggle: isLoading ? null : _onToggle,
+                      onSettleAll: isLoading ? null : _onSettleAll,
+                    ),
+                  ],
+                ),
+                footer: [
                   const Divider(height: 1, color: AppColors.border),
                   _TotalBand(
                     label: l10n.facturationCreatePaymentTotalToCollect,

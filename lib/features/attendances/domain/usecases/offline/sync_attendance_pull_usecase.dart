@@ -1,49 +1,29 @@
-import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/offline/attendance_pull_outcome.dart';
-import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 
-/// Déclenche le pull keyset de la Présence (hydratation au montage du
-/// FeatureScope). Le second déclencheur — retour online — passe par le
-/// `PullCoordinator` (`AttendancePullHandler`). Les DEUX sont nécessaires : une
-/// tablette démarrée déjà connectée ne tirerait jamais sur le seul signal online.
+/// Hydrate la Présence au montage de son FeatureScope (ADR-015 F6).
 ///
-/// **Gate crédentiels** : ce déclencheur contourne le gate `SessionCredentialsProbe`
-/// du `PullCoordinator` — sans le revérifier ici, une tablette sans session
-/// valide taperait le réseau à chaque montage du scope Présence.
+/// **Ne tire plus le repository en direct.** Ce déclencheur passe désormais par
+/// le `PullCoordinator`, qui reste seul à connaître l'ordre, les droits et —
+/// bientôt — le plan de synchronisation. Tant que des écrans tiraient à côté, la
+/// largeur effective du pull était l'union du coordinateur et d'une douzaine de
+/// portes dérobées, aucune filtrée par une permission : faire du plan l'autorité
+/// du seul coordinateur n'aurait rien resserré.
 ///
-/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
-/// tablette hors-ligne taperait quand même le réseau à chaque montage.
+/// Ce qui vivait ici et vit maintenant dans le socle, pour tout le monde : la
+/// pré-garde de connectivité, la sonde de crédentiels, le filtre de permission,
+/// l'isolation des échecs et la diffusion sur le `PullCompletionBus`. Ce use
+/// case ne porte plus qu'une chose — **de quelles ressources cet écran a
+/// besoin** — et c'est la seule qui lui appartienne vraiment.
+///
+/// Le second déclencheur reste le cycle complet du coordinateur (ouverture de
+/// session, retour online). Les deux sont nécessaires : une tablette posée sur
+/// le Wi-Fi de l'école ne verrait aucun retour online de la journée.
 class SyncAttendancePullUseCase {
-  final AttendancePullRepository _repository;
-  final SessionCredentialsProbe _credentialsProbe;
-  final ConnectivityService _connectivity;
+  final PullCoordinator _coordinator;
 
-  const SyncAttendancePullUseCase(
-    this._repository,
-    this._credentialsProbe,
-    this._connectivity,
-  );
+  const SyncAttendancePullUseCase(this._coordinator);
 
-  Future<Either<Failure, AttendancePullOutcome>> call() async {
-    if (!await _connectivity.isOnline()) {
-      return const Left(NetworkFailure('Hors-ligne : pull ignoré'));
-    }
-    if (!await _canAuthenticate()) {
-      return const Left(AuthFailure('Session non authentifiée : pull ignoré'));
-    }
-    return _repository.syncAttendance();
-  }
-
-  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
-  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
-  Future<bool> _canAuthenticate() async {
-    try {
-      return await _credentialsProbe.canAuthenticate();
-    } catch (_) {
-      return true;
-    }
-  }
+  Future<PullRunReport> call() =>
+      _coordinator.pullSubset(const {kAttendanceResource});
 }

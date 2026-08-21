@@ -8,13 +8,20 @@ class PaymentsRequested extends PaymentsEvent {
   final String studentId;
   final String academicYearId;
 
+  /// Relecture **silencieuse** déclenchée par un cycle de synchro abouti : pas
+  /// de passage en `loading` (l'écran garde ses lignes, aucun skeleton ne
+  /// revient) et un échec ne détruit pas l'affichage déjà servi. Les états
+  /// étant `Equatable`, une relecture qui ne change rien n'émet même pas.
+  final bool silent;
+
   const PaymentsRequested({
     required this.studentId,
     required this.academicYearId,
+    this.silent = false,
   });
 
   @override
-  List<Object?> get props => [studentId, academicYearId];
+  List<Object?> get props => [studentId, academicYearId, silent];
 }
 
 class PaymentsAllocationsRequested extends PaymentsEvent {

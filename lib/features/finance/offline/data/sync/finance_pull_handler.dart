@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
@@ -14,23 +15,34 @@ class FinancePullHandler implements PullHandler {
   @override
   final String resource;
 
+  @override
+  final List<Perm> requiredPermissions;
+
+  @override
+  bool get isBaseline => false;
+
   final Future<Either<Failure, FinancePullOutcome>> Function() _pull;
 
-  const FinancePullHandler._(this.resource, this._pull);
+  const FinancePullHandler._(
+    this.resource,
+    this.requiredPermissions,
+    this._pull,
+  );
 
   /// Créances autoritaires du roster (le plus gros volume, §2.1).
+  ///
+  /// `finance.charge.read` — distinct de la caisse : le secrétariat lit ce
+  /// qu'un élève doit sans avoir le droit de voir les encaissements.
   FinancePullHandler.studentCharges(FinancePullRepository repository)
-    : this._(
-        FinancePullRepositoryImpl.chargesResource,
-        repository.syncStudentCharges,
-      );
+    : this._(FinancePullRepositoryImpl.chargesResource, const [
+        Perm.financeChargeRead,
+      ], repository.syncStudentCharges);
 
   /// Paiements — y compris ceux de l'autre poste de perception (§2.2).
   FinancePullHandler.payments(FinancePullRepository repository)
-    : this._(
-        FinancePullRepositoryImpl.paymentsResource,
-        repository.syncPayments,
-      );
+    : this._(FinancePullRepositoryImpl.paymentsResource, const [
+        Perm.financePaymentRead,
+      ], repository.syncPayments);
 
   @override
   Future<PullOutcome> pull() async {

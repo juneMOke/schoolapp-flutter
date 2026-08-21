@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -178,5 +179,24 @@ void main() {
     );
     expect(find.textContaining('Reçu n°'), findsOneWidget);
     expect(find.text('Fermer'), findsOneWidget);
+  });
+
+  // B-9 — cette modale n'a aucun champ, mais elle s'ouvre PAR-DESSUS la saisie
+  // d'encaissement : c'est celle du lot pour qui le clavier a le plus de
+  // chances d'être déjà levé. `Dialog` ajoute alors les `viewInsets` à son
+  // `insetPadding`, et il ne reste qu'une poignée de dp pour un bandeau
+  // d'étapes et un pied à deux actions.
+  testWidgets('téléphone en PAYSAGE, clavier déjà levé : rien ne déborde', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(731, 411);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.reset);
+
+    await open(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(EteeloDialogBody), findsOneWidget);
   });
 }

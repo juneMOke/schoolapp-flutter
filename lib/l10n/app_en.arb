@@ -64,6 +64,34 @@
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",
+  "accueilUnknownRightsTitle": "Rights not known",
+  "@accueilUnknownRightsTitle": {
+    "description": "Home title when no permission set has ever been reported for this account on this device (ADR-014, unknown state)"
+  },
+  "accueilUnknownRightsMessage": "Your rights are not known on this device yet. Sign in online to retrieve them.",
+  "@accueilUnknownRightsMessage": {
+    "description": "Unknown-state message — signing in is enough, no need to contact the administration"
+  },
+  "accueilNoAccessTitle": "No module available",
+  "@accueilNoAccessTitle": {
+    "description": "Home title when the effective permission set unlocks no module (ADR-014 fail-closed)"
+  },
+  "accueilNoAccessMessage": "Your account has access to no module. Contact your school administrator to have your rights adjusted.",
+  "@accueilNoAccessMessage": {
+    "description": "Message when the server did report the rights and they are empty"
+  },
+  "accueilNoAccessOfflineMessage": "Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.",
+  "@accueilNoAccessOfflineMessage": {
+    "description": "Message when the session comes from the local durable copy — signing in online can refresh the rights"
+  },
+  "splashForbiddenTitle": "Access not allowed",
+  "@splashForbiddenTitle": {
+    "description": "Bootstrap screen title when the account lacks the permission to load the referential (403)"
+  },
+  "splashForbiddenMessage": "Your account does not have the rights needed to open the application. Contact your school administrator.",
+  "@splashForbiddenMessage": {
+    "description": "Bootstrap screen message on 403 — retrying cannot help, only a rights change will"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",
@@ -180,6 +208,10 @@
   "subMenuBilling": "Billing",
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
+  },
+  "subMenuFeeControl": "Fee control",
+  "@subMenuFeeControl": {
+    "description": "Fee control sub-menu title"
   },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
@@ -884,14 +916,7 @@
   "searchStudents": "Search Students",
   "searchFormSubtitleFirstRegistration": "Filter the enrollments list",
   "reRegistrationSearchHint": "Find a student or a class from the previous year to re-enroll",
-  "reRegistrationSearchHelpPill": "Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.",
   "reRegistrationSearchTitle": "Search a student",
-  "reRegistrationSearchByNameGroup": "By name",
-  "reRegistrationSearchByLevelGroup": "By cycle / level",
-  "reRegistrationSearchOrSeparator": "OR",
-  "reRegistrationSearchActiveModeLabel": "Active search by:",
-  "reRegistrationSearchModeNameBadge": "Name",
-  "reRegistrationSearchModeLevelBadge": "Cycle / level",
   "reRegistrationSearchLevelPlaceholder": "Choose a cycle first",
   "reRegistrationAcademicInfoHelp": "Select the target cycle and level to filter results.",
   "reRegistrationSearchNoOptions": "No cycle/level is available for this search.",
@@ -900,23 +925,10 @@
   "reRegistrationSearchInvitationTitle": "Start a re-registration search",
   "reRegistrationSearchInvitationMessage": "Fill the form above then click Search to display enrollment files.",
   "preRegistrationSearchHint": "Find a pre-registration by student or by desired cycle/level",
-  "preRegistrationSearchHelpPill": "Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.",
   "preRegistrationSearchTitle": "Search a pre-registration",
-  "preRegistrationSearchByNameGroup": "By name",
-  "preRegistrationSearchByLevelGroup": "By cycle / level",
-  "preRegistrationSearchOrSeparator": "OR",
-  "preRegistrationSearchActiveModeLabel": "Active search by:",
-  "preRegistrationSearchModeNameBadge": "Name",
-  "preRegistrationSearchModeLevelBadge": "Cycle / level",
   "preRegistrationSearchLevelPlaceholder": "Choose a cycle first",
   "preRegistrationSearchInvitationTitle": "Start a pre-registration search",
   "preRegistrationSearchInvitationMessage": "Fill the form above then click Search to display requests.",
-  "firstRegistrationSearchByStudentGroup": "By student",
-  "firstRegistrationSearchByLevelGroup": "By target level",
-  "firstRegistrationSearchOrSeparator": "OR",
-  "firstRegistrationSearchActiveModeLabel": "Active search by:",
-  "firstRegistrationSearchModeStudentBadge": "Student",
-  "firstRegistrationSearchModeLevelBadge": "Level",
   "firstRegistrationSearchLevelPlaceholder": "Choose a cycle",
   "firstName": "First Name",
   "lastName": "Last Name",
@@ -924,6 +936,14 @@
   "dateOfBirth": "Date of Birth",
   "search": "Search",
   "clear": "Clear",
+  "searchModeSwitchLabel": "Search by",
+  "searchModeSemantics": "Search mode",
+  "searchModeByClass": "By class",
+  "searchModeByIdentity": "By identity",
+  "searchModeClassHint": "Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.",
+  "searchModeIdentityHint": "Enter the student's last name, middle name and first name. To list a whole class, switch to \u201cBy class\u201d.",
+  "searchRefineByNameLabel": "Refine by last name (optional)",
+  "searchRefineByNamePlaceholder": "Student's last name, even partial",
   "viewDetails": "View details",
   "editEnrollment": "Edit",
   "exportData": "Export",
@@ -1054,8 +1074,14 @@
     }
   },
   "guardianSearchAction": "Search for a guardian",
-  "guardianSearchDialogTitle": "Search for an existing guardian",
-  "guardianSearchHint": "Enter at least one criterion (name or phone number)",
+  "guardianSearchDialogTitle": "Search for an existing parent",
+  "guardianSearchDialogEyebrow": "Guardians",
+  "guardianSearchModeSemantics": "Search mode",
+  "guardianSearchModeByPhone": "By number",
+  "guardianSearchModeByIdentity": "By identity",
+  "guardianSearchPhoneHint": "The number is enough, even partial: \"8169\" brings up every matching guardian.",
+  "guardianSearchIdentityHint": "Last name and first name are required. The middle name narrows the search when known.",
+  "guardianSearchResultsPlaceholder": "Matching guardians will appear here.",
   "guardianSearchEmptyTitle": "No guardian found",
   "guardianSearchEmptyDescription": "No guardian matches these criteria. Check your input or add them as a new guardian.",
   "guardianSearchAlreadyAddedError": "This guardian has already been added to this enrollment.",
@@ -1154,6 +1180,15 @@
   "identificationNumberHelp": "Official identification number.",
   "phoneNumberLabel": "Phone",
   "phoneNumberHelp": "Guardian's phone number.",
+  "phoneNumberCountryCodeLabel": "Country dialling code",
+  "phoneNumberInvalidError": "Invalid phone number ({expectedDigits} digits expected after the dialling code).",
+  "@phoneNumberInvalidError": {
+    "placeholders": {
+      "expectedDigits": {
+        "type": "int"
+      }
+    }
+  },
   "emailLabel": "Email",
   "emailLabelHelp": "Guardian's email address.",
   "relationshipFather": "Father",
@@ -1326,6 +1361,14 @@
   "studentChargesLoading": "Loading student charges...",
   "studentChargesRetry": "Retry",
   "studentChargesEmpty": "No charges are available for this student.",
+  "studentChargesFeeGridUnavailable": "The fee grid is not available on this device for this year. Synchronise before continuing.",
+  "@studentChargesFeeGridUnavailable": {
+    "description": "Fee step: the grid is missing from the local referential whatever the current account's right — a sync is enough, unlike the missing-right case"
+  },
+  "studentChargesTariffsWithheld": "Fees cannot be computed: your account has no access to the fee grid. Ask an authorised account to synchronise this device.",
+  "@studentChargesTariffsWithheld": {
+    "description": "Wizard fee step when the server withheld the fee grid from the referential for lack of finance.grid.read (ADR-014) — not to be confused with \"no charges\""
+  },
   "studentChargesUnavailable": "Student charges cannot be loaded without a student or target level.",
   "studentChargesAmountColumn": "Amount",
   "studentChargesLabelColumn": "Charge label",
@@ -1389,17 +1432,75 @@
   "facturationViewChargesLabel": "View charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
+  "facturationEmptyEnrollmentWithheld": "The student list belongs to the Enrolment module, which this profile cannot access: no student can be shown here, whatever the criteria. Your administrator can grant that access.",
   "facturationEmptyTitle": "No student found",
-  "facturationSearchHelpBanner": "Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.",
-  "facturationSearchByStudentGroup": "By student",
-  "facturationSearchByClassGroup": "By class",
-  "facturationSearchOrSeparator": "OR",
-  "facturationSearchActiveModeLabel": "Active search by:",
-  "facturationSearchModeStudentBadge": "Student",
-  "facturationSearchModeClassBadge": "Class",
+  "facturationSearchHelpBanner": "Search a whole class (cycle + level), or one specific student (last name + middle name + first name).",
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Level",
   "facturationSearchLevelPlaceholder": "Pick a cycle first",
+  "feeControlSearchTitle": "Control a fee",
+  "feeControlSearchHelpBanner": "Pick the class, then the fee to control. The payment status applies to that fee only.",
+  "feeControlSearchClassGroupTitle": "Class and fee",
+  "feeControlSearchStudentGroupTitle": "Narrow by student",
+  "feeControlSearchStudentGroupHint": "Optional",
+  "feeControlSearchCycleLabel": "Cycle",
+  "feeControlSearchLevelLabel": "Level",
+  "feeControlSearchLevelPlaceholder": "Pick a cycle first",
+  "feeControlClassroomLabel": "Class",
+  "feeControlClassroomPlaceholder": "Pick a level first",
+  "feeControlClassroomAll": "All classes of the level",
+  "feeControlClassroomEmptyForLevel": "No class has been composed for this level: the control covers the whole level.",
+  "feeControlClassroomWithheld": "Classes belong to a module this profile cannot access: the control covers the whole level.",
+  "feeControlFeeLabel": "Fee",
+  "feeControlFeePlaceholder": "Pick a level first",
+  "feeControlFeeEmptyForLevel": "No fee is defined for this level.",
+  "feeControlFeeGridMissing": "The fee schedule has not reached this device yet. Sync to control a fee.",
+  "feeControlFeeGridWithheld": "The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.",
+  "feeControlFeeLoadFailed": "The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.",
+  "feeControlFeeLoadRetry": "Try again",
+  "feeControlPaymentStatusLabel": "Payment status",
+  "feeControlPaymentStatusAll": "All",
+  "feeControlViewDetailLabel": "Open the financial record",
+  "feeControlSummaryA11yLabel": "Fee control summary",
+  "feeControlSummaryStudents": "Students concerned",
+  "feeControlInvitationTitle": "No control under way",
+  "feeControlInvitationMessage": "Pick a class then a fee above to see who has settled it.",
+  "feeControlEmptyTitle": "No student found",
+  "feeControlNoResultsDescription": "No student matches these criteria. Adjust the form and search again.",
+  "feeControlEmptyEnrollmentWithheld": "Students belong to the Enrolment module, which this profile cannot access: the control cannot cover anyone, whatever the criteria. Your administrator can grant that access.",
+  "feeControlEmptyClassroomWithheld": "Class composition belongs to a module this profile cannot access: checking by class is not possible. Search again without a class filter to cover the whole level.",
+  "feeControlEmptyRosterMissing": "This class's student list has not reached this device yet. Sync, then run the control again.",
+  "feeControlEmptyNoLocalEnrollment": "No student in this class has a local enrollment record for this year. Sync enrollments, then run the control again.",
+  "feeControlNoChargeDescription": "No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.",
+  "feeControlEmptyNoEnrollmentForLevel": "No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.",
+  "feeControlNoChargeForLevelDescription": "No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.",
+  "feeControlCriteriaFee": "Fee: {label}",
+  "@feeControlCriteriaFee": {
+    "description": "Criteria chip recalling the controlled fee.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaClassroom": "Class: {label}",
+  "@feeControlCriteriaClassroom": {
+    "description": "Criteria chip recalling the controlled class.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaStatus": "Status: {label}",
+  "@feeControlCriteriaStatus": {
+    "description": "Criteria chip recalling the requested payment status.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "facturationBalanceDuePill": "{amount} due",
   "@facturationBalanceDuePill": {
     "description": "Billing AppBar pill when the balance is outstanding.",
@@ -1491,6 +1592,8 @@
   "facturationDetailCollectPaymentAction": "Collect payment",
   "facturationDetailPaymentsRetry": "Retry",
   "facturationDetailPaymentsEmpty": "No payment has been recorded for this student.",
+  "facturationDetailPaymentsWithheldSubtitle": "Tracked by the cash desk.",
+  "facturationDetailPaymentsWithheld": "Payment detail belongs to the cash desk: it is not shown for this profile. The already-paid total at the top of the record is still accurate.",
   "facturationDetailPaymentPayerColumn": "Payer",
   "facturationDetailPaymentPaidAtColumn": "Date",
   "facturationDetailPaymentAmountColumn": "Amount",
@@ -1511,6 +1614,10 @@
   "facturationPaymentReceiptLabel": "Receipt no.",
   "facturationPaymentStudentLabel": "Student",
   "facturationPaymentDownloadReceiptLabel": "Download receipt",
+  "facturationPaymentReceiptForbiddenHint": "You are not allowed to issue this document.",
+  "@facturationPaymentReceiptForbiddenHint": {
+    "description": "Reason shown under a disabled receipt button when editique.write is missing (ADR-014) — not to be confused with pending synchronisation"
+  },
   "facturationPaymentReceiptPendingSyncHint": "The receipt will be available once the payment has been synchronised.",
   "facturationPaymentReceiptNumberPending": "Awaiting synchronisation",
   "facturationPaymentCloseLabel": "Close",
@@ -1574,6 +1681,7 @@
   "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Allocated total",
   "facturationChargeDetailAllocationsEmpty": "No allocation was found for this charge.",
+  "facturationChargeDetailAllocationsWithheld": "Payment allocation belongs to the cash desk: it is not detailed for this profile. The already-paid amount above is still accurate.",
   "facturationChargeDetailAllocationsRetry": "Retry",
   "facturationChargeDetailAllocationsNetworkError": "Unable to load allocations. Please check your internet connection.",
   "facturationChargeDetailAllocationsNotFound": "No allocation found for this charge.",
@@ -1610,6 +1718,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Add allocation",
   "facturationCreatePaymentAllChargesPaid": "All student charges are already paid.",
   "facturationCreatePaymentChargesUnavailable": "No charges available. Go back to the list and try again.",
+  "facturationCollectPreflightMessage": "Checking recent payments\u2026",
   "facturationCreatePaymentChargeDropdownHint": "Select a charge",
   "facturationCreatePaymentAmountLabel": "Amount to pay",
   "facturationCreatePaymentAmountHint": "E.g.: 5000",
@@ -2182,6 +2291,7 @@
   "statusAbsentJustified": "Justified",
   "statusAbsentUnjustified": "Absent",
   "statusSynced": "Up to date",
+  "statusPartiallySynced": "Partly up to date",
   "statusSyncing": "Syncing…",
   "statusOffline": "Offline",
   "statusPendingUpload": "Pending upload",
@@ -2215,6 +2325,9 @@
       }
     }
   },
+  "syncRowSynced": "Synced with the server",
+  "syncRowPending": "Waiting to be synced",
+  "syncRowError": "Rejected by the server — will not retry on its own",
   "syncErrorsTitle": "Failed writes",
   "syncErrorsSubtitle": "These records were rejected by the server. They will not be sent again on their own.",
   "syncErrorsRetry": "Retry",
@@ -2971,6 +3084,12 @@
     }
   },
   "syncErrorsForeignEntryAnonymous": "Written by another account — it has to be retried from that session.",
+  "syncSheetStatusTitle": "Sync status",
+  "syncSheetStatusSubtitle": "What this tablet has not received, and the writes the server refused — those will not go back on their own.",
+  "syncIncompleteReadTitle": "Some data is not coming down",
+  "syncIncompleteReadDescription": "The last update did not bring everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost. If this persists, your administrator can check your account's access rights.",
+  "syncIncompleteReadRetriableDescription": "The last update stopped before bringing everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost.",
+  "syncIncompleteReadRetry": "Try again",
   "syncErrorsHeldTitle": "Waiting",
   "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears.",
   "editiqueViewerReceiptTitle": "Payment receipt",
@@ -3028,12 +3147,6 @@
   "subMenuDocumentsStudent": "Student documents",
   "documentsSearchTitle": "Student documents",
   "documentsSearchHelpBanner": "Search for one student, or a whole class, then open their document catalogue.",
-  "documentsSearchByStudentGroup": "By student",
-  "documentsSearchByClassGroup": "By class",
-  "documentsSearchOrSeparator": "OR",
-  "documentsSearchActiveModeLabel": "Active mode",
-  "documentsSearchModeStudentBadge": "Student",
-  "documentsSearchModeClassBadge": "Class",
   "documentsSearchCycleLabel": "Cycle",
   "documentsSearchLevelLabel": "Level",
   "documentsSearchLevelPlaceholder": "Pick a cycle first",
@@ -3095,6 +3208,7 @@
   "ticketKeepNotice": "Keep this ticket until you receive your final receipt.",
   "ticketPrintLabel": "Print collection ticket",
   "ticketPrintFailed": "Printing unavailable: the ticket could not be produced.",
+  "ticketRefusedUnknownStudent": "Printing refused: this tablet does not know the student's name. The payment is recorded — print again after the next sync.",
   "ticketCutNotice": "Cut along the frame.",
   "ticketPrinterPickerTitle": "Choose the printer",
   "ticketPrinterUnnamed": "Unnamed printer",

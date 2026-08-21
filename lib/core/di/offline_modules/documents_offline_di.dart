@@ -139,6 +139,10 @@ void registerDocumentsOffline(GetIt getIt) {
       syncMetaDao: getIt<SyncMetaDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: requiredAuth,
+      // La MÊME autorité que celle qui garde l'écriture de l'index. Sans elle,
+      // le cycle descendait le catalogue entier, n'en gardait rien, et avançait
+      // quand même le curseur — ces pièces n'étaient jamais redemandées.
+      access: getIt<EditiqueCacheAccess>(),
     ),
   );
   getIt<PullCoordinator>().registerHandler(

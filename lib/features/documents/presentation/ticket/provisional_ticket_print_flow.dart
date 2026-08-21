@@ -33,6 +33,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// concurrente entre les deux remettrait au parent un papier qui ne dit pas ce
 /// que la thermique n'a pas réussi à imprimer.
 ///
+/// Une seule condition court-circuite les deux sorties : un **nom d'élève
+/// vide** (ADR-015 F1). Le refus est alors motivé, et c'est la seule exception
+/// à AM-11 — voir la garde elle-même.
+///
 /// ⚠️ Rien ici n'est un échec d'encaissement : le versement est **déjà écrit
 /// localement**. Tout ce qui suit ne coûte que du papier.
 Future<void> printProvisionalTicketWithFallback(
@@ -53,6 +57,34 @@ Future<void> printProvisionalTicketWithFallback(
 
   if (model == null) {
     messenger?.showSnackBar(SnackBar(content: Text(l10n.ticketPrintFailed)));
+    return;
+  }
+
+  // Zone élève vide → aucun papier, ni thermique ni PDF (ADR-015 F1).
+  //
+  // Le gabarit n'imprime pas une ligne blanche pour un nom vide, il n'émet
+  // AUCUNE ligne (`ticket_text_layout.dart`, `_wrapped`) : le ticket sort avec
+  // deux séparateurs qui se touchent et rien qui signale le trou. Ce papier ne
+  // nomme personne — ce n'est pas un justificatif dégradé, c'est un
+  // justificatif qui n'atteste rien, et le parent repart avec.
+  //
+  // Le refus porte sur les DEUX sorties parce que le PDF part du même gabarit :
+  // le replier ici ne ferait que produire le même papier anonyme par l'autre
+  // chemin. C'est l'unique exception à la doctrine AM-11 (« le parent repart
+  // avec un papier »), et elle est de son côté : AM-11 protège la preuve d'un
+  // versement, or un ticket sans nom n'en est pas une.
+  //
+  // La cause est presque toujours la même : la table `students` n'est hydratée
+  // que par le pull d'Inscription, gardé sur `enrollment.read`. D'où le motif,
+  // qui dit quoi attendre plutôt que d'accuser l'imprimante.
+  //
+  // ⚠️ L'encaissement, lui, est déjà écrit localement et reste intact. Le
+  // rattrapage reste ouvert (aucun `MarkTicketPrintedUseCase` ici) : le
+  // caissier réimprimera quand la donnée sera descendue.
+  if (model.studentFullName.trim().isEmpty) {
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l10n.ticketRefusedUnknownStudent)),
+    );
     return;
   }
 

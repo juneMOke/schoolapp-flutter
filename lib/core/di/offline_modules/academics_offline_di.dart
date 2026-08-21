@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
-import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -29,7 +27,6 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
-import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
@@ -177,22 +174,18 @@ void registerAcademicsOffline(GetIt getIt) {
   );
 
   // ── UseCases ──
-  // Hydratation au montage des scopes academics/schedule (le PullCoordinator ne
-  // se déclenche qu'au retour online — une tablette démarrée connectée ne
-  // tirerait jamais sans lui).
+  // Hydratation au montage des scopes academics/schedule. Elle reste nécessaire
+  // à côté du cycle complet : celui-ci part à l'ouverture de session et au
+  // retour online, et une tablette posée sur le Wi-Fi de l'école ne verra aucun
+  // retour online de la journée.
+  //
+  // Une seule dépendance depuis le lot F6 : le use case ne porte plus que la
+  // LISTE de ses ressources. Gardes (connectivité, crédentiels), permissions,
+  // ordre et diffusion sur le `PullCompletionBus` sont passés dans le socle —
+  // d'où la disparition d'`AuthSessionManager`, `ConnectivityService` et
+  // `PullCompletionBus` de cette construction.
   getIt.registerFactory<SyncAcademicsPullsUseCase>(
-    () => SyncAcademicsPullsUseCase(
-      schedulePullRepository: getIt<SchedulePullRepositoryImpl>(),
-      coursPullRepository: getIt<AcademicsCoursPullRepositoryImpl>(),
-      metierPullRepository: getIt<AcademicsMetierPullRepositoryImpl>(),
-      gradesReferentialPullRepository:
-          getIt<GradesReferentialPullRepositoryImpl>(),
-      credentialsProbe: getIt<AuthSessionManager>(),
-      connectivity: getIt<ConnectivityService>(),
-      // Réveille l'emploi du temps / « Mes cours » quand l'hydratation a
-      // effectivement rempli le cache (la lecture locale l'a précédée).
-      completionBus: getIt<PullCompletionBus>(),
-    ),
+    () => SyncAcademicsPullsUseCase(getIt<PullCoordinator>()),
   );
 
   // ── Handlers d'outbox (push, routés par aggregateType) ──
@@ -214,6 +207,21 @@ void registerAcademicsOffline(GetIt getIt) {
   );
 
   // ── Handlers de pull delta (routés par ressource) ──
+  //
+  // ⚠️ L'ORDRE D'ENREGISTREMENT EST L'ORDRE D'EXÉCUTION : le coordinateur itère
+  // `_handlers.values`, et une `LinkedHashMap` conserve la position
+  // d'insertion. Le référentiel de notes vient donc EN PREMIER — il était
+  // enregistré dernier des six, à rebours du graphe de dépendances (ADR-015 K),
+  // alors que le détail d'un cours et la composition des évaluations le lisent.
+  //
+  // Depuis le lot F6, c'est le SEUL endroit où cet ordre est décidé :
+  // `SyncAcademicsPullsUseCase` en tenait une seconde copie, il ne fournit plus
+  // qu'un ensemble de ressources et `pullSubset` les exécute dans l'ordre
+  // ci-dessous. Le figer reste indispensable — cf.
+  // `test/core/di/offline_pull_registration_order_test.dart`.
+  getIt<PullCoordinator>().registerHandler(
+    GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
+  );
   getIt<PullCoordinator>().registerHandler(
     TimeSlotsPullHandler(getIt<SchedulePullRepositoryImpl>()),
   );
@@ -228,8 +236,5 @@ void registerAcademicsOffline(GetIt getIt) {
   );
   getIt<PullCoordinator>().registerHandler(
     NotesPullHandler(getIt<AcademicsMetierPullRepositoryImpl>()),
-  );
-  getIt<PullCoordinator>().registerHandler(
-    GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
   );
 }

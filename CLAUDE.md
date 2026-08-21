@@ -38,6 +38,14 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 8. **`mounted` guard après chaque `await`** dans un `StatefulWidget`.
 9. **`buildWhen` / `listenWhen`** dès qu'un rebuild partiel est possible.
 10. **États (chargement / vide / erreur) via les widgets partagés** — jamais de spinner ni `StateCard` ad hoc pour une zone de résultats. Chargement → `EteeloListSkeleton` / `EteeloSkeletonBox` (reduced-motion respecté). Vide → `EteeloEmptyResult` (médaillon pointillé + action). Erreur → `EteeloErrorResult` via un wrapper `XxxResultsErrorState` (anatomie 4 types : réseau / 401 / 403 / 500, 403 ne propose jamais « Réessayer »). Détails dans AGENTS.md §"États partagés".
+11. **Formatage des champs texte par défaut** — `EteeloTextInput` capitalise
+    seul (mot par mot pour une identité, première lettre pour un texte libre).
+    C'est l'**exception** qui se déclare (`EteeloTextCapitalization.none`),
+    jamais la règle.
+12. **Recherche bi-mode → bascule exclusive** (`SearchModeSwitch` /
+    `BiModeSearchForm`), jamais deux blocs concurrents reliés par un « OU ».
+    Classe en premier, identité en second ; seuls les critères du mode actif
+    partent. Détails dans AGENTS.md §"Formulaires de recherche".
 
 ## Modules (`lib/features/`)
 

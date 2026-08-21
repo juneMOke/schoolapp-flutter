@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
@@ -10,11 +12,19 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_le
 /// Implémentation **offline-first** de [StudentChargesRepository] (Stratégie C).
 ///
 /// Les lectures sont servies par le grand-livre LOCAL avec le **reste composé
-/// au read** (FRONT §5), précédées d'un **rafraîchissement ciblé** best-effort
-/// (§6 step 2) qui peuple le local si le réseau est là. L'UI online (BLoC +
-/// widgets) reste inchangée : elle consomme des [StudentCharge] enrichis via les
-/// mappers. L'édition admin (`updateStudentChargeExpectedAmount`) reste
-/// **déléguée à l'online** (hors périmètre offline-first).
+/// au read** (FRONT §5), **sans rien attendre** : la revalidation ciblée
+/// (§6 step 2) part en même temps mais n'est pas awaitée, et annonce son
+/// aboutissement sur `FinanceLedgerRefresher.revalidated` — c'est l'écran qui
+/// relit alors. Attendue, elle tenait le skeleton du détail élève jusqu'à ~22 s
+/// en réseau dégradé pour afficher des lignes **déjà en base**. L'attente ne
+/// subsiste que devant l'**encaissement**, seul endroit où elle borne un risque
+/// d'argent, et `FACTURATION_OFFLINE_PLAN.md` §13 ne l'avait jamais placée
+/// ailleurs.
+///
+/// L'UI online (BLoC + widgets) reste inchangée : elle consomme des
+/// [StudentCharge] enrichis via les mappers. L'édition admin
+/// (`updateStudentChargeExpectedAmount`) reste **déléguée à l'online** (hors
+/// périmètre offline-first).
 class StudentChargesOfflineFirstRepository implements StudentChargesRepository {
   final FinanceLocalDao _dao;
   final LedgerRefresh _refresh;
@@ -45,10 +55,12 @@ class StudentChargesOfflineFirstRepository implements StudentChargesRepository {
     required String? academicYearId,
   }) async {
     try {
-      // Rafraîchissement ciblé (best-effort) AVANT la lecture — l'endpoint
-      // ledger?studentId exige l'année, donc on ne peut le tenter que si connue.
+      // Revalidation ciblée lancée AVANT la lecture pour partir au plus tôt,
+      // mais délibérément NON attendue : ce qui est lent ici c'est le réseau,
+      // pas la base. L'endpoint `ledger?studentId` exige l'année — sans elle
+      // (flux brouillon du wizard), il n'y a rien à tirer.
       if (academicYearId != null) {
-        await _refresh(studentId, academicYearId);
+        unawaited(_refresh(studentId, academicYearId));
       }
       final local = await _dao.getChargesByStudent(studentId);
       final scoped = academicYearId == null

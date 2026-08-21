@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -11,17 +12,17 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_state.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_search_form.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_search_results_list.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Popin "Rechercher un parent" (étape Tuteurs) : recherche locale par
-/// nom/postnom/prénom et/ou téléphone, sélection immédiate au tap (comme
-/// `showEteeloSelectSheet`) — renvoie le parent choisi ou `null` si annulé.
+/// Popin "Rechercher un parent" (étape Tuteurs) : recherche locale par numéro
+/// OU par identité, sélection immédiate au tap (comme `showEteeloSelectSheet`)
+/// — renvoie le parent choisi ou `null` si annulé.
 Future<LocalParent?> showParentSearchDialog({required BuildContext context}) {
   return showDialog<LocalParent>(
     context: context,
@@ -41,68 +42,31 @@ class _ParentSearchDialog extends StatefulWidget {
 }
 
 class _ParentSearchDialogState extends State<_ParentSearchDialog> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _surnameController = TextEditingController();
-  final _phoneController = TextEditingController();
+  /// Derniers critères validés : le bouton « Réessayer » de l'état d'erreur
+  /// les rejoue tels quels, sans obliger à ressaisir.
+  ParentSearchCriteria? _lastCriteria;
 
-  bool get _canSearch =>
-      _firstNameController.text.trim().isNotEmpty ||
-      _lastNameController.text.trim().isNotEmpty ||
-      _surnameController.text.trim().isNotEmpty ||
-      _phoneController.text.trim().isNotEmpty;
-
-  @override
-  void initState() {
-    super.initState();
-    for (final c in [
-      _firstNameController,
-      _lastNameController,
-      _surnameController,
-      _phoneController,
-    ]) {
-      c.addListener(_onFieldChanged);
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final c in [
-      _firstNameController,
-      _lastNameController,
-      _surnameController,
-      _phoneController,
-    ]) {
-      c.removeListener(_onFieldChanged);
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  void _onFieldChanged() => setState(() {});
-
-  String? _trimmedOrNull(String value) {
-    final trimmed = value.trim();
-    return trimmed.isEmpty ? null : trimmed;
-  }
-
-  void _search() {
-    if (!_canSearch) return;
+  void _search(ParentSearchCriteria criteria) {
+    _lastCriteria = criteria;
     context.read<ParentSearchBloc>().add(
       ParentSearchRequested(
-        firstName: _trimmedOrNull(_firstNameController.text),
-        lastName: _trimmedOrNull(_lastNameController.text),
-        surname: _trimmedOrNull(_surnameController.text),
-        phoneNumber: _trimmedOrNull(_phoneController.text),
+        firstName: criteria.firstName,
+        lastName: criteria.lastName,
+        surname: criteria.surname,
+        phoneNumber: criteria.phoneNumber,
       ),
     );
+  }
+
+  void _retry() {
+    final criteria = _lastCriteria;
+    if (criteria != null) _search(criteria);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.sizeOf(context);
-    final maxHeight = size.height * 0.85;
     final inset = size.width <= AppBreakpoints.dataTablePhoneMax
         ? AppDimensions.spacingM
         : AppDimensions.spacingL;
@@ -116,128 +80,63 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.guardianSearchModalMaxWidth,
-          maxHeight: maxHeight,
+          maxHeight: size.height * 0.85,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(l10n),
-            const Divider(height: 1, color: AppColors.border),
-            Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacingL),
-              child: _buildSearchForm(l10n),
-            ),
-            const Divider(height: 1, color: AppColors.border),
-            // Flexible + scroll : la zone résultats (squelette/vide/erreur/
-            // liste) doit pouvoir se réduire OU défiler sans jamais déborder,
-            // le budget vertical restant dépendant du nombre de lignes prises
-            // par le formulaire de recherche (Wrap responsive).
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.spacingL),
-                child: _buildResults(l10n),
+        child: EteeloDialogBody(
+          // Seul l'en-tête reste ancré — titre et croix de fermeture ne
+          // doivent jamais fuir vers le haut. Il pèse 86 dp ; sous ce seuil
+          // (paysage clavier ouvert, ~63 dp offerts) il déborderait à lui
+          // tout seul, et rejoint donc le défilement comme le reste.
+          minPinnedHeight: 160,
+          header: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              EteeloDialogDarkHeader(
+                eyebrow: l10n.guardianSearchDialogEyebrow,
+                title: l10n.guardianSearchDialogTitle,
+                onClose: () => Navigator.of(context).pop(),
               ),
-            ),
-          ],
+              const EteeloDialogGoldDivider(),
+            ],
+          ),
+          // Les critères DÉFILENT avec les résultats.
+          //
+          // Ils restaient figés au-dessus tant qu'ils tenaient en quatre
+          // champs nus. Depuis la bascule de mode, l'aide contextuelle et les
+          // champs requis, le bloc figé pèserait 494 dp (86 d'en-tête + 373
+          // de formulaire en mode identité + marges) et il faudrait 726 dp de
+          // hauteur offerte pour garder aux résultats leur place minimale —
+          // quand la cible, une tablette 10" en paysage, n'en offre que 680.
+          // Le figer reviendrait donc à écraser les résultats partout, et à
+          // garder pour rien la bascule qui avait rendu le champ intapable
+          // (défaut H-1).
+          bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
+          footer: const [],
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Seul l'état de chargement compte ici : `buildWhen` évite de
+              // reconstruire le formulaire (et sa saisie en cours) à chaque
+              // arrivée de résultats.
+              BlocBuilder<ParentSearchBloc, ParentSearchState>(
+                buildWhen: (prev, curr) =>
+                    (prev is ParentSearchLoading) !=
+                    (curr is ParentSearchLoading),
+                builder: (context, state) => ParentSearchForm(
+                  onSearch: _search,
+                  isSearching: state is ParentSearchLoading,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingL),
+              const Divider(height: 1, color: AppColors.border),
+              const SizedBox(height: AppDimensions.spacingL),
+              _buildResults(l10n),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              l10n.guardianSearchDialogTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-            icon: const Icon(Icons.close_rounded, size: 20),
-            color: AppColors.textSecondary,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchForm(AppLocalizations l10n) {
-    final nameFormatters = <TextInputFormatter>[
-      const FirstLetterUppercaseTextInputFormatter(),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          l10n.guardianSearchHint,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Wrap(
-          spacing: AppDimensions.spacingM,
-          runSpacing: AppDimensions.spacingM,
-          children: [
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.firstName,
-                controller: _firstNameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.lastName,
-                controller: _lastNameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.surname,
-                controller: _surnameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.phoneNumberLabel,
-                controller: _phoneController,
-                keyboardType: EteeloTextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
-                ],
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Align(
-          alignment: Alignment.centerRight,
-          child: EteeloButton.primary(
-            label: l10n.search,
-            onPressed: _canSearch ? _search : null,
-          ),
-        ),
-      ],
     );
   }
 
@@ -245,15 +144,18 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
     return BlocBuilder<ParentSearchBloc, ParentSearchState>(
       builder: (context, state) {
         return switch (state) {
-          ParentSearchInitial() => SizedBox(
-            height: AppDimensions.guardianSearchResultsMinHeight,
-            child: Center(
-              child: Text(
-                l10n.guardianSearchHint,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+          // Avant toute recherche, la zone reste COMPACTE : lui réserver la
+          // hauteur d'une liste pousserait le champ et le bouton hors de la
+          // fenêtre à l'ouverture, alors que c'est là que tout se joue.
+          ParentSearchInitial() => Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppDimensions.spacingS,
+            ),
+            child: Text(
+              l10n.guardianSearchResultsPlaceholder,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -262,7 +164,7 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
             pillCount: 0,
             semanticsLabel: l10n.guardianSearchDialogTitle,
           ),
-          ParentSearchLoaded(:final results) => _ResultsList(
+          ParentSearchLoaded(:final results) => ParentSearchResultsList(
             results: results,
             onSelected: (parent) => Navigator.of(context).pop(parent),
           ),
@@ -287,82 +189,10 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
             ),
             primaryAction: EteeloButton.primary(
               label: l10n.guardianSearchErrorRetry,
-              onPressed: _search,
+              onPressed: _retry,
             ),
           ),
         };
-      },
-    );
-  }
-}
-
-class _ResultsList extends StatelessWidget {
-  final List<LocalParent> results;
-  final ValueChanged<LocalParent> onSelected;
-
-  const _ResultsList({required this.results, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      itemCount: results.length,
-      separatorBuilder: (_, _) =>
-          const SizedBox(height: AppDimensions.spacingS),
-      itemBuilder: (context, index) {
-        final parent = results[index];
-        final fullName = [
-          parent.firstName,
-          parent.surname,
-          parent.lastName,
-        ].where((part) => part != null && part.trim().isNotEmpty).join(' ');
-
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => onSelected(parent),
-            borderRadius: AppRadius.brMd,
-            child: Container(
-              padding: const EdgeInsets.all(AppDimensions.spacingM),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: AppRadius.brMd,
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fullName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyStrong.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          parent.phoneNumber,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
       },
     );
   }

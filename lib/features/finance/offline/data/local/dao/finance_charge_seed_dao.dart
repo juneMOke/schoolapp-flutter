@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
@@ -139,21 +140,45 @@ class FinanceChargeSeedDao {
   /// Tarifs applicables : ceux du niveau visé + ceux définis au CYCLE seul
   /// (`school_level_id` NULL), scopés année-du-wizard-ou-NULL (la grille peut
   /// conserver plusieurs saisons — purge du pull scopée par année).
+  /// La grille tarifaire est-elle présente **sur cet appareil** pour cette
+  /// année ? Distingue les deux causes d'une liste de créances vide, qui se
+  /// ressemblent à l'écran et pas au guichet :
+  ///  - table vide pour l'année → le référentiel n'a pas été hydraté (le
+  ///    serveur caviarde `feeTariffs` pour qui n'a pas `finance.grid.read`,
+  ///    et le pull laisse alors `ref_academic_years` peuplée mais la grille
+  ///    absente) → il n'y a rien à annoncer, il faut synchroniser ;
+  ///  - table peuplée mais aucun tarif pour ce niveau → information réelle,
+  ///    ce niveau n'a pas de frais.
+  ///
+  /// Même clause d'année que [_queryTariffs] : la grille conserve plusieurs
+  /// saisons, et un tarif à année NULL vaut pour toutes.
+  Future<bool> hasAnyTariffForYear(String academicYearId) async {
+    final rows = await _db.query(
+      'ref_fee_tariffs',
+      columns: ['id'],
+      where: 'academic_year_id = ? OR academic_year_id IS NULL',
+      whereArgs: [academicYearId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
   Future<List<Map<String, Object?>>> _queryTariffs(
     DatabaseExecutor txn, {
     required String academicYearId,
     required String schoolLevelId,
     String? schoolLevelGroupId,
   }) {
-    final levelClause = schoolLevelGroupId == null
-        ? 'school_level_id = ?'
-        : '(school_level_id = ? OR '
-              '(school_level_id IS NULL AND school_level_group_id = ?))';
+    // Périmètre partagé avec la lecture du Contrôle des frais : ce que l'élève
+    // DOIT et ce que l'on peut CONTRÔLER se lisent sur la même clause.
     return txn.query(
       'ref_fee_tariffs',
-      where:
-          '$levelClause AND (academic_year_id = ? OR academic_year_id IS NULL)',
-      whereArgs: [schoolLevelId, ?schoolLevelGroupId, academicYearId],
+      where: FeeTariffScope.whereClause(schoolLevelGroupId: schoolLevelGroupId),
+      whereArgs: FeeTariffScope.whereArgs(
+        schoolLevelId: schoolLevelId,
+        academicYearId: academicYearId,
+        schoolLevelGroupId: schoolLevelGroupId,
+      ),
     );
   }
 

@@ -55,7 +55,7 @@ Le `main.dart` écoute `AuthBloc.state.status` et déclenche :
 → **Toute modification de `AuthStatus`** doit être vérifiée contre :
 - `main.dart` (listener)
 - `app_router.dart` (`RouterNotifier`, logique de redirect)
-- `academic_year_context_bloc.dart` (réactions, dont `sessionExpired` sur 401/403)
+- `academic_year_context_bloc.dart` (réactions, dont `sessionExpired` sur **401 seulement** — le 403 dit « droits insuffisants », pas « session morte », cf. ADR-014 §4)
 
 ## Token & session
 

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classroom_referential_use_case.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 
 class AttendanceFeatureScope extends StatefulWidget {
@@ -45,6 +46,20 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
     // Le second déclencheur (retour online) passe par le PullCoordinator. Le
     // pull ne lève jamais et l'UI lit TOUJOURS le local : on l'oublie sciemment.
     unawaited(GetIt.instance<SyncAttendancePullUseCase>().call());
+    // Le référentiel Classe (classes + roster + transferts) est un PRÉ-REQUIS
+    // de ce module, pas une affinité : la feuille d'appel est pilotée par le
+    // roster, et le résumé d'assiduité de la fiche élève refuse tout affichage
+    // tant que le marqueur de bootstrap des transferts n'est pas posé. Aucun
+    // autre déclencheur de montage ne les tirait : sur une tablette démarrée
+    // déjà connectée, l'onglet Présence restait à vie sur « Synchronisation en
+    // attente » (ADR-015 §6-D).
+    //
+    // ⚠️ Depuis le repli F6, ces deux pulls passent par le `PullCoordinator` et
+    // sont donc filtrés par les droits de la session : le référentiel Classe
+    // exige `classroom.read`. Un rôle qui ne fait que l'appel sans ce droit
+    // n'aura jamais le marqueur de bootstrap — ce qui était déjà le cas, mais
+    // par un 403 du serveur ; le refus est désormais local et silencieux.
+    unawaited(GetIt.instance<SyncClassroomReferentialUseCase>().call());
   }
 
   @override

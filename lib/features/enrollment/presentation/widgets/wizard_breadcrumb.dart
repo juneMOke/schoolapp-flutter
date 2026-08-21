@@ -7,11 +7,19 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/brea
 /// Barre du stepper d'inscription (PARCOURS 18) : bande pleine largeur collée
 /// sous l'AppBar — barre de progression dégradée puis la rangée de steps
 /// (chip + connecteurs + « ÉTAPE N » / description) répartis de bout en bout.
+///
+/// En [compact], la bande garde son fond et son liseré mais se réduit à sa
+/// seule progression : une dizaine de dp au lieu d'une centaine (cf.
+/// `WizardChromeDensity`).
 class WizardBreadcrumb extends StatelessWidget {
   final List<String> titles;
   final int currentStep;
   final double progress;
   final ValueChanged<int> onStepTap;
+
+  /// Barre réduite à sa progression, quand la hauteur disponible ne permet plus
+  /// d'afficher les steps sans manger le champ en cours de saisie.
+  final bool compact;
 
   const WizardBreadcrumb({
     super.key,
@@ -19,36 +27,43 @@ class WizardBreadcrumb extends StatelessWidget {
     required this.currentStep,
     required this.progress,
     required this.onStepTap,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final progressBar = WizardProgressBar(
+      progress: progress,
+      reduceMotion: reduceMotion,
+    );
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        vertical: compact ? AppSpacing.xs : AppSpacing.sm,
       ),
       decoration: const BoxDecoration(
         color: AppColors.surfaceRaised,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          WizardProgressBar(progress: progress, reduceMotion: reduceMotion),
-          const SizedBox(height: AppSpacing.md),
-          _StepRow(
-            titles: titles,
-            currentStep: currentStep,
-            reduceMotion: reduceMotion,
-            onStepTap: onStepTap,
-          ),
-        ],
-      ),
+      child: compact
+          ? progressBar
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                progressBar,
+                const SizedBox(height: AppSpacing.md),
+                _StepRow(
+                  titles: titles,
+                  currentStep: currentStep,
+                  reduceMotion: reduceMotion,
+                  onStepTap: onStepTap,
+                ),
+              ],
+            ),
     );
   }
 }

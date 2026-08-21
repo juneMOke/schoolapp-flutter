@@ -106,6 +106,10 @@ class AppDimensions {
 
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
+
+  /// Largeur d'un critère d'identité de la recherche de parent (Nom,
+  /// Post-nom, Prénom), posés dans un `Wrap`.
+  static const guardianSearchCriterionWidth = 200.0;
   static const guardianSearchResultsMinHeight = 200.0;
 
   // Connexion — panneau formulaire (spec §01).
@@ -190,6 +194,11 @@ class AppDimensions {
   static const chipPaddingH = 10.0;
   static const chipPaddingV = 4.0;
   static const chipIconSize = 12.0;
+
+  /// Picto d'état de synchro d'une ligne de listing (SyncStateIcon) : assez
+  /// grand pour rester lisible sans libellé, assez discret pour ne pas
+  /// concurrencer la pastille de statut métier voisine.
+  static const syncStateIconSize = 16.0;
 
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;

@@ -18,7 +18,19 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 // ── Inscription ──────────────────────────────────────────────────────────────
 
 /// `students` — élèves saisis localement (uuid client). `matriculation_number`
-/// et `email` sont NULL hors-ligne (« en cours d'attribution »), remplis à l'ACK.
+/// est NULL hors-ligne (« en cours d'attribution »), rempli à l'ACK.
+///
+/// ⚠️ `phone_number` et `email` sont **inertes depuis la v27** : plus rien ne
+/// les écrit, et la migration a effacé ce qui était déjà descendu. Ils portaient
+/// de la donnée personnelle qu'aucune requête ne lisait et que le mapper vers
+/// l'écran abandonnait (`StudentDetail` ne les déclare pas) — elle descendait du
+/// pull hydratant et dormait sur chaque tablette. Les colonnes restent déclarées
+/// parce que SQLite ne sait pas en retirer une sans reconstruire la table, et
+/// `students` est la source de Facturation, du Contrôle des frais, de Documents
+/// et du ticket imprimé : le gain ne vaut pas le risque.
+///
+/// Le tuteur, lui, garde son téléphone (`parents.phone_number`) — c'est la clé
+/// d'unicité applicative du rapprochement RE/PRE, pas un contact dormant.
 const TableSchema studentsTable = TableSchema(
   name: 'students',
   createTableSql: '''
@@ -46,7 +58,8 @@ const TableSchema studentsTable = TableSchema(
     )
   ''',
   createIndexSql: [
-    'CREATE INDEX idx_students_phone ON students(phone_number)',
+    // Pas d'index sur `phone_number` (retiré v27) : il portait sur une colonne
+    // qu'aucune requête n'interrogeait — du coût d'écriture pur à chaque élève.
     'CREATE INDEX idx_students_names ON students(last_name, first_name)',
     'CREATE INDEX idx_students_dob ON students(date_of_birth)',
   ],
@@ -80,6 +93,11 @@ const TableSchema parentsTable = TableSchema(
     )
   ''',
   createIndexSql: [
+    // `idx_parents_phone` ne porte plus les rapprochements de tuteurs :
+    // ceux-ci comparent une clé normalisée (`PhoneNumberSql.matchKey`) pour
+    // reconnaître un même numéro écrit autrement, ce qu'un index sur la
+    // valeur brute ne peut pas servir. Conservé faute de justifier un
+    // palier de schéma à lui seul.
     'CREATE INDEX idx_parents_phone ON parents(phone_number)',
     'CREATE INDEX idx_parents_names ON parents(last_name, first_name)',
   ],

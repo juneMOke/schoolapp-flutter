@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 
 /// Qui a le droit de détenir des pièces scellées sur cette tablette (RG-012-4).
@@ -65,7 +66,29 @@ class LocalEditiqueCacheAccess implements EditiqueCacheAccess {
   Future<bool> isEntitled() async {
     try {
       final user = await _authLocalDao.getSessionUser();
-      return EditiqueCacheEntitlement.isAllowed(user?.role);
+      if (user == null) return false;
+      // ── La PERMISSION fait autorité, le rôle n'est que son repli (ADR-014) ──
+      //
+      // La liste blanche ci-dessus était la seule décision de tout le dépôt
+      // prise à partir d'un rôle — une chaîne libre du serveur, sans enum ni
+      // validation. C'est exactement la « copie durcie du modèle de droits,
+      // embarquée dans l'APK » que ce chantier a passé son temps à démonter :
+      // elle rend aujourd'hui le même verdict que `editique.read` sur les six
+      // profils par défaut, et diverge silencieusement dès qu'une école crée un
+      // rôle sur mesure.
+      //
+      // **Substitution, jamais union**, comme partout ailleurs ici : le rôle
+      // reprend la main PARCE QUE l'ensemble est inconnu, pas en plus de lui.
+      //
+      // ⚠️ Un basculement sec serait une panne de parc. La colonne
+      // `permissions` a été ajoutée SANS backfill : tout compte antérieur la
+      // porte à `null`, ce qui est massif au premier démarrage. Traduire `null`
+      // en refus fermerait le cache à tout le monde ; le traduire en accord
+      // l'ouvrirait aux enseignants. Le tri-état est donc respecté à la lettre —
+      // `null` n'est ni l'un ni l'autre, c'est « demande au rôle ».
+      final held = user.permissions;
+      if (held == null) return EditiqueCacheEntitlement.isAllowed(user.role);
+      return held.contains(Perm.editiqueRead.wire);
     } catch (_) {
       // Une base qu'on ne sait pas lire ne prouve aucun droit.
       return false;

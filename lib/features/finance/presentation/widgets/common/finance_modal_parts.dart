@@ -3,125 +3,15 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 
-/// Briques communes aux popins de facturation (détail paiement / frais).
+/// Briques communes aux popins de facturation (détail paiement / frais) :
+/// lignes clé/valeur et pied à deux actions responsive — pour un rendu
+/// strictement identique d'une popin à l'autre.
 ///
-/// En-tête sombre type AppBar applicative, liseré or-doux, lignes clé/valeur
-/// et pied à deux actions responsive — pour un rendu strictement identique
-/// d'une popin à l'autre.
-
-/// En-tête sombre : sur-titre or-doux (MAJUSCULES) + titre blanc + pastille
-/// optionnelle (statut/solde) + croix de fermeture. Fond Bleu Profond texturé
-/// Kuba, comme l'AppBar de la page Facturation (spec §06).
-class FinanceModalDarkHeader extends StatelessWidget {
-  final String eyebrow;
-  final String title;
-  final Widget? trailing;
-  final VoidCallback onClose;
-
-  const FinanceModalDarkHeader({
-    super.key,
-    required this.eyebrow,
-    required this.title,
-    required this.onClose,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [AppColors.bleuProfond, AppColors.bleuArdoise],
-        ),
-      ),
-      child: Stack(
-        children: [
-          const KubaPatternLayer(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppDimensions.spacingM,
-              AppDimensions.spacingM,
-              AppDimensions.spacingS,
-              AppDimensions.spacingM,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        eyebrow.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.orDoux,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXS),
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.totalAmountLora.copyWith(
-                          fontSize: 24,
-                          color: AppColors.textOnDark,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (trailing != null) ...[
-                  const SizedBox(width: AppDimensions.spacingS),
-                  trailing!,
-                ],
-                const SizedBox(width: AppDimensions.spacingXS),
-                IconButton(
-                  onPressed: onClose,
-                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                  icon: const Icon(Icons.close_rounded, size: 20),
-                  color: AppColors.textOnDark,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Liseré or-doux (dégradé horizontal, opacité .55) séparant l'en-tête.
-class FinanceModalGoldDivider extends StatelessWidget {
-  const FinanceModalGoldDivider({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 2,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.orDoux.withValues(alpha: 0),
-            AppColors.orDoux.withValues(alpha: 0.55),
-            AppColors.orDoux.withValues(alpha: 0),
-          ],
-        ),
-      ),
-    );
-  }
-}
+/// L'en-tête sombre et son liseré ont rejoint le socle partagé
+/// (`EteeloDialogDarkHeader`, `EteeloDialogGoldDivider`) : ils servent
+/// désormais au-delà de Facturation.
 
 /// Donnée d'une ligne clé/valeur d'une popin de facturation.
 class FinanceKeyValueRow {

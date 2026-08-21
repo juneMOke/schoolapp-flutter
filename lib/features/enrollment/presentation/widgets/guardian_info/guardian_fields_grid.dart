@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -91,7 +91,6 @@ class GuardianFieldsGrid extends StatelessWidget {
             controller: firstNameController,
             required: true,
             readOnly: !isEditable || identityReadOnly,
-            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
         WizardGridField(
@@ -100,7 +99,6 @@ class GuardianFieldsGrid extends StatelessWidget {
             controller: lastNameController,
             required: true,
             readOnly: !isEditable || identityReadOnly,
-            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
         WizardGridField(
@@ -108,20 +106,15 @@ class GuardianFieldsGrid extends StatelessWidget {
             label: l10n.surname,
             controller: surnameController,
             readOnly: !isEditable || identityReadOnly,
-            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
         WizardGridField(
-          EteeloTextInput(
+          EteeloPhoneInput(
             label: l10n.phoneNumberLabel,
             controller: phoneController,
-            keyboardType: EteeloTextInputType.phone,
             required: true,
             readOnly: !isEditable || identityReadOnly,
-            placeholder: l10n.phoneNumberHelp,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
-            ],
+            dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
           ),
         ),
         WizardGridField(

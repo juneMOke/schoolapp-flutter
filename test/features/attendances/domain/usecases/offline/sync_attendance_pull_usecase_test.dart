@@ -1,107 +1,65 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/offline/attendance_pull_outcome.dart';
-import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
 
-class MockAttendancePullRepository extends Mock
-    implements AttendancePullRepository {}
+class _MockPullCoordinator extends Mock implements PullCoordinator {}
 
-class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
-
-class MockConnectivityService extends Mock implements ConnectivityService {}
-
+/// Depuis ADR-015 F6, ce use case ne possède plus qu'une chose : **l'ensemble
+/// des ressources dont l'écran a besoin**. Les gardes qu'il portait — pré-garde
+/// de connectivité, sonde de crédentiels, filtre de permission, isolation des
+/// échecs — sont dans le socle, où elles valent pour les deux points d'entrée du
+/// coordinateur et sont prouvées une seule fois.
+///
+/// Les tester encore ici les prouverait sur un mock, c'est-à-dire nulle part :
+/// un `PullCoordinator` bouchonné ne refuse rien. Ce fichier vérifie donc le
+/// contrat qui reste — quelles ressources sont demandées, et que rien n'est
+/// décidé avant de les demander.
 void main() {
-  late MockAttendancePullRepository repository;
-  late MockCredentialsProbe credentialsProbe;
-  late MockConnectivityService connectivity;
+  late _MockPullCoordinator coordinator;
   late SyncAttendancePullUseCase useCase;
 
-  const outcome = AttendancePullOutcome(
-    upserted: 1,
-    notModified: false,
-    bootstrapComplete: true,
-    syncedAt: 10000,
-  );
+  setUpAll(() => registerFallbackValue(<String>{}));
 
   setUp(() {
-    repository = MockAttendancePullRepository();
-    credentialsProbe = MockCredentialsProbe();
-    connectivity = MockConnectivityService();
+    coordinator = _MockPullCoordinator();
     when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenAnswer((_) async => true);
-    when(() => connectivity.isOnline()).thenAnswer((_) async => true);
-    useCase = SyncAttendancePullUseCase(
-      repository,
-      credentialsProbe,
-      connectivity,
+      () => coordinator.pullSubset(any()),
+    ).thenAnswer((_) async => const PullRunReport(updated: 1));
+    useCase = SyncAttendancePullUseCase(coordinator);
+  });
+
+  Set<String> demande() =>
+      verify(() => coordinator.pullSubset(captureAny())).captured.single
+          as Set<String>;
+
+  test('demande la ressource Présence, et elle seule', () async {
+    await useCase();
+
+    expect(demande(), {kAttendanceResource});
+  });
+
+  test('délègue sans condition : aucune garde n\'est rejouée ici', () async {
+    await useCase();
+
+    verify(() => coordinator.pullSubset(any())).called(1);
+    // Le socle décide de tirer ou non ; le use case ne consulte ni la
+    // connectivité, ni les crédentiels, ni les droits — il n'a plus de quoi.
+    verifyNoMoreInteractions(coordinator);
+  });
+
+  test('rend le bilan du cycle tel quel, sans le réinterpréter', () async {
+    const bilan = PullRunReport(
+      failed: 1,
+      outcomes: {kAttendanceResource: PullResult.error},
     );
-  });
+    when(() => coordinator.pullSubset(any())).thenAnswer((_) async => bilan);
 
-  test('authentifié : délègue au repository', () async {
-    when(
-      () => repository.syncAttendance(),
-    ).thenAnswer((_) async => const Right(outcome));
+    final rapport = await useCase();
 
-    final result = await useCase();
-
-    expect(result, const Right(outcome));
-    verify(() => repository.syncAttendance()).called(1);
-  });
-
-  test('gate connectivité : hors-ligne, le repository n\'est jamais appelé et '
-      'un NetworkFailure est retourné', () async {
-    when(
-      () => repository.syncAttendance(),
-    ).thenAnswer((_) async => const Right(outcome));
-    when(() => connectivity.isOnline()).thenAnswer((_) async => false);
-
-    final result = await useCase();
-
-    verifyNever(() => repository.syncAttendance());
-    expect(result.isLeft(), isTrue);
-    result.fold(
-      (failure) => expect(failure, isA<NetworkFailure>()),
-      (_) => fail('devrait être un Left'),
-    );
-  });
-
-  test('gate crédentiels : sans session authentifiable, le repository n\'est '
-      'jamais appelé et un AuthFailure est retourné', () async {
-    when(
-      () => repository.syncAttendance(),
-    ).thenAnswer((_) async => const Right(outcome));
-    when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenAnswer((_) async => false);
-
-    final result = await useCase();
-
-    verifyNever(() => repository.syncAttendance());
-    expect(result.isLeft(), isTrue);
-    result.fold(
-      (failure) => expect(failure, isA<AuthFailure>()),
-      (_) => fail('devrait être un Left'),
-    );
-  });
-
-  test('gate crédentiels : une sonde en échec ne bloque pas l\'hydratation '
-      '(fail-open, même politique que SyncStatusCubit)', () async {
-    when(
-      () => repository.syncAttendance(),
-    ).thenAnswer((_) async => const Right(outcome));
-    when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenThrow(Exception('storage indisponible'));
-
-    final result = await useCase();
-
-    verify(() => repository.syncAttendance()).called(1);
-    expect(result, const Right(outcome));
+    expect(identical(rapport, bilan), isTrue);
+    expect(rapport.succeeded(kAttendanceResource), isFalse);
   });
 }

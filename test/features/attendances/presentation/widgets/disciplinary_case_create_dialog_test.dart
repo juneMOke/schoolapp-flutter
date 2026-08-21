@@ -90,4 +90,31 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(DisciplinaryCaseCreateDialog), findsOneWidget);
   });
+
+  // Le portrait ci-dessus laissait encore ~370 dp au dialog, de quoi tenir.
+  // C'est le PAYSAGE qui ne pardonne pas : clavier ouvert, il ne reste qu'une
+  // vingtaine de dp, quand l'en-tête et le pied à boutons en réclament plus de
+  // deux cents. Le dialog débordait alors de 149 dp (640×360), 129 (760×380)
+  // et 98 (731×411) — mesures prises avant que ces zones ne rejoignent le
+  // défilement sous le seuil.
+  for (final surface in const [
+    Size(640, 360),
+    Size(731, 411),
+    Size(760, 380),
+  ]) {
+    testWidgets('paysage $surface, clavier ouvert : rien ne déborde', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(surface);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        harness(bloc, viewInsets: const EdgeInsets.only(bottom: 300)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(DisciplinaryCaseCreateDialog), findsOneWidget);
+    });
+  }
 }

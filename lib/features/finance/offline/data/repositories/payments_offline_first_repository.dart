@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
@@ -11,7 +13,11 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_le
 ///
 /// Les lectures listent les paiements LOCAUX de l'élève — mélange voulu (FRONT
 /// §3) de ce poste (synchronisés ou `PENDING_SYNC`) et de l'autre poste (arrivés
-/// par pull) — précédées d'un rafraîchissement ciblé best-effort (§6 step 2).
+/// par pull) — et les rendent **tout de suite** : la revalidation ciblée
+/// (§6 step 2) est lancée sans être attendue, puis l'écran relit sur
+/// `FinanceLedgerRefresher.revalidated`. C'est cette section qui replie
+/// l'historique en « total payé », d'où l'attente qu'on avait mise ici ; elle a
+/// été déplacée là où elle décide de quelque chose — devant l'encaissement.
 /// L'écriture (`createPayment`) reste **déléguée à l'online** : l'encaissement
 /// réel passe déjà par le chemin local-first (`FinanceOfflineBloc`), ce délégué
 /// n'est là que pour honorer le contrat (chemin non emprunté par l'UI).
@@ -34,7 +40,8 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
     required String academicYearId,
   }) async {
     try {
-      await _refresh(studentId, academicYearId);
+      // Non attendue : voir le commentaire jumeau du repo des créances.
+      unawaited(_refresh(studentId, academicYearId));
       final local = await _dao.getPaymentsByStudent(studentId);
       final scoped = local
           .where(

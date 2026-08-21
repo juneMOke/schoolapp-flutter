@@ -350,6 +350,48 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get splashErrorRetry;
 
+  /// Home title when no permission set has ever been reported for this account on this device (ADR-014, unknown state)
+  ///
+  /// In en, this message translates to:
+  /// **'Rights not known'**
+  String get accueilUnknownRightsTitle;
+
+  /// Unknown-state message — signing in is enough, no need to contact the administration
+  ///
+  /// In en, this message translates to:
+  /// **'Your rights are not known on this device yet. Sign in online to retrieve them.'**
+  String get accueilUnknownRightsMessage;
+
+  /// Home title when the effective permission set unlocks no module (ADR-014 fail-closed)
+  ///
+  /// In en, this message translates to:
+  /// **'No module available'**
+  String get accueilNoAccessTitle;
+
+  /// Message when the server did report the rights and they are empty
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has access to no module. Contact your school administrator to have your rights adjusted.'**
+  String get accueilNoAccessMessage;
+
+  /// Message when the session comes from the local durable copy — signing in online can refresh the rights
+  ///
+  /// In en, this message translates to:
+  /// **'Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.'**
+  String get accueilNoAccessOfflineMessage;
+
+  /// Bootstrap screen title when the account lacks the permission to load the referential (403)
+  ///
+  /// In en, this message translates to:
+  /// **'Access not allowed'**
+  String get splashForbiddenTitle;
+
+  /// Bootstrap screen message on 403 — retrying cannot help, only a rights change will
+  ///
+  /// In en, this message translates to:
+  /// **'Your account does not have the rights needed to open the application. Contact your school administrator.'**
+  String get splashForbiddenMessage;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:
@@ -595,6 +637,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Billing'**
   String get subMenuBilling;
+
+  /// Fee control sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control'**
+  String get subMenuFeeControl;
 
   /// Organization sub-menu title
   ///
@@ -2252,53 +2300,11 @@ abstract class AppLocalizations {
   /// **'Find a student or a class from the previous year to re-enroll'**
   String get reRegistrationSearchHint;
 
-  /// No description provided for @reRegistrationSearchHelpPill.
-  ///
-  /// In en, this message translates to:
-  /// **'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.'**
-  String get reRegistrationSearchHelpPill;
-
   /// No description provided for @reRegistrationSearchTitle.
   ///
   /// In en, this message translates to:
   /// **'Search a student'**
   String get reRegistrationSearchTitle;
-
-  /// No description provided for @reRegistrationSearchByNameGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By name'**
-  String get reRegistrationSearchByNameGroup;
-
-  /// No description provided for @reRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By cycle / level'**
-  String get reRegistrationSearchByLevelGroup;
-
-  /// No description provided for @reRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get reRegistrationSearchOrSeparator;
-
-  /// No description provided for @reRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get reRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @reRegistrationSearchModeNameBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get reRegistrationSearchModeNameBadge;
-
-  /// No description provided for @reRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Cycle / level'**
-  String get reRegistrationSearchModeLevelBadge;
 
   /// No description provided for @reRegistrationSearchLevelPlaceholder.
   ///
@@ -2348,53 +2354,11 @@ abstract class AppLocalizations {
   /// **'Find a pre-registration by student or by desired cycle/level'**
   String get preRegistrationSearchHint;
 
-  /// No description provided for @preRegistrationSearchHelpPill.
-  ///
-  /// In en, this message translates to:
-  /// **'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.'**
-  String get preRegistrationSearchHelpPill;
-
   /// No description provided for @preRegistrationSearchTitle.
   ///
   /// In en, this message translates to:
   /// **'Search a pre-registration'**
   String get preRegistrationSearchTitle;
-
-  /// No description provided for @preRegistrationSearchByNameGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By name'**
-  String get preRegistrationSearchByNameGroup;
-
-  /// No description provided for @preRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By cycle / level'**
-  String get preRegistrationSearchByLevelGroup;
-
-  /// No description provided for @preRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get preRegistrationSearchOrSeparator;
-
-  /// No description provided for @preRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get preRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @preRegistrationSearchModeNameBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get preRegistrationSearchModeNameBadge;
-
-  /// No description provided for @preRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Cycle / level'**
-  String get preRegistrationSearchModeLevelBadge;
 
   /// No description provided for @preRegistrationSearchLevelPlaceholder.
   ///
@@ -2413,42 +2377,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill the form above then click Search to display requests.'**
   String get preRegistrationSearchInvitationMessage;
-
-  /// No description provided for @firstRegistrationSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get firstRegistrationSearchByStudentGroup;
-
-  /// No description provided for @firstRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By target level'**
-  String get firstRegistrationSearchByLevelGroup;
-
-  /// No description provided for @firstRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get firstRegistrationSearchOrSeparator;
-
-  /// No description provided for @firstRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get firstRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @firstRegistrationSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get firstRegistrationSearchModeStudentBadge;
-
-  /// No description provided for @firstRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Level'**
-  String get firstRegistrationSearchModeLevelBadge;
 
   /// No description provided for @firstRegistrationSearchLevelPlaceholder.
   ///
@@ -2491,6 +2419,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @searchModeSwitchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by'**
+  String get searchModeSwitchLabel;
+
+  /// No description provided for @searchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get searchModeSemantics;
+
+  /// No description provided for @searchModeByClass.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get searchModeByClass;
+
+  /// No description provided for @searchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By identity'**
+  String get searchModeByIdentity;
+
+  /// No description provided for @searchModeClassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.'**
+  String get searchModeClassHint;
+
+  /// No description provided for @searchModeIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.'**
+  String get searchModeIdentityHint;
+
+  /// No description provided for @searchRefineByNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine by last name (optional)'**
+  String get searchRefineByNameLabel;
+
+  /// No description provided for @searchRefineByNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s last name, even partial'**
+  String get searchRefineByNamePlaceholder;
 
   /// No description provided for @viewDetails.
   ///
@@ -2891,14 +2867,50 @@ abstract class AppLocalizations {
   /// No description provided for @guardianSearchDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Search for an existing guardian'**
+  /// **'Search for an existing parent'**
   String get guardianSearchDialogTitle;
 
-  /// No description provided for @guardianSearchHint.
+  /// No description provided for @guardianSearchDialogEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Enter at least one criterion (name or phone number)'**
-  String get guardianSearchHint;
+  /// **'Guardians'**
+  String get guardianSearchDialogEyebrow;
+
+  /// No description provided for @guardianSearchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get guardianSearchModeSemantics;
+
+  /// No description provided for @guardianSearchModeByPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'By number'**
+  String get guardianSearchModeByPhone;
+
+  /// No description provided for @guardianSearchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By identity'**
+  String get guardianSearchModeByIdentity;
+
+  /// No description provided for @guardianSearchPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The number is enough, even partial: \"8169\" brings up every matching guardian.'**
+  String get guardianSearchPhoneHint;
+
+  /// No description provided for @guardianSearchIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name and first name are required. The middle name narrows the search when known.'**
+  String get guardianSearchIdentityHint;
+
+  /// No description provided for @guardianSearchResultsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching guardians will appear here.'**
+  String get guardianSearchResultsPlaceholder;
 
   /// No description provided for @guardianSearchEmptyTitle.
   ///
@@ -3403,6 +3415,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guardian\'s phone number.'**
   String get phoneNumberHelp;
+
+  /// No description provided for @phoneNumberCountryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country dialling code'**
+  String get phoneNumberCountryCodeLabel;
+
+  /// No description provided for @phoneNumberInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number ({expectedDigits} digits expected after the dialling code).'**
+  String phoneNumberInvalidError(int expectedDigits);
 
   /// No description provided for @emailLabel.
   ///
@@ -4052,6 +4076,18 @@ abstract class AppLocalizations {
   /// **'No charges are available for this student.'**
   String get studentChargesEmpty;
 
+  /// Fee step: the grid is missing from the local referential whatever the current account's right — a sync is enough, unlike the missing-right case
+  ///
+  /// In en, this message translates to:
+  /// **'The fee grid is not available on this device for this year. Synchronise before continuing.'**
+  String get studentChargesFeeGridUnavailable;
+
+  /// Wizard fee step when the server withheld the fee grid from the referential for lack of finance.grid.read (ADR-014) — not to be confused with "no charges"
+  ///
+  /// In en, this message translates to:
+  /// **'Fees cannot be computed: your account has no access to the fee grid. Ask an authorised account to synchronise this device.'**
+  String get studentChargesTariffsWithheld;
+
   /// No description provided for @studentChargesUnavailable.
   ///
   /// In en, this message translates to:
@@ -4382,6 +4418,12 @@ abstract class AppLocalizations {
   /// **'No student matches these criteria. Update the form and try again.'**
   String get facturationNoResultsDescription;
 
+  /// No description provided for @facturationEmptyEnrollmentWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'The student list belongs to the Enrolment module, which this profile cannot access: no student can be shown here, whatever the criteria. Your administrator can grant that access.'**
+  String get facturationEmptyEnrollmentWithheld;
+
   /// No description provided for @facturationEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -4391,44 +4433,8 @@ abstract class AppLocalizations {
   /// No description provided for @facturationSearchHelpBanner.
   ///
   /// In en, this message translates to:
-  /// **'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.'**
+  /// **'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).'**
   String get facturationSearchHelpBanner;
-
-  /// No description provided for @facturationSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get facturationSearchByStudentGroup;
-
-  /// No description provided for @facturationSearchByClassGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By class'**
-  String get facturationSearchByClassGroup;
-
-  /// No description provided for @facturationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get facturationSearchOrSeparator;
-
-  /// No description provided for @facturationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get facturationSearchActiveModeLabel;
-
-  /// No description provided for @facturationSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get facturationSearchModeStudentBadge;
-
-  /// No description provided for @facturationSearchModeClassBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Class'**
-  String get facturationSearchModeClassBadge;
 
   /// No description provided for @facturationSearchCycleLabel.
   ///
@@ -4447,6 +4453,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a cycle first'**
   String get facturationSearchLevelPlaceholder;
+
+  /// No description provided for @feeControlSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control a fee'**
+  String get feeControlSearchTitle;
+
+  /// No description provided for @feeControlSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the class, then the fee to control. The payment status applies to that fee only.'**
+  String get feeControlSearchHelpBanner;
+
+  /// No description provided for @feeControlSearchClassGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class and fee'**
+  String get feeControlSearchClassGroupTitle;
+
+  /// No description provided for @feeControlSearchStudentGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow by student'**
+  String get feeControlSearchStudentGroupTitle;
+
+  /// No description provided for @feeControlSearchStudentGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get feeControlSearchStudentGroupHint;
+
+  /// No description provided for @feeControlSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get feeControlSearchCycleLabel;
+
+  /// No description provided for @feeControlSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get feeControlSearchLevelLabel;
+
+  /// No description provided for @feeControlSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get feeControlSearchLevelPlaceholder;
+
+  /// No description provided for @feeControlClassroomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get feeControlClassroomLabel;
+
+  /// No description provided for @feeControlClassroomPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level first'**
+  String get feeControlClassroomPlaceholder;
+
+  /// No description provided for @feeControlClassroomAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All classes of the level'**
+  String get feeControlClassroomAll;
+
+  /// No description provided for @feeControlClassroomEmptyForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No class has been composed for this level: the control covers the whole level.'**
+  String get feeControlClassroomEmptyForLevel;
+
+  /// No description provided for @feeControlClassroomWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes belong to a module this profile cannot access: the control covers the whole level.'**
+  String get feeControlClassroomWithheld;
+
+  /// No description provided for @feeControlFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get feeControlFeeLabel;
+
+  /// No description provided for @feeControlFeePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level first'**
+  String get feeControlFeePlaceholder;
+
+  /// No description provided for @feeControlFeeEmptyForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee is defined for this level.'**
+  String get feeControlFeeEmptyForLevel;
+
+  /// No description provided for @feeControlFeeGridMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee schedule has not reached this device yet. Sync to control a fee.'**
+  String get feeControlFeeGridMissing;
+
+  /// No description provided for @feeControlFeeGridWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.'**
+  String get feeControlFeeGridWithheld;
+
+  /// No description provided for @feeControlFeeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.'**
+  String get feeControlFeeLoadFailed;
+
+  /// No description provided for @feeControlFeeLoadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get feeControlFeeLoadRetry;
+
+  /// No description provided for @feeControlPaymentStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment status'**
+  String get feeControlPaymentStatusLabel;
+
+  /// No description provided for @feeControlPaymentStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get feeControlPaymentStatusAll;
+
+  /// No description provided for @feeControlViewDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the financial record'**
+  String get feeControlViewDetailLabel;
+
+  /// No description provided for @feeControlSummaryA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control summary'**
+  String get feeControlSummaryA11yLabel;
+
+  /// No description provided for @feeControlSummaryStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students concerned'**
+  String get feeControlSummaryStudents;
+
+  /// No description provided for @feeControlInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No control under way'**
+  String get feeControlInvitationTitle;
+
+  /// No description provided for @feeControlInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a class then a fee above to see who has settled it.'**
+  String get feeControlInvitationMessage;
+
+  /// No description provided for @feeControlEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get feeControlEmptyTitle;
+
+  /// No description provided for @feeControlNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches these criteria. Adjust the form and search again.'**
+  String get feeControlNoResultsDescription;
+
+  /// No description provided for @feeControlEmptyEnrollmentWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Students belong to the Enrolment module, which this profile cannot access: the control cannot cover anyone, whatever the criteria. Your administrator can grant that access.'**
+  String get feeControlEmptyEnrollmentWithheld;
+
+  /// No description provided for @feeControlEmptyClassroomWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition belongs to a module this profile cannot access: checking by class is not possible. Search again without a class filter to cover the whole level.'**
+  String get feeControlEmptyClassroomWithheld;
+
+  /// No description provided for @feeControlEmptyRosterMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This class\'s student list has not reached this device yet. Sync, then run the control again.'**
+  String get feeControlEmptyRosterMissing;
+
+  /// No description provided for @feeControlEmptyNoLocalEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this class has a local enrollment record for this year. Sync enrollments, then run the control again.'**
+  String get feeControlEmptyNoLocalEnrollment;
+
+  /// No description provided for @feeControlNoChargeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.'**
+  String get feeControlNoChargeDescription;
+
+  /// No description provided for @feeControlEmptyNoEnrollmentForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.'**
+  String get feeControlEmptyNoEnrollmentForLevel;
+
+  /// No description provided for @feeControlNoChargeForLevelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.'**
+  String get feeControlNoChargeForLevelDescription;
+
+  /// Criteria chip recalling the controlled fee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee: {label}'**
+  String feeControlCriteriaFee(String label);
+
+  /// Criteria chip recalling the controlled class.
+  ///
+  /// In en, this message translates to:
+  /// **'Class: {label}'**
+  String feeControlCriteriaClassroom(String label);
+
+  /// Criteria chip recalling the requested payment status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {label}'**
+  String feeControlCriteriaStatus(String label);
 
   /// Billing AppBar pill when the balance is outstanding.
   ///
@@ -4670,6 +4910,18 @@ abstract class AppLocalizations {
   /// **'No payment has been recorded for this student.'**
   String get facturationDetailPaymentsEmpty;
 
+  /// No description provided for @facturationDetailPaymentsWithheldSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked by the cash desk.'**
+  String get facturationDetailPaymentsWithheldSubtitle;
+
+  /// No description provided for @facturationDetailPaymentsWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment detail belongs to the cash desk: it is not shown for this profile. The already-paid total at the top of the record is still accurate.'**
+  String get facturationDetailPaymentsWithheld;
+
   /// No description provided for @facturationDetailPaymentPayerColumn.
   ///
   /// In en, this message translates to:
@@ -4789,6 +5041,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download receipt'**
   String get facturationPaymentDownloadReceiptLabel;
+
+  /// Reason shown under a disabled receipt button when editique.write is missing (ADR-014) — not to be confused with pending synchronisation
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to issue this document.'**
+  String get facturationPaymentReceiptForbiddenHint;
 
   /// No description provided for @facturationPaymentReceiptPendingSyncHint.
   ///
@@ -5130,6 +5388,12 @@ abstract class AppLocalizations {
   /// **'No allocation was found for this charge.'**
   String get facturationChargeDetailAllocationsEmpty;
 
+  /// No description provided for @facturationChargeDetailAllocationsWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment allocation belongs to the cash desk: it is not detailed for this profile. The already-paid amount above is still accurate.'**
+  String get facturationChargeDetailAllocationsWithheld;
+
   /// No description provided for @facturationChargeDetailAllocationsRetry.
   ///
   /// In en, this message translates to:
@@ -5345,6 +5609,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No charges available. Go back to the list and try again.'**
   String get facturationCreatePaymentChargesUnavailable;
+
+  /// No description provided for @facturationCollectPreflightMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking recent payments…'**
+  String get facturationCollectPreflightMessage;
 
   /// No description provided for @facturationCreatePaymentChargeDropdownHint.
   ///
@@ -7338,6 +7608,12 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get statusSynced;
 
+  /// No description provided for @statusPartiallySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly up to date'**
+  String get statusPartiallySynced;
+
   /// No description provided for @statusSyncing.
   ///
   /// In en, this message translates to:
@@ -7391,6 +7667,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}'**
   String syncLastSyncDaysAgo(int count);
+
+  /// No description provided for @syncRowSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced with the server'**
+  String get syncRowSynced;
+
+  /// No description provided for @syncRowPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be synced'**
+  String get syncRowPending;
+
+  /// No description provided for @syncRowError.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server — will not retry on its own'**
+  String get syncRowError;
 
   /// No description provided for @syncErrorsTitle.
   ///
@@ -9429,6 +9723,42 @@ abstract class AppLocalizations {
   /// **'Written by another account — it has to be retried from that session.'**
   String get syncErrorsForeignEntryAnonymous;
 
+  /// No description provided for @syncSheetStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync status'**
+  String get syncSheetStatusTitle;
+
+  /// No description provided for @syncSheetStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What this tablet has not received, and the writes the server refused — those will not go back on their own.'**
+  String get syncSheetStatusSubtitle;
+
+  /// No description provided for @syncIncompleteReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some data is not coming down'**
+  String get syncIncompleteReadTitle;
+
+  /// No description provided for @syncIncompleteReadDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The last update did not bring everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost. If this persists, your administrator can check your account\'s access rights.'**
+  String get syncIncompleteReadDescription;
+
+  /// No description provided for @syncIncompleteReadRetriableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The last update stopped before bringing everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost.'**
+  String get syncIncompleteReadRetriableDescription;
+
+  /// No description provided for @syncIncompleteReadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get syncIncompleteReadRetry;
+
   /// No description provided for @syncErrorsHeldTitle.
   ///
   /// In en, this message translates to:
@@ -9686,42 +10016,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for one student, or a whole class, then open their document catalogue.'**
   String get documentsSearchHelpBanner;
-
-  /// No description provided for @documentsSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get documentsSearchByStudentGroup;
-
-  /// No description provided for @documentsSearchByClassGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By class'**
-  String get documentsSearchByClassGroup;
-
-  /// No description provided for @documentsSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get documentsSearchOrSeparator;
-
-  /// No description provided for @documentsSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active mode'**
-  String get documentsSearchActiveModeLabel;
-
-  /// No description provided for @documentsSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get documentsSearchModeStudentBadge;
-
-  /// No description provided for @documentsSearchModeClassBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Class'**
-  String get documentsSearchModeClassBadge;
 
   /// No description provided for @documentsSearchCycleLabel.
   ///
@@ -10055,6 +10349,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Printing unavailable: the ticket could not be produced.'**
   String get ticketPrintFailed;
+
+  /// No description provided for @ticketRefusedUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing refused: this tablet does not know the student\'s name. The payment is recorded — print again after the next sync.'**
+  String get ticketRefusedUnknownStudent;
 
   /// No description provided for @ticketCutNotice.
   ///

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/bi_mode_search_form.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Carte de recherche bi-mode de la Pré-inscription — recherche par nom OU par
@@ -28,9 +27,6 @@ class PreRegistrationSearchForm extends StatelessWidget {
 
     return BiModeSearchForm(
       isLoading: isLoading,
-      nameInputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
-      helpPill: l10n.preRegistrationSearchHelpPill,
-      helpPillIcon: Icons.school_outlined,
       options: options,
       onSearch: (request) => dispatch(
         AcademicInfoSearchCommand(
@@ -44,20 +40,9 @@ class PreRegistrationSearchForm extends StatelessWidget {
       labels: BiModeSearchLabels(
         title: l10n.preRegistrationSearchTitle,
         helpBanner: l10n.preRegistrationSearchHint,
-        byStudentGroup: l10n.preRegistrationSearchByNameGroup,
-        byClassGroup: l10n.preRegistrationSearchByLevelGroup,
-        orSeparator: l10n.preRegistrationSearchOrSeparator,
-        activeModeLabel: l10n.preRegistrationSearchActiveModeLabel,
-        studentBadge: l10n.preRegistrationSearchModeNameBadge,
-        classBadge: l10n.preRegistrationSearchModeLevelBadge,
         cycleLabel: l10n.targetCycleLabel,
         levelLabel: l10n.targetLevelLabel,
         levelPlaceholder: l10n.preRegistrationSearchLevelPlaceholder,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        searchLabel: l10n.search,
-        clearLabel: l10n.clear,
       ),
     );
   }

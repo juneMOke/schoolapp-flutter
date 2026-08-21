@@ -91,8 +91,11 @@ class _ClassesListPageState extends State<ClassesListPage> {
                 return;
               }
               _classroomsPullRequested = true;
+              // Sans année : le pull passe par le `PullCoordinator`, dont les
+              // handlers Classe résolvent la courante eux-mêmes — la même que
+              // celle que cet écran vient de recevoir (ADR-015 F6).
               context.read<ClassroomOfflineBloc>().add(
-                ClassroomsSyncRequested(academicYearId: academicYearId),
+                const ClassroomsSyncRequested(),
               );
             },
           ),

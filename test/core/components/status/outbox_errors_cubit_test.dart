@@ -404,6 +404,52 @@ void main() {
       expect(cubit.state.isEmpty, isTrue);
     });
   });
+
+  // B-5 — la feuille était chargée une fois et ne bougeait plus. Le battement
+  // de la file a périmé cette hypothèse : un flush automatique peut acquitter
+  // et supprimer, pendant la lecture, une ligne que la feuille liste encore.
+  // Le tap « Réessayer » devient alors un no-op MUET — `requeue` ne touche que
+  // les `SYNC_ERROR`, et il n'y a plus de ligne à toucher.
+  group('la liste suit les flush du moteur', () {
+    test('un flush qui acquitte une entrée la retire de la feuille', () async {
+      engine.registerHandler(
+        _ScriptedHandler('PAYMENT', const OutboxDispatchResult.acked()),
+      );
+      await dao.enqueue(entry(id: 'p1'));
+      await dao.markSyncError('p1', 'rejet initial');
+
+      final cubit = OutboxErrorsCubit(outbox: dao, syncEngine: engine);
+      await cubit.load();
+      expect(cubit.state.entries, hasLength(1));
+
+      // Le battement remet la ligne en file et la pousse : c'est le flush du
+      // MOTEUR, pas celui de la feuille.
+      await dao.requeue('p1');
+      await engine.flush();
+      // La notification de fin de flush est synchrone ; la relecture qu'elle
+      // déclenche ne l'est pas.
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        cubit.state.entries,
+        isEmpty,
+        reason: 'la feuille ne doit pas survivre à ce qu\'elle liste',
+      );
+      await cubit.close();
+    });
+
+    test('fermée, la feuille ne s\'abonne plus à rien', () async {
+      final cubit = OutboxErrorsCubit(outbox: dao, syncEngine: engine);
+      await cubit.load();
+      await cubit.close();
+
+      // Ne doit ni lever ni émettre sur un cubit fermé.
+      await engine.flush();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.isClosed, isTrue);
+    });
+  });
 }
 
 /// Annuaire de test.
