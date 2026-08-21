@@ -213,4 +213,121 @@ void main() {
 
     expect(guard.isBusy('attendance'), isFalse);
   });
+
+  // B-1 — deux voies, parce que deux attentes. Le coordinateur veut SON issue
+  // (`PullOutcome`) ; un écran qui tire hors coordinateur veut seulement que la
+  // ressource soit à jour. Mélangés dans une seule voie générique, le second
+  // servait son `void` au premier : `null as PullOutcome` lève, le `catch` du
+  // coordinateur compte un échec, et le handler ne tourne jamais.
+  group('deux voies : issue partagée d\'un côté, ignorée de l\'autre', () {
+    test(
+      'un cycle SANS issue ne se fait pas passer pour un cycle typé',
+      () async {
+        final guard = PullCycleGuard();
+        final premier = Completer<void>();
+        var typedRuns = 0;
+
+        // 1. un cycle qui tourne (il tient la ressource) ;
+        final enVol = guard.runIgnoringResult(
+          'enrollments',
+          () => premier.future,
+        );
+        // 2. un second SANS issue, donc programmé derrière — c'est lui qui,
+        //    avant le correctif, s'offrait à la coalescence.
+        final enAttente = guard.runIgnoringResult('enrollments', () async {});
+        // 3. le coordinateur arrive et réclame son issue.
+        final typed = guard.run<String>('enrollments', () async {
+          typedRuns++;
+          return 'issue-a-moi';
+        });
+
+        premier.complete();
+        await enVol;
+        await enAttente;
+
+        expect(
+          await typed,
+          'issue-a-moi',
+          reason:
+              'un cycle sans issue ne peut pas satisfaire qui en attend une',
+        );
+        expect(typedRuns, 1, reason: 'il a donc tourné pour de bon');
+      },
+    );
+
+    test(
+      'CONTRE-ÉPREUVE : entre appelants typés, la coalescence tient',
+      () async {
+        // C'est le cas NORMAL — un écran qui se monte pendant un cycle complet —
+        // et le correctif ne doit pas le supprimer : ce serait un aller-retour
+        // réseau de plus par écran.
+        final guard = PullCycleGuard();
+        final premier = Completer<String>();
+        var seconds = 0;
+
+        final enVol = guard.run<String>('enrollments', () => premier.future);
+        final enAttente = guard.run<String>('enrollments', () async {
+          seconds++;
+          return 'issue-partagee';
+        });
+        final arrivant = guard.run<String>('enrollments', () async {
+          seconds++;
+          return 'jamais';
+        });
+
+        premier.complete('premier');
+        expect(await enVol, 'premier');
+        expect(await enAttente, 'issue-partagee');
+        expect(await arrivant, 'issue-partagee');
+        expect(seconds, 1, reason: 'un seul cycle pour les deux arrivants');
+      },
+    );
+
+    test('un appelant sans issue se coalesce sur un cycle typé', () async {
+      // L'inverse est sûr : il ignore la valeur, il ne la transtype pas.
+      final guard = PullCycleGuard();
+      final premier = Completer<String>();
+      var seconds = 0;
+
+      final enVol = guard.run<String>('enrollments', () => premier.future);
+      final enAttente = guard.run<String>('enrollments', () async {
+        seconds++;
+        return 'issue';
+      });
+      final sansIssue = guard.runIgnoringResult('enrollments', () async {
+        seconds++;
+      });
+
+      premier.complete('premier');
+      await enVol;
+      await enAttente;
+      await sansIssue;
+
+      expect(seconds, 1, reason: 'aucun cycle superflu, aucun transtypage');
+    });
+
+    test('la sérialisation vaut ENTRE les deux voies', () async {
+      // Ce qui ne doit surtout pas changer : deux cycles keyset concurrents
+      // font régresser le curseur, quelle que soit la voie par laquelle ils
+      // sont entrés.
+      final guard = PullCycleGuard();
+      final premier = Completer<void>();
+      final ordre = <String>[];
+
+      final sansIssue = guard.runIgnoringResult('enrollments', () async {
+        await premier.future;
+        ordre.add('sans-issue');
+      });
+      final typed = guard.run<int>('enrollments', () async {
+        ordre.add('typé');
+        return 1;
+      });
+
+      premier.complete();
+      await sansIssue;
+      await typed;
+
+      expect(ordre, ['sans-issue', 'typé']);
+    });
+  });
 }

@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/auth/permission_policy.dart';
+
 /// Holder mémoire de l'**ensemble effectif des permissions** de la session
 /// courante (ADR-014 §4), pendant de `CurrentUserContext` pour l'uid.
 ///
@@ -103,10 +105,9 @@ class CurrentPermissions {
     }
   }
 
-  static bool _sameSet(List<String>? a, List<String>? b) {
-    if (a == null || b == null) return a == null && b == null;
-    if (a.length != b.length) return false;
-    final held = b.toSet();
-    return a.every(held.contains);
-  }
+  /// La comparaison vit dans `permission_policy.dart` : elle était recopiée
+  /// ici et dans `PermissionGate`, et les deux copies portaient la même
+  /// erreur.
+  static bool _sameSet(List<String>? a, List<String>? b) =>
+      samePermissionSet(a, b);
 }

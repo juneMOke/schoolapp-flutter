@@ -354,6 +354,39 @@ void main() {
       await cubit.close();
     });
 
+    // B-2 — ce cubit vit aussi longtemps que l'application, et ces drapeaux ne
+    // sont réécrits que par un cycle qui a réellement observé quelque chose. Le
+    // compte A pose « partiellement à jour », A se déconnecte, B se connecte —
+    // et si le cycle de B s'arrête tôt (hors ligne, sans jetons, mint refusé),
+    // B porte la pastille de A sans rien pour la corriger. Sur la tablette en
+    // Wi-Fi permanent que ce chantier vise, la transition réseau qui
+    // rattraperait n'arrive jamais.
+    test(
+      'la fermeture de session efface les drapeaux du compte qui part',
+      () async {
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(updated: 2, failed: 1));
+
+        final cubit = buildWithPull();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+        expect(cubit.state.hasIncompleteRead, isTrue);
+        expect(cubit.state.hasRetriableRead, isTrue);
+
+        cubit.onSessionClosed();
+
+        expect(
+          cubit.state.hasIncompleteRead,
+          isFalse,
+          reason: 'la dégradation appartenait au compte qui vient de partir',
+        );
+        expect(cubit.state.hasRetriableRead, isFalse);
+        await cubit.close();
+      },
+    );
+
     test('pull sain → synced, aucun drapeau levé', () async {
       when(() => pull.pullAll()).thenAnswer(
         (_) async => const PullRunReport(updated: 3, notModified: 4),

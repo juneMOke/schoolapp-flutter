@@ -107,13 +107,12 @@ class PermissionGate extends StatelessWidget {
   /// reste ici, en un seul endroit.
   static AuthBloc? maybeBlocOf(BuildContext context) => _maybeAuthBloc(context);
 
-  static bool _sameSet(List<String>? a, List<String>? b) {
-    if (identical(a, b)) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    final held = b.toSet();
-    return a.every(held.contains);
-  }
+  /// La comparaison vit dans `permission_policy.dart` : elle était recopiée
+  /// ici et dans `CurrentPermissions`, et les deux copies tenaient
+  /// `['a','a']` pour l'égal de `['a','b']` — un changement de droits réel qui
+  /// ne reconstruisait alors aucune garde.
+  static bool _sameSet(List<String>? a, List<String>? b) =>
+      identical(a, b) || samePermissionSet(a, b);
 
   static AuthBloc? _maybeAuthBloc(BuildContext context) {
     // Détection d'absence, pas gestion d'erreur : flutter_bloc lève un

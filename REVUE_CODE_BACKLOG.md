@@ -4,9 +4,9 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Seize sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5, B-6 et B-8 (B-7 clos sans changement) ; **il ne reste plus aucun défaut
-« haut » ni « moyen »**. **Cinq restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Dix-neuf sont corrigés** — le #13
+(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5, B-6 et B-8 (B-7 clos sans changement), enfin B-1, B-2 et B-3 ; **il ne reste plus aucun défaut
+« haut » ni « moyen »**. **Deux restent ouverts** — B-4 et B-9, tous deux « bas », et sont listés ici (B-9 compris, ouvert hors revue
 par la passe « clavier ») ; aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
@@ -33,49 +33,6 @@ réseau avant d'afficher un grand-livre déjà présent en base. Seul défaut du
 *Aucun défaut « moyen » ouvert.*
 
 ## 🟡 Bas
-
-### B-1 · `PullCycleGuard.run<T>` fait un transtypage aveugle
-
-`lib/core/offline/pull_cycle_guard.dart:65` (et l. 84)
-
-`run<T>` agrège un appelant qui arrive sur la future déjà programmée et la transtype en `T`. Or
-`PullCoordinator.guarded()` expose publiquement le verrou avec `T = void` pour les appelants qui tirent hors
-coordinateur, quand les handlers l'utilisent avec `T = PullOutcome`. Deux `guarded('enrollments', …)`
-suivis du cycle du coordinateur sur la même ressource lui rendent la future
-`void` : `null as PullOutcome` lève, le `catch` du coordinateur compte un échec, et `handler.pull()` ne tourne jamais.
-
-Aucun appelant ne l'exerce aujourd'hui — l'API est neuve dans ce PR.
-
-**À faire** — séparer les deux usages, ou rendre le verrou non générique.
-
----
-
-### B-2 · Les drapeaux de lecture dégradée survivent au logout
-
-`lib/core/components/status/sync_status_cubit.dart:80`
-
-Le cubit est app-lifetime et `_pullDegraded` / `_pullRetriable` ne sont réécrits que par un cycle qui a réellement
-observé quelque chose. Le compte A pose les drapeaux sur un cycle `forbidden > 0`, A se déconnecte, B se connecte et son
-`syncNow()` s'arrête tôt (hors ligne, sans jetons, mint refusé) : **B porte la pastille « Partiellement à jour » de A**,
-sans cycle à lui pour la corriger — et sur la tablette en Wi-Fi permanent que ce chantier vise, la transition réseau qui
-rattraperait n'arrive jamais.
-
-**À faire** — les remettre à zéro là où `CurrentPermissions.clear()` et
-`SyncPlanHolder.clear()` sont déjà appelés.
-
----
-
-### B-3 · `_sameSet` accepte un doublon comme égal
-
-`lib/core/auth/current_permissions.dart:105`
-
-`_sameSet(['a','a'], ['a','b'])` rend `true` : les longueurs concordent et chaque élément du premier est dans le second.
-Un refresh livrant le second après le premier ne notifierait donc pas, `SyncPlanHolder` ne serait jamais marqué périmé,
-et le plan d'avant le changement continuerait de gouverner le périmètre de pull jusqu'au logout.
-
-**À faire** — comparer `a.toSet()` à `b.toSet()`.
-
----
 
 ### B-4 · La recherche par niveau n'a pas d'état « inscriptions pas encore synchronisées »
 
@@ -236,6 +193,54 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~B-1 + B-2 + B-3 · Trois fuites du socle : un transtypage, un drapeau, un doublon~~ — corrigés
+
+Trois défauts sans rapport apparent, et un point commun qui justifie le lot : chacun rend **silencieuse**
+une information qui existait. Aucun ne fait planter un écran ; tous les trois font travailler la
+synchronisation sur une prémisse fausse.
+
+**B-1 — une voie générique pour deux attentes.** Les handlers du coordinateur veulent leur issue
+(`PullOutcome`) ; les écrans qui tirent hors coordinateur veulent seulement que la ressource soit à jour.
+Un `guarded('enrollments', …)` programmé avec `T = void`, puis le cycle du coordinateur sur la même
+ressource, et ce dernier recevait le futur du premier : `null as PullOutcome` lève, le `catch` du
+coordinateur compte un échec, et `handler.pull()` **ne tourne jamais**. La ressource ainsi perdue est
+l'Inscription — source de `students`, donc de la Facturation, du Contrôle des frais, des Documents et du
+ticket imprimé.
+
+Le garde a désormais deux voies. Seuls les cycles de `run` s'enregistrent comme **coalesçables**, si bien
+que le transtypage qui les partage ne voit jamais qu'un cycle du même type ; `runIgnoringResult` se
+coalesce volontiers sur eux — il ignore la valeur, donc ne transtype rien — mais ne s'offre jamais en
+retour. ⚠️ **La coalescence entre appelants typés est préservée**, et c'est délibéré : c'est le cas
+NORMAL (un écran qui se monte pendant un cycle complet), et le supprimer coûterait un aller-retour réseau
+par écran. Le surcoût du correctif est un cycle de plus dans le cas mixte, c'est-à-dire un 304 ; le prix
+de l'erreur inverse était une ressource jamais tirée.
+
+**B-2 — la pastille du compte précédent.** Le cubit vit aussi longtemps que l'application, et les deux
+drapeaux de lecture dégradée ne sont réécrits que par un cycle qui a réellement observé quelque chose
+(délibéré : neuf chemins appellent `refresh()` sans avoir rien tiré). A pose « partiellement à jour », A
+part, B arrive — et si le cycle de B s'arrête tôt, **B porte la pastille de A**. Remis à zéro dans
+`onSessionClosed()`, au même endroit et pour la même raison que `CurrentPermissions.clear()` et
+`SyncPlanHolder.clear()`. ⚠️ `_lastSyncAtMs` n'en fait PAS partie — c'est la date de dernière synchro de
+la **tablette**, persistée, vraie quel que soit le porteur — ni `_hasHeldWork`, relu de la file à chaque
+`refresh()` et partagé entre les comptes.
+
+**B-3 — `['a','a']` valait `['a','b']`.** Longueurs égales, puis « chaque élément de a est dans b » :
+deux ensembles différents passaient pour identiques. Rien n'oblige le serveur à dédupliquer ce qu'il
+sérialise, et la conséquence était muette — un refresh livrant le second après le premier ne notifiait
+personne, le plan de synchro n'était jamais marqué périmé, et le périmètre de pull restait celui d'avant
+le changement de droits jusqu'au logout.
+
+⚠️ **Le comparateur était recopié DEUX fois**, et les deux copies portaient l'erreur : `CurrentPermissions`
+et `PermissionGate`. La fiche n'en nommait qu'une. Il vit maintenant une seule fois, dans
+`permission_policy.dart` (`samePermissionSet`), à côté de `canAccess` dont il partage la raison d'être :
+un contrôle d'accès recopié finit par diverger.
+
+Tests : quatre sur le garde (le cycle sans issue ne se fait pas passer pour un cycle typé, la
+contre-épreuve que la coalescence typée tient, l'inverse est sûr, la sérialisation vaut entre les voies),
+un sur la fermeture de session, trois sur les doublons dans les deux sens. Vérifiés par mutation.
 
 ---
 

@@ -47,3 +47,27 @@ bool canAccess({
       ? requires.every((p) => held.contains(p.wire))
       : requires.any((p) => held.contains(p.wire));
 }
+
+/// Deux ensembles de permissions sont-ils le **même**, doublons compris ?
+///
+/// La question a l'air triviale et ne l'est pas. Elle était résolue deux fois
+/// dans le dépôt — une copie dans `CurrentPermissions`, une dans
+/// `PermissionGate` — et les deux du même mauvais côté : longueurs égales, puis
+/// « chaque élément de a est dans b ». `['a','a']` et `['a','b']` passaient
+/// donc pour identiques.
+///
+/// Ce n'est pas un cas de laboratoire : rien n'oblige le serveur à dédupliquer
+/// ce qu'il sérialise, et la conséquence était silencieuse. Un refresh livrant
+/// le second ensemble après le premier ne notifiait personne : le plan de
+/// synchronisation n'était jamais marqué périmé et continuait de gouverner le
+/// périmètre de pull avec les droits d'avant, jusqu'au logout ; les gardes
+/// d'écran, elles, restaient sur leur verdict de montage.
+///
+/// `null` ne vaut que `null` — « jamais communiqué » n'est pas « vide », et le
+/// tri-état dépend de cette distinction (cf. `PermissionHolding`).
+bool samePermissionSet(Iterable<String>? a, Iterable<String>? b) {
+  if (a == null || b == null) return a == null && b == null;
+  final mine = a.toSet();
+  final held = b.toSet();
+  return mine.length == held.length && mine.containsAll(held);
+}

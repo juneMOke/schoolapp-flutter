@@ -332,7 +332,32 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   /// La session se ferme : le battement s'arrête. Sans cela, chaque tic
   /// interrogerait la sonde de crédentiels d'une session qui n'en a plus.
-  void onSessionClosed() => _heartbeat.sessionClosed();
+  void onSessionClosed() {
+    _heartbeat.sessionClosed();
+    // ⚠️ Les drapeaux de lecture dégradée appartiennent au compte qui part.
+    //
+    // Ce cubit vit aussi longtemps que l'application, et ces deux drapeaux ne
+    // sont réécrits que par un cycle qui a réellement observé quelque chose
+    // (c'est délibéré : neuf chemins appellent `refresh()` sans avoir rien
+    // tiré). Le compte A pose « partiellement à jour » sur un cycle
+    // `forbidden > 0`, A se déconnecte, B se connecte — et si le `syncNow()` de
+    // B s'arrête tôt (hors ligne, sans jetons, mint refusé), **B porte la
+    // pastille de A**, sans cycle à lui pour la corriger. Sur la tablette en
+    // Wi-Fi permanent que ce chantier vise, la transition réseau qui
+    // rattraperait n'arrive jamais.
+    //
+    // Remis à zéro au même endroit et pour la même raison que
+    // `CurrentPermissions.clear()` et `SyncPlanHolder.clear()` : rien de ce qui
+    // décrit une session ne doit survivre à sa fermeture.
+    //
+    // `_lastSyncAtMs` n'en fait PAS partie : c'est la date de dernière synchro
+    // de cette TABLETTE, persistée dans `sync_meta` et vraie quel que soit le
+    // porteur. `_hasHeldWork` non plus — il est relu de la file à chaque
+    // `refresh()`, et la file est partagée entre les comptes de la tablette.
+    _pullDegraded = false;
+    _pullRetriable = false;
+    _safeEmit(state.status);
+  }
 
   /// L'application est au premier plan.
   void onForeground() => _heartbeat.enterForeground();

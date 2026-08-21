@@ -45,30 +45,71 @@ import 'dart:async';
 /// écrit et éprouvé sur la ressource la plus chère du dépôt. Extrait ici parce
 /// que le socle en a désormais besoin pour toutes les ressources, pas seulement
 /// pour l'argent.
-/// ## Le résultat est partagé, pas recalculé
+/// ## Le résultat est partagé, pas recalculé — et c'est pour cela qu'il y a
+/// deux voies
 ///
 /// Un appelant qui se coalesce reçoit **le futur de l'autre**, donc son
 /// résultat. C'est cohérent avec ce qu'il demandait : un cycle qui démarre après
-/// son appel. Tous les appelants d'une même ressource doivent donc attendre le
-/// même type de résultat — c'est le cas par construction, une ressource n'ayant
-/// qu'un handler.
+/// son appel.
+///
+/// ⚠️ Mais tous les appelants n'attendent pas la même chose. Les handlers du
+/// coordinateur veulent **leur issue** (`PullOutcome`) ; les écrans qui tirent
+/// hors coordinateur veulent seulement que la ressource soit à jour. Une seule
+/// voie générique les mélangeait : un `guarded('enrollments', …)` programmé avec
+/// `T = void`, puis le cycle du coordinateur sur la même ressource, et ce
+/// dernier recevait le futur du premier — `null as PullOutcome` lève, le `catch`
+/// du coordinateur compte un échec, et `handler.pull()` **ne tourne jamais**.
+/// La ressource ainsi perdue est l'Inscription, source de `students`, donc de
+/// la Facturation, du Contrôle des frais, des Documents et du ticket imprimé.
+///
+/// D'où [run] et [runIgnoringResult] :
+///  - seuls les cycles de [run] sont enregistrés comme **coalesçables**, si bien
+///    que le transtypage qui les partage ne voit jamais qu'un cycle du même
+///    type — une ressource n'ayant qu'un handler ;
+///  - [runIgnoringResult] se coalesce volontiers sur eux (il **ignore** la
+///    valeur, donc ne transtype rien) mais ne s'offre jamais en retour : un
+///    appelant qui a besoin d'une issue chaînera derrière lui plutôt que de
+///    recevoir un `void`. Le surcoût est un cycle de plus, c'est-à-dire un 304 ;
+///    le prix de l'erreur inverse était une ressource jamais tirée.
 class PullCycleGuard {
   final Map<String, Future<Object?>> _tail = {};
   final Map<String, Future<Object?>> _queued = {};
 
-  /// Exécute [cycle] pour [resource], sérialisé avec les cycles déjà en vol ou
-  /// déjà programmés sur la même ressource.
+  /// Exécute [cycle] pour [resource] et **rend son issue**, sérialisé avec les
+  /// cycles déjà en vol ou déjà programmés sur la même ressource.
   Future<T> run<T>(String resource, Future<T> Function() cycle) {
     // Un cycle est programmé mais pas encore parti → il lira le curseur après
-    // nous : il fait l'affaire, et son résultat est le nôtre.
+    // nous : il fait l'affaire, et son résultat est le nôtre. Il vient
+    // forcément de cette voie-ci (cf. docstring de classe), donc du même type.
     final queued = _queued[resource];
     if (queued != null) return queued.then((value) => value as T);
+    return _schedule<T>(resource, cycle, coalescable: true);
+  }
 
+  /// Exécute [cycle] pour [resource] sans que personne n'en attende l'issue —
+  /// les pulls lancés hors coordinateur (ADR-015 F6).
+  ///
+  /// Se coalesce sur un cycle programmé s'il y en a un, **sans lire sa
+  /// valeur** : ce qui est demandé ici est un état à jour, pas un résultat.
+  Future<void> runIgnoringResult(
+    String resource,
+    Future<void> Function() cycle,
+  ) {
+    final queued = _queued[resource];
+    if (queued != null) return queued.then((_) {});
+    return _schedule<void>(resource, cycle, coalescable: false);
+  }
+
+  Future<T> _schedule<T>(
+    String resource,
+    Future<T> Function() cycle, {
+    required bool coalescable,
+  }) {
     final tail = _tail[resource];
-    late final Future<Object?> scheduled;
+    late final Future<T> scheduled;
     final run = tail == null
         ? cycle()
-        : _chainAfter(tail, resource, () => scheduled, cycle);
+        : _chainAfter<T>(tail, resource, () => scheduled, cycle);
     // Corps en BLOC, pas en expression : `Map.remove` renvoie la valeur retirée
     // — ici le futur qu'on est en train de terminer — et `whenComplete` attend
     // tout futur que son rappel renvoie. En flèche, le cycle s'attendrait
@@ -80,8 +121,8 @@ class PullCycleGuard {
     // Aucun `await` entre la programmation et l'enregistrement : la pose du
     // garde est atomique vis-à-vis de la boucle d'événements.
     _tail[resource] = scheduled;
-    if (tail != null) _queued[resource] = scheduled;
-    return scheduled.then((value) => value as T);
+    if (tail != null && coalescable) _queued[resource] = scheduled;
+    return scheduled;
   }
 
   /// Attend le cycle précédent **quel que soit son sort**, puis exécute le
@@ -94,11 +135,11 @@ class PullCycleGuard {
   /// qui n'était pas le sien. L'écran qui attendait repartait sur un cache
   /// froid en croyant avoir tiré : la panne exacte que ce garde doit rendre
   /// impossible, au moment précis où elle fait le plus de mal.
-  Future<Object?> _chainAfter(
+  Future<T> _chainAfter<T>(
     Future<Object?> tail,
     String resource,
-    Future<Object?> Function() scheduled,
-    Future<Object?> Function() cycle,
+    Future<T> Function() scheduled,
+    Future<T> Function() cycle,
   ) async {
     try {
       await tail;

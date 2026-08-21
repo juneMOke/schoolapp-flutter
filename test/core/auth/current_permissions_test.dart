@@ -57,6 +57,43 @@ void main() {
       expect(notifications, 1);
     });
 
+    // B-3 — le trou que « longueurs égales + chaque élément de a est dans b »
+    // laissait ouvert. Rien n'oblige le serveur à dédupliquer ce qu'il
+    // sérialise, et la conséquence n'était pas cosmétique : le plan de synchro
+    // n'était jamais marqué périmé et continuait de gouverner le périmètre de
+    // pull avec les droits d'avant, jusqu'au logout.
+    test('un DOUBLON ne fait pas passer deux ensembles différents pour un '
+        'seul', () {
+      permissions.set(const ['classroom.read', 'classroom.read']);
+      expect(notifications, 1);
+
+      permissions.set(const ['classroom.read', 'finance.payment.read']);
+
+      expect(notifications, 2);
+    });
+
+    test(
+      'et dans l\'autre sens : un droit RETIRÉ derrière un doublon notifie',
+      () {
+        permissions.set(const ['classroom.read', 'finance.payment.read']);
+        expect(notifications, 1);
+
+        permissions.set(const ['classroom.read', 'classroom.read']);
+
+        expect(notifications, 2);
+      },
+    );
+
+    test('un ensemble réémis AVEC un doublon ne notifie pas : c\'est le même '
+        'ensemble', () {
+      permissions.set(const ['classroom.read']);
+      expect(notifications, 1);
+
+      permissions.set(const ['classroom.read', 'classroom.read']);
+
+      expect(notifications, 1);
+    });
+
     test('même taille, contenu différent : notifie', () {
       permissions.set(const ['classroom.read', 'finance.payment.read']);
       expect(notifications, 1);

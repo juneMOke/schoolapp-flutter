@@ -424,7 +424,7 @@ class PullCoordinator {
   /// Sérialise un cycle sur cette ressource — réservé aux appelants qui tirent
   /// hors coordinateur en attendant leur repli (ADR-015 F6).
   Future<void> guarded(String resource, Future<void> Function() cycle) =>
-      _guard.run(resource, cycle);
+      _guard.runIgnoringResult(resource, cycle);
 
   /// Vrai si la session courante peut lire cette ressource (ADR-014).
   ///
