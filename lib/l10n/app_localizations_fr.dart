@@ -712,6 +712,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String myCoursesUnsyncedClassroomNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours masqués — classe non synchronisée',
+      one: '1 cours masqué — classe non synchronisée',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get myCoursesExpandAll => 'Tout déplier';
 
   @override

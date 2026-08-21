@@ -12,6 +12,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Vue « contenu » de la liste : en-tête (compteur + bascule globale) puis les
 /// accordéons de classe. L'état d'ouverture est local (présentation pure) ;
 /// toutes les classes sont dépliées par défaut (spec §1).
+///
+/// Un cours dont la classe n'est pas encore descendue en local
+/// ([CourseSummary.classroomUnsynced]) n'a **pas** d'accordéon : on ne sait ni
+/// la nommer ni compter ses élèves, et une carte anonyme aux effectifs à zéro
+/// se lit comme une classe vide. Il est masqué, et une mention en pied dit
+/// combien de cours attendent leur classe — les taire ferait croire à un cours
+/// perdu.
 class MyCoursesSuccessView extends StatefulWidget {
   final List<CourseSummary> courses;
 
@@ -46,8 +53,18 @@ class _MyCoursesSuccessViewState extends State<MyCoursesSuccessView> {
     }
   }
 
+  /// Les classes réellement affichables, dans l'ordre reçu.
+  List<CourseSummary> get _visible => widget.courses
+      .where((course) => !course.classroomUnsynced)
+      .toList(growable: false);
+
+  /// Nombre de cours masqués faute de leur classe.
+  int get _pendingCourseCount => widget.courses
+      .where((course) => course.classroomUnsynced)
+      .fold(0, (sum, course) => sum + course.courses.length);
+
   Set<String> _allIds() =>
-      widget.courses.map((course) => course.classroom.id).toSet();
+      _visible.map((course) => course.classroom.id).toSet();
 
   bool _sameIds(List<CourseSummary> a, List<CourseSummary> b) {
     if (a.length != b.length) return false;
@@ -56,10 +73,12 @@ class _MyCoursesSuccessViewState extends State<MyCoursesSuccessView> {
   }
 
   bool get _allExpanded =>
-      widget.courses.isNotEmpty && _expandedIds.length == widget.courses.length;
+      _visible.isNotEmpty && _expandedIds.length == _visible.length;
 
+  /// Le compteur ne parle que de ce qui est à l'écran : annoncer des cours
+  /// qu'on masque serait un compte que l'utilisateur ne peut pas vérifier.
   int get _totalCourses =>
-      widget.courses.fold(0, (sum, course) => sum + course.courses.length);
+      _visible.fold(0, (sum, course) => sum + course.courses.length);
 
   void _toggleAll() {
     setState(() {
@@ -81,28 +100,33 @@ class _MyCoursesSuccessViewState extends State<MyCoursesSuccessView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    final visible = _visible;
+    final pending = _pendingCourseCount;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _ListHeader(
-          counterLabel: l10n.myCoursesCount(
-            widget.courses.length,
-            _totalCourses,
-          ),
+          counterLabel: l10n.myCoursesCount(visible.length, _totalCourses),
           allExpanded: _allExpanded,
           onToggleAll: _toggleAll,
         ),
         const SizedBox(height: AppSpacing.lg),
-        for (var i = 0; i < widget.courses.length; i++) ...[
+        for (var i = 0; i < visible.length; i++) ...[
           MyCoursesClassAccordion(
-            group: widget.courses[i],
+            group: visible[i],
             visual: AcademicsClassVisual.forIndex(i),
-            expanded: _expandedIds.contains(widget.courses[i].classroom.id),
-            onToggle: () => _toggleOne(widget.courses[i].classroom.id),
+            expanded: _expandedIds.contains(visible[i].classroom.id),
+            onToggle: () => _toggleOne(visible[i].classroom.id),
             onOpenCourse: widget.onOpenCourse,
           ),
-          if (i != widget.courses.length - 1)
-            const SizedBox(height: AppSpacing.md),
+          if (i != visible.length - 1) const SizedBox(height: AppSpacing.md),
+        ],
+        if (pending > 0) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _UnsyncedClassroomNotice(
+            label: l10n.myCoursesUnsyncedClassroomNotice(pending),
+          ),
         ],
       ],
     );
@@ -145,6 +169,38 @@ class _ListHeader extends StatelessWidget {
               : Icons.unfold_more_rounded,
           onPressed: onToggleAll,
           fullWidth: false,
+        ),
+      ],
+    );
+  }
+}
+
+/// Mention de pied de liste : des cours existent, mais leur classe n'est pas
+/// encore descendue. Discrète — c'est un retard de synchro, pas une erreur.
+class _UnsyncedClassroomNotice extends StatelessWidget {
+  final String label;
+
+  const _UnsyncedClassroomNotice({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.cloud_off_rounded,
+          size: 16,
+          color: AppColors.textMuted,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textMuted,
+              height: 1.35,
+            ),
+          ),
         ),
       ],
     );

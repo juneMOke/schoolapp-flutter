@@ -8,8 +8,21 @@ class CourseSummary extends Equatable {
   final ClassroomSummary classroom;
   final List<CourseRef> courses;
 
-  const CourseSummary({required this.classroom, required this.courses});
+  /// Vrai quand la classe n'est **pas encore** dans le cache local : on connaît
+  /// les cours, pas la classe qui les porte — donc ni son nom, ni son année.
+  ///
+  /// Ces cours ne sont pas des cartes : l'écran les **masque** et se contente
+  /// de dire qu'une classe n'est pas synchronisée. Les afficher donnerait des
+  /// cartes anonymes aux effectifs à zéro ; les taire tout à fait laisserait
+  /// croire à un cours perdu, alors qu'il n'attend que le pull des classes.
+  final bool classroomUnsynced;
+
+  const CourseSummary({
+    required this.classroom,
+    required this.courses,
+    this.classroomUnsynced = false,
+  });
 
   @override
-  List<Object?> get props => [classroom, courses];
+  List<Object?> get props => [classroom, courses, classroomUnsynced];
 }

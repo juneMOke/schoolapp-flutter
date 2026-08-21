@@ -33,6 +33,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/t
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
 /// Implémentation **offline-first** de [CourseRepository].
 ///
@@ -66,6 +67,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   final ClassroomLocalDataSource _classroomLocal;
   final EvaluationOfflineRepositoryImpl _evaluationRepo;
   final SyncMetaDao _syncMetaDao;
+  final EnrollmentReferentialDao _referentialDao;
   final CurrentUserContext? _currentUser;
 
   const CourseOfflineRepositoryImpl({
@@ -75,6 +77,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     required ClassroomLocalDataSource classroomLocalDataSource,
     required EvaluationOfflineRepositoryImpl evaluationRepository,
     required SyncMetaDao syncMetaDao,
+    required EnrollmentReferentialDao referentialDao,
     CurrentUserContext? currentUser,
   }) : _online = online,
        _academicsLocal = academicsLocalDataSource,
@@ -82,6 +85,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
        _classroomLocal = classroomLocalDataSource,
        _evaluationRepo = evaluationRepository,
        _syncMetaDao = syncMetaDao,
+       _referentialDao = referentialDao,
        _currentUser = currentUser;
 
   /// Compte dont on lit le cache (partition tablette partagée, cf.
@@ -128,12 +132,31 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
             );
       }
 
+      // Année courante : `ref_cours` ne porte AUCUNE année, et son pull est un
+      // delta qui ne retire rien hors rejeu bootstrap — les cours d'une année
+      // révolue restent donc en cache indéfiniment. La seule année atteignable
+      // est celle de la classe qui les porte.
+      //
+      // `null` = référentiel pas encore synchronisé pour cette école (base
+      // fraîche, ou école inconnue faute de session). On ne filtre alors PAS :
+      // filtrer sur une année inconnue viderait l'écran d'un prof dont tous les
+      // cours sont légitimes. Année absente ≠ année vide.
+      final schoolId = _currentUser?.schoolId;
+      final currentYearId = schoolId == null
+          ? null
+          : await _referentialDao.findCurrentAcademicYearId(schoolId);
+
       final summaries = <CourseSummary>[];
       for (final entry in coursesByClassroom.entries) {
         final classroomId = entry.key;
         final dto = await _classroomLocal.getClassroomById(classroomId);
-        final classroom = dto == null
-            ? ClassroomSummary(
+
+        if (dto == null) {
+          // Classe pas encore pullée : on ne peut ni la nommer ni dater ses
+          // cours. Signalée telle quelle — l'écran la masque et le dit.
+          summaries.add(
+            CourseSummary(
+              classroom: ClassroomSummary(
                 id: classroomId,
                 schoolLevelId: '',
                 name: '',
@@ -141,19 +164,34 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
                 totalCount: 0,
                 femaleCount: 0,
                 maleCount: 0,
-              )
-            : ClassroomSummary(
-                id: dto.id,
-                version: dto.version,
-                schoolLevelId: dto.schoolLevelId ?? '',
-                name: dto.name,
-                capacity: dto.capacity ?? 0,
-                totalCount: dto.totalCount,
-                femaleCount: dto.femaleCount,
-                maleCount: dto.maleCount,
-              );
+              ),
+              courses: entry.value,
+              classroomUnsynced: true,
+            ),
+          );
+          continue;
+        }
+
+        // Classe connue d'une AUTRE année : le cours n'est pas de cette année,
+        // il sort sans un mot — ce n'est pas une panne de synchro.
+        if (currentYearId != null && dto.academicYearId != currentYearId) {
+          continue;
+        }
+
         summaries.add(
-          CourseSummary(classroom: classroom, courses: entry.value),
+          CourseSummary(
+            classroom: ClassroomSummary(
+              id: dto.id,
+              version: dto.version,
+              schoolLevelId: dto.schoolLevelId ?? '',
+              name: dto.name,
+              capacity: dto.capacity ?? 0,
+              totalCount: dto.totalCount,
+              femaleCount: dto.femaleCount,
+              maleCount: dto.maleCount,
+            ),
+            courses: entry.value,
+          ),
         );
       }
       return Right(summaries);

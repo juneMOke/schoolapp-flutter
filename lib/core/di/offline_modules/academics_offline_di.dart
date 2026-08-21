@@ -45,6 +45,8 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 /// Ordre : DataSources → APIs → Repositories → Handlers (push sur `SyncEngine`,
 /// pull sur `PullCoordinator`). Aucun BLoC ici : la présentation est branchée en
 /// NF-7 sur les BLoCs online rapatriés.
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+
 void registerAcademicsOffline(GetIt getIt) {
   final requiredAuth = getIt<Map<String, dynamic>>();
 
@@ -145,6 +147,7 @@ void registerAcademicsOffline(GetIt getIt) {
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
       syncMetaDao: getIt<SyncMetaDao>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );

@@ -1292,6 +1292,12 @@ abstract class AppLocalizations {
   /// **'{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}'**
   String myCoursesCount(int classCount, int courseCount);
 
+  /// No description provided for @myCoursesUnsyncedClassroomNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course hidden — classroom not synchronised} other{{count} courses hidden — classroom not synchronised}}'**
+  String myCoursesUnsyncedClassroomNotice(int count);
+
   /// No description provided for @myCoursesExpandAll.
   ///
   /// In en, this message translates to:

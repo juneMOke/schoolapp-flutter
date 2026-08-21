@@ -407,6 +407,14 @@
       }
     }
   },
+  "myCoursesUnsyncedClassroomNotice": "{count, plural, =1{1 cours masqué — classe non synchronisée} other{{count} cours masqués — classe non synchronisée}}",
+  "@myCoursesUnsyncedClassroomNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "myCoursesExpandAll": "Tout déplier",
   "myCoursesCollapseAll": "Tout replier",
   "myCoursesClassCourseCount": "{count, plural, =0{0 cours} =1{1 cours} other{{count} cours}}",
