@@ -1,7 +1,9 @@
 # PRESENCE_MOTIFS_PLAN.md — le verdict d'absence et la saisie des motifs
 
-> **Statut :** plan validé (2026-08-22). **Aucun lot ouvert.** Toutes les
-> décisions du §3 sont verrouillées ; un seul sous-point reste ouvert (§9).
+> **Statut :** plan validé (2026-08-22). **P-1a livré** (back, `7b47b9c` sur
+> `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`) ; P-1b→P-2b
+> ouverts. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
+> reste ouvert (§9).
 >
 > **Origine :** les deux entrées `P-1` et `P-2` de `REVUE_CODE_BACKLOG.md`,
 > §"Ouverts", signalées à l'usage sur la **Présence de l'élève**.
@@ -184,10 +186,28 @@ un chiffre corrigé, on le corrige.
 
 ## 6. Lots
 
-### P-1a — Back : le prédicat, et le test qui manquait
+### ~~P-1a — Back : le prédicat, et le test qui manquait~~ — LIVRÉ (`7b47b9c`)
 
-Se livre sur une **branche dédiée du dépôt `eteelo-backend`**, avec son propre
-cycle de revue et de déploiement.
+Livré sur `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`, avec son
+propre cycle de revue et de déploiement. **1557 tests verts, `BUILD SUCCESS`.**
+
+La règle a quitté ses trois copies pour vivre sur l'enum : `UNJUSTIFIED_REASONS`
+(ce que reçoivent les requêtes) et `isUnjustified(reason)` (ce qu'appelle le
+Java), qui prend un `null` **volontairement** — refuser `null` forcerait chaque
+appelant à réinventer ce cas, ce qui est exactement comment les copies avaient
+divergé. Les deux JPQL passent d'un motif unique à une `Collection`.
+
+⚠️ **Prouvé par mutation** : en remettant `EnumSet.of(UNKNOWN)` seul, deux tests
+rougissent — `unjustifiedIsUnjustified` et `unjustifiedReasonIsCountedUnjustified`.
+En revanche `setAndPredicateAgree` reste vert sous cette mutation, et c'est
+normal : le prédicat dérive de l'ensemble, donc les deux bougent ensemble. Ce
+test garde une divergence **future** (quelqu'un qui réécrirait le prédicat à la
+main), pas celle-ci.
+
+⚠️ **Ne pas filtrer les tests sur ce dépôt.** `-Dtest=NomDeClasse` ne découvre
+pas les classes `@Nested` : deux suites sur trois rapportaient « 0 test » sous
+un `exit 0`. Le résumé `.txt` de surefire attribue par ailleurs 0 à la classe
+externe et range les cas imbriqués dans le XML — c'est le XML qui dit vrai.
 
 Corriger les **trois** porteurs de la règle (§4.7) pour ranger `UNJUSTIFIED` du
 côté injustifié : `AttendanceStatsService.countUnjustified`, et les deux JPQL de
