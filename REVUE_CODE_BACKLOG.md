@@ -33,8 +33,9 @@ déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 S'y ajoutent **P-1**, **P-2** et **P-3**, hors revue, sur la **Présence de
 l'élève** (2026-08-22). P-1 était un défaut du chemin nominal — l'écran d'appel
 et les KPIs rendaient des verdicts contraires sur la même absence : **livré**
-(`PRESENCE_MOTIFS_PLAN.md`). P-2 est un besoin produit, P-3 un défaut trouvé en
-revue de P-1 : tous deux **ouverts**. Voir « Ouverts ».
+(`PRESENCE_MOTIFS_PLAN.md`). P-2 est un besoin produit, **livré pour moitié** (le
+mode Focus existe ; reste la grille de motifs). P-3, défaut trouvé en revue de
+P-1, reste **entièrement ouvert**. Voir « Ouverts ».
 
 > Ordre : gravité décroissante. Un défaut « haut » a une conséquence métier
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
@@ -140,6 +141,13 @@ l'enum de transport brut. Trois gestes, dans cet ordre :
 
 ### P-2 · L'appel n'a qu'un seul mode de saisie — et le Focus des notes ne s'y transpose pas tel quel
 
+> **Partiellement livré.** Le mode Focus restreint aux absents existe
+> (`AttendanceFocusMode`, lot P-2a du plan) : le constat ci-dessous n'est donc
+> plus vrai de l'écran d'aujourd'hui. **Reste P-2b** — le motif en grille de
+> grandes cibles, qui remplacera le dropdown dans la carte. La fiche est
+> conservée telle quelle : c'est elle qui porte le raisonnement de cadrage, et
+> il vaut toujours pour P-2b.
+
 Côté notes, la saisie a deux modes : `SaisieModeBar` bascule Tableau | Focus via
 le `SegmentedTabFilter` du socle, vers `SaisieTable` ou `SaisieFocus` (183 + 250
 lignes) et un `SaisieNumpad` (108 lignes), le tout piloté par un
@@ -186,10 +194,11 @@ se propose que quand il reste des motifs à renseigner, et elle traite trois
 élèves, pas quarante. Ce n'est pas le Focus des notes — c'est un meilleur, et il
 coûte moins cher.
 
-⚠️ **Ordre entre les deux fiches : P-1 d'abord.** Construire une grille de
-motifs sur un catalogue qui contient « Congé de mariage » et « Inconnu »
-figerait le problème de P-1 dans une UI bien plus coûteuse à défaire qu'un
-dropdown.
+⚠️ ~~**Ordre entre les deux fiches : P-1 d'abord.**~~ — **levé** : P-1 est
+livré, la liste de saisie est arrêtée à cinq motifs et « Inconnu » s'affiche
+« Non justifiée ». La grille de P-2b peut donc être construite sans figer un
+catalogue périmé dans une UI coûteuse à défaire — c'était toute la raison de
+cet ordre.
 
 ---
 
