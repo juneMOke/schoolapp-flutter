@@ -1984,6 +1984,7 @@
   "attendanceErrorUnknownTitle": "Chargement impossible",
   "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
+  "attendancePastCallAmendLocked": "Cet appel a déjà été enregistré et le jour est révolu : le corriger relève de la surveillance générale, pas de la prise d'appel.",
   "attendanceFocusPrevious": "Précédent",
   "attendanceFocusNext": "Suivant",
   "attendanceModeList": "Liste",

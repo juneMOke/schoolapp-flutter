@@ -87,6 +87,7 @@ const _discipline = <String>[
   'attendance.read',
   'attendance.write',
   'attendance.delete',
+  'attendance.amend',
   'attendance.stats.read',
   'discipline.read',
   'discipline.write',

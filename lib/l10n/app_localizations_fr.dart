@@ -3937,6 +3937,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceSaveCallAction => 'Enregistrer l\'appel';
 
   @override
+  String get attendancePastCallAmendLocked =>
+      'Cet appel a déjà été enregistré et le jour est révolu : le corriger relève de la surveillance générale, pas de la prise d\'appel.';
+
+  @override
   String get attendanceFocusPrevious => 'Précédent';
 
   @override

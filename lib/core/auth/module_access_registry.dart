@@ -60,6 +60,29 @@ const ModuleAccess kPaymentCollectAccess = ModuleAccess([
   Perm.editiqueWrite,
 ], requiresAll: true);
 
+/// Enregistrer un appel — le geste de celui qui constate (`POST /sync/attendance`).
+const ModuleAccess kAttendanceRecordAccess = ModuleAccess([
+  Perm.attendanceWrite,
+]);
+
+/// Corriger un appel **déjà enregistré**, pour un jour **révolu**
+/// (`POST /sync/attendance`, même point d'entrée).
+///
+/// **Conjonction** : c'est la même écriture, plus le droit d'arbitrer. Le motif
+/// d'absence porte le verdict justifiée / injustifiée, et « on ne sait pas »
+/// vaut « pas justifiée » : rouvrir l'appel d'hier pour y poser « maladie »
+/// efface une absence injustifiée d'un registre qui sert à convoquer une
+/// famille. Prendre l'appel en retard, ou rectifier celui du jour, reste le
+/// geste de celui qui constate et n'exige que [kAttendanceRecordAccess].
+///
+/// ⚠️ Masquer n'est pas cosmétique ici. Cette écriture part par l'outbox, où un
+/// 403 est classé TERMINAL : sans la garde, l'enseignant corrigerait hors ligne,
+/// croirait avoir corrigé, et la saisie mourrait plus tard sans rattrapage.
+const ModuleAccess kAttendanceAmendAccess = ModuleAccess([
+  Perm.attendanceWrite,
+  Perm.attendanceAmend,
+], requiresAll: true);
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
@@ -67,7 +90,8 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'valider une inscription': kEnrollmentSubmitAccess,
   'encaisser un paiement': kPaymentCollectAccess,
   'émettre une pièce': ModuleAccess([Perm.editiqueWrite]),
-  'enregistrer un appel': ModuleAccess([Perm.attendanceWrite]),
+  'enregistrer un appel': kAttendanceRecordAccess,
+  'corriger un appel d\'un jour révolu': kAttendanceAmendAccess,
   'instruire un cas disciplinaire': kDisciplineInstructAccess,
   'créer une évaluation / saisir des notes': ModuleAccess([
     Perm.academicsGradeWrite,

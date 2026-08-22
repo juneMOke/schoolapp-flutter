@@ -3900,6 +3900,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceSaveCallAction => 'Save attendance';
 
   @override
+  String get attendancePastCallAmendLocked =>
+      'This call is already recorded and the day is over: correcting it is for the discipline office, not for whoever takes the call.';
+
+  @override
   String get attendanceFocusPrevious => 'Previous';
 
   @override

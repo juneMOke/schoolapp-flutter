@@ -1,8 +1,8 @@
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -237,6 +237,12 @@ class _AttendanceResultsSectionState extends State<AttendanceResultsSection> {
                     state.canSave &&
                     missingReasonsCount == 0 &&
                     unsupportedReasonsCount == 0,
+                // Corriger un appel DÉJÀ enregistré, un jour RÉVOLU, est un
+                // geste d'arbitrage. Prendre l'appel en retard — aucune session
+                // pour ce jour — reste celui de qui constate, comme rectifier
+                // l'appel du jour même.
+                isPastCorrection:
+                    state.callTaken && _isBeforeToday(request.date),
                 onMarkAllPresent: () => context.read<AttendanceBloc>().add(
                   const AttendanceMarkAllPresentRequested(),
                 ),
@@ -309,11 +315,15 @@ class _AttendanceActionBar extends StatelessWidget {
   final VoidCallback onMarkAllPresent;
   final VoidCallback onSaveCall;
 
+  /// L'écriture serait une correction d'un appel passé, donc un arbitrage.
+  final bool isPastCorrection;
+
   const _AttendanceActionBar({
     required this.isSaving,
     required this.canSave,
     required this.onMarkAllPresent,
     required this.onSaveCall,
+    required this.isPastCorrection,
   });
 
   @override
@@ -322,8 +332,13 @@ class _AttendanceActionBar extends StatelessWidget {
 
     // La feuille d'appel est atteignable avec `attendance.read` seul : sans
     // cette garde, un profil en lecture se verrait offrir l'enregistrement.
-    return PermissionGate(
-      requires: const [Perm.attendanceWrite],
+    //
+    // Sur une correction d'un jour révolu, l'exigence monte d'un cran. Le repli
+    // n'est pas vide ici, contrairement à la convention du gate : une feuille
+    // d'appel sans bouton d'enregistrement, sans un mot, se lit comme une panne.
+    return PermissionGate.access(
+      isPastCorrection ? kAttendanceAmendAccess : kAttendanceRecordAccess,
+      fallback: isPastCorrection ? const _PastCallAmendLockedNotice() : null,
       child: SessionWriteGate(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -448,6 +463,50 @@ class _EntryModeBar extends StatelessWidget {
       ],
     );
   }
+}
+
+class _PastCallAmendLockedNotice extends StatelessWidget {
+  const _PastCallAmendLockedNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.lock_outline_rounded,
+          size: 16,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: AppDimensions.spacingS),
+        Expanded(
+          child: Text(
+            l10n.attendancePastCallAmendLocked,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Le jour est-il révolu ?
+///
+/// L'horloge lue est celle de la tablette, et elle n'est pas digne de confiance
+/// — c'est bien pourquoi le serveur refait le calcul sur la sienne avant
+/// d'écrire. Ici on ne protège rien : on évite de mettre en file une écriture
+/// qui mourrait en 403, et un 403 sur l'outbox est TERMINAL, donc la saisie
+/// serait perdue plutôt que rejouée.
+bool _isBeforeToday(DateTime date) {
+  final now = DateTime.now();
+  return DateTime(
+    date.year,
+    date.month,
+    date.day,
+  ).isBefore(DateTime(now.year, now.month, now.day));
 }
 
 /// Bandeau du 3e état (invariant #1) : aucune session pour ce jour → l'appel
