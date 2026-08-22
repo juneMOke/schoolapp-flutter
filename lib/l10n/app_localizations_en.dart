@@ -3900,6 +3900,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceSaveCallAction => 'Save attendance';
 
   @override
+  String get attendanceFocusPrevious => 'Previous';
+
+  @override
+  String get attendanceFocusNext => 'Next';
+
+  @override
+  String get attendanceModeList => 'List';
+
+  @override
+  String get attendanceModeFocus => 'Focus';
+
+  @override
+  String attendancePendingReasons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reasons to fill in',
+      one: '1 reason to fill in',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get attendanceUnsupportedReasonBlocked =>
       'An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.';
 

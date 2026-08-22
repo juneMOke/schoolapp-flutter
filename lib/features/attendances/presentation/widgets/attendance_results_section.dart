@@ -24,14 +24,19 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/att
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_toolbar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_save_overlay.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_empty_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_focus_mode.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
-class AttendanceResultsSection extends StatelessWidget {
+/// Mode de saisie de l'appel.
+enum AttendanceEntryMode { list, focus }
+
+class AttendanceResultsSection extends StatefulWidget {
   final AttendanceSearchRequest? lastRequest;
   final VoidCallback onRetry;
 
@@ -41,6 +46,16 @@ class AttendanceResultsSection extends StatelessWidget {
     required this.onRetry,
   });
 
+  @override
+  State<AttendanceResultsSection> createState() =>
+      _AttendanceResultsSectionState();
+}
+
+class _AttendanceResultsSectionState extends State<AttendanceResultsSection> {
+  /// Le mode vit ici, hors du BLoC : c'est une préférence d'affichage, pas un
+  /// état métier. Rien de ce qu'il change ne doit partir à la synchro.
+  AttendanceEntryMode _mode = AttendanceEntryMode.list;
+
   Future<void> _contactAdmin() async {
     await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
   }
@@ -48,7 +63,7 @@ class AttendanceResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final request = lastRequest;
+    final request = widget.lastRequest;
 
     if (request == null) {
       return EteeloEmptyResult(
@@ -79,7 +94,7 @@ class AttendanceResultsSection extends StatelessWidget {
           // Anatomie d'erreur partagee (4 types) ; le 403 reste dormant.
           child = AttendanceResultsErrorState(
             type: state.fetchErrorType,
-            onRetry: onRetry,
+            onRetry: widget.onRetry,
             onReconnect: () =>
                 context.read<AuthBloc>().add(const AuthLogoutRequested()),
             onContactAdmin: _contactAdmin,
@@ -141,6 +156,17 @@ class AttendanceResultsSection extends StatelessWidget {
                     row.absenceReason == AbsenceReason.unsupported,
               )
               .length;
+          // Le Focus n'itère que sur les ABSENTS : c'est le cadrage du lot.
+          final rowsToFocus = state.draftRows
+              .where((row) => !row.present)
+              .toList(growable: false);
+          // ⚠️ Le mode peut rester `focus` alors qu'il n'y a plus rien à
+          // montrer — le dernier motif vient d'être posé, ou tout le monde est
+          // repassé présent. On retombe alors sur la liste plutôt que de rendre
+          // une carte vide : la bascule elle-même a déjà disparu.
+          final focusUsable =
+              _mode == AttendanceEntryMode.focus && rowsToFocus.isNotEmpty;
+
           final panelHeight = (MediaQuery.sizeOf(context).height * 0.62)
               .clamp(
                 AppDimensions.attendanceResultsPanelMinHeight,
@@ -188,6 +214,19 @@ class AttendanceResultsSection extends StatelessWidget {
                 const _AppelNonFaitBar(),
                 const SizedBox(height: AppDimensions.spacingS),
               ],
+              // Le Focus ne se propose QUE s'il reste des motifs à renseigner.
+              // Ailleurs il serait plus lent que la liste : le flux dominant
+              // est « tout le monde est là sauf trois », déjà servi par
+              // « Marquer tous présents ». Un Focus sur l'effectif entier
+              // imposerait quarante passages pour trois absences.
+              if (missingReasonsCount > 0) ...[
+                _EntryModeBar(
+                  mode: _mode,
+                  pending: missingReasonsCount,
+                  onChanged: (m) => setState(() => _mode = m),
+                ),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
               if (unsupportedReasonsCount > 0) ...[
                 _UnsupportedReasonBar(count: unsupportedReasonsCount),
                 const SizedBox(height: AppDimensions.spacingS),
@@ -227,11 +266,13 @@ class AttendanceResultsSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: AttendanceRecordsMobileList(
-                            rows: state.draftRows,
-                            classroomName: request.selectedClassroom.name,
-                            shrinkWrap: false,
-                          ),
+                          child: focusUsable
+                              ? AttendanceFocusMode(rows: rowsToFocus)
+                              : AttendanceRecordsMobileList(
+                                  rows: state.draftRows,
+                                  classroomName: request.selectedClassroom.name,
+                                  shrinkWrap: false,
+                                ),
                         ),
                         if (missingReasonsCount > 0)
                           _RappelAmbreBar(
@@ -346,6 +387,65 @@ class _UnsupportedReasonBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// La bascule Liste | Focus, avec le nombre de motifs restants.
+///
+/// Elle n'apparaît que s'il en reste : c'est ce qui empêche le Focus de devenir
+/// un détour. Le compteur est le même que celui qui bloque l'enregistrement —
+/// l'utilisateur voit donc décroître exactement ce qui le retient.
+class _EntryModeBar extends StatelessWidget {
+  final AttendanceEntryMode mode;
+  final int pending;
+  final ValueChanged<AttendanceEntryMode> onChanged;
+
+  const _EntryModeBar({
+    required this.mode,
+    required this.pending,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      children: [
+        // ⚠️ `expand: true` : contraint en largeur dans une Row, le contrôle
+        // déborde sans lui.
+        SizedBox(
+          width: 220,
+          child: SegmentedTabFilter<AttendanceEntryMode>(
+            selected: mode,
+            onSelected: onChanged,
+            expand: true,
+            options: [
+              SegmentedTabOption(
+                label: l10n.attendanceModeList,
+                value: AttendanceEntryMode.list,
+                icon: Icons.table_rows_rounded,
+              ),
+              SegmentedTabOption(
+                label: l10n.attendanceModeFocus,
+                value: AttendanceEntryMode.focus,
+                icon: Icons.center_focus_strong_rounded,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingM),
+        Expanded(
+          child: Text(
+            l10n.attendancePendingReasons(pending),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -6618,6 +6618,36 @@ abstract class AppLocalizations {
   /// **'Save attendance'**
   String get attendanceSaveCallAction;
 
+  /// No description provided for @attendanceFocusPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get attendanceFocusPrevious;
+
+  /// No description provided for @attendanceFocusNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get attendanceFocusNext;
+
+  /// No description provided for @attendanceModeList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get attendanceModeList;
+
+  /// No description provided for @attendanceModeFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get attendanceModeFocus;
+
+  /// No description provided for @attendancePendingReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reason to fill in} other{{count} reasons to fill in}}'**
+  String attendancePendingReasons(int count);
+
   /// No description provided for @attendanceUnsupportedReasonBlocked.
   ///
   /// In en, this message translates to:

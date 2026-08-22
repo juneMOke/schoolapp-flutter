@@ -3,7 +3,7 @@
 > **Statut :** plan validé (2026-08-22). **P-1a livré** (back, `7b47b9c` sur
 > `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`), **P-1b, P-1c et
 > P-1d livrés** (front), plus la permission `attendance.amend` qui n'y figurait
-> pas ; **P-2a et P-2b restent ouverts**. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
+> pas, ainsi que **P-2a**. **Seul P-2b reste ouvert.** Toutes les décisions du §3 sont verrouillées ; un seul sous-point
 > reste ouvert (§9).
 >
 > **Origine :** les deux entrées `P-1` et `P-2` de `REVUE_CODE_BACKLOG.md`,
@@ -313,21 +313,42 @@ Le calcul local dit donc la même chose que le serveur sur cette ligne.
 recopiait verbatim les onze lignes de `getDisplayName`. Elle délègue désormais,
 ne gardant que le cas « sans motif ».
 
-### P-2a — Le Focus, restreint aux absents
+### ~~P-2a — Le Focus, restreint aux absents~~ — LIVRÉ
 
-Un `SegmentedTabFilter` (composant socle, déjà partagé — ⚠ `expand: true`) au
-dessus de la zone de saisie, comme `SaisieModeBar`. Le mode Focus **ne se
-propose que s'il reste des motifs à renseigner** et n'itère **que sur les
-absents** : une carte par élève, Précédent / Suivant, fil de progression, et le
-compteur « en attente » qui décroît sous les yeux.
+`AttendanceFocusMode` : une carte par absent, fil de progression cliquable,
+Précédent / Suivant, flèches clavier. La bascule `Liste | Focus` n'apparaît que
+s'il reste des motifs, avec le compteur de ce qui reste — le même que celui qui
+bloque l'enregistrement. 3956 verts, analyze propre.
 
-Le mode émet les événements existants ; aucune couche data, aucun modèle neuf.
-⚠ `buildWhen` sur la bascule de mode, sinon toute la page se reconstruit
-(règle non-négociable #9).
+⚠️ **Aucun brouillon propre au mode.** Celui des notes partage un
+`SaisieDraftController` avec son tableau ; ici l'état vit dans le BLoC et la
+carte émet **les mêmes événements** que les lignes de la liste. Les deux modes
+sont d'accord par construction — ne pas « factoriser » vers un contrôleur, ce
+serait recréer la synchronisation que cette absence évite.
 
-**Bloqué par P-1c** : construire des cibles sur un catalogue qui contient encore
-« Congé de mariage » et « Inconnu » figerait le problème dans une UI bien plus
-coûteuse à défaire qu'un dropdown.
+⚠️ **Le clavier ne capture QUE la navigation** (flèches). Le Focus des notes
+intercepte les chiffres pour son pavé ; ici les champs doivent continuer de
+recevoir la frappe.
+
+⚠️ **La liste des absents rétrécit sous les pieds du widget** — repasser un
+élève présent le retire. L'index est borné à **chaque rendu**, pas seulement à
+la navigation, et le mode retombe sur la liste s'il ne reste personne : sinon
+`rows[_index]` sort de la liste au premier retrait.
+
+**Prouvé par mutation**, trois fois : bascule non masquée quand tout est
+renseigné, Focus itérant sur tout l'effectif, Focus imposé par défaut — chacune
+fait rougir un test différent.
+
+⚠️ **Le `buildWhen` que cette fiche exigeait n'a PAS été posé, et c'est
+délibéré.** La section lit `fetchStatus`, `fetchErrorType`, `draftRows`,
+`callTaken`, `saveStatus` et `canSave` — soit presque tout l'état ; les champs
+restants (`records`, `saveErrorType`, `activeClassroomId/YearId/Date`,
+`modifiedStudentIds`) ne changent **jamais seuls**, toujours en même temps que
+l'un des six. Une clause `buildWhen` y énumérerait six champs pour éviter
+approximativement zéro reconstruction, tout en créant un endroit de plus où
+oublier le septième le jour où la section lira un champ de plus. La bascule de
+mode, elle, reconstruit par `setState` — une fois par tap, pour un contenu qui
+change entièrement : c'est le rebuild attendu, pas un rebuild parasite.
 
 ### P-2b — La grille de motifs
 

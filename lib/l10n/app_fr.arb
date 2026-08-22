@@ -1984,6 +1984,18 @@
   "attendanceErrorUnknownTitle": "Chargement impossible",
   "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
+  "attendanceFocusPrevious": "Précédent",
+  "attendanceFocusNext": "Suivant",
+  "attendanceModeList": "Liste",
+  "attendanceModeFocus": "Focus",
+  "attendancePendingReasons": "{count, plural, =1{1 motif à renseigner} other{{count} motifs à renseigner}}",
+  "@attendancePendingReasons": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attendanceUnsupportedReasonBlocked": "Une absence porte un motif que cette version de l'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.",
   "attendanceMarkAllPresentAction": "Tout présent",
   "attendanceCallNotTakenTitle": "Appel non fait",

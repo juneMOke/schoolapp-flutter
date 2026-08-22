@@ -2027,6 +2027,18 @@
   "attendanceErrorUnknownTitle": "Unable to load",
   "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
+  "attendanceFocusPrevious": "Previous",
+  "attendanceFocusNext": "Next",
+  "attendanceModeList": "List",
+  "attendanceModeFocus": "Focus",
+  "attendancePendingReasons": "{count, plural, =1{1 reason to fill in} other{{count} reasons to fill in}}",
+  "@attendancePendingReasons": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attendanceUnsupportedReasonBlocked": "An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.",
   "attendanceMarkAllPresentAction": "All present",
   "attendanceCallNotTakenTitle": "Attendance not taken",

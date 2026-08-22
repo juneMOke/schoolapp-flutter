@@ -3937,6 +3937,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceSaveCallAction => 'Enregistrer l\'appel';
 
   @override
+  String get attendanceFocusPrevious => 'Précédent';
+
+  @override
+  String get attendanceFocusNext => 'Suivant';
+
+  @override
+  String get attendanceModeList => 'Liste';
+
+  @override
+  String get attendanceModeFocus => 'Focus';
+
+  @override
+  String attendancePendingReasons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count motifs à renseigner',
+      one: '1 motif à renseigner',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get attendanceUnsupportedReasonBlocked =>
       'Une absence porte un motif que cette version de l\'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.';
 
