@@ -1298,6 +1298,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 course hidden — classroom not synchronised} other{{count} courses hidden — classroom not synchronised}}'**
   String myCoursesUnsyncedClassroomNotice(int count);
 
+  /// No description provided for @myCoursesUnsyncedClassroomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsynced class'**
+  String get myCoursesUnsyncedClassroomName;
+
+  /// No description provided for @myCoursesDegradedClassroomNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course shown without its class — the class sync has not completed yet} other{{count} courses shown without their class — the class sync has not completed yet}}'**
+  String myCoursesDegradedClassroomNotice(int count);
+
   /// No description provided for @myCoursesExpandAll.
   ///
   /// In en, this message translates to:

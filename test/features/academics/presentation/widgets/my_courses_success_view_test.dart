@@ -56,6 +56,49 @@ void main() {
     classroomUnsynced: true,
   );
 
+  testWidgets(
+    'aucune classe synchronisée : tout est rendu en repli, jamais un écran vide',
+    (tester) async {
+      // Le filtre ne doit JAMAIS tout masquer. Sur une base fraîche `ref_cours`
+      // est tiré indépendamment du pull des classes — lequel échoue tant que le
+      // référentiel Inscription n'a pas atterri — donc `ref_classrooms` est vide
+      // alors que les cours sont là. Masquer les uns après les autres donnait
+      // « 0 CLASSE · 0 COURS » et plus aucun cours atteignable.
+      await tester.pumpWidget(
+        host(MyCoursesSuccessView(courses: [unsyncedGroup()])),
+      );
+
+      // Les cours sont à l'écran, pas masqués.
+      expect(find.text('Géographie'), findsOneWidget);
+      expect(find.text('Biologie'), findsOneWidget);
+
+      // La classe est nommée plutôt qu'anonyme : une carte sans titre aux
+      // effectifs à zéro se lirait comme une classe vide, ce qui est faux.
+      expect(find.text('Classe non synchronisée'), findsOneWidget);
+
+      // Le bandeau explique le repli, et ne dit plus « masqués ».
+      expect(find.textContaining('affichés sans leur classe'), findsOneWidget);
+      expect(find.textContaining('masqué'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'une classe synchronisée suffit à masquer les autres (pas de repli)',
+    (tester) async {
+      await tester.pumpWidget(
+        host(
+          MyCoursesSuccessView(courses: [...buildCourses(), unsyncedGroup()]),
+        ),
+      );
+
+      // Contre-épreuve du repli : dès qu'il reste quelque chose à montrer, le
+      // comportement d'origine s'applique — masquer et le dire.
+      expect(find.text('Géographie'), findsNothing);
+      expect(find.text('Classe non synchronisée'), findsNothing);
+      expect(find.textContaining('masqués'), findsOneWidget);
+    },
+  );
+
   testWidgets('une classe non synchronisée est masquée, et la mention le dit', (
     tester,
   ) async {

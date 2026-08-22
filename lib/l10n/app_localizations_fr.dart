@@ -723,6 +723,22 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get myCoursesUnsyncedClassroomName => 'Classe non synchronisée';
+
+  @override
+  String myCoursesDegradedClassroomNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count cours affichés sans leur classe — la synchronisation des classes n\'a pas encore abouti',
+      one:
+          '1 cours affiché sans sa classe — la synchronisation des classes n\'a pas encore abouti',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get myCoursesExpandAll => 'Tout déplier';
 
   @override

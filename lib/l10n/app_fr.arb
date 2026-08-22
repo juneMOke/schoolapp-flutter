@@ -415,6 +415,15 @@
       }
     }
   },
+  "myCoursesUnsyncedClassroomName": "Classe non synchronisée",
+  "myCoursesDegradedClassroomNotice": "{count, plural, =1{1 cours affiché sans sa classe — la synchronisation des classes n'a pas encore abouti} other{{count} cours affichés sans leur classe — la synchronisation des classes n'a pas encore abouti}}",
+  "@myCoursesDegradedClassroomNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "myCoursesExpandAll": "Tout déplier",
   "myCoursesCollapseAll": "Tout replier",
   "myCoursesClassCourseCount": "{count, plural, =0{0 cours} =1{1 cours} other{{count} cours}}",
@@ -1683,7 +1692,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Ajouter une allocation",
   "facturationCreatePaymentAllChargesPaid": "Toutes les charges de cet élève sont déjà réglées.",
   "facturationCreatePaymentChargesUnavailable": "Aucune charge disponible. Revenez à la liste et recommencez.",
-  "facturationCollectPreflightMessage": "Vérification des encaissements récents\u2026",
+  "facturationCollectPreflightMessage": "Vérification des encaissements récents…",
   "facturationCreatePaymentChargeDropdownHint": "Sélectionnez une charge",
   "facturationCreatePaymentAmountLabel": "Montant à payer",
   "facturationCreatePaymentAmountHint": "Ex : 5000",
@@ -3150,21 +3159,66 @@
   "documentsBlockedMissingEnrollmentNotice": "Dossier introuvable depuis ce lien : rouvrez la fiche depuis la liste des élèves.",
   "documentsBlockedOfflineNotice": "Hors connexion : cette pièce est produite par le serveur.",
   "documentsConfirmGenerateTitle": "Générer : {document} ?",
-  "@documentsConfirmGenerateTitle": {"placeholders": {"document": {"type": "String"}}},
+  "@documentsConfirmGenerateTitle": {
+    "placeholders": {
+      "document": {
+        "type": "String"
+      }
+    }
+  },
   "documentsConfirmGenerateMessage": "Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les pièces déjà remises restent valides — elles ne sont pas remplacées.",
   "documentsConfirmClearanceWarning": "Le quitus est émis quel que soit le solde : un élève qui n'est pas en règle recevra une pièce portant la mention « NON EN RÈGLE ».",
   "documentsConfirmGenerateAction": "Générer",
   "documentsConfirmGenerateCancel": "Annuler",
   "documentsLastIssueSubtitle": "Dernière émission {date} · réf. {reference}",
-  "@documentsLastIssueSubtitle": {"placeholders": {"date": {"type": "String"}, "reference": {"type": "String"}}},
+  "@documentsLastIssueSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "documentsCancelledNotice": "Pièce annulée le {date} par l'établissement.",
-  "@documentsCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "@documentsCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "documentsCancelledWithReasonNotice": "Pièce annulée le {date} par l'établissement — {reason}",
-  "@documentsCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "@documentsCancelledWithReasonNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "facturationReceiptCancelledNotice": "Reçu annulé le {date} par l'établissement.",
-  "@facturationReceiptCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "@facturationReceiptCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "facturationReceiptCancelledWithReasonNotice": "Reçu annulé le {date} par l'établissement — {reason}",
-  "@facturationReceiptCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "@facturationReceiptCancelledWithReasonNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "ticketDocumentTitle": "Ticket de perception",
   "ticketProvisionalBanner": "Provisoire",
   "ticketReferenceLabel": "Réf.",
@@ -3192,6 +3246,12 @@
   "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
   "paymentAnomalyAcknowledgeLabel": "Traité",
   "paymentAnomalyOthersPending": "{count} autre(s) en attente",
-  "@paymentAnomalyOthersPending": {"placeholders": {"count": {"type": "int"}}},
+  "@paymentAnomalyOthersPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "documentsBlockedEnrollmentUnreadableNotice": "Dossier illisible sur cette tablette : l'attestation n'est pas disponible ici."
 }

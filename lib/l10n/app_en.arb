@@ -457,6 +457,15 @@
       }
     }
   },
+  "myCoursesUnsyncedClassroomName": "Unsynced class",
+  "myCoursesDegradedClassroomNotice": "{count, plural, =1{1 course shown without its class — the class sync has not completed yet} other{{count} courses shown without their class — the class sync has not completed yet}}",
+  "@myCoursesDegradedClassroomNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "myCoursesExpandAll": "Expand all",
   "myCoursesCollapseAll": "Collapse all",
   "myCoursesClassCourseCount": "{count, plural, =0{0 courses} =1{1 course} other{{count} courses}}",
@@ -949,7 +958,7 @@
   "searchModeByClass": "By class",
   "searchModeByIdentity": "By identity",
   "searchModeClassHint": "Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.",
-  "searchModeIdentityHint": "Enter the student's last name, middle name and first name. To list a whole class, switch to \u201cBy class\u201d.",
+  "searchModeIdentityHint": "Enter the student's last name, middle name and first name. To list a whole class, switch to “By class”.",
   "searchRefineByNameLabel": "Refine by last name (optional)",
   "searchRefineByNamePlaceholder": "Student's last name, even partial",
   "viewDetails": "View details",
@@ -1726,7 +1735,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Add allocation",
   "facturationCreatePaymentAllChargesPaid": "All student charges are already paid.",
   "facturationCreatePaymentChargesUnavailable": "No charges available. Go back to the list and try again.",
-  "facturationCollectPreflightMessage": "Checking recent payments\u2026",
+  "facturationCollectPreflightMessage": "Checking recent payments…",
   "facturationCreatePaymentChargeDropdownHint": "Select a charge",
   "facturationCreatePaymentAmountLabel": "Amount to pay",
   "facturationCreatePaymentAmountHint": "E.g.: 5000",
@@ -3186,21 +3195,66 @@
   "documentsBlockedMissingEnrollmentNotice": "Enrolment not reachable from this link: reopen the student from the list.",
   "documentsBlockedOfflineNotice": "Offline: this document is produced by the server.",
   "documentsConfirmGenerateTitle": "Generate: {document}?",
-  "@documentsConfirmGenerateTitle": {"placeholders": {"document": {"type": "String"}}},
+  "@documentsConfirmGenerateTitle": {
+    "placeholders": {
+      "document": {
+        "type": "String"
+      }
+    }
+  },
   "documentsConfirmGenerateMessage": "The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.",
   "documentsConfirmClearanceWarning": "The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.",
   "documentsConfirmGenerateAction": "Generate",
   "documentsConfirmGenerateCancel": "Cancel",
   "documentsLastIssueSubtitle": "Last issued {date} · ref. {reference}",
-  "@documentsLastIssueSubtitle": {"placeholders": {"date": {"type": "String"}, "reference": {"type": "String"}}},
+  "@documentsLastIssueSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "documentsCancelledNotice": "Document cancelled by the school on {date}.",
-  "@documentsCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "@documentsCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "documentsCancelledWithReasonNotice": "Document cancelled by the school on {date} — {reason}",
-  "@documentsCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "@documentsCancelledWithReasonNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "facturationReceiptCancelledNotice": "Receipt cancelled by the school on {date}.",
-  "@facturationReceiptCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "@facturationReceiptCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "facturationReceiptCancelledWithReasonNotice": "Receipt cancelled by the school on {date} — {reason}",
-  "@facturationReceiptCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "@facturationReceiptCancelledWithReasonNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "ticketDocumentTitle": "Collection ticket",
   "ticketProvisionalBanner": "Provisional",
   "ticketReferenceLabel": "Ref.",
@@ -3228,6 +3282,12 @@
   "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
   "paymentAnomalyAcknowledgeLabel": "Handled",
   "paymentAnomalyOthersPending": "{count} more pending",
-  "@paymentAnomalyOthersPending": {"placeholders": {"count": {"type": "int"}}},
+  "@paymentAnomalyOthersPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here."
 }
