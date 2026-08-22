@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 import 'package:school_app_flutter/features/attendances/presentation/models/attendance_editable_row.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_focus_mode.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_reason_grid.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_records_mobile_list.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_section.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -75,7 +76,7 @@ void main() {
     absenceReasonNote: '',
   );
 
-  Future<void> pump(
+  Future<AttendanceBloc> pump(
     WidgetTester tester,
     List<AttendanceEditableRow> rows,
   ) async {
@@ -131,7 +132,14 @@ void main() {
       ),
     );
     await tester.pump();
+    return attendance;
   }
+
+  /// Alias lisible là où le test se sert du bloc renvoyé.
+  Future<AttendanceBloc> pumpAndReturnBloc(
+    WidgetTester tester,
+    List<AttendanceEditableRow> rows,
+  ) => pump(tester, rows);
 
   testWidgets('aucun motif manquant : la bascule ne se propose pas', (
     tester,
@@ -178,6 +186,80 @@ void main() {
     expect(find.text('1 / 2'), findsOneWidget);
     // La présente n'a pas de carte.
     expect(find.textContaining('Aline'), findsNothing);
+  });
+
+  testWidgets('le motif se choisit en grande cible, pas en dropdown', (
+    tester,
+  ) async {
+    await pump(tester, [
+      row('s1', 'Aline', present: false),
+      row('s2', 'Bea', present: false),
+    ]);
+    await tester.tap(find.text('Focus'));
+    await tester.pump();
+
+    // Le geste que le mode existe pour économiser : un menu rouvert à chaque
+    // élève coûte deux taps, une cible en coûte un.
+    expect(find.byType(AttendanceReasonGrid), findsOneWidget);
+    expect(
+      find.byType(DropdownButton<AbsenceReason>),
+      findsNothing,
+      reason: 'la carte Focus ne doit plus porter le dropdown de la liste',
+    );
+    // Les cinq motifs de saisie sont des cibles, pas des entrées de menu.
+    for (final motif in kSelectableAbsenceReasons) {
+      expect(
+        find.text(
+          motif.getDisplayName(
+            AppLocalizations.of(
+              tester.element(find.byType(AttendanceReasonGrid)),
+            )!,
+          ),
+        ),
+        findsOneWidget,
+      );
+    }
+  });
+
+  testWidgets('poser un motif avance à l\'absent suivant', (tester) async {
+    final bloc = await pumpAndReturnBloc(tester, [
+      row('s1', 'Aline', present: false),
+      row('s2', 'Bea', present: false),
+    ]);
+    await tester.tap(find.text('Focus'));
+    await tester.pump();
+    expect(find.text('1 / 2'), findsOneWidget);
+
+    await tester.tap(find.text('Maladie'));
+    await tester.pump();
+
+    // L'événement part…
+    verify(
+      () => bloc.add(
+        const AttendanceAbsenceReasonChanged(
+          studentId: 's1',
+          absenceReason: AbsenceReason.sickness,
+        ),
+      ),
+    ).called(1);
+    // …et la carte a avancé : c'est ce qui rend la passe faisable en un tap
+    // par élève.
+    expect(find.text('2 / 2'), findsOneWidget);
+  });
+
+  testWidgets('depuis le DERNIER absent, poser un motif n\'avance pas', (
+    tester,
+  ) async {
+    // Contre-épreuve : avancer depuis le dernier sortirait de la carte et
+    // laisserait l'écran sans rien montrer.
+    await pumpAndReturnBloc(tester, [row('s1', 'Aline', present: false)]);
+    await tester.tap(find.text('Focus'));
+    await tester.pump();
+
+    await tester.tap(find.text('Maladie'));
+    await tester.pump();
+
+    expect(find.text('1 / 1'), findsOneWidget);
   });
 
   testWidgets('la liste reste le mode par défaut', (tester) async {

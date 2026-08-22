@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/models/attendance_editable_row.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_reason_grid.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_row_editors.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -73,6 +74,21 @@ class _AttendanceFocusModeState extends State<AttendanceFocusMode> {
     if (_safeIndex > 0) _go(_safeIndex - 1);
   }
 
+  /// Avance d'un élève dès qu'un motif est posé — c'est la passe des motifs
+  /// qui est le sujet du mode, et la faire en un tap par élève est son intérêt.
+  ///
+  /// ⚠️ **Le compromis est assumé et il a un coût** : la note libre de la carte
+  /// devient inatteignable dans la foulée du motif. C'est acceptable parce que
+  /// la note est l'exception — et parce que revenir coûte **un tap** sur le fil
+  /// de progression, qui est juste au-dessus. Un mauvais motif se rattrape par
+  /// le même chemin.
+  ///
+  /// Depuis le dernier absent, [_next] ne bouge pas — il porte déjà le garde,
+  /// et `_go` borne par-dessus. Une troisième condition ici serait une
+  /// redondance qu'aucun test ne peut distinguer : la mutation qui la retire
+  /// laisse la suite verte, parce que le comportement est identique.
+  void _advanceAfterReason() => _next();
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -117,16 +133,20 @@ class _AttendanceFocusModeState extends State<AttendanceFocusMode> {
                 const SizedBox(height: AppDimensions.spacingM),
                 _Identity(row: row, position: index + 1, total: _total),
                 const SizedBox(height: AppDimensions.spacingM),
-                AttendanceAbsenceReasonField(
-                  value: row.absenceReason,
-                  enabled: true,
-                  showValidationError: row.absenceReason == null,
-                  onChanged: (reason) => bloc.add(
-                    AttendanceAbsenceReasonChanged(
-                      studentId: row.studentId,
-                      absenceReason: reason,
-                    ),
-                  ),
+                // Grande cible plutôt que dropdown : c'est le geste que le
+                // mode existe pour économiser — un menu rouvert à chaque élève
+                // coûte deux taps là où une cible en coûte un.
+                AttendanceReasonGrid(
+                  selected: row.absenceReason,
+                  onSelected: (reason) {
+                    bloc.add(
+                      AttendanceAbsenceReasonChanged(
+                        studentId: row.studentId,
+                        absenceReason: reason,
+                      ),
+                    );
+                    _advanceAfterReason();
+                  },
                 ),
                 const SizedBox(height: AppDimensions.spacingS),
                 AttendanceAbsenceNoteField(

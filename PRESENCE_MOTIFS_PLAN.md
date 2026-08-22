@@ -3,7 +3,7 @@
 > **Statut :** plan validé (2026-08-22). **P-1a livré** (back, `7b47b9c` sur
 > `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`), **P-1b, P-1c et
 > P-1d livrés** (front), plus la permission `attendance.amend` qui n'y figurait
-> pas, ainsi que **P-2a**. **Seul P-2b reste ouvert.** Toutes les décisions du §3 sont verrouillées ; un seul sous-point
+> pas, ainsi que **P-2a et P-2b**. **Le plan est entièrement livré.** Toutes les décisions du §3 sont verrouillées ; un seul sous-point
 > reste ouvert (§9).
 >
 > **Origine :** les deux entrées `P-1` et `P-2` de `REVUE_CODE_BACKLOG.md`,
@@ -350,11 +350,26 @@ oublier le septième le jour où la section lira un champ de plus. La bascule de
 mode, elle, reconstruit par `setState` — une fois par tap, pour un contenu qui
 change entièrement : c'est le rebuild attendu, pas un rebuild parasite.
 
-### P-2b — La grille de motifs
+### ~~P-2b — La grille de motifs~~ — LIVRÉ
 
-Le choix du motif en grille de grandes cibles plutôt qu'en dropdown, dans le
-mode Focus. C'est l'équivalent fonctionnel du pavé numérique des notes : le
-geste qui évite de rouvrir un menu à chaque élève.
+`AttendanceReasonGrid` : les cinq motifs de saisie en cibles de 56 dp minimum,
+deux colonnes dès qu'il y a la place, une icône par motif. La sentinelle
+« Motif non reconnu » n'y figure que si la ligne la porte déjà. 3959 verts.
+
+**Équivalent fonctionnel du pavé numérique, pas sa copie** : là-bas on frappe un
+nombre, ici on désigne un motif parmi cinq. Ce que les deux partagent est le
+geste évité — rouvrir un menu à chaque élève.
+
+⚠️ **L'avance automatique après chaque motif rend la note libre inatteignable
+dans la foulée.** Compromis assumé : la note est l'exception, et revenir coûte
+un tap sur le fil de progression juste au-dessus. C'est une vraie perte, pas un
+détail — si le terrain la conteste, c'est une ligne à retirer.
+
+⚠️ **Une redondance trouvée par mutation.** `_advanceAfterReason` portait un
+garde « pas depuis le dernier » qui était le **troisième** : `_go()` borne par
+`clamp` et `_next()` porte déjà la condition. La mutation qui le retire laisse
+la suite verte — aucun test ne pouvait le distinguer, parce qu'il ne changeait
+rien. Supprimé plutôt que conservé « au cas où ».
 
 **Ordre :** P-1a → P-1b (les deux peuvent partir en parallèle, ils ne se
 touchent pas) → P-1c → P-1d → P-2a → P-2b.
