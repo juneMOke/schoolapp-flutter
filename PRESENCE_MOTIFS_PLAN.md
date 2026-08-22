@@ -371,12 +371,20 @@ touchent pas) → P-1c → P-1d → P-2a → P-2b.
   l'amendement de D-5) : le verdict reste dérivé du motif, `UNKNOWN` le porte,
   et la correction passe par la réouverture de l'appel.
 
-- **Qui a le droit de corriger un appel passé ?** Le geste est attribué au
-  directeur de discipline, mais le code ne connaît que `attendance.write` —
-  « enregistrer un appel », que **tout enseignant** détient. N'importe qui peut
-  donc rouvrir n'importe quel jour des deux dernières années et transformer une
-  absence non justifiée en absence justifiée. L'acteur nommé n'est pas l'acteur
-  autorisé. Ne bloque pas P-1c ; à trancher pour lui-même.
+- **Le donut des motifs ne totalise pas les absences** — hors périmètre de ce
+  plan, fiche `P-3` de `REVUE_CODE_BACKLOG.md`. `aggregateAbsenceByReason`
+  filtre les motifs nuls, donc les absences sans motif comptent dans les KPIs
+  (côté injustifié) et disparaissent du graphique. Défaut antérieur, rendu plus
+  visible par ce plan : « sans motif = injustifiée » est désormais la règle
+  partout. P-1c en borne la population — les absences neuves portent toutes un
+  motif — sans la faire disparaître.
+
+- ~~Qui a le droit de corriger un appel passé ?~~ — **LIVRÉ** : permission
+  dédiée `attendance.amend`, accordée à `DISCIPLINE_SUPERVISOR` et à l'accès
+  complet, refusée à `TEACHER`. Serveur `feat/attendance-amend-permission`
+  (PR back #133), client `feat/attendance-amend-guard` (PR front #31).
+  ⚠️ **Ordre de déploiement strict** : le serveur d'abord, sinon la garde
+  client ferme une porte que personne ne peut ouvrir.
 - **Le back est un autre dépôt** (`eteelo-backend`) : P-1a s'y livre, avec son
   propre cycle. Tant qu'il n'est pas déployé, P-1b **aggrave** l'écart visible
   (le front deviendra cohérent avec lui-même et toujours en désaccord avec le

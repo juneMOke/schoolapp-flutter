@@ -30,10 +30,11 @@ d'un élève en Facturation attendait le réseau avant d'afficher un grand-livre
 déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 **nominal**, à chaque ouverture de fiche : **corrigé** (voir « Traité »).
 
-S'y ajoutent **P-1** et **P-2**, hors revue : deux besoins sur la **Présence de
-l'élève** signalés à l'usage le 2026-08-22. Ils sont **ouverts** — P-1 est un
-défaut du chemin nominal (l'écran d'appel et les KPIs rendent des verdicts
-contraires sur la même absence), P-2 est un besoin produit. Voir « Ouverts ».
+S'y ajoutent **P-1**, **P-2** et **P-3**, hors revue, sur la **Présence de
+l'élève** (2026-08-22). P-1 était un défaut du chemin nominal — l'écran d'appel
+et les KPIs rendaient des verdicts contraires sur la même absence : **livré**
+(`PRESENCE_MOTIFS_PLAN.md`). P-2 est un besoin produit, P-3 un défaut trouvé en
+revue de P-1 : tous deux **ouverts**. Voir « Ouverts ».
 
 > Ordre : gravité décroissante. Un défaut « haut » a une conséquence métier
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
@@ -44,13 +45,14 @@ contraires sur la même absence), P-2 est un besoin produit. Voir « Ouverts ».
 
 ## 🟠 Ouverts — hors revue, signalés à l'usage
 
-Deux besoins constatés sur la **Présence de l'élève** le 2026-08-22 et analysés
-contre le code front **et** back. Ils ne sortent pas de la revue : ce sont des
-entrées neuves, et elles sont **ouvertes**.
+Besoins et défauts constatés sur la **Présence de l'élève** le 2026-08-22,
+analysés contre le code front **et** back. Ils ne sortent pas de la revue : ce
+sont des entrées neuves.
 
-➜ **Plan d'implémentation : `PRESENCE_MOTIFS_PLAN.md`** (6 lots, 3 décisions
-restées à arbitrer). Les deux fiches ci-dessous restent la description du
-défaut ; le plan porte les lots, les invariants et les pièges.
+➜ **Plan d'implémentation : `PRESENCE_MOTIFS_PLAN.md`** — P-1 y est décomposé et
+**livré** (P-1a→c, plus la permission `attendance.amend` qui n'y figurait pas).
+P-2 et P-3 restent ouverts. Les fiches ci-dessous décrivent le défaut ; le plan
+porte les lots, les invariants et les pièges.
 
 ### P-1 · Le verdict « justifiée / injustifiée » n'a pas le même sens des deux côtés
 
@@ -188,6 +190,50 @@ coûte moins cher.
 motifs sur un catalogue qui contient « Congé de mariage » et « Inconnu »
 figerait le problème de P-1 dans une UI bien plus coûteuse à défaire qu'un
 dropdown.
+
+---
+
+### P-3 · Le donut des motifs ne totalise pas les absences qu'il prétend ventiler
+
+Trouvé en revue du lot P-1a, **antérieur à ce lot** et hors de son périmètre.
+
+`AttendanceRecordRepository.aggregateAbsenceByReason` filtre
+`ar.absenceReason is not null`. La ventilation par motif renvoyée au client ne
+contient donc **jamais** d'entrée pour les absences sans motif. Or ces absences
+existent — le contrat les autorise (`AbsenceInput.absenceReason` n'est pas
+`@NotNull`) et des lignes historiques en portent — et les KPIs du même écran
+les comptent, du côté **injustifié**, depuis toujours.
+
+Le tableau de bord affiche donc deux nombres qui ne se réconcilient pas : le
+total central du donut (`AttendanceOverviewReasonsSection` le rend) vaut les
+absences **avec** motif, tandis que la bande de KPIs annonce des jours d'absence
+qui incluent celles sans motif. L'écart est exactement le nombre de jours
+d'absence sans motif sur la période.
+
+⚠️ **Et le front prétend gérer un cas que le serveur ne peut pas produire.**
+`attendance_overview_palette.dart` replie `reason == null` dans la part
+« Non justifié » du donut. Cette branche est **morte** : aucune entrée nulle
+n'arrive jamais. Elle a l'air d'une précaution et n'en est pas une — elle
+masque le défaut en donnant à lire que le cas est traité.
+
+⚠️ **Ne pas confondre avec la part rouge.** Le donut a bien une part
+« Non justifié », alimentée par `UNKNOWN` et `UNJUSTIFIED`, qui sont des motifs
+non nuls. Ce n'est donc pas la part qui manque, c'est le **sans-motif** qui
+n'atteint jamais le graphique.
+
+**Ce que P-1c change, et ce qu'il ne change pas.** Depuis que l'écran d'appel
+interdit d'enregistrer sans motif et propose « Non justifiée » (`UNKNOWN`), les
+absences neuves portent toutes un motif : la population concernée ne grandit
+plus. Elle ne disparaît pas pour autant — l'historique reste, et le contrat
+continue d'accepter un motif nul d'un autre client.
+
+**Deux façons d'en sortir, et il faut choisir.** Soit le serveur émet une entrée
+à motif nul dans `byAbsenceReason` (le front sait déjà la replier, sa branche
+morte reprend vie, et les deux totaux se rejoignent) ; soit le front cesse de
+prétendre gérer ce cas et le tableau de bord dit explicitement sur quoi porte le
+donut. **Le premier réconcilie les chiffres, le second se contente de ne plus
+mentir** — et un donut qui ne totalise pas ce que la bande de KPIs annonce reste
+un chiffre qu'un directeur ne peut pas vérifier à l'œil.
 
 ---
 
