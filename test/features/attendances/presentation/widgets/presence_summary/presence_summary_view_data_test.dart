@@ -109,22 +109,28 @@ void main() {
     expect(vm.sortedAbsences.last.date, DateTime(2026, 2, 5));
   });
 
-  test('forAbsenceReason : injustifiee si unjustified ou unknown', () {
-    expect(
-      AttendanceDayStatusX.forAbsenceReason(AbsenceReason.unjustified),
-      AttendanceDayStatus.unjustified,
-    );
-    expect(
-      AttendanceDayStatusX.forAbsenceReason(AbsenceReason.unknown),
-      AttendanceDayStatus.unjustified,
-    );
-    expect(
-      AttendanceDayStatusX.forAbsenceReason(AbsenceReason.sickness),
-      AttendanceDayStatus.justified,
-    );
-    expect(
-      AttendanceDayStatusX.forAbsenceReason(null),
-      AttendanceDayStatus.justified,
-    );
-  });
+  test(
+    'forAbsenceReason : injustifiee si unjustified, unknown, ou sans motif',
+    () {
+      expect(
+        AttendanceDayStatusX.forAbsenceReason(AbsenceReason.unjustified),
+        AttendanceDayStatus.unjustified,
+      );
+      expect(
+        AttendanceDayStatusX.forAbsenceReason(AbsenceReason.unknown),
+        AttendanceDayStatus.unjustified,
+      );
+      expect(
+        AttendanceDayStatusX.forAbsenceReason(AbsenceReason.sickness),
+        AttendanceDayStatus.justified,
+      );
+      // Renversé : une absence sans motif est injustifiée. Elle était comptée
+      // justifiée ici et dans le calcul offline, alors que le tableau de bord la
+      // rangeait déjà du côté injustifié — deux écrans, deux réponses.
+      expect(
+        AttendanceDayStatusX.forAbsenceReason(null),
+        AttendanceDayStatus.unjustified,
+      );
+    },
+  );
 }

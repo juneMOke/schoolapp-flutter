@@ -51,12 +51,6 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.other => 'OTHER',
   };
 
-  /// Une absence est consideree injustifiee si son motif est `unjustified` ou
-  /// `unknown` (motif inconnu / non renseigne cote backend). Regle metier
-  /// partagee par l'ecran d'appel et la synthese de presence.
-  bool get isUnjustified =>
-      this == AbsenceReason.unjustified || this == AbsenceReason.unknown;
-
   /// Libelle localise du motif (reutilise les cles `absenceReason*`).
   String getDisplayName(AppLocalizations l10n) => switch (this) {
     AbsenceReason.sickness => l10n.absenceReasonSickness,
@@ -72,3 +66,36 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.other => l10n.absenceReasonOther,
   };
 }
+
+/// Le verdict d'une absence : injustifiée, ou justifiée.
+///
+/// `unknown` = motif non connu au moment de la saisie (transitoire) ;
+/// `unjustified` = verdict rendu après coup, aucune justification produite ;
+/// **motif absent** (`null`) = injustifiée aussi. Tout autre motif renseigné
+/// justifie l'absence.
+///
+/// ## Pourquoi la fonction prend un `AbsenceReason?`
+///
+/// C'est le cœur du défaut qu'elle corrige. La règle vivait sur un getter
+/// d'extension, qui ne pouvait pas être appelé sur un motif absent : chaque
+/// appelant devait donc décider lui-même du sort de `null`, et les quatre l'ont
+/// décidé différemment — deux le rangeaient du côté justifié, un du côté
+/// injustifié, un l'excluait des deux. Une signature qui refuse `null` ne
+/// centralise rien : elle délègue la moitié de la question.
+///
+/// ## L'accord avec le serveur n'est pas décoratif
+///
+/// La synthèse d'un élève se calcule **en local** et les KPIs du tableau de bord
+/// viennent du **serveur** : les deux doivent rendre le même chiffre sur la même
+/// période, sinon le produit se contredit d'un écran à l'autre. Le miroir de
+/// cette fonction côté back est `AbsenceReason.isUnjustified` (dépôt
+/// `eteelo-backend`) ; les deux ne bougent qu'ensemble.
+///
+/// ⚠️ L'écran d'appel est la seule exception, et elle est délibérée : il
+/// **interdit** d'enregistrer une absence sans motif, donc « sans motif » y est
+/// un état de saisie en cours, jamais un verdict. Il écarte `null` avant
+/// d'appeler cette fonction et le compte à part.
+bool isUnjustifiedAbsence(AbsenceReason? reason) =>
+    reason == null ||
+    reason == AbsenceReason.unjustified ||
+    reason == AbsenceReason.unknown;

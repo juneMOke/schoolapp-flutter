@@ -102,17 +102,27 @@ class AttendanceResultsSection extends StatelessWidget {
               .where((row) => !row.present)
               .length;
           final presentCount = totalCount - absentCount;
+          // ⚠️ Les deux compteurs écartent explicitement le motif absent, alors
+          // qu'`isUnjustifiedAbsence(null)` vaut `true` partout ailleurs. Ce
+          // n'est pas une divergence : cet écran INTERDIT d'enregistrer tant
+          // qu'un motif manque (`canSave && missingReasonsCount == 0`), donc
+          // « sans motif » y est un état de saisie en cours — compté à part,
+          // dans `missingReasonsCount` — et jamais un verdict rendu. Le verdict
+          // ne s'applique qu'aux absences déjà écrites.
           final justifiedCount = state.draftRows
               .where(
                 (r) =>
                     !r.present &&
                     r.absenceReason != null &&
-                    !r.absenceReason!.isUnjustified,
+                    !isUnjustifiedAbsence(r.absenceReason),
               )
               .length;
           final unjustifiedCount = state.draftRows
               .where(
-                (r) => !r.present && (r.absenceReason?.isUnjustified ?? false),
+                (r) =>
+                    !r.present &&
+                    r.absenceReason != null &&
+                    isUnjustifiedAbsence(r.absenceReason),
               )
               .length;
           final missingReasonsCount = state.draftRows

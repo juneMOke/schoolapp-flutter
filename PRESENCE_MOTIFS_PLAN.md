@@ -1,8 +1,8 @@
 # PRESENCE_MOTIFS_PLAN.md — le verdict d'absence et la saisie des motifs
 
 > **Statut :** plan validé (2026-08-22). **P-1a livré** (back, `7b47b9c` sur
-> `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`) ; P-1b→P-2b
-> ouverts. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
+> `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`) et **P-1b livré**
+> (front) ; P-1c→P-2b ouverts. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
 > reste ouvert (§9).
 >
 > **Origine :** les deux entrées `P-1` et `P-2` de `REVUE_CODE_BACKLOG.md`,
@@ -223,7 +223,25 @@ ne dit rien du verdict aujourd'hui.
 
 **Livrable :** le serveur et l'écran d'appel rendent le même verdict.
 
-### P-1b — Front : une seule règle, quatre sites
+### ~~P-1b — Front : une seule règle, quatre sites~~ — LIVRÉ
+
+**3938 tests verts, `flutter analyze` propre. Prouvé par mutation** : en retirant
+le cas `null` de la règle, trois tests rougissent (le verdict à sa source, le
+statut d'un jour, et le calcul offline).
+
+Le getter `isUnjustified` est **supprimé**, pas délégué : c'est lui le défaut.
+Ne pouvant pas être appelé sur un motif absent, il forçait chaque appelant à
+trancher `null` pour son compte. `isUnjustifiedAbsence(AbsenceReason?)` le
+remplace.
+
+⚠️ **Un site a demandé une restructuration non prévue.** `isUnjustifiedAbsence`
+ne promeut pas le type comme le faisait `reason == null || …`, et le `else` de
+`attendance_overview_palette.dart` ne compilait plus (`byReason[reason]` sur un
+nullable). Réécrit en séparant les deux questions : le `!= null` y est la
+condition pour servir de **clé de regroupement** — un segment sans nom ne se
+dessine pas — et non un verdict rendu localement.
+
+Ce que la fiche disait, pour mémoire :
 
 Une fonction de domaine unique prenant `AbsenceReason?` (D-3), et les quatre
 sites du §4.2 qui l'appellent. Supprimer `isUnjustified` de l'extension, ou le
@@ -313,8 +331,15 @@ touchent pas) → P-1c → P-1d → P-2a → P-2b.
   deux ; la tentation de « juste passer une autre valeur » ne marche pas.
 - ⚠ **Deux tests front épinglent la règle fausse** — leur rougeur est attendue.
   Un lot qui passerait vert du premier coup n'aurait rien changé.
-- ⚠ **Aucun test, nulle part, ne couvre le motif `null`.** C'est le cas sur
-  lequel le front se contredit trois fois.
+- ⚠ **CORRIGÉ — cette fiche affirmait qu'aucun test ne couvrait le motif
+  `null`. C'était faux.** Le front en avait **deux**, et ils épinglaient le
+  mauvais comportement : `forAbsenceReason(null) == justified`
+  (`presence_summary_view_data_test.dart`) et `unjustifiedAbsences == 1` sur un
+  jeu où une absence sur trois n'a pas de motif
+  (`attendance_student_stats_test.dart`). Il fallait donc les **retourner**, pas
+  les ajouter — et un test qui épingle un défaut est plus coûteux à débusquer
+  qu'une absence de test, puisqu'il rend la suite verte sur le mauvais
+  comportement.
 - ⚠ **Le catalogue est un catalogue RH.** Les cinq valeurs de congé salarié
   suggèrent une reprise d'un module de personnel ; vérifier avant de les retirer
   qu'aucun autre appelant ne s'en sert.

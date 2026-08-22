@@ -36,11 +36,15 @@ extension AttendanceDayStatusX on AttendanceDayStatus {
     AttendanceDayStatus.unjustified => l10n.presenceStatusUnjustified,
   };
 
-  /// Statut d'une absence selon son motif : injustifiee si le motif l'est
-  /// (cf. [AbsenceReasonX.isUnjustified] — `unjustified` ou `unknown`),
-  /// justifiee sinon.
+  /// Statut d'une absence selon son motif — le verdict vient d'
+  /// [isUnjustifiedAbsence], seul endroit où la règle vit.
+  ///
+  /// ⚠️ Une absence **sans motif** est désormais injustifiée, et non plus
+  /// justifiée par défaut : elle l'était ici et dans le calcul offline, alors
+  /// que le tableau de bord la comptait déjà à l'inverse. Deux écrans du même
+  /// produit répondaient le contraire sur la même journée.
   static AttendanceDayStatus forAbsenceReason(AbsenceReason? reason) =>
-      (reason?.isUnjustified ?? false)
+      isUnjustifiedAbsence(reason)
       ? AttendanceDayStatus.unjustified
       : AttendanceDayStatus.justified;
 }

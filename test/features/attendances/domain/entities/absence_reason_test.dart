@@ -2,20 +2,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 
 void main() {
-  test('isUnjustified : vrai pour unjustified et unknown, faux sinon', () {
-    expect(AbsenceReason.unjustified.isUnjustified, isTrue);
-    expect(AbsenceReason.unknown.isUnjustified, isTrue);
+  group('isUnjustifiedAbsence — le verdict, à sa source', () {
+    test(
+      'unjustified et unknown sont injustifiés, tout autre motif justifie',
+      () {
+        expect(isUnjustifiedAbsence(AbsenceReason.unjustified), isTrue);
+        expect(isUnjustifiedAbsence(AbsenceReason.unknown), isTrue);
 
-    final justified = AbsenceReason.values.where(
-      (r) => r != AbsenceReason.unjustified && r != AbsenceReason.unknown,
+        final justified = AbsenceReason.values.where(
+          (r) => r != AbsenceReason.unjustified && r != AbsenceReason.unknown,
+        );
+        for (final reason in justified) {
+          expect(
+            isUnjustifiedAbsence(reason),
+            isFalse,
+            reason: '$reason ne doit pas etre injustifie',
+          );
+        }
+      },
     );
-    for (final reason in justified) {
-      expect(
-        reason.isUnjustified,
-        isFalse,
-        reason: '$reason ne doit pas etre injustifie',
-      );
-    }
+
+    test('motif absent = injustifiée, et la fonction l\'accepte', () {
+      // Le cas que l'ancienne API rendait impossible à poser : la règle vivait
+      // sur un getter d'extension, donc chaque appelant tranchait `null` pour
+      // son compte. Deux le rangeaient du côté justifié, un du côté injustifié.
+      expect(isUnjustifiedAbsence(null), isTrue);
+    });
   });
 
   group('fromApiValue — parsing défensif (invariant #9)', () {
