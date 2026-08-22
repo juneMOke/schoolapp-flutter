@@ -12,6 +12,22 @@ enum AbsenceReason {
   workLeave,
   unjustified,
   other,
+
+  /// **Sentinelle front, absente du contrat.** Une valeur de motif que le
+  /// serveur connaît et que cette tablette ignore — un catalogue enrichi
+  /// au-delà de la version installée.
+  ///
+  /// Elle existe parce que le repli tombait auparavant sur [other], qui est
+  /// **aussi** un choix légitime d'enseignant : une fois la ligne réécrite,
+  /// plus rien ne distinguait « l'enseignant a choisi Autre » de « cette
+  /// tablette est trop ancienne pour connaître ce motif ». Et la réécriture
+  /// n'est pas hypothétique : l'écran d'appel renvoie **toutes** les lignes du
+  /// brouillon à chaque enregistrement, chacune reconvertie par [toApiValue] —
+  /// une ligne que personne n'a touchée voyait donc son motif remplacé.
+  ///
+  /// Elle n'est jamais proposée à la saisie, jamais sérialisée, et **bloque
+  /// l'enregistrement** tant que l'enseignant n'a pas choisi autre chose.
+  unsupported,
 }
 
 extension AbsenceReasonX on AbsenceReason {
@@ -29,11 +45,16 @@ extension AbsenceReasonX on AbsenceReason {
       'WORK_LEAVE' => AbsenceReason.workLeave,
       'UNJUSTIFIED' => AbsenceReason.unjustified,
       'OTHER' => AbsenceReason.other,
-      // Parsing défensif (invariant #9) : un motif ENRICHI côté back mais inconnu
-      // de cette tablette retombe sur `OTHER`, jamais une exception. Distinct de
-      // `UNKNOWN` (valeur cataloguée = motif inconnu à la saisie). Sans ça,
-      // ajouter un motif ferait tomber les tablettes non redéployées.
-      _ => AbsenceReason.other,
+      // Parsing défensif (invariant #9) : un motif ENRICHI côté back mais
+      // inconnu de cette tablette retombe sur [AbsenceReason.unsupported],
+      // jamais une exception — ajouter un motif ne doit pas faire tomber les
+      // tablettes non redéployées.
+      //
+      // ⚠️ Surtout PAS sur `other`, qui est un choix d'enseignant : les
+      // confondre faisait réécrire silencieusement la donnée du serveur.
+      // Distinct aussi de `unknown`, valeur CATALOGUÉE qui porte le verdict
+      // « pas justifiée ».
+      _ => AbsenceReason.unsupported,
     };
   }
 
@@ -49,6 +70,15 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.workLeave => 'WORK_LEAVE',
     AbsenceReason.unjustified => 'UNJUSTIFIED',
     AbsenceReason.other => 'OTHER',
+    // Inatteignable par construction : la valeur n'a pas de représentation sur
+    // le fil, et l'écran d'appel refuse d'enregistrer tant qu'une ligne la
+    // porte. Lever plutôt que d'inventer une valeur — écrire `OTHER` ici
+    // rétablirait exactement le défaut que cette sentinelle existe pour fermer,
+    // en silence et sur la donnée d'autrui.
+    AbsenceReason.unsupported => throw StateError(
+      'AbsenceReason.unsupported n\'a pas de valeur sur le fil : '
+      'la ligne devait être bloquée avant d\'atteindre la sérialisation.',
+    ),
   };
 
   /// Libelle localise du motif (reutilise les cles `absenceReason*`).
@@ -64,6 +94,7 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.workLeave => l10n.absenceReasonWorkLeave,
     AbsenceReason.unjustified => l10n.absenceReasonUnjustified,
     AbsenceReason.other => l10n.absenceReasonOther,
+    AbsenceReason.unsupported => l10n.absenceReasonUnsupported,
   };
 }
 

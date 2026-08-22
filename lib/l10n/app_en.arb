@@ -2027,6 +2027,7 @@
   "attendanceErrorUnknownTitle": "Unable to load",
   "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
+  "attendanceUnsupportedReasonBlocked": "An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.",
   "attendanceMarkAllPresentAction": "All present",
   "attendanceCallNotTakenTitle": "Attendance not taken",
   "@attendanceCallNotTakenTitle": {
@@ -2055,6 +2056,7 @@
   "absenceReasonWorkLeave": "Work leave",
   "absenceReasonUnjustified": "Unjustified absence",
   "absenceReasonOther": "Other",
+  "absenceReasonUnsupported": "Unrecognised reason",
   "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
   "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
   "signOutAction": "Sign out",

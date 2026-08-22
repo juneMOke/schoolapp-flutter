@@ -128,6 +128,19 @@ class AttendanceResultsSection extends StatelessWidget {
           final missingReasonsCount = state.draftRows
               .where((row) => !row.present && row.absenceReason == null)
               .length;
+          // Une ligne dont le motif vient d'un catalogue serveur plus récent
+          // que cette version. L'enregistrement renvoie TOUTES les lignes du
+          // brouillon, chacune re-sérialisée : laisser passer celle-ci
+          // remplacerait le motif d'origine sans que personne le voie. On
+          // bloque jusqu'à ce qu'un motif connu soit choisi — et
+          // `toApiValue()` lève si on l'atteignait quand même.
+          final unsupportedReasonsCount = state.draftRows
+              .where(
+                (row) =>
+                    !row.present &&
+                    row.absenceReason == AbsenceReason.unsupported,
+              )
+              .length;
           final panelHeight = (MediaQuery.sizeOf(context).height * 0.62)
               .clamp(
                 AppDimensions.attendanceResultsPanelMinHeight,
@@ -136,7 +149,11 @@ class AttendanceResultsSection extends StatelessWidget {
               .toDouble();
 
           Future<void> onSaveCallPressed() async {
-            if (!state.canSave || missingReasonsCount > 0) return;
+            if (!state.canSave ||
+                missingReasonsCount > 0 ||
+                unsupportedReasonsCount > 0) {
+              return;
+            }
 
             if (absentCount == 0) {
               final confirmed = await showAppConfirmationDialog(
@@ -171,9 +188,16 @@ class AttendanceResultsSection extends StatelessWidget {
                 const _AppelNonFaitBar(),
                 const SizedBox(height: AppDimensions.spacingS),
               ],
+              if (unsupportedReasonsCount > 0) ...[
+                _UnsupportedReasonBar(count: unsupportedReasonsCount),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
               _AttendanceActionBar(
                 isSaving: state.saveStatus == AttendanceStatus.loading,
-                canSave: state.canSave && missingReasonsCount == 0,
+                canSave:
+                    state.canSave &&
+                    missingReasonsCount == 0 &&
+                    unsupportedReasonsCount == 0,
                 onMarkAllPresent: () => context.read<AttendanceBloc>().add(
                   const AttendanceMarkAllPresentRequested(),
                 ),
@@ -274,6 +298,50 @@ class _AttendanceActionBar extends StatelessWidget {
               isLoading: isSaving,
               onPressed: canSave ? onSaveCall : null,
               fullWidth: false,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Ce qui bloque l'enregistrement quand une ligne porte un motif que cette
+/// version ne connaît pas — et qui dit pourquoi, plutôt que de laisser un
+/// bouton grisé sans explication.
+class _UnsupportedReasonBar extends StatelessWidget {
+  final int count;
+
+  const _UnsupportedReasonBar({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.help_outline_rounded,
+              size: 18,
+              color: AppColors.warning,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
+            Expanded(
+              child: Text(
+                l10n.attendanceUnsupportedReasonBlocked,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ),
           ],
         ),

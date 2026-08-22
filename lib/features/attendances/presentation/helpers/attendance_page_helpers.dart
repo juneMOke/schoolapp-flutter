@@ -114,22 +114,13 @@ class AttendancePageHelpers {
     AppLocalizations l10n,
     AbsenceReason? reason,
   ) {
-    if (reason == null) {
-      return l10n.attendanceNoAbsenceReason;
-    }
-
-    return switch (reason) {
-      AbsenceReason.sickness => l10n.absenceReasonSickness,
-      AbsenceReason.familyEmergency => l10n.absenceReasonFamilyEmergency,
-      AbsenceReason.personal => l10n.absenceReasonPersonal,
-      AbsenceReason.unknown => l10n.absenceReasonUnknown,
-      AbsenceReason.vacation => l10n.absenceReasonVacation,
-      AbsenceReason.underGraduateLeave => l10n.absenceReasonUnderGraduateLeave,
-      AbsenceReason.marriageLeave => l10n.absenceReasonMarriageLeave,
-      AbsenceReason.parentalLeave => l10n.absenceReasonParentalLeave,
-      AbsenceReason.workLeave => l10n.absenceReasonWorkLeave,
-      AbsenceReason.unjustified => l10n.absenceReasonUnjustified,
-      AbsenceReason.other => l10n.absenceReasonOther,
-    };
+    // Le seul apport de cette fonction est le cas SANS motif ; les onze autres
+    // lignes étaient une copie verbatim de `getDisplayName`. Deux tables de
+    // libellés pour un même enum, c'est deux occasions de diverger — et
+    // l'ajout d'`unsupported` n'en aurait alimenté qu'une, le compilateur ne
+    // signalant l'oubli que parce que le `switch` était exhaustif.
+    return reason == null
+        ? l10n.attendanceNoAbsenceReason
+        : reason.getDisplayName(l10n);
   }
 }

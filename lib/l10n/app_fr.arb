@@ -1984,6 +1984,7 @@
   "attendanceErrorUnknownTitle": "Chargement impossible",
   "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
+  "attendanceUnsupportedReasonBlocked": "Une absence porte un motif que cette version de l'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.",
   "attendanceMarkAllPresentAction": "Tout présent",
   "attendanceCallNotTakenTitle": "Appel non fait",
   "@attendanceCallNotTakenTitle": {
@@ -2012,6 +2013,7 @@
   "absenceReasonWorkLeave": "Congé professionnel",
   "absenceReasonUnjustified": "Absence non justifiée",
   "absenceReasonOther": "Autre",
+  "absenceReasonUnsupported": "Motif non reconnu",
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
   "signOutAction": "Se déconnecter",

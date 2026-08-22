@@ -1,8 +1,9 @@
 # PRESENCE_MOTIFS_PLAN.md — le verdict d'absence et la saisie des motifs
 
 > **Statut :** plan validé (2026-08-22). **P-1a livré** (back, `7b47b9c` sur
-> `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`) et **P-1b livré**
-> (front) ; P-1c→P-2b ouverts. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
+> `fix/absence-unjustified-verdict` du dépôt `eteelo-backend`), **P-1b, P-1c et
+> P-1d livrés** (front), plus la permission `attendance.amend` qui n'y figurait
+> pas ; **P-2a et P-2b restent ouverts**. Toutes les décisions du §3 sont verrouillées ; un seul sous-point
 > reste ouvert (§9).
 >
 > **Origine :** les deux entrées `P-1` et `P-2` de `REVUE_CODE_BACKLOG.md`,
@@ -286,10 +287,31 @@ La liste est arrêtée : **cinq entrées** — `SICKNESS`, `FAMILY_EMERGENCY`,
 les cinq congés salariés et `UNJUSTIFIED`. Le libellé d'`UNKNOWN` passe à
 « Non justifiée » dans les deux `.arb`.
 
-### P-1d — Front : `OTHER` dédoublé
+### ~~P-1d — Front : `OTHER` dédoublé~~ — LIVRÉ
 
-Selon D-6. En option (a) : la sentinelle `unsupported`, jamais proposée, jamais
-sérialisée, qui bloque le réenregistrement de sa ligne.
+Option (a) de D-6 : `AbsenceReason.unsupported`, sentinelle **front seulement**,
+jamais proposée à la saisie, dont `toApiValue()` **lève**, et qui bloque
+l'enregistrement avec un bandeau qui dit pourquoi. 3952 verts, analyze propre.
+
+⚠️ **Le danger était vérifié, pas supposé** : `attendance_save_overlay.dart:118`
+renvoie **toutes** les lignes du brouillon, chacune reconvertie par
+`toApiValue()`. Un motif inconnu du serveur était donc réécrit en `OTHER` à
+chaque enregistrement, **y compris sur une ligne que personne n'avait touchée**.
+Seules les lignes « préservées » — absentes en base mais hors du brouillon —
+échappaient à la reconversion, gardant leur chaîne brute.
+
+⚠️ **Un `DropdownButtonFormField` dont la valeur courante n'est pas dans ses
+items casse le rendu de la ligne entière.** La sentinelle est donc ajoutée aux
+items **uniquement pour la ligne qui la porte**.
+
+⚠️ **`unsupported` compte comme JUSTIFIÉE**, et c'est démontrable : le verdict
+serveur est « null, `UNKNOWN` ou `UNJUSTIFIED` ⇒ injustifiée ; tout le reste ⇒
+justifiée ». Une valeur que le client ne reconnaît pas n'est aucune des trois.
+Le calcul local dit donc la même chose que le serveur sur cette ligne.
+
+**Dette supprimée au passage** : `AttendancePageHelpers.absenceReasonLabel`
+recopiait verbatim les onze lignes de `getDisplayName`. Elle délègue désormais,
+ne gardant que le cas « sans motif ».
 
 ### P-2a — Le Focus, restreint aux absents
 

@@ -86,15 +86,57 @@ void main() {
     });
 
     test(
-      'motif ENRICHI côté back mais inconnu → OTHER (jamais d\'exception)',
+      'motif ENRICHI côté back mais inconnu → unsupported (jamais d\'exception)',
       () {
         // Une valeur ajoutée au catalogue serveur, absente de cette tablette,
-        // ne doit pas faire tomber le parsing ni retomber sur UNKNOWN.
+        // ne doit pas faire tomber le parsing.
         expect(
           AbsenceReasonX.fromApiValue('DETENTION_SUSPENSION'),
-          AbsenceReason.other,
+          AbsenceReason.unsupported,
         );
       },
     );
+
+    test(
+      'le repli n\'est NI `other` NI `unknown` — les trois sont distincts',
+      () {
+        // C'est tout l'objet de la sentinelle. `other` est un choix
+        // d'enseignant ; les confondre faisait réécrire silencieusement la
+        // donnée du serveur, l'écran renvoyant toutes les lignes du brouillon à
+        // chaque enregistrement. `unknown`, lui, est CATALOGUÉ et porte le
+        // verdict « pas justifiée ».
+        final repli = AbsenceReasonX.fromApiValue('DETENTION_SUSPENSION');
+        expect(repli, isNot(AbsenceReason.other));
+        expect(repli, isNot(AbsenceReason.unknown));
+      },
+    );
+  });
+
+  group('unsupported — la sentinelle front', () {
+    test('n\'est pas proposée à la saisie', () {
+      expect(
+        kSelectableAbsenceReasons,
+        isNot(contains(AbsenceReason.unsupported)),
+      );
+    });
+
+    test('n\'a pas de valeur sur le fil : sérialiser lève', () {
+      // Écrire `OTHER` ici rétablirait le défaut en silence. Lever est
+      // inatteignable par construction — l'écran bloque avant — mais c'est le
+      // filet qui rend l'inatteignabilité vérifiable.
+      expect(
+        () => AbsenceReason.unsupported.toApiValue(),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('compte comme JUSTIFIÉE, et c\'est ce que le serveur en dit', () {
+      // Le verdict serveur est « null, UNKNOWN ou UNJUSTIFIED ⇒ injustifiée ;
+      // tout le reste ⇒ justifiée ». Une valeur que le client ne reconnaît pas
+      // n'est, par définition, aucune des trois : le serveur la compte donc
+      // justifiée, et le calcul local doit dire la même chose — sinon la
+      // synthèse élève contredit le tableau de bord sur cette ligne.
+      expect(isUnjustifiedAbsence(AbsenceReason.unsupported), isFalse);
+    });
   });
 }

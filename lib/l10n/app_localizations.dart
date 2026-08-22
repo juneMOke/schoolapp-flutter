@@ -6618,6 +6618,12 @@ abstract class AppLocalizations {
   /// **'Save attendance'**
   String get attendanceSaveCallAction;
 
+  /// No description provided for @attendanceUnsupportedReasonBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.'**
+  String get attendanceUnsupportedReasonBlocked;
+
   /// No description provided for @attendanceMarkAllPresentAction.
   ///
   /// In en, this message translates to:
@@ -6749,6 +6755,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get absenceReasonOther;
+
+  /// No description provided for @absenceReasonUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognised reason'**
+  String get absenceReasonUnsupported;
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

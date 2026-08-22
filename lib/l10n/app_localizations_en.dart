@@ -3900,6 +3900,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceSaveCallAction => 'Save attendance';
 
   @override
+  String get attendanceUnsupportedReasonBlocked =>
+      'An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.';
+
+  @override
   String get attendanceMarkAllPresentAction => 'All present';
 
   @override
@@ -3967,6 +3971,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get absenceReasonOther => 'Other';
+
+  @override
+  String get absenceReasonUnsupported => 'Unrecognised reason';
 
   @override
   String get bootstrapContextUnavailableTitle =>

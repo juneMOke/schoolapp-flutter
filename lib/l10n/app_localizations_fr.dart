@@ -3937,6 +3937,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceSaveCallAction => 'Enregistrer l\'appel';
 
   @override
+  String get attendanceUnsupportedReasonBlocked =>
+      'Une absence porte un motif que cette version de l\'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.';
+
+  @override
   String get attendanceMarkAllPresentAction => 'Tout présent';
 
   @override
@@ -4004,6 +4008,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get absenceReasonOther => 'Autre';
+
+  @override
+  String get absenceReasonUnsupported => 'Motif non reconnu';
 
   @override
   String get bootstrapContextUnavailableTitle =>
