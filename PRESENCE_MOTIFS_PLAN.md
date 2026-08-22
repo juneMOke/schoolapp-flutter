@@ -95,14 +95,28 @@ Le catalogue mélange trois natures : des motifs, des états du cycle de vie
 `PARENTAL_LEAVE`, `WORK_LEAVE`) qui n'ont pas de sens pour un élève. Seuls les
 motifs restent. `UNKNOWN` n'est jamais choisi — le swagger le dit transitoire.
 
-⚠️ **Conséquence à traiter avant P-1c :** `UNJUSTIFIED` sort de la liste, donc
-**plus rien dans l'app ne peut poser ce verdict**. Et comme l'appel interdit
-déjà d'enregistrer sans motif, `null` ne se produit plus non plus : les deux
-seules valeurs du côté injustifié deviendraient inatteignables, et le taux
-d'absences injustifiées tendrait vers **zéro** — un KPI qui ne mesure plus rien.
-Le verdict doit donc être posable **a posteriori**, hors écran d'appel (le
-dossier de l'élève est le candidat naturel). C'est le seul point encore ouvert,
-cf. §9.
+**Amendement du 2026-08-22 — la liste compte CINQ entrées : `UNKNOWN` reste
+proposé, et c'est LUI qui porte « pas justifiée ».**
+
+La version précédente de cette décision retirait `UNJUSTIFIED` sans rien mettre
+à sa place : l'appel interdisant déjà d'enregistrer sans motif, les valeurs du
+côté injustifié devenaient toutes inatteignables et le taux tendait vers
+**zéro** — un KPI qui affiche encore un chiffre tout en ne mesurant plus rien.
+
+Le verdict reste donc **dérivé du motif**, et « on ne sait pas » vaut « pas
+justifiée ». La correction après coup passe par le chemin qui existe déjà :
+rouvrir l'appel d'un jour passé (le sélecteur de date couvre N−2 → N+2,
+`attendance_search_form.dart:123`) et poser le vrai motif. Aucun écran neuf,
+aucune colonne, aucun contrat.
+
+⚠️ **`UNJUSTIFIED` reste au catalogue mais n'est plus proposé** : des lignes le
+portent déjà, et le retirer du contrat ferait tomber leur parsing sur le repli
+défensif. Il devient une valeur d'historique, jamais écrite à neuf.
+
+⚠️ **Le libellé doit dire ce que la valeur veut dire.** `UNKNOWN` s'affiche
+« Inconnu » ; un enseignant qui le choisit croirait noter son ignorance, pas
+rendre un verdict — et le KPI lirait « non justifié » sur un haussement
+d'épaules. Renommé en **« Non justifiée »**.
 
 **D-6 — Le repli de parsing devient une sentinelle front, option (a).**
 *(arbitré le 2026-08-22)*
@@ -267,9 +281,10 @@ Une liste `selectableAtEntry` (D-4/D-5) consommée par
 `.arb` des motifs retirés **restent** : elles servent toujours à l'affichage des
 données historiques, seule la liste proposée rétrécit.
 
-La liste est arrêtée (D-5). ⚠ **Ne pas livrer ce lot seul** : retirer
-`UNJUSTIFIED` de la saisie sans avoir posé le chemin du verdict a posteriori
-rendrait le KPI d'absences injustifiées structurellement nul (cf. D-5 et §9).
+La liste est arrêtée : **cinq entrées** — `SICKNESS`, `FAMILY_EMERGENCY`,
+`PERSONAL`, `OTHER`, `UNKNOWN` (cf. l'amendement de D-5). Sortent de la saisie
+les cinq congés salariés et `UNJUSTIFIED`. Le libellé d'`UNKNOWN` passe à
+« Non justifiée » dans les deux `.arb`.
 
 ### P-1d — Front : `OTHER` dédoublé
 
@@ -352,13 +367,16 @@ touchent pas) → P-1c → P-1d → P-2a → P-2b.
 
 ## 9. Points restés ouverts
 
-- **Le chemin du verdict `UNJUSTIFIED` a posteriori** — seul point encore
-  ouvert. D-5 le sort de l'écran d'appel, ce qui est juste (c'est un jugement
-  rendu après, pas un motif constaté), mais rien ne le remplace aujourd'hui.
-  Sans ce chemin, le KPI d'absences injustifiées ne peut plus rien compter.
-  Candidat : le dossier de l'élève, où l'absence existe déjà et où une
-  justification peut être produite ou refusée après coup. À répondre avant que
-  P-1c ne parte.
+- ~~Le chemin du verdict a posteriori~~ — **TRANCHÉ le 2026-08-22** (voir
+  l'amendement de D-5) : le verdict reste dérivé du motif, `UNKNOWN` le porte,
+  et la correction passe par la réouverture de l'appel.
+
+- **Qui a le droit de corriger un appel passé ?** Le geste est attribué au
+  directeur de discipline, mais le code ne connaît que `attendance.write` —
+  « enregistrer un appel », que **tout enseignant** détient. N'importe qui peut
+  donc rouvrir n'importe quel jour des deux dernières années et transformer une
+  absence non justifiée en absence justifiée. L'acteur nommé n'est pas l'acteur
+  autorisé. Ne bloque pas P-1c ; à trancher pour lui-même.
 - **Le back est un autre dépôt** (`eteelo-backend`) : P-1a s'y livre, avec son
   propre cycle. Tant qu'il n'est pas déployé, P-1b **aggrave** l'écart visible
   (le front deviendra cohérent avec lui-même et toujours en désaccord avec le

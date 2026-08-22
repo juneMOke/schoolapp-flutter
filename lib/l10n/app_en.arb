@@ -2047,7 +2047,7 @@
   "absenceReasonSickness": "Sickness",
   "absenceReasonFamilyEmergency": "Family emergency",
   "absenceReasonPersonal": "Personal",
-  "absenceReasonUnknown": "Unknown",
+  "absenceReasonUnknown": "Not justified",
   "absenceReasonVacation": "Vacation",
   "absenceReasonUnderGraduateLeave": "Study leave",
   "absenceReasonMarriageLeave": "Marriage leave",

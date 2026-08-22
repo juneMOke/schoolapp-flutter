@@ -6705,7 +6705,7 @@ abstract class AppLocalizations {
   /// No description provided for @absenceReasonUnknown.
   ///
   /// In en, this message translates to:
-  /// **'Unknown'**
+  /// **'Not justified'**
   String get absenceReasonUnknown;
 
   /// No description provided for @absenceReasonVacation.

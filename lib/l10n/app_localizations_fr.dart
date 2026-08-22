@@ -3982,7 +3982,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get absenceReasonPersonal => 'Personnel';
 
   @override
-  String get absenceReasonUnknown => 'Inconnu';
+  String get absenceReasonUnknown => 'Non justifiée';
 
   @override
   String get absenceReasonVacation => 'Vacances';

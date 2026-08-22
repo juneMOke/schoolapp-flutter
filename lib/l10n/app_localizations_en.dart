@@ -3945,7 +3945,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absenceReasonPersonal => 'Personal';
 
   @override
-  String get absenceReasonUnknown => 'Unknown';
+  String get absenceReasonUnknown => 'Not justified';
 
   @override
   String get absenceReasonVacation => 'Vacation';

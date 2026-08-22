@@ -126,7 +126,9 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
           vertical: AppDimensions.spacingS,
         ),
       ),
-      items: AbsenceReason.values
+      // La liste de SAISIE, pas le catalogue de transport : les congés de
+      // salarié et le verdict `unjustified` n'y sont pas.
+      items: kSelectableAbsenceReasons
           .map(
             (reason) => DropdownMenuItem<AbsenceReason>(
               value: reason,

@@ -99,3 +99,46 @@ bool isUnjustifiedAbsence(AbsenceReason? reason) =>
     reason == null ||
     reason == AbsenceReason.unjustified ||
     reason == AbsenceReason.unknown;
+
+/// Les motifs proposés **à la saisie**, dans l'ordre d'affichage.
+///
+/// ## Catalogue de transport ≠ liste de saisie
+///
+/// [AbsenceReason] est le catalogue du contrat : onze valeurs, que le parc lit
+/// et écrit déjà, et dont aucune n'est retirée — supprimer une valeur ferait
+/// tomber sur le repli défensif des données parfaitement valides. Ce que l'UI
+/// propose est autre chose, et c'est cette liste-ci.
+///
+/// ## Ce qui en sort, et pourquoi
+///
+/// Cinq valeurs sont des congés de **salarié** — vacances, congé d'études, de
+/// mariage, parental, professionnel. Elles n'ont pas de sens pour un élève, et
+/// l'écran les offrait parce qu'il rendait `AbsenceReason.values` brut.
+///
+/// `unjustified` en sort aussi, mais pour la raison inverse : ce n'est pas un
+/// motif, c'est un **verdict**. Des lignes le portent déjà, il reste donc au
+/// catalogue et s'affiche normalement — il n'est simplement plus écrit à neuf.
+///
+/// ## Ce qui y reste, et qui porte le verdict
+///
+/// `unknown` **reste proposé**, et c'est lui qui vaut « pas justifiée » (cf.
+/// [isUnjustifiedAbsence]). Sans lui, plus aucune valeur du côté injustifié ne
+/// serait atteignable — l'appel interdisant déjà d'enregistrer sans motif — et
+/// le taux d'absences injustifiées tendrait vers zéro : un indicateur qui
+/// affiche encore un chiffre tout en ne mesurant plus rien.
+///
+/// ⚠️ Son libellé dit « Non justifiée », pas « Inconnu ». La valeur technique
+/// parle d'ignorance, l'écran doit parler du verdict : un enseignant qui croit
+/// noter qu'il ne sait pas ne saurait pas qu'il tranche, et le KPI se lirait sur
+/// un haussement d'épaules.
+///
+/// Le verdict se corrige après coup **sans écran neuf** : on rouvre l'appel du
+/// jour concerné (le sélecteur de date couvre deux ans en arrière) et on pose le
+/// vrai motif.
+const List<AbsenceReason> kSelectableAbsenceReasons = [
+  AbsenceReason.sickness,
+  AbsenceReason.familyEmergency,
+  AbsenceReason.personal,
+  AbsenceReason.other,
+  AbsenceReason.unknown,
+];

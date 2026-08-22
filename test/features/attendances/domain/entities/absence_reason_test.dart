@@ -30,6 +30,52 @@ void main() {
     });
   });
 
+  group('kSelectableAbsenceReasons — la liste de SAISIE', () {
+    test('les cinq congés de salarié n\'y sont pas', () {
+      for (final salarie in const [
+        AbsenceReason.vacation,
+        AbsenceReason.underGraduateLeave,
+        AbsenceReason.marriageLeave,
+        AbsenceReason.parentalLeave,
+        AbsenceReason.workLeave,
+      ]) {
+        expect(
+          kSelectableAbsenceReasons,
+          isNot(contains(salarie)),
+          reason: '$salarie est un congé de salarié, pas un motif d\'élève',
+        );
+      }
+    });
+
+    test('unjustified n\'y est pas : c\'est un verdict, pas un motif', () {
+      expect(
+        kSelectableAbsenceReasons,
+        isNot(contains(AbsenceReason.unjustified)),
+      );
+      // Mais il RESTE au catalogue : des lignes le portent déjà, et le retirer
+      // ferait tomber leur parsing sur le repli défensif.
+      expect(AbsenceReason.values, contains(AbsenceReason.unjustified));
+    });
+
+    test('unknown Y EST, et il porte le verdict', () {
+      // Le point qui tient tout : sans lui, plus aucune valeur du côté
+      // injustifié n'est atteignable — l'appel interdisant d'enregistrer sans
+      // motif — et le taux d'absences injustifiées tend structurellement vers
+      // zéro. Un indicateur qui affiche encore un chiffre sans rien mesurer.
+      expect(kSelectableAbsenceReasons, contains(AbsenceReason.unknown));
+      expect(isUnjustifiedAbsence(AbsenceReason.unknown), isTrue);
+    });
+
+    test('au moins un motif proposé reste du côté justifié', () {
+      // Contre-épreuve : une liste dont TOUT serait injustifié rendrait le
+      // verdict aussi vide que l'inverse.
+      expect(
+        kSelectableAbsenceReasons.any((r) => !isUnjustifiedAbsence(r)),
+        isTrue,
+      );
+    });
+  });
+
   group('fromApiValue — parsing défensif (invariant #9)', () {
     test('valeurs cataloguées mappées (dont UNKNOWN, distinct de OTHER)', () {
       expect(AbsenceReasonX.fromApiValue('SICKNESS'), AbsenceReason.sickness);
