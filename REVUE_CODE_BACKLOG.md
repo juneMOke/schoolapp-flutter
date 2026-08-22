@@ -48,6 +48,10 @@ Deux besoins constatés sur la **Présence de l'élève** le 2026-08-22 et analy
 contre le code front **et** back. Ils ne sortent pas de la revue : ce sont des
 entrées neuves, et elles sont **ouvertes**.
 
+➜ **Plan d'implémentation : `PRESENCE_MOTIFS_PLAN.md`** (6 lots, 3 décisions
+restées à arbitrer). Les deux fiches ci-dessous restent la description du
+défaut ; le plan porte les lots, les invariants et les pièges.
+
 ### P-1 · Le verdict « justifiée / injustifiée » n'a pas le même sens des deux côtés
 
 Les onze motifs d'absence sont rigoureusement identiques aux trois endroits qui
