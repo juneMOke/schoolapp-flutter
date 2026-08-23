@@ -14,7 +14,6 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/school_le
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
@@ -44,9 +43,6 @@ class MockSearchByStudentNamesAndDateOfBirthUseCase extends Mock
 class MockSearchByDateOfBirthUseCase extends Mock
     implements
         SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase {}
-
-class MockSearchByAcademicInfoUseCase extends Mock
-    implements SearchEnrollmentSummaryByAcademicInfoUseCase {}
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -131,7 +127,6 @@ void main() {
   late MockSearchByStudentNamesAndDateOfBirthUseCase
   mockSearchByStudentNamesAndDateOfBirthUseCase;
   late MockSearchByDateOfBirthUseCase mockSearchByDateOfBirthUseCase;
-  late MockSearchByAcademicInfoUseCase mockSearchByAcademicInfoUseCase;
 
   setUp(() {
     mockGetEnrollmentSummaryListByStatusUseCase =
@@ -143,7 +138,6 @@ void main() {
     mockSearchByStudentNamesAndDateOfBirthUseCase =
         MockSearchByStudentNamesAndDateOfBirthUseCase();
     mockSearchByDateOfBirthUseCase = MockSearchByDateOfBirthUseCase();
-    mockSearchByAcademicInfoUseCase = MockSearchByAcademicInfoUseCase();
   });
 
   EnrollmentBloc buildBloc() => EnrollmentBloc(
@@ -155,224 +149,7 @@ void main() {
     searchByStudentNamesAndDateOfBirthUseCase:
         mockSearchByStudentNamesAndDateOfBirthUseCase,
     searchByDateOfBirthUseCase: mockSearchByDateOfBirthUseCase,
-    searchByAcademicInfoUseCase: mockSearchByAcademicInfoUseCase,
   );
-
-  group('EnrollmentSummariesByAcademicInfoRequested', () {
-    const firstName = 'John';
-    const lastName = 'Doe';
-    const surname = 'Smith';
-    const schoolLevelGroupId = 'group-1';
-    const schoolLevelId = 'level-1';
-
-    blocTest<EnrollmentBloc, EnrollmentState>(
-      'emet [loading, success] et stocke la query académique',
-      setUp: () {
-        when(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).thenAnswer((_) async => const Right(_tEnrollmentSummaryPage));
-      },
-      build: buildBloc,
-      act: (bloc) => bloc.add(
-        const EnrollmentSummariesByAcademicInfoRequested(
-          firstName: firstName,
-          lastName: lastName,
-          surname: surname,
-          schoolLevelGroupId: schoolLevelGroupId,
-          schoolLevelId: schoolLevelId,
-        ),
-      ),
-      expect: () => [
-        isA<EnrollmentState>()
-            .having(
-              (s) => s.summariesStatus,
-              'summariesStatus',
-              EnrollmentLoadStatus.loading,
-            )
-            .having(
-              (s) => s.summariesQueryType,
-              'summariesQueryType',
-              EnrollmentSummaryQueryType.byAcademicInfo,
-            )
-            .having(
-              (s) => s.lastSummariesQuery?.firstName,
-              'firstName',
-              firstName,
-            )
-            .having(
-              (s) => s.lastSummariesQuery?.schoolLevelGroupId,
-              'schoolLevelGroupId',
-              schoolLevelGroupId,
-            ),
-        isA<EnrollmentState>()
-            .having(
-              (s) => s.summariesStatus,
-              'summariesStatus',
-              EnrollmentLoadStatus.success,
-            )
-            .having(
-              (s) => s.summariesQueryType,
-              'summariesQueryType',
-              EnrollmentSummaryQueryType.byAcademicInfo,
-            )
-            .having((s) => s.summaries.length, 'summaries.length', 1)
-            .having((s) => s.errorMessage, 'errorMessage', isNull),
-      ],
-      verify: (_) {
-        verify(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).called(1);
-      },
-    );
-
-    blocTest<EnrollmentBloc, EnrollmentState>(
-      'emet [loading, failure] quand le use case renvoie une erreur',
-      setUp: () {
-        when(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(ServerFailure('Server unavailable')),
-        );
-      },
-      build: buildBloc,
-      act: (bloc) => bloc.add(
-        const EnrollmentSummariesByAcademicInfoRequested(
-          firstName: firstName,
-          lastName: lastName,
-          surname: surname,
-          schoolLevelGroupId: schoolLevelGroupId,
-          schoolLevelId: schoolLevelId,
-        ),
-      ),
-      expect: () => [
-        isA<EnrollmentState>()
-            .having(
-              (s) => s.summariesStatus,
-              'summariesStatus',
-              EnrollmentLoadStatus.loading,
-            )
-            .having(
-              (s) => s.summariesQueryType,
-              'summariesQueryType',
-              EnrollmentSummaryQueryType.byAcademicInfo,
-            ),
-        isA<EnrollmentState>()
-            .having(
-              (s) => s.summariesStatus,
-              'summariesStatus',
-              EnrollmentLoadStatus.failure,
-            )
-            .having(
-              (s) => s.errorMessage,
-              'errorMessage',
-              'Server unavailable',
-            ),
-      ],
-      verify: (_) {
-        verify(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).called(1);
-      },
-    );
-
-    blocTest<EnrollmentBloc, EnrollmentState>(
-      'rejoue la dernière query académique sur refresh',
-      setUp: () {
-        when(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).thenAnswer((_) async => const Right(_tEnrollmentSummaryPage));
-      },
-      build: buildBloc,
-      act: (bloc) async {
-        bloc.add(
-          const EnrollmentSummariesByAcademicInfoRequested(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-          ),
-        );
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const EnrollmentSummariesRefreshRequested());
-      },
-      expect: () => [
-        isA<EnrollmentState>().having(
-          (s) => s.summariesStatus,
-          'summariesStatus',
-          EnrollmentLoadStatus.loading,
-        ),
-        isA<EnrollmentState>().having(
-          (s) => s.summariesStatus,
-          'summariesStatus',
-          EnrollmentLoadStatus.success,
-        ),
-        isA<EnrollmentState>().having(
-          (s) => s.summariesStatus,
-          'summariesStatus',
-          EnrollmentLoadStatus.loading,
-        ),
-        isA<EnrollmentState>().having(
-          (s) => s.summariesStatus,
-          'summariesStatus',
-          EnrollmentLoadStatus.success,
-        ),
-      ],
-      verify: (_) {
-        verify(
-          () => mockSearchByAcademicInfoUseCase(
-            firstName: firstName,
-            lastName: lastName,
-            surname: surname,
-            schoolLevelGroupId: schoolLevelGroupId,
-            schoolLevelId: schoolLevelId,
-            page: 0,
-            size: 10,
-          ),
-        ).called(2);
-      },
-    );
-  });
 
   group('EnrollmentDetailRequested', () {
     const enrollmentId = 'enrollment-1';

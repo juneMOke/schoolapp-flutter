@@ -60,18 +60,6 @@ abstract class EnrollmentRemoteDataSource {
     @Query('size') int size,
   );
 
-  @GET(AppConstants.enrollmentSearchByAcademicInfoEndpoint)
-  Future<EnrollmentSummaryPageModel> searchEnrollmentSummaryByAcademicInfo(
-    @Extras() Map<String, dynamic> extras,
-    @Query('firstName') String firstName,
-    @Query('lastName') String lastName,
-    @Query('surname') String surname,
-    @Query('schoolLevelGroupId') String schoolLevelGroupId,
-    @Query('schoolLevelId') String schoolLevelId,
-    @Query('page') int page,
-    @Query('size') int size,
-  );
-
   @GET(AppConstants.enrollmentPreviewByStudentEndpoint)
   Future<EnrollmentDetailModel> getEnrollmentPreviewByStudentId(
     @Extras() Map<String, dynamic> extras,

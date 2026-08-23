@@ -45,17 +45,6 @@ abstract class EnrollmentRepository {
     int size = AppConstants.enrollmentDefaultPageSize,
   });
 
-  Future<Either<Failure, EnrollmentSummaryPage>>
-  searchEnrollmentSummaryByAcademicInfo({
-    required String firstName,
-    required String lastName,
-    required String surname,
-    required String schoolLevelGroupId,
-    required String schoolLevelId,
-    int page = 0,
-    int size = AppConstants.enrollmentDefaultPageSize,
-  });
-
   Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   });

@@ -117,37 +117,6 @@ class EnrollmentSummariesByDateOfBirthRequested extends EnrollmentEvent {
   List<Object?> get props => [status, academicYearId, dateOfBirth, page, size];
 }
 
-class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
-  final String firstName;
-  final String lastName;
-  final String surname;
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
-  final int page;
-  final int size;
-
-  const EnrollmentSummariesByAcademicInfoRequested({
-    required this.firstName,
-    required this.lastName,
-    required this.surname,
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
-    this.page = 0,
-    this.size = AppConstants.enrollmentDefaultPageSize,
-  });
-
-  @override
-  List<Object?> get props => [
-    firstName,
-    lastName,
-    surname,
-    schoolLevelGroupId,
-    schoolLevelId,
-    page,
-    size,
-  ];
-}
-
 class EnrollmentSummariesPageRequested extends EnrollmentEvent {
   final int page;
 
