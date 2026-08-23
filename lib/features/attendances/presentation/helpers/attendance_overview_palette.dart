@@ -60,10 +60,15 @@ class AttendanceOverviewPalette {
     final byReason = <AbsenceReason, int>{};
     for (final e in stats) {
       final reason = e.reason;
-      if (reason == null || reason.isUnjustified) {
-        unjustified += e.absenceDays;
-      } else {
+      // Le `!= null` n'est pas un verdict rendu ici — `isUnjustifiedAbsence`
+      // range déjà le motif absent du côté injustifié. C'est la condition pour
+      // pouvoir servir de CLÉ de regroupement : un segment sans nom ne peut pas
+      // être dessiné. Un motif nommé et justifié va dans sa part ; tout le
+      // reste — sans nom, ou injustifié — va dans la part rouge.
+      if (reason != null && !isUnjustifiedAbsence(reason)) {
         byReason[reason] = (byReason[reason] ?? 0) + e.absenceDays;
+      } else {
+        unjustified += e.absenceDays;
       }
     }
 

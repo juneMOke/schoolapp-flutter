@@ -187,14 +187,18 @@ void main() {
     expect(entity.topAbsentClasses.first.absenceRate, 18.5);
     expect(entity.topAbsentClasses.first.absenceDays, 33);
 
-    // byAbsenceReason : SICKNESS / null / valeur non mappée -> other (parsing
-    // défensif, invariant #9 : distinct de UNKNOWN explicite).
+    // byAbsenceReason : SICKNESS / null / valeur non mappée -> unsupported
+    // (parsing défensif, invariant #9 : distinct de UNKNOWN cataloguée ET
+    // d'OTHER, qui est un choix d'enseignant).
     expect(entity.byAbsenceReason, hasLength(3));
     expect(entity.byAbsenceReason[0].reason, AbsenceReason.sickness);
     expect(entity.byAbsenceReason[0].absenceDays, 12);
     expect(entity.byAbsenceReason[1].reason, isNull);
     expect(entity.byAbsenceReason[1].absenceDays, 5);
-    expect(entity.byAbsenceReason[2].reason, AbsenceReason.other);
+    // Le repli du parsing défensif est désormais `unsupported`, et non plus
+    // `other` : ce dernier est un choix d'enseignant, les confondre faisait
+    // réécrire silencieusement la donnée du serveur au prochain enregistrement.
+    expect(entity.byAbsenceReason[2].reason, AbsenceReason.unsupported);
     expect(entity.byAbsenceReason[2].absenceDays, 2);
 
     // byWeekday : MONDAY -> monday, SATURDAY (hors lundi-vendredi) -> unknown

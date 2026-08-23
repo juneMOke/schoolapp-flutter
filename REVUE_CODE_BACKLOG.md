@@ -10,8 +10,9 @@ dix-neuf corrigés, un tranché sans changement (B-7, faute d'un harnais qui
 l'observe), et le dernier corrigé autrement que ce que sa fiche prescrivait
 (B-9, dont la modale d'éditique ne pouvait pas recevoir la coquille commune).
 
-**Ce fichier n'est plus une liste de travail** : c'est la mémoire de ce qui a
-été trouvé, tranché, et parfois refusé. Les fiches ci-dessous gardent leur ⚠️ —
+**Le corps de ce fichier n'est plus une liste de travail** : c'est la mémoire
+de ce qui a été trouvé, tranché, et parfois refusé. Seule la section « Ouverts »
+en tête reste du travail à faire. Les fiches ci-dessous gardent leur ⚠️ —
 ce sont les pièges à ne pas réintroduire, et plusieurs disent aussi ce que la
 fiche d'origine annonçait de travers.
 
@@ -29,10 +30,219 @@ d'un élève en Facturation attendait le réseau avant d'afficher un grand-livre
 déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 **nominal**, à chaque ouverture de fiche : **corrigé** (voir « Traité »).
 
+S'y ajoutent **P-1**, **P-2** et **P-3**, hors revue, sur la **Présence de
+l'élève** (2026-08-22). P-1 était un défaut du chemin nominal — l'écran d'appel
+et les KPIs rendaient des verdicts contraires sur la même absence : **livré**
+(`PRESENCE_MOTIFS_PLAN.md`). P-2 est un besoin produit, **livré pour moitié** (le
+mode Focus existe ; reste la grille de motifs). P-3, défaut trouvé en revue de
+P-1, reste **entièrement ouvert**. Voir « Ouverts ».
+
 > Ordre : gravité décroissante. Un défaut « haut » a une conséquence métier
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
 > ou un affichage ; un « bas » attend un appelant qui n'existe pas encore, ou ne
 > se manifeste que sur une transition rare.
+
+---
+
+## 🟠 Ouverts — hors revue, signalés à l'usage
+
+Besoins et défauts constatés sur la **Présence de l'élève** le 2026-08-22,
+analysés contre le code front **et** back. Ils ne sortent pas de la revue : ce
+sont des entrées neuves.
+
+➜ **Plan d'implémentation : `PRESENCE_MOTIFS_PLAN.md`** — P-1 y est décomposé et
+**livré** (P-1a→c, plus la permission `attendance.amend` qui n'y figurait pas).
+P-2 et P-3 restent ouverts. Les fiches ci-dessous décrivent le défaut ; le plan
+porte les lots, les invariants et les pièges.
+
+### P-1 · Le verdict « justifiée / injustifiée » n'a pas le même sens des deux côtés
+
+Les onze motifs d'absence sont rigoureusement identiques aux trois endroits qui
+les portent — `attendance/domain/AbsenceReason.java`, le schéma `AbsenceReason`
+d'`openApi.yaml:8038`, et `absence_reason.dart`. Même contenu, même ordre. **Le
+catalogue est aligné ; la règle qu'il alimente ne l'est pas.**
+
+`AttendanceStatsService.java:217` — javadoc `:47`, identique dans
+`AttendanceOverviewStatsService.java:38` :
+
+```
+motif == null || motif == UNKNOWN   →  injustifiée
+tout le reste                        →  justifiée
+```
+
+« Tout le reste » **inclut `UNJUSTIFIED`**. Le front dit l'inverse
+(`absence_reason.dart:57`) : `isUnjustified = unjustified || unknown`.
+
+⇒ Un enseignant qui choisit explicitement « Absence non justifiée » la voit
+comptée **injustifiée** sur l'écran d'appel et dans la synthèse élève, et
+**justifiée** dans les KPIs du tableau de bord Présence. Même absence, deux
+verdicts selon l'écran regardé — et c'est le chemin **nominal**, pas une
+transition rare.
+
+C'est le **back** qui a tort : son prédicat n'a jamais été repris quand
+`UNJUSTIFIED` est entré au catalogue, il teste encore les deux seuls cas
+d'origine. Il est intenable qu'une valeur nommée `UNJUSTIFIED` compte comme
+justifiée.
+
+⚠️ **Et le front n'est pas d'accord avec lui-même sur le motif absent.** Quatre
+sites appliquent la règle, pour trois comportements :
+
+- `attendance_overview_palette.dart:63` — `reason == null || reason.isUnjustified`
+  ⇒ injustifiée (le seul d'accord avec le back) ;
+- `presence_status.dart:43` — `reason?.isUnjustified ?? false` ⇒ **justifiée** ;
+- `student_attendance_stats.dart:58`, le calcul **offline** ⇒ **justifiée**, et
+  le commentaire assume le choix ;
+- `attendance_results_section.dart:110/115` ⇒ ni l'un ni l'autre, exclu des deux
+  compteurs et isolé en `missingReasonsCount`. C'est le seul défendable :
+  l'écran d'appel **interdit d'enregistrer** tant qu'un motif manque
+  (`canSave && missingReasonsCount == 0`), donc « sans motif » y est un état
+  transitoire, jamais une catégorie.
+
+⚠️ Le docstring d'`absence_reason_stats.dart` affirme qu'un motif nul « est
+alors considérée comme injustifiée (cf. `AbsenceReasonX`) » — or
+`AbsenceReasonX.isUnjustified` ne traite pas `null` du tout. **La doc renvoie à
+un code qui ne fait pas ce qu'elle dit.**
+
+⚠️ **Le catalogue est un catalogue RH, pas un catalogue élève.**
+`attendance_row_editors.dart:129` rend `AbsenceReason.values` **brut**, sans
+filtre, dans l'ordre de déclaration. L'enseignant se voit donc proposer, pour un
+élève : « Congé de mariage », « Congé parental », « Congé professionnel »
+(motifs de congé de salarié), « Vacances » (un calendrier, pas une absence à
+justifier), et surtout « Inconnu » et « Absence non justifiée » — que le swagger
+décrit lui-même comme n'étant **pas** des motifs de saisie (`UNKNOWN` = *reason
+not known at entry (transient)*, `UNJUSTIFIED` = *verdict rendered afterwards*).
+Le catalogue mélange trois natures — des motifs, des états du cycle de vie, un
+fourre-tout — et l'UI les aplatit en une liste de onze.
+
+⚠️ **`OTHER` porte deux sens incompatibles.** `absence_reason.dart` fait tomber
+toute valeur serveur inconnue sur `OTHER` (`_ => AbsenceReason.other`), avec un
+bon commentaire expliquant pourquoi ce n'est pas `UNKNOWN`. Mais `OTHER` est
+**aussi** un choix légitime de l'enseignant : une fois la valeur écrite, plus
+rien ne distingue « l'enseignant a choisi Autre » de « cette tablette est trop
+ancienne pour connaître ce motif ». C'est précisément le risque que
+l'enrichissement du catalogue est censé rendre sûr.
+
+**Ce que ça demande** — décider qui arbitre le verdict, une fois, à un seul
+endroit, puis dériver la liste de saisie de cette décision au lieu d'exposer
+l'enum de transport brut. Trois gestes, dans cet ordre :
+
+1. **Corriger le prédicat back** pour qu'il couvre `UNJUSTIFIED`, et acter par
+   écrit le sort du motif absent. Correctif serveur, petit.
+2. **Une seule règle front**, dans le domaine, qui prenne `AbsenceReason?` —
+   donc qui traite `null` — et remplacer les quatre sites. La règle est
+   aujourd'hui recopiée quatre fois avec trois sémantiques : même piège que le
+   comparateur d'ensembles de permissions recopié deux fois (cf. B-1+B-2+B-3).
+3. **Séparer catalogue de transport et liste de saisie** : une liste
+   `selectableAtEntry` qui exclut `UNKNOWN`, `UNJUSTIFIED` et le `OTHER`-repli,
+   et qui écarte les motifs de congé salarié si le métier confirme qu'ils n'ont
+   pas de sens pour un élève.
+
+---
+
+### P-2 · L'appel n'a qu'un seul mode de saisie — et le Focus des notes ne s'y transpose pas tel quel
+
+> **Partiellement livré.** Le mode Focus restreint aux absents existe
+> (`AttendanceFocusMode`, lot P-2a du plan) : le constat ci-dessous n'est donc
+> plus vrai de l'écran d'aujourd'hui. **Reste P-2b** — le motif en grille de
+> grandes cibles, qui remplacera le dropdown dans la carte. La fiche est
+> conservée telle quelle : c'est elle qui porte le raisonnement de cadrage, et
+> il vaut toujours pour P-2b.
+
+Côté notes, la saisie a deux modes : `SaisieModeBar` bascule Tableau | Focus via
+le `SegmentedTabFilter` du socle, vers `SaisieTable` ou `SaisieFocus` (183 + 250
+lignes) et un `SaisieNumpad` (108 lignes), le tout piloté par un
+`SaisieDraftController` partagé (208 lignes) pour que les deux modes éditent le
+même brouillon.
+
+Côté appel, **un seul rendu** : `AttendanceRecordsMobileList`, un
+`ListView.separated` de lignes dans un panneau à hauteur fixe (`height * 0.62`
+clampé), chaque ligne portant un `DropdownButtonFormField` inline et un champ
+note. Aucune bascule.
+
+**Ce qui se transpose** : la barre de mode (composant socle déjà partagé), la
+carte un-élève-à-la-fois, le fil de progression, Précédent / Suivant, et les
+compteurs par statut en direct — l'écran d'appel les calcule déjà dans
+`AttendanceResultsToolbar`.
+
+⚠️ **Ce qui ne se transpose pas : le pavé numérique.** Une note est un nombre ;
+une présence est un **booléen + un enum + une note libre**. Tout le bénéfice du
+Focus des notes tient au « grand nombre + pavé + clavier physique mappé, on ne
+quitte jamais le pavé ». L'équivalent pour la présence est un grand basculeur
+Présent / Absent et les motifs en grille de cibles larges — pas un pavé. Copier
+le numpad serait copier la mauvaise moitié.
+
+**Prérequis structurel** : les notes ont un `SaisieDraftController` que les deux
+modes partagent ; la présence n'en a pas — le brouillon vit dans le BLoC
+(`state.draftRows`, muté par événements, chaque ligne faisant son
+`context.read<AttendanceBloc>()`). Ce n'est pas un blocage, c'est même plus
+propre : le mode Focus émettrait les mêmes événements et les deux modes
+resteraient synchrones par le BLoC. À surveiller, un `buildWhen` pour que la
+bascule de mode ne reconstruise pas tout (règle non-négociable #9).
+
+⚠️ **L'objection qui compte, et le recadrage qu'elle impose.** Le gain du Focus
+pour les notes, c'est saisir ~40 nombres vite. Pour l'appel, le flux dominant
+est « tout le monde est là sauf 3 » — et l'écran a déjà « Marquer tous présents »
+(`AttendanceMarkAllPresentRequested`). En mode liste on scanne et on bascule
+trois lignes ; un Focus sur tout l'effectif imposerait **40 passages pour 3
+absences**, donc serait plus lent que ce qu'il remplace.
+
+Là où le Focus vaut quelque chose, c'est sur la **passe des motifs** —
+exactement ce qui bloque l'enregistrement aujourd'hui (`missingReasonsCount > 0`
+interdit de sauver). Un Focus **restreint aux seuls absents**, une carte par
+absent, motif en grille de grandes cibles, Suivant automatique : la bascule ne
+se propose que quand il reste des motifs à renseigner, et elle traite trois
+élèves, pas quarante. Ce n'est pas le Focus des notes — c'est un meilleur, et il
+coûte moins cher.
+
+⚠️ ~~**Ordre entre les deux fiches : P-1 d'abord.**~~ — **levé** : P-1 est
+livré, la liste de saisie est arrêtée à cinq motifs et « Inconnu » s'affiche
+« Non justifiée ». La grille de P-2b peut donc être construite sans figer un
+catalogue périmé dans une UI coûteuse à défaire — c'était toute la raison de
+cet ordre.
+
+---
+
+### P-3 · Le donut des motifs ne totalise pas les absences qu'il prétend ventiler
+
+Trouvé en revue du lot P-1a, **antérieur à ce lot** et hors de son périmètre.
+
+`AttendanceRecordRepository.aggregateAbsenceByReason` filtre
+`ar.absenceReason is not null`. La ventilation par motif renvoyée au client ne
+contient donc **jamais** d'entrée pour les absences sans motif. Or ces absences
+existent — le contrat les autorise (`AbsenceInput.absenceReason` n'est pas
+`@NotNull`) et des lignes historiques en portent — et les KPIs du même écran
+les comptent, du côté **injustifié**, depuis toujours.
+
+Le tableau de bord affiche donc deux nombres qui ne se réconcilient pas : le
+total central du donut (`AttendanceOverviewReasonsSection` le rend) vaut les
+absences **avec** motif, tandis que la bande de KPIs annonce des jours d'absence
+qui incluent celles sans motif. L'écart est exactement le nombre de jours
+d'absence sans motif sur la période.
+
+⚠️ **Et le front prétend gérer un cas que le serveur ne peut pas produire.**
+`attendance_overview_palette.dart` replie `reason == null` dans la part
+« Non justifié » du donut. Cette branche est **morte** : aucune entrée nulle
+n'arrive jamais. Elle a l'air d'une précaution et n'en est pas une — elle
+masque le défaut en donnant à lire que le cas est traité.
+
+⚠️ **Ne pas confondre avec la part rouge.** Le donut a bien une part
+« Non justifié », alimentée par `UNKNOWN` et `UNJUSTIFIED`, qui sont des motifs
+non nuls. Ce n'est donc pas la part qui manque, c'est le **sans-motif** qui
+n'atteint jamais le graphique.
+
+**Ce que P-1c change, et ce qu'il ne change pas.** Depuis que l'écran d'appel
+interdit d'enregistrer sans motif et propose « Non justifiée » (`UNKNOWN`), les
+absences neuves portent toutes un motif : la population concernée ne grandit
+plus. Elle ne disparaît pas pour autant — l'historique reste, et le contrat
+continue d'accepter un motif nul d'un autre client.
+
+**Deux façons d'en sortir, et il faut choisir.** Soit le serveur émet une entrée
+à motif nul dans `byAbsenceReason` (le front sait déjà la replier, sa branche
+morte reprend vie, et les deux totaux se rejoignent) ; soit le front cesse de
+prétendre gérer ce cas et le tableau de bord dit explicitement sur quoi porte le
+donut. **Le premier réconcilie les chiffres, le second se contente de ne plus
+mentir** — et un donut qui ne totalise pas ce que la bande de KPIs annonce reste
+un chiffre qu'un directeur ne peut pas vérifier à l'œil.
 
 ---
 

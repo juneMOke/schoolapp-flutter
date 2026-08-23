@@ -24,14 +24,19 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/att
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_toolbar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_save_overlay.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_empty_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_focus_mode.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
-class AttendanceResultsSection extends StatelessWidget {
+/// Mode de saisie de l'appel.
+enum AttendanceEntryMode { list, focus }
+
+class AttendanceResultsSection extends StatefulWidget {
   final AttendanceSearchRequest? lastRequest;
   final VoidCallback onRetry;
 
@@ -41,6 +46,16 @@ class AttendanceResultsSection extends StatelessWidget {
     required this.onRetry,
   });
 
+  @override
+  State<AttendanceResultsSection> createState() =>
+      _AttendanceResultsSectionState();
+}
+
+class _AttendanceResultsSectionState extends State<AttendanceResultsSection> {
+  /// Le mode vit ici, hors du BLoC : c'est une préférence d'affichage, pas un
+  /// état métier. Rien de ce qu'il change ne doit partir à la synchro.
+  AttendanceEntryMode _mode = AttendanceEntryMode.list;
+
   Future<void> _contactAdmin() async {
     await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
   }
@@ -48,7 +63,7 @@ class AttendanceResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final request = lastRequest;
+    final request = widget.lastRequest;
 
     if (request == null) {
       return EteeloEmptyResult(
@@ -79,7 +94,7 @@ class AttendanceResultsSection extends StatelessWidget {
           // Anatomie d'erreur partagee (4 types) ; le 403 reste dormant.
           child = AttendanceResultsErrorState(
             type: state.fetchErrorType,
-            onRetry: onRetry,
+            onRetry: widget.onRetry,
             onReconnect: () =>
                 context.read<AuthBloc>().add(const AuthLogoutRequested()),
             onContactAdmin: _contactAdmin,
@@ -102,22 +117,56 @@ class AttendanceResultsSection extends StatelessWidget {
               .where((row) => !row.present)
               .length;
           final presentCount = totalCount - absentCount;
+          // ⚠️ Les deux compteurs écartent explicitement le motif absent, alors
+          // qu'`isUnjustifiedAbsence(null)` vaut `true` partout ailleurs. Ce
+          // n'est pas une divergence : cet écran INTERDIT d'enregistrer tant
+          // qu'un motif manque (`canSave && missingReasonsCount == 0`), donc
+          // « sans motif » y est un état de saisie en cours — compté à part,
+          // dans `missingReasonsCount` — et jamais un verdict rendu. Le verdict
+          // ne s'applique qu'aux absences déjà écrites.
           final justifiedCount = state.draftRows
               .where(
                 (r) =>
                     !r.present &&
                     r.absenceReason != null &&
-                    !r.absenceReason!.isUnjustified,
+                    !isUnjustifiedAbsence(r.absenceReason),
               )
               .length;
           final unjustifiedCount = state.draftRows
               .where(
-                (r) => !r.present && (r.absenceReason?.isUnjustified ?? false),
+                (r) =>
+                    !r.present &&
+                    r.absenceReason != null &&
+                    isUnjustifiedAbsence(r.absenceReason),
               )
               .length;
           final missingReasonsCount = state.draftRows
               .where((row) => !row.present && row.absenceReason == null)
               .length;
+          // Une ligne dont le motif vient d'un catalogue serveur plus récent
+          // que cette version. L'enregistrement renvoie TOUTES les lignes du
+          // brouillon, chacune re-sérialisée : laisser passer celle-ci
+          // remplacerait le motif d'origine sans que personne le voie. On
+          // bloque jusqu'à ce qu'un motif connu soit choisi — et
+          // `toApiValue()` lève si on l'atteignait quand même.
+          final unsupportedReasonsCount = state.draftRows
+              .where(
+                (row) =>
+                    !row.present &&
+                    row.absenceReason == AbsenceReason.unsupported,
+              )
+              .length;
+          // Le Focus n'itère que sur les ABSENTS : c'est le cadrage du lot.
+          final rowsToFocus = state.draftRows
+              .where((row) => !row.present)
+              .toList(growable: false);
+          // ⚠️ Le mode peut rester `focus` alors qu'il n'y a plus rien à
+          // montrer — le dernier motif vient d'être posé, ou tout le monde est
+          // repassé présent. On retombe alors sur la liste plutôt que de rendre
+          // une carte vide : la bascule elle-même a déjà disparu.
+          final focusUsable =
+              _mode == AttendanceEntryMode.focus && rowsToFocus.isNotEmpty;
+
           final panelHeight = (MediaQuery.sizeOf(context).height * 0.62)
               .clamp(
                 AppDimensions.attendanceResultsPanelMinHeight,
@@ -126,7 +175,11 @@ class AttendanceResultsSection extends StatelessWidget {
               .toDouble();
 
           Future<void> onSaveCallPressed() async {
-            if (!state.canSave || missingReasonsCount > 0) return;
+            if (!state.canSave ||
+                missingReasonsCount > 0 ||
+                unsupportedReasonsCount > 0) {
+              return;
+            }
 
             if (absentCount == 0) {
               final confirmed = await showAppConfirmationDialog(
@@ -161,9 +214,29 @@ class AttendanceResultsSection extends StatelessWidget {
                 const _AppelNonFaitBar(),
                 const SizedBox(height: AppDimensions.spacingS),
               ],
+              // Le Focus ne se propose QUE s'il reste des motifs à renseigner.
+              // Ailleurs il serait plus lent que la liste : le flux dominant
+              // est « tout le monde est là sauf trois », déjà servi par
+              // « Marquer tous présents ». Un Focus sur l'effectif entier
+              // imposerait quarante passages pour trois absences.
+              if (missingReasonsCount > 0) ...[
+                _EntryModeBar(
+                  mode: _mode,
+                  pending: missingReasonsCount,
+                  onChanged: (m) => setState(() => _mode = m),
+                ),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
+              if (unsupportedReasonsCount > 0) ...[
+                _UnsupportedReasonBar(count: unsupportedReasonsCount),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
               _AttendanceActionBar(
                 isSaving: state.saveStatus == AttendanceStatus.loading,
-                canSave: state.canSave && missingReasonsCount == 0,
+                canSave:
+                    state.canSave &&
+                    missingReasonsCount == 0 &&
+                    unsupportedReasonsCount == 0,
                 onMarkAllPresent: () => context.read<AttendanceBloc>().add(
                   const AttendanceMarkAllPresentRequested(),
                 ),
@@ -193,11 +266,13 @@ class AttendanceResultsSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: AttendanceRecordsMobileList(
-                            rows: state.draftRows,
-                            classroomName: request.selectedClassroom.name,
-                            shrinkWrap: false,
-                          ),
+                          child: focusUsable
+                              ? AttendanceFocusMode(rows: rowsToFocus)
+                              : AttendanceRecordsMobileList(
+                                  rows: state.draftRows,
+                                  classroomName: request.selectedClassroom.name,
+                                  shrinkWrap: false,
+                                ),
                         ),
                         if (missingReasonsCount > 0)
                           _RappelAmbreBar(
@@ -268,6 +343,109 @@ class _AttendanceActionBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Ce qui bloque l'enregistrement quand une ligne porte un motif que cette
+/// version ne connaît pas — et qui dit pourquoi, plutôt que de laisser un
+/// bouton grisé sans explication.
+class _UnsupportedReasonBar extends StatelessWidget {
+  final int count;
+
+  const _UnsupportedReasonBar({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.help_outline_rounded,
+              size: 18,
+              color: AppColors.warning,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
+            Expanded(
+              child: Text(
+                l10n.attendanceUnsupportedReasonBlocked,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// La bascule Liste | Focus, avec le nombre de motifs restants.
+///
+/// Elle n'apparaît que s'il en reste : c'est ce qui empêche le Focus de devenir
+/// un détour. Le compteur est le même que celui qui bloque l'enregistrement —
+/// l'utilisateur voit donc décroître exactement ce qui le retient.
+class _EntryModeBar extends StatelessWidget {
+  final AttendanceEntryMode mode;
+  final int pending;
+  final ValueChanged<AttendanceEntryMode> onChanged;
+
+  const _EntryModeBar({
+    required this.mode,
+    required this.pending,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      children: [
+        // ⚠️ `expand: true` : contraint en largeur dans une Row, le contrôle
+        // déborde sans lui.
+        SizedBox(
+          width: 220,
+          child: SegmentedTabFilter<AttendanceEntryMode>(
+            selected: mode,
+            onSelected: onChanged,
+            expand: true,
+            options: [
+              SegmentedTabOption(
+                label: l10n.attendanceModeList,
+                value: AttendanceEntryMode.list,
+                icon: Icons.table_rows_rounded,
+              ),
+              SegmentedTabOption(
+                label: l10n.attendanceModeFocus,
+                value: AttendanceEntryMode.focus,
+                icon: Icons.center_focus_strong_rounded,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingM),
+        Expanded(
+          child: Text(
+            l10n.attendancePendingReasons(pending),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

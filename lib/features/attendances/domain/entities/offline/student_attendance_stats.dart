@@ -50,12 +50,15 @@ class StudentAttendanceStats extends Equatable {
 
   int get absences => entries.length;
 
-  /// Même règle de classification que la synthèse en ligne
-  /// (`AttendanceDayStatusX.forAbsenceReason`) : injustifiée seulement si le
-  /// motif l'est explicitement (`unjustified`/`unknown`) — motif absent =
-  /// justifiée par défaut, pour rester cohérent avec le détail par ligne.
+  /// Le verdict d'[isUnjustifiedAbsence], comme partout ailleurs — motif absent
+  /// compris, qui compte comme injustifié.
+  ///
+  /// ⚠️ Ce chiffre est calculé **en local** et son homologue serveur alimente
+  /// les KPIs du tableau de bord : les deux doivent rester d'accord sur la même
+  /// période. C'est la raison d'être de la règle unique, et le sens dans lequel
+  /// ce getter ne doit jamais être « optimisé » avec un prédicat écrit à la main.
   int get unjustifiedAbsences =>
-      entries.where((e) => e.reason?.isUnjustified ?? false).length;
+      entries.where((e) => isUnjustifiedAbsence(e.reason)).length;
 
   int get justifiedAbsences => absences - unjustifiedAbsences;
 

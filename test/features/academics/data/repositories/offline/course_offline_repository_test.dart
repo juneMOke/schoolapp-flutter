@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
@@ -59,6 +60,8 @@ void main() {
         now: () => 1000,
       ),
       syncMetaDao: syncMetaDao,
+      referentialDao: EnrollmentReferentialDao(db),
+      currentUser: CurrentUserContext()..set(null, schoolId: 'school-1'),
     );
   });
 
@@ -175,6 +178,135 @@ void main() {
       );
 
       test(
+        'un cours porté par une classe d\'une année PRÉCÉDENTE ne remonte pas '
+        '(ref_cours n\'a pas d\'année : elle vient de la classe)',
+        () async {
+          await markReferentialsBootstrapped();
+          // Le référentiel sait quelle année est courante.
+          await db.insert('ref_academic_years', {
+            'id': 'ay-courante',
+            'name': '2026-2027',
+            'is_current': 1,
+            'school_id': 'school-1',
+          });
+          await db.insert('ref_academic_years', {
+            'id': 'ay-passee',
+            'name': '2025-2026',
+            'is_current': 0,
+            'school_id': 'school-1',
+          });
+          await db.insert('ref_branche', {'id': 'b1', 'nom': 'Maths'});
+          await db.insert('ref_ligne_bareme', {
+            'id': 'lb1',
+            'grille_id': 'g1',
+            'rubrique_id': 'r1',
+            'branche_id': 'b1',
+            'ordre': 1,
+            'max_journalier_par_sous_periode': 2,
+          });
+          // Un cours de l'an dernier, resté en cache : le pull cours est un
+          // delta et ne retire jamais rien hors rejeu bootstrap.
+          await db.insert('ref_cours', {
+            'id': 'co-an-dernier',
+            'classroom_id': 'class-an-dernier',
+            'ligne_bareme_id': 'lb1',
+            'synced_at': 1,
+          });
+          await db.insert('ref_classrooms', {
+            'id': 'class-an-dernier',
+            'academic_year_id': 'ay-passee',
+            'name': '3ème A (2025-2026)',
+            'total_count': 30,
+          });
+
+          final summaries = (await repo.getMyCourses()).getOrElse(
+            () => fail('Left'),
+          );
+
+          expect(
+            summaries,
+            isEmpty,
+            reason: 'la classe appartient à ay-passee, pas à ay-courante',
+          );
+        },
+      );
+
+      test(
+        'année courante NON résolue → aucun filtrage (année absente ≠ vide)',
+        () async {
+          await markReferentialsBootstrapped();
+          // Aucune ligne dans ref_academic_years : référentiel pas encore
+          // synchronisé pour cette école. Filtrer viderait l'écran d'un prof
+          // dont tous les cours sont pourtant légitimes.
+          await db.insert('ref_branche', {'id': 'b1', 'nom': 'Maths'});
+          await db.insert('ref_ligne_bareme', {
+            'id': 'lb1',
+            'grille_id': 'g1',
+            'rubrique_id': 'r1',
+            'branche_id': 'b1',
+            'ordre': 1,
+            'max_journalier_par_sous_periode': 2,
+          });
+          await db.insert('ref_cours', {
+            'id': 'co1',
+            'classroom_id': 'class-1',
+            'ligne_bareme_id': 'lb1',
+            'synced_at': 1,
+          });
+          await db.insert('ref_classrooms', {
+            'id': 'class-1',
+            'academic_year_id': 'ay-quelconque',
+            'name': '3ème A',
+            'total_count': 30,
+          });
+
+          final summaries = (await repo.getMyCourses()).getOrElse(
+            () => fail('Left'),
+          );
+
+          expect(summaries.single.classroom.name, '3ème A');
+          expect(summaries.single.classroomUnsynced, isFalse);
+        },
+      );
+
+      test('classe absente du cache → cours signalé « non synchronisé », '
+          'jamais confondu avec un cours d\'une autre année', () async {
+        await markReferentialsBootstrapped();
+        await db.insert('ref_academic_years', {
+          'id': 'ay-courante',
+          'name': '2026-2027',
+          'is_current': 1,
+          'school_id': 'school-1',
+        });
+        await db.insert('ref_branche', {'id': 'b1', 'nom': 'Maths'});
+        await db.insert('ref_ligne_bareme', {
+          'id': 'lb1',
+          'grille_id': 'g1',
+          'rubrique_id': 'r1',
+          'branche_id': 'b1',
+          'ordre': 1,
+          'max_journalier_par_sous_periode': 2,
+        });
+        // Le pull des cours a devancé celui des classes.
+        await db.insert('ref_cours', {
+          'id': 'co-en-attente',
+          'classroom_id': 'class-pas-encore-pullee',
+          'ligne_bareme_id': 'lb1',
+          'synced_at': 1,
+        });
+
+        final summaries = (await repo.getMyCourses()).getOrElse(
+          () => fail('Left'),
+        );
+
+        // Il remonte — sinon l'écran tairait un cours qui n'attend qu'un
+        // pull — mais porté par son drapeau, pas par une classe anonyme.
+        expect(summaries.single.classroomUnsynced, isTrue);
+        expect(summaries.single.courses.single.id, 'co-en-attente');
+        expect(summaries.single.classroom.name, isEmpty);
+      });
+
+      test(
         'ref_cours ou grades-referential pas encore bootstrappés → repli online',
         () async {
           final online = MockOnlineCourse();
@@ -189,6 +321,7 @@ void main() {
               now: () => 1,
             ),
             syncMetaDao: syncMetaDao,
+            referentialDao: EnrollmentReferentialDao(db),
           );
           when(
             () => online.getMyCourses(),
@@ -403,6 +536,7 @@ void main() {
           now: () => 1,
         ),
         syncMetaDao: syncMetaDao,
+        referentialDao: EnrollmentReferentialDao(db),
       );
       when(
         () => online.getCoursNotationDetail('absent'),
@@ -432,6 +566,7 @@ void main() {
           now: () => 1,
         ),
         syncMetaDao: syncMetaDao,
+        referentialDao: EnrollmentReferentialDao(db),
       );
       when(
         () => online.getCoursNotationDetail('co-no-bundle'),

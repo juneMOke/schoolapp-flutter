@@ -1292,6 +1292,24 @@ abstract class AppLocalizations {
   /// **'{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}'**
   String myCoursesCount(int classCount, int courseCount);
 
+  /// No description provided for @myCoursesUnsyncedClassroomNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course hidden — classroom not synchronised} other{{count} courses hidden — classroom not synchronised}}'**
+  String myCoursesUnsyncedClassroomNotice(int count);
+
+  /// No description provided for @myCoursesUnsyncedClassroomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsynced class'**
+  String get myCoursesUnsyncedClassroomName;
+
+  /// No description provided for @myCoursesDegradedClassroomNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course shown without its class — the class sync has not completed yet} other{{count} courses shown without their class — the class sync has not completed yet}}'**
+  String myCoursesDegradedClassroomNotice(int count);
+
   /// No description provided for @myCoursesExpandAll.
   ///
   /// In en, this message translates to:
@@ -6600,6 +6618,42 @@ abstract class AppLocalizations {
   /// **'Save attendance'**
   String get attendanceSaveCallAction;
 
+  /// No description provided for @attendanceFocusPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get attendanceFocusPrevious;
+
+  /// No description provided for @attendanceFocusNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get attendanceFocusNext;
+
+  /// No description provided for @attendanceModeList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get attendanceModeList;
+
+  /// No description provided for @attendanceModeFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get attendanceModeFocus;
+
+  /// No description provided for @attendancePendingReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reason to fill in} other{{count} reasons to fill in}}'**
+  String attendancePendingReasons(int count);
+
+  /// No description provided for @attendanceUnsupportedReasonBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.'**
+  String get attendanceUnsupportedReasonBlocked;
+
   /// No description provided for @attendanceMarkAllPresentAction.
   ///
   /// In en, this message translates to:
@@ -6687,7 +6741,7 @@ abstract class AppLocalizations {
   /// No description provided for @absenceReasonUnknown.
   ///
   /// In en, this message translates to:
-  /// **'Unknown'**
+  /// **'Not justified'**
   String get absenceReasonUnknown;
 
   /// No description provided for @absenceReasonVacation.
@@ -6731,6 +6785,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get absenceReasonOther;
+
+  /// No description provided for @absenceReasonUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognised reason'**
+  String get absenceReasonUnsupported;
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

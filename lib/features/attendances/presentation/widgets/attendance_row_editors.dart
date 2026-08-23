@@ -126,17 +126,31 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
           vertical: AppDimensions.spacingS,
         ),
       ),
-      items: AbsenceReason.values
-          .map(
-            (reason) => DropdownMenuItem<AbsenceReason>(
-              value: reason,
-              child: Text(
-                AttendancePageHelpers.absenceReasonLabel(l10n, reason),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          )
-          .toList(growable: false),
+      // La liste de SAISIE, pas le catalogue de transport : les congés de
+      // salarié et le verdict `unjustified` n'y sont pas.
+      //
+      // ⚠️ `unsupported` non plus — mais un `DropdownButtonFormField` dont la
+      // valeur courante n'est pas dans ses items **lève** (« exactly one item
+      // with value »). Quand la ligne porte un motif que cette version ignore,
+      // on l'ajoute donc à la liste, uniquement pour cette ligne, le temps que
+      // l'enseignant choisisse autre chose. Il le voit, l'enregistrement reste
+      // bloqué, et rien n'est réécrit dans son dos.
+      items:
+          <AbsenceReason>[
+                ...kSelectableAbsenceReasons,
+                if (value == AbsenceReason.unsupported)
+                  AbsenceReason.unsupported,
+              ]
+              .map(
+                (reason) => DropdownMenuItem<AbsenceReason>(
+                  value: reason,
+                  child: Text(
+                    AttendancePageHelpers.absenceReasonLabel(l10n, reason),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+              .toList(growable: false),
       onChanged: enabled ? onChanged : null,
     );
   }

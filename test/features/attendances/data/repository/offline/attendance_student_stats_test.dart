@@ -187,10 +187,11 @@ void main() {
       )).getOrElse(() => throw StateError('left'));
 
       expect(res.absences, 3);
-      // Sans motif = justifiée par défaut (même règle que forAbsenceReason,
-      // cohérence avec le détail par ligne de PresenceAbsenceList).
-      expect(res.unjustifiedAbsences, 1);
-      expect(res.justifiedAbsences, 2);
+      // Sans motif = INJUSTIFIÉE (même règle qu'`isUnjustifiedAbsence`, partout
+      // et côté serveur). Ce chiffre est calculé en local et son homologue
+      // serveur alimente le tableau de bord : les deux doivent s'accorder.
+      expect(res.unjustifiedAbsences, 2);
+      expect(res.justifiedAbsences, 1);
       expect(res.entries, hasLength(3));
       // Trié par la couche appelante (le DAO renvoie déjà DESC) : le plus
       // récent (06) en tête.

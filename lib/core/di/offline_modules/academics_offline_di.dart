@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -39,12 +40,15 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 /// Registrar de la branche offline **Notes / Cours** (academics + schedule,
 /// ADR-006). Appelé depuis `registerOfflineModules` APRÈS le socle et les
 /// branches A/B. Le pull cours/sessions est scopé **enseignant dérivé du
-/// token** (DF-K) — plus de dépendance à `ref_classrooms`/l'année courante
-/// pour son itération.
+/// token** (DF-K) — son ITÉRATION ne dépend donc ni de `ref_classrooms` ni de
+/// l'année courante. La LECTURE, elle, en dépend depuis `e95be65` : `ref_cours`
+/// ne portant aucune année, `CourseOfflineRepositoryImpl` résout l'année via la
+/// classe qui porte le cours, d'où l'`EnrollmentReferentialDao` câblé plus bas.
 ///
 /// Ordre : DataSources → APIs → Repositories → Handlers (push sur `SyncEngine`,
 /// pull sur `PullCoordinator`). Aucun BLoC ici : la présentation est branchée en
 /// NF-7 sur les BLoCs online rapatriés.
+
 void registerAcademicsOffline(GetIt getIt) {
   final requiredAuth = getIt<Map<String, dynamic>>();
 
@@ -145,6 +149,7 @@ void registerAcademicsOffline(GetIt getIt) {
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
       syncMetaDao: getIt<SyncMetaDao>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );

@@ -712,6 +712,33 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String myCoursesUnsyncedClassroomNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours masqués — classe non synchronisée',
+      one: '1 cours masqué — classe non synchronisée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myCoursesUnsyncedClassroomName => 'Classe non synchronisée';
+
+  @override
+  String myCoursesDegradedClassroomNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count cours affichés sans leur classe — la synchronisation des classes n\'a pas encore abouti',
+      one:
+          '1 cours affiché sans sa classe — la synchronisation des classes n\'a pas encore abouti',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get myCoursesExpandAll => 'Tout déplier';
 
   @override
@@ -3910,6 +3937,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceSaveCallAction => 'Enregistrer l\'appel';
 
   @override
+  String get attendanceFocusPrevious => 'Précédent';
+
+  @override
+  String get attendanceFocusNext => 'Suivant';
+
+  @override
+  String get attendanceModeList => 'Liste';
+
+  @override
+  String get attendanceModeFocus => 'Focus';
+
+  @override
+  String attendancePendingReasons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count motifs à renseigner',
+      one: '1 motif à renseigner',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get attendanceUnsupportedReasonBlocked =>
+      'Une absence porte un motif que cette version de l\'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.';
+
+  @override
   String get attendanceMarkAllPresentAction => 'Tout présent';
 
   @override
@@ -3955,7 +4009,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get absenceReasonPersonal => 'Personnel';
 
   @override
-  String get absenceReasonUnknown => 'Inconnu';
+  String get absenceReasonUnknown => 'Non justifiée';
 
   @override
   String get absenceReasonVacation => 'Vacances';
@@ -3977,6 +4031,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get absenceReasonOther => 'Autre';
+
+  @override
+  String get absenceReasonUnsupported => 'Motif non reconnu';
 
   @override
   String get bootstrapContextUnavailableTitle =>
