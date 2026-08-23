@@ -402,6 +402,110 @@ void main() {
     });
   });
 
+  group('niveau porté par la LIGNE (projection commune des listes)', () {
+    Future<void> seedReferential() async {
+      await db.insert('ref_school_level_groups', {
+        'id': 'grp-1',
+        'name': 'Primaire',
+        'code': 'PRIM',
+        'academic_year_id': 'ay-2026',
+      });
+      await db.insert('ref_school_levels', {
+        'id': 'lvl-1',
+        'name': '5ème année',
+        'code': 'P5',
+        'level_group_id': 'grp-1',
+      });
+    }
+
+    test('projette les ids ET les libellés résolus sur le référentiel', () async {
+      await seedReferential();
+      await seedPendingEnrollment(
+        withEnrollment: const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'lvl-1',
+          schoolLevelGroupId: 'grp-1',
+          enrollmentDate: '2026-07-06',
+          updatedAt: 100,
+        ),
+      );
+
+      final row = (await readDao.getEnrollments()).single;
+      expect(row.schoolLevelId, 'lvl-1');
+      expect(row.schoolLevelGroupId, 'grp-1');
+      expect(row.schoolLevelName, '5ème année');
+      expect(row.schoolLevelGroupName, 'Primaire');
+    });
+
+    test(
+      'référentiel pas encore descendu : la ligne SURVIT, id gardé, libellés null',
+      () async {
+        // Aucun `seedReferential()` : c'est l'état d'une tablette dont le pull
+        // du référentiel n'a pas encore abouti. Une jointure interne ferait
+        // disparaître le dossier de toutes les listes.
+        await seedPendingEnrollment();
+
+        final row = (await readDao.getEnrollments()).single;
+        expect(row.schoolLevelId, 'lvl-1');
+        expect(row.schoolLevelName, isNull);
+        expect(
+          row.schoolLevelGroupName,
+          isNull,
+          reason: 'un libellé absent ne vaut pas un niveau absent',
+        );
+      },
+    );
+
+    test('inscription sans niveau (brouillon) : la ligne survit aussi', () async {
+      await seedReferential();
+      await draftDao.insertDraftStudent(student(id: 's9'));
+      await draftDao.insertDraftEnrollment(
+        const EnrollmentLocalModel(
+          id: 'e9',
+          studentId: 's9',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          enrollmentDate: '2026-07-06',
+          updatedAt: 100,
+        ),
+      );
+
+      final row = (await readDao.getEnrollments()).single;
+      expect(row.enrollmentId, 'e9');
+      expect(row.schoolLevelId, isNull);
+      expect(row.schoolLevelName, isNull);
+    });
+
+    test('la recherche Facturation porte le niveau elle aussi', () async {
+      await seedReferential();
+      await seedPendingEnrollment(
+        withEnrollment: const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'lvl-1',
+          schoolLevelGroupId: 'grp-1',
+          enrollmentDate: '2026-07-06',
+          updatedAt: 100,
+        ),
+      );
+
+      // Sans niveau dans les critères — le cas exact d'une recherche par
+      // identité : la ligne doit quand même savoir dire son niveau.
+      final rows = await readDao.searchEnrolledByAcademicInfo(
+        academicYearId: 'ay-2026',
+      );
+      expect(rows.single.schoolLevelName, '5ème année');
+    });
+  });
+
   group('getEnrollments — filtre par type (anti-confusion pré-inscription / '
       'réinscription)', () {
     setUp(() async {
