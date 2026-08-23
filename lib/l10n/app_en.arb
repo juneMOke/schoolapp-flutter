@@ -2027,6 +2027,7 @@
   "attendanceErrorUnknownTitle": "Unable to load",
   "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
+  "attendancePastCallAmendLocked": "This call is already recorded and the day is over: correcting it is for the discipline office, not for whoever takes the call.",
   "attendanceFocusPrevious": "Previous",
   "attendanceFocusNext": "Next",
   "attendanceModeList": "List",

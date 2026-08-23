@@ -6618,6 +6618,12 @@ abstract class AppLocalizations {
   /// **'Save attendance'**
   String get attendanceSaveCallAction;
 
+  /// No description provided for @attendancePastCallAmendLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This call is already recorded and the day is over: correcting it is for the discipline office, not for whoever takes the call.'**
+  String get attendancePastCallAmendLocked;
+
   /// No description provided for @attendanceFocusPrevious.
   ///
   /// In en, this message translates to:

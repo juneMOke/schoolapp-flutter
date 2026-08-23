@@ -33,6 +33,7 @@ void main() {
     Perm.attendanceRead: 'attendance.read',
     Perm.attendanceWrite: 'attendance.write',
     Perm.attendanceDelete: 'attendance.delete',
+    Perm.attendanceAmend: 'attendance.amend',
     Perm.attendanceStatsRead: 'attendance.stats.read',
     Perm.disciplineRead: 'discipline.read',
     Perm.disciplineWrite: 'discipline.write',
@@ -64,8 +65,13 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 48 permissions (v1.7 du catalogue serveur)', () {
-    expect(Perm.values, hasLength(48));
+  test('le catalogue compte 49 permissions (v1.8 du catalogue serveur)', () {
+    // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
+    // le prendre. Un ajout, pas un renommage — aucune ligne de
+    // `school_role_permission` ne référence la valeur neuve, donc rien à
+    // migrer ; mais le serveur doit la connaître avant que cette release ne
+    // pose la garde, sinon elle ferme une porte que personne ne peut ouvrir.
+    expect(Perm.values, hasLength(49));
   });
 
   // `platform.school.provision` n'appartient à aucune école : jamais semée,

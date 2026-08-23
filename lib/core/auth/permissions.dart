@@ -50,6 +50,7 @@ enum Perm {
   attendanceRead('attendance.read'),
   attendanceWrite('attendance.write'),
   attendanceDelete('attendance.delete'),
+  attendanceAmend('attendance.amend'),
   attendanceStatsRead('attendance.stats.read'),
 
   // ── Discipline ────────────────────────────────────────────────────────────
