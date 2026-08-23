@@ -422,13 +422,29 @@ void main() {
       await cubit.load();
       expect(cubit.state.entries, hasLength(1));
 
+      // La notification de fin de flush est synchrone ; la RELECTURE qu'elle
+      // déclenche ne l'est pas : `_onFlushCompleted` lance `load()` sans
+      // l'attendre, et `load()` interroge la base avant d'émettre. Céder un
+      // seul tour de boucle — `Future.delayed(Duration.zero)` — pariait donc
+      // sur le nombre de micro-tâches d'une lecture SQL. Le pari passait sur
+      // une machine au repos et tombait sur un runner chargé : c'est ce qui
+      // rendait ce test intermittent. On attend l'ÉMISSION, pas un délai.
+      //
+      // ⚠️ L'abonnement est pris AVANT le flush. Après, l'émission pourrait
+      // déjà avoir eu lieu, et `firstWhere` attendrait un événement passé —
+      // le test se figerait au lieu de rougir.
+      final feuilleVidee = cubit.stream.firstWhere((s) => s.entries.isEmpty);
+
       // Le battement remet la ligne en file et la pousse : c'est le flush du
       // MOTEUR, pas celui de la feuille.
       await dao.requeue('p1');
       await engine.flush();
-      // La notification de fin de flush est synchrone ; la relecture qu'elle
-      // déclenche ne l'est pas.
-      await Future<void>.delayed(Duration.zero);
+      await feuilleVidee.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw StateError(
+          'la feuille n\'a pas été relue après le flush du moteur',
+        ),
+      );
 
       expect(
         cubit.state.entries,
