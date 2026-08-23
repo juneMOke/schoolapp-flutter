@@ -608,20 +608,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesListClassroomOptionalLabel => 'Classe (optionnel)';
 
   @override
-  String get classesListFirstNameOptionalLabel => 'Prénom (optionnel)';
+  String get classesListClassroomPlaceholder => 'Choisissez d\'abord un niveau';
 
   @override
-  String get classesListLastNameOptionalLabel => 'Nom (optionnel)';
+  String get classesListClassroomNonePlaceholder =>
+      'Aucune classe pour ce niveau';
 
   @override
-  String get classesListSurnameOptionalLabel => 'Post-nom (optionnel)';
+  String get classesListSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get classesListLevelColumnLabel => 'Niveau';
+
+  @override
+  String get classesListLevelUnknown => '—';
 
   @override
   String get classesListInitialEmptyTitle => 'Aucune recherche en cours';
 
   @override
   String get classesListInitialEmptyMessage =>
-      'Renseignez au moins un critère pour afficher les élèves.';
+      'Choisissez un niveau, ou renseignez l\'identité complète d\'un élève, pour afficher des résultats.';
 
   @override
   String get classesListNoMatchTitle =>

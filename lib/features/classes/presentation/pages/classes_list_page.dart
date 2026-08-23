@@ -20,7 +20,7 @@ import 'package:school_app_flutter/features/classes/presentation/helpers/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_page_content.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -99,7 +99,7 @@ class _ClassesListPageState extends State<ClassesListPage> {
               );
             },
           ),
-          BlocListener<EnrollmentBloc, EnrollmentState>(
+          BlocListener<EnrollmentLocalListBloc, EnrollmentLocalListState>(
             listenWhen:
                 ClassesListPageHelpers.listenWhenEnrollmentStatusChanges,
             listener: (context, state) {
@@ -203,6 +203,7 @@ class _ClassesListPageState extends State<ClassesListPage> {
               lastRequest: _lastRequest,
               onSearch: _handleSearch,
               onExportPressed: _handleExport,
+              onPageRequested: _onPageRequested,
               onEnrollmentViewRequested: _onEnrollmentViewRequested,
               onClassroomMemberViewRequested: _onClassroomMemberViewRequested,
             );
@@ -228,7 +229,9 @@ class _ClassesListPageState extends State<ClassesListPage> {
     setState(() => _lastRequest = request);
 
     if (request.targetsClassroom && request.selectedClassroom != null) {
-      context.read<EnrollmentBloc>().add(const EnrollmentResetRequested());
+      context.read<EnrollmentLocalListBloc>().add(
+        const LocalListResetRequested(),
+      );
       context.read<ClassroomBloc>().add(
         ClassroomMembersRequested(
           classroomId: request.selectedClassroom!.id,
@@ -239,14 +242,26 @@ class _ClassesListPageState extends State<ClassesListPage> {
     }
 
     context.read<ClassroomBloc>().add(const ClassroomResetRequested());
-    context.read<EnrollmentBloc>().add(
-      EnrollmentSummariesByAcademicInfoRequested(
+    // Lecture LOCALE des élèves réellement inscrits l'année courante (dossiers
+    // finalisés) — même source que la Facturation. Le mode identité part sans
+    // niveau ni cycle : le bloc les traite alors comme absents plutôt que comme
+    // un filtre sur la chaîne vide, et c'est la LIGNE qui rend le niveau de
+    // chaque élève trouvé.
+    context.read<EnrollmentLocalListBloc>().add(
+      LocalListByEnrolledAcademicInfoRequested(
+        academicYearId: academicYearId,
         firstName: request.firstName,
         lastName: request.lastName,
         surname: request.surname,
         schoolLevelGroupId: request.selectedLevel?.schoolLevelGroupId ?? '',
         schoolLevelId: request.selectedLevel?.schoolLevelId ?? '',
       ),
+    );
+  }
+
+  void _onPageRequested(int page) {
+    context.read<EnrollmentLocalListBloc>().add(
+      LocalListPageRequested(page: page),
     );
   }
 
@@ -261,7 +276,7 @@ class _ClassesListPageState extends State<ClassesListPage> {
     try {
       final csv = request.targetsClassroom
           ? _buildClassroomExport(l10n, request)
-          : _buildEnrollmentExport(l10n);
+          : _buildEnrollmentExport(l10n, request);
 
       if (csv == null || csv.trim().isEmpty) {
         AppSnackBar.showWarning(context, l10n.classesListExportNothingToExport);
@@ -281,16 +296,27 @@ class _ClassesListPageState extends State<ClassesListPage> {
     }
   }
 
-  String? _buildEnrollmentExport(AppLocalizations l10n) {
-    final enrollmentState = context.read<EnrollmentBloc>().state;
-    if (enrollmentState.summariesStatus != EnrollmentLoadStatus.success ||
-        enrollmentState.summaries.isEmpty) {
+  String? _buildEnrollmentExport(
+    AppLocalizations l10n,
+    ClassesListSearchRequest request,
+  ) {
+    final bloc = context.read<EnrollmentLocalListBloc>();
+    if (bloc.state.summariesStatus != EnrollmentLoadStatus.success) {
+      return null;
+    }
+
+    // TOUS les résultats, pas la page affichée : un export tronqué à dix lignes
+    // sous un décompte qui en annonce quarante ne se voit pas à l'ouverture du
+    // fichier.
+    final summaries = bloc.loadedSummaries;
+    if (summaries.isEmpty) {
       return null;
     }
 
     return ClassesListExportHelper.buildEnrollmentCsv(
       l10n: l10n,
-      summaries: enrollmentState.summaries,
+      summaries: summaries,
+      includeLevel: request.isIdentityMode,
     );
   }
 

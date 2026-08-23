@@ -46,6 +46,17 @@ class EnrollmentLocalListBloc
   // repeindre la liste sous une identité de requête plus fraîche.
   int _loadGeneration = 0;
 
+  /// Tous les résultats de la dernière requête **résolue**, pages confondues —
+  /// ce que l'état ne porte pas (il n'en garde que la page affichée).
+  ///
+  /// Pour un export : sans ça, « Exporter » ne rendrait que la page courante
+  /// sous un décompte qui en annonce beaucoup plus, et le fichier serait
+  /// silencieusement tronqué. Ne vaut que sur un état `success` — pendant un
+  /// chargement le cache appartient encore à la requête précédente, exactement
+  /// comme pour la pagination.
+  List<EnrollmentSummary> get loadedSummaries =>
+      List<EnrollmentSummary>.unmodifiable(_cache);
+
   EnrollmentLocalListBloc({
     required GetLocalEnrollmentsUseCase getEnrollments,
     required SearchLocalEnrollmentsUseCase search,

@@ -5,7 +5,9 @@ import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-enum _ClassesListSortColumn { lastName, surname, firstName }
+/// Colonnes triables. `level` vient en dernier pour que l'ajout ou le retrait
+/// de la colonne Niveau ne décale jamais l'index des trois autres.
+enum _ClassesListSortColumn { lastName, surname, firstName, level }
 
 class ClassesListStudentsTable extends StatefulWidget {
   final List<ClassesListStudentRow> rows;
@@ -16,6 +18,23 @@ class ClassesListStudentsTable extends StatefulWidget {
   final String? errorLabel;
   final String? emptyLabel;
 
+  /// Rend la colonne « Niveau ». Faux quand le niveau est le critère de la
+  /// recherche : la colonne répéterait alors la même valeur sur toutes les
+  /// lignes, sous un bandeau qui l'annonce déjà.
+  final bool showLevelColumn;
+
+  /// Nombre total de résultats, toutes pages confondues — distinct de
+  /// `rows.length`, qui n'est que la page affichée.
+  final int? totalCount;
+
+  /// Pagination, **1-based**. Absente (`totalPages <= 1` ou callbacks nuls)
+  /// quand la liste tient d'un bloc, comme le roster d'une classe.
+  final int currentPage;
+  final int totalPages;
+  final int pageSize;
+  final VoidCallback? onPreviousPage;
+  final VoidCallback? onNextPage;
+
   const ClassesListStudentsTable({
     super.key,
     required this.rows,
@@ -25,6 +44,13 @@ class ClassesListStudentsTable extends StatefulWidget {
     this.loadingLabel,
     this.errorLabel,
     this.emptyLabel,
+    this.showLevelColumn = false,
+    this.totalCount,
+    this.currentPage = 1,
+    this.totalPages = 1,
+    this.pageSize = 0,
+    this.onPreviousPage,
+    this.onNextPage,
   });
 
   @override
@@ -36,11 +62,20 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
   _ClassesListSortColumn _sortColumn = _ClassesListSortColumn.lastName;
   bool _sortAscending = true;
 
+  /// Le tri par niveau ne survit pas au retrait de la colonne : sans ce repli,
+  /// `sortColumnIndex` désignerait une colonne qui n'existe plus dès qu'on
+  /// revient d'une recherche par identité vers une recherche par classe.
+  _ClassesListSortColumn get _effectiveSortColumn =>
+      _sortColumn == _ClassesListSortColumn.level && !widget.showLevelColumn
+      ? _ClassesListSortColumn.lastName
+      : _sortColumn;
+
   List<ClassesListStudentRow> get _sortedRows {
+    final column = _effectiveSortColumn;
     final rows = [...widget.rows];
     rows.sort((left, right) {
-      final leftValue = _valueFor(left, _sortColumn);
-      final rightValue = _valueFor(right, _sortColumn);
+      final leftValue = _valueFor(left, column);
+      final rightValue = _valueFor(right, column);
       final result = leftValue.compareTo(rightValue);
       return _sortAscending ? result : -result;
     });
@@ -60,16 +95,37 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
         isError: widget.isError,
         loadingLabel: widget.loadingLabel ?? l10n.loadingStudents,
         errorLabel: widget.errorLabel ?? l10n.classesOrganisationErrorUnknown,
-        sortColumnIndex: _sortColumn.index,
+        sortColumnIndex: _effectiveSortColumn.index,
         sortAscending: _sortAscending,
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.classesListNoMatchMessage,
         footer: DataTableFooterConfig(
           label: l10n.paginationResultsCount(rows.length),
-          total: rows.length,
+          total: widget.totalCount ?? rows.length,
           unit: l10n.unitStudents,
+          pagination: _buildPaginationConfig(),
         ),
       ),
+    );
+  }
+
+  DataTablePaginationConfig? _buildPaginationConfig() {
+    if (widget.totalPages <= 1) {
+      return null;
+    }
+    final onPrevious = widget.onPreviousPage;
+    final onNext = widget.onNextPage;
+    if (onPrevious == null || onNext == null) {
+      return null;
+    }
+
+    return DataTablePaginationConfig(
+      currentPage: widget.currentPage,
+      totalPages: widget.totalPages,
+      pageSize: widget.pageSize,
+      onPrevious: onPrevious,
+      onNext: onNext,
+      isLoading: widget.isLoading,
     );
   }
 
@@ -93,6 +149,13 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
         sortable: true,
         sortIndex: _ClassesListSortColumn.firstName.index,
       ),
+      if (widget.showLevelColumn)
+        DataTableColumnDef(
+          label: l10n.classesListLevelColumnLabel,
+          flex: 2,
+          sortable: true,
+          sortIndex: _ClassesListSortColumn.level.index,
+        ),
     ];
   }
 
@@ -118,6 +181,15 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
               ),
               DataTableCellSpec(text: row.surname),
               DataTableCellSpec(text: row.firstName),
+              if (widget.showLevelColumn)
+                DataTableCellSpec(
+                  // Un niveau que la ligne ne sait pas dire (référentiel pas
+                  // encore descendu) se montre comme tel plutôt que comme une
+                  // cellule vide, qu'on lirait comme « pas de niveau ».
+                  text: row.levelLabel.trim().isEmpty
+                      ? l10n.classesListLevelUnknown
+                      : row.levelLabel,
+                ),
             ],
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
@@ -131,9 +203,13 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
 
   void _onSortChanged(int column, bool ascending) {
     if (column < 0 || column >= _ClassesListSortColumn.values.length) return;
+    final requested = _ClassesListSortColumn.values[column];
+    if (requested == _ClassesListSortColumn.level && !widget.showLevelColumn) {
+      return;
+    }
 
     setState(() {
-      _sortColumn = _ClassesListSortColumn.values[column];
+      _sortColumn = requested;
       _sortAscending = ascending;
     });
   }
@@ -143,6 +219,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
       _ClassesListSortColumn.lastName => row.lastName.toLowerCase(),
       _ClassesListSortColumn.surname => row.surname.toLowerCase(),
       _ClassesListSortColumn.firstName => row.firstName.toLowerCase(),
+      _ClassesListSortColumn.level => row.levelLabel.toLowerCase(),
     };
   }
 }

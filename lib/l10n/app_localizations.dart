@@ -1142,23 +1142,35 @@ abstract class AppLocalizations {
   /// **'Classroom (optional)'**
   String get classesListClassroomOptionalLabel;
 
-  /// No description provided for @classesListFirstNameOptionalLabel.
+  /// No description provided for @classesListClassroomPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'First name (optional)'**
-  String get classesListFirstNameOptionalLabel;
+  /// **'Pick a level first'**
+  String get classesListClassroomPlaceholder;
 
-  /// No description provided for @classesListLastNameOptionalLabel.
+  /// No description provided for @classesListClassroomNonePlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Last name (optional)'**
-  String get classesListLastNameOptionalLabel;
+  /// **'No classroom for this level'**
+  String get classesListClassroomNonePlaceholder;
 
-  /// No description provided for @classesListSurnameOptionalLabel.
+  /// No description provided for @classesListSearchLevelPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Surname (optional)'**
-  String get classesListSurnameOptionalLabel;
+  /// **'Pick a cycle'**
+  String get classesListSearchLevelPlaceholder;
+
+  /// No description provided for @classesListLevelColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get classesListLevelColumnLabel;
+
+  /// No description provided for @classesListLevelUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get classesListLevelUnknown;
 
   /// No description provided for @classesListInitialEmptyTitle.
   ///
@@ -1169,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @classesListInitialEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'Fill in at least one criterion to display students.'**
+  /// **'Pick a level, or fill in a student\'s full identity, to display results.'**
   String get classesListInitialEmptyMessage;
 
   /// No description provided for @classesListNoMatchTitle.

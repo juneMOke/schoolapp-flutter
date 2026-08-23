@@ -605,20 +605,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesListClassroomOptionalLabel => 'Classroom (optional)';
 
   @override
-  String get classesListFirstNameOptionalLabel => 'First name (optional)';
+  String get classesListClassroomPlaceholder => 'Pick a level first';
 
   @override
-  String get classesListLastNameOptionalLabel => 'Last name (optional)';
+  String get classesListClassroomNonePlaceholder =>
+      'No classroom for this level';
 
   @override
-  String get classesListSurnameOptionalLabel => 'Surname (optional)';
+  String get classesListSearchLevelPlaceholder => 'Pick a cycle';
+
+  @override
+  String get classesListLevelColumnLabel => 'Level';
+
+  @override
+  String get classesListLevelUnknown => '—';
 
   @override
   String get classesListInitialEmptyTitle => 'No search in progress';
 
   @override
   String get classesListInitialEmptyMessage =>
-      'Fill in at least one criterion to display students.';
+      'Pick a level, or fill in a student\'s full identity, to display results.';
 
   @override
   String get classesListNoMatchTitle => 'No student matches the criteria';

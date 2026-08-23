@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 
 class ClassesListCycleOption extends Equatable {
@@ -51,15 +52,30 @@ class ClassesListLevelOption extends Equatable {
   ];
 }
 
+/// Critères émis par la carte de recherche de la liste des classes.
+///
+/// Les deux modes s'excluent, et le [mode] est porté ici plutôt que déduit des
+/// champs remplis : sans lui, un affinage par nom en mode « Par classe » serait
+/// indiscernable d'une recherche par identité dont le cycle serait resté vide.
 class ClassesListSearchRequest extends Equatable {
+  final SearchMode mode;
+
+  /// Mode identité : le prénom saisi. Mode classe : toujours vide.
   final String firstName;
+
+  /// Mode identité : le nom saisi. Mode classe : le **nom d'affinage**, qui
+  /// n'ouvre pas la recherche mais restreint la classe déjà ouverte.
   final String lastName;
+
+  /// Mode identité : le post-nom saisi. Mode classe : toujours vide.
   final String surname;
+
   final ClassesListCycleOption? selectedCycle;
   final ClassesListLevelOption? selectedLevel;
   final OfflineClassroom? selectedClassroom;
 
   const ClassesListSearchRequest({
+    required this.mode,
     required this.firstName,
     required this.lastName,
     required this.surname,
@@ -68,22 +84,37 @@ class ClassesListSearchRequest extends Equatable {
     required this.selectedClassroom,
   });
 
+  bool get isIdentityMode => mode == SearchMode.identity;
+
   bool get hasNameFilters =>
       firstName.trim().isNotEmpty ||
       lastName.trim().isNotEmpty ||
       surname.trim().isNotEmpty;
 
-  bool get targetsClassroom => selectedClassroom != null;
+  /// Vrai quand les résultats doivent venir du **roster local d'une classe**
+  /// plutôt que de la liste des inscriptions. Le mode identité ne cible jamais
+  /// une classe, même si une classe traîne dans les critères de l'autre mode.
+  bool get targetsClassroom =>
+      mode == SearchMode.level && selectedClassroom != null;
 
   bool get hasAcademicFilters =>
       selectedCycle != null ||
       selectedLevel != null ||
       selectedClassroom != null;
 
-  bool get hasAnyCriteria => hasNameFilters || hasAcademicFilters;
+  /// Ce qui arme la recherche, par mode : un niveau d'un côté, les trois noms
+  /// de l'autre. L'affinage par nom du mode classe n'arme rien.
+  bool get hasAnyCriteria => switch (mode) {
+    SearchMode.level => selectedLevel != null,
+    SearchMode.identity =>
+      firstName.trim().isNotEmpty &&
+          lastName.trim().isNotEmpty &&
+          surname.trim().isNotEmpty,
+  };
 
   @override
   List<Object?> get props => [
+    mode,
     firstName,
     lastName,
     surname,
@@ -104,6 +135,12 @@ class ClassesListStudentRow extends Equatable {
   final String firstName;
   final String classroomLabel;
 
+  /// Niveau de l'élève, tel que la LIGNE le porte — vide quand la source ne
+  /// sait pas le dire (roster d'une classe, ou référentiel pas encore
+  /// descendu). N'est rendu qu'en mode identité : ailleurs le niveau est le
+  /// critère, déjà annoncé au-dessus du tableau.
+  final String levelLabel;
+
   const ClassesListStudentRow({
     required this.id,
     required this.studentId,
@@ -111,6 +148,7 @@ class ClassesListStudentRow extends Equatable {
     required this.surname,
     required this.firstName,
     this.classroomLabel = '',
+    this.levelLabel = '',
   });
 
   @override
@@ -121,5 +159,6 @@ class ClassesListStudentRow extends Equatable {
     surname,
     firstName,
     classroomLabel,
+    levelLabel,
   ];
 }

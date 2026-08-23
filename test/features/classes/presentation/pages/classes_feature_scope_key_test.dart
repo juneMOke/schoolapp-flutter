@@ -7,9 +7,10 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 
-class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
+class _MockEnrollmentListBloc extends Mock
+    implements EnrollmentLocalListBloc {}
 
 class _MockAcademicYearContextBloc extends Mock
     implements AcademicYearContextBloc {}
@@ -36,8 +37,8 @@ void main() {
     resolutionCount = 0;
     resolvedClassroomBlocs = [];
 
-    GetIt.instance.registerFactory<EnrollmentBloc>(() {
-      final mock = _MockEnrollmentBloc();
+    GetIt.instance.registerFactory<EnrollmentLocalListBloc>(() {
+      final mock = _MockEnrollmentListBloc();
       when(() => mock.close()).thenAnswer((_) async {});
       return mock;
     });
