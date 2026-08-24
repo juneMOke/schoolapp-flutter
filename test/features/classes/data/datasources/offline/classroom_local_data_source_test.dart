@@ -298,4 +298,91 @@ void main() {
       },
     );
   });
+
+  group('studentsWithPendingTransfer (garde de push CLASSE → PRÉSENCE)', () {
+    /// Écrit un transfert local dans l'état [syncStatus].
+    Future<void> transfer({
+      required String id,
+      required String studentId,
+      String syncStatus = 'PENDING_SYNC',
+      String academicYearId = yearId,
+    }) => dao.recordTransferWithOutbox(
+      row: ClassroomTransferRow(
+        id: id,
+        studentId: studentId,
+        fromClassroomId: classroomId,
+        toClassroomId: 'class-b',
+        schoolLevelId: 'level-1',
+        academicYearId: academicYearId,
+        transferredAt: 2000,
+        syncStatus: syncStatus,
+      ),
+      outboxEntry: OutboxEntry(
+        id: 'CLASSROOM_TRANSFER:$id',
+        aggregateType: 'CLASSROOM_TRANSFER',
+        aggregateId: id,
+        operation: OutboxOperation.upsert,
+        payload: '{}',
+        createdAt: 2000,
+      ),
+    );
+
+    test('ne retient que les transferts non synchronisés', () async {
+      // C'est exactement ce qui rend le roster de l'appel divergent de celui du
+      // serveur : tant que le transfert n'est pas parti, l'élève figure en
+      // local dans une classe où le serveur ne le connaît pas.
+      await transfer(id: 't1', studentId: 'stu-a');
+      await transfer(id: 't2', studentId: 'stu-b', syncStatus: 'SYNCED');
+
+      final pending = await dao.studentsWithPendingTransfer(
+        studentIds: const ['stu-a', 'stu-b', 'stu-c'],
+        academicYearId: yearId,
+      );
+
+      expect(pending, {'stu-a'});
+    });
+
+    test(
+      'scopé à l\'année : un transfert d\'un autre exercice ne bloque rien',
+      () async {
+        await transfer(id: 't1', studentId: 'stu-a', academicYearId: 'year-0');
+
+        final pending = await dao.studentsWithPendingTransfer(
+          studentIds: const ['stu-a'],
+          academicYearId: yearId,
+        );
+
+        expect(pending, isEmpty);
+      },
+    );
+
+    test('liste vide : aucune requête, ensemble vide', () async {
+      await transfer(id: 't1', studentId: 'stu-a');
+
+      expect(
+        await dao.studentsWithPendingTransfer(
+          studentIds: const [],
+          academicYearId: yearId,
+        ),
+        isEmpty,
+      );
+    });
+
+    test(
+      'au-delà du plafond de variables liées de SQLite, le lot tient',
+      () async {
+        // Un `IN (…)` d'un roster entier dépasserait les 999 variables liées : la
+        // requête lèverait au lieu de répondre, et la garde échouerait OUVERTE.
+        await transfer(id: 't1', studentId: 'stu-900');
+
+        final ids = List.generate(1200, (i) => 'stu-$i');
+        final pending = await dao.studentsWithPendingTransfer(
+          studentIds: ids,
+          academicYearId: yearId,
+        );
+
+        expect(pending, {'stu-900'});
+      },
+    );
+  });
 }
