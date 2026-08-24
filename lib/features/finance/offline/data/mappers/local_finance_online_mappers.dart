@@ -38,6 +38,7 @@ extension LocalPaymentToOnline on LocalPayment {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
     // malformée est un bug de données, on retombe sur l'epoch (jamais un crash).
     paidAt: DateTime.tryParse(paidAt) ?? DateTime.fromMillisecondsSinceEpoch(0),

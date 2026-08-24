@@ -48,6 +48,7 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
+    String? payerPhoneNumber,
     required List<CreatePaymentAllocationInput> allocations,
   }) async {
     try {
@@ -61,6 +62,7 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
           payerFirstName: payerFirstName,
           payerLastName: payerLastName,
           payerMiddleName: payerMiddleName,
+          payerPhoneNumber: payerPhoneNumber,
           allocations: allocations
               .map(
                 (allocation) => CreatePaymentAllocationRequestModel(

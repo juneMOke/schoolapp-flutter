@@ -15,6 +15,7 @@ PaymentModel _$PaymentModelFromJson(Map<String, dynamic> json) => PaymentModel(
   payerFirstName: json['payerFirstName'] as String,
   payerLastName: json['payerLastName'] as String,
   payerMiddleName: json['payerMiddleName'] as String?,
+  payerPhoneNumber: json['payerPhoneNumber'] as String?,
   paidAt: DateTime.parse(json['paidAt'] as String),
 );
 
@@ -28,5 +29,6 @@ Map<String, dynamic> _$PaymentModelToJson(PaymentModel instance) =>
       'payerFirstName': instance.payerFirstName,
       'payerLastName': instance.payerLastName,
       'payerMiddleName': instance.payerMiddleName,
+      'payerPhoneNumber': instance.payerPhoneNumber,
       'paidAt': instance.paidAt.toIso8601String(),
     };

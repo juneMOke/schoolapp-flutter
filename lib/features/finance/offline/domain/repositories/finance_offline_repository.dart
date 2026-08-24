@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
 class AllocationDraft {
@@ -31,6 +32,11 @@ class RecordPaymentDraft {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur. Requis à la saisie (le CTA reste gris sans lui),
+  /// nullable dans le draft : les rejeux d'outbox et les tests d'avant la v28
+  /// n'en portent pas.
+  final String? payerPhoneNumber;
   final int? amountInCents; // si null → Σ allocations
   final List<AllocationDraft> allocations;
 
@@ -43,6 +49,7 @@ class RecordPaymentDraft {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.amountInCents,
     required this.allocations,
   });
@@ -52,6 +59,23 @@ class RecordPaymentDraft {
 abstract class FinanceOfflineRepository {
   /// Encaisse un paiement en local-first. Renvoie l'id du paiement (uuid client).
   Future<Either<Failure, String>> recordPayment(RecordPaymentDraft draft);
+
+  /// Payeurs à proposer d'emblée pour cet élève : ceux qui ont déjà payé pour
+  /// lui, puis ses tuteurs déclarés. Lecture locale, jamais d'erreur métier.
+  Future<Either<Failure, List<LocalPayerIdentity>>> getPayerSuggestions(
+    String studentId, {
+    int limit,
+  });
+
+  /// Recherche un payeur déjà venu à la caisse, toutes fiches élèves
+  /// confondues. Sans critère : liste vide.
+  Future<Either<Failure, List<LocalPayerIdentity>>> searchPayers({
+    String? lastName,
+    String? firstName,
+    String? surname,
+    String? phoneNumber,
+    int limit,
+  });
 
   /// La grille tarifaire est-elle présente sur cet appareil pour cette année ?
   /// Sépare « rien à payer » de « rien à annoncer » quand les créances

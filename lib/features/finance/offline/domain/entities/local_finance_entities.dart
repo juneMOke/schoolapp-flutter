@@ -205,6 +205,10 @@ class LocalPayment extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28), nul quand le versement est antérieur au
+  /// palier ou vient d'un autre poste.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// Caissier ayant encaissé — uid et nom dénormalisé (v19). Alimentent la
@@ -234,6 +238,7 @@ class LocalPayment extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.cashierUid,
     this.cashierFirstName,
@@ -256,6 +261,7 @@ class LocalPayment extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     status,
     cashierUid,
     cashierFirstName,

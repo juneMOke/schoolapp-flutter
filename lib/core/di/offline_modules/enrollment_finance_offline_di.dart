@@ -68,8 +68,11 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payer_suggestions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/search_payers_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payer_search_bloc.dart';
 // Facturation — redirection des lectures online → local-first (Stratégie C).
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
@@ -405,6 +408,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<RecordPaymentUseCase>(
     () => RecordPaymentUseCase(getIt<FinanceOfflineRepository>()),
   );
+  getIt.registerFactory<GetPayerSuggestionsUseCase>(
+    () => GetPayerSuggestionsUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<SearchPayersUseCase>(
+    () => SearchPayersUseCase(getIt<FinanceOfflineRepository>()),
+  );
   getIt.registerFactory<GetLocalStudentChargesUseCase>(
     () => GetLocalStudentChargesUseCase(getIt<FinanceOfflineRepository>()),
   );
@@ -471,6 +480,14 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // créé/fermé avec la popin.
   getIt.registerFactory<ParentSearchBloc>(
     () => ParentSearchBloc(search: getIt<SearchParentsUseCase>()),
+  );
+  // Bloc transitoire de la popin « Choisir un payeur » (encaissement) —
+  // créé/fermé avec la popin, comme la recherche de tuteur.
+  getIt.registerFactory<PayerSearchBloc>(
+    () => PayerSearchBloc(
+      suggestions: getIt<GetPayerSuggestionsUseCase>(),
+      search: getIt<SearchPayersUseCase>(),
+    ),
   );
   getIt.registerFactory<FinanceOfflineBloc>(
     () => FinanceOfflineBloc(

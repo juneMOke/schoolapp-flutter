@@ -15,6 +15,11 @@ class PaymentLocalModel {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). Nul pour tout versement antérieur au palier
+  /// et pour tout versement venu d'un autre poste — la saisie l'exige ici, le
+  /// passé n'en a pas.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// Caissier — uid ET nom dénormalisé (v19). Le nom est recopié plutôt que
@@ -51,6 +56,7 @@ class PaymentLocalModel {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.cashierUid,
     this.cashierFirstName,
@@ -75,6 +81,7 @@ class PaymentLocalModel {
     'payer_first_name': payerFirstName,
     'payer_last_name': payerLastName,
     'payer_middle_name': payerMiddleName,
+    'payer_phone_number': payerPhoneNumber,
     'status': status,
     'cashier_uid': cashierUid,
     'cashier_first_name': cashierFirstName,
@@ -91,9 +98,12 @@ class PaymentLocalModel {
   /// §PaymentDelta). Sert au patch d'une ligne DÉJÀ connue ; une ligne inconnue
   /// (paiement de l'autre poste) s'insère via [toMap].
   ///
-  /// **Exclut l'identité du payeur et `client_uuid`** : le contrat ne les porte
-  /// pas. Les réécrire depuis un DTO de pull les remplacerait par le repli `''`
-  /// — perte définitive du nom saisi au guichet.
+  /// **Exclut l'identité du payeur — téléphone compris — et `client_uuid`** :
+  /// le contrat ne les porte pas. Les réécrire depuis un DTO de pull les
+  /// remplacerait par le repli `''` — perte définitive du nom saisi au guichet.
+  /// Le téléphone (v28) suit la même règle et pour une raison de plus : il est
+  /// `null` chez qui ne l'a pas, et un patch le viderait sur le poste MÊME qui
+  /// vient de le saisir, dès le premier delta portant ce versement.
   ///
   /// **Exclut surtout l'état de synchro** (`sync_status`, `sync_error`,
   /// `synced_at`) : il appartient à l'ACK et à l'outbox, JAMAIS au pull. Le pull
@@ -138,6 +148,7 @@ class PaymentLocalModel {
         payerFirstName: m['payer_first_name'] as String,
         payerLastName: m['payer_last_name'] as String,
         payerMiddleName: m['payer_middle_name'] as String?,
+        payerPhoneNumber: m['payer_phone_number'] as String?,
         status: m['status'] as String?,
         cashierUid: m['cashier_uid'] as String?,
         cashierFirstName: m['cashier_first_name'] as String?,
@@ -162,6 +173,7 @@ class PaymentLocalModel {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     status: status,
     cashierUid: cashierUid,
     cashierFirstName: cashierFirstName,

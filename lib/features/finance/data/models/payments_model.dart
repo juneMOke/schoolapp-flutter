@@ -14,6 +14,7 @@ class PaymentModel extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+  final String? payerPhoneNumber;
   final DateTime paidAt;
 
   const PaymentModel({
@@ -25,6 +26,7 @@ class PaymentModel extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.paidAt,
   });
 
@@ -42,6 +44,7 @@ class PaymentModel extends Equatable {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     paidAt: paidAt,
   );
 
@@ -55,6 +58,7 @@ class PaymentModel extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     paidAt,
   ];
 }

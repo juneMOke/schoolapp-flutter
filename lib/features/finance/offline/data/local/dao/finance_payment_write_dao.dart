@@ -138,6 +138,7 @@ class FinancePaymentWriteDao {
       payerFirstName: payment.payerFirstName,
       payerLastName: payment.payerLastName,
       payerMiddleName: payment.payerMiddleName,
+      payerPhoneNumber: payment.payerPhoneNumber,
     ),
     allocations: allocations
         .map(

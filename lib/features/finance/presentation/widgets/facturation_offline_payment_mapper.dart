@@ -23,6 +23,7 @@ RecordPaymentDraft recordPaymentDraftFromRequest(
     payerFirstName: request.payerFirstName,
     payerLastName: request.payerLastName,
     payerMiddleName: request.payerMiddleName,
+    payerPhoneNumber: request.payerPhoneNumber,
     amountInCents: request.amountInCents,
     allocations: [
       for (final allocation in request.allocations)

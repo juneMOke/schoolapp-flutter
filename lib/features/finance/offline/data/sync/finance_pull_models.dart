@@ -119,6 +119,12 @@ class PaymentDto {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro du payeur (v28). Absent des deltas scellés avant l'évolution du
+  /// contrat : il ne sert donc qu'à HYDRATER une ligne inconnue (versement d'un
+  /// autre poste), jamais à patcher une ligne que ce poste a saisie —
+  /// cf. `PaymentLocalModel.toPullPatch`.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// UUID du reçu scellé, porté par `PaymentDelta` (v19). Le serveur l'envoyait
@@ -138,6 +144,7 @@ class PaymentDto {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.receiptId,
   });
@@ -153,6 +160,7 @@ class PaymentDto {
     payerFirstName: (j['payerFirstName'] as String?) ?? '',
     payerLastName: (j['payerLastName'] as String?) ?? '',
     payerMiddleName: j['payerMiddleName'] as String?,
+    payerPhoneNumber: j['payerPhoneNumber'] as String?,
     status: j['status'] as String?,
     receiptId: j['receiptId'] as String?,
   );
@@ -169,6 +177,7 @@ class PaymentDto {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     status: status,
     receiptId: receiptId,
     syncStatus: 'SYNCED',

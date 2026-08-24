@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
 /// Implémentation offline-first du module Facturation : encaissement local
@@ -96,6 +97,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         payerFirstName: draft.payerFirstName,
         payerLastName: draft.payerLastName,
         payerMiddleName: draft.payerMiddleName,
+        payerPhoneNumber: draft.payerPhoneNumber,
         cashierUid: cashierUid,
         cashierFirstName: cashier?.firstName,
         cashierLastName: cashier?.lastName,
@@ -146,6 +148,44 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       return Right(paymentId);
     } catch (e) {
       return Left(StorageFailure('Échec de l\'encaissement local : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LocalPayerIdentity>>> getPayerSuggestions(
+    String studentId, {
+    int limit = 8,
+  }) async {
+    try {
+      return Right(await _dao.getPayerSuggestions(studentId, limit: limit));
+    } catch (_) {
+      // Une suggestion est un confort : base illisible → l'écran retombe sur la
+      // saisie manuelle, qui n'a jamais cessé d'être offerte. Jamais de
+      // remontée bruyante, l'encaissement n'en dépend pas.
+      return const Left(StorageFailure('Failed to read payer suggestions'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LocalPayerIdentity>>> searchPayers({
+    String? lastName,
+    String? firstName,
+    String? surname,
+    String? phoneNumber,
+    int limit = 20,
+  }) async {
+    try {
+      return Right(
+        await _dao.searchPayers(
+          lastName: lastName,
+          firstName: firstName,
+          surname: surname,
+          phoneNumber: phoneNumber,
+          limit: limit,
+        ),
+      );
+    } catch (_) {
+      return const Left(StorageFailure('Failed to search payers'));
     }
   }
 

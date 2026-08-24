@@ -41,6 +41,10 @@ class PaymentsCreateRequested extends PaymentsEvent {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28) — obligatoire à la saisie, porté nullable
+  /// pour que le contrat reste lisible par un rejeu antérieur au palier.
+  final String? payerPhoneNumber;
   final List<CreatePaymentAllocationInput> allocations;
 
   const PaymentsCreateRequested({
@@ -51,6 +55,7 @@ class PaymentsCreateRequested extends PaymentsEvent {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.allocations,
   });
 
@@ -63,6 +68,7 @@ class PaymentsCreateRequested extends PaymentsEvent {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     allocations,
   ];
 }

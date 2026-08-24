@@ -9,6 +9,11 @@ class Payment extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). Nul est un état NORMAL : la saisie l'exige
+  /// depuis le palier, mais tout versement plus ancien — et tout versement
+  /// scellé avant que le contrat ne le porte — n'en a pas.
+  final String? payerPhoneNumber;
   final DateTime paidAt;
 
   /// Paiement de CE poste pas encore remonté au serveur (FRONT §3). Faux pour
@@ -38,6 +43,7 @@ class Payment extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.paidAt,
     this.isPendingSync = false,
     this.cashierFirstName,
@@ -67,6 +73,7 @@ class Payment extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     paidAt,
     isPendingSync,
     cashierFirstName,
