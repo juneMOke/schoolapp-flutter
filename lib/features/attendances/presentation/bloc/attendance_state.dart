@@ -92,9 +92,24 @@ class AttendanceState extends Equatable {
     modifiedStudentIds: modifiedStudentIds ?? this.modifiedStudentIds,
   );
 
+  /// L'appel est-il enregistrable en l'état ?
+  ///
+  /// ⚠️ Ce n'est PAS « le brouillon a changé ». Un appel **jamais fait**
+  /// ([callTaken] faux) présente le roster « présent par défaut » : « tout le
+  /// monde est là » est donc exactement **zéro différence** avec ce qui est
+  /// affiché — et c'est pourtant l'appel le plus courant. Exiger
+  /// [hasUnsavedChanges] rendait ce cas-là inenregistrable : le bouton restait
+  /// gris, la confirmation « tous présents » de l'écran était inatteignable, et
+  /// le bandeau « appel non fait » ne pouvait jamais tomber. Il fallait rendre
+  /// un élève absent puis le repasser présent pour... revenir à un brouillon
+  /// identique, donc à un bouton gris.
+  ///
+  /// Une fois l'appel FAIT, la règle redevient « il faut quelque chose à
+  /// enregistrer » : réenregistrer à l'identique ne ferait que rebumper le
+  /// jeton LWW et repousser au serveur un agrégat qu'il détient déjà.
   bool get canSave =>
       draftRows.isNotEmpty &&
-      hasUnsavedChanges &&
+      (!callTaken || hasUnsavedChanges) &&
       !hasValidationErrors &&
       saveStatus != AttendanceStatus.loading;
 
