@@ -49,6 +49,9 @@ extension LocalPaymentToOnline on LocalPayment {
     // « Encaissé par » vide sur une donnée pourtant présente en base.
     cashierFirstName: cashierFirstName,
     cashierLastName: cashierLastName,
+    // Le repli quand rien n'a été stampé ici (versement d'un autre guichet) —
+    // c'est `Payment.cashierFullName` qui arbitre entre les deux.
+    collectedByName: collectedByName,
   );
 }
 

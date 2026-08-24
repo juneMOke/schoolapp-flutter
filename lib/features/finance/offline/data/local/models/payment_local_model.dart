@@ -32,6 +32,13 @@ class PaymentLocalModel {
   final String? cashierFirstName;
   final String? cashierLastName;
 
+  /// Encaisseur tel que le SERVEUR l'attribue (v29), distinct des `cashier_*`
+  /// ci-dessus que ce poste stampe lui-même : les deux nomment la même
+  /// personne pour un versement encaissé ici, mais seul celui-ci existe quand
+  /// le versement vient d'un autre guichet.
+  final String? collectedById;
+  final String? collectedByName;
+
   /// Appareil ayant encaissé (zone Z3 du ticket, traçabilité RG-012-16).
   final String? deviceId;
 
@@ -61,6 +68,8 @@ class PaymentLocalModel {
     this.cashierUid,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedById,
+    this.collectedByName,
     this.deviceId,
     this.receiptId,
     this.syncStatus = 'PENDING_SYNC',
@@ -86,6 +95,8 @@ class PaymentLocalModel {
     'cashier_uid': cashierUid,
     'cashier_first_name': cashierFirstName,
     'cashier_last_name': cashierLastName,
+    'collected_by_id': collectedById,
+    'collected_by_name': collectedByName,
     'device_id': deviceId,
     'receipt_id': receiptId,
     'sync_status': syncStatus,
@@ -132,6 +143,15 @@ class PaymentLocalModel {
     'currency': currency,
     'paid_at': paidAt,
     if (receiptId != null) 'receipt_id': receiptId,
+    // Écrits sous condition, comme `receipt_id` : le delta ne peut qu'AJOUTER
+    // l'attribution serveur, jamais l'effacer. Un payload qui les omettrait —
+    // versement scellé avant l'évolution du contrat, poste resté en arrière —
+    // rendrait sinon anonyme une ligne déjà nommée.
+    //
+    // Ils ne touchent PAS aux `cashier_*` : ce que ce poste a imprimé sur le
+    // ticket ne se réécrit pas depuis le réseau.
+    if (collectedById != null) 'collected_by_id': collectedById,
+    if (collectedByName != null) 'collected_by_name': collectedByName,
     'updated_at': updatedAt,
   };
 
@@ -153,6 +173,8 @@ class PaymentLocalModel {
         cashierUid: m['cashier_uid'] as String?,
         cashierFirstName: m['cashier_first_name'] as String?,
         cashierLastName: m['cashier_last_name'] as String?,
+        collectedById: m['collected_by_id'] as String?,
+        collectedByName: m['collected_by_name'] as String?,
         deviceId: m['device_id'] as String?,
         receiptId: m['receipt_id'] as String?,
         syncStatus: (m['sync_status'] as String?) ?? 'PENDING_SYNC',
@@ -178,6 +200,8 @@ class PaymentLocalModel {
     cashierUid: cashierUid,
     cashierFirstName: cashierFirstName,
     cashierLastName: cashierLastName,
+    collectedById: collectedById,
+    collectedByName: collectedByName,
     deviceId: deviceId,
     receiptId: receiptId,
     syncState: SyncState.fromDbValue(syncStatus),

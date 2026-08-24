@@ -133,6 +133,13 @@ class PaymentDto {
   /// eu de ligne `generated_documents` locale.
   final String? receiptId;
 
+  /// Encaisseur attribué par le serveur (v29). `GET /sync/payments` l'APLATIT
+  /// en deux champs, là où les routes back-office rendent un objet
+  /// `collectedBy { id, firstName, lastName }` — le flux de synchro est le seul
+  /// contrat que lit ce client.
+  final String? collectedById;
+  final String? collectedByName;
+
   const PaymentDto({
     required this.id,
     required this.studentId,
@@ -147,6 +154,8 @@ class PaymentDto {
     this.payerPhoneNumber,
     this.status,
     this.receiptId,
+    this.collectedById,
+    this.collectedByName,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -163,6 +172,8 @@ class PaymentDto {
     payerPhoneNumber: j['payerPhoneNumber'] as String?,
     status: j['status'] as String?,
     receiptId: j['receiptId'] as String?,
+    collectedById: j['collectedById'] as String?,
+    collectedByName: j['collectedByName'] as String?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -180,6 +191,8 @@ class PaymentDto {
     payerPhoneNumber: payerPhoneNumber,
     status: status,
     receiptId: receiptId,
+    collectedById: collectedById,
+    collectedByName: collectedByName,
     syncStatus: 'SYNCED',
     syncedAt: now,
     updatedAt: now,

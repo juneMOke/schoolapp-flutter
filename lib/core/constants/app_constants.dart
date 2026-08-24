@@ -407,7 +407,7 @@ class AppConstants {
   // sans backfill : le tuteur de l'élève n'est PAS le payeur (c'est ce que la
   // saisie établit), donc rien de fiable à recopier dans le passé — NULL s'y
   // lit « on ne sait pas », et l'annuaire propose alors par l'identité seule.
-  static const int offlineDbSchemaVersion = 28;
+  static const int offlineDbSchemaVersion = 29;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

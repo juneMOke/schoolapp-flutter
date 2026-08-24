@@ -218,6 +218,11 @@ class LocalPayment extends Equatable {
   final String? cashierFirstName;
   final String? cashierLastName;
 
+  /// Encaisseur attribué par le serveur (v29) — le seul renseigné quand le
+  /// versement vient d'un autre guichet, où rien de local n'a été stampé.
+  final String? collectedById;
+  final String? collectedByName;
+
   /// Appareil ayant encaissé (préfixe du numéro provisoire, traçabilité).
   final String? deviceId;
 
@@ -243,6 +248,8 @@ class LocalPayment extends Equatable {
     this.cashierUid,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedById,
+    this.collectedByName,
     this.deviceId,
     this.receiptId,
     this.syncState = SyncState.pendingSync,
@@ -266,6 +273,8 @@ class LocalPayment extends Equatable {
     cashierUid,
     cashierFirstName,
     cashierLastName,
+    collectedById,
+    collectedByName,
     deviceId,
     receiptId,
     syncState,
