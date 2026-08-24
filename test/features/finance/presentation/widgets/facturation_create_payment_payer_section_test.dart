@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -35,10 +36,19 @@ void main() {
     await tester.pump();
   }
 
+  /// Le champ de saisie réel, retrouvé par le contrôleur que le test a fourni.
+  ///
+  /// On descend jusqu'au `TextField` : depuis le passage au socle, le widget
+  /// exposé est un `EteeloTextInput` (libellé au-dessus du champ), et non plus
+  /// un `TextFormField` — `enterText` a besoin du champ, pas de son enveloppe.
   Finder fieldByController(TextEditingController controller) {
-    return find.byWidgetPredicate(
-      (widget) =>
-          widget is TextFormField && identical(widget.controller, controller),
+    return find.descendant(
+      of: find.byWidgetPredicate(
+        (widget) =>
+            widget is EteeloTextInput &&
+            identical(widget.controller, controller),
+      ),
+      matching: find.byType(TextField),
     );
   }
 

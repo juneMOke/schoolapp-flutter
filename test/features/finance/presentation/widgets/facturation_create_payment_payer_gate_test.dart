@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
@@ -98,10 +99,19 @@ void main() {
     return buttons.single.onPressed != null;
   }
 
+  /// Le champ visé PAR SON LIBELLÉ, jamais par sa position dans l'arbre : la
+  /// modale porte aussi le champ de montant d'un frais, et un index se
+  /// décalerait au premier champ ajouté.
+  Finder champParLibelle(String label) => find.descendant(
+    of: find.byWidgetPredicate(
+      (widget) => widget is EteeloTextInput && widget.label == label,
+    ),
+    matching: find.byType(TextField),
+  );
+
   Future<void> remplirIdentite(WidgetTester tester) async {
-    final champs = find.byType(TextFormField);
-    await tester.enterText(champs.at(0), 'Kabongo'); // Nom
-    await tester.enterText(champs.at(2), 'Joseph'); // Prénom
+    await tester.enterText(champParLibelle('Nom'), 'Kabongo');
+    await tester.enterText(champParLibelle('Prénom'), 'Joseph');
     await tester.pump();
   }
 

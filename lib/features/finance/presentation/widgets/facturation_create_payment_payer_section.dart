@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Bloc identité du payeur de la modale d'encaissement (spec MODALE-12).
@@ -14,6 +13,18 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// contrainte, suivie du téléphone. Le Post-nom est le seul champ facultatif —
 /// les autres portent l'étoile du socle, et la validité est gardée par la
 /// modale (cf. `_payerValid`).
+///
+/// **Tous les champs sont ceux du socle** (`EteeloTextInput` /
+/// `EteeloPhoneInput`), libellé au-dessus du champ. Ils portaient jusqu'ici la
+/// décoration Finance, à libellé flottant DANS la bordure : le téléphone, lui,
+/// ne peut pas s'y plier sans qu'on recopie sa conversion national↔E.164 et son
+/// repli numéro étranger. C'est donc le téléphone qui donne le format, et le
+/// reste de la section qui s'y range — une section homogène, et la même écriture
+/// d'un champ que partout ailleurs dans l'application.
+///
+/// La capitalisation n'est plus déclarée : c'est le DÉFAUT du socle (mot par
+/// mot pour une identité, règle non négociable #11). C'est l'exception qui se
+/// déclare.
 ///
 /// Le bouton « Choisir un payeur » ouvre l'annuaire local : le même parent
 /// revient chaque trimestre, et le retrouver doit coûter un tap plutôt que
@@ -47,33 +58,29 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const nameInputFormatters = [WordCapitalizationInputFormatter()];
 
-    final lastName = FinanceTextFormField(
+    final lastName = EteeloTextInput(
       controller: lastNameController,
       label: l10n.facturationCreatePaymentPayerLastNameLabel,
-      hint: l10n.facturationCreatePaymentPayerLastNameHint,
-      accentColor: AppColors.bleuArdoise,
+      placeholder: l10n.facturationCreatePaymentPayerLastNameHint,
       readOnly: readOnly,
-      isRequired: true,
-      inputFormatters: nameInputFormatters,
+      required: true,
+      textInputAction: TextInputAction.next,
     );
-    final middleName = FinanceTextFormField(
+    final middleName = EteeloTextInput(
       controller: middleNameController,
       label: l10n.facturationCreatePaymentPayerMiddleNameLabel,
-      hint: l10n.facturationCreatePaymentPayerMiddleNameHint,
-      accentColor: AppColors.bleuArdoise,
+      placeholder: l10n.facturationCreatePaymentPayerMiddleNameHint,
       readOnly: readOnly,
-      inputFormatters: nameInputFormatters,
+      textInputAction: TextInputAction.next,
     );
-    final firstName = FinanceTextFormField(
+    final firstName = EteeloTextInput(
       controller: firstNameController,
       label: l10n.facturationCreatePaymentPayerFirstNameLabel,
-      hint: l10n.facturationCreatePaymentPayerFirstNameHint,
-      accentColor: AppColors.bleuArdoise,
+      placeholder: l10n.facturationCreatePaymentPayerFirstNameHint,
       readOnly: readOnly,
-      isRequired: true,
-      inputFormatters: nameInputFormatters,
+      required: true,
+      textInputAction: TextInputAction.next,
     );
 
     return Column(
@@ -114,9 +121,9 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
           },
         ),
         const SizedBox(height: AppDimensions.spacingM),
-        // Le socle téléphone plutôt qu'un champ texte : il tient l'indicatif à
-        // part, ne rend que de l'E.164 au contrôleur, et comprend les écritures
-        // héritées d'un payeur repris de l'annuaire (`0816939060`).
+        // Il tient l'indicatif à part, ne rend que de l'E.164 au contrôleur, et
+        // comprend les écritures héritées d'un payeur repris de l'annuaire
+        // (`0816939060`). C'est lui qui a fixé le format de toute la section.
         EteeloPhoneInput(
           controller: phoneController,
           label: l10n.facturationCreatePaymentPayerPhoneLabel,
