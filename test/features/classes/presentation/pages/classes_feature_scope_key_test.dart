@@ -9,8 +9,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/offline/cl
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 
-class _MockEnrollmentListBloc extends Mock
-    implements EnrollmentLocalListBloc {}
+class _MockEnrollmentListBloc extends Mock implements EnrollmentLocalListBloc {}
 
 class _MockAcademicYearContextBloc extends Mock
     implements AcademicYearContextBloc {}

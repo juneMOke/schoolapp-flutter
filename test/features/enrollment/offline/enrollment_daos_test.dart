@@ -418,28 +418,31 @@ void main() {
       });
     }
 
-    test('projette les ids ET les libellés résolus sur le référentiel', () async {
-      await seedReferential();
-      await seedPendingEnrollment(
-        withEnrollment: const EnrollmentLocalModel(
-          id: 'e1',
-          studentId: 's1',
-          enrollmentType: 'NEW_ENROLLMENT',
-          status: 'IN_PROGRESS',
-          academicYearId: 'ay-2026',
-          schoolLevelId: 'lvl-1',
-          schoolLevelGroupId: 'grp-1',
-          enrollmentDate: '2026-07-06',
-          updatedAt: 100,
-        ),
-      );
+    test(
+      'projette les ids ET les libellés résolus sur le référentiel',
+      () async {
+        await seedReferential();
+        await seedPendingEnrollment(
+          withEnrollment: const EnrollmentLocalModel(
+            id: 'e1',
+            studentId: 's1',
+            enrollmentType: 'NEW_ENROLLMENT',
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2026',
+            schoolLevelId: 'lvl-1',
+            schoolLevelGroupId: 'grp-1',
+            enrollmentDate: '2026-07-06',
+            updatedAt: 100,
+          ),
+        );
 
-      final row = (await readDao.getEnrollments()).single;
-      expect(row.schoolLevelId, 'lvl-1');
-      expect(row.schoolLevelGroupId, 'grp-1');
-      expect(row.schoolLevelName, '5ème année');
-      expect(row.schoolLevelGroupName, 'Primaire');
-    });
+        final row = (await readDao.getEnrollments()).single;
+        expect(row.schoolLevelId, 'lvl-1');
+        expect(row.schoolLevelGroupId, 'grp-1');
+        expect(row.schoolLevelName, '5ème année');
+        expect(row.schoolLevelGroupName, 'Primaire');
+      },
+    );
 
     test(
       'référentiel pas encore descendu : la ligne SURVIT, id gardé, libellés null',
@@ -460,26 +463,29 @@ void main() {
       },
     );
 
-    test('inscription sans niveau (brouillon) : la ligne survit aussi', () async {
-      await seedReferential();
-      await draftDao.insertDraftStudent(student(id: 's9'));
-      await draftDao.insertDraftEnrollment(
-        const EnrollmentLocalModel(
-          id: 'e9',
-          studentId: 's9',
-          enrollmentType: 'NEW_ENROLLMENT',
-          status: 'IN_PROGRESS',
-          academicYearId: 'ay-2026',
-          enrollmentDate: '2026-07-06',
-          updatedAt: 100,
-        ),
-      );
+    test(
+      'inscription sans niveau (brouillon) : la ligne survit aussi',
+      () async {
+        await seedReferential();
+        await draftDao.insertDraftStudent(student(id: 's9'));
+        await draftDao.insertDraftEnrollment(
+          const EnrollmentLocalModel(
+            id: 'e9',
+            studentId: 's9',
+            enrollmentType: 'NEW_ENROLLMENT',
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2026',
+            enrollmentDate: '2026-07-06',
+            updatedAt: 100,
+          ),
+        );
 
-      final row = (await readDao.getEnrollments()).single;
-      expect(row.enrollmentId, 'e9');
-      expect(row.schoolLevelId, isNull);
-      expect(row.schoolLevelName, isNull);
-    });
+        final row = (await readDao.getEnrollments()).single;
+        expect(row.enrollmentId, 'e9');
+        expect(row.schoolLevelId, isNull);
+        expect(row.schoolLevelName, isNull);
+      },
+    );
 
     test('la recherche Facturation porte le niveau elle aussi', () async {
       await seedReferential();

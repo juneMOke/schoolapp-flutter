@@ -6,8 +6,6 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary_page.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
@@ -19,7 +17,6 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -45,30 +42,6 @@ class MockSearchByDateOfBirthUseCase extends Mock
         SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase {}
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
-
-const _tStudentSummary = StudentSummary(
-  id: 'student-1',
-  firstName: 'John',
-  lastName: 'Doe',
-  surname: 'Smith',
-  dateOfBirth: '2010-01-01',
-  gender: Gender.male,
-);
-
-const _tEnrollmentSummary = EnrollmentSummary(
-  enrollmentId: 'enrollment-1',
-  enrollmentCode: 'ENR-001',
-  status: 'PENDING',
-  student: _tStudentSummary,
-);
-
-const _tEnrollmentSummaryPage = EnrollmentSummaryPage(
-  content: <EnrollmentSummary>[_tEnrollmentSummary],
-  page: 0,
-  size: 10,
-  totalElements: 1,
-  totalPages: 1,
-);
 
 final _tEnrollmentDetail = EnrollmentDetail(
   studentDetail: const StudentDetail(

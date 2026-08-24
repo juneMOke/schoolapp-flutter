@@ -51,7 +51,10 @@ class ClassesListPageContent extends StatelessWidget {
           buildWhen: (previous, current) =>
               previous.membersStatus != current.membersStatus,
           builder: (context, classroomState) {
-            return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+            return BlocBuilder<
+              EnrollmentLocalListBloc,
+              EnrollmentLocalListState
+            >(
               buildWhen: (previous, current) =>
                   previous.summariesStatus != current.summariesStatus,
               builder: (context, enrollmentState) {

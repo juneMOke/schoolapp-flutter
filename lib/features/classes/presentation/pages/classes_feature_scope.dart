@@ -47,9 +47,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<EnrollmentLocalListBloc>.value(
-          value: _enrollmentListBloc,
-        ),
+        BlocProvider<EnrollmentLocalListBloc>.value(value: _enrollmentListBloc),
         BlocProvider<AcademicYearContextBloc>.value(
           value: _academicYearContextBloc,
         ),
