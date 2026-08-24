@@ -1847,6 +1847,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce numéro est déjà saisi pour un autre tuteur de ce dossier.';
 
   @override
+  String get guardianLinkTargetGoneError =>
+      'Ce tuteur n\'est plus dans le dossier : la fiche n\'a pas été rattachée.';
+
+  @override
   String get schoolFees => 'Frais Scolaires';
 
   @override

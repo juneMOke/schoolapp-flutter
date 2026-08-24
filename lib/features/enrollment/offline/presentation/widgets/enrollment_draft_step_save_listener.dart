@@ -28,10 +28,11 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
   final VoidCallback onSaved;
   final ValueChanged<String> onError;
 
-  /// Reçoit le numéro refusé EN PLUS du message : c'est lui qui permet à
-  /// l'étape Tuteurs de désigner la carte fautive et de proposer la fiche
-  /// existante, au lieu d'un simple message sans issue.
-  final void Function(String phoneNumber, String message)?
+  /// Reçoit l'état de conflit ENTIER, pas seulement son message : le numéro
+  /// refusé désigne la carte fautive, et `existingParentId` désigne la fiche
+  /// qui porte déjà ce numéro. Sans eux, l'étape ne peut que redeviner l'un
+  /// et l'autre — et se tromper de fiche.
+  final ValueChanged<EnrollmentDraftGuardianPhoneConflict>?
   onGuardianPhoneConflict;
   final Widget child;
 
@@ -64,7 +65,7 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
         } else if (state is EnrollmentDraftGuardianPhoneConflict) {
           final onConflict = onGuardianPhoneConflict;
           if (onConflict != null) {
-            onConflict(state.phoneNumber, state.message);
+            onConflict(state);
           } else {
             onError(state.message);
           }

@@ -326,7 +326,11 @@ class EnrollmentOfflineBloc
     emit(
       result.fold(
         (f) => f is DuplicateParentPhoneFailure
-            ? EnrollmentDraftGuardianPhoneConflict(f.phoneNumber, _map(f))
+            ? EnrollmentDraftGuardianPhoneConflict(
+                f.phoneNumber,
+                _map(f),
+                existingParentId: f.existingParentId,
+              )
             : EnrollmentDraftError(_map(f)),
         (_) => const EnrollmentDraftStepSaved(),
       ),

@@ -478,6 +478,19 @@ numéro refusé** et propose la ou les fiches qui le portent. « Utiliser cette
 fiche » remplace la carte fautive ; « Corriger le numéro » ne referme que la
 popin (rien n'a été écrit — l'enregistrement a déjà échoué).
 
+⚠️ **La fiche proposée vient de la garde, pas de la recherche.**
+`ParentPhoneConflictException` connaît l'id du coupable ; il voyage jusqu'à
+l'UI (`DuplicateParentPhoneFailure.existingParentId` →
+`EnrollmentDraftGuardianPhoneConflict`) et c'est LUI qui est pré-désigné. La
+recherche rejouée ne sert qu'à peupler la liste, et ses résultats sont
+re-filtrés par `PhoneNumberFormat.sameNumber` : son `LIKE` sur les chiffres est
+un sur-ensemble strict de la comparaison canonique qui a refusé l'écriture, un
+numéro hérité voisin y remonterait à côté du vrai coupable. À plusieurs
+porteurs sans id nommé, **rien n'est pré-coché** — un rattachement porte
+`isLinkedToExisting: true`, donc `upsertDraftGuardianParent` sort par la
+branche « fiche existante » sans rejouer la garde : personne en aval ne
+rattraperait le mauvais parent.
+
 Deux cas gardent le simple message, parce qu'aucune fiche existante n'y est en
 cause : quand **deux cartes du même dossier** portent le numéro (le doublon est
 interne, aucune ne peut être désignée), et quand plus aucune carte ne le porte.

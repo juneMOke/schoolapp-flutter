@@ -1841,6 +1841,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This number is already entered for another guardian in this file.';
 
   @override
+  String get guardianLinkTargetGoneError =>
+      'This guardian is no longer in the file: the record was not linked.';
+
+  @override
   String get schoolFees => 'School Fees';
 
   @override

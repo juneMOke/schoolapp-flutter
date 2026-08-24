@@ -1123,6 +1123,7 @@
   "guardianPhoneConflictNotFoundTitle": "Record not found",
   "guardianPhoneConflictNotFoundDescription": "No record carrying this number could be found. Correct the number you entered.",
   "guardianPhoneDuplicateInFormError": "This number is already entered for another guardian in this file.",
+  "guardianLinkTargetGoneError": "This guardian is no longer in the file: the record was not linked.",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",

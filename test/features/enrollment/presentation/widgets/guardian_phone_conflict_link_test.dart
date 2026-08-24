@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -59,6 +60,27 @@ const _ownerParent = LocalParent(
   surname: 'Junior',
   phoneNumber: _conflictedPhone,
   email: 'sarah.moke@example.com',
+);
+
+/// Fiche que la recherche remonte sans qu'elle porte le numéro refusé.
+///
+/// `ParentSearchDao.search` rapproche par `LIKE` sur les chiffres, sans
+/// confirmation en Dart : c'est un sur-ensemble de ce que la garde a refusé.
+/// Elle ne doit jamais être proposée ici — un seul geste rattacherait le
+/// mauvais parent à l'élève.
+const _decoyParent = LocalParent(
+  id: 'decoy-parent-7',
+  firstName: 'Alain',
+  lastName: 'Baka',
+  phoneNumber: '+243999888777',
+);
+
+/// Même numéro que [_ownerParent], écrit autrement (valeur héritée).
+const _otherHolderParent = LocalParent(
+  id: 'existing-parent-99',
+  firstName: 'Aline',
+  lastName: 'Abala',
+  phoneNumber: '0816939060',
 );
 
 void main() {
@@ -143,6 +165,7 @@ void main() {
   Future<void> enregistrerPuisRefuser(
     WidgetTester tester, {
     String phoneNumber = _conflictedPhone,
+    String? existingParentId = 'existing-parent-42',
   }) async {
     final carte = find.byKey(
       ValueKey<String>('parent-item-${_editedParent.id}'),
@@ -160,6 +183,7 @@ void main() {
       EnrollmentDraftGuardianPhoneConflict(
         phoneNumber,
         'Un tuteur avec ce numéro existe déjà.',
+        existingParentId: existingParentId,
       ),
     );
     await tester.pumpAndSettle();
@@ -263,6 +287,102 @@ void main() {
         ),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'une fiche remontée qui ne porte PAS le numéro refusé n\'est jamais '
+    'proposée — le LIKE de la recherche est plus large que la garde',
+    (tester) async {
+      when(
+        () => searchUseCase(
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+          surname: any(named: 'surname'),
+          phoneNumber: any(named: 'phoneNumber'),
+        ),
+        // L'intrus arrive EN PREMIER : c'est lui que l'ancien code
+        // pré-désignait, et « Utiliser cette fiche » l'aurait rattaché.
+      ).thenAnswer((_) async => const Right([_decoyParent, _ownerParent]));
+
+      await pumpStep(tester);
+      await enregistrerPuisRefuser(tester);
+
+      expect(find.text('Alain Baka'), findsNothing);
+      expect(find.text('Sarah Junior Moke'), findsOneWidget);
+
+      await tester.tap(find.text('Utiliser cette fiche'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(
+        find.byKey(ValueKey<String>('parent-item-${_ownerParent.id}')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('parent-item-decoy-parent-7')),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'à plusieurs porteurs, c\'est la fiche NOMMÉE par la garde qui est '
+    'désignée, pas la première remontée',
+    (tester) async {
+      when(
+        () => searchUseCase(
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+          surname: any(named: 'surname'),
+          phoneNumber: any(named: 'phoneNumber'),
+        ),
+        // Tri par nom : « Abala » précède « Moke ». Sans l'id porté par la
+        // garde, la fiche pré-désignée dépendrait de l'alphabet.
+      ).thenAnswer(
+        (_) async => const Right([_otherHolderParent, _ownerParent]),
+      );
+
+      await pumpStep(tester);
+      await enregistrerPuisRefuser(tester);
+
+      await tester.tap(find.text('Utiliser cette fiche'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(
+        find.byKey(ValueKey<String>('parent-item-${_ownerParent.id}')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'plusieurs porteurs et aucune désignation sûre : rien n\'est pré-coché, '
+    '« Utiliser cette fiche » reste inerte',
+    (tester) async {
+      when(
+        () => searchUseCase(
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+          surname: any(named: 'surname'),
+          phoneNumber: any(named: 'phoneNumber'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right([_otherHolderParent, _ownerParent]),
+      );
+
+      await pumpStep(tester);
+      // Émetteur historique : la garde ne nomme aucune fiche.
+      await enregistrerPuisRefuser(tester, existingParentId: null);
+
+      final bouton = tester.widget<EteeloButton>(
+        find.ancestor(
+          of: find.text('Utiliser cette fiche'),
+          matching: find.byType(EteeloButton),
+        ),
+      );
+      expect(bouton.onPressed, isNull);
     },
   );
 }

@@ -110,9 +110,16 @@ class ThermalPrinterFailure extends Failure {
 /// (distinct de [ConflictFailure], réservée aux 2 usages HTTP 409 ci-dessus).
 class DuplicateParentPhoneFailure extends Failure {
   final String phoneNumber;
-  const DuplicateParentPhoneFailure(this.phoneNumber)
+
+  /// Id de la fiche qui porte DÉJÀ ce numéro — la garde le connaît, et sans
+  /// lui l'UI ne peut que le redeviner par une recherche plus large que la
+  /// comparaison qui a refusé l'écriture (donc proposer la mauvaise fiche).
+  /// `null` seulement pour les émetteurs historiques qui ne le fournissent pas.
+  final String? existingParentId;
+
+  const DuplicateParentPhoneFailure(this.phoneNumber, {this.existingParentId})
     : super('Un tuteur avec le numéro $phoneNumber existe déjà.');
 
   @override
-  List<Object?> get props => [message, phoneNumber];
+  List<Object?> get props => [message, phoneNumber, existingParentId];
 }

@@ -3032,6 +3032,12 @@ abstract class AppLocalizations {
   /// **'This number is already entered for another guardian in this file.'**
   String get guardianPhoneDuplicateInFormError;
 
+  /// No description provided for @guardianLinkTargetGoneError.
+  ///
+  /// In en, this message translates to:
+  /// **'This guardian is no longer in the file: the record was not linked.'**
+  String get guardianLinkTargetGoneError;
+
   /// No description provided for @schoolFees.
   ///
   /// In en, this message translates to:

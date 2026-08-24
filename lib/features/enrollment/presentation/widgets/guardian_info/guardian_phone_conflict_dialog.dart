@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -34,6 +35,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 Future<LocalParent?> showGuardianPhoneConflictDialog({
   required BuildContext context,
   required String phoneNumber,
+  String? existingParentId,
 }) {
   return showDialog<LocalParent>(
     context: context,
@@ -44,7 +46,10 @@ Future<LocalParent?> showGuardianPhoneConflictDialog({
       create: (_) =>
           getIt<ParentSearchBloc>()
             ..add(ParentSearchRequested(phoneNumber: phoneNumber)),
-      child: _GuardianPhoneConflictDialog(phoneNumber: phoneNumber),
+      child: _GuardianPhoneConflictDialog(
+        phoneNumber: phoneNumber,
+        existingParentId: existingParentId,
+      ),
     ),
   );
 }
@@ -52,7 +57,15 @@ Future<LocalParent?> showGuardianPhoneConflictDialog({
 class _GuardianPhoneConflictDialog extends StatefulWidget {
   final String phoneNumber;
 
-  const _GuardianPhoneConflictDialog({required this.phoneNumber});
+  /// Fiche désignée par la garde elle-même. C'est la SEULE désignation sûre :
+  /// la recherche rejouée ci-dessous rapproche par `LIKE` sur les chiffres,
+  /// là où la garde a tranché sur la forme canonique.
+  final String? existingParentId;
+
+  const _GuardianPhoneConflictDialog({
+    required this.phoneNumber,
+    this.existingParentId,
+  });
 
   @override
   State<_GuardianPhoneConflictDialog> createState() =>
@@ -61,16 +74,43 @@ class _GuardianPhoneConflictDialog extends StatefulWidget {
 
 class _GuardianPhoneConflictDialogState
     extends State<_GuardianPhoneConflictDialog> {
-  /// Fiche désignée. `null` tant que l'utilisateur n'a rien touché : la
-  /// première remontée fait alors office de proposition (cas courant — une
-  /// seule fiche porte ce numéro).
+  /// Fiche désignée par l'utilisateur. `null` tant qu'il n'a rien touché : la
+  /// proposition par défaut est calculée par [_defaultSelection].
   String? _selectedId;
 
-  LocalParent? _effectiveSelection(List<LocalParent> results) {
-    if (results.isEmpty) return null;
+  /// Ne garde que les fiches qui portent VRAIMENT ce numéro.
+  ///
+  /// `ParentSearchDao.search` rapproche par `LIKE` sur les chiffres, sans
+  /// confirmation en Dart : c'est un sur-ensemble strict de ce que la garde a
+  /// refusé (`findParentIdByPhone` confirme, lui, sur la forme canonique). Un
+  /// numéro hérité à 10 chiffres qui contient la partie nationale du numéro
+  /// refusé remonterait donc ici, à côté du vrai coupable — et un seul geste
+  /// rattacherait le mauvais parent à l'élève.
+  List<LocalParent> _holdersOf(List<LocalParent> results) => results
+      .where(
+        (p) => PhoneNumberFormat.sameNumber(p.phoneNumber, widget.phoneNumber),
+      )
+      .toList(growable: false);
+
+  /// Proposition par défaut : la fiche que la garde a nommée si elle est là,
+  /// sinon l'unique candidate. À plusieurs candidates sans désignation sûre,
+  /// on ne pré-coche RIEN — c'est à l'utilisateur de trancher, le bouton
+  /// « Utiliser » reste inerte d'ici là.
+  LocalParent? _defaultSelection(List<LocalParent> holders) {
+    final expected = widget.existingParentId;
+    if (expected != null) {
+      final named = holders.where((p) => p.id == expected).firstOrNull;
+      if (named != null) return named;
+    }
+    return holders.length == 1 ? holders.first : null;
+  }
+
+  LocalParent? _effectiveSelection(List<LocalParent> holders) {
+    if (holders.isEmpty) return null;
     final id = _selectedId;
-    if (id == null) return results.first;
-    return results.where((p) => p.id == id).firstOrNull ?? results.first;
+    if (id == null) return _defaultSelection(holders);
+    return holders.where((p) => p.id == id).firstOrNull ??
+        _defaultSelection(holders);
   }
 
   void _retry() => context.read<ParentSearchBloc>().add(
@@ -144,12 +184,20 @@ class _GuardianPhoneConflictDialogState
             pillCount: 0,
             semanticsLabel: l10n.guardianPhoneConflictDialogTitle,
           ),
-          ParentSearchLoaded(:final results) => ParentSearchResultsList(
-            results: results,
-            selectable: true,
-            selectedParentId: _effectiveSelection(results)?.id,
-            onSelected: (parent) => setState(() => _selectedId = parent.id),
-          ),
+          ParentSearchLoaded(:final results)
+              when _holdersOf(results).isNotEmpty =>
+            () {
+              final holders = _holdersOf(results);
+              return ParentSearchResultsList(
+                results: holders,
+                selectable: true,
+                selectedParentId: _effectiveSelection(holders)?.id,
+                onSelected: (parent) => setState(() => _selectedId = parent.id),
+              );
+            }(),
+          // Résultats tous écartés par [_holdersOf] : aucune fiche ne porte
+          // réellement ce numéro, on le dit comme une absence.
+          ParentSearchLoaded() ||
           // Numéro refusé mais fiche introuvable : la garde compare des
           // numéros normalisés là où la recherche passe par un `LIKE` sur les
           // chiffres. Le cas est improbable, jamais impossible — et sans
@@ -187,7 +235,7 @@ class _GuardianPhoneConflictDialogState
     return BlocBuilder<ParentSearchBloc, ParentSearchState>(
       builder: (context, state) {
         final selection = state is ParentSearchLoaded
-            ? _effectiveSelection(state.results)
+            ? _effectiveSelection(_holdersOf(state.results))
             : null;
 
         return Container(

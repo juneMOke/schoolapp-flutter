@@ -1078,6 +1078,7 @@
   "guardianPhoneConflictNotFoundTitle": "Fiche introuvable",
   "guardianPhoneConflictNotFoundDescription": "Aucune fiche portant ce numéro n'a pu être retrouvée. Corrigez le numéro saisi.",
   "guardianPhoneDuplicateInFormError": "Ce numéro est déjà saisi pour un autre tuteur de ce dossier.",
+  "guardianLinkTargetGoneError": "Ce tuteur n'est plus dans le dossier : la fiche n'a pas été rattachée.",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",

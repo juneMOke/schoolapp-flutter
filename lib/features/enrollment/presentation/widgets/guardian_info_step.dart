@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/l
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
@@ -66,6 +67,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _isBatchSaving = false;
   bool _awaitingDraftSave = false;
 
+  /// Vrai tant que la popin de conflit est ouverte. `_isBatchSaving` est déjà
+  /// retombé à ce moment-là (l'écriture est bel et bien terminée, en échec) :
+  /// sans ce second verrou, les gardes `if (_isBatchSaving) return` seraient
+  /// inertes pendant toute la vie de la popin, et une seconde écriture
+  /// déclenchée par ailleurs pourrait en empiler une deuxième.
+  bool _isConflictDialogOpen = false;
+
   bool _isDirty = false;
   bool _isValid = false;
   bool _showValidationHints = false;
@@ -73,6 +81,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _isHydratingFromDetail = false;
   String? _expandedParentId;
   String? _primaryParentId;
+
+  /// Une écriture est en vol, OU l'utilisateur est en train d'arbitrer un
+  /// conflit : dans les deux cas, la composition des tuteurs ne bouge pas.
+  bool get _isBusy => _isBatchSaving || _isConflictDialogOpen;
 
   bool get _canSave => _stepState.canSave;
   StepFormState get _stepState =>
@@ -333,7 +345,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
-    if (!_isDirty || _isBatchSaving) return;
+    if (!_isDirty || _isBusy) return;
 
     _dispatchDraftGuardians();
   }
@@ -436,8 +448,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// désignée, ou là où le doublon est interne au dossier (deux cartes, même
   /// numéro) — cas où aucune fiche existante n'est en cause.
   Future<void> _onGuardianPhoneConflict(
-    String phoneNumber,
-    String message,
+    EnrollmentDraftGuardianPhoneConflict conflict,
   ) async {
     setState(() {
       _awaitingDraftSave = false;
@@ -445,22 +456,29 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     });
     _onSavingChanged(false);
 
-    final candidates = _cardsHoldingPhone(phoneNumber);
+    final candidates = _cardsHoldingPhone(conflict.phoneNumber);
     if (candidates.length != 1) {
       AppSnackBar.showError(
         context,
         candidates.isEmpty
-            ? message
+            ? conflict.message
             : AppLocalizations.of(context)!.guardianPhoneDuplicateInFormError,
       );
       return;
     }
 
     final conflictedParentId = candidates.single;
-    final found = await showGuardianPhoneConflictDialog(
-      context: context,
-      phoneNumber: phoneNumber,
-    );
+    setState(() => _isConflictDialogOpen = true);
+    final LocalParent? found;
+    try {
+      found = await showGuardianPhoneConflictDialog(
+        context: context,
+        phoneNumber: conflict.phoneNumber,
+        existingParentId: conflict.existingParentId,
+      );
+    } finally {
+      if (mounted) setState(() => _isConflictDialogOpen = false);
+    }
     if (!mounted) return;
 
     if (found == null) {
@@ -474,7 +492,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   void _onAddGuardian() {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final draftId = getIt<IdGenerator>().newId();
     final draftParent = ParentSummary(
@@ -519,7 +537,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// comportement (ajout en fin de liste) le laissait avec une ligne à moitié
   /// saisie à supprimer à la main.
   Future<void> _onLinkExistingParent(String targetParentId) async {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final found = await showParentSearchDialog(context: context);
     if (!mounted || found == null) return;
@@ -535,7 +553,16 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     final index = _editableParentDetails.indexWhere(
       (parent) => parent.id == replacedParentId,
     );
-    if (index < 0) return;
+    // La carte a disparu pendant que la popin était ouverte (ré-hydratation
+    // du dossier). Ne rien faire EN SILENCE laisserait l'utilisateur devant
+    // un choix validé qui n'a produit aucun effet.
+    if (index < 0) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.guardianLinkTargetGoneError,
+      );
+      return;
+    }
 
     final alreadyAdded = _editableParentDetails.any(
       (parent) => parent.id == found.id && parent.id != replacedParentId,
@@ -620,7 +647,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   void _onRemoveGuardian(String parentId) {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final exists = _editableParentDetails.any(
       (parent) => parent.id == parentId,
@@ -653,7 +680,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   Future<void> _onRemoveGuardianRequested(String parentId) async {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showAppConfirmationDialog(
@@ -677,6 +704,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   void _onOpenParent(String parentId) {
     if (_expandedParentId == parentId) return;
+    // Sans cette garde, un id périmé (carte disparue pendant une popin)
+    // replierait TOUTES les cartes sans en rouvrir aucune.
+    if (!_editableParentDetails.any((parent) => parent.id == parentId)) return;
     setState(() => _expandedParentId = parentId);
   }
 
