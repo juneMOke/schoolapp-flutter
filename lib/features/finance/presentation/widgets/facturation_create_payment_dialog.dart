@@ -260,6 +260,12 @@ class _FacturationCreatePaymentDialogViewState
       _lastNameController.text = payer.lastName;
       _firstNameController.text = payer.firstName;
       _middleNameController.text = payer.middleName ?? '';
+      // La tolérance au numéro malformé appartient au payeur qui l'a apporté,
+      // pas au champ. Sans cette remise à zéro elle survivait au changement de
+      // payeur : reprendre A (numéro hérité invalide) puis B (aucun numéro
+      // connu, donc champ inchangé) laissait passer un versement au nom de B
+      // portant le numéro invalide de A — sans erreur affichée.
+      _pickedPhone = null;
       // Un payeur sans numéro connu (versements antérieurs à la v28) ne doit
       // pas EFFACER un numéro déjà tapé : on ne remplace que ce qu'on sait.
       final phone = payer.phoneNumber?.trim() ?? '';

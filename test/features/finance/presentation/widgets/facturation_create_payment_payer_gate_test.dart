@@ -1,12 +1,20 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payer_suggestions_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/search_payers_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payer_search_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
@@ -23,6 +31,22 @@ class _MockFinanceOfflineBloc
     extends MockBloc<FinanceOfflineEvent, FinanceOfflineState>
     implements FinanceOfflineBloc {}
 
+/// Annuaire de test : chaque ouverture de la popin propose le payeur suivant
+/// de [queue].
+class _FakePayerRepo implements FinanceOfflineRepository {
+  final List<List<LocalPayerIdentity>> queue = [];
+
+  @override
+  Future<Either<Failure, List<LocalPayerIdentity>>> getPayerSuggestions(
+    String studentId, {
+    int limit = 8,
+  }) async => Right(queue.isEmpty ? const [] : queue.removeAt(0));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('hors périmètre de cette modale');
+}
+
 /// Le téléphone du payeur est OBLIGATOIRE à l'encaissement.
 ///
 /// Ce n'est pas un confort d'affichage : le numéro est recopié sur le versement
@@ -33,12 +57,24 @@ void main() {
   late _MockPaymentsBloc payments;
   late _MockFinanceOfflineBloc offline;
 
+  late _FakePayerRepo payerRepo;
+
   setUp(() {
     payments = _MockPaymentsBloc();
     offline = _MockFinanceOfflineBloc();
     when(() => payments.state).thenReturn(const PaymentsState());
     when(() => offline.state).thenReturn(const FinanceOfflineInitial());
+
+    payerRepo = _FakePayerRepo();
+    getIt.registerFactory<PayerSearchBloc>(
+      () => PayerSearchBloc(
+        suggestions: GetPayerSuggestionsUseCase(payerRepo),
+        search: SearchPayersUseCase(payerRepo),
+      ),
+    );
   });
+
+  tearDown(() async => getIt.reset());
 
   StudentCharge charge(String id) => StudentCharge(
     id: id,
@@ -191,5 +227,69 @@ void main() {
     await remplirIdentite(tester);
 
     expect(find.textContaining('9 chiffres'), findsNothing);
+  });
+
+  /// Reprend un payeur de l'annuaire : la popin propose le prochain lot de
+  /// [_FakePayerRepo], et on tape la ligne par son nom.
+  Future<void> reprendreUnPayeur(WidgetTester tester, String nomComplet) async {
+    final cta = find.text('Choisir un payeur');
+    await tester.ensureVisible(cta);
+    await tester.pumpAndSettle();
+    await tester.tap(cta);
+    await tester.pumpAndSettle();
+
+    final ligne = find.text(nomComplet);
+    await tester.ensureVisible(ligne);
+    await tester.pumpAndSettle();
+    await tester.tap(ligne);
+    await tester.pumpAndSettle();
+  }
+
+  /// La tolérance au numéro hérité appartient au PAYEUR qui l'a apporté.
+  ///
+  /// Mémorisée sur la seule chaîne du champ, elle survivait au changement de
+  /// payeur : un payeur sans numéro connu ne remplace rien (on n'efface pas ce
+  /// qui est déjà tapé), donc le champ gardait le numéro invalide du
+  /// précédent — et l'encaissement partait au nom de l'un avec le numéro de
+  /// l'autre, sans qu'aucune erreur ne s'affiche.
+  testWidgets('changer de payeur retire la tolérance au numéro du précédent', (
+    tester,
+  ) async {
+    payerRepo.queue.addAll([
+      // A : numéro hérité INVALIDE (8 chiffres, écrit avant la garde).
+      const [
+        LocalPayerIdentity(
+          lastName: 'Kabongo',
+          firstName: 'Joseph',
+          phoneNumber: '08169390',
+          origin: PayerOrigin.previousPayment,
+          paymentCount: 3,
+        ),
+      ],
+      // B : aucun numéro connu (versements antérieurs à la v28).
+      const [
+        LocalPayerIdentity(
+          lastName: 'Mbayo',
+          firstName: 'Alice',
+          origin: PayerOrigin.previousPayment,
+          paymentCount: 1,
+        ),
+      ],
+    ]);
+
+    await ouvrir(tester);
+    await cocherLePremierFrais(tester);
+
+    await reprendreUnPayeur(tester, 'Kabongo Joseph');
+    // Le numéro hérité INTACT est toléré : exiger un format qu'aucune saisie
+    // du guichetier n'a produit bloquerait l'encaissement pour rien.
+    expect(collectEnabled(tester), isTrue);
+
+    await reprendreUnPayeur(tester, 'Mbayo Alice');
+
+    // Le champ porte toujours le numéro de A — on n'efface pas ce qu'on ne
+    // sait pas remplacer — mais il n'est plus couvert par personne.
+    expect(collectEnabled(tester), isFalse);
+    expect(find.textContaining('9 chiffres'), findsOneWidget);
   });
 }
