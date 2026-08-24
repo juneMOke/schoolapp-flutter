@@ -16,7 +16,11 @@ class GuardianInfoStepBody extends StatelessWidget {
   final ParentItemStateChanged onItemStateChanged;
   final ParentItemValueChanged onItemValueChanged;
   final VoidCallback? onAddParent;
-  final VoidCallback? onSearchParent;
+
+  /// Ouvre la recherche d'une fiche parent déjà connue. L'appel part du
+  /// bandeau posé DANS la carte ([GuardianLinkExistingBanner]), plus d'une
+  /// loupe d'en-tête que personne n'allait chercher.
+  final VoidCallback? onLinkExistingParent;
   final ValueChanged<String>? onRemoveParent;
   final ValueChanged<String>? onOpenParent;
   final ValueChanged<String>? onPrimaryParentChanged;
@@ -38,7 +42,7 @@ class GuardianInfoStepBody extends StatelessWidget {
     required this.onItemStateChanged,
     required this.onItemValueChanged,
     this.onAddParent,
-    this.onSearchParent,
+    this.onLinkExistingParent,
     this.onRemoveParent,
     this.onOpenParent,
     this.onPrimaryParentChanged,
@@ -115,6 +119,9 @@ class GuardianInfoStepBody extends StatelessWidget {
                     onRemoveRequested: isEditable && parentDetails.length > 1
                         ? () => onRemoveParent?.call(parent.id)
                         : null,
+                    onLinkExistingRequested: isEditable && !isLoading
+                        ? onLinkExistingParent
+                        : null,
                     isEditable: isEditable,
                     identityLocked: identityLockedParentIds.contains(parent.id),
                   ),
@@ -185,6 +192,8 @@ class GuardianInfoStepBody extends StatelessWidget {
       builder: (context, constraints) {
         final stack =
             constraints.maxWidth < AppBreakpoints.guardianHeaderRowMin;
+        // « Ajouter » est la SEULE action de l'en-tête : la recherche d'une
+        // fiche connue a rejoint la carte (voir [GuardianLinkExistingBanner]).
         final addButton = SecondaryButton(
           onPressed: canAddParent ? onAddParent : null,
           icon: Icons.person_add_alt_1_rounded,
@@ -194,48 +203,19 @@ class GuardianInfoStepBody extends StatelessWidget {
         );
 
         if (stack) {
-          // Téléphone : titre pleine largeur puis boutons empilés dessous —
-          // le titre n'est plus écrasé par les boutons au long libellé.
-          final searchButton = SecondaryButton(
-            onPressed: canAddParent ? onSearchParent : null,
-            icon: Icons.search_rounded,
-            label: l10n.guardianSearchAction,
-            fullWidth: true,
-          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               titleBlock,
               const SizedBox(height: AppSpacing.md),
-              searchButton,
-              const SizedBox(height: AppSpacing.sm),
               addButton,
             ],
           );
         }
 
-        // En ligne : le bouton de recherche reste compact (icône + tooltip)
-        // pour laisser la place au libellé complet du bouton d'ajout (action
-        // principale) sans faire déborder la ligne.
-        final searchIconButton = Tooltip(
-          message: l10n.guardianSearchAction,
-          child: IconButton.filledTonal(
-            onPressed: canAddParent ? onSearchParent : null,
-            icon: const Icon(Icons.search_rounded),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
-              foregroundColor: AppColors.bleuArdoise,
-              shape: const StadiumBorder(),
-              minimumSize: const Size.square(AppSpacing.xxxl),
-            ),
-          ),
-        );
-
         return Row(
           children: [
             Expanded(child: titleBlock),
-            const SizedBox(width: AppSpacing.sm),
-            searchIconButton,
             const SizedBox(width: AppSpacing.md),
             addButton,
           ],

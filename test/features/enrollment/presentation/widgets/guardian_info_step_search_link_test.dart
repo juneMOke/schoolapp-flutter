@@ -124,6 +124,16 @@ void main() {
     await tester.tap(resultat);
   }
 
+  /// Le rattachement part du bandeau posé DANS la carte dépliée — plus de la
+  /// loupe d'en-tête.
+  Future<void> ouvrirRechercheDepuisLaCarte(WidgetTester tester) async {
+    final bouton = find.text('Rechercher une fiche');
+    await tester.ensureVisible(bouton);
+    await tester.pumpAndSettle();
+    await tester.tap(bouton);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> pumpGuardianStep(
     WidgetTester tester, {
     List<ParentSummary> parents = const [_existingParent],
@@ -136,9 +146,6 @@ void main() {
         home: Scaffold(
           body: BlocProvider<EnrollmentOfflineBloc>.value(
             value: offlineBloc,
-            // Largeur étroite : force le layout empilé de l'en-tête, où le
-            // bouton "Rechercher un parent" porte son libellé complet
-            // (le mode en ligne l'affiche en icône seule).
             child: SizedBox(
               width: 360,
               child: GuardianInfoStep(
@@ -170,8 +177,7 @@ void main() {
 
       await pumpGuardianStep(tester);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       expect(find.text('Rechercher un parent existant'), findsOneWidget);
       // Le tuteur existant (déjà expandé sous le dialog) porte lui aussi un
@@ -258,8 +264,7 @@ void main() {
 
       await pumpGuardianStep(tester);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
 
@@ -307,8 +312,7 @@ void main() {
       // reproduit ici sans y toucher.
       await pumpGuardianStep(tester, parents: const []);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
       await chercherParIdentite(
@@ -363,8 +367,7 @@ void main() {
 
       await pumpGuardianStep(tester);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
       await chercherParIdentite(

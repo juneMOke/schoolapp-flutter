@@ -1047,7 +1047,6 @@
       }
     }
   },
-  "guardianSearchAction": "Rechercher un parent",
   "guardianSearchDialogTitle": "Rechercher un parent existant",
   "guardianSearchDialogEyebrow": "Tuteurs",
   "guardianSearchModeSemantics": "Mode de recherche",
@@ -1061,6 +1060,9 @@
   "guardianSearchAlreadyAddedError": "Ce parent est déjà ajouté à cette inscription.",
   "guardianSearchIdentityLockedHint": "Informations issues d'une fiche existante — non modifiables ici.",
   "guardianSearchErrorRetry": "Réessayer",
+  "guardianLinkExistingBannerTitle": "Ce tuteur est déjà enregistré à l'école ?",
+  "guardianLinkExistingBannerDescription": "Retrouvez sa fiche au lieu de la ressaisir : elle remplacera ce que porte cette carte.",
+  "guardianLinkExistingAction": "Rechercher une fiche",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",

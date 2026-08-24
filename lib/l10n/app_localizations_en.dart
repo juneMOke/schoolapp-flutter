@@ -1756,9 +1756,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get guardianSearchAction => 'Search for a guardian';
-
-  @override
   String get guardianSearchDialogTitle => 'Search for an existing parent';
 
   @override
@@ -1802,6 +1799,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSearchErrorRetry => 'Retry';
+
+  @override
+  String get guardianLinkExistingBannerTitle =>
+      'Is this guardian already on file?';
+
+  @override
+  String get guardianLinkExistingBannerDescription =>
+      'Find their record instead of typing it again: it will replace what this card holds.';
+
+  @override
+  String get guardianLinkExistingAction => 'Search for a record';
 
   @override
   String get schoolFees => 'School Fees';

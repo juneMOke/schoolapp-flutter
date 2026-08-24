@@ -369,7 +369,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// Exclut les tuteurs incomplets (ex. la ligne vide auto-créée à l'ouverture
   /// d'un wizard sans tuteur, jamais remplie) des écritures déclenchées SANS
   /// passer par la garde `_isValid` de `_onSave()` — c'est le cas de
-  /// `_onSearchParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
+  /// `_onLinkExistingParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
   /// Sans ce filtre, une ligne vide (`phoneNumber: ''`) atteindrait la garde
   /// d'unicité téléphone et soit polluerait `parents` d'une fiche vide, soit
   /// ferait échouer un rattachement légitime avec un conflit incompréhensible
@@ -475,7 +475,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
-  Future<void> _onSearchParent() async {
+  /// Ouvre la recherche d'une fiche parent déjà connue, depuis le bandeau
+  /// posé dans la carte.
+  Future<void> _onLinkExistingParent() async {
     if (!widget.isEditable || _isBatchSaving) return;
 
     final found = await showParentSearchDialog(context: context);
@@ -650,7 +652,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       onItemStateChanged: _onParentItemStateChanged,
       onItemValueChanged: _onParentItemValueChanged,
       onAddParent: _onAddGuardian,
-      onSearchParent: _onSearchParent,
+      onLinkExistingParent: _onLinkExistingParent,
       onRemoveParent: _onRemoveGuardianRequested,
       onOpenParent: _onOpenParent,
       onPrimaryParentChanged: _onPrimaryParentChanged,

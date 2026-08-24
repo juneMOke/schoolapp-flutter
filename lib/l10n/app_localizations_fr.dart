@@ -1763,9 +1763,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get guardianSearchAction => 'Rechercher un parent';
-
-  @override
   String get guardianSearchDialogTitle => 'Rechercher un parent existant';
 
   @override
@@ -1809,6 +1806,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianSearchErrorRetry => 'Réessayer';
+
+  @override
+  String get guardianLinkExistingBannerTitle =>
+      'Ce tuteur est déjà enregistré à l\'école ?';
+
+  @override
+  String get guardianLinkExistingBannerDescription =>
+      'Retrouvez sa fiche au lieu de la ressaisir : elle remplacera ce que porte cette carte.';
+
+  @override
+  String get guardianLinkExistingAction => 'Rechercher une fiche';
 
   @override
   String get schoolFees => 'Frais Scolaires';

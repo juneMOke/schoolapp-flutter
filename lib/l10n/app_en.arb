@@ -1092,7 +1092,6 @@
       }
     }
   },
-  "guardianSearchAction": "Search for a guardian",
   "guardianSearchDialogTitle": "Search for an existing parent",
   "guardianSearchDialogEyebrow": "Guardians",
   "guardianSearchModeSemantics": "Search mode",
@@ -1106,6 +1105,9 @@
   "guardianSearchAlreadyAddedError": "This guardian has already been added to this enrollment.",
   "guardianSearchIdentityLockedHint": "Details from an existing record — not editable here.",
   "guardianSearchErrorRetry": "Retry",
+  "guardianLinkExistingBannerTitle": "Is this guardian already on file?",
+  "guardianLinkExistingBannerDescription": "Find their record instead of typing it again: it will replace what this card holds.",
+  "guardianLinkExistingAction": "Search for a record",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",

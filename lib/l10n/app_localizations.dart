@@ -2888,12 +2888,6 @@ abstract class AppLocalizations {
   /// **'Failed to remove guardian: {message}'**
   String guardianUnlinkError(String message);
 
-  /// No description provided for @guardianSearchAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Search for a guardian'**
-  String get guardianSearchAction;
-
   /// No description provided for @guardianSearchDialogTitle.
   ///
   /// In en, this message translates to:
@@ -2971,6 +2965,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get guardianSearchErrorRetry;
+
+  /// No description provided for @guardianLinkExistingBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this guardian already on file?'**
+  String get guardianLinkExistingBannerTitle;
+
+  /// No description provided for @guardianLinkExistingBannerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find their record instead of typing it again: it will replace what this card holds.'**
+  String get guardianLinkExistingBannerDescription;
+
+  /// No description provided for @guardianLinkExistingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a record'**
+  String get guardianLinkExistingAction;
 
   /// No description provided for @schoolFees.
   ///
