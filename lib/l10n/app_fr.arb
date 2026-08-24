@@ -1681,6 +1681,49 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Post-nom (optionnel)",
   "facturationCreatePaymentPayerMiddleNameHint": "Entrez le post-nom",
   "facturationCreatePaymentPayerFieldRequired": "Ce champ est obligatoire",
+  "facturationCreatePaymentPayerPhoneLabel": "Téléphone du payeur",
+  "facturationCreatePaymentPayerPickAction": "Choisir un payeur",
+  "facturationCreatePaymentPayerPickHelp": "Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.",
+  "facturationPayerSearchDialogEyebrow": "Encaissement",
+  "facturationPayerSearchDialogTitle": "Choisir un payeur",
+  "facturationPayerSearchModeSemantics": "Mode de recherche",
+  "facturationPayerSearchModeByPhone": "Par numéro",
+  "facturationPayerSearchModeByIdentity": "Par identité",
+  "facturationPayerSearchPhoneHint": "Le numéro suffit, même partiel : « 8169 » remonte tous les payeurs concernés.",
+  "facturationPayerSearchIdentityHint": "Un seul mot suffit — nom, post-nom ou prénom. Les accents sont ignorés.",
+  "facturationPayerSearchAction": "Rechercher",
+  "facturationPayerSearchSuggestionsTitle": "Déjà connus pour cet élève",
+  "facturationPayerSearchResultsTitle": "Résultats",
+  "facturationPayerSearchResultsPlaceholder": "Les payeurs correspondants s'afficheront ici.",
+  "facturationPayerSearchEmptyTitle": "Aucun payeur trouvé",
+  "facturationPayerSearchEmptyDescription": "Aucun payeur ne correspond à ces critères. Vérifiez la saisie, ou fermez cette fenêtre pour le saisir à la main.",
+  "facturationPayerSearchErrorRetry": "Réessayer",
+  "facturationPayerSearchOriginGuardian": "Tuteur de l'élève — n'a encore rien payé",
+  "facturationPayerSearchPaymentCount": "{count, plural, =1{1 versement} other{{count} versements}}",
+  "@facturationPayerSearchPaymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationPayerSearchLastPaidAt": "dernier le {date}",
+  "@facturationPayerSearchLastPaidAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationPayerSearchUnknownPhone": "Numéro inconnu",
+  "facturationPayerSearchSelectSemantics": "Choisir {name} comme payeur",
+  "@facturationPayerSearchSelectSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentDetailsSectionTitle": "Détails du paiement",
   "facturationCreatePaymentDetailsSectionSubtitle": "Saisissez le montant reçu, la devise et la date du paiement.",
   "facturationCreatePaymentReceivedAmountLabel": "Montant reçu",

@@ -3284,6 +3284,91 @@ class AppLocalizationsEn extends AppLocalizations {
       'This field is required';
 
   @override
+  String get facturationCreatePaymentPayerPhoneLabel => 'Payer\'s phone number';
+
+  @override
+  String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
+
+  @override
+  String get facturationCreatePaymentPayerPickHelp =>
+      'Reuse a payer who has already been to the desk, or enter one below.';
+
+  @override
+  String get facturationPayerSearchDialogEyebrow => 'Collection';
+
+  @override
+  String get facturationPayerSearchDialogTitle => 'Choose a payer';
+
+  @override
+  String get facturationPayerSearchModeSemantics => 'Search mode';
+
+  @override
+  String get facturationPayerSearchModeByPhone => 'By phone number';
+
+  @override
+  String get facturationPayerSearchModeByIdentity => 'By name';
+
+  @override
+  String get facturationPayerSearchPhoneHint =>
+      'A partial number is enough: “8169” brings up every matching payer.';
+
+  @override
+  String get facturationPayerSearchIdentityHint =>
+      'A single word is enough — last, middle or first name. Accents are ignored.';
+
+  @override
+  String get facturationPayerSearchAction => 'Search';
+
+  @override
+  String get facturationPayerSearchSuggestionsTitle =>
+      'Already known for this student';
+
+  @override
+  String get facturationPayerSearchResultsTitle => 'Results';
+
+  @override
+  String get facturationPayerSearchResultsPlaceholder =>
+      'Matching payers will appear here.';
+
+  @override
+  String get facturationPayerSearchEmptyTitle => 'No payer found';
+
+  @override
+  String get facturationPayerSearchEmptyDescription =>
+      'No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.';
+
+  @override
+  String get facturationPayerSearchErrorRetry => 'Retry';
+
+  @override
+  String get facturationPayerSearchOriginGuardian =>
+      'Student\'s guardian — has never paid yet';
+
+  @override
+  String facturationPayerSearchPaymentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String facturationPayerSearchLastPaidAt(String date) {
+    return 'last one on $date';
+  }
+
+  @override
+  String get facturationPayerSearchUnknownPhone => 'Phone number unknown';
+
+  @override
+  String facturationPayerSearchSelectSemantics(String name) {
+    return 'Choose $name as the payer';
+  }
+
+  @override
   String get facturationCreatePaymentDetailsSectionTitle => 'Payment details';
 
   @override

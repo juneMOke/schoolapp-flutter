@@ -1724,6 +1724,49 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Surname (optional)",
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
+  "facturationCreatePaymentPayerPhoneLabel": "Payer's phone number",
+  "facturationCreatePaymentPayerPickAction": "Choose a payer",
+  "facturationCreatePaymentPayerPickHelp": "Reuse a payer who has already been to the desk, or enter one below.",
+  "facturationPayerSearchDialogEyebrow": "Collection",
+  "facturationPayerSearchDialogTitle": "Choose a payer",
+  "facturationPayerSearchModeSemantics": "Search mode",
+  "facturationPayerSearchModeByPhone": "By phone number",
+  "facturationPayerSearchModeByIdentity": "By name",
+  "facturationPayerSearchPhoneHint": "A partial number is enough: “8169” brings up every matching payer.",
+  "facturationPayerSearchIdentityHint": "A single word is enough — last, middle or first name. Accents are ignored.",
+  "facturationPayerSearchAction": "Search",
+  "facturationPayerSearchSuggestionsTitle": "Already known for this student",
+  "facturationPayerSearchResultsTitle": "Results",
+  "facturationPayerSearchResultsPlaceholder": "Matching payers will appear here.",
+  "facturationPayerSearchEmptyTitle": "No payer found",
+  "facturationPayerSearchEmptyDescription": "No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.",
+  "facturationPayerSearchErrorRetry": "Retry",
+  "facturationPayerSearchOriginGuardian": "Student's guardian — has never paid yet",
+  "facturationPayerSearchPaymentCount": "{count, plural, =1{1 payment} other{{count} payments}}",
+  "@facturationPayerSearchPaymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationPayerSearchLastPaidAt": "last one on {date}",
+  "@facturationPayerSearchLastPaidAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationPayerSearchUnknownPhone": "Phone number unknown",
+  "facturationPayerSearchSelectSemantics": "Choose {name} as the payer",
+  "@facturationPayerSearchSelectSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentDetailsSectionTitle": "Payment details",
   "facturationCreatePaymentDetailsSectionSubtitle": "Enter the received amount, currency and payment date.",
   "facturationCreatePaymentReceivedAmountLabel": "Amount received",

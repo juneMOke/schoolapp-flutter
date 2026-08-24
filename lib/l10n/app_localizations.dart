@@ -5562,6 +5562,138 @@ abstract class AppLocalizations {
   /// **'This field is required'**
   String get facturationCreatePaymentPayerFieldRequired;
 
+  /// No description provided for @facturationCreatePaymentPayerPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer\'s phone number'**
+  String get facturationCreatePaymentPayerPhoneLabel;
+
+  /// No description provided for @facturationCreatePaymentPayerPickAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payer'**
+  String get facturationCreatePaymentPayerPickAction;
+
+  /// No description provided for @facturationCreatePaymentPayerPickHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse a payer who has already been to the desk, or enter one below.'**
+  String get facturationCreatePaymentPayerPickHelp;
+
+  /// No description provided for @facturationPayerSearchDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get facturationPayerSearchDialogEyebrow;
+
+  /// No description provided for @facturationPayerSearchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payer'**
+  String get facturationPayerSearchDialogTitle;
+
+  /// No description provided for @facturationPayerSearchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get facturationPayerSearchModeSemantics;
+
+  /// No description provided for @facturationPayerSearchModeByPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'By phone number'**
+  String get facturationPayerSearchModeByPhone;
+
+  /// No description provided for @facturationPayerSearchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get facturationPayerSearchModeByIdentity;
+
+  /// No description provided for @facturationPayerSearchPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A partial number is enough: “8169” brings up every matching payer.'**
+  String get facturationPayerSearchPhoneHint;
+
+  /// No description provided for @facturationPayerSearchIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A single word is enough — last, middle or first name. Accents are ignored.'**
+  String get facturationPayerSearchIdentityHint;
+
+  /// No description provided for @facturationPayerSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get facturationPayerSearchAction;
+
+  /// No description provided for @facturationPayerSearchSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already known for this student'**
+  String get facturationPayerSearchSuggestionsTitle;
+
+  /// No description provided for @facturationPayerSearchResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get facturationPayerSearchResultsTitle;
+
+  /// No description provided for @facturationPayerSearchResultsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching payers will appear here.'**
+  String get facturationPayerSearchResultsPlaceholder;
+
+  /// No description provided for @facturationPayerSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No payer found'**
+  String get facturationPayerSearchEmptyTitle;
+
+  /// No description provided for @facturationPayerSearchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.'**
+  String get facturationPayerSearchEmptyDescription;
+
+  /// No description provided for @facturationPayerSearchErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationPayerSearchErrorRetry;
+
+  /// No description provided for @facturationPayerSearchOriginGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s guardian — has never paid yet'**
+  String get facturationPayerSearchOriginGuardian;
+
+  /// No description provided for @facturationPayerSearchPaymentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment} other{{count} payments}}'**
+  String facturationPayerSearchPaymentCount(int count);
+
+  /// No description provided for @facturationPayerSearchLastPaidAt.
+  ///
+  /// In en, this message translates to:
+  /// **'last one on {date}'**
+  String facturationPayerSearchLastPaidAt(String date);
+
+  /// No description provided for @facturationPayerSearchUnknownPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number unknown'**
+  String get facturationPayerSearchUnknownPhone;
+
+  /// No description provided for @facturationPayerSearchSelectSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose {name} as the payer'**
+  String facturationPayerSearchSelectSemantics(String name);
+
   /// No description provided for @facturationCreatePaymentDetailsSectionTitle.
   ///
   /// In en, this message translates to:
