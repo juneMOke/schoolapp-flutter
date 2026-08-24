@@ -454,6 +454,22 @@ Règles :
   a besoin de la classe et de la période pour calculer) garde sa propre bascule
   et n'entre pas dans `BiModeSearchForm`.
 
+### Rattacher une fiche déjà connue (étape Tuteurs)
+
+Le point d'entrée d'une recherche de rattachement se pose **dans la carte qu'il
+va remplacer**, jamais dans l'en-tête de l'étape.
+
+- `GuardianLinkExistingBanner` ouvre le corps de la carte dépliée, avant les
+  champs — là où l'utilisateur s'apprête à ressaisir ce qui existe déjà. Une
+  loupe d'en-tête ne se trouvait pas, et ne désignait aucun tuteur.
+- La fiche retenue **remplace** la carte d'où l'appel est parti
+  (`_linkFoundParent`) : son id devient l'id RÉEL de la fiche (ce qui marque le
+  lien pour la garde d'unicité), l'identité passe en lecture seule, et le
+  brouillon est réécrit dans la foulée. Le **lien de parenté survit** au
+  remplacement : il appartient à cet élève, pas à la fiche parent.
+- Le bandeau disparaît d'une carte déjà rattachée — il n'aurait plus rien à
+  proposer.
+
 ### Formatage des champs texte
 
 La capitalisation est le **défaut** d'`EteeloTextInput` : c'est l'exception qui

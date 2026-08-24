@@ -25,7 +25,7 @@ void main() {
     double width, {
     List<ParentSummary> parents = const [],
     String? expandedParentId,
-    VoidCallback? onLinkExistingParent,
+    void Function(String)? onLinkExistingParent,
   }) => MaterialApp(
     locale: const Locale('fr'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -39,7 +39,7 @@ void main() {
           onItemStateChanged: (_, _) {},
           onItemValueChanged: (_, _) {},
           onAddParent: () {},
-          onLinkExistingParent: onLinkExistingParent ?? () {},
+          onLinkExistingParent: onLinkExistingParent ?? (_) {},
           onSave: () {},
           showInlineSaveButton: false,
         ),
@@ -91,26 +91,27 @@ void main() {
     },
   );
 
-  testWidgets('la carte dépliée porte le bandeau de rattachement', (
-    tester,
-  ) async {
-    var taps = 0;
-    await tester.pumpWidget(
-      harness(
-        800,
-        parents: const [parent],
-        expandedParentId: 'parent-1',
-        onLinkExistingParent: () => taps++,
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'la carte dépliée porte le bandeau de rattachement, qui désigne SA carte',
+    (tester) async {
+      final linkRequests = <String>[];
+      await tester.pumpWidget(
+        harness(
+          800,
+          parents: const [parent],
+          expandedParentId: 'parent-1',
+          onLinkExistingParent: linkRequests.add,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(GuardianLinkExistingBanner), findsOneWidget);
-    await tester.tap(find.text('Rechercher une fiche'));
-    await tester.pumpAndSettle();
+      expect(find.byType(GuardianLinkExistingBanner), findsOneWidget);
+      await tester.tap(find.text('Rechercher une fiche'));
+      await tester.pumpAndSettle();
 
-    expect(taps, 1);
-  });
+      expect(linkRequests, ['parent-1']);
+    },
+  );
 
   testWidgets('carte repliée : pas de bandeau (le corps n\'est pas rendu)', (
     tester,

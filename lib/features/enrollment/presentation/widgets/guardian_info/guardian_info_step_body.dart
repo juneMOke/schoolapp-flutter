@@ -17,10 +17,10 @@ class GuardianInfoStepBody extends StatelessWidget {
   final ParentItemValueChanged onItemValueChanged;
   final VoidCallback? onAddParent;
 
-  /// Ouvre la recherche d'une fiche parent déjà connue. L'appel part du
-  /// bandeau posé DANS la carte ([GuardianLinkExistingBanner]), plus d'une
-  /// loupe d'en-tête que personne n'allait chercher.
-  final VoidCallback? onLinkExistingParent;
+  /// Rattacher une fiche existante À LA PLACE du tuteur désigné — l'appel part
+  /// du bandeau posé dans la carte elle-même ([GuardianLinkExistingBanner]),
+  /// plus d'une loupe d'en-tête qui n'aurait désigné personne.
+  final ValueChanged<String>? onLinkExistingParent;
   final ValueChanged<String>? onRemoveParent;
   final ValueChanged<String>? onOpenParent;
   final ValueChanged<String>? onPrimaryParentChanged;
@@ -119,8 +119,9 @@ class GuardianInfoStepBody extends StatelessWidget {
                     onRemoveRequested: isEditable && parentDetails.length > 1
                         ? () => onRemoveParent?.call(parent.id)
                         : null,
-                    onLinkExistingRequested: isEditable && !isLoading
-                        ? onLinkExistingParent
+                    onLinkExistingRequested:
+                        isEditable && !isLoading && onLinkExistingParent != null
+                        ? () => onLinkExistingParent!.call(parent.id)
                         : null,
                     isEditable: isEditable,
                     identityLocked: identityLockedParentIds.contains(parent.id),
@@ -192,8 +193,9 @@ class GuardianInfoStepBody extends StatelessWidget {
       builder: (context, constraints) {
         final stack =
             constraints.maxWidth < AppBreakpoints.guardianHeaderRowMin;
-        // « Ajouter » est la SEULE action de l'en-tête : la recherche d'une
-        // fiche connue a rejoint la carte (voir [GuardianLinkExistingBanner]).
+        // « Ajouter » est désormais la SEULE action de l'en-tête : le
+        // rattachement d'une fiche connue a rejoint la carte qu'il remplace
+        // (voir [GuardianLinkExistingBanner]).
         final addButton = SecondaryButton(
           onPressed: canAddParent ? onAddParent : null,
           icon: Icons.person_add_alt_1_rounded,

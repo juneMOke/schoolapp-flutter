@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_parent.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
@@ -369,7 +370,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// Exclut les tuteurs incomplets (ex. la ligne vide auto-créée à l'ouverture
   /// d'un wizard sans tuteur, jamais remplie) des écritures déclenchées SANS
   /// passer par la garde `_isValid` de `_onSave()` — c'est le cas de
-  /// `_onLinkExistingParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
+  /// `_linkFoundParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
   /// Sans ce filtre, une ligne vide (`phoneNumber: ''`) atteindrait la garde
   /// d'unicité téléphone et soit polluerait `parents` d'une fiche vide, soit
   /// ferait échouer un rattachement légitime avec un conflit incompréhensible
@@ -475,16 +476,34 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
-  /// Ouvre la recherche d'une fiche parent déjà connue, depuis le bandeau
-  /// posé dans la carte.
-  Future<void> _onLinkExistingParent() async {
+  /// Ouvre la recherche d'une fiche existante POUR LA CARTE [targetParentId].
+  ///
+  /// L'appel part du bandeau posé dans la carte elle-même : la fiche retenue
+  /// remplace donc ce tuteur-là, sans jamais s'ajouter à côté. C'est ce que
+  /// l'utilisateur décrit quand il dit « en fait, c'est celui-ci » — l'ancien
+  /// comportement (ajout en fin de liste) le laissait avec une ligne à moitié
+  /// saisie à supprimer à la main.
+  Future<void> _onLinkExistingParent(String targetParentId) async {
     if (!widget.isEditable || _isBatchSaving) return;
 
     final found = await showParentSearchDialog(context: context);
     if (!mounted || found == null) return;
 
+    _linkFoundParent(found, replacedParentId: targetParentId);
+  }
+
+  /// Substitue [found] à la carte [replacedParentId] : identité, téléphone et
+  /// e-mail viennent de la fiche existante, l'id de la carte devient l'id RÉEL
+  /// de cette fiche (ce qui marque le lien pour la garde d'unicité), et le
+  /// brouillon est réécrit dans la foulée.
+  void _linkFoundParent(LocalParent found, {required String replacedParentId}) {
+    final index = _editableParentDetails.indexWhere(
+      (parent) => parent.id == replacedParentId,
+    );
+    if (index < 0) return;
+
     final alreadyAdded = _editableParentDetails.any(
-      (parent) => parent.id == found.id,
+      (parent) => parent.id == found.id && parent.id != replacedParentId,
     );
     if (alreadyAdded) {
       AppSnackBar.showError(
@@ -494,6 +513,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
+    // Le lien de parenté appartient à CET élève, pas à la fiche parent (qui
+    // peut être la mère d'un élève et la tante d'un autre) : ce que
+    // l'utilisateur avait déjà choisi sur la carte survit au remplacement.
+    final keptRelationshipType =
+        _currentValuesByParentId[replacedParentId]?.relationshipType ??
+        RelationshipType.guardian;
+
     final parentSummary = ParentSummary(
       id: found.id, // id RÉEL (existant) ⇒ marque le lien explicite
       firstName: found.firstName,
@@ -502,34 +528,45 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       identificationNumber: found.identificationNumber ?? '',
       phoneNumber: found.phoneNumber,
       email: found.email ?? '',
-      relationshipType: RelationshipType.guardian,
+      relationshipType: keptRelationshipType,
     );
 
     setState(() {
-      _editableParentDetails = <ParentSummary>[
-        ..._editableParentDetails,
-        parentSummary,
-      ];
-      _currentValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
-        parentSummary,
-      );
-      _initialValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
-        parentSummary,
-      );
+      final next = List<ParentSummary>.from(_editableParentDetails);
+      next[index] = parentSummary;
+      _editableParentDetails = List<ParentSummary>.unmodifiable(next);
+
+      // Retrait AVANT ajout : la carte peut déjà porter cet id (on rejoue la
+      // même fiche), auquel cas l'ordre inverse effacerait ce qu'on vient
+      // d'écrire.
+      _currentValuesByParentId.remove(replacedParentId);
+      _initialValuesByParentId.remove(replacedParentId);
+      _itemStatesByParentId.remove(replacedParentId);
+      _linkedFromSearchParentIds.remove(replacedParentId);
+
+      final linkedValue = ParentItemValue.fromParent(parentSummary);
+      _currentValuesByParentId[parentSummary.id] = linkedValue;
+      _initialValuesByParentId[parentSummary.id] = linkedValue;
       _itemStatesByParentId[parentSummary.id] = ParentItemFormState(
-        valid: ParentItemValue.fromParent(parentSummary).isValid,
+        valid: linkedValue.isValid,
         dirty: false,
         changedFields: const <String, bool>{},
       );
       _linkedFromSearchParentIds.add(parentSummary.id);
-      _expandedParentId = parentSummary.id;
-      _primaryParentId ??= parentSummary.id;
+
+      if (_expandedParentId == replacedParentId || _expandedParentId == null) {
+        _expandedParentId = parentSummary.id;
+      }
+      if (_primaryParentId == replacedParentId || _primaryParentId == null) {
+        _primaryParentId = parentSummary.id;
+      }
     });
 
     _recomputeFormState();
     // Rattachement structurel (comme la suppression) : sauvegarde immédiate,
-    // sans attendre un clic « Enregistrer » qui resterait grisé (le nouveau
-    // tuteur est déjà valide mais pas "dirty" au sens d'une édition de champ).
+    // sans attendre un clic « Enregistrer » qui resterait grisé (le tuteur
+    // rattaché est déjà valide mais pas "dirty" au sens d'une édition de
+    // champ).
     _dispatchDraftGuardians();
   }
 
