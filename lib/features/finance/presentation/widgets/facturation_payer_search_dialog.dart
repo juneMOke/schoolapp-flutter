@@ -36,13 +36,18 @@ Future<LocalPayerIdentity?> showFacturationPayerSearchDialog({
     builder: (_) => BlocProvider<PayerSearchBloc>(
       create: (_) =>
           getIt<PayerSearchBloc>()..add(PayerSuggestionsRequested(studentId)),
-      child: const _FacturationPayerSearchDialog(),
+      child: _FacturationPayerSearchDialog(studentId: studentId),
     ),
   );
 }
 
 class _FacturationPayerSearchDialog extends StatefulWidget {
-  const _FacturationPayerSearchDialog();
+  /// Élève dont on propose les payeurs à l'ouverture. Conservé pour pouvoir
+  /// **rejouer ce chargement-là** : c'est le seul qui n'a pas de critères à
+  /// remettre dans la requête.
+  final String studentId;
+
+  const _FacturationPayerSearchDialog({required this.studentId});
 
   @override
   State<_FacturationPayerSearchDialog> createState() =>
@@ -67,9 +72,19 @@ class _FacturationPayerSearchDialogState
     );
   }
 
+  /// L'erreur peut venir de deux chemins, et « Réessayer » doit rejouer
+  /// CELUI qui a échoué. Sans la branche « suggestions », une erreur au
+  /// chargement initial (aucun critère n'a encore été saisi) laissait un
+  /// bouton qui ne faisait rien, indéfiniment et sans le dire.
   void _retry() {
     final criteria = _lastCriteria;
-    if (criteria != null) _search(criteria);
+    if (criteria != null) {
+      _search(criteria);
+      return;
+    }
+    context.read<PayerSearchBloc>().add(
+      PayerSuggestionsRequested(widget.studentId),
+    );
   }
 
   @override
