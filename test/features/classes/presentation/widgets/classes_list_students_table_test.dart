@@ -45,6 +45,7 @@ Future<void> _pump(
   int pageSize = 10,
   VoidCallback? onPreviousPage,
   VoidCallback? onNextPage,
+  VoidCallback? onSortChanged,
 }) async {
   tester.view.physicalSize = const Size(1400, 1200);
   tester.view.devicePixelRatio = 1.0;
@@ -65,6 +66,7 @@ Future<void> _pump(
           pageSize: pageSize,
           onPreviousPage: onPreviousPage,
           onNextPage: onNextPage,
+          onSortChanged: onSortChanged,
           onViewRequested: (_) {},
         ),
       ),
@@ -181,5 +183,86 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(nextCalls, 1);
+  });
+
+  testWidgets('paginée : la table ne rend que la tranche de la page', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      pageSize: 2,
+      totalPages: 2,
+      onPreviousPage: () {},
+      onNextPage: () {},
+    );
+
+    // Ordre par défaut (Nom ascendant) : Abedi, Ilunga | Kabongo.
+    expect(find.text('Abedi'), findsOneWidget);
+    expect(find.text('Ilunga'), findsOneWidget);
+    expect(find.text('Kabongo'), findsNothing);
+  });
+
+  testWidgets('le tri porte sur TOUT le corpus, pas sur la page affichée', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      pageSize: 2,
+      totalPages: 2,
+      onPreviousPage: () {},
+      onNextPage: () {},
+    );
+
+    // Kabongo est en page 2 tant que l'ordre est ascendant.
+    expect(find.text('Kabongo'), findsNothing);
+
+    // Un tap sur une colonne déjà active inverse le sens.
+    await tester.tap(find.text('NOM'));
+    await tester.pumpAndSettle();
+
+    // Descendant, Kabongo devient PREMIER du corpus : un tri qui ne porterait
+    // que sur la page affichée ne l'y ferait jamais remonter.
+    expect(find.text('Kabongo'), findsOneWidget);
+    expect(find.text('Ilunga'), findsOneWidget);
+    expect(find.text('Abedi'), findsNothing);
+    expect(
+      _isAbove(tester, 'Kabongo', 'Ilunga'),
+      isTrue,
+      reason: 'ordre du Nom descendant',
+    );
+  });
+
+  testWidgets('un changement de tri redemande la première page', (
+    tester,
+  ) async {
+    var sortChanges = 0;
+    await _pump(
+      tester,
+      pageSize: 2,
+      currentPage: 2,
+      totalPages: 2,
+      onPreviousPage: () {},
+      onNextPage: () {},
+      onSortChanged: () => sortChanges++,
+    );
+
+    await tester.tap(find.text('NOM'));
+    await tester.pumpAndSettle();
+
+    expect(sortChanges, 1);
+  });
+
+  testWidgets('sans pagination, un tri ne redemande aucune page', (
+    tester,
+  ) async {
+    var sortChanges = 0;
+    await _pump(tester, onSortChanged: () => sortChanges++);
+
+    await tester.tap(find.text('NOM'));
+    await tester.pumpAndSettle();
+
+    // Rien n'est découpé : la page 1 est déjà la seule, et prévenir le parent
+    // le ferait re-piloter une liste qu'il ne pagine pas.
+    expect(sortChanges, 0);
   });
 }

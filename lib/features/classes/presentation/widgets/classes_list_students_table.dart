@@ -10,6 +10,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 enum _ClassesListSortColumn { lastName, surname, firstName, level }
 
 class ClassesListStudentsTable extends StatefulWidget {
+  /// **Tout** le corpus à afficher, jamais une page déjà découpée : quand la
+  /// table pagine (cf. [totalPages]), c'est elle qui découpe, et seulement
+  /// **après** avoir trié.
+  ///
+  /// Recevoir une page rendrait le tri page-local, c'est-à-dire faux : « trier
+  /// par niveau » ne réordonnerait que les lignes sous les yeux, sans jamais
+  /// faire remonter de la page suivante l'élève qui devrait être premier.
   final List<ClassesListStudentRow> rows;
   final ValueChanged<ClassesListStudentRow> onViewRequested;
   final bool isLoading;
@@ -23,17 +30,25 @@ class ClassesListStudentsTable extends StatefulWidget {
   /// lignes, sous un bandeau qui l'annonce déjà.
   final bool showLevelColumn;
 
-  /// Nombre total de résultats, toutes pages confondues — distinct de
-  /// `rows.length`, qui n'est que la page affichée.
+  /// Décompte annoncé au pied du tableau. Vaut `rows.length` par défaut ;
+  /// ne se renseigne que si la source connaît un total que le corpus reçu ne
+  /// dit pas.
   final int? totalCount;
 
-  /// Pagination, **1-based**. Absente (`totalPages <= 1` ou callbacks nuls)
-  /// quand la liste tient d'un bloc, comme le roster d'une classe.
+  /// Pagination, **1-based**. Absente (`totalPages <= 1`, `pageSize` nul ou
+  /// callbacks nuls) quand la liste tient d'un bloc, comme le roster d'une
+  /// classe : la table rend alors tout ce qu'elle a reçu.
   final int currentPage;
   final int totalPages;
   final int pageSize;
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
+
+  /// Prévient qu'un tri vient de changer l'ordre du corpus **entier**. Le
+  /// parent doit revenir à la première page : rester sur la page 3 après un
+  /// changement de tri y afficherait le milieu d'un ordre que l'utilisateur
+  /// vient à peine de demander. Sans pagination, jamais appelé.
+  final VoidCallback? onSortChanged;
 
   const ClassesListStudentsTable({
     super.key,
@@ -51,6 +66,7 @@ class ClassesListStudentsTable extends StatefulWidget {
     this.pageSize = 0,
     this.onPreviousPage,
     this.onNextPage,
+    this.onSortChanged,
   });
 
   @override
@@ -70,6 +86,30 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
       ? _ClassesListSortColumn.lastName
       : _sortColumn;
 
+  /// Vrai quand la table découpe elle-même : elle a reçu tout le corpus et
+  /// n'en rend qu'une tranche.
+  bool get _isPaginated =>
+      widget.totalPages > 1 &&
+      widget.pageSize > 0 &&
+      widget.onPreviousPage != null &&
+      widget.onNextPage != null;
+
+  /// Les lignes réellement rendues : **le tri d'abord, la découpe ensuite**.
+  /// L'inverse trierait une page, donc rien.
+  List<ClassesListStudentRow> get _visibleRows {
+    final sorted = _sortedRows;
+    if (!_isPaginated) {
+      return sorted;
+    }
+
+    final start = ((widget.currentPage - 1) * widget.pageSize).clamp(
+      0,
+      sorted.length,
+    );
+    final end = (start + widget.pageSize).clamp(0, sorted.length);
+    return sorted.sublist(start, end);
+  }
+
   List<ClassesListStudentRow> get _sortedRows {
     final column = _effectiveSortColumn;
     final rows = [...widget.rows];
@@ -85,7 +125,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final rows = _sortedRows;
+    final rows = _visibleRows;
 
     return DataTableView(
       rows: _buildRows(rows, l10n),
@@ -101,7 +141,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
         emptyLabel: widget.emptyLabel ?? l10n.classesListNoMatchMessage,
         footer: DataTableFooterConfig(
           label: l10n.paginationResultsCount(rows.length),
-          total: widget.totalCount ?? rows.length,
+          total: widget.totalCount ?? widget.rows.length,
           unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
@@ -109,13 +149,11 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
     );
   }
 
+  // Le même prédicat gouverne la barre de pagination et la découpe : les
+  // dissocier ferait rendre tout le corpus sous une barre qui promet des pages,
+  // ou l'inverse.
   DataTablePaginationConfig? _buildPaginationConfig() {
-    if (widget.totalPages <= 1) {
-      return null;
-    }
-    final onPrevious = widget.onPreviousPage;
-    final onNext = widget.onNextPage;
-    if (onPrevious == null || onNext == null) {
+    if (!_isPaginated) {
       return null;
     }
 
@@ -123,8 +161,8 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
       currentPage: widget.currentPage,
       totalPages: widget.totalPages,
       pageSize: widget.pageSize,
-      onPrevious: onPrevious,
-      onNext: onNext,
+      onPrevious: widget.onPreviousPage!,
+      onNext: widget.onNextPage!,
       isLoading: widget.isLoading,
     );
   }
@@ -208,10 +246,19 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
       return;
     }
 
+    if (requested == _sortColumn && ascending == _sortAscending) {
+      return;
+    }
+
     setState(() {
       _sortColumn = requested;
       _sortAscending = ascending;
     });
+
+    // L'ordre a changé pour TOUT le corpus : la page 1 n'est plus la même.
+    if (_isPaginated) {
+      widget.onSortChanged?.call();
+    }
   }
 
   String _valueFor(ClassesListStudentRow row, _ClassesListSortColumn column) {

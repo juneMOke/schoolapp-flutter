@@ -58,6 +58,10 @@ class ClassesListResultsSection extends StatelessWidget {
       builder: (context, state) => ClassesListEnrollmentResults(
         request: request,
         state: state,
+        // Le corpus entier, que l'état ne porte pas : la table trie avant de
+        // découper, et l'œil doit pouvoir résoudre une ligne de n'importe
+        // quelle page.
+        summaries: context.read<EnrollmentLocalListBloc>().loadedSummaries,
         onExportPressed: onExportPressed,
         onPageRequested: onPageRequested,
         onViewRequested: onEnrollmentViewRequested,

@@ -11,6 +11,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class ClassesListEnrollmentResults extends StatelessWidget {
   final ClassesListSearchRequest request;
   final EnrollmentLocalListState state;
+
+  /// **Tous** les résultats de la recherche, pages confondues — et non
+  /// `state.summaries`, qui n'en est que la page courante. C'est la table qui
+  /// découpe, une fois le tri appliqué : lui donner la page rendrait le tri
+  /// page-local (« trier par niveau » ne réordonnerait que les lignes déjà à
+  /// l'écran). Le décompte et la pagination, eux, restent ceux de l'état.
+  final List<EnrollmentSummary> summaries;
   final VoidCallback onExportPressed;
   final ValueChanged<int> onPageRequested;
   final ValueChanged<EnrollmentSummary> onViewRequested;
@@ -19,6 +26,7 @@ class ClassesListEnrollmentResults extends StatelessWidget {
     super.key,
     required this.request,
     required this.state,
+    required this.summaries,
     required this.onExportPressed,
     required this.onPageRequested,
     required this.onViewRequested,
@@ -27,10 +35,8 @@ class ClassesListEnrollmentResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final byId = {
-      for (final summary in state.summaries) summary.student.id: summary,
-    };
-    final rows = state.summaries
+    final byId = {for (final summary in summaries) summary.student.id: summary};
+    final rows = summaries
         .map(
           (summary) => ClassesListStudentRow(
             id: summary.student.id,
@@ -103,6 +109,9 @@ class ClassesListEnrollmentResults extends StatelessWidget {
       // la pagination entière dès la première page.
       onPreviousPage: () => onPageRequested(state.summariesPage - 1),
       onNextPage: () => onPageRequested(state.summariesPage + 1),
+      // Un tri réordonne tout le corpus : rester sur la page courante y
+      // montrerait le milieu d'un ordre qu'on vient de demander.
+      onSortChanged: () => onPageRequested(0),
       isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
       isError: state.summariesStatus == EnrollmentLoadStatus.failure,
       loadingLabel: l10n.loadingStudents,
