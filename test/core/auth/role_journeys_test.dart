@@ -56,6 +56,12 @@ const _comptabilite = <String>[
   'editique.cancel',
 ];
 
+/// ⚠️ `ACADEMIC_ADMIN` a perdu **tout `/schedule/*` et tout
+/// `/academics/cours/*`** — 12 routes fermées côté serveur, qui répondent 403
+/// dès la migration passée. Les permissions correspondantes ont été retirées du
+/// template en même temps, donc l'APK ferme les sous-modules de lui-même :
+/// c'est ce que cette liste doit refléter, et l'absence de `schedule.read` ici
+/// est ce qui l'atteste.
 const _directionEtudes = <String>[
   'enrollment.read',
   'finance.charge.read',
@@ -65,9 +71,6 @@ const _directionEtudes = <String>[
   'student.read',
   'teacher.read',
   'school.read',
-  'schedule.read',
-  'schedule.write',
-  'academics.course.read',
   'academics.grade.read',
   'academics.result.read',
   'academics.referential.read',
@@ -77,13 +80,14 @@ const _directionEtudes = <String>[
   'editique.write',
 ];
 
+/// ⚠️ `DISCIPLINE_SUPERVISOR` a perdu les **quatre routes `/schedule/*` en
+/// lecture** : plus d'emploi du temps pour la surveillance générale.
 const _discipline = <String>[
   'enrollment.read',
   'finance.charge.read',
   'classroom.read',
   'student.read',
   'school.read',
-  'schedule.read',
   'attendance.read',
   'attendance.write',
   'attendance.delete',
@@ -202,29 +206,32 @@ void main() {
       expect(_comptabilite, isNot(contains(Perm.financeGridWrite.wire)));
     });
 
-    test(
-      'direction des études : compose les classes et l\'emploi du temps',
-      () {
-        final ids = visibleSubMenus(_directionEtudes);
-        expect(ids, contains(MenuConstants.organisationId));
-        expect(ids, contains(MenuConstants.classesListId));
-        expect(ids, contains(MenuConstants.classesDashboardId));
-        expect(ids, contains(MenuConstants.timetableId));
-        expect(ids, contains(MenuConstants.myCoursesId));
-        expect(ids, contains(MenuConstants.resultatsClasseId));
+    test('direction des études : compose les classes, sans l\'emploi du temps '
+        'ni les cours', () {
+      final ids = visibleSubMenus(_directionEtudes);
+      expect(ids, contains(MenuConstants.organisationId));
+      expect(ids, contains(MenuConstants.classesListId));
+      expect(ids, contains(MenuConstants.classesDashboardId));
+      expect(ids, contains(MenuConstants.resultatsClasseId));
 
-        expect(
-          can(const ModuleAccess([Perm.classroomWrite]), _directionEtudes),
-          isTrue,
-        );
-        // Elle scelle les bulletins mais ne saisit pas les notes (§2.7).
-        expect(_directionEtudes, contains(Perm.academicsGradeSeal.wire));
-        expect(
-          can(const ModuleAccess([Perm.academicsGradeWrite]), _directionEtudes),
-          isFalse,
-        );
-      },
-    );
+      // Les 12 routes fermées côté serveur : l'APK ne doit pas offrir une
+      // porte qui répondrait 403. Il ne le fait pas de lui-même — c'est le
+      // retrait des permissions du template qui ferme, et c'est cela que ces
+      // deux lignes surveillent.
+      expect(ids, isNot(contains(MenuConstants.timetableId)));
+      expect(ids, isNot(contains(MenuConstants.myCoursesId)));
+
+      expect(
+        can(const ModuleAccess([Perm.classroomWrite]), _directionEtudes),
+        isTrue,
+      );
+      // Elle scelle les bulletins mais ne saisit pas les notes (§2.7).
+      expect(_directionEtudes, contains(Perm.academicsGradeSeal.wire));
+      expect(
+        can(const ModuleAccess([Perm.academicsGradeWrite]), _directionEtudes),
+        isFalse,
+      );
+    });
 
     test('discipline : instruit présences et cas, lit le reste', () {
       final ids = visibleSubMenus(_discipline);
@@ -247,6 +254,8 @@ void main() {
         isFalse,
       );
       expect(ids, contains(MenuConstants.documentsStudentId));
+      // Les quatre routes schedule lui sont fermées : le sous-module suit.
+      expect(ids, isNot(contains(MenuConstants.timetableId)));
     });
 
     test('enseignant : fait cours, appelle et note', () {
