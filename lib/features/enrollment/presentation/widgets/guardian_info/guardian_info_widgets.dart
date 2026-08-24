@@ -4,6 +4,7 @@ export 'guardian_empty_state.dart';
 export 'guardian_fields_grid.dart';
 export 'guardian_info_step_body.dart';
 export 'guardian_link_existing_banner.dart';
+export 'guardian_phone_conflict_dialog.dart';
 export 'parent_item.dart';
 export 'parent_item_models.dart';
 export 'parent_search_dialog.dart';

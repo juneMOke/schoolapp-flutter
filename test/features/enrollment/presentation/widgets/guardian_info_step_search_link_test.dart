@@ -445,10 +445,10 @@ void main() {
             'GuardianInfoStepState.build() n\'est jamais ré-invoqué après '
             'l\'erreur — l\'étape reste figée avec un spinner.',
       );
-      expect(
-        find.text('Un tuteur avec ce numéro existe déjà.'),
-        findsOneWidget,
-      );
+      // Et le refus n'est plus une impasse : la fiche qui porte ce numéro est
+      // proposée au rattachement (voir guardian_phone_conflict_link_test).
+      await tester.pumpAndSettle();
+      expect(find.text('Ce numéro est déjà utilisé'), findsOneWidget);
     },
   );
 }

@@ -27,7 +27,12 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
   final bool Function() isAwaiting;
   final VoidCallback onSaved;
   final ValueChanged<String> onError;
-  final ValueChanged<String>? onGuardianPhoneConflict;
+
+  /// Reçoit le numéro refusé EN PLUS du message : c'est lui qui permet à
+  /// l'étape Tuteurs de désigner la carte fautive et de proposer la fiche
+  /// existante, au lieu d'un simple message sans issue.
+  final void Function(String phoneNumber, String message)?
+  onGuardianPhoneConflict;
   final Widget child;
 
   const EnrollmentDraftStepSaveListener({
@@ -57,7 +62,12 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
         if (state is EnrollmentDraftStepSaved) {
           onSaved();
         } else if (state is EnrollmentDraftGuardianPhoneConflict) {
-          (onGuardianPhoneConflict ?? onError)(state.message);
+          final onConflict = onGuardianPhoneConflict;
+          if (onConflict != null) {
+            onConflict(state.phoneNumber, state.message);
+          } else {
+            onError(state.message);
+          }
         } else if (state is EnrollmentDraftError) {
           onError(state.message);
         }

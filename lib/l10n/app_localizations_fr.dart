@@ -1819,6 +1819,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianLinkExistingAction => 'Rechercher une fiche';
 
   @override
+  String get guardianPhoneConflictDialogEyebrow => 'Tuteurs';
+
+  @override
+  String get guardianPhoneConflictDialogTitle => 'Ce numéro est déjà utilisé';
+
+  @override
+  String guardianPhoneConflictDialogMessage(String phoneNumber) {
+    return '$phoneNumber appartient déjà à une fiche existante. Rattachez-la à l\'élève, ou corrigez le numéro saisi.';
+  }
+
+  @override
+  String get guardianPhoneConflictUseAction => 'Utiliser cette fiche';
+
+  @override
+  String get guardianPhoneConflictFixPhoneAction => 'Corriger le numéro';
+
+  @override
+  String get guardianPhoneConflictNotFoundTitle => 'Fiche introuvable';
+
+  @override
+  String get guardianPhoneConflictNotFoundDescription =>
+      'Aucune fiche portant ce numéro n\'a pu être retrouvée. Corrigez le numéro saisi.';
+
+  @override
+  String get guardianPhoneDuplicateInFormError =>
+      'Ce numéro est déjà saisi pour un autre tuteur de ce dossier.';
+
+  @override
   String get schoolFees => 'Frais Scolaires';
 
   @override

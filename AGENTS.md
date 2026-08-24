@@ -470,6 +470,20 @@ va remplacer**, jamais dans l'en-tête de l'étape.
 - Le bandeau disparaît d'une carte déjà rattachée — il n'aurait plus rien à
   proposer.
 
+### Un refus de doublon propose la sortie
+
+Quand la garde d'unicité téléphone refuse une écriture, l'étape ne se contente
+pas du message : `showGuardianPhoneConflictDialog` relance la recherche **sur le
+numéro refusé** et propose la ou les fiches qui le portent. « Utiliser cette
+fiche » remplace la carte fautive ; « Corriger le numéro » ne referme que la
+popin (rien n'a été écrit — l'enregistrement a déjà échoué).
+
+Deux cas gardent le simple message, parce qu'aucune fiche existante n'y est en
+cause : quand **deux cartes du même dossier** portent le numéro (le doublon est
+interne, aucune ne peut être désignée), et quand plus aucune carte ne le porte.
+C'est pourquoi `EnrollmentDraftGuardianPhoneConflict` transporte le **numéro**
+en plus du message : sans lui, la carte fautive serait indésignable.
+
 ### Formatage des champs texte
 
 La capitalisation est le **défaut** d'`EteeloTextInput` : c'est l'exception qui

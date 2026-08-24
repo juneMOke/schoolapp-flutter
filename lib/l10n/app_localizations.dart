@@ -2984,6 +2984,54 @@ abstract class AppLocalizations {
   /// **'Search for a record'**
   String get guardianLinkExistingAction;
 
+  /// No description provided for @guardianPhoneConflictDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardians'**
+  String get guardianPhoneConflictDialogEyebrow;
+
+  /// No description provided for @guardianPhoneConflictDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already in use'**
+  String get guardianPhoneConflictDialogTitle;
+
+  /// No description provided for @guardianPhoneConflictDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{phoneNumber} already belongs to an existing record. Link it to the student, or correct the number you entered.'**
+  String guardianPhoneConflictDialogMessage(String phoneNumber);
+
+  /// No description provided for @guardianPhoneConflictUseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this record'**
+  String get guardianPhoneConflictUseAction;
+
+  /// No description provided for @guardianPhoneConflictFixPhoneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct the number'**
+  String get guardianPhoneConflictFixPhoneAction;
+
+  /// No description provided for @guardianPhoneConflictNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record not found'**
+  String get guardianPhoneConflictNotFoundTitle;
+
+  /// No description provided for @guardianPhoneConflictNotFoundDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No record carrying this number could be found. Correct the number you entered.'**
+  String get guardianPhoneConflictNotFoundDescription;
+
+  /// No description provided for @guardianPhoneDuplicateInFormError.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already entered for another guardian in this file.'**
+  String get guardianPhoneDuplicateInFormError;
+
   /// No description provided for @schoolFees.
   ///
   /// In en, this message translates to:

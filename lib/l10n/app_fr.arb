@@ -1063,6 +1063,21 @@
   "guardianLinkExistingBannerTitle": "Ce tuteur est déjà enregistré à l'école ?",
   "guardianLinkExistingBannerDescription": "Retrouvez sa fiche au lieu de la ressaisir : elle remplacera ce que porte cette carte.",
   "guardianLinkExistingAction": "Rechercher une fiche",
+  "guardianPhoneConflictDialogEyebrow": "Tuteurs",
+  "guardianPhoneConflictDialogTitle": "Ce numéro est déjà utilisé",
+  "guardianPhoneConflictDialogMessage": "{phoneNumber} appartient déjà à une fiche existante. Rattachez-la à l'élève, ou corrigez le numéro saisi.",
+  "@guardianPhoneConflictDialogMessage": {
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "guardianPhoneConflictUseAction": "Utiliser cette fiche",
+  "guardianPhoneConflictFixPhoneAction": "Corriger le numéro",
+  "guardianPhoneConflictNotFoundTitle": "Fiche introuvable",
+  "guardianPhoneConflictNotFoundDescription": "Aucune fiche portant ce numéro n'a pu être retrouvée. Corrigez le numéro saisi.",
+  "guardianPhoneDuplicateInFormError": "Ce numéro est déjà saisi pour un autre tuteur de ce dossier.",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",

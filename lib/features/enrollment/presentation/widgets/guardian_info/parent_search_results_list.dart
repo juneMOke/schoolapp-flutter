@@ -16,10 +16,21 @@ class ParentSearchResultsList extends StatelessWidget {
   final List<LocalParent> results;
   final ValueChanged<LocalParent> onSelected;
 
+  /// Mode **désignation** : le tap marque la ligne au lieu de valider tout de
+  /// suite — c'est un bouton de pied qui tranche ensuite. Sert à la popin de
+  /// conflit de téléphone, où l'on veut relire la fiche proposée avant de
+  /// remplacer le tuteur en cours de saisie.
+  final bool selectable;
+
+  /// Ligne actuellement désignée en mode [selectable].
+  final String? selectedParentId;
+
   const ParentSearchResultsList({
     super.key,
     required this.results,
     required this.onSelected,
+    this.selectable = false,
+    this.selectedParentId,
   });
 
   @override
@@ -39,6 +50,8 @@ class ParentSearchResultsList extends StatelessWidget {
           parent.lastName,
         ].where((part) => part != null && part.trim().isNotEmpty).join(' ');
 
+        final isSelected = selectable && selectedParentId == parent.id;
+
         return Material(
           color: Colors.transparent,
           child: InkWell(
@@ -49,7 +62,10 @@ class ParentSearchResultsList extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: AppRadius.brMd,
-                border: Border.all(color: AppColors.border),
+                border: Border.all(
+                  color: isSelected ? AppColors.bleuArdoise : AppColors.border,
+                  width: isSelected ? 2 : 1,
+                ),
               ),
               child: Row(
                 children: [
@@ -75,9 +91,15 @@ class ParentSearchResultsList extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary,
+                  Icon(
+                    selectable
+                        ? (isSelected
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded)
+                        : Icons.chevron_right_rounded,
+                    color: isSelected
+                        ? AppColors.bleuArdoise
+                        : AppColors.textSecondary,
                   ),
                 ],
               ),

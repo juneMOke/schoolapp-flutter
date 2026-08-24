@@ -429,13 +429,48 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// cette étape affiche elle-même le message d'erreur — `_onDraftError`
   /// reste muet pour les échecs génériques (déjà couverts par le toast
   /// générique de `EnrollmentStepperScope`, en amont).
-  void _onGuardianPhoneConflict(String message) {
+  ///
+  /// Le refus n'est pas une impasse : la fiche qui porte déjà ce numéro est
+  /// proposée au rattachement, et si elle est retenue elle REMPLACE la carte
+  /// fautive. Le toast ne subsiste que là où aucune carte ne peut être
+  /// désignée, ou là où le doublon est interne au dossier (deux cartes, même
+  /// numéro) — cas où aucune fiche existante n'est en cause.
+  Future<void> _onGuardianPhoneConflict(
+    String phoneNumber,
+    String message,
+  ) async {
     setState(() {
       _awaitingDraftSave = false;
       _isBatchSaving = false;
     });
     _onSavingChanged(false);
-    AppSnackBar.showError(context, message);
+
+    final candidates = _cardsHoldingPhone(phoneNumber);
+    if (candidates.length != 1) {
+      AppSnackBar.showError(
+        context,
+        candidates.isEmpty
+            ? message
+            : AppLocalizations.of(context)!.guardianPhoneDuplicateInFormError,
+      );
+      return;
+    }
+
+    final conflictedParentId = candidates.single;
+    final found = await showGuardianPhoneConflictDialog(
+      context: context,
+      phoneNumber: phoneNumber,
+    );
+    if (!mounted) return;
+
+    if (found == null) {
+      // « Corriger le numéro » : rien n'a été écrit (l'enregistrement a
+      // échoué), on ramène simplement la carte fautive sous les yeux.
+      _onOpenParent(conflictedParentId);
+      return;
+    }
+
+    _linkFoundParent(found, replacedParentId: conflictedParentId);
   }
 
   void _onAddGuardian() {
@@ -568,6 +603,20 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     // rattaché est déjà valide mais pas "dirty" au sens d'une édition de
     // champ).
     _dispatchDraftGuardians();
+  }
+
+  /// Ids des cartes dont le numéro saisi est CELUI-CI, à la mise en forme
+  /// près.
+  List<String> _cardsHoldingPhone(String phoneNumber) {
+    return _editableParentDetails
+        .map((parent) => parent.id)
+        .where(
+          (id) => PhoneNumberFormat.sameNumber(
+            _currentValuesByParentId[id]?.phoneNumber ?? '',
+            phoneNumber,
+          ),
+        )
+        .toList(growable: false);
   }
 
   void _onRemoveGuardian(String parentId) {

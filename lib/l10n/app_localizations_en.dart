@@ -1812,6 +1812,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianLinkExistingAction => 'Search for a record';
 
   @override
+  String get guardianPhoneConflictDialogEyebrow => 'Guardians';
+
+  @override
+  String get guardianPhoneConflictDialogTitle =>
+      'This number is already in use';
+
+  @override
+  String guardianPhoneConflictDialogMessage(String phoneNumber) {
+    return '$phoneNumber already belongs to an existing record. Link it to the student, or correct the number you entered.';
+  }
+
+  @override
+  String get guardianPhoneConflictUseAction => 'Use this record';
+
+  @override
+  String get guardianPhoneConflictFixPhoneAction => 'Correct the number';
+
+  @override
+  String get guardianPhoneConflictNotFoundTitle => 'Record not found';
+
+  @override
+  String get guardianPhoneConflictNotFoundDescription =>
+      'No record carrying this number could be found. Correct the number you entered.';
+
+  @override
+  String get guardianPhoneDuplicateInFormError =>
+      'This number is already entered for another guardian in this file.';
+
+  @override
   String get schoolFees => 'School Fees';
 
   @override

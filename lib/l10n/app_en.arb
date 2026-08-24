@@ -1108,6 +1108,21 @@
   "guardianLinkExistingBannerTitle": "Is this guardian already on file?",
   "guardianLinkExistingBannerDescription": "Find their record instead of typing it again: it will replace what this card holds.",
   "guardianLinkExistingAction": "Search for a record",
+  "guardianPhoneConflictDialogEyebrow": "Guardians",
+  "guardianPhoneConflictDialogTitle": "This number is already in use",
+  "guardianPhoneConflictDialogMessage": "{phoneNumber} already belongs to an existing record. Link it to the student, or correct the number you entered.",
+  "@guardianPhoneConflictDialogMessage": {
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "guardianPhoneConflictUseAction": "Use this record",
+  "guardianPhoneConflictFixPhoneAction": "Correct the number",
+  "guardianPhoneConflictNotFoundTitle": "Record not found",
+  "guardianPhoneConflictNotFoundDescription": "No record carrying this number could be found. Correct the number you entered.",
+  "guardianPhoneDuplicateInFormError": "This number is already entered for another guardian in this file.",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",
