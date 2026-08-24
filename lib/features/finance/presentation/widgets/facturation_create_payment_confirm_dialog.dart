@@ -47,6 +47,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   required String totalLabel,
   required String studentName,
   required String payerName,
+  required String payerPhone,
   required List<FacturationConfirmAllocationItem> allocations,
   required PaymentsCreateRequested request,
   VoidCallback? onDownloadReceipt,
@@ -63,6 +64,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
         totalLabel: totalLabel,
         studentName: studentName,
         payerName: payerName,
+        payerPhone: payerPhone,
         allocations: allocations,
         request: request,
         onDownloadReceipt: onDownloadReceipt,
@@ -78,6 +80,7 @@ class _CollectFlowDialog extends StatefulWidget {
   final String totalLabel;
   final String studentName;
   final String payerName;
+  final String payerPhone;
   final List<FacturationConfirmAllocationItem> allocations;
   final PaymentsCreateRequested request;
   final VoidCallback? onDownloadReceipt;
@@ -86,6 +89,7 @@ class _CollectFlowDialog extends StatefulWidget {
     required this.totalLabel,
     required this.studentName,
     required this.payerName,
+    required this.payerPhone,
     required this.allocations,
     required this.request,
     this.onDownloadReceipt,
@@ -223,6 +227,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                         totalLabel: widget.totalLabel,
                         studentName: widget.studentName,
                         payerName: widget.payerName,
+                        payerPhone: widget.payerPhone,
                         allocations: widget.allocations,
                       )
                     : _ResultBody(
@@ -339,12 +344,14 @@ class _ConfirmBody extends StatelessWidget {
   final String totalLabel;
   final String studentName;
   final String payerName;
+  final String payerPhone;
   final List<FacturationConfirmAllocationItem> allocations;
 
   const _ConfirmBody({
     required this.totalLabel,
     required this.studentName,
     required this.payerName,
+    required this.payerPhone,
     required this.allocations,
   });
 
@@ -381,6 +388,33 @@ class _ConfirmBody extends StatelessWidget {
           ),
           style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
         ),
+        // Le numéro sur SA ligne, hors de la phrase : c'est le dernier écran
+        // avant d'engager l'argent, et le seul endroit où le guichetier peut
+        // encore relire ce qu'il a tapé. Noyé dans une phrase, il ne se relit
+        // pas.
+        if (payerPhone.trim().isNotEmpty) ...[
+          const SizedBox(height: AppDimensions.spacingXS),
+          Row(
+            children: [
+              const Icon(
+                Icons.phone_outlined,
+                size: AppDimensions.financeRowIconSize,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: AppDimensions.spacingXS),
+              Flexible(
+                child: Text(
+                  payerPhone.trim(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyStrong.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppDimensions.spacingM),
         Text(
           l10n.facturationCreatePaymentConfirmDistributionTitle,

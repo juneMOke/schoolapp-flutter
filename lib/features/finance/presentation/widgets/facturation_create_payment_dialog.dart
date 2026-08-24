@@ -332,6 +332,7 @@ class _FacturationCreatePaymentDialogViewState
       totalLabel: _formatWithCurrency(total, currency),
       studentName: _studentFullName(l10n),
       payerName: _payerFullName(l10n),
+      payerPhone: _phoneController.text.trim(),
       allocations: [
         for (final entry in retained)
           FacturationConfirmAllocationItem(

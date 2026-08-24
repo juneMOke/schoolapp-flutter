@@ -94,7 +94,8 @@ class FinanceLedgerReadDao {
              p.paid_at           AS p_paid_at,
              p.payer_first_name  AS p_payer_first_name,
              p.payer_last_name   AS p_payer_last_name,
-             p.payer_middle_name AS p_payer_middle_name
+             p.payer_middle_name AS p_payer_middle_name,
+             p.payer_phone_number AS p_payer_phone_number
       FROM payment_allocations pa
       JOIN payments p ON p.id = pa.payment_id
       WHERE pa.payment_id = ?
@@ -108,6 +109,7 @@ class FinanceLedgerReadDao {
             payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
             payerLastName: (r['p_payer_last_name'] as String?) ?? '',
             payerMiddleName: r['p_payer_middle_name'] as String?,
+            payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,
           ),
         )
@@ -130,7 +132,8 @@ class FinanceLedgerReadDao {
              p.paid_at           AS p_paid_at,
              p.payer_first_name  AS p_payer_first_name,
              p.payer_last_name   AS p_payer_last_name,
-             p.payer_middle_name AS p_payer_middle_name
+             p.payer_middle_name AS p_payer_middle_name,
+             p.payer_phone_number AS p_payer_phone_number
       FROM payment_allocations pa
       JOIN payments p ON p.id = pa.payment_id
       WHERE pa.student_charge_id = ?
@@ -144,6 +147,7 @@ class FinanceLedgerReadDao {
             payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
             payerLastName: (r['p_payer_last_name'] as String?) ?? '',
             payerMiddleName: r['p_payer_middle_name'] as String?,
+            payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,
           ),
         )

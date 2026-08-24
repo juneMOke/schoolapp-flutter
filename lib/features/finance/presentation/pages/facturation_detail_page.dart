@@ -160,6 +160,7 @@ class FacturationDetailPage extends StatelessWidget {
         payerFirstName: payment.payerFirstName,
         payerLastName: payment.payerLastName,
         payerMiddleName: payment.payerMiddleName,
+        payerPhoneNumber: payment.payerPhoneNumber,
         amountInCents: payment.amountInCents,
         currency: payment.currency,
         paidAt: payment.paidAt,

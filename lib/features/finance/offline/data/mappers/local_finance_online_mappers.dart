@@ -65,6 +65,7 @@ extension LocalPaymentAllocationToOnline on LocalPaymentAllocation {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
     // malformée ou absente laisse `paidAt` nul (l'UI affiche « inconnu »).
     paidAt: paidAt == null ? null : DateTime.tryParse(paidAt!),

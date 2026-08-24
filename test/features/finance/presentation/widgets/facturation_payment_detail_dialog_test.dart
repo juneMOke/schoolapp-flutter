@@ -9,6 +9,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 FacturationPaymentDetailIntent _intent({
   bool isPendingSync = false,
   String? cashierFullName,
+  String? payerPhoneNumber = '+243816939060',
 }) => FacturationPaymentDetailIntent(
   paymentId: 'pay-1',
   studentId: 'stu-1',
@@ -21,6 +22,7 @@ FacturationPaymentDetailIntent _intent({
   payerFirstName: 'Joseph',
   payerLastName: 'Kabongo',
   payerMiddleName: 'Mwamba',
+  payerPhoneNumber: payerPhoneNumber,
   amountInCents: 15000,
   currency: 'USD',
   paidAt: DateTime(2025, 11, 8),
@@ -37,6 +39,7 @@ Future<void> _pump(
   EditiqueCacheEntry? cancelledReceipt,
   String? cashierFullName,
   Widget? ticketPrint,
+  String? payerPhoneNumber = '+243816939060',
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -49,6 +52,7 @@ Future<void> _pump(
             intent: _intent(
               isPendingSync: isPendingSync,
               cashierFullName: cashierFullName,
+              payerPhoneNumber: payerPhoneNumber,
             ),
             allocations: const Text('ALLOC_SLOT'),
             receiptNumber: receiptNumber,
@@ -433,5 +437,26 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(EteeloDialogBody), findsOneWidget);
+  });
+
+  testWidgets('le bloc payeur porte son numéro', (tester) async {
+    await _pump(tester, onDownload: () {});
+    await tester.pumpAndSettle();
+
+    expect(find.text('+243816939060'), findsOneWidget);
+  });
+
+  /// Ici, contrairement aux listes, l'absence se DIT : on a ouvert cette popin
+  /// POUR savoir, et une ligne escamotée s'y lirait comme un défaut
+  /// d'affichage. Le tiret est le même repli que les autres valeurs manquantes
+  /// de l'écran.
+  testWidgets('sans numéro, le détail affiche le repli « valeur inconnue »', (
+    tester,
+  ) async {
+    await _pump(tester, onDownload: () {}, payerPhoneNumber: null);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.phone_outlined), findsOneWidget);
+    expect(find.text('+243816939060'), findsNothing);
   });
 }

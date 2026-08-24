@@ -288,6 +288,10 @@ class LocalPaymentAllocation extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro du payeur, replié depuis le paiement porteur (v28). Nul pour un
+  /// versement antérieur au palier ou venu d'un autre poste.
+  final String? payerPhoneNumber;
   final String? paidAt;
 
   const LocalPaymentAllocation({
@@ -301,6 +305,7 @@ class LocalPaymentAllocation extends Equatable {
     this.payerFirstName = '',
     this.payerLastName = '',
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.paidAt,
   });
 
@@ -316,6 +321,7 @@ class LocalPaymentAllocation extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     paidAt,
   ];
 }
