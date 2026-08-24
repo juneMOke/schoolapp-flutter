@@ -50,6 +50,24 @@ class FinancePayerDirectoryDao {
     ORDER BY last_paid_at DESC
   ''';
 
+  /// Plafond du nombre de payeurs DISTINCTS ramenés en mémoire par une
+  /// recherche.
+  ///
+  /// Le filtre d'identité se fait en Dart (accents), donc SQL ne peut pas
+  /// réduire les lignes lui-même : sans ce plafond, chaque recherche par
+  /// identité matérialise TOUS les payeurs distincts de la table sur
+  /// l'isolate de l'UI. Les groupes arrivent du plus récemment actif au plus
+  /// ancien : ce qui tombe au-delà du plafond est donc toujours le plus
+  /// dormant.
+  ///
+  /// 5000 est volontairement hors d'atteinte d'un déploiement réel — la
+  /// conception suppose une tablette pour une école, dont les payeurs
+  /// distincts se comptent en centaines même après plusieurs exercices. Il ne
+  /// borne que le cas pathologique. À revoir le jour où une base réelle en
+  /// approcherait : au-delà, un payeur dormant deviendrait introuvable
+  /// SILENCIEUSEMENT, ce qu'aucun message ne dit aujourd'hui.
+  static const searchScanCap = 5000;
+
   /// Un versement sans identité exploitable n'est proposable à personne.
   static const _namedPayer =
       "TRIM(payer_last_name) <> '' AND TRIM(payer_first_name) <> ''";
@@ -101,6 +119,7 @@ class FinancePayerDirectoryDao {
     String? surname,
     String? phoneNumber,
     int limit = 20,
+    int scanCap = searchScanCap,
   }) async {
     final phoneDigits = PhoneNumberFormat.nationalPartOf(
       phoneNumber?.trim() ?? '',
@@ -118,6 +137,9 @@ class FinancePayerDirectoryDao {
     // sur `Kabongo` manquerait `Kabóngo`. On laisse donc SQL réduire les
     // versements à leurs payeurs DISTINCTS (quelques centaines de lignes là où
     // la table en compte des milliers) et on tranche en Dart, accents pliés.
+    //
+    // En mode identité, ce « quelques centaines » est la seule chose qui borne
+    // le travail : aucune clause ne restreint les lignes, d'où [scanCap].
     final clauses = <String>[_namedPayer];
     final args = <Object?>[];
     if (phoneDigits.isNotEmpty) {
@@ -130,7 +152,8 @@ class FinancePayerDirectoryDao {
     }
 
     final rows = await _db.rawQuery(
-      '$_paymentGroupSelect WHERE ${clauses.join(' AND ')} $_paymentGroupBy',
+      '$_paymentGroupSelect WHERE ${clauses.join(' AND ')} $_paymentGroupBy '
+      'LIMIT $scanCap',
       args,
     );
     final payers = _mergeByIdentity(rows.map(_payerFromPaymentRow));

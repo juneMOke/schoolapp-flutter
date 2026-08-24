@@ -302,5 +302,51 @@ void main() {
     test('un joker LIKE dans le numéro ne remonte pas tout', () async {
       expect(await dao.searchPayers(phoneNumber: '%'), isEmpty);
     });
+
+    /// Le filtre d'identité étant en Dart, rien côté SQL ne borne le travail :
+    /// sans plafond, une recherche par identité matérialise TOUS les payeurs
+    /// distincts de la table sur l'isolate de l'UI.
+    group('plafond de balayage', () {
+      setUp(() async {
+        // Trois payeurs de plus, du plus ancien au plus récent.
+        for (var i = 0; i < 3; i++) {
+          await insertPayment(
+            studentId: 's-3',
+            lastName: 'Ngoy',
+            firstName: 'Payeur$i',
+            phone: '+24381000000$i',
+            paidAt: '2026-08-0${i + 1}T09:00:00.000Z',
+          );
+        }
+      });
+
+      /// Le plafond porte sur la récence GLOBALE, avant tout filtre
+      /// d'identité : les 3 groupes lus ici sont Mbayo (08-11), Kabóngo
+      /// (08-10) et le seul Ngoy assez récent pour entrer.
+      test('ne ramène que les groupes les plus récemment actifs', () async {
+        final found = await dao.searchPayers(lastName: 'Ngoy', scanCap: 3);
+
+        expect(found.map((p) => p.firstName), ['Payeur2']);
+      });
+
+      /// Le prix du plafond, dit sans détour : sous le seuil, un payeur
+      /// dormant devient introuvable, et rien ne le signale. C'est pourquoi
+      /// la valeur par défaut est posée hors d'atteinte d'une base réelle.
+      test('sous le plafond, un payeur dormant est hors d\'atteinte', () async {
+        final found = await dao.searchPayers(lastName: 'Ngoy', scanCap: 2);
+
+        expect(found, isEmpty);
+      });
+
+      test('le plafond par défaut ne coupe rien à cette échelle', () async {
+        final found = await dao.searchPayers(lastName: 'Ngoy');
+
+        expect(found.map((p) => p.firstName), [
+          'Payeur2',
+          'Payeur1',
+          'Payeur0',
+        ]);
+      });
+    });
   });
 }
