@@ -15,11 +15,16 @@ Ce projet utilise une approche hybride :
 
 ## Matrice des environnements
 
-| Environnement | Flavor    | Bundle / App ID attendu                  | Nom affiché          |
-|---------------|-----------|------------------------------------------|----------------------|
-| Dev           | `dev`     | `com.junethink.schoolAppFlutter.dev`     | `School App Dev`     |
-| Staging       | `staging` | `com.junethink.schoolAppFlutter.staging` | `School App Staging` |
-| Prod          | `prod`    | `com.junethink.schoolAppFlutter`         | `School App`         |
+| Environnement | Flavor | `applicationId` Android | Bundle id iOS | Nom affiché |
+|---|---|---|---|---|
+| Dev | `dev` | `com.junethink.school_app_flutter.dev` | `com.junethink.schoolAppFlutter.dev` | `ETEELO CONNECT Dev` |
+| Staging | `staging` | `com.junethink.school_app_flutter.staging` | `com.junethink.schoolAppFlutter.staging` | `ETEELO CONNECT Staging` |
+| Prod | `prod` | `com.junethink.school_app_flutter` | `com.junethink.schoolAppFlutter` | `ETEELO CONNECT` |
+
+⚠ Les deux plateformes n'ont **pas** le même identifiant : Android est en
+`snake_case` (`build.gradle.kts`), iOS en `camelCase` (`project.pbxproj`). Ce
+n'est pas une coquille — toute console tierce (Firebase, Play, App Store) doit
+recevoir la forme de SA plateforme.
 
 ## Run local (Flutter)
 
@@ -73,8 +78,9 @@ Workflow `Build Android` → `environment: staging`.
   `build_number`. **Aucun `version_tag` n'est requis** — il ne l'est que pour la
   prod.
 - Distribution Firebase : `FIREBASE_APP_ID` doit être celui de l'app
-  `com.junethink.schoolAppFlutter.staging`, défini dans l'environnement GitHub
-  `staging` (l'App ID prod serait rejeté pour cause de package name différent).
+  `com.junethink.school_app_flutter.staging` (forme **Android**, pas la forme
+  iOS), défini dans l'environnement GitHub `staging`. L'App ID prod serait
+  rejeté : il est lié à un autre nom de package.
 
 ## Signature Android release (option B recommandee)
 
