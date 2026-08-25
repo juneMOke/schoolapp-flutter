@@ -75,9 +75,17 @@ if (isSigningDebugEnabled) {
     )
 }
 
-val isProdReleaseTaskRequested =
+// Flavors dont un build release DOIT porter la vraie signature d'upload.
+// `staging` en fait partie : un APK signé avec la clé debug du runner ne peut
+// pas être mis à jour par le suivant (la clé est regénérée à chaque build),
+// ce qui imposerait une désinstallation sur chaque tablette de recette.
+val signedReleaseFlavors = listOf("prod", "staging")
+
+val isSignedReleaseTaskRequested =
     gradle.startParameter.taskNames.any { taskName ->
-        taskName.contains("prodrelease", ignoreCase = true)
+        signedReleaseFlavors.any { flavor ->
+            taskName.contains("${flavor}release", ignoreCase = true)
+        }
     }
 
 android {
@@ -144,7 +152,7 @@ android {
             if (hasReleaseSigningCredentials) {
                 signingConfig = signingConfigs.getByName("release")
             } else {
-                if (isProdReleaseTaskRequested) {
+                if (isSignedReleaseTaskRequested) {
                     val missingCredentialFields = buildList {
                         if (resolvedKeystorePath.isNullOrBlank()) add("storeFile / ANDROID_KEYSTORE_PATH")
                         if (resolvedKeystorePassword.isNullOrBlank()) add("storePassword / ANDROID_KEYSTORE_PASSWORD")
@@ -152,12 +160,13 @@ android {
                         if (resolvedKeyPassword.isNullOrBlank()) add("keyPassword / ANDROID_KEY_PASSWORD")
                     }
                     throw GradleException(
-                        "Missing Android release signing credentials for prod release (${missingCredentialFields.joinToString()}). " +
+                        "Missing Android release signing credentials for a signed release " +
+                            "(${missingCredentialFields.joinToString()}). " +
                             "Provide key.properties or ANDROID_KEYSTORE_PATH / ANDROID_KEYSTORE_PASSWORD / " +
                             "ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD.",
                     )
                 }
-                // Fallback local pour release non-prod uniquement.
+                // Fallback local pour les flavors non signés (dev) uniquement.
                 signingConfig = signingConfigs.getByName("debug")
             }
             isMinifyEnabled = true

@@ -43,15 +43,44 @@ flutter run --flavor prod --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=
 
 ## Build Android
 
+`dev` est le seul environnement construit en `--debug`. **`staging` se construit
+exactement comme `prod`** — même `--release`, mêmes optimisations R8 /
+`shrinkResources`, même keystore d'upload — seule l'URL de l'API diffère.
+
 ```bash
-flutter build apk --flavor dev --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://10.0.2.2:8080
-flutter build appbundle --flavor staging --dart-define=APP_ENV=staging --dart-define=API_BASE_URL=https://staging.api.example.com
+flutter build apk --flavor dev --debug --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://10.0.2.2:8080
+flutter build appbundle --flavor staging --release --dart-define=APP_ENV=staging --dart-define=API_BASE_URL=https://staging.api.example.com
 flutter build appbundle --flavor prod --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://api.example.com
 ```
 
+Un build `staging` **ou** `prod` en `--release` sans identifiants de signature
+échoue désormais dans `build.gradle.kts` (`signedReleaseFlavors`) au lieu de
+retomber silencieusement sur la clé debug : cette clé étant regénérée à chaque
+machine / runner, une tablette de recette ne pourrait plus recevoir la mise à
+jour suivante sans désinstallation.
+
+### Build staging via GitHub Actions
+
+Workflow `Build Android` → `environment: staging`.
+
+- Secret requis : `STAGING_API_BASE_URL` (HTTPS obligatoire, loopback refusé par
+  `validate_env.sh`), dans l'environnement GitHub `staging` ou au niveau dépôt.
+- Signature : réutilise les secrets `ANDROID_RELEASE_KEYSTORE_BASE64` /
+  `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` de
+  la prod. L'`applicationId` diffère (`.staging`), donc aucun conflit
+  d'installation avec la prod sur la même tablette.
+- Versionnement : `version` du `pubspec.yaml` + `GITHUB_RUN_NUMBER` comme
+  `build_number`. **Aucun `version_tag` n'est requis** — il ne l'est que pour la
+  prod.
+- Distribution Firebase : `FIREBASE_APP_ID` doit être celui de l'app
+  `com.junethink.schoolAppFlutter.staging`, défini dans l'environnement GitHub
+  `staging` (l'App ID prod serait rejeté pour cause de package name différent).
+
 ## Signature Android release (option B recommandee)
 
-Le projet utilise une signature release Android via secrets GitHub Actions pour les builds `prod` (et les builds `appbundle`).
+Le projet utilise une signature release Android via secrets GitHub Actions
+pour tout build produisant le buildType `release` : `prod` et `staging` (APK
+comme App Bundle), ainsi que les App Bundles `dev`.
 
 ### Secrets GitHub requis
 

@@ -48,6 +48,9 @@ jobs:
     outputs:
       app_env: ${{ steps.config.outputs.app_env }}
       flavor: ${{ steps.config.outputs.flavor }}
+      build_type: ${{ steps.config.outputs.build_type }}
+      build_mode: ${{ steps.config.outputs.build_mode }}
+      needs_signing: ${{ steps.config.outputs.needs_signing }}
     steps:
       - name: Resolve environment variables
         id: config
@@ -58,17 +61,40 @@ jobs:
             ENV="dev"
           fi
 
+          BUILD_TYPE="${{ inputs.build_type }}"
+          if [[ -z "$BUILD_TYPE" ]]; then
+            BUILD_TYPE="apk"
+          fi
+
+          # `staging` est un build de production à part entière : mêmes
+          # optimisations R8, même signature, même chaîne. Seule l'URL de
+          # l'API backend le distingue de `prod` (cf. « Resolve API base URL »).
           case "$ENV" in
             dev)
+              BUILD_MODE="debug"
               ;;
-            staging)
+            staging|prod)
+              BUILD_MODE="release"
               ;;
-            prod)
+            *)
+              echo "Environnement inconnu : '$ENV'. Attendu : dev, staging ou prod."
+              exit 1
               ;;
           esac
 
-          echo "app_env=$ENV"       >> "$GITHUB_OUTPUT"
-          echo "flavor=$ENV"         >> "$GITHUB_OUTPUT"
+          # `flutter build appbundle` produit toujours le buildType release :
+          # il exige donc la signature même là où l'APK resterait en debug.
+          if [[ "$BUILD_MODE" == "release" || "$BUILD_TYPE" == "appbundle" ]]; then
+            NEEDS_SIGNING="true"
+          else
+            NEEDS_SIGNING="false"
+          fi
+
+          echo "app_env=$ENV"                 >> "$GITHUB_OUTPUT"
+          echo "build_type=$BUILD_TYPE"       >> "$GITHUB_OUTPUT"
+          echo "flavor=$ENV"                  >> "$GITHUB_OUTPUT"
+          echo "build_mode=$BUILD_MODE"       >> "$GITHUB_OUTPUT"
+          echo "needs_signing=$NEEDS_SIGNING" >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────
   # Job 2 — Validation fail-fast
@@ -107,7 +133,7 @@ jobs:
   # Job 3 — Build Android
   # ─────────────────────────────────────────────────────────────────
   build-android:
-    name: Build Android ${{ needs.resolve-config.outputs.flavor }} (${{ inputs.build_type || 'apk' }})
+    name: Build Android ${{ needs.resolve-config.outputs.flavor }} (${{ needs.resolve-config.outputs.build_type }})
     needs: [ resolve-config, validate-env ]
     runs-on: ubuntu-latest
     environment: ${{ needs.resolve-config.outputs.app_env }}
@@ -171,7 +197,7 @@ jobs:
           done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
 
       - name: Prepare Android release signing
-        if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
+        if: ${{ needs.resolve-config.outputs.needs_signing == 'true' }}
         uses: ./.github/actions/prepare-android-signing
         with:
           android_release_keystore_base64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
@@ -181,38 +207,29 @@ jobs:
           key_properties_path: android/key.properties
 
       - name: Build APK
-        if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
+        if: ${{ needs.resolve-config.outputs.build_type == 'apk' }}
         run: |
-          if [[ "${{ needs.resolve-config.outputs.app_env }}" == "prod" ]]; then
-            flutter build apk \
-              --flavor "${{ needs.resolve-config.outputs.flavor }}" \
-              --release \
-              --build-name "${{ steps.version.outputs.build_name }}" \
-              --build-number "${{ steps.version.outputs.build_number }}" \
-              --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-              --dart-define=API_BASE_URL="$API_BASE_URL"
-          else
-            flutter build apk \
-              --flavor "${{ needs.resolve-config.outputs.flavor }}" \
-              --debug \
-              --build-name "${{ steps.version.outputs.build_name }}" \
-              --build-number "${{ steps.version.outputs.build_number }}" \
-              --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-              --dart-define=API_BASE_URL="$API_BASE_URL"
-          fi
+          flutter build apk \
+            --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            "--${{ needs.resolve-config.outputs.build_mode }}" \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
+            --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+            --dart-define=API_BASE_URL="$API_BASE_URL"
 
       - name: Build App Bundle
-        if: ${{ inputs.build_type == 'appbundle' }}
+        if: ${{ needs.resolve-config.outputs.build_type == 'appbundle' }}
         run: |
           flutter build appbundle \
             --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            --release \
             --build-name "${{ steps.version.outputs.build_name }}" \
             --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
             --dart-define=API_BASE_URL="$API_BASE_URL"
 
       - name: Upload APK artifact
-        if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
+        if: ${{ needs.resolve-config.outputs.build_type == 'apk' }}
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
@@ -220,7 +237,7 @@ jobs:
           retention-days: 30
 
       - name: Upload App Bundle artifact
-        if: ${{ inputs.build_type == 'appbundle' }}
+        if: ${{ needs.resolve-config.outputs.build_type == 'appbundle' }}
         uses: actions/upload-artifact@v4
         with:
           name: android-aab-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
@@ -231,7 +248,10 @@ jobs:
     needs: [ resolve-config, build-android ]
     if: ${{ inputs.distribute_firebase == true }}
     runs-on: ubuntu-latest
-    environment: prod
+    # L'App ID Firebase est lié à un applicationId précis
+    # (`…schoolAppFlutter.staging` ≠ `…schoolAppFlutter`) : les secrets se
+    # lisent dans l'environnement GitHub correspondant, jamais dans `prod`.
+    environment: ${{ needs.resolve-config.outputs.app_env }}
     steps:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
@@ -244,7 +264,7 @@ jobs:
 
       - name: Check secrets present
         run: |
-          test -n "${{ secrets.FIREBASE_APP_ID }}" || { echo "FIREBASE_APP_ID vide"; exit 1; }
+          test -n "${{ secrets.FIREBASE_APP_ID }}" || { echo "FIREBASE_APP_ID vide pour l'environnement '${{ needs.resolve-config.outputs.app_env }}'"; exit 1; }
           test -s "$RUNNER_TEMP/firebase-sa.json" || { echo "JSON service account vide/absent"; exit 1; }
           echo "Secrets OK"
 
@@ -260,7 +280,7 @@ jobs:
           firebase appdistribution:distribute "$APK" \
             --app "${{ secrets.FIREBASE_APP_ID }}" \
             --groups "demo-tablets" \
-            --release-notes "Démo build ${{ github.run_number }}"
+            --release-notes "Démo ${{ needs.resolve-config.outputs.app_env }} build ${{ github.run_number }}"
 
       - name: Cleanup secret
         if: always()
