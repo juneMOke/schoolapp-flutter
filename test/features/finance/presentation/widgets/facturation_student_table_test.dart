@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_data_table.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_invitation_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
@@ -71,6 +72,26 @@ const _summary = EnrollmentSummary(
   ),
 );
 
+/// La même ligne, telle que la lecture LOCALE la rend depuis le passage du
+/// niveau sur la ligne : le DAO résout les libellés par LEFT JOIN.
+const _summaryAvecNiveau = EnrollmentSummary(
+  enrollmentId: 'enr-1',
+  enrollmentCode: 'MAT-001',
+  status: 'COMPLETED',
+  syncState: SyncState.synced,
+  schoolLevelId: 'lvl-5p',
+  schoolLevelName: '5e primaire',
+  schoolLevelGroupName: 'Primaire',
+  student: StudentSummary(
+    id: 's1',
+    firstName: 'Debbie',
+    lastName: 'MOKE',
+    surname: 'Junior',
+    dateOfBirth: '2010-01-01',
+    gender: Gender.female,
+  ),
+);
+
 const _query = EnrollmentSummariesQuery(
   type: EnrollmentSummaryQueryType.byAcademicInfo,
   status: '',
@@ -79,6 +100,18 @@ const _query = EnrollmentSummariesQuery(
   size: 10,
   lastName: 'Kabongo',
   schoolLevelId: 'l1',
+);
+
+/// Une recherche par **identité** : la bascule exclusive n'envoie que les
+/// critères du mode actif, donc aucun niveau ne voyage.
+const _queryParIdentite = EnrollmentSummariesQuery(
+  type: EnrollmentSummaryQueryType.byAcademicInfo,
+  status: '',
+  academicYearId: 'ay-1',
+  page: 0,
+  size: 10,
+  lastName: 'MOKE',
+  schoolLevelId: '',
 );
 
 /// Fabrique d'état — le constructeur exige tous ses champs, ce qui rendrait
@@ -106,6 +139,7 @@ Future<void> _pumpTable(
   WidgetTester tester,
   EnrollmentLocalListState state, {
   _Session? session,
+  void Function(EnrollmentSummary summary, String levelId)? onViewRequested,
 }) async {
   tester.view.physicalSize = const Size(1400, 1600);
   tester.view.devicePixelRatio = 1.0;
@@ -114,7 +148,9 @@ Future<void> _pumpTable(
   Widget child = BlocProvider<EnrollmentLocalListBloc>(
     create: (_) => _FakeEnrollmentLocalListBloc(state),
     child: AppPageBackground(
-      child: FacturationStudentTable(onViewRequested: (_, _) {}),
+      child: FacturationStudentTable(
+        onViewRequested: onViewRequested ?? (_, _) {},
+      ),
     ),
   );
 
@@ -159,6 +195,54 @@ void main() {
 
     expect(find.byType(FacturationSearchInvitationCard), findsOneWidget);
   });
+
+  // Le « · - » du sur-titre de la fiche : jusqu'ici la SEULE source d'un niveau
+  // à l'affichage était le critère de recherche, et une recherche par identité
+  // n'en transporte aucun. La ligne, elle, sait — et c'est elle que l'oeil
+  // remonte.
+  testWidgets(
+    'recherche par identité : l\'oeil remonte le niveau porté par la ligne',
+    (tester) async {
+      EnrollmentSummary? recu;
+      String? levelIdRecu;
+
+      await _pumpTable(
+        tester,
+        _state(
+          status: EnrollmentLoadStatus.success,
+          summaries: const [_summaryAvecNiveau],
+          lastQuery: _queryParIdentite,
+        ),
+        session: _caissierComplet,
+        onViewRequested: (summary, levelId) {
+          recu = summary;
+          levelIdRecu = levelId;
+        },
+      );
+
+      await tester.tap(find.byIcon(Icons.visibility_outlined));
+      await tester.pumpAndSettle();
+
+      expect(
+        levelIdRecu,
+        isEmpty,
+        reason:
+            'les critères ne portent aucun niveau : c\'est exactement le cas '
+            'qui produisait « Facturation · - »',
+      );
+      expect(recu?.schoolLevelName, '5e primaire');
+
+      // Ce que la page compose ensuite, avec un référentiel vide pour prouver
+      // que la ligne se suffit à elle-même.
+      final labels = resolveEnrollmentLevelLabels(
+        recu!,
+        bundles: const [],
+        searchedLevelId: levelIdRecu,
+      );
+      expect(labels.levelName, '5e primaire');
+      expect(labels.levelGroupName, 'Primaire');
+    },
+  );
 
   testWidgets('des résultats → tableau, quel que soit le profil', (
     tester,

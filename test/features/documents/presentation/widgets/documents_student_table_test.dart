@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/documents_student_table.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
@@ -23,12 +24,18 @@ EnrollmentSummary _summary({
   String lastName = 'Mbala',
   String surname = 'Kasa',
   String firstName = 'Amina',
+  String? schoolLevelId,
+  String? schoolLevelName,
+  String? schoolLevelGroupName,
 }) => EnrollmentSummary(
   enrollmentId: enrollmentId,
   enrollmentCode: 'MAT-001',
   status: 'CONFIRMED',
   enrollmentType: 'NEW',
   syncState: SyncState.synced,
+  schoolLevelId: schoolLevelId,
+  schoolLevelName: schoolLevelName,
+  schoolLevelGroupName: schoolLevelGroupName,
   student: StudentSummary(
     id: 's-$enrollmentId',
     firstName: firstName,
@@ -129,6 +136,50 @@ void main() {
     await tester.pump();
 
     expect(opened?.enrollmentId, 'e-1');
+  });
+
+  // Le segment de classe que le sur-titre du catalogue laissait tomber : les
+  // critères d'une recherche par identité ne portent aucun niveau, la ligne si.
+  testWidgets('recherche par identité : la ligne ouverte porte sa classe', (
+    tester,
+  ) async {
+    EnrollmentSummary? opened;
+    await _pump(
+      tester,
+      _state(
+        queryType: EnrollmentSummaryQueryType.byAcademicInfo,
+        status: EnrollmentLoadStatus.success,
+        summaries: [
+          _summary(
+            schoolLevelId: 'lvl-5p',
+            schoolLevelName: '5e primaire',
+            schoolLevelGroupName: 'Primaire',
+          ),
+        ],
+        lastQuery: const EnrollmentSummariesQuery(
+          type: EnrollmentSummaryQueryType.byAcademicInfo,
+          status: '',
+          academicYearId: 'y-1',
+          page: 0,
+          size: 10,
+          lastName: 'Mbala',
+        ),
+      ),
+      onCatalogRequested: (summary) => opened = summary,
+    );
+
+    await tester.tap(find.byTooltip('Ouvrir les documents'));
+    await tester.pump();
+
+    // Ce que la page compose ensuite : référentiel vide et aucun critère de
+    // niveau — la ligne doit suffire.
+    final labels = resolveEnrollmentLevelLabels(
+      opened!,
+      bundles: const [],
+      searchedLevelId: null,
+    );
+    expect(labels.levelName, '5e primaire');
+    expect(labels.levelGroupName, 'Primaire');
   });
 
   testWidgets('affiche l état vide avec les critères cherchés', (tester) async {

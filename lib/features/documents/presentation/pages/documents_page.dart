@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/documents/presentation/helpers/docum
 import 'package:school_app_flutter/features/documents/presentation/widgets/documents_search_form.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/documents_student_table.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -137,9 +137,13 @@ class _DocumentsPageState extends State<DocumentsPage> {
         .state
         .lastSummariesQuery
         ?.schoolLevelId;
-    final labels = _levelLabels(
-      academicYearContext?.schoolLevelGroups ?? const [],
-      levelId,
+    // La LIGNE d'abord, le critère de recherche ensuite : une recherche par
+    // identité ne transporte aucun niveau, et le sur-titre perdait alors son
+    // segment de classe alors que le résumé sait de quel niveau est l'élève.
+    final labels = resolveEnrollmentLevelLabels(
+      summary,
+      bundles: academicYearContext?.schoolLevelGroups ?? const [],
+      searchedLevelId: levelId,
     );
 
     context.push(
@@ -156,29 +160,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
         firstName: summary.student.firstName,
         lastName: summary.student.lastName,
         surname: summary.student.surname,
-        levelName: labels.$1,
-        levelGroupName: labels.$2,
+        levelName: labels.levelName,
+        levelGroupName: labels.levelGroupName,
       ),
     );
-  }
-
-  /// (niveau, cycle) correspondant à [levelId].
-  ///
-  /// Vides quand la recherche s'est faite **par nom** : le résumé d'élève ne
-  /// porte aucun niveau, et le dernier critère de recherche est la seule source
-  /// disponible. Le catalogue s'affiche alors sans sur-titre de classe — c'est
-  /// du contexte d'affichage, jamais une condition d'ouverture.
-  (String, String) _levelLabels(
-    List<SchoolLevelGroupBundle> bundles,
-    String? levelId,
-  ) {
-    if (levelId == null || levelId.isEmpty) return ('', '');
-
-    for (final bundle in bundles) {
-      for (final level in bundle.levels) {
-        if (level.id == levelId) return (level.name, bundle.group.name);
-      }
-    }
-    return ('', '');
   }
 }
