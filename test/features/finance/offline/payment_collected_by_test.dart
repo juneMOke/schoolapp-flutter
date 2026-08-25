@@ -22,8 +22,8 @@ void main() {
     'paidAt': '2026-08-24T09:30:00.000Z',
     'payerFirstName': 'Joseph',
     'payerLastName': 'Kabongo',
-    if (collectedById != null) 'collectedById': collectedById,
-    if (collectedByName != null) 'collectedByName': collectedByName,
+    'collectedById': ?collectedById,
+    'collectedByName': ?collectedByName,
   };
 
   group('pull', () {
