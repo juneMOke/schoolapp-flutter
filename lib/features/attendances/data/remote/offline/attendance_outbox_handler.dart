@@ -244,19 +244,23 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
 
   /// Le jeton LWW sur lequel se réancrer après avoir PERDU l'arbitrage.
   ///
-  /// ⚠️ Le contrat ne transporte pas celui de la session gagnante :
-  /// `AttendanceAggregateResponse.session` porte `id`, `serverUpdatedAt` et
-  /// `expectedCount`, rien d'autre (openApi.yaml § AttendanceAggregateResponse,
-  /// et `SessionRef` côté serveur). `response.updatedAt` est donc toujours nul
-  /// aujourd'hui ; on le lit d'abord pour le jour où le serveur l'ajoutera.
+  /// `response.updatedAt` est la bonne réponse et passe donc en premier : le
+  /// serveur porte désormais le jeton de l'état retenu sur le fil
+  /// (`AttendanceAggregateResponse.session.updatedAt`).
+  ///
+  /// ⚠️ **Le repli reste, et il n'est pas décoratif.** Ce champ n'a pas toujours
+  /// existé : `SessionRef` n'exposait que `id`, `serverUpdatedAt` et
+  /// `expectedCount`, et un serveur pas encore monté de version répond toujours
+  /// sans. Le parc ne bascule pas d'un bloc, la tablette parle à celui qu'elle
+  /// trouve.
   ///
   /// Le repli d'origine était `now()` — l'horloge de la tablette, précisément
   /// celle qui retarde quand un `SUPERSEDED` survient. On se réancrait sur un
   /// jeton encore perdant, la correction suivante reperdait, et la journée ne
   /// pouvait plus jamais atterrir : la boucle que ce chemin existe pour fermer.
   ///
-  /// À défaut du bon jeton, on prend le plus tardif de ce que la réponse porte
-  /// RÉELLEMENT : le commit Postgres du gagnant (`serverUpdatedAt`) et les
+  /// À défaut du bon jeton, on prend donc le plus tardif de ce que la réponse
+  /// porte encore : le commit Postgres du gagnant (`serverUpdatedAt`) et les
   /// `updatedAt` de ses absences, qui sont, eux, de vrais jetons client. Ce
   /// n'est pas exact — un gagnant dont l'horloge avançait a pu poser un jeton
   /// jusqu'à `ClientClockGuard.DEFAULT_TOLERANCE` (5 min) au-dessus de son

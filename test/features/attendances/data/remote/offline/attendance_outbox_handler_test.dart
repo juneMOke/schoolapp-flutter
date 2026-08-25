@@ -441,90 +441,94 @@ void main() {
     });
   });
 
-  group('SUPERSEDED : jeton LWW réancré sur la réponse, jamais sur la tablette', () {
-    /// Epoch d'un instant ISO — l'horloge du handler est figée à 7000 ms, donc
-    /// toute valeur issue de la réponse s'en distingue sans ambiguïté.
-    int epochOf(String iso) => DateTime.parse(iso).millisecondsSinceEpoch;
+  group(
+    'SUPERSEDED : jeton LWW réancré sur la réponse, jamais sur la tablette',
+    () {
+      /// Epoch d'un instant ISO — l'horloge du handler est figée à 7000 ms, donc
+      /// toute valeur issue de la réponse s'en distingue sans ambiguïté.
+      int epochOf(String iso) => DateTime.parse(iso).millisecondsSinceEpoch;
 
-    Future<int> adoptedToken() async {
-      when(
-        () => local.adoptCanonicalDay(
-          classroomId: any(named: 'classroomId'),
-          dateStr: any(named: 'dateStr'),
-          academicYearId: any(named: 'academicYearId'),
-          canonicalAbsences: any(named: 'canonicalAbsences'),
-          updatedAt: any(named: 'updatedAt'),
-          syncedAt: any(named: 'syncedAt'),
-          serverUpdatedAt: any(named: 'serverUpdatedAt'),
-          expectedCount: any(named: 'expectedCount'),
-        ),
-      ).thenAnswer((_) async {});
-      stubMarkSynced();
+      Future<int> adoptedToken() async {
+        when(
+          () => local.adoptCanonicalDay(
+            classroomId: any(named: 'classroomId'),
+            dateStr: any(named: 'dateStr'),
+            academicYearId: any(named: 'academicYearId'),
+            canonicalAbsences: any(named: 'canonicalAbsences'),
+            updatedAt: any(named: 'updatedAt'),
+            syncedAt: any(named: 'syncedAt'),
+            serverUpdatedAt: any(named: 'serverUpdatedAt'),
+            expectedCount: any(named: 'expectedCount'),
+          ),
+        ).thenAnswer((_) async {});
+        stubMarkSynced();
 
-      await handler.dispatch(entry());
+        await handler.dispatch(entry());
 
-      return verify(
-            () => local.adoptCanonicalDay(
-              classroomId: any(named: 'classroomId'),
-              dateStr: any(named: 'dateStr'),
-              academicYearId: any(named: 'academicYearId'),
-              canonicalAbsences: any(named: 'canonicalAbsences'),
-              updatedAt: captureAny(named: 'updatedAt'),
-              syncedAt: any(named: 'syncedAt'),
-              serverUpdatedAt: any(named: 'serverUpdatedAt'),
-              expectedCount: any(named: 'expectedCount'),
+        return verify(
+              () => local.adoptCanonicalDay(
+                classroomId: any(named: 'classroomId'),
+                dateStr: any(named: 'dateStr'),
+                academicYearId: any(named: 'academicYearId'),
+                canonicalAbsences: any(named: 'canonicalAbsences'),
+                updatedAt: captureAny(named: 'updatedAt'),
+                syncedAt: any(named: 'syncedAt'),
+                serverUpdatedAt: any(named: 'serverUpdatedAt'),
+                expectedCount: any(named: 'expectedCount'),
+              ),
+            ).captured.single
+            as int;
+      }
+
+      test(
+        'serveur qui ne porte pas le jeton : on ne retombe pas sur now()',
+        () async {
+          // `SessionRef` n'a longtemps exposé que id / serverUpdatedAt /
+          // expectedCount, et un serveur pas encore monté de version répond
+          // toujours ainsi. Le repli d'origine était l'horloge de la tablette —
+          // précisément celle qui retarde quand un SUPERSEDED survient, donc un
+          // jeton encore perdant, donc la journée condamnée à reperdre tous les
+          // arbitrages suivants.
+          when(() => api.submitAttendance(any(), any())).thenAnswer(
+            (_) async => response(outcome: 'SUPERSEDED', updatedAt: null),
+          );
+
+          expect(await adoptedToken(), epochOf('2026-06-15T09:00:00.000Z'));
+        },
+      );
+
+      test(
+        'on prend le plus tardif de ce que la réponse porte vraiment',
+        () async {
+          // Les ACK d'absence, eux, portent de vrais jetons client : le gagnant y
+          // est mieux approché que par son seul temps de commit.
+          when(() => api.submitAttendance(any(), any())).thenAnswer(
+            (_) async => response(
+              outcome: 'SUPERSEDED',
+              updatedAt: null,
+              absences: const [
+                AttendanceAbsenceAck(
+                  studentId: 's9',
+                  updatedAt: '2026-06-15T10:00:00.000Z',
+                ),
+              ],
             ),
-          ).captured.single
-          as int;
-    }
+          );
 
-    test(
-      'le contrat ne porte PAS session.updatedAt : on ne retombe pas sur now()',
-      () async {
-        // C'est le cas RÉEL : `AttendanceAggregateResponse.session` n'expose que
-        // id / serverUpdatedAt / expectedCount. Le repli d'origine était
-        // l'horloge de la tablette — précisément celle qui retarde quand un
-        // SUPERSEDED survient, donc un jeton encore perdant, donc la journée
-        // condamnée à reperdre tous les arbitrages suivants.
-        when(() => api.submitAttendance(any(), any())).thenAnswer(
-          (_) async => response(outcome: 'SUPERSEDED', updatedAt: null),
-        );
+          expect(await adoptedToken(), epochOf('2026-06-15T10:00:00.000Z'));
+        },
+      );
 
-        expect(await adoptedToken(), epochOf('2026-06-15T09:00:00.000Z'));
-      },
-    );
-
-    test(
-      'on prend le plus tardif de ce que la réponse porte vraiment',
-      () async {
-        // Les ACK d'absence, eux, portent de vrais jetons client : le gagnant y
-        // est mieux approché que par son seul temps de commit.
+      test('session.updatedAt prime dès que le serveur le porte', () async {
         when(() => api.submitAttendance(any(), any())).thenAnswer(
           (_) async => response(
             outcome: 'SUPERSEDED',
-            updatedAt: null,
-            absences: const [
-              AttendanceAbsenceAck(
-                studentId: 's9',
-                updatedAt: '2026-06-15T10:00:00.000Z',
-              ),
-            ],
+            updatedAt: '2026-06-15T11:00:00.000Z',
           ),
         );
 
-        expect(await adoptedToken(), epochOf('2026-06-15T10:00:00.000Z'));
-      },
-    );
-
-    test('session.updatedAt prime dès que le serveur l\'émettra', () async {
-      when(() => api.submitAttendance(any(), any())).thenAnswer(
-        (_) async => response(
-          outcome: 'SUPERSEDED',
-          updatedAt: '2026-06-15T11:00:00.000Z',
-        ),
-      );
-
-      expect(await adoptedToken(), epochOf('2026-06-15T11:00:00.000Z'));
-    });
-  });
+        expect(await adoptedToken(), epochOf('2026-06-15T11:00:00.000Z'));
+      });
+    },
+  );
 }

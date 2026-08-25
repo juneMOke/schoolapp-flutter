@@ -20,18 +20,17 @@ class AttendanceAggregateResponseModel extends Equatable {
   /// `APPLIED` (écriture retenue) | `SUPERSEDED` (un état plus récent existait).
   final String lwwOutcome;
 
-  /// Jeton LWW de l'état **gagnant** (`client_updated_at`).
+  /// Jeton LWW de l'état **retenu** (`client_updated_at`) — celui du **gagnant**
+  /// sur un `SUPERSEDED`, et la seule sortie d'un arbitrage perdu : sans lui, la
+  /// tablette resterait sur son propre jeton, celui qui vient de perdre, et
+  /// reperdrait tous les suivants.
   ///
-  /// ⚠️ **Le contrat ne le transporte pas.** `AttendanceAggregateResponse`
-  /// n'expose sur sa session que `id`, `serverUpdatedAt` et `expectedCount` —
-  /// au swagger comme dans le `SessionRef` du serveur. Ce champ vaut donc
-  /// toujours `null` aujourd'hui ; il est conservé parce qu'il est ce dont le
-  /// client a besoin pour se réancrer, et qu'il se remplira seul le jour où le
-  /// serveur l'émettra.
-  ///
-  /// En attendant, [AttendanceOutboxHandler] reconstitue le meilleur jeton
-  /// disponible à partir de ce que la réponse porte vraiment. Ne PAS retomber
-  /// sur l'horloge locale : c'est elle qui a fait perdre l'arbitrage.
+  /// ⚠️ **Reste optionnel, et le repli n'est pas décoratif.** Le serveur ne
+  /// l'émet que depuis l'ajout d'`updatedAt` à `SessionRef` ; un serveur
+  /// antérieur répond sans, et le parc ne se met pas à jour d'un bloc. Quand il
+  /// manque, [AttendanceOutboxHandler] reconstitue le meilleur jeton que la
+  /// réponse porte encore — jamais l'horloge locale, qui est précisément celle
+  /// qui a fait perdre l'arbitrage.
   final String? updatedAt;
 
   /// État canonique des absences du gagnant. Le contrat le renvoie précisément
