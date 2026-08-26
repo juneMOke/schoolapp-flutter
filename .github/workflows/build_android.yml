@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.resolve-config.outputs.app_env }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -141,7 +141,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
