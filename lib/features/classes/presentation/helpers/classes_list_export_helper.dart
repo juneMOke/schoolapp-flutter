@@ -5,12 +5,23 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class ClassesListExportHelper {
   const ClassesListExportHelper._();
 
+  /// [includeLevel] suit la colonne « Niveau » du tableau : l'export rend ce
+  /// que l'écran rend. En mode classe le niveau est le critère, identique sur
+  /// toutes les lignes.
   static String buildEnrollmentCsv({
     required AppLocalizations l10n,
     required List<EnrollmentSummary> summaries,
+    bool includeLevel = false,
   }) {
     final buffer = StringBuffer()
-      ..writeln(_row([l10n.lastName, l10n.surname, l10n.firstName]));
+      ..writeln(
+        _row([
+          l10n.lastName,
+          l10n.surname,
+          l10n.firstName,
+          if (includeLevel) l10n.classesListLevelColumnLabel,
+        ]),
+      );
 
     for (final summary in summaries) {
       buffer.writeln(
@@ -18,6 +29,7 @@ class ClassesListExportHelper {
           summary.student.lastName,
           summary.student.surname,
           summary.student.firstName,
+          if (includeLevel) summary.schoolLevelName ?? '',
         ]),
       );
     }

@@ -16,6 +16,10 @@ class PaymentAllocation extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro du payeur (v28), même repli et même réserve que ci-dessus : la
+  /// source online ne le porte pas encore, il est alors nul.
+  final String? payerPhoneNumber;
   final DateTime? paidAt;
 
   const PaymentAllocation({
@@ -29,6 +33,7 @@ class PaymentAllocation extends Equatable {
     this.payerFirstName = '',
     this.payerLastName = '',
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.paidAt,
   });
 
@@ -44,6 +49,7 @@ class PaymentAllocation extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     paidAt,
   ];
 }

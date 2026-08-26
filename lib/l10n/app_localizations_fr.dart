@@ -608,20 +608,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesListClassroomOptionalLabel => 'Classe (optionnel)';
 
   @override
-  String get classesListFirstNameOptionalLabel => 'Prénom (optionnel)';
+  String get classesListClassroomPlaceholder => 'Choisissez d\'abord un niveau';
 
   @override
-  String get classesListLastNameOptionalLabel => 'Nom (optionnel)';
+  String get classesListClassroomNonePlaceholder =>
+      'Aucune classe pour ce niveau';
 
   @override
-  String get classesListSurnameOptionalLabel => 'Post-nom (optionnel)';
+  String get classesListSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get classesListLevelColumnLabel => 'Niveau';
+
+  @override
+  String get classesListLevelUnknown => '—';
 
   @override
   String get classesListInitialEmptyTitle => 'Aucune recherche en cours';
 
   @override
   String get classesListInitialEmptyMessage =>
-      'Renseignez au moins un critère pour afficher les élèves.';
+      'Choisissez un niveau, ou renseignez l\'identité complète d\'un élève, pour afficher des résultats.';
 
   @override
   String get classesListNoMatchTitle =>
@@ -1756,9 +1763,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get guardianSearchAction => 'Rechercher un parent';
-
-  @override
   String get guardianSearchDialogTitle => 'Rechercher un parent existant';
 
   @override
@@ -1802,6 +1806,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianSearchErrorRetry => 'Réessayer';
+
+  @override
+  String get guardianLinkExistingBannerTitle =>
+      'Ce tuteur est déjà enregistré à l\'école ?';
+
+  @override
+  String get guardianLinkExistingBannerDescription =>
+      'Retrouvez sa fiche au lieu de la ressaisir : elle remplacera ce que porte cette carte.';
+
+  @override
+  String get guardianLinkExistingAction => 'Rechercher une fiche';
+
+  @override
+  String get guardianPhoneConflictDialogEyebrow => 'Tuteurs';
+
+  @override
+  String get guardianPhoneConflictDialogTitle => 'Ce numéro est déjà utilisé';
+
+  @override
+  String guardianPhoneConflictDialogMessage(String phoneNumber) {
+    return '$phoneNumber appartient déjà à une fiche existante. Rattachez-la à l\'élève, ou corrigez le numéro saisi.';
+  }
+
+  @override
+  String get guardianPhoneConflictUseAction => 'Utiliser cette fiche';
+
+  @override
+  String get guardianPhoneConflictFixPhoneAction => 'Corriger le numéro';
+
+  @override
+  String get guardianPhoneConflictNotFoundTitle => 'Fiche introuvable';
+
+  @override
+  String get guardianPhoneConflictNotFoundDescription =>
+      'Aucune fiche portant ce numéro n\'a pu être retrouvée. Corrigez le numéro saisi.';
+
+  @override
+  String get guardianPhoneDuplicateInFormError =>
+      'Ce numéro est déjà saisi pour un autre tuteur de ce dossier.';
+
+  @override
+  String get guardianLinkTargetGoneError =>
+      'Ce tuteur n\'est plus dans le dossier : la fiche n\'a pas été rattachée.';
 
   @override
   String get schoolFees => 'Frais Scolaires';
@@ -3299,6 +3346,91 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get facturationCreatePaymentPayerFieldRequired =>
       'Ce champ est obligatoire';
+
+  @override
+  String get facturationCreatePaymentPayerPhoneLabel => 'Téléphone du payeur';
+
+  @override
+  String get facturationCreatePaymentPayerPickAction => 'Choisir un payeur';
+
+  @override
+  String get facturationCreatePaymentPayerPickHelp =>
+      'Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.';
+
+  @override
+  String get facturationPayerSearchDialogEyebrow => 'Encaissement';
+
+  @override
+  String get facturationPayerSearchDialogTitle => 'Choisir un payeur';
+
+  @override
+  String get facturationPayerSearchModeSemantics => 'Mode de recherche';
+
+  @override
+  String get facturationPayerSearchModeByPhone => 'Par numéro';
+
+  @override
+  String get facturationPayerSearchModeByIdentity => 'Par identité';
+
+  @override
+  String get facturationPayerSearchPhoneHint =>
+      'Le numéro suffit, même partiel : « 8169 » remonte tous les payeurs concernés.';
+
+  @override
+  String get facturationPayerSearchIdentityHint =>
+      'Un seul mot suffit — nom, post-nom ou prénom. Les accents sont ignorés.';
+
+  @override
+  String get facturationPayerSearchAction => 'Rechercher';
+
+  @override
+  String get facturationPayerSearchSuggestionsTitle =>
+      'Déjà connus pour cet élève';
+
+  @override
+  String get facturationPayerSearchResultsTitle => 'Résultats';
+
+  @override
+  String get facturationPayerSearchResultsPlaceholder =>
+      'Les payeurs correspondants s\'afficheront ici.';
+
+  @override
+  String get facturationPayerSearchEmptyTitle => 'Aucun payeur trouvé';
+
+  @override
+  String get facturationPayerSearchEmptyDescription =>
+      'Aucun payeur ne correspond à ces critères. Vérifiez la saisie, ou fermez cette fenêtre pour le saisir à la main.';
+
+  @override
+  String get facturationPayerSearchErrorRetry => 'Réessayer';
+
+  @override
+  String get facturationPayerSearchOriginGuardian =>
+      'Tuteur de l\'élève — n\'a encore rien payé';
+
+  @override
+  String facturationPayerSearchPaymentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements',
+      one: '1 versement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String facturationPayerSearchLastPaidAt(String date) {
+    return 'dernier le $date';
+  }
+
+  @override
+  String get facturationPayerSearchUnknownPhone => 'Numéro inconnu';
+
+  @override
+  String facturationPayerSearchSelectSemantics(String name) {
+    return 'Choisir $name comme payeur';
+  }
 
   @override
   String get facturationCreatePaymentDetailsSectionTitle =>

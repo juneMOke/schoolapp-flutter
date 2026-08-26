@@ -1142,23 +1142,35 @@ abstract class AppLocalizations {
   /// **'Classroom (optional)'**
   String get classesListClassroomOptionalLabel;
 
-  /// No description provided for @classesListFirstNameOptionalLabel.
+  /// No description provided for @classesListClassroomPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'First name (optional)'**
-  String get classesListFirstNameOptionalLabel;
+  /// **'Pick a level first'**
+  String get classesListClassroomPlaceholder;
 
-  /// No description provided for @classesListLastNameOptionalLabel.
+  /// No description provided for @classesListClassroomNonePlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Last name (optional)'**
-  String get classesListLastNameOptionalLabel;
+  /// **'No classroom for this level'**
+  String get classesListClassroomNonePlaceholder;
 
-  /// No description provided for @classesListSurnameOptionalLabel.
+  /// No description provided for @classesListSearchLevelPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Surname (optional)'**
-  String get classesListSurnameOptionalLabel;
+  /// **'Pick a cycle'**
+  String get classesListSearchLevelPlaceholder;
+
+  /// No description provided for @classesListLevelColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get classesListLevelColumnLabel;
+
+  /// No description provided for @classesListLevelUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get classesListLevelUnknown;
 
   /// No description provided for @classesListInitialEmptyTitle.
   ///
@@ -1169,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @classesListInitialEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'Fill in at least one criterion to display students.'**
+  /// **'Pick a level, or fill in a student\'s full identity, to display results.'**
   String get classesListInitialEmptyMessage;
 
   /// No description provided for @classesListNoMatchTitle.
@@ -2876,12 +2888,6 @@ abstract class AppLocalizations {
   /// **'Failed to remove guardian: {message}'**
   String guardianUnlinkError(String message);
 
-  /// No description provided for @guardianSearchAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Search for a guardian'**
-  String get guardianSearchAction;
-
   /// No description provided for @guardianSearchDialogTitle.
   ///
   /// In en, this message translates to:
@@ -2959,6 +2965,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get guardianSearchErrorRetry;
+
+  /// No description provided for @guardianLinkExistingBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this guardian already on file?'**
+  String get guardianLinkExistingBannerTitle;
+
+  /// No description provided for @guardianLinkExistingBannerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find their record instead of typing it again: it will replace what this card holds.'**
+  String get guardianLinkExistingBannerDescription;
+
+  /// No description provided for @guardianLinkExistingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a record'**
+  String get guardianLinkExistingAction;
+
+  /// No description provided for @guardianPhoneConflictDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardians'**
+  String get guardianPhoneConflictDialogEyebrow;
+
+  /// No description provided for @guardianPhoneConflictDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already in use'**
+  String get guardianPhoneConflictDialogTitle;
+
+  /// No description provided for @guardianPhoneConflictDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{phoneNumber} already belongs to an existing record. Link it to the student, or correct the number you entered.'**
+  String guardianPhoneConflictDialogMessage(String phoneNumber);
+
+  /// No description provided for @guardianPhoneConflictUseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this record'**
+  String get guardianPhoneConflictUseAction;
+
+  /// No description provided for @guardianPhoneConflictFixPhoneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct the number'**
+  String get guardianPhoneConflictFixPhoneAction;
+
+  /// No description provided for @guardianPhoneConflictNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record not found'**
+  String get guardianPhoneConflictNotFoundTitle;
+
+  /// No description provided for @guardianPhoneConflictNotFoundDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No record carrying this number could be found. Correct the number you entered.'**
+  String get guardianPhoneConflictNotFoundDescription;
+
+  /// No description provided for @guardianPhoneDuplicateInFormError.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already entered for another guardian in this file.'**
+  String get guardianPhoneDuplicateInFormError;
+
+  /// No description provided for @guardianLinkTargetGoneError.
+  ///
+  /// In en, this message translates to:
+  /// **'This guardian is no longer in the file: the record was not linked.'**
+  String get guardianLinkTargetGoneError;
 
   /// No description provided for @schoolFees.
   ///
@@ -5549,6 +5627,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This field is required'**
   String get facturationCreatePaymentPayerFieldRequired;
+
+  /// No description provided for @facturationCreatePaymentPayerPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer\'s phone number'**
+  String get facturationCreatePaymentPayerPhoneLabel;
+
+  /// No description provided for @facturationCreatePaymentPayerPickAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payer'**
+  String get facturationCreatePaymentPayerPickAction;
+
+  /// No description provided for @facturationCreatePaymentPayerPickHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse a payer who has already been to the desk, or enter one below.'**
+  String get facturationCreatePaymentPayerPickHelp;
+
+  /// No description provided for @facturationPayerSearchDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get facturationPayerSearchDialogEyebrow;
+
+  /// No description provided for @facturationPayerSearchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payer'**
+  String get facturationPayerSearchDialogTitle;
+
+  /// No description provided for @facturationPayerSearchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get facturationPayerSearchModeSemantics;
+
+  /// No description provided for @facturationPayerSearchModeByPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'By phone number'**
+  String get facturationPayerSearchModeByPhone;
+
+  /// No description provided for @facturationPayerSearchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get facturationPayerSearchModeByIdentity;
+
+  /// No description provided for @facturationPayerSearchPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A partial number is enough: “8169” brings up every matching payer.'**
+  String get facturationPayerSearchPhoneHint;
+
+  /// No description provided for @facturationPayerSearchIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A single word is enough — last, middle or first name. Accents are ignored.'**
+  String get facturationPayerSearchIdentityHint;
+
+  /// No description provided for @facturationPayerSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get facturationPayerSearchAction;
+
+  /// No description provided for @facturationPayerSearchSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already known for this student'**
+  String get facturationPayerSearchSuggestionsTitle;
+
+  /// No description provided for @facturationPayerSearchResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get facturationPayerSearchResultsTitle;
+
+  /// No description provided for @facturationPayerSearchResultsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching payers will appear here.'**
+  String get facturationPayerSearchResultsPlaceholder;
+
+  /// No description provided for @facturationPayerSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No payer found'**
+  String get facturationPayerSearchEmptyTitle;
+
+  /// No description provided for @facturationPayerSearchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.'**
+  String get facturationPayerSearchEmptyDescription;
+
+  /// No description provided for @facturationPayerSearchErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationPayerSearchErrorRetry;
+
+  /// No description provided for @facturationPayerSearchOriginGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s guardian — has never paid yet'**
+  String get facturationPayerSearchOriginGuardian;
+
+  /// No description provided for @facturationPayerSearchPaymentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment} other{{count} payments}}'**
+  String facturationPayerSearchPaymentCount(int count);
+
+  /// No description provided for @facturationPayerSearchLastPaidAt.
+  ///
+  /// In en, this message translates to:
+  /// **'last one on {date}'**
+  String facturationPayerSearchLastPaidAt(String date);
+
+  /// No description provided for @facturationPayerSearchUnknownPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number unknown'**
+  String get facturationPayerSearchUnknownPhone;
+
+  /// No description provided for @facturationPayerSearchSelectSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose {name} as the payer'**
+  String facturationPayerSearchSelectSemantics(String name);
 
   /// No description provided for @facturationCreatePaymentDetailsSectionTitle.
   ///

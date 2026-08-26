@@ -119,6 +119,12 @@ class PaymentDto {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro du payeur (v28). Absent des deltas scellés avant l'évolution du
+  /// contrat : il ne sert donc qu'à HYDRATER une ligne inconnue (versement d'un
+  /// autre poste), jamais à patcher une ligne que ce poste a saisie —
+  /// cf. `PaymentLocalModel.toPullPatch`.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// UUID du reçu scellé, porté par `PaymentDelta` (v19). Le serveur l'envoyait
@@ -126,6 +132,13 @@ class PaymentDto {
   /// définitif d'un versement encaissé sur un AUTRE poste — celui-ci n'a jamais
   /// eu de ligne `generated_documents` locale.
   final String? receiptId;
+
+  /// Encaisseur attribué par le serveur (v29). `GET /sync/payments` l'APLATIT
+  /// en deux champs, là où les routes back-office rendent un objet
+  /// `collectedBy { id, firstName, lastName }` — le flux de synchro est le seul
+  /// contrat que lit ce client.
+  final String? collectedById;
+  final String? collectedByName;
 
   const PaymentDto({
     required this.id,
@@ -138,8 +151,11 @@ class PaymentDto {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.receiptId,
+    this.collectedById,
+    this.collectedByName,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -153,8 +169,11 @@ class PaymentDto {
     payerFirstName: (j['payerFirstName'] as String?) ?? '',
     payerLastName: (j['payerLastName'] as String?) ?? '',
     payerMiddleName: j['payerMiddleName'] as String?,
+    payerPhoneNumber: j['payerPhoneNumber'] as String?,
     status: j['status'] as String?,
     receiptId: j['receiptId'] as String?,
+    collectedById: j['collectedById'] as String?,
+    collectedByName: j['collectedByName'] as String?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -169,8 +188,11 @@ class PaymentDto {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     status: status,
     receiptId: receiptId,
+    collectedById: collectedById,
+    collectedByName: collectedByName,
     syncStatus: 'SYNCED',
     syncedAt: now,
     updatedAt: now,

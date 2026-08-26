@@ -9,6 +9,11 @@ class Payment extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). Nul est un état NORMAL : la saisie l'exige
+  /// depuis le palier, mais tout versement plus ancien — et tout versement
+  /// scellé avant que le contrat ne le porte — n'en a pas.
+  final String? payerPhoneNumber;
   final DateTime paidAt;
 
   /// Paiement de CE poste pas encore remonté au serveur (FRONT §3). Faux pour
@@ -18,14 +23,15 @@ class Payment extends Equatable {
   /// Qui a encaissé, tel que le poste l'a stampé à l'encaissement (v19).
   ///
   /// ⚠️ **Nul est un état NORMAL et durable, pas un chargement.** Le nom n'est
-  /// écrit que par la tablette qui encaisse : aucun contrat de synchronisation
-  /// ne le transporte aujourd'hui, et le pull exclut délibérément ces colonnes
-  /// de son patch pour ne pas les écraser. Il est donc vide pour tout paiement
-  /// venu d'un autre guichet, pour tout encaissement antérieur à la v19, et
-  /// quand l'annuaire local était muet au moment du geste.
+  /// écrit que par la tablette qui encaisse, et le pull exclut délibérément
+  /// ces colonnes de son patch pour ne pas les écraser — ce qui est imprimé
+  /// sur le ticket ne se réécrit pas depuis le réseau. Il est donc vide pour
+  /// tout paiement venu d'un autre guichet, pour tout encaissement antérieur à
+  /// la v19, et quand l'annuaire local était muet au moment du geste.
   ///
-  /// Le combler demande que `PaymentDelta`/`PaymentDto` le portent — une
-  /// évolution de contrat côté serveur, pas un correctif front.
+  /// Ce vide-là est désormais comblé par [collectedByName] (v29) : le contrat
+  /// de synchro porte l'attribution du SERVEUR, que [cashierFullName] utilise
+  /// en repli. Ces deux champs-ci restent, eux, la trace de ce poste.
   final String? cashierFirstName;
   final String? cashierLastName;
 
@@ -38,13 +44,29 @@ class Payment extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.paidAt,
     this.isPendingSync = false,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedByName,
   });
 
-  /// Nom affichable de l'encaisseur, `null` si rien n'a été stampé.
+  /// Nom de l'encaisseur tel que le SERVEUR l'attribue (v29), aplati par le
+  /// flux de synchro. Nul pour un versement pas encore remonté.
+  final String? collectedByName;
+
+  /// Nom affichable de l'encaisseur, `null` si personne ne l'a nommé.
+  ///
+  /// Deux sources, dans cet ordre :
+  ///  1. ce que CE poste a stampé à l'encaissement (`cashier_*`, v19) ;
+  ///  2. à défaut, ce que le serveur attribue (`collectedByName`, v29).
+  ///
+  /// L'ordre n'est pas arbitraire. Le nom stampé localement est celui qui a été
+  /// IMPRIMÉ sur le ticket remis au payeur : le faire remplacer plus tard par
+  /// une autre écriture du même nom ferait diverger l'écran du papier que le
+  /// payeur a en main. Le second ne comble que le vide — un versement encaissé
+  /// à un autre guichet, où rien de local n'a jamais été observé.
   ///
   /// Même règle de composition que le ticket
   /// (`TicketPaymentRow.cashierFullName`) : les deux surfaces montrent le même
@@ -54,7 +76,9 @@ class Payment extends Equatable {
       cashierFirstName?.trim(),
       cashierLastName?.trim(),
     ].where((part) => part != null && part.isNotEmpty).cast<String>();
-    return parts.isEmpty ? null : parts.join(' ');
+    if (parts.isNotEmpty) return parts.join(' ');
+    final attributed = collectedByName?.trim();
+    return (attributed == null || attributed.isEmpty) ? null : attributed;
   }
 
   @override
@@ -67,6 +91,8 @@ class Payment extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    collectedByName,
+    payerPhoneNumber,
     paidAt,
     isPendingSync,
     cashierFirstName,

@@ -36,6 +36,12 @@ EnrollmentSummary localItemToEnrollmentSummary(LocalEnrollmentListItem item) =>
       // Axe synchro conservé : distingue un brouillon local (DRAFT, repris au
       // tap + badge « Brouillon ») des dossiers finalisés/synchronisés.
       syncState: item.syncState,
+      // Niveau porté par la LIGNE : c'est ce qui permet à une recherche par
+      // identité (qui ne transporte aucun niveau dans ses critères) de dire
+      // quand même de quel niveau est l'élève trouvé.
+      schoolLevelId: item.schoolLevelId,
+      schoolLevelName: item.schoolLevelName,
+      schoolLevelGroupName: item.schoolLevelGroupName,
       student: StudentSummary(
         id: item.studentId,
         firstName: item.firstName,

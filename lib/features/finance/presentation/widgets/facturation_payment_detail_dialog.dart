@@ -318,6 +318,12 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
               _PayerBlock(
                 payerLabel: l10n.facturationPaymentPayerLabel,
                 payerName: _payerFullName(l10n),
+                // Repli explicite plutôt qu'une ligne absente : on a ouvert
+                // cette modale POUR savoir. Le tiret dit « on ne sait pas »,
+                // exactement comme les autres valeurs manquantes de l'écran.
+                payerPhone: intent.payerPhoneNumber?.trim().isNotEmpty ?? false
+                    ? intent.payerPhoneNumber!.trim()
+                    : l10n.facturationDetailUnknownValue,
               ),
               const SizedBox(height: AppDimensions.spacingM),
               FinanceKeyValueRows(
@@ -340,11 +346,12 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                   FinanceKeyValueRow(
                     icon: Icons.person_outline_rounded,
                     label: l10n.facturationPaymentCollectedByLabel,
-                    // Vide pour tout versement venu d'un autre guichet :
-                    // le nom n'est stampé que par le poste qui encaisse,
-                    // et aucun contrat de synchronisation ne le
-                    // transporte. La ligne garde alors son tiret, comme
-                    // les autres champs inconnus de cette modale.
+                    // Le nom stampé par le poste qui encaisse, ou à défaut
+                    // celui que le serveur attribue (v29 — le contrat de
+                    // synchro le transporte désormais, ce qui laissait
+                    // jusqu'ici cette ligne vide pour tout versement venu
+                    // d'un autre guichet). Tiret si personne ne l'a nommé,
+                    // comme les autres champs inconnus de cette modale.
                     value: intent.cashierFullName ?? '',
                   ),
                   FinanceKeyValueRow(
@@ -420,12 +427,21 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   }
 }
 
-/// Bloc payeur : médaillon billet vert + « Payeur » + nom complet.
+/// Bloc payeur : médaillon billet vert + « Payeur » + nom complet + numéro.
 class _PayerBlock extends StatelessWidget {
   final String payerLabel;
   final String payerName;
 
-  const _PayerBlock({required this.payerLabel, required this.payerName});
+  /// Déjà replié par l'appelant — la valeur « inconnue » se dit, elle ne se
+  /// tait pas : sur un écran de détail, une ligne absente se lit comme un
+  /// défaut d'affichage.
+  final String payerPhone;
+
+  const _PayerBlock({
+    required this.payerLabel,
+    required this.payerName,
+    required this.payerPhone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -464,6 +480,27 @@ class _PayerBlock extends StatelessWidget {
                 style: AppTextStyles.bodyStrong.copyWith(
                   color: AppColors.textPrimary,
                 ),
+              ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.phone_outlined,
+                    size: 13,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: AppDimensions.spacingXS),
+                  Flexible(
+                    child: Text(
+                      payerPhone,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

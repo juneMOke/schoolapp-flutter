@@ -38,6 +38,7 @@ extension LocalPaymentToOnline on LocalPayment {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
     // malformée est un bug de données, on retombe sur l'epoch (jamais un crash).
     paidAt: DateTime.tryParse(paidAt) ?? DateTime.fromMillisecondsSinceEpoch(0),
@@ -48,6 +49,9 @@ extension LocalPaymentToOnline on LocalPayment {
     // « Encaissé par » vide sur une donnée pourtant présente en base.
     cashierFirstName: cashierFirstName,
     cashierLastName: cashierLastName,
+    // Le repli quand rien n'a été stampé ici (versement d'un autre guichet) —
+    // c'est `Payment.cashierFullName` qui arbitre entre les deux.
+    collectedByName: collectedByName,
   );
 }
 
@@ -64,6 +68,7 @@ extension LocalPaymentAllocationToOnline on LocalPaymentAllocation {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
     // malformée ou absente laisse `paidAt` nul (l'UI affiche « inconnu »).
     paidAt: paidAt == null ? null : DateTime.tryParse(paidAt!),

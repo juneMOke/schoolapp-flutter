@@ -12,6 +12,11 @@ class FacturationPaymentDetailIntent extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). `null` est un état NORMAL : les versements
+  /// antérieurs au palier n'en portent pas, et un versement scellé avant que le
+  /// contrat de synchro ne le descende non plus.
+  final String? payerPhoneNumber;
   final int amountInCents;
   final String currency;
   final DateTime paidAt;
@@ -46,6 +51,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.amountInCents,
     required this.currency,
     required this.paidAt,
@@ -103,6 +109,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     amountInCents: amountInCents,
     currency: currency,
     paidAt: paidAt,
@@ -146,6 +153,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     amountInCents,
     currency,
     paidAt,

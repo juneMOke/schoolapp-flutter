@@ -5,11 +5,12 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Table des paiements affectés à un frais : une ligne par allocation
-/// (payeur + date du versement à gauche · montant imputé à l'extrême droite) +
-/// total alloué.
+/// (payeur + numéro + date du versement à gauche · montant imputé à l'extrême
+/// droite) + total alloué.
 ///
 /// Épouse la largeur disponible (pas de défilement horizontal) → la colonne
 /// montant reste toujours visible, y compris dans une popin étroite.
@@ -134,6 +135,7 @@ class _AllocationRow extends StatelessWidget {
                     ),
                   ],
                 ),
+                FinancePayerPhoneLine(phoneNumber: allocation.payerPhoneNumber),
               ],
             ),
           ),

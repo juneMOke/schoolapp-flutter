@@ -7,11 +7,13 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/finan
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_read_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_sync_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_ack_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payer_directory_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 
 /// DAO local du module Facturation (sqflite) — **coordinateur**. Chaque
 /// responsabilité vit dans un DAO focalisé (une classe, un fichier) ; ce point
@@ -23,6 +25,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 ///  - créances offline (FF5)         → [FinanceChargeSeedDao]
 ///  - pull autoritaire (FF2)         → [FinanceLedgerSyncDao]
 ///  - lectures                       → [FinanceLedgerReadDao]
+///  - annuaire des payeurs           → [FinancePayerDirectoryDao]
 ///
 /// Aucune méthode ne franchit deux responsabilités : chacune ouvre sa propre
 /// transaction dans son DAO, la garantie money-grade est portée là où elle vit.
@@ -32,13 +35,15 @@ class FinanceLocalDao {
   final FinanceChargeSeedDao _seed;
   final FinanceLedgerSyncDao _sync;
   final FinanceLedgerReadDao _read;
+  final FinancePayerDirectoryDao _payers;
 
   FinanceLocalDao(Database db, IdGenerator idGenerator)
     : _write = FinancePaymentWriteDao(db),
       _ack = FinancePaymentAckDao(db),
       _seed = FinanceChargeSeedDao(db, idGenerator),
       _sync = FinanceLedgerSyncDao(db),
-      _read = FinanceLedgerReadDao(db);
+      _read = FinanceLedgerReadDao(db),
+      _payers = FinancePayerDirectoryDao(db);
 
   // ── Encaissement local-first (FF3) ─────────────────────────────────────────
 
@@ -146,5 +151,26 @@ class FinanceLocalDao {
     academicYearId: academicYearId,
     feeCode: feeCode,
     studentIds: studentIds,
+  );
+
+  // ── Annuaire des payeurs ───────────────────────────────────────────────────
+
+  Future<List<LocalPayerIdentity>> getPayerSuggestions(
+    String studentId, {
+    int limit = 8,
+  }) => _payers.payersForStudent(studentId, limit: limit);
+
+  Future<List<LocalPayerIdentity>> searchPayers({
+    String? lastName,
+    String? firstName,
+    String? surname,
+    String? phoneNumber,
+    int limit = 20,
+  }) => _payers.searchPayers(
+    lastName: lastName,
+    firstName: firstName,
+    surname: surname,
+    phoneNumber: phoneNumber,
+    limit: limit,
   );
 }

@@ -1662,6 +1662,7 @@ void main() {
           payerFirstName: 'Ada',
           payerLastName: 'Lovelace',
           payerMiddleName: 'B',
+          payerPhoneNumber: '+243816939060',
         ),
         allocations: const [
           PaymentAllocationLocalModel(
@@ -1685,9 +1686,54 @@ void main() {
         expect(a.payerFirstName, 'Ada');
         expect(a.payerLastName, 'Lovelace');
         expect(a.payerMiddleName, 'B');
+        // Le NUMÉRO est replié par les deux lectures, ou par aucune : la table
+        // des imputations d'un frais et celle d'un versement montrent la même
+        // personne, elles doivent pouvoir la rappeler pareil.
+        expect(a.payerPhoneNumber, '+243816939060');
         expect(a.paidAt, '2026-07-06T10:00:00Z');
       }
     });
+
+    /// Une imputation d'un versement antérieur au palier v28 : le repli rend
+    /// `null`, jamais une chaîne vide — l'UI doit pouvoir distinguer « pas de
+    /// numéro » d'un numéro effacé.
+    test(
+      'imputation sans numéro : le repli rend null, pas une chaîne vide',
+      () async {
+        await insertCharge('c2', 's1', 'TUITION', expected: 100000, paid: 0);
+        await dao.recordPayment(
+          payment: const PaymentLocalModel(
+            id: 'pay2',
+            clientUuid: 'pay2',
+            studentId: 's1',
+            amountInCents: 30000,
+            currency: 'USD',
+            paidAt: '2026-07-06T10:00:00Z',
+            payerFirstName: 'Ada',
+            payerLastName: 'Lovelace',
+          ),
+          allocations: const [
+            PaymentAllocationLocalModel(
+              id: 'a2',
+              clientUuid: 'a2',
+              paymentId: 'pay2',
+              studentChargeId: 'c2',
+              feeCode: 'TUITION',
+              studentChargeLabel: 'Scolarité',
+              amountInCents: 30000,
+              currency: 'USD',
+            ),
+          ],
+          outboxEntryId: 'ob-pay2',
+          nowMs: 1000,
+        );
+
+        expect(
+          (await dao.getAllocationsByCharge('c2')).single.payerPhoneNumber,
+          isNull,
+        );
+      },
+    );
   });
 
   group('replaceTariffsForYears (FF2 pull scopé)', () {

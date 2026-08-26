@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 
 class ClassesFeatureScope extends StatefulWidget {
   final Widget child;
@@ -17,7 +17,7 @@ class ClassesFeatureScope extends StatefulWidget {
 }
 
 class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
-  late final EnrollmentBloc _enrollmentBloc;
+  late final EnrollmentLocalListBloc _enrollmentListBloc;
   late final AcademicYearContextBloc _academicYearContextBloc;
   late final ClassroomBloc _classroomBloc;
   late final ClassroomStatsBloc _classroomStatsBloc;
@@ -26,7 +26,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   @override
   void initState() {
     super.initState();
-    _enrollmentBloc = GetIt.instance<EnrollmentBloc>();
+    _enrollmentListBloc = GetIt.instance<EnrollmentLocalListBloc>();
     _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
     _classroomBloc = GetIt.instance<ClassroomBloc>();
     _classroomStatsBloc = GetIt.instance<ClassroomStatsBloc>();
@@ -35,7 +35,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
 
   @override
   void dispose() {
-    _enrollmentBloc.close();
+    _enrollmentListBloc.close();
     _academicYearContextBloc.close();
     _classroomBloc.close();
     _classroomStatsBloc.close();
@@ -47,7 +47,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<EnrollmentBloc>.value(value: _enrollmentBloc),
+        BlocProvider<EnrollmentLocalListBloc>.value(value: _enrollmentListBloc),
         BlocProvider<AcademicYearContextBloc>.value(
           value: _academicYearContextBloc,
         ),

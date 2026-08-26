@@ -43,6 +43,7 @@ abstract class PaymentsRepository {
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
+    String? payerPhoneNumber,
     required List<CreatePaymentAllocationInput> allocations,
   });
 

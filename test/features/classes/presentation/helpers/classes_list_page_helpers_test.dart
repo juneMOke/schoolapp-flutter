@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
@@ -91,61 +92,116 @@ void main() {
       },
     );
 
-    test(
-      'filterMembers applies case-insensitive filtering on all name parts',
-      () {
-        const cycle = ClassesListCycleOption(
-          id: 'group-a',
-          label: 'Primaire',
-          displayOrder: 1,
-          levels: [],
-        );
-        const level = ClassesListLevelOption(
-          schoolLevelGroupId: 'group-a',
-          schoolLevelGroupName: 'Primaire',
-          schoolLevelId: 'level-a',
-          label: '1re',
-          displayOrder: 1,
-          splitIntoClassrooms: true,
-          classrooms: [],
-        );
-        const request = ClassesListSearchRequest(
-          firstName: 'jean',
-          lastName: 'dup',
-          surname: 'cla',
-          selectedCycle: cycle,
-          selectedLevel: level,
-          selectedClassroom: null,
+    group('filterMembers', () {
+      const cycle = ClassesListCycleOption(
+        id: 'group-a',
+        label: 'Primaire',
+        displayOrder: 1,
+        levels: [],
+      );
+      const level = ClassesListLevelOption(
+        schoolLevelGroupId: 'group-a',
+        schoolLevelGroupName: 'Primaire',
+        schoolLevelId: 'level-a',
+        label: '1re',
+        displayOrder: 1,
+        splitIntoClassrooms: true,
+        classrooms: [],
+      );
+
+      /// La forme réelle d'une requête du mode « Par classe » : seul le nom
+      /// d'affinage est rempli, prénom et post-nom restent vides.
+      ClassesListSearchRequest refinedBy(String lastName) =>
+          ClassesListSearchRequest(
+            mode: SearchMode.level,
+            firstName: '',
+            lastName: lastName,
+            surname: '',
+            selectedCycle: cycle,
+            selectedLevel: level,
+            selectedClassroom: null,
+          );
+
+      const members = [
+        ClassroomMember(
+          id: '1',
+          studentId: 'student-1',
+          classroomId: 'class-1',
+          academicYearId: 'year-1',
+          studentFirstName: 'Jean',
+          studentLastName: 'Dupont',
+          studentMiddleName: 'Claude',
+          studentGender: ClassroomMemberGender.male,
+        ),
+        ClassroomMember(
+          id: '2',
+          studentId: 'student-2',
+          classroomId: 'class-1',
+          academicYearId: 'year-1',
+          studentFirstName: 'Sarah',
+          studentLastName: 'Mukendi',
+          studentMiddleName: 'Anne',
+          studentGender: ClassroomMemberGender.female,
+        ),
+        ClassroomMember(
+          id: '3',
+          studentId: 'student-3',
+          classroomId: 'class-1',
+          academicYearId: 'year-1',
+          studentFirstName: 'José',
+          studentLastName: 'Kabéya',
+          studentMiddleName: 'Émile',
+          studentGender: ClassroomMemberGender.male,
+        ),
+      ];
+
+      test('restreint la classe sur un nom partiel, insensible à la casse', () {
+        final result = ClassesListPageHelpers.filterMembers(
+          members,
+          refinedBy('dup'),
         );
 
-        const members = [
-          ClassroomMember(
-            id: '1',
-            studentId: 'student-1',
-            classroomId: 'class-1',
-            academicYearId: 'year-1',
-            studentFirstName: 'Jean',
-            studentLastName: 'Dupont',
-            studentMiddleName: 'Claude',
-            studentGender: ClassroomMemberGender.male,
-          ),
-          ClassroomMember(
-            id: '2',
-            studentId: 'student-2',
-            classroomId: 'class-1',
-            academicYearId: 'year-1',
-            studentFirstName: 'Sarah',
-            studentLastName: 'Mukendi',
-            studentMiddleName: 'Anne',
-            studentGender: ClassroomMemberGender.female,
-          ),
-        ];
+        expect(result.map((m) => m.id), ['1']);
+      });
 
-        final result = ClassesListPageHelpers.filterMembers(members, request);
+      test('insensible aux accents — parité avec l\'affinage de la liste des '
+          'inscriptions', () {
+        expect(
+          ClassesListPageHelpers.filterMembers(
+            members,
+            refinedBy('kabeya'),
+          ).map((m) => m.id),
+          ['3'],
+          reason: 'une saisie sans accent doit trouver « Kabéya »',
+        );
+      });
 
-        expect(result, hasLength(1));
-        expect(result.single.id, '1');
-      },
-    );
+      test('sans affinage : la classe entière remonte', () {
+        expect(
+          ClassesListPageHelpers.filterMembers(members, refinedBy('')),
+          hasLength(3),
+        );
+      });
+
+      test(
+        'les trois noms se conjuguent quand ils sont tous là (helper générique)',
+        () {
+          const request = ClassesListSearchRequest(
+            mode: SearchMode.level,
+            firstName: 'jean',
+            lastName: 'dup',
+            surname: 'cla',
+            selectedCycle: cycle,
+            selectedLevel: level,
+            selectedClassroom: null,
+          );
+
+          expect(
+            ClassesListPageHelpers.filterMembers(members, request).single.id,
+            '1',
+          );
+        },
+      );
+    });
   });
 }

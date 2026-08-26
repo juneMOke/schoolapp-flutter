@@ -80,6 +80,7 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
+    String? payerPhoneNumber,
     required List<CreatePaymentAllocationInput> allocations,
   }) => _online.createPayment(
     studentId: studentId,
@@ -89,6 +90,7 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     allocations: allocations,
   );
 }

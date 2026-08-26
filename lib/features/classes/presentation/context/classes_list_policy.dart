@@ -87,8 +87,17 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
       studentMiddleName: summary.student.surname,
       studentGender: _mapEnrollmentGender(summary.student.gender),
       academicYearId: academicYearId,
-      levelName: _resolveLevelName(request),
-      levelGroupName: _resolveLevelGroupName(request),
+      // La LIGNE d'abord, les critères ensuite : une recherche par identité
+      // n'en porte aucun, et l'en-tête du dossier afficherait « · - » là où le
+      // résumé sait parfaitement de quel niveau est l'élève.
+      levelName: _firstNonEmpty(
+        summary.schoolLevelName,
+        _resolveLevelName(request),
+      ),
+      levelGroupName: _firstNonEmpty(
+        summary.schoolLevelGroupName,
+        _resolveLevelGroupName(request),
+      ),
       classroomName: _resolveClassroomName(request),
     );
 
@@ -151,6 +160,11 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
         ClassroomMemberGender.female => 'FEMALE',
         ClassroomMemberGender.other => 'OTHER',
       };
+
+  String _firstNonEmpty(String? preferred, String fallback) {
+    final trimmed = preferred?.trim() ?? '';
+    return trimmed.isEmpty ? fallback : trimmed;
+  }
 
   String _resolveLevelName(ClassesListSearchRequest? request) =>
       request?.selectedLevel?.label.trim() ?? '';

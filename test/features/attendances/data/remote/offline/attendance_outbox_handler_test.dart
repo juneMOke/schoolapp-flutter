@@ -33,13 +33,30 @@ void main() {
     registerFallbackValue(FakeAggregate());
   });
 
+  /// Élèves que la sonde CLASSE → PRÉSENCE déclare sous transfert non
+  /// synchronisé. Vide par défaut : le cas nominal ne bloque rien.
+  late Set<String> pendingTransfers;
+
+  /// Arguments reçus par la sonde, pour prouver qu'elle est bien interrogée sur
+  /// les ABSENTS de l'agrégat et sur SON année.
+  List<String>? probedStudentIds;
+  String? probedAcademicYearId;
+
   setUp(() {
     api = MockAttendanceSyncApi();
     local = MockAttendanceLocalDataSource();
+    pendingTransfers = <String>{};
+    probedStudentIds = null;
+    probedAcademicYearId = null;
     handler = AttendanceOutboxHandler(
       syncApi: api,
       localDataSource: local,
       requiredAuth: auth,
+      pendingTransfers: (studentIds, academicYearId) async {
+        probedStudentIds = studentIds;
+        probedAcademicYearId = academicYearId;
+        return pendingTransfers;
+      },
       now: () => 7000,
     );
   });
@@ -99,19 +116,21 @@ void main() {
       syncApi: api,
       localDataSource: local,
       requiredAuth: auth,
+      pendingTransfers: (_, _) async => pendingTransfers,
       currentUser: ctx,
       now: () => 7000,
     );
   }
 
-  DioException dio(Object? error, {int? status}) => DioException(
+  DioException dio(Object? error, {int? status, Object? body}) => DioException(
     requestOptions: RequestOptions(path: '/sync/attendance'),
     error: error,
-    response: status == null
+    response: status == null && body == null
         ? null
         : Response<dynamic>(
             requestOptions: RequestOptions(path: '/sync/attendance'),
             statusCode: status,
+            data: body,
           ),
   );
 
@@ -283,4 +302,233 @@ void main() {
     expect(result.outcome, OutboxDispatchOutcome.failed);
     verifyNever(() => api.submitAttendance(any(), any()));
   });
+
+  group('agrégat sans auteur (ADR-010 D-05)', () {
+    /// Même agrégat, `authorId` absent — l'état d'une tablette dont la session
+    /// n'a jamais porté d'uid (jeton hérité sans le claim, amorçage manqué).
+    final unauthored = AttendanceAggregateRequestModel(
+      session: aggregate.session,
+      absences: aggregate.absences,
+    );
+
+    test(
+      'rejeté sans aller-retour : le serveur le refuserait toujours',
+      () async {
+        // `authorId` est `@NotNull` côté serveur : la validation du corps rejette
+        // en 400 AVANT même la garde d'attribution. Pousser, c'était brûler un
+        // appel réseau pour un refus certain.
+        final result = await handler.dispatch(
+          entry(payload: unauthored.toJsonString()),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+        verifyNever(() => api.submitAttendance(any(), any()));
+      },
+    );
+
+    test('le refus dit le geste qui répare', () async {
+      // L'ancien libellé venait de l'intercepteur (« Invalid request data ») :
+      // ni la cause ni la sortie. Réenfiler le même jour avec un auteur est la
+      // seule issue — encore faut-il que la feuille de reprise le dise.
+      final result = await handler.dispatch(
+        entry(payload: unauthored.toJsonString()),
+      );
+
+      expect(result.error, contains('sans auteur'));
+      expect(result.error, contains('réenregistrez'));
+    });
+  });
+
+  group('garde CLASSE → PRÉSENCE (transfert non synchronisé)', () {
+    test(
+      'un absent sous transfert en vol → blocked, rien n\'est poussé',
+      () async {
+        // Le roster de l'appel est COMPOSÉ, celui que valide le serveur ne l'est
+        // pas : pousser ferait rejeter l'agrégat ENTIER en 422 terminal, donc
+        // perdrait la journée complète de la classe pour un seul élève.
+        pendingTransfers = {'s1'};
+
+        final result = await handler.dispatch(entry());
+
+        expect(result.outcome, OutboxDispatchOutcome.blocked);
+        verifyNever(() => api.submitAttendance(any(), any()));
+      },
+    );
+
+    test(
+      'la sonde est interrogée sur les ABSENTS et sur l\'année de l\'appel',
+      () async {
+        when(
+          () => api.submitAttendance(any(), any()),
+        ).thenAnswer((_) async => response());
+        stubMarkSynced();
+
+        await handler.dispatch(entry());
+
+        expect(probedStudentIds, ['s1']);
+        expect(probedAcademicYearId, 'year-1');
+      },
+    );
+
+    test('aucun transfert en vol → l\'appel part normalement', () async {
+      when(
+        () => api.submitAttendance(any(), any()),
+      ).thenAnswer((_) async => response());
+      stubMarkSynced();
+
+      final result = await handler.dispatch(entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+    });
+  });
+
+  group('raison du refus lisible', () {
+    test(
+      '422 : c\'est le message du SERVEUR qui atterrit dans la file',
+      () async {
+        // L'intercepteur aplatit tout 400/422 sur « Invalid request data » ; la
+        // feuille de reprise n'affichait donc jamais la cause, alors que le corps
+        // la porte mot pour mot.
+        when(() => api.submitAttendance(any(), any())).thenThrow(
+          dio(
+            const ValidationFailure('Invalid request data'),
+            status: 422,
+            body: <String, dynamic>{
+              'status': 422,
+              'code': 'UNPROCESSABLE',
+              'message': 'Student not in the active roster of this class: s1',
+            },
+          ),
+        );
+
+        final result = await handler.dispatch(entry());
+
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+        expect(
+          result.error,
+          'Student not in the active roster of this class: s1',
+        );
+      },
+    );
+
+    test('403 terminal : même lecture', () async {
+      when(() => api.submitAttendance(any(), any())).thenThrow(
+        dio(
+          const UnauthorizedFailure('Access forbidden'),
+          status: 403,
+          body: <String, dynamic>{
+            'message':
+                'Corriger un appel d\'un jour révolu exige la permission '
+                'attendance.amend',
+          },
+        ),
+      );
+
+      final result = await handlerFor(uid: 'author-1').dispatch(entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(result.error, contains('attendance.amend'));
+    });
+
+    test('corps sans message : on garde le libellé du socle', () async {
+      when(
+        () => api.submitAttendance(any(), any()),
+      ).thenThrow(dio(const ValidationFailure('bad'), status: 422));
+
+      final result = await handler.dispatch(entry());
+
+      expect(result.error, 'bad');
+    });
+  });
+
+  group(
+    'SUPERSEDED : jeton LWW réancré sur la réponse, jamais sur la tablette',
+    () {
+      /// Epoch d'un instant ISO — l'horloge du handler est figée à 7000 ms, donc
+      /// toute valeur issue de la réponse s'en distingue sans ambiguïté.
+      int epochOf(String iso) => DateTime.parse(iso).millisecondsSinceEpoch;
+
+      Future<int> adoptedToken() async {
+        when(
+          () => local.adoptCanonicalDay(
+            classroomId: any(named: 'classroomId'),
+            dateStr: any(named: 'dateStr'),
+            academicYearId: any(named: 'academicYearId'),
+            canonicalAbsences: any(named: 'canonicalAbsences'),
+            updatedAt: any(named: 'updatedAt'),
+            syncedAt: any(named: 'syncedAt'),
+            serverUpdatedAt: any(named: 'serverUpdatedAt'),
+            expectedCount: any(named: 'expectedCount'),
+          ),
+        ).thenAnswer((_) async {});
+        stubMarkSynced();
+
+        await handler.dispatch(entry());
+
+        return verify(
+              () => local.adoptCanonicalDay(
+                classroomId: any(named: 'classroomId'),
+                dateStr: any(named: 'dateStr'),
+                academicYearId: any(named: 'academicYearId'),
+                canonicalAbsences: any(named: 'canonicalAbsences'),
+                updatedAt: captureAny(named: 'updatedAt'),
+                syncedAt: any(named: 'syncedAt'),
+                serverUpdatedAt: any(named: 'serverUpdatedAt'),
+                expectedCount: any(named: 'expectedCount'),
+              ),
+            ).captured.single
+            as int;
+      }
+
+      test(
+        'serveur qui ne porte pas le jeton : on ne retombe pas sur now()',
+        () async {
+          // `SessionRef` n'a longtemps exposé que id / serverUpdatedAt /
+          // expectedCount, et un serveur pas encore monté de version répond
+          // toujours ainsi. Le repli d'origine était l'horloge de la tablette —
+          // précisément celle qui retarde quand un SUPERSEDED survient, donc un
+          // jeton encore perdant, donc la journée condamnée à reperdre tous les
+          // arbitrages suivants.
+          when(() => api.submitAttendance(any(), any())).thenAnswer(
+            (_) async => response(outcome: 'SUPERSEDED', updatedAt: null),
+          );
+
+          expect(await adoptedToken(), epochOf('2026-06-15T09:00:00.000Z'));
+        },
+      );
+
+      test(
+        'on prend le plus tardif de ce que la réponse porte vraiment',
+        () async {
+          // Les ACK d'absence, eux, portent de vrais jetons client : le gagnant y
+          // est mieux approché que par son seul temps de commit.
+          when(() => api.submitAttendance(any(), any())).thenAnswer(
+            (_) async => response(
+              outcome: 'SUPERSEDED',
+              updatedAt: null,
+              absences: const [
+                AttendanceAbsenceAck(
+                  studentId: 's9',
+                  updatedAt: '2026-06-15T10:00:00.000Z',
+                ),
+              ],
+            ),
+          );
+
+          expect(await adoptedToken(), epochOf('2026-06-15T10:00:00.000Z'));
+        },
+      );
+
+      test('session.updatedAt prime dès que le serveur le porte', () async {
+        when(() => api.submitAttendance(any(), any())).thenAnswer(
+          (_) async => response(
+            outcome: 'SUPERSEDED',
+            updatedAt: '2026-06-15T11:00:00.000Z',
+          ),
+        );
+
+        expect(await adoptedToken(), epochOf('2026-06-15T11:00:00.000Z'));
+      });
+    },
+  );
 }

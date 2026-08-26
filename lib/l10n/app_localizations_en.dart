@@ -605,20 +605,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesListClassroomOptionalLabel => 'Classroom (optional)';
 
   @override
-  String get classesListFirstNameOptionalLabel => 'First name (optional)';
+  String get classesListClassroomPlaceholder => 'Pick a level first';
 
   @override
-  String get classesListLastNameOptionalLabel => 'Last name (optional)';
+  String get classesListClassroomNonePlaceholder =>
+      'No classroom for this level';
 
   @override
-  String get classesListSurnameOptionalLabel => 'Surname (optional)';
+  String get classesListSearchLevelPlaceholder => 'Pick a cycle';
+
+  @override
+  String get classesListLevelColumnLabel => 'Level';
+
+  @override
+  String get classesListLevelUnknown => '—';
 
   @override
   String get classesListInitialEmptyTitle => 'No search in progress';
 
   @override
   String get classesListInitialEmptyMessage =>
-      'Fill in at least one criterion to display students.';
+      'Pick a level, or fill in a student\'s full identity, to display results.';
 
   @override
   String get classesListNoMatchTitle => 'No student matches the criteria';
@@ -1749,9 +1756,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get guardianSearchAction => 'Search for a guardian';
-
-  @override
   String get guardianSearchDialogTitle => 'Search for an existing parent';
 
   @override
@@ -1795,6 +1799,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSearchErrorRetry => 'Retry';
+
+  @override
+  String get guardianLinkExistingBannerTitle =>
+      'Is this guardian already on file?';
+
+  @override
+  String get guardianLinkExistingBannerDescription =>
+      'Find their record instead of typing it again: it will replace what this card holds.';
+
+  @override
+  String get guardianLinkExistingAction => 'Search for a record';
+
+  @override
+  String get guardianPhoneConflictDialogEyebrow => 'Guardians';
+
+  @override
+  String get guardianPhoneConflictDialogTitle =>
+      'This number is already in use';
+
+  @override
+  String guardianPhoneConflictDialogMessage(String phoneNumber) {
+    return '$phoneNumber already belongs to an existing record. Link it to the student, or correct the number you entered.';
+  }
+
+  @override
+  String get guardianPhoneConflictUseAction => 'Use this record';
+
+  @override
+  String get guardianPhoneConflictFixPhoneAction => 'Correct the number';
+
+  @override
+  String get guardianPhoneConflictNotFoundTitle => 'Record not found';
+
+  @override
+  String get guardianPhoneConflictNotFoundDescription =>
+      'No record carrying this number could be found. Correct the number you entered.';
+
+  @override
+  String get guardianPhoneDuplicateInFormError =>
+      'This number is already entered for another guardian in this file.';
+
+  @override
+  String get guardianLinkTargetGoneError =>
+      'This guardian is no longer in the file: the record was not linked.';
 
   @override
   String get schoolFees => 'School Fees';
@@ -3275,6 +3323,91 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get facturationCreatePaymentPayerFieldRequired =>
       'This field is required';
+
+  @override
+  String get facturationCreatePaymentPayerPhoneLabel => 'Payer\'s phone number';
+
+  @override
+  String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
+
+  @override
+  String get facturationCreatePaymentPayerPickHelp =>
+      'Reuse a payer who has already been to the desk, or enter one below.';
+
+  @override
+  String get facturationPayerSearchDialogEyebrow => 'Collection';
+
+  @override
+  String get facturationPayerSearchDialogTitle => 'Choose a payer';
+
+  @override
+  String get facturationPayerSearchModeSemantics => 'Search mode';
+
+  @override
+  String get facturationPayerSearchModeByPhone => 'By phone number';
+
+  @override
+  String get facturationPayerSearchModeByIdentity => 'By name';
+
+  @override
+  String get facturationPayerSearchPhoneHint =>
+      'A partial number is enough: “8169” brings up every matching payer.';
+
+  @override
+  String get facturationPayerSearchIdentityHint =>
+      'A single word is enough — last, middle or first name. Accents are ignored.';
+
+  @override
+  String get facturationPayerSearchAction => 'Search';
+
+  @override
+  String get facturationPayerSearchSuggestionsTitle =>
+      'Already known for this student';
+
+  @override
+  String get facturationPayerSearchResultsTitle => 'Results';
+
+  @override
+  String get facturationPayerSearchResultsPlaceholder =>
+      'Matching payers will appear here.';
+
+  @override
+  String get facturationPayerSearchEmptyTitle => 'No payer found';
+
+  @override
+  String get facturationPayerSearchEmptyDescription =>
+      'No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.';
+
+  @override
+  String get facturationPayerSearchErrorRetry => 'Retry';
+
+  @override
+  String get facturationPayerSearchOriginGuardian =>
+      'Student\'s guardian — has never paid yet';
+
+  @override
+  String facturationPayerSearchPaymentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String facturationPayerSearchLastPaidAt(String date) {
+    return 'last one on $date';
+  }
+
+  @override
+  String get facturationPayerSearchUnknownPhone => 'Phone number unknown';
+
+  @override
+  String facturationPayerSearchSelectSemantics(String name) {
+    return 'Choose $name as the payer';
+  }
 
   @override
   String get facturationCreatePaymentDetailsSectionTitle => 'Payment details';

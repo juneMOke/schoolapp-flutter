@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_state.dart';
@@ -127,6 +128,7 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
       _awaitingBloc = false;
       // Pastille globale de synchronisation + push opportuniste en arrière-plan.
       context.read<SyncStatusCubit>().notifyLocalWrite();
+      _reloadSavedDay();
       setState(() => _phase = _Phase.success);
     } else if (state is AttendanceOfflineError) {
       _awaitingBloc = false;
@@ -135,6 +137,37 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
         _incidentCode = _generateIncidentCode();
       });
     }
+  }
+
+  /// Réaligne la feuille d'appel sur ce qui vient d'être écrit en base.
+  ///
+  /// Sans ça, l'écran resté derrière l'overlay porte l'état d'AVANT
+  /// l'enregistrement : bandeau « appel non fait » alors que la session existe,
+  /// brouillon toujours réputé modifié, bouton d'enregistrement encore actif —
+  /// et, sur un jour révolu, une correction qui échapperait à la garde
+  /// d'amendement puisque l'écran croit encore l'appel jamais pris.
+  ///
+  /// On RELIT plutôt que de recopier le brouillon dans les enregistrements : la
+  /// base locale est la source de vérité (réconciliation par différence, heure
+  /// d'appel d'origine conservée), et cette relecture est un accès SQLite local
+  /// — l'écriture, elle, est déjà committée quand cet état arrive.
+  void _reloadSavedDay() {
+    final attendanceBloc = context.read<AttendanceBloc>();
+    final state = attendanceBloc.state;
+    final classroomId = state.activeClassroomId;
+    final academicYearId = state.activeAcademicYearId;
+    final date = state.activeDate;
+    if (classroomId == null || academicYearId == null || date == null) {
+      return;
+    }
+
+    attendanceBloc.add(
+      AttendanceFetchRequested(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: academicYearId,
+      ),
+    );
   }
 
   String _generateIncidentCode() =>

@@ -135,6 +135,7 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
       payerFirstName: event.payerFirstName,
       payerLastName: event.payerLastName,
       payerMiddleName: event.payerMiddleName,
+      payerPhoneNumber: event.payerPhoneNumber,
       allocations: event.allocations,
     );
 

@@ -46,6 +46,9 @@ jobs:
     name: Validate PROD env variables
     needs: guard
     runs-on: ubuntu-latest
+    # Les secrets de ce dépôt sont tous scopés par environnement (aucun secret
+    # au niveau dépôt) : sans cette ligne, PROD_API_BASE_URL arrive vide.
+    environment: prod
     steps:
       - uses: actions/checkout@v4
         with:
@@ -64,6 +67,9 @@ jobs:
     name: Analyze & Test (release gate)
     needs: validate-env
     runs-on: ubuntu-latest
+    # Idem : les quatre ANDROID_* de l'étape de signature vivent dans
+    # l'environnement "prod", pas au niveau dépôt.
+    environment: prod
     permissions:
       contents: read
     steps:

@@ -309,7 +309,12 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
       );
       return const Right(unit);
     } on ParentPhoneConflictException catch (e) {
-      return Left(DuplicateParentPhoneFailure(e.phoneNumber));
+      return Left(
+        DuplicateParentPhoneFailure(
+          e.phoneNumber,
+          existingParentId: e.existingParentId,
+        ),
+      );
     } catch (e) {
       return Left(
         StorageFailure('Échec de l\'enregistrement du brouillon : $e'),

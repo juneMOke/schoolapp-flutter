@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_info_step_body.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_link_existing_banner.dart';
+import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
   const title = 'Informations des tuteurs';
   const buttonLabel = 'Ajouter un tuteur/responsable';
 
-  Widget harness(double width) => MaterialApp(
+  const parent = ParentSummary(
+    id: 'parent-1',
+    firstName: 'Jean',
+    lastName: 'Dupont',
+    surname: 'K',
+    identificationNumber: 'ID-123',
+    phoneNumber: '+243810000000',
+    email: 'jean.dupont@example.com',
+    relationshipType: RelationshipType.guardian,
+  );
+
+  Widget harness(
+    double width, {
+    List<ParentSummary> parents = const [],
+    String? expandedParentId,
+    void Function(String)? onLinkExistingParent,
+  }) => MaterialApp(
     locale: const Locale('fr'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
@@ -15,11 +34,12 @@ void main() {
       body: SizedBox(
         width: width,
         child: GuardianInfoStepBody(
-          parentDetails: const [],
+          parentDetails: parents,
+          expandedParentId: expandedParentId,
           onItemStateChanged: (_, _) {},
           onItemValueChanged: (_, _) {},
           onAddParent: () {},
-          onSearchParent: () {},
+          onLinkExistingParent: onLinkExistingParent ?? (_) {},
           onSave: () {},
           showInlineSaveButton: false,
         ),
@@ -37,8 +57,6 @@ void main() {
       final buttonTop = tester.getTopLeft(find.text(buttonLabel)).dy;
       // Empilé : le bouton est sous le bloc titre.
       expect(buttonTop, greaterThan(titleBottom));
-      // Empilé : le bouton de recherche porte aussi son libellé complet.
-      expect(find.text('Rechercher un parent'), findsOneWidget);
     },
   );
 
@@ -56,11 +74,51 @@ void main() {
       // En ligne : même bande verticale (approx.) et bouton à droite du titre.
       expect((buttonCenterY - titleCenterY).abs(), lessThan(60));
       expect(buttonX, greaterThan(titleX));
-      // En ligne : le bouton de recherche est compact (icône + tooltip) pour
-      // laisser la place au libellé complet du bouton d'ajout.
-      expect(find.text('Rechercher un parent'), findsNothing);
-      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
-      expect(find.byTooltip('Rechercher un parent'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'l\'en-tête ne porte plus de recherche : « Ajouter » est sa seule action',
+    (tester) async {
+      await tester.pumpWidget(harness(800, parents: const [parent]));
+      await tester.pumpAndSettle();
+
+      // L'ancienne loupe d'en-tête (icône seule + tooltip) a disparu : le
+      // rattachement d'une fiche connue se déclenche depuis la carte.
+      expect(find.byIcon(Icons.search_rounded), findsNothing);
+      expect(find.byTooltip('Rechercher un parent'), findsNothing);
+      expect(find.text(buttonLabel), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'la carte dépliée porte le bandeau de rattachement, qui désigne SA carte',
+    (tester) async {
+      final linkRequests = <String>[];
+      await tester.pumpWidget(
+        harness(
+          800,
+          parents: const [parent],
+          expandedParentId: 'parent-1',
+          onLinkExistingParent: linkRequests.add,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(GuardianLinkExistingBanner), findsOneWidget);
+      await tester.tap(find.text('Rechercher une fiche'));
+      await tester.pumpAndSettle();
+
+      expect(linkRequests, ['parent-1']);
+    },
+  );
+
+  testWidgets('carte repliée : pas de bandeau (le corps n\'est pas rendu)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(harness(800, parents: const [parent]));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GuardianLinkExistingBanner), findsNothing);
+  });
 }

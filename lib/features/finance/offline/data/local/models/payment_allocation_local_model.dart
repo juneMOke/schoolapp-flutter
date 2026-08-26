@@ -90,6 +90,7 @@ class PaymentAllocationLocalModel {
     String payerFirstName = '',
     String payerLastName = '',
     String? payerMiddleName,
+    String? payerPhoneNumber,
     String? paidAt,
   }) => LocalPaymentAllocation(
     id: id,
@@ -102,6 +103,7 @@ class PaymentAllocationLocalModel {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     paidAt: paidAt,
   );
 }

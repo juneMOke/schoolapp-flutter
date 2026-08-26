@@ -15,6 +15,11 @@ class PaymentLocalModel {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). Nul pour tout versement antérieur au palier
+  /// et pour tout versement venu d'un autre poste — la saisie l'exige ici, le
+  /// passé n'en a pas.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// Caissier — uid ET nom dénormalisé (v19). Le nom est recopié plutôt que
@@ -26,6 +31,13 @@ class PaymentLocalModel {
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
+
+  /// Encaisseur tel que le SERVEUR l'attribue (v29), distinct des `cashier_*`
+  /// ci-dessus que ce poste stampe lui-même : les deux nomment la même
+  /// personne pour un versement encaissé ici, mais seul celui-ci existe quand
+  /// le versement vient d'un autre guichet.
+  final String? collectedById;
+  final String? collectedByName;
 
   /// Appareil ayant encaissé (zone Z3 du ticket, traçabilité RG-012-16).
   final String? deviceId;
@@ -51,10 +63,13 @@ class PaymentLocalModel {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.cashierUid,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedById,
+    this.collectedByName,
     this.deviceId,
     this.receiptId,
     this.syncStatus = 'PENDING_SYNC',
@@ -75,10 +90,13 @@ class PaymentLocalModel {
     'payer_first_name': payerFirstName,
     'payer_last_name': payerLastName,
     'payer_middle_name': payerMiddleName,
+    'payer_phone_number': payerPhoneNumber,
     'status': status,
     'cashier_uid': cashierUid,
     'cashier_first_name': cashierFirstName,
     'cashier_last_name': cashierLastName,
+    'collected_by_id': collectedById,
+    'collected_by_name': collectedByName,
     'device_id': deviceId,
     'receipt_id': receiptId,
     'sync_status': syncStatus,
@@ -91,9 +109,12 @@ class PaymentLocalModel {
   /// §PaymentDelta). Sert au patch d'une ligne DÉJÀ connue ; une ligne inconnue
   /// (paiement de l'autre poste) s'insère via [toMap].
   ///
-  /// **Exclut l'identité du payeur et `client_uuid`** : le contrat ne les porte
-  /// pas. Les réécrire depuis un DTO de pull les remplacerait par le repli `''`
-  /// — perte définitive du nom saisi au guichet.
+  /// **Exclut l'identité du payeur — téléphone compris — et `client_uuid`** :
+  /// le contrat ne les porte pas. Les réécrire depuis un DTO de pull les
+  /// remplacerait par le repli `''` — perte définitive du nom saisi au guichet.
+  /// Le téléphone (v28) suit la même règle et pour une raison de plus : il est
+  /// `null` chez qui ne l'a pas, et un patch le viderait sur le poste MÊME qui
+  /// vient de le saisir, dès le premier delta portant ce versement.
   ///
   /// **Exclut surtout l'état de synchro** (`sync_status`, `sync_error`,
   /// `synced_at`) : il appartient à l'ACK et à l'outbox, JAMAIS au pull. Le pull
@@ -122,6 +143,15 @@ class PaymentLocalModel {
     'currency': currency,
     'paid_at': paidAt,
     if (receiptId != null) 'receipt_id': receiptId,
+    // Écrits sous condition, comme `receipt_id` : le delta ne peut qu'AJOUTER
+    // l'attribution serveur, jamais l'effacer. Un payload qui les omettrait —
+    // versement scellé avant l'évolution du contrat, poste resté en arrière —
+    // rendrait sinon anonyme une ligne déjà nommée.
+    //
+    // Ils ne touchent PAS aux `cashier_*` : ce que ce poste a imprimé sur le
+    // ticket ne se réécrit pas depuis le réseau.
+    if (collectedById != null) 'collected_by_id': collectedById,
+    if (collectedByName != null) 'collected_by_name': collectedByName,
     'updated_at': updatedAt,
   };
 
@@ -138,10 +168,13 @@ class PaymentLocalModel {
         payerFirstName: m['payer_first_name'] as String,
         payerLastName: m['payer_last_name'] as String,
         payerMiddleName: m['payer_middle_name'] as String?,
+        payerPhoneNumber: m['payer_phone_number'] as String?,
         status: m['status'] as String?,
         cashierUid: m['cashier_uid'] as String?,
         cashierFirstName: m['cashier_first_name'] as String?,
         cashierLastName: m['cashier_last_name'] as String?,
+        collectedById: m['collected_by_id'] as String?,
+        collectedByName: m['collected_by_name'] as String?,
         deviceId: m['device_id'] as String?,
         receiptId: m['receipt_id'] as String?,
         syncStatus: (m['sync_status'] as String?) ?? 'PENDING_SYNC',
@@ -162,10 +195,13 @@ class PaymentLocalModel {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     status: status,
     cashierUid: cashierUid,
     cashierFirstName: cashierFirstName,
     cashierLastName: cashierLastName,
+    collectedById: collectedById,
+    collectedByName: collectedByName,
     deviceId: deviceId,
     receiptId: receiptId,
     syncState: SyncState.fromDbValue(syncStatus),

@@ -9,12 +9,13 @@ import 'package:school_app_flutter/features/classes/presentation/helpers/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_state_card.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListResultsSection extends StatelessWidget {
   final ClassesListSearchRequest? lastRequest;
   final VoidCallback onExportPressed;
+  final ValueChanged<int> onPageRequested;
   final ValueChanged<EnrollmentSummary> onEnrollmentViewRequested;
   final ValueChanged<ClassroomMember> onClassroomMemberViewRequested;
 
@@ -22,6 +23,7 @@ class ClassesListResultsSection extends StatelessWidget {
     super.key,
     required this.lastRequest,
     required this.onExportPressed,
+    required this.onPageRequested,
     required this.onEnrollmentViewRequested,
     required this.onClassroomMemberViewRequested,
   });
@@ -51,12 +53,17 @@ class ClassesListResultsSection extends StatelessWidget {
       );
     }
 
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       buildWhen: ClassesListPageHelpers.buildWhenEnrollmentResultsChange,
       builder: (context, state) => ClassesListEnrollmentResults(
         request: request,
         state: state,
+        // Le corpus entier, que l'état ne porte pas : la table trie avant de
+        // découper, et l'œil doit pouvoir résoudre une ligne de n'importe
+        // quelle page.
+        summaries: context.read<EnrollmentLocalListBloc>().loadedSummaries,
         onExportPressed: onExportPressed,
+        onPageRequested: onPageRequested,
         onViewRequested: onEnrollmentViewRequested,
       ),
     );

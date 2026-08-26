@@ -72,6 +72,12 @@ class PaymentInput {
   final String? payerFirstName;
   final String? payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28). Nullable dans le contrat bien que la saisie
+  /// l'exige : l'outbox peut encore porter un versement mis en file par une
+  /// version ANTÉRIEURE de l'app, qui n'en avait aucun. Le refuser ici
+  /// bloquerait définitivement de l'argent déjà encaissé, reçu déjà imprimé.
+  final String? payerPhoneNumber;
   final String? externalReference;
 
   /// Heure **métier** de l'encaissement (ISO-8601) — peut être antérieure au
@@ -90,6 +96,7 @@ class PaymentInput {
     this.payerFirstName,
     this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.externalReference,
     required this.paidAt,
   });
@@ -106,6 +113,7 @@ class PaymentInput {
     'payerFirstName': payerFirstName,
     'payerLastName': payerLastName,
     'payerMiddleName': payerMiddleName,
+    'payerPhoneNumber': payerPhoneNumber,
     'externalReference': externalReference,
     'paidAt': paidAt,
   };
@@ -122,6 +130,7 @@ class PaymentInput {
     payerFirstName: j['payerFirstName'] as String?,
     payerLastName: j['payerLastName'] as String?,
     payerMiddleName: j['payerMiddleName'] as String?,
+    payerPhoneNumber: j['payerPhoneNumber'] as String?,
     externalReference: j['externalReference'] as String?,
     paidAt: j['paidAt'] as String,
   );

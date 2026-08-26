@@ -98,6 +98,7 @@ void main() {
                     totalLabel: '7 000 CDF',
                     studentName: 'Kabeya Junior',
                     payerName: 'Mukendi Paul',
+                    payerPhone: '+243816939060',
                     request: _request,
                     allocations: const [
                       FacturationConfirmAllocationItem(
@@ -198,5 +199,19 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(EteeloDialogBody), findsOneWidget);
+  });
+
+  /// Le dernier écran avant d'engager l'argent doit montrer le numéro tel
+  /// qu'il partira : c'est le seul endroit où le guichetier peut encore relire
+  /// ce qu'il a tapé, et le versement est append-only — rien ne se corrige
+  /// après. Hors de la phrase récapitulative, sur sa propre ligne : noyé
+  /// dedans, il ne se relirait pas.
+  testWidgets('l\'étape de confirmation montre le numéro du payeur', (
+    tester,
+  ) async {
+    await open(tester);
+
+    expect(find.text('+243816939060'), findsOneWidget);
+    expect(find.byIcon(Icons.phone_outlined), findsOneWidget);
   });
 }

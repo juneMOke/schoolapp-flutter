@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -20,6 +21,7 @@ import 'package:school_app_flutter/features/finance/presentation/utils/facturati
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charge_allocation_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payer_search_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -94,6 +96,18 @@ class _FacturationCreatePaymentDialogViewState
   final _firstNameController = TextEditingController();
   final _middleNameController = TextEditingController();
 
+  /// Porte l'E.164 complet (`+243816939060`) — c'est `EteeloPhoneInput` qui
+  /// recompose, aucun appelant n'a à le faire.
+  final _phoneController = TextEditingController();
+
+  /// Numéro tel qu'il est arrivé d'un payeur repris dans l'annuaire, avant
+  /// toute retouche. Un numéro HÉRITÉ mal formé (`0816939060` d'une fiche
+  /// ancienne) ne doit pas bloquer l'encaissement tant que le guichetier n'y a
+  /// pas touché : il ne l'a pas saisi, et le reformater d'office ferait partir
+  /// au serveur un numéro que personne n'a validé. Dès la première frappe, la
+  /// règle normale reprend.
+  String? _pickedPhone;
+
   late final List<_ChargeEntry> _entries;
 
   /// Anti double-dialogue : un second déclencheur (retour système pendant que
@@ -113,6 +127,7 @@ class _FacturationCreatePaymentDialogViewState
     _lastNameController.addListener(_onChanged);
     _firstNameController.addListener(_onChanged);
     _middleNameController.addListener(_onChanged);
+    _phoneController.addListener(_onChanged);
   }
 
   @override
@@ -120,6 +135,7 @@ class _FacturationCreatePaymentDialogViewState
     _lastNameController.dispose();
     _firstNameController.dispose();
     _middleNameController.dispose();
+    _phoneController.dispose();
     for (final entry in _entries) {
       entry.dispose();
     }
@@ -127,6 +143,11 @@ class _FacturationCreatePaymentDialogViewState
   }
 
   void _onChanged() {
+    // La tolérance ne couvre QUE la valeur reprise telle quelle : dès qu'elle
+    // diverge, le guichetier a repris la main et le format redevient exigé.
+    if (_pickedPhone != null && _phoneController.text.trim() != _pickedPhone) {
+      _pickedPhone = null;
+    }
     if (mounted) setState(() {});
   }
 
@@ -200,7 +221,60 @@ class _FacturationCreatePaymentDialogViewState
 
   bool get _payerValid =>
       _lastNameController.text.trim().isNotEmpty &&
-      _firstNameController.text.trim().isNotEmpty;
+      _firstNameController.text.trim().isNotEmpty &&
+      _phoneAcceptable;
+
+  /// Le téléphone est obligatoire ET complet : un numéro tronqué partirait en
+  /// base et vers le serveur en E.164 invalide, sans moyen de rappeler le
+  /// payeur — et il est recopié sur chaque versement, donc jamais corrigeable
+  /// après coup.
+  ///
+  /// Seule exception : la valeur héritée d'un payeur repris dans l'annuaire,
+  /// tant qu'elle est INTACTE. Exiger un format qu'aucune saisie du guichetier
+  /// n'a produit bloquerait un encaissement pour une donnée écrite ailleurs.
+  bool get _phoneAcceptable {
+    final raw = _phoneController.text.trim();
+    if (raw.isEmpty) return false;
+    if (PhoneNumberFormat.isValid(raw)) return true;
+    return _pickedPhone != null && raw == _pickedPhone!.trim();
+  }
+
+  /// Erreur affichée sous le champ : jamais tant que le champ est vide (le
+  /// formulaire s'ouvre vierge, l'accuser d'emblée serait agressif), seulement
+  /// quand ce qui est saisi ne fait pas un numéro complet.
+  String? _phoneErrorText(AppLocalizations l10n) {
+    if (_phoneController.text.trim().isEmpty || _phoneAcceptable) return null;
+    return l10n.phoneNumberInvalidError(PhoneCountry.congoDrc.nationalLength);
+  }
+
+  /// Reprend un payeur de l'annuaire : les quatre champs sont remplis d'un
+  /// coup, et restent modifiables — le nom d'un payeur peut avoir été mal
+  /// orthographié au versement précédent.
+  Future<void> _pickPayer() async {
+    final payer = await showFacturationPayerSearchDialog(
+      context: context,
+      studentId: widget.intent.studentId,
+    );
+    if (!mounted || payer == null) return;
+    setState(() {
+      _lastNameController.text = payer.lastName;
+      _firstNameController.text = payer.firstName;
+      _middleNameController.text = payer.middleName ?? '';
+      // La tolérance au numéro malformé appartient au payeur qui l'a apporté,
+      // pas au champ. Sans cette remise à zéro elle survivait au changement de
+      // payeur : reprendre A (numéro hérité invalide) puis B (aucun numéro
+      // connu, donc champ inchangé) laissait passer un versement au nom de B
+      // portant le numéro invalide de A — sans erreur affichée.
+      _pickedPhone = null;
+      // Un payeur sans numéro connu (versements antérieurs à la v28) ne doit
+      // pas EFFACER un numéro déjà tapé : on ne remplace que ce qu'on sait.
+      final phone = payer.phoneNumber?.trim() ?? '';
+      if (phone.isNotEmpty) {
+        _phoneController.text = phone;
+        _pickedPhone = phone;
+      }
+    });
+  }
 
   String _studentFullName(AppLocalizations l10n) {
     final name = [
@@ -240,6 +314,9 @@ class _FacturationCreatePaymentDialogViewState
       payerMiddleName: _middleNameController.text.trim().isEmpty
           ? null
           : _middleNameController.text.trim(),
+      payerPhoneNumber: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
       allocations: [
         for (final entry in retained)
           CreatePaymentAllocationInput(
@@ -261,6 +338,7 @@ class _FacturationCreatePaymentDialogViewState
       totalLabel: _formatWithCurrency(total, currency),
       studentName: _studentFullName(l10n),
       payerName: _payerFullName(l10n),
+      payerPhone: _phoneController.text.trim(),
       allocations: [
         for (final entry in retained)
           FacturationConfirmAllocationItem(
@@ -344,6 +422,9 @@ class _FacturationCreatePaymentDialogViewState
                       lastNameController: _lastNameController,
                       firstNameController: _firstNameController,
                       middleNameController: _middleNameController,
+                      phoneController: _phoneController,
+                      onPickPayer: _pickPayer,
+                      phoneErrorText: _phoneErrorText(l10n),
                       readOnly: isLoading,
                     ),
                     const SizedBox(height: AppDimensions.spacingL),

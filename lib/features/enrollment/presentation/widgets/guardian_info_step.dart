@@ -12,9 +12,11 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_parent.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
@@ -65,6 +67,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _isBatchSaving = false;
   bool _awaitingDraftSave = false;
 
+  /// Vrai tant que la popin de conflit est ouverte. `_isBatchSaving` est déjà
+  /// retombé à ce moment-là (l'écriture est bel et bien terminée, en échec) :
+  /// sans ce second verrou, les gardes `if (_isBatchSaving) return` seraient
+  /// inertes pendant toute la vie de la popin, et une seconde écriture
+  /// déclenchée par ailleurs pourrait en empiler une deuxième.
+  bool _isConflictDialogOpen = false;
+
   bool _isDirty = false;
   bool _isValid = false;
   bool _showValidationHints = false;
@@ -72,6 +81,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _isHydratingFromDetail = false;
   String? _expandedParentId;
   String? _primaryParentId;
+
+  /// Une écriture est en vol, OU l'utilisateur est en train d'arbitrer un
+  /// conflit : dans les deux cas, la composition des tuteurs ne bouge pas.
+  bool get _isBusy => _isBatchSaving || _isConflictDialogOpen;
 
   bool get _canSave => _stepState.canSave;
   StepFormState get _stepState =>
@@ -332,7 +345,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
-    if (!_isDirty || _isBatchSaving) return;
+    if (!_isDirty || _isBusy) return;
 
     _dispatchDraftGuardians();
   }
@@ -369,7 +382,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// Exclut les tuteurs incomplets (ex. la ligne vide auto-créée à l'ouverture
   /// d'un wizard sans tuteur, jamais remplie) des écritures déclenchées SANS
   /// passer par la garde `_isValid` de `_onSave()` — c'est le cas de
-  /// `_onSearchParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
+  /// `_linkFoundParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
   /// Sans ce filtre, une ligne vide (`phoneNumber: ''`) atteindrait la garde
   /// d'unicité téléphone et soit polluerait `parents` d'une fiche vide, soit
   /// ferait échouer un rattachement légitime avec un conflit incompréhensible
@@ -428,17 +441,58 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// cette étape affiche elle-même le message d'erreur — `_onDraftError`
   /// reste muet pour les échecs génériques (déjà couverts par le toast
   /// générique de `EnrollmentStepperScope`, en amont).
-  void _onGuardianPhoneConflict(String message) {
+  ///
+  /// Le refus n'est pas une impasse : la fiche qui porte déjà ce numéro est
+  /// proposée au rattachement, et si elle est retenue elle REMPLACE la carte
+  /// fautive. Le toast ne subsiste que là où aucune carte ne peut être
+  /// désignée, ou là où le doublon est interne au dossier (deux cartes, même
+  /// numéro) — cas où aucune fiche existante n'est en cause.
+  Future<void> _onGuardianPhoneConflict(
+    EnrollmentDraftGuardianPhoneConflict conflict,
+  ) async {
     setState(() {
       _awaitingDraftSave = false;
       _isBatchSaving = false;
     });
     _onSavingChanged(false);
-    AppSnackBar.showError(context, message);
+
+    final candidates = _cardsHoldingPhone(conflict.phoneNumber);
+    if (candidates.length != 1) {
+      AppSnackBar.showError(
+        context,
+        candidates.isEmpty
+            ? conflict.message
+            : AppLocalizations.of(context)!.guardianPhoneDuplicateInFormError,
+      );
+      return;
+    }
+
+    final conflictedParentId = candidates.single;
+    setState(() => _isConflictDialogOpen = true);
+    final LocalParent? found;
+    try {
+      found = await showGuardianPhoneConflictDialog(
+        context: context,
+        phoneNumber: conflict.phoneNumber,
+        existingParentId: conflict.existingParentId,
+      );
+    } finally {
+      if (mounted) setState(() => _isConflictDialogOpen = false);
+    }
+    if (!mounted) return;
+
+    if (found == null) {
+      // « Corriger le numéro » : rien n'a été écrit (l'enregistrement a
+      // échoué), on ramène simplement la carte fautive sous les yeux.
+      _onOpenParent(conflictedParentId);
+      return;
+    }
+
+    _linkFoundParent(found, replacedParentId: conflictedParentId);
   }
 
   void _onAddGuardian() {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final draftId = getIt<IdGenerator>().newId();
     final draftParent = ParentSummary(
@@ -475,14 +529,43 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
-  Future<void> _onSearchParent() async {
-    if (!widget.isEditable || _isBatchSaving) return;
+  /// Ouvre la recherche d'une fiche existante POUR LA CARTE [targetParentId].
+  ///
+  /// L'appel part du bandeau posé dans la carte elle-même : la fiche retenue
+  /// remplace donc ce tuteur-là, sans jamais s'ajouter à côté. C'est ce que
+  /// l'utilisateur décrit quand il dit « en fait, c'est celui-ci » — l'ancien
+  /// comportement (ajout en fin de liste) le laissait avec une ligne à moitié
+  /// saisie à supprimer à la main.
+  Future<void> _onLinkExistingParent(String targetParentId) async {
+    if (!widget.isEditable || _isBusy) return;
 
     final found = await showParentSearchDialog(context: context);
     if (!mounted || found == null) return;
 
+    _linkFoundParent(found, replacedParentId: targetParentId);
+  }
+
+  /// Substitue [found] à la carte [replacedParentId] : identité, téléphone et
+  /// e-mail viennent de la fiche existante, l'id de la carte devient l'id RÉEL
+  /// de cette fiche (ce qui marque le lien pour la garde d'unicité), et le
+  /// brouillon est réécrit dans la foulée.
+  void _linkFoundParent(LocalParent found, {required String replacedParentId}) {
+    final index = _editableParentDetails.indexWhere(
+      (parent) => parent.id == replacedParentId,
+    );
+    // La carte a disparu pendant que la popin était ouverte (ré-hydratation
+    // du dossier). Ne rien faire EN SILENCE laisserait l'utilisateur devant
+    // un choix validé qui n'a produit aucun effet.
+    if (index < 0) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.guardianLinkTargetGoneError,
+      );
+      return;
+    }
+
     final alreadyAdded = _editableParentDetails.any(
-      (parent) => parent.id == found.id,
+      (parent) => parent.id == found.id && parent.id != replacedParentId,
     );
     if (alreadyAdded) {
       AppSnackBar.showError(
@@ -492,6 +575,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
+    // Le lien de parenté appartient à CET élève, pas à la fiche parent (qui
+    // peut être la mère d'un élève et la tante d'un autre) : ce que
+    // l'utilisateur avait déjà choisi sur la carte survit au remplacement.
+    final keptRelationshipType =
+        _currentValuesByParentId[replacedParentId]?.relationshipType ??
+        RelationshipType.guardian;
+
     final parentSummary = ParentSummary(
       id: found.id, // id RÉEL (existant) ⇒ marque le lien explicite
       firstName: found.firstName,
@@ -500,39 +590,64 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       identificationNumber: found.identificationNumber ?? '',
       phoneNumber: found.phoneNumber,
       email: found.email ?? '',
-      relationshipType: RelationshipType.guardian,
+      relationshipType: keptRelationshipType,
     );
 
     setState(() {
-      _editableParentDetails = <ParentSummary>[
-        ..._editableParentDetails,
-        parentSummary,
-      ];
-      _currentValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
-        parentSummary,
-      );
-      _initialValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
-        parentSummary,
-      );
+      final next = List<ParentSummary>.from(_editableParentDetails);
+      next[index] = parentSummary;
+      _editableParentDetails = List<ParentSummary>.unmodifiable(next);
+
+      // Retrait AVANT ajout : la carte peut déjà porter cet id (on rejoue la
+      // même fiche), auquel cas l'ordre inverse effacerait ce qu'on vient
+      // d'écrire.
+      _currentValuesByParentId.remove(replacedParentId);
+      _initialValuesByParentId.remove(replacedParentId);
+      _itemStatesByParentId.remove(replacedParentId);
+      _linkedFromSearchParentIds.remove(replacedParentId);
+
+      final linkedValue = ParentItemValue.fromParent(parentSummary);
+      _currentValuesByParentId[parentSummary.id] = linkedValue;
+      _initialValuesByParentId[parentSummary.id] = linkedValue;
       _itemStatesByParentId[parentSummary.id] = ParentItemFormState(
-        valid: ParentItemValue.fromParent(parentSummary).isValid,
+        valid: linkedValue.isValid,
         dirty: false,
         changedFields: const <String, bool>{},
       );
       _linkedFromSearchParentIds.add(parentSummary.id);
-      _expandedParentId = parentSummary.id;
-      _primaryParentId ??= parentSummary.id;
+
+      if (_expandedParentId == replacedParentId || _expandedParentId == null) {
+        _expandedParentId = parentSummary.id;
+      }
+      if (_primaryParentId == replacedParentId || _primaryParentId == null) {
+        _primaryParentId = parentSummary.id;
+      }
     });
 
     _recomputeFormState();
     // Rattachement structurel (comme la suppression) : sauvegarde immédiate,
-    // sans attendre un clic « Enregistrer » qui resterait grisé (le nouveau
-    // tuteur est déjà valide mais pas "dirty" au sens d'une édition de champ).
+    // sans attendre un clic « Enregistrer » qui resterait grisé (le tuteur
+    // rattaché est déjà valide mais pas "dirty" au sens d'une édition de
+    // champ).
     _dispatchDraftGuardians();
   }
 
+  /// Ids des cartes dont le numéro saisi est CELUI-CI, à la mise en forme
+  /// près.
+  List<String> _cardsHoldingPhone(String phoneNumber) {
+    return _editableParentDetails
+        .map((parent) => parent.id)
+        .where(
+          (id) => PhoneNumberFormat.sameNumber(
+            _currentValuesByParentId[id]?.phoneNumber ?? '',
+            phoneNumber,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   void _onRemoveGuardian(String parentId) {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final exists = _editableParentDetails.any(
       (parent) => parent.id == parentId,
@@ -565,7 +680,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   Future<void> _onRemoveGuardianRequested(String parentId) async {
-    if (!widget.isEditable || _isBatchSaving) return;
+    if (!widget.isEditable || _isBusy) return;
 
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showAppConfirmationDialog(
@@ -589,6 +704,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   void _onOpenParent(String parentId) {
     if (_expandedParentId == parentId) return;
+    // Sans cette garde, un id périmé (carte disparue pendant une popin)
+    // replierait TOUTES les cartes sans en rouvrir aucune.
+    if (!_editableParentDetails.any((parent) => parent.id == parentId)) return;
     setState(() => _expandedParentId = parentId);
   }
 
@@ -650,7 +768,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       onItemStateChanged: _onParentItemStateChanged,
       onItemValueChanged: _onParentItemValueChanged,
       onAddParent: _onAddGuardian,
-      onSearchParent: _onSearchParent,
+      onLinkExistingParent: _onLinkExistingParent,
       onRemoveParent: _onRemoveGuardianRequested,
       onOpenParent: _onOpenParent,
       onPrimaryParentChanged: _onPrimaryParentChanged,

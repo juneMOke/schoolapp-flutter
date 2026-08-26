@@ -37,6 +37,17 @@ const _existingParent = ParentSummary(
   relationshipType: RelationshipType.guardian,
 );
 
+const _otherParent = ParentSummary(
+  id: 'parent-2',
+  firstName: 'Marie',
+  lastName: 'Kabila',
+  surname: null,
+  identificationNumber: 'ID-456',
+  phoneNumber: '+243111111111',
+  email: '',
+  relationshipType: RelationshipType.mother,
+);
+
 const _foundParent = LocalParent(
   id: 'server-parent-42',
   firstName: 'Sarah',
@@ -124,6 +135,16 @@ void main() {
     await tester.tap(resultat);
   }
 
+  /// Le rattachement part désormais du bandeau posé DANS la carte dépliée —
+  /// plus de la loupe d'en-tête, qui ne désignait aucun tuteur.
+  Future<void> ouvrirRechercheDepuisLaCarte(WidgetTester tester) async {
+    final bouton = find.text('Rechercher une fiche');
+    await tester.ensureVisible(bouton);
+    await tester.pumpAndSettle();
+    await tester.tap(bouton);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> pumpGuardianStep(
     WidgetTester tester, {
     List<ParentSummary> parents = const [_existingParent],
@@ -136,9 +157,6 @@ void main() {
         home: Scaffold(
           body: BlocProvider<EnrollmentOfflineBloc>.value(
             value: offlineBloc,
-            // Largeur étroite : force le layout empilé de l'en-tête, où le
-            // bouton "Rechercher un parent" porte son libellé complet
-            // (le mode en ligne l'affiche en icône seule).
             child: SizedBox(
               width: 360,
               child: GuardianInfoStep(
@@ -156,8 +174,8 @@ void main() {
   }
 
   testWidgets(
-    'sélection via recherche ajoute le tuteur avec identité verrouillée '
-    'et relation éditable ; le draft envoyé porte isLinkedToExisting: true',
+    'la fiche choisie REMPLACE le tuteur en cours d\'édition, identité '
+    'verrouillée ; le draft envoyé porte isLinkedToExisting: true',
     (tester) async {
       when(
         () => searchUseCase(
@@ -170,8 +188,7 @@ void main() {
 
       await pumpGuardianStep(tester);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       expect(find.text('Rechercher un parent existant'), findsOneWidget);
       // Le tuteur existant (déjà expandé sous le dialog) porte lui aussi un
@@ -207,10 +224,15 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      // Dialog fermé, nouveau tuteur ajouté (id réel du parent trouvé).
+      // Dialog fermé, la carte porte maintenant la fiche trouvée (id réel) —
+      // et la carte d'origine a DISPARU : c'est un remplacement, pas un ajout.
       expect(find.text('Rechercher un parent existant'), findsNothing);
       final newItemKey = ValueKey<String>('parent-item-${_foundParent.id}');
       expect(find.byKey(newItemKey), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('parent-item-parent-1')),
+        findsNothing,
+      );
 
       // Champs identité verrouillés (readOnly) — le lien de parenté reste
       // piloté par isEditable uniquement (non vérifié ici, testé ailleurs).
@@ -229,14 +251,17 @@ void main() {
                 ),
               ).captured.single
               as SaveDraftGuardiansRequested;
-      final draft = captured.parents.firstWhere((p) => p.id == _foundParent.id);
+      expect(captured.parents, hasLength(1));
+      final draft = captured.parents.single;
+      expect(draft.id, _foundParent.id);
       expect(draft.isLinkedToExisting, isTrue);
       expect(draft.phoneNumber, _foundParent.phoneNumber);
     },
   );
 
   testWidgets(
-    'parent déjà ajouté à cette inscription → erreur, pas de doublon',
+    'fiche déjà portée par UNE AUTRE carte → erreur, aucun remplacement '
+    '(sinon le même tuteur figurerait deux fois dans le dossier)',
     (tester) async {
       when(
         () => searchUseCase(
@@ -248,18 +273,21 @@ void main() {
       ).thenAnswer(
         (_) async => const Right([
           LocalParent(
-            id: 'parent-1', // même id que le tuteur déjà présent
-            firstName: 'Jean',
-            lastName: 'Dupont',
-            phoneNumber: '+243000000000',
+            id: 'parent-2', // id du SECOND tuteur, déjà dans le dossier
+            firstName: 'Marie',
+            lastName: 'Kabila',
+            phoneNumber: '+243111111111',
           ),
         ]),
       );
 
-      await pumpGuardianStep(tester);
+      // Deux tuteurs : la recherche part de la carte dépliée (la première).
+      await pumpGuardianStep(
+        tester,
+        parents: const [_existingParent, _otherParent],
+      );
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
 
@@ -272,7 +300,7 @@ void main() {
 
       await choisirResultat(
         tester,
-        find.descendant(of: dialogFinder, matching: find.text('Jean Dupont')),
+        find.descendant(of: dialogFinder, matching: find.text('Marie Kabila')),
       );
       await tester.pumpAndSettle();
 
@@ -280,18 +308,22 @@ void main() {
         find.text('Ce parent est déjà ajouté à cette inscription.'),
         findsOneWidget,
       );
-      // Toujours un seul tuteur dans la liste (pas de doublon).
+      // Les deux cartes sont intactes : rien n'a été remplacé.
       expect(
         find.byKey(const ValueKey<String>('parent-item-parent-1')),
         findsOneWidget,
       );
+      expect(
+        find.byKey(const ValueKey<String>('parent-item-parent-2')),
+        findsOneWidget,
+      );
+      verifyNever(() => offlineBloc.add(any()));
     },
   );
 
   testWidgets(
-    'tuteur vide auto-créé (aucun tuteur au départ) n\'est PAS envoyé lors '
-    'd\'un rattachement via recherche — évite de polluer `parents` avec une '
-    'fiche vide ou de faire échouer le rattachement sur un faux conflit',
+    'tuteur vide auto-créé (aucun tuteur au départ) : la fiche choisie prend '
+    'sa place, et rien de vide ne part dans `parents`',
     (tester) async {
       when(
         () => searchUseCase(
@@ -307,8 +339,7 @@ void main() {
       // reproduit ici sans y toucher.
       await pumpGuardianStep(tester, parents: const []);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
       await chercherParIdentite(
@@ -335,8 +366,8 @@ void main() {
               ).captured.single
               as SaveDraftGuardiansRequested;
 
-      // Seul le tuteur trouvé est envoyé — la ligne vide auto-créée est
-      // exclue (n'était jamais un vrai tuteur, juste un brouillon d'édition).
+      // Seul le tuteur trouvé est envoyé : la ligne vide auto-créée n'a pas
+      // été doublée, elle a été REMPLACÉE.
       expect(captured.parents, hasLength(1));
       expect(captured.parents.single.id, _foundParent.id);
     },
@@ -363,8 +394,7 @@ void main() {
 
       await pumpGuardianStep(tester);
 
-      await tester.tap(find.text('Rechercher un parent'));
-      await tester.pumpAndSettle();
+      await ouvrirRechercheDepuisLaCarte(tester);
 
       final dialogFinder = find.byType(Dialog);
       await chercherParIdentite(
@@ -415,10 +445,10 @@ void main() {
             'GuardianInfoStepState.build() n\'est jamais ré-invoqué après '
             'l\'erreur — l\'étape reste figée avec un spinner.',
       );
-      expect(
-        find.text('Un tuteur avec ce numéro existe déjà.'),
-        findsOneWidget,
-      );
+      // Et le refus n'est plus une impasse : la fiche qui porte ce numéro est
+      // proposée au rattachement (voir guardian_phone_conflict_link_test).
+      await tester.pumpAndSettle();
+      expect(find.text('Ce numéro est déjà utilisé'), findsOneWidget);
     },
   );
 }

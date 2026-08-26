@@ -388,6 +388,32 @@ const TableSchema studentChargesTable = TableSchema(
 /// **`receipt_id` (v19)** : UUID de la pièce scellée, renvoyé par le serveur
 /// dans l'ACK de push ET dans le delta de pull. Seule clé permettant de
 /// re-télécharger un reçu définitif par `GET /editique/documents/{id}`.
+///
+/// **`payer_phone_number` (v28)** : numéro E.164 du payeur, saisi au guichet.
+/// NULLABLE alors que la saisie l'exige — la colonne décrit aussi le passé :
+/// tout versement antérieur à la v28 et tout versement encaissé sur un poste
+/// resté en arrière n'en portent aucun, et le pull ne peut pas en inventer. Un
+/// `NOT NULL` aurait donc obligé à replier sur `''`, c'est-à-dire à rendre
+/// « pas de numéro » indiscernable de « numéro inconnu » au moment précis où
+/// l'écran doit choisir entre proposer ce payeur et le taire.
+///
+/// **`collected_by_id` / `collected_by_name` (v29)** : l'encaisseur tel que le
+/// SERVEUR l'attribue, distinct des `cashier_*` que ce poste stampe lui-même
+/// (v19). Les deux nomment la même personne quand le versement a été encaissé
+/// ICI ; seul le second existe quand il vient d'un autre guichet, cas où les
+/// `cashier_*` restent nuls parce qu'aucun poste local n'a rien observé.
+///
+/// Ils ne sont pas fusionnés en une seule paire de colonnes, et c'est
+/// délibéré : `cashier_*` est ce qui a été IMPRIMÉ sur le ticket de ce poste
+/// (RG-012-11), une trace que nul delta ne doit pouvoir réécrire. Les remplir
+/// depuis le pull reviendrait à laisser le serveur changer après coup le nom
+/// que le guichetier a remis au payeur sur papier.
+///
+/// C'est la SEULE donnée personnelle qu'on rajoute au repos après le ménage de
+/// la v27 (`students.phone_number`/`email` effacés). La différence est sa
+/// destination : celle-ci est lue — elle remonte au serveur avec le versement
+/// et alimente l'annuaire de payeurs du guichet. La v27 n'a pas proscrit la
+/// PII, elle a proscrit la PII que personne ne lit.
 const TableSchema paymentsTable = TableSchema(
   name: 'payments',
   createTableSql: '''
@@ -403,10 +429,13 @@ const TableSchema paymentsTable = TableSchema(
       payer_first_name TEXT NOT NULL,
       payer_last_name TEXT NOT NULL,
       payer_middle_name TEXT,
+      payer_phone_number TEXT,
       status TEXT,
       cashier_uid TEXT,
       cashier_first_name TEXT,
       cashier_last_name TEXT,
+      collected_by_id TEXT,
+      collected_by_name TEXT,
       device_id TEXT,
       receipt_id TEXT,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',

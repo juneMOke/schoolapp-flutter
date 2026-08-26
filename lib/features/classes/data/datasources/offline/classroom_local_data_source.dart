@@ -331,6 +331,44 @@ class ClassroomLocalDataSource {
     return rows.first['classroom_id'] as String?;
   }
 
+  /// Parmi [studentIds], ceux dont un transfert de classe local n'est **pas
+  /// encore synchronisé** pour [academicYearId].
+  ///
+  /// Sert la garde de push CLASSE → PRÉSENCE. Le roster que lit l'appel est
+  /// COMPOSÉ (cf. [_composedClassroomExpr]) : un élève déjà déplacé en local
+  /// figure dans sa NOUVELLE classe alors que le serveur l'ignore encore. Son
+  /// absence part alors dans un agrégat que `requireAllInRoster` rejette en 422
+  /// — et un 422 est terminal, donc c'est la journée ENTIÈRE de la classe qui
+  /// est perdue pour un seul élève.
+  ///
+  /// Découpé en lots : SQLite plafonne le nombre de variables liées d'une
+  /// requête (999 par défaut), et un `IN (…)` sur un gros roster le dépasserait.
+  Future<Set<String>> studentsWithPendingTransfer({
+    required List<String> studentIds,
+    required String academicYearId,
+  }) async {
+    if (studentIds.isEmpty) return const <String>{};
+
+    final pending = <String>{};
+    for (var start = 0; start < studentIds.length; start += _inClauseChunk) {
+      final end = start + _inClauseChunk < studentIds.length
+          ? start + _inClauseChunk
+          : studentIds.length;
+      final chunk = studentIds.sublist(start, end);
+      final rows = await _db.rawQuery(
+        'SELECT DISTINCT student_id FROM $transfersTable '
+        'WHERE academic_year_id = ? AND sync_status <> ? '
+        'AND student_id IN (${List.filled(chunk.length, '?').join(',')})',
+        [academicYearId, SyncState.synced.dbValue, ...chunk],
+      );
+      pending.addAll(rows.map((r) => r['student_id'] as String));
+    }
+    return pending;
+  }
+
+  /// Taille de lot d'un `IN (…)` — sous le plafond de variables liées de SQLite.
+  static const int _inClauseChunk = 500;
+
   /// Nombre d'élèves ACTIVE d'une classe (effectif pour le taux dérivé AF-3).
   Future<int> countActiveRoster(String classroomId) async {
     final rows = await _db.rawQuery(

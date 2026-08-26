@@ -355,11 +355,13 @@
   "classesListSearchTitle": "Formulaire de recherche",
   "classesListSearchHint": "",
   "classesListClassroomOptionalLabel": "Classe (optionnel)",
-  "classesListFirstNameOptionalLabel": "Prénom (optionnel)",
-  "classesListLastNameOptionalLabel": "Nom (optionnel)",
-  "classesListSurnameOptionalLabel": "Post-nom (optionnel)",
+  "classesListClassroomPlaceholder": "Choisissez d'abord un niveau",
+  "classesListClassroomNonePlaceholder": "Aucune classe pour ce niveau",
+  "classesListSearchLevelPlaceholder": "Choisissez un cycle",
+  "classesListLevelColumnLabel": "Niveau",
+  "classesListLevelUnknown": "—",
   "classesListInitialEmptyTitle": "Aucune recherche en cours",
-  "classesListInitialEmptyMessage": "Renseignez au moins un critère pour afficher les élèves.",
+  "classesListInitialEmptyMessage": "Choisissez un niveau, ou renseignez l'identité complète d'un élève, pour afficher des résultats.",
   "classesListNoMatchTitle": "Aucun élève ne correspond aux critères",
   "classesListNoMatchMessage": "Essayez d'élargir vos filtres ou de modifier votre recherche.",
   "classesListResultsSummary": "{count} élèves trouvés — {criteria}",
@@ -1045,7 +1047,6 @@
       }
     }
   },
-  "guardianSearchAction": "Rechercher un parent",
   "guardianSearchDialogTitle": "Rechercher un parent existant",
   "guardianSearchDialogEyebrow": "Tuteurs",
   "guardianSearchModeSemantics": "Mode de recherche",
@@ -1059,6 +1060,25 @@
   "guardianSearchAlreadyAddedError": "Ce parent est déjà ajouté à cette inscription.",
   "guardianSearchIdentityLockedHint": "Informations issues d'une fiche existante — non modifiables ici.",
   "guardianSearchErrorRetry": "Réessayer",
+  "guardianLinkExistingBannerTitle": "Ce tuteur est déjà enregistré à l'école ?",
+  "guardianLinkExistingBannerDescription": "Retrouvez sa fiche au lieu de la ressaisir : elle remplacera ce que porte cette carte.",
+  "guardianLinkExistingAction": "Rechercher une fiche",
+  "guardianPhoneConflictDialogEyebrow": "Tuteurs",
+  "guardianPhoneConflictDialogTitle": "Ce numéro est déjà utilisé",
+  "guardianPhoneConflictDialogMessage": "{phoneNumber} appartient déjà à une fiche existante. Rattachez-la à l'élève, ou corrigez le numéro saisi.",
+  "@guardianPhoneConflictDialogMessage": {
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "guardianPhoneConflictUseAction": "Utiliser cette fiche",
+  "guardianPhoneConflictFixPhoneAction": "Corriger le numéro",
+  "guardianPhoneConflictNotFoundTitle": "Fiche introuvable",
+  "guardianPhoneConflictNotFoundDescription": "Aucune fiche portant ce numéro n'a pu être retrouvée. Corrigez le numéro saisi.",
+  "guardianPhoneDuplicateInFormError": "Ce numéro est déjà saisi pour un autre tuteur de ce dossier.",
+  "guardianLinkTargetGoneError": "Ce tuteur n'est plus dans le dossier : la fiche n'a pas été rattachée.",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",
@@ -1679,6 +1699,49 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Post-nom (optionnel)",
   "facturationCreatePaymentPayerMiddleNameHint": "Entrez le post-nom",
   "facturationCreatePaymentPayerFieldRequired": "Ce champ est obligatoire",
+  "facturationCreatePaymentPayerPhoneLabel": "Téléphone du payeur",
+  "facturationCreatePaymentPayerPickAction": "Choisir un payeur",
+  "facturationCreatePaymentPayerPickHelp": "Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.",
+  "facturationPayerSearchDialogEyebrow": "Encaissement",
+  "facturationPayerSearchDialogTitle": "Choisir un payeur",
+  "facturationPayerSearchModeSemantics": "Mode de recherche",
+  "facturationPayerSearchModeByPhone": "Par numéro",
+  "facturationPayerSearchModeByIdentity": "Par identité",
+  "facturationPayerSearchPhoneHint": "Le numéro suffit, même partiel : « 8169 » remonte tous les payeurs concernés.",
+  "facturationPayerSearchIdentityHint": "Un seul mot suffit — nom, post-nom ou prénom. Les accents sont ignorés.",
+  "facturationPayerSearchAction": "Rechercher",
+  "facturationPayerSearchSuggestionsTitle": "Déjà connus pour cet élève",
+  "facturationPayerSearchResultsTitle": "Résultats",
+  "facturationPayerSearchResultsPlaceholder": "Les payeurs correspondants s'afficheront ici.",
+  "facturationPayerSearchEmptyTitle": "Aucun payeur trouvé",
+  "facturationPayerSearchEmptyDescription": "Aucun payeur ne correspond à ces critères. Vérifiez la saisie, ou fermez cette fenêtre pour le saisir à la main.",
+  "facturationPayerSearchErrorRetry": "Réessayer",
+  "facturationPayerSearchOriginGuardian": "Tuteur de l'élève — n'a encore rien payé",
+  "facturationPayerSearchPaymentCount": "{count, plural, =1{1 versement} other{{count} versements}}",
+  "@facturationPayerSearchPaymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationPayerSearchLastPaidAt": "dernier le {date}",
+  "@facturationPayerSearchLastPaidAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationPayerSearchUnknownPhone": "Numéro inconnu",
+  "facturationPayerSearchSelectSemantics": "Choisir {name} comme payeur",
+  "@facturationPayerSearchSelectSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentDetailsSectionTitle": "Détails du paiement",
   "facturationCreatePaymentDetailsSectionSubtitle": "Saisissez le montant reçu, la devise et la date du paiement.",
   "facturationCreatePaymentReceivedAmountLabel": "Montant reçu",

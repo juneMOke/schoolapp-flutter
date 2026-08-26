@@ -346,6 +346,15 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       syncApi: getIt<AttendanceSyncApi>(),
       localDataSource: getIt<AttendanceLocalDataSource>(),
       requiredAuth: requiredAuth,
+      // Garde de dépendance CLASSE → PRÉSENCE : l'appel attend qu'un transfert
+      // saisi en local soit parti avant de pousser l'absence de l'élève
+      // déplacé — sinon le serveur, qui valide contre SON roster, rejette
+      // l'agrégat entier en 422 et la journée de la classe est perdue.
+      pendingTransfers: (studentIds, academicYearId) =>
+          getIt<ClassroomLocalDataSource>().studentsWithPendingTransfer(
+            studentIds: studentIds,
+            academicYearId: academicYearId,
+          ),
       // Pré-garde d'attribution : distingue un 403 « pas mon jeton » (blocked,
       // repart à la reconnexion de l'auteur) d'un 403 réellement terminal.
       currentUser: getIt<CurrentUserContext>(),

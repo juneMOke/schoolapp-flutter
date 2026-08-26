@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -103,6 +104,9 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                     _PaymentMeta(
                       date: date,
                       method: l10n.facturationPaymentMethodCash,
+                    ),
+                    FinancePayerPhoneLine(
+                      phoneNumber: widget.payment.payerPhoneNumber,
                     ),
                     // Versement de ce poste pas encore remonté (FRONT §3).
                     if (widget.payment.isPendingSync) ...[

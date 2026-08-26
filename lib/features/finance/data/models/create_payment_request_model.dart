@@ -30,6 +30,7 @@ class CreatePaymentRequestModel {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+  final String? payerPhoneNumber;
   final List<CreatePaymentAllocationRequestModel> allocations;
 
   const CreatePaymentRequestModel({
@@ -40,6 +41,7 @@ class CreatePaymentRequestModel {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     required this.allocations,
   });
 
@@ -51,6 +53,7 @@ class CreatePaymentRequestModel {
     'payerFirstName': payerFirstName,
     'payerLastName': payerLastName,
     'payerMiddleName': payerMiddleName,
+    'payerPhoneNumber': payerPhoneNumber,
     'allocations': allocations
         .map((allocation) => allocation.toJson())
         .toList(),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -88,6 +90,78 @@ void main() {
       // RC provisoire toujours émis à l'encaissement (FRONT §7).
       expect((await db.query('generated_documents')).single['doc_type'], 'RC');
       expect((await db.query('outbox')).single['aggregate_type'], 'PAYMENT');
+    },
+  );
+
+  /// Le numéro du payeur doit atteindre LES DEUX destinations d'un même geste :
+  /// la ligne locale (qui alimente l'annuaire du prochain versement) ET le
+  /// payload d'outbox (qui le porte au serveur). N'en tenir qu'une donnerait un
+  /// écran qui propose un numéro que le serveur n'a jamais reçu, ou l'inverse —
+  /// et le versement est append-only : rien ne se corrige après coup.
+  test('recordPayment : le téléphone du payeur atteint la ligne locale ET '
+      'la file d\'attente', () async {
+    final result = await repo.recordPayment(
+      const RecordPaymentDraft(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        currency: 'USD',
+        paidAt: '2026-07-06T10:00:00Z',
+        payerFirstName: 'Joseph',
+        payerLastName: 'Kabongo',
+        payerPhoneNumber: '+243816939060',
+        allocations: [
+          AllocationDraft(
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: 30000,
+            currency: 'USD',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isRight(), isTrue);
+    expect(
+      (await db.query('payments')).single['payer_phone_number'],
+      '+243816939060',
+    );
+
+    final payload =
+        jsonDecode((await db.query('outbox')).single['payload'] as String)
+            as Map<String, dynamic>;
+    expect(
+      (payload['payment'] as Map<String, dynamic>)['payerPhoneNumber'],
+      '+243816939060',
+    );
+  });
+
+  /// Un versement mis en file par une version ANTÉRIEURE de l'app n'a pas de
+  /// numéro. Le refuser ici bloquerait définitivement de l'argent déjà
+  /// encaissé, reçu déjà imprimé : la colonne et le contrat restent nullables.
+  test(
+    'recordPayment : sans téléphone, l\'encaissement passe quand même',
+    () async {
+      final result = await repo.recordPayment(
+        const RecordPaymentDraft(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          currency: 'USD',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'Joseph',
+          payerLastName: 'Kabongo',
+          allocations: [
+            AllocationDraft(
+              feeCode: 'TUITION',
+              studentChargeLabel: 'Scolarité',
+              amountInCents: 30000,
+              currency: 'USD',
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+      expect((await db.query('payments')).single['payer_phone_number'], isNull);
     },
   );
 }

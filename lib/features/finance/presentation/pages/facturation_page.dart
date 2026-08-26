@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
@@ -128,22 +129,14 @@ class _FacturationPageState extends State<FacturationPage> {
       return;
     }
 
-    String levelName = '';
-    String levelGroupName = '';
-
-    for (final groupBundle
-        in academicYearContext?.schoolLevelGroups ?? const []) {
-      for (final level in groupBundle.levels) {
-        if (level.id == levelId) {
-          levelName = level.name;
-          levelGroupName = groupBundle.group.name;
-          break;
-        }
-      }
-      if (levelName.isNotEmpty) {
-        break;
-      }
-    }
+    // La LIGNE d'abord, le critère de recherche ensuite : une recherche par
+    // identité ne transporte aucun niveau, et le sur-titre affichait « · - »
+    // là où le résumé sait de quel niveau est l'élève.
+    final labels = resolveEnrollmentLevelLabels(
+      summary,
+      bundles: academicYearContext?.schoolLevelGroups ?? const [],
+      searchedLevelId: levelId,
+    );
 
     context.push(
       AppRoutesNames.facturationDetailPath(
@@ -156,8 +149,8 @@ class _FacturationPageState extends State<FacturationPage> {
         firstName: summary.student.firstName,
         lastName: summary.student.lastName,
         surname: summary.student.surname,
-        levelName: levelName,
-        levelGroupName: levelGroupName,
+        levelName: labels.levelName,
+        levelGroupName: labels.levelGroupName,
       ),
     );
   }

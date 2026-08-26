@@ -44,9 +44,6 @@ class AppConstants {
   static const String enrollmentSearchByDateOfBirthEndpoint =
       '/api/v1/enrollments/search/by-date-of-birth';
 
-  static const String enrollmentSearchByAcademicInfoEndpoint =
-      '/api/v1/enrollments/search/by-academic-info';
-
   static const String enrollmentPreviewByStudentEndpoint =
       '/api/v1/enrollments/students/{studentId}/preview';
 
@@ -403,7 +400,14 @@ class AppConstants {
   //      bundle `grades-referential` dès la v12, mais toujours CRÉÉ sur chaque
   //      base neuve. Son DDL est désormais inliné dans l'étape v9, qui le lisait
   //      dans le schéma vivant.
-  static const int offlineDbSchemaVersion = 27;
+  // v28 (2026-08-24) : Facturation — `payments.payer_phone_number`. Le guichet
+  // exige désormais le numéro du payeur à la saisie, et l'écran propose les
+  // payeurs déjà venus ; sans colonne, le numéro serait poussé au serveur sans
+  // jamais revenir, et l'annuaire local n'aurait rien à rapprocher. Nullable
+  // sans backfill : le tuteur de l'élève n'est PAS le payeur (c'est ce que la
+  // saisie établit), donc rien de fiable à recopier dans le passé — NULL s'y
+  // lit « on ne sait pas », et l'annuaire propose alors par l'identité seule.
+  static const int offlineDbSchemaVersion = 29;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

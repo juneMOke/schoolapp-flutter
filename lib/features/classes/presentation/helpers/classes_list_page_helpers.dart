@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
@@ -6,7 +7,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListPageHelpers {
@@ -48,6 +49,15 @@ class ClassesListPageHelpers {
     );
   }
 
+  /// Restreint le roster d'une classe aux noms portés par [request].
+  ///
+  /// En production c'est l'**affinage** du mode « Par classe » qui arrive ici,
+  /// donc le seul nom rempli est [ClassesListSearchRequest.lastName]. Le
+  /// rapprochement est partiel et **insensible aux accents**, comme celui du
+  /// même champ sur la liste des inscriptions
+  /// (`EnrollmentLocalListProjector`) : « kab » doit trouver « Kabongo » des
+  /// deux côtés, sans quoi le même geste rendrait deux résultats différents
+  /// selon qu'une classe est choisie ou non.
   static List<ClassroomMember> filterMembers(
     List<ClassroomMember> members,
     ClassesListSearchRequest request,
@@ -56,22 +66,22 @@ class ClassesListPageHelpers {
       return members;
     }
 
-    final firstName = request.firstName.trim().toLowerCase();
-    final lastName = request.lastName.trim().toLowerCase();
-    final surname = request.surname.trim().toLowerCase();
-
     return members
-        .where((member) {
-          final memberFirstName = member.studentFirstName.trim().toLowerCase();
-          final memberLastName = member.studentLastName.trim().toLowerCase();
-          final memberSurname = (member.studentMiddleName ?? '')
-              .trim()
-              .toLowerCase();
-
-          return memberFirstName.contains(firstName) &&
-              memberLastName.contains(lastName) &&
-              memberSurname.contains(surname);
-        })
+        .where(
+          (member) =>
+              SearchNormalizationHelper.contains(
+                member.studentFirstName,
+                request.firstName,
+              ) &&
+              SearchNormalizationHelper.contains(
+                member.studentLastName,
+                request.lastName,
+              ) &&
+              SearchNormalizationHelper.contains(
+                member.studentMiddleName,
+                request.surname,
+              ),
+        )
         .toList(growable: false);
   }
 
@@ -84,7 +94,7 @@ class ClassesListPageHelpers {
   );
 
   static bool isSearching({
-    required EnrollmentState enrollmentState,
+    required EnrollmentLocalListState enrollmentState,
     required ClassroomState classroomState,
     required ClassesListSearchRequest? lastRequest,
   }) {
@@ -108,8 +118,8 @@ class ClassesListPageHelpers {
   }
 
   static bool listenWhenEnrollmentStatusChanges(
-    EnrollmentState previous,
-    EnrollmentState current,
+    EnrollmentLocalListState previous,
+    EnrollmentLocalListState current,
   ) {
     return previous.summariesStatus != current.summariesStatus ||
         previous.errorMessage != current.errorMessage;
@@ -124,8 +134,8 @@ class ClassesListPageHelpers {
   }
 
   static bool buildWhenEnrollmentResultsChange(
-    EnrollmentState previous,
-    EnrollmentState current,
+    EnrollmentLocalListState previous,
+    EnrollmentLocalListState current,
   ) {
     return previous.summariesStatus != current.summariesStatus ||
         previous.summaries != current.summaries ||

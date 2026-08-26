@@ -9,13 +9,14 @@ import 'package:school_app_flutter/features/classes/presentation/widgets/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_results_section.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_form.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 
 class ClassesListPageContent extends StatelessWidget {
   final List<ClassesListCycleOption> options;
   final ClassesListSearchRequest? lastRequest;
   final ValueChanged<ClassesListSearchRequest> onSearch;
   final VoidCallback onExportPressed;
+  final ValueChanged<int> onPageRequested;
   final ValueChanged<EnrollmentSummary> onEnrollmentViewRequested;
   final ValueChanged<ClassroomMember> onClassroomMemberViewRequested;
 
@@ -25,15 +26,23 @@ class ClassesListPageContent extends StatelessWidget {
     required this.lastRequest,
     required this.onSearch,
     required this.onExportPressed,
+    required this.onPageRequested,
     required this.onEnrollmentViewRequested,
     required this.onClassroomMemberViewRequested,
   });
 
   @override
   Widget build(BuildContext context) {
-    final searchModeKey = lastRequest?.targetsClassroom == true
-        ? 'classes-list-classroom-mode'
-        : 'classes-list-level-mode';
+    // Trois formes de résultats, trois clés : le roster d'une classe, la liste
+    // d'un niveau, et la liste par identité — qui porte une colonne de plus.
+    // Les confondre ferait hériter la nouvelle liste de l'état de tri de
+    // l'ancienne, sur des colonnes qui ne sont pas les mêmes.
+    final searchModeKey = switch (lastRequest) {
+      null => 'classes-list-initial',
+      final request when request.targetsClassroom => 'classes-list-classroom',
+      final request when request.isIdentityMode => 'classes-list-identity',
+      _ => 'classes-list-level',
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +51,10 @@ class ClassesListPageContent extends StatelessWidget {
           buildWhen: (previous, current) =>
               previous.membersStatus != current.membersStatus,
           builder: (context, classroomState) {
-            return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+            return BlocBuilder<
+              EnrollmentLocalListBloc,
+              EnrollmentLocalListState
+            >(
               buildWhen: (previous, current) =>
                   previous.summariesStatus != current.summariesStatus,
               builder: (context, enrollmentState) {
@@ -67,6 +79,7 @@ class ClassesListPageContent extends StatelessWidget {
             child: ClassesListResultsSection(
               lastRequest: lastRequest,
               onExportPressed: onExportPressed,
+              onPageRequested: onPageRequested,
               onEnrollmentViewRequested: onEnrollmentViewRequested,
               onClassroomMemberViewRequested: onClassroomMemberViewRequested,
             ),

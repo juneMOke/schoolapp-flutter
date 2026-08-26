@@ -65,12 +65,21 @@ class EnrollmentDraftError extends EnrollmentOfflineState {
 /// [EnrollmentDraftFinalizeError].
 class EnrollmentDraftGuardianPhoneConflict extends EnrollmentOfflineState {
   final String phoneNumber;
+
+  /// Id de la fiche qui porte déjà ce numéro — voir
+  /// [DuplicateParentPhoneFailure.existingParentId].
+  final String? existingParentId;
+
   final String message;
 
-  const EnrollmentDraftGuardianPhoneConflict(this.phoneNumber, this.message);
+  const EnrollmentDraftGuardianPhoneConflict(
+    this.phoneNumber,
+    this.message, {
+    this.existingParentId,
+  });
 
   @override
-  List<Object?> get props => [phoneNumber, message];
+  List<Object?> get props => [phoneNumber, existingParentId, message];
 }
 
 /// Échec de la **finalisation** spécifiquement — distinct de

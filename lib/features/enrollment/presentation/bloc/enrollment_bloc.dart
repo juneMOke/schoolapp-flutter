@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary_page.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
@@ -42,8 +43,6 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
   _searchByStudentNamesAndDateOfBirthUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
   _searchByDateOfBirthUseCase;
-  final SearchEnrollmentSummaryByAcademicInfoUseCase
-  _searchByAcademicInfoUseCase;
 
   EnrollmentBloc({
     required GetEnrollmentSummaryListByStatusUseCase
@@ -57,8 +56,6 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     searchByStudentNamesAndDateOfBirthUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
     searchByDateOfBirthUseCase,
-    required SearchEnrollmentSummaryByAcademicInfoUseCase
-    searchByAcademicInfoUseCase,
   }) : _getEnrollmentSummaryListByStatusUseCase = getEnrollmentSummariesUseCase,
        _getEnrollmentDetailUseCase = getEnrollmentDetailUseCase,
        _getEnrollmentPreviewByStudentIdUseCase =
@@ -67,7 +64,6 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
        _searchByStudentNamesAndDateOfBirthUseCase =
            searchByStudentNamesAndDateOfBirthUseCase,
        _searchByDateOfBirthUseCase = searchByDateOfBirthUseCase,
-       _searchByAcademicInfoUseCase = searchByAcademicInfoUseCase,
        super(const EnrollmentState.initial()) {
     on<EnrollmentResetRequested>(_onResetRequested);
     on<EnrollmentSummariesRefreshRequested>(_onSummariesRefreshRequested);
@@ -80,9 +76,6 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     );
     on<EnrollmentSummariesByDateOfBirthRequested>(
       _onSummariesByDateOfBirthRequested,
-    );
-    on<EnrollmentSummariesByAcademicInfoRequested>(
-      _onSummariesByAcademicInfoRequested,
     );
     on<EnrollmentSummariesPageRequested>(_onSummariesPageRequested);
     on<EnrollmentDetailRequested>(_onDetailRequested);
@@ -164,27 +157,6 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         page: event.page,
         size: event.size,
         dateOfBirth: event.dateOfBirth,
-      ),
-    );
-  }
-
-  Future<void> _onSummariesByAcademicInfoRequested(
-    EnrollmentSummariesByAcademicInfoRequested event,
-    Emitter<EnrollmentState> emit,
-  ) async {
-    await _loadSummariesForQuery(
-      emit,
-      EnrollmentSummariesQuery(
-        type: EnrollmentSummaryQueryType.byAcademicInfo,
-        status: '',
-        academicYearId: '',
-        page: event.page,
-        size: event.size,
-        firstName: event.firstName,
-        lastName: event.lastName,
-        surname: event.surname,
-        schoolLevelGroupId: event.schoolLevelGroupId,
-        schoolLevelId: event.schoolLevelId,
       ),
     );
   }
@@ -281,14 +253,16 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         page: query.page,
         size: query.size,
       ),
-      EnrollmentSummaryQueryType.byAcademicInfo => _searchByAcademicInfoUseCase(
-        firstName: query.firstName ?? '',
-        lastName: query.lastName ?? '',
-        surname: query.surname ?? '',
-        schoolLevelGroupId: query.schoolLevelGroupId ?? '',
-        schoolLevelId: query.schoolLevelId ?? '',
-        page: query.page,
-        size: query.size,
+      // `byAcademicInfo` appartient au listing LOCAL seul : le CONTRAT de
+      // requête est partagé (`EnrollmentSummariesQuery`), les sources ne le
+      // sont pas. Aucun événement de ce bloc ne produit ce type, et l'endpoint
+      // online correspondant a été retiré — il exigeait le niveau en paramètre,
+      // donc il ne pouvait de toute façon pas servir une recherche par
+      // identité. Cette branche n'existe que pour l'exhaustivité de l'énumération.
+      EnrollmentSummaryQueryType.byAcademicInfo => Future.value(
+        const Left<Failure, EnrollmentSummaryPage>(
+          ServerFailure('Query type not served by the online listing'),
+        ),
       ),
     };
 

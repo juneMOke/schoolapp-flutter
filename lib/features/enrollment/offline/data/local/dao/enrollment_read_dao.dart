@@ -16,16 +16,33 @@ class EnrollmentReadDao {
 
   const EnrollmentReadDao(this._db);
 
+  /// Projection commune des listes. Le **niveau est porté par la ligne**
+  /// (ids + libellés résolus sur le référentiel) : sans lui, la seule source d'un
+  /// niveau à l'affichage serait les critères de la recherche — donc rien du
+  /// tout dès qu'on cherche par identité.
+  ///
+  /// ⚠️ Les deux jointures du référentiel sont **LEFT** à dessein :
+  /// `school_level_id` / `school_level_group_id` sont nullables en base (un
+  /// brouillon peut ne pas encore avoir de niveau), et `ref_school_levels` /
+  /// `ref_school_level_groups` peuvent être vides tant que le pull du
+  /// référentiel n'est pas descendu. Une jointure interne ferait alors
+  /// **disparaître les dossiers** de toutes les listes.
   static const String _listSelect = '''
     SELECT e.id AS enrollment_id, e.student_id AS student_id,
            e.enrollment_type AS enrollment_type, e.status AS enrollment_status,
            e.enrollment_date AS enrollment_date,
            e.sync_status AS enrollment_sync_status,
+           e.school_level_id AS school_level_id,
+           e.school_level_group_id AS school_level_group_id,
+           sl.name AS school_level_name,
+           slg.name AS school_level_group_name,
            s.first_name AS first_name, s.last_name AS last_name,
            s.surname AS surname, s.date_of_birth AS date_of_birth,
            s.gender AS gender, s.matriculation_number AS matriculation_number
     FROM enrollments e
     JOIN students s ON s.id = e.student_id
+    LEFT JOIN ref_school_levels sl ON sl.id = e.school_level_id
+    LEFT JOIN ref_school_level_groups slg ON slg.id = e.school_level_group_id
   ''';
 
   LocalEnrollmentListItem _listItem(Map<String, Object?> r) =>
@@ -45,6 +62,10 @@ class EnrollmentReadDao {
         ),
         matriculationNumber: r['matriculation_number'] as String?,
         enrollmentDate: r['enrollment_date'] as String,
+        schoolLevelId: r['school_level_id'] as String?,
+        schoolLevelGroupId: r['school_level_group_id'] as String?,
+        schoolLevelName: r['school_level_name'] as String?,
+        schoolLevelGroupName: r['school_level_group_name'] as String?,
         syncState: SyncState.fromDbValue(
           r['enrollment_sync_status'] as String?,
         ),

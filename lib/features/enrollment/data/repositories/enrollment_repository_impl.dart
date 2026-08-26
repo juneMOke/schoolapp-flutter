@@ -146,40 +146,6 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }
 
   @override
-  Future<Either<Failure, EnrollmentSummaryPage>>
-  searchEnrollmentSummaryByAcademicInfo({
-    required String firstName,
-    required String lastName,
-    required String surname,
-    required String schoolLevelGroupId,
-    required String schoolLevelId,
-    int page = 0,
-    int size = AppConstants.enrollmentDefaultPageSize,
-  }) async {
-    try {
-      final enrollmentSummaryPageModel = await remoteDataSource
-          .searchEnrollmentSummaryByAcademicInfo(
-            requiredAuth,
-            firstName,
-            lastName,
-            surname,
-            schoolLevelGroupId,
-            schoolLevelId,
-            page,
-            size,
-          );
-      return Right(enrollmentSummaryPageModel.toEnrollmentSummaryPage());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
   Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   }) async {

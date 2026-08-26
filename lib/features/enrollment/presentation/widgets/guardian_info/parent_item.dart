@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_card_header.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_fields_grid.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_link_existing_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item_models.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -25,6 +26,11 @@ class ParentItem extends StatefulWidget {
   final VoidCallback? onRemoveRequested;
   final bool isEditable;
 
+  /// Ouvre la recherche d'une fiche parent existante POUR CETTE CARTE — la
+  /// fiche choisie la remplace. `null` masque le bandeau d'appel (carte non
+  /// éditable, ou déjà rattachée).
+  final VoidCallback? onLinkExistingRequested;
+
   /// true si ce tuteur a été rattaché via "Rechercher un parent" cette
   /// session — verrouille les champs d'identité (voir [GuardianFieldsGrid]).
   final bool identityLocked;
@@ -39,6 +45,7 @@ class ParentItem extends StatefulWidget {
     this.onFormStateChanged,
     this.onValueChanged,
     this.onRemoveRequested,
+    this.onLinkExistingRequested,
     this.isEditable = true,
     this.identityLocked = false,
   });
@@ -192,6 +199,12 @@ class _ParentItemState extends State<ParentItem> {
   @override
   Widget build(BuildContext context) {
     final state = _currentState();
+    // Une carte déjà rattachée n'a plus rien à chercher : ses champs
+    // d'identité sont en lecture seule.
+    final showLinkBanner =
+        widget.isEditable &&
+        !widget.identityLocked &&
+        widget.onLinkExistingRequested != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -256,18 +269,29 @@ class _ParentItemState extends State<ParentItem> {
                 AppSpacing.md,
                 AppSpacing.sm,
               ),
-              child: GuardianFieldsGrid(
-                firstNameController: _firstNameController,
-                lastNameController: _lastNameController,
-                surnameController: _surnameController,
-                phoneController: _phoneController,
-                emailController: _emailController,
-                selectedRelationshipType: _selectedRelationshipType,
-                onRelationshipTypeChanged: _onRelationshipChanged,
-                isEditable: widget.isEditable,
-                isPrimary: widget.isPrimary,
-                onPrimaryChanged: widget.onPrimaryChanged,
-                identityReadOnly: widget.identityLocked,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (showLinkBanner) ...[
+                    GuardianLinkExistingBanner(
+                      onPressed: widget.onLinkExistingRequested,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  GuardianFieldsGrid(
+                    firstNameController: _firstNameController,
+                    lastNameController: _lastNameController,
+                    surnameController: _surnameController,
+                    phoneController: _phoneController,
+                    emailController: _emailController,
+                    selectedRelationshipType: _selectedRelationshipType,
+                    onRelationshipTypeChanged: _onRelationshipChanged,
+                    isEditable: widget.isEditable,
+                    isPrimary: widget.isPrimary,
+                    onPrimaryChanged: widget.onPrimaryChanged,
+                    identityReadOnly: widget.identityLocked,
+                  ),
+                ],
               ),
             ),
           ],

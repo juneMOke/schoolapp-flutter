@@ -391,11 +391,13 @@
   "classesListSearchTitle": "Search form",
   "classesListSearchHint": "",
   "classesListClassroomOptionalLabel": "Classroom (optional)",
-  "classesListFirstNameOptionalLabel": "First name (optional)",
-  "classesListLastNameOptionalLabel": "Last name (optional)",
-  "classesListSurnameOptionalLabel": "Surname (optional)",
+  "classesListClassroomPlaceholder": "Pick a level first",
+  "classesListClassroomNonePlaceholder": "No classroom for this level",
+  "classesListSearchLevelPlaceholder": "Pick a cycle",
+  "classesListLevelColumnLabel": "Level",
+  "classesListLevelUnknown": "—",
   "classesListInitialEmptyTitle": "No search in progress",
-  "classesListInitialEmptyMessage": "Fill in at least one criterion to display students.",
+  "classesListInitialEmptyMessage": "Pick a level, or fill in a student's full identity, to display results.",
   "classesListNoMatchTitle": "No student matches the criteria",
   "classesListNoMatchMessage": "Try broadening your filters or adjusting your search.",
   "classesListResultsSummary": "{count} students found — {criteria}",
@@ -1090,7 +1092,6 @@
       }
     }
   },
-  "guardianSearchAction": "Search for a guardian",
   "guardianSearchDialogTitle": "Search for an existing parent",
   "guardianSearchDialogEyebrow": "Guardians",
   "guardianSearchModeSemantics": "Search mode",
@@ -1104,6 +1105,25 @@
   "guardianSearchAlreadyAddedError": "This guardian has already been added to this enrollment.",
   "guardianSearchIdentityLockedHint": "Details from an existing record — not editable here.",
   "guardianSearchErrorRetry": "Retry",
+  "guardianLinkExistingBannerTitle": "Is this guardian already on file?",
+  "guardianLinkExistingBannerDescription": "Find their record instead of typing it again: it will replace what this card holds.",
+  "guardianLinkExistingAction": "Search for a record",
+  "guardianPhoneConflictDialogEyebrow": "Guardians",
+  "guardianPhoneConflictDialogTitle": "This number is already in use",
+  "guardianPhoneConflictDialogMessage": "{phoneNumber} already belongs to an existing record. Link it to the student, or correct the number you entered.",
+  "@guardianPhoneConflictDialogMessage": {
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "guardianPhoneConflictUseAction": "Use this record",
+  "guardianPhoneConflictFixPhoneAction": "Correct the number",
+  "guardianPhoneConflictNotFoundTitle": "Record not found",
+  "guardianPhoneConflictNotFoundDescription": "No record carrying this number could be found. Correct the number you entered.",
+  "guardianPhoneDuplicateInFormError": "This number is already entered for another guardian in this file.",
+  "guardianLinkTargetGoneError": "This guardian is no longer in the file: the record was not linked.",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",
@@ -1722,6 +1742,49 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Surname (optional)",
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
+  "facturationCreatePaymentPayerPhoneLabel": "Payer's phone number",
+  "facturationCreatePaymentPayerPickAction": "Choose a payer",
+  "facturationCreatePaymentPayerPickHelp": "Reuse a payer who has already been to the desk, or enter one below.",
+  "facturationPayerSearchDialogEyebrow": "Collection",
+  "facturationPayerSearchDialogTitle": "Choose a payer",
+  "facturationPayerSearchModeSemantics": "Search mode",
+  "facturationPayerSearchModeByPhone": "By phone number",
+  "facturationPayerSearchModeByIdentity": "By name",
+  "facturationPayerSearchPhoneHint": "A partial number is enough: “8169” brings up every matching payer.",
+  "facturationPayerSearchIdentityHint": "A single word is enough — last, middle or first name. Accents are ignored.",
+  "facturationPayerSearchAction": "Search",
+  "facturationPayerSearchSuggestionsTitle": "Already known for this student",
+  "facturationPayerSearchResultsTitle": "Results",
+  "facturationPayerSearchResultsPlaceholder": "Matching payers will appear here.",
+  "facturationPayerSearchEmptyTitle": "No payer found",
+  "facturationPayerSearchEmptyDescription": "No payer matches these criteria. Check what you typed, or close this window to enter the payer by hand.",
+  "facturationPayerSearchErrorRetry": "Retry",
+  "facturationPayerSearchOriginGuardian": "Student's guardian — has never paid yet",
+  "facturationPayerSearchPaymentCount": "{count, plural, =1{1 payment} other{{count} payments}}",
+  "@facturationPayerSearchPaymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationPayerSearchLastPaidAt": "last one on {date}",
+  "@facturationPayerSearchLastPaidAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationPayerSearchUnknownPhone": "Phone number unknown",
+  "facturationPayerSearchSelectSemantics": "Choose {name} as the payer",
+  "@facturationPayerSearchSelectSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentDetailsSectionTitle": "Payment details",
   "facturationCreatePaymentDetailsSectionSubtitle": "Enter the received amount, currency and payment date.",
   "facturationCreatePaymentReceivedAmountLabel": "Amount received",

@@ -16,6 +16,7 @@ class CreatePaymentUseCase {
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
+    String? payerPhoneNumber,
     required List<CreatePaymentAllocationInput> allocations,
   }) => _repository.createPayment(
     studentId: studentId,
@@ -25,6 +26,7 @@ class CreatePaymentUseCase {
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
+    payerPhoneNumber: payerPhoneNumber,
     allocations: allocations,
   );
 }

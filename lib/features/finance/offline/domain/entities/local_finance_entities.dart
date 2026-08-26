@@ -205,6 +205,10 @@ class LocalPayment extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro E.164 du payeur (v28), nul quand le versement est antérieur au
+  /// palier ou vient d'un autre poste.
+  final String? payerPhoneNumber;
   final String? status;
 
   /// Caissier ayant encaissé — uid et nom dénormalisé (v19). Alimentent la
@@ -213,6 +217,11 @@ class LocalPayment extends Equatable {
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
+
+  /// Encaisseur attribué par le serveur (v29) — le seul renseigné quand le
+  /// versement vient d'un autre guichet, où rien de local n'a été stampé.
+  final String? collectedById;
+  final String? collectedByName;
 
   /// Appareil ayant encaissé (préfixe du numéro provisoire, traçabilité).
   final String? deviceId;
@@ -234,10 +243,13 @@ class LocalPayment extends Equatable {
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.status,
     this.cashierUid,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedById,
+    this.collectedByName,
     this.deviceId,
     this.receiptId,
     this.syncState = SyncState.pendingSync,
@@ -256,10 +268,13 @@ class LocalPayment extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     status,
     cashierUid,
     cashierFirstName,
     cashierLastName,
+    collectedById,
+    collectedByName,
     deviceId,
     receiptId,
     syncState,
@@ -282,6 +297,10 @@ class LocalPaymentAllocation extends Equatable {
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
+
+  /// Numéro du payeur, replié depuis le paiement porteur (v28). Nul pour un
+  /// versement antérieur au palier ou venu d'un autre poste.
+  final String? payerPhoneNumber;
   final String? paidAt;
 
   const LocalPaymentAllocation({
@@ -295,6 +314,7 @@ class LocalPaymentAllocation extends Equatable {
     this.payerFirstName = '',
     this.payerLastName = '',
     this.payerMiddleName,
+    this.payerPhoneNumber,
     this.paidAt,
   });
 
@@ -310,6 +330,7 @@ class LocalPaymentAllocation extends Equatable {
     payerFirstName,
     payerLastName,
     payerMiddleName,
+    payerPhoneNumber,
     paidAt,
   ];
 }

@@ -656,6 +656,65 @@ Future<void> migrateOfflineDatabase(
     // schéma. Toute base antérieure à la v9 aurait échoué à monter.
     await db.execute('DROP TABLE IF EXISTS ref_cours_notation');
   }
+  if (upTo(28)) {
+    // v28 — Facturation : `payments.payer_phone_number`, le numéro du payeur
+    // saisi au guichet.
+    //
+    // Nullable, et il doit le rester : le palier ne fait pas remonter le passé.
+    // Aucun versement déjà en base n'a de numéro à recevoir, aucun backfill
+    // n'est possible (le tuteur de l'élève N'EST PAS le payeur — c'est
+    // précisément ce que la saisie établit), et le contrat de pull ne portera
+    // rien pour les versements scellés avant l'évolution. Ces lignes gardent
+    // donc `NULL`, qui se lit « on ne sait pas », pas « pas de numéro ».
+    //
+    // C'est ce que l'annuaire de payeurs exploite : une ligne sans numéro est
+    // proposable par son identité, jamais rapprochée par son numéro.
+    //
+    // Pas d'index. La recherche par numéro compare des CHIFFRES normalisés
+    // (`PhoneNumberSql.matchKey`, `LIKE '%…%'`), qu'aucun index sur la valeur
+    // brute ne sert — il ne coûterait que des écritures à chaque encaissement.
+    if (await _hasTable(db, 'payments') &&
+        !await _hasColumn(db, 'payments', 'payer_phone_number')) {
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN payer_phone_number TEXT',
+      );
+    }
+  }
+  if (upTo(29)) {
+    // v29 — Facturation : `payments.collected_by_id` / `collected_by_name`,
+    // l'encaisseur tel que le SERVEUR l'attribue.
+    //
+    // Le contrat de synchro le transporte depuis l'évolution du back
+    // (`GET /sync/payments` : `collectedById`, `collectedByName`). Jusqu'ici
+    // l'écran de détail affichait un « Encaissé par » vide pour tout versement
+    // venu d'un autre guichet — non par oubli, mais parce qu'aucune donnée ne
+    // franchissait la synchro. Ces deux colonnes sont ce chemin.
+    //
+    // Nullables, et pour deux raisons distinctes qu'il ne faut pas confondre :
+    // les versements scellés avant l'évolution du contrat n'en portent aucun
+    // (le passé ne remonte pas), et un versement saisi ICI n'en a pas encore
+    // tant que le serveur ne l'a pas accusé — il porte alors ses `cashier_*`,
+    // qui suffisent.
+    //
+    // Aucun backfill possible, et surtout aucun souhaitable : recopier les
+    // `cashier_*` locaux ici inventerait une attribution SERVEUR qui n'a
+    // jamais été prononcée.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (await _hasTable(db, 'payments')) {
+      if (!await _hasColumn(db, 'payments', 'collected_by_id')) {
+        await db.execute(
+          'ALTER TABLE payments ADD COLUMN collected_by_id TEXT',
+        );
+      }
+      if (!await _hasColumn(db, 'payments', 'collected_by_name')) {
+        await db.execute(
+          'ALTER TABLE payments ADD COLUMN collected_by_name TEXT',
+        );
+      }
+    }
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.

@@ -24,6 +24,21 @@ class EnrollmentSummary extends Equatable {
   /// autoritaires. Voir [isLocalDraft].
   final SyncState? syncState;
 
+  /// Niveau **de la ligne**, quand la source sait le dire — seule la lecture
+  /// LOCALE le sait aujourd'hui (le `EnrollmentSummaryDto` du serveur ne porte
+  /// aucun niveau, donc un résumé issu du réseau les laisse à `null`).
+  ///
+  /// Sans eux, la seule source d'un niveau à l'affichage serait les critères de
+  /// la recherche : une recherche par identité n'en transporte aucun, et la
+  /// ligne ne saurait pas dire de quel niveau est l'élève trouvé.
+  ///
+  /// `schoolLevelName` peut être `null` alors que [schoolLevelId] est renseigné
+  /// (référentiel pas encore descendu) : ne jamais déduire l'absence de niveau
+  /// de l'absence de libellé.
+  final String? schoolLevelId;
+  final String? schoolLevelName;
+  final String? schoolLevelGroupName;
+
   const EnrollmentSummary({
     required this.enrollmentId,
     required this.enrollmentCode,
@@ -31,6 +46,9 @@ class EnrollmentSummary extends Equatable {
     required this.student,
     this.enrollmentType,
     this.syncState,
+    this.schoolLevelId,
+    this.schoolLevelName,
+    this.schoolLevelGroupName,
   });
 
   /// Vrai pour un brouillon local du wizard offline (non finalisé, non
@@ -68,5 +86,8 @@ class EnrollmentSummary extends Equatable {
     student,
     enrollmentType,
     syncState,
+    schoolLevelId,
+    schoolLevelName,
+    schoolLevelGroupName,
   ];
 }
