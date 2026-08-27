@@ -146,7 +146,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -230,7 +230,7 @@ jobs:
 
       - name: Upload APK artifact
         if: ${{ needs.resolve-config.outputs.build_type == 'apk' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-apk-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
           path: build/app/outputs/flutter-apk/*.apk
@@ -238,7 +238,7 @@ jobs:
 
       - name: Upload App Bundle artifact
         if: ${{ needs.resolve-config.outputs.build_type == 'appbundle' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-aab-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
           path: build/app/outputs/bundle/**/*.aab
@@ -254,7 +254,7 @@ jobs:
     environment: ${{ needs.resolve-config.outputs.app_env }}
     steps:
       - name: Download APK artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: android-apk-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
           path: ./apk

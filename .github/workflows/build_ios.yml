@@ -169,14 +169,14 @@ jobs:
       #       --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
       #
       # - name: Upload IPA artifact
-      #   uses: actions/upload-artifact@v4
+      #   uses: actions/upload-artifact@v6
       #   with:
       #     name: ios-ipa-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
       #     path: build/ios/ipa/*.ipa
       #     retention-days: 30
 
       - name: Upload iOS build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ios-build-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
           path: build/ios/iphoneos/*.app
