@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/configuration/presentation/bloc/conf
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/academic_year_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/school_identity_step.dart';
+import 'package:school_app_flutter/features/configuration/presentation/steps/structure_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_app_bar.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_save_bar.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_stepper.dart';
@@ -143,7 +144,8 @@ class _StepBody extends StatelessWidget {
             child: switch (state.step) {
               ConfigurationStep.school => const SchoolIdentityStep(),
               ConfigurationStep.academicYear => const AcademicYearStep(),
-              // Les trois autres étapes arrivent avec les lots suivants.
+              ConfigurationStep.structure => const StructureStep(),
+              // Les deux autres étapes arrivent avec les lots suivants.
               _ => const SizedBox.shrink(),
             },
           ),
@@ -169,6 +171,7 @@ class _StepFooter extends StatelessWidget {
       builder: (context, state) => switch (state.step) {
         ConfigurationStep.school => const _SchoolStepFooter(),
         ConfigurationStep.academicYear => const _DraftStepFooter(),
+        ConfigurationStep.structure => const _DraftStepFooter(),
         _ => const SizedBox.shrink(),
       },
     );
@@ -263,6 +266,10 @@ class _DraftStepFooter extends StatelessWidget {
       // simulation.
       ConfigurationStep.academicYear =>
         state.draft.academicYear?.hasValidRange ?? false,
+      // L'étape 3 se juge sur le PLAN, pas sur les cases cochées : c'est le
+      // serveur qui dit combien de classes seront créées, et c'est ce
+      // chiffre-là qui engage.
+      ConfigurationStep.structure => state.counts.classrooms > 0,
       _ => false,
     };
   }
@@ -272,5 +279,14 @@ class _DraftStepFooter extends StatelessWidget {
   /// L'étape 2 n'en fournit aucun : elle n'a que deux dates, et les nommer
   /// n'ajouterait rien à ce que le champ en erreur montre déjà. C'est le
   /// message par défaut de la barre qui prend le relais.
-  String? _hintFor(AppLocalizations l10n, ConfigurationState state) => null;
+  String? _hintFor(AppLocalizations l10n, ConfigurationState state) {
+    return switch (state.step) {
+      // Le seul endroit où l'engagement est chiffré avant l'activation.
+      ConfigurationStep.structure =>
+        state.counts.classrooms > 0
+            ? l10n.configurationStructureHint(state.counts.classrooms)
+            : l10n.configurationStructureEmptyHint,
+      _ => null,
+    };
+  }
 }

@@ -662,6 +662,108 @@ abstract class AppLocalizations {
   /// **'Terms and semesters are set later, in Results.'**
   String get configurationYearPeriodsNote;
 
+  /// Step 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles, levels and classes'**
+  String get configurationStructureTitle;
+
+  /// Cycle total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{cycle} other{cycles}}'**
+  String configurationTotalCycles(int count);
+
+  /// Level total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{level} other{levels}}'**
+  String configurationTotalLevels(int count);
+
+  /// Classroom total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{class} other{classes}}'**
+  String configurationTotalClassrooms(int count);
+
+  /// Course total chip label — the teaching volume activation will generate
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{course} other{courses}}'**
+  String configurationTotalCourses(int count);
+
+  /// Cycle-wide setting, with no effect on levels carrying official grids
+  ///
+  /// In en, this message translates to:
+  /// **'Classes per level'**
+  String get configurationCycleClassroomsPerLevel;
+
+  /// Header counter of a fully deselected cycle
+  ///
+  /// In en, this message translates to:
+  /// **'Not offered'**
+  String get configurationCycleNotOffered;
+
+  /// Cycle header counter: open levels out of total, then classes
+  ///
+  /// In en, this message translates to:
+  /// **'{open} / {total} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}'**
+  String configurationCycleSummary(int open, int total, int classrooms);
+
+  /// Row of a level whose counter is zero
+  ///
+  /// In en, this message translates to:
+  /// **'Level not offered this year'**
+  String get configurationLevelNotOffered;
+
+  /// Amber warning under a level with no MINEDUC grid. Blocks nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No official grid — these classes will have no courses.'**
+  String get configurationLevelNoGrid;
+
+  /// Header of a level's stream row
+  ///
+  /// In en, this message translates to:
+  /// **'Grids served on {level}'**
+  String configurationSectionsServed(String level);
+
+  /// Course cost of a class following this grid
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} course} other{{count} courses}}'**
+  String configurationSectionCourses(int count);
+
+  /// Step 3 footer message — the only place the commitment is quantified before activation
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} class will be created for the year} other{{count} classes will be created for the year}}'**
+  String configurationStructureHint(int count);
+
+  /// Footer message when no class is open
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least one level'**
+  String get configurationStructureEmptyHint;
+
+  /// Step 3 empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No level selected'**
+  String get configurationStructureEmptyTitle;
+
+  /// Step 3 empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.'**
+  String get configurationStructureEmptyMessage;
+
+  /// Empty state action: rebuilds the proposal from the catalogue
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the proposal'**
+  String get configurationStructureRestore;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

@@ -320,6 +320,117 @@ class AppLocalizationsEn extends AppLocalizations {
       'Terms and semesters are set later, in Results.';
 
   @override
+  String get configurationStructureTitle => 'Cycles, levels and classes';
+
+  @override
+  String configurationTotalCycles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cycles',
+      one: 'cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalLevels(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'levels',
+      one: 'level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'classes',
+      one: 'class',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'courses',
+      one: 'course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationCycleClassroomsPerLevel => 'Classes per level';
+
+  @override
+  String get configurationCycleNotOffered => 'Not offered';
+
+  @override
+  String configurationCycleSummary(int open, int total, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    return '$open / $total · $_temp0';
+  }
+
+  @override
+  String get configurationLevelNotOffered => 'Level not offered this year';
+
+  @override
+  String get configurationLevelNoGrid =>
+      'No official grid — these classes will have no courses.';
+
+  @override
+  String configurationSectionsServed(String level) {
+    return 'Grids served on $level';
+  }
+
+  @override
+  String configurationSectionCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses',
+      one: '$count course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationStructureHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes will be created for the year',
+      one: '$count class will be created for the year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationStructureEmptyHint => 'Tick at least one level';
+
+  @override
+  String get configurationStructureEmptyTitle => 'No level selected';
+
+  @override
+  String get configurationStructureEmptyMessage =>
+      'A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.';
+
+  @override
+  String get configurationStructureRestore => 'Restore the proposal';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

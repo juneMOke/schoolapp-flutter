@@ -301,6 +301,120 @@
   "@configurationYearPeriodsNote": {
       "description": "Explicit pointer to another module — do not add terms here"
   },
+  "configurationStructureTitle": "Cycles, levels and classes",
+  "@configurationStructureTitle": {
+      "description": "Step 3 title"
+  },
+  "configurationTotalCycles": "{count, plural, one{cycle} other{cycles}}",
+  "@configurationTotalCycles": {
+      "description": "Cycle total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalLevels": "{count, plural, one{level} other{levels}}",
+  "@configurationTotalLevels": {
+      "description": "Level total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalClassrooms": "{count, plural, one{class} other{classes}}",
+  "@configurationTotalClassrooms": {
+      "description": "Classroom total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalCourses": "{count, plural, one{course} other{courses}}",
+  "@configurationTotalCourses": {
+      "description": "Course total chip label — the teaching volume activation will generate",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCycleClassroomsPerLevel": "Classes per level",
+  "@configurationCycleClassroomsPerLevel": {
+      "description": "Cycle-wide setting, with no effect on levels carrying official grids"
+  },
+  "configurationCycleNotOffered": "Not offered",
+  "@configurationCycleNotOffered": {
+      "description": "Header counter of a fully deselected cycle"
+  },
+  "configurationCycleSummary": "{open} / {total} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
+  "@configurationCycleSummary": {
+      "description": "Cycle header counter: open levels out of total, then classes",
+      "placeholders": {
+          "open": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationLevelNotOffered": "Level not offered this year",
+  "@configurationLevelNotOffered": {
+      "description": "Row of a level whose counter is zero"
+  },
+  "configurationLevelNoGrid": "No official grid — these classes will have no courses.",
+  "@configurationLevelNoGrid": {
+      "description": "Amber warning under a level with no MINEDUC grid. Blocks nothing"
+  },
+  "configurationSectionsServed": "Grids served on {level}",
+  "@configurationSectionsServed": {
+      "description": "Header of a level's stream row",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSectionCourses": "{count, plural, one{{count} course} other{{count} courses}}",
+  "@configurationSectionCourses": {
+      "description": "Course cost of a class following this grid",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureHint": "{count, plural, one{{count} class will be created for the year} other{{count} classes will be created for the year}}",
+  "@configurationStructureHint": {
+      "description": "Step 3 footer message — the only place the commitment is quantified before activation",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureEmptyHint": "Tick at least one level",
+  "@configurationStructureEmptyHint": {
+      "description": "Footer message when no class is open"
+  },
+  "configurationStructureEmptyTitle": "No level selected",
+  "@configurationStructureEmptyTitle": {
+      "description": "Step 3 empty state title"
+  },
+  "configurationStructureEmptyMessage": "A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.",
+  "@configurationStructureEmptyMessage": {
+      "description": "Step 3 empty state message"
+  },
+  "configurationStructureRestore": "Restore the proposal",
+  "@configurationStructureRestore": {
+      "description": "Empty state action: rebuilds the proposal from the catalogue"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

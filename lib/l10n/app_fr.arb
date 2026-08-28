@@ -301,6 +301,120 @@
   "@configurationYearPeriodsNote": {
       "description": "Renvoi explicite vers un autre module — ne pas ajouter de trimestres ici"
   },
+  "configurationStructureTitle": "Cycles, niveaux et classes",
+  "@configurationStructureTitle": {
+      "description": "Titre de l'étape 3"
+  },
+  "configurationTotalCycles": "{count, plural, one{cycle} other{cycles}}",
+  "@configurationTotalCycles": {
+      "description": "Libellé de la pastille de total des cycles",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalLevels": "{count, plural, one{niveau} other{niveaux}}",
+  "@configurationTotalLevels": {
+      "description": "Libellé de la pastille de total des niveaux",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalClassrooms": "{count, plural, one{classe} other{classes}}",
+  "@configurationTotalClassrooms": {
+      "description": "Libellé de la pastille de total des classes",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalCourses": "{count, plural, one{cours} other{cours}}",
+  "@configurationTotalCourses": {
+      "description": "Libellé de la pastille de total des cours — le volume pédagogique que l'activation générera",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCycleClassroomsPerLevel": "Classes par niveau",
+  "@configurationCycleClassroomsPerLevel": {
+      "description": "Réglage global d'un cycle, sans effet sur les niveaux à barèmes"
+  },
+  "configurationCycleNotOffered": "Non proposé",
+  "@configurationCycleNotOffered": {
+      "description": "Compteur d'en-tête d'un cycle entièrement décoché"
+  },
+  "configurationCycleSummary": "{open} / {total} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}}",
+  "@configurationCycleSummary": {
+      "description": "Compteur d'en-tête d'un cycle : niveaux ouverts sur total, puis classes",
+      "placeholders": {
+          "open": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationLevelNotOffered": "Niveau non proposé cette année",
+  "@configurationLevelNotOffered": {
+      "description": "Ligne d'un niveau dont le compteur est à zéro"
+  },
+  "configurationLevelNoGrid": "Aucun barème officiel — ces classes n'auront aucun cours.",
+  "@configurationLevelNoGrid": {
+      "description": "Avertissement ambre sous un niveau sans barème MINEDUC. Ne bloque rien"
+  },
+  "configurationSectionsServed": "Barèmes servis sur {level}",
+  "@configurationSectionsServed": {
+      "description": "En-tête de la rangée de filières d'un niveau",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSectionCourses": "{count, plural, one{{count} cours} other{{count} cours}}",
+  "@configurationSectionCourses": {
+      "description": "Coût en cours d'une classe suivant ce barème",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureHint": "{count, plural, one{{count} classe sera créée pour l'année} other{{count} classes seront créées pour l'année}}",
+  "@configurationStructureHint": {
+      "description": "Message de la barre de pied à l'étape 3 — le seul endroit où l'engagement est chiffré avant l'activation",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureEmptyHint": "Cochez au moins un niveau",
+  "@configurationStructureEmptyHint": {
+      "description": "Message de la barre de pied quand aucune classe n'est ouverte"
+  },
+  "configurationStructureEmptyTitle": "Aucun niveau retenu",
+  "@configurationStructureEmptyTitle": {
+      "description": "Titre de l'état vide de l'étape 3"
+  },
+  "configurationStructureEmptyMessage": "Une école a besoin d'au moins une classe pour ouvrir les inscriptions. Rétablissez la proposition par défaut ou cochez les niveaux que vous ouvrez.",
+  "@configurationStructureEmptyMessage": {
+      "description": "Message de l'état vide de l'étape 3"
+  },
+  "configurationStructureRestore": "Rétablir la proposition",
+  "@configurationStructureRestore": {
+      "description": "Action de l'état vide : reconstruit la proposition depuis le catalogue"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
