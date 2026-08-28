@@ -201,6 +201,13 @@ bool canAccessMenu(String menuId, List<String>? permissions) {
 /// n'ont rien à faire.
 const Map<String, ModuleAccess> kStandaloneRouteAccess = {
   'enrollments': ModuleAccess([Perm.enrollmentRead]),
+  // L'assistant de mise en service : hors coquille parce qu'il doit être
+  // atteignable AVANT que l'école ait une année académique — donc avant que la
+  // coquille et son menu aient quoi que ce soit à afficher.
+  //
+  // `school.provisioning.write`, jamais `platform.school.provision` : cf.
+  // [Perm.schoolProvisioningWrite].
+  'configuration': ModuleAccess([Perm.schoolProvisioningWrite]),
 };
 
 /// Vrai si [location] est atteignable avec [permissions].

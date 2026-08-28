@@ -31,6 +31,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/fee_contr
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
+import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_page.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -151,50 +152,89 @@ class AppRouter {
     return GoRouter(
       initialLocation: '/splash',
       refreshListenable: notifier,
-      redirect: (context, state) {
-        final authState = authBloc.state;
-        final academicYearState = academicYearContextBloc.state;
-        final isAuthenticated = authState.status == AuthStatus.authenticated;
-        final isAuthLoading =
-            authState.status == AuthStatus.loading ||
-            authState.status == AuthStatus.initial;
-        final isAcademicYearBlocking = academicYearState.blocksNavigation;
-        final hasAcademicYearFailure = academicYearState.hasBlockingFailure;
-        final isOnSplash = state.matchedLocation == '/splash';
-        final isOnAuthFlow =
-            state.matchedLocation == '/login' ||
-            state.matchedLocation.startsWith('/forgot-password');
-
-        if (isAuthLoading) {
-          return isOnSplash ? null : '/splash';
-        }
-
-        if (!isAuthenticated) {
-          return isOnAuthFlow ? null : '/login';
-        }
-
-        if (isAcademicYearBlocking) {
-          return isOnSplash ? null : '/splash';
-        }
-
-        // Échec de la résolution du contexte académique : retenir sur le
-        // splash (ErrorView + retry) au lieu d'éjecter vers /home sans données.
-        if (hasAcademicYearFailure) {
-          return isOnSplash ? null : '/splash';
-        }
-
-        if (isOnAuthFlow || isOnSplash) return '/home';
-
-        // Garde de permission (ADR-014 §2.9) : masquer une tuile ne suffit pas.
-        // Un lien profond, une restauration d'état ou un retour arrière
-        // atteignent la route sans passer par le menu — c'est précisément ce
-        // que le filtrage du registre ne couvre pas.
-        return canAccessLocation(state.uri, authState.permissions)
-            ? null
-            : '/home';
-      },
+      redirect: (context, state) => resolveRedirect(
+        authStatus: authBloc.state.status,
+        permissions: authBloc.state.permissions,
+        academicYearBlocksNavigation:
+            academicYearContextBloc.state.blocksNavigation,
+        academicYearHasBlockingFailure:
+            academicYearContextBloc.state.hasBlockingFailure,
+        matchedLocation: state.matchedLocation,
+        location: state.uri,
+      ),
       routes: buildRoutes(),
     );
+  }
+
+  /// Décision de redirection, **extraite de [createRouter]** pour être
+  /// éprouvable par un test.
+  ///
+  /// Elle ne prend que des valeurs : sans cela, la seule façon de la vérifier
+  /// serait de monter un routeur complet avec ses blocs, et l'ordre des gardes —
+  /// qui est tout ce qui compte ici — resterait invérifiable.
+  ///
+  /// Rend `null` pour « laisser passer », ou le chemin vers lequel dérouter.
+  static String? resolveRedirect({
+    required AuthStatus authStatus,
+    required List<String>? permissions,
+    required bool academicYearBlocksNavigation,
+    required bool academicYearHasBlockingFailure,
+    required String matchedLocation,
+    required Uri location,
+  }) {
+    final isAuthenticated = authStatus == AuthStatus.authenticated;
+    final isAuthLoading =
+        authStatus == AuthStatus.loading || authStatus == AuthStatus.initial;
+    final isOnSplash = matchedLocation == '/splash';
+    final isOnAuthFlow =
+        matchedLocation == '/login' ||
+        matchedLocation.startsWith('/forgot-password');
+    final isOnConfiguration = matchedLocation.startsWith(
+      AppRoutesNames.configurationPath,
+    );
+
+    if (isAuthLoading) {
+      return isOnSplash ? null : '/splash';
+    }
+
+    if (!isAuthenticated) {
+      return isOnAuthFlow ? null : '/login';
+    }
+
+    // ── La porte de l'assistant de mise en service ──────────────────────────
+    // Les deux gardes qui suivent retiennent sur le splash tant qu'il n'y a pas
+    // d'année académique. Or une école qu'on n'a pas encore paramétrée n'en a
+    // pas — c'est sa définition. Sans cette exception, le module Configuration
+    // serait inatteignable exactement dans la seule situation pour laquelle il
+    // existe, et l'agent n'aurait devant lui qu'une erreur qu'aucun
+    // « Réessayer » ne peut lever.
+    //
+    // La permission est confrontée ICI et pas seulement en fin de fonction : les
+    // deux `return` suivants la court-circuitent. Sans elle, la porte s'ouvrirait
+    // pour tout le monde dès qu'une école tombe en panne de référentiel — y
+    // compris à qui n'a rien à y paramétrer.
+    if ((academicYearBlocksNavigation || academicYearHasBlockingFailure) &&
+        isOnConfiguration) {
+      return canAccessLocation(location, permissions) ? null : '/splash';
+    }
+
+    if (academicYearBlocksNavigation) {
+      return isOnSplash ? null : '/splash';
+    }
+
+    // Échec de la résolution du contexte académique : retenir sur le splash
+    // (ErrorView + retry) au lieu d'éjecter vers /home sans données.
+    if (academicYearHasBlockingFailure) {
+      return isOnSplash ? null : '/splash';
+    }
+
+    if (isOnAuthFlow || isOnSplash) return '/home';
+
+    // Garde de permission (ADR-014 §2.9) : masquer une tuile ne suffit pas. Un
+    // lien profond, une restauration d'état ou un retour arrière atteignent la
+    // route sans passer par le menu — c'est précisément ce que le filtrage du
+    // registre ne couvre pas.
+    return canAccessLocation(location, permissions) ? null : '/home';
   }
 
   /// Arbre de routes de l'application, **extrait de [createRouter]** pour être
@@ -231,6 +271,11 @@ class AppRouter {
       path: '/forgot-password/reset',
       name: AppRoutesNames.forgotPasswordReset,
       builder: (context, state) => const ResetPasswordPage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.configurationPath,
+      name: AppRoutesNames.configuration,
+      builder: (context, state) => const ConfigurationPage(),
     ),
     GoRoute(
       path: '/home',

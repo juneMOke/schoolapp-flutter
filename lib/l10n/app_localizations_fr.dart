@@ -171,6 +171,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Votre compte ne dispose pas des droits nécessaires pour ouvrir l\'application. Contactez l\'administrateur de votre école.';
 
   @override
+  String get splashNotProvisionedTitle => 'École pas encore paramétrée';
+
+  @override
+  String get splashNotProvisionedMessage =>
+      'Cette école n\'a pas encore d\'année scolaire ouverte. La configuration déclare l\'année, les classes et les frais, puis met l\'établissement en service.';
+
+  @override
+  String get splashNotProvisionedAction => 'Configurer l\'école';
+
+  @override
+  String get splashNotProvisionedWaitMessage =>
+      'Cette école n\'a pas encore d\'année scolaire ouverte. Seule la direction peut la configurer — rapprochez-vous d\'elle avant de réessayer.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

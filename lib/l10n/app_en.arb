@@ -92,6 +92,22 @@
   "@splashForbiddenMessage": {
     "description": "Bootstrap screen message on 403 — retrying cannot help, only a rights change will"
   },
+  "splashNotProvisionedTitle": "School not set up yet",
+  "@splashNotProvisionedTitle": {
+    "description": "Splash title when the school has no academic year — the pull succeeded, the school simply was never configured"
+  },
+  "splashNotProvisionedMessage": "This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.",
+  "@splashNotProvisionedMessage": {
+    "description": "Splash message for an unprovisioned school — neither an outage nor a missing right"
+  },
+  "splashNotProvisionedAction": "Set up the school",
+  "@splashNotProvisionedAction": {
+    "description": "Splash action opening the provisioning wizard — shown only with school.provisioning.write"
+  },
+  "splashNotProvisionedWaitMessage": "This school has no open academic year yet. Only school management can set it up — check with them before retrying.",
+  "@splashNotProvisionedWaitMessage": {
+    "description": "Splash message for an unprovisioned school without the permission to set it up: nothing to do from this device"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

@@ -392,6 +392,30 @@ abstract class AppLocalizations {
   /// **'Your account does not have the rights needed to open the application. Contact your school administrator.'**
   String get splashForbiddenMessage;
 
+  /// Splash title when the school has no academic year — the pull succeeded, the school simply was never configured
+  ///
+  /// In en, this message translates to:
+  /// **'School not set up yet'**
+  String get splashNotProvisionedTitle;
+
+  /// Splash message for an unprovisioned school — neither an outage nor a missing right
+  ///
+  /// In en, this message translates to:
+  /// **'This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.'**
+  String get splashNotProvisionedMessage;
+
+  /// Splash action opening the provisioning wizard — shown only with school.provisioning.write
+  ///
+  /// In en, this message translates to:
+  /// **'Set up the school'**
+  String get splashNotProvisionedAction;
+
+  /// Splash message for an unprovisioned school without the permission to set it up: nothing to do from this device
+  ///
+  /// In en, this message translates to:
+  /// **'This school has no open academic year yet. Only school management can set it up — check with them before retrying.'**
+  String get splashNotProvisionedWaitMessage;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

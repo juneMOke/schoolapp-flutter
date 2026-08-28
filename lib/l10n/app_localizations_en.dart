@@ -169,6 +169,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account does not have the rights needed to open the application. Contact your school administrator.';
 
   @override
+  String get splashNotProvisionedTitle => 'School not set up yet';
+
+  @override
+  String get splashNotProvisionedMessage =>
+      'This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.';
+
+  @override
+  String get splashNotProvisionedAction => 'Set up the school';
+
+  @override
+  String get splashNotProvisionedWaitMessage =>
+      'This school has no open academic year yet. Only school management can set it up — check with them before retrying.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

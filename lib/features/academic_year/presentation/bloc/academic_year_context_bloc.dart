@@ -72,6 +72,7 @@ class AcademicYearContextBloc
           // son écran.
           sessionExpired: _isSessionFailure(failure) && state.context == null,
           insufficientPermissions: failure is UnauthorizedFailure,
+          schoolNotProvisioned: failure is SchoolNotProvisionedFailure,
         ),
       ),
       (context) => emit(
@@ -81,6 +82,7 @@ class AcademicYearContextBloc
           errorMessage: null,
           sessionExpired: false,
           insufficientPermissions: false,
+          schoolNotProvisioned: false,
         ),
       ),
     );

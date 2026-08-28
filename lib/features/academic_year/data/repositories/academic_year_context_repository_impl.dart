@@ -49,8 +49,14 @@ class AcademicYearContextRepositoryImpl
       if (pullFailure != null) return Left(pullFailure);
       yearId = await _referentialDao.findCurrentAcademicYearId(schoolId);
       if (yearId == null) {
+        // Le pull a réussi et le serveur ne connaît aucune année pour cette
+        // école : ce n'est pas une panne, c'est un établissement qui n'a pas
+        // encore été paramétré. La distinction porte l'écran — une panne se
+        // réessaie, un paramétrage manquant se fait.
         return const Left(
-          ServerFailure('Aucune année scolaire courante pour cette école'),
+          SchoolNotProvisionedFailure(
+            'Aucune année scolaire courante pour cette école',
+          ),
         );
       }
     }

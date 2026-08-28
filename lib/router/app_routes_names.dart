@@ -75,6 +75,14 @@ class AppRoutesNames {
   }) =>
       '/disciplines/${MenuConstants.presencesId}/student/$studentId/$academicYearId';
 
+  /// Assistant de mise en service de l'école (module Configuration).
+  ///
+  /// Route de premier niveau, hors coquille : elle doit s'ouvrir alors que
+  /// l'école n'a pas encore d'année académique, c'est-à-dire au moment précis où
+  /// le reste de l'application n'a rien à montrer.
+  static const String configuration = 'configuration';
+  static const String configurationPath = '/configuration';
+
   // Debug — galerie de composants (kDebugMode uniquement)
   static const String componentGallery = '/dev/components';
 

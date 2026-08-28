@@ -92,6 +92,22 @@
   "@splashForbiddenMessage": {
     "description": "Message de l'écran d'amorçage en 403 — aucun réessai possible, seul un changement de droits y remédie"
   },
+  "splashNotProvisionedTitle": "École pas encore paramétrée",
+  "@splashNotProvisionedTitle": {
+    "description": "Titre du splash quand l'école n'a aucune année académique — le pull a abouti, l'établissement n'a simplement jamais été configuré"
+  },
+  "splashNotProvisionedMessage": "Cette école n'a pas encore d'année scolaire ouverte. La configuration déclare l'année, les classes et les frais, puis met l'établissement en service.",
+  "@splashNotProvisionedMessage": {
+    "description": "Message du splash pour une école non paramétrée — ni panne ni droit manquant"
+  },
+  "splashNotProvisionedAction": "Configurer l'école",
+  "@splashNotProvisionedAction": {
+    "description": "Action du splash qui ouvre l'assistant de mise en service — visible seulement avec school.provisioning.write"
+  },
+  "splashNotProvisionedWaitMessage": "Cette école n'a pas encore d'année scolaire ouverte. Seule la direction peut la configurer — rapprochez-vous d'elle avant de réessayer.",
+  "@splashNotProvisionedWaitMessage": {
+    "description": "Message du splash pour une école non paramétrée, sans la permission de la configurer : rien à faire depuis cet appareil"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
