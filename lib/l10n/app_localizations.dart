@@ -956,6 +956,138 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}'**
   String configurationFeesValidHint(int count);
 
+  /// Step 5 title
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get configurationSummaryTitle;
+
+  /// Summary card shortcut back to its step
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get configurationSummaryEdit;
+
+  /// Identity summary card
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get configurationSummarySchool;
+
+  /// Year summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get configurationSummaryYear;
+
+  /// Structure summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Structure · {count, plural, one{{count} class} other{{count} classes}}'**
+  String configurationSummaryStructure(int count);
+
+  /// Fees summary card
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationSummaryFees;
+
+  /// Shown instead of a missing field — never a silent blank
+  ///
+  /// In en, this message translates to:
+  /// **'to be filled in'**
+  String get configurationSummaryMissing;
+
+  /// Cycle line in the structure summary
+  ///
+  /// In en, this message translates to:
+  /// **'{levels, plural, one{{levels} level} other{{levels} levels}} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}'**
+  String configurationSummaryCycleLine(int levels, int classrooms);
+
+  /// Added to a cycle whose levels carry no official grid
+  ///
+  /// In en, this message translates to:
+  /// **'no official grid'**
+  String get configurationSummaryNoGrid;
+
+  /// Activation check: the eight fields
+  ///
+  /// In en, this message translates to:
+  /// **'School identity complete'**
+  String get configurationCheckSchool;
+
+  /// Activation check: the date range
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year dated'**
+  String get configurationCheckYear;
+
+  /// Activation check: classes from the plan
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No class to open} one{{count} class ready to open} other{{count} classes ready to open}}'**
+  String configurationCheckClassrooms(int count);
+
+  /// Activation check: fees entered
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No fee attached to levels} one{{count} fee attached to levels} other{{count} fees attached to levels}}'**
+  String configurationCheckFees(int count);
+
+  /// Activation button — the journey's only structural write
+  ///
+  /// In en, this message translates to:
+  /// **'Bring the school into service'**
+  String get configurationActivate;
+
+  /// Button label while activating
+  ///
+  /// In en, this message translates to:
+  /// **'Activating…'**
+  String get configurationActivating;
+
+  /// Shown while the four checks do not pass
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the amber items to activate.'**
+  String get configurationActivateBlocked;
+
+  /// Activation failure toast. No data is lost
+  ///
+  /// In en, this message translates to:
+  /// **'Activation failed — try again.'**
+  String get configurationActivateFailed;
+
+  /// Success screen title
+  ///
+  /// In en, this message translates to:
+  /// **'{school} is in service'**
+  String configurationActivatedTitle(String school);
+
+  /// Success screen message
+  ///
+  /// In en, this message translates to:
+  /// **'The {year} year is open with {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} and {fees, plural, one{{fees} fee} other{{fees} fees}}. You can enrol your first students.'**
+  String configurationActivatedMessage(String year, int classrooms, int fees);
+
+  /// Primary exit of the success screen
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the dashboard'**
+  String get configurationGoHome;
+
+  /// Secondary exit of the success screen
+  ///
+  /// In en, this message translates to:
+  /// **'Review the setup'**
+  String get configurationReviewSetup;
+
+  /// Header of the plan warnings block
+  ///
+  /// In en, this message translates to:
+  /// **'Worth knowing before activating'**
+  String get configurationWarningsTitle;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

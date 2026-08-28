@@ -52,6 +52,7 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
     on<ConfigurationDraftChanged>(_onDraftChanged);
     on<ConfigurationRetryRequested>(_onRetryRequested);
     on<ConfigurationSimulationRequested>(_onSimulationRequested);
+    on<ConfigurationActivationRequested>(_onActivationRequested);
   }
 
   /// Étape de reprise, **bornée**.
@@ -292,6 +293,47 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
           doneSteps: markDone == null ? null : {...state.doneSteps, markDone},
         ),
       ),
+    );
+  }
+
+  Future<void> _onActivationRequested(
+    ConfigurationActivationRequested event,
+    Emitter<ConfigurationState> emit,
+  ) async {
+    // Garde anti-double-envoi. L'activation n'est pas idempotente : un second
+    // appel se ferait refuser en « année déjà existante », et l'écran ne
+    // saurait pas dire si la première a abouti.
+    if (state.isActivating || state.isActivated) return;
+
+    emit(state.copyWith(isActivating: true, failure: null));
+
+    final result = await _repository.activate(state.draft);
+    if (isClosed) return;
+
+    await result.fold(
+      (failure) async => emit(
+        state.copyWith(
+          isActivating: false,
+          status: ConfigurationStatus.failure,
+          failure: failure,
+        ),
+      ),
+      (plan) async {
+        // Le brouillon n'est détruit qu'AU SUCCÈS. S'il survivait à une
+        // activation réussie, l'assistant se rejouerait jusqu'au refus « année
+        // déjà existante », que rien à l'écran ne saurait expliquer.
+        await _draftRepository.clear();
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            isActivating: false,
+            status: ConfigurationStatus.ready,
+            activatedPlan: plan,
+            failure: null,
+            isDirty: false,
+          ),
+        );
+      },
     );
   }
 }

@@ -3,12 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/academic_year_step.dart';
+import 'package:school_app_flutter/features/configuration/presentation/steps/activation_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/fees_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/school_identity_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/structure_step.dart';
@@ -75,8 +78,32 @@ class _ConfigurationView extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.step != current.step ||
           previous.maxStep != current.maxStep ||
-          previous.doneSteps != current.doneSteps,
+          previous.doneSteps != current.doneSteps ||
+          previous.isActivated != current.isActivated,
       builder: (context, state) {
+        // L'école est en service : l'assistant s'efface. Y laisser le stepper
+        // inviterait à revenir sur des étapes que le serveur refuserait de
+        // rejouer.
+        if (state.activatedPlan case final plan?) {
+          return AppPageBackground(
+            scrollable: false,
+            child: ActivationSuccessView(
+              schoolName:
+                  context
+                      .watch<SchoolIdentityFormCubit>()
+                      .state
+                      .identity
+                      ?.name ??
+                  '',
+              plan: plan,
+              onGoHome: () => context.goNamed(AppRoutesNames.home),
+              onReview: () => context.read<ConfigurationBloc>().add(
+                const ConfigurationStepSelected(ConfigurationStep.school),
+              ),
+            ),
+          );
+        }
+
         return AppPageBackground(
           scrollable: false,
           appBar: ConfigurationAppBar(
@@ -147,8 +174,7 @@ class _StepBody extends StatelessWidget {
               ConfigurationStep.academicYear => const AcademicYearStep(),
               ConfigurationStep.structure => const StructureStep(),
               ConfigurationStep.fees => const FeesStep(),
-              // L'étape d'activation arrive avec le lot suivant.
-              _ => const SizedBox.shrink(),
+              ConfigurationStep.activation => const ActivationStep(),
             },
           ),
         );
@@ -175,7 +201,9 @@ class _StepFooter extends StatelessWidget {
         ConfigurationStep.academicYear => const _DraftStepFooter(),
         ConfigurationStep.structure => const _DraftStepFooter(),
         ConfigurationStep.fees => const _DraftStepFooter(),
-        _ => const SizedBox.shrink(),
+        // L'étape 5 n'a pas de barre d'enregistrement : elle porte son propre
+        // bloc d'activation, qui n'enregistre pas — il écrit.
+        ConfigurationStep.activation => const _ActivationFooter(),
       },
     );
   }
@@ -295,5 +323,78 @@ class _DraftStepFooter extends StatelessWidget {
             : l10n.configurationStructureEmptyHint,
       _ => null,
     };
+  }
+}
+
+/// Pied de l'étape 5 : le bloc d'activation.
+///
+/// Pas de `ConfigurationSaveBar` ici. Cette étape n'enregistre rien — elle
+/// écrit, en une transaction, tout ou rien. Lui donner la même barre qu'aux
+/// autres ferait passer le geste le plus lourd du parcours pour un
+/// enregistrement de plus.
+class _ActivationFooter extends StatelessWidget {
+  const _ActivationFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return BlocBuilder<ConfigurationBloc, ConfigurationState>(
+      builder: (context, state) {
+        final identity = context
+            .watch<SchoolIdentityFormCubit>()
+            .state
+            .identity;
+        final ready =
+            (identity?.isComplete ?? false) &&
+            state.hasDatedYear &&
+            state.hasClassrooms &&
+            state.hasFees;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.surfaceRaised,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
+            children: [
+              TextButton.icon(
+                onPressed: state.isActivating
+                    ? null
+                    : () => context.read<ConfigurationBloc>().add(
+                        const ConfigurationBackRequested(),
+                      ),
+                icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                label: Text(l10n.configurationBack),
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                // Actif seulement si les quatre contrôles passent, et fermé
+                // pendant l'activation : ce geste n'est pas idempotent, un
+                // second appel se ferait refuser en « année déjà existante ».
+                onPressed: ready && !state.isActivating
+                    ? () => context.read<ConfigurationBloc>().add(
+                        const ConfigurationActivationRequested(),
+                      )
+                    : null,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                ),
+                icon: const Icon(Icons.power_settings_new_rounded, size: 18),
+                label: Text(
+                  state.isActivating
+                      ? l10n.configurationActivating
+                      : l10n.configurationActivate,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

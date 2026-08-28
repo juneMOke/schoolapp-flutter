@@ -76,3 +76,12 @@ class ConfigurationRetryRequested extends ConfigurationEvent {
 class ConfigurationSimulationRequested extends ConfigurationEvent {
   const ConfigurationSimulationRequested();
 }
+
+/// « Activer l'école » — **la seule écriture de structure de tout le parcours**.
+///
+/// Un appel, tout ou rien : cycles, niveaux, classes, cours et tarifs sont
+/// écrits dans une transaction unique, ou rien ne l'est. Aucun appel partiel de
+/// rattrapage en cas d'échec.
+class ConfigurationActivationRequested extends ConfigurationEvent {
+  const ConfigurationActivationRequested();
+}

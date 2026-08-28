@@ -596,6 +596,133 @@
           }
       }
   },
+  "configurationSummaryTitle": "Summary",
+  "@configurationSummaryTitle": {
+      "description": "Step 5 title"
+  },
+  "configurationSummaryEdit": "Edit",
+  "@configurationSummaryEdit": {
+      "description": "Summary card shortcut back to its step"
+  },
+  "configurationSummarySchool": "School",
+  "@configurationSummarySchool": {
+      "description": "Identity summary card"
+  },
+  "configurationSummaryYear": "Academic year",
+  "@configurationSummaryYear": {
+      "description": "Year summary card"
+  },
+  "configurationSummaryStructure": "Structure · {count, plural, one{{count} class} other{{count} classes}}",
+  "@configurationSummaryStructure": {
+      "description": "Structure summary card",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryFees": "School fees",
+  "@configurationSummaryFees": {
+      "description": "Fees summary card"
+  },
+  "configurationSummaryMissing": "to be filled in",
+  "@configurationSummaryMissing": {
+      "description": "Shown instead of a missing field — never a silent blank"
+  },
+  "configurationSummaryCycleLine": "{levels, plural, one{{levels} level} other{{levels} levels}} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
+  "@configurationSummaryCycleLine": {
+      "description": "Cycle line in the structure summary",
+      "placeholders": {
+          "levels": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryNoGrid": "no official grid",
+  "@configurationSummaryNoGrid": {
+      "description": "Added to a cycle whose levels carry no official grid"
+  },
+  "configurationCheckSchool": "School identity complete",
+  "@configurationCheckSchool": {
+      "description": "Activation check: the eight fields"
+  },
+  "configurationCheckYear": "Academic year dated",
+  "@configurationCheckYear": {
+      "description": "Activation check: the date range"
+  },
+  "configurationCheckClassrooms": "{count, plural, =0{No class to open} one{{count} class ready to open} other{{count} classes ready to open}}",
+  "@configurationCheckClassrooms": {
+      "description": "Activation check: classes from the plan",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCheckFees": "{count, plural, =0{No fee attached to levels} one{{count} fee attached to levels} other{{count} fees attached to levels}}",
+  "@configurationCheckFees": {
+      "description": "Activation check: fees entered",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationActivate": "Bring the school into service",
+  "@configurationActivate": {
+      "description": "Activation button — the journey's only structural write"
+  },
+  "configurationActivating": "Activating…",
+  "@configurationActivating": {
+      "description": "Button label while activating"
+  },
+  "configurationActivateBlocked": "Complete the amber items to activate.",
+  "@configurationActivateBlocked": {
+      "description": "Shown while the four checks do not pass"
+  },
+  "configurationActivateFailed": "Activation failed — try again.",
+  "@configurationActivateFailed": {
+      "description": "Activation failure toast. No data is lost"
+  },
+  "configurationActivatedTitle": "{school} is in service",
+  "@configurationActivatedTitle": {
+      "description": "Success screen title",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationActivatedMessage": "The {year} year is open with {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} and {fees, plural, one{{fees} fee} other{{fees} fees}}. You can enrol your first students.",
+  "@configurationActivatedMessage": {
+      "description": "Success screen message",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "fees": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationGoHome": "Go to the dashboard",
+  "@configurationGoHome": {
+      "description": "Primary exit of the success screen"
+  },
+  "configurationReviewSetup": "Review the setup",
+  "@configurationReviewSetup": {
+      "description": "Secondary exit of the success screen"
+  },
+  "configurationWarningsTitle": "Worth knowing before activating",
+  "@configurationWarningsTitle": {
+      "description": "Header of the plan warnings block"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

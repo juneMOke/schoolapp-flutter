@@ -74,6 +74,16 @@ class ConfigurationState extends Equatable {
   /// modification suivante ou au changement d'étape.
   final bool justSaved;
 
+  /// L'activation est en vol.
+  final bool isActivating;
+
+  /// L'école est en service : le plan rendu par l'activation, avec ses
+  /// identifiants. `null` tant que rien n'a été activé.
+  ///
+  /// Distinct de [plan], qui reste celui de la simulation : c'est ce qui permet
+  /// à l'écran de succès de citer ce qui a réellement été écrit.
+  final ProvisioningPlan? activatedPlan;
+
   const ConfigurationState({
     this.status = ConfigurationStatus.initial,
     this.step = ConfigurationStep.school,
@@ -87,6 +97,8 @@ class ConfigurationState extends Equatable {
     this.failure,
     this.isDirty = false,
     this.justSaved = false,
+    this.isActivating = false,
+    this.activatedPlan,
   });
 
   /// Progression du stepper, dans le régime jalonné : on revient sur tout ce
@@ -108,6 +120,20 @@ class ConfigurationState extends Equatable {
   /// et c'est le comportement juste avant qu'on ait coché quoi que ce soit.
   ProvisioningCounts get counts => plan?.counts ?? ProvisioningCounts.zero;
 
+  /// L'école est en service.
+  bool get isActivated => activatedPlan != null;
+
+  /// Les quatre contrôles de l'écran d'activation.
+  ///
+  /// Ils portent sur le PLAN, jamais sur les cases cochées : l'activation
+  /// rejoue exactement le calcul de la simulation, et c'est ce que le plan
+  /// annonce qui sera écrit.
+  bool get hasDatedYear => draft.academicYear?.hasValidRange ?? false;
+
+  bool get hasClassrooms => counts.classrooms > 0;
+
+  bool get hasFees => draft.fees.isNotEmpty;
+
   ConfigurationState copyWith({
     ConfigurationStatus? status,
     ConfigurationStep? step,
@@ -121,6 +147,8 @@ class ConfigurationState extends Equatable {
     Object? failure = _unchanged,
     bool? isDirty,
     bool? justSaved,
+    bool? isActivating,
+    ProvisioningPlan? activatedPlan,
   }) {
     return ConfigurationState(
       status: status ?? this.status,
@@ -137,6 +165,8 @@ class ConfigurationState extends Equatable {
           : failure as Failure?,
       isDirty: isDirty ?? this.isDirty,
       justSaved: justSaved ?? this.justSaved,
+      isActivating: isActivating ?? this.isActivating,
+      activatedPlan: activatedPlan ?? this.activatedPlan,
     );
   }
 
@@ -156,5 +186,7 @@ class ConfigurationState extends Equatable {
     failure,
     isDirty,
     justSaved,
+    isActivating,
+    activatedPlan,
   ];
 }

@@ -573,6 +573,129 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get configurationSummaryTitle => 'Summary';
+
+  @override
+  String get configurationSummaryEdit => 'Edit';
+
+  @override
+  String get configurationSummarySchool => 'School';
+
+  @override
+  String get configurationSummaryYear => 'Academic year';
+
+  @override
+  String configurationSummaryStructure(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+    );
+    return 'Structure · $_temp0';
+  }
+
+  @override
+  String get configurationSummaryFees => 'School fees';
+
+  @override
+  String get configurationSummaryMissing => 'to be filled in';
+
+  @override
+  String configurationSummaryCycleLine(int levels, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels levels',
+      one: '$levels level',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSummaryNoGrid => 'no official grid';
+
+  @override
+  String get configurationCheckSchool => 'School identity complete';
+
+  @override
+  String get configurationCheckYear => 'Academic year dated';
+
+  @override
+  String configurationCheckClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes ready to open',
+      one: '$count class ready to open',
+      zero: 'No class to open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationCheckFees(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees attached to levels',
+      one: '$count fee attached to levels',
+      zero: 'No fee attached to levels',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationActivate => 'Bring the school into service';
+
+  @override
+  String get configurationActivating => 'Activating…';
+
+  @override
+  String get configurationActivateBlocked =>
+      'Complete the amber items to activate.';
+
+  @override
+  String get configurationActivateFailed => 'Activation failed — try again.';
+
+  @override
+  String configurationActivatedTitle(String school) {
+    return '$school is in service';
+  }
+
+  @override
+  String configurationActivatedMessage(String year, int classrooms, int fees) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      fees,
+      locale: localeName,
+      other: '$fees fees',
+      one: '$fees fee',
+    );
+    return 'The $year year is open with $_temp0 and $_temp1. You can enrol your first students.';
+  }
+
+  @override
+  String get configurationGoHome => 'Go to the dashboard';
+
+  @override
+  String get configurationReviewSetup => 'Review the setup';
+
+  @override
+  String get configurationWarningsTitle => 'Worth knowing before activating';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

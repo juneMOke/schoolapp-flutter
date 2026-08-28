@@ -596,6 +596,133 @@
           }
       }
   },
+  "configurationSummaryTitle": "Récapitulatif",
+  "@configurationSummaryTitle": {
+      "description": "Titre de l'étape 5"
+  },
+  "configurationSummaryEdit": "Modifier",
+  "@configurationSummaryEdit": {
+      "description": "Raccourci d'une carte de récapitulatif vers son étape"
+  },
+  "configurationSummarySchool": "École",
+  "@configurationSummarySchool": {
+      "description": "Carte de récapitulatif de l'identité"
+  },
+  "configurationSummaryYear": "Année académique",
+  "@configurationSummaryYear": {
+      "description": "Carte de récapitulatif de l'année"
+  },
+  "configurationSummaryStructure": "Structure · {count, plural, one{{count} classe} other{{count} classes}}",
+  "@configurationSummaryStructure": {
+      "description": "Carte de récapitulatif de la structure",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryFees": "Frais scolaires",
+  "@configurationSummaryFees": {
+      "description": "Carte de récapitulatif des frais"
+  },
+  "configurationSummaryMissing": "à renseigner",
+  "@configurationSummaryMissing": {
+      "description": "Valeur affichée à la place d'un champ manquant — jamais un vide silencieux"
+  },
+  "configurationSummaryCycleLine": "{levels, plural, one{{levels} niveau} other{{levels} niveaux}} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}}",
+  "@configurationSummaryCycleLine": {
+      "description": "Ligne d'un cycle dans le récapitulatif de structure",
+      "placeholders": {
+          "levels": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryNoGrid": "aucun barème",
+  "@configurationSummaryNoGrid": {
+      "description": "Mention ajoutée à un cycle dont les niveaux n'ont pas de barème officiel"
+  },
+  "configurationCheckSchool": "Identité de l'école complète",
+  "@configurationCheckSchool": {
+      "description": "Contrôle d'activation : les huit champs"
+  },
+  "configurationCheckYear": "Année académique datée",
+  "@configurationCheckYear": {
+      "description": "Contrôle d'activation : l'intervalle de dates"
+  },
+  "configurationCheckClassrooms": "{count, plural, =0{Aucune classe à ouvrir} one{{count} classe prête à ouvrir} other{{count} classes prêtes à ouvrir}}",
+  "@configurationCheckClassrooms": {
+      "description": "Contrôle d'activation : les classes du plan",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCheckFees": "{count, plural, =0{Aucun frais rattaché aux niveaux} one{{count} frais rattaché aux niveaux} other{{count} frais rattachés aux niveaux}}",
+  "@configurationCheckFees": {
+      "description": "Contrôle d'activation : les frais saisis",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationActivate": "Activer l'école",
+  "@configurationActivate": {
+      "description": "Bouton d'activation — la seule écriture de structure du parcours"
+  },
+  "configurationActivating": "Activation…",
+  "@configurationActivating": {
+      "description": "Libellé du bouton pendant l'activation"
+  },
+  "configurationActivateBlocked": "Complétez les points en ambre pour activer.",
+  "@configurationActivateBlocked": {
+      "description": "Message affiché tant que les quatre contrôles ne passent pas"
+  },
+  "configurationActivateFailed": "L'activation a échoué — réessayez.",
+  "@configurationActivateFailed": {
+      "description": "Toast d'échec d'activation. Aucune donnée n'est perdue"
+  },
+  "configurationActivatedTitle": "{school} est en service",
+  "@configurationActivatedTitle": {
+      "description": "Titre de l'écran de succès",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationActivatedMessage": "L'année {year} est ouverte avec {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}} et {fees, plural, one{{fees} frais} other{{fees} frais}}. Vous pouvez inscrire vos premiers élèves.",
+  "@configurationActivatedMessage": {
+      "description": "Message de l'écran de succès",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "fees": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationGoHome": "Aller à l'accueil",
+  "@configurationGoHome": {
+      "description": "Issue principale de l'écran de succès"
+  },
+  "configurationReviewSetup": "Revoir la configuration",
+  "@configurationReviewSetup": {
+      "description": "Seconde issue de l'écran de succès"
+  },
+  "configurationWarningsTitle": "À savoir avant d'activer",
+  "@configurationWarningsTitle": {
+      "description": "En-tête du bloc des avertissements du plan"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
