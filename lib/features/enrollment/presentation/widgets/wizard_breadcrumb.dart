@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_step_progression.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
@@ -84,23 +85,28 @@ class _StepRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = titles.length;
+    // Mécanique commune aux assistants (`WizardStepProgression`), plutôt que
+    // recalculée ici : ce parcours est linéaire — retour libre, saut avant
+    // interdit — et c'est exactement ce que le régime `linear` exprime.
+    final progression = WizardStepProgression.linear(
+      stepCount: count,
+      currentStep: currentStep,
+    );
 
     // Steps répartis à parts égales (Expanded) pour occuper toute la largeur ;
     // les connecteurs relient les chips de bout en bout.
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: List<Widget>.generate(count, (index) {
-        final isDone = index < currentStep;
-        final isCurrent = index == currentStep;
-        final canTap = index <= currentStep;
+        final status = progression.statusAt(index);
 
         return Expanded(
           child: WizardStepDot(
             index: index,
             title: titles[index],
-            isCurrent: isCurrent,
-            isDone: isDone,
-            canTap: canTap,
+            isCurrent: status.isCurrent,
+            isDone: status.isDone,
+            canTap: status.canTap,
             reduceMotion: reduceMotion,
             onTap: () => onStepTap(index),
             isFirst: index == 0,
