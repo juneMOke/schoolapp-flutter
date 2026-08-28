@@ -108,6 +108,93 @@
   "@splashNotProvisionedWaitMessage": {
     "description": "Splash message for an unprovisioned school without the permission to set it up: nothing to do from this device"
   },
+  "configurationTitle": "Setup",
+  "@configurationTitle": {
+      "description": "Provisioning wizard app bar title"
+  },
+  "configurationSubtitle": "Bringing the school into service",
+  "@configurationSubtitle": {
+      "description": "Provisioning wizard app bar subtitle"
+  },
+  "configurationStepCounter": "Step {current} / {total}",
+  "@configurationStepCounter": {
+      "description": "Wizard step counter, right-aligned in the bar",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationExitTooltip": "Leave setup",
+  "@configurationExitTooltip": {
+      "description": "Exit button tooltip — no confirmation, everything is saved"
+  },
+  "configurationStepSchool": "School",
+  "@configurationStepSchool": {
+      "description": "Short label of step 1 in the stepper"
+  },
+  "configurationStepAcademicYear": "Year",
+  "@configurationStepAcademicYear": {
+      "description": "Short label of step 2 in the stepper"
+  },
+  "configurationStepStructure": "Structure",
+  "@configurationStepStructure": {
+      "description": "Short label of step 3 in the stepper"
+  },
+  "configurationStepFees": "Fees",
+  "@configurationStepFees": {
+      "description": "Short label of step 4 in the stepper"
+  },
+  "configurationStepActivation": "Activation",
+  "@configurationStepActivation": {
+      "description": "Short label of step 5 in the stepper"
+  },
+  "configurationStepSemantics": "Step {current} of {total}, {title}",
+  "@configurationStepSemantics": {
+      "description": "Accessibility label of a stepper dot",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "title": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationBack": "Back",
+  "@configurationBack": {
+      "description": "Back button of the save bar"
+  },
+  "configurationSave": "Save",
+  "@configurationSave": {
+      "description": "Save button of the footer bar"
+  },
+  "configurationContinue": "Continue",
+  "@configurationContinue": {
+      "description": "Advance button of the footer bar"
+  },
+  "configurationSaving": "Saving…",
+  "@configurationSaving": {
+      "description": "Transient footer message while writing"
+  },
+  "configurationSaved": "Saved",
+  "@configurationSaved": {
+      "description": "Footer check on step 1, the only step that really writes"
+  },
+  "configurationDraftSaved": "Draft saved",
+  "@configurationDraftSaved": {
+      "description": "Footer check on steps 2 to 4, which only build a local draft"
+  },
+  "configurationSaveBarDefaultHint": "Fill in the required fields to continue",
+  "@configurationSaveBarDefaultHint": {
+      "description": "Default footer message when the step provides no hint"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

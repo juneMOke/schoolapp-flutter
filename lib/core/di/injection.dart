@@ -10,7 +10,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
 import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
+import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
 import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
@@ -1040,6 +1042,16 @@ Future<void> configureDependencies({
       remote: getIt<ProvisioningRemoteDataSource>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  // `registerFactory` (règle non négociable) : le bloc porte le brouillon en
+  // cours d'édition. En singleton, rouvrir l'assistant reprendrait un état
+  // qu'on croyait quitté.
+  getIt.registerFactory<ConfigurationBloc>(
+    () => ConfigurationBloc(
+      repository: getIt<ProvisioningRepository>(),
+      draftRepository: getIt<ProvisioningDraftRepository>(),
     ),
   );
 

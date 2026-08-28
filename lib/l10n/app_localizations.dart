@@ -416,6 +416,108 @@ abstract class AppLocalizations {
   /// **'This school has no open academic year yet. Only school management can set it up — check with them before retrying.'**
   String get splashNotProvisionedWaitMessage;
 
+  /// Provisioning wizard app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get configurationTitle;
+
+  /// Provisioning wizard app bar subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Bringing the school into service'**
+  String get configurationSubtitle;
+
+  /// Wizard step counter, right-aligned in the bar
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} / {total}'**
+  String configurationStepCounter(int current, int total);
+
+  /// Exit button tooltip — no confirmation, everything is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Leave setup'**
+  String get configurationExitTooltip;
+
+  /// Short label of step 1 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get configurationStepSchool;
+
+  /// Short label of step 2 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get configurationStepAcademicYear;
+
+  /// Short label of step 3 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Structure'**
+  String get configurationStepStructure;
+
+  /// Short label of step 4 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Fees'**
+  String get configurationStepFees;
+
+  /// Short label of step 5 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Activation'**
+  String get configurationStepActivation;
+
+  /// Accessibility label of a stepper dot
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}, {title}'**
+  String configurationStepSemantics(int current, int total, String title);
+
+  /// Back button of the save bar
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get configurationBack;
+
+  /// Save button of the footer bar
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get configurationSave;
+
+  /// Advance button of the footer bar
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get configurationContinue;
+
+  /// Transient footer message while writing
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get configurationSaving;
+
+  /// Footer check on step 1, the only step that really writes
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get configurationSaved;
+
+  /// Footer check on steps 2 to 4, which only build a local draft
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get configurationDraftSaved;
+
+  /// Default footer message when the step provides no hint
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the required fields to continue'**
+  String get configurationSaveBarDefaultHint;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

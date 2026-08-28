@@ -185,6 +185,62 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette école n\'a pas encore d\'année scolaire ouverte. Seule la direction peut la configurer — rapprochez-vous d\'elle avant de réessayer.';
 
   @override
+  String get configurationTitle => 'Configuration';
+
+  @override
+  String get configurationSubtitle => 'Mise en service de l\'école';
+
+  @override
+  String configurationStepCounter(int current, int total) {
+    return 'Étape $current / $total';
+  }
+
+  @override
+  String get configurationExitTooltip => 'Quitter la configuration';
+
+  @override
+  String get configurationStepSchool => 'École';
+
+  @override
+  String get configurationStepAcademicYear => 'Année';
+
+  @override
+  String get configurationStepStructure => 'Structure';
+
+  @override
+  String get configurationStepFees => 'Frais';
+
+  @override
+  String get configurationStepActivation => 'Activation';
+
+  @override
+  String configurationStepSemantics(int current, int total, String title) {
+    return 'Étape $current sur $total, $title';
+  }
+
+  @override
+  String get configurationBack => 'Retour';
+
+  @override
+  String get configurationSave => 'Enregistrer';
+
+  @override
+  String get configurationContinue => 'Continuer';
+
+  @override
+  String get configurationSaving => 'Enregistrement…';
+
+  @override
+  String get configurationSaved => 'Enregistré';
+
+  @override
+  String get configurationDraftSaved => 'Brouillon enregistré';
+
+  @override
+  String get configurationSaveBarDefaultHint =>
+      'Complétez les champs obligatoires pour continuer';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

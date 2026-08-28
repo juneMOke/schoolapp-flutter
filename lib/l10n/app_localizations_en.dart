@@ -183,6 +183,62 @@ class AppLocalizationsEn extends AppLocalizations {
       'This school has no open academic year yet. Only school management can set it up — check with them before retrying.';
 
   @override
+  String get configurationTitle => 'Setup';
+
+  @override
+  String get configurationSubtitle => 'Bringing the school into service';
+
+  @override
+  String configurationStepCounter(int current, int total) {
+    return 'Step $current / $total';
+  }
+
+  @override
+  String get configurationExitTooltip => 'Leave setup';
+
+  @override
+  String get configurationStepSchool => 'School';
+
+  @override
+  String get configurationStepAcademicYear => 'Year';
+
+  @override
+  String get configurationStepStructure => 'Structure';
+
+  @override
+  String get configurationStepFees => 'Fees';
+
+  @override
+  String get configurationStepActivation => 'Activation';
+
+  @override
+  String configurationStepSemantics(int current, int total, String title) {
+    return 'Step $current of $total, $title';
+  }
+
+  @override
+  String get configurationBack => 'Back';
+
+  @override
+  String get configurationSave => 'Save';
+
+  @override
+  String get configurationContinue => 'Continue';
+
+  @override
+  String get configurationSaving => 'Saving…';
+
+  @override
+  String get configurationSaved => 'Saved';
+
+  @override
+  String get configurationDraftSaved => 'Draft saved';
+
+  @override
+  String get configurationSaveBarDefaultHint =>
+      'Fill in the required fields to continue';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

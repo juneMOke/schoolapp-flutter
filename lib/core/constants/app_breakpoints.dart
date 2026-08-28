@@ -10,6 +10,15 @@ class AppBreakpoints {
   static const double dataTablePhoneMax = 390.0;
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;
+
+  /// Assistant de mise en service — deux bascules seulement.
+  ///
+  /// À [configurationGridMax] les grilles de champs passent de quatre colonnes
+  /// à deux, puis à une sous [configurationCompactMax] ; c'est aussi là que le
+  /// stepper se réduit à ses seules pastilles. Un libellé tronqué au tiers ne
+  /// dit rien de plus qu'un numéro et prend la place du contenu.
+  static const double configurationGridMax = 900.0;
+  static const double configurationCompactMax = 560.0;
   // Connexion (spec §01) — split deux panneaux ≥ 900 ; empilé 560–900 ;
   // bandeau slim (lockup seul) < 560.
   static const double loginSplitMin = 900.0;

@@ -108,6 +108,93 @@
   "@splashNotProvisionedWaitMessage": {
     "description": "Message du splash pour une école non paramétrée, sans la permission de la configurer : rien à faire depuis cet appareil"
   },
+  "configurationTitle": "Configuration",
+  "@configurationTitle": {
+      "description": "Titre de la barre de l'assistant de mise en service"
+  },
+  "configurationSubtitle": "Mise en service de l'école",
+  "@configurationSubtitle": {
+      "description": "Sous-titre de la barre de l'assistant"
+  },
+  "configurationStepCounter": "Étape {current} / {total}",
+  "@configurationStepCounter": {
+      "description": "Compteur d'étapes de l'assistant, aligné à droite de la barre",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationExitTooltip": "Quitter la configuration",
+  "@configurationExitTooltip": {
+      "description": "Infobulle du bouton de sortie — aucune confirmation, tout est enregistré"
+  },
+  "configurationStepSchool": "École",
+  "@configurationStepSchool": {
+      "description": "Libellé court de l'étape 1 dans le stepper"
+  },
+  "configurationStepAcademicYear": "Année",
+  "@configurationStepAcademicYear": {
+      "description": "Libellé court de l'étape 2 dans le stepper"
+  },
+  "configurationStepStructure": "Structure",
+  "@configurationStepStructure": {
+      "description": "Libellé court de l'étape 3 dans le stepper"
+  },
+  "configurationStepFees": "Frais",
+  "@configurationStepFees": {
+      "description": "Libellé court de l'étape 4 dans le stepper"
+  },
+  "configurationStepActivation": "Activation",
+  "@configurationStepActivation": {
+      "description": "Libellé court de l'étape 5 dans le stepper"
+  },
+  "configurationStepSemantics": "Étape {current} sur {total}, {title}",
+  "@configurationStepSemantics": {
+      "description": "Libellé d'accessibilité d'une pastille du stepper",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "title": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationBack": "Retour",
+  "@configurationBack": {
+      "description": "Bouton de retour de la barre d'enregistrement"
+  },
+  "configurationSave": "Enregistrer",
+  "@configurationSave": {
+      "description": "Bouton d'enregistrement de la barre de pied"
+  },
+  "configurationContinue": "Continuer",
+  "@configurationContinue": {
+      "description": "Bouton d'avancement de la barre de pied"
+  },
+  "configurationSaving": "Enregistrement…",
+  "@configurationSaving": {
+      "description": "Message transitoire de la barre de pied pendant l'écriture"
+  },
+  "configurationSaved": "Enregistré",
+  "@configurationSaved": {
+      "description": "Coche de la barre de pied à l'étape 1, la seule qui écrit vraiment"
+  },
+  "configurationDraftSaved": "Brouillon enregistré",
+  "@configurationDraftSaved": {
+      "description": "Coche de la barre de pied aux étapes 2 à 4, qui ne construisent qu'un brouillon local"
+  },
+  "configurationSaveBarDefaultHint": "Complétez les champs obligatoires pour continuer",
+  "@configurationSaveBarDefaultHint": {
+      "description": "Message par défaut de la barre de pied quand l'étape n'en fournit pas"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
