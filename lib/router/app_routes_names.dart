@@ -83,6 +83,11 @@ class AppRoutesNames {
   static const String configuration = 'configuration';
   static const String configurationPath = '/configuration';
 
+  /// Réglages réouvrables, après mise en service. Même garde que l'assistant :
+  /// même geste, même autorité.
+  static const String configurationSettings = 'configuration-settings';
+  static const String configurationSettingsPath = '/configuration/settings';
+
   // Debug — galerie de composants (kDebugMode uniquement)
   static const String componentGallery = '/dev/components';
 

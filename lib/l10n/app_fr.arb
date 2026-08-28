@@ -723,6 +723,124 @@
   "@configurationWarningsTitle": {
       "description": "En-tête du bloc des avertissements du plan"
   },
+  "configurationSettingsTitle": "Configuration de l'école",
+  "@configurationSettingsTitle": {
+      "description": "Titre de l'écran de réglages, après mise en service"
+  },
+  "configurationSettingsInService": "{school} · en service",
+  "@configurationSettingsInService": {
+      "description": "Bandeau d'état : l'école est paramétrée",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsSummary": "Année {year} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}} · {levels, plural, one{{levels} niveau} other{{levels} niveaux}}",
+  "@configurationSettingsSummary": {
+      "description": "Résumé du bandeau d'état",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "levels": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSettingsNextYear": "Préparer l'année suivante",
+  "@configurationSettingsNextYear": {
+      "description": "Bouton désactivé en V1 — l'assistant ne se rejoue pas"
+  },
+  "configurationSettingsNextYearTooltip": "Indisponible pour l'instant : l'assistant ne peut pas être rejoué, le serveur refuserait une année déjà ouverte. Un geste dédié reste à livrer.",
+  "@configurationSettingsNextYearTooltip": {
+      "description": "Infobulle du bouton « Préparer l'année suivante »"
+  },
+  "configurationSettingsTabIdentity": "Identité de l'école",
+  "@configurationSettingsTabIdentity": {
+      "description": "Onglet modifiable des réglages"
+  },
+  "configurationSettingsTabStructure": "Cycles, niveaux et classes",
+  "@configurationSettingsTabStructure": {
+      "description": "Onglet en lecture des réglages"
+  },
+  "configurationSettingsTabFees": "Frais scolaires",
+  "@configurationSettingsTabFees": {
+      "description": "Onglet des tarifs, modifiable ligne par ligne"
+  },
+  "configurationSettingsReadOnly": "lecture",
+  "@configurationSettingsReadOnly": {
+      "description": "Marqueur d'un onglet non modifiable"
+  },
+  "configurationSettingsStructureReadOnlyNote": "La structure ne se modifie plus après la mise en service. Le serveur ne sait pas encore refuser proprement la suppression d'un niveau peuplé : la câbler ici risquerait de casser des inscriptions en cours.",
+  "@configurationSettingsStructureReadOnlyNote": {
+      "description": "Explication de la lecture seule de l'onglet Structure"
+  },
+  "configurationSettingsSaved": "Modifications enregistrées",
+  "@configurationSettingsSaved": {
+      "description": "Toast après enregistrement dans les réglages"
+  },
+  "configurationSettingsSave": "Enregistrer",
+  "@configurationSettingsSave": {
+      "description": "Bouton d'enregistrement des réglages"
+  },
+  "configurationSettingsNoYear": "Aucune année ouverte",
+  "@configurationSettingsNoYear": {
+      "description": "État vide des réglages quand le contexte académique ne rend pas d'année"
+  },
+  "configurationSettingsTariffsForLevel": "Tarifs de {level}",
+  "@configurationSettingsTariffsForLevel": {
+      "description": "En-tête de la liste des tarifs d'un niveau",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsTariffOne": "Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.",
+  "@configurationSettingsTariffOne": {
+      "description": "Note expliquant que l'assiette de l'assistant n'existe plus dans les réglages"
+  },
+  "configurationTariffAdd": "Ajouter un tarif",
+  "@configurationTariffAdd": {
+      "description": "Bouton d'ajout d'un tarif sur un niveau"
+  },
+  "configurationTariffEdit": "Modifier le tarif",
+  "@configurationTariffEdit": {
+      "description": "Titre de la modale d'édition d'un tarif"
+  },
+  "configurationTariffNew": "Nouveau tarif",
+  "@configurationTariffNew": {
+      "description": "Titre de la modale de création d'un tarif"
+  },
+  "configurationTariffDelete": "Supprimer le tarif",
+  "@configurationTariffDelete": {
+      "description": "Action de suppression d'un tarif"
+  },
+  "configurationTariffDeleteConfirm": "Supprimer « {label} » ? Les créances déjà générées ne sont pas touchées.",
+  "@configurationTariffDeleteConfirm": {
+      "description": "Confirmation de suppression d'un tarif — une écriture serveur, contrairement au brouillon de l'assistant",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationTariffSaved": "Tarif enregistré",
+  "@configurationTariffSaved": {
+      "description": "Toast après écriture d'un tarif"
+  },
+  "configurationTariffDeleted": "Tarif supprimé",
+  "@configurationTariffDeleted": {
+      "description": "Toast après suppression d'un tarif"
+  },
+  "configurationTariffNone": "Aucun tarif sur ce niveau",
+  "@configurationTariffNone": {
+      "description": "Message quand un niveau ne porte aucun tarif"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",

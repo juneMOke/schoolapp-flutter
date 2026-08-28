@@ -696,6 +696,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationWarningsTitle => 'Worth knowing before activating';
 
   @override
+  String get configurationSettingsTitle => 'School setup';
+
+  @override
+  String configurationSettingsInService(String school) {
+    return '$school · in service';
+  }
+
+  @override
+  String configurationSettingsSummary(String year, int classrooms, int levels) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels levels',
+      one: '$levels level',
+    );
+    return '$year year · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSettingsNextYear => 'Prepare next year';
+
+  @override
+  String get configurationSettingsNextYearTooltip =>
+      'Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.';
+
+  @override
+  String get configurationSettingsTabIdentity => 'School identity';
+
+  @override
+  String get configurationSettingsTabStructure => 'Cycles, levels and classes';
+
+  @override
+  String get configurationSettingsTabFees => 'School fees';
+
+  @override
+  String get configurationSettingsReadOnly => 'read-only';
+
+  @override
+  String get configurationSettingsStructureReadOnlyNote =>
+      'The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.';
+
+  @override
+  String get configurationSettingsSaved => 'Changes saved';
+
+  @override
+  String get configurationSettingsSave => 'Save';
+
+  @override
+  String get configurationSettingsNoYear => 'No open year';
+
+  @override
+  String configurationSettingsTariffsForLevel(String level) {
+    return 'Tariffs for $level';
+  }
+
+  @override
+  String get configurationSettingsTariffOne =>
+      'Here a tariff carries a single level: each row is edited on its own.';
+
+  @override
+  String get configurationTariffAdd => 'Add a tariff';
+
+  @override
+  String get configurationTariffEdit => 'Edit tariff';
+
+  @override
+  String get configurationTariffNew => 'New tariff';
+
+  @override
+  String get configurationTariffDelete => 'Delete tariff';
+
+  @override
+  String configurationTariffDeleteConfirm(String label) {
+    return 'Delete \"$label\"? Charges already generated are not affected.';
+  }
+
+  @override
+  String get configurationTariffSaved => 'Tariff saved';
+
+  @override
+  String get configurationTariffDeleted => 'Tariff deleted';
+
+  @override
+  String get configurationTariffNone => 'No tariff on this level';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

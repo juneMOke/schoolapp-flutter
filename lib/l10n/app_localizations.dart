@@ -1088,6 +1088,144 @@ abstract class AppLocalizations {
   /// **'Worth knowing before activating'**
   String get configurationWarningsTitle;
 
+  /// Settings screen title, after the school is in service
+  ///
+  /// In en, this message translates to:
+  /// **'School setup'**
+  String get configurationSettingsTitle;
+
+  /// State banner: the school is set up
+  ///
+  /// In en, this message translates to:
+  /// **'{school} · in service'**
+  String configurationSettingsInService(String school);
+
+  /// State banner summary
+  ///
+  /// In en, this message translates to:
+  /// **'{year} year · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} · {levels, plural, one{{levels} level} other{{levels} levels}}'**
+  String configurationSettingsSummary(String year, int classrooms, int levels);
+
+  /// Disabled in V1 — the wizard cannot be replayed
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare next year'**
+  String get configurationSettingsNextYear;
+
+  /// Tooltip of the prepare-next-year button
+  ///
+  /// In en, this message translates to:
+  /// **'Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.'**
+  String get configurationSettingsNextYearTooltip;
+
+  /// Editable settings tab
+  ///
+  /// In en, this message translates to:
+  /// **'School identity'**
+  String get configurationSettingsTabIdentity;
+
+  /// Read-only settings tab
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles, levels and classes'**
+  String get configurationSettingsTabStructure;
+
+  /// Tariff tab, editable row by row
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationSettingsTabFees;
+
+  /// Marker of a non-editable tab
+  ///
+  /// In en, this message translates to:
+  /// **'read-only'**
+  String get configurationSettingsReadOnly;
+
+  /// Why the structure tab is read-only
+  ///
+  /// In en, this message translates to:
+  /// **'The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.'**
+  String get configurationSettingsStructureReadOnlyNote;
+
+  /// Toast after saving in the settings
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get configurationSettingsSaved;
+
+  /// Settings save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get configurationSettingsSave;
+
+  /// Settings empty state when the academic context returns no year
+  ///
+  /// In en, this message translates to:
+  /// **'No open year'**
+  String get configurationSettingsNoYear;
+
+  /// Header of a level's tariff list
+  ///
+  /// In en, this message translates to:
+  /// **'Tariffs for {level}'**
+  String configurationSettingsTariffsForLevel(String level);
+
+  /// Note explaining the wizard's scope no longer exists in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Here a tariff carries a single level: each row is edited on its own.'**
+  String get configurationSettingsTariffOne;
+
+  /// Button adding a tariff on a level
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tariff'**
+  String get configurationTariffAdd;
+
+  /// Tariff edit dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit tariff'**
+  String get configurationTariffEdit;
+
+  /// Tariff creation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'New tariff'**
+  String get configurationTariffNew;
+
+  /// Tariff deletion action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete tariff'**
+  String get configurationTariffDelete;
+
+  /// Tariff deletion confirmation — a server write, unlike the wizard's draft
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{label}\"? Charges already generated are not affected.'**
+  String configurationTariffDeleteConfirm(String label);
+
+  /// Toast after writing a tariff
+  ///
+  /// In en, this message translates to:
+  /// **'Tariff saved'**
+  String get configurationTariffSaved;
+
+  /// Toast after deleting a tariff
+  ///
+  /// In en, this message translates to:
+  /// **'Tariff deleted'**
+  String get configurationTariffDeleted;
+
+  /// Shown when a level carries no tariff
+  ///
+  /// In en, this message translates to:
+  /// **'No tariff on this level'**
+  String get configurationTariffNone;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

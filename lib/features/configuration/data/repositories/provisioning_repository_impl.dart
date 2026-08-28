@@ -3,9 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
+import 'package:school_app_flutter/features/configuration/data/models/fee_tariff_payload_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/provisioning_request_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/school_identity_model.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
+import 'package:school_app_flutter/features/configuration/domain/entities/fee_tariff.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_catalog.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_plan.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_request.dart';
@@ -100,6 +102,50 @@ class ProvisioningRepositoryImpl implements ProvisioningRepository {
         SchoolIdentityModel.fromEntity(identity),
       );
       return model.toEntity(fallbackId: schoolId);
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<FeeTariff>>> loadTariffs(
+    String schoolLevelId,
+  ) async {
+    return _guard(() async {
+      final models = await _remote.listTariffs(_requiredAuth, schoolLevelId);
+      return models.map((model) => model.toEntity()).toList();
+    });
+  }
+
+  @override
+  Future<Either<Failure, FeeTariff>> createTariff(FeeTariffDraft draft) async {
+    return _guard(() async {
+      final model = await _remote.createTariff(
+        _requiredAuth,
+        FeeTariffPayloadModel.fromEntity(draft),
+      );
+      return model.toEntity();
+    });
+  }
+
+  @override
+  Future<Either<Failure, FeeTariff>> updateTariff(
+    String tariffId,
+    FeeTariffDraft draft,
+  ) async {
+    return _guard(() async {
+      final model = await _remote.updateTariff(
+        _requiredAuth,
+        tariffId,
+        FeeTariffPayloadModel.fromEntity(draft),
+      );
+      return model.toEntity();
+    });
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteTariff(String tariffId) async {
+    return _guard(() async {
+      await _remote.deleteTariff(_requiredAuth, tariffId);
+      return unit;
     });
   }
 

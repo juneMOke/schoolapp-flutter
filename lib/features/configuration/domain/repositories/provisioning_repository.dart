@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
+import 'package:school_app_flutter/features/configuration/domain/entities/fee_tariff.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_catalog.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_plan.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_request.dart';
@@ -40,6 +41,21 @@ abstract class ProvisioningRepository {
   Future<Either<Failure, ProvisioningPlan>> simulate(
     ProvisioningRequest request,
   );
+
+  /// Tarifs d'un niveau, après activation.
+  Future<Either<Failure, List<FeeTariff>>> loadTariffs(String schoolLevelId);
+
+  /// Crée un tarif sur un niveau.
+  Future<Either<Failure, FeeTariff>> createTariff(FeeTariffDraft draft);
+
+  /// Remplace un tarif.
+  Future<Either<Failure, FeeTariff>> updateTariff(
+    String tariffId,
+    FeeTariffDraft draft,
+  );
+
+  /// Supprime un tarif.
+  Future<Either<Failure, Unit>> deleteTariff(String tariffId);
 
   /// Active l'établissement : **une transaction, tout ou rien**.
   ///

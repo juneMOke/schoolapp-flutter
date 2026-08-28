@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_page.dart';
+import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -276,6 +277,16 @@ class AppRouter {
       path: AppRoutesNames.configurationPath,
       name: AppRoutesNames.configuration,
       builder: (context, state) => const ConfigurationPage(),
+      routes: [
+        GoRoute(
+          // `settings` est un chemin RELATIF : déclaré en absolu sous ce parent,
+          // GoRouter refuserait l'arbre. Il hérite donc de la garde de son
+          // premier segment, `configuration`.
+          path: 'settings',
+          name: AppRoutesNames.configurationSettings,
+          builder: (context, state) => const ConfigurationSettingsPage(),
+        ),
+      ],
     ),
     GoRoute(
       path: '/home',

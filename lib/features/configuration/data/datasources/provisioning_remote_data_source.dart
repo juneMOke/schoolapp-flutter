@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/configuration/data/models/fee_code_model.dart';
+import 'package:school_app_flutter/features/configuration/data/models/fee_tariff_payload_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/provisioning_catalog_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/provisioning_plan_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/provisioning_request_model.dart';
@@ -45,6 +46,34 @@ abstract class ProvisioningRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Path('schoolId') String schoolId,
     @Body() SchoolIdentityModel body,
+  );
+
+  /// Tarifs d'un niveau — la lecture des réglages.
+  @GET(AppConstants.feeTariffsEndpoint)
+  Future<List<FeeTariffResponseModel>> listTariffs(
+    @Extras() Map<String, dynamic> extras,
+    @Query('levelId') String levelId,
+  );
+
+  /// Crée un tarif. **Un tarif = un niveau** : l'assiette de l'assistant
+  /// n'existe plus ici.
+  @POST(AppConstants.feeTariffsEndpoint)
+  Future<FeeTariffResponseModel> createTariff(
+    @Extras() Map<String, dynamic> extras,
+    @Body() FeeTariffPayloadModel body,
+  );
+
+  @PUT('${AppConstants.feeTariffsEndpoint}/{tariffId}')
+  Future<FeeTariffResponseModel> updateTariff(
+    @Extras() Map<String, dynamic> extras,
+    @Path('tariffId') String tariffId,
+    @Body() FeeTariffPayloadModel body,
+  );
+
+  @DELETE('${AppConstants.feeTariffsEndpoint}/{tariffId}')
+  Future<void> deleteTariff(
+    @Extras() Map<String, dynamic> extras,
+    @Path('tariffId') String tariffId,
   );
 
   /// Simulation (`dryRun=true`) ou activation (`false`).

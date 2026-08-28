@@ -700,6 +700,98 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationWarningsTitle => 'À savoir avant d\'activer';
 
   @override
+  String get configurationSettingsTitle => 'Configuration de l\'école';
+
+  @override
+  String configurationSettingsInService(String school) {
+    return '$school · en service';
+  }
+
+  @override
+  String configurationSettingsSummary(String year, int classrooms, int levels) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels niveaux',
+      one: '$levels niveau',
+    );
+    return 'Année $year · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSettingsNextYear => 'Préparer l\'année suivante';
+
+  @override
+  String get configurationSettingsNextYearTooltip =>
+      'Indisponible pour l\'instant : l\'assistant ne peut pas être rejoué, le serveur refuserait une année déjà ouverte. Un geste dédié reste à livrer.';
+
+  @override
+  String get configurationSettingsTabIdentity => 'Identité de l\'école';
+
+  @override
+  String get configurationSettingsTabStructure => 'Cycles, niveaux et classes';
+
+  @override
+  String get configurationSettingsTabFees => 'Frais scolaires';
+
+  @override
+  String get configurationSettingsReadOnly => 'lecture';
+
+  @override
+  String get configurationSettingsStructureReadOnlyNote =>
+      'La structure ne se modifie plus après la mise en service. Le serveur ne sait pas encore refuser proprement la suppression d\'un niveau peuplé : la câbler ici risquerait de casser des inscriptions en cours.';
+
+  @override
+  String get configurationSettingsSaved => 'Modifications enregistrées';
+
+  @override
+  String get configurationSettingsSave => 'Enregistrer';
+
+  @override
+  String get configurationSettingsNoYear => 'Aucune année ouverte';
+
+  @override
+  String configurationSettingsTariffsForLevel(String level) {
+    return 'Tarifs de $level';
+  }
+
+  @override
+  String get configurationSettingsTariffOne =>
+      'Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.';
+
+  @override
+  String get configurationTariffAdd => 'Ajouter un tarif';
+
+  @override
+  String get configurationTariffEdit => 'Modifier le tarif';
+
+  @override
+  String get configurationTariffNew => 'Nouveau tarif';
+
+  @override
+  String get configurationTariffDelete => 'Supprimer le tarif';
+
+  @override
+  String configurationTariffDeleteConfirm(String label) {
+    return 'Supprimer « $label » ? Les créances déjà générées ne sont pas touchées.';
+  }
+
+  @override
+  String get configurationTariffSaved => 'Tarif enregistré';
+
+  @override
+  String get configurationTariffDeleted => 'Tarif supprimé';
+
+  @override
+  String get configurationTariffNone => 'Aucun tarif sur ce niveau';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

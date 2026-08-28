@@ -128,6 +128,30 @@ void main() {
     });
   });
 
+  group('les réglages héritent de la garde de l\'assistant', () {
+    test('le promoteur atteint /configuration/settings', () {
+      expect(
+        redirectFor(
+          location: '/configuration/settings',
+          permissions: provisioner,
+        ),
+        isNull,
+      );
+    });
+
+    test('sans la permission, les réglages sont fermés', () {
+      // Même geste, même autorité : la garde se lit sur le premier segment,
+      // qui est celui de l'assistant.
+      expect(
+        redirectFor(
+          location: '/configuration/settings',
+          permissions: secretary,
+        ),
+        '/home',
+      );
+    });
+  });
+
   group('école déjà paramétrée — le contexte académique est résolu', () {
     test('le promoteur rouvre /configuration comme réglages', () {
       expect(

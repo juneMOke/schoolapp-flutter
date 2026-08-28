@@ -723,6 +723,124 @@
   "@configurationWarningsTitle": {
       "description": "Header of the plan warnings block"
   },
+  "configurationSettingsTitle": "School setup",
+  "@configurationSettingsTitle": {
+      "description": "Settings screen title, after the school is in service"
+  },
+  "configurationSettingsInService": "{school} · in service",
+  "@configurationSettingsInService": {
+      "description": "State banner: the school is set up",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsSummary": "{year} year · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} · {levels, plural, one{{levels} level} other{{levels} levels}}",
+  "@configurationSettingsSummary": {
+      "description": "State banner summary",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "levels": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSettingsNextYear": "Prepare next year",
+  "@configurationSettingsNextYear": {
+      "description": "Disabled in V1 — the wizard cannot be replayed"
+  },
+  "configurationSettingsNextYearTooltip": "Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.",
+  "@configurationSettingsNextYearTooltip": {
+      "description": "Tooltip of the prepare-next-year button"
+  },
+  "configurationSettingsTabIdentity": "School identity",
+  "@configurationSettingsTabIdentity": {
+      "description": "Editable settings tab"
+  },
+  "configurationSettingsTabStructure": "Cycles, levels and classes",
+  "@configurationSettingsTabStructure": {
+      "description": "Read-only settings tab"
+  },
+  "configurationSettingsTabFees": "School fees",
+  "@configurationSettingsTabFees": {
+      "description": "Tariff tab, editable row by row"
+  },
+  "configurationSettingsReadOnly": "read-only",
+  "@configurationSettingsReadOnly": {
+      "description": "Marker of a non-editable tab"
+  },
+  "configurationSettingsStructureReadOnlyNote": "The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.",
+  "@configurationSettingsStructureReadOnlyNote": {
+      "description": "Why the structure tab is read-only"
+  },
+  "configurationSettingsSaved": "Changes saved",
+  "@configurationSettingsSaved": {
+      "description": "Toast after saving in the settings"
+  },
+  "configurationSettingsSave": "Save",
+  "@configurationSettingsSave": {
+      "description": "Settings save button"
+  },
+  "configurationSettingsNoYear": "No open year",
+  "@configurationSettingsNoYear": {
+      "description": "Settings empty state when the academic context returns no year"
+  },
+  "configurationSettingsTariffsForLevel": "Tariffs for {level}",
+  "@configurationSettingsTariffsForLevel": {
+      "description": "Header of a level's tariff list",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsTariffOne": "Here a tariff carries a single level: each row is edited on its own.",
+  "@configurationSettingsTariffOne": {
+      "description": "Note explaining the wizard's scope no longer exists in settings"
+  },
+  "configurationTariffAdd": "Add a tariff",
+  "@configurationTariffAdd": {
+      "description": "Button adding a tariff on a level"
+  },
+  "configurationTariffEdit": "Edit tariff",
+  "@configurationTariffEdit": {
+      "description": "Tariff edit dialog title"
+  },
+  "configurationTariffNew": "New tariff",
+  "@configurationTariffNew": {
+      "description": "Tariff creation dialog title"
+  },
+  "configurationTariffDelete": "Delete tariff",
+  "@configurationTariffDelete": {
+      "description": "Tariff deletion action"
+  },
+  "configurationTariffDeleteConfirm": "Delete \"{label}\"? Charges already generated are not affected.",
+  "@configurationTariffDeleteConfirm": {
+      "description": "Tariff deletion confirmation — a server write, unlike the wizard's draft",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationTariffSaved": "Tariff saved",
+  "@configurationTariffSaved": {
+      "description": "Toast after writing a tariff"
+  },
+  "configurationTariffDeleted": "Tariff deleted",
+  "@configurationTariffDeleted": {
+      "description": "Toast after deleting a tariff"
+  },
+  "configurationTariffNone": "No tariff on this level",
+  "@configurationTariffNone": {
+      "description": "Shown when a level carries no tariff"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",
