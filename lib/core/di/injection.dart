@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
@@ -340,23 +341,45 @@ Future<void> configureDependencies({
                 type: e.type,
               ),
             );
-          } else if (e.response?.statusCode == 400 ||
-              e.response?.statusCode == 422) {
+          } else if (e.response?.statusCode == 429) {
+            // Ni réseau ni panne : il faut ATTENDRE. Sans ce cas, un 429
+            // tombait dans `handler.next` et ressortait en échec réseau
+            // générique — donc en « Réessayer », c'est-à-dire l'invitation à
+            // reproduire exactement ce que le serveur vient de refuser.
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
                 response: e.response,
-                error: const ValidationFailure('Invalid request data'),
+                error: ApiErrorParser.tooManyRequestsFailure(e.response),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 400 ||
+              e.response?.statusCode == 422) {
+            // Reste une `ValidationFailure` par héritage : les appelants qui
+            // filtrent sur ce type continuent de la voir. Ce qu'elle porte en
+            // plus, c'est le `code` typé du serveur — sans lui, « cette année
+            // académique existe déjà » (BUSINESS_RULE, qui demande de purger un
+            // brouillon) et un champ mal rempli (VALIDATION, qui se corrige sur
+            // place) arrivaient à l'écran sous le même « Invalid request data ».
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: ApiErrorParser.validationFailure(e.response),
                 type: e.type,
               ),
             );
           } else if (e.response?.statusCode != null &&
               e.response!.statusCode! >= 500) {
+            // `incidentId` est la référence que l'utilisateur cite au support ;
+            // le serveur l'écrit dans son journal au même instant. En fabriquer
+            // une côté client donnerait un code que rien ne permet de retrouver.
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
                 response: e.response,
-                error: const ServerFailure('Server error'),
+                error: ApiErrorParser.serverFailure(e.response),
                 type: e.type,
               ),
             );

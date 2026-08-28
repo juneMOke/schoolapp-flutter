@@ -123,3 +123,162 @@ class DuplicateParentPhoneFailure extends Failure {
   @override
   List<Object?> get props => [message, phoneNumber, existingParentId];
 }
+
+/// Cause typée servie par le serveur dans l'enveloppe `ApiErrorResponse`.
+///
+/// **Le statut seul ne suffit pas à décider.** Deux 400 peuvent appeler des
+/// conduites opposées : un champ mal rempli se corrige sur place, tandis qu'une
+/// règle métier refusée — « cette année académique existe déjà » — demande de
+/// purger le brouillon et de revenir en arrière. Sans ce code, les deux
+/// arrivaient à l'écran sous le même « Invalid request data ».
+///
+/// Se brancher sur la valeur, **jamais sur le message** : celui-ci est rédigé
+/// pour être lu par un humain et changera sans préavis.
+///
+/// Miroir de `ApiErrorCode` côté serveur. [unknown] est le repli obligatoire :
+/// le catalogue serveur peut grandir sans release client, et une valeur inédite
+/// doit dégrader vers le comportement générique du statut HTTP, pas faire
+/// échouer le parsing.
+enum ApiErrorCode {
+  businessRule('BUSINESS_RULE'),
+  validation('VALIDATION'),
+  unauthenticated('UNAUTHENTICATED'),
+  forbidden('FORBIDDEN'),
+  notFound('NOT_FOUND'),
+  duplicate('DUPLICATE'),
+  concurrentModification('CONCURRENT_MODIFICATION'),
+  unprocessable('UNPROCESSABLE'),
+  tooManyRequests('TOO_MANY_REQUESTS'),
+  internalError('INTERNAL_ERROR'),
+
+  /// Code servi que ce client ne connaît pas encore.
+  unknown('');
+
+  const ApiErrorCode(this.wire);
+
+  final String wire;
+
+  /// Résout un code servi, ou [unknown] — jamais une exception.
+  static ApiErrorCode fromWire(Object? wire) {
+    if (wire is! String || wire.isEmpty) return unknown;
+    for (final code in values) {
+      if (code != unknown && code.wire == wire) return code;
+    }
+    return unknown;
+  }
+}
+
+/// Ce qu'une réponse d'erreur du serveur porte au-delà de son statut.
+///
+/// Mixin plutôt que classe : les failles typées doivent rester **assignables à
+/// leur famille historique** ([ValidationFailure], [ServerFailure]…), sur
+/// laquelle une vingtaine de repositories filtrent déjà. Un appelant qui ignore
+/// le code continue de fonctionner ; celui qui en a besoin teste le sous-type.
+mixin ApiErrorDetails on Failure {
+  ApiErrorCode get code;
+
+  /// Message rédigé par le serveur, à afficher tel quel quand il est plus précis
+  /// que le libellé générique de l'écran — un 422 nomme le niveau fautif.
+  /// Jamais à tester : il change sans préavis.
+  String? get serverMessage;
+
+  /// Référence d'incident, posée **uniquement** sur les pannes serveur et
+  /// écrite au même instant dans le journal du serveur. C'est le « code
+  /// incident » que l'utilisateur cite au support ; en fabriquer un côté client
+  /// donnerait une référence que rien ne permettrait de retrouver.
+  String? get incidentId;
+}
+
+/// 400 ou 422 portant le code typé du serveur.
+///
+/// Reste une [ValidationFailure] : tout ce qui filtrait dessus continue de la
+/// voir. Ce qu'elle ajoute, c'est de quoi distinguer les deux 400 qui ne
+/// se traitent pas pareil (cf. [ApiErrorCode]).
+class ApiValidationFailure extends ValidationFailure with ApiErrorDetails {
+  @override
+  final ApiErrorCode code;
+
+  @override
+  final String? serverMessage;
+
+  @override
+  String? get incidentId => null;
+
+  const ApiValidationFailure({
+    required this.code,
+    this.serverMessage,
+    String message = 'Invalid request data',
+  }) : super(message);
+
+  @override
+  List<Object?> get props => [message, code, serverMessage];
+}
+
+/// 5xx portant le code typé et, quand le serveur en pose une, la référence
+/// d'incident à afficher et à copier.
+class ApiServerFailure extends ServerFailure with ApiErrorDetails {
+  @override
+  final ApiErrorCode code;
+
+  @override
+  final String? serverMessage;
+
+  @override
+  final String? incidentId;
+
+  const ApiServerFailure({
+    this.code = ApiErrorCode.internalError,
+    this.serverMessage,
+    this.incidentId,
+    String message = 'Server error',
+  }) : super(message);
+
+  @override
+  List<Object?> get props => [message, code, serverMessage, incidentId];
+}
+
+/// HTTP 429 — cadence dépassée.
+///
+/// Distincte de [NetworkFailure] et de [ServerFailure] parce que le geste
+/// qu'elle appelle l'est : ni l'une ni l'autre, il faut **attendre**. Proposer
+/// « Réessayer » ici invite à reproduire exactement ce qui vient d'être refusé.
+class TooManyRequestsFailure extends Failure with ApiErrorDetails {
+  @override
+  ApiErrorCode get code => ApiErrorCode.tooManyRequests;
+
+  @override
+  final String? serverMessage;
+
+  @override
+  String? get incidentId => null;
+
+  /// Délai annoncé par l'en-tête `Retry-After`, quand le serveur en pose un.
+  final Duration? retryAfter;
+
+  const TooManyRequestsFailure({
+    this.retryAfter,
+    this.serverMessage,
+    String message = 'Too many requests',
+  }) : super(message);
+
+  @override
+  List<Object?> get props => [message, retryAfter, serverMessage];
+}
+
+/// L'école de la session n'a **pas encore été paramétrée** : le référentiel a
+/// bien été pullé, le serveur a répondu, et il n'y a toujours aucune année
+/// académique courante.
+///
+/// Ce n'est ni une panne ni une absence de réseau — c'est un état légitime du
+/// produit, celui d'un établissement fraîchement souscrit. Sans ce type, il
+/// remontait en [ServerFailure] et le splash affichait une erreur réseau avec un
+/// bouton « Réessayer » qui ne pouvait par construction jamais aboutir : rien
+/// dans le geste de réessayer ne crée une année scolaire.
+///
+/// L'issue n'est pas de réessayer, c'est d'ouvrir l'assistant de configuration —
+/// et seulement pour qui détient `school.provisioning.write`.
+class SchoolNotProvisionedFailure extends Failure {
+  const SchoolNotProvisionedFailure([
+    super.message = 'School has not been provisioned yet',
+  ]);
+}
