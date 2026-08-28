@@ -432,6 +432,150 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationStructureRestore => 'Rétablir la proposition';
 
   @override
+  String get configurationFeesTitle => 'Frais scolaires';
+
+  @override
+  String get configurationFeeNew => 'Nouveau frais';
+
+  @override
+  String get configurationFeeFormTitle => 'Nouveau frais';
+
+  @override
+  String get configurationFeeFormEditTitle => 'Modifier le frais';
+
+  @override
+  String get configurationFeeType => 'Type de frais';
+
+  @override
+  String configurationFeeTypeOthers(int count) {
+    return 'Autres types ($count)';
+  }
+
+  @override
+  String get configurationFeeLabel => 'Libellé affiché aux parents';
+
+  @override
+  String get configurationFeeAmount => 'Montant';
+
+  @override
+  String get configurationFeeCurrency => 'Devise';
+
+  @override
+  String get configurationFeeDueAt => 'Échéance';
+
+  @override
+  String get configurationFeeScope => 'Assiette';
+
+  @override
+  String get configurationFeeScopeAll => 'Tous les niveaux ouverts';
+
+  @override
+  String get configurationFeeScopeSome => 'Certains niveaux';
+
+  @override
+  String configurationFeeScopeAllHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux ouverts',
+      one: '$count niveau ouvert',
+    );
+    return 'S\'appliquera aux $_temp0';
+  }
+
+  @override
+  String configurationFeeScopeCount(int selected, int total) {
+    return '$selected / $total sélectionnés';
+  }
+
+  @override
+  String get configurationFeeScopeWholeCycle => 'Tout le cycle';
+
+  @override
+  String get configurationFeeAdd => 'Ajouter le frais';
+
+  @override
+  String get configurationFeeUpdate => 'Mettre à jour';
+
+  @override
+  String get configurationFeeCancel => 'Annuler';
+
+  @override
+  String configurationFeeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frais définis',
+      one: '$count frais défini',
+      zero: 'Aucun frais défini',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeCatalogTotal(String total) {
+    return 'Total catalogue : $total';
+  }
+
+  @override
+  String get configurationFeePerStudent => 'par élève';
+
+  @override
+  String configurationFeeLevelsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux',
+      one: '$count niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeDueLabel(String date) {
+    return 'échéance $date';
+  }
+
+  @override
+  String configurationFeeDeleted(String label) {
+    return 'Frais « $label » supprimé';
+  }
+
+  @override
+  String configurationFeeSaved(String label) {
+    return 'Frais « $label » enregistré';
+  }
+
+  @override
+  String get configurationFeesEmptyTitle => 'Aucun frais pour l\'instant';
+
+  @override
+  String get configurationFeesEmptyMessage =>
+      'Ajoutez au moins un frais — inscription, minerval, cantine — pour que la facturation puisse générer les notes de perception.';
+
+  @override
+  String get configurationFeesEmptyAction => 'Créer le premier frais';
+
+  @override
+  String get configurationFeesEmptyHint =>
+      'Ajoutez au moins un frais pour continuer';
+
+  @override
+  String get configurationFeesDraftHint =>
+      'Terminez le frais en cours d\'édition';
+
+  @override
+  String configurationFeesValidHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frais seront rattachés aux niveaux ouverts',
+      one: '$count frais sera rattaché aux niveaux ouverts',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

@@ -764,6 +764,198 @@ abstract class AppLocalizations {
   /// **'Restore the proposal'**
   String get configurationStructureRestore;
 
+  /// Step 4 title
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationFeesTitle;
+
+  /// Button opening the fee form
+  ///
+  /// In en, this message translates to:
+  /// **'New fee'**
+  String get configurationFeeNew;
+
+  /// Fee creation form title
+  ///
+  /// In en, this message translates to:
+  /// **'New fee'**
+  String get configurationFeeFormTitle;
+
+  /// Fee form title when editing
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fee'**
+  String get configurationFeeFormEditTitle;
+
+  /// Fee type field, served by the catalogue
+  ///
+  /// In en, this message translates to:
+  /// **'Fee type'**
+  String get configurationFeeType;
+
+  /// Disclosure for fee types outside the common ones
+  ///
+  /// In en, this message translates to:
+  /// **'Other types ({count})'**
+  String configurationFeeTypeOthers(int count);
+
+  /// Label field — the one printed on the collection note
+  ///
+  /// In en, this message translates to:
+  /// **'Label shown to parents'**
+  String get configurationFeeLabel;
+
+  /// Amount field, entered in units
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get configurationFeeAmount;
+
+  /// Currency selector next to the amount
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get configurationFeeCurrency;
+
+  /// Fee due date field
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get configurationFeeDueAt;
+
+  /// Scope field — the levels the fee is charged on
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get configurationFeeScope;
+
+  /// Scope mode: every level receiving at least one class
+  ///
+  /// In en, this message translates to:
+  /// **'All opened levels'**
+  String get configurationFeeScopeAll;
+
+  /// Scope mode: a chosen set of levels
+  ///
+  /// In en, this message translates to:
+  /// **'Selected levels'**
+  String get configurationFeeScopeSome;
+
+  /// Dynamic subtitle of the all-levels mode
+  ///
+  /// In en, this message translates to:
+  /// **'Will apply to {count, plural, one{{count} open level} other{{count} open levels}}'**
+  String configurationFeeScopeAllHint(int count);
+
+  /// Counter of levels held in the scope
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} / {total} selected'**
+  String configurationFeeScopeCount(int selected, int total);
+
+  /// Shortcut ticking every open level of a cycle
+  ///
+  /// In en, this message translates to:
+  /// **'Whole cycle'**
+  String get configurationFeeScopeWholeCycle;
+
+  /// Fee form submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Add the fee'**
+  String get configurationFeeAdd;
+
+  /// Fee form submit button when editing
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get configurationFeeUpdate;
+
+  /// Fee form dismiss button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get configurationFeeCancel;
+
+  /// Summary of how many fees were entered
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No fee defined} one{{count} fee defined} other{{count} fees defined}}'**
+  String configurationFeeCount(int count);
+
+  /// Total of entered fees, per currency — never summed across currencies
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue total: {total}'**
+  String configurationFeeCatalogTotal(String total);
+
+  /// Caption under a fee row amount
+  ///
+  /// In en, this message translates to:
+  /// **'per student'**
+  String get configurationFeePerStudent;
+
+  /// Scope summary of a fee row
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} level} other{{count} levels}}'**
+  String configurationFeeLevelsLabel(int count);
+
+  /// Due date summary of a fee row
+  ///
+  /// In en, this message translates to:
+  /// **'due {date}'**
+  String configurationFeeDueLabel(String date);
+
+  /// Toast after deleting a fee
+  ///
+  /// In en, this message translates to:
+  /// **'Fee \"{label}\" deleted'**
+  String configurationFeeDeleted(String label);
+
+  /// Toast after adding or updating a fee
+  ///
+  /// In en, this message translates to:
+  /// **'Fee \"{label}\" saved'**
+  String configurationFeeSaved(String label);
+
+  /// Step 4 empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No fees yet'**
+  String get configurationFeesEmptyTitle;
+
+  /// Step 4 empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.'**
+  String get configurationFeesEmptyMessage;
+
+  /// Step 4 empty state action
+  ///
+  /// In en, this message translates to:
+  /// **'Create the first fee'**
+  String get configurationFeesEmptyAction;
+
+  /// Footer message when no fee has been entered
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one fee to continue'**
+  String get configurationFeesEmptyHint;
+
+  /// Footer message while a sub-form is open
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the fee you are editing'**
+  String get configurationFeesDraftHint;
+
+  /// Footer message when step 4 is valid
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}'**
+  String configurationFeesValidHint(int count);
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

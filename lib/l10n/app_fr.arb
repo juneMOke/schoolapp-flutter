@@ -415,6 +415,187 @@
   "@configurationStructureRestore": {
       "description": "Action de l'état vide : reconstruit la proposition depuis le catalogue"
   },
+  "configurationFeesTitle": "Frais scolaires",
+  "@configurationFeesTitle": {
+      "description": "Titre de l'étape 4"
+  },
+  "configurationFeeNew": "Nouveau frais",
+  "@configurationFeeNew": {
+      "description": "Bouton d'ouverture du formulaire de frais"
+  },
+  "configurationFeeFormTitle": "Nouveau frais",
+  "@configurationFeeFormTitle": {
+      "description": "Titre du formulaire de création d'un frais"
+  },
+  "configurationFeeFormEditTitle": "Modifier le frais",
+  "@configurationFeeFormEditTitle": {
+      "description": "Titre du formulaire en édition"
+  },
+  "configurationFeeType": "Type de frais",
+  "@configurationFeeType": {
+      "description": "Champ du type, servi par le catalogue"
+  },
+  "configurationFeeTypeOthers": "Autres types ({count})",
+  "@configurationFeeTypeOthers": {
+      "description": "Dépliant des types de frais hors des usuels",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeLabel": "Libellé affiché aux parents",
+  "@configurationFeeLabel": {
+      "description": "Champ du libellé — celui qui figure sur la note de perception"
+  },
+  "configurationFeeAmount": "Montant",
+  "@configurationFeeAmount": {
+      "description": "Champ du montant, saisi en unité"
+  },
+  "configurationFeeCurrency": "Devise",
+  "@configurationFeeCurrency": {
+      "description": "Sélecteur de devise accolé au montant"
+  },
+  "configurationFeeDueAt": "Échéance",
+  "@configurationFeeDueAt": {
+      "description": "Champ de l'échéance du frais"
+  },
+  "configurationFeeScope": "Assiette",
+  "@configurationFeeScope": {
+      "description": "Champ de l'assiette — la liste des niveaux sur lesquels le frais porte"
+  },
+  "configurationFeeScopeAll": "Tous les niveaux ouverts",
+  "@configurationFeeScopeAll": {
+      "description": "Mode d'assiette : tous les niveaux qui reçoivent au moins une classe"
+  },
+  "configurationFeeScopeSome": "Certains niveaux",
+  "@configurationFeeScopeSome": {
+      "description": "Mode d'assiette : une sélection de niveaux"
+  },
+  "configurationFeeScopeAllHint": "S'appliquera aux {count, plural, one{{count} niveau ouvert} other{{count} niveaux ouverts}}",
+  "@configurationFeeScopeAllHint": {
+      "description": "Sous-titre dynamique du mode « tous les niveaux »",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeCount": "{selected} / {total} sélectionnés",
+  "@configurationFeeScopeCount": {
+      "description": "Compteur de niveaux retenus dans l'assiette",
+      "placeholders": {
+          "selected": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeWholeCycle": "Tout le cycle",
+  "@configurationFeeScopeWholeCycle": {
+      "description": "Raccourci qui coche tous les niveaux ouverts d'un cycle"
+  },
+  "configurationFeeAdd": "Ajouter le frais",
+  "@configurationFeeAdd": {
+      "description": "Bouton de validation du formulaire de frais"
+  },
+  "configurationFeeUpdate": "Mettre à jour",
+  "@configurationFeeUpdate": {
+      "description": "Bouton de validation du formulaire en édition"
+  },
+  "configurationFeeCancel": "Annuler",
+  "@configurationFeeCancel": {
+      "description": "Bouton d'abandon du formulaire de frais"
+  },
+  "configurationFeeCount": "{count, plural, =0{Aucun frais défini} one{{count} frais défini} other{{count} frais définis}}",
+  "@configurationFeeCount": {
+      "description": "Synthèse du nombre de frais saisis",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeCatalogTotal": "Total catalogue : {total}",
+  "@configurationFeeCatalogTotal": {
+      "description": "Total des frais saisis, par devise — jamais additionné entre devises",
+      "placeholders": {
+          "total": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeePerStudent": "par élève",
+  "@configurationFeePerStudent": {
+      "description": "Mention sous le montant d'une ligne de frais"
+  },
+  "configurationFeeLevelsLabel": "{count, plural, one{{count} niveau} other{{count} niveaux}}",
+  "@configurationFeeLevelsLabel": {
+      "description": "Résumé de l'assiette d'une ligne de frais",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeDueLabel": "échéance {date}",
+  "@configurationFeeDueLabel": {
+      "description": "Résumé de l'échéance d'une ligne de frais",
+      "placeholders": {
+          "date": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeDeleted": "Frais « {label} » supprimé",
+  "@configurationFeeDeleted": {
+      "description": "Toast de suppression d'un frais",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeSaved": "Frais « {label} » enregistré",
+  "@configurationFeeSaved": {
+      "description": "Toast d'ajout ou de mise à jour d'un frais",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeesEmptyTitle": "Aucun frais pour l'instant",
+  "@configurationFeesEmptyTitle": {
+      "description": "Titre de l'état vide de l'étape 4"
+  },
+  "configurationFeesEmptyMessage": "Ajoutez au moins un frais — inscription, minerval, cantine — pour que la facturation puisse générer les notes de perception.",
+  "@configurationFeesEmptyMessage": {
+      "description": "Message de l'état vide de l'étape 4"
+  },
+  "configurationFeesEmptyAction": "Créer le premier frais",
+  "@configurationFeesEmptyAction": {
+      "description": "Action de l'état vide de l'étape 4"
+  },
+  "configurationFeesEmptyHint": "Ajoutez au moins un frais pour continuer",
+  "@configurationFeesEmptyHint": {
+      "description": "Message de la barre de pied quand aucun frais n'est saisi"
+  },
+  "configurationFeesDraftHint": "Terminez le frais en cours d'édition",
+  "@configurationFeesDraftHint": {
+      "description": "Message de la barre de pied quand un sous-formulaire est ouvert"
+  },
+  "configurationFeesValidHint": "{count, plural, one{{count} frais sera rattaché aux niveaux ouverts} other{{count} frais seront rattachés aux niveaux ouverts}}",
+  "@configurationFeesValidHint": {
+      "description": "Message de la barre de pied quand l'étape 4 est valide",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",

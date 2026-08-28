@@ -431,6 +431,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationStructureRestore => 'Restore the proposal';
 
   @override
+  String get configurationFeesTitle => 'School fees';
+
+  @override
+  String get configurationFeeNew => 'New fee';
+
+  @override
+  String get configurationFeeFormTitle => 'New fee';
+
+  @override
+  String get configurationFeeFormEditTitle => 'Edit fee';
+
+  @override
+  String get configurationFeeType => 'Fee type';
+
+  @override
+  String configurationFeeTypeOthers(int count) {
+    return 'Other types ($count)';
+  }
+
+  @override
+  String get configurationFeeLabel => 'Label shown to parents';
+
+  @override
+  String get configurationFeeAmount => 'Amount';
+
+  @override
+  String get configurationFeeCurrency => 'Currency';
+
+  @override
+  String get configurationFeeDueAt => 'Due date';
+
+  @override
+  String get configurationFeeScope => 'Applies to';
+
+  @override
+  String get configurationFeeScopeAll => 'All opened levels';
+
+  @override
+  String get configurationFeeScopeSome => 'Selected levels';
+
+  @override
+  String configurationFeeScopeAllHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open levels',
+      one: '$count open level',
+    );
+    return 'Will apply to $_temp0';
+  }
+
+  @override
+  String configurationFeeScopeCount(int selected, int total) {
+    return '$selected / $total selected';
+  }
+
+  @override
+  String get configurationFeeScopeWholeCycle => 'Whole cycle';
+
+  @override
+  String get configurationFeeAdd => 'Add the fee';
+
+  @override
+  String get configurationFeeUpdate => 'Update';
+
+  @override
+  String get configurationFeeCancel => 'Cancel';
+
+  @override
+  String configurationFeeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees defined',
+      one: '$count fee defined',
+      zero: 'No fee defined',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeCatalogTotal(String total) {
+    return 'Catalogue total: $total';
+  }
+
+  @override
+  String get configurationFeePerStudent => 'per student';
+
+  @override
+  String configurationFeeLevelsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count levels',
+      one: '$count level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeDueLabel(String date) {
+    return 'due $date';
+  }
+
+  @override
+  String configurationFeeDeleted(String label) {
+    return 'Fee \"$label\" deleted';
+  }
+
+  @override
+  String configurationFeeSaved(String label) {
+    return 'Fee \"$label\" saved';
+  }
+
+  @override
+  String get configurationFeesEmptyTitle => 'No fees yet';
+
+  @override
+  String get configurationFeesEmptyMessage =>
+      'Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.';
+
+  @override
+  String get configurationFeesEmptyAction => 'Create the first fee';
+
+  @override
+  String get configurationFeesEmptyHint => 'Add at least one fee to continue';
+
+  @override
+  String get configurationFeesDraftHint => 'Finish the fee you are editing';
+
+  @override
+  String configurationFeesValidHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees will be attached to the open levels',
+      one: '$count fee will be attached to the open levels',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

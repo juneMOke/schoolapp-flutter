@@ -415,6 +415,187 @@
   "@configurationStructureRestore": {
       "description": "Empty state action: rebuilds the proposal from the catalogue"
   },
+  "configurationFeesTitle": "School fees",
+  "@configurationFeesTitle": {
+      "description": "Step 4 title"
+  },
+  "configurationFeeNew": "New fee",
+  "@configurationFeeNew": {
+      "description": "Button opening the fee form"
+  },
+  "configurationFeeFormTitle": "New fee",
+  "@configurationFeeFormTitle": {
+      "description": "Fee creation form title"
+  },
+  "configurationFeeFormEditTitle": "Edit fee",
+  "@configurationFeeFormEditTitle": {
+      "description": "Fee form title when editing"
+  },
+  "configurationFeeType": "Fee type",
+  "@configurationFeeType": {
+      "description": "Fee type field, served by the catalogue"
+  },
+  "configurationFeeTypeOthers": "Other types ({count})",
+  "@configurationFeeTypeOthers": {
+      "description": "Disclosure for fee types outside the common ones",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeLabel": "Label shown to parents",
+  "@configurationFeeLabel": {
+      "description": "Label field — the one printed on the collection note"
+  },
+  "configurationFeeAmount": "Amount",
+  "@configurationFeeAmount": {
+      "description": "Amount field, entered in units"
+  },
+  "configurationFeeCurrency": "Currency",
+  "@configurationFeeCurrency": {
+      "description": "Currency selector next to the amount"
+  },
+  "configurationFeeDueAt": "Due date",
+  "@configurationFeeDueAt": {
+      "description": "Fee due date field"
+  },
+  "configurationFeeScope": "Applies to",
+  "@configurationFeeScope": {
+      "description": "Scope field — the levels the fee is charged on"
+  },
+  "configurationFeeScopeAll": "All opened levels",
+  "@configurationFeeScopeAll": {
+      "description": "Scope mode: every level receiving at least one class"
+  },
+  "configurationFeeScopeSome": "Selected levels",
+  "@configurationFeeScopeSome": {
+      "description": "Scope mode: a chosen set of levels"
+  },
+  "configurationFeeScopeAllHint": "Will apply to {count, plural, one{{count} open level} other{{count} open levels}}",
+  "@configurationFeeScopeAllHint": {
+      "description": "Dynamic subtitle of the all-levels mode",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeCount": "{selected} / {total} selected",
+  "@configurationFeeScopeCount": {
+      "description": "Counter of levels held in the scope",
+      "placeholders": {
+          "selected": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeWholeCycle": "Whole cycle",
+  "@configurationFeeScopeWholeCycle": {
+      "description": "Shortcut ticking every open level of a cycle"
+  },
+  "configurationFeeAdd": "Add the fee",
+  "@configurationFeeAdd": {
+      "description": "Fee form submit button"
+  },
+  "configurationFeeUpdate": "Update",
+  "@configurationFeeUpdate": {
+      "description": "Fee form submit button when editing"
+  },
+  "configurationFeeCancel": "Cancel",
+  "@configurationFeeCancel": {
+      "description": "Fee form dismiss button"
+  },
+  "configurationFeeCount": "{count, plural, =0{No fee defined} one{{count} fee defined} other{{count} fees defined}}",
+  "@configurationFeeCount": {
+      "description": "Summary of how many fees were entered",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeCatalogTotal": "Catalogue total: {total}",
+  "@configurationFeeCatalogTotal": {
+      "description": "Total of entered fees, per currency — never summed across currencies",
+      "placeholders": {
+          "total": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeePerStudent": "per student",
+  "@configurationFeePerStudent": {
+      "description": "Caption under a fee row amount"
+  },
+  "configurationFeeLevelsLabel": "{count, plural, one{{count} level} other{{count} levels}}",
+  "@configurationFeeLevelsLabel": {
+      "description": "Scope summary of a fee row",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeDueLabel": "due {date}",
+  "@configurationFeeDueLabel": {
+      "description": "Due date summary of a fee row",
+      "placeholders": {
+          "date": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeDeleted": "Fee \"{label}\" deleted",
+  "@configurationFeeDeleted": {
+      "description": "Toast after deleting a fee",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeSaved": "Fee \"{label}\" saved",
+  "@configurationFeeSaved": {
+      "description": "Toast after adding or updating a fee",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeesEmptyTitle": "No fees yet",
+  "@configurationFeesEmptyTitle": {
+      "description": "Step 4 empty state title"
+  },
+  "configurationFeesEmptyMessage": "Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.",
+  "@configurationFeesEmptyMessage": {
+      "description": "Step 4 empty state message"
+  },
+  "configurationFeesEmptyAction": "Create the first fee",
+  "@configurationFeesEmptyAction": {
+      "description": "Step 4 empty state action"
+  },
+  "configurationFeesEmptyHint": "Add at least one fee to continue",
+  "@configurationFeesEmptyHint": {
+      "description": "Footer message when no fee has been entered"
+  },
+  "configurationFeesDraftHint": "Finish the fee you are editing",
+  "@configurationFeesDraftHint": {
+      "description": "Footer message while a sub-form is open"
+  },
+  "configurationFeesValidHint": "{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}",
+  "@configurationFeesValidHint": {
+      "description": "Footer message when step 4 is valid",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

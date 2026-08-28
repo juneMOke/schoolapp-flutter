@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/academic_year_step.dart';
+import 'package:school_app_flutter/features/configuration/presentation/steps/fees_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/school_identity_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/structure_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_app_bar.dart';
@@ -145,7 +146,8 @@ class _StepBody extends StatelessWidget {
               ConfigurationStep.school => const SchoolIdentityStep(),
               ConfigurationStep.academicYear => const AcademicYearStep(),
               ConfigurationStep.structure => const StructureStep(),
-              // Les deux autres étapes arrivent avec les lots suivants.
+              ConfigurationStep.fees => const FeesStep(),
+              // L'étape d'activation arrive avec le lot suivant.
               _ => const SizedBox.shrink(),
             },
           ),
@@ -172,6 +174,7 @@ class _StepFooter extends StatelessWidget {
         ConfigurationStep.school => const _SchoolStepFooter(),
         ConfigurationStep.academicYear => const _DraftStepFooter(),
         ConfigurationStep.structure => const _DraftStepFooter(),
+        ConfigurationStep.fees => const _DraftStepFooter(),
         _ => const SizedBox.shrink(),
       },
     );
@@ -270,6 +273,10 @@ class _DraftStepFooter extends StatelessWidget {
       // serveur qui dit combien de classes seront créées, et c'est ce
       // chiffre-là qui engage.
       ConfigurationStep.structure => state.counts.classrooms > 0,
+      // Au moins un frais saisi. Le sous-formulaire ouvert bloque de son côté,
+      // depuis l'étape elle-même : le bloc ne le connaît pas, et n'a pas à le
+      // connaître — c'est un état d'écran, pas de brouillon.
+      ConfigurationStep.fees => state.draft.fees.isNotEmpty,
       _ => false,
     };
   }
