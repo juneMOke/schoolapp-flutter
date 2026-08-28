@@ -715,6 +715,32 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
+
+  if (upTo(30)) {
+    // v30 — Configuration : `provisioning_drafts`, le brouillon de mise en
+    // service de l'école.
+    //
+    // Création pure, aucune donnée touchée : le module n'existait pas avant, et
+    // rien dans la base ne s'y rattache. Un appareil qui monte de v29 n'a
+    // simplement pas de brouillon, ce qui est l'état nominal d'une école déjà
+    // paramétrée.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'provisioning_drafts')) {
+      await db.execute('''
+        CREATE TABLE provisioning_drafts (
+          school_id TEXT NOT NULL,
+          user_id TEXT NOT NULL,
+          payload TEXT NOT NULL,
+          step INTEGER NOT NULL DEFAULT 0,
+          max_step INTEGER NOT NULL DEFAULT 0,
+          updated_at INTEGER NOT NULL,
+          PRIMARY KEY (school_id, user_id)
+        )
+      ''');
+    }
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.

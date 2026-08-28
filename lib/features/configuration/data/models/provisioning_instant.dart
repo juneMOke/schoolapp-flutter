@@ -29,14 +29,23 @@ class ProvisioningInstant {
     return '${_datePart(utc)}T${_timePart(utc)}';
   }
 
-  /// Lit un instant servi, quelle que soit sa forme.
+  /// Lit un instant servi, quelle que soit sa forme, **sans le ramener à
+  /// l'heure locale de l'appareil**.
   ///
   /// Tolérant par nécessité : les deux routes ci-dessus rendent l'une avec `Z`,
   /// l'autre sans, et la lecture ne doit pas avoir à savoir laquelle a répondu.
   /// Une valeur illisible rend `null` plutôt que de faire échouer tout un plan.
+  ///
+  /// **Pas de `toLocal()`, et c'est important.** Ces valeurs sont des dates de
+  /// calendrier déguisées en instants : une rentrée « au 1er septembre », une
+  /// échéance « au 30 juin ». Le contrat impose de les transporter en UTC, mais
+  /// les reconvertir à la lecture décale le JOUR — une échéance servie
+  /// `2027-06-30T23:59:59Z` s'afficherait au 1er juillet sur un appareil réglé
+  /// à l'est de Greenwich, et au 29 juin à l'ouest. Le jour qu'on relit doit
+  /// être celui qui a été saisi.
   static DateTime? parse(Object? raw) {
     if (raw is! String || raw.trim().isEmpty) return null;
-    return DateTime.tryParse(raw.trim())?.toLocal();
+    return DateTime.tryParse(raw.trim());
   }
 
   /// Fin de journée d'une date de calendrier, en instant UTC.

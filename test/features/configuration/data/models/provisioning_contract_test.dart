@@ -45,6 +45,21 @@ void main() {
       expect(ProvisioningInstant.parse(null), isNull);
       expect(ProvisioningInstant.parse(42), isNull);
     });
+
+    test('la lecture ne décale jamais le JOUR', () {
+      // Ces valeurs sont des dates de calendrier déguisées en instants : une
+      // rentrée « au 1er septembre », une échéance « au 30 juin ». Les ramener
+      // à l'heure de l'appareil ferait afficher le 1er juillet à l'est de
+      // Greenwich, et le 29 juin à l'ouest.
+      final echeance = ProvisioningInstant.parse('2027-06-30T23:59:59Z')!;
+      expect(echeance.isUtc, isTrue);
+      expect(echeance.day, 30);
+      expect(echeance.month, 6);
+
+      final rentree = ProvisioningInstant.parse('2026-09-01T00:00:00Z')!;
+      expect(rentree.day, 1);
+      expect(rentree.month, 9);
+    });
   });
 
   group('corps envoyé à /provisioning/apply', () {

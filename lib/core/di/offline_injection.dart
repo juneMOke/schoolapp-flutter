@@ -30,6 +30,9 @@ import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
 import 'package:uuid/uuid.dart';
+import 'package:school_app_flutter/features/configuration/data/local/provisioning_draft_dao.dart';
+import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_draft_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
 ///
@@ -78,6 +81,19 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   );
   getIt.registerLazySingleton<AuthLocalDao>(
     () => AuthLocalDao(getIt<Database>()),
+  );
+
+  // Configuration — brouillon de mise en service. Pas un module offline (aucune
+  // outbox, aucun curseur) : seulement de la reprise de saisie, dans la base
+  // chiffrée parce que c'est là que vit tout ce qui doit survivre au processus.
+  getIt.registerLazySingleton<ProvisioningDraftDao>(
+    () => ProvisioningDraftDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ProvisioningDraftRepository>(
+    () => ProvisioningDraftRepositoryImpl(
+      dao: getIt<ProvisioningDraftDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
 
   // Uid courant (ADR-010 D-05) : alimenté par l'auth, lu au write-time par les

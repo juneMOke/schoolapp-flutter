@@ -426,7 +426,13 @@ class AppConstants {
   // sans backfill : le tuteur de l'élève n'est PAS le payeur (c'est ce que la
   // saisie établit), donc rien de fiable à recopier dans le passé — NULL s'y
   // lit « on ne sait pas », et l'annuaire propose alors par l'identité seule.
-  static const int offlineDbSchemaVersion = 29;
+  // v30 (2026-08-28) : Configuration — `provisioning_drafts`, le brouillon de
+  // mise en service. Création pure, sans backfill : rien dans la base ne s'y
+  // rattachait, et une école déjà paramétrée n'a pas de brouillon — c'est son
+  // état nominal. Scopé `(school_id, user_id)` : la conception « une tablette,
+  // une école » a déjà produit dix flux à curseur nu, et celui-ci aboutit à une
+  // écriture irréversible.
+  static const int offlineDbSchemaVersion = 30;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
