@@ -195,6 +195,63 @@
   "@configurationSaveBarDefaultHint": {
       "description": "Message par défaut de la barre de pied quand l'étape n'en fournit pas"
   },
+  "configurationSchoolSectionTitle": "Identité de l'école",
+  "@configurationSchoolSectionTitle": {
+      "description": "Titre de la carte de l'étape 1"
+  },
+  "configurationSchoolSectionSubtitle": "Ces informations apparaissent sur les attestations, reçus et bulletins.",
+  "@configurationSchoolSectionSubtitle": {
+      "description": "Sous-titre de la carte de l'étape 1 — dit pourquoi ces champs comptent"
+  },
+  "configurationSchoolName": "Dénomination de l'école",
+  "@configurationSchoolName": {
+      "description": "Champ nom de l'établissement"
+  },
+  "configurationSchoolCountry": "Pays",
+  "@configurationSchoolCountry": {
+      "description": "Champ pays, en lecture seule"
+  },
+  "configurationSchoolCity": "Ville",
+  "@configurationSchoolCity": {
+      "description": "Champ ville, en lecture seule"
+  },
+  "configurationSchoolDistrict": "District",
+  "@configurationSchoolDistrict": {
+      "description": "Champ district de Kinshasa"
+  },
+  "configurationSchoolMunicipality": "Commune",
+  "@configurationSchoolMunicipality": {
+      "description": "Champ commune, en cascade sur le district"
+  },
+  "configurationSchoolMunicipalityPlaceholder": "District d'abord",
+  "@configurationSchoolMunicipalityPlaceholder": {
+      "description": "Marque-place de la commune tant qu'aucun district n'est choisi"
+  },
+  "configurationSchoolAddress": "Adresse",
+  "@configurationSchoolAddress": {
+      "description": "Champ adresse de l'établissement"
+  },
+  "configurationSchoolPhone": "Téléphone de l'école",
+  "@configurationSchoolPhone": {
+      "description": "Champ téléphone de l'établissement"
+  },
+  "configurationSchoolEmail": "E-mail de l'école",
+  "@configurationSchoolEmail": {
+      "description": "Champ e-mail de l'établissement"
+  },
+  "configurationSchoolMissingHint": "À compléter : {fields}",
+  "@configurationSchoolMissingHint": {
+      "description": "Message de la barre de pied nommant les champs requis encore vides",
+      "placeholders": {
+          "fields": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSchoolReadOnlyNote": "Pays et ville sont fixés : l'application est déployée à Kinshasa.",
+  "@configurationSchoolReadOnlyNote": {
+      "description": "Note expliquant pourquoi deux champs ne se saisissent pas"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",

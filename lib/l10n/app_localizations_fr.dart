@@ -241,6 +241,49 @@ class AppLocalizationsFr extends AppLocalizations {
       'Complétez les champs obligatoires pour continuer';
 
   @override
+  String get configurationSchoolSectionTitle => 'Identité de l\'école';
+
+  @override
+  String get configurationSchoolSectionSubtitle =>
+      'Ces informations apparaissent sur les attestations, reçus et bulletins.';
+
+  @override
+  String get configurationSchoolName => 'Dénomination de l\'école';
+
+  @override
+  String get configurationSchoolCountry => 'Pays';
+
+  @override
+  String get configurationSchoolCity => 'Ville';
+
+  @override
+  String get configurationSchoolDistrict => 'District';
+
+  @override
+  String get configurationSchoolMunicipality => 'Commune';
+
+  @override
+  String get configurationSchoolMunicipalityPlaceholder => 'District d\'abord';
+
+  @override
+  String get configurationSchoolAddress => 'Adresse';
+
+  @override
+  String get configurationSchoolPhone => 'Téléphone de l\'école';
+
+  @override
+  String get configurationSchoolEmail => 'E-mail de l\'école';
+
+  @override
+  String configurationSchoolMissingHint(String fields) {
+    return 'À compléter : $fields';
+  }
+
+  @override
+  String get configurationSchoolReadOnlyNote =>
+      'Pays et ville sont fixés : l\'application est déployée à Kinshasa.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

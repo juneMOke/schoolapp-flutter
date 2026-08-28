@@ -195,6 +195,63 @@
   "@configurationSaveBarDefaultHint": {
       "description": "Default footer message when the step provides no hint"
   },
+  "configurationSchoolSectionTitle": "School identity",
+  "@configurationSchoolSectionTitle": {
+      "description": "Step 1 card title"
+  },
+  "configurationSchoolSectionSubtitle": "This information appears on certificates, receipts and report cards.",
+  "@configurationSchoolSectionSubtitle": {
+      "description": "Step 1 card subtitle — says why these fields matter"
+  },
+  "configurationSchoolName": "School name",
+  "@configurationSchoolName": {
+      "description": "School name field"
+  },
+  "configurationSchoolCountry": "Country",
+  "@configurationSchoolCountry": {
+      "description": "Country field, read-only"
+  },
+  "configurationSchoolCity": "City",
+  "@configurationSchoolCity": {
+      "description": "City field, read-only"
+  },
+  "configurationSchoolDistrict": "District",
+  "@configurationSchoolDistrict": {
+      "description": "Kinshasa district field"
+  },
+  "configurationSchoolMunicipality": "Municipality",
+  "@configurationSchoolMunicipality": {
+      "description": "Municipality field, cascading from the district"
+  },
+  "configurationSchoolMunicipalityPlaceholder": "Pick a district first",
+  "@configurationSchoolMunicipalityPlaceholder": {
+      "description": "Municipality placeholder while no district is chosen"
+  },
+  "configurationSchoolAddress": "Address",
+  "@configurationSchoolAddress": {
+      "description": "School address field"
+  },
+  "configurationSchoolPhone": "School phone",
+  "@configurationSchoolPhone": {
+      "description": "School phone field"
+  },
+  "configurationSchoolEmail": "School email",
+  "@configurationSchoolEmail": {
+      "description": "School email field"
+  },
+  "configurationSchoolMissingHint": "Still needed: {fields}",
+  "@configurationSchoolMissingHint": {
+      "description": "Footer message naming the required fields still empty",
+      "placeholders": {
+          "fields": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSchoolReadOnlyNote": "Country and city are fixed: the application is deployed in Kinshasa.",
+  "@configurationSchoolReadOnlyNote": {
+      "description": "Note explaining why two fields cannot be edited"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

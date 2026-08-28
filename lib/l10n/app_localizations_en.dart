@@ -239,6 +239,50 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fill in the required fields to continue';
 
   @override
+  String get configurationSchoolSectionTitle => 'School identity';
+
+  @override
+  String get configurationSchoolSectionSubtitle =>
+      'This information appears on certificates, receipts and report cards.';
+
+  @override
+  String get configurationSchoolName => 'School name';
+
+  @override
+  String get configurationSchoolCountry => 'Country';
+
+  @override
+  String get configurationSchoolCity => 'City';
+
+  @override
+  String get configurationSchoolDistrict => 'District';
+
+  @override
+  String get configurationSchoolMunicipality => 'Municipality';
+
+  @override
+  String get configurationSchoolMunicipalityPlaceholder =>
+      'Pick a district first';
+
+  @override
+  String get configurationSchoolAddress => 'Address';
+
+  @override
+  String get configurationSchoolPhone => 'School phone';
+
+  @override
+  String get configurationSchoolEmail => 'School email';
+
+  @override
+  String configurationSchoolMissingHint(String fields) {
+    return 'Still needed: $fields';
+  }
+
+  @override
+  String get configurationSchoolReadOnlyNote =>
+      'Country and city are fixed: the application is deployed in Kinshasa.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

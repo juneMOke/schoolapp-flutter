@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/configuration/data/repositories/prov
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
 import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
+import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
@@ -1053,6 +1054,10 @@ Future<void> configureDependencies({
       repository: getIt<ProvisioningRepository>(),
       draftRepository: getIt<ProvisioningDraftRepository>(),
     ),
+  );
+
+  getIt.registerFactory<SchoolIdentityFormCubit>(
+    () => SchoolIdentityFormCubit(repository: getIt<ProvisioningRepository>()),
   );
 
   // ── Academics (cours de l'enseignant connecté) ──────────────────────────────

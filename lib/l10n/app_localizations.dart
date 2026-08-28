@@ -518,6 +518,84 @@ abstract class AppLocalizations {
   /// **'Fill in the required fields to continue'**
   String get configurationSaveBarDefaultHint;
 
+  /// Step 1 card title
+  ///
+  /// In en, this message translates to:
+  /// **'School identity'**
+  String get configurationSchoolSectionTitle;
+
+  /// Step 1 card subtitle — says why these fields matter
+  ///
+  /// In en, this message translates to:
+  /// **'This information appears on certificates, receipts and report cards.'**
+  String get configurationSchoolSectionSubtitle;
+
+  /// School name field
+  ///
+  /// In en, this message translates to:
+  /// **'School name'**
+  String get configurationSchoolName;
+
+  /// Country field, read-only
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get configurationSchoolCountry;
+
+  /// City field, read-only
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get configurationSchoolCity;
+
+  /// Kinshasa district field
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get configurationSchoolDistrict;
+
+  /// Municipality field, cascading from the district
+  ///
+  /// In en, this message translates to:
+  /// **'Municipality'**
+  String get configurationSchoolMunicipality;
+
+  /// Municipality placeholder while no district is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a district first'**
+  String get configurationSchoolMunicipalityPlaceholder;
+
+  /// School address field
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get configurationSchoolAddress;
+
+  /// School phone field
+  ///
+  /// In en, this message translates to:
+  /// **'School phone'**
+  String get configurationSchoolPhone;
+
+  /// School email field
+  ///
+  /// In en, this message translates to:
+  /// **'School email'**
+  String get configurationSchoolEmail;
+
+  /// Footer message naming the required fields still empty
+  ///
+  /// In en, this message translates to:
+  /// **'Still needed: {fields}'**
+  String configurationSchoolMissingHint(String fields);
+
+  /// Note explaining why two fields cannot be edited
+  ///
+  /// In en, this message translates to:
+  /// **'Country and city are fixed: the application is deployed in Kinshasa.'**
+  String get configurationSchoolReadOnlyNote;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:
