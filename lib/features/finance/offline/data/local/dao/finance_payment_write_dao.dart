@@ -110,11 +110,18 @@ class FinancePaymentWriteDao {
     );
     if (alive.isNotEmpty) return alloc; // l'uuid tient toujours
 
+    // Même règle que `_remapProvisionalCharge` : `null` est une valeur d'année
+    // à part entière, et sqflite refuse de la LIER (il avertit aujourd'hui,
+    // lèvera demain). Le SQL se branche donc, et jamais en `= ?` — qui ne
+    // rapprocherait plus aucune créance sans année, en silence.
+    final annee = payment.academicYearId;
     final resolved = await txn.query(
       'student_charges',
       columns: ['id'],
-      where: 'student_id = ? AND fee_code = ? AND academic_year_id IS ?',
-      whereArgs: [payment.studentId, alloc.feeCode, payment.academicYearId],
+      where: annee == null
+          ? 'student_id = ? AND fee_code = ? AND academic_year_id IS NULL'
+          : 'student_id = ? AND fee_code = ? AND academic_year_id = ?',
+      whereArgs: [payment.studentId, alloc.feeCode, ?annee],
       limit: 1,
     );
     final relinked = resolved.isEmpty ? null : resolved.first['id'] as String;
