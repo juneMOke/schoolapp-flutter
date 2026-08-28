@@ -50,13 +50,13 @@ void main() {
         dueAt: DateTime.utc(2027, 6, 30, 23, 59, 59),
         appliesTo: const FeeScopeInput.allOpenedLevels(),
       ),
-      FeeInput(
+      const FeeInput(
         feeCode: 'CANTEEN',
         label: 'Cantine',
         amountInCents: 800000,
         currency: 'CDF',
         dueAt: null,
-        appliesTo: const FeeScopeInput(
+        appliesTo: FeeScopeInput(
           scope: FeeScope.levels,
           levelCatalogCodes: ['P6'],
         ),
