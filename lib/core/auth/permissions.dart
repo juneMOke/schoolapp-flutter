@@ -82,6 +82,21 @@ enum Perm {
   schoolRead('school.read'),
   schoolWrite('school.write'),
 
+  /// Paramétrer son établissement : déclarer l'année, l'offre pédagogique et la
+  /// grille tarifaire, puis activer l'école (`POST /provisioning/apply`).
+  ///
+  /// **À ne pas confondre avec [platformSchoolProvision]**, qui crée un
+  /// établissement depuis la plateforme et n'appartient à aucune école. Celle-ci
+  /// est scopée-école comme toutes les autres, semée par la migration serveur
+  /// V93 sur `DIRECTOR` et `SUPER_ADMIN`, et c'est elle — jamais l'autre — que
+  /// la garde du module Configuration confronte. Se tromper de jeton livrerait
+  /// un module que personne ne peut ouvrir, sans erreur visible.
+  ///
+  /// Elle garde un geste qui écrit dans **quatre** modules en une transaction :
+  /// se rabattre sur l'une des quatre autorités concernées l'ouvrirait à qui
+  /// n'en détient qu'un quart.
+  schoolProvisioningWrite('school.provisioning.write'),
+
   // ── Élèves ────────────────────────────────────────────────────────────────
   studentRead('student.read'),
   studentWrite('student.write'),
