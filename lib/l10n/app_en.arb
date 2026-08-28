@@ -252,6 +252,55 @@
   "@configurationSchoolReadOnlyNote": {
       "description": "Note explaining why two fields cannot be edited"
   },
+  "configurationYearSectionTitle": "Academic year",
+  "@configurationYearSectionTitle": {
+      "description": "Step 2 card title"
+  },
+  "configurationYearSectionSubtitle": "A first year is proposed from today's date — adjust the dates if needed.",
+  "@configurationYearSectionSubtitle": {
+      "description": "Step 2 card subtitle"
+  },
+  "configurationYearProposed": "Proposed automatically",
+  "@configurationYearProposed": {
+      "description": "Origin badge while the proposal is untouched"
+  },
+  "configurationYearEdited": "Edited",
+  "@configurationYearEdited": {
+      "description": "Origin badge once a date or the label has changed"
+  },
+  "configurationYearRestore": "Restore the proposal",
+  "@configurationYearRestore": {
+      "description": "Link rebuilding the proposal from today's date"
+  },
+  "configurationYearStart": "First day of class",
+  "@configurationYearStart": {
+      "description": "Start date field"
+  },
+  "configurationYearEnd": "End of year",
+  "@configurationYearEnd": {
+      "description": "End date field"
+  },
+  "configurationYearDuration": "Length",
+  "@configurationYearDuration": {
+      "description": "Label of the indicative span between both dates"
+  },
+  "configurationYearDurationValue": "≈ {months} months",
+  "@configurationYearDurationValue": {
+      "description": "Indicative span, rounded to months",
+      "placeholders": {
+          "months": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationYearRangeError": "The end must follow the start",
+  "@configurationYearRangeError": {
+      "description": "Shown when the end date does not follow the start date"
+  },
+  "configurationYearPeriodsNote": "Terms and semesters are set later, in Results.",
+  "@configurationYearPeriodsNote": {
+      "description": "Explicit pointer to another module — do not add terms here"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

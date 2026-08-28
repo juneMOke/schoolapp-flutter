@@ -596,6 +596,72 @@ abstract class AppLocalizations {
   /// **'Country and city are fixed: the application is deployed in Kinshasa.'**
   String get configurationSchoolReadOnlyNote;
 
+  /// Step 2 card title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get configurationYearSectionTitle;
+
+  /// Step 2 card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'A first year is proposed from today\'s date — adjust the dates if needed.'**
+  String get configurationYearSectionSubtitle;
+
+  /// Origin badge while the proposal is untouched
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed automatically'**
+  String get configurationYearProposed;
+
+  /// Origin badge once a date or the label has changed
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get configurationYearEdited;
+
+  /// Link rebuilding the proposal from today's date
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the proposal'**
+  String get configurationYearRestore;
+
+  /// Start date field
+  ///
+  /// In en, this message translates to:
+  /// **'First day of class'**
+  String get configurationYearStart;
+
+  /// End date field
+  ///
+  /// In en, this message translates to:
+  /// **'End of year'**
+  String get configurationYearEnd;
+
+  /// Label of the indicative span between both dates
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get configurationYearDuration;
+
+  /// Indicative span, rounded to months
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {months} months'**
+  String configurationYearDurationValue(int months);
+
+  /// Shown when the end date does not follow the start date
+  ///
+  /// In en, this message translates to:
+  /// **'The end must follow the start'**
+  String get configurationYearRangeError;
+
+  /// Explicit pointer to another module — do not add terms here
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and semesters are set later, in Results.'**
+  String get configurationYearPeriodsNote;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

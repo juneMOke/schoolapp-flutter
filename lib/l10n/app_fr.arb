@@ -252,6 +252,55 @@
   "@configurationSchoolReadOnlyNote": {
       "description": "Note expliquant pourquoi deux champs ne se saisissent pas"
   },
+  "configurationYearSectionTitle": "Année académique",
+  "@configurationYearSectionTitle": {
+      "description": "Titre de la carte de l'étape 2"
+  },
+  "configurationYearSectionSubtitle": "Une première année est proposée d'après la date du jour — ajustez les dates si besoin.",
+  "@configurationYearSectionSubtitle": {
+      "description": "Sous-titre de la carte de l'étape 2"
+  },
+  "configurationYearProposed": "Proposée automatiquement",
+  "@configurationYearProposed": {
+      "description": "Pastille d'origine tant que la proposition n'a pas été touchée"
+  },
+  "configurationYearEdited": "Modifiée",
+  "@configurationYearEdited": {
+      "description": "Pastille d'origine dès qu'une date ou le libellé a changé"
+  },
+  "configurationYearRestore": "Rétablir la proposition",
+  "@configurationYearRestore": {
+      "description": "Lien qui reconstruit la proposition d'après la date du jour"
+  },
+  "configurationYearStart": "Début des cours",
+  "@configurationYearStart": {
+      "description": "Champ date de rentrée"
+  },
+  "configurationYearEnd": "Fin de l'année",
+  "@configurationYearEnd": {
+      "description": "Champ date de fin d'exercice"
+  },
+  "configurationYearDuration": "Durée",
+  "@configurationYearDuration": {
+      "description": "Libellé de la durée indicative entre les deux dates"
+  },
+  "configurationYearDurationValue": "≈ {months} mois",
+  "@configurationYearDurationValue": {
+      "description": "Durée indicative, arrondie au mois",
+      "placeholders": {
+          "months": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationYearRangeError": "La fin doit suivre le début",
+  "@configurationYearRangeError": {
+      "description": "Message affiché quand la date de fin ne suit pas celle de début"
+  },
+  "configurationYearPeriodsNote": "Le découpage en périodes (trimestres, semestres) se règle plus tard, dans Résultats.",
+  "@configurationYearPeriodsNote": {
+      "description": "Renvoi explicite vers un autre module — ne pas ajouter de trimestres ici"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",

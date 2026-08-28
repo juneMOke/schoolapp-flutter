@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
+import 'package:school_app_flutter/features/configuration/presentation/steps/academic_year_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/school_identity_step.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_app_bar.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_save_bar.dart';
@@ -141,7 +142,8 @@ class _StepBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: switch (state.step) {
               ConfigurationStep.school => const SchoolIdentityStep(),
-              // Les quatre autres étapes arrivent avec les lots suivants.
+              ConfigurationStep.academicYear => const AcademicYearStep(),
+              // Les trois autres étapes arrivent avec les lots suivants.
               _ => const SizedBox.shrink(),
             },
           ),
@@ -166,6 +168,7 @@ class _StepFooter extends StatelessWidget {
       buildWhen: (previous, current) => previous.step != current.step,
       builder: (context, state) => switch (state.step) {
         ConfigurationStep.school => const _SchoolStepFooter(),
+        ConfigurationStep.academicYear => const _DraftStepFooter(),
         _ => const SizedBox.shrink(),
       },
     );
@@ -217,4 +220,57 @@ class _SchoolStepFooter extends StatelessWidget {
       },
     );
   }
+}
+
+/// Barre de pied des étapes 2 à 4 — celles qui ne construisent qu'un brouillon.
+///
+/// Elle dit « Brouillon enregistré » là où l'étape 1 dit « Enregistré ». Les
+/// confondre laisserait croire que la structure et les frais sont partis au
+/// serveur, alors que rien ne l'est avant l'activation.
+class _DraftStepFooter extends StatelessWidget {
+  const _DraftStepFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return BlocBuilder<ConfigurationBloc, ConfigurationState>(
+      builder: (context, state) {
+        final bloc = context.read<ConfigurationBloc>();
+        final blocked = state.isLoading || state.hasFailure;
+        final valid = _isStepValid(state);
+
+        return ConfigurationSaveBar(
+          mode: state.justSaved
+              ? ConfigurationSaveBarMode.saved
+              : ConfigurationSaveBarMode.idle,
+          savedLabel: l10n.configurationDraftSaved,
+          hint: _hintFor(l10n, state),
+          canSave: !blocked && valid,
+          canContinue: !blocked && valid,
+          onBack: () => bloc.add(const ConfigurationBackRequested()),
+          onSave: () => bloc.add(const ConfigurationSaveRequested()),
+          onContinue: () => bloc.add(const ConfigurationContinueRequested()),
+        );
+      },
+    );
+  }
+
+  bool _isStepValid(ConfigurationState state) {
+    return switch (state.step) {
+      // L'étape 2 ne demande qu'un intervalle qui tienne debout ; c'est le
+      // serveur qui refusera une année déjà existante, et seulement à la
+      // simulation.
+      ConfigurationStep.academicYear =>
+        state.draft.academicYear?.hasValidRange ?? false,
+      _ => false,
+    };
+  }
+
+  /// Ce que l'étape a à dire quand elle bloque.
+  ///
+  /// L'étape 2 n'en fournit aucun : elle n'a que deux dates, et les nommer
+  /// n'ajouterait rien à ce que le champ en erreur montre déjà. C'est le
+  /// message par défaut de la barre qui prend le relais.
+  String? _hintFor(AppLocalizations l10n, ConfigurationState state) => null;
 }

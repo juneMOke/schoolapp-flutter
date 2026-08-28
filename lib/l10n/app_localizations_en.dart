@@ -283,6 +283,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'Country and city are fixed: the application is deployed in Kinshasa.';
 
   @override
+  String get configurationYearSectionTitle => 'Academic year';
+
+  @override
+  String get configurationYearSectionSubtitle =>
+      'A first year is proposed from today\'s date — adjust the dates if needed.';
+
+  @override
+  String get configurationYearProposed => 'Proposed automatically';
+
+  @override
+  String get configurationYearEdited => 'Edited';
+
+  @override
+  String get configurationYearRestore => 'Restore the proposal';
+
+  @override
+  String get configurationYearStart => 'First day of class';
+
+  @override
+  String get configurationYearEnd => 'End of year';
+
+  @override
+  String get configurationYearDuration => 'Length';
+
+  @override
+  String configurationYearDurationValue(int months) {
+    return '≈ $months months';
+  }
+
+  @override
+  String get configurationYearRangeError => 'The end must follow the start';
+
+  @override
+  String get configurationYearPeriodsNote =>
+      'Terms and semesters are set later, in Results.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

@@ -284,6 +284,43 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pays et ville sont fixés : l\'application est déployée à Kinshasa.';
 
   @override
+  String get configurationYearSectionTitle => 'Année académique';
+
+  @override
+  String get configurationYearSectionSubtitle =>
+      'Une première année est proposée d\'après la date du jour — ajustez les dates si besoin.';
+
+  @override
+  String get configurationYearProposed => 'Proposée automatiquement';
+
+  @override
+  String get configurationYearEdited => 'Modifiée';
+
+  @override
+  String get configurationYearRestore => 'Rétablir la proposition';
+
+  @override
+  String get configurationYearStart => 'Début des cours';
+
+  @override
+  String get configurationYearEnd => 'Fin de l\'année';
+
+  @override
+  String get configurationYearDuration => 'Durée';
+
+  @override
+  String configurationYearDurationValue(int months) {
+    return '≈ $months mois';
+  }
+
+  @override
+  String get configurationYearRangeError => 'La fin doit suivre le début';
+
+  @override
+  String get configurationYearPeriodsNote =>
+      'Le découpage en périodes (trimestres, semestres) se règle plus tard, dans Résultats.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }
