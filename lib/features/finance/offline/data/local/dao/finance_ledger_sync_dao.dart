@@ -9,8 +9,12 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 /// Un **record**, pas une chaîne jointe : l'égalité est structurelle, donc
 /// aucun délimiteur à choisir (un `studentId` contenant le séparateur ne peut
 /// pas provoquer de collision) et `null` reste distinct de `''` — la même
-/// sémantique que le `academic_year_id IS ?` du SQL, alors qu'un
+/// sémantique que le `academic_year_id IS NULL` du SQL, alors qu'un
 /// `'$a|${year ?? ''}|$c'` les confondait.
+///
+/// ⚠️ Le SQL dit bien `IS NULL`, et jamais `= ?` avec un `null` lié : sqflite
+/// refuse `null` dans `whereArgs`, et `x = NULL` ne serait de toute façon
+/// jamais vrai.
 typedef _ChargeKey = (String studentId, String? academicYearId, String feeCode);
 
 /// Application du miroir autoritaire du pull de masse (FF2) : grille tarifaire

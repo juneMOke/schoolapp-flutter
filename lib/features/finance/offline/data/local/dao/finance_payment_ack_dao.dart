@@ -285,17 +285,30 @@ class FinancePaymentAckDao {
     // dissoudrait une et laisserait l'autre vivre à côté de la canonique — le
     // frais serait facturé deux fois. Même règle que `_pendingChargeIndex` côté
     // pull de masse.
+    // ⚠️ `academic_year_id` est NULLABLE, et `null` doit rester DISTINCT de
+    // `''` (cf. `_ChargeKey` dans `finance_ledger_sync_dao.dart`). La
+    // comparaison null-safe est donc obligatoire — mais elle ne peut pas
+    // passer par un paramètre lié : sqflite refuse `null` dans `whereArgs`
+    // (types admis : num, String, Uint8List) et avertit qu'il LÈVERA dans une
+    // version future. On branche donc le SQL au lieu de lier un `null`.
+    //
+    // ⚠️ Surtout PAS un `= ?` : `x = NULL` n'est jamais vrai en SQL, la requête
+    // ne remonterait AUCUNE jumelle, en silence — le frais serait facturé deux
+    // fois, exactement ce que cette fonction existe pour empêcher.
+    final anneeClause = academicYearId == null
+        ? 'academic_year_id IS NULL'
+        : 'academic_year_id = ?';
     final twins = await txn.query(
       'student_charges',
       columns: ['id'],
       where:
           'student_id = ? AND fee_code = ? AND id != ? '
-          'AND academic_year_id IS ? AND sync_status <> ?',
+          'AND $anneeClause AND sync_status <> ?',
       whereArgs: [
         studentId,
         feeCode,
         realChargeId,
-        academicYearId,
+        ?academicYearId,
         SyncState.synced.dbValue,
       ],
     );
