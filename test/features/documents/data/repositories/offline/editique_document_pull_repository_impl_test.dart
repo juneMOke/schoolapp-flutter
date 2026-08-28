@@ -55,6 +55,35 @@ class _FakeIds implements IdGenerator {
   String newId() => 'gen-${++_next}';
 }
 
+/// Rend la main dès que [condition] est vraie, sinon au bout de [delai].
+///
+/// ⚠️ Ne JAMAIS remplacer par un `pumpEventQueue()` nu : celui-ci ne draine que
+/// vingt tours d'event-loop, or un cycle de pull traverse deux lectures SQLite
+/// réelles avant d'atteindre l'API. Sur une machine chargée ces I/O ne rendent
+/// pas la main dans ces vingt tours, et le test rougissait alors qu'il n'avait
+/// simplement pas assez attendu (CI de la PR #35 : `Expected: ['cycle-1']`,
+/// `Actual: []`). On attend donc l'ÉVÉNEMENT, jamais un nombre de tours.
+///
+/// [exigee] distingue les deux usages : `true` pour une condition qui DOIT
+/// survenir (son absence est un échec), `false` pour laisser à un comportement
+/// fautif toute sa chance de se manifester — on sort tôt s'il se manifeste, et
+/// l'assertion qui suit tranche.
+Future<void> _attendreQue(
+  bool Function() condition, {
+  required String quoi,
+  bool exigee = true,
+  Duration delai = const Duration(seconds: 5),
+}) async {
+  final butoir = DateTime.now().add(delai);
+  while (!condition()) {
+    if (DateTime.now().isAfter(butoir)) {
+      if (exigee) fail('délai dépassé en attendant que $quoi');
+      return;
+    }
+    await Future<void>.delayed(Duration.zero);
+  }
+}
+
 /// Le cycle de pull du catalogue des pièces scellées.
 ///
 /// Ce qui gouverne ce fichier : **le curseur ne franchit jamais ce qui n'a pas
@@ -352,7 +381,26 @@ void main() {
 
         final premier = repo.syncDocuments();
         final second = repo.syncDocuments();
-        await pumpEventQueue();
+
+        // 1) Attendre que le PREMIER cycle ait réellement atteint l'API : il
+        //    est alors parqué sur l'écluse, son curseur pas encore persisté.
+        //    C'est cette étape que `pumpEventQueue()` ne garantissait pas.
+        await _attendreQue(
+          () => journal.isNotEmpty,
+          quoi: 'le premier cycle atteigne l\'API',
+        );
+
+        // 2) Laisser au SECOND toutes ses chances de démarrer à tort. Sans
+        //    sérialisation il relit le curseur — toujours null, le premier
+        //    n'ayant rien persisté — et rappelle la MÊME route, ce qui
+        //    inscrirait « cycle-1 » une seconde fois. On sort dès qu'il
+        //    bronche ; l'assertion qui suit trancherait de toute façon.
+        await _attendreQue(
+          () => journal.length > 1,
+          quoi: 'le second cycle démarre',
+          exigee: false,
+          delai: const Duration(milliseconds: 300),
+        );
 
         expect(journal, [
           'cycle-1',
