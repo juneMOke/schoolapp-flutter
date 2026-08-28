@@ -8,6 +8,9 @@ import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
+import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
+import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
 import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
@@ -1021,6 +1024,22 @@ Future<void> configureDependencies({
       getDisciplinaryCaseDetailUseCase:
           getIt<GetDisciplinaryCaseDetailUseCase>(),
       createDisciplinaryCaseUseCase: getIt<CreateDisciplinaryCaseUseCase>(),
+    ),
+  );
+
+  // ── Configuration (mise en service de l'école) ──────────────────────────────
+  getIt.registerLazySingleton<ProvisioningRemoteDataSource>(
+    () => ProvisioningRemoteDataSource(getIt<Dio>()),
+  );
+
+  // Singleton, et c'est intentionnel : le repository porte le cache de session
+  // des deux catalogues (D-9 du plan). En `registerFactory`, chaque étape de
+  // l'assistant repartirait d'un cache vide et rappellerait le serveur.
+  getIt.registerLazySingleton<ProvisioningRepository>(
+    () => ProvisioningRepositoryImpl(
+      remote: getIt<ProvisioningRemoteDataSource>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
 

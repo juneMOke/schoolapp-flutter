@@ -67,6 +67,25 @@ class AppConstants {
   static const String bootstrapPreviousYearEndpoint =
       '/api/v1/bootstrap/previous-year';
   static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
+
+  // ─── Configuration — mise en service de l'école ──────────────────────────
+  /// Catalogue du système éducatif. Référentiel figé, identique pour toutes les
+  /// écoles : sans paramètre, et gardé par une simple lecture.
+  static const String provisioningCatalogEndpoint =
+      '/api/v1/provisioning/catalog';
+
+  /// Simulation **et** activation : même route, même corps, même calcul. Seul
+  /// `?dryRun=true` décide si le résultat est écrit.
+  static const String provisioningApplyEndpoint = '/api/v1/provisioning/apply';
+
+  /// Catalogue des types de frais. Servi par le serveur, jamais figé côté
+  /// client : un code ajouté doit apparaître sans release de l'application.
+  static const String feeCodesEndpoint = '/api/v1/finance/fee-codes';
+
+  /// Identité de l'établissement. L'identifiant du chemin est confronté à celui
+  /// du jeton : un écart rend **403**, pas 404 — toujours passer le `schoolId`
+  /// de la session en cours.
+  static const String schoolByIdEndpoint = '/api/v1/schools/{schoolId}';
   static const String initializeStudentChargesEndpoint =
       '/api/v1/finance/student-charges/{studentId}/initialize-charges';
   static const String listStudentChargesByStudentAndAcademicYearEndpoint =
