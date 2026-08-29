@@ -40,6 +40,12 @@ const _secretariat = <String>[
   'editique.cancel',
 ];
 
+/// ⚠️ Elle tient la caisse boutique, et le seul droit boutique qui lui manque
+/// est `boutique.catalog.write` : qui encaisse ne réécrit pas la grille des
+/// prix, sans quoi le garde-fou anti-coulage de l'ADR-020 ne garderait plus
+/// rien — il suffirait de baisser le prix, de vendre, puis de le remettre.
+/// C'est le **seul** des cinq rôles applicatifs à détenir un droit boutique :
+/// `DIRECTOR` et `SUPER_ADMIN`, qui ont les quatre, n'ont pas d'application.
 const _comptabilite = <String>[
   'enrollment.read',
   'finance.charge.read',
@@ -48,6 +54,9 @@ const _comptabilite = <String>[
   'finance.payment.write',
   'finance.grid.read',
   'finance.stats.read',
+  'boutique.catalog.read',
+  'boutique.sale.read',
+  'boutique.sale.write',
   'classroom.read',
   'student.read',
   'school.read',

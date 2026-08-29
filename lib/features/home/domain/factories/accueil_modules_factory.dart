@@ -143,6 +143,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.feeControlId,
           title: l10n.subMenuFeeControl,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.boutiqueId,
+          title: l10n.subMenuBoutique,
+        ),
       ],
     );
   }

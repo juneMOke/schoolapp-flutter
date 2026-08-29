@@ -90,11 +90,26 @@ class ReferentialYearBundleDto {
   /// dépend de cette distinction : voir `_applyReferential`.
   final List<RefFeeTariffDto>? feeTariffs;
 
+  /// Catalogue boutique **vendable** de l'année — nullable pour exactement la
+  /// même raison que [feeTariffs], et avec la même conséquence sur la purge
+  /// (ADR-020, décision F4). Le serveur le retire du bundle pour qui ne détient
+  /// pas `boutique.catalog.read` et l'envoie à `null` plutôt qu'à `[]`.
+  ///
+  /// La nuance décide de deux écrans distincts : `null` → « catalogue non
+  /// communiqué », `[]` → « la boutique n'a pas encore d'article ». Les replier
+  /// l'un sur l'autre ferait conclure au guichet que l'école n'a rien
+  /// paramétré, alors qu'il lui manque un droit.
+  ///
+  /// Les articles retirés de la vente n'y descendent pas : le poste reçoit ce
+  /// qu'il peut vendre.
+  final List<RefBoutiqueArticleDto>? boutiqueArticles;
+
   const ReferentialYearBundleDto({
     required this.academicYear,
     required this.schoolLevelGroups,
     required this.schoolLevels,
     required this.feeTariffs,
+    this.boutiqueArticles,
   });
 
   factory ReferentialYearBundleDto.fromJson(Map<String, dynamic> j) =>
@@ -112,6 +127,84 @@ class ReferentialYearBundleDto {
         feeTariffs: j['feeTariffs'] == null
             ? null
             : pullList(j['feeTariffs'], RefFeeTariffDto.fromJson),
+        boutiqueArticles: j['boutiqueArticles'] == null
+            ? null
+            : pullList(j['boutiqueArticles'], RefBoutiqueArticleDto.fromJson),
+      );
+}
+
+/// Un article du catalogue boutique, tel qu'il descend dans le bundle.
+///
+/// `pricingMode` descend **en clair**, et c'est indispensable : c'est la seule
+/// chose qui dise à la caisse si elle doit demander un niveau. Le déduire de la
+/// forme des prix conclurait « c'est plat » d'un article dont les cases
+/// coïncident aujourd'hui — chez La Fontaine, la Lacoste vaut 10 en primaire et
+/// 10 en CTEB — puis la vendrait au tarif primaire en humanités, où elle vaut
+/// 15.
+///
+/// Les deux enum restent en `String` ici : la traduction vers le domaine se fait
+/// au mapping, où l'inconnu se décide (`ArticleFamily.fromWire`,
+/// `PricingMode.fromWire`). Un DTO qui refuserait une valeur inédite ferait
+/// échouer tout le bundle sur un seul article servi par un serveur plus récent.
+class RefBoutiqueArticleDto {
+  final String id;
+  final String academicYearId;
+  final String code;
+  final String label;
+  final String? family;
+  final String? pricingMode;
+
+  /// Renseigné ssi `PRIX_UNIQUE`.
+  final int? unitPriceInCents;
+
+  /// Renseignée ssi `PRIX_PAR_NIVEAU`.
+  final List<RefBoutiqueLevelPriceDto> levelPrices;
+
+  final String currency;
+
+  const RefBoutiqueArticleDto({
+    required this.id,
+    required this.academicYearId,
+    required this.code,
+    required this.label,
+    this.family,
+    this.pricingMode,
+    this.unitPriceInCents,
+    this.levelPrices = const [],
+    required this.currency,
+  });
+
+  factory RefBoutiqueArticleDto.fromJson(Map<String, dynamic> j) =>
+      RefBoutiqueArticleDto(
+        id: j['id'] as String,
+        academicYearId: j['academicYearId'] as String,
+        code: j['code'] as String,
+        label: j['label'] as String,
+        family: j['family'] as String?,
+        pricingMode: j['pricingMode'] as String?,
+        unitPriceInCents: (j['unitPriceInCents'] as num?)?.toInt(),
+        levelPrices: pullList(
+          j['levelPrices'],
+          RefBoutiqueLevelPriceDto.fromJson,
+        ),
+        currency: (j['currency'] as String?) ?? 'USD',
+      );
+}
+
+/// Une case de la grille : un niveau, un prix en cents.
+class RefBoutiqueLevelPriceDto {
+  final String schoolLevelId;
+  final int priceInCents;
+
+  const RefBoutiqueLevelPriceDto({
+    required this.schoolLevelId,
+    required this.priceInCents,
+  });
+
+  factory RefBoutiqueLevelPriceDto.fromJson(Map<String, dynamic> j) =>
+      RefBoutiqueLevelPriceDto(
+        schoolLevelId: j['schoolLevelId'] as String,
+        priceInCents: (j['priceInCents'] as num).toInt(),
       );
 }
 

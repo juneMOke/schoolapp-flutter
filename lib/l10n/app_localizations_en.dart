@@ -1002,6 +1002,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuFeeControl => 'Fee control';
 
   @override
+  String get subMenuBoutique => 'Shop';
+
+  @override
   String get subMenuOrganization => 'Class\ncomposition';
 
   @override
@@ -7102,4 +7105,426 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentsBlockedEnrollmentUnreadableNotice =>
       'Enrolment not readable on this tablet: the certificate is unavailable here.';
+
+  @override
+  String get boutiqueEyebrow => 'Finance ▸ Shop';
+
+  @override
+  String get boutiqueTitle => 'Shop — Till';
+
+  @override
+  String get boutiqueSubtitle =>
+      'Cash sale of school items. No debt, no balance.';
+
+  @override
+  String get boutiqueSearchPlaceholder => 'Search an item or a code…';
+
+  @override
+  String get boutiqueFilterAll => 'All';
+
+  @override
+  String get boutiqueFamilyUniforme => 'Uniform';
+
+  @override
+  String get boutiqueFamilyFournitures => 'Supplies';
+
+  @override
+  String get boutiqueFamilyActivites => 'Activities';
+
+  @override
+  String get boutiqueFamilyActes => 'Administrative';
+
+  @override
+  String boutiqueArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueInCartBadge(int count) {
+    return '$count in cart';
+  }
+
+  @override
+  String get boutiqueLevelBadge => 'by level';
+
+  @override
+  String boutiquePriceRange(String min, String max) {
+    return '$min – $max';
+  }
+
+  @override
+  String get boutiqueGridReminder =>
+      'Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.';
+
+  @override
+  String get boutiqueCartTitle => 'Cart';
+
+  @override
+  String get boutiqueCartEmpty => 'Cart is empty. Tap an item to add it.';
+
+  @override
+  String get boutiqueCartClear => 'Empty the cart';
+
+  @override
+  String get boutiqueTotalLabel => 'Total to collect';
+
+  @override
+  String get boutiqueCollectAction => 'Collect in cash';
+
+  @override
+  String get boutiquePriceUnresolved => 'Price unresolved';
+
+  @override
+  String get boutiqueLevelRequired => 'Level required…';
+
+  @override
+  String get boutiqueBeneficiaryPlaceholder => 'Recipient';
+
+  @override
+  String get boutiqueSizeLabel => 'Size';
+
+  @override
+  String boutiqueLineMeta(String unitPrice, int quantity) {
+    return '$unitPrice × $quantity';
+  }
+
+  @override
+  String get boutiquePayerSection => 'Payer';
+
+  @override
+  String get boutiquePayerKnownBadge => 'Known payer';
+
+  @override
+  String get boutiquePayerPhoneLabel => 'Phone';
+
+  @override
+  String get boutiquePayerLastNameLabel => 'Last name';
+
+  @override
+  String get boutiquePayerMiddleNameLabel => 'Middle name';
+
+  @override
+  String get boutiquePayerFirstNameLabel => 'First name';
+
+  @override
+  String get boutiquePayerReceiptNotice =>
+      'The receipt is in the payer\'s name; recipients are attached to each line.';
+
+  @override
+  String get boutiquePayerUnknownNotice =>
+      'Unknown number — this payer will be added to the directory with the sale.';
+
+  @override
+  String get boutiqueBlockersPrefix => 'Still missing:';
+
+  @override
+  String get boutiqueBlockerEmptyCart => 'Cart is empty';
+
+  @override
+  String get boutiqueBlockerLastName => 'Last name';
+
+  @override
+  String get boutiqueBlockerMiddleName => 'Middle name';
+
+  @override
+  String get boutiqueBlockerFirstName => 'First name';
+
+  @override
+  String get boutiqueBlockerPhone => 'Payer\'s phone';
+
+  @override
+  String get boutiqueBlockerPhoneIncomplete => 'Incomplete phone';
+
+  @override
+  String boutiqueBlockerLinesWithoutLevel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines without a level',
+      one: '1 line without a level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Mixed currencies';
+
+  @override
+  String get boutiqueEmptyCatalogTitle => 'No item in the catalogue';
+
+  @override
+  String get boutiqueEmptyCatalogMessage =>
+      'The shop has no item yet. Create one in the catalogue to be able to make a sale.';
+
+  @override
+  String get boutiqueWithheldCatalogTitle => 'Catalogue not shared';
+
+  @override
+  String get boutiqueWithheldCatalogMessage =>
+      'Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.';
+
+  @override
+  String get boutiqueNoMatchTitle => 'No matching item';
+
+  @override
+  String boutiqueNoMatchMessage(String query, String family) {
+    return 'Nothing for “$query” in “$family”. Broaden the search.';
+  }
+
+  @override
+  String boutiqueNoMatchMessageAll(String query) {
+    return 'Nothing for “$query”. Broaden the search.';
+  }
+
+  @override
+  String get boutiqueResetFilters => 'Reset filters';
+
+  @override
+  String boutiqueUnsellableNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count items in this catalogue cannot be sold from this version of the app.',
+      one:
+          '1 item in this catalogue cannot be sold from this version of the app.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueErrorNetworkTitle => 'No connection';
+
+  @override
+  String get boutiqueErrorNetwork =>
+      'The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.';
+
+  @override
+  String get boutiqueErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get boutiqueErrorUnauthorized =>
+      'Sign in again to resume the till. The cart is kept.';
+
+  @override
+  String get boutiqueErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get boutiqueErrorForbidden =>
+      'Your account lacks the rights to run the shop till. Contact the head office.';
+
+  @override
+  String get boutiqueErrorServerTitle => 'Catalogue unreadable';
+
+  @override
+  String get boutiqueErrorServer =>
+      'The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.';
+
+  @override
+  String get boutiqueErrorRetry => 'Try again';
+
+  @override
+  String get boutiqueErrorReconnect => 'Sign in again';
+
+  @override
+  String boutiqueErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get boutiqueBeneficiaryEyebrow => 'Line recipient';
+
+  @override
+  String get boutiqueBeneficiaryTitle => 'Pick a student';
+
+  @override
+  String get boutiqueBeneficiaryHint =>
+      'The student\'s level resolves the price automatically — you never enter an amount.';
+
+  @override
+  String get boutiqueBeneficiarySearchLabel =>
+      'Last name, middle name or first name';
+
+  @override
+  String get boutiqueBeneficiarySearchPlaceholder => 'e.g. Dylan Ndombo';
+
+  @override
+  String get boutiqueBeneficiaryTooShort =>
+      'Type at least 2 letters, or switch to “By level”.';
+
+  @override
+  String boutiqueBeneficiaryNoResult(String query) {
+    return 'No student matches “$query”. Check the spelling or search by level.';
+  }
+
+  @override
+  String get boutiqueBeneficiaryPickLevel =>
+      'Pick a level to list its students.';
+
+  @override
+  String get boutiqueBeneficiaryLevelEmpty =>
+      'No student enrolled at this level.';
+
+  @override
+  String get boutiqueBeneficiaryNotSynced =>
+      'Enrolment not synced yet — sell by level, without a recipient: the price is the same.';
+
+  @override
+  String get boutiqueBeneficiaryNoLevel =>
+      'This enrolment carries no level — sell by level, without a recipient.';
+
+  @override
+  String get boutiqueBeneficiaryLoadFailed =>
+      'The student list could not be read.';
+
+  @override
+  String boutiquePayerDirectoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return 'Already in the directory · $_temp0';
+  }
+
+  @override
+  String get boutiquePayerUse => 'Use';
+
+  @override
+  String get boutiqueConfirmEyebrow => 'Cash collection';
+
+  @override
+  String get boutiqueConfirmTitle => 'Confirm the sale';
+
+  @override
+  String get boutiqueConfirmPayer => 'Payer';
+
+  @override
+  String get boutiqueConfirmPhone => 'Phone';
+
+  @override
+  String get boutiqueConfirmArticles => 'Items';
+
+  @override
+  String get boutiqueConfirmMethod => 'Method';
+
+  @override
+  String get boutiqueConfirmMethodCash => 'Cash';
+
+  @override
+  String get boutiqueConfirmAmountReceived => 'Amount received';
+
+  @override
+  String get boutiqueConfirmNotice =>
+      'The total is paid in one go: no partial payment, no shop debt.';
+
+  @override
+  String get boutiqueConfirmNewPayerPrefix =>
+      'This payer is new: their number and identity join the directory with the sale.';
+
+  @override
+  String get boutiqueConfirmOfflineSuffix =>
+      'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.';
+
+  @override
+  String get boutiqueConfirmCancel => 'Cancel';
+
+  @override
+  String boutiqueConfirmAction(String total) {
+    return 'Collect $total';
+  }
+
+  @override
+  String boutiqueSaleRecorded(String total) {
+    return 'Sale collected · $total';
+  }
+
+  @override
+  String get boutiqueSaleFailed =>
+      'The sale could not be recorded. Nothing was collected — try again.';
+
+  @override
+  String get editiqueViewerSaleReceiptTitle => 'Sale receipt';
+
+  @override
+  String get documentsHintSaleReceipt =>
+      'Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student\'s file.';
+
+  @override
+  String get boutiqueTicketTitle => 'Sale receipt — Shop';
+
+  @override
+  String get boutiqueTicketProvisionalBanner => 'Provisional document';
+
+  @override
+  String get boutiqueTicketProvisionalNotice => 'Final receipt sealed on sync.';
+
+  @override
+  String get boutiqueTicketSealedNotice => 'Sealed receipt — valid discharge';
+
+  @override
+  String get boutiqueTicketPayerLabel => 'PAYER:';
+
+  @override
+  String get boutiqueTicketPhoneLabel => 'Tel.';
+
+  @override
+  String get boutiqueTicketCashierLabel => 'Cashier:';
+
+  @override
+  String get boutiqueTicketTotalLabel => 'TOTAL';
+
+  @override
+  String get boutiqueTicketCashReceivedLabel => 'Cash received';
+
+  @override
+  String get boutiqueTicketRemainingLabel => 'Remaining';
+
+  @override
+  String get boutiqueTicketBeneficiaryPrefix => 'for';
+
+  @override
+  String get boutiqueTicketSizePrefix => 'Sz.';
+
+  @override
+  String get boutiqueTicketUnitSuffix => '/ea';
+
+  @override
+  String get boutiqueTicketNoRefundNotice =>
+      'No refund once the item is handed over.';
+
+  @override
+  String boutiqueReceiptBannerTitle(String total) {
+    return 'Sale collected · $total';
+  }
+
+  @override
+  String boutiqueReceiptBannerProvisional(String reference) {
+    return '$reference · provisional, will be sealed on sync';
+  }
+
+  @override
+  String boutiqueReceiptBannerSealed(String reference) {
+    return '$reference · sealed';
+  }
+
+  @override
+  String get boutiqueReceiptPrint => 'Print';
+
+  @override
+  String get boutiqueReceiptNewSale => 'New sale';
+
+  @override
+  String get boutiqueReceiptPrintFailed =>
+      'The ticket could not be printed. The sale is recorded — you can try again.';
+
+  @override
+  String get boutiqueReceiptPrinted => 'Ticket printed.';
 }

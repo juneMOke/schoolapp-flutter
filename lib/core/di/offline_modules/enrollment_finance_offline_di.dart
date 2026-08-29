@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_catalog_dao.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -263,8 +264,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     ),
   );
   // Pulls Inscription (référentiel / cohorte / préinscriptions / delta). La
-  // grille tarifaire du bundle référentiel est déléguée à la Facturation via
-  // un seam étroit (même précédent que le gate PAYMENT ci-dessous).
+  // grille tarifaire du bundle référentiel est déléguée à la Facturation, et le
+  // catalogue boutique à la caisse, via deux seams étroits (même précédent que
+  // le gate PAYMENT ci-dessous).
   getIt.registerLazySingleton<EnrollmentPullRepository>(
     () => EnrollmentPullRepositoryImpl(
       api: getIt<EnrollmentPullApi>(),
@@ -273,6 +275,16 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       reconciliationDao: getIt<EnrollmentReconciliationDao>(),
       replaceTariffs: (tariffs, academicYearIds) => getIt<FinanceLocalDao>()
           .replaceTariffsForYears(tariffs, academicYearIds: academicYearIds),
+      // Même seam, même raison : le bundle porte le catalogue de la caisse, et
+      // `enrollment` n'a rien à savoir de la boutique. Le `schoolId` est résolu
+      // à l'appel et non à l'enregistrement — la DI offline est montée AVANT
+      // l'authentification, l'école n'est pas encore connue ici.
+      replaceBoutiqueArticles: (articles, academicYearIds) =>
+          getIt<BoutiqueCatalogDao>().replaceArticlesForYears(
+            articles,
+            schoolId: getIt<CurrentUserContext>().schoolId ?? '',
+            academicYearIds: academicYearIds,
+          ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

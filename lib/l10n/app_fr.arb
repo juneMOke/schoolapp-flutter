@@ -1021,6 +1021,7 @@
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
   "subMenuFeeControl": "Contrôle des frais",
+  "subMenuBoutique": "Boutique",
   "subMenuOrganization": "Composition\ndes classes",
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
@@ -4173,5 +4174,201 @@
       }
     }
   },
-  "documentsBlockedEnrollmentUnreadableNotice": "Dossier illisible sur cette tablette : l'attestation n'est pas disponible ici."
+  "documentsBlockedEnrollmentUnreadableNotice": "Dossier illisible sur cette tablette : l'attestation n'est pas disponible ici.",
+  "boutiqueEyebrow": "Finances ▸ Boutique",
+  "boutiqueTitle": "Boutique — Caisse",
+  "boutiqueSubtitle": "Vente au comptant d'articles de l'école. Aucune dette, aucun reste.",
+  "boutiqueSearchPlaceholder": "Chercher un article ou un code…",
+  "boutiqueFilterAll": "Toutes",
+  "boutiqueFamilyUniforme": "Uniforme",
+  "boutiqueFamilyFournitures": "Fournitures",
+  "boutiqueFamilyActivites": "Activités",
+  "boutiqueFamilyActes": "Actes",
+  "boutiqueArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
+  "@boutiqueArticleCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueInCartBadge": "{count} au panier",
+  "@boutiqueInCartBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueLevelBadge": "par niveau",
+  "boutiquePriceRange": "{min} – {max}",
+  "@boutiquePriceRange": {
+    "placeholders": {
+      "min": { "type": "String" },
+      "max": { "type": "String" }
+    }
+  },
+  "boutiqueGridReminder": "Les prix viennent toujours de la grille du catalogue. À la caisse, on désigne un élève ou un niveau — jamais un montant.",
+  "boutiqueCartTitle": "Panier",
+  "boutiqueCartEmpty": "Panier vide. Touchez un article pour l'ajouter.",
+  "boutiqueCartClear": "Vider le panier",
+  "boutiqueTotalLabel": "Total à encaisser",
+  "boutiqueCollectAction": "Encaisser en espèces",
+  "boutiquePriceUnresolved": "Prix à résoudre",
+  "boutiqueLevelRequired": "Niveau requis…",
+  "boutiqueBeneficiaryPlaceholder": "Bénéficiaire",
+  "boutiqueSizeLabel": "Taille",
+  "boutiqueLineMeta": "{unitPrice} × {quantity}",
+  "@boutiqueLineMeta": {
+    "placeholders": {
+      "unitPrice": { "type": "String" },
+      "quantity": { "type": "int" }
+    }
+  },
+  "boutiquePayerSection": "Payeur",
+  "boutiquePayerKnownBadge": "Payeur connu",
+  "boutiquePayerPhoneLabel": "Téléphone",
+  "boutiquePayerLastNameLabel": "Nom",
+  "boutiquePayerMiddleNameLabel": "Post-nom",
+  "boutiquePayerFirstNameLabel": "Prénom",
+  "boutiquePayerReceiptNotice": "Le reçu est nominatif au payeur ; les élèves bénéficiaires s'attachent à chaque ligne.",
+  "boutiquePayerUnknownNotice": "Numéro inconnu — ce payeur sera enregistré au répertoire avec la vente.",
+  "boutiqueBlockersPrefix": "À compléter :",
+  "boutiqueBlockerEmptyCart": "Panier vide",
+  "boutiqueBlockerLastName": "Nom",
+  "boutiqueBlockerMiddleName": "Post-nom",
+  "boutiqueBlockerFirstName": "Prénom",
+  "boutiqueBlockerPhone": "Téléphone du payeur",
+  "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
+  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
+  "@boutiqueBlockerLinesWithoutLevel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueBlockerMixedCurrency": "Devises mélangées",
+  "boutiqueEmptyCatalogTitle": "Aucun article au catalogue",
+  "boutiqueEmptyCatalogMessage": "La boutique n'a pas encore d'article. Créez-en un dans le catalogue pour pouvoir encaisser une vente.",
+  "boutiqueWithheldCatalogTitle": "Catalogue non communiqué",
+  "boutiqueWithheldCatalogMessage": "Votre compte n'a pas le droit de lire le catalogue de la boutique. Demandez-le à la direction : sans lui, aucun article ne peut être vendu depuis ce poste.",
+  "boutiqueNoMatchTitle": "Aucun article ne correspond",
+  "boutiqueNoMatchMessage": "Rien pour « {query} » dans « {family} ». Élargissez la recherche.",
+  "@boutiqueNoMatchMessage": {
+    "placeholders": {
+      "query": { "type": "String" },
+      "family": { "type": "String" }
+    }
+  },
+  "boutiqueNoMatchMessageAll": "Rien pour « {query} ». Élargissez la recherche.",
+  "@boutiqueNoMatchMessageAll": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueResetFilters": "Réinitialiser les filtres",
+  "boutiqueUnsellableNotice": "{count, plural, one{1 article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
+  "@boutiqueUnsellableNotice": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueErrorNetworkTitle": "Pas de connexion",
+  "boutiqueErrorNetwork": "Le catalogue n'a pas pu être lu. Le panier en cours est conservé : une coupure ne fait pas perdre une vente en composition.",
+  "boutiqueErrorUnauthorizedTitle": "Session expirée",
+  "boutiqueErrorUnauthorized": "Reconnectez-vous pour reprendre la caisse. Le panier est conservé.",
+  "boutiqueErrorForbiddenTitle": "Accès refusé",
+  "boutiqueErrorForbidden": "Votre compte n'a pas les droits requis pour tenir la caisse boutique. Contactez la direction.",
+  "boutiqueErrorServerTitle": "Catalogue illisible",
+  "boutiqueErrorServer": "Le catalogue local n'a pas pu être lu. Réessayez ; s'il ne revient pas, une synchronisation le reconstruira.",
+  "boutiqueErrorRetry": "Réessayer",
+  "boutiqueErrorReconnect": "Se reconnecter",
+  "boutiqueErrorIncidentCode": "Code incident : {code}",
+  "@boutiqueErrorIncidentCode": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryEyebrow": "Bénéficiaire de la ligne",
+  "boutiqueBeneficiaryTitle": "Désigner un élève",
+  "boutiqueBeneficiaryHint": "Le niveau de l'élève résout le prix automatiquement — vous ne saisissez jamais de montant.",
+  "boutiqueBeneficiarySearchLabel": "Nom, post-nom ou prénom",
+  "boutiqueBeneficiarySearchPlaceholder": "ex. Dylan Ndombo",
+  "boutiqueBeneficiaryTooShort": "Tapez au moins 2 lettres, ou passez par « Par niveau ».",
+  "boutiqueBeneficiaryNoResult": "Aucun élève ne correspond à « {query} ». Vérifiez l'orthographe ou cherchez par niveau.",
+  "@boutiqueBeneficiaryNoResult": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryPickLevel": "Choisissez un niveau pour voir ses élèves.",
+  "boutiqueBeneficiaryLevelEmpty": "Aucun élève inscrit à ce niveau.",
+  "boutiqueBeneficiaryNotSynced": "Inscription pas encore synchronisée — vendez au niveau, sans bénéficiaire : le prix est le même.",
+  "boutiqueBeneficiaryNoLevel": "Cette inscription ne porte pas de niveau — vendez au niveau, sans bénéficiaire.",
+  "boutiqueBeneficiaryLoadFailed": "La liste des élèves n'a pas pu être lue.",
+  "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{1 vente} other{{count} ventes}}",
+  "@boutiquePayerDirectoryCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiquePayerUse": "Utiliser",
+  "boutiqueConfirmEyebrow": "Encaissement comptant",
+  "boutiqueConfirmTitle": "Confirmer la vente",
+  "boutiqueConfirmPayer": "Payeur",
+  "boutiqueConfirmPhone": "Téléphone",
+  "boutiqueConfirmArticles": "Articles",
+  "boutiqueConfirmMethod": "Moyen",
+  "boutiqueConfirmMethodCash": "Espèces",
+  "boutiqueConfirmAmountReceived": "Montant reçu",
+  "boutiqueConfirmNotice": "Le total est payé en une fois : pas de paiement partiel, pas de créance boutique.",
+  "boutiqueConfirmNewPayerPrefix": "Ce payeur est nouveau : son numéro et son identité entrent au répertoire avec la vente.",
+  "boutiqueConfirmOfflineSuffix": "Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.",
+  "boutiqueConfirmCancel": "Annuler",
+  "boutiqueConfirmAction": "Encaisser {total}",
+  "@boutiqueConfirmAction": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleRecorded": "Vente encaissée · {total}",
+  "@boutiqueSaleRecorded": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleFailed": "La vente n'a pas pu être enregistrée. Rien n'a été encaissé — réessayez.",
+  "editiqueViewerSaleReceiptTitle": "Reçu de vente",
+  "documentsHintSaleReceipt": "Reçu d'une vente de la boutique. Il ne concerne ni le minerval ni les frais scolaires, et se retrouve depuis la caisse — pas depuis le dossier d'un élève.",
+  "boutiqueTicketTitle": "Reçu de vente — Boutique",
+  "boutiqueTicketProvisionalBanner": "Document provisoire",
+  "boutiqueTicketProvisionalNotice": "Reçu définitif scellé à la synchronisation.",
+  "boutiqueTicketSealedNotice": "Reçu scellé — vaut quittance",
+  "boutiqueTicketPayerLabel": "PAYEUR :",
+  "boutiqueTicketPhoneLabel": "Tél.",
+  "boutiqueTicketCashierLabel": "Caissier :",
+  "boutiqueTicketTotalLabel": "TOTAL",
+  "boutiqueTicketCashReceivedLabel": "Espèces reçues",
+  "boutiqueTicketRemainingLabel": "Reste à payer",
+  "boutiqueTicketBeneficiaryPrefix": "pour",
+  "boutiqueTicketSizePrefix": "T.",
+  "boutiqueTicketUnitSuffix": "/u",
+  "boutiqueTicketNoRefundNotice": "Aucun remboursement après remise de l'article.",
+  "boutiqueReceiptBannerTitle": "Vente encaissée · {total}",
+  "@boutiqueReceiptBannerTitle": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerProvisional": "{reference} · provisoire, sera scellé à la synchro",
+  "@boutiqueReceiptBannerProvisional": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerSealed": "{reference} · scellé",
+  "@boutiqueReceiptBannerSealed": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptPrint": "Imprimer",
+  "boutiqueReceiptNewSale": "Nouvelle vente",
+  "boutiqueReceiptPrintFailed": "Le ticket n'a pas pu être imprimé. La vente est enregistrée — vous pouvez réessayer.",
+  "boutiqueReceiptPrinted": "Ticket imprimé."
 }

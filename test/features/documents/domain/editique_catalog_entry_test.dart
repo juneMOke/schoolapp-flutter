@@ -4,13 +4,31 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_d
 
 void main() {
   group('barème du catalogue', () {
-    test('couvre les cinq pièces que le front sait émettre, sans doublon', () {
+    test('couvre les cinq pièces scopées ÉLÈVE, sans doublon', () {
       final types = EditiqueCatalogEntry.all
           .map((entry) => entry.type)
           .toList(growable: false);
 
-      expect(types.toSet(), EditiqueDocumentType.values.toSet());
-      expect(types.length, EditiqueDocumentType.values.length);
+      expect(types.toSet(), {
+        EditiqueDocumentType.enrollmentAttestation,
+        EditiqueDocumentType.notePerception,
+        EditiqueDocumentType.paymentReceipt,
+        EditiqueDocumentType.accountStatement,
+        EditiqueDocumentType.financialClearance,
+      });
+      expect(types.length, types.toSet().length, reason: 'aucun doublon');
+    });
+
+    test('le reçu de VENTE en est délibérément absent', () {
+      // Le catalogue est celui d'un dossier ÉLÈVE. Le RV ne désigne aucun
+      // élève — son sujet est le payeur — et rien de ce dossier ne pourrait
+      // l'émettre. L'y ajouter offrirait une ligne que le serveur refuserait,
+      // et laisserait croire qu'une vente boutique appartient à la scolarité
+      // (invariant I-4).
+      expect(
+        EditiqueCatalogEntry.all.map((entry) => entry.type),
+        isNot(contains(EditiqueDocumentType.saleReceipt)),
+      );
     });
 
     // Invariant de contrat : « figé » n'est pas un choix d'affichage, c'est

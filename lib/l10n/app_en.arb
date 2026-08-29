@@ -1054,6 +1054,10 @@
   "@subMenuFeeControl": {
     "description": "Fee control sub-menu title"
   },
+  "subMenuBoutique": "Shop",
+  "@subMenuBoutique": {
+    "description": "Shop till sub-menu title"
+  },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
     "description": "Organization sub-menu title"
@@ -4209,5 +4213,201 @@
       }
     }
   },
-  "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here."
+  "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here.",
+  "boutiqueEyebrow": "Finance ▸ Shop",
+  "boutiqueTitle": "Shop — Till",
+  "boutiqueSubtitle": "Cash sale of school items. No debt, no balance.",
+  "boutiqueSearchPlaceholder": "Search an item or a code…",
+  "boutiqueFilterAll": "All",
+  "boutiqueFamilyUniforme": "Uniform",
+  "boutiqueFamilyFournitures": "Supplies",
+  "boutiqueFamilyActivites": "Activities",
+  "boutiqueFamilyActes": "Administrative",
+  "boutiqueArticleCount": "{count, plural, one{1 item} other{{count} items}}",
+  "@boutiqueArticleCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueInCartBadge": "{count} in cart",
+  "@boutiqueInCartBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueLevelBadge": "by level",
+  "boutiquePriceRange": "{min} – {max}",
+  "@boutiquePriceRange": {
+    "placeholders": {
+      "min": { "type": "String" },
+      "max": { "type": "String" }
+    }
+  },
+  "boutiqueGridReminder": "Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.",
+  "boutiqueCartTitle": "Cart",
+  "boutiqueCartEmpty": "Cart is empty. Tap an item to add it.",
+  "boutiqueCartClear": "Empty the cart",
+  "boutiqueTotalLabel": "Total to collect",
+  "boutiqueCollectAction": "Collect in cash",
+  "boutiquePriceUnresolved": "Price unresolved",
+  "boutiqueLevelRequired": "Level required…",
+  "boutiqueBeneficiaryPlaceholder": "Recipient",
+  "boutiqueSizeLabel": "Size",
+  "boutiqueLineMeta": "{unitPrice} × {quantity}",
+  "@boutiqueLineMeta": {
+    "placeholders": {
+      "unitPrice": { "type": "String" },
+      "quantity": { "type": "int" }
+    }
+  },
+  "boutiquePayerSection": "Payer",
+  "boutiquePayerKnownBadge": "Known payer",
+  "boutiquePayerPhoneLabel": "Phone",
+  "boutiquePayerLastNameLabel": "Last name",
+  "boutiquePayerMiddleNameLabel": "Middle name",
+  "boutiquePayerFirstNameLabel": "First name",
+  "boutiquePayerReceiptNotice": "The receipt is in the payer's name; recipients are attached to each line.",
+  "boutiquePayerUnknownNotice": "Unknown number — this payer will be added to the directory with the sale.",
+  "boutiqueBlockersPrefix": "Still missing:",
+  "boutiqueBlockerEmptyCart": "Cart is empty",
+  "boutiqueBlockerLastName": "Last name",
+  "boutiqueBlockerMiddleName": "Middle name",
+  "boutiqueBlockerFirstName": "First name",
+  "boutiqueBlockerPhone": "Payer's phone",
+  "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
+  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
+  "@boutiqueBlockerLinesWithoutLevel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueBlockerMixedCurrency": "Mixed currencies",
+  "boutiqueEmptyCatalogTitle": "No item in the catalogue",
+  "boutiqueEmptyCatalogMessage": "The shop has no item yet. Create one in the catalogue to be able to make a sale.",
+  "boutiqueWithheldCatalogTitle": "Catalogue not shared",
+  "boutiqueWithheldCatalogMessage": "Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.",
+  "boutiqueNoMatchTitle": "No matching item",
+  "boutiqueNoMatchMessage": "Nothing for “{query}” in “{family}”. Broaden the search.",
+  "@boutiqueNoMatchMessage": {
+    "placeholders": {
+      "query": { "type": "String" },
+      "family": { "type": "String" }
+    }
+  },
+  "boutiqueNoMatchMessageAll": "Nothing for “{query}”. Broaden the search.",
+  "@boutiqueNoMatchMessageAll": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueResetFilters": "Reset filters",
+  "boutiqueUnsellableNotice": "{count, plural, one{1 item in this catalogue cannot be sold from this version of the app.} other{{count} items in this catalogue cannot be sold from this version of the app.}}",
+  "@boutiqueUnsellableNotice": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueErrorNetworkTitle": "No connection",
+  "boutiqueErrorNetwork": "The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.",
+  "boutiqueErrorUnauthorizedTitle": "Session expired",
+  "boutiqueErrorUnauthorized": "Sign in again to resume the till. The cart is kept.",
+  "boutiqueErrorForbiddenTitle": "Access denied",
+  "boutiqueErrorForbidden": "Your account lacks the rights to run the shop till. Contact the head office.",
+  "boutiqueErrorServerTitle": "Catalogue unreadable",
+  "boutiqueErrorServer": "The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.",
+  "boutiqueErrorRetry": "Try again",
+  "boutiqueErrorReconnect": "Sign in again",
+  "boutiqueErrorIncidentCode": "Incident code: {code}",
+  "@boutiqueErrorIncidentCode": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryEyebrow": "Line recipient",
+  "boutiqueBeneficiaryTitle": "Pick a student",
+  "boutiqueBeneficiaryHint": "The student's level resolves the price automatically — you never enter an amount.",
+  "boutiqueBeneficiarySearchLabel": "Last name, middle name or first name",
+  "boutiqueBeneficiarySearchPlaceholder": "e.g. Dylan Ndombo",
+  "boutiqueBeneficiaryTooShort": "Type at least 2 letters, or switch to “By level”.",
+  "boutiqueBeneficiaryNoResult": "No student matches “{query}”. Check the spelling or search by level.",
+  "@boutiqueBeneficiaryNoResult": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryPickLevel": "Pick a level to list its students.",
+  "boutiqueBeneficiaryLevelEmpty": "No student enrolled at this level.",
+  "boutiqueBeneficiaryNotSynced": "Enrolment not synced yet — sell by level, without a recipient: the price is the same.",
+  "boutiqueBeneficiaryNoLevel": "This enrolment carries no level — sell by level, without a recipient.",
+  "boutiqueBeneficiaryLoadFailed": "The student list could not be read.",
+  "boutiquePayerDirectoryCount": "Already in the directory · {count, plural, one{1 sale} other{{count} sales}}",
+  "@boutiquePayerDirectoryCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiquePayerUse": "Use",
+  "boutiqueConfirmEyebrow": "Cash collection",
+  "boutiqueConfirmTitle": "Confirm the sale",
+  "boutiqueConfirmPayer": "Payer",
+  "boutiqueConfirmPhone": "Phone",
+  "boutiqueConfirmArticles": "Items",
+  "boutiqueConfirmMethod": "Method",
+  "boutiqueConfirmMethodCash": "Cash",
+  "boutiqueConfirmAmountReceived": "Amount received",
+  "boutiqueConfirmNotice": "The total is paid in one go: no partial payment, no shop debt.",
+  "boutiqueConfirmNewPayerPrefix": "This payer is new: their number and identity join the directory with the sale.",
+  "boutiqueConfirmOfflineSuffix": "Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.",
+  "boutiqueConfirmCancel": "Cancel",
+  "boutiqueConfirmAction": "Collect {total}",
+  "@boutiqueConfirmAction": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleRecorded": "Sale collected · {total}",
+  "@boutiqueSaleRecorded": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleFailed": "The sale could not be recorded. Nothing was collected — try again.",
+  "editiqueViewerSaleReceiptTitle": "Sale receipt",
+  "documentsHintSaleReceipt": "Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student's file.",
+  "boutiqueTicketTitle": "Sale receipt — Shop",
+  "boutiqueTicketProvisionalBanner": "Provisional document",
+  "boutiqueTicketProvisionalNotice": "Final receipt sealed on sync.",
+  "boutiqueTicketSealedNotice": "Sealed receipt — valid discharge",
+  "boutiqueTicketPayerLabel": "PAYER:",
+  "boutiqueTicketPhoneLabel": "Tel.",
+  "boutiqueTicketCashierLabel": "Cashier:",
+  "boutiqueTicketTotalLabel": "TOTAL",
+  "boutiqueTicketCashReceivedLabel": "Cash received",
+  "boutiqueTicketRemainingLabel": "Remaining",
+  "boutiqueTicketBeneficiaryPrefix": "for",
+  "boutiqueTicketSizePrefix": "Sz.",
+  "boutiqueTicketUnitSuffix": "/ea",
+  "boutiqueTicketNoRefundNotice": "No refund once the item is handed over.",
+  "boutiqueReceiptBannerTitle": "Sale collected · {total}",
+  "@boutiqueReceiptBannerTitle": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerProvisional": "{reference} · provisional, will be sealed on sync",
+  "@boutiqueReceiptBannerProvisional": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerSealed": "{reference} · sealed",
+  "@boutiqueReceiptBannerSealed": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptPrint": "Print",
+  "boutiqueReceiptNewSale": "New sale",
+  "boutiqueReceiptPrintFailed": "The ticket could not be printed. The sale is recorded — you can try again.",
+  "boutiqueReceiptPrinted": "Ticket printed."
 }

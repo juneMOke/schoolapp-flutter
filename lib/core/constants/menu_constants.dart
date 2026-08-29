@@ -34,6 +34,11 @@ class MenuConstants {
   static const String facturationsId = 'facturations';
   static const String feeControlId = 'controle-frais';
 
+  /// La caisse boutique (ADR-020). Sous Finances et non dans un menu propre :
+  /// c'est de l'encaissement, tenu par la même personne au même guichet — mais
+  /// une caisse ÉTANCHE à la scolarité, qui n'alimente aucun poste dû.
+  static const String boutiqueId = 'boutique';
+
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
   static const String classesListId = 'classes-list';

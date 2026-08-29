@@ -19,7 +19,24 @@ enum EditiqueDocumentType {
   accountStatement('RL'),
 
   /// Quitus financier horodaté — `POST /finance/students/{studentId}/quitus`.
-  financialClearance('QT');
+  financialClearance('QT'),
+
+  /// Reçu de vente boutique (ADR-020).
+  ///
+  /// **La seule pièce de l'imprimerie qui ne désigne aucun élève** : son sujet
+  /// est le payeur, un nom libre, et les bénéficiaires vivent sur les lignes.
+  ///
+  /// ⚠️ **Le front ne l'émet jamais à la vente** : c'est le push de la vente qui
+  /// la scelle, côté serveur et en best-effort. Le front la *réclame*
+  /// (`POST /boutique/sales/{id}/receipt`) quand l'ACK est revenu sans elle, ou
+  /// pour réimprimer.
+  ///
+  /// ⚠️ Elle est **délibérément absente du delta éditique** : ce flux n'est
+  /// gardé que par `editique.read`, que le secrétariat détient sans aucun droit
+  /// boutique — et un reçu de vente porte le payeur, son téléphone, les prénoms
+  /// des enfants et les prix. La caisse apprend ses reçus par le delta des
+  /// ventes.
+  saleReceipt('RV');
 
   /// Préfixe du numéro de pièce côté serveur (`ETL-AI-2526-000087`).
   final String code;
@@ -37,7 +54,8 @@ enum EditiqueDocumentType {
   bool get isArchived =>
       this == enrollmentAttestation ||
       this == notePerception ||
-      this == paymentReceipt;
+      this == paymentReceipt ||
+      this == saleReceipt;
 
   /// Vrai si un rejeu après échec est **sûr**.
   ///

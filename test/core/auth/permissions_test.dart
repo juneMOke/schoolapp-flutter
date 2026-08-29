@@ -26,6 +26,10 @@ void main() {
     Perm.financeGridRead: 'finance.grid.read',
     Perm.financeGridWrite: 'finance.grid.write',
     Perm.financeStatsRead: 'finance.stats.read',
+    Perm.boutiqueCatalogRead: 'boutique.catalog.read',
+    Perm.boutiqueCatalogWrite: 'boutique.catalog.write',
+    Perm.boutiqueSaleRead: 'boutique.sale.read',
+    Perm.boutiqueSaleWrite: 'boutique.sale.write',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -66,7 +70,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 50 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 54 permissions (v1.8 du catalogue serveur)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -76,7 +80,13 @@ void main() {
     // 49 → 50 : `school.provisioning.write`, semée par la migration serveur V93
     // sur `DIRECTOR` et `SUPER_ADMIN`. Ajout également, et le serveur la connaît
     // déjà — c'est le client qui rattrapait son retard.
-    expect(Perm.values, hasLength(50));
+    //
+    // 50 → 54 : les quatre droits de la caisse boutique (ADR-020), semés sur
+    // tout le parc par la migration serveur V97. La scission `catalog` / `sale`
+    // n'est pas une symétrie de façade : la comptabilité tient la caisse et LIT
+    // le catalogue, mais ne l'écrit pas — sinon l'interdiction du prix libre à
+    // la caisse ne garderait plus rien.
+    expect(Perm.values, hasLength(54));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

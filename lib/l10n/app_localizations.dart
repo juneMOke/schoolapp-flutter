@@ -1616,6 +1616,12 @@ abstract class AppLocalizations {
   /// **'Fee control'**
   String get subMenuFeeControl;
 
+  /// Shop till sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get subMenuBoutique;
+
   /// Organization sub-menu title
   ///
   /// In en, this message translates to:
@@ -11681,6 +11687,684 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enrolment not readable on this tablet: the certificate is unavailable here.'**
   String get documentsBlockedEnrollmentUnreadableNotice;
+
+  /// No description provided for @boutiqueEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance ▸ Shop'**
+  String get boutiqueEyebrow;
+
+  /// No description provided for @boutiqueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop — Till'**
+  String get boutiqueTitle;
+
+  /// No description provided for @boutiqueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sale of school items. No debt, no balance.'**
+  String get boutiqueSubtitle;
+
+  /// No description provided for @boutiqueSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search an item or a code…'**
+  String get boutiqueSearchPlaceholder;
+
+  /// No description provided for @boutiqueFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get boutiqueFilterAll;
+
+  /// No description provided for @boutiqueFamilyUniforme.
+  ///
+  /// In en, this message translates to:
+  /// **'Uniform'**
+  String get boutiqueFamilyUniforme;
+
+  /// No description provided for @boutiqueFamilyFournitures.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies'**
+  String get boutiqueFamilyFournitures;
+
+  /// No description provided for @boutiqueFamilyActivites.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get boutiqueFamilyActivites;
+
+  /// No description provided for @boutiqueFamilyActes.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get boutiqueFamilyActes;
+
+  /// No description provided for @boutiqueArticleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueArticleCount(int count);
+
+  /// No description provided for @boutiqueInCartBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in cart'**
+  String boutiqueInCartBadge(int count);
+
+  /// No description provided for @boutiqueLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'by level'**
+  String get boutiqueLevelBadge;
+
+  /// No description provided for @boutiquePriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} – {max}'**
+  String boutiquePriceRange(String min, String max);
+
+  /// No description provided for @boutiqueGridReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.'**
+  String get boutiqueGridReminder;
+
+  /// No description provided for @boutiqueCartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get boutiqueCartTitle;
+
+  /// No description provided for @boutiqueCartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart is empty. Tap an item to add it.'**
+  String get boutiqueCartEmpty;
+
+  /// No description provided for @boutiqueCartClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the cart'**
+  String get boutiqueCartClear;
+
+  /// No description provided for @boutiqueTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to collect'**
+  String get boutiqueTotalLabel;
+
+  /// No description provided for @boutiqueCollectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect in cash'**
+  String get boutiqueCollectAction;
+
+  /// No description provided for @boutiquePriceUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price unresolved'**
+  String get boutiquePriceUnresolved;
+
+  /// No description provided for @boutiqueLevelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Level required…'**
+  String get boutiqueLevelRequired;
+
+  /// No description provided for @boutiqueBeneficiaryPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get boutiqueBeneficiaryPlaceholder;
+
+  /// No description provided for @boutiqueSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get boutiqueSizeLabel;
+
+  /// No description provided for @boutiqueLineMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{unitPrice} × {quantity}'**
+  String boutiqueLineMeta(String unitPrice, int quantity);
+
+  /// No description provided for @boutiquePayerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiquePayerSection;
+
+  /// No description provided for @boutiquePayerKnownBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Known payer'**
+  String get boutiquePayerKnownBadge;
+
+  /// No description provided for @boutiquePayerPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiquePayerPhoneLabel;
+
+  /// No description provided for @boutiquePayerLastNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get boutiquePayerLastNameLabel;
+
+  /// No description provided for @boutiquePayerMiddleNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get boutiquePayerMiddleNameLabel;
+
+  /// No description provided for @boutiquePayerFirstNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get boutiquePayerFirstNameLabel;
+
+  /// No description provided for @boutiquePayerReceiptNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt is in the payer\'s name; recipients are attached to each line.'**
+  String get boutiquePayerReceiptNotice;
+
+  /// No description provided for @boutiquePayerUnknownNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown number — this payer will be added to the directory with the sale.'**
+  String get boutiquePayerUnknownNotice;
+
+  /// No description provided for @boutiqueBlockersPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Still missing:'**
+  String get boutiqueBlockersPrefix;
+
+  /// No description provided for @boutiqueBlockerEmptyCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart is empty'**
+  String get boutiqueBlockerEmptyCart;
+
+  /// No description provided for @boutiqueBlockerLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get boutiqueBlockerLastName;
+
+  /// No description provided for @boutiqueBlockerMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get boutiqueBlockerMiddleName;
+
+  /// No description provided for @boutiqueBlockerFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get boutiqueBlockerFirstName;
+
+  /// No description provided for @boutiqueBlockerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer\'s phone'**
+  String get boutiqueBlockerPhone;
+
+  /// No description provided for @boutiqueBlockerPhoneIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete phone'**
+  String get boutiqueBlockerPhoneIncomplete;
+
+  /// No description provided for @boutiqueBlockerLinesWithoutLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 line without a level} other{{count} lines without a level}}'**
+  String boutiqueBlockerLinesWithoutLevel(int count);
+
+  /// No description provided for @boutiqueBlockerMixedCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed currencies'**
+  String get boutiqueBlockerMixedCurrency;
+
+  /// No description provided for @boutiqueEmptyCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No item in the catalogue'**
+  String get boutiqueEmptyCatalogTitle;
+
+  /// No description provided for @boutiqueEmptyCatalogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop has no item yet. Create one in the catalogue to be able to make a sale.'**
+  String get boutiqueEmptyCatalogMessage;
+
+  /// No description provided for @boutiqueWithheldCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue not shared'**
+  String get boutiqueWithheldCatalogTitle;
+
+  /// No description provided for @boutiqueWithheldCatalogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.'**
+  String get boutiqueWithheldCatalogMessage;
+
+  /// No description provided for @boutiqueNoMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching item'**
+  String get boutiqueNoMatchTitle;
+
+  /// No description provided for @boutiqueNoMatchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for “{query}” in “{family}”. Broaden the search.'**
+  String boutiqueNoMatchMessage(String query, String family);
+
+  /// No description provided for @boutiqueNoMatchMessageAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for “{query}”. Broaden the search.'**
+  String boutiqueNoMatchMessageAll(String query);
+
+  /// No description provided for @boutiqueResetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get boutiqueResetFilters;
+
+  /// No description provided for @boutiqueUnsellableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item in this catalogue cannot be sold from this version of the app.} other{{count} items in this catalogue cannot be sold from this version of the app.}}'**
+  String boutiqueUnsellableNotice(int count);
+
+  /// No description provided for @boutiqueErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get boutiqueErrorNetworkTitle;
+
+  /// No description provided for @boutiqueErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.'**
+  String get boutiqueErrorNetwork;
+
+  /// No description provided for @boutiqueErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get boutiqueErrorUnauthorizedTitle;
+
+  /// No description provided for @boutiqueErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to resume the till. The cart is kept.'**
+  String get boutiqueErrorUnauthorized;
+
+  /// No description provided for @boutiqueErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get boutiqueErrorForbiddenTitle;
+
+  /// No description provided for @boutiqueErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account lacks the rights to run the shop till. Contact the head office.'**
+  String get boutiqueErrorForbidden;
+
+  /// No description provided for @boutiqueErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue unreadable'**
+  String get boutiqueErrorServerTitle;
+
+  /// No description provided for @boutiqueErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.'**
+  String get boutiqueErrorServer;
+
+  /// No description provided for @boutiqueErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get boutiqueErrorRetry;
+
+  /// No description provided for @boutiqueErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get boutiqueErrorReconnect;
+
+  /// No description provided for @boutiqueErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String boutiqueErrorIncidentCode(String code);
+
+  /// No description provided for @boutiqueBeneficiaryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Line recipient'**
+  String get boutiqueBeneficiaryEyebrow;
+
+  /// No description provided for @boutiqueBeneficiaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a student'**
+  String get boutiqueBeneficiaryTitle;
+
+  /// No description provided for @boutiqueBeneficiaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The student\'s level resolves the price automatically — you never enter an amount.'**
+  String get boutiqueBeneficiaryHint;
+
+  /// No description provided for @boutiqueBeneficiarySearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name, middle name or first name'**
+  String get boutiqueBeneficiarySearchLabel;
+
+  /// No description provided for @boutiqueBeneficiarySearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Dylan Ndombo'**
+  String get boutiqueBeneficiarySearchPlaceholder;
+
+  /// No description provided for @boutiqueBeneficiaryTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least 2 letters, or switch to “By level”.'**
+  String get boutiqueBeneficiaryTooShort;
+
+  /// No description provided for @boutiqueBeneficiaryNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{query}”. Check the spelling or search by level.'**
+  String boutiqueBeneficiaryNoResult(String query);
+
+  /// No description provided for @boutiqueBeneficiaryPickLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level to list its students.'**
+  String get boutiqueBeneficiaryPickLevel;
+
+  /// No description provided for @boutiqueBeneficiaryLevelEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled at this level.'**
+  String get boutiqueBeneficiaryLevelEmpty;
+
+  /// No description provided for @boutiqueBeneficiaryNotSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not synced yet — sell by level, without a recipient: the price is the same.'**
+  String get boutiqueBeneficiaryNotSynced;
+
+  /// No description provided for @boutiqueBeneficiaryNoLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment carries no level — sell by level, without a recipient.'**
+  String get boutiqueBeneficiaryNoLevel;
+
+  /// No description provided for @boutiqueBeneficiaryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The student list could not be read.'**
+  String get boutiqueBeneficiaryLoadFailed;
+
+  /// No description provided for @boutiquePayerDirectoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in the directory · {count, plural, one{1 sale} other{{count} sales}}'**
+  String boutiquePayerDirectoryCount(int count);
+
+  /// No description provided for @boutiquePayerUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get boutiquePayerUse;
+
+  /// No description provided for @boutiqueConfirmEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collection'**
+  String get boutiqueConfirmEyebrow;
+
+  /// No description provided for @boutiqueConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the sale'**
+  String get boutiqueConfirmTitle;
+
+  /// No description provided for @boutiqueConfirmPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiqueConfirmPayer;
+
+  /// No description provided for @boutiqueConfirmPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiqueConfirmPhone;
+
+  /// No description provided for @boutiqueConfirmArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get boutiqueConfirmArticles;
+
+  /// No description provided for @boutiqueConfirmMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get boutiqueConfirmMethod;
+
+  /// No description provided for @boutiqueConfirmMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get boutiqueConfirmMethodCash;
+
+  /// No description provided for @boutiqueConfirmAmountReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get boutiqueConfirmAmountReceived;
+
+  /// No description provided for @boutiqueConfirmNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The total is paid in one go: no partial payment, no shop debt.'**
+  String get boutiqueConfirmNotice;
+
+  /// No description provided for @boutiqueConfirmNewPayerPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'This payer is new: their number and identity join the directory with the sale.'**
+  String get boutiqueConfirmNewPayerPrefix;
+
+  /// No description provided for @boutiqueConfirmOfflineSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.'**
+  String get boutiqueConfirmOfflineSuffix;
+
+  /// No description provided for @boutiqueConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get boutiqueConfirmCancel;
+
+  /// No description provided for @boutiqueConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {total}'**
+  String boutiqueConfirmAction(String total);
+
+  /// No description provided for @boutiqueSaleRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected · {total}'**
+  String boutiqueSaleRecorded(String total);
+
+  /// No description provided for @boutiqueSaleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The sale could not be recorded. Nothing was collected — try again.'**
+  String get boutiqueSaleFailed;
+
+  /// No description provided for @editiqueViewerSaleReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt'**
+  String get editiqueViewerSaleReceiptTitle;
+
+  /// No description provided for @documentsHintSaleReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student\'s file.'**
+  String get documentsHintSaleReceipt;
+
+  /// No description provided for @boutiqueTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt — Shop'**
+  String get boutiqueTicketTitle;
+
+  /// No description provided for @boutiqueTicketProvisionalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional document'**
+  String get boutiqueTicketProvisionalBanner;
+
+  /// No description provided for @boutiqueTicketProvisionalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Final receipt sealed on sync.'**
+  String get boutiqueTicketProvisionalNotice;
+
+  /// No description provided for @boutiqueTicketSealedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed receipt — valid discharge'**
+  String get boutiqueTicketSealedNotice;
+
+  /// No description provided for @boutiqueTicketPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PAYER:'**
+  String get boutiqueTicketPayerLabel;
+
+  /// No description provided for @boutiqueTicketPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tel.'**
+  String get boutiqueTicketPhoneLabel;
+
+  /// No description provided for @boutiqueTicketCashierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier:'**
+  String get boutiqueTicketCashierLabel;
+
+  /// No description provided for @boutiqueTicketTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get boutiqueTicketTotalLabel;
+
+  /// No description provided for @boutiqueTicketCashReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash received'**
+  String get boutiqueTicketCashReceivedLabel;
+
+  /// No description provided for @boutiqueTicketRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get boutiqueTicketRemainingLabel;
+
+  /// No description provided for @boutiqueTicketBeneficiaryPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'for'**
+  String get boutiqueTicketBeneficiaryPrefix;
+
+  /// No description provided for @boutiqueTicketSizePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Sz.'**
+  String get boutiqueTicketSizePrefix;
+
+  /// No description provided for @boutiqueTicketUnitSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/ea'**
+  String get boutiqueTicketUnitSuffix;
+
+  /// No description provided for @boutiqueTicketNoRefundNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'No refund once the item is handed over.'**
+  String get boutiqueTicketNoRefundNotice;
+
+  /// No description provided for @boutiqueReceiptBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected · {total}'**
+  String boutiqueReceiptBannerTitle(String total);
+
+  /// No description provided for @boutiqueReceiptBannerProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'{reference} · provisional, will be sealed on sync'**
+  String boutiqueReceiptBannerProvisional(String reference);
+
+  /// No description provided for @boutiqueReceiptBannerSealed.
+  ///
+  /// In en, this message translates to:
+  /// **'{reference} · sealed'**
+  String boutiqueReceiptBannerSealed(String reference);
+
+  /// No description provided for @boutiqueReceiptPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get boutiqueReceiptPrint;
+
+  /// No description provided for @boutiqueReceiptNewSale.
+  ///
+  /// In en, this message translates to:
+  /// **'New sale'**
+  String get boutiqueReceiptNewSale;
+
+  /// No description provided for @boutiqueReceiptPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket could not be printed. The sale is recorded — you can try again.'**
+  String get boutiqueReceiptPrintFailed;
+
+  /// No description provided for @boutiqueReceiptPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed.'**
+  String get boutiqueReceiptPrinted;
 }
 
 class _AppLocalizationsDelegate

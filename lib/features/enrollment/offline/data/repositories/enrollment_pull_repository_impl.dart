@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
@@ -67,7 +68,8 @@ String preEnrollmentsCursorKey(String schoolId) =>
 ///    rien de neuf (curseur conservé).
 ///
 /// La grille tarifaire du bundle est déléguée à la Facturation via le seam
-/// [replaceTariffs].
+/// [replaceTariffs], et le catalogue boutique à la caisse via
+/// [replaceBoutiqueArticles].
 class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   final EnrollmentPullApi api;
   final EnrollmentReferentialDao referentialDao;
@@ -78,6 +80,16 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     List<String> academicYearIds,
   )
   replaceTariffs;
+
+  /// Seam vers la Boutique, pour la même raison que [replaceTariffs] : le
+  /// bundle porte une section `boutiqueArticles`, mais `enrollment` n'a rien à
+  /// savoir du catalogue d'une caisse. L'isolation du module (invariant I-4)
+  /// commencerait à se défaire par un import direct.
+  final Future<void> Function(
+    List<BoutiqueArticleLocalModel> articles,
+    List<String> academicYearIds,
+  )
+  replaceBoutiqueArticles;
   final SyncMetaDao syncMetaDao;
   final Map<String, dynamic> requiredAuth;
   final CurrentUserContext currentUser;
@@ -107,6 +119,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.seedDao,
     required this.reconciliationDao,
     required this.replaceTariffs,
+    required this.replaceBoutiqueArticles,
     required this.syncMetaDao,
     required this.requiredAuth,
     required this.currentUser,
@@ -410,7 +423,8 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       if (body.current.feeTariffs != null) body.current,
       if (body.previous?.feeTariffs != null) body.previous!,
     ];
-    if (tariffBundles.isEmpty) return upserted;
+    final boutiqueApplied = await _applyBoutiqueCatalog(body);
+    if (tariffBundles.isEmpty) return upserted + boutiqueApplied;
 
     final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
     final yearIds = <String>{
@@ -439,7 +453,64 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           .toList(growable: false),
       yearIds,
     );
-    return upserted + allTariffs.length;
+    return upserted + allTariffs.length + boutiqueApplied;
+  }
+
+  /// Catalogue boutique du bundle → caisse, par le seam
+  /// [replaceBoutiqueArticles].
+  ///
+  /// **Même caviardage que la grille tarifaire, même piège.** Le serveur envoie
+  /// `boutiqueArticles: null` — et non `[]` — à qui n'a pas
+  /// `boutique.catalog.read`. Replier l'un sur l'autre ferait lire à la purge
+  /// scopée un ordre de tout supprimer : sur une tablette partagée, un pull par
+  /// un compte sans ce droit effacerait le catalogue dont dépend la caisse d'un
+  /// autre poste. On ne purge donc QUE les années dont le bundle a réellement
+  /// porté sa section — une section présente mais vide reste, elle, un ordre de
+  /// purge légitime (l'école n'a pas d'article).
+  ///
+  /// Un article dont l'année ne serait pas celle de son bundle est **ignoré**
+  /// plutôt que rangé sous l'année du bundle : la purge est scopée par année, et
+  /// l'y ranger d'office rendrait le catalogue d'une autre année invisible sans
+  /// qu'aucune requête n'échoue.
+  Future<int> _applyBoutiqueCatalog(ReferentialBundleDto body) async {
+    final bundles = <ReferentialYearBundleDto>[
+      if (body.current.boutiqueArticles != null) body.current,
+      if (body.previous?.boutiqueArticles != null) body.previous!,
+    ];
+    if (bundles.isEmpty) return 0;
+
+    final articles = [
+      for (final bundle in bundles)
+        for (final article in bundle.boutiqueArticles!)
+          BoutiqueArticleLocalModel(
+            id: article.id,
+            academicYearId: article.academicYearId,
+            code: article.code,
+            label: article.label,
+            // Le `?? ''` n'est PAS un repli sur une famille : la colonne est
+            // NOT NULL, et une chaîne vide ne correspond à aucune constante,
+            // donc `ArticleFamily.fromWire` rendra `null` et l'article se
+            // rangera à part. Écrire ici « FOURNITURES » lui donnerait une
+            // place et une couleur que personne n'a choisies.
+            family: article.family ?? '',
+            pricingMode: article.pricingMode ?? '',
+            unitPriceInCents: article.unitPriceInCents,
+            levelPrices: {
+              for (final price in article.levelPrices)
+                price.schoolLevelId: price.priceInCents,
+            },
+            currency: article.currency,
+          ),
+    ];
+    final yearIds = <String>{
+      for (final bundle in bundles) bundle.academicYear.id,
+    }.toList(growable: false);
+
+    await replaceBoutiqueArticles([
+      for (final article in articles)
+        if (yearIds.contains(article.academicYearId)) article,
+    ], yearIds);
+    return articles.length;
   }
 
   /// Bilan d'un pull : `notModified` si aucune ligne locale écrite (curseur tout

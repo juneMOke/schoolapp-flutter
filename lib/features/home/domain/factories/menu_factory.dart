@@ -151,6 +151,11 @@ class MenuFactory {
           title: l10n.subMenuFeeControl,
           route: AppRoutesNames.feeControl,
         ),
+        SubMenuItem(
+          id: MenuConstants.boutiqueId,
+          title: l10n.subMenuBoutique,
+          route: AppRoutesNames.boutique,
+        ),
       ],
     );
   }

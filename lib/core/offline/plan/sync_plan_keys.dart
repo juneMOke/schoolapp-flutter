@@ -27,7 +27,7 @@
 /// **Tout `PullHandler` enregistré est couvert par exactement une [planKeyOf],
 /// et toute clé de [kSyncPlanAliases] couvre au moins un handler.**
 ///
-/// Dix-huit clés pour dix-neuf handlers, et ce n'est pas une erreur de compte :
+/// Dix-neuf clés pour vingt handlers, et ce n'est pas une erreur de compte :
 /// `enrollment.snapshots` porte **deux** ressources, l'hydratant et le delta.
 /// Le serveur les a fusionnées sous une clé unique précisément pour rendre leur
 /// arête d'ordre indéclarable, donc incassable.
@@ -76,7 +76,7 @@
 /// flux, seulement un **préfixe** de clé de curseur. Voir [isCursorKeyPrefix].
 library;
 
-/// Les dix-huit clés de flux du contrat, dans l'ordre de l'énumération serveur.
+/// Les dix-neuf clés de flux du contrat, dans l'ordre de l'énumération serveur.
 ///
 /// Recopiées de `SyncStream.java`, **jamais** du catalogue en Markdown : le
 /// catalogue est un relevé daté, l'énumération est ce qui est déployé.
@@ -101,6 +101,11 @@ abstract final class SyncPlanKeys {
   static const String academicsEvaluations = 'academics.evaluations';
   static const String academicsNotes = 'academics.notes';
   static const String editiqueDocuments = 'editique.documents';
+
+  /// Les ventes de la caisse boutique (ADR-020). **Jamais entraînée** : aucun
+  /// autre module ne lit ces ventes, et l'isolation stricte du module est
+  /// précisément ce qu'une arête d'entraînement commencerait à défaire.
+  static const String boutiqueSales = 'boutique.sales';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -129,6 +134,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
   SyncPlanKeys.academicsNotes: ['academics_notes'],
   SyncPlanKeys.editiqueDocuments: ['editique_documents'],
+  SyncPlanKeys.boutiqueSales: ['boutique_sales'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -203,6 +209,7 @@ Set<String> pullCompletionSubjectsOf(String resource) {
 /// | `academics_grades_referential` | `academics_grades_referential@<uid>` |
 /// | `schedule_sessions` | `schedule_sessions@<uid>` |
 /// | `editique_documents` | `editique_documents@<schoolId>` |
+/// | `boutique_sales` | `boutique_sales@<schoolId>` |
 /// | `enrollment_reenrollment_cohort` | `…:<yearId>`, nue en repli |
 ///
 /// D'où une liste explicite plutôt qu'une déduction depuis `mode`/`scope` : la
@@ -217,5 +224,9 @@ const Set<String> _kCursorKeyPrefixes = {
   'academics_grades_referential',
   'schedule_sessions',
   'editique_documents',
+  // Scopé école pour la même raison que l'éditique : une tablette réaffectée
+  // ferait sinon reprendre le second établissement au point où le premier
+  // s'était arrêté, et ses ventes ne descendraient jamais.
+  'boutique_sales',
   'enrollment_reenrollment_cohort',
 };

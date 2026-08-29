@@ -40,6 +40,18 @@ enum Perm {
   financeGridWrite('finance.grid.write'),
   financeStatsRead('finance.stats.read'),
 
+  // ── Boutique ──────────────────────────────────────────────────────────────
+  // Caisse point-de-vente (ADR-020). La scission `catalog` / `sale` reprend
+  // celle de `finance.grid` / `finance.payment`, et pour la même raison : si
+  // celui qui tient la caisse pouvait réécrire la grille, l'interdiction du
+  // prix libre ne garderait plus rien — il suffirait de baisser le prix, de
+  // vendre, puis de le remettre. Le catalogue reste à la direction ; la
+  // comptabilité le LIT sans pouvoir l'écrire.
+  boutiqueCatalogRead('boutique.catalog.read'),
+  boutiqueCatalogWrite('boutique.catalog.write'),
+  boutiqueSaleRead('boutique.sale.read'),
+  boutiqueSaleWrite('boutique.sale.write'),
+
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),
   classroomWrite('classroom.write'),

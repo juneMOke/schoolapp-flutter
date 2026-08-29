@@ -203,6 +203,26 @@ class AppColors {
   static const accueilConfigurationAccent = Color(0xFF4A5568);
   static const accueilConfigurationSoft = Color(0xFFEEF0F3);
 
+  // Boutique — caisse point-de-vente (ADR-020, spec §19).
+  //
+  // Un accent par famille d'article : il colore le médaillon de la carte, la
+  // pastille de l'intitulé de groupe et la bordure au survol. Trois des quatre
+  // sont déjà des couleurs de marque — seul l'aubergine des actes administratifs
+  // est propre à cet écran, et il est choisi pour ne se confondre avec aucune
+  // sémantique existante (ni succès, ni alerte, ni information).
+  static const boutiqueUniformeAccent = bleuArdoise; // #1B4D6B
+  static const boutiqueFournituresAccent = vertSavane; // #3D6B4A
+  static const boutiqueActivitesAccent = terreCuite; // #B85C2C
+  static const boutiqueActesAccent = Color(0xFF7B4B94);
+
+  // Ligne dont le prix n'est pas résolu. Le fond et la bordure portent l'ambre
+  // du `warning`, mais le TEXTE prend un ambre foncé : #D68910 sur fond clair
+  // tombe sous 4,5:1, et la mention « Prix à résoudre » doit se lire — la
+  // couleur seule n'est jamais suffisante (spec §18).
+  static const boutiqueUnresolvedSurface = Color(0xFFFBF1DF);
+  static const boutiqueUnresolvedBorder = Color(0xFFD68910);
+  static const boutiqueUnresolvedText = Color(0xFF8A5A08);
+
   // Relationship colours
   static const relationshipFather = Color(0xFF1976D2);
   static const relationshipMother = Color(0xFFC2185B);

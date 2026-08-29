@@ -741,6 +741,113 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
+  if (upTo(31)) {
+    // v31 — Boutique (ADR-020) : le catalogue et les ventes de la caisse
+    // point-de-vente.
+    //
+    // Création pure, aucune donnée touchée : le module n'existait pas. Un
+    // appareil qui monte de v30 reçoit quatre tables vides, et le premier
+    // bundle référentiel remplit le catalogue.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'ref_boutique_articles')) {
+      await db.execute('''
+        CREATE TABLE ref_boutique_articles (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          code TEXT NOT NULL,
+          label TEXT NOT NULL,
+          family TEXT NOT NULL,
+          pricing_mode TEXT NOT NULL,
+          unit_price_in_cents INTEGER,
+          currency TEXT NOT NULL,
+          updated_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_ref_boutique_articles_scope '
+        'ON ref_boutique_articles(school_id, academic_year_id)',
+      );
+    }
+    if (!await _hasTable(db, 'ref_boutique_article_level_prices')) {
+      await db.execute('''
+        CREATE TABLE ref_boutique_article_level_prices (
+          article_id TEXT NOT NULL,
+          school_level_id TEXT NOT NULL,
+          price_in_cents INTEGER NOT NULL,
+          PRIMARY KEY (article_id, school_level_id)
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_ref_boutique_level_prices_article '
+        'ON ref_boutique_article_level_prices(article_id)',
+      );
+    }
+    if (!await _hasTable(db, 'boutique_sales')) {
+      await db.execute('''
+        CREATE TABLE boutique_sales (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          payer_first_name TEXT,
+          payer_last_name TEXT NOT NULL,
+          payer_middle_name TEXT,
+          payer_phone_number TEXT,
+          payer_name TEXT,
+          collected_by_id TEXT,
+          collected_by_name TEXT,
+          total_in_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL,
+          sold_at TEXT NOT NULL,
+          receipt_document_id TEXT,
+          receipt_number TEXT,
+          device_id TEXT,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+          sync_error TEXT,
+          synced_at INTEGER,
+          server_updated_at TEXT,
+          updated_at INTEGER NOT NULL DEFAULT 0,
+          ticket_printed_at INTEGER
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_scope '
+        'ON boutique_sales(school_id, academic_year_id)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_sold_at ON boutique_sales(sold_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_sync ON boutique_sales(sync_status)',
+      );
+    }
+    if (!await _hasTable(db, 'boutique_sale_lines')) {
+      await db.execute('''
+        CREATE TABLE boutique_sale_lines (
+          id TEXT PRIMARY KEY,
+          sale_id TEXT NOT NULL,
+          article_id TEXT NOT NULL,
+          article_label TEXT NOT NULL,
+          article_code TEXT,
+          beneficiary_student_id TEXT,
+          beneficiary_name TEXT,
+          school_level_id TEXT,
+          size TEXT,
+          quantity INTEGER NOT NULL,
+          unit_price_in_cents INTEGER NOT NULL,
+          line_total_in_cents INTEGER NOT NULL,
+          catalog_price_in_cents INTEGER,
+          position INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_boutique_sale_lines_sale '
+        'ON boutique_sale_lines(sale_id)',
+      );
+    }
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.

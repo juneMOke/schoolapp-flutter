@@ -1010,6 +1010,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuFeeControl => 'Contrôle des frais';
 
   @override
+  String get subMenuBoutique => 'Boutique';
+
+  @override
   String get subMenuOrganization => 'Composition\ndes classes';
 
   @override
@@ -7173,4 +7176,427 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentsBlockedEnrollmentUnreadableNotice =>
       'Dossier illisible sur cette tablette : l\'attestation n\'est pas disponible ici.';
+
+  @override
+  String get boutiqueEyebrow => 'Finances ▸ Boutique';
+
+  @override
+  String get boutiqueTitle => 'Boutique — Caisse';
+
+  @override
+  String get boutiqueSubtitle =>
+      'Vente au comptant d\'articles de l\'école. Aucune dette, aucun reste.';
+
+  @override
+  String get boutiqueSearchPlaceholder => 'Chercher un article ou un code…';
+
+  @override
+  String get boutiqueFilterAll => 'Toutes';
+
+  @override
+  String get boutiqueFamilyUniforme => 'Uniforme';
+
+  @override
+  String get boutiqueFamilyFournitures => 'Fournitures';
+
+  @override
+  String get boutiqueFamilyActivites => 'Activités';
+
+  @override
+  String get boutiqueFamilyActes => 'Actes';
+
+  @override
+  String boutiqueArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueInCartBadge(int count) {
+    return '$count au panier';
+  }
+
+  @override
+  String get boutiqueLevelBadge => 'par niveau';
+
+  @override
+  String boutiquePriceRange(String min, String max) {
+    return '$min – $max';
+  }
+
+  @override
+  String get boutiqueGridReminder =>
+      'Les prix viennent toujours de la grille du catalogue. À la caisse, on désigne un élève ou un niveau — jamais un montant.';
+
+  @override
+  String get boutiqueCartTitle => 'Panier';
+
+  @override
+  String get boutiqueCartEmpty =>
+      'Panier vide. Touchez un article pour l\'ajouter.';
+
+  @override
+  String get boutiqueCartClear => 'Vider le panier';
+
+  @override
+  String get boutiqueTotalLabel => 'Total à encaisser';
+
+  @override
+  String get boutiqueCollectAction => 'Encaisser en espèces';
+
+  @override
+  String get boutiquePriceUnresolved => 'Prix à résoudre';
+
+  @override
+  String get boutiqueLevelRequired => 'Niveau requis…';
+
+  @override
+  String get boutiqueBeneficiaryPlaceholder => 'Bénéficiaire';
+
+  @override
+  String get boutiqueSizeLabel => 'Taille';
+
+  @override
+  String boutiqueLineMeta(String unitPrice, int quantity) {
+    return '$unitPrice × $quantity';
+  }
+
+  @override
+  String get boutiquePayerSection => 'Payeur';
+
+  @override
+  String get boutiquePayerKnownBadge => 'Payeur connu';
+
+  @override
+  String get boutiquePayerPhoneLabel => 'Téléphone';
+
+  @override
+  String get boutiquePayerLastNameLabel => 'Nom';
+
+  @override
+  String get boutiquePayerMiddleNameLabel => 'Post-nom';
+
+  @override
+  String get boutiquePayerFirstNameLabel => 'Prénom';
+
+  @override
+  String get boutiquePayerReceiptNotice =>
+      'Le reçu est nominatif au payeur ; les élèves bénéficiaires s\'attachent à chaque ligne.';
+
+  @override
+  String get boutiquePayerUnknownNotice =>
+      'Numéro inconnu — ce payeur sera enregistré au répertoire avec la vente.';
+
+  @override
+  String get boutiqueBlockersPrefix => 'À compléter :';
+
+  @override
+  String get boutiqueBlockerEmptyCart => 'Panier vide';
+
+  @override
+  String get boutiqueBlockerLastName => 'Nom';
+
+  @override
+  String get boutiqueBlockerMiddleName => 'Post-nom';
+
+  @override
+  String get boutiqueBlockerFirstName => 'Prénom';
+
+  @override
+  String get boutiqueBlockerPhone => 'Téléphone du payeur';
+
+  @override
+  String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';
+
+  @override
+  String boutiqueBlockerLinesWithoutLevel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lignes sans niveau',
+      one: '1 ligne sans niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
+
+  @override
+  String get boutiqueEmptyCatalogTitle => 'Aucun article au catalogue';
+
+  @override
+  String get boutiqueEmptyCatalogMessage =>
+      'La boutique n\'a pas encore d\'article. Créez-en un dans le catalogue pour pouvoir encaisser une vente.';
+
+  @override
+  String get boutiqueWithheldCatalogTitle => 'Catalogue non communiqué';
+
+  @override
+  String get boutiqueWithheldCatalogMessage =>
+      'Votre compte n\'a pas le droit de lire le catalogue de la boutique. Demandez-le à la direction : sans lui, aucun article ne peut être vendu depuis ce poste.';
+
+  @override
+  String get boutiqueNoMatchTitle => 'Aucun article ne correspond';
+
+  @override
+  String boutiqueNoMatchMessage(String query, String family) {
+    return 'Rien pour « $query » dans « $family ». Élargissez la recherche.';
+  }
+
+  @override
+  String boutiqueNoMatchMessageAll(String query) {
+    return 'Rien pour « $query ». Élargissez la recherche.';
+  }
+
+  @override
+  String get boutiqueResetFilters => 'Réinitialiser les filtres';
+
+  @override
+  String boutiqueUnsellableNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count articles de ce catalogue ne sont pas vendables depuis cette version de l\'application.',
+      one:
+          '1 article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get boutiqueErrorNetwork =>
+      'Le catalogue n\'a pas pu être lu. Le panier en cours est conservé : une coupure ne fait pas perdre une vente en composition.';
+
+  @override
+  String get boutiqueErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get boutiqueErrorUnauthorized =>
+      'Reconnectez-vous pour reprendre la caisse. Le panier est conservé.';
+
+  @override
+  String get boutiqueErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get boutiqueErrorForbidden =>
+      'Votre compte n\'a pas les droits requis pour tenir la caisse boutique. Contactez la direction.';
+
+  @override
+  String get boutiqueErrorServerTitle => 'Catalogue illisible';
+
+  @override
+  String get boutiqueErrorServer =>
+      'Le catalogue local n\'a pas pu être lu. Réessayez ; s\'il ne revient pas, une synchronisation le reconstruira.';
+
+  @override
+  String get boutiqueErrorRetry => 'Réessayer';
+
+  @override
+  String get boutiqueErrorReconnect => 'Se reconnecter';
+
+  @override
+  String boutiqueErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get boutiqueBeneficiaryEyebrow => 'Bénéficiaire de la ligne';
+
+  @override
+  String get boutiqueBeneficiaryTitle => 'Désigner un élève';
+
+  @override
+  String get boutiqueBeneficiaryHint =>
+      'Le niveau de l\'élève résout le prix automatiquement — vous ne saisissez jamais de montant.';
+
+  @override
+  String get boutiqueBeneficiarySearchLabel => 'Nom, post-nom ou prénom';
+
+  @override
+  String get boutiqueBeneficiarySearchPlaceholder => 'ex. Dylan Ndombo';
+
+  @override
+  String get boutiqueBeneficiaryTooShort =>
+      'Tapez au moins 2 lettres, ou passez par « Par niveau ».';
+
+  @override
+  String boutiqueBeneficiaryNoResult(String query) {
+    return 'Aucun élève ne correspond à « $query ». Vérifiez l\'orthographe ou cherchez par niveau.';
+  }
+
+  @override
+  String get boutiqueBeneficiaryPickLevel =>
+      'Choisissez un niveau pour voir ses élèves.';
+
+  @override
+  String get boutiqueBeneficiaryLevelEmpty =>
+      'Aucun élève inscrit à ce niveau.';
+
+  @override
+  String get boutiqueBeneficiaryNotSynced =>
+      'Inscription pas encore synchronisée — vendez au niveau, sans bénéficiaire : le prix est le même.';
+
+  @override
+  String get boutiqueBeneficiaryNoLevel =>
+      'Cette inscription ne porte pas de niveau — vendez au niveau, sans bénéficiaire.';
+
+  @override
+  String get boutiqueBeneficiaryLoadFailed =>
+      'La liste des élèves n\'a pas pu être lue.';
+
+  @override
+  String boutiquePayerDirectoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+    );
+    return 'Déjà au répertoire · $_temp0';
+  }
+
+  @override
+  String get boutiquePayerUse => 'Utiliser';
+
+  @override
+  String get boutiqueConfirmEyebrow => 'Encaissement comptant';
+
+  @override
+  String get boutiqueConfirmTitle => 'Confirmer la vente';
+
+  @override
+  String get boutiqueConfirmPayer => 'Payeur';
+
+  @override
+  String get boutiqueConfirmPhone => 'Téléphone';
+
+  @override
+  String get boutiqueConfirmArticles => 'Articles';
+
+  @override
+  String get boutiqueConfirmMethod => 'Moyen';
+
+  @override
+  String get boutiqueConfirmMethodCash => 'Espèces';
+
+  @override
+  String get boutiqueConfirmAmountReceived => 'Montant reçu';
+
+  @override
+  String get boutiqueConfirmNotice =>
+      'Le total est payé en une fois : pas de paiement partiel, pas de créance boutique.';
+
+  @override
+  String get boutiqueConfirmNewPayerPrefix =>
+      'Ce payeur est nouveau : son numéro et son identité entrent au répertoire avec la vente.';
+
+  @override
+  String get boutiqueConfirmOfflineSuffix =>
+      'Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.';
+
+  @override
+  String get boutiqueConfirmCancel => 'Annuler';
+
+  @override
+  String boutiqueConfirmAction(String total) {
+    return 'Encaisser $total';
+  }
+
+  @override
+  String boutiqueSaleRecorded(String total) {
+    return 'Vente encaissée · $total';
+  }
+
+  @override
+  String get boutiqueSaleFailed =>
+      'La vente n\'a pas pu être enregistrée. Rien n\'a été encaissé — réessayez.';
+
+  @override
+  String get editiqueViewerSaleReceiptTitle => 'Reçu de vente';
+
+  @override
+  String get documentsHintSaleReceipt =>
+      'Reçu d\'une vente de la boutique. Il ne concerne ni le minerval ni les frais scolaires, et se retrouve depuis la caisse — pas depuis le dossier d\'un élève.';
+
+  @override
+  String get boutiqueTicketTitle => 'Reçu de vente — Boutique';
+
+  @override
+  String get boutiqueTicketProvisionalBanner => 'Document provisoire';
+
+  @override
+  String get boutiqueTicketProvisionalNotice =>
+      'Reçu définitif scellé à la synchronisation.';
+
+  @override
+  String get boutiqueTicketSealedNotice => 'Reçu scellé — vaut quittance';
+
+  @override
+  String get boutiqueTicketPayerLabel => 'PAYEUR :';
+
+  @override
+  String get boutiqueTicketPhoneLabel => 'Tél.';
+
+  @override
+  String get boutiqueTicketCashierLabel => 'Caissier :';
+
+  @override
+  String get boutiqueTicketTotalLabel => 'TOTAL';
+
+  @override
+  String get boutiqueTicketCashReceivedLabel => 'Espèces reçues';
+
+  @override
+  String get boutiqueTicketRemainingLabel => 'Reste à payer';
+
+  @override
+  String get boutiqueTicketBeneficiaryPrefix => 'pour';
+
+  @override
+  String get boutiqueTicketSizePrefix => 'T.';
+
+  @override
+  String get boutiqueTicketUnitSuffix => '/u';
+
+  @override
+  String get boutiqueTicketNoRefundNotice =>
+      'Aucun remboursement après remise de l\'article.';
+
+  @override
+  String boutiqueReceiptBannerTitle(String total) {
+    return 'Vente encaissée · $total';
+  }
+
+  @override
+  String boutiqueReceiptBannerProvisional(String reference) {
+    return '$reference · provisoire, sera scellé à la synchro';
+  }
+
+  @override
+  String boutiqueReceiptBannerSealed(String reference) {
+    return '$reference · scellé';
+  }
+
+  @override
+  String get boutiqueReceiptPrint => 'Imprimer';
+
+  @override
+  String get boutiqueReceiptNewSale => 'Nouvelle vente';
+
+  @override
+  String get boutiqueReceiptPrintFailed =>
+      'Le ticket n\'a pas pu être imprimé. La vente est enregistrée — vous pouvez réessayer.';
+
+  @override
+  String get boutiqueReceiptPrinted => 'Ticket imprimé.';
 }

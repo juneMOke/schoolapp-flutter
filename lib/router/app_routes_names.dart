@@ -27,6 +27,8 @@ class AppRoutesNames {
 
   static const String feeControl = '/finances/${MenuConstants.feeControlId}';
 
+  static const String boutique = '/finances/${MenuConstants.boutiqueId}';
+
   static String facturationDetailPath({
     required String studentId,
     required String academicYearId,

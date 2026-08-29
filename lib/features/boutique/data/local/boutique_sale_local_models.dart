@@ -1,0 +1,176 @@
+/// Une vente telle qu'elle est stockée localement.
+///
+/// `id` est l'uuid **client** honoré par le serveur : il n'y a pas de
+/// `client_uuid` séparé comme sur `payments`, parce qu'il n'y a rien à remapper.
+class BoutiqueSaleLocalModel {
+  final String id;
+  final String schoolId;
+  final String academicYearId;
+  final String payerLastName;
+  final String? payerMiddleName;
+  final String? payerFirstName;
+  final String? payerPhoneNumber;
+
+  /// Nom composé — **dérivé serveur** sur le fil, mais recopié ici pour que le
+  /// ticket imprimé au guichet dise la même chose que le reçu scellé, sans
+  /// attendre la synchro.
+  final String? payerName;
+
+  final String? collectedById;
+  final String? collectedByName;
+  final int totalInCents;
+  final String currency;
+
+  /// Heure **métier** de la vente (ISO-8601). C'est elle qui décide de quelle
+  /// caisse la vente relève, pas sa date d'arrivée au serveur.
+  final String soldAt;
+
+  final String? receiptDocumentId;
+  final String? receiptNumber;
+  final String? deviceId;
+  final String syncStatus;
+  final int updatedAt;
+
+  const BoutiqueSaleLocalModel({
+    required this.id,
+    required this.schoolId,
+    required this.academicYearId,
+    required this.payerLastName,
+    this.payerMiddleName,
+    this.payerFirstName,
+    this.payerPhoneNumber,
+    this.payerName,
+    this.collectedById,
+    this.collectedByName,
+    required this.totalInCents,
+    required this.currency,
+    required this.soldAt,
+    this.receiptDocumentId,
+    this.receiptNumber,
+    this.deviceId,
+    this.syncStatus = 'PENDING_SYNC',
+    required this.updatedAt,
+  });
+
+  Map<String, Object?> toMap() => {
+    'id': id,
+    'school_id': schoolId,
+    'academic_year_id': academicYearId,
+    'payer_last_name': payerLastName,
+    'payer_middle_name': payerMiddleName,
+    'payer_first_name': payerFirstName,
+    'payer_phone_number': payerPhoneNumber,
+    'payer_name': payerName,
+    'collected_by_id': collectedById,
+    'collected_by_name': collectedByName,
+    'total_in_cents': totalInCents,
+    'currency': currency,
+    'sold_at': soldAt,
+    'receipt_document_id': receiptDocumentId,
+    'receipt_number': receiptNumber,
+    'device_id': deviceId,
+    'sync_status': syncStatus,
+    'updated_at': updatedAt,
+  };
+
+  factory BoutiqueSaleLocalModel.fromMap(Map<String, Object?> map) =>
+      BoutiqueSaleLocalModel(
+        id: map['id'] as String,
+        schoolId: map['school_id'] as String,
+        academicYearId: map['academic_year_id'] as String,
+        payerLastName: map['payer_last_name'] as String,
+        payerMiddleName: map['payer_middle_name'] as String?,
+        payerFirstName: map['payer_first_name'] as String?,
+        payerPhoneNumber: map['payer_phone_number'] as String?,
+        payerName: map['payer_name'] as String?,
+        collectedById: map['collected_by_id'] as String?,
+        collectedByName: map['collected_by_name'] as String?,
+        totalInCents: (map['total_in_cents'] as num).toInt(),
+        currency: map['currency'] as String,
+        soldAt: map['sold_at'] as String,
+        receiptDocumentId: map['receipt_document_id'] as String?,
+        receiptNumber: map['receipt_number'] as String?,
+        deviceId: map['device_id'] as String?,
+        syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
+        updatedAt: (map['updated_at'] as num?)?.toInt() ?? 0,
+      );
+}
+
+/// Une ligne du panier, figée à la vente.
+class BoutiqueSaleLineLocalModel {
+  final String id;
+  final String saleId;
+  final String articleId;
+
+  /// **Recopié**, jamais joint : le catalogue est remplacé en bloc à chaque
+  /// bundle, et une vente d'hier doit rester lisible après le retrait de son
+  /// article.
+  final String articleLabel;
+
+  final String? articleCode;
+  final String? beneficiaryStudentId;
+  final String? beneficiaryName;
+  final String? schoolLevelId;
+  final String? size;
+  final int quantity;
+  final int unitPriceInCents;
+  final int lineTotalInCents;
+
+  /// Ce que le catalogue serveur disait — `null` quand il ne disait plus rien.
+  /// **Jamais zéro**, qui se relirait « il disait gratuit ».
+  final int? catalogPriceInCents;
+
+  final int position;
+
+  const BoutiqueSaleLineLocalModel({
+    required this.id,
+    required this.saleId,
+    required this.articleId,
+    required this.articleLabel,
+    this.articleCode,
+    this.beneficiaryStudentId,
+    this.beneficiaryName,
+    this.schoolLevelId,
+    this.size,
+    required this.quantity,
+    required this.unitPriceInCents,
+    required this.lineTotalInCents,
+    this.catalogPriceInCents,
+    this.position = 0,
+  });
+
+  Map<String, Object?> toMap() => {
+    'id': id,
+    'sale_id': saleId,
+    'article_id': articleId,
+    'article_label': articleLabel,
+    'article_code': articleCode,
+    'beneficiary_student_id': beneficiaryStudentId,
+    'beneficiary_name': beneficiaryName,
+    'school_level_id': schoolLevelId,
+    'size': size,
+    'quantity': quantity,
+    'unit_price_in_cents': unitPriceInCents,
+    'line_total_in_cents': lineTotalInCents,
+    'catalog_price_in_cents': catalogPriceInCents,
+    'position': position,
+  };
+
+  factory BoutiqueSaleLineLocalModel.fromMap(Map<String, Object?> map) =>
+      BoutiqueSaleLineLocalModel(
+        id: map['id'] as String,
+        saleId: map['sale_id'] as String,
+        articleId: map['article_id'] as String,
+        articleLabel: map['article_label'] as String,
+        articleCode: map['article_code'] as String?,
+        beneficiaryStudentId: map['beneficiary_student_id'] as String?,
+        beneficiaryName: map['beneficiary_name'] as String?,
+        schoolLevelId: map['school_level_id'] as String?,
+        size: map['size'] as String?,
+        quantity: (map['quantity'] as num).toInt(),
+        unitPriceInCents: (map['unit_price_in_cents'] as num).toInt(),
+        lineTotalInCents: (map['line_total_in_cents'] as num).toInt(),
+        catalogPriceInCents: (map['catalog_price_in_cents'] as num?)?.toInt(),
+        position: (map['position'] as num?)?.toInt() ?? 0,
+      );
+}

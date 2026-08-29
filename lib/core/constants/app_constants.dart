@@ -432,7 +432,13 @@ class AppConstants {
   // état nominal. Scopé `(school_id, user_id)` : la conception « une tablette,
   // une école » a déjà produit dix flux à curseur nu, et celui-ci aboutit à une
   // écriture irréversible.
-  static const int offlineDbSchemaVersion = 30;
+  // v31 (2026-08-29) : Boutique (ADR-020) — quatre tables, deux de référentiel
+  // (`ref_boutique_articles` + sa grille, remplacées en bloc par le bundle) et
+  // deux d'argent (`boutique_sales`, `boutique_sale_lines`). Création pure, sans
+  // backfill : le module n'existait pas. `catalog_price_in_cents` est nullable
+  // et JAMAIS zéro — `null` dit « le catalogue ne disait plus rien », zéro
+  // dirait « il disait gratuit ».
+  static const int offlineDbSchemaVersion = 31;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -553,6 +559,34 @@ class AppConstants {
   /// À ne pas confondre avec [createPaymentEndpoint], le POST **en ligne** du
   /// module Facturation (forme à plat), qui reste en service hors offline.
   static const String syncPaymentsEndpoint = '/api/v1/sync/payments';
+
+  // ── Offline sync — Boutique (caisse point-de-vente, ADR-020) ──
+  /// Agrégat vente boutique :
+  ///  - **POST** = push idempotent de la vente et de son panier en un appel
+  ///    (uuid client honoré sur `sale.id`) — exige `boutique.sale.write` **et**
+  ///    `editique.write`, la soumission scellant le reçu ;
+  ///  - **GET** = pull KEYSET des ventes de l'année, dont celles de l'autre
+  ///    guichet, jeton `cursor` opaque, 304 applicatif.
+  ///
+  /// **Le catalogue ne passe pas par ici** : il descend dans la section
+  /// `boutiqueArticles` de [syncReferentialEndpoint], caviardée par
+  /// `boutique.catalog.read`.
+  static const String syncBoutiqueSalesEndpoint = '/api/v1/sync/boutique/sales';
+
+  /// Réclame (ou réimprime) le reçu de vente scellé — rend les **octets** du
+  /// PDF et pose l'en-tête `X-Document-Id`.
+  ///
+  /// Le scellement fait au push est *best-effort* : l'ACK peut rendre
+  /// `documents: []` sur un 201 parfaitement en ligne. Cette route est le
+  /// rattrapage immédiat ; le pull des ventes est le rattrapage différé.
+  /// Idempotente sous verrou — la rejouer ne brûle pas un second numéro.
+  static const String emitBoutiqueSaleReceiptEndpoint =
+      '/api/v1/boutique/sales/{saleId}/receipt';
+
+  /// Écarts constatés à l'ingestion des ventes (`PRICE_DIVERGENCE`,
+  /// `CATALOG_UNRESOLVABLE`), fenêtre `since` — écran de contrôle, hors V1.
+  static const String boutiqueSaleAnomaliesEndpoint =
+      '/api/v1/boutique/sales/anomalies';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

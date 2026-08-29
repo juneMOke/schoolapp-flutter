@@ -127,6 +127,10 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
         );
       // Le reçu ne s'émet jamais d'ici : sa ligne est éteinte par la matrice.
       case EditiqueDocumentType.paymentReceipt:
+      // Le reçu de VENTE non plus, et pour une raison de plus : il ne désigne
+      // aucun élève, donc rien de ce dossier ne pourrait l'émettre. Il se
+      // réclame depuis la caisse, sur l'identifiant de la vente.
+      case EditiqueDocumentType.saleReceipt:
         break;
     }
   }
@@ -140,6 +144,7 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
       l10n.editiqueViewerNotePerceptionTitle,
     EditiqueDocumentType.paymentReceipt => l10n.editiqueViewerReceiptTitle,
     EditiqueDocumentType.accountStatement => l10n.editiqueViewerStatementTitle,
+    EditiqueDocumentType.saleReceipt => l10n.editiqueViewerSaleReceiptTitle,
     EditiqueDocumentType.financialClearance =>
       l10n.editiqueViewerClearanceTitle,
   };

@@ -50,7 +50,7 @@ class _RecordingPullCoordinator extends PullCoordinator {
   }
 }
 
-/// Les dix-huit constantes de [SyncPlanKeys], référencées **par leur symbole**.
+/// Les dix-neuf constantes de [SyncPlanKeys], référencées **par leur symbole**.
 ///
 /// Une liste de chaînes recopiées ne prouverait rien ; ces références-là ne
 /// compilent que tant que les constantes existent, et la comparaison
@@ -68,6 +68,7 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.financePayments,
   SyncPlanKeys.attendanceRecords,
   SyncPlanKeys.disciplineCases,
+  SyncPlanKeys.boutiqueSales,
   SyncPlanKeys.scheduleTimeSlots,
   SyncPlanKeys.scheduleSessions,
   SyncPlanKeys.academicsGradesReferential,
@@ -77,16 +78,20 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.editiqueDocuments,
 ];
 
-/// Les sept ressources dont la clé de curseur réelle porte un suffixe.
+/// Les huit ressources dont la clé de curseur réelle porte un suffixe.
 ///
 /// ⚠️ Déduire cette liste de `mode`/`scope` du plan serait **faux**. Le contrat
 /// annonce « FANOUT ⇒ préfixe » ; la règle est incomplète :
 ///  - `editique.documents` est KEYSET + school et porte pourtant `@<schoolId>`
 ///    (`'$kEditiqueDocumentsResource@$schoolId'`) ;
 ///  - `enrollment.reenrollment-cohort` est COHORT + school et porte
-///    `:<yearId>` (`'$cohortResource:$currentYearId'`, clé nue en repli).
+///    `:<yearId>` (`'$cohortResource:$currentYearId'`, clé nue en repli) ;
+///  - `boutique.sales` est KEYSET + school et porte `@<schoolId>`, pour la même
+///    raison que l'éditique : une tablette réaffectée reprendrait sinon au
+///    curseur de l'école précédente, et les ventes de la nouvelle ne
+///    descendraient jamais.
 /// Interroger `sync_meta` sur la ressource nue rendrait `null` pour ces
-/// sept-là, et conclure « ce flux n'a jamais été tiré » serait un contresens.
+/// huit-là, et conclure « ce flux n'a jamais été tiré » serait un contresens.
 const Set<String> _kSuffixedCursorResources = {
   'academics_cours',
   'academics_evaluations',
@@ -94,6 +99,7 @@ const Set<String> _kSuffixedCursorResources = {
   'academics_grades_referential',
   'schedule_sessions',
   'editique_documents',
+  'boutique_sales',
   'enrollment_reenrollment_cohort',
 };
 
@@ -216,17 +222,17 @@ void main() {
     );
   });
 
-  // ── Le compte : dix-huit clés, dix-neuf ressources ────────────────────────
+  // ── Le compte : dix-neuf clés, vingt ressources ───────────────────────────
 
-  test('dix-huit clés de plan pour dix-neuf ressources de handler', () {
-    expect(kSyncPlanAliases.length, 18);
-    expect(registeredResources.length, 19);
+  test('dix-neuf clés de plan pour vingt ressources de handler', () {
+    expect(kSyncPlanAliases.length, 19);
+    expect(registeredResources.length, 20);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 19);
-    // Dix-neuf ressources aliasées ET dix-neuf handlers : les deux ensembles
+    expect(aliased.length, 20);
+    // Vingt ressources aliasées ET vingt handlers : les deux ensembles
     // coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
   });
@@ -243,12 +249,12 @@ void main() {
   });
 
   test(
-    'les dix-huit constantes déclarées sont exactement les clés de la table',
+    'les dix-neuf constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 18);
+      expect(_kDeclaredPlanKeys.length, 19);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        18,
+        19,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -380,7 +386,7 @@ void main() {
 
   // ── isCursorKeyPrefix ─────────────────────────────────────────────────────
 
-  test('isCursorKeyPrefix : vrai pour les sept ressources à suffixe', () {
+  test('isCursorKeyPrefix : vrai pour les huit ressources à suffixe', () {
     // Cf. la docstring de [_kSuffixedCursorResources] : la déduction depuis
     // `mode`/`scope` échouerait sur `editique_documents` et
     // `enrollment_reenrollment_cohort`, d'où une liste explicite.
@@ -391,7 +397,7 @@ void main() {
         reason: '« $resource » porte un suffixe de curseur',
       );
     }
-    // Les sept sont bien des ressources réellement enregistrées, pas des
+    // Les huit sont bien des ressources réellement enregistrées, pas des
     // chaînes mortes.
     expect(
       registeredResources.toSet().containsAll(_kSuffixedCursorResources),

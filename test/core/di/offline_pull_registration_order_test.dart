@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
@@ -39,7 +40,7 @@ import '../../features/offline_full_db.dart';
 /// `PullCoordinator` qui **retient l'ordre d'enregistrement**.
 ///
 /// C'est le seul moyen d'observer cet ordre depuis un test : le registre est
-/// privé, et `pullAll()` est inutilisable ici (les dix-neuf handlers réels
+/// privé, et `pullAll()` est inutilisable ici (les vingt handlers réels
 /// taperaient le réseau). L'ordre retenu est bien celui d'exécution — le
 /// coordinateur itère `_handlers.values`, et une `LinkedHashMap` rend ses
 /// valeurs dans l'ordre d'insertion des clés.
@@ -232,11 +233,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('dix-neuf handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(19));
+    test('vingt handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(20));
       expect(
         order().toSet(),
-        hasLength(19),
+        hasLength(20),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -256,7 +257,7 @@ void main() {
     // Les dix-huit autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
-    test('les dix-huit autres flux déclarent tous une exigence de lecture', () {
+    test('les dix-neuf autres flux déclarent tous une exigence de lecture', () {
       final sansExigence = coordinator.registered
           .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
           .map((h) => h.resource)
@@ -265,7 +266,7 @@ void main() {
       // Une exigence vide serait pire qu'un oubli : `canAccess` refuse sur
       // exigence vide, le flux ne descendrait plus jamais.
       expect(sansExigence, isEmpty);
-      expect(coordinator.registered.where((h) => !h.isBaseline), hasLength(18));
+      expect(coordinator.registered.where((h) => !h.isBaseline), hasLength(19));
     });
 
     // Les autres handlers, notamment ceux du même module, ne doivent pas
@@ -292,7 +293,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les dix-neuf
   // ressources attendues sont là, nommément.
-  test('les dix-neuf ressources attendues sont toutes enregistrées', () {
+  test('les vingt ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       EnrollmentPullRepositoryImpl.referentialResource,
       EnrollmentPullRepositoryImpl.cohortResource,
@@ -313,6 +314,7 @@ void main() {
       kAcademicsEvaluationsResourcePrefix,
       kAcademicsNotesResourcePrefix,
       kEditiqueDocumentsResource,
+      kBoutiqueSalesResource,
     });
   });
 
