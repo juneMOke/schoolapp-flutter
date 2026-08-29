@@ -841,6 +841,90 @@
   "@configurationTariffNone": {
       "description": "Message quand un niveau ne porte aucun tarif"
   },
+  "configurationFeeTypesUnavailableTitle": "Types de frais indisponibles",
+  "@configurationFeeTypesUnavailableTitle": {
+      "description": "État vide de l'étape 4 quand le référentiel des types de frais n'a pas pu être servi"
+  },
+  "configurationFeeTypesUnavailableMessage": "Le référentiel des types de frais n'a pas été chargé. Rechargez-le pour saisir les frais de l'école.",
+  "@configurationFeeTypesUnavailableMessage": {
+      "description": "Message de l'état vide de l'étape 4 sans types de frais servis"
+  },
+  "configurationLoadingA11yLabel": "Chargement des données de l'étape",
+  "@configurationLoadingA11yLabel": {
+      "description": "Libellé annoncé aux lecteurs d'écran pendant que les squelettes de l'assistant de mise en service sont affichés"
+  },
+  "configurationErrorNetworkTitle": "Connexion perdue",
+  "@configurationErrorNetworkTitle": {
+      "description": "Titre de l'erreur réseau dans l'assistant"
+  },
+  "configurationErrorNetworkMessage": "La configuration n'a pas été envoyée. Vérifiez votre connexion, puis réessayez.",
+  "@configurationErrorNetworkMessage": {
+      "description": "Message de l'erreur réseau"
+  },
+  "configurationErrorSessionTitle": "Votre session a expiré",
+  "@configurationErrorSessionTitle": {
+      "description": "Titre du 401"
+  },
+  "configurationErrorSessionMessage": "Reconnectez-vous pour reprendre là où vous en étiez. Votre saisie est conservée.",
+  "@configurationErrorSessionMessage": {
+      "description": "Message du 401 — le brouillon local survit à une session expirée"
+  },
+  "configurationErrorForbiddenTitle": "Accès refusé",
+  "@configurationErrorForbiddenTitle": {
+      "description": "Titre du 403"
+  },
+  "configurationErrorForbiddenMessage": "Seul le promoteur peut configurer l'école. Contactez l'administrateur de votre établissement.",
+  "@configurationErrorForbiddenMessage": {
+      "description": "Message du 403 — aucun réessai possible"
+  },
+  "configurationErrorServerTitle": "Le serveur n'a pas pu enregistrer",
+  "@configurationErrorServerTitle": {
+      "description": "Titre du 500"
+  },
+  "configurationErrorServerMessage": "Une panne est survenue. Réessayez, et citez le code ci-dessous au support si elle persiste.",
+  "@configurationErrorServerMessage": {
+      "description": "Message du 500"
+  },
+  "configurationErrorRateTitle": "Trop de demandes",
+  "@configurationErrorRateTitle": {
+      "description": "Titre du 429"
+  },
+  "configurationErrorRateMessage": "Le serveur demande une pause. Patientez quelques instants avant de reprendre.",
+  "@configurationErrorRateMessage": {
+      "description": "Message du 429 — surtout pas de « Réessayer »"
+  },
+  "configurationErrorYearExistsTitle": "Cette année scolaire existe déjà",
+  "@configurationErrorYearExistsTitle": {
+      "description": "Titre du refus 400 BUSINESS_RULE"
+  },
+  "configurationErrorYearExistsMessage": "Le paramétrage est un geste d'amorçage : il n'ajoute pas une année à une école qui en a déjà une. Reprenez à l'étape de l'année pour en déclarer une autre.",
+  "@configurationErrorYearExistsMessage": {
+      "description": "Message du refus « année déjà existante »"
+  },
+  "configurationErrorYearExistsAction": "Revenir à l'année",
+  "@configurationErrorYearExistsAction": {
+      "description": "Action du refus « année déjà existante » — repart à l'étape 2 avec un brouillon purgé"
+  },
+  "configurationErrorRetry": "Réessayer",
+  "@configurationErrorRetry": {
+      "description": "Action de récupération générique"
+  },
+  "configurationErrorSignIn": "Se reconnecter",
+  "@configurationErrorSignIn": {
+      "description": "Action du 401"
+  },
+  "configurationErrorContact": "Contacter l'administrateur",
+  "@configurationErrorContact": {
+      "description": "Action du 403"
+  },
+  "configurationErrorIncident": "Code incident",
+  "@configurationErrorIncident": {
+      "description": "Libellé du code d'incident à citer au support"
+  },
+  "configurationErrorReloadCatalog": "Recharger le référentiel",
+  "@configurationErrorReloadCatalog": {
+      "description": "Action d'un 422 « code inconnu » — le catalogue en mémoire est périmé"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",

@@ -788,6 +788,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationTariffNone => 'No tariff on this level';
 
   @override
+  String get configurationFeeTypesUnavailableTitle => 'Fee types unavailable';
+
+  @override
+  String get configurationFeeTypesUnavailableMessage =>
+      'The fee type reference was not loaded. Reload it to enter the school fees.';
+
+  @override
+  String get configurationLoadingA11yLabel => 'Loading the step data';
+
+  @override
+  String get configurationErrorNetworkTitle => 'Connection lost';
+
+  @override
+  String get configurationErrorNetworkMessage =>
+      'The setup was not sent. Check your connection, then try again.';
+
+  @override
+  String get configurationErrorSessionTitle => 'Your session has expired';
+
+  @override
+  String get configurationErrorSessionMessage =>
+      'Sign in again to pick up where you left off. Your entries are kept.';
+
+  @override
+  String get configurationErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get configurationErrorForbiddenMessage =>
+      'Only the school owner can set up the school. Contact your school administrator.';
+
+  @override
+  String get configurationErrorServerTitle => 'The server could not save';
+
+  @override
+  String get configurationErrorServerMessage =>
+      'Something broke. Try again, and quote the code below to support if it persists.';
+
+  @override
+  String get configurationErrorRateTitle => 'Too many requests';
+
+  @override
+  String get configurationErrorRateMessage =>
+      'The server is asking for a pause. Wait a few moments before carrying on.';
+
+  @override
+  String get configurationErrorYearExistsTitle =>
+      'This academic year already exists';
+
+  @override
+  String get configurationErrorYearExistsMessage =>
+      'Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.';
+
+  @override
+  String get configurationErrorYearExistsAction => 'Back to the year';
+
+  @override
+  String get configurationErrorRetry => 'Try again';
+
+  @override
+  String get configurationErrorSignIn => 'Sign in again';
+
+  @override
+  String get configurationErrorContact => 'Contact the administrator';
+
+  @override
+  String get configurationErrorIncident => 'Incident code';
+
+  @override
+  String get configurationErrorReloadCatalog => 'Reload the referential';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

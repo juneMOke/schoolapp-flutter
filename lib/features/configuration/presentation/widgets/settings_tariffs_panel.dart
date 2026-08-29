@@ -4,11 +4,13 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_tariff.dart';
 import 'package:school_app_flutter/features/configuration/domain/fee_amount.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
+import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_error_view.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/tariff_edit_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -45,7 +47,12 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
   List<FeeTariff>? _tariffs;
   List<FeeCodeOption> _feeCodes = const <FeeCodeOption>[];
   bool _loading = false;
-  bool _failed = false;
+
+  /// L'échec tel qu'il est venu, pas un drapeau.
+  ///
+  /// Un booléen forçait l'écran à parler de réseau quoi qu'il arrive — et à
+  /// proposer « Réessayer » sur un 403, qu'aucun nouvel appel ne lèvera.
+  Failure? _failure;
 
   /// Une écriture est en vol : les actions se ferment. Ici, contrairement au
   /// brouillon de l'assistant, chaque geste part au serveur — un double envoi
@@ -56,7 +63,7 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
     if (_loading) return;
     setState(() {
       _loading = true;
-      _failed = false;
+      _failure = null;
     });
 
     final repository = getIt<ProvisioningRepository>();
@@ -70,9 +77,9 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
 
     _feeCodes = codes.getOrElse(() => const <FeeCodeOption>[]);
     result.fold(
-      (_) => setState(() {
+      (failure) => setState(() {
         _loading = false;
-        _failed = true;
+        _failure = failure;
       }),
       (tariffs) => setState(() {
         _loading = false;
@@ -93,22 +100,31 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
       },
       children: [
         if (_loading)
-          const Padding(
-            padding: EdgeInsets.all(AppSpacing.md),
-            child: LinearProgressIndicator(),
-          )
-        else if (_failed)
-          EteeloErrorResult(
-            type: EteeloErrorType.network,
-            fullWidthCard: true,
-            title: l10n.splashErrorTitle,
-            message: l10n.splashErrorMessage,
-            primaryAction: FilledButton.icon(
-              onPressed: _load,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(l10n.splashErrorRetry),
+          // Un squelette, jamais une barre de progression : la ligne de tarifs
+          // qui arrive a une forme, et la montrer évite le saut de mise en
+          // page au moment où les chiffres s'affichent.
+          Semantics(
+            container: true,
+            liveRegion: true,
+            label: l10n.configurationLoadingA11yLabel,
+            child: const ExcludeSemantics(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Column(
+                  children: [
+                    EteeloSkeletonBox(width: double.infinity, height: 40),
+                    SizedBox(height: AppSpacing.xs),
+                    EteeloSkeletonBox(width: double.infinity, height: 40),
+                  ],
+                ),
+              ),
             ),
           )
+        else if (_failure case final failure?)
+          // Le même classement que l'assistant : un 403 ne propose rien, un 429
+          // non plus. L'écran des réglages n'a pas de raison d'être plus
+          // bavard — ni moins juste — que le parcours de mise en service.
+          ConfigurationErrorView(failure: failure, onRetry: _load)
         else ...[
           if ((_tariffs ?? const <FeeTariff>[]).isEmpty)
             Padding(

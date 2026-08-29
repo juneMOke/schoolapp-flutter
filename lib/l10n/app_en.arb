@@ -841,6 +841,90 @@
   "@configurationTariffNone": {
       "description": "Shown when a level carries no tariff"
   },
+  "configurationFeeTypesUnavailableTitle": "Fee types unavailable",
+  "@configurationFeeTypesUnavailableTitle": {
+      "description": "Empty state of step 4 when the fee type reference could not be served"
+  },
+  "configurationFeeTypesUnavailableMessage": "The fee type reference was not loaded. Reload it to enter the school fees.",
+  "@configurationFeeTypesUnavailableMessage": {
+      "description": "Message of the step 4 empty state when no fee type is served"
+  },
+  "configurationLoadingA11yLabel": "Loading the step data",
+  "@configurationLoadingA11yLabel": {
+      "description": "Label announced to screen readers while the provisioning wizard skeletons are on screen"
+  },
+  "configurationErrorNetworkTitle": "Connection lost",
+  "@configurationErrorNetworkTitle": {
+      "description": "Network error title in the wizard"
+  },
+  "configurationErrorNetworkMessage": "The setup was not sent. Check your connection, then try again.",
+  "@configurationErrorNetworkMessage": {
+      "description": "Network error message"
+  },
+  "configurationErrorSessionTitle": "Your session has expired",
+  "@configurationErrorSessionTitle": {
+      "description": "401 title"
+  },
+  "configurationErrorSessionMessage": "Sign in again to pick up where you left off. Your entries are kept.",
+  "@configurationErrorSessionMessage": {
+      "description": "401 message — the local draft survives an expired session"
+  },
+  "configurationErrorForbiddenTitle": "Access denied",
+  "@configurationErrorForbiddenTitle": {
+      "description": "403 title"
+  },
+  "configurationErrorForbiddenMessage": "Only the school owner can set up the school. Contact your school administrator.",
+  "@configurationErrorForbiddenMessage": {
+      "description": "403 message — retrying cannot help"
+  },
+  "configurationErrorServerTitle": "The server could not save",
+  "@configurationErrorServerTitle": {
+      "description": "500 title"
+  },
+  "configurationErrorServerMessage": "Something broke. Try again, and quote the code below to support if it persists.",
+  "@configurationErrorServerMessage": {
+      "description": "500 message"
+  },
+  "configurationErrorRateTitle": "Too many requests",
+  "@configurationErrorRateTitle": {
+      "description": "429 title"
+  },
+  "configurationErrorRateMessage": "The server is asking for a pause. Wait a few moments before carrying on.",
+  "@configurationErrorRateMessage": {
+      "description": "429 message — definitely no Retry"
+  },
+  "configurationErrorYearExistsTitle": "This academic year already exists",
+  "@configurationErrorYearExistsTitle": {
+      "description": "400 BUSINESS_RULE title"
+  },
+  "configurationErrorYearExistsMessage": "Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.",
+  "@configurationErrorYearExistsMessage": {
+      "description": "Message for the already-existing-year refusal"
+  },
+  "configurationErrorYearExistsAction": "Back to the year",
+  "@configurationErrorYearExistsAction": {
+      "description": "Action for the already-existing-year refusal — returns to step 2 with a purged draft"
+  },
+  "configurationErrorRetry": "Try again",
+  "@configurationErrorRetry": {
+      "description": "Generic recovery action"
+  },
+  "configurationErrorSignIn": "Sign in again",
+  "@configurationErrorSignIn": {
+      "description": "401 action"
+  },
+  "configurationErrorContact": "Contact the administrator",
+  "@configurationErrorContact": {
+      "description": "403 action"
+  },
+  "configurationErrorIncident": "Incident code",
+  "@configurationErrorIncident": {
+      "description": "Label of the incident code to quote to support"
+  },
+  "configurationErrorReloadCatalog": "Reload the referential",
+  "@configurationErrorReloadCatalog": {
+      "description": "Action for a 422 unknown-code — the cached catalogue is stale"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

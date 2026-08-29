@@ -1226,6 +1226,132 @@ abstract class AppLocalizations {
   /// **'No tariff on this level'**
   String get configurationTariffNone;
 
+  /// Empty state of step 4 when the fee type reference could not be served
+  ///
+  /// In en, this message translates to:
+  /// **'Fee types unavailable'**
+  String get configurationFeeTypesUnavailableTitle;
+
+  /// Message of the step 4 empty state when no fee type is served
+  ///
+  /// In en, this message translates to:
+  /// **'The fee type reference was not loaded. Reload it to enter the school fees.'**
+  String get configurationFeeTypesUnavailableMessage;
+
+  /// Label announced to screen readers while the provisioning wizard skeletons are on screen
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the step data'**
+  String get configurationLoadingA11yLabel;
+
+  /// Network error title in the wizard
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost'**
+  String get configurationErrorNetworkTitle;
+
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'The setup was not sent. Check your connection, then try again.'**
+  String get configurationErrorNetworkMessage;
+
+  /// 401 title
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired'**
+  String get configurationErrorSessionTitle;
+
+  /// 401 message — the local draft survives an expired session
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to pick up where you left off. Your entries are kept.'**
+  String get configurationErrorSessionMessage;
+
+  /// 403 title
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get configurationErrorForbiddenTitle;
+
+  /// 403 message — retrying cannot help
+  ///
+  /// In en, this message translates to:
+  /// **'Only the school owner can set up the school. Contact your school administrator.'**
+  String get configurationErrorForbiddenMessage;
+
+  /// 500 title
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not save'**
+  String get configurationErrorServerTitle;
+
+  /// 500 message
+  ///
+  /// In en, this message translates to:
+  /// **'Something broke. Try again, and quote the code below to support if it persists.'**
+  String get configurationErrorServerMessage;
+
+  /// 429 title
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests'**
+  String get configurationErrorRateTitle;
+
+  /// 429 message — definitely no Retry
+  ///
+  /// In en, this message translates to:
+  /// **'The server is asking for a pause. Wait a few moments before carrying on.'**
+  String get configurationErrorRateMessage;
+
+  /// 400 BUSINESS_RULE title
+  ///
+  /// In en, this message translates to:
+  /// **'This academic year already exists'**
+  String get configurationErrorYearExistsTitle;
+
+  /// Message for the already-existing-year refusal
+  ///
+  /// In en, this message translates to:
+  /// **'Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.'**
+  String get configurationErrorYearExistsMessage;
+
+  /// Action for the already-existing-year refusal — returns to step 2 with a purged draft
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the year'**
+  String get configurationErrorYearExistsAction;
+
+  /// Generic recovery action
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get configurationErrorRetry;
+
+  /// 401 action
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get configurationErrorSignIn;
+
+  /// 403 action
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get configurationErrorContact;
+
+  /// Label of the incident code to quote to support
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code'**
+  String get configurationErrorIncident;
+
+  /// Action for a 422 unknown-code — the cached catalogue is stale
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the referential'**
+  String get configurationErrorReloadCatalog;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

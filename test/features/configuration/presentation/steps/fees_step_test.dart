@@ -97,13 +97,16 @@ void main() {
 
   tearDown(() => bloc.close());
 
-  void seed({List<FeeInput> fees = const []}) {
+  void seed({
+    List<FeeInput> fees = const [],
+    List<FeeCodeOption> feeCodes = _feeCodes,
+  }) {
     bloc.emit(
       ConfigurationState(
         status: ConfigurationStatus.ready,
         step: ConfigurationStep.fees,
         catalog: _catalog,
-        feeCodes: _feeCodes,
+        feeCodes: feeCodes,
         draft: ProvisioningRequest(
           academicYear: AcademicYearInput(
             name: '2026-2027',
@@ -290,5 +293,48 @@ void main() {
     // Deux appels à l'action concurrents feraient hésiter sur celui qui compte.
     expect(find.widgetWithText(FilledButton, 'Nouveau frais'), findsNothing);
     expect(find.text('Modifier le frais'), findsOneWidget);
+  });
+
+  testWidgets('sans un seul type servi, l\'étape le DIT et propose l\'issue', (
+    tester,
+  ) async {
+    // La route des types de frais n'est pas bloquante à l'entrée : on peut
+    // arriver ici les mains vides. Laisser ouvrir le formulaire montrerait une
+    // grille de types vide, sans un mot.
+    when(
+      () => repository.loadCatalog(forceRefresh: any(named: 'forceRefresh')),
+    ).thenAnswer((_) async => const Right(_catalog));
+    when(
+      () => repository.loadFeeCodes(forceRefresh: any(named: 'forceRefresh')),
+    ).thenAnswer((_) async => const Right(_feeCodes));
+
+    seed(feeCodes: const <FeeCodeOption>[]);
+    await pump(tester);
+
+    expect(find.text('Types de frais indisponibles'), findsOneWidget);
+    expect(find.text('Nouveau frais'), findsNothing);
+
+    await tester.tap(find.text('Recharger le référentiel'));
+    // Le bloc naît dans le `setUp`, hors du faux temps du test : sans
+    // `runAsync`, le premier appel du handler ne se dénouerait jamais et le
+    // second ne partirait pas.
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump();
+
+    // Le catalogue pédagogique ET les types de frais : n'en rafraîchir qu'un
+    // ferait d'une action de récupération une action qui ne change rien.
+    verify(() => repository.loadFeeCodes(forceRefresh: true)).called(1);
+    verify(() => repository.loadCatalog(forceRefresh: true)).called(1);
+  });
+
+  testWidgets('les frais déjà saisis survivent à l\'absence de types', (
+    tester,
+  ) async {
+    // Un brouillon repris en porte. Les cacher ferait croire à une perte.
+    seed(fees: [minerval()], feeCodes: const <FeeCodeOption>[]);
+    await pump(tester);
+
+    expect(find.text('Minerval'), findsOneWidget);
+    expect(find.text('Types de frais indisponibles'), findsOneWidget);
   });
 }

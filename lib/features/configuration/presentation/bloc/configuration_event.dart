@@ -85,3 +85,12 @@ class ConfigurationSimulationRequested extends ConfigurationEvent {
 class ConfigurationActivationRequested extends ConfigurationEvent {
   const ConfigurationActivationRequested();
 }
+
+/// Le serveur refuse l'année parce qu'elle existe déjà (400 `BUSINESS_RULE`).
+///
+/// Purge le brouillon et revient à l'étape de l'année. Sans ce geste, l'agent
+/// resterait devant un refus que « Réessayer » ne peut pas lever : le brouillon
+/// rejouerait la même année à chaque tentative.
+class ConfigurationYearConflictAcknowledged extends ConfigurationEvent {
+  const ConfigurationYearConflictAcknowledged();
+}

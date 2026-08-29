@@ -53,6 +53,7 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
     on<ConfigurationRetryRequested>(_onRetryRequested);
     on<ConfigurationSimulationRequested>(_onSimulationRequested);
     on<ConfigurationActivationRequested>(_onActivationRequested);
+    on<ConfigurationYearConflictAcknowledged>(_onYearConflictAcknowledged);
   }
 
   /// Étape de reprise, **bornée**.
@@ -251,6 +252,12 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
 
     if (event.refreshCatalog) {
       final result = await _repository.loadCatalog(forceRefresh: true);
+      // Les deux référentiels sont mis en cache POUR LA MÊME SESSION, et un
+      // 422 « code inconnu » peut aussi bien viser un code de frais qu'un
+      // niveau. N'en rafraîchir qu'un ferait d'une action de récupération une
+      // action qui ne change rien — et l'étape 4 resterait sans un seul type.
+      final feeCodesResult = await _repository.loadFeeCodes(forceRefresh: true);
+
       final failure = result.fold<Failure?>((f) => f, (_) => null);
       if (failure != null) {
         emit(
@@ -261,6 +268,9 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
       emit(
         state.copyWith(
           catalog: result.getOrElse(() => throw StateError('unreachable')),
+          // Comme à l'ouverture, l'échec des types de frais ne ferme pas le
+          // parcours : on garde ce qu'on avait plutôt que de vider l'écran.
+          feeCodes: feeCodesResult.getOrElse(() => state.feeCodes),
         ),
       );
     }
@@ -334,6 +344,32 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _onYearConflictAcknowledged(
+    ConfigurationYearConflictAcknowledged event,
+    Emitter<ConfigurationState> emit,
+  ) async {
+    // Le brouillon part avec l'année qu'il porte : le garder ferait rejouer le
+    // même refus à chaque tentative, sans que rien à l'écran ne l'explique.
+    // La structure et les frais s'en vont avec — ils appartenaient à cette
+    // année-là, et les rattacher à une autre serait une décision que personne
+    // n'a prise.
+    await _draftRepository.clear();
+    if (isClosed) return;
+
+    emit(
+      state.copyWith(
+        status: ConfigurationStatus.ready,
+        step: ConfigurationStep.academicYear,
+        draft: ProvisioningRequest.empty,
+        plan: null,
+        failure: null,
+        isDirty: false,
+        justSaved: false,
+        doneSteps: const <int>{},
+      ),
     );
   }
 }

@@ -792,6 +792,80 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationTariffNone => 'Aucun tarif sur ce niveau';
 
   @override
+  String get configurationFeeTypesUnavailableTitle =>
+      'Types de frais indisponibles';
+
+  @override
+  String get configurationFeeTypesUnavailableMessage =>
+      'Le référentiel des types de frais n\'a pas été chargé. Rechargez-le pour saisir les frais de l\'école.';
+
+  @override
+  String get configurationLoadingA11yLabel =>
+      'Chargement des données de l\'étape';
+
+  @override
+  String get configurationErrorNetworkTitle => 'Connexion perdue';
+
+  @override
+  String get configurationErrorNetworkMessage =>
+      'La configuration n\'a pas été envoyée. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get configurationErrorSessionTitle => 'Votre session a expiré';
+
+  @override
+  String get configurationErrorSessionMessage =>
+      'Reconnectez-vous pour reprendre là où vous en étiez. Votre saisie est conservée.';
+
+  @override
+  String get configurationErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get configurationErrorForbiddenMessage =>
+      'Seul le promoteur peut configurer l\'école. Contactez l\'administrateur de votre établissement.';
+
+  @override
+  String get configurationErrorServerTitle =>
+      'Le serveur n\'a pas pu enregistrer';
+
+  @override
+  String get configurationErrorServerMessage =>
+      'Une panne est survenue. Réessayez, et citez le code ci-dessous au support si elle persiste.';
+
+  @override
+  String get configurationErrorRateTitle => 'Trop de demandes';
+
+  @override
+  String get configurationErrorRateMessage =>
+      'Le serveur demande une pause. Patientez quelques instants avant de reprendre.';
+
+  @override
+  String get configurationErrorYearExistsTitle =>
+      'Cette année scolaire existe déjà';
+
+  @override
+  String get configurationErrorYearExistsMessage =>
+      'Le paramétrage est un geste d\'amorçage : il n\'ajoute pas une année à une école qui en a déjà une. Reprenez à l\'étape de l\'année pour en déclarer une autre.';
+
+  @override
+  String get configurationErrorYearExistsAction => 'Revenir à l\'année';
+
+  @override
+  String get configurationErrorRetry => 'Réessayer';
+
+  @override
+  String get configurationErrorSignIn => 'Se reconnecter';
+
+  @override
+  String get configurationErrorContact => 'Contacter l\'administrateur';
+
+  @override
+  String get configurationErrorIncident => 'Code incident';
+
+  @override
+  String get configurationErrorReloadCatalog => 'Recharger le référentiel';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

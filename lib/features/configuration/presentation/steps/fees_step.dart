@@ -53,6 +53,20 @@ class _FeesStepState extends State<FeesStep> {
         final selection = StructureSelection.fromDraft(state.draft, catalog);
         final fees = state.draft.fees;
 
+        // Aucun type servi : la route des types de frais n'est pas bloquante à
+        // l'entrée de l'assistant, et on peut donc arriver ici les mains vides.
+        // Ouvrir le formulaire montrerait alors une grille de types VIDE, sans
+        // un mot — l'agent chercherait la faute de son côté. L'état le dit, et
+        // propose la seule action qui change quelque chose.
+        if (state.feeCodes.isEmpty) {
+          return _FeeTypesUnavailable(
+            fees: fees,
+            onReload: () => bloc.add(
+              const ConfigurationRetryRequested(refreshCatalog: true),
+            ),
+          );
+        }
+
         void commit(List<FeeInput> next) {
           bloc.add(ConfigurationDraftChanged(state.draft.copyWith(fees: next)));
         }
@@ -132,6 +146,44 @@ class _FeesStepState extends State<FeesStep> {
           ],
         );
       },
+    );
+  }
+}
+
+/// L'étape 4 sans un seul type de frais servi.
+///
+/// Les frais déjà saisis restent affichés — un brouillon repris en porte, et
+/// les cacher ferait croire à une perte. Ils sont en LECTURE : les modifier
+/// demanderait de rechoisir un type, et il n'y en a aucun à choisir.
+class _FeeTypesUnavailable extends StatelessWidget {
+  final List<FeeInput> fees;
+  final VoidCallback onReload;
+
+  const _FeeTypesUnavailable({required this.fees, required this.onReload});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Summary(fees: fees, onNew: null),
+        const SizedBox(height: AppSpacing.lg),
+        EteeloEmptyResult(
+          medallionIcon: Icons.price_change_outlined,
+          accentColor: AppColors.orDoux,
+          label: l10n.configurationFeeTypesUnavailableTitle,
+          description: l10n.configurationFeeTypesUnavailableMessage,
+          primaryAction: FilledButton.icon(
+            onPressed: onReload,
+            icon: const Icon(Icons.sync_rounded),
+            label: Text(l10n.configurationErrorReloadCatalog),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        for (final fee in fees) _FeeRow(fee: fee, onEdit: null, onDelete: null),
+      ],
     );
   }
 }
