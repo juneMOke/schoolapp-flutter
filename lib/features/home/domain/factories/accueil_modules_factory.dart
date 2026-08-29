@@ -34,6 +34,7 @@ class AccueilModulesFactory {
       _cours(l10n),
       _resultats(l10n),
       _disciplines(l10n),
+      _configuration(l10n),
     ];
 
     final visible = <AccueilModule>[];
@@ -246,6 +247,28 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
+        ),
+      ],
+    );
+  }
+
+  /// Configuration — page unique, et la seule carte qui ne serve pas un métier
+  /// quotidien : elle n'apparaît qu'à qui détient `school.provisioning.write`,
+  /// c'est-à-dire à la direction.
+  static AccueilModule _configuration(AppLocalizations l10n) {
+    const menuId = MenuConstants.configurationMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuConfiguration,
+      description: l10n.accueilModuleConfigurationDescription,
+      icon: Icons.tune_rounded,
+      accent: AppColors.accueilConfigurationAccent,
+      softBackground: AppColors.accueilConfigurationSoft,
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.configurationSchoolId,
+          title: l10n.subMenuConfigurationSchool,
         ),
       ],
     );

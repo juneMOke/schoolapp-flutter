@@ -158,6 +158,15 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   MenuConstants.documentsMenuId: {
     MenuConstants.documentsStudentId: ModuleAccess([Perm.editiqueRead]),
   },
+  // Les réglages de l'école, une fois celle-ci en service. Même exigence que
+  // l'assistant dont ils rouvrent les écrans : ce sont les mêmes champs, sur la
+  // même école — les fermer moins fort ici ouvrirait par la porte de derrière
+  // ce que `kStandaloneRouteAccess` garde par la porte d'entrée.
+  MenuConstants.configurationMenuId: {
+    MenuConstants.configurationSchoolId: ModuleAccess([
+      Perm.schoolProvisioningWrite,
+    ]),
+  },
 };
 
 /// Vrai si [subMenuId] est accessible avec [permissions].
@@ -196,14 +205,20 @@ bool canAccessMenu(String menuId, List<String>? permissions) {
 /// légitimement. L'écriture reste gardée sur ses propres boutons, par
 /// [kEnrollmentSubmitAccess].
 ///
-/// **Ne pas déclarer ces segments dans [kModuleAccessRegistry]** : le test
-/// d'accord menu↔garde exigerait alors qu'ils soient visibles au menu, où ils
-/// n'ont rien à faire.
+/// **Ne pas déclarer `enrollments` dans [kModuleAccessRegistry]** : le test
+/// d'accord menu↔garde exigerait alors qu'il soit visible au menu, où il n'a
+/// rien à faire. `configuration`, lui, y figure — et c'est délibéré : ses
+/// réglages sont bel et bien offerts au menu (cf. ci-dessus), et les deux
+/// déclarations exigent la même permission, si bien que l'accord tient.
 const Map<String, ModuleAccess> kStandaloneRouteAccess = {
   'enrollments': ModuleAccess([Perm.enrollmentRead]),
   // L'assistant de mise en service : hors coquille parce qu'il doit être
   // atteignable AVANT que l'école ait une année académique — donc avant que la
   // coquille et son menu aient quoi que ce soit à afficher.
+  //
+  // Cette entrée garde AUSSI `/configuration/settings`, atteint en lien profond
+  // hors coquille : `canAccessLocation` s'arrête au premier segment. Le registre
+  // ci-dessus décide, lui, de la visibilité au menu et du rendu en coquille.
   //
   // `school.provisioning.write`, jamais `platform.school.provision` : cf.
   // [Perm.schoolProvisioningWrite].

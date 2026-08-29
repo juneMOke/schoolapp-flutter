@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/domain/factories/accueil_modules_factory.dart';
@@ -40,6 +41,16 @@ const _comptabilite = <String>[
   'editique.write',
   'editique.cancel',
 ];
+
+/// La direction : tout, sauf la permission plateforme qu'aucune école ne reçoit
+/// (§2.13). Elle est indispensable au sens POSITIF de l'accord menu ↔ garde :
+/// sans porteur des droits, un module réservé à la direction ne serait vérifié
+/// que par sa moitié « fermé à tous les autres », et une garde de route
+/// exigeant une permission différente de celle du menu passerait inaperçue.
+final _direction = Perm.values
+    .where((p) => p != Perm.platformSchoolProvision)
+    .map((p) => p.wire)
+    .toList(growable: false);
 
 void main() {
   final AppLocalizations l10n = AppLocalizationsFr();
@@ -313,10 +324,11 @@ void main() {
     // Cohérence avec les deux autres surfaces : ce qui est masqué au menu doit
     // être refusé à la route, et l'inverse.
     test('la garde et le menu s\'accordent, sous-menu par sous-menu', () {
-      for (final permissions in const <List<String>>[
+      for (final permissions in <List<String>>[
         _enseignant,
         _comptabilite,
-        <String>[],
+        _direction,
+        const <String>[],
       ]) {
         final visibles = menuSubMenuIds(permissions);
         for (final entry in kModuleAccessRegistry.entries) {

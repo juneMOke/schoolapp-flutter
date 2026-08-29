@@ -700,6 +700,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationWarningsTitle => 'À savoir avant d\'activer';
 
   @override
+  String get menuConfiguration => 'Configuration';
+
+  @override
+  String get subMenuConfigurationSchool => 'Paramètres de l\'école';
+
+  @override
   String get configurationSettingsTitle => 'Configuration de l\'école';
 
   @override
@@ -2035,7 +2041,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Six modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
+      'Ces modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -2060,6 +2066,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilModuleDisciplinesDescription =>
       'Présences du jour, dossiers de discipline et suivi des élèves.';
+
+  @override
+  String get accueilModuleConfigurationDescription =>
+      'Identité de l\'école, structure des cycles et niveaux, grille des frais scolaires.';
 
   @override
   String accueilModulePageCount(int count) {

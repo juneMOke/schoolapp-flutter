@@ -696,6 +696,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationWarningsTitle => 'Worth knowing before activating';
 
   @override
+  String get menuConfiguration => 'Setup';
+
+  @override
+  String get subMenuConfigurationSchool => 'School settings';
+
+  @override
   String get configurationSettingsTitle => 'School setup';
 
   @override
@@ -2025,7 +2031,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Six modules cover the life of the school — each card opens its dashboard or its pages.';
+      'These modules cover the life of the school — each card opens its dashboard or its pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -2050,6 +2056,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleDisciplinesDescription =>
       'Daily attendance, disciplinary records and student follow-up.';
+
+  @override
+  String get accueilModuleConfigurationDescription =>
+      'School identity, cycles and levels, and the school fee schedule.';
 
   @override
   String accueilModulePageCount(int count) {

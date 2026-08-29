@@ -723,6 +723,14 @@
   "@configurationWarningsTitle": {
       "description": "En-tête du bloc des avertissements du plan"
   },
+  "menuConfiguration": "Configuration",
+  "@menuConfiguration": {
+      "description": "Menu latéral — réglages de l'école, après mise en service"
+  },
+  "subMenuConfigurationSchool": "Paramètres de l'école",
+  "@subMenuConfigurationSchool": {
+      "description": "Sous-menu du module Configuration"
+  },
   "configurationSettingsTitle": "Configuration de l'école",
   "@configurationSettingsTitle": {
       "description": "Titre de l'écran de réglages, après mise en service"
@@ -1669,13 +1677,14 @@
   },
   "accueilModulesEyebrow": "Vos modules",
   "accueilModulesTitle": "Où souhaitez-vous aller ?",
-  "accueilModulesIntro": "Six modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
+  "accueilModulesIntro": "Ces modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
   "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
   "accueilModuleResultatsDescription": "Pourcentages par période, par classe entière ou pour un élève précis.",
   "accueilModuleDisciplinesDescription": "Présences du jour, dossiers de discipline et suivi des élèves.",
+  "accueilModuleConfigurationDescription": "Identité de l'école, structure des cycles et niveaux, grille des frais scolaires.",
   "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
   "@accueilModulePageCount": {
     "description": "Sous-titre d'une carte module : nombre de pages qu'elle regroupe.",

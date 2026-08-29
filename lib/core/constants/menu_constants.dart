@@ -19,6 +19,11 @@ class MenuConstants {
   // sous-menu de Finances qui en mentirait sur la portée.
   static const String documentsMenuId = 'documents';
 
+  // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
+  // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
+  // il précède la coquille, qui n'a rien à afficher sans année académique.
+  static const String configurationMenuId = 'configuration';
+
   // Sub-menu IDs
   static const String inscriptionsDashboardId = 'inscriptions-dashboard';
   static const String preInscriptionsId = 'pre-inscriptions';
@@ -43,4 +48,10 @@ class MenuConstants {
   static const String resultatsClasseId = 'resultats-classe';
 
   static const String documentsStudentId = 'documents-eleve';
+
+  /// ⚠️ Cet identifiant **est** le second segment de la route réelle
+  /// (`/configuration/settings`), et non un libellé choisi librement comme les
+  /// autres. C'est ce qui rend littéralement vrai le test d'accord
+  /// menu ↔ garde de route, qui reconstruit `/{menu}/{sousMenu}`.
+  static const String configurationSchoolId = 'settings';
 }

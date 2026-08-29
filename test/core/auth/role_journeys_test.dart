@@ -281,6 +281,24 @@ void main() {
       expect(ids, isNot(contains(MenuConstants.documentsStudentId)));
     });
 
+    // Le module Configuration n'a pas de rôle opérationnel : c'est un geste de
+    // direction. Ce test dit les deux moitiés — elle l'a, personne d'autre ne
+    // l'a — parce que la première seule laisserait passer un élargissement
+    // silencieux du template.
+    test('configuration : la direction seule règle l\'école', () {
+      expect(
+        visibleSubMenus(_direction),
+        contains(MenuConstants.configurationSchoolId),
+      );
+      for (final role in _rolesActifs.entries) {
+        expect(
+          visibleSubMenus(role.value),
+          isNot(contains(MenuConstants.configurationSchoolId)),
+          reason: '${role.key} ne provisionne pas l\'école',
+        );
+      }
+    });
+
     test('direction : rien ne lui est masqué', () {
       final ids = visibleSubMenus(_direction);
       final tous = {
@@ -314,11 +332,21 @@ void main() {
       });
     }
 
+    // La direction compte ici, et pas dans le groupe des actions d'écriture
+    // ci-dessus. Un module peut être légitimement réservé à elle seule — la
+    // mise en service de l'école l'est — sans qu'aucun rôle opérationnel n'y
+    // touche jamais. L'exclure des porteurs ferait rougir ce test sur un module
+    // correctement réservé, et la seule façon de le rendre vert serait
+    // d'affaiblir la garde. Ce qu'il continue d'attraper : un module déclaré
+    // sur `platform.school.provision`, la permission plateforme qu'aucune école
+    // ne reçoit (§2.13) — le piège exact que la mise en service a frôlé.
+    final porteursDeModule = {..._rolesActifs, 'direction': _direction};
+
     test('chaque sous-module est atteignable par au moins un rôle', () {
       for (final menu in kModuleAccessRegistry.entries) {
         for (final sub in menu.value.entries) {
           expect(
-            _rolesActifs.values.any((perms) => can(sub.value, perms)),
+            porteursDeModule.values.any((perms) => can(sub.value, perms)),
             isTrue,
             reason: '${sub.key} n\'est ouvert à aucun rôle',
           );

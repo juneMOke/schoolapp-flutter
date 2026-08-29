@@ -197,6 +197,11 @@ class AppColors {
   static const accueilResultatsSoft = Color(0xFFF5EDF2);
   static const accueilDisciplinesAccent = info; // #2E6E8E
   static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
+  // Configuration — gris ardoise, volontairement le moins saturé des sept :
+  // c'est une carte de réglages, elle ne doit pas concurrencer les modules
+  // métier dans la grille.
+  static const accueilConfigurationAccent = Color(0xFF4A5568);
+  static const accueilConfigurationSoft = Color(0xFFEEF0F3);
 
   // Relationship colours
   static const relationshipFather = Color(0xFF1976D2);

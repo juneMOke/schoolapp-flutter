@@ -723,6 +723,14 @@
   "@configurationWarningsTitle": {
       "description": "Header of the plan warnings block"
   },
+  "menuConfiguration": "Setup",
+  "@menuConfiguration": {
+      "description": "Sidebar menu — school settings, once the school is in service"
+  },
+  "subMenuConfigurationSchool": "School settings",
+  "@subMenuConfigurationSchool": {
+      "description": "Sub-menu of the Setup module"
+  },
   "configurationSettingsTitle": "School setup",
   "@configurationSettingsTitle": {
       "description": "Settings screen title, after the school is in service"
@@ -1714,13 +1722,14 @@
   },
   "accueilModulesEyebrow": "Your modules",
   "accueilModulesTitle": "Where would you like to go?",
-  "accueilModulesIntro": "Six modules cover the life of the school — each card opens its dashboard or its pages.",
+  "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
   "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
   "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
+  "accueilModuleConfigurationDescription": "School identity, cycles and levels, and the school fee schedule.",
   "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
   "@accueilModulePageCount": {
     "description": "Module card subtitle: number of pages it gathers.",

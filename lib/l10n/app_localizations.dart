@@ -1088,6 +1088,18 @@ abstract class AppLocalizations {
   /// **'Worth knowing before activating'**
   String get configurationWarningsTitle;
 
+  /// Sidebar menu — school settings, once the school is in service
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get menuConfiguration;
+
+  /// Sub-menu of the Setup module
+  ///
+  /// In en, this message translates to:
+  /// **'School settings'**
+  String get subMenuConfigurationSchool;
+
   /// Settings screen title, after the school is in service
   ///
   /// In en, this message translates to:
@@ -3149,7 +3161,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'Six modules cover the life of the school — each card opens its dashboard or its pages.'**
+  /// **'These modules cover the life of the school — each card opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.
@@ -3187,6 +3199,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily attendance, disciplinary records and student follow-up.'**
   String get accueilModuleDisciplinesDescription;
+
+  /// No description provided for @accueilModuleConfigurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'School identity, cycles and levels, and the school fee schedule.'**
+  String get accueilModuleConfigurationDescription;
 
   /// Module card subtitle: number of pages it gathers.
   ///

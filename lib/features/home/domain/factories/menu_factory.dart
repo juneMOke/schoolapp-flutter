@@ -30,6 +30,7 @@ class MenuFactory {
       _createCoursesMenu(l10n),
       _createResultatsMenu(l10n),
       _createDocumentsMenu(l10n),
+      _createConfigurationMenu(l10n),
     ];
 
     final visible = <MenuItem>[];
@@ -47,6 +48,27 @@ class MenuFactory {
       visible.add(menu.copyWith(subMenus: subMenus));
     }
     return visible;
+  }
+
+  /// Menu Configuration — les réglages de l'école, une fois celle-ci en
+  /// service. Dernier de la liste : on n'y revient qu'exceptionnellement.
+  ///
+  /// L'assistant de mise en service n'y figure PAS : il précède l'existence
+  /// d'une année académique, donc l'existence même de cette barre latérale, et
+  /// s'atteint depuis le splash.
+  static MenuItem _createConfigurationMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.configurationMenuId,
+      title: l10n.menuConfiguration,
+      icon: Icons.tune_rounded,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.configurationSchoolId,
+          title: l10n.subMenuConfigurationSchool,
+          route: AppRoutesNames.configurationSettingsPath,
+        ),
+      ],
+    );
   }
 
   /// Menu Documents — l'éditique couvre trois domaines (Scolarité, Finances,

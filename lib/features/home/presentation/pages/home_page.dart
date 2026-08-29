@@ -31,6 +31,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_f
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_coordinator_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
@@ -195,7 +196,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.myCoursesId ||
         state.selectedSubMenuId == MenuConstants.timetableId ||
         state.selectedSubMenuId == MenuConstants.resultatsClasseId ||
-        state.selectedSubMenuId == MenuConstants.documentsStudentId;
+        state.selectedSubMenuId == MenuConstants.documentsStudentId ||
+        state.selectedSubMenuId == MenuConstants.configurationSchoolId;
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -383,6 +385,12 @@ class _HomePageView extends StatelessWidget {
         return const ScheduleFeatureScope(child: ScheduleCoordinatorPage());
       case MenuConstants.resultatsClasseId:
         return const ResultatsFeatureScope(child: ResultatsCoordinatorPage());
+      // Même page que la route hors coquille `/configuration/settings`, qui
+      // reste servie pour le lien profond. Elle ne monte ni Scaffold ni AppBar
+      // — elle peint son propre `AppPageBackground` — donc elle s'insère ici
+      // telle quelle, sans chrome à démonter.
+      case MenuConstants.configurationSchoolId:
+        return const ConfigurationSettingsPage();
       default:
         return Container(
           width: double.infinity,
