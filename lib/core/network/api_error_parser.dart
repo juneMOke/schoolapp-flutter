@@ -85,11 +85,25 @@ class ApiErrorParser {
     return Duration(seconds: seconds);
   }
 
+  /// Cause précise nommée par le serveur sur un 422, `null` sinon.
+  ///
+  /// Rendue **telle quelle**, sans énumération côté client : le catalogue est
+  /// ouvert par module (`BoutiqueErrorCodes` en nomme six à lui seul) et
+  /// grandit sans release. C'est l'appelant qui compare à la constante qui le
+  /// concerne, et qui ignore ce qu'il ne connaît pas.
+  static String? detailCodeOf(Response<dynamic>? response) {
+    final detailCode = _bodyOf(response)?['detailCode'];
+    if (detailCode is! String) return null;
+    final trimmed = detailCode.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   /// [ApiValidationFailure] pour un 400 ou un 422.
   static ApiValidationFailure validationFailure(Response<dynamic>? response) =>
       ApiValidationFailure(
         code: codeOf(response),
         serverMessage: serverMessageOf(response),
+        detailCode: detailCodeOf(response),
       );
 
   /// [ApiServerFailure] pour un 5xx, avec sa référence d'incident si elle existe.

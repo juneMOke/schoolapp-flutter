@@ -187,6 +187,19 @@ mixin ApiErrorDetails on Failure {
   /// incident » que l'utilisateur cite au support ; en fabriquer un côté client
   /// donnerait une référence que rien ne permettrait de retrouver.
   String? get incidentId;
+
+  /// Cause précise d'un 422, en `SCREAMING_SNAKE`, quand le serveur en nomme
+  /// une (`PRICE_UNRESOLVABLE`, `UNKNOWN_ARTICLE`…). `null` partout ailleurs.
+  ///
+  /// [code] dit le **genre** de refus, celui-ci dit **lequel** — et c'est la
+  /// différence entre « contactez le support » et « l'inscription du
+  /// bénéficiaire n'est pas encore partie, la vente repartira seule ». Sans
+  /// lui, toutes les causes d'un 422 se ressemblent, sur de l'argent parfois
+  /// déjà encaissé.
+  ///
+  /// Se brancher dessus, **jamais sur [serverMessage]** : la phrase est
+  /// française et se reformule, le code est une valeur de fil.
+  String? get detailCode;
 }
 
 /// 400 ou 422 portant le code typé du serveur.
@@ -204,14 +217,18 @@ class ApiValidationFailure extends ValidationFailure with ApiErrorDetails {
   @override
   String? get incidentId => null;
 
+  @override
+  final String? detailCode;
+
   const ApiValidationFailure({
     required this.code,
     this.serverMessage,
+    this.detailCode,
     String message = 'Invalid request data',
   }) : super(message);
 
   @override
-  List<Object?> get props => [message, code, serverMessage];
+  List<Object?> get props => [message, code, serverMessage, detailCode];
 }
 
 /// 5xx portant le code typé et, quand le serveur en pose une, la référence
@@ -225,6 +242,10 @@ class ApiServerFailure extends ServerFailure with ApiErrorDetails {
 
   @override
   final String? incidentId;
+
+  /// Toujours `null` : le serveur ne nomme une cause précise que sur un 422.
+  @override
+  String? get detailCode => null;
 
   const ApiServerFailure({
     this.code = ApiErrorCode.internalError,
@@ -251,6 +272,9 @@ class TooManyRequestsFailure extends Failure with ApiErrorDetails {
 
   @override
   String? get incidentId => null;
+
+  @override
+  String? get detailCode => null;
 
   /// Délai annoncé par l'en-tête `Retry-After`, quand le serveur en pose un.
   final Duration? retryAfter;
