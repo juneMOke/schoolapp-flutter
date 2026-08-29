@@ -57,6 +57,12 @@ class _ConfigurationSettingsPageState extends State<ConfigurationSettingsPage> {
               .context;
 
           return AppPageBackground(
+            // Pas de défilement au fond : cet écran a une hauteur bornée et
+            // ne fait défiler QUE le contenu de l'onglet, sous un bandeau et
+            // une barre d'onglets qui restent en place. Avec le défilement du
+            // socle, la colonne recevait une hauteur infinie et son `Expanded`
+            // faisait échouer la mise en page — l'écran ne se peignait plus.
+            scrollable: false,
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: academicContext == null
@@ -84,6 +90,13 @@ class _ConfigurationSettingsPageState extends State<ConfigurationSettingsPage> {
                         SegmentedTabFilter<ConfigurationSettingsTab>(
                           selected: _tab,
                           onSelected: (tab) => setState(() => _tab = tab),
+                          // Les trois libellés réclament ~940 dp de largeur
+                          // intrinsèque : à leur largeur naturelle, la barre
+                          // déborde dès qu'on descend sous la tablette en
+                          // paysage. `expand` les fait se partager la place et
+                          // couper au besoin — c'est exactement ce pour quoi le
+                          // drapeau existe.
+                          expand: true,
                           options: [
                             SegmentedTabOption(
                               value: ConfigurationSettingsTab.identity,
