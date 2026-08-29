@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -31,6 +33,21 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 Future<ThermalTicketOutcome> printThermalTicket(
   BuildContext context, {
   required TicketReceiptModel model,
+}) => printThermalBytes(context, bytes: EscPosTicketRenderer.render(model));
+
+/// Le même parcours, à partir d'octets **déjà rendus**.
+///
+/// Extrait pour que la caisse boutique l'emprunte : tout ce qui précède l'envoi
+/// — permission, liste, choix de l'imprimante — ne dépend pas de ce qu'on
+/// imprime, et deux copies de ce parcours divergeraient sur la seule chose qui
+/// compte, l'ordre des trois questions.
+///
+/// C'est aussi ce qui garde le **choix redemandé à chaque ticket** : mémoriser
+/// l'imprimante ferait sortir le reçu d'un parent dans la pièce d'à côté, et il
+/// n'y a aucune raison que ce soit vrai pour un ticket et faux pour l'autre.
+Future<ThermalTicketOutcome> printThermalBytes(
+  BuildContext context, {
+  required Uint8List bytes,
 }) async {
   final port = getIt<ThermalPrinterPort>();
 
@@ -59,10 +76,7 @@ Future<ThermalTicketOutcome> printThermalTicket(
 
   // Un seul envoi pour tout le ticket : le canal natif préfixe chaque appel
   // d'un LF, qui tomberait entre une commande ESC/POS et son argument.
-  final sent = await port.printBytes(
-    EscPosTicketRenderer.render(model),
-    macAddress: chosen.macAddress,
-  );
+  final sent = await port.printBytes(bytes, macAddress: chosen.macAddress);
 
   return sent.fold(
     (failure) => ThermalTicketFailed(
