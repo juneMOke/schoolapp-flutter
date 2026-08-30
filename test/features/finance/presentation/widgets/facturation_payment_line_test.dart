@@ -58,7 +58,8 @@ void main() {
       // nu : depuis que la ligne porte aussi le numéro du payeur, un `+` seul
       // matche `+243816939060` autant que le montant.
       expect(find.textContaining('+ '), findsOneWidget);
-      expect(find.textContaining('USD'), findsOneWidget);
+      // Le dollar s'abrège « $ ».
+      expect(find.textContaining(r'$'), findsOneWidget);
       // Méta : moyen toujours « Espèces ».
       expect(find.textContaining('Espèces'), findsOneWidget);
     },

@@ -63,7 +63,9 @@ void main() {
       expect(find.text('Montant attendu'), findsOneWidget);
       expect(find.text('Déjà payé'), findsOneWidget);
       expect(find.text('Reste à payer'), findsOneWidget);
-      expect(find.textContaining('USD'), findsNWidgets(3));
+      // Le dollar s'abrège « $ » — le code ISO circule sur le fil, c'est
+      // l'abréviation d'usage qui s'affiche.
+      expect(find.textContaining(r'$'), findsNWidgets(3));
 
       // Emplacement de la table « Paiements affectés ».
       expect(find.text('ALLOC_SLOT'), findsOneWidget);

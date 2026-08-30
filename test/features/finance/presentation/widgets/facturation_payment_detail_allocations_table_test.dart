@@ -59,7 +59,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     // 2 allocations + 1 total = 3 montants.
-    expect(find.textContaining('USD'), findsNWidgets(3));
+    // Le dollar s'abrège « $ ».
+    expect(find.textContaining(r'$'), findsNWidgets(3));
   });
 
   testWidgets(

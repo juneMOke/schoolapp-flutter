@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/money_bag_text.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_error_state.dart';
@@ -62,20 +65,17 @@ class StudentChargesStepBody extends StatelessWidget {
         : (parsed * 100).roundToDouble();
   }
 
-  double _computeTotalAmountInCents() {
-    return studentCharges.fold<double>(
-      0,
-      (sum, charge) => sum + _draftAmountInCentsFor(charge),
-    );
-  }
-
-  String _displayCurrency() {
-    if (studentCharges.isEmpty) {
-      return '';
-    }
-
-    return studentCharges.first.currency;
-  }
+  /// Le total du brouillon, **par devise**.
+  ///
+  /// Ce sont les montants SAISIS qui sont sommés, pas ceux de la grille : le
+  /// guichet peut ajuster une ligne, et le pied doit suivre. Chacun garde la
+  /// devise de sa créance — une ligne en francs ne vient pas gonfler le total
+  /// en dollars.
+  MoneyBag _totalBag() => MoneyBag.sumBy(
+    studentCharges,
+    (charge) =>
+        Money.parse(_draftAmountInCentsFor(charge).round(), charge.currency),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -134,11 +134,8 @@ class StudentChargesStepBody extends StatelessWidget {
                             textAlign: TextAlign.left,
                           ),
                         ),
-                        Text(
-                          formatMonetaryAmountWithCurrency(
-                            amount: _computeTotalAmountInCents() / 100,
-                            currency: _displayCurrency(),
-                          ),
+                        MoneyBagText(
+                          bag: _totalBag(),
                           style: AppTextStyles.totalAmountLora.copyWith(
                             color: AppColors.bleuArdoise,
                           ),

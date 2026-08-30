@@ -79,7 +79,9 @@ void main() {
 
       expect(find.text('1 500'), findsOneWidget);
       expect(find.textContaining('150 000'), findsNothing);
-      expect(find.textContaining('1 500 CDF'), findsOneWidget);
+      // Le franc s'écrit « FC » et n'a pas de décimales : la règle
+      // d'écriture se décide sur la devise, plus sur la valeur.
+      expect(find.textContaining('1 500 FC'), findsOneWidget);
     },
   );
 

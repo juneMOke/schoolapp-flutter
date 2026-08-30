@@ -215,6 +215,11 @@ class AppDimensions {
 
   // Disciplines — tableau de bord des presences (attendance overview)
   static const kpiCardHeightWithSubline = 128.0;
+
+  /// Hauteur ajoutée par chaque valeur au-delà de la première, sur une carte KPI
+  /// qui empile plusieurs devises. Deux montants ne se somment pas : ils
+  /// s'écrivent l'un sous l'autre, et la carte grandit d'autant.
+  static const kpiCardExtraValueHeight = 22.0;
   static const attendanceOverviewTrendMinRate = 70.0;
   static const attendanceOverviewTrendMaxRate = 100.0;
   static const attendanceOverviewTargetRate = 95.0;
