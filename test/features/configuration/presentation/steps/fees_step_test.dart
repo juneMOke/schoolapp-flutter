@@ -262,10 +262,16 @@ void main() {
     await pump(tester);
 
     // 100 USD et 100 CDF ne font pas 200 de quoi que ce soit.
+    //
+    // Les devises s'écrivent par leur abréviation d'usage — « $ » et « FC »,
+    // plus le code ISO — et l'ordre est désormais stable : code croissant, le
+    // même que celui du serveur.
     final total = find.textContaining('Total catalogue');
     expect(total, findsOneWidget);
-    expect(tester.widget<Text>(total).data, contains('USD'));
-    expect(tester.widget<Text>(total).data, contains('FC'));
+    final rendered = tester.widget<Text>(total).data!;
+    expect(rendered, contains(r'$'));
+    expect(rendered, contains('FC'));
+    expect(rendered.indexOf('FC'), lessThan(rendered.indexOf(r'$')));
   });
 
   testWidgets('supprimer un frais est immédiat et le nomme', (tester) async {

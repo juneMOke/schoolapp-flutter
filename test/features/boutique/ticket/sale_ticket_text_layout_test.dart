@@ -84,7 +84,7 @@ void main() {
       final ticket = render().join('\n');
 
       expect(ticket, contains('Reste à payer'));
-      expect(ticket, contains('0.00 \$'));
+      expect(ticket, contains('0,00 \$'));
     });
 
     test('le montant reçu EST le total — jamais un écart', () {
@@ -92,8 +92,8 @@ void main() {
       final total = ticket.firstWhere((l) => l.startsWith('TOTAL'));
       final received = ticket.firstWhere((l) => l.startsWith('Espèces reçues'));
 
-      expect(total, contains('35.00 \$'));
-      expect(received, contains('35.00 \$'));
+      expect(total, contains('35,00 \$'));
+      expect(received, contains('35,00 \$'));
     });
   });
 
@@ -112,13 +112,13 @@ void main() {
       );
 
       final meta = ticket.firstWhere((l) => l.contains('/u'));
-      expect(meta.trim(), '10.00 \$ /u');
+      expect(meta.trim(), '10,00 \$ /u');
     });
 
     test('un article à grille porte son niveau, puis sa taille', () {
       final meta = render().firstWhere((l) => l.contains('1ère HUM'));
 
-      expect(meta, contains('15.00 \$ /u'));
+      expect(meta, contains('15,00 \$ /u'));
       expect(meta, contains('1ère HUM'));
       expect(meta, contains('T. M'));
     });

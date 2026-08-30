@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
 
@@ -154,28 +156,21 @@ abstract final class TicketTextLayout {
     return lines;
   }
 
-  /// Montant en centimes → « 1 234,56 CDF ».
+  /// Montant en centimes → « 1 234 FC », « 425,00 $ ».
+  ///
+  /// Façade sur [MoneyFormat], qui porte désormais la règle : les décimales se
+  /// décident sur la **devise**, et `CDF` s'écrit « FC ». Le ticket écrivait
+  /// jusqu'ici « 1 234,00 CDF » — deux décimales sur une devise qui n'en a pas,
+  /// et le code ISO à la place de l'abréviation d'usage.
   ///
   /// Formateur **pur**, sans données de locale à initialiser : le ticket doit
   /// pouvoir être rendu dans un test unitaire comme dans un isolat d'impression.
-  /// Espace insécable fine exclue à dessein — une imprimante thermique ne la
-  /// rend pas.
-  static String formatAmount(int cents, String currency) {
-    final negative = cents < 0;
-    final absolute = negative ? -cents : cents;
-    final units = (absolute ~/ 100).toString();
-    final decimals = (absolute % 100).toString().padLeft(2, '0');
-
-    final grouped = StringBuffer();
-    for (var i = 0; i < units.length; i++) {
-      if (i > 0 && (units.length - i) % 3 == 0) grouped.write(' ');
-      grouped.write(units[i]);
-    }
-
-    final sign = negative ? '-' : '';
-    final suffix = currency.trim().isEmpty ? '' : ' ${currency.trim()}';
-    return '$sign$grouped,$decimals$suffix';
-  }
+  /// L'espace de groupement est l'**ordinaire** — une imprimante thermique ne
+  /// rend pas l'insécable.
+  static String formatAmount(int cents, String currency) => MoneyFormat.format(
+    Money.parse(cents, currency),
+    space: MoneyFormat.thermalSpace,
+  );
 
   // ── Primitives de mise en page ──────────────────────────────────────────────
   //

@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_model.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
@@ -173,6 +174,9 @@ abstract final class SaleTicketTextLayout {
   /// celui du ticket de perception (« 1 234,56 CDF »). ⚠️ Les deux tickets
   /// sortent de la même imprimante : l'écart de format est **assumé et à
   /// arbitrer**, il est signalé au plan.
-  static String _amount(int cents, String currency) =>
-      TicketCharset.printable(BoutiqueMoneyFormat.exact(cents, currency));
+  static String _amount(int cents, String currency) => TicketCharset.printable(
+    // Espace ORDINAIRE : le ticket part sur une thermique, et le parc a
+    // tranché d'éviter l'insécable (`TicketTextLayout.formatAmount`).
+    BoutiqueMoneyFormat.exact(cents, currency, space: MoneyFormat.thermalSpace),
+  );
 }

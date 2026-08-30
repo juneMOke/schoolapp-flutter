@@ -80,7 +80,7 @@ void main() {
   // LE défaut que les tests de gabarit ne pouvaient pas voir : il est
   // typographique, pas textuel. 48 caractères de Courier à une taille posée à
   // la main débordaient la largeur utile du rouleau, et `pw.Text` repliait la
-  // ligne en silence — « Montant reçu … 25 » puis « 000,00 CDF » en dessous, sur
+  // ligne en silence — « Montant reçu … 25 » puis « 000 FC » en dessous, sur
   // le papier remis au parent.
   test('une ligne pleine largeur tient sur UNE ligne imprimée', () {
     const courierAdvance = 0.6;
@@ -297,8 +297,10 @@ void main() {
         isNotEmpty,
         reason: 'extraction du flux de contenu en échec',
       );
-      // Le ticket entier, montants compris.
-      expect(mots, contains('CDF'));
+      // Le ticket entier, montants compris. Le franc s'imprime « FC » depuis
+      // que la règle d'écriture se décide sur la devise ; c'est cette
+      // abréviation-là qu'on cherche sur le papier.
+      expect(mots, contains('FC'));
       expect(_paintedWords(sheet), containsAll(mots));
     });
 

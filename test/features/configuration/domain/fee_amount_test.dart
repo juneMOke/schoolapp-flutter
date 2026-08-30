@@ -46,9 +46,20 @@ void main() {
 
   group('centimes vers affichage', () {
     test('le franc congolais s\'affiche FC, mais circule CDF', () {
+      // `displayCurrency` a disparu : l'abréviation est désormais la charge de
+      // `MoneyFormat.symbolOf`, pour toute l'application. Ce module fut le seul
+      // à la connaître, il n'a plus à la porter seul.
       expect(FeeAmount.display(800000, 'CDF'), contains('FC'));
-      expect(FeeAmount.displayCurrency('CDF'), 'FC');
-      expect(FeeAmount.displayCurrency('USD'), 'USD');
+      expect(FeeAmount.display(800000, 'CDF'), isNot(contains('CDF')));
+    });
+
+    test('le dollar porte ses deux décimales et son symbole', () {
+      expect(FeeAmount.display(42500, 'USD'), contains(r'$'));
+      expect(FeeAmount.display(42500, 'USD'), contains('425,00'));
+    });
+
+    test('le franc n\'en porte aucune', () {
+      expect(FeeAmount.display(800000, 'CDF'), isNot(contains(',00')));
     });
 
     test('un aller-retour saisie conserve le montant', () {
