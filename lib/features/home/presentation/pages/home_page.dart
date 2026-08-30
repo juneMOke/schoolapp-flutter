@@ -28,6 +28,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
@@ -189,6 +190,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
         state.selectedSubMenuId == MenuConstants.feeControlId ||
+        state.selectedSubMenuId == MenuConstants.boutiqueAchatsId ||
+        state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
@@ -342,8 +345,11 @@ class _HomePageView extends StatelessWidget {
       // menait bel et bien, et l'écran répondait « page en cours de
       // développement » — alors que la route existait et que le module était
       // entier. Un sous-menu déclaré au registre DOIT avoir son cas ici.
-      case MenuConstants.boutiqueId:
+      case MenuConstants.boutiqueAchatsId:
         return const BoutiquePage();
+
+      case MenuConstants.boutiqueHistoriqueId:
+        return const BoutiqueHistoryPage();
       case MenuConstants.feeControlId:
         return const FinanceFeatureScope(
           key: ValueKey(MenuConstants.feeControlId),

@@ -189,6 +189,10 @@ class AppColors {
   static const accueilFinancesSoft = Color(0xFFEDF5EF);
   // Or profond propre à l'Accueil : l'or-doux de marque (#D9A24E) est trop
   // clair pour porter un titre ou une icône sur fond papier (spec §03).
+  /// La caisse boutique : un cuivre chaud, distinct du vert Finances — la
+  /// caisse est étanche à la scolarité, la couleur ne doit pas les confondre.
+  static const accueilBoutiqueAccent = Color(0xFF8A4F2D);
+  static const accueilBoutiqueSoft = Color(0xFFF6EDE7);
   static const accueilClassesAccent = Color(0xFFB8862B);
   static const accueilClassesSoft = Color(0xFFFBF3E3);
   static const accueilCoursAccent = terreCuite; // #B85C2C

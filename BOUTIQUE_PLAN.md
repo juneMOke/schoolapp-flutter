@@ -590,6 +590,135 @@ aucun montant en `double`, parsing tolérant sur l'ACK serveur, et aucune lectur
 d'affichage qui remonte une erreur au milieu d'un flux d'argent (le répertoire
 des payeurs avale et rend « inconnu »).
 
+### BQ-11 — Le module « Boutique » dans la barre ✅
+
+La caisse quitte le sous-menu de Finances pour un **menu propre**, avec deux
+entrées : **Achats** (le guichet) et **Historiques** (les ventes déjà
+encaissées). C'est l'étanchéité (I-4) portée jusque dans la navigation : une
+vente n'alimente aucun poste dû, et la ranger sous Finances laissait entendre
+qu'elle s'y mêlait.
+
+- `MenuConstants.boutiqueMenuId` + `boutiqueAchatsId` / `boutiqueHistoriqueId`,
+  routes `/boutique/{sous-menu}`, entrée de `MenuFactory`, carte d'accueil
+  (`AccueilModulesFactory`, accent cuivre), registre d'accès sur les deux
+  sous-menus (même droit : `boutique.sale.read`).
+- Le fil d'Ariane de ces deux écrans est **supprimé** (`hidePageBreadcrumb`) :
+  il coûtait une ligne pour ne dire que d'où l'on venait.
+
+### BQ-12 — Le panier au sommet, hors du défilement ✅
+
+`BoutiqueTopBar` (en `appBar` du `Scaffold`, donc jamais défilée) porte
+l'intitulé à gauche et **le panier à droite**, avec son compte. La disposition à
+deux colonnes et la feuille modale disparaissent toutes deux.
+
+⚠️ Le contenu de la barre est plafonné à `detailContentMaxWidth` et centré :
+pleine largeur, le panier se collait au bord de l'écran, à plusieurs centimètres
+de la colonne qu'il coiffe.
+
+### BQ-13 — Le panier en page dédiée ✅
+
+`BoutiqueCartPage`, poussée par `Navigator` avec le bloc **passé par valeur** :
+un second bloc composerait un second panier, et la vente encaissée ne serait pas
+celle qu'on a vue à l'écran. Elle porte les contrôleurs du payeur, la
+désignation des bénéficiaires, la confirmation et l'encaissement.
+
+### BQ-14 — Le pas d'ajout sur la vignette ✅
+
+La carte n'est plus le bouton : son pied porte « Ajouter au panier », puis
+« − n + ». Le geste et son inverse au même endroit — auparavant, un article
+ajouté par erreur se retirait en ouvrant le panier.
+
+- `BoutiqueCart.removeOneBareArticle` / `hasBareLineOfArticle` +
+  `BoutiqueArticleDecremented`. Le pas n'agit que sur la ligne **nue** : une
+  ligne déjà désignée à un enfant se retire au panier, où le nom est sous les
+  yeux. Le dernier exemplaire **emporte la ligne**, sinon la vignette resterait
+  bloquée sur « 1 ».
+- Effet d'ajout : la bordure prend l'accent 420 ms (reduced-motion respecté).
+- ⚠️ `mainAxisExtent` passe de 148 à **212** — mesuré sur « Duplicata de
+  bulletin scolaire », pas estimé (test de débordement dédié).
+
+### BQ-15 — La modale de succès ✅
+
+`BoutiqueSaleSuccessDialog` remplace la barre de reçu : phrase de succès,
+numéro scellé ou mention provisoire, impression du ticket. **Fermer vaut
+terminer** — croix, fond et « Terminer » ont la même issue : panier vidé, retour
+au catalogue. Le panier n'est vidé **qu'à ce moment** : plus tôt, il effacerait
+ce que le ticket sert à imprimer.
+
+### BQ-16 — L'historique de caisse ✅
+
+`/boutique/boutique-historique` — **lecture locale exclusive**. Une caisse se
+consulte le jour où le réseau manque, et c'est aussi ce qui rend visibles les
+ventes non encore parties, que le serveur ignore.
+
+- Quatre fenêtres **calendaires** ancrées sur aujourd'hui (jour par défaut,
+  semaine depuis lundi, mois, année civile), par-dessus le scope de l'exercice.
+- Total **par devise**, jamais additionné ; compte des ventes en attente.
+- ⚠️ **Le piège de la borne.** `sold_at` mélange deux formats : `...:00.000Z`
+  (écriture locale) et `...:00Z` (delta serveur). `'.'` (0x2E) est INFÉRIEUR à
+  `'Z'` (0x5A) — une borne suffixée exclurait silencieusement l'un des deux à
+  minuit pile. La borne est donc un **préfixe de 19 caractères**, qui reste
+  exploitable par l'index.
+- ⚠️ La borne est convertie en **UTC** : « aujourd'hui » est le jour du guichet,
+  mais la colonne est en UTC — comparer une heure locale décalerait la fenêtre
+  de trois heures chaque soir à Kinshasa.
+
+### BQ-17 — Habillage de la caisse ✅
+
+La caisse portait une barre claire et des surfaces grises, là où le reste de
+l'application est en Bleu Profond texturé Kuba : elle se lisait comme un autre
+logiciel.
+
+- `BoutiqueTopBar` reprend l'anatomie de `StudentDetailAppBar` — dégradé Bleu
+  Profond → Bleu Ardoise, `KubaPatternLayer`, sur-titre or-doux, liseré or. Le
+  bouton panier y devient blanc translucide, sa pastille or-doux : un bouton
+  clair sur fond bleu faisait une tache.
+- **La ligne de panier** : carte blanche posée (et non grise, qui la faisait
+  passer pour désactivée), liseré d'état à gauche — accent de famille si la
+  ligne est prête, couleur d'alerte sinon — médaillon de famille, prix en
+  chiffres tabulaires. La corbeille passe **sous** le prix : au bout de la ligne
+  elle jouxtait le pas « + », et un doigt qui vise vite supprimait au lieu
+  d'ajouter.
+- **Le total** prend son propre bandeau Bleu Profond texturé — le même que la
+  confirmation et que la fiche de vente : c'est le même chiffre d'un écran à
+  l'autre.
+- **« Vider le panier »** cesse d'être un lien souligné (qui se touche par
+  accident et ne ressemblait à rien) : bouton bordé rouge, et surtout
+  `BoutiqueClearCartDialog`, qui **nomme ce qui se perd** — articles, payeur
+  saisi — et rappelle que rien n'est encaissé, donc qu'il n'y a rien à annuler
+  côté argent.
+- **Les deux modales d'encaissement** passent au socle `EteeloDialogBody` avec
+  en-tête sombre. Sur la confirmation, le montant remonte **en premier**, dans
+  son bandeau : enfoui en bas d'un tableau, il se confirmait sans se lire.
+
+⚠️ `KubaPatternLayer` se pose **lui-même** en `Positioned.fill`. L'envelopper
+dans un second `Positioned` lève « Competing ParentDataWidgets » — sur trois
+écrans à la fois, puisque le bandeau est partagé.
+
+### BQ-18 — La fiche d'une vente ✅
+
+Chaque ligne de l'historique ouvre `BoutiqueSaleDetailPage` : le contenu figé de
+la vente, le payeur, l'horodatage, **« encaissé par »** — sur une caisse tenue à
+plusieurs, la seule ligne qui dise qui a pris l'argent — et le numéro de reçu ou
+sa référence provisoire.
+
+Deux preuves, qui ne se remplacent pas : le **ticket thermique**, que la tablette
+compose seule, et le **reçu scellé** (RV), que le serveur a produit et que
+`showEditiqueRestitutionDialog` ressort — copie locale d'abord, re-téléchargement
+ensuite (ADR-012 D-1). Rien n'est émis, aucun numéro n'est consommé.
+
+- `printSaleTicket` rend désormais **vrai si le papier est sorti**, et la trace
+  `ticket_printed_at` n'est posée qu'alors : marquer un envoi annulé ferait
+  afficher « déjà imprimé » sur un ticket que personne n'a en main.
+- ⚠️ La trace **n'interdit jamais de réimprimer** — un papier se déchire, une
+  imprimante se bloque à mi-course. Elle change le libellé, pas la porte.
+- ⚠️ Le bouton du reçu se décide sur l'**identifiant d'archive**, jamais sur le
+  numéro : le numéro s'imprime, l'identifiant seul permet de re-télécharger, et
+  le contrat autorise l'un sans l'autre.
+- ⚠️ Une vente disparue rend `NotFoundFailure` et s'affiche en état **vide**, pas
+  en erreur : « historique illisible » ferait réessayer indéfiniment une lecture
+  qui répond correctement qu'il n'y a rien.
+
 ## 8. Ce qui reste au back
 
 Un seul point, et il n'est pas bloquant.

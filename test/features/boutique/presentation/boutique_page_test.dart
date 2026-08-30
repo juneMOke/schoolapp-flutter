@@ -18,12 +18,14 @@ import 'package:school_app_flutter/features/boutique/domain/entities/boutique_ca
 import 'package:school_app_flutter/features/boutique/domain/entities/pricing_mode.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/find_boutique_payer_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_catalog_use_case.dart';
-import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/record_boutique_sale_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_bloc.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_cart_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_article_card.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_panel.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
@@ -43,20 +45,6 @@ class _MockAcademicYearBloc
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
-/// Un bloc dont l'état de départ est imposé — pour observer l'écran d'après
-/// l'encaissement sans rejouer tout le parcours.
-class _SeededBloc extends BoutiqueBloc {
-  _SeededBloc({
-    required super.getCatalog,
-    required super.findPayer,
-    required super.recordSale,
-    required super.ids,
-    required BoutiqueState seed,
-  }) {
-    emit(seed);
-  }
-}
-
 class _SeqIds implements IdGenerator {
   int _n = 0;
 
@@ -72,6 +60,20 @@ const _polo = BoutiqueArticle(
   family: ArticleFamily.uniforme,
   pricingMode: PricingMode.prixParNiveau,
   levelPrices: {'lvl-1': 1000},
+  currency: 'USD',
+);
+
+/// Le libellé le plus long du catalogue réel, sur DEUX lignes — c'est lui qui
+/// fixe la hauteur de case de la grille, et une carte qui déborde de six pixels
+/// raye son propre prix.
+const _duplicata = BoutiqueArticle(
+  id: 'art-dup',
+  academicYearId: 'ay-1',
+  code: 'DUPL',
+  label: 'Duplicata de bulletin scolaire',
+  family: ArticleFamily.actes,
+  pricingMode: PricingMode.prixUnique,
+  unitPriceInCents: 500,
   currency: 'USD',
 );
 
@@ -139,22 +141,12 @@ void main() {
 
   tearDown(() => GetIt.I.reset());
 
-  Future<void> pumpPage(WidgetTester tester, {BoutiqueState? seed}) async {
-    await tester.binding.setSurfaceSize(const Size(1400, 1200));
+  Future<void> pumpPage(
+    WidgetTester tester, {
+    Size size = const Size(1400, 1200),
+  }) async {
+    await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    if (seed != null) {
-      GetIt.I.unregister<BoutiqueBloc>();
-      GetIt.I.registerFactory<BoutiqueBloc>(
-        () => _SeededBloc(
-          getCatalog: getCatalog,
-          findPayer: findPayer,
-          recordSale: recordSale,
-          ids: _SeqIds(),
-          seed: seed,
-        ),
-      );
-    }
 
     await tester.pumpWidget(
       MultiBlocProvider(
@@ -175,6 +167,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Le compte tel que la BARRE le porte. La vignette a sa propre pastille de
+  /// quantité : un `find.text('1')` nu confondrait les deux, et le test
+  /// passerait avec une barre muette.
+  Finder countOnCartButton(String value) => find.descendant(
+    of: find.byType(BoutiqueCartButton),
+    matching: find.text(value),
+  );
+
+  testWidgets('un libellé sur DEUX lignes ne déborde pas de sa case', (
+    tester,
+  ) async {
+    // `mainAxisExtent` est une hauteur FIXE : la sous-estimer ne se voit sur
+    // aucun test qui n'affiche que des libellés courts, et raye le prix en
+    // production.
+    when(() => getCatalog(any())).thenAnswer(
+      (_) async => const Right(
+        BoutiqueCatalog(articles: [_polo, _duplicata], withheld: false),
+      ),
+    );
+
+    await pumpPage(tester);
+
+    expect(find.text('Duplicata de bulletin scolaire'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('la page se monte et rend le catalogue', (tester) async {
     // Ce test existe pour une raison précise : le sélecteur de niveau aplatit
     // `schoolLevelGroups`, dont le type se laisse inférer en `dynamic` sur une
@@ -186,26 +204,19 @@ void main() {
     expect(find.byType(BoutiqueArticleCard), findsOneWidget);
   });
 
-  testWidgets('taper une carte pose une ligne au panier', (tester) async {
+  testWidgets('ajouter pose une ligne, et le panier la porte', (tester) async {
     await pumpPage(tester);
 
-    await tester.tap(find.byType(BoutiqueArticleCard));
+    await tester.tap(find.text('Ajouter au panier'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BoutiqueCartButton));
     await tester.pumpAndSettle();
 
     // La ligne est là, avec sa mention « Prix à résoudre » : l'article est
     // tarifé par niveau, et aucun n'a été choisi.
     expect(find.text('Prix à résoudre'), findsOneWidget);
-    // Et jamais un « 0.00 $ » qui ferait croire la ligne gratuite.
-    expect(find.text('—'), findsWidgets);
-  });
-
-  testWidgets('le bouton d\'encaissement NOMME ce qui manque', (tester) async {
-    await pumpPage(tester);
-    await tester.tap(find.byType(BoutiqueArticleCard));
-    await tester.pumpAndSettle();
-
-    // Jamais grisé muet : le pied énumère, dans l'ordre où le guichet peut
-    // corriger.
+    // Jamais grisé muet : le pied énumère ce qui manque, dans l'ordre où le
+    // guichet peut le corriger.
     expect(find.textContaining('À compléter :'), findsOneWidget);
     expect(find.textContaining('1 ligne sans niveau'), findsOneWidget);
   });
@@ -247,63 +258,112 @@ void main() {
     expect(find.byType(BoutiqueArticleCard), findsNothing);
   });
 
-  group('après encaissement', () {
-    /// Un panier prêt, posé dans l'état du bloc : le parcours complet passe par
-    /// la modale de confirmation, qui a son propre test.
-    BoutiqueState collected() => const BoutiqueState(
-      status: BoutiqueStatus.ready,
-      catalog: BoutiqueCatalog(articles: [_polo], withheld: false),
-      recordedSale: RecordedSale(
-        sale: BoutiqueSaleLocalModel(
-          id: 'aaaabbbb-cccc-dddd',
-          schoolId: 'E1',
-          academicYearId: 'ay-1',
-          payerLastName: 'Ndombo',
-          totalInCents: 3500,
-          currency: 'USD',
-          soldAt: '2026-08-29T11:42:00Z',
-          updatedAt: 0,
+  group('le panier vit AILLEURS', () {
+    testWidgets('le catalogue ne porte NI panneau NI total', (tester) async {
+      // Le panier a sa page. Le laisser aussi en colonne ferait deux
+      // compositions du même panier, qui divergeraient sur les règles portant
+      // l'argent.
+      await pumpPage(tester);
+
+      expect(find.byType(BoutiqueCartPanel), findsNothing);
+      expect(find.text('Total à encaisser'), findsNothing);
+    });
+
+    testWidgets('la barre porte le panier, hors du défilement', (tester) async {
+      // Posée en `appBar` du Scaffold : c'est ce qui la maintient au-dessus du
+      // catalogue quel que soit le défilement. Une caisse dont le panier
+      // disparaît fait recompter le guichet.
+      await pumpPage(tester);
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
+      expect(scaffold.appBar, isA<BoutiqueTopBar>());
+      expect(
+        find.descendant(
+          of: find.byType(BoutiqueTopBar),
+          matching: find.byType(BoutiqueCartButton),
         ),
-        lines: [],
-      ),
-    );
-
-    testWidgets('la barre de reçu remplace le pied, panier INTACT', (
-      tester,
-    ) async {
-      // Le panier reste derrière : il permet de réimprimer sans recomposer, et
-      // évite qu'un doigt malheureux efface la vente qu'on remet.
-      await pumpPage(tester, seed: collected());
-
-      expect(find.textContaining('Vente encaissée'), findsOneWidget);
-      expect(find.text('Imprimer'), findsOneWidget);
-      expect(find.text('Nouvelle vente'), findsOneWidget);
-    });
-
-    testWidgets('le pied ne propose plus NI encaisser NI vider', (
-      tester,
-    ) async {
-      // Le panier reste intact après l'encaissement (pour réimprimer), donc
-      // `canCollect` reste vrai. Sans neutralisation, le guichet appuierait sur
-      // « Encaisser » et rien ne se produirait — le bloc refuse en silence.
-      await pumpPage(tester, seed: collected());
-
-      final collect = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Encaisser en espèces'),
+        findsOneWidget,
       );
-      expect(collect.onPressed, isNull);
-      // Et vider effacerait ce que la barre de reçu sert à réimprimer.
-      expect(find.text('Vider le panier'), findsNothing);
     });
 
-    testWidgets('sans numéro, le sous-titre annonce le PROVISOIRE', (
+    testWidgets('taper le panier ouvre sa PAGE', (tester) async {
+      await pumpPage(tester);
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(BoutiqueCartButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsOneWidget);
+      // Le panier lui-même, pas une variante : une seule composition.
+      expect(find.byType(BoutiqueCartPanel), findsOneWidget);
+      expect(find.textContaining('À compléter :'), findsOneWidget);
+    });
+
+    testWidgets('revenir du panier ne perd RIEN', (tester) async {
+      await pumpPage(tester);
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BoutiqueCartButton));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsNothing);
+      expect(countOnCartButton('1'), findsOneWidget);
+    });
+  });
+
+  group('le pas d\'ajout de la vignette', () {
+    testWidgets('le bouton d\'ajout cède la place au compteur', (tester) async {
+      // Le geste et son inverse au même endroit : ajouté par erreur, un article
+      // se retirait auparavant en ouvrant le panier.
+      await pumpPage(tester);
+      expect(find.text('Ajouter au panier'), findsOneWidget);
+
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ajouter au panier'), findsNothing);
+      expect(find.byIcon(Icons.remove_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.add_rounded), findsOneWidget);
+    });
+
+    testWidgets('« + » monte le compte, sur la carte ET dans la barre', (
       tester,
     ) async {
-      // Un ticket provisoire et un reçu scellé se ressemblent au comptoir :
-      // c'est le seul endroit où l'écran peut lever le doute.
-      await pumpPage(tester, seed: collected());
+      await pumpPage(tester);
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
 
-      expect(find.textContaining('provisoire'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.pumpAndSettle();
+
+      expect(countOnCartButton('2'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BoutiqueArticleCard),
+          matching: find.text('2'),
+        ),
+        findsWidgets,
+      );
+    });
+
+    testWidgets('« − » sur le DERNIER exemplaire rend le bouton d\'ajout', (
+      tester,
+    ) async {
+      // Sans cela la vignette resterait bloquée sur « 1 », sans aucun moyen de
+      // revenir en arrière depuis le catalogue.
+      await pumpPage(tester);
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.remove_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ajouter au panier'), findsOneWidget);
+      expect(countOnCartButton('1'), findsNothing);
     });
   });
 }

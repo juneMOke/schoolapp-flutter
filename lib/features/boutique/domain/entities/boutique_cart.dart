@@ -132,6 +132,38 @@ class BoutiqueCart extends Equatable {
     return _withLines([...lines, CartLine(key: keyOf(), article: article)]);
   }
 
+  /// Y a-t-il, pour cet article, un exemplaire encore libre de toute intention ?
+  ///
+  /// C'est ce que le pas de la vignette peut défaire — et lui seul.
+  bool hasBareLineOfArticle(String articleId) =>
+      lines.any((line) => line.article.id == articleId && line.isBare);
+
+  /// Retire un exemplaire **non encore destiné à un enfant**, depuis le
+  /// catalogue.
+  ///
+  /// Le pas de la vignette n'agit que sur la ligne « nue », miroir exact
+  /// d'[addArticle]. Une ligne déjà désignée à un bénéficiaire porte une
+  /// intention que le catalogue ne connaît pas : la défaire depuis une vignette
+  /// la ferait disparaître sans que le guichet voie de quel enfant il
+  /// s'agissait. Elle se retire au panier, où le nom est sous les yeux.
+  ///
+  /// **Le dernier exemplaire emporte la ligne** — contrairement au compteur du
+  /// panier, qui plancherait à 1. Sans cela la vignette resterait bloquée sur
+  /// « 1 », sans aucun moyen de revenir au bouton d'ajout.
+  BoutiqueCart removeOneBareArticle(String articleId) {
+    final index = lines.indexWhere(
+      (line) => line.article.id == articleId && line.isBare,
+    );
+    if (index < 0) return this;
+    final line = lines[index];
+    if (line.quantity <= 1) return removeLine(line.key);
+    return _withLines([
+      ...lines.sublist(0, index),
+      line.copyWith(quantity: line.quantity - 1),
+      ...lines.sublist(index + 1),
+    ]);
+  }
+
   /// Retire une ligne — **immédiat, sans confirmation** : le panier n'est pas
   /// encore un engagement, et l'ajout se refait d'un geste.
   BoutiqueCart removeLine(String key) => _withLines([

@@ -3,6 +3,13 @@ import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_history_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_history_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_pull_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/ticket/sale_ticket_composer.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_write_dao.dart';
@@ -105,6 +112,37 @@ void registerBoutiqueOffline(GetIt getIt) {
   );
   getIt.registerFactory<RecordBoutiqueSaleUseCase>(
     () => RecordBoutiqueSaleUseCase(getIt<BoutiqueSaleRepository>()),
+  );
+
+  // ── Historique de caisse ────────────────────────────────────────────────
+  // Lecture LOCALE seule : une caisse se consulte le jour où le réseau manque,
+  // et c'est aussi ce qui rend les ventes non encore parties visibles ici.
+  getIt.registerLazySingleton<BoutiqueSaleHistoryDao>(
+    () => BoutiqueSaleHistoryDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<BoutiqueHistoryRepository>(
+    () => BoutiqueHistoryRepositoryImpl(
+      dao: getIt<BoutiqueSaleHistoryDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      now: DateTime.now,
+    ),
+  );
+  getIt.registerFactory<GetBoutiqueSalesHistoryUseCase>(
+    () => GetBoutiqueSalesHistoryUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueSaleDetailUseCase>(
+    () => GetBoutiqueSaleDetailUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  getIt.registerFactory<MarkSaleTicketPrintedUseCase>(
+    () => MarkSaleTicketPrintedUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  // `registerFactory`, jamais singleton : la fenêtre choisie appartient à
+  // l'écran ouvert, et un bloc partagé ferait revenir la période d'une visite
+  // précédente.
+  getIt.registerFactory<BoutiqueHistoryBloc>(
+    () => BoutiqueHistoryBloc(
+      getHistory: getIt<GetBoutiqueSalesHistoryUseCase>(),
+    ),
   );
 
   getIt.registerFactoryParam<BeneficiaryPickerCubit, String, void>(

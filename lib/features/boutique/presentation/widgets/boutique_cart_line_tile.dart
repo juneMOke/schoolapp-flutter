@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_line.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_family_style.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -55,47 +56,82 @@ class BoutiqueCartLineTile extends StatelessWidget {
           ? null
           : '${l10n.boutiqueLevelRequired} ${line.article.label}',
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: resolved
-              ? AppColors.surfaceAlt
-              : AppColors.boutiqueUnresolvedSurface,
-          borderRadius: BorderRadius.circular(12),
+          // Fond BLANC, et non gris : une carte posée se lit comme un objet
+          // qu'on manipule ; un gris de fond la faisait passer pour une zone
+          // désactivée. C'est le liseré de gauche qui porte l'état.
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: resolved
                 ? AppColors.border
                 : AppColors.boutiqueUnresolvedBorder,
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _TopRow(line: line, onRemove: onRemove),
-            const SizedBox(height: AppDimensions.spacingS),
-            Wrap(
-              spacing: AppDimensions.spacingS,
-              runSpacing: AppDimensions.spacingS,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                _BeneficiaryChip(
-                  line: line,
-                  onPick: onPickBeneficiary,
-                  onClear: onClearBeneficiary,
-                ),
-                // Le sélecteur de niveau n'existe QUE sur une ligne walk-in
-                // d'un article à grille : dès qu'un bénéficiaire est posé, le
-                // niveau vient de l'élève, et l'offrir ferait croire qu'on peut
-                // en choisir un autre.
-                if (line.article.requiresLevel && line.beneficiary == null)
-                  _LevelSelector(
-                    line: line,
-                    levels: levels,
-                    onChanged: onLevelChanged,
-                  ),
-                _Stepper(quantity: line.quantity, onChanged: onQuantityChanged),
-              ],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.bleuProfond.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Le liseré d'état : accent de famille quand la ligne est prête,
+              // couleur d'alerte quand le prix ne se résout pas. Jamais SEUL —
+              // les mots « Prix à résoudre » restent dans la ligne, parce qu'un
+              // daltonien tient une caisse aussi bien qu'un autre.
+              Container(
+                width: 4,
+                color: resolved
+                    ? BoutiqueFamilyStyle.accentOf(line.article.family)
+                    : AppColors.boutiqueUnresolvedText,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _TopRow(line: line, onRemove: onRemove),
+                      const SizedBox(height: AppDimensions.spacingS),
+                      Wrap(
+                        spacing: AppDimensions.spacingS,
+                        runSpacing: AppDimensions.spacingS,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _BeneficiaryChip(
+                            line: line,
+                            onPick: onPickBeneficiary,
+                            onClear: onClearBeneficiary,
+                          ),
+                          // Le sélecteur de niveau n'existe QUE sur une ligne
+                          // walk-in d'un article à grille : dès qu'un
+                          // bénéficiaire est posé, le niveau vient de l'élève,
+                          // et l'offrir ferait croire qu'on peut en choisir un
+                          // autre.
+                          if (line.article.requiresLevel &&
+                              line.beneficiary == null)
+                            _LevelSelector(
+                              line: line,
+                              levels: levels,
+                              onChanged: onLevelChanged,
+                            ),
+                          _Stepper(
+                            quantity: line.quantity,
+                            onChanged: onQuantityChanged,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -123,9 +159,27 @@ class _TopRow extends StatelessWidget {
     final theme = Theme.of(context);
     final total = line.lineTotalInCents;
 
+    final accent = BoutiqueFamilyStyle.accentOf(line.article.family);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Le médaillon de famille, comme sur la vignette du catalogue : c'est
+        // ce qui permet de retrouver un article dans le panier sans le lire.
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: accent.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            BoutiqueFamilyStyle.iconOf(line.article.family),
+            size: 18,
+            color: accent,
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingS),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,8 +188,12 @@ class _TopRow extends StatelessWidget {
                 line.article.label,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: AppColors.bleuProfond,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: 1),
               Text(
                 BoutiqueCartLineTile.metaOf(line, l10n),
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -151,28 +209,71 @@ class _TopRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppDimensions.spacingS),
-        Text(
-          // Un tiret, JAMAIS « 0.00 $ » : un zéro s'additionne à l'œil et fait
-          // croire que la ligne est gratuite.
-          total == null
-              ? '—'
-              : BoutiqueMoneyFormat.exact(total, line.article.currency),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: line.isResolved
-                ? AppColors.bleuProfond
-                : AppColors.boutiqueUnresolvedText,
-          ),
-        ),
-        IconButton(
-          onPressed: onRemove,
-          icon: const Icon(Icons.delete_outline, size: 20),
-          tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-          padding: EdgeInsets.zero,
-          color: AppColors.textMuted,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              // Un tiret, JAMAIS « 0.00 $ » : un zéro s'additionne à l'œil et
+              // fait croire que la ligne est gratuite.
+              total == null
+                  ? '—'
+                  : BoutiqueMoneyFormat.exact(total, line.article.currency),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                // Chiffres à chasse fixe : des totaux de ligne qui dansent en
+                // largeur ne s'additionnent plus à l'œil.
+                fontFeatures: const [FontFeature.tabularFigures()],
+                color: line.isResolved
+                    ? AppColors.bleuProfond
+                    : AppColors.boutiqueUnresolvedText,
+              ),
+            ),
+            const SizedBox(height: 2),
+            // La corbeille sous le prix, et non à côté : au bout d'une ligne,
+            // elle jouxtait le pas « + » du compteur, et un doigt qui vise vite
+            // supprimait au lieu d'ajouter.
+            _RemoveButton(onRemove: onRemove),
+          ],
         ),
       ],
+    );
+  }
+}
+
+/// Le retrait d'une ligne — **immédiat, sans confirmation** : le panier n'est
+/// pas encore un engagement, et l'ajout se refait d'un geste.
+class _RemoveButton extends StatelessWidget {
+  final VoidCallback onRemove;
+
+  const _RemoveButton({required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final tooltip = MaterialLocalizations.of(context).deleteButtonTooltip;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: InkWell(
+          onTap: onRemove,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 30,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.delete_outline_rounded,
+              size: 17,
+              color: AppColors.error,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -287,10 +388,13 @@ class _Stepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
+    // Terre-cuite, comme le pas de la vignette et le bouton d'encaissement :
+    // c'est la couleur de ce qui va être payé, et le guichet reconnaît le même
+    // compteur d'un écran à l'autre.
     decoration: BoxDecoration(
-      color: AppColors.surface,
+      color: AppColors.terreCuite.withValues(alpha: 0.07),
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: AppColors.border),
+      border: Border.all(color: AppColors.terreCuite.withValues(alpha: 0.30)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -304,7 +408,10 @@ class _Stepper extends StatelessWidget {
           child: Text(
             '$quantity',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.terreCuite,
+            ),
           ),
         ),
         _StepButton(icon: Icons.add, onPressed: () => onChanged(quantity + 1)),
@@ -323,9 +430,18 @@ class _StepButton extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: onPressed,
     borderRadius: BorderRadius.circular(999),
-    child: Opacity(
-      opacity: onPressed == null ? 0.35 : 1,
-      child: SizedBox(width: 30, height: 28, child: Icon(icon, size: 16)),
+    child: SizedBox(
+      width: 32,
+      height: 30,
+      child: Icon(
+        icon,
+        size: 16,
+        // Le « − » à 1 est INACTIF, pas invisible : il reste à sa place, et le
+        // retrait se fait par la corbeille — un compteur qui supprime surprend.
+        color: onPressed == null
+            ? AppColors.terreCuite.withValues(alpha: 0.30)
+            : AppColors.terreCuite,
+      ),
     ),
   );
 }

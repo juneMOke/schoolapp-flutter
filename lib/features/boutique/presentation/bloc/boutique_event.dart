@@ -53,6 +53,20 @@ class BoutiqueArticleAdded extends BoutiqueEvent {
   List<Object?> get props => [article];
 }
 
+/// Retire un exemplaire depuis la VIGNETTE du catalogue — le pas « − » du
+/// compteur, miroir de [BoutiqueArticleAdded].
+///
+/// Distinct de [BoutiqueLineRemoved], qui vise une ligne précise du panier : le
+/// catalogue ne connaît que l'article, jamais la ligne.
+class BoutiqueArticleDecremented extends BoutiqueEvent {
+  final BoutiqueArticle article;
+
+  const BoutiqueArticleDecremented(this.article);
+
+  @override
+  List<Object?> get props => [article];
+}
+
 class BoutiqueLineRemoved extends BoutiqueEvent {
   final String lineKey;
 

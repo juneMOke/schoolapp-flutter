@@ -24,14 +24,20 @@ class BoutiqueCatalogView extends StatelessWidget {
   /// l'intitulé de groupe.
   final int Function(ArticleFamily family) cartCountOfFamily;
 
-  final void Function(BoutiqueArticle article) onArticleTap;
+  /// Reste-t-il un exemplaire non destiné, que le pas « − » puisse défaire ?
+  final bool Function(String articleId) canRemoveOne;
+
+  final void Function(BoutiqueArticle article) onAddArticle;
+  final void Function(BoutiqueArticle article) onRemoveArticle;
 
   const BoutiqueCatalogView({
     super.key,
     required this.groups,
     required this.quantityOf,
     required this.cartCountOfFamily,
-    required this.onArticleTap,
+    required this.canRemoveOne,
+    required this.onAddArticle,
+    required this.onRemoveArticle,
   });
 
   @override
@@ -49,7 +55,9 @@ class BoutiqueCatalogView extends StatelessWidget {
           _ArticleGrid(
             articles: entry.value,
             quantityOf: quantityOf,
-            onArticleTap: onArticleTap,
+            canRemoveOne: canRemoveOne,
+            onAddArticle: onAddArticle,
+            onRemoveArticle: onRemoveArticle,
           ),
           const SizedBox(height: 18),
         ],
@@ -67,12 +75,16 @@ class BoutiqueCatalogView extends StatelessWidget {
 class _ArticleGrid extends StatelessWidget {
   final List<BoutiqueArticle> articles;
   final int Function(String articleId) quantityOf;
-  final void Function(BoutiqueArticle article) onArticleTap;
+  final bool Function(String articleId) canRemoveOne;
+  final void Function(BoutiqueArticle article) onAddArticle;
+  final void Function(BoutiqueArticle article) onRemoveArticle;
 
   const _ArticleGrid({
     required this.articles,
     required this.quantityOf,
-    required this.onArticleTap,
+    required this.canRemoveOne,
+    required this.onAddArticle,
+    required this.onRemoveArticle,
   });
 
   @override
@@ -81,11 +93,13 @@ class _ArticleGrid extends StatelessWidget {
     physics: const NeverScrollableScrollPhysics(),
     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
       maxCrossAxisExtent: 260,
-      // 148 et non 128 : la spec donne 128 comme **minimum** de carte, et
-      // `mainAxisExtent` en ferait une hauteur FIXE — trop juste dès qu'un
-      // libellé prend deux lignes, ce qui est le cas nominal (« Duplicata de
-      // bulletin »). Une carte qui déborde de six pixels raye son propre prix.
-      mainAxisExtent: 148,
+      // 212 : la carte porte désormais son pas d'ajout au pied, qui coûte
+      // 40 dp de plus que l'ancienne surface-bouton. `mainAxisExtent` est une
+      // hauteur FIXE — la sous-estimer déborde dès qu'un libellé prend deux
+      // lignes, ce qui est le cas nominal (« Duplicata de bulletin scolaire »),
+      // et une carte qui déborde raye son propre prix. Le chiffre est mesuré
+      // sur ce libellé-là, pas estimé : cf. le test de débordement.
+      mainAxisExtent: 212,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
     ),
@@ -95,7 +109,9 @@ class _ArticleGrid extends StatelessWidget {
       return BoutiqueArticleCard(
         article: article,
         quantityInCart: quantityOf(article.id),
-        onTap: () => onArticleTap(article),
+        canRemoveOne: canRemoveOne(article.id),
+        onAdd: () => onAddArticle(article),
+        onRemove: () => onRemoveArticle(article),
       );
     },
   );

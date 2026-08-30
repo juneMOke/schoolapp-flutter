@@ -22,11 +22,20 @@ class BoutiqueResultsErrorState extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onReconnect;
 
+  /// L'écran qui échoue — c'est lui qui décide ce que le message NOMME.
+  ///
+  /// Les quatre familles et leurs quatre gestes sont partagés ; les phrases, non.
+  /// L'historique annonçant « le catalogue local n'a pas pu être lu » ferait
+  /// chercher une panne de catalogue à qui vient consulter sa caisse, et le
+  /// message réseau y serait carrément faux : l'historique se lit en local.
+  final BoutiqueErrorSurface surface;
+
   const BoutiqueResultsErrorState({
     super.key,
     required this.failure,
     this.onRetry,
     this.onReconnect,
+    this.surface = BoutiqueErrorSurface.catalog,
   });
 
   @override
@@ -88,21 +97,31 @@ class BoutiqueResultsErrorState extends StatelessWidget {
                 ),
       };
 
-  static String _title(AppLocalizations l10n, EteeloErrorType type) =>
-      switch (type) {
-        EteeloErrorType.network => l10n.boutiqueErrorNetworkTitle,
-        EteeloErrorType.unauthorized => l10n.boutiqueErrorUnauthorizedTitle,
-        EteeloErrorType.forbidden => l10n.boutiqueErrorForbiddenTitle,
-        EteeloErrorType.server ||
-        EteeloErrorType.unknown => l10n.boutiqueErrorServerTitle,
-      };
+  String _title(AppLocalizations l10n, EteeloErrorType type) => switch (type) {
+    EteeloErrorType.network => l10n.boutiqueErrorNetworkTitle,
+    EteeloErrorType.unauthorized => l10n.boutiqueErrorUnauthorizedTitle,
+    EteeloErrorType.forbidden => l10n.boutiqueErrorForbiddenTitle,
+    EteeloErrorType.server || EteeloErrorType.unknown =>
+      surface == BoutiqueErrorSurface.history
+          ? l10n.boutiqueHistoryErrorServerTitle
+          : l10n.boutiqueErrorServerTitle,
+  };
 
-  static String _message(AppLocalizations l10n, EteeloErrorType type) =>
+  String _message(AppLocalizations l10n, EteeloErrorType type) =>
       switch (type) {
-        EteeloErrorType.network => l10n.boutiqueErrorNetwork,
+        EteeloErrorType.network =>
+          surface == BoutiqueErrorSurface.history
+              ? l10n.boutiqueHistoryErrorNetwork
+              : l10n.boutiqueErrorNetwork,
         EteeloErrorType.unauthorized => l10n.boutiqueErrorUnauthorized,
         EteeloErrorType.forbidden => l10n.boutiqueErrorForbidden,
-        EteeloErrorType.server ||
-        EteeloErrorType.unknown => l10n.boutiqueErrorServer,
+        EteeloErrorType.server || EteeloErrorType.unknown =>
+          surface == BoutiqueErrorSurface.history
+              ? l10n.boutiqueHistoryErrorServer
+              : l10n.boutiqueErrorServer,
       };
 }
+
+/// Quel écran de la caisse échoue. Les gestes de reprise sont les mêmes ; ce que
+/// les phrases NOMMENT ne l'est pas.
+enum BoutiqueErrorSurface { catalog, history }

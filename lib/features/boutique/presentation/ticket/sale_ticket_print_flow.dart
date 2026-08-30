@@ -19,7 +19,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// l'envoi thermique peut rester en vol une trentaine de secondes, et un
 /// caissier qui referme pour servir le client suivant ne doit pas perdre son
 /// ticket.
-Future<void> printSaleTicket(
+/// Rend **vrai si le papier est sorti** — et rien d'autre. Un envoi annulé, une
+/// imprimante absente ou un échec rendent faux : l'appelant s'en sert pour
+/// noter la trace d'impression, et marquer un envoi qui a échoué ferait
+/// afficher « déjà imprimé » sur un ticket que personne n'a en main.
+Future<bool> printSaleTicket(
   BuildContext context, {
   required RecordedSale sale,
   required Map<String, String> levelLabels,
@@ -37,7 +41,7 @@ Future<void> printSaleTicket(
     labels: labels,
     levelLabels: levelLabels,
   );
-  if (!context.mounted) return;
+  if (!context.mounted) return false;
 
   final bytes = EscPosTicketRenderer.renderLines(
     SaleTicketTextLayout.render(model),
@@ -47,12 +51,14 @@ Future<void> printSaleTicket(
   switch (outcome) {
     case ThermalTicketPrinted():
       messenger?.showSnackBar(SnackBar(content: Text(printedNotice)));
+      return true;
     // Le caissier a fermé la liste : le geste demandé a été repris. Insister
     // par un message serait lui reprocher son propre choix.
     case ThermalTicketCancelled():
-      break;
+      return false;
     case ThermalTicketNoSurface():
     case ThermalTicketFailed():
       messenger?.showSnackBar(SnackBar(content: Text(failedNotice)));
+      return false;
   }
 }

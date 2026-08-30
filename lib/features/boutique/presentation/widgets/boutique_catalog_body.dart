@@ -21,14 +21,16 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///  - *erreur* — la lecture a échoué.
 class BoutiqueCatalogBody extends StatelessWidget {
   final BoutiqueState state;
-  final void Function(BoutiqueArticle article) onArticleTap;
+  final void Function(BoutiqueArticle article) onAddArticle;
+  final void Function(BoutiqueArticle article) onRemoveArticle;
   final VoidCallback onResetFilters;
   final VoidCallback onRetry;
 
   const BoutiqueCatalogBody({
     super.key,
     required this.state,
-    required this.onArticleTap,
+    required this.onAddArticle,
+    required this.onRemoveArticle,
     required this.onResetFilters,
     required this.onRetry,
   });
@@ -104,7 +106,9 @@ class BoutiqueCatalogBody extends StatelessWidget {
           cartCountOfFamily: (family) => state.cart.lines
               .where((line) => line.article.family == family)
               .fold(0, (sum, line) => sum + line.quantity),
-          onArticleTap: onArticleTap,
+          canRemoveOne: state.cart.hasBareLineOfArticle,
+          onAddArticle: onAddArticle,
+          onRemoveArticle: onRemoveArticle,
         ),
       ],
     );

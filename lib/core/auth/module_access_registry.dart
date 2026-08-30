@@ -149,17 +149,22 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // franchit aussi la disjonction ci-dessus, donc la fiche financière ouverte
     // depuis cet écran reste atteignable.
     MenuConstants.feeControlId: ModuleAccess([Perm.financeChargeRead]),
-    // La caisse boutique s'OUVRE sur la seule lecture des ventes — encaisser
-    // est gardé à part, par [kBoutiqueCollectAccess]. Exiger ici la paire
-    // d'écriture fermerait l'écran à qui a le droit de consulter la caisse du
-    // jour sans tenir le guichet.
+  },
+  MenuConstants.boutiqueMenuId: {
+    // La caisse s'OUVRE sur la seule lecture des ventes — encaisser est gardé à
+    // part, par [kBoutiqueCollectAccess]. Exiger ici la paire d'écriture
+    // fermerait l'écran à qui a le droit de consulter la caisse du jour sans
+    // tenir le guichet.
     //
     // `boutique.catalog.read` n'y figure PAS, et c'est délibéré : sans elle le
     // serveur caviarde la section `boutiqueArticles` du référentiel à `null`,
     // et l'écran doit dire « catalogue non communiqué » — pas rester
     // inatteignable. Un écran fermé n'apprend rien ; un écran qui nomme le
     // droit manquant, si.
-    MenuConstants.boutiqueId: ModuleAccess([Perm.boutiqueSaleRead]),
+    MenuConstants.boutiqueAchatsId: ModuleAccess([Perm.boutiqueSaleRead]),
+    // L'historique lit les MÊMES ventes, en local : même droit. Le distinguer
+    // n'inventerait qu'une permission que le serveur ne connaît pas.
+    MenuConstants.boutiqueHistoriqueId: ModuleAccess([Perm.boutiqueSaleRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

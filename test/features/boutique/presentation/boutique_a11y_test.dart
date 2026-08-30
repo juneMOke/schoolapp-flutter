@@ -39,11 +39,13 @@ void main() {
       _host(
         SizedBox(
           width: 240,
-          height: 160,
+          height: 220,
           child: BoutiqueArticleCard(
             article: _polo,
             quantityInCart: 3,
-            onTap: () {},
+            canRemoveOne: true,
+            onAdd: () {},
+            onRemove: () {},
           ),
         ),
       ),
@@ -56,32 +58,55 @@ void main() {
     expect(semantics.label, contains('3 au panier'));
   });
 
-  testWidgets('la carte est un BOUTON pour le lecteur d\'écran', (
+  testWidgets('le PAS d\'ajout est nommé, pas seulement dessiné', (
     tester,
   ) async {
-    // Toute la surface est tapable : l'annoncer comme un bouton est ce qui rend
-    // ce geste découvrable sans le voir.
+    // La carte n'est plus le bouton : son pied l'est. Un « + » et un « − » sans
+    // libellé se lisent « bouton, bouton » au lecteur d'écran — deux cibles
+    // indiscernables sur un geste qui engage de l'argent.
     await tester.pumpWidget(
       _host(
         SizedBox(
           width: 240,
-          height: 160,
+          height: 220,
           child: BoutiqueArticleCard(
             article: _polo,
-            quantityInCart: 0,
-            onTap: () {},
+            quantityInCart: 2,
+            canRemoveOne: true,
+            onAdd: () {},
+            onRemove: () {},
           ),
         ),
       ),
     );
 
-    expect(
-      tester.getSemantics(find.byType(BoutiqueArticleCard)),
-      // Le matcher PARTIEL : le nœud porte aussi son libellé et ses actions, et
-      // exiger de tous les énumérer casserait ce test au premier ajout
-      // d'annonce.
-      isSemantics(isButton: true),
+    expect(find.bySemanticsLabel('Ajouter un Polo Lacoste'), findsOneWidget);
+    expect(find.bySemanticsLabel('Retirer un Polo Lacoste'), findsOneWidget);
+  });
+
+  testWidgets('article absent du panier : le geste est d\'AJOUTER', (
+    tester,
+  ) async {
+    // À zéro, le pas n'aurait rien à retirer : le pied porte un bouton unique,
+    // nommé, qui dit ce qu'il fait.
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: 240,
+          height: 220,
+          child: BoutiqueArticleCard(
+            article: _polo,
+            quantityInCart: 0,
+            canRemoveOne: false,
+            onAdd: () {},
+            onRemove: () {},
+          ),
+        ),
+      ),
     );
+
+    expect(find.text('Ajouter au panier'), findsOneWidget);
+    expect(find.byIcon(Icons.remove_rounded), findsNothing);
   });
 
   testWidgets('une ligne non résolue annonce le manque AVANT le libellé', (

@@ -25,6 +25,7 @@ class MenuFactory {
       _createAccueilMenu(l10n),
       _createInscriptionsMenu(l10n),
       _createFinancesMenu(l10n),
+      _createBoutiqueMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -151,10 +152,31 @@ class MenuFactory {
           title: l10n.subMenuFeeControl,
           route: AppRoutesNames.feeControl,
         ),
+      ],
+    );
+  }
+
+  /// Menu Boutique — la caisse point-de-vente (ADR-020).
+  ///
+  /// Un menu propre, et non un sous-menu de Finances : la caisse est **étanche**
+  /// à la scolarité (I-4). Une vente n'apparaît sur aucune note de perception,
+  /// n'alimente aucun poste dû, et son historique n'est pas celui des paiements
+  /// — la ranger sous Finances laissait entendre qu'elle s'y mêlait.
+  static MenuItem _createBoutiqueMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.boutiqueMenuId,
+      title: l10n.menuBoutique,
+      icon: Icons.storefront_outlined,
+      subMenus: [
         SubMenuItem(
-          id: MenuConstants.boutiqueId,
-          title: l10n.subMenuBoutique,
-          route: AppRoutesNames.boutique,
+          id: MenuConstants.boutiqueAchatsId,
+          title: l10n.subMenuBoutiquePurchases,
+          route: AppRoutesNames.boutiqueAchats,
+        ),
+        SubMenuItem(
+          id: MenuConstants.boutiqueHistoriqueId,
+          title: l10n.subMenuBoutiqueHistory,
+          route: AppRoutesNames.boutiqueHistorique,
         ),
       ],
     );

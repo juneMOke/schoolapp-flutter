@@ -51,7 +51,8 @@ void main() {
     );
 
     // La comparaison porte sur les VALEURS, pas sur les noms de constantes :
-    // le `switch` cite `MenuConstants.boutiqueId`, la barre offre `'boutique'`.
+    // le `switch` cite `MenuConstants.boutiqueAchatsId`, la barre offre
+    // `'boutique-achats'`.
     final renderedValues = {
       for (final name in rendered) _valueOfConstant(source: name),
     };
@@ -86,7 +87,8 @@ const Map<String, String> _constants = {
   'financesDashboardId': 'finances-dashboard',
   'facturationsId': 'facturations',
   'feeControlId': 'controle-frais',
-  'boutiqueId': 'boutique',
+  'boutiqueAchatsId': 'boutique-achats',
+  'boutiqueHistoriqueId': 'boutique-historique',
   'classesDashboardId': 'classes-dashboard',
   'organisationId': 'organisation',
   'classesListId': 'classes-list',

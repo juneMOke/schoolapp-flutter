@@ -19,6 +19,12 @@ class MenuConstants {
   // sous-menu de Finances qui en mentirait sur la portée.
   static const String documentsMenuId = 'documents';
 
+  /// La caisse boutique (ADR-020) — un menu PROPRE, et non un sous-menu de
+  /// Finances : c'est une caisse **étanche** à la scolarité (I-4), qui n'alimente
+  /// aucun poste dû, et la ranger sous Finances laissait croire le contraire.
+  /// Elle a d'ailleurs son propre historique, qui n'est pas celui des paiements.
+  static const String boutiqueMenuId = 'boutique';
+
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
   // il précède la coquille, qui n'a rien à afficher sans année académique.
@@ -34,10 +40,12 @@ class MenuConstants {
   static const String facturationsId = 'facturations';
   static const String feeControlId = 'controle-frais';
 
-  /// La caisse boutique (ADR-020). Sous Finances et non dans un menu propre :
-  /// c'est de l'encaissement, tenu par la même personne au même guichet — mais
-  /// une caisse ÉTANCHE à la scolarité, qui n'alimente aucun poste dû.
-  static const String boutiqueId = 'boutique';
+  /// Le guichet : catalogue, panier, encaissement.
+  static const String boutiqueAchatsId = 'boutique-achats';
+
+  /// Les ventes déjà encaissées, lues **en local seulement** : l'historique
+  /// d'une caisse doit se consulter le jour où le réseau manque.
+  static const String boutiqueHistoriqueId = 'boutique-historique';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';

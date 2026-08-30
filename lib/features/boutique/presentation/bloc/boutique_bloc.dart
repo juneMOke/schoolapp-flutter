@@ -44,6 +44,7 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     on<BoutiqueFamilyFilterChanged>(_onFamilyFilterChanged);
     on<BoutiqueFiltersReset>(_onFiltersReset);
     on<BoutiqueArticleAdded>(_onArticleAdded);
+    on<BoutiqueArticleDecremented>(_onArticleDecremented);
     on<BoutiqueLineRemoved>(_onLineRemoved);
     on<BoutiqueLineQuantityChanged>(_onLineQuantityChanged);
     on<BoutiqueLineBeneficiaryAssigned>(_onBeneficiaryAssigned);
@@ -55,6 +56,17 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     on<BoutiqueCartCleared>(_onCartCleared);
     on<BoutiqueSaleSubmitted>(_onSaleSubmitted);
     on<BoutiqueNewSaleStarted>(_onNewSaleStarted);
+  }
+
+  /// Le pas « − » de la vignette. Ne touche qu'aux exemplaires non destinés :
+  /// cf. [BoutiqueCart.removeOneBareArticle].
+  void _onArticleDecremented(
+    BoutiqueArticleDecremented event,
+    Emitter<BoutiqueState> emit,
+  ) {
+    emit(
+      state.copyWith(cart: state.cart.removeOneBareArticle(event.article.id)),
+    );
   }
 
   Future<void> _onCatalogRequested(

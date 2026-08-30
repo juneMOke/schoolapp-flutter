@@ -27,13 +27,16 @@ class AppRoutesNames {
 
   static const String feeControl = '/finances/${MenuConstants.feeControlId}';
 
-  static const String boutique = '/finances/${MenuConstants.boutiqueId}';
-
   static String facturationDetailPath({
     required String studentId,
     required String academicYearId,
   }) =>
       '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
+
+  static const String boutiqueAchats =
+      '/boutique/${MenuConstants.boutiqueAchatsId}';
+  static const String boutiqueHistorique =
+      '/boutique/${MenuConstants.boutiqueHistoriqueId}';
 
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';

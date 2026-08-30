@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/auth/presentation/pages/forgot_passw
 import 'package:school_app_flutter/features/auth/presentation/pages/login_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
@@ -369,13 +370,16 @@ class AppRouter {
         ),
       ],
     ),
-    // La caisse boutique est sous `/finances`, mais **hors** du
-    // `FinanceFeatureScope` : elle ne lit ni créance ni paiement, et l'isolation
-    // stricte du module (I-4) commencerait à se défaire par le partage d'un
-    // scope. Son propre scope arrive avec ses BLoCs.
+    // La caisse boutique a son propre menu, et **aucun** `FeatureScope` partagé
+    // avec Finances : elle ne lit ni créance ni paiement, et l'isolation stricte
+    // du module (I-4) commencerait à se défaire par le partage d'un scope.
     GoRoute(
-      path: AppRoutesNames.boutique,
+      path: AppRoutesNames.boutiqueAchats,
       builder: (context, state) => const BoutiquePage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.boutiqueHistorique,
+      builder: (context, state) => const BoutiqueHistoryPage(),
     ),
     ShellRoute(
       builder: (context, state, child) => ClassesFeatureScope(child: child),
