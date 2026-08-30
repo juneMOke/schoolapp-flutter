@@ -28,6 +28,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
@@ -333,6 +334,16 @@ class _HomePageView extends StatelessWidget {
           key: ValueKey(MenuConstants.facturationsId),
           child: FacturationPage(),
         );
+      // Même page que la route hors coquille `/finances/boutique`. Elle peint
+      // son propre `AppPageBackground`, comme les réglages de Configuration, et
+      // s'insère donc ici telle quelle.
+      //
+      // ⚠️ Sans ce cas, la caisse tombait dans le `default` : le menu latéral y
+      // menait bel et bien, et l'écran répondait « page en cours de
+      // développement » — alors que la route existait et que le module était
+      // entier. Un sous-menu déclaré au registre DOIT avoir son cas ici.
+      case MenuConstants.boutiqueId:
+        return const BoutiquePage();
       case MenuConstants.feeControlId:
         return const FinanceFeatureScope(
           key: ValueKey(MenuConstants.feeControlId),
