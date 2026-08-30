@@ -93,8 +93,10 @@ const tRelanceQuery = FeeControlQuery(
   size: 10,
 );
 
-const tRow = FeeControlRow(
-  summary: EnrollmentSummary(
+// Non `const` : l'agrégat porte une LISTE de positions (une par devise), et
+// une fabrique ne peut pas l'être.
+final tRow = FeeControlRow(
+  summary: const EnrollmentSummary(
     enrollmentId: 'enr-1',
     enrollmentCode: 'code-1',
     status: 'COMPLETED',
@@ -108,7 +110,7 @@ const tRow = FeeControlRow(
       gender: Gender.female,
     ),
   ),
-  aggregate: LocalFeeChargeAggregate(
+  aggregate: LocalFeeChargeAggregate.single(
     studentId: 's1',
     expectedInCents: 150000,
     paidMirrorInCents: 150000,
@@ -181,13 +183,13 @@ void main() {
 
     await _pumpView(
       tester,
-      const FeeControlState(
+      FeeControlState(
         status: EnrollmentLoadStatus.success,
         rows: [tRow],
         totalElements: 1,
         totalPages: 1,
         studentsInScope: 1,
-        breakdown: FeeControlBreakdown(settled: 1),
+        breakdown: const FeeControlBreakdown(settled: 1),
         lastQuery: tQuery,
       ),
     );

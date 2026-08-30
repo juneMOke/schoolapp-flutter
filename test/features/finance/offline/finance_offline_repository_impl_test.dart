@@ -64,6 +64,120 @@ void main() {
   });
 
   test(
+    'recordPayment : total juste GLOBALEMENT mais mal réparti → refus',
+    () async {
+      // 3 000 déclarés d'un côté, 3 000 imputés de l'autre : la comparaison
+      // scalaire d'avant laissait passer. Le serveur, lui, vérifie désormais
+      // `ALLOCATION_SUM_MISMATCH` DEVISE PAR DEVISE — le 422 tomberait sur de
+      // l'argent physiquement reçu, reçu déjà imprimé, et l'immobiliserait en
+      // SYNC_ERROR.
+      final result = await repo.recordPayment(
+        const RecordPaymentDraft(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          currency: 'USD',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'S',
+          payerLastName: 'M',
+          amountInCents: 300000,
+          allocations: [
+            AllocationDraft(
+              feeCode: 'TUITION',
+              studentChargeLabel: 'Scolarité',
+              amountInCents: 100000,
+              currency: 'USD',
+            ),
+            AllocationDraft(
+              feeCode: 'INSURANCE',
+              studentChargeLabel: 'Assurance',
+              amountInCents: 200000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isLeft(), isTrue);
+      // C'est bien le FAIL-FAST DE RÉPARTITION qui a mordu, et pas la garde
+      // anti-mixte qui le suit : sans cette vérification, un fail-fast redevenu
+      // scalaire passerait au vert, couvert par la seconde garde.
+      result.fold((f) {
+        expect(f, isA<ValidationFailure>());
+        expect(f.message, contains('somme des allocations'));
+      }, (_) => fail('!'));
+      expect(await db.query('payments'), isEmpty, reason: 'aucune écriture');
+      expect(await db.query('outbox'), isEmpty);
+    },
+  );
+
+  test('recordPayment : deux devises dans un même versement → refus', () async {
+    // Le contrat de push porte encore un montant SCALAIRE (D2 non livré) : un
+    // versement mixte partirait avec un total unique, refusé par le serveur.
+    // Deux versements, deux reçus — dégradé, mais l'argent remonte.
+    final result = await repo.recordPayment(
+      const RecordPaymentDraft(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        currency: 'USD',
+        paidAt: '2026-07-06T10:00:00Z',
+        payerFirstName: 'S',
+        payerLastName: 'M',
+        allocations: [
+          AllocationDraft(
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: 42500,
+            currency: 'USD',
+          ),
+          AllocationDraft(
+            feeCode: 'INSURANCE',
+            studentChargeLabel: 'Assurance',
+            amountInCents: 9000000,
+            currency: 'CDF',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isLeft(), isTrue);
+    result.fold((f) {
+      expect(f, isA<ValidationFailure>());
+      expect(f.message, contains('plusieurs devises'));
+    }, (_) => fail('!'));
+    expect(await db.query('payments'), isEmpty);
+    expect(await db.query('outbox'), isEmpty);
+  });
+
+  test(
+    'recordPayment : la devise vient des IMPUTATIONS, pas du brouillon',
+    () async {
+      // C'est `allocation.currency == charge.currency` que le serveur vérifie ;
+      // la devise du brouillon n'est qu'une déclaration d'intention.
+      final result = await repo.recordPayment(
+        const RecordPaymentDraft(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          currency: 'cdf',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'S',
+          payerLastName: 'M',
+          allocations: [
+            AllocationDraft(
+              feeCode: 'TUITION',
+              studentChargeLabel: 'Scolarité',
+              amountInCents: 30000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+      expect((await db.query('payments')).single['currency'], 'CDF');
+    },
+  );
+
+  test(
     'recordPayment : total cohérent → Right(paymentId) + paiement en file',
     () async {
       final result = await repo.recordPayment(

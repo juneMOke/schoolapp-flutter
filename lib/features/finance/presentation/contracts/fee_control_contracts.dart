@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 
 /// Filtre de statut de paiement du Contrôle des frais.
 ///
@@ -32,10 +31,10 @@ class FeeControlRow extends Equatable {
   /// Statut dérivé **des montants** (payé composé), jamais de la colonne
   /// `status` du grand-livre — celle-ci est un miroir serveur et ferait
   /// réapparaître « dû » un poste soldé hors-ligne (FRONT §6/§8).
-  StudentChargeStatus get status => feeStatusFromAmounts(
-    expectedAmountInCents: aggregate.expectedInCents.toDouble(),
-    amountPaidInCents: aggregate.paidTotalInCents.toDouble(),
-  );
+  ///
+  /// Le calcul vit dans l'agrégat depuis qu'il porte une position par devise :
+  /// soldé seulement si TOUTES le sont.
+  StudentChargeStatus get status => aggregate.status;
 
   bool matches(FeeControlPaymentFilter filter) {
     final target = filter.targetStatus;

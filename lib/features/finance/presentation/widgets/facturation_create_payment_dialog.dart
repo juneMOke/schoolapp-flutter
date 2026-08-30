@@ -7,6 +7,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -202,22 +205,35 @@ class _FacturationCreatePaymentDialogViewState
     });
   }
 
-  int get _totalInCents =>
-      _entries.fold<int>(0, (sum, entry) => sum + entry.effectiveCents);
+  /// Le total à encaisser, **par devise**.
+  ///
+  /// C'était un entier unique, sommé sur toutes les lignes retenues, étiqueté
+  /// avec la première devise non vide rencontrée. Un versement soldant 425,00 $
+  /// et 90 000 FC s'affichait « 9 042 500 USD » — sur le bandeau or, sur le
+  /// ticket remis au parent, et dans le payload envoyé au serveur.
+  MoneyBag get _totalBag => MoneyBag.sumBy(
+    _entries.where((entry) => entry.effectiveCents > 0),
+    (entry) => Money.parse(entry.effectiveCents, entry.charge.currency),
+  );
 
-  String get _currency {
-    for (final entry in _entries) {
-      if (entry.effectiveCents > 0 && entry.charge.currency.trim().isNotEmpty) {
-        return entry.charge.currency.trim();
-      }
-    }
-    for (final entry in _entries) {
-      if (entry.charge.currency.trim().isNotEmpty) {
-        return entry.charge.currency.trim();
-      }
-    }
-    return '';
-  }
+  /// Le versement en cours mêle deux devises.
+  ///
+  /// ## Pourquoi c'est refusé pour l'instant
+  ///
+  /// Le serveur ne sait pas encore recevoir un versement à plusieurs montants :
+  /// le contrat de push porte un `amountInCents` scalaire (D2 n'est pas livré),
+  /// et le payload est **reconstruit depuis la table au moment de l'envoi**, pas
+  /// figé à la saisie. Un versement mixte partirait donc avec un total unique,
+  /// que le serveur refuserait en `ALLOCATION_SUM_MISMATCH` — désormais vérifié
+  /// devise par devise. Le paiement basculerait en `SYNC_ERROR` : argent
+  /// physiquement reçu, reçu déjà imprimé, bloqué hors du grand-livre.
+  ///
+  /// Encaisser en deux fois est dégradé, mais l'argent remonte. **Cette garde
+  /// se retire avec MD-8**, dans le commit qui ouvre le contrat.
+  bool get _isMixedCurrency => _totalBag.isMultiCurrency;
+
+  /// Le total, rendu sur une ligne — les devises séparées, jamais sommées.
+  String _totalLabel() => _totalBag.entries.map(MoneyFormat.format).join(' · ');
 
   bool get _payerValid =>
       _lastNameController.text.trim().isNotEmpty &&
@@ -295,11 +311,15 @@ class _FacturationCreatePaymentDialogViewState
   }
 
   Future<void> _onCollect(AppLocalizations l10n) async {
-    final total = _totalInCents;
-    final currency = _currency;
-    if (!_payerValid || total <= 0 || currency.isEmpty) {
+    final bag = _totalBag;
+    final sole = bag.soleEntry;
+    // `soleEntry` nul couvre les trois refus d'un coup : rien à encaisser, et
+    // le mélange de devises que le serveur ne sait pas encore recevoir.
+    if (!_payerValid || sole == null || sole.amountInCents <= 0) {
       return;
     }
+    final total = sole.amountInCents;
+    final currency = sole.currency;
 
     final retained = _entries.where((e) => e.effectiveCents > 0).toList();
     final offlineBloc = context.read<FinanceOfflineBloc>();
@@ -377,9 +397,11 @@ class _FacturationCreatePaymentDialogViewState
       buildWhen: (prev, curr) => prev.createStatus != curr.createStatus,
       builder: (context, state) {
         final isLoading = state.createStatus == PaymentsStatus.loading;
-        final total = _totalInCents;
-        final currency = _currency;
-        final canCollect = _payerValid && total > 0 && !isLoading;
+        final bag = _totalBag;
+        final mixed = _isMixedCurrency;
+        final totalLabel = _totalLabel();
+        final canCollect =
+            _payerValid && !bag.isAllZero && !mixed && !isLoading;
 
         return PopScope(
           // Bloque uniquement le retour système / `maybePop` (croix incluse) :
@@ -439,8 +461,14 @@ class _FacturationCreatePaymentDialogViewState
                   const Divider(height: 1, color: AppColors.border),
                   _TotalBand(
                     label: l10n.facturationCreatePaymentTotalToCollect,
-                    amount: _formatWithCurrency(total, currency),
+                    amount: totalLabel,
                   ),
+                  // Dit POURQUOI le bouton est gris, plutôt que de le laisser
+                  // inerte sans explication devant un payeur qui attend.
+                  if (mixed)
+                    _MixedCurrencyNotice(
+                      message: l10n.facturationCreatePaymentMixedCurrency,
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(AppDimensions.spacingM),
                     child: SizedBox(
@@ -453,7 +481,7 @@ class _FacturationCreatePaymentDialogViewState
                         child: EteeloButton.primary(
                           label: l10n
                               .facturationCreatePaymentCollectAmountAction(
-                                _formatWithCurrency(total, currency),
+                                totalLabel,
                               ),
                           icon: Icons.account_balance_wallet_outlined,
                           isLoading: isLoading,
@@ -581,6 +609,48 @@ class _AllSettledCard extends StatelessWidget {
 }
 
 /// Bandeau sombre totalisant en direct : billet or-doux + total.
+/// Dit pourquoi l'encaissement est bloqué quand le panier mêle deux devises.
+///
+/// Un bouton gris sans explication, devant un payeur qui attend, se règle par
+/// un appel au support. Une phrase qui nomme la cause **et** le geste — solder
+/// une devise, puis l'autre — se règle au guichet.
+class _MixedCurrencyNotice extends StatelessWidget {
+  final String message;
+
+  const _MixedCurrencyNotice({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.feeStatusDueSoft,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingM,
+        vertical: AppDimensions.spacingS,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.feeStatusDue,
+            size: 18,
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.feeStatusDue,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TotalBand extends StatelessWidget {
   final String label;
   final String amount;

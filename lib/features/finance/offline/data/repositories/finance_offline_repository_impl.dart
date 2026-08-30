@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
@@ -68,22 +70,47 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
           : await _resolveCashier(cashierUid);
       final deviceId = await _resolveDeviceId();
       final paymentId = _idGenerator.newId();
-      final allocationsTotal = draft.allocations.fold<int>(
-        0,
-        (s, a) => s + a.amountInCents,
+      // Invariant FRONT §6 step7 / §8 : le total du paiement = Σ des
+      // allocations — **devise par devise**.
+      //
+      // Le serveur a resserré `ALLOCATION_SUM_MISMATCH` : un total juste
+      // globalement mais mal réparti est désormais refusé. La comparaison
+      // scalaire d'avant laissait passer 1 000 $ + 2 000 FC déclarés contre
+      // 2 000 $ + 1 000 FC imputés — le total « collait », la répartition non.
+      // Le 422 tombait alors sur de l'argent physiquement reçu, reçu déjà
+      // imprimé, et l'immobilisait en SYNC_ERROR. Ce fail-fast LOCAL est ce qui
+      // l'empêche d'arriver.
+      final allocationsBag = MoneyBag.sumBy(
+        draft.allocations,
+        (a) => Money.parse(a.amountInCents, a.currency),
       );
-      final total = draft.amountInCents ?? allocationsTotal;
-      // Invariant FRONT §6 step7 / §8 : le total du paiement = Σ des allocations.
-      // Fail-fast LOCAL plutôt que de subir un 422 serveur qui immobiliserait
-      // l'argent (paiement bloqué en SYNC_ERROR).
-      if (total != allocationsTotal) {
+      final declaredBag = draft.amountInCents == null
+          ? allocationsBag
+          : MoneyBag.of([Money.parse(draft.amountInCents!, draft.currency)]);
+
+      if (declaredBag != allocationsBag) {
         return Left(
           ValidationFailure(
-            'Total du paiement ($total) ≠ somme des allocations '
-            '($allocationsTotal).',
+            'Total du paiement ($declaredBag) ≠ somme des allocations '
+            '($allocationsBag), devise par devise.',
           ),
         );
       }
+
+      // Le contrat de push porte encore un montant scalaire (D2 non livré) : un
+      // versement à deux devises ne peut pas remonter. L'UI le refuse déjà
+      // (`_isMixedCurrency`) ; cette garde-ci ferme le chemin programmatique,
+      // parce que c'est ici que l'argent devient une écriture.
+      final sole = allocationsBag.soleEntry;
+      if (sole == null) {
+        return Left(
+          ValidationFailure(
+            'Un versement ne peut pas porter plusieurs devises tant que le '
+            'contrat de synchro n\'en accepte qu\'une ($allocationsBag).',
+          ),
+        );
+      }
+      final total = sole.amountInCents;
 
       final payment = PaymentLocalModel(
         id: paymentId,
@@ -91,7 +118,11 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         studentId: draft.studentId,
         academicYearId: draft.academicYearId,
         amountInCents: total,
-        currency: draft.currency,
+        // La devise vient des IMPUTATIONS, pas du brouillon : c'est elle qui
+        // fait foi côté serveur (`allocation.currency == charge.currency`), et
+        // les deux ne peuvent plus diverger puisqu'elles viennent d'être
+        // comparées.
+        currency: sole.currency,
         method: draft.method ?? 'CASH',
         paidAt: draft.paidAt,
         payerFirstName: draft.payerFirstName,
