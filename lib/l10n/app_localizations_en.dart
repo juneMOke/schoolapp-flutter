@@ -1002,7 +1002,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuFeeControl => 'Fee control';
 
   @override
-  String get subMenuBoutique => 'Shop';
+  String get menuBoutique => 'Shop';
+
+  @override
+  String get subMenuBoutiquePurchases => 'Purchases';
+
+  @override
+  String get subMenuBoutiqueHistory => 'History';
 
   @override
   String get subMenuOrganization => 'Class\ncomposition';
@@ -2045,6 +2051,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Revenue, invoicing and tracking of school fee collection.';
 
   @override
+  String get accueilModuleBoutiqueDescription =>
+      'Cash sales of school items, and the counter\'s collection history.';
+
+  @override
   String get accueilModuleClassesDescription =>
       'Class composition and student lists by cycle.';
 
@@ -2734,6 +2744,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yearNotValidated => 'Not validated';
+
+  @override
+  String get yearValidationUnknown => 'Not specified';
+
+  @override
+  String get guardianEmergencyContactLabel => 'Emergency contact';
+
+  @override
+  String get guardianEmergencyContactBadge => 'Emergency';
+
+  @override
+  String get guardianEmergencyContactHint =>
+      'One guardian per pupil: designating one clears the previous designation.';
+
+  @override
+  String get guardianEmergencyContactAmbiguous =>
+      'Only one guardian can be the emergency contact for this pupil.';
+
+  @override
+  String get guardianEmergencyContactSaved => 'Emergency contact updated.';
+
+  @override
+  String get guardianEmergencyContactCleared => 'Emergency contact cleared.';
+
+  @override
+  String get guardianEmergencyContactRetry => 'Retry';
+
+  @override
+  String get guardianEmergencyContactFailed =>
+      'Setting the emergency contact failed.';
+
+  @override
+  String get medicalNotesLabel => 'Health information';
+
+  @override
+  String get medicalNotesHelp =>
+      'Allergies, ongoing treatment, what to do. Optional.';
+
+  @override
+  String get medicalNotesSectionTitle => 'Health';
+
+  @override
+  String get formerStudentLabel => 'Former pupil of this school';
+
+  @override
+  String get formerStudentHelp =>
+      'Tick if the child has already been enrolled in this school, even before the app.';
+
+  @override
+  String get formerStudentLockedHelp =>
+      'Re-enrolment: the child comes from last year\'s file in this school.';
+
+  @override
+  String get previousSchoolOptionalHint =>
+      'Optional — leave blank if the child has not been to school yet.';
+
+  @override
+  String get averageOutOfRangeError => 'The average must be between 0 and 100.';
 
   @override
   String get currentAcademicYearLabel => 'Academic year';
@@ -7107,10 +7175,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enrolment not readable on this tablet: the certificate is unavailable here.';
 
   @override
-  String get boutiqueEyebrow => 'Finance ▸ Shop';
+  String get boutiqueEyebrow => 'Shop ▸ Purchases';
 
   @override
-  String get boutiqueTitle => 'Shop — Till';
+  String get boutiqueTitle => 'Till';
 
   @override
   String get boutiqueSubtitle =>
@@ -7527,4 +7595,245 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueReceiptPrinted => 'Ticket printed.';
+
+  @override
+  String get boutiqueOpenCart => 'View the cart';
+
+  @override
+  String boutiqueOpenCartWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return 'View the cart, $_temp0';
+  }
+
+  @override
+  String get boutiqueCartPageEyebrow => 'Shop ▸ Cart';
+
+  @override
+  String get boutiqueBackToCatalog => 'Back to catalogue';
+
+  @override
+  String get boutiqueAddToCart => 'Add to cart';
+
+  @override
+  String boutiqueAddOneMore(String article) {
+    return 'Add one $article';
+  }
+
+  @override
+  String boutiqueRemoveOne(String article) {
+    return 'Remove one $article';
+  }
+
+  @override
+  String get boutiqueSuccessTitle => 'Sale collected';
+
+  @override
+  String boutiqueSuccessMessage(String total) {
+    return 'The customer paid $total in cash. Hand them their ticket.';
+  }
+
+  @override
+  String get boutiqueSuccessDone => 'Done';
+
+  @override
+  String get boutiqueHistoryEyebrow => 'Shop ▸ History';
+
+  @override
+  String get boutiqueHistoryTitle => 'Sales history';
+
+  @override
+  String get boutiqueHistoryPeriodDay => 'Today';
+
+  @override
+  String get boutiqueHistoryPeriodWeek => 'This week';
+
+  @override
+  String get boutiqueHistoryPeriodMonth => 'This month';
+
+  @override
+  String get boutiqueHistoryPeriodYear => 'This year';
+
+  @override
+  String boutiqueHistorySaleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales have not reached the server yet.',
+      one: '1 sale has not reached the server yet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueHistoryPendingBadge => 'Pending';
+
+  @override
+  String get boutiqueHistoryEmptyTitle => 'No sale in this period';
+
+  @override
+  String get boutiqueHistoryEmptyMessage =>
+      'Nothing was collected at the counter. Widen the period, or open the shop to collect.';
+
+  @override
+  String get boutiqueHistoryPayerUnknown => 'Payer not recorded';
+
+  @override
+  String get boutiqueHistoryTotalLabel => 'Total collected';
+
+  @override
+  String boutiqueHistorySaleTime(String time, String reference) {
+    return '$time · $reference';
+  }
+
+  @override
+  String get boutiqueHistoryProvisional => 'provisional ticket';
+
+  @override
+  String get boutiqueHistoryErrorServerTitle => 'History unreadable';
+
+  @override
+  String get boutiqueHistoryErrorServer =>
+      'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.';
+
+  @override
+  String get boutiqueHistoryErrorNetwork =>
+      'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.';
+
+  @override
+  String get boutiqueClearEyebrow => 'Shop ▸ Cart';
+
+  @override
+  String get boutiqueClearTitle => 'Empty the cart?';
+
+  @override
+  String get boutiqueClearMessage =>
+      'The composed lines and the payer\'s identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.';
+
+  @override
+  String boutiqueClearLinesSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 in the cart';
+  }
+
+  @override
+  String boutiqueClearPayerSummary(String payer) {
+    return 'Payer entered: $payer';
+  }
+
+  @override
+  String get boutiqueClearCancel => 'Keep the cart';
+
+  @override
+  String get boutiqueClearConfirm => 'Empty';
+
+  @override
+  String get boutiqueSuccessEyebrow => 'Shop ▸ Collection';
+
+  @override
+  String get boutiqueSaleDetailEyebrow => 'Shop ▸ Sale';
+
+  @override
+  String get boutiqueSaleDetailTitle => 'Sale details';
+
+  @override
+  String get boutiqueSaleDetailBack => 'Back to history';
+
+  @override
+  String get boutiqueSaleDetailPayer => 'Payer';
+
+  @override
+  String get boutiqueSaleDetailPhone => 'Phone';
+
+  @override
+  String get boutiqueSaleDetailSoldAt => 'Collected on';
+
+  @override
+  String get boutiqueSaleDetailCollectedBy => 'Collected by';
+
+  @override
+  String get boutiqueSaleDetailCollectedByUnknown => 'Cashier not recorded';
+
+  @override
+  String get boutiqueSaleDetailReceipt => 'Receipt';
+
+  @override
+  String get boutiqueSaleDetailLines => 'Items sold';
+
+  @override
+  String boutiqueSaleDetailBeneficiary(String name) {
+    return 'for $name';
+  }
+
+  @override
+  String boutiqueSaleDetailSizePrefix(String size) {
+    return 'Size $size';
+  }
+
+  @override
+  String get boutiqueSaleDetailPrintTicket => 'Print the ticket';
+
+  @override
+  String get boutiqueSaleDetailReprintTicket => 'Reprint the ticket';
+
+  @override
+  String boutiqueSaleDetailTicketPrintedAt(String date) {
+    return 'Ticket printed on $date';
+  }
+
+  @override
+  String get boutiqueSaleDetailTicketNeverPrinted =>
+      'Ticket never printed from this tablet.';
+
+  @override
+  String get boutiqueSaleDetailOpenReceipt => 'Open the sealed receipt';
+
+  @override
+  String get boutiqueSaleDetailReceiptPending =>
+      'The receipt will be sealed at synchronisation. The ticket stands in the meantime.';
+
+  @override
+  String get boutiqueSaleDetailReceiptTitle => 'Sale receipt';
+
+  @override
+  String get boutiqueSaleDetailNotFoundTitle => 'Sale not found';
+
+  @override
+  String get boutiqueSaleDetailNotFound =>
+      'This sale is no longer in this school\'s local database. Nothing is lost server-side if it had already been sent.';
+
+  @override
+  String get boutiqueSaleDetailPendingNotice =>
+      'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.';
 }

@@ -124,6 +124,14 @@ abstract final class EnrollmentConfirmDraftBuilder {
       previousSchoolLevelGroup: _nn(candidate.previousSchoolLevelGroupName),
       previousSchoolLevel: _nn(candidate.previousSchoolLevelName),
       previousSchoolName: _nn(candidate.previousSchoolName),
+      // Une réinscription vient d'un dossier N-1 de cette école : ancien
+      // élève par construction, pas par déclaration.
+      formerStudent: true,
+      // **Reprise de la fiche santé N-1.** C'est une proposition du serveur,
+      // pas une valeur acquise : sans cette ligne, le guichet devrait la
+      // ressaisir chaque année, et le canal tablette perdrait les allergies
+      // de l'enfant là où le guichet en ligne, lui, les conserve.
+      medicalNotes: _nullIfEmpty(candidate.medicalNotes ?? ''),
       enrollmentDate: _today(),
       parents: _guardianParents(
         candidate.guardianName,

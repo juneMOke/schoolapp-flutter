@@ -229,6 +229,7 @@ void main() {
             'previousSchoolLevelId': 'lvl-6e',
             'previousBalanceInCents': 250000,
             'currency': 'USD',
+            'medicalNotes': 'Asthme — inhalateur dans le cartable.',
           },
         ],
         'nextCursorId': 'stu-N1',
@@ -247,6 +248,10 @@ void main() {
       expect(page.bootstrapComplete, isFalse);
       expect(page.totalCount, 120);
       expect(page.serverTime, '2026-07-08T09:00:00Z');
+      // Fiche santé N-1 : une PROPOSITION. Elle ne vaudra pour le nouveau
+      // dossier que si le poste la repousse dans son agrégat — sans quoi
+      // l'enfant perd ses allergies à chaque changement d'année.
+      expect(c.medicalNotes, 'Asthme — inhalateur dans le cartable.');
     });
 
     test('dernière page → bootstrapComplete=true, nextCursorId null', () {
@@ -277,6 +282,8 @@ void main() {
         'serverTime': 't',
       });
       expect(page.items.single.previousBalanceInCents, 0);
+      // Le dossier N-1 n'avait rien de renseigné : rien à proposer.
+      expect(page.items.single.medicalNotes, isNull);
       // Absence de bootstrapComplete → false (ne JAMAIS marquer complet à tort).
       expect(page.bootstrapComplete, isFalse);
     });
@@ -357,6 +364,8 @@ void main() {
                 'gender': 'FEMALE',
                 'previousRate': 82.5,
                 'validatedPreviousYear': true,
+                'formerStudent': true,
+                'medicalNotes': 'Allergie aux arachides.',
                 'updatedAt': '2026-07-08T09:00:00Z',
               },
               'student': {
@@ -376,6 +385,7 @@ void main() {
                   'lastName': 'Ilunga',
                   'phoneNumber': '+243900000001',
                   'relationshipType': 'FATHER',
+                  'emergencyContact': true,
                 },
               ],
               'serverUpdatedAt': '2026-07-08T10:00:00Z',
@@ -401,6 +411,9 @@ void main() {
         // figerait la ressource entière au prochain champ ajouté côté back.
         // C'est le parsing tolérant exigé partout ici.
         expect(agg.parents.single.relationshipType, 'FATHER');
+        expect(agg.enrollment.formerStudent, isTrue);
+        expect(agg.enrollment.medicalNotes, 'Allergie aux arachides.');
+        expect(agg.parents.single.emergencyContact, isTrue);
       },
     );
 
@@ -442,6 +455,99 @@ void main() {
       expect(agg.enrollment.cancellationReason, isNull);
       expect(agg.student.matriculationNumber, isNull);
       expect(agg.parents, isEmpty); // 'parents' absent → [] (pullList défensif)
+      // Le contrat donne `formerStudent` non nul, mais un back antérieur au
+      // champ ne doit pas faire tomber le pull entier : repli sur le type,
+      // ici NEW_ENROLLMENT.
+      expect(agg.enrollment.formerStudent, isFalse);
+      expect(agg.enrollment.medicalNotes, isNull);
+    });
+
+    test(
+      'snapshot d\'une RÉINSCRIPTION sans formerStudent → replié sur le type',
+      () {
+        final dto = EnrollmentSnapshotPageDto.fromJson({
+          'items': [
+            {
+              'enrollment': {
+                'id': 'enr-3',
+                'studentId': 'stu-3',
+                'academicYearId': 'ay-1',
+                'status': 'IN_PROGRESS',
+                'enrollmentType': 'RE_ENROLLMENT',
+                'enrollmentCode': 'ETL-2026-0003',
+                'enrollmentDate': '2026-07-03',
+                'firstName': 'A',
+                'lastName': 'B',
+                'surname': 'C',
+                'dateOfBirth': '2016-01-01',
+                'gender': 'MALE',
+              },
+              'student': {
+                'id': 'stu-3',
+                'firstName': 'A',
+                'lastName': 'B',
+                'surname': 'C',
+                'gender': 'MALE',
+                'dateOfBirth': '2016-01-01',
+              },
+              'serverUpdatedAt': '2026-07-08T10:00:00Z',
+            },
+          ],
+          'hasMore': false,
+          'serverTime': '2026-07-08T10:00:01Z',
+        });
+
+        expect(dto.items.single.enrollment.formerStudent, isTrue);
+      },
+    );
+
+    /// Le drapeau décrit le couple (élève, tuteur) : le serveur le rend nul
+    /// dans les vues sans élève de référence. Ici l'agrégat EN A un, mais un
+    /// back antérieur au champ n'envoie rien — et `null` doit rester `null`,
+    /// jamais devenir `false`, qui est une désignation retirée.
+    test('tuteur sans emergencyContact → null, pas false', () {
+      final dto = EnrollmentSnapshotPageDto.fromJson({
+        'items': [
+          {
+            'enrollment': {
+              'id': 'enr-4',
+              'studentId': 'stu-4',
+              'academicYearId': 'ay-1',
+              'status': 'IN_PROGRESS',
+              'enrollmentType': 'NEW_ENROLLMENT',
+              'enrollmentCode': 'ETL-2026-0004',
+              'enrollmentDate': '2026-07-04',
+              'firstName': 'A',
+              'lastName': 'B',
+              'surname': 'C',
+              'dateOfBirth': '2016-01-01',
+              'gender': 'MALE',
+            },
+            'student': {
+              'id': 'stu-4',
+              'firstName': 'A',
+              'lastName': 'B',
+              'surname': 'C',
+              'gender': 'MALE',
+              'dateOfBirth': '2016-01-01',
+            },
+            'parents': [
+              {
+                'id': 'par-4',
+                'firstName': 'Joseph',
+                'lastName': 'Ilunga',
+                'phoneNumber': '+243900000004',
+                'relationshipType': 'FATHER',
+              },
+            ],
+            'serverUpdatedAt': '2026-07-08T10:00:00Z',
+          },
+        ],
+        'hasMore': false,
+        'serverTime': '2026-07-08T10:00:01Z',
+      });
+
+      expect(dto.items.single.parents.single.emergencyContact, isNull);
     });
   });
 }

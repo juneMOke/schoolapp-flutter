@@ -54,6 +54,113 @@ void main() {
       expect(restored.student.gender, 'FEMALE');
       expect(restored.parents.single.phoneNumber, '+243111');
     });
+
+    test('round-trip conserve la fiche santé et « ancien élève »', () {
+      const command = EnrollmentCommand(
+        enrollment: EnrollmentPayload(
+          id: 'e2',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-1',
+          enrollmentDate: '2026-08-30',
+          formerStudent: true,
+          medicalNotes: 'Asthme — inhalateur dans le cartable.',
+        ),
+        student: StudentPayload(
+          id: 's2',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          gender: 'FEMALE',
+          dateOfBirth: '2015-04-02',
+          birthPlace: 'Kinshasa',
+          nationality: 'CD',
+        ),
+        parents: [
+          ParentPayload(
+            clientId: 'p1',
+            firstName: 'Sarah',
+            lastName: 'Moke',
+            phoneNumber: '+243111',
+            relationshipType: 'MOTHER',
+            emergencyContact: true,
+          ),
+        ],
+      );
+
+      final restored = EnrollmentCommand.fromJson(command.toJson());
+      expect(restored.enrollment.formerStudent, isTrue);
+      expect(
+        restored.enrollment.medicalNotes,
+        'Asthme — inhalateur dans le cartable.',
+      );
+      expect(restored.parents.single.emergencyContact, isTrue);
+    });
+
+    /// Une inscription confirmée dort peut-être déjà dans l'outbox, écrite par
+    /// une version qui ne connaissait pas ces champs. Un `as bool` y lèverait
+    /// et bloquerait la file entière — donc le dossier, donc la journée.
+    test('payload ANTÉRIEUR aux champs : se relit sans lever', () {
+      final legacy = <String, dynamic>{
+        'enrollment': <String, dynamic>{
+          'id': 'e-old',
+          'enrollmentType': 'RE_ENROLLMENT',
+          'status': 'IN_PROGRESS',
+          'academicYearId': 'ay-1',
+          'enrollmentDate': '2026-07-06',
+        },
+        'student': <String, dynamic>{
+          'id': 's-old',
+          'firstName': 'Amina',
+          'lastName': 'Moke',
+          'gender': 'FEMALE',
+          'dateOfBirth': '2015-04-02',
+        },
+        'parents': <dynamic>[
+          <String, dynamic>{
+            'clientId': 'p-old',
+            'firstName': 'Sarah',
+            'lastName': 'Moke',
+            'phoneNumber': '+243111',
+            'relationshipType': 'MOTHER',
+          },
+        ],
+      };
+
+      final restored = EnrollmentCommand.fromJson(legacy);
+
+      // Repli sur la seule information que ce payload porte — son type. Même
+      // dérivation que le serveur applique aux postes muets.
+      expect(restored.enrollment.formerStudent, isTrue);
+      expect(restored.enrollment.medicalNotes, isNull);
+      // `null`, jamais `false` : cet agrégat ne désignait personne et ne doit
+      // rien démoter au push.
+      expect(restored.parents.single.emergencyContact, isNull);
+    });
+
+    test('payload ANTÉRIEUR d\'une NEW : « ancien élève » reste faux', () {
+      final legacy = <String, dynamic>{
+        'enrollment': <String, dynamic>{
+          'id': 'e-old',
+          'enrollmentType': 'NEW_ENROLLMENT',
+          'status': 'IN_PROGRESS',
+          'academicYearId': 'ay-1',
+          'enrollmentDate': '2026-07-06',
+        },
+        'student': <String, dynamic>{
+          'id': 's-old',
+          'firstName': 'Amina',
+          'lastName': 'Moke',
+          'gender': 'FEMALE',
+          'dateOfBirth': '2015-04-02',
+        },
+      };
+
+      expect(
+        EnrollmentCommand.fromJson(legacy).enrollment.formerStudent,
+        isFalse,
+      );
+    });
   });
 
   group('requête réseau (EnrollmentAggregateRequest.toJson — contrat)', () {
@@ -209,6 +316,8 @@ void main() {
           'previousRate',
           'previousRank',
           'validatedPreviousYear',
+          'formerStudent',
+          'medicalNotes',
           'sourceRef',
         ]),
       );
@@ -236,6 +345,9 @@ void main() {
       );
 
       // `clientId` est renommé `id` (id provisoire remappé dans la réponse).
+      // `emergencyContact` n'y figure PAS : le tuteur de `tCommand` ne désigne
+      // rien, et la clé est alors omise — le serveur lit l'absence comme « ne
+      // touche pas à la désignation en place ». Cf. le test dédié ci-dessous.
       expect(
         ((json['parents'] as List).single as Map<String, dynamic>).keys,
         unorderedEquals(<String>[
@@ -248,6 +360,34 @@ void main() {
           'email',
         ]),
       );
+    });
+
+    /// Le tri-état du contact d'urgence, vu du fil : c'est la seule des trois
+    /// valeurs qui ne s'écrit pas. Un `false` posé par confort à la place d'un
+    /// `null` retirerait une désignation faite depuis un autre poste.
+    test('emergencyContact : `true` part, `false` part, `null` est OMIS', () {
+      Map<String, dynamic> parentJsonFor(bool? designation) {
+        final command = EnrollmentCommand(
+          enrollment: tCommand.enrollment,
+          student: tCommand.student,
+          parents: [
+            ParentPayload(
+              clientId: 'p1',
+              firstName: 'Awa',
+              lastName: 'Mbayo',
+              phoneNumber: '+243810000000',
+              relationshipType: 'MOTHER',
+              emergencyContact: designation,
+            ),
+          ],
+        );
+        final json = EnrollmentAggregateRequest(command).toJson();
+        return (json['parents'] as List).single as Map<String, dynamic>;
+      }
+
+      expect(parentJsonFor(true)['emergencyContact'], isTrue);
+      expect(parentJsonFor(false)['emergencyContact'], isFalse);
+      expect(parentJsonFor(null).containsKey('emergencyContact'), isFalse);
     });
   });
 

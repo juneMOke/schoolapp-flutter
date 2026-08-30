@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_info_widgets.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class GuardianInfoStep extends StatefulWidget {
@@ -35,6 +36,11 @@ class GuardianInfoStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+
+  /// Voir le commentaire sur `_onEmergencyContactChanged` : fourni, il ouvre la
+  /// désignation du contact d'urgence sur un dossier en consultation et
+  /// l'envoie par le chemin online.
+  final ValueChanged<String?>? onEmergencyContactCommitted;
   final EnrollmentStepSubmitController? stepController;
 
   const GuardianInfoStep({
@@ -46,6 +52,7 @@ class GuardianInfoStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    this.onEmergencyContactCommitted,
     this.stepController,
   });
 
@@ -81,6 +88,39 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _isHydratingFromDetail = false;
   String? _expandedParentId;
   String? _primaryParentId;
+
+  /// Tuteur désigné contact d'urgence, ou `null` si aucun. **Un seul id pour
+  /// tout l'écran** : l'exclusivité tient à la forme de cet état, elle n'est
+  /// pas une garde qu'on pourrait oublier d'écrire. Le serveur refuse en 422
+  /// un agrégat qui en désignerait deux, et ce refus est TERMINAL — la saisie
+  /// resterait bloquée dans la file d'écritures. Il ne doit donc jamais partir.
+  String? _emergencyContactParentId;
+
+  /// Quand il est fourni, la désignation du contact d'urgence reste **active
+  /// même sur un dossier en consultation**, et part par ce chemin (online)
+  /// plutôt que par le brouillon.
+  ///
+  /// C'est la seule brèche dans une page figée par construction, et elle est
+  /// nommée : le reste du dossier finalisé n'est pas modifiable. Le contact
+  /// d'urgence, lui, doit pouvoir changer sans rouvrir l'inscription — c'est
+  /// l'information qu'on relira un jour d'accident.
+  /// (déclaré sur le widget, cf. [GuardianInfoStep.onEmergencyContactCommitted])
+
+  /// `true` dès que l'écran a touché à la désignation. Tant qu'il est faux,
+  /// l'agrégat n'en dit RIEN (`null` sur chaque tuteur) plutôt que d'affirmer
+  /// « personne » — le serveur lit l'absence comme « ne touche pas à ce qui
+  /// est en place », et un dossier ouvert puis enregistré sans passer par
+  /// cette case ne doit pas effacer une désignation venue d'ailleurs.
+  bool _emergencyContactTouched = false;
+
+  /// Désignation telle qu'elle était au chargement — l'ancre du « modifié ».
+  String? _initialEmergencyContactParentId;
+
+  /// Dernière désignation envoyée par le chemin online, gardée pour pouvoir la
+  /// REJOUER : le `409` du serveur signale une course entre deux postes que le
+  /// rejeu résout, et « Réessayer » doit renvoyer la même chose, pas la
+  /// dernière valeur affichée entre-temps.
+  String? _lastCommittedDesignation;
 
   /// Une écriture est en vol, OU l'utilisateur est en train d'arbitrer un
   /// conflit : dans les deux cas, la composition des tuteurs ne bouge pas.
@@ -173,9 +213,26 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         _primaryParentId = primaryStillExists
             ? _primaryParentId
             : _editableParentDetails.first.id;
+
+        // La désignation vient du dossier, pas d'un défaut : contrairement au
+        // tuteur principal, aucune carte n'est désignée d'office. Personne à
+        // appeler est un état légitime — en inventer un serait pire que rien
+        // le jour où il faudra vraiment appeler.
+        final designated = _editableParentDetails
+            .where((p) => p.emergencyContact)
+            .map((p) => p.id)
+            .toList(growable: false);
+        _emergencyContactParentId = designated.length == 1
+            ? designated.single
+            : null;
+        if (resetSnapshot) {
+          _initialEmergencyContactParentId = _emergencyContactParentId;
+          _emergencyContactTouched = false;
+        }
       } else {
         _expandedParentId = null;
         _primaryParentId = null;
+        _emergencyContactParentId = null;
       }
     } finally {
       _isHydratingFromDetail = false;
@@ -245,9 +302,14 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         parentIds.contains(_primaryParentId) &&
         parentIds.every((id) => _itemStatesByParentId[id]?.valid == true);
 
-    final dirtyNow = parentIds.any(
-      (id) => _itemStatesByParentId[id]?.dirty == true,
-    );
+    // La désignation du contact d'urgence compte dans le « modifié », au même
+    // titre qu'un champ de carte : elle ne vit dans aucun `ParentItemValue`
+    // (elle décrit le couple élève/tuteur, pas la fiche du tuteur), et sans
+    // cette ligne, cocher la case laisserait le bouton d'enregistrement
+    // inerte — la désignation ne partirait jamais.
+    final dirtyNow =
+        parentIds.any((id) => _itemStatesByParentId[id]?.dirty == true) ||
+        _emergencyContactParentId != _initialEmergencyContactParentId;
 
     if (_isValid != validNow || _isDirty != dirtyNow) {
       setState(() {
@@ -403,6 +465,16 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
                 ? null
                 : _normalizeEmailForApi(value.email),
             relationshipType: value.relationshipType.name.toUpperCase(),
+            // **Tri-état.** Tant que l'écran n'a pas touché à la désignation,
+            // il n'en dit rien — `null`, pas `false` : le serveur lit
+            // l'absence comme « ne touche à rien », et un `false` projeté
+            // partout retirerait une désignation faite depuis un autre poste.
+            // Une fois l'écran passé par là, il dit tout : `true` sur le
+            // désigné, `false` sur les autres, ce qui rend le RETRAIT
+            // exprimable.
+            emergencyContact: _emergencyContactTouched
+                ? parent.id == _emergencyContactParentId
+                : null,
           );
         })
         .whereType<ConfirmParentDraft>()
@@ -663,6 +735,14 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       _itemStatesByParentId.remove(parentId);
       _linkedFromSearchParentIds.remove(parentId);
 
+      // Retirer le tuteur désigné retire la désignation : sinon l'écran
+      // garderait un id qui ne correspond plus à aucune carte, et l'agrégat
+      // partirait sans désigner personne tout en croyant l'avoir fait.
+      if (_emergencyContactParentId == parentId) {
+        _emergencyContactParentId = null;
+        _emergencyContactTouched = true;
+      }
+
       if (_expandedParentId == parentId) {
         _expandedParentId = _editableParentDetails.isNotEmpty
             ? _editableParentDetails.first.id
@@ -716,6 +796,43 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
+  /// Désigne le tuteur à appeler en urgence, ou n'en désigne aucun
+  /// ([parentId] à `null`).
+  ///
+  /// **Aucune garde d'unicité à écrire** : l'état est un id unique, désigner
+  /// B remplace A dans le même geste. C'est ce qui rend impossible l'agrégat à
+  /// deux désignations, refusé en 422 par le serveur — un refus TERMINAL qui
+  /// bloquerait l'inscription dans la file d'écritures.
+  void _onEmergencyContactChanged(String? parentId) {
+    // Le chemin online s'ouvre AUSSI sur un dossier en consultation : c'est
+    // toute sa raison d'être. Il ne touche pas au brouillon — le dossier est
+    // finalisé, il n'y en a plus.
+    final committer = widget.onEmergencyContactCommitted;
+    if (committer != null) {
+      // Le « Réessayer » du bandeau d'erreur rappelle ce chemin, et un
+      // bandeau survit au changement d'écran : sans cette garde, un appui
+      // après avoir quitté le dossier toucherait un élément mort.
+      if (!mounted) return;
+      if (_emergencyContactParentId == parentId) return;
+      setState(() {
+        _emergencyContactParentId = parentId;
+        _emergencyContactTouched = true;
+      });
+      _lastCommittedDesignation = parentId;
+      committer(parentId);
+      return;
+    }
+    if (!widget.isEditable || _isBusy) return;
+    if (_emergencyContactParentId == parentId && _emergencyContactTouched) {
+      return;
+    }
+    setState(() {
+      _emergencyContactParentId = parentId;
+      _emergencyContactTouched = true;
+    });
+    _recomputeFormState();
+  }
+
   /// Vrai si la session peut écrire ce dossier. Les CTA « Ajouter » /
   /// « Rechercher un parent » et la corbeille écrivent le brouillon SANS
   /// attendre le bouton « Enregistrer » du pied — lequel est, lui, gardé. Sans
@@ -729,6 +846,47 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     requiresAll: kEnrollmentSubmitAccess.requiresAll,
   );
 
+  /// Rend compte de la désignation partie en ligne.
+  ///
+  /// **Un seul refus mérite « Réessayer » : le `409`.** Il vient d'une course
+  /// entre deux postes que l'index unique du serveur vient de trancher, et le
+  /// rejeu converge. Proposer le même bouton sur un `404` ou un `422` serait
+  /// inviter à reproduire exactement ce que le serveur refuse.
+  void _onEmergencyContactStateChanged(
+    BuildContext context,
+    ParentState state,
+  ) {
+    if (state.operation != ParentOperation.emergencyContact) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (state.status == ParentUpdateStatus.success) {
+      AppSnackBar.showSuccess(
+        context,
+        _lastCommittedDesignation == null
+            ? l10n.guardianEmergencyContactCleared
+            : l10n.guardianEmergencyContactSaved,
+      );
+      widget.onRefreshRequested?.call();
+      return;
+    }
+    if (state.status != ParentUpdateStatus.failure) return;
+
+    // L'écran a affiché la désignation avant l'acquittement : l'échec doit la
+    // reprendre, sinon la case resterait cochée sur un serveur qui a refusé.
+    setState(() {
+      _emergencyContactParentId = _initialEmergencyContactParentId;
+      _emergencyContactTouched = false;
+    });
+    AppSnackBar.showError(
+      context,
+      state.errorMessage ?? l10n.guardianEmergencyContactFailed,
+      onRetry: state.retryable
+          ? () => _onEmergencyContactChanged(_lastCommittedDesignation)
+          : null,
+      retryLabel: state.retryable ? l10n.guardianEmergencyContactRetry : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return EnrollmentDraftStepSaveListener(
@@ -737,7 +895,15 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       onSaved: _onDraftSaved,
       onError: _onDraftError,
       onGuardianPhoneConflict: _onGuardianPhoneConflict,
-      child: _rebuiltOnPermissionChange(_buildBody),
+      child: widget.onEmergencyContactCommitted == null
+          ? _rebuiltOnPermissionChange(_buildBody)
+          : BlocListener<ParentBloc, ParentState>(
+              listenWhen: (previous, current) =>
+                  previous.status != current.status ||
+                  previous.operation != current.operation,
+              listener: _onEmergencyContactStateChanged,
+              child: _rebuiltOnPermissionChange(_buildBody),
+            ),
     );
   }
 
@@ -774,6 +940,11 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       onPrimaryParentChanged: _onPrimaryParentChanged,
       expandedParentId: _expandedParentId,
       primaryParentId: _primaryParentId,
+      emergencyContactParentId: _emergencyContactParentId,
+      onEmergencyContactChanged:
+          widget.isEditable || widget.onEmergencyContactCommitted != null
+          ? _onEmergencyContactChanged
+          : null,
       isLoading: _isBatchSaving,
       canSave: _canSave,
       showInlineSaveButton: widget.showInlineSaveButton,

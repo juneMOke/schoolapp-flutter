@@ -85,6 +85,31 @@ class _ParentRemoteDataSource implements ParentRemoteDataSource {
   }
 
   @override
+  Future<void> setEmergencyContact(
+    Map<String, dynamic> extras,
+    String studentId,
+    SetEmergencyContactRequest request,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<void>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/parents/students/${studentId}/emergency-contact',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    await _dio.fetch<void>(_options);
+  }
+
+  @override
   Future<void> unlinkParent(
     Map<String, dynamic> extras,
     String studentId,

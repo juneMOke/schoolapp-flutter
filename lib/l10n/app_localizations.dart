@@ -1616,11 +1616,23 @@ abstract class AppLocalizations {
   /// **'Fee control'**
   String get subMenuFeeControl;
 
-  /// Shop till sub-menu title
+  /// Shop till menu title
   ///
   /// In en, this message translates to:
   /// **'Shop'**
-  String get subMenuBoutique;
+  String get menuBoutique;
+
+  /// Shop till counter sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases'**
+  String get subMenuBoutiquePurchases;
+
+  /// Shop sales history sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get subMenuBoutiqueHistory;
 
   /// Organization sub-menu title
   ///
@@ -3182,6 +3194,12 @@ abstract class AppLocalizations {
   /// **'Revenue, invoicing and tracking of school fee collection.'**
   String get accueilModuleFinancesDescription;
 
+  /// No description provided for @accueilModuleBoutiqueDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sales of school items, and the counter\'s collection history.'**
+  String get accueilModuleBoutiqueDescription;
+
   /// No description provided for @accueilModuleClassesDescription.
   ///
   /// In en, this message translates to:
@@ -4387,6 +4405,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not validated'**
   String get yearNotValidated;
+
+  /// No description provided for @yearValidationUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get yearValidationUnknown;
+
+  /// No description provided for @guardianEmergencyContactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get guardianEmergencyContactLabel;
+
+  /// No description provided for @guardianEmergencyContactBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get guardianEmergencyContactBadge;
+
+  /// No description provided for @guardianEmergencyContactHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One guardian per pupil: designating one clears the previous designation.'**
+  String get guardianEmergencyContactHint;
+
+  /// No description provided for @guardianEmergencyContactAmbiguous.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one guardian can be the emergency contact for this pupil.'**
+  String get guardianEmergencyContactAmbiguous;
+
+  /// No description provided for @guardianEmergencyContactSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact updated.'**
+  String get guardianEmergencyContactSaved;
+
+  /// No description provided for @guardianEmergencyContactCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact cleared.'**
+  String get guardianEmergencyContactCleared;
+
+  /// No description provided for @guardianEmergencyContactRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get guardianEmergencyContactRetry;
+
+  /// No description provided for @guardianEmergencyContactFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting the emergency contact failed.'**
+  String get guardianEmergencyContactFailed;
+
+  /// No description provided for @medicalNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Health information'**
+  String get medicalNotesLabel;
+
+  /// No description provided for @medicalNotesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies, ongoing treatment, what to do. Optional.'**
+  String get medicalNotesHelp;
+
+  /// No description provided for @medicalNotesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get medicalNotesSectionTitle;
+
+  /// No description provided for @formerStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Former pupil of this school'**
+  String get formerStudentLabel;
+
+  /// No description provided for @formerStudentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick if the child has already been enrolled in this school, even before the app.'**
+  String get formerStudentHelp;
+
+  /// No description provided for @formerStudentLockedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolment: the child comes from last year\'s file in this school.'**
+  String get formerStudentLockedHelp;
+
+  /// No description provided for @previousSchoolOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — leave blank if the child has not been to school yet.'**
+  String get previousSchoolOptionalHint;
+
+  /// No description provided for @averageOutOfRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'The average must be between 0 and 100.'**
+  String get averageOutOfRangeError;
 
   /// No description provided for @currentAcademicYearLabel.
   ///
@@ -11691,13 +11811,13 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Finance ▸ Shop'**
+  /// **'Shop ▸ Purchases'**
   String get boutiqueEyebrow;
 
   /// No description provided for @boutiqueTitle.
   ///
   /// In en, this message translates to:
-  /// **'Shop — Till'**
+  /// **'Till'**
   String get boutiqueTitle;
 
   /// No description provided for @boutiqueSubtitle.
@@ -12365,6 +12485,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ticket printed.'**
   String get boutiqueReceiptPrinted;
+
+  /// No description provided for @boutiqueOpenCart.
+  ///
+  /// In en, this message translates to:
+  /// **'View the cart'**
+  String get boutiqueOpenCart;
+
+  /// No description provided for @boutiqueOpenCartWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'View the cart, {count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueOpenCartWithCount(int count);
+
+  /// No description provided for @boutiqueCartPageEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Cart'**
+  String get boutiqueCartPageEyebrow;
+
+  /// No description provided for @boutiqueBackToCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to catalogue'**
+  String get boutiqueBackToCatalog;
+
+  /// No description provided for @boutiqueAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get boutiqueAddToCart;
+
+  /// No description provided for @boutiqueAddOneMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one {article}'**
+  String boutiqueAddOneMore(String article);
+
+  /// No description provided for @boutiqueRemoveOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove one {article}'**
+  String boutiqueRemoveOne(String article);
+
+  /// No description provided for @boutiqueSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected'**
+  String get boutiqueSuccessTitle;
+
+  /// No description provided for @boutiqueSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The customer paid {total} in cash. Hand them their ticket.'**
+  String boutiqueSuccessMessage(String total);
+
+  /// No description provided for @boutiqueSuccessDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get boutiqueSuccessDone;
+
+  /// No description provided for @boutiqueHistoryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ History'**
+  String get boutiqueHistoryEyebrow;
+
+  /// No description provided for @boutiqueHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales history'**
+  String get boutiqueHistoryTitle;
+
+  /// No description provided for @boutiqueHistoryPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get boutiqueHistoryPeriodDay;
+
+  /// No description provided for @boutiqueHistoryPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get boutiqueHistoryPeriodWeek;
+
+  /// No description provided for @boutiqueHistoryPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get boutiqueHistoryPeriodMonth;
+
+  /// No description provided for @boutiqueHistoryPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get boutiqueHistoryPeriodYear;
+
+  /// No description provided for @boutiqueHistorySaleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 sale} other{{count} sales}}'**
+  String boutiqueHistorySaleCount(int count);
+
+  /// No description provided for @boutiqueHistoryArticleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueHistoryArticleCount(int count);
+
+  /// No description provided for @boutiqueHistoryPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}'**
+  String boutiqueHistoryPendingNotice(int count);
+
+  /// No description provided for @boutiqueHistoryPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get boutiqueHistoryPendingBadge;
+
+  /// No description provided for @boutiqueHistoryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale in this period'**
+  String get boutiqueHistoryEmptyTitle;
+
+  /// No description provided for @boutiqueHistoryEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was collected at the counter. Widen the period, or open the shop to collect.'**
+  String get boutiqueHistoryEmptyMessage;
+
+  /// No description provided for @boutiqueHistoryPayerUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer not recorded'**
+  String get boutiqueHistoryPayerUnknown;
+
+  /// No description provided for @boutiqueHistoryTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total collected'**
+  String get boutiqueHistoryTotalLabel;
+
+  /// No description provided for @boutiqueHistorySaleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {reference}'**
+  String boutiqueHistorySaleTime(String time, String reference);
+
+  /// No description provided for @boutiqueHistoryProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional ticket'**
+  String get boutiqueHistoryProvisional;
+
+  /// No description provided for @boutiqueHistoryErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History unreadable'**
+  String get boutiqueHistoryErrorServerTitle;
+
+  /// No description provided for @boutiqueHistoryErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.'**
+  String get boutiqueHistoryErrorServer;
+
+  /// No description provided for @boutiqueHistoryErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
+  String get boutiqueHistoryErrorNetwork;
+
+  /// No description provided for @boutiqueClearEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Cart'**
+  String get boutiqueClearEyebrow;
+
+  /// No description provided for @boutiqueClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the cart?'**
+  String get boutiqueClearTitle;
+
+  /// No description provided for @boutiqueClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The composed lines and the payer\'s identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.'**
+  String get boutiqueClearMessage;
+
+  /// No description provided for @boutiqueClearLinesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}} in the cart'**
+  String boutiqueClearLinesSummary(int count);
+
+  /// No description provided for @boutiqueClearPayerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer entered: {payer}'**
+  String boutiqueClearPayerSummary(String payer);
+
+  /// No description provided for @boutiqueClearCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the cart'**
+  String get boutiqueClearCancel;
+
+  /// No description provided for @boutiqueClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get boutiqueClearConfirm;
+
+  /// No description provided for @boutiqueSuccessEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Collection'**
+  String get boutiqueSuccessEyebrow;
+
+  /// No description provided for @boutiqueSaleDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Sale'**
+  String get boutiqueSaleDetailEyebrow;
+
+  /// No description provided for @boutiqueSaleDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale details'**
+  String get boutiqueSaleDetailTitle;
+
+  /// No description provided for @boutiqueSaleDetailBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to history'**
+  String get boutiqueSaleDetailBack;
+
+  /// No description provided for @boutiqueSaleDetailPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiqueSaleDetailPayer;
+
+  /// No description provided for @boutiqueSaleDetailPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiqueSaleDetailPhone;
+
+  /// No description provided for @boutiqueSaleDetailSoldAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on'**
+  String get boutiqueSaleDetailSoldAt;
+
+  /// No description provided for @boutiqueSaleDetailCollectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected by'**
+  String get boutiqueSaleDetailCollectedBy;
+
+  /// No description provided for @boutiqueSaleDetailCollectedByUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier not recorded'**
+  String get boutiqueSaleDetailCollectedByUnknown;
+
+  /// No description provided for @boutiqueSaleDetailReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get boutiqueSaleDetailReceipt;
+
+  /// No description provided for @boutiqueSaleDetailLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Items sold'**
+  String get boutiqueSaleDetailLines;
+
+  /// No description provided for @boutiqueSaleDetailBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'for {name}'**
+  String boutiqueSaleDetailBeneficiary(String name);
+
+  /// No description provided for @boutiqueSaleDetailSizePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Size {size}'**
+  String boutiqueSaleDetailSizePrefix(String size);
+
+  /// No description provided for @boutiqueSaleDetailPrintTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the ticket'**
+  String get boutiqueSaleDetailPrintTicket;
+
+  /// No description provided for @boutiqueSaleDetailReprintTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint the ticket'**
+  String get boutiqueSaleDetailReprintTicket;
+
+  /// No description provided for @boutiqueSaleDetailTicketPrintedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed on {date}'**
+  String boutiqueSaleDetailTicketPrintedAt(String date);
+
+  /// No description provided for @boutiqueSaleDetailTicketNeverPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket never printed from this tablet.'**
+  String get boutiqueSaleDetailTicketNeverPrinted;
+
+  /// No description provided for @boutiqueSaleDetailOpenReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the sealed receipt'**
+  String get boutiqueSaleDetailOpenReceipt;
+
+  /// No description provided for @boutiqueSaleDetailReceiptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt will be sealed at synchronisation. The ticket stands in the meantime.'**
+  String get boutiqueSaleDetailReceiptPending;
+
+  /// No description provided for @boutiqueSaleDetailReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt'**
+  String get boutiqueSaleDetailReceiptTitle;
+
+  /// No description provided for @boutiqueSaleDetailNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale not found'**
+  String get boutiqueSaleDetailNotFoundTitle;
+
+  /// No description provided for @boutiqueSaleDetailNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale is no longer in this school\'s local database. Nothing is lost server-side if it had already been sent.'**
+  String get boutiqueSaleDetailNotFound;
+
+  /// No description provided for @boutiqueSaleDetailPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.'**
+  String get boutiqueSaleDetailPendingNotice;
 }
 
 class _AppLocalizationsDelegate

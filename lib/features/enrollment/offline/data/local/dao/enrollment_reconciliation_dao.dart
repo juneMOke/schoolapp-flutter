@@ -236,6 +236,12 @@ class EnrollmentReconciliationDao {
       'previous_rate': e.previousRate,
       'previous_rank': e.previousRank,
       'validated_previous_year': _boolToInt(e.validatedPreviousYear),
+      // Sans ces deux lignes, une tablette neuve hydratée par le pull recevrait
+      // le dossier ENTIER sauf « ancien élève » et la fiche santé : deux
+      // colonnes à leur défaut, indiscernables d'une déclaration réelle. La
+      // fiche santé, en particulier, disparaîtrait sans que rien ne le dise.
+      'former_student': e.formerStudent ? 1 : 0,
+      'medical_notes': e.medicalNotes,
       'transfer_reason': e.transferReason,
       'cancellation_reason': e.cancellationReason,
     };
@@ -253,12 +259,59 @@ class EnrollmentReconciliationDao {
       for (final p in agg.parents)
         await _upsertSnapshotParent(txn, e.studentId, p, lwwMs, syncedAt),
     ];
+    await _designateFrom(txn, e.studentId, agg.parents, resolvedParentIds);
     // L'agrégat porte l'ensemble COMPLET des tuteurs (contrat auto-suffisant) →
     // purge des liens vers des tuteurs SYNCED disparus du dossier serveur (les
     // liens vers un tuteur local protégé, non SYNCED, sont préservés).
     await _pruneStudentParentLinks(txn, e.studentId, resolvedParentIds);
 
     return wroteEnrollment;
+  }
+
+  /// Reflète en local une désignation de contact d'urgence **déjà acquittée par
+  /// le serveur** (`204`).
+  ///
+  /// Sans elle, l'écran de consultation — intégralement local — garderait
+  /// l'ancien contact jusqu'au prochain pull. Le serveur remonte bien le
+  /// curseur de synchro du dossier, mais « finira par arriver » n'est pas une
+  /// réponse quand quelqu'un vient de changer le numéro qu'on appellera en cas
+  /// d'accident.
+  ///
+  /// **Démote puis promeut, dans une seule transaction** : l'index unique
+  /// partiel n'admet qu'une ligne à `1` par élève, et promouvoir B pendant que
+  /// A porte encore le drapeau le violerait. [parentId] à `null` retire la
+  /// désignation sans en poser d'autre.
+  Future<void> applyEmergencyContactDesignation({
+    required String studentId,
+    required String? parentId,
+  }) async {
+    await _db.transaction(
+      (txn) =>
+          _applyDesignationIn(txn, studentId: studentId, parentId: parentId),
+    );
+  }
+
+  /// Corps partagé — appelé aussi depuis l'hydratation, qui tient déjà sa
+  /// transaction. **Démote d'abord, promeut ensuite** : l'inverse violerait
+  /// l'index à l'instant du flush.
+  Future<void> _applyDesignationIn(
+    DatabaseExecutor txn, {
+    required String studentId,
+    required String? parentId,
+  }) async {
+    await txn.update(
+      'student_parent',
+      {'emergency_contact': 0},
+      where: 'student_id = ? AND emergency_contact = 1',
+      whereArgs: [studentId],
+    );
+    if (parentId == null) return;
+    await txn.update(
+      'student_parent',
+      {'emergency_contact': 1},
+      where: 'student_id = ? AND parent_id = ?',
+      whereArgs: [studentId, parentId],
+    );
   }
 
   /// Vrai si une ligne existe déjà à cet `id` avec un `sync_status` protégé
@@ -399,12 +452,72 @@ class EnrollmentReconciliationDao {
       }
     }
 
+    // **`emergency_contact` n'est PAS écrit ici**, et c'est vital.
+    //
+    // Cette écriture est un `INSERT OR REPLACE`, et SQLite y résout les
+    // conflits de TOUTE contrainte d'unicité — l'index partiel
+    // `ux_emergency_contact_per_student` compris — en SUPPRIMANT la ligne en
+    // conflit, jamais en refusant. Poser le drapeau à 1 sur un tuteur alors
+    // qu'un autre le porte déjà pour cet élève ne ferait donc pas basculer un
+    // booléen : cela ferait disparaître le LIEN entier de l'autre tuteur.
+    //
+    // Le tuteur perdu serait, qui plus est, celui qu'on protège le plus : une
+    // fiche locale provisoire, que `_pruneStudentParentLinks` s'interdit de
+    // purger précisément parce qu'elle porte une écriture non encore poussée.
+    // Elle n'aurait même pas eu l'occasion d'être épargnée.
+    //
+    // La désignation est donc appliquée APRÈS toute la liste, en une passe
+    // démote-puis-promeut (cf. `_designateFrom`).
+    // **`INSERT OR IGNORE` puis `UPDATE` ciblé**, jamais `OR REPLACE`.
+    //
+    // `REPLACE` ne met pas la ligne à jour : il la SUPPRIME et en insère une
+    // neuve. Les colonnes qu'on ne cite pas y reprennent donc leur défaut —
+    // `emergency_contact` retomberait à 0 à chaque pull, effaçant en silence
+    // une désignation locale qui attend son push. Ne pas écrire une colonne ne
+    // suffit pas à la préserver sous ce mode.
     await txn.insert('student_parent', {
       'student_id': studentId,
       'parent_id': parentId,
       'relationship_type': p.relationshipType,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    await txn.update(
+      'student_parent',
+      {'relationship_type': p.relationshipType},
+      where: 'student_id = ? AND parent_id = ?',
+      whereArgs: [studentId, parentId],
+    );
     return parentId;
+  }
+
+  /// Applique la désignation « contact d'urgence » portée par l'agrégat, une
+  /// fois TOUS ses liens écrits.
+  ///
+  /// En une passe, et jamais tuteur par tuteur : l'index unique partiel
+  /// n'admet qu'une ligne à 1 par élève, et l'écriture des liens se fait en
+  /// `INSERT OR REPLACE`, qui détruirait la ligne en conflit au lieu de la
+  /// refuser (voir `_upsertSnapshotParent`).
+  ///
+  /// **Trois cas, et le troisième n'est pas le deuxième.** Un `true` désigne et
+  /// démote le reste. Que des `false` : le serveur dit explicitement que
+  /// personne n'est désigné, on démote. Que des `null` : c'est un serveur
+  /// antérieur au champ, qui ne dit RIEN — on ne touche à rien, plutôt que de
+  /// détruire une désignation locale qui attend peut-être son push.
+  Future<void> _designateFrom(
+    DatabaseExecutor txn,
+    String studentId,
+    List<ParentSnapshotDto> parents,
+    List<String> resolvedParentIds,
+  ) async {
+    String? designated;
+    var saysSomething = false;
+    for (var i = 0; i < parents.length && i < resolvedParentIds.length; i++) {
+      final flag = parents[i].emergencyContact;
+      if (flag == null) continue;
+      saysSomething = true;
+      if (flag) designated = resolvedParentIds[i];
+    }
+    if (!saysSomething) return;
+    await _applyDesignationIn(txn, studentId: studentId, parentId: designated);
   }
 
   /// Réconcilie les liens `student_parent` d'un élève après hydratation : purge

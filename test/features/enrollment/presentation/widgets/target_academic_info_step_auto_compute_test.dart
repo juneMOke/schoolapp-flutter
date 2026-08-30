@@ -135,10 +135,11 @@ void main() {
   EnrollmentSchoolDetail buildEnrollmentDetail({
     String previousSchoolLevelLabel = '',
     String previousSchoolLevelGroupLabel = '',
-    required bool validatedPreviousYear,
-    // previousRank non-null = signal que l'étape Antécédents a déjà été
-    // enregistrée (moyenne+rang requis pour sauvegarder) ; sans ça, le
-    // calcul auto reste désactivé (cf. _hasConfirmedPreviousYearData).
+    // `null` = le verdict de l'année précédente n'a pas été prononcé, et le
+    // calcul auto reste alors désactivé. Le signal était auparavant
+    // `previousRank != null`, un proxy devenu faux depuis que le rang est
+    // facultatif.
+    required bool? validatedPreviousYear,
     int? previousRank = 5,
     // schoolLevelId/schoolLevelGroupId PERSISTÉS : tant qu'ils sont vides, le
     // calcul auto peut s'appliquer ; dès qu'ils sont renseignés, plus jamais.
@@ -153,7 +154,7 @@ void main() {
     previousAcademicYear: '',
     previousSchoolLevelGroup: previousSchoolLevelGroupLabel,
     previousSchoolLevel: previousSchoolLevelLabel,
-    previousRate: 0,
+    previousRate: null,
     previousRank: previousRank,
     validatedPreviousYear: validatedPreviousYear,
     schoolLevelGroupId: schoolLevelGroupId,
@@ -400,8 +401,44 @@ void main() {
   );
 
   testWidgets(
-    'Antécédents pas encore confirmé (previousRank null) → pas de calcul '
-    'auto ni de badge, même avec un libellé + validatedPreviousYear',
+    'verdict de l\'année précédente NON prononcé → pas de calcul auto ni de '
+    'badge, même avec un libellé de niveau',
+    (tester) async {
+      final controller = EnrollmentStepSubmitController();
+      await tester.pumpWidget(
+        buildStep(
+          buildEnrollmentDetail(
+            previousSchoolLevelLabel: 'P1',
+            previousSchoolLevelGroupLabel: 'Primaire',
+            validatedPreviousYear: null,
+          ),
+          controller: controller,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('fr'));
+      expect(find.text(l10n.targetLevelAutoBadge), findsNothing);
+
+      controller.submitForm();
+      await tester.pump();
+
+      // Défaut naïf (1er groupe/1er niveau), PAS la progression 'p2' : sans
+      // verdict, le calcul ne saurait pas distinguer un passage d'un
+      // redoublement, et trancherait à la place du guichet.
+      final captured = captureLastSave();
+      expect(captured.schoolLevelGroupId, 'primaire');
+      expect(captured.schoolLevelId, 'p1');
+    },
+  );
+
+  /// Le rang est devenu facultatif : son absence ne doit plus RIEN désactiver.
+  /// C'est la contre-épreuve du test ci-dessus — le proxy est mort, le verdict
+  /// gouverne seul. Sans elle, le calcul aurait pu cesser de s'appliquer à
+  /// tout dossier sans rang sans qu'un seul test rougisse.
+  testWidgets(
+    'sans rang mais avec un verdict, le calcul auto s\'applique quand même',
     (tester) async {
       final controller = EnrollmentStepSubmitController();
       await tester.pumpWidget(
@@ -419,17 +456,13 @@ void main() {
       await tester.pump();
 
       final l10n = await AppLocalizations.delegate.load(const Locale('fr'));
-      expect(find.text(l10n.targetLevelAutoBadge), findsNothing);
+      expect(find.text(l10n.targetLevelAutoBadge), findsOneWidget);
 
       controller.submitForm();
       await tester.pump();
 
-      // Défaut naïf (1er groupe/1er niveau), PAS la progression 'p2' : sans
-      // confirmation de l'étape Antécédents, validatedPreviousYear=true n'est
-      // pas fiable (défaut non distinguable d'une vraie saisie).
       final captured = captureLastSave();
-      expect(captured.schoolLevelGroupId, 'primaire');
-      expect(captured.schoolLevelId, 'p1');
+      expect(captured.schoolLevelId, 'p2');
     },
   );
 }

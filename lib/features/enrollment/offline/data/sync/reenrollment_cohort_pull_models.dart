@@ -53,6 +53,12 @@ class ReenrollmentCandidateDto {
   final int previousBalanceInCents;
   final String? currency;
 
+  /// Fiche santé du dossier N-1, descendue pour que le guichet n'ait pas à la
+  /// ressaisir. **C'est une proposition, pas la valeur du nouveau dossier** :
+  /// le serveur écrit ce que l'agrégat lui envoie, donc un poste qui la lit
+  /// sans la repousser perd les allergies de l'enfant au changement d'année.
+  final String? medicalNotes;
+
   const ReenrollmentCandidateDto({
     required this.studentId,
     required this.matriculationNumber,
@@ -69,6 +75,7 @@ class ReenrollmentCandidateDto {
     this.guardianPhone,
     required this.previousBalanceInCents,
     this.currency,
+    this.medicalNotes,
   });
 
   factory ReenrollmentCandidateDto.fromJson(Map<String, dynamic> j) =>
@@ -89,5 +96,6 @@ class ReenrollmentCandidateDto {
         previousBalanceInCents:
             (j['previousBalanceInCents'] as num?)?.toInt() ?? 0,
         currency: j['currency'] as String?,
+        medicalNotes: j['medicalNotes'] as String?,
       );
 }

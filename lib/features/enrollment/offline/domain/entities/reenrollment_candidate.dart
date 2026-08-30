@@ -22,6 +22,13 @@ class ReenrollmentCandidate extends Equatable {
   final int previousBalanceInCents;
   final String? currency;
 
+  /// Fiche santé du dossier N-1. **Une proposition, pas une valeur acquise** :
+  /// elle ne devient celle du nouveau dossier que si le brouillon la reprend
+  /// puis la repousse dans son agrégat. Un seed qui l'ignore fait perdre à
+  /// l'enfant ses allergies au changement d'année — pendant que le guichet en
+  /// ligne, lui, les conserve.
+  final String? medicalNotes;
+
   /// Libellé du niveau N-1 (résolu localement depuis [previousSchoolLevelId]
   /// via `ref_school_levels` — le backend de la cohorte ne renvoie qu'un id).
   /// `null` si le référentiel N-1 n'est plus en cache (purge).
@@ -51,6 +58,7 @@ class ReenrollmentCandidate extends Equatable {
     this.guardianPhone,
     this.previousBalanceInCents = 0,
     this.currency,
+    this.medicalNotes,
     this.previousSchoolLevelName,
     this.previousSchoolLevelGroupName,
     this.previousSchoolName,
@@ -73,6 +81,7 @@ class ReenrollmentCandidate extends Equatable {
     guardianPhone,
     previousBalanceInCents,
     currency,
+    medicalNotes,
     previousSchoolLevelName,
     previousSchoolLevelGroupName,
     previousSchoolName,

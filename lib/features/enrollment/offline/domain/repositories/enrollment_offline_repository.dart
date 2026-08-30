@@ -21,6 +21,12 @@ class ConfirmParentDraft {
   final String? email;
   final String relationshipType; // valeur API SCREAMING_SNAKE
 
+  /// Tuteur à appeler en urgence pour CET élève — au plus un par élève.
+  /// **Tri-état conservé jusqu'au fil** : `true` désigne (et démote les
+  /// autres), `false` retire celui-là, `null` ne dit rien. Aplatir `null` en
+  /// `false` effacerait une désignation venue d'ailleurs.
+  final bool? emergencyContact;
+
   const ConfirmParentDraft({
     this.id,
     this.isLinkedToExisting = false,
@@ -30,6 +36,7 @@ class ConfirmParentDraft {
     required this.phoneNumber,
     this.email,
     this.relationshipType = 'OTHER',
+    this.emergencyContact,
   });
 }
 
@@ -77,6 +84,16 @@ class ConfirmEnrollmentDraft {
   final int? previousRank;
   final bool? validatedPreviousYear;
   final String? transferReason;
+
+  /// « Ancien élève de l'école » à la photo de départ. `true` par construction
+  /// en réinscription : le dossier vient d'une inscription de l'année
+  /// précédente DANS cette école.
+  final bool formerStudent;
+
+  /// Fiche santé reprise du dossier N-1. **C'est une proposition** que le
+  /// guichet relit à l'étape Identité ; elle ne devient la valeur de la
+  /// nouvelle inscription que si l'agrégat la repousse.
+  final String? medicalNotes;
   final bool emitDocument;
 
   final List<ConfirmParentDraft> parents;
@@ -111,6 +128,8 @@ class ConfirmEnrollmentDraft {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     this.transferReason,
     this.emitDocument = true,
     this.parents = const [],
@@ -167,6 +186,7 @@ abstract class EnrollmentOfflineRepository {
     String? schoolLevelId,
     String? schoolLevelGroupId,
     required String enrollmentDate,
+    String? medicalNotes,
   });
 
   /// Étape Adresse : UPDATE partiel de l'élève DRAFT (colonnes non-null).
@@ -194,6 +214,7 @@ abstract class EnrollmentOfflineRepository {
     double? previousRate,
     int? previousRank,
     bool? validatedPreviousYear,
+    bool? formerStudent,
     String? transferReason,
   });
 

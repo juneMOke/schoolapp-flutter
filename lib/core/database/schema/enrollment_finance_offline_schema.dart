@@ -103,7 +103,21 @@ const TableSchema parentsTable = TableSchema(
   ],
 );
 
-/// `student_parent` — lien N-N élève ↔ tuteur, porteur du `relationship_type`.
+/// `student_parent` — lien N-N élève ↔ tuteur, porteur du `relationship_type`
+/// et du drapeau `emergency_contact`.
+///
+/// Les deux décrivent le COUPLE (élève, tuteur), jamais le tuteur seul : un
+/// tuteur est rapproché par téléphone, donc une même ligne `parents` sert toute
+/// une fratrie. Posé sur `parents`, « contact d'urgence » désignerait le même
+/// adulte pour tous les enfants de ce tuteur.
+///
+/// L'index unique PARTIEL tient l'invariant « au plus un contact d'urgence par
+/// élève » — miroir de `ux_emergency_contact_per_student` côté serveur (V101).
+/// Partiel, jamais contrainte unique : seules les lignes à 1 sont concernées,
+/// les tuteurs ordinaires (0) restent en nombre quelconque. Il est le FILET,
+/// pas la règle : le DAO démote puis promeut dans la même transaction, et
+/// l'index n'a le dernier mot que sur une écriture qui aurait échappé à ce
+/// chemin.
 const TableSchema studentParentTable = TableSchema(
   name: 'student_parent',
   createTableSql: '''
@@ -111,15 +125,33 @@ const TableSchema studentParentTable = TableSchema(
       student_id TEXT NOT NULL,
       parent_id TEXT NOT NULL,
       relationship_type TEXT NOT NULL DEFAULT 'OTHER',
+      emergency_contact INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (student_id, parent_id)
     )
   ''',
+  createIndexSql: [
+    'CREATE UNIQUE INDEX ux_emergency_contact_per_student '
+        'ON student_parent(student_id) WHERE emergency_contact = 1',
+  ],
 );
 
 /// `enrollments` — dossiers d'inscription (uuid client). `enrollment_date` =
 /// date terrain honorée serveur. `enrollment_code` rempli à l'ACK.
 /// `source_ref` = référence d'origine du dossier (contrat agrégat) : matricule
 /// (RE_ENROLLMENT), id de préinscription (PRE_ENROLLMENT), NULL (NEW).
+///
+/// `former_student` — le « nouveau / ancien » du formulaire, au sens « déjà
+/// élève de CETTE école ». **Délibérément distinct d'`enrollment_type`** :
+/// l'enum décrit le chemin technique suivi par le dossier, ce drapeau un fait
+/// déclaré au guichet. Les deux divergent dès qu'une école démarre sur
+/// l'application — tous ses anciens élèves y entrent en NEW_ENROLLMENT, faute
+/// de dossier N-1. NOT NULL, comme la colonne serveur.
+///
+/// `medical_notes` — texte libre sur la santé de l'enfant (allergies,
+/// traitement en cours, conduite à tenir). Porté par l'INSCRIPTION et non par
+/// l'élève : côté serveur `saveStudent` est un get-or-return, une note posée
+/// sur `students` serait figée à vie dès la première saisie. Donnée de santé :
+/// jamais journalisée, jamais imprimée.
 const TableSchema enrollmentsTable = TableSchema(
   name: 'enrollments',
   createTableSql: '''
@@ -142,6 +174,8 @@ const TableSchema enrollmentsTable = TableSchema(
       previous_rate REAL,
       previous_rank INTEGER,
       validated_previous_year INTEGER,
+      former_student INTEGER NOT NULL DEFAULT 0,
+      medical_notes TEXT,
       transfer_reason TEXT,
       cancellation_reason TEXT,
       emit_document INTEGER NOT NULL DEFAULT 1,
@@ -256,6 +290,12 @@ const TableSchema refSchoolLevelsTable = TableSchema(
 /// bornée/statique + snapshot arriérés. `student_id` = id CANONIQUE réutilisé par
 /// le nouvel `enrollment` (cas RE) → aucun doublon d'élève.
 /// `previous_balance_in_cents` remplace le REAL de la spec (règle argent).
+///
+/// `medical_notes` est la fiche santé du dossier N-1, descendue pour que le
+/// guichet n'ait pas à la ressaisir. C'est une **proposition** : elle ne devient
+/// la valeur de la nouvelle inscription que si le poste la repousse dans son
+/// agrégat. Un canal qui la lit sans la renvoyer perd les allergies de l'enfant
+/// à chaque changement d'année.
 const TableSchema refPreviousYearStudentsTable = TableSchema(
   name: 'ref_previous_year_students',
   createTableSql: '''
@@ -275,6 +315,7 @@ const TableSchema refPreviousYearStudentsTable = TableSchema(
       guardian_phone TEXT,
       previous_balance_in_cents INTEGER NOT NULL DEFAULT 0,
       currency TEXT,
+      medical_notes TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
     )
   ''',

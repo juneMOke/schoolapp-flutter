@@ -12,6 +12,12 @@ class LocalParent extends Equatable {
   final String? email;
   final String? identificationNumber;
   final OfflineRelationshipType relationshipType;
+
+  /// Tuteur à appeler en urgence pour l'élève de ce dossier. Comme
+  /// [relationshipType], il décrit le couple (élève, tuteur) et se lit sur le
+  /// lien `student_parent`, pas sur la fiche du tuteur — un même adulte peut
+  /// être le contact d'urgence d'un enfant et pas de son frère.
+  final bool emergencyContact;
   final SyncState syncState;
 
   const LocalParent({
@@ -23,6 +29,7 @@ class LocalParent extends Equatable {
     this.email,
     this.identificationNumber,
     this.relationshipType = OfflineRelationshipType.other,
+    this.emergencyContact = false,
     this.syncState = SyncState.pendingSync,
   });
 
@@ -36,6 +43,7 @@ class LocalParent extends Equatable {
     email,
     identificationNumber,
     relationshipType,
+    emergencyContact,
     syncState,
   ];
 }

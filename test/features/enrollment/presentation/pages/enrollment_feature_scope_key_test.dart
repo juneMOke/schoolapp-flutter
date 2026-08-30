@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
@@ -16,6 +17,8 @@ class _MockEnrollmentOfflineBloc extends Mock
 
 class _MockEnrollmentLocalListBloc extends Mock
     implements EnrollmentLocalListBloc {}
+
+class _MockParentBloc extends Mock implements ParentBloc {}
 
 class _MockAcademicYearContextBloc extends Mock
     implements AcademicYearContextBloc {}
@@ -64,6 +67,14 @@ void main() {
     });
     registerCloseable<AcademicYearPreviousContextBloc>(() {
       final mock = _MockAcademicYearPreviousContextBloc();
+      when(() => mock.close()).thenAnswer((_) async {});
+      return mock;
+    });
+    // Écriture ONLINE du module (désignation du contact d'urgence sur un
+    // dossier finalisé) : le scope la résout comme les autres, et le harnais
+    // doit donc la fournir.
+    registerCloseable<ParentBloc>(() {
+      final mock = _MockParentBloc();
       when(() => mock.close()).thenAnswer((_) async {});
       return mock;
     });

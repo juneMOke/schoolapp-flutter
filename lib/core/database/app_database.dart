@@ -71,7 +71,21 @@ Future<void> migrateOfflineDatabase(
     // `IF NOT EXISTS` : les tables déjà présentes sont ignorées, seules les
     // nouvelles sont créées (aucune donnée existante n'est touchée).
     for (final table in schema) {
+      final existed = await _hasTable(db, table.name);
       await db.execute(_asIfNotExists(table.createTableSql));
+      // **Les index d'une table préexistante ne sont PAS rejoués ici.** Cette
+      // étape lit le schéma d'AUJOURD'HUI, et une table déjà là porte la forme
+      // d'ALORS : un index d'aujourd'hui peut donc citer une colonne qu'elle
+      // n'a pas encore. C'est le cas de `ux_emergency_contact_per_student`
+      // (v32), qui filtre sur `student_parent.emergency_contact` — colonne
+      // ajoutée trente paliers plus loin. Sans cette garde, toute base montant
+      // de v1 échouait ici, et avec elle l'escalier entier.
+      //
+      // Rien n'est perdu : les index d'une table préexistante ont été créés
+      // avec elle, et ceux ajoutés depuis le sont par le palier qui les
+      // introduit (v17 pour `idx_parents_names`, v32 pour celui-ci). Ce palier
+      // ne doit poser que les index des tables qu'il vient, lui, de créer.
+      if (existed) continue;
       for (final indexSql in table.createIndexSql) {
         await db.execute(_indexAsIfNotExists(indexSql));
       }
@@ -845,6 +859,66 @@ Future<void> migrateOfflineDatabase(
       await db.execute(
         'CREATE INDEX idx_boutique_sale_lines_sale '
         'ON boutique_sale_lines(sale_id)',
+      );
+    }
+  }
+
+  if (upTo(32)) {
+    // v32 — Inscription : les quatre champs que le guichet saisit et que le
+    // dossier ne savait pas porter.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (await _hasTable(db, 'enrollments')) {
+      if (!await _hasColumn(db, 'enrollments', 'former_student')) {
+        // NOT NULL avec défaut : la colonne existe côté serveur sous la même
+        // contrainte, et un dossier sans déclaration n'est pas « inconnu » mais
+        // « pas ancien ».
+        await db.execute(
+          'ALTER TABLE enrollments '
+          'ADD COLUMN former_student INTEGER NOT NULL DEFAULT 0',
+        );
+        // Backfill best-effort, et strictement le même compromis que V100 côté
+        // serveur : le type d'inscription est la SEULE information que
+        // l'existant porte pour distinguer un ancien élève. Ce n'est pas que
+        // les deux notions soient synonymes — elles divergent dès qu'une école
+        // démarre sur l'application — c'est qu'aucune déclaration de guichet
+        // n'a jamais été possible sur ces lignes.
+        await db.execute(
+          'UPDATE enrollments SET former_student = 1 '
+          "WHERE enrollment_type = 'RE_ENROLLMENT'",
+        );
+      }
+      if (!await _hasColumn(db, 'enrollments', 'medical_notes')) {
+        await db.execute(
+          'ALTER TABLE enrollments ADD COLUMN medical_notes TEXT',
+        );
+      }
+    }
+
+    if (await _hasTable(db, 'student_parent')) {
+      if (!await _hasColumn(db, 'student_parent', 'emergency_contact')) {
+        await db.execute(
+          'ALTER TABLE student_parent '
+          'ADD COLUMN emergency_contact INTEGER NOT NULL DEFAULT 0',
+        );
+      }
+      // Index unique PARTIEL — il ne contraint que les lignes à 1. Créé APRÈS
+      // la colonne et jamais avant : sur une base existante, toutes les lignes
+      // valent 0, donc aucune ne le viole à la création.
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS ux_emergency_contact_per_student '
+        'ON student_parent(student_id) WHERE emergency_contact = 1',
+      );
+    }
+
+    if (await _hasTable(db, 'ref_previous_year_students') &&
+        !await _hasColumn(db, 'ref_previous_year_students', 'medical_notes')) {
+      // Reste NULL jusqu'au prochain pull de la cohorte : la fiche santé N-1
+      // n'est pas reconstituable localement, et une colonne vide se lit
+      // correctement « pas encore descendue ».
+      await db.execute(
+        'ALTER TABLE ref_previous_year_students ADD COLUMN medical_notes TEXT',
       );
     }
   }

@@ -25,6 +25,18 @@ class LocalEnrollment extends Equatable {
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
+
+  /// « Ancien élève de CETTE école », déclaré au guichet. Non nullable, comme
+  /// sa colonne : un dossier sans déclaration n'est pas « inconnu » mais « pas
+  /// ancien ». **Distinct d'[enrollmentType]**, qui décrit le chemin technique
+  /// suivi par le dossier : les deux divergent dès qu'une école démarre sur
+  /// l'application, où tous ses anciens élèves entrent en NEW_ENROLLMENT.
+  final bool formerStudent;
+
+  /// Fiche santé de l'enfant (allergies, traitement en cours, conduite à
+  /// tenir), portée par l'inscription et non par l'élève. Donnée de santé :
+  /// jamais journalisée, jamais imprimée.
+  final String? medicalNotes;
   final String? transferReason;
   final String? cancellationReason;
   final bool emitDocument;
@@ -49,6 +61,8 @@ class LocalEnrollment extends Equatable {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     this.transferReason,
     this.cancellationReason,
     this.emitDocument = true,
@@ -75,6 +89,8 @@ class LocalEnrollment extends Equatable {
     previousRate,
     previousRank,
     validatedPreviousYear,
+    formerStudent,
+    medicalNotes,
     transferReason,
     cancellationReason,
     emitDocument,

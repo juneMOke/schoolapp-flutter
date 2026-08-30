@@ -31,6 +31,15 @@ class AppConstants {
   static const String parentUnlinkEndpoint =
       '/api/v1/parents/students/{studentId}/{parentId}';
 
+  /// Désignation du tuteur à appeler en urgence pour UN élève.
+  ///
+  /// Route distincte de [parentUpdateEndpoint] parce qu'elle porte un
+  /// `studentId`, que l'autre n'a pas : un tuteur est partagé par une fratrie
+  /// (rapproché par téléphone côté serveur), et `PUT /parents/{id}` applique
+  /// donc ce qu'il reçoit à TOUS les enfants de ce tuteur.
+  static const String parentEmergencyContactEndpoint =
+      '/api/v1/parents/students/{studentId}/emergency-contact';
+
   static const String enrollmentAcademicInfoEndpoint =
       '/api/v1/enrollments/{enrollmentId}/previous-school-info';
 
@@ -438,7 +447,17 @@ class AppConstants {
   // backfill : le module n'existait pas. `catalog_price_in_cents` est nullable
   // et JAMAIS zéro — `null` dit « le catalogue ne disait plus rien », zéro
   // dirait « il disait gratuit ».
-  static const int offlineDbSchemaVersion = 31;
+  // v32 (2026-08-30) : Inscription — les quatre champs que le guichet saisit et
+  // que le dossier ne savait pas porter. `enrollments.former_student` (NOT NULL,
+  // backfillé depuis `enrollment_type = 'RE_ENROLLMENT'` — la seule information
+  // que l'existant porte, pas un synonyme) et `enrollments.medical_notes` ;
+  // `student_parent.emergency_contact` avec son index unique PARTIEL, miroir de
+  // `ux_emergency_contact_per_student` (V101 back) ; et
+  // `ref_previous_year_students.medical_notes`, la fiche santé N-1 proposée à la
+  // réinscription. Rien à faire ici pour rendre le bloc « école précédente »
+  // facultatif : ses colonnes sont nullables depuis toujours côté local — la
+  // contrainte vivait dans l'écran, pas en base.
+  static const int offlineDbSchemaVersion = 32;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

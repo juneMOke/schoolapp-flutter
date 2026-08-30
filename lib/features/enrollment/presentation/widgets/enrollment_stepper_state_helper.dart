@@ -54,14 +54,21 @@ class EnrollmentStepperStateHelper {
         isAcademicTargetInfoValid(enrollment);
   }
 
-  static bool isAcademicPreviousInfoValid(EnrollmentSchoolDetail enrollment) {
-    return enrollment.previousAcademicYear.trim().isNotEmpty &&
-        enrollment.previousSchoolName.trim().isNotEmpty &&
-        enrollment.previousSchoolLevelGroup.trim().isNotEmpty &&
-        enrollment.previousSchoolLevel.trim().isNotEmpty &&
-        enrollment.previousRate > 0 &&
-        enrollment.previousRank != null;
-  }
+  /// Le bloc « école précédente » est **entièrement facultatif** : un enfant
+  /// qui entre en première année de maternelle n'a ni école, ni cycle, ni
+  /// moyenne, ni rang à déclarer, et devait jusqu'ici en inventer pour
+  /// franchir l'étape.
+  ///
+  /// Il ne reste donc **rien à exiger** ici. Ce qui subsiste — la cohérence de
+  /// format d'une valeur effectivement saisie — est vérifié dans le formulaire,
+  /// au contact du texte brut : une fois la valeur parsée en `double?`, une
+  /// saisie illisible et une case vide sont devenues indiscernables.
+  ///
+  /// Conservée plutôt que supprimée : elle nomme une étape du parcours, et le
+  /// registre des handlers l'appelle. La rendre `true` en bloc est le fait
+  /// métier, pas un raccourci.
+  static bool isAcademicPreviousInfoValid(EnrollmentSchoolDetail enrollment) =>
+      true;
 
   static bool isAcademicTargetInfoValid(EnrollmentSchoolDetail enrollment) {
     return enrollment.academicYearId.trim().isNotEmpty &&

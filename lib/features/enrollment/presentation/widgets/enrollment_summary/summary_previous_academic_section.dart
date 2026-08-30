@@ -25,13 +25,23 @@ class SummaryPreviousAcademicSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final enrollmentData = enrollmentDetail.enrollmentDetail;
-    final yearBadge = enrollmentData.validatedPreviousYear
-        ? StatusBadge.enrollmentValidated(label: l10n.summaryYes)
-        : StatusBadge(
-            icon: Icons.remove_circle_outline,
-            label: l10n.summaryNo,
-            color: AppColors.textMuted,
-          );
+    // Trois états, pas deux. « Non validée » est un redoublement ; « non
+    // renseignée » n'est rien du tout, et l'afficher comme un « Non » ferait
+    // lire un redoublement là où personne n'a rien dit.
+    final validated = enrollmentData.validatedPreviousYear;
+    final yearBadge = switch (validated) {
+      true => StatusBadge.enrollmentValidated(label: l10n.summaryYes),
+      false => StatusBadge(
+        icon: Icons.remove_circle_outline,
+        label: l10n.summaryNo,
+        color: AppColors.textMuted,
+      ),
+      null => StatusBadge(
+        icon: Icons.help_outline_rounded,
+        label: l10n.yearValidationUnknown,
+        color: AppColors.textMuted,
+      ),
+    };
 
     return SummarySectionCard(
       title: l10n.previousYear,
@@ -65,9 +75,33 @@ class SummaryPreviousAcademicSection extends StatelessWidget {
               ),
               SummaryField(
                 label: l10n.averageLabel,
+                // Une moyenne absente se dit « — », jamais « 0% » : zéro pour
+                // cent est une note, et le dossier n'en porte aucune.
                 value: EnrollmentSummaryUtils.fallbackValue(
                   l10n,
-                  '${enrollmentData.previousRate}%',
+                  enrollmentData.previousRate == null
+                      ? ''
+                      : '${enrollmentData.previousRate}%',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spacingS),
+          Row(
+            children: [
+              Text(
+                l10n.formerStudentLabel,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Text(
+                enrollmentData.formerStudent ? l10n.summaryYes : l10n.summaryNo,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

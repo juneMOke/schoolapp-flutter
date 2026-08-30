@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/former_student_checkbox.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validated_year_selector.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -23,8 +26,16 @@ class PreviousYearFields extends StatelessWidget {
   final bool isCatalogLoading;
   final TextEditingController prevRateController;
   final TextEditingController prevRankController;
-  final bool validatedPreviousYear;
-  final ValueChanged<bool> onValidatedChanged;
+  final bool? validatedPreviousYear;
+
+  /// « Ancien élève de l'école », déclaré au guichet.
+  final bool formerStudent;
+
+  /// Modifiable ? `false` en réinscription, où le fait est acquis.
+  final bool formerStudentEditable;
+  final bool formerStudentChanged;
+  final ValueChanged<bool> onFormerStudentChanged;
+  final ValueChanged<bool?> onValidatedChanged;
   final bool showValidation;
   final String? prevYearError;
   final String? prevSchoolError;
@@ -52,6 +63,10 @@ class PreviousYearFields extends StatelessWidget {
     required this.prevRateController,
     required this.prevRankController,
     required this.validatedPreviousYear,
+    required this.formerStudent,
+    required this.onFormerStudentChanged,
+    this.formerStudentEditable = true,
+    this.formerStudentChanged = false,
     required this.onValidatedChanged,
     this.showValidation = false,
     this.prevYearError,
@@ -68,11 +83,39 @@ class PreviousYearFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return WizardFieldsGrid(
       fields: [
+        // **En tête du bloc, et pas ailleurs** : c'est la question qui dit
+        // comment lire tout ce qui suit. Si l'enfant est un ancien de la
+        // maison, « l'école précédente », c'est nous.
+        WizardGridField(
+          FormerStudentCheckbox(
+            l10n: l10n,
+            value: formerStudent,
+            onChanged: onFormerStudentChanged,
+            editable: isEditable && formerStudentEditable,
+            isChanged: formerStudentChanged,
+          ),
+          fullWidth: true,
+        ),
+        // **Aucun champ de ce bloc n'est obligatoire.** Un enfant qui entre en
+        // première année de maternelle n'a ni école, ni cycle, ni moyenne à
+        // déclarer — et devait jusqu'ici en inventer pour franchir l'étape.
+        WizardGridField(
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppDimensions.spacingS),
+            child: Text(
+              l10n.previousSchoolOptionalHint,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          fullWidth: true,
+        ),
         // Année scolaire
         WizardGridField(
           EteeloSelectInput<String>(
             label: l10n.academicYearLabel,
-            required: true,
+            required: false,
             value: selectedYear,
             items: _itemsFrom(yearOptions),
             onChanged: onYearChanged,
@@ -86,7 +129,7 @@ class PreviousYearFields extends StatelessWidget {
           EteeloTextInput(
             controller: prevSchoolController,
             label: l10n.schoolLabel,
-            required: true,
+            required: false,
             errorText: prevSchoolError,
             readOnly: !isEditable,
           ),
@@ -95,12 +138,15 @@ class PreviousYearFields extends StatelessWidget {
         WizardGridField(
           EteeloSelectInput<String>(
             label: l10n.schoolCycle,
-            required: true,
+            required: false,
             value: selectedCycle,
             items: _itemsFrom(cycleOptions),
             onChanged: onCycleChanged,
             errorText: prevCycleError,
-            enabled: isEditable && !isCatalogLoading && selectedYear != null,
+            // La cascade ne dépend plus de l'année : celle-ci est facultative,
+            // et l'exiger pour ouvrir le cycle la rendrait obligatoire par la
+            // porte de derrière.
+            enabled: isEditable && !isCatalogLoading,
             readOnly: !isEditable,
           ),
         ),
@@ -108,7 +154,7 @@ class PreviousYearFields extends StatelessWidget {
         WizardGridField(
           EteeloSelectInput<String>(
             label: l10n.schoolLevelLabel,
-            required: true,
+            required: false,
             value: selectedLevel,
             items: _itemsFrom(levelOptions),
             onChanged: onLevelChanged,
@@ -122,7 +168,7 @@ class PreviousYearFields extends StatelessWidget {
           EteeloTextInput(
             controller: prevRateController,
             label: l10n.averageLabel,
-            required: true,
+            required: false,
             keyboardType: EteeloTextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
@@ -136,7 +182,7 @@ class PreviousYearFields extends StatelessWidget {
           EteeloTextInput(
             controller: prevRankController,
             label: l10n.rankingLabel,
-            required: true,
+            required: false,
             keyboardType: EteeloTextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             errorText: prevRankError,

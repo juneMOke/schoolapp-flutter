@@ -25,10 +25,19 @@ class ParentDraft {
   /// inchangé).
   final bool linkedToExisting;
 
+  /// Désignation « contact d'urgence » **telle que l'écran la dit** : `true`
+  /// désigne, `false` retire, `null` ne dit rien — et « ne rien dire » n'est
+  /// pas « non ». Le remplacement des tuteurs efface puis réécrit tous les
+  /// liens de l'élève ; sans ce troisième état, chaque passage sur l'étape
+  /// Tuteurs effacerait une désignation posée ailleurs (cf.
+  /// `_replaceParentsIn`).
+  final bool? emergencyContact;
+
   const ParentDraft({
     required this.parent,
     required this.relationshipType,
     this.linkedToExisting = false,
+    this.emergencyContact,
   });
 }
 
@@ -114,6 +123,33 @@ class ParentPhoneConflictException implements Exception {
   final String phoneNumber;
   final String existingParentId;
   const ParentPhoneConflictException(this.phoneNumber, this.existingParentId);
+}
+
+/// Deux tuteurs désignés contact d'urgence pour le même élève.
+///
+/// Levée **avant toute écriture**, et non laissée à l'index unique partiel :
+/// les liens `student_parent` s'écrivent en `INSERT OR REPLACE` (clé composée
+/// élève+tuteur), et sous ce mode SQLite **supprime la ligne en conflit** au
+/// lieu de refuser. Le filet deviendrait alors un destructeur silencieux — le
+/// tuteur précédemment désigné disparaîtrait du dossier, pas seulement son
+/// drapeau.
+///
+/// Miroir local du `422 AMBIGUOUS_EMERGENCY_CONTACT` du serveur, et même
+/// doctrine : ce n'est pas un conflit entre deux postes mais une contradiction
+/// interne à une seule saisie. Rien à arbitrer, rien à rejouer — l'écran doit
+/// la corriger.
+class AmbiguousEmergencyContactException implements Exception {
+  final String studentId;
+  final int designatedCount;
+  const AmbiguousEmergencyContactException(
+    this.studentId,
+    this.designatedCount,
+  );
+
+  @override
+  String toString() =>
+      'AmbiguousEmergencyContactException(student: $studentId, '
+      'désignés: $designatedCount)';
 }
 
 /// Upsert d'un tuteur de l'étape Tuteurs — id fixé par l'UI, jamais généré
@@ -236,6 +272,8 @@ EnrollmentPayload enrollmentPayloadOf(EnrollmentLocalModel e) =>
       previousRate: e.previousRate,
       previousRank: e.previousRank,
       validatedPreviousYear: e.validatedPreviousYear,
+      formerStudent: e.formerStudent,
+      medicalNotes: e.medicalNotes,
       transferReason: e.transferReason,
       cancellationReason: e.cancellationReason,
     );

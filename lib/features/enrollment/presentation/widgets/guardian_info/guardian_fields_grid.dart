@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
@@ -20,6 +23,12 @@ class GuardianFieldsGrid extends StatelessWidget {
   final bool isPrimary;
   final ValueChanged<bool?>? onPrimaryChanged;
 
+  /// Tuteur à appeler en urgence pour CET élève. Au plus un par élève :
+  /// l'exclusivité est tenue par l'étape, qui connaît toutes les cartes — une
+  /// case ne sait rien de ses voisines.
+  final bool isEmergencyContact;
+  final ValueChanged<bool?>? onEmergencyContactChanged;
+
   /// true si ce tuteur a été rattaché via "Rechercher un parent" cette
   /// session : verrouille les champs d'IDENTITÉ (nom/postnom/prénom/
   /// téléphone/email) en lecture seule PLEINE COULEUR (pas grisé — convention
@@ -40,6 +49,8 @@ class GuardianFieldsGrid extends StatelessWidget {
     this.isEditable = true,
     this.isPrimary = false,
     this.onPrimaryChanged,
+    this.isEmergencyContact = false,
+    this.onEmergencyContactChanged,
     this.identityReadOnly = false,
   });
 
@@ -174,6 +185,55 @@ class GuardianFieldsGrid extends StatelessWidget {
                 onChanged: isEditable ? onPrimaryChanged : null,
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ],
+          ),
+        ),
+        // Contact d'urgence — DÉSÉLECTIONNABLE, contrairement au tuteur
+        // principal : « aucun contact désigné » est un état légitime du
+        // dossier, et le serveur distingue « retirer » de « ne rien dire ».
+        WizardGridField(
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.guardianEmergencyContactLabel,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      l10n.guardianEmergencyContactHint,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // **Pas de filtre `isEditable` ici**, contrairement au tuteur
+              // principal : la désignation reste ouverte sur un dossier en
+              // consultation, où elle part par le chemin online. C'est
+              // l'appelant qui décide, en fournissant — ou non — le callback ;
+              // deux conditions concurrentes finiraient par diverger.
+              //
+              // Masquée sans la permission d'écriture (un CTA absent dit « pas
+              // vous »), gelée en session lecture seule (un CTA estompé dit
+              // « pas maintenant ») : deux causes, deux formes.
+              PermissionGate(
+                requires: const [Perm.studentWrite],
+                child: SessionWriteGate(
+                  child: Checkbox(
+                    value: isEmergencyContact,
+                    onChanged: onEmergencyContactChanged,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               ),
             ],
           ),

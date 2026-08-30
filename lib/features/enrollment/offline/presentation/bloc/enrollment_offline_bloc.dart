@@ -258,6 +258,7 @@ class EnrollmentOfflineBloc
       schoolLevelId: event.schoolLevelId,
       schoolLevelGroupId: event.schoolLevelGroupId,
       enrollmentDate: event.enrollmentDate,
+      medicalNotes: event.medicalNotes,
     );
     _emitStep(result, emit);
   }
@@ -292,6 +293,7 @@ class EnrollmentOfflineBloc
       previousRate: event.previousRate,
       previousRank: event.previousRank,
       validatedPreviousYear: event.validatedPreviousYear,
+      formerStudent: event.formerStudent,
       transferReason: event.transferReason,
     );
     _emitStep(result, emit);

@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
@@ -59,15 +61,39 @@ class GuardianStepHandler extends BaseEnrollmentStepHandler {
 
   @override
   Widget buildContent(HandlerBuildContext context) {
-    return GuardianInfoStep(
-      parentDetails: context.detail.parentDetails,
-      studentId: resolveStudentId(context),
-      flowStepIndex: step.index,
-      enrollmentId: context.detail.enrollmentDetail.id,
-      showInlineSaveButton: false,
-      onRefreshRequested: context.onRefreshRequested,
-      isEditable: context.detailPolicy.isStepEditable(step),
-      stepController: controller,
+    final readOnlyDossier = !context.detailPolicy.isStepEditable(step);
+    // `Builder` pour disposer d'un BuildContext SOUS les providers de la page :
+    // le handler, lui, n'en a aucun. Le widget reste ainsi ignorant du
+    // `ParentBloc` — c'est le handler qui décide d'où part l'écriture.
+    return Builder(
+      builder: (innerContext) => GuardianInfoStep(
+        parentDetails: context.detail.parentDetails,
+        studentId: resolveStudentId(context),
+        flowStepIndex: step.index,
+        enrollmentId: context.detail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+        onRefreshRequested: context.onRefreshRequested,
+        isEditable: context.detailPolicy.isStepEditable(step),
+        // **La seule écriture qui survit à la finalisation.** Sur un dossier en
+        // consultation, la désignation du contact d'urgence reste ouverte et
+        // part en ligne ; tout le reste demeure figé. C'est un choix, pas un
+        // oubli : c'est l'information qu'on relira un jour d'accident, et la
+        // faire dépendre d'une réouverture du dossier la rendrait inutilisable
+        // au moment où elle sert.
+        onEmergencyContactCommitted: readOnlyDossier
+            ? (parentId) {
+                final studentId = resolveStudentId(context).trim();
+                if (studentId.isEmpty) return;
+                innerContext.read<ParentBloc>().add(
+                  ParentEmergencyContactRequested(
+                    studentId: studentId,
+                    parentId: parentId,
+                  ),
+                );
+              }
+            : null,
+        stepController: controller,
+      ),
     );
   }
 }

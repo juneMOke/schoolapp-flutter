@@ -38,6 +38,8 @@ class EnrollmentAggregateRequest {
         'previousRate': e.previousRate,
         'previousRank': e.previousRank,
         'validatedPreviousYear': e.validatedPreviousYear,
+        'formerStudent': e.formerStudent,
+        'medicalNotes': e.medicalNotes,
         // RE = matricule, PRE = id préinscription, NEW = null (posé au seed
         // du brouillon, transporté par le payload outbox).
         'sourceRef': e.sourceRef,
@@ -69,6 +71,12 @@ class EnrollmentAggregateRequest {
               'phoneNumber': p.phoneNumber,
               'relationshipType': p.relationshipType,
               'email': p.email,
+              // **Omis quand nul, jamais aplati en `false`.** Le serveur lit
+              // l'absence comme « ne touche pas à la désignation en place » ;
+              // un `false` écrit par confort retirerait un contact d'urgence
+              // désigné depuis un autre poste, sans que personne l'ait demandé.
+              if (p.emergencyContact != null)
+                'emergencyContact': p.emergencyContact,
             },
           )
           .toList(),

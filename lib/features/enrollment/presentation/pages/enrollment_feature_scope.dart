@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 
 class EnrollmentFeatureScope extends StatefulWidget {
   final Widget child;
@@ -27,6 +28,12 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
   late final AcademicYearContextBloc _academicYearContextBloc;
   late final AcademicYearPreviousContextBloc _academicYearPreviousContextBloc;
 
+  /// Seule écriture ONLINE du module : la désignation du contact d'urgence sur
+  /// un dossier déjà finalisé. Elle ne passe pas par l'outbox — la route n'est
+  /// pas idempotente à son sens, et un rejeu différé désignerait peut-être un
+  /// tuteur que quelqu'un a entre-temps délogé.
+  late final ParentBloc _parentBloc;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +43,7 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
     _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
     _academicYearPreviousContextBloc =
         GetIt.instance<AcademicYearPreviousContextBloc>();
+    _parentBloc = GetIt.instance<ParentBloc>();
     // Rafraîchit les caches de référence Inscription (référentiel, cohorte
     // N-1, préinscriptions, delta) à l'entrée du module — silencieux et
     // best-effort, en complément du cycle global au retour online.
@@ -49,6 +57,7 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
     _enrollmentLocalListBloc.close();
     _academicYearContextBloc.close();
     _academicYearPreviousContextBloc.close();
+    _parentBloc.close();
     super.dispose();
   }
 
@@ -57,6 +66,7 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<EnrollmentBloc>.value(value: _enrollmentBloc),
+        BlocProvider<ParentBloc>.value(value: _parentBloc),
         BlocProvider<EnrollmentOfflineBloc>.value(
           value: _enrollmentOfflineBloc,
         ),

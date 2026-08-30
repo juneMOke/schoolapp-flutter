@@ -124,6 +124,35 @@ class DuplicateParentPhoneFailure extends Failure {
   List<Object?> get props => [message, phoneNumber, existingParentId];
 }
 
+/// Deux tuteurs désignés contact d'urgence pour le même élève.
+///
+/// **Terminale : jamais rejouable.** Ce n'est pas un conflit entre deux postes
+/// que le temps résoudrait, mais une contradiction interne à une seule saisie —
+/// le serveur la refuse pareillement, en `422 AMBIGUOUS_EMERGENCY_CONTACT`,
+/// avant d'écrire quoi que ce soit. Elle doit être corrigée à l'écran, et ne
+/// jamais atteindre la file d'écritures : une inscription bloquée dans l'outbox
+/// sur ce motif y resterait indéfiniment.
+/// Le tuteur est bien rattaché à l'élève, mais leur parenté n'a **jamais été
+/// déclarée** — cas d'un élève créé avec des `parentIds` sans passer par
+/// `POST /api/v1/parents`.
+///
+/// Distinguée d'un `404` parce que la conduite n'est pas la même : ici le
+/// tuteur EST visible sur la fiche, et « tuteur non rattaché » serait un
+/// mensonge menant à une impasse. Le secrétariat a une sortie — déclarer la
+/// parenté, ce qui peut poser le drapeau dans le même geste.
+class UndeclaredRelationshipFailure extends Failure {
+  const UndeclaredRelationshipFailure()
+    : super(
+        'La parenté de ce tuteur n\'a jamais été déclarée : renseignez-la '
+        'avant de le désigner comme contact d\'urgence.',
+      );
+}
+
+class AmbiguousEmergencyContactFailure extends Failure {
+  const AmbiguousEmergencyContactFailure()
+    : super('Un seul tuteur peut être le contact d\'urgence de cet élève.');
+}
+
 /// Cause typée servie par le serveur dans l'enveloppe `ApiErrorResponse`.
 ///
 /// **Le statut seul ne suffit pas à décider.** Deux 400 peuvent appeler des

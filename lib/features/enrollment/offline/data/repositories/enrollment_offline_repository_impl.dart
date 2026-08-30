@@ -121,6 +121,8 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
           previousRate: seed.previousRate,
           previousRank: seed.previousRank,
           validatedPreviousYear: seed.validatedPreviousYear,
+          formerStudent: seed.formerStudent,
+          medicalNotes: seed.medicalNotes,
           transferReason: seed.transferReason,
           emitDocument: seed.emitDocument,
           updatedAt: now,
@@ -142,6 +144,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
                   updatedAt: now,
                 ),
                 relationshipType: p.relationshipType,
+                emergencyContact: p.emergencyContact,
               ),
             )
             .toList(),
@@ -176,6 +179,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? schoolLevelId,
     String? schoolLevelGroupId,
     required String enrollmentDate,
+    String? medicalNotes,
   }) => _guardUnit(() async {
     final now = _now();
     await _draftDao.insertDraftStudent(
@@ -202,6 +206,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         schoolLevelId: schoolLevelId,
         schoolLevelGroupId: schoolLevelGroupId,
         enrollmentDate: enrollmentDate,
+        medicalNotes: medicalNotes,
         updatedAt: now,
       ),
     );
@@ -225,6 +230,21 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     }, nowMs: _now()),
   );
 
+  /// **Remplacement du bloc, pas mise à jour partielle.** Les sept champs
+  /// s'écrivent tels qu'ils arrivent, `null` compris — sans quoi une moyenne
+  /// saisie par erreur ne pourrait plus jamais être effacée : l'étape envoie
+  /// alors `null`, l'omission garderait l'ancienne valeur, et le champ vidé à
+  /// l'écran resterait rempli en base. C'est la contrepartie du bloc devenu
+  /// facultatif, et la même sémantique que le PUT du serveur.
+  ///
+  /// L'unique appelant est l'étape Antécédents, qui envoie le bloc entier à
+  /// chaque enregistrement — un appel partiel effacerait donc ce qu'il ne dit
+  /// pas, et n'a pas de sens ici.
+  ///
+  /// Deux champs y échappent, chacun pour sa raison. `transferReason` parce
+  /// que cette étape ne le saisit pas (elle passe toujours `null`) : l'écrire
+  /// viderait un motif de transfert posé ailleurs. `formerStudent` parce que
+  /// sa colonne est NOT NULL — omis, il garde sa valeur.
   @override
   Future<Either<Failure, Unit>> saveDraftPreviousAcademic({
     required String enrollmentId,
@@ -235,6 +255,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     double? previousRate,
     int? previousRank,
     bool? validatedPreviousYear,
+    bool? formerStudent,
     String? transferReason,
   }) => _guardUnit(() {
     final validated = validatedPreviousYear == null
@@ -242,13 +263,14 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         : (validatedPreviousYear ? 1 : 0);
     return _draftDao
         .updateDraftEnrollmentColumns(enrollmentId, <String, Object?>{
-          'previous_school_name': ?previousSchoolName,
-          'previous_academic_year': ?previousAcademicYear,
-          'previous_school_level_group': ?previousSchoolLevelGroup,
-          'previous_school_level': ?previousSchoolLevel,
-          'previous_rate': ?previousRate,
-          'previous_rank': ?previousRank,
-          'validated_previous_year': ?validated,
+          'previous_school_name': previousSchoolName,
+          'previous_academic_year': previousAcademicYear,
+          'previous_school_level_group': previousSchoolLevelGroup,
+          'previous_school_level': previousSchoolLevel,
+          'previous_rate': previousRate,
+          'previous_rank': previousRank,
+          'validated_previous_year': validated,
+          if (formerStudent != null) 'former_student': formerStudent ? 1 : 0,
           'transfer_reason': ?transferReason,
         }, nowMs: _now());
   });
@@ -297,6 +319,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         ),
         relationshipType: p.relationshipType,
         linkedToExisting: isFallbackId ? false : p.isLinkedToExisting,
+        emergencyContact: p.emergencyContact,
       );
     }).toList();
 
@@ -315,6 +338,11 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
           existingParentId: e.existingParentId,
         ),
       );
+    } on AmbiguousEmergencyContactException {
+      // Typée, jamais rabattue sur un `StorageFailure` : l'écran doit pouvoir
+      // dire QUOI corriger. Une panne de stockage et une saisie contradictoire
+      // n'appellent pas la même phrase.
+      return const Left(AmbiguousEmergencyContactFailure());
     } catch (e) {
       return Left(
         StorageFailure('Échec de l\'enregistrement du brouillon : $e'),

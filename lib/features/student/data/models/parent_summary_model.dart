@@ -10,6 +10,7 @@ class ParentSummaryModel {
   final String phoneNumber;
   final String email;
   final String relationshipType;
+  final bool? emergencyContact;
 
   const ParentSummaryModel({
     required this.id,
@@ -20,6 +21,7 @@ class ParentSummaryModel {
     required this.phoneNumber,
     required this.email,
     required this.relationshipType,
+    this.emergencyContact,
   });
 
   factory ParentSummaryModel.fromJson(Map<String, dynamic> json) =>
@@ -32,6 +34,10 @@ class ParentSummaryModel {
         phoneNumber: _readString(json['phoneNumber']),
         email: _readString(json['email']),
         relationshipType: _readString(json['relationshipType']),
+        // Le serveur le rend nul dans les vues sans élève de référence
+        // (recherche, mise à jour) : `null` y veut dire « la question ne se
+        // pose pas », pas « non ».
+        emergencyContact: json['emergencyContact'] as bool?,
       );
 
   static String _readString(dynamic value) => value?.toString() ?? '';
@@ -44,6 +50,7 @@ class ParentSummaryModel {
     'phone': phoneNumber,
     'email': email,
     'relationshipType': relationshipType,
+    'emergencyContact': emergencyContact,
   };
 
   ParentSummary toParentSummary() => ParentSummary(
@@ -55,5 +62,6 @@ class ParentSummaryModel {
     phoneNumber: phoneNumber,
     email: email,
     relationshipType: RelationshipType.fromString(relationshipType),
+    emergencyContact: emergencyContact ?? false,
   );
 }

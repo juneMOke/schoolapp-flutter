@@ -21,14 +21,18 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
   final bool isCatalogLoading;
   final TextEditingController prevRateController;
   final TextEditingController prevRankController;
-  final bool validatedPreviousYear;
+  final bool? validatedPreviousYear;
+  final bool formerStudent;
+  final bool formerStudentEditable;
+  final bool formerStudentChanged;
+  final ValueChanged<bool> onFormerStudentChanged;
   final bool showValidation;
   final bool isLoading;
   final bool canSave;
   final bool showInlineSaveButton;
   final VoidCallback onSave;
   final bool isEditable;
-  final ValueChanged<bool> onValidatedChanged;
+  final ValueChanged<bool?> onValidatedChanged;
   final String? prevYearError;
   final String? prevSchoolError;
   final String? prevCycleError;
@@ -53,6 +57,10 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
     required this.prevRateController,
     required this.prevRankController,
     required this.validatedPreviousYear,
+    required this.formerStudent,
+    required this.onFormerStudentChanged,
+    this.formerStudentEditable = true,
+    this.formerStudentChanged = false,
     required this.showValidation,
     required this.isLoading,
     required this.canSave,
@@ -94,6 +102,10 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
             prevRateController: prevRateController,
             prevRankController: prevRankController,
             validatedPreviousYear: validatedPreviousYear,
+            formerStudent: formerStudent,
+            onFormerStudentChanged: onFormerStudentChanged,
+            formerStudentEditable: formerStudentEditable,
+            formerStudentChanged: formerStudentChanged,
             onValidatedChanged: onValidatedChanged,
             showValidation: showValidation,
             prevYearError: prevYearError,

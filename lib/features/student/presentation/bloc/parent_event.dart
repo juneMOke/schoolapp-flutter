@@ -73,6 +73,21 @@ class ParentCreateRequested extends ParentEvent {
   ];
 }
 
+/// Désigne le tuteur à appeler en urgence pour [studentId], ou n'en désigne
+/// aucun ([parentId] à `null`).
+class ParentEmergencyContactRequested extends ParentEvent {
+  final String studentId;
+  final String? parentId;
+
+  const ParentEmergencyContactRequested({
+    required this.studentId,
+    required this.parentId,
+  });
+
+  @override
+  List<Object?> get props => [studentId, parentId];
+}
+
 class ParentUnlinkRequested extends ParentEvent {
   final String studentId;
   final String parentId;

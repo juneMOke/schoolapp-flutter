@@ -195,6 +195,8 @@ import 'package:school_app_flutter/features/student/data/repositories/student_re
 import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/create_parent_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/set_emergency_contact_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/unlink_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
@@ -691,6 +693,8 @@ Future<void> configureDependencies({
         ParentRepositoryImpl(
               remoteDataSource: getIt<ParentRemoteDataSource>(),
               requiredAuth: getIt<Map<String, dynamic>>(),
+              connectivityService: getIt<ConnectivityService>(),
+              emergencyContactMirror: getIt<EnrollmentReconciliationDao>(),
             )
             as ParentRepository,
   );
@@ -707,11 +711,16 @@ Future<void> configureDependencies({
     () => UnlinkParentUseCase(getIt<ParentRepository>()),
   );
 
+  getIt.registerFactory<SetEmergencyContactUseCase>(
+    () => SetEmergencyContactUseCase(getIt<ParentRepository>()),
+  );
+
   getIt.registerFactory<ParentBloc>(
     () => ParentBloc(
       updateParentUseCase: getIt<UpdateParentUseCase>(),
       createParentUseCase: getIt<CreateParentUseCase>(),
       unlinkParentUseCase: getIt<UnlinkParentUseCase>(),
+      setEmergencyContactUseCase: getIt<SetEmergencyContactUseCase>(),
     ),
   );
 

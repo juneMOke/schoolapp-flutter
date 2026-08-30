@@ -56,6 +56,14 @@ class EnrollmentDraftDao {
   /// mises à jour que les colonnes portées par l'étape ; `source_ref`, les
   /// antécédents et le niveau visé déjà saisis sont conservés (niveau/cycle ne
   /// sont écrits que s'ils sont fournis).
+  /// Une chaîne blanche vaut « vide », pas « renseignée avec des espaces » —
+  /// sans quoi la colonne porterait un texte qui se lirait comme une fiche
+  /// remplie. Miroir de `normalizeToNull` côté serveur.
+  static String? _blankToNull(String? value) {
+    final trimmed = value?.trim();
+    return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+  }
+
   Future<void> insertDraftEnrollment(EnrollmentLocalModel enrollment) async {
     await _db.transaction((txn) async {
       final existing = await txn.query(
@@ -67,7 +75,8 @@ class EnrollmentDraftDao {
       );
       if (existing.isEmpty) {
         final map = enrollment.toMap()
-          ..['sync_status'] = SyncState.draft.dbValue;
+          ..['sync_status'] = SyncState.draft.dbValue
+          ..['medical_notes'] = _blankToNull(enrollment.medicalNotes);
         await txn.insert('enrollments', map);
         return;
       }
@@ -83,6 +92,15 @@ class EnrollmentDraftDao {
             'school_level_id': enrollment.schoolLevelId,
           if (enrollment.schoolLevelGroupId != null)
             'school_level_group_id': enrollment.schoolLevelGroupId,
+          // **Omis = conservé, chaîne vide = vidé** — exactement la sémantique
+          // du serveur sur ce champ, et pour la même raison : la fiche santé
+          // peut avoir été seedée depuis le dossier N-1, et un appelant qui ne
+          // la saisit pas (le seed lui-même, une correction d'identité venue
+          // d'un chemin qui l'ignore) ne doit pas effacer des allergies sans
+          // que personne ne l'ait demandé. La vider reste possible, mais il
+          // faut le DIRE.
+          if (enrollment.medicalNotes != null)
+            'medical_notes': _blankToNull(enrollment.medicalNotes),
           'updated_at': enrollment.updatedAt,
         },
         where: 'id = ? AND sync_status = ?',
@@ -221,6 +239,33 @@ class EnrollmentDraftDao {
     List<ParentDraft> parents, {
     required bool enforcePhoneUniqueness,
   }) async {
+    // Au plus un désigné, vérifié AVANT d'écrire quoi que ce soit — pour la
+    // raison détaillée sur [AmbiguousEmergencyContactException] : sous
+    // `INSERT OR REPLACE`, l'index unique partiel ne refuserait pas la seconde
+    // désignation, il ferait disparaître le lien de la première.
+    final designatedCount = parents
+        .where((draft) => draft.emergencyContact == true)
+        .length;
+    if (designatedCount > 1) {
+      throw AmbiguousEmergencyContactException(studentId, designatedCount);
+    }
+
+    // **Lu AVANT la purge.** Ce remplacement efface tous les liens de l'élève
+    // pour les réécrire : sans cette photo, un draft qui ne dit rien du contact
+    // d'urgence (`null`) effacerait la désignation en place à chaque passage
+    // sur l'étape Tuteurs. « Ne rien dire » doit valoir « ne touche à rien »
+    // ici comme sur le fil.
+    final previousDesignation = <String, bool>{
+      for (final link in await txn.query(
+        'student_parent',
+        columns: const ['parent_id', 'emergency_contact'],
+        where: 'student_id = ?',
+        whereArgs: [studentId],
+      ))
+        link['parent_id'] as String:
+            (link['emergency_contact'] as int? ?? 0) != 0,
+    };
+
     await txn.delete(
       'student_parent',
       where: 'student_id = ?',
@@ -235,10 +280,13 @@ class EnrollmentDraftDao {
               asDraft: true,
             )
           : await upsertParentByPhone(txn, draft.parent, asDraft: true);
+      final designated =
+          draft.emergencyContact ?? previousDesignation[resolvedId] ?? false;
       await txn.insert('student_parent', {
         'student_id': studentId,
         'parent_id': resolvedId,
         'relationship_type': draft.relationshipType,
+        'emergency_contact': designated ? 1 : 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
   }
@@ -313,6 +361,21 @@ class EnrollmentDraftDao {
             phoneNumber: parent.phoneNumber,
             email: parent.email,
             relationshipType: (link['relationship_type'] as String?) ?? 'OTHER',
+            // **La base est projetée telle quelle : `1 → true`, `0 → false`.**
+            //
+            // Elle ne distingue pas « jamais désigné » de « désignation
+            // retirée » — les deux valent 0 — et une projection en `true` ou
+            // rien perdait donc le retrait au dernier saut avant le fil : la
+            // case décochée à l'écran, le lien local à 0, et le serveur qui
+            // garde son désigné jusqu'à ce que le pull suivant le remette.
+            //
+            // Envoyer `false` ne risque pas d'écraser une désignation faite
+            // ailleurs : l'agrégat porte la liste COMPLÈTE des tuteurs de
+            // l'élève, c'est une image entière, pas une retouche partielle.
+            // Le tri-état reste utile en amont — `ParentDraft.emergencyContact`
+            // à `null` veut dire « cette étape n'en parle pas » et laisse la
+            // valeur en base intacte — mais ici, la base a déjà tranché.
+            emergencyContact: (link['emergency_contact'] as int? ?? 0) != 0,
           ),
         );
       }

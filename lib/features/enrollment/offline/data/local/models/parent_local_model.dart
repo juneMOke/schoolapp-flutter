@@ -54,7 +54,10 @@ class ParentLocalModel {
     updatedAt: (m['updated_at'] as int?) ?? 0,
   );
 
-  LocalParent toEntity(OfflineRelationshipType relationshipType) => LocalParent(
+  LocalParent toEntity(
+    OfflineRelationshipType relationshipType, {
+    bool emergencyContact = false,
+  }) => LocalParent(
     id: id,
     firstName: firstName,
     lastName: lastName,
@@ -63,6 +66,7 @@ class ParentLocalModel {
     email: email,
     identificationNumber: identificationNumber,
     relationshipType: relationshipType,
+    emergencyContact: emergencyContact,
     syncState: SyncState.fromDbValue(syncStatus),
   );
 }

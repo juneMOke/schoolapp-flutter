@@ -65,6 +65,7 @@ class PersonalInfoStepHandler extends BaseEnrollmentStepHandler {
       studentDetail: context.detail.studentDetail,
       enrollmentId: context.detail.enrollmentDetail.id,
       academicYearId: context.detail.enrollmentDetail.academicYearId,
+      medicalNotes: context.detail.enrollmentDetail.medicalNotes,
       detailIntent: context.intent,
       detailPolicy: context.detailPolicy,
       showInlineSaveButton: false,

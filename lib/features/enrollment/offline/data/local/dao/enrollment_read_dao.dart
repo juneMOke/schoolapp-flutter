@@ -288,6 +288,7 @@ class EnrollmentReadDao {
             OfflineRelationshipType.fromApiValue(
               link['relationship_type'] as String?,
             ),
+            emergencyContact: (link['emergency_contact'] as int? ?? 0) != 0,
           ),
         );
       }

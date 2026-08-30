@@ -9,6 +9,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class GuardianCardHeader extends StatelessWidget {
   final ParentSummary parent;
   final bool isPrimary;
+  final bool isEmergencyContact;
   final bool isExpanded;
   final bool isComplete;
   final VoidCallback? onToggle;
@@ -17,6 +18,7 @@ class GuardianCardHeader extends StatelessWidget {
     super.key,
     required this.parent,
     required this.isPrimary,
+    this.isEmergencyContact = false,
     required this.isExpanded,
     this.isComplete = true,
     this.onToggle,
@@ -130,6 +132,12 @@ class GuardianCardHeader extends StatelessWidget {
                   if (isPrimary) ...[
                     const SizedBox(width: 6),
                     _buildPrimaryBadge(l10n.guardianPrincipalBadge),
+                  ],
+                  // Visible carte repliée : le jour d'un accident, personne
+                  // n'ouvrira trois cartes pour trouver qui appeler.
+                  if (isEmergencyContact) ...[
+                    const SizedBox(width: 6),
+                    _buildPrimaryBadge(l10n.guardianEmergencyContactBadge),
                   ],
                 ],
               ),

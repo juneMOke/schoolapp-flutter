@@ -99,9 +99,12 @@ void main() {
       expect(model.previousAcademicYear, '');
       expect(model.previousSchoolLevelGroup, '');
       expect(model.previousSchoolLevel, '');
-      expect(model.previousRate, 0);
+      // **`null`, jamais `0` ni `false`.** Le bloc « école précédente » est
+      // facultatif : un payload muet décrit un dossier sans antécédents, pas
+      // un élève à zéro pour cent qui aurait redoublé.
+      expect(model.previousRate, isNull);
       expect(model.previousRank, isNull);
-      expect(model.validatedPreviousYear, isFalse);
+      expect(model.validatedPreviousYear, isNull);
       expect(model.schoolLevelGroupId, '');
       expect(model.schoolLevelId, '');
       expect(model.transferReason, '');
@@ -129,9 +132,12 @@ void main() {
 
       expect(model.id, '99');
       expect(model.status, EnrollmentStatus.pending);
-      expect(model.previousRate, 0);
+      // Une valeur illisible vaut « on ne sait pas », pas « zéro » : un repli
+      // sur 0 / false rendrait une donnée corrompue indiscernable d'une vraie
+      // saisie, et l'écran l'imprimerait comme telle.
+      expect(model.previousRate, isNull);
       expect(model.previousRank, isNull);
-      expect(model.validatedPreviousYear, isFalse);
+      expect(model.validatedPreviousYear, isNull);
       expect(model.transferReason, '{reason: moved}');
       expect(model.cancellationReason, '[none]');
     });

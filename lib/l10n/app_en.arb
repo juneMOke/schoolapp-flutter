@@ -1054,9 +1054,17 @@
   "@subMenuFeeControl": {
     "description": "Fee control sub-menu title"
   },
-  "subMenuBoutique": "Shop",
-  "@subMenuBoutique": {
-    "description": "Shop till sub-menu title"
+  "menuBoutique": "Shop",
+  "@menuBoutique": {
+    "description": "Shop till menu title"
+  },
+  "subMenuBoutiquePurchases": "Purchases",
+  "@subMenuBoutiquePurchases": {
+    "description": "Shop till counter sub-menu title"
+  },
+  "subMenuBoutiqueHistory": "History",
+  "@subMenuBoutiqueHistory": {
+    "description": "Shop sales history sub-menu title"
   },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
@@ -1729,6 +1737,7 @@
   "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
   "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
@@ -2038,6 +2047,23 @@
   "yearValidated": "Year validated",
   "yearValidatedHelp": "Indicates whether the student validated the previous school year.",
   "yearNotValidated": "Not validated",
+  "yearValidationUnknown": "Not specified",
+  "guardianEmergencyContactLabel": "Emergency contact",
+  "guardianEmergencyContactBadge": "Emergency",
+  "guardianEmergencyContactHint": "One guardian per pupil: designating one clears the previous designation.",
+  "guardianEmergencyContactAmbiguous": "Only one guardian can be the emergency contact for this pupil.",
+  "guardianEmergencyContactSaved": "Emergency contact updated.",
+  "guardianEmergencyContactCleared": "Emergency contact cleared.",
+  "guardianEmergencyContactRetry": "Retry",
+  "guardianEmergencyContactFailed": "Setting the emergency contact failed.",
+  "medicalNotesLabel": "Health information",
+  "medicalNotesHelp": "Allergies, ongoing treatment, what to do. Optional.",
+  "medicalNotesSectionTitle": "Health",
+  "formerStudentLabel": "Former pupil of this school",
+  "formerStudentHelp": "Tick if the child has already been enrolled in this school, even before the app.",
+  "formerStudentLockedHelp": "Re-enrolment: the child comes from last year's file in this school.",
+  "previousSchoolOptionalHint": "Optional — leave blank if the child has not been to school yet.",
+  "averageOutOfRangeError": "The average must be between 0 and 100.",
   "currentAcademicYearLabel": "Academic year",
   "currentAcademicYearHelp": "Target academic year.",
   "targetCycleLabel": "Target cycle",
@@ -4214,8 +4240,8 @@
     }
   },
   "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here.",
-  "boutiqueEyebrow": "Finance ▸ Shop",
-  "boutiqueTitle": "Shop — Till",
+  "boutiqueEyebrow": "Shop ▸ Purchases",
+  "boutiqueTitle": "Till",
   "boutiqueSubtitle": "Cash sale of school items. No debt, no balance.",
   "boutiqueSearchPlaceholder": "Search an item or a code…",
   "boutiqueFilterAll": "All",
@@ -4409,5 +4435,87 @@
   "boutiqueReceiptPrint": "Print",
   "boutiqueReceiptNewSale": "New sale",
   "boutiqueReceiptPrintFailed": "The ticket could not be printed. The sale is recorded — you can try again.",
-  "boutiqueReceiptPrinted": "Ticket printed."
+  "boutiqueReceiptPrinted": "Ticket printed.",
+  "boutiqueOpenCart": "View the cart",
+  "boutiqueOpenCartWithCount": "View the cart, {count, plural, one{1 item} other{{count} items}}",
+  "boutiqueCartPageEyebrow": "Shop ▸ Cart",
+  "boutiqueBackToCatalog": "Back to catalogue",
+  "boutiqueAddToCart": "Add to cart",
+  "boutiqueAddOneMore": "Add one {article}",
+  "boutiqueRemoveOne": "Remove one {article}",
+  "boutiqueSuccessTitle": "Sale collected",
+  "boutiqueSuccessMessage": "The customer paid {total} in cash. Hand them their ticket.",
+  "boutiqueSuccessDone": "Done",
+  "@boutiqueAddOneMore": {
+    "placeholders": { "article": { "type": "String" } }
+  },
+  "@boutiqueRemoveOne": {
+    "placeholders": { "article": { "type": "String" } }
+  },
+  "@boutiqueSuccessMessage": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "boutiqueHistoryEyebrow": "Shop ▸ History",
+  "boutiqueHistoryTitle": "Sales history",
+  "boutiqueHistoryPeriodDay": "Today",
+  "boutiqueHistoryPeriodWeek": "This week",
+  "boutiqueHistoryPeriodMonth": "This month",
+  "boutiqueHistoryPeriodYear": "This year",
+  "boutiqueHistorySaleCount": "{count, plural, one{1 sale} other{{count} sales}}",
+  "boutiqueHistoryArticleCount": "{count, plural, one{1 item} other{{count} items}}",
+  "boutiqueHistoryPendingNotice": "{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}",
+  "boutiqueHistoryPendingBadge": "Pending",
+  "boutiqueHistoryEmptyTitle": "No sale in this period",
+  "boutiqueHistoryEmptyMessage": "Nothing was collected at the counter. Widen the period, or open the shop to collect.",
+  "boutiqueHistoryPayerUnknown": "Payer not recorded",
+  "boutiqueHistoryTotalLabel": "Total collected",
+  "boutiqueHistorySaleTime": "{time} · {reference}",
+  "boutiqueHistoryProvisional": "provisional ticket",
+  "@boutiqueHistorySaleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistoryArticleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistoryPendingNotice": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistorySaleTime": {"placeholders": {"time": {"type": "String"}, "reference": {"type": "String"}}},
+  "boutiqueHistoryErrorServerTitle": "History unreadable",
+  "boutiqueHistoryErrorServer": "The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.",
+  "boutiqueHistoryErrorNetwork": "History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
+  "boutiqueClearEyebrow": "Shop ▸ Cart",
+  "boutiqueClearTitle": "Empty the cart?",
+  "boutiqueClearMessage": "The composed lines and the payer's identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.",
+  "boutiqueClearLinesSummary": "{count, plural, one{1 item} other{{count} items}} in the cart",
+  "boutiqueClearPayerSummary": "Payer entered: {payer}",
+  "boutiqueClearCancel": "Keep the cart",
+  "boutiqueClearConfirm": "Empty",
+  "@boutiqueClearLinesSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueClearPayerSummary": {"placeholders": {"payer": {"type": "String"}}},
+  "boutiqueSuccessEyebrow": "Shop ▸ Collection",
+  "boutiqueSaleDetailEyebrow": "Shop ▸ Sale",
+  "boutiqueSaleDetailTitle": "Sale details",
+  "boutiqueSaleDetailBack": "Back to history",
+  "boutiqueSaleDetailPayer": "Payer",
+  "boutiqueSaleDetailPhone": "Phone",
+  "boutiqueSaleDetailSoldAt": "Collected on",
+  "boutiqueSaleDetailCollectedBy": "Collected by",
+  "boutiqueSaleDetailCollectedByUnknown": "Cashier not recorded",
+  "boutiqueSaleDetailReceipt": "Receipt",
+  "boutiqueSaleDetailLines": "Items sold",
+  "boutiqueSaleDetailBeneficiary": "for {name}",
+  "boutiqueSaleDetailSizePrefix": "Size {size}",
+  "boutiqueSaleDetailPrintTicket": "Print the ticket",
+  "boutiqueSaleDetailReprintTicket": "Reprint the ticket",
+  "boutiqueSaleDetailTicketPrintedAt": "Ticket printed on {date}",
+  "boutiqueSaleDetailTicketNeverPrinted": "Ticket never printed from this tablet.",
+  "boutiqueSaleDetailOpenReceipt": "Open the sealed receipt",
+  "boutiqueSaleDetailReceiptPending": "The receipt will be sealed at synchronisation. The ticket stands in the meantime.",
+  "boutiqueSaleDetailReceiptTitle": "Sale receipt",
+  "boutiqueSaleDetailNotFoundTitle": "Sale not found",
+  "boutiqueSaleDetailNotFound": "This sale is no longer in this school's local database. Nothing is lost server-side if it had already been sent.",
+  "boutiqueSaleDetailPendingNotice": "This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.",
+  "@boutiqueSaleDetailBeneficiary": {"placeholders": {"name": {"type": "String"}}},
+  "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
+  "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@boutiqueOpenCartWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

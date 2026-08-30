@@ -63,8 +63,11 @@ void main() {
       expect(result, isFalse);
     });
 
+    /// Le rang est devenu FACULTATIF : son absence ne bloque plus rien. Ce
+    /// test épinglait la contrainte inverse — il est retourné, pas supprimé,
+    /// pour que la règle reste sous surveillance dans les deux sens.
     test(
-      'isAcademicInfoValid retourne false quand previousRank est absent',
+      'isAcademicInfoValid reste true sans previousRank (rang facultatif)',
       () {
         final enrollment = _buildEnrollmentSchoolDetail(previousRank: null);
 
@@ -72,24 +75,60 @@ void main() {
           enrollment,
         );
 
-        expect(result, isFalse);
+        expect(result, isTrue);
       },
     );
 
+    /// Même bascule pour l'école précédente : un enfant qui entre en première
+    /// année de maternelle n'en a pas, et devait jusqu'ici en inventer une.
+    test('isAcademicPreviousInfoValid reste true sans école précédente', () {
+      final enrollment = _buildEnrollmentSchoolDetail(previousSchoolName: ' ');
+
+      final result = EnrollmentStepperStateHelper.isAcademicPreviousInfoValid(
+        enrollment,
+      );
+
+      expect(result, isTrue);
+    });
+
+    /// Le bloc « école précédente » est facultatif EN ENTIER — les sept
+    /// champs, pas seulement la moyenne et le rang. Un dossier entièrement
+    /// vide franchit l'étape.
     test(
-      'isAcademicPreviousInfoValid retourne false quand previousSchoolName est vide',
+      'isAcademicPreviousInfoValid : un bloc entièrement vide est valide',
       () {
         final enrollment = _buildEnrollmentSchoolDetail(
-          previousSchoolName: ' ',
+          previousAcademicYear: '',
+          previousSchoolName: '',
+          previousSchoolLevelGroup: '',
+          previousSchoolLevel: '',
+          previousRate: null,
+          previousRank: null,
+          validatedPreviousYear: null,
         );
 
-        final result = EnrollmentStepperStateHelper.isAcademicPreviousInfoValid(
-          enrollment,
+        expect(
+          EnrollmentStepperStateHelper.isAcademicPreviousInfoValid(enrollment),
+          isTrue,
         );
-
-        expect(result, isFalse);
       },
     );
+
+    /// L'étape CIBLE, elle, n'a pas bougé : c'est elle qui porte encore des
+    /// exigences, et rien dans ce lot ne doit les relâcher par ricochet.
+    test('la cible reste exigeante même avec un bloc précédent vide', () {
+      final enrollment = _buildEnrollmentSchoolDetail(
+        previousSchoolName: '',
+        previousRate: null,
+        previousRank: null,
+        schoolLevelId: ' ',
+      );
+
+      expect(
+        EnrollmentStepperStateHelper.isAcademicInfoValid(enrollment),
+        isFalse,
+      );
+    });
 
     test(
       'isAcademicTargetInfoValid retourne false quand schoolLevelGroupId est vide',
@@ -303,8 +342,9 @@ EnrollmentSchoolDetail _buildEnrollmentSchoolDetail({
   String previousSchoolName = 'College A',
   String previousSchoolLevelGroup = 'College',
   String previousSchoolLevel = '5eme',
-  double previousRate = 12.5,
+  double? previousRate = 12.5,
   int? previousRank = 10,
+  bool? validatedPreviousYear = true,
   String schoolLevelGroupId = 'group-1',
   String schoolLevelId = 'level-1',
 }) {
@@ -319,7 +359,7 @@ EnrollmentSchoolDetail _buildEnrollmentSchoolDetail({
     previousSchoolLevel: previousSchoolLevel,
     previousRate: previousRate,
     previousRank: previousRank,
-    validatedPreviousYear: true,
+    validatedPreviousYear: validatedPreviousYear,
     schoolLevelGroupId: schoolLevelGroupId,
     schoolLevelId: schoolLevelId,
   );
