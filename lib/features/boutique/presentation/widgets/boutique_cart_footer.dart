@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_cart.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_blocker.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le pied du panier : le total, ce qui manque, le bouton.
@@ -87,10 +87,11 @@ class BoutiqueCartFooter extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      BoutiqueMoneyFormat.exact(
-                        cart.totalInCents,
-                        cart.currency ?? 'USD',
-                      ),
+                      // Un total PAR DEVISE, joints par « · » : le pied est une
+                      // ligne, et deux unités ne s'y additionnent pas. Le repli
+                      // « USD » qui vivait ici inventait une unité au panier
+                      // vide comme au panier mixte.
+                      cart.totals.entries.map(MoneyFormat.format).join(' · '),
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textOnDark,
@@ -218,5 +219,6 @@ class _BlockerList extends StatelessWidget {
         CartBlockerKind.incompletePhone => l10n.boutiqueBlockerPhoneIncomplete,
         CartBlockerKind.linesWithoutLevel =>
           l10n.boutiqueBlockerLinesWithoutLevel(blocker.count),
+        CartBlockerKind.mixedCurrency => l10n.boutiqueBlockerMixedCurrency,
       };
 }

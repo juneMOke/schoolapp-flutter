@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_cart.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Confirmation d'encaissement — un récapitulatif **non modifiable**.
@@ -55,8 +55,10 @@ class BoutiqueConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final currency = cart.currency ?? 'USD';
-    final total = BoutiqueMoneyFormat.exact(cart.totalInCents, currency);
+    // Le panier est mono-devise ici : `canCollect` l'a garanti (le mélange est
+    // un blocage). La jointure reste, parce qu'un écran qui suppose une seule
+    // entrée finit toujours par en recevoir deux.
+    final total = cart.totals.entries.map(MoneyFormat.format).join(' · ');
     final payer = cart.payer;
 
     return Dialog(

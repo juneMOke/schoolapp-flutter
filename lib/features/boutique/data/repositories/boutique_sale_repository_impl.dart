@@ -73,7 +73,24 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
       final soldAt = DateTime.now().toUtc().toIso8601String();
       final saleId = _ids.newId();
       final payer = cart.payer;
-      final currency = cart.currency ?? 'USD';
+      // `cart.currency` est nul si le panier mêle deux devises. Le contrat de
+      // vente ne porte qu'un `totalInCents` scalaire, et l'invariant serveur
+      // (`totalInCents == Σ lineTotalInCents`) serait satisfait *numériquement*
+      // par la somme brute de deux unités : le serveur scellerait un ticket
+      // dont le total ne veut rien dire, et un ticket scellé ne se corrige pas.
+      //
+      // Le repli « USD » qui vivait ici inventait cette unité. L'UI bloque déjà
+      // (`CartBlockerKind.mixedCurrency`) ; cette garde-ci ferme le chemin
+      // programmatique, parce que c'est ici que la vente devient une écriture.
+      final currency = cart.currency;
+      if (currency == null) {
+        return const Left(
+          ValidationFailure(
+            'Panier sans devise unique : une vente ne peut pas mêler deux '
+            'unités tant que le contrat n\'en porte qu\'une.',
+          ),
+        );
+      }
       final deviceId = await _resolveDeviceId();
 
       final lines = <BoutiqueSaleLineLocalModel>[];

@@ -223,16 +223,21 @@ void main() {
     });
   });
 
-  group('⚠️ multi-devises : DÉTECTÉ, jamais bloqué', () {
-    // TESTS RETOURNÉS le 2026-08-29, sur décision produit : la garde bloquante a
-    // été retirée, la gestion des deux devises étant traitée sur une branche
-    // dédiée. Ils épinglent désormais la DÉCISION — sans quoi la remettre en
-    // place passerait pour une correction, et la retirer pour une régression.
+  group('multi-devises : détecté ET bloqué', () {
+    // TESTS RETOURNÉS UNE SECONDE FOIS, par la branche multi-devises.
     //
-    // ⚠️ Ce que cela laisse ouvert : le serveur ne refuse plus ce cas non plus.
-    // Un panier USD + CDF est additionné, encaissé et scellé avec un total qui
-    // n'a pas de sens. C'est le trou que la branche multi-devises doit fermer.
-    test('deux devises n\'empêchent PAS d\'encaisser', () {
+    // Le 2026-08-29, la garde bloquante avait été retirée sur décision produit,
+    // et ces tests épinglaient ce retrait — « le trou que la branche
+    // multi-devises devra fermer », disait leur propre commentaire. C'est cette
+    // branche-ci, et le trou se referme.
+    //
+    // Ce qu'il laissait passer : le contrat de vente porte un `totalInCents`
+    // SCALAIRE, et l'invariant serveur (`totalInCents == Σ lineTotalInCents`)
+    // est satisfait *numériquement* par la somme brute de deux unités. Un
+    // panier USD + CDF était donc encaissé et **scellé** avec un total qui ne
+    // veut rien dire, sans que rien ne le signale au caissier — et un ticket
+    // scellé ne se corrige pas.
+    test('deux devises empêchent d\'encaisser, et le disent', () {
       var cart = const BoutiqueCart().withPayer(_payeurComplet);
       cart = cart.addArticle(_ecusson(), keyOf: _key);
       cart = cart.addArticle(
@@ -240,11 +245,27 @@ void main() {
         keyOf: _key,
       );
 
-      expect(cart.canCollect, isTrue);
-      expect(cart.blockers, isEmpty);
+      expect(cart.canCollect, isFalse);
+      expect(
+        cart.blockers.map((b) => b.kind),
+        contains(CartBlockerKind.mixedCurrency),
+      );
     });
 
-    test('le mélange reste DÉTECTABLE — la branche à venir s\'y appuiera', () {
+    test('le blocage vient EN DERNIER — il coûte le plus cher à réparer', () {
+      // Les manques d'identité se corrigent en tapant ; celui-ci demande de
+      // défaire le panier. L'ordre des blocages est une règle métier.
+      var cart = const BoutiqueCart();
+      cart = cart.addArticle(_ecusson(), keyOf: _key);
+      cart = cart.addArticle(
+        _ecusson(currency: 'CDF', id: 'art-journal-cdf'),
+        keyOf: _key,
+      );
+
+      expect(cart.blockers.last.kind, CartBlockerKind.mixedCurrency);
+    });
+
+    test('les totaux sont ventilés, jamais sommés', () {
       var cart = const BoutiqueCart().withPayer(_payeurComplet);
       cart = cart.addArticle(_ecusson(), keyOf: _key);
       cart = cart.addArticle(
@@ -252,9 +273,37 @@ void main() {
         keyOf: _key,
       );
 
-      expect(cart.isMultiCurrency, isTrue);
-      expect(cart.currencies, {'USD', 'CDF'});
+      expect(cart.totals.isMultiCurrency, isTrue);
+      expect(cart.totals.length, 2);
     });
+
+    test('la devise du panier est NULLE quand il en mêle deux', () {
+      // Elle valait « celle de la première ligne » : une unité choisie au
+      // hasard de l'ordre d'ajout, sous laquelle la vente partait se sceller.
+      var cart = const BoutiqueCart().withPayer(_payeurComplet);
+      cart = cart.addArticle(_ecusson(), keyOf: _key);
+      cart = cart.addArticle(
+        _ecusson(currency: 'CDF', id: 'art-journal-cdf'),
+        keyOf: _key,
+      );
+
+      expect(cart.currency, isNull);
+    });
+
+    test(
+      'le mélange reste DÉTECTABLE — c\'est sur quoi le blocage s\'appuie',
+      () {
+        var cart = const BoutiqueCart().withPayer(_payeurComplet);
+        cart = cart.addArticle(_ecusson(), keyOf: _key);
+        cart = cart.addArticle(
+          _ecusson(currency: 'CDF', id: 'art-journal-cdf'),
+          keyOf: _key,
+        );
+
+        expect(cart.isMultiCurrency, isTrue);
+        expect(cart.currencies, {'USD', 'CDF'});
+      },
+    );
 
     test('une seule devise : rien à détecter', () {
       var cart = const BoutiqueCart().withPayer(_payeurComplet);

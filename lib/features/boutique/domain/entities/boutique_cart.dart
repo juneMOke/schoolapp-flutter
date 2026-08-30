@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_article.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_blocker.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_line.dart';
@@ -30,11 +32,22 @@ class BoutiqueCart extends Equatable {
   int get totalInCents =>
       lines.fold(0, (sum, line) => sum + (line.lineTotalInCents ?? 0));
 
-  /// La devise du panier : celle de sa première ligne, `null` s'il est vide.
+  /// Le total **par devise** — jamais une somme unique.
   ///
-  /// ⚠️ **Approximation assumée sur un panier multi-devises** — voir
-  /// [isMultiCurrency].
-  String? get currency => lines.isEmpty ? null : lines.first.article.currency;
+  /// Les lignes non résolues comptent pour zéro, comme dans [totalInCents].
+  MoneyBag get totals => MoneyBag.sumBy(
+    lines,
+    (line) => Money.parse(line.lineTotalInCents ?? 0, line.article.currency),
+  );
+
+  /// La devise du panier quand il n'en a qu'une, `null` s'il est vide **ou**
+  /// s'il en mêle plusieurs.
+  ///
+  /// C'était « celle de sa première ligne » — une approximation qui laissait
+  /// sceller une vente sous une unité choisie au hasard de l'ordre d'ajout.
+  /// `null` en cas de mélange n'est pas un appauvrissement : c'est ce qui rend
+  /// l'ambiguïté impossible à ignorer en aval.
+  String? get currency => totals.soleEntry?.currency;
 
   /// Les devises distinctes présentes.
   Set<String> get currencies => {
@@ -43,20 +56,20 @@ class BoutiqueCart extends Equatable {
 
   /// Vrai si le panier mélange deux devises.
   ///
-  /// ## ⚠️ Détecté, PAS bloqué — décision produit du 2026-08-29
+  /// ## Détecté depuis l'origine, bloqué le temps que le contrat arrive
   ///
-  /// Le mélange **n'empêche pas d'encaisser**, sur arbitrage explicite : la
-  /// gestion des deux devises est renvoyée à une branche dédiée, où le panier
-  /// portera des totaux ventilés plutôt qu'une somme unique.
+  /// La décision produit du 2026-08-29 laissait encaisser un panier mixte, le
+  /// temps qu'une branche dédiée porte des totaux ventilés. C'est cette
+  /// branche-ci, et le prédicat gardé à son intention sert enfin — mais pas
+  /// pour interdire : pour **attendre**.
   ///
-  /// **Ce que cela laisse ouvert, en attendant.** Le serveur ne refuse plus ce
-  /// cas non plus — il écarte la référence de prix et consigne une anomalie. Un
-  /// panier USD + CDF est donc additionné par [totalInCents], encaissé, et
-  /// scellé avec un total qui n'a pas de sens, sans que rien ne le signale au
-  /// caissier. C'est le trou que la branche multi-devises devra fermer.
+  /// La révision 4 du contrat autorise la vente mixte et en fait un seul acte
+  /// de caisse (`sale.amounts[]`, `currency` par ligne). Tant qu'elle n'est pas
+  /// fusionnée, la vente ne part qu'avec un total scalaire : le serveur
+  /// scellerait un ticket additionnant deux unités, sans rien signaler au
+  /// caissier — et un ticket scellé ne se corrige pas.
   ///
-  /// Le prédicat est **gardé** plutôt que retiré : il est ce sur quoi cette
-  /// branche s'appuiera, et le supprimer obligerait à le réinventer.
+  /// ⇒ Blocage temporaire, levé par le lot « caisse multi-devise ».
   bool get isMultiCurrency => currencies.length > 1;
 
   /// Somme des quantités des lignes portant cet article — la pastille de la
@@ -97,9 +110,13 @@ class BoutiqueCart extends Equatable {
       );
     }
 
-    // ⚠️ Le mélange de devises ne figure PAS ici : il est détecté
-    // ([isMultiCurrency]) mais n'empêche pas d'encaisser, par décision produit
-    // — la gestion des deux devises est traitée sur une branche dédiée.
+    // Le mélange de devises vient EN DERNIER : les manques d'identité se
+    // corrigent en tapant, celui-ci demande de défaire le panier. On ne met pas
+    // en tête ce qui coûte le plus cher à réparer.
+    if (isMultiCurrency) {
+      blockers.add(const CartBlocker(CartBlockerKind.mixedCurrency));
+    }
+
     return blockers;
   }
 
