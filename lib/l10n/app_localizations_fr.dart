@@ -3607,6 +3607,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get facturationBalanceDueMultiCurrencyPill => 'Solde dû';
+
+  @override
   String get facturationBalanceUpToDatePill => 'À jour';
 
   @override
@@ -4464,6 +4467,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentSettledChip => 'Soldé';
+
+  @override
+  String get facturationCreatePaymentMixedCurrency =>
+      'Ce versement mêle deux devises. Encaissez d\'abord les frais d\'une devise, puis ceux de l\'autre — un versement, un reçu, par devise.';
 
   @override
   String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
@@ -7383,6 +7390,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';
 
   @override
+  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
+
+  @override
   String boutiqueBlockerLinesWithoutLevel(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -7392,9 +7402,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
 
   @override
   String get boutiqueEmptyCatalogTitle => 'Aucun article au catalogue';

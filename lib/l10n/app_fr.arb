@@ -2367,6 +2367,10 @@
       }
     }
   },
+  "facturationBalanceDueMultiCurrencyPill": "Solde dû",
+  "@facturationBalanceDueMultiCurrencyPill": {
+    "description": "Pastille AppBar facturation quand le solde est dû dans PLUSIEURS devises. Sans montant : deux montants ne tiennent pas dans une pastille, et n'en montrer qu'un serait faux. Le détail est dans les cartes."
+  },
   "facturationBalanceUpToDatePill": "À jour",
   "financePendingSyncBadge": "En attente de synchro",
   "@financePendingSyncBadge": {
@@ -2728,6 +2732,10 @@
     }
   },
   "facturationCreatePaymentSettledChip": "Soldé",
+  "facturationCreatePaymentMixedCurrency": "Ce versement mêle deux devises. Encaissez d'abord les frais d'une devise, puis ceux de l'autre — un versement, un reçu, par devise.",
+  "@facturationCreatePaymentMixedCurrency": {
+    "description": "Avertissement de la modale d'encaissement quand les frais cochés portent plusieurs devises. Le serveur ne sait pas encore recevoir un versement à plusieurs montants : le pousser le bloquerait en erreur de synchro, sur de l'argent déjà reçu."
+  },
   "facturationCreatePaymentTotalToCollect": "Total à encaisser",
   "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -4256,6 +4264,10 @@
   "boutiqueBlockerFirstName": "Prénom",
   "boutiqueBlockerPhone": "Téléphone du payeur",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
+  "boutiqueBlockerMixedCurrency": "La caisse ne sait pas encore encaisser deux devises ensemble. Faites une vente par devise.",
+  "@boutiqueBlockerMixedCurrency": {
+    "description": "Blocage TEMPORAIRE de la caisse boutique quand le panier porte plusieurs devises. Le contrat de vente ne porte encore qu'un total scalaire : le serveur scellerait un ticket dont le total additionne deux unités, et un ticket scellé ne se corrige pas. La révision 4 du contrat autorisera la vente mixte en un seul acte — « pas encore » et non « jamais »."
+  },
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {

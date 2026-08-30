@@ -5894,6 +5894,12 @@ abstract class AppLocalizations {
   /// **'{amount} due'**
   String facturationBalanceDuePill(String amount);
 
+  /// Billing AppBar pill when the balance is outstanding in SEVERAL currencies. No amount: two amounts do not fit in a pill, and showing only one would be false. The breakdown is in the cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance due'**
+  String get facturationBalanceDueMultiCurrencyPill;
+
   /// No description provided for @facturationBalanceUpToDatePill.
   ///
   /// In en, this message translates to:
@@ -7267,6 +7273,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settled'**
   String get facturationCreatePaymentSettledChip;
+
+  /// Warning in the collection dialog when the selected fees span several currencies. The server cannot yet accept a payment carrying several amounts: pushing it would strand it in a sync error, on money already received.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment mixes two currencies. Collect the fees in one currency first, then the others — one payment, one receipt, per currency.'**
+  String get facturationCreatePaymentMixedCurrency;
 
   /// No description provided for @facturationCreatePaymentTotalToCollect.
   ///
@@ -12042,17 +12054,17 @@ abstract class AppLocalizations {
   /// **'Incomplete phone'**
   String get boutiqueBlockerPhoneIncomplete;
 
+  /// TEMPORARY shop till blocker when the cart spans several currencies. The sale contract still carries a single scalar total: the server would seal a receipt whose total adds two units, and a sealed receipt cannot be corrected. Contract revision 4 will allow a mixed sale as one act — 'not yet', not 'never'.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed currencies'**
+  String get boutiqueBlockerMixedCurrency;
+
   /// No description provided for @boutiqueBlockerLinesWithoutLevel.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, one{1 line without a level} other{{count} lines without a level}}'**
   String boutiqueBlockerLinesWithoutLevel(int count);
-
-  /// No description provided for @boutiqueBlockerMixedCurrency.
-  ///
-  /// In en, this message translates to:
-  /// **'Mixed currencies'**
-  String get boutiqueBlockerMixedCurrency;
 
   /// No description provided for @boutiqueEmptyCatalogTitle.
   ///

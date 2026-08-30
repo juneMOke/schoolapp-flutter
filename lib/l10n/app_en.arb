@@ -2419,6 +2419,10 @@
       }
     }
   },
+  "facturationBalanceDueMultiCurrencyPill": "Balance due",
+  "@facturationBalanceDueMultiCurrencyPill": {
+    "description": "Billing AppBar pill when the balance is outstanding in SEVERAL currencies. No amount: two amounts do not fit in a pill, and showing only one would be false. The breakdown is in the cards."
+  },
   "facturationBalanceUpToDatePill": "Up to date",
   "financePendingSyncBadge": "Pending sync",
   "@financePendingSyncBadge": {
@@ -2780,6 +2784,10 @@
     }
   },
   "facturationCreatePaymentSettledChip": "Settled",
+  "facturationCreatePaymentMixedCurrency": "This payment mixes two currencies. Collect the fees in one currency first, then the others — one payment, one receipt, per currency.",
+  "@facturationCreatePaymentMixedCurrency": {
+    "description": "Warning in the collection dialog when the selected fees span several currencies. The server cannot yet accept a payment carrying several amounts: pushing it would strand it in a sync error, on money already received."
+  },
   "facturationCreatePaymentTotalToCollect": "Total to collect",
   "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -4301,6 +4309,10 @@
   "boutiqueBlockerFirstName": "First name",
   "boutiqueBlockerPhone": "Payer's phone",
   "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
+  "boutiqueBlockerMixedCurrency": "The till cannot take two currencies together yet. Ring up one sale per currency.",
+  "@boutiqueBlockerMixedCurrency": {
+    "description": "TEMPORARY shop till blocker when the cart spans several currencies. The sale contract still carries a single scalar total: the server would seal a receipt whose total adds two units, and a sealed receipt cannot be corrected. Contract revision 4 will allow a mixed sale as one act — 'not yet', not 'never'."
+  },
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {
