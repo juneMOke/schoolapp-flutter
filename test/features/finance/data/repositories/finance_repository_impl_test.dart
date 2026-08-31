@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/finance/data/models/fee_tariff_model
 import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/finance_currency_block_model.dart';
 
 class MockFinanceRemoteDataSource extends Mock
     implements FinanceRemoteDataSource {}
@@ -30,38 +31,43 @@ final tFinanceStatsResponseModel = FinanceStatsResponseModel(
     periodEnd: DateTime.utc(2026, 5, 31),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
   ),
-  kpis: const FinanceKpisModel(
-    collected: 150000,
-    expected: 200000,
-    outstanding: 50000,
-    collectionRate: 75,
-  ),
-  evolution: const FinanceEvolutionModel(
-    granularity: 'week',
-    currentBucketIndex: 1,
-    buckets: <FinanceEvolutionBucketModel>[
-      FinanceEvolutionBucketModel(
-        key: '2026-W20',
-        value: 50000,
-        isCurrent: false,
+  byCurrency: [
+    const FinanceCurrencyBlockModel(
+      currency: 'USD',
+      kpis: FinanceKpisModel(
+        collected: 150000,
+        expected: 200000,
+        outstanding: 50000,
+        collectionRate: 75,
       ),
-      FinanceEvolutionBucketModel(
-        key: '2026-W21',
-        value: 100000,
-        isCurrent: true,
+      evolution: FinanceEvolutionModel(
+        granularity: 'week',
+        currentBucketIndex: 1,
+        buckets: <FinanceEvolutionBucketModel>[
+          FinanceEvolutionBucketModel(
+            key: '2026-W20',
+            value: 50000,
+            isCurrent: false,
+          ),
+          FinanceEvolutionBucketModel(
+            key: '2026-W21',
+            value: 100000,
+            isCurrent: true,
+          ),
+        ],
       ),
-    ],
-  ),
-  distributionByFeeType: const FeeTypeDistributionModel(
-    items: <FeeTypeItemModel>[
-      FeeTypeItemModel(
-        code: 'TUITION',
-        collected: 120000,
-        expected: 150000,
-        collectionRate: 80,
+      distributionByFeeType: FeeTypeDistributionModel(
+        items: <FeeTypeItemModel>[
+          FeeTypeItemModel(
+            code: 'TUITION',
+            collected: 120000,
+            expected: 150000,
+            collectionRate: 80,
+          ),
+        ],
       ),
-    ],
-  ),
+    ),
+  ],
 );
 
 void main() {
@@ -109,8 +115,12 @@ void main() {
 
       result.fold((_) => fail('Expected Right but got Left'), (stats) {
         expect(stats.context.schoolYear, '2025-2026');
-        expect(stats.kpis.collectionRate, 75);
-        expect(stats.distributionByFeeType.items.first.code, 'TUITION');
+        // Les indicateurs sont descendus d'un niveau : un bloc complet par
+        // devise, jamais une racine sous une unité que le serveur devrait élire.
+        final block = stats.byCurrency.single;
+        expect(block.currency, 'USD');
+        expect(block.kpis.collectionRate, 75);
+        expect(block.distributionByFeeType.items.first.code, 'TUITION');
       });
 
       verify(

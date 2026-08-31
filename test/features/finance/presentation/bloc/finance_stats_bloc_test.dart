@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_stats_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_currency_block.dart';
 
 class MockGetFinanceStatsUseCase extends Mock
     implements GetFinanceStatsUseCase {}
@@ -19,30 +20,39 @@ final tStats = FinanceStats(
     periodEnd: DateTime.utc(2026, 6, 30),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
   ),
-  kpis: const FinanceKpis(
-    collected: 300000,
-    expected: 400000,
-    outstanding: 100000,
-    collectionRate: 75,
-  ),
-  evolution: const FinanceEvolution(
-    granularity: FinanceEvolutionGranularity.month,
-    currentBucketIndex: 8,
-    buckets: <FinanceEvolutionBucket>[
-      FinanceEvolutionBucket(key: '2025-09', value: 12000, isCurrent: false),
-      FinanceEvolutionBucket(key: '2026-05', value: 18000, isCurrent: true),
-    ],
-  ),
-  distributionByFeeType: const FeeTypeDistribution(
-    items: <FeeTypeItem>[
-      FeeTypeItem(
-        code: 'TUITION',
-        collected: 200000,
-        expected: 240000,
-        collectionRate: 83,
+  byCurrency: const [
+    FinanceCurrencyBlock(
+      currency: 'USD',
+      kpis: FinanceKpis(
+        collected: 300000,
+        expected: 400000,
+        outstanding: 100000,
+        collectionRate: 75,
       ),
-    ],
-  ),
+      evolution: FinanceEvolution(
+        granularity: FinanceEvolutionGranularity.month,
+        currentBucketIndex: 8,
+        buckets: <FinanceEvolutionBucket>[
+          FinanceEvolutionBucket(
+            key: '2025-09',
+            value: 12000,
+            isCurrent: false,
+          ),
+          FinanceEvolutionBucket(key: '2026-05', value: 18000, isCurrent: true),
+        ],
+      ),
+      distributionByFeeType: FeeTypeDistribution(
+        items: <FeeTypeItem>[
+          FeeTypeItem(
+            code: 'TUITION',
+            collected: 200000,
+            expected: 240000,
+            collectionRate: 83,
+          ),
+        ],
+      ),
+    ),
+  ],
 );
 
 void main() {

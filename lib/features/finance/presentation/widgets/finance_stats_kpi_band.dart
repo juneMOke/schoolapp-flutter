@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -16,10 +17,16 @@ class FinanceStatsKpiBand extends StatelessWidget {
   final FinanceKpis kpis;
   final FeeTypeDistribution distribution;
 
+  /// La devise du bloc. Les montants s'affichaient en **nombre nu** : quatre
+  /// chiffres sans unité, justes tant qu'il n'y en avait qu'une, muets dès
+  /// qu'il y en a deux.
+  final String currency;
+
   const FinanceStatsKpiBand({
     super.key,
     required this.kpis,
     required this.distribution,
+    required this.currency,
   });
 
   @override
@@ -73,7 +80,8 @@ class FinanceStatsKpiBand extends StatelessWidget {
     );
   }
 
-  String _money(int amountInCents) => formatMonetaryAmount(amountInCents / 100);
+  String _money(int amountInCents) =>
+      MoneyFormat.format(Money.parse(amountInCents, currency));
 
   int _safePercent({required int value, required int total}) {
     if (total <= 0) return 0;

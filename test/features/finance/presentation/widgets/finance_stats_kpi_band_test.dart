@@ -42,6 +42,7 @@ Future<void> _pump(WidgetTester tester, double width) {
           child: const FinanceStatsKpiBand(
             kpis: _kpis,
             distribution: _distribution,
+            currency: 'USD',
           ),
         ),
       ),
@@ -63,9 +64,12 @@ void main() {
       expect(find.byType(EteeloKpiCard), findsNWidgets(4));
       // Le taux de recouvrement est rendu en pourcentage.
       expect(find.text('62%'), findsOneWidget);
-      // Montant formaté en devise (jamais la valeur brute en cents).
+      // Montant formaté en devise (jamais la valeur brute en cents), et il
+      // porte enfin son unité : les KPI s'affichaient en nombre NU, justes tant
+      // qu'il n'y avait qu'une devise, muets dès qu'il y en a deux.
       expect(find.textContaining('18'), findsWidgets); // 18 500,00 …
       expect(find.text('1850000'), findsNothing);
+      expect(find.textContaining(r'$'), findsWidgets);
     },
   );
 

@@ -1,20 +1,16 @@
-import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/fee_type_distribution_model.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/finance_evolution_model.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/finance_kpis_model.dart';
+import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/finance_currency_block_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/stats_context_model.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_stats.dart';
 
 class FinanceStatsResponseModel {
   final StatsContextModel context;
-  final FinanceKpisModel kpis;
-  final FinanceEvolutionModel evolution;
-  final FeeTypeDistributionModel distributionByFeeType;
+
+  /// Un bloc par devise, ordonnés par code. Vide = aucun argent n'a circulé.
+  final List<FinanceCurrencyBlockModel> byCurrency;
 
   const FinanceStatsResponseModel({
     required this.context,
-    required this.kpis,
-    required this.evolution,
-    required this.distributionByFeeType,
+    required this.byCurrency,
   });
 
   factory FinanceStatsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -22,27 +18,24 @@ class FinanceStatsResponseModel {
       context: StatsContextModel.fromJson(
         json['context'] as Map<String, dynamic>,
       ),
-      kpis: FinanceKpisModel.fromJson(json['kpis'] as Map<String, dynamic>),
-      evolution: FinanceEvolutionModel.fromJson(
-        json['evolution'] as Map<String, dynamic>,
-      ),
-      distributionByFeeType: FeeTypeDistributionModel.fromJson(
-        json['distributionByFeeType'] as Map<String, dynamic>,
-      ),
+      // Absent ou vide : aucun argent sur la fenêtre. Le rendu est un état
+      // vide, jamais une erreur — et surtout jamais un bloc à zéro dans une
+      // devise inventée.
+      byCurrency: [
+        for (final raw in (json['byCurrency'] as List<dynamic>? ?? const []))
+          if (raw is Map<String, dynamic>)
+            FinanceCurrencyBlockModel.fromJson(raw),
+      ],
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'context': context.toJson(),
-    'kpis': kpis.toJson(),
-    'evolution': evolution.toJson(),
-    'distributionByFeeType': distributionByFeeType.toJson(),
+    'byCurrency': [for (final block in byCurrency) block.toJson()],
   };
 
   FinanceStats toEntity() => FinanceStats(
     context: context.toEntity(),
-    kpis: kpis.toEntity(),
-    evolution: evolution.toEntity(),
-    distributionByFeeType: distributionByFeeType.toEntity(),
+    byCurrency: [for (final block in byCurrency) block.toEntity()],
   );
 }
