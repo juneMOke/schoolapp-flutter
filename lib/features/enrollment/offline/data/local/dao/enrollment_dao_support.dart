@@ -255,7 +255,13 @@ StudentPayload studentPayloadOf(StudentLocalModel s) => StudentPayload(
 );
 
 /// Projette un `EnrollmentLocalModel` en payload d'agrégat.
-EnrollmentPayload enrollmentPayloadOf(EnrollmentLocalModel e) =>
+///
+/// [reductionCodes] vient d'une table à part (`enrollment_reductions`) et non
+/// de la ligne : il est donc passé, pas dérivé.
+EnrollmentPayload enrollmentPayloadOf(
+  EnrollmentLocalModel e, {
+  List<String> reductionCodes = const [],
+}) =>
     EnrollmentPayload(
       id: e.id,
       enrollmentType: e.enrollmentType,
@@ -276,6 +282,7 @@ EnrollmentPayload enrollmentPayloadOf(EnrollmentLocalModel e) =>
       medicalNotes: e.medicalNotes,
       transferReason: e.transferReason,
       cancellationReason: e.cancellationReason,
+      reductionCodes: reductionCodes,
     );
 
 /// Enfile **une** entrée outbox = l'agrégat inscription figé (student +
@@ -291,8 +298,25 @@ Future<void> enqueueEnrollmentAggregate(
   String? schoolId,
   String? authorId,
 }) async {
+  // Les réductions déclarées au guichet (ADR-021 V1) sont FIGÉES ICI, dans la
+  // même transaction que l'enfilage : la commande d'outbox est un instantané,
+  // et une relecture au moment du push renverrait ce que l'écran affiche
+  // aujourd'hui plutôt que ce que le guichet a déclaré ce jour-là.
+  final reductionRows = await txn.query(
+    'enrollment_reductions',
+    columns: ['reduction_code'],
+    where: 'enrollment_id = ?',
+    whereArgs: [enrollment.id],
+    orderBy: 'reduction_code',
+  );
+
   final command = EnrollmentCommand(
-    enrollment: enrollmentPayloadOf(enrollment),
+    enrollment: enrollmentPayloadOf(
+      enrollment,
+      reductionCodes: [
+        for (final row in reductionRows) row['reduction_code'] as String,
+      ],
+    ),
     student: studentPayloadOf(student),
     parents: parents,
     emitDocument: emitDocument,

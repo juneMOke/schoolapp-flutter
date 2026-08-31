@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/models/re
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/grantable_reduction.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 
@@ -112,6 +113,11 @@ class FinanceLocalDao {
     List<ReductionLineLocalModel> lines, {
     required String schoolId,
   }) => _reductions.replaceForSchool(types, lines, schoolId: schoolId);
+
+  /// Réductions proposables au guichet pour cette école (ADR-021 V1).
+  Future<List<GrantableReduction>> grantableReductionsForSchool(
+    String schoolId,
+  ) => _reductions.grantableForSchool(schoolId);
 
   Future<void> upsertLedger({
     List<StudentChargeLocalModel> charges = const [],

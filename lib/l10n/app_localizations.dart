@@ -5342,6 +5342,12 @@ abstract class AppLocalizations {
   /// **'Please save charge changes before continuing.'**
   String get studentChargesSaveHintBeforeContinue;
 
+  /// Title of the reductions section in the fees step of the enrolment wizard (ADR-021 V1). No rate is shown: ticking records a declaration, amounts do not move.
+  ///
+  /// In en, this message translates to:
+  /// **'Reductions'**
+  String get enrollmentReductionsSectionTitle;
+
   /// No description provided for @studentChargesTotalLabel.
   ///
   /// In en, this message translates to:

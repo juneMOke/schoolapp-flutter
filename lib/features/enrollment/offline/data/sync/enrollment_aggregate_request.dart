@@ -43,6 +43,10 @@ class EnrollmentAggregateRequest {
         // RE = matricule, PRE = id préinscription, NEW = null (posé au seed
         // du brouillon, transporté par le payload outbox).
         'sourceRef': e.sourceRef,
+        // Réductions déclarées au guichet (ADR-021 V1) — omis quand vide : un
+        // `[]` systématique dirait « retire tout » à un serveur qui ne porte
+        // pas encore le champ, et le dira demain à celui qui le porte.
+        if (e.reductionCodes.isNotEmpty) 'reductionCodes': e.reductionCodes,
       },
       'student': <String, dynamic>{
         'id': s.id,

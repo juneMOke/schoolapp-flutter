@@ -3265,6 +3265,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please save charge changes before continuing.';
 
   @override
+  String get enrollmentReductionsSectionTitle => 'Reductions';
+
+  @override
   String get studentChargesTotalLabel => 'Total';
 
   @override

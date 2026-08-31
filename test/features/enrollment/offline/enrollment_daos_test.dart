@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reduction_dao.dart';
 
 import '../../offline_full_db.dart';
 
@@ -284,6 +285,43 @@ void main() {
     /// absente du fil, serveur inchangé, et le pull suivant qui remet tout
     /// comme avant. L'agrégat portant la liste COMPLÈTE des tuteurs, il n'y a
     /// rien à préserver qu'il ne dise déjà.
+    // ── Réductions déclarées au guichet (ADR-021 V1) ────────────────────────
+    //
+    // Les codes vivent dans une table à part, pas sur la ligne d'inscription :
+    // c'est l'enfilage qui doit aller les chercher. Sans cela, le guichet
+    // cocherait, la base retiendrait, et rien ne partirait — l'écran serait
+    // muet sur la perte.
+    test('les codes déclarés partent avec l\'agrégat', () async {
+      await EnrollmentReductionDao(
+        db,
+      ).replaceFor('e1', const ['SIBLING', 'STAFF_CHILD'], nowMs: 1000);
+
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final command =
+          jsonDecode((await db.query('outbox')).single['payload'] as String)
+              as Map<String, dynamic>;
+      expect((command['enrollment'] as Map<String, dynamic>)['reductionCodes'], [
+        'SIBLING',
+        'STAFF_CHILD',
+      ]);
+    });
+
+    test('aucune réduction déclarée → la clé ne part pas', () async {
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final command =
+          jsonDecode((await db.query('outbox')).single['payload'] as String)
+              as Map<String, dynamic>;
+      // Ni `[]` ni `null` : absente. Un `[]` dirait « retire tout » au serveur.
+      expect(
+        (command['enrollment'] as Map<String, dynamic>).containsKey(
+          'reductionCodes',
+        ),
+        isFalse,
+      );
+    });
+
     test('le payload poussé dit la désignation ET le retrait', () async {
       await draftDao.replaceDraftParents('s1', [
         designating(true, id: 'p1', phone: '+243111'),

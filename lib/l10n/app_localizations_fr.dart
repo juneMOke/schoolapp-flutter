@@ -3286,6 +3286,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Veuillez enregistrer les modifications des charges avant de continuer.';
 
   @override
+  String get enrollmentReductionsSectionTitle => 'Réductions';
+
+  @override
   String get studentChargesTotalLabel => 'Total';
 
   @override

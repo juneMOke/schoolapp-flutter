@@ -33,6 +33,16 @@ class StudentChargesStep extends StatefulWidget {
   final String academicYearId;
   final String? schoolLevelGroupId;
 
+  /// Inscription visée, pour les réductions déclarées au guichet (ADR-021).
+  /// Vide = la section ne s'affiche pas — c'est le cas de la consultation du
+  /// grand-livre hors wizard.
+  final String enrollmentId;
+
+  /// Les réductions se cochent-elles ? Répond du PARCOURS, pas de
+  /// [isEditable] — qui ne gouverne que les montants et vaut `false` dans le
+  /// wizard alors que la saisie y est ouverte.
+  final bool reductionsEditable;
+
   const StudentChargesStep({
     super.key,
     required this.studentId,
@@ -45,6 +55,8 @@ class StudentChargesStep extends StatefulWidget {
     this.initializeDraftCharges = false,
     this.academicYearId = '',
     this.schoolLevelGroupId,
+    this.enrollmentId = '',
+    this.reductionsEditable = false,
   });
 
   @override
@@ -429,6 +441,8 @@ class StudentChargesStepState extends State<StudentChargesStep> {
                 : l10n.studentChargesUnavailable,
             tariffsWithheld: _tariffsWithheld,
             feeGridUnavailable: state.feeGridUnavailable,
+            enrollmentId: widget.enrollmentId,
+            reductionsEditable: widget.reductionsEditable,
           );
         },
       ),

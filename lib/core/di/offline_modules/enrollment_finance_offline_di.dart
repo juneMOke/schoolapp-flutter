@@ -15,6 +15,10 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reduction_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/repositories/reduction_grant_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/reduction_grant_repository.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/reduction_selection_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
@@ -126,6 +130,24 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentSeedDao>(
     () => EnrollmentSeedDao(getIt<Database>()),
   );
+  // Octrois de réduction (ADR-021 V1). Le CATALOGUE, lui, appartient à la
+  // Facturation : il est lu par un seam plutôt qu'un import direct, comme la
+  // grille tarifaire et le catalogue boutique au pull (invariant I-4).
+  getIt.registerLazySingleton<EnrollmentReductionDao>(
+    () => EnrollmentReductionDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ReductionGrantRepository>(
+    () => ReductionGrantRepositoryImpl(
+      dao: getIt<EnrollmentReductionDao>(),
+      readGrantable: (schoolId) =>
+          getIt<FinanceLocalDao>().grantableReductionsForSchool(schoolId),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt.registerFactory<ReductionSelectionCubit>(
+    () => ReductionSelectionCubit(getIt<ReductionGrantRepository>()),
+  );
+
   getIt.registerLazySingleton<EnrollmentReconciliationDao>(
     () => EnrollmentReconciliationDao(getIt<Database>()),
   );

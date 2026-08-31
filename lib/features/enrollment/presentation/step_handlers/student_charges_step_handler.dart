@@ -84,6 +84,11 @@ class StudentChargesStepHandler extends BaseEnrollmentStepHandler {
       initializeDraftCharges: context.detailPolicy.usesLocalDraft,
       academicYearId: context.detail.enrollmentDetail.academicYearId,
       schoolLevelGroupId: context.detail.enrollmentDetail.schoolLevelGroupId,
+      // Réductions (ADR-021 V1) : déclaratives, sans effet sur les montants.
+      // Elles se cochent tant que le dossier se saisit — `isEditable: false`
+      // ci-dessus ne concerne QUE les montants des créances.
+      enrollmentId: context.detail.enrollmentDetail.id,
+      reductionsEditable: !context.detailPolicy.isReadOnlyConsultation,
     );
   }
 }

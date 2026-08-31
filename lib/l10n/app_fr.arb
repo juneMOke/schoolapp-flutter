@@ -2235,6 +2235,10 @@
   "studentChargesSavingAction": "Enregistrement des charges...",
   "studentChargesSaveSuccess": "Charges enregistrées avec succès.",
   "studentChargesSaveHintBeforeContinue": "Veuillez enregistrer les modifications des charges avant de continuer.",
+  "enrollmentReductionsSectionTitle": "Réductions",
+  "@enrollmentReductionsSectionTitle": {
+    "description": "Titre de la section des réductions dans l'étape Frais du wizard d'inscription (ADR-021 V1). Aucun taux n'est affiché : cocher enregistre une déclaration, les montants ne bougent pas."
+  },
   "studentChargesTotalLabel": "Total",
   "studentChargesHelperText": "Les montants peuvent être modifiés ultérieurement depuis la fiche de l'élève.",
   "studentChargesNetworkError": "Impossible de charger les charges. Vérifiez votre connexion internet.",

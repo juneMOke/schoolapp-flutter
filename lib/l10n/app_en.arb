@@ -2287,6 +2287,10 @@
   "studentChargesSavingAction": "Saving charges...",
   "studentChargesSaveSuccess": "Charges saved successfully.",
   "studentChargesSaveHintBeforeContinue": "Please save charge changes before continuing.",
+  "enrollmentReductionsSectionTitle": "Reductions",
+  "@enrollmentReductionsSectionTitle": {
+    "description": "Title of the reductions section in the fees step of the enrolment wizard (ADR-021 V1). No rate is shown: ticking records a declaration, amounts do not move."
+  },
   "studentChargesTotalLabel": "Total",
   "studentChargesHelperText": "Amounts can be updated later from the student's profile.",
   "studentChargesNetworkError": "Unable to load charges. Please check your internet connection.",
