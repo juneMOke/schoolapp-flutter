@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 
 // Pull de la cohorte de réinscription N-1 —
 // `GET /api/v1/sync/reenrollment-cohort` (miroir `openApi.yaml`).
@@ -35,7 +36,7 @@ class ReenrollmentCohortPageDto {
 }
 
 /// Élève N-1 réinscriptible. `studentId` = id CANONIQUE réutilisé par le nouvel
-/// enrollment (RE) → aucun doublon. `previousBalanceInCents` = arriérés (cents).
+/// enrollment (RE) → aucun doublon.
 class ReenrollmentCandidateDto {
   final String studentId;
   final String matriculationNumber;
@@ -50,8 +51,14 @@ class ReenrollmentCandidateDto {
   final String? previousClassroomId;
   final String? guardianName;
   final String? guardianPhone;
-  final int previousBalanceInCents;
-  final String? currency;
+
+  /// Arriérés N-1, **une entrée par devise**.
+  ///
+  /// C'était un scalaire étiqueté de la devise du premier poste : un élève
+  /// devant 425,00 $ et 90 000 FC se voyait annoncer « 90 425,00 $ ». Vide
+  /// quand l'élève ne devait rien — et non « zéro » dans une unité qu'il
+  /// faudrait choisir.
+  final List<Money> previousBalances;
 
   /// Fiche santé du dossier N-1, descendue pour que le guichet n'ait pas à la
   /// ressaisir. **C'est une proposition, pas la valeur du nouveau dossier** :
@@ -73,8 +80,7 @@ class ReenrollmentCandidateDto {
     this.previousClassroomId,
     this.guardianName,
     this.guardianPhone,
-    required this.previousBalanceInCents,
-    this.currency,
+    this.previousBalances = const [],
     this.medicalNotes,
   });
 
@@ -93,9 +99,17 @@ class ReenrollmentCandidateDto {
         previousClassroomId: j['previousClassroomId'] as String?,
         guardianName: j['guardianName'] as String?,
         guardianPhone: j['guardianPhone'] as String?,
-        previousBalanceInCents:
-            (j['previousBalanceInCents'] as num?)?.toInt() ?? 0,
-        currency: j['currency'] as String?,
+        // Absent ou vide = ne doit rien. Jamais un `[Money(0, 'USD')]` de
+        // repli : personne n'a choisi cette unité.
+        previousBalances: [
+          for (final raw
+              in (j['previousBalances'] as List<dynamic>? ?? const []))
+            if (raw is Map<String, dynamic>)
+              Money.parse(
+                (raw['amountInCents'] as num?)?.toInt() ?? 0,
+                (raw['currency'] as String?) ?? '',
+              ),
+        ],
         medicalNotes: j['medicalNotes'] as String?,
       );
 }

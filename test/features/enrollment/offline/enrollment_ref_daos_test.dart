@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 
 void main() {
   late Database db;
@@ -84,8 +85,7 @@ void main() {
     dateOfBirth: '2015-04-02',
     birthPlace: 'Kinshasa',
     previousSchoolLevelId: previousSchoolLevelId,
-    previousBalanceInCents: 12500,
-    currency: 'USD',
+    previousBalances: const [Money(12500, 'USD'), Money(9000000, 'CDF')],
   );
 
   PreEnrollmentDto preEnrollment({
@@ -688,8 +688,17 @@ void main() {
         final rows = await db.query('ref_previous_year_students');
         expect(rows, hasLength(1));
         expect(rows.single['student_id'], 'stu-2');
-        expect(rows.single['previous_balance_in_cents'], 12500);
         expect(rows.single['matriculation_number'], 'KIN-2025-0001');
+        // Les arriérés sont partis dans la table fille, une ligne par devise.
+        final balances = await db.query(
+          'ref_previous_year_student_balances',
+          where: 'student_id = ?',
+          whereArgs: ['stu-2'],
+          orderBy: 'currency',
+        );
+        expect(balances, hasLength(2));
+        expect(balances.first['currency'], 'CDF');
+        expect(balances.last['amount_in_cents'], 12500);
         expect(rows.single['synced_at'], 600);
       },
     );
@@ -1116,7 +1125,16 @@ void main() {
         expect(found.matriculationNumber, 'KIN-2025-0001');
         expect(found.firstName, 'Amina');
         expect(found.gender, 'FEMALE');
-        expect(found.previousBalanceInCents, 12500);
+        // Deux devises relues, triées par code : elles ne se somment jamais.
+        expect(found.previousBalances.length, 2);
+        expect(
+          found.previousBalances.amountIn('USD'),
+          const Money(12500, 'USD'),
+        );
+        expect(
+          found.previousBalances.amountIn('CDF'),
+          const Money(9000000, 'CDF'),
+        );
       },
     );
 

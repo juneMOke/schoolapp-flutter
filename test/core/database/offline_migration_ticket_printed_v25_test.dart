@@ -66,10 +66,12 @@ void main() {
   Future<void> seedPayment(String id) => db.insert('payments', {
     'id': id,
     'client_uuid': id,
-    'student_id': 's-1',
-    'academic_year_id': 'y-1',
+    // La table est ici dans sa forme d'ÉPOQUE : le montant y est encore
+    // NOT NULL, et cette insertion précède la migration.
     'amount_in_cents': 150000,
     'currency': 'CDF',
+    'student_id': 's-1',
+    'academic_year_id': 'y-1',
     'paid_at': '2026-08-12T09:30:00.000Z',
     'payer_first_name': 'Joseph',
     'payer_last_name': 'Kabongo',

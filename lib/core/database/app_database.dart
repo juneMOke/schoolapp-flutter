@@ -922,6 +922,206 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+
+  if (upTo(33)) {
+    // v33 — Multi-devise : les arriérés N-1 quittent la ligne de l'élève pour
+    // une table fille, une entrée PAR DEVISE.
+    //
+    // La colonne scalaire étiquetait la somme de tous les postes avec la devise
+    // du premier : un élève devant 425,00 $ et 90 000 FC se voyait annoncer
+    // « 90 425,00 $ ».
+    //
+    // **Recréée plutôt que reconstruite par copie.** `ref_previous_year_students`
+    // est 100 % dérivée de la synchro — le seed la remplace en bloc à chaque
+    // pull — donc rien n'est perdu à la vider, à condition de **rembobiner son
+    // curseur** : une purge sans rembobinage laisserait la cohorte vide jusqu'au
+    // prochain rollover d'année, et le guichet sans vivier de réinscription.
+    //
+    // Le curseur est scopé par année (`enrollment_reenrollment_cohort:<yearId>`),
+    // d'où le `LIKE` : on ne connaît pas ici l'année courante, et en laisser un
+    // seul debout suffirait à faire répondre 304 au prochain pull.
+    //
+    // **Rejouable**, et c'est ce que la garde suivante achète : l'étape se
+    // décide sur la FORME RÉELLE de la table — la colonne scalaire est-elle
+    // encore là ? — et non sur un drapeau. Un `DROP` inconditionnel
+    // redétruirait, à chaque rejeu, une cohorte fraîchement redescendue.
+    final hadScalarBalance =
+        await _hasTable(db, 'ref_previous_year_students') &&
+        await _hasColumn(
+          db,
+          'ref_previous_year_students',
+          'previous_balance_in_cents',
+        );
+
+    if (hadScalarBalance) {
+      await db.execute('DROP TABLE ref_previous_year_students');
+      // `sync_meta` manque sur les bases partielles des tests de palier : une
+      // migration qui suppose une table voisine cesse de monter le jour où
+      // quelqu'un la retire.
+      if (await _hasTable(db, 'sync_meta')) {
+        await db.delete(
+          'sync_meta',
+          where: 'resource = ? OR resource LIKE ?',
+          whereArgs: const [
+            'enrollment_reenrollment_cohort',
+            'enrollment_reenrollment_cohort:%',
+          ],
+        );
+      }
+    }
+
+    for (final name in const [
+      'ref_previous_year_students',
+      'ref_previous_year_student_balances',
+    ]) {
+      if (await _hasTable(db, name)) continue;
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(table.createTableSql);
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
+
+  if (upTo(34)) {
+    // v34 — Multi-devise : `payments` perd ses montants, qui se dérivent
+    // désormais de ses imputations.
+    //
+    // Ce n'étaient pas des propriétés du versement : un résumé de ses
+    // allocations, stockable en scalaire tant qu'il n'y avait qu'une devise. Un
+    // passage au guichet qui solde une créance en dollars ET une en francs n'a
+    // pas de montant unique.
+    //
+    // **Reconstruite avec COPIE**, jamais vidée : `payments` porte de l'argent
+    // encaissé, dont des lignes qui n'ont pas encore été poussées. En perdre une
+    // serait perdre un encaissement que le reçu papier atteste déjà.
+    await _dropPaymentScalarAmounts(db, schema);
+  }
+
+  if (upTo(35)) {
+    // v35 — Multi-devise à la caisse : la DEVISE descend sur la ligne, et la
+    // vente perd ses montants.
+    //
+    // C'est l'article qui est tarifé dans une unité, donc la ligne : un panier
+    // peut en mêler deux, et c'est un acte de caisse — une vente, un reçu, pas
+    // deux. La devise envoyée est celle **réellement encaissée**, enregistrée
+    // telle quelle et jamais déduite du catalogue : la caisse vend hors ligne
+    // sur une copie qui peut précéder un changement de devise, et déduire
+    // imprimerait des dollars sur un reçu dont le tiroir contient des francs.
+    await _moveBoutiqueCurrencyToLines(db, schema);
+  }
+}
+
+/// Étape v35 : `boutique_sale_lines.currency`, et `boutique_sales` sans montant.
+///
+/// La colonne de ligne est **backfillée depuis la vente** : ces lignes ont été
+/// encaissées dans la devise que la vente portait, et c'est la seule vérité
+/// disponible. Sans backfill, un `NOT NULL` sur des lignes existantes ferait
+/// échouer la montée sur une caisse qui a déjà vendu.
+///
+/// Rejouable : se garde sur la forme réelle des deux tables.
+Future<void> _moveBoutiqueCurrencyToLines(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const sales = 'boutique_sales';
+  const lines = 'boutique_sale_lines';
+  if (!await _hasTable(db, sales) || !await _hasTable(db, lines)) return;
+  if (!await _hasColumn(db, sales, 'currency')) return;
+
+  if (!await _hasColumn(db, lines, 'currency')) {
+    // Défaut vide plutôt qu'une devise inventée : le backfill qui suit le
+    // remplace par celle de la vente, et une ligne orpheline se lira « devise
+    // inconnue » — jamais « dollars » par accident.
+    await db.execute(
+      "ALTER TABLE $lines ADD COLUMN currency TEXT NOT NULL DEFAULT ''",
+    );
+    await db.execute(
+      'UPDATE $lines SET currency = ('
+      'SELECT s.currency FROM $sales s WHERE s.id = $lines.sale_id'
+      ') WHERE EXISTS ('
+      'SELECT 1 FROM $sales s WHERE s.id = $lines.sale_id)',
+    );
+  }
+
+  // La vente perd `total_in_cents` et `currency` : ils se dérivent des lignes.
+  final table = schema.firstWhere((t) => t.name == sales);
+  final sourceColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($sales)'))
+      c['name'] as String,
+  };
+  await db.execute('ALTER TABLE $sales RENAME TO ${sales}_v34');
+  await db.execute(table.createTableSql);
+  final targetColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($sales)'))
+      c['name'] as String,
+  };
+  final columnList = targetColumns.where(sourceColumns.contains).join(', ');
+  if (columnList.isNotEmpty) {
+    await db.execute(
+      'INSERT INTO $sales ($columnList) SELECT $columnList FROM ${sales}_v34',
+    );
+  }
+  await db.execute('DROP TABLE ${sales}_v34');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
+}
+
+/// Étape v34 : retire `amount_in_cents` et `currency` de `payments`.
+///
+/// SQLite ne sait pas supprimer une colonne avant 3.35 : on reconstruit la table
+/// et on recopie. **Les 23 colonnes de la forme v33, et elles seules** — la
+/// table source porte la forme d'AVANT cette étape, et un `SELECT` d'une colonne
+/// qu'elle n'a pas ferait lever la migration.
+///
+/// L'étape est rejouable : elle se garde sur la **forme réelle** de la table
+/// plutôt que sur un drapeau, et ne fait rien si les colonnes sont déjà parties.
+Future<void> _dropPaymentScalarAmounts(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const name = 'payments';
+  if (!await _hasTable(db, name)) return;
+  if (!await _hasColumn(db, name, 'amount_in_cents')) return;
+
+  // Les colonnes RÉELLEMENT présentes des deux côtés, jamais une liste figée.
+  //
+  // Une liste écrite à la main suppose que la table source a exactement la
+  // forme d'avant cette étape. C'est faux dès qu'une base part de plus loin :
+  // toutes les migrations tournent dans le même passage, et un test de palier
+  // ancien crée une `payments` qui n'a ni `academic_year_id` ni la moitié du
+  // reste. Le `SELECT` lève alors, et c'est toute la montée qui s'arrête — sur
+  // une table qui porte de l'argent.
+  //
+  // L'intersection règle les deux sens : une colonne que la source n'a pas
+  // reste à son défaut dans la table neuve, une colonne qu'elle a en trop est
+  // ignorée.
+  final table = schema.firstWhere((t) => t.name == name);
+  final sourceColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  // L'ancienne table emporte ses index en changeant de nom ; ils disparaissent
+  // avec elle au DROP, ce qui laisse les noms libres pour les index canoniques
+  // recréés en dernier.
+  await db.execute('ALTER TABLE $name RENAME TO ${name}_v33');
+  await db.execute(table.createTableSql);
+
+  final targetColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  final columnList = targetColumns.where(sourceColumns.contains).join(', ');
+  if (columnList.isNotEmpty) {
+    await db.execute(
+      'INSERT INTO $name ($columnList) SELECT $columnList FROM ${name}_v33',
+    );
+  }
+  await db.execute('DROP TABLE ${name}_v33');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Candidat de **réinscription** lu localement dans `ref_previous_year_students`
 /// (cohorte N-1 peuplée par le pull). Sert de **photo de départ** au brouillon
@@ -19,8 +20,9 @@ class ReenrollmentCandidate extends Equatable {
   final String? previousClassroomId;
   final String? guardianName;
   final String? guardianPhone;
-  final int previousBalanceInCents;
-  final String? currency;
+
+  /// Arriérés N-1, **par devise**. Vide = ne doit rien, dans aucune unité.
+  final MoneyBag previousBalances;
 
   /// Fiche santé du dossier N-1. **Une proposition, pas une valeur acquise** :
   /// elle ne devient celle du nouveau dossier que si le brouillon la reprend
@@ -56,8 +58,7 @@ class ReenrollmentCandidate extends Equatable {
     this.previousClassroomId,
     this.guardianName,
     this.guardianPhone,
-    this.previousBalanceInCents = 0,
-    this.currency,
+    this.previousBalances = MoneyBag.empty,
     this.medicalNotes,
     this.previousSchoolLevelName,
     this.previousSchoolLevelGroupName,
@@ -79,8 +80,7 @@ class ReenrollmentCandidate extends Equatable {
     previousClassroomId,
     guardianName,
     guardianPhone,
-    previousBalanceInCents,
-    currency,
+    previousBalances,
     medicalNotes,
     previousSchoolLevelName,
     previousSchoolLevelGroupName,

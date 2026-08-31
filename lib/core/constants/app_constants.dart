@@ -457,7 +457,7 @@ class AppConstants {
   // réinscription. Rien à faire ici pour rendre le bloc « école précédente »
   // facultatif : ses colonnes sont nullables depuis toujours côté local — la
   // contrainte vivait dans l'écran, pas en base.
-  static const int offlineDbSchemaVersion = 32;
+  static const int offlineDbSchemaVersion = 35;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

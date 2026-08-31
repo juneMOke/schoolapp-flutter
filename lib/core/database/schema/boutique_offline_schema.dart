@@ -102,8 +102,6 @@ const TableSchema boutiqueSalesTable = TableSchema(
       payer_name TEXT,
       collected_by_id TEXT,
       collected_by_name TEXT,
-      total_in_cents INTEGER NOT NULL,
-      currency TEXT NOT NULL,
       sold_at TEXT NOT NULL,
       receipt_document_id TEXT,
       receipt_number TEXT,
@@ -156,6 +154,7 @@ const TableSchema boutiqueSaleLinesTable = TableSchema(
       quantity INTEGER NOT NULL,
       unit_price_in_cents INTEGER NOT NULL,
       line_total_in_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL,
       catalog_price_in_cents INTEGER,
       position INTEGER NOT NULL DEFAULT 0
     )

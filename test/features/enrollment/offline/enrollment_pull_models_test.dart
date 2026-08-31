@@ -227,8 +227,10 @@ void main() {
             'dateOfBirth': '2013-05-02',
             'birthPlace': 'Kinshasa',
             'previousSchoolLevelId': 'lvl-6e',
-            'previousBalanceInCents': 250000,
-            'currency': 'USD',
+            'previousBalances': [
+              {'amountInCents': 250000, 'currency': 'USD'},
+              {'amountInCents': 9000000, 'currency': 'CDF'},
+            ],
             'medicalNotes': 'Asthme — inhalateur dans le cartable.',
           },
         ],
@@ -241,8 +243,13 @@ void main() {
       final c = page.items.single;
       expect(c.studentId, 'stu-N1');
       expect(c.matriculationNumber, 'ETL-2025-000042');
-      expect(c.previousBalanceInCents, isA<int>());
-      expect(c.previousBalanceInCents, 250000);
+      // Une entrée PAR DEVISE. Le scalaire d'avant valait la somme de tous les
+      // postes, étiquetée de la devise du premier : un élève devant 2 500,00 $
+      // et 90 000 FC s'entendait annoncer « 92 500,00 $ ».
+      expect(c.previousBalances, hasLength(2));
+      expect(c.previousBalances.first.amountInCents, 250000);
+      expect(c.previousBalances.first.currency, 'USD');
+      expect(c.previousBalances.last.currency, 'CDF');
       // Pagination statique par studentId (ni watermark ni 304).
       expect(page.nextCursorId, 'stu-N1');
       expect(page.bootstrapComplete, isFalse);
@@ -265,7 +272,7 @@ void main() {
       expect(page.nextCursorId, isNull);
     });
 
-    test('bootstrapComplete/previousBalanceInCents absents → défauts sûrs', () {
+    test('bootstrapComplete/previousBalances absents → défauts sûrs', () {
       final page = ReenrollmentCohortPageDto.fromJson({
         'items': [
           {
@@ -281,7 +288,9 @@ void main() {
         ],
         'serverTime': 't',
       });
-      expect(page.items.single.previousBalanceInCents, 0);
+      // Absent = ne doit rien. JAMAIS un `[Money(0, 'USD')]` de repli : personne
+      // n'a choisi cette unité.
+      expect(page.items.single.previousBalances, isEmpty);
       // Le dossier N-1 n'avait rien de renseigné : rien à proposer.
       expect(page.items.single.medicalNotes, isNull);
       // Absence de bootstrapComplete → false (ne JAMAIS marquer complet à tort).

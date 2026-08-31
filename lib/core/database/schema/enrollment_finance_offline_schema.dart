@@ -289,7 +289,10 @@ const TableSchema refSchoolLevelsTable = TableSchema(
 /// `ref_previous_year_students` — **cohorte de réinscription** (D3) : élèves N-1,
 /// bornée/statique + snapshot arriérés. `student_id` = id CANONIQUE réutilisé par
 /// le nouvel `enrollment` (cas RE) → aucun doublon d'élève.
-/// `previous_balance_in_cents` remplace le REAL de la spec (règle argent).
+/// Les arriérés N-1 vivent dans `ref_previous_year_student_balances` — une
+/// ligne PAR DEVISE. Ils tenaient ici en `previous_balance_in_cents` +
+/// `currency` : un scalaire étiqueté de la devise du premier poste, qui
+/// annonçait « 90 425,00 $ » à un élève devant 425,00 $ et 90 000 FC.
 ///
 /// `medical_notes` est la fiche santé du dossier N-1, descendue pour que le
 /// guichet n'ait pas à la ressaisir. C'est une **proposition** : elle ne devient
@@ -313,8 +316,6 @@ const TableSchema refPreviousYearStudentsTable = TableSchema(
       previous_classroom_id TEXT,
       guardian_name TEXT,
       guardian_phone TEXT,
-      previous_balance_in_cents INTEGER NOT NULL DEFAULT 0,
-      currency TEXT,
       medical_notes TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
     )
@@ -324,6 +325,31 @@ const TableSchema refPreviousYearStudentsTable = TableSchema(
         'ON ref_previous_year_students(matriculation_number)',
     'CREATE INDEX idx_ref_previous_year_students_name '
         'ON ref_previous_year_students(last_name, surname)',
+  ],
+);
+
+/// `ref_previous_year_student_balances` — arriérés N-1, **une ligne par devise**.
+///
+/// Table fille plutôt qu'une colonne JSON : la cohorte se re-seede par lots, et
+/// un JSON obligerait à relire-modifier-réécrire une chaîne à chaque pull, là où
+/// une table fille se remplace par `DELETE` + `INSERT` sous le même index que le
+/// reste du seed.
+///
+/// **Aucune ligne = ne doit rien**, et jamais un zéro dans une unité que
+/// personne n'a choisie. C'est la même règle que la liste vide du contrat.
+const TableSchema refPreviousYearStudentBalancesTable = TableSchema(
+  name: 'ref_previous_year_student_balances',
+  createTableSql: '''
+    CREATE TABLE ref_previous_year_student_balances (
+      student_id TEXT NOT NULL,
+      currency TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      PRIMARY KEY (student_id, currency)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_prev_year_balances_student '
+        'ON ref_previous_year_student_balances(student_id)',
   ],
 );
 
@@ -455,6 +481,16 @@ const TableSchema studentChargesTable = TableSchema(
 /// destination : celle-ci est lue — elle remonte au serveur avec le versement
 /// et alimente l'annuaire de payeurs du guichet. La v27 n'a pas proscrit la
 /// PII, elle a proscrit la PII que personne ne lit.
+/// Les montants ne sont **pas** ici, et c'est le même choix que côté serveur :
+/// `amount_in_cents` + `currency` n'ont jamais été des propriétés du versement,
+/// seulement un résumé de ses imputations — qu'on pouvait stocker en scalaire
+/// tant qu'il n'y avait qu'une devise. Un passage au guichet qui solde une
+/// créance en dollars et une en francs n'a pas de montant unique.
+///
+/// Ils se dérivent de `payment_allocations`, dont la devise est NOT NULL depuis
+/// la création de la table. Le contrat de pull porte d'ailleurs la même
+/// garantie sur chaque imputation, « ce qui permet à un client de reconstruire
+/// le total par devise sans faire confiance à `amounts` ».
 const TableSchema paymentsTable = TableSchema(
   name: 'payments',
   createTableSql: '''
@@ -463,8 +499,6 @@ const TableSchema paymentsTable = TableSchema(
       client_uuid TEXT NOT NULL,
       student_id TEXT NOT NULL,
       academic_year_id TEXT,
-      amount_in_cents INTEGER NOT NULL,
-      currency TEXT NOT NULL,
       method TEXT NOT NULL DEFAULT 'CASH',
       paid_at TEXT NOT NULL,
       payer_first_name TEXT NOT NULL,
@@ -607,6 +641,7 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refSchoolLevelGroupsTable,
   refSchoolLevelsTable,
   refPreviousYearStudentsTable,
+  refPreviousYearStudentBalancesTable,
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,

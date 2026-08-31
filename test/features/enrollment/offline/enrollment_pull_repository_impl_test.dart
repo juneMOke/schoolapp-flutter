@@ -151,7 +151,6 @@ void main() {
     gender: 'FEMALE',
     dateOfBirth: '2015-04-02',
     birthPlace: 'Kinshasa',
-    previousBalanceInCents: 0,
   );
 
   ReenrollmentCohortPageDto cohortPage({
@@ -760,7 +759,6 @@ void main() {
           'last_name': 'Moke',
           'gender': 'MALE',
           'date_of_birth': '2014-01-01',
-          'previous_balance_in_cents': 0,
           'synced_at': 1,
         });
         when(
@@ -789,7 +787,6 @@ void main() {
           'last_name': 'Roster',
           'gender': 'MALE',
           'date_of_birth': '2013-01-01',
-          'previous_balance_in_cents': 0,
           'synced_at': 1,
         });
         var call = 0;

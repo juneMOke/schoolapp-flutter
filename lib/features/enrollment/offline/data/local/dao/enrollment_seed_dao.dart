@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao_support.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Viviers de (ré)inscription : cohorte N-1 (`ref_previous_year_students`) et
 /// préinscriptions (`ref_pre_enrollments`). Porte à la fois les **écritures de
@@ -28,6 +30,9 @@ class EnrollmentSeedDao {
     var affected = items.length;
     await _db.transaction((txn) async {
       final removed = await txn.delete('ref_previous_year_students');
+      // La fille se vide avec la mère : une ligne d'arriéré orpheline
+      // ressortirait sur un élève que la cohorte ne porte plus.
+      await txn.delete('ref_previous_year_student_balances');
       if (items.isEmpty) affected = removed;
       final batch = txn.batch();
       for (final c in items) {
@@ -47,13 +52,25 @@ class EnrollmentSeedDao {
             'previous_classroom_id': c.previousClassroomId,
             'guardian_name': c.guardianName,
             'guardian_phone': c.guardianPhone,
-            'previous_balance_in_cents': c.previousBalanceInCents,
-            'currency': c.currency,
             'medical_notes': c.medicalNotes,
             'synced_at': syncedAt,
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
+        // Les arriérés vivent dans la table fille, une ligne par devise. Aucune
+        // ligne = ne doit rien : on n'écrit pas un zéro dans une unité que
+        // personne n'a choisie.
+        for (final balance in c.previousBalances) {
+          batch.insert(
+            'ref_previous_year_student_balances',
+            {
+              'student_id': c.studentId,
+              'currency': balance.currency,
+              'amount_in_cents': balance.amountInCents,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
       }
       await batch.commit(noResult: true);
     });
@@ -156,7 +173,8 @@ class EnrollmentSeedDao {
       [studentId],
     );
     if (rows.isEmpty) return null;
-    return _candidateFromRow(rows.first);
+    final balances = await _balancesOf([studentId]);
+    return _candidateFromRow(rows.first, balances[studentId] ?? MoneyBag.empty);
   }
 
   /// Recherche des candidats à la réinscription (vivier N-1) filtrée par niveau.
@@ -185,31 +203,68 @@ class EnrollmentSeedDao {
       '$_candidateSelect $where ORDER BY rpys.last_name, rpys.first_name',
       args,
     );
-    return rows.map(_candidateFromRow).toList();
+    final balances = await _balancesOf([
+      for (final r in rows) r['student_id'] as String,
+    ]);
+    return [
+      for (final r in rows)
+        _candidateFromRow(r, balances[r['student_id']] ?? MoneyBag.empty),
+    ];
   }
 
-  ReenrollmentCandidate _candidateFromRow(Map<String, Object?> r) =>
-      ReenrollmentCandidate(
-        studentId: r['student_id'] as String,
-        matriculationNumber: r['matriculation_number'] as String,
-        firstName: r['first_name'] as String,
-        lastName: r['last_name'] as String,
-        surname: r['surname'] as String?,
-        gender: r['gender'] as String,
-        dateOfBirth: r['date_of_birth'] as String,
-        birthPlace: r['birth_place'] as String?,
-        previousAcademicYearId: r['previous_academic_year_id'] as String?,
-        previousSchoolLevelId: r['previous_school_level_id'] as String?,
-        previousClassroomId: r['previous_classroom_id'] as String?,
-        guardianName: r['guardian_name'] as String?,
-        guardianPhone: r['guardian_phone'] as String?,
-        previousBalanceInCents: (r['previous_balance_in_cents'] as int?) ?? 0,
-        currency: r['currency'] as String?,
-        medicalNotes: r['medical_notes'] as String?,
-        previousSchoolLevelName: r['previous_level_name'] as String?,
-        previousSchoolLevelGroupName: r['previous_level_group_name'] as String?,
-        previousSchoolName: r['current_school_name'] as String?,
+  /// Arriérés N-1 des élèves demandés, groupés par élève.
+  ///
+  /// Une requête pour tout le lot plutôt qu'une par candidat : la liste de
+  /// réinscription se lit d'un coup, et N+1 requêtes sur une tablette se
+  /// sentent.
+  Future<Map<String, MoneyBag>> _balancesOf(List<String> studentIds) async {
+    if (studentIds.isEmpty) return const {};
+    final placeholders = List.filled(studentIds.length, '?').join(', ');
+    final rows = await _db.rawQuery(
+      'SELECT student_id, currency, amount_in_cents '
+      'FROM ref_previous_year_student_balances '
+      'WHERE student_id IN ($placeholders) '
+      'ORDER BY student_id, currency',
+      studentIds,
+    );
+    final byStudent = <String, List<Money>>{};
+    for (final r in rows) {
+      (byStudent[r['student_id'] as String] ??= <Money>[]).add(
+        Money.parse(
+          (r['amount_in_cents'] as int?) ?? 0,
+          (r['currency'] as String?) ?? '',
+        ),
       );
+    }
+    return {
+      for (final entry in byStudent.entries)
+        entry.key: MoneyBag.of(entry.value),
+    };
+  }
+
+  ReenrollmentCandidate _candidateFromRow(
+    Map<String, Object?> r,
+    MoneyBag balances,
+  ) => ReenrollmentCandidate(
+    studentId: r['student_id'] as String,
+    matriculationNumber: r['matriculation_number'] as String,
+    firstName: r['first_name'] as String,
+    lastName: r['last_name'] as String,
+    surname: r['surname'] as String?,
+    gender: r['gender'] as String,
+    dateOfBirth: r['date_of_birth'] as String,
+    birthPlace: r['birth_place'] as String?,
+    previousAcademicYearId: r['previous_academic_year_id'] as String?,
+    previousSchoolLevelId: r['previous_school_level_id'] as String?,
+    previousClassroomId: r['previous_classroom_id'] as String?,
+    guardianName: r['guardian_name'] as String?,
+    guardianPhone: r['guardian_phone'] as String?,
+    previousBalances: balances,
+    medicalNotes: r['medical_notes'] as String?,
+    previousSchoolLevelName: r['previous_level_name'] as String?,
+    previousSchoolLevelGroupName: r['previous_level_group_name'] as String?,
+    previousSchoolName: r['current_school_name'] as String?,
+  );
 
   /// Préinscription par `id` (photo de départ du brouillon PRE). `null` =
   /// snapshot non peuplé (pull dormant) ou préinscription absente.

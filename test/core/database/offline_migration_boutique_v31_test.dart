@@ -94,6 +94,8 @@ void main() {
       'school_id': 'E1',
       'academic_year_id': 'A1',
       'payer_last_name': 'Ndombo',
+      // Ce palier s'arrête à la v31 : la table y porte encore ses montants,
+      // que la v35 déplacera sur les lignes.
       'total_in_cents': 3500,
       'currency': 'USD',
       'sold_at': '2026-08-29T11:42:00Z',
