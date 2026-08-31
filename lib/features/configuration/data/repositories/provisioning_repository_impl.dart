@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/configuration/domain/entities/provis
 import 'package:school_app_flutter/features/configuration/domain/entities/provisioning_request.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/school_identity.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 
 /// Implémentation en ligne de la mise en service.
 ///
@@ -196,6 +197,30 @@ class ProvisioningRepositoryImpl implements ProvisioningRepository {
         // saurait expliquer.
         return const Left(UncertainOutcomeFailure());
       }
+
+      // Le serveur a REFUSÉ, il n'est pas absent. Le 409 n'est pas typé par
+      // l'intercepteur — il tombait donc sur « Réseau indisponible », une
+      // phrase fausse qui envoie chercher du signal quand il faudrait lire la
+      // réponse. Le multi-devise le rend atteignable : changer la devise d'un
+      // tarif dont des créances sont nées est refusé, parce que ça ferait
+      // refuser au guichet un encaissement déjà perçu.
+      final status = error.response?.statusCode;
+      if (status == 409) {
+        return Left(
+          ConflictFailure(
+            ApiErrorParser.serverMessageOf(error.response) ??
+                'Modification refusée : cette écriture est déjà engagée.',
+          ),
+        );
+      }
+      if (status != null) {
+        return Left(
+          ServerFailure(
+            ApiErrorParser.serverMessageOf(error.response) ?? 'HTTP $status',
+          ),
+        );
+      }
+
       return const Left(NetworkFailure('Réseau indisponible'));
     } catch (error) {
       return Left(ServerFailure('Réponse illisible : $error'));
