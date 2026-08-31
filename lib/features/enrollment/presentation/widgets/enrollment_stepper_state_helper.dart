@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/student_address_parts.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 
@@ -42,11 +43,22 @@ class EnrollmentStepperStateHelper {
         student.dateOfBirth.trim().isNotEmpty;
   }
 
+  /// L'adresse complémentaire (rue, avenue, numéro) est **facultative**, et le
+  /// champ `address` du dossier ne porte plus qu'elle. L'exiger ici revenait à
+  /// ré-imposer une étape plus haut ce que le formulaire venait d'abandonner :
+  /// l'état semé au dossier repasse par ici à chaque rechargement — il y en a
+  /// un après chaque enregistrement — et refermait l'étape derrière l'usager,
+  /// « Continuer » éteint et « Enregistrer » avec lui puisque plus rien
+  /// n'était modifié. Aucune issue, sauf inventer une ligne d'adresse.
+  ///
+  /// Ce qui reste exigé, c'est le QUARTIER : porté par `neighborhood` depuis
+  /// la scission des deux champs, et par le préfixe d'`address` pour les
+  /// dossiers écrits avant elle — d'où la lecture partagée avec le formulaire.
   static bool isAddressValid(StudentDetail student) {
     return student.city.trim().isNotEmpty &&
         student.district.trim().isNotEmpty &&
         student.municipality.trim().isNotEmpty &&
-        student.address.trim().isNotEmpty;
+        StudentAddressParts.of(student).neighborhood.isNotEmpty;
   }
 
   static bool isAcademicInfoValid(EnrollmentSchoolDetail enrollment) {

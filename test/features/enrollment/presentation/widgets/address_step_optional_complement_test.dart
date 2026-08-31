@@ -9,7 +9,14 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/school_le
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/address_step_handler.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -42,7 +49,10 @@ void main() {
   // catalogue re-résout ce qu'il reçoit, et une commune inconnue de lui serait
   // effacée au chargement — l'étape deviendrait invalide pour une raison
   // étrangère à ce que le test prouve.
-  StudentDetail student({required String address}) => StudentDetail(
+  StudentDetail student({
+    required String address,
+    String neighborhood = 'Bitshaku-Tshaku',
+  }) => StudentDetail(
     id: 'stu-1',
     firstName: 'Daniel',
     lastName: 'Kabongo',
@@ -54,7 +64,7 @@ void main() {
     city: 'Kinshasa',
     district: 'Lukunga',
     municipality: 'Barumbu',
-    neighborhood: 'Bitshaku-Tshaku',
+    neighborhood: neighborhood,
     address: address,
     schoolLevel: const SchoolLevel(
       id: 'lvl-1',
@@ -149,5 +159,80 @@ void main() {
     // ne l'est plus, donc il n'a rien à reprocher.
     expect(find.textContaining('Adresse complémentaire'), findsOneWidget);
     expect(find.textContaining('obligatoire'), findsNothing);
+  });
+
+  /// Le pied du stepper ne lit pas le formulaire : il lit l'état de l'étape
+  /// dans le bloc de flux. Or cet état a DEUX sources — ce que l'étape
+  /// rapporte, et ce que le dossier sème (`initialState`) à chaque
+  /// rechargement, c'est-à-dire après chaque enregistrement. Rendre le champ
+  /// facultatif dans le formulaire seul laissait la seconde source exiger
+  /// encore un `address` non vide : l'étape se refermait derrière l'usager,
+  /// « Continuer » éteint et « Enregistrer » avec lui — plus rien n'étant
+  /// modifié, il n'y avait plus d'issue que d'inventer une ligne d'adresse.
+  group('la porte du wizard', () {
+    EnrollmentDetail dossier({required String address}) => EnrollmentDetail(
+      studentDetail: student(address: address),
+      parentDetails: const [],
+      enrollmentDetail: const EnrollmentSchoolDetail(
+        id: 'enr-1',
+        status: EnrollmentStatus.inProgress,
+        academicYearId: 'ay-2026',
+        enrollmentCode: '',
+        previousSchoolName: '',
+        previousAcademicYear: '',
+        previousSchoolLevelGroup: '',
+        previousSchoolLevel: '',
+        previousRate: null,
+        previousRank: null,
+        validatedPreviousYear: null,
+        schoolLevelGroupId: 'grp-1',
+        schoolLevelId: 'lvl-1',
+      ),
+    );
+
+    StepFormState seme(String address) =>
+        AddressStepHandler(
+          controller: EnrollmentStepSubmitController(),
+        ).initialState(
+          HandlerInitialStateContext(detail: dossier(address: address)),
+        );
+
+    test('un dossier sans complément sème une étape VALIDE', () {
+      expect(seme('').valid, isTrue);
+    });
+
+    test('« Continuer » est ouvert sur un dossier sans complément', () {
+      final ouvert = EnrollmentStepperStateHelper.canContinueForStep(
+        currentStep: 1,
+        stepStates: <int, StepFormState>{1: seme('')},
+      );
+
+      expect(ouvert, isTrue);
+    });
+
+    /// Le quartier, lui, reste exigé : c'est ce qui distingue « un champ
+    /// devenu facultatif » de « l'étape ne valide plus rien ».
+    test('« Continuer » reste fermé sans quartier', () {
+      final sansQuartier =
+          AddressStepHandler(
+            controller: EnrollmentStepSubmitController(),
+          ).initialState(
+            HandlerInitialStateContext(
+              detail: EnrollmentDetail(
+                studentDetail: student(address: '', neighborhood: ''),
+                parentDetails: const [],
+                enrollmentDetail: dossier(address: '').enrollmentDetail,
+              ),
+            ),
+          );
+
+      expect(
+        EnrollmentStepperStateHelper.canContinueForStep(
+          currentStep: 1,
+          stepStates: <int, StepFormState>{1: sansQuartier},
+        ),
+        isFalse,
+      );
+    });
   });
 }

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_form_content.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/student_address_parts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -79,49 +80,6 @@ class AddressStepState extends State<AddressStep> {
 
   String get _selectedAdditionalAddress =>
       _additionalAddressController.text.trim();
-
-  ({String neighborhood, String additionalAddress}) _splitAddressValue(
-    String rawAddress,
-  ) {
-    final trimmed = rawAddress.trim();
-    if (trimmed.isEmpty) {
-      return (neighborhood: '', additionalAddress: '');
-    }
-
-    final separatorIndex = trimmed.indexOf(',');
-    if (separatorIndex < 0) {
-      return (neighborhood: trimmed, additionalAddress: '');
-    }
-
-    return (
-      neighborhood: trimmed.substring(0, separatorIndex).trim(),
-      additionalAddress: trimmed.substring(separatorIndex + 1).trim(),
-    );
-  }
-
-  ({String neighborhood, String additionalAddress}) _buildInitialAddressParts(
-    StudentDetail student,
-  ) {
-    final neighborhood = student.neighborhood.trim();
-    if (neighborhood.isEmpty) {
-      return _splitAddressValue(student.address);
-    }
-
-    final rawAddress = student.address.trim();
-    if (rawAddress.isEmpty) {
-      return (neighborhood: neighborhood, additionalAddress: '');
-    }
-
-    final prefixed = '$neighborhood,';
-    if (rawAddress.startsWith(prefixed)) {
-      return (
-        neighborhood: neighborhood,
-        additionalAddress: rawAddress.substring(prefixed.length).trim(),
-      );
-    }
-
-    return (neighborhood: neighborhood, additionalAddress: rawAddress);
-  }
 
   String _buildAddressPayload() {
     return _selectedAdditionalAddress;
@@ -359,7 +317,7 @@ class AddressStepState extends State<AddressStep> {
   }
 
   void _syncFromStudent(StudentDetail student, {required bool resetSnapshot}) {
-    final addressParts = _buildInitialAddressParts(student);
+    final addressParts = StudentAddressParts.of(student);
 
     _isHydratingFromDetail = true;
     try {

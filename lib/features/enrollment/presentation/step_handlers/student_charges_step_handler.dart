@@ -35,6 +35,11 @@ class StudentChargesStepHandler extends BaseEnrollmentStepHandler {
   @override
   bool showSaveAction(HandlerFlowContext context) => false;
 
+  /// Le semis ne peut rien dire de cette étape : sa validité dépend de la
+  /// grille tarifaire et des créances chargées, que le dossier ne porte pas.
+  /// Il se pose donc invalide, et c'est l'étape montée qui tranche dès qu'elle
+  /// se signale — le rechargement du dossier ne la déloge plus (cf.
+  /// `EnrollmentStepperFlowBloc._onStatesSynced`).
   @override
   StepFormState initialState(HandlerInitialStateContext context) {
     return const StepFormState(dirty: false, saving: false, valid: false);

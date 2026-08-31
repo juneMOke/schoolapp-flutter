@@ -39,12 +39,34 @@ class EnrollmentStepperFlowBloc
     emit(state.copyWith(stepStates: nextStates));
   }
 
+  /// Le dossier re-sème l'état de TOUTES les étapes à chaque rechargement — il
+  /// y en a un après chaque enregistrement, et `EnrollmentDetail` n'ayant pas
+  /// d'égalité de valeur, la moindre nouvelle instance suffit à le déclencher.
+  ///
+  /// L'étape COURANTE est la seule montée : elle seule connaît le formulaire
+  /// tel qu'il est à l'écran, et son état est le seul que le pied du stepper
+  /// lise. Lui réappliquer le semis, c'était remplacer ce qu'elle rapporte par
+  /// ce que le dossier laisse deviner — or le semis ne devine pas toujours :
+  /// l'étape Frais, elle, se sème invalide **en dur**, faute de pouvoir
+  /// consulter la grille depuis le dossier.
+  ///
+  /// La porte se refermait donc derrière l'usager à l'instant même où il
+  /// venait d'enregistrer : « Continuer » éteint, et « Enregistrer » avec lui
+  /// puisque plus rien n'était modifié. Seul un aller-retour vers une autre
+  /// étape — qui remonte le widget et le fait se re-signaler — en sortait.
+  ///
+  /// Le semis garde donc les étapes non montées, dont il est la seule source ;
+  /// l'étape courante garde ce qu'elle a rapporté. Si le rechargement la
+  /// concerne vraiment, elle se ré-hydrate et se re-signale d'elle-même.
   void _onStatesSynced(
     EnrollmentStepperStatesSynced event,
     Emitter<EnrollmentStepperFlowState> emit,
   ) {
-    emit(
-      state.copyWith(stepStates: Map<int, StepFormState>.from(event.states)),
-    );
+    final nextStates = Map<int, StepFormState>.from(event.states);
+    final reportedByCurrentStep = state.stepStates[state.currentStep];
+    if (reportedByCurrentStep != null) {
+      nextStates[state.currentStep] = reportedByCurrentStep;
+    }
+    emit(state.copyWith(stepStates: nextStates));
   }
 }

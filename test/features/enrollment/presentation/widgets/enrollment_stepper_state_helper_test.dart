@@ -32,12 +32,39 @@ void main() {
       expect(result, isFalse);
     });
 
-    test('isAddressValid retourne false quand address est vide', () {
+    /// L'adresse complémentaire est facultative dans le formulaire ; le champ
+    /// `address` du dossier ne porte plus qu'elle. Ce test disait l'inverse —
+    /// il épinglait l'exigence que l'étape venait d'abandonner, et c'est par
+    /// ici que le pied du stepper la retrouvait à chaque rechargement.
+    test('isAddressValid : un complément vide ne referme pas l\'étape', () {
       final student = _buildStudentDetail(address: '');
 
       final result = EnrollmentStepperStateHelper.isAddressValid(student);
 
+      expect(result, isTrue);
+    });
+
+    /// Ce qui reste obligatoire : le quartier. Sans lui, ce test signerait
+    /// l'abandon de toute validation d'adresse plutôt que celui d'un champ.
+    test('isAddressValid retourne false quand le quartier manque', () {
+      final student = _buildStudentDetail(neighborhood: '', address: '');
+
+      final result = EnrollmentStepperStateHelper.isAddressValid(student);
+
       expect(result, isFalse);
+    });
+
+    /// Dossier écrit avant la scission des deux champs : le quartier n'est
+    /// pas dans `neighborhood`, il préfixe encore `address`.
+    test('isAddressValid lit le quartier préfixé des anciens dossiers', () {
+      final student = _buildStudentDetail(
+        neighborhood: '',
+        address: 'Riviera, Rue 12',
+      );
+
+      final result = EnrollmentStepperStateHelper.isAddressValid(student);
+
+      expect(result, isTrue);
     });
 
     test(
@@ -306,6 +333,7 @@ StudentDetail _buildStudentDetail({
   String city = 'Abidjan',
   String district = 'Cocody',
   String municipality = 'Riviera',
+  String neighborhood = 'Riviera',
   String address = 'Riviera 2',
 }) {
   return StudentDetail(
@@ -333,7 +361,7 @@ StudentDetail _buildStudentDetail({
       name: 'College',
       code: 'COL',
     ),
-    neighborhood: 'Riviera',
+    neighborhood: neighborhood,
   );
 }
 
