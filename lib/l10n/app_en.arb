@@ -3497,6 +3497,14 @@
   "financeStatsKpiExpected": "Total expected",
   "financeStatsKpiOutstanding": "Outstanding",
   "financeStatsKpiCollectionRate": "Collection rate",
+  "financeStatsKpiRateForCurrency": "{rate}% · {currency}",
+  "@financeStatsKpiRateForCurrency": {
+    "description": "Collection rate of one currency, when the dashboard carries several.",
+    "placeholders": {
+      "rate": { "type": "int" },
+      "currency": { "type": "String" }
+    }
+  },
   "financeStatsSectionEvolution": "Collection evolution",
   "financeStatsLegendCurrentPeriod": "Current period",
   "financeStatsLegendOtherPeriods": "Other periods",

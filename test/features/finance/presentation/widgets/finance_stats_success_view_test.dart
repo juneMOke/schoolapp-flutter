@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_currency_block.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -81,14 +80,19 @@ void main() {
     expect(find.textContaining('En '), findsNothing);
   });
 
-  testWidgets('deux devises : deux blocs complets, chacun nommé', (
+  testWidgets('deux devises : des indicateurs communs, des graphiques nommés', (
     tester,
   ) async {
     await _pump(tester, _stats([_block('CDF', 900000), _block('USD', 200000)]));
 
     expect(tester.takeException(), isNull);
-    // Quatre cartes PAR bloc — jamais un chiffre unique qui mêlerait les deux.
-    expect(find.byType(EteeloKpiCard), findsNWidgets(8));
+    // Quatre cartes en tout, chacune portant ses deux devises. C'étaient huit
+    // cartes : « Total encaissé » en francs, puis le même intitulé en dollars
+    // un écran de graphiques plus bas — il fallait défiler pour lire ce qui
+    // était rentré. Les montants ne sont pas additionnés pour autant : ils
+    // s'empilent (cf. `finance_stats_kpi_band_test.dart`).
+    expect(find.byType(EteeloKpiCard), findsNWidgets(4));
+    // Les en-têtes nomment ce qui reste par devise : les graphiques.
     expect(find.text('En FC'), findsOneWidget);
     expect(find.text(r'En $'), findsOneWidget);
   });

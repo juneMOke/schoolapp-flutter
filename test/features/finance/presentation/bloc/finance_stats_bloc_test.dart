@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_stats_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_currency_block.dart';
 
 class MockGetFinanceStatsUseCase extends Mock
     implements GetFinanceStatsUseCase {}

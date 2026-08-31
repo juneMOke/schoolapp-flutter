@@ -9732,6 +9732,12 @@ abstract class AppLocalizations {
   /// **'Collection rate'**
   String get financeStatsKpiCollectionRate;
 
+  /// Collection rate of one currency, when the dashboard carries several.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% · {currency}'**
+  String financeStatsKpiRateForCurrency(int rate, String currency);
+
   /// No description provided for @financeStatsSectionEvolution.
   ///
   /// In en, this message translates to:

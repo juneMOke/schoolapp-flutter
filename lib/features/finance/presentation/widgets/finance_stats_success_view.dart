@@ -11,21 +11,30 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_kpi_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le tableau de bord financier — **un bloc complet par devise**.
+/// Le tableau de bord financier — **des indicateurs communs, des graphiques par
+/// devise**.
 ///
-/// ## Répéter, plutôt qu'un sélecteur
+/// ## Ce qui fusionne et ce qui se répète
 ///
-/// Les blocs sont faits pour être lus côte à côte, et c'est la comparaison qui a
-/// de la valeur : un sélecteur cacherait la moitié du pilotage derrière un clic.
-/// L'axe du temps étant garanti identique d'un bloc à l'autre, les graphiques
-/// empilés s'alignent naturellement.
+/// Les quatre cartes du haut portent toutes les devises à la fois, une ligne
+/// chacune : « combien est rentré » est une seule question, et y répondre en
+/// deux cartes homonymes séparées par un écran de graphiques obligeait à faire
+/// défiler pour lire un chiffre. Elles ne s'additionnent pas pour autant — cf.
+/// [FinanceStatsKpiBand].
+///
+/// Les graphiques, eux, restent un jeu complet par devise. Ils sont faits pour
+/// être lus côte à côte, et c'est la comparaison qui a de la valeur : un
+/// sélecteur cacherait la moitié du pilotage derrière un clic. L'axe du temps
+/// étant garanti identique d'un bloc à l'autre, les graphiques empilés
+/// s'alignent naturellement.
 ///
 /// **Jamais deux devises sur un même axe vertical** : l'écart d'échelle est de
 /// ×2 800, et une courbe en francs écraserait une courbe en dollars jusqu'à
 /// l'illisible.
 ///
 /// À une seule devise, le rendu est celui d'avant — l'en-tête de devise ne
-/// paraît que lorsqu'il y a quelque chose à distinguer.
+/// paraît que lorsqu'il y a quelque chose à distinguer, et les cartes gardent
+/// leur ligne unique.
 class FinanceStatsSuccessView extends StatelessWidget {
   final FinanceStats stats;
 
@@ -53,15 +62,14 @@ class FinanceStatsSuccessView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Les INDICATEURS en tête, toutes devises sur les mêmes quatre cartes :
+        // « ce qui est rentré » est une question unique, et la répéter par
+        // devise obligeait à faire défiler entre deux cartes homonymes.
+        FinanceStatsKpiBand(blocks: stats.byCurrency),
+        const SizedBox(height: AppDimensions.spacingL),
         for (final block in stats.byCurrency) ...[
           if (showCurrencyHeadings)
             _CurrencyHeading(currency: block.currency, l10n: l10n),
-          FinanceStatsKpiBand(
-            kpis: block.kpis,
-            distribution: block.distributionByFeeType,
-            currency: block.currency,
-          ),
-          const SizedBox(height: AppDimensions.spacingL),
           // Sur grand écran, Évolution et Répartition par frais se juxtaposent
           // pour occuper l'espace (flex 2:3 → la répartition garde ≥2 colonnes) ;
           // en dessous, elles s'empilent verticalement.

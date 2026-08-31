@@ -5951,6 +5951,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeStatsKpiCollectionRate => 'Taux de recouvrement';
 
   @override
+  String financeStatsKpiRateForCurrency(int rate, String currency) {
+    return '$rate % · $currency';
+  }
+
+  @override
   String get financeStatsSectionEvolution => 'Évolution des encaissements';
 
   @override

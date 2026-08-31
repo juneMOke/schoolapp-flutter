@@ -3452,6 +3452,14 @@
   "financeStatsKpiExpected": "Total attendu",
   "financeStatsKpiOutstanding": "Reste à recouvrer",
   "financeStatsKpiCollectionRate": "Taux de recouvrement",
+  "financeStatsKpiRateForCurrency": "{rate}\u00A0% · {currency}",
+  "@financeStatsKpiRateForCurrency": {
+    "description": "Taux de recouvrement d'une devise, quand le tableau de bord en porte plusieurs.",
+    "placeholders": {
+      "rate": { "type": "int" },
+      "currency": { "type": "String" }
+    }
+  },
   "financeStatsSectionEvolution": "Évolution des encaissements",
   "financeStatsLegendCurrentPeriod": "Période en cours",
   "financeStatsLegendOtherPeriods": "Autres périodes",

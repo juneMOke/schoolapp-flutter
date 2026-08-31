@@ -1,5 +1,6 @@
 export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/fee_type_distribution.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/fee_type_item.dart';
+export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_currency_block.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_evolution.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_evolution_bucket.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_stats/finance_evolution_granularity.dart';
