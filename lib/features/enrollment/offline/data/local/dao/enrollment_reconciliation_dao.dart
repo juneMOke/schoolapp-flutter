@@ -264,7 +264,7 @@ class EnrollmentReconciliationDao {
     // purge des liens vers des tuteurs SYNCED disparus du dossier serveur (les
     // liens vers un tuteur local protégé, non SYNCED, sont préservés).
     await _pruneStudentParentLinks(txn, e.studentId, resolvedParentIds);
-    await _applySnapshotReductions(txn, e, syncedAt);
+    await _applySnapshotReductions(txn, agg, syncedAt);
 
     return wroteEnrollment;
   }
@@ -283,20 +283,24 @@ class EnrollmentReconciliationDao {
   /// rendrait invisibles exactement dans le cas que la V2 va créer.
   Future<void> _applySnapshotReductions(
     DatabaseExecutor txn,
-    EnrollmentSnapshotDto e,
+    EnrollmentAggregateSnapshotDto agg,
     int syncedAt,
   ) async {
-    final codes = e.reductionCodes;
+    // La section est portée par l'AGRÉGAT, pas par son bloc inscription : côté
+    // serveur l'octroi est une table à part, et il descend ici faute de flux
+    // propre — pas parce qu'il serait une colonne de l'inscription.
+    final codes = agg.reductionCodes;
     if (codes == null) return;
 
+    final enrollmentId = agg.enrollment.id;
     await txn.delete(
       'enrollment_reductions',
       where: 'enrollment_id = ?',
-      whereArgs: [e.id],
+      whereArgs: [enrollmentId],
     );
     for (final code in codes.toSet()) {
       await txn.insert('enrollment_reductions', {
-        'enrollment_id': e.id,
+        'enrollment_id': enrollmentId,
         'reduction_code': code,
         'updated_at': syncedAt,
       });

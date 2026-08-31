@@ -479,17 +479,17 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   /// [replaceReductionCatalog].
   ///
   /// **Même caviardage que la grille tarifaire, purge d'une autre nature.** Le
-  /// serveur retire les deux sections à qui n'a pas `finance.grid.read` et les
-  /// envoie à `null`, jamais à `[]`. Mais ces tables n'ont pas d'année : le
-  /// scope de la purge est l'ÉCOLE, et il n'existe donc aucun filtre d'année
-  /// pour amortir une erreur ici. Une section absente doit rester un
-  /// non-événement — c'est aussi ce qui permet à ce code d'exister avant que le
-  /// serveur ne porte les sections.
+  /// serveur retire la section à qui n'a pas `finance.grid.read` et l'envoie à
+  /// `null`, jamais à `[]`. Mais ces tables n'ont pas d'année : le scope de la
+  /// purge est l'ÉCOLE, et il n'existe donc aucun filtre d'année pour amortir
+  /// une erreur ici. Une section absente doit rester un non-événement —
+  /// c'est aussi ce qui permet à ce code de tourner contre un serveur qui ne
+  /// porterait pas encore la section.
   ///
-  /// Les deux sections se décident **ensemble** : elles sont caviardées par le
-  /// même droit, donc l'une sans l'autre n'existe pas côté serveur. Si le cas
-  /// survenait, on applique ce qui est là et on traite l'absente comme vide
-  /// plutôt que de renoncer au barème entier.
+  /// **Une section, pas deux.** Les lignes descendent imbriquées dans leur
+  /// type ; l'aplatissement local leur stampe le code du parent. Rien à
+  /// joindre, donc rien à désynchroniser — c'est la raison que le serveur
+  /// donne lui-même d'imbriquer.
   ///
   /// `schoolId` vient de [currentUser], **jamais du payload** : c'est la clé de
   /// purge, et la laisser au serveur reviendrait à lui confier de quoi effacer
@@ -498,39 +498,39 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     ReferentialBundleDto body,
     int syncedAt,
   ) async {
-    final types = body.reductionTypes;
-    final lines = body.reductionLines;
-    if (types == null && lines == null) return 0;
+    final reductions = body.reductions;
+    if (reductions == null) return 0;
 
     final schoolId = currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return 0;
 
+    final lines = [
+      for (final reduction in reductions)
+        for (final line in reduction.lines)
+          ReductionLineLocalModel(
+            schoolId: schoolId,
+            reductionCode: reduction.code,
+            feeCode: line.feeCode,
+            percentage: line.percentage,
+            syncedAt: syncedAt,
+          ),
+    ];
+
     await replaceReductionCatalog(
       [
-        for (final type in types ?? const <RefReductionTypeDto>[])
+        for (final reduction in reductions)
           ReductionTypeLocalModel(
-            id: type.id,
             schoolId: schoolId,
-            code: type.code,
-            label: type.label,
-            active: type.active,
+            code: reduction.code,
+            label: reduction.label,
+            active: reduction.active,
             syncedAt: syncedAt,
           ),
       ],
-      [
-        for (final line in lines ?? const <RefReductionLineDto>[])
-          ReductionLineLocalModel(
-            id: line.id,
-            schoolId: schoolId,
-            reductionCode: line.reductionCode,
-            feeCode: line.feeCode,
-            value: line.value,
-            syncedAt: syncedAt,
-          ),
-      ],
+      lines,
       schoolId,
     );
-    return (types?.length ?? 0) + (lines?.length ?? 0);
+    return reductions.length + lines.length;
   }
 
   /// Catalogue boutique du bundle → caisse, par le seam

@@ -93,72 +93,66 @@ void main() {
       'email': 'contact@etoile.cd',
     };
 
-    // ── Barème de réductions (ADR-021) — les deux sections RACINE ────────────
+    // ── Barème de réductions (ADR-021) — UNE section racine ──────────────────
     //
     // La distinction `null` / `[]` ne vit pas dans la fabrique Dart : elle vit
     // sur le fil. Une fixture construite en Dart n'exerce jamais `fromJson`, et
     // c'est précisément là que `pullList` replierait `null` sur la liste vide
     // si quelqu'un l'y branchait — avec, au bout, une purge du barème d'une
     // école déclenchée par un pull qui n'avait rien à dire.
-    test('sections absentes → null, jamais liste vide', () {
+    test('section absente → null, jamais liste vide', () {
       final bundle = ReferentialBundleDto.fromJson({
         'school': schoolJson(),
         'current': yearBundleJson(yearId: 'ay-2', current: true),
         'serverTime': '2026-07-08T10:00:00Z',
       });
 
-      expect(bundle.reductionTypes, isNull);
-      expect(bundle.reductionLines, isNull);
+      expect(bundle.reductions, isNull);
     });
 
-    test('sections présentes et vides → [] (l\'école n\'a pas de barème)', () {
+    test('section présente et vide → [] (l\'école n\'a pas de barème)', () {
       final bundle = ReferentialBundleDto.fromJson({
         'school': schoolJson(),
         'current': yearBundleJson(yearId: 'ay-2', current: true),
-        'reductionTypes': <dynamic>[],
-        'reductionLines': <dynamic>[],
+        'reductions': <dynamic>[],
         'serverTime': '2026-07-08T10:00:00Z',
       });
 
-      expect(bundle.reductionTypes, isEmpty);
-      expect(bundle.reductionLines, isEmpty);
-      expect(bundle.reductionTypes, isNotNull);
-      expect(bundle.reductionLines, isNotNull);
+      expect(bundle.reductions, isEmpty);
+      expect(bundle.reductions, isNotNull);
     });
 
-    test('parse le barème, `active` par défaut à true', () {
+    // Le barème arrive IMBRIQUÉ : les lignes vivent dans leur type, et ne
+    // portent ni id ni code de rattachement. C'est la forme du serveur
+    // (`ReductionSummaryDto`), et le seul endroit où elle est exercée.
+    test('parse le barème imbriqué, `active` par défaut à true', () {
       final bundle = ReferentialBundleDto.fromJson({
         'school': schoolJson(),
         'current': yearBundleJson(yearId: 'ay-2', current: true),
-        'reductionTypes': [
+        'reductions': [
           {
-            'id': 'rt-1',
             'code': 'STAFF_CHILD',
             'label': 'Enfant du personnel',
             'active': false,
+            'lines': [
+              {'feeCode': 'MINERVAL', 'percentage': 50},
+            ],
           },
           // Serveur qui ne porte pas le drapeau : repli sur `true`. `false`
-          // masquerait tout un barème sur un champ simplement absent.
-          {'id': 'rt-2', 'code': 'SIBLING', 'label': 'Fratrie'},
-        ],
-        'reductionLines': [
-          {
-            'id': 'rl-1',
-            'reductionCode': 'STAFF_CHILD',
-            'feeCode': 'MINERVAL',
-            'value': 50,
-          },
+          // masquerait tout un barème sur un champ simplement absent. Et un
+          // type sans `lines` reste lisible : il ne réduit simplement rien.
+          {'code': 'SIBLING', 'label': 'Fratrie'},
         ],
         'serverTime': '2026-07-08T10:00:00Z',
       });
 
-      expect(bundle.reductionTypes!.first.active, isFalse);
-      expect(bundle.reductionTypes!.last.active, isTrue);
-      final line = bundle.reductionLines!.single;
-      expect(line.reductionCode, 'STAFF_CHILD');
+      expect(bundle.reductions!.first.active, isFalse);
+      expect(bundle.reductions!.last.active, isTrue);
+      expect(bundle.reductions!.last.lines, isEmpty);
+      final line = bundle.reductions!.first.lines.single;
       expect(line.feeCode, 'MINERVAL');
       // Pourcentage, pas de l'argent : un entier sur le fil arrive en double.
-      expect(line.value, 50.0);
+      expect(line.percentage, 50.0);
     });
 
     test(

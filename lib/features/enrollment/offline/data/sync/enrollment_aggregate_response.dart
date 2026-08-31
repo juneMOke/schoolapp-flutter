@@ -8,20 +8,10 @@ class ResponseEnrollment {
   final String? enrollmentCode; // numéro attribué serveur
   final String? status;
 
-  /// Réductions réellement gravées (ADR-021 V1). **Le serveur fait foi** : il
-  /// a pu en refuser une dont le code avait quitté le barème, et c'est cette
-  /// liste-là qui doit rester en local — pas celle qu'on a envoyée.
-  ///
-  /// `null` = l'accusé ne porte pas la section (serveur antérieur au champ) :
-  /// on garde ce que le guichet a déclaré, faute de mieux. `[]` = le serveur
-  /// n'a rien gravé, et c'est une information.
-  final List<String>? reductionCodes;
-
   const ResponseEnrollment({
     required this.id,
     this.enrollmentCode,
     this.status,
-    this.reductionCodes,
   });
 
   factory ResponseEnrollment.fromJson(Map<String, dynamic> j) =>
@@ -29,12 +19,6 @@ class ResponseEnrollment {
         id: j['id'] as String,
         enrollmentCode: j['enrollmentCode'] as String?,
         status: j['status'] as String?,
-        reductionCodes: j['reductionCodes'] == null
-            ? null
-            : [
-                for (final code in (j['reductionCodes'] as List<dynamic>))
-                  if (code is String) code,
-              ],
       );
 }
 
@@ -125,6 +109,19 @@ class EnrollmentAggregateResponse {
   final ResponseEnrollment enrollment;
   final ResponseStudent student;
   final List<ParentRemap> parents;
+
+  /// Réductions réellement gravées (ADR-021 V1). **À la racine de l'accusé**,
+  /// à côté de [enrollment] et non dedans — l'octroi n'est pas une colonne de
+  /// l'inscription, c'est une table à lui.
+  ///
+  /// **Le serveur fait foi** : il refuse en 422 un code sorti du barème, donc
+  /// ce qui revient ici est ce qui est gravé — y compris sur un rejeu, où ce
+  /// sont les octrois déjà en place et non un second octroi.
+  ///
+  /// `null` = l'accusé ne porte pas la section : on garde ce que le guichet a
+  /// déclaré, faute de mieux. `[]` = le serveur n'a rien gravé, et c'est une
+  /// information.
+  final List<String>? reductionCodes;
   final List<GeneratedDocumentDto> documents;
   final DeduplicationSignal? deduplication;
 
@@ -132,6 +129,7 @@ class EnrollmentAggregateResponse {
     required this.enrollment,
     required this.student,
     this.parents = const [],
+    this.reductionCodes,
     this.documents = const [],
     this.deduplication,
   });
@@ -141,6 +139,12 @@ class EnrollmentAggregateResponse {
         enrollment: ResponseEnrollment.fromJson(
           j['enrollment'] as Map<String, dynamic>,
         ),
+        reductionCodes: j['reductionCodes'] == null
+            ? null
+            : [
+                for (final code in (j['reductionCodes'] as List<dynamic>))
+                  if (code is String) code,
+              ],
         student: ResponseStudent.fromJson(j['student'] as Map<String, dynamic>),
         parents: (j['parents'] as List<dynamic>? ?? const [])
             .map((e) => ParentRemap.fromJson(e as Map<String, dynamic>))

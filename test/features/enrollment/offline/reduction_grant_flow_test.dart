@@ -54,10 +54,7 @@ void main() {
 
       // Ce qui n'est pas une chaîne est ignoré ; ce qui l'est passe. La file
       // ne s'arrête pas sur un serveur qui aurait servi un élément inattendu.
-      expect(
-        EnrollmentPayload.fromJson(json).reductionCodes,
-        ['STAFF_CHILD'],
-      );
+      expect(EnrollmentPayload.fromJson(json).reductionCodes, ['STAFF_CHILD']);
     });
 
     test('aller-retour des codes', () {
@@ -217,7 +214,6 @@ void main() {
       await catalog.replaceForSchool(
         const [
           ReductionTypeLocalModel(
-            id: 't1',
             schoolId: 'A',
             code: 'STAFF_CHILD',
             label: 'Enfant du personnel',
@@ -225,11 +221,10 @@ void main() {
         ],
         const [
           ReductionLineLocalModel(
-            id: 'l1',
             schoolId: 'A',
             reductionCode: 'STAFF_CHILD',
             feeCode: 'MINERVAL',
-            value: 50,
+            percentage: 50,
           ),
         ],
         schoolId: 'A',
@@ -243,19 +238,21 @@ void main() {
     });
     tearDown(() async => db.close());
 
-    test('cocher persiste immédiatement — il n\'y a pas d\'enregistrement',
-        () async {
-      final cubit = ReductionSelectionCubit(repository);
-      await cubit.load('e1');
+    test(
+      'cocher persiste immédiatement — il n\'y a pas d\'enregistrement',
+      () async {
+        final cubit = ReductionSelectionCubit(repository);
+        await cubit.load('e1');
 
-      await cubit.toggle('e1', 'STAFF_CHILD');
+        await cubit.toggle('e1', 'STAFF_CHILD');
 
-      // L'étape Frais n'a pas de bouton « Enregistrer » (PARCOURS 21) : une
-      // case qui attendrait une validation d'étape se perdrait en silence.
-      expect(await dao.codesFor('e1'), ['STAFF_CHILD']);
-      expect(cubit.state.selected, {'STAFF_CHILD'});
-      await cubit.close();
-    });
+        // L'étape Frais n'a pas de bouton « Enregistrer » (PARCOURS 21) : une
+        // case qui attendrait une validation d'étape se perdrait en silence.
+        expect(await dao.codesFor('e1'), ['STAFF_CHILD']);
+        expect(cubit.state.selected, {'STAFF_CHILD'});
+        await cubit.close();
+      },
+    );
 
     test('décocher persiste aussi', () async {
       await dao.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
@@ -269,46 +266,50 @@ void main() {
       await cubit.close();
     });
 
-    test('un octroi dont le type a quitté le barème reste sélectionné',
-        () async {
-      await dao.replaceFor('e1', const ['DISPARU'], nowMs: 1);
-      final cubit = ReductionSelectionCubit(repository);
+    test(
+      'un octroi dont le type a quitté le barème reste sélectionné',
+      () async {
+        await dao.replaceFor('e1', const ['DISPARU'], nowMs: 1);
+        final cubit = ReductionSelectionCubit(repository);
 
-      await cubit.load('e1');
+        await cubit.load('e1');
 
-      // Il ne se propose plus — mais le retirer d'office reviendrait à
-      // révoquer une réduction parce qu'une liste a changé.
-      expect(cubit.state.options.map((o) => o.code), ['STAFF_CHILD']);
-      expect(cubit.state.selected, {'DISPARU'});
-      // …et il reste VISIBLE, sous son code faute de libellé. Ne montrer que
-      // le barème le cacherait : la réduction existerait en base, partirait
-      // dans l'agrégat, et l'écran n'en dirait rien.
-      expect(cubit.state.entries.map((e) => e.code), [
-        'STAFF_CHILD',
-        'DISPARU',
-      ]);
-      expect(cubit.state.entries.last.label, 'DISPARU');
-      await cubit.close();
-    });
+        // Il ne se propose plus — mais le retirer d'office reviendrait à
+        // révoquer une réduction parce qu'une liste a changé.
+        expect(cubit.state.options.map((o) => o.code), ['STAFF_CHILD']);
+        expect(cubit.state.selected, {'DISPARU'});
+        // …et il reste VISIBLE, sous son code faute de libellé. Ne montrer que
+        // le barème le cacherait : la réduction existerait en base, partirait
+        // dans l'agrégat, et l'écran n'en dirait rien.
+        expect(cubit.state.entries.map((e) => e.code), [
+          'STAFF_CHILD',
+          'DISPARU',
+        ]);
+        expect(cubit.state.entries.last.label, 'DISPARU');
+        await cubit.close();
+      },
+    );
 
-    test('barème non communiqué mais octroi présent → la section s\'affiche',
-        () async {
-      await dao.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
-      // `finance.grid.read` manquant : le serveur caviarde le barème, donc
-      // aucune option ne descend. La réduction, elle, est bien là.
-      final withheld = ReductionGrantRepositoryImpl(
-        dao: dao,
-        readGrantable: (_) async => const <GrantableReduction>[],
-        currentUser: CurrentUserContext()..set('u1', schoolId: 'A'),
-      );
-      final cubit = ReductionSelectionCubit(withheld);
+    test(
+      'barème non communiqué mais octroi présent → la section s\'affiche',
+      () async {
+        await dao.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
+        // `finance.grid.read` manquant : le serveur caviarde le barème, donc
+        // aucune option ne descend. La réduction, elle, est bien là.
+        final withheld = ReductionGrantRepositoryImpl(
+          dao: dao,
+          readGrantable: (_) async => const <GrantableReduction>[],
+          currentUser: CurrentUserContext()..set('u1', schoolId: 'A'),
+        );
+        final cubit = ReductionSelectionCubit(withheld);
 
-      await cubit.load('e1');
+        await cubit.load('e1');
 
-      expect(cubit.state.isEmpty, isFalse);
-      expect(cubit.state.entries.single.code, 'STAFF_CHILD');
-      await cubit.close();
-    });
+        expect(cubit.state.isEmpty, isFalse);
+        expect(cubit.state.entries.single.code, 'STAFF_CHILD');
+        await cubit.close();
+      },
+    );
 
     test('barème vide → la section n\'a rien à afficher', () async {
       final empty = ReductionGrantRepositoryImpl(

@@ -13,15 +13,21 @@ import '../../offline_full_db.dart';
 ///
 /// **Le tri-état est ici plus dangereux qu'ailleurs.** Un octroi vit dans une
 /// table sans flux propre : personne ne le repousse, personne ne le rejoue. Si
-/// un agrégat muet l'effaçait, il serait perdu pour de bon — et il serait muet
-/// exactement aujourd'hui, puisque le back ne porte pas encore la section.
+/// un agrégat muet l'effaçait, il serait perdu pour de bon — et un agrégat est
+/// muet dès que la portion n'est pas communiquée.
+///
+/// **La section est à la RACINE de l'agrégat et de l'accusé**, jamais dans leur
+/// bloc `enrollment` : côté serveur l'octroi est une table à part. Le front l'a
+/// d'abord lue au mauvais niveau, où elle valait toujours `null` — donc « ne
+/// touche à rien », donc un silence parfait. Les deux tests de placement
+/// ci-dessous sont là pour ça.
 void main() {
   late Database db;
   late EnrollmentReductionDao grants;
 
   EnrollmentAggregateSnapshotDto snapshot({List<String>? codes}) =>
       EnrollmentAggregateSnapshotDto(
-        enrollment: EnrollmentSnapshotDto(
+        enrollment: const EnrollmentSnapshotDto(
           id: 'e1',
           studentId: 's1',
           academicYearId: 'ay-1',
@@ -34,7 +40,6 @@ void main() {
           surname: 'Junior',
           dateOfBirth: '2015-04-02',
           gender: 'FEMALE',
-          reductionCodes: codes,
         ),
         student: const StudentSnapshotDto(
           id: 's1',
@@ -45,6 +50,7 @@ void main() {
           dateOfBirth: '2015-04-02',
         ),
         parents: const [],
+        reductionCodes: codes,
         serverUpdatedAt: '2026-08-31T10:00:00Z',
       );
 
@@ -54,8 +60,8 @@ void main() {
   });
   tearDown(() async => db.close());
 
-  group('EnrollmentSnapshotDto.fromJson', () {
-    Map<String, dynamic> json({Object? codes = #absent}) => {
+  group('EnrollmentAggregateSnapshotDto.fromJson', () {
+    Map<String, dynamic> enrollmentJson({Object? codes = #absent}) => {
       'id': 'e1',
       'studentId': 's1',
       'academicYearId': 'ay-1',
@@ -71,12 +77,33 @@ void main() {
       if (codes != #absent) 'reductionCodes': codes,
     };
 
+    Map<String, dynamic> json({
+      Object? codes = #absent,
+      Object? nestedCodes = #absent,
+    }) => {
+      'enrollment': enrollmentJson(codes: nestedCodes),
+      'student': {
+        'id': 's1',
+        'firstName': 'Amina',
+        'lastName': 'Moke',
+        'surname': 'Junior',
+        'gender': 'FEMALE',
+        'dateOfBirth': '2015-04-02',
+      },
+      'parents': <dynamic>[],
+      if (codes != #absent) 'reductionCodes': codes,
+      'serverUpdatedAt': '2026-08-31T10:00:00Z',
+    };
+
     test('section absente → null, pas liste vide', () {
-      expect(EnrollmentSnapshotDto.fromJson(json()).reductionCodes, isNull);
+      expect(
+        EnrollmentAggregateSnapshotDto.fromJson(json()).reductionCodes,
+        isNull,
+      );
     });
 
     test('section vide → [], une information', () {
-      final dto = EnrollmentSnapshotDto.fromJson(
+      final dto = EnrollmentAggregateSnapshotDto.fromJson(
         json(codes: <dynamic>[]),
       );
       expect(dto.reductionCodes, isNotNull);
@@ -85,20 +112,29 @@ void main() {
 
     test('codes parsés, éléments non-chaîne ignorés', () {
       expect(
-        EnrollmentSnapshotDto.fromJson(
+        EnrollmentAggregateSnapshotDto.fromJson(
           json(codes: <dynamic>['STAFF_CHILD', 7]),
         ).reductionCodes,
         ['STAFF_CHILD'],
       );
     });
+
+    test('la section se lit à la RACINE, pas dans le bloc inscription', () {
+      // Le niveau est tout : lue dans `enrollment`, la section vaut toujours
+      // `null` — « je n'en parle pas » — et la relecture devient un silence
+      // parfait que rien ne signale. C'est le défaut qu'on a eu.
+      final dto = EnrollmentAggregateSnapshotDto.fromJson(
+        json(nestedCodes: <dynamic>['STAFF_CHILD']),
+      );
+      expect(dto.reductionCodes, isNull);
+    });
   });
 
   group('pull hydratant', () {
     Future<void> apply(EnrollmentAggregateSnapshotDto agg) =>
-        EnrollmentReconciliationDao(db).upsertEnrollmentSnapshots(
-          [agg],
-          syncedAt: 2000,
-        );
+        EnrollmentReconciliationDao(
+          db,
+        ).upsertEnrollmentSnapshots([agg], syncedAt: 2000);
 
     test('agrégat MUET n\'efface pas un octroi déclaré localement', () async {
       await grants.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1000);
@@ -143,9 +179,10 @@ void main() {
 
       await EnrollmentAckDao(db).applyEnrollmentAck(
         EnrollmentAggregateResponse(
-          enrollment: ResponseEnrollment(id: 'e1', reductionCodes: codes),
+          enrollment: const ResponseEnrollment(id: 'e1'),
           student: const ResponseStudent(id: 's1'),
           parents: const [],
+          reductionCodes: codes,
           documents: const [],
         ),
         enrollmentId: 'e1',
@@ -153,14 +190,15 @@ void main() {
       );
     }
 
-    test('le serveur fait foi : il retire ce qu\'il n\'a pas gravé', () async {
-      await grants.replaceFor('e1', const ['STAFF_CHILD', 'REFUSE'], nowMs: 1);
+    test('le serveur fait foi : sa liste remplace la déclaration', () async {
+      await grants.replaceFor('e1', const ['STAFF_CHILD', 'ANCIEN'], nowMs: 1);
 
       await ack(codes: const ['STAFF_CHILD']);
 
-      // Un code qui avait quitté le barème pendant que la tablette était hors
-      // ligne : le garder afficherait une réduction que personne n'a accordée,
-      // et le pull suivant dirait le contraire.
+      // Le cas réel n'est pas un refus partiel — un code hors barème fait
+      // échouer tout l'agrégat en 422 — mais le REJEU : l'accusé rend alors les
+      // octrois déjà en place, et ce sont eux qui font foi, pas ce que la
+      // tablette avait dans sa file.
       expect(await grants.codesFor('e1'), ['STAFF_CHILD']);
     });
 
@@ -168,6 +206,37 @@ void main() {
       await grants.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
 
       await ack();
+
+      expect(await grants.codesFor('e1'), ['STAFF_CHILD']);
+    });
+
+    test('la section se lit à la RACINE de l\'accusé', () async {
+      await grants.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
+      await db.insert('enrollments', {
+        'id': 'e1',
+        'student_id': 's1',
+        'enrollment_type': 'NEW_ENROLLMENT',
+        'status': 'PENDING',
+        'academic_year_id': 'ay-1',
+        'enrollment_date': '2026-08-31',
+        'sync_status': 'PENDING_SYNC',
+        'updated_at': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      // Un accusé qui ne porterait la section QUE dans son bloc inscription est
+      // un accusé muet : `reductionCodes` n'y est plus décodé, et le silence
+      // conserve — il n'efface pas.
+      await EnrollmentAckDao(db).applyEnrollmentAck(
+        EnrollmentAggregateResponse.fromJson(const {
+          'enrollment': {
+            'id': 'e1',
+            'reductionCodes': ['SIBLING'],
+          },
+          'student': {'id': 's1'},
+        }),
+        enrollmentId: 'e1',
+        nowMs: 3000,
+      );
 
       expect(await grants.codesFor('e1'), ['STAFF_CHILD']);
     });

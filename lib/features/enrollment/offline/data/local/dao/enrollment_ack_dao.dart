@@ -92,7 +92,7 @@ class EnrollmentAckDao {
     EnrollmentAggregateResponse response,
     String enrollmentId,
   ) async {
-    final codes = response.enrollment.reductionCodes;
+    final codes = response.reductionCodes;
     if (codes == null) return;
 
     await txn.delete(

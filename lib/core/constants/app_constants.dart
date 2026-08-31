@@ -463,7 +463,12 @@ class AppConstants {
   // montant ne change. Les deux tables de barème portent un `school_id` et PAS
   // d'`academic_year_id` — le barème descend à la racine du bundle, sa purge au
   // pull est donc scopée par école et non par année.
-  static const int offlineDbSchemaVersion = 36;
+  // v37 (2026-08-31) : les deux tables du barème alignées sur le contrat livré
+  // (ADR-021 côté back) — plus d'`id`, la clé est `(school_id, code)` puis
+  // `(school_id, reduction_code, fee_code)`, et `value` devient `percentage`.
+  // Tables de cache refaites plutôt que migrées : le pull du bundle les réécrit
+  // en entier, et aucune base de terrain n'a jamais porté la v36.
+  static const int offlineDbSchemaVersion = 37;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

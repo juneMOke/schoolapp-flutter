@@ -31,12 +31,25 @@ class EnrollmentAggregateSnapshotDto {
   final EnrollmentSnapshotDto enrollment;
   final StudentSnapshotDto student;
   final List<ParentSnapshotDto> parents;
+
+  /// Réductions octroyées (ADR-021 V1). **À la racine de l'agrégat**, à côté de
+  /// [enrollment] et non dedans : l'octroi vit dans sa propre table côté
+  /// serveur, et il descend ici plutôt que par un flux propre parce qu'il
+  /// voyage déjà dans la page de la ligne qu'il qualifie.
+  ///
+  /// **Nullable, et la nuance compte** : `null` = l'agrégat ne porte pas la
+  /// section (portion non communiquée) — on ne touche alors à rien en local ;
+  /// `[]` = ce dossier n'a aucune réduction, et c'est un ordre d'effacer. Les
+  /// replier l'un sur l'autre ferait perdre au premier pull les octrois que le
+  /// guichet vient de déclarer.
+  final List<String>? reductionCodes;
   final String serverUpdatedAt; // ISO-8601
 
   const EnrollmentAggregateSnapshotDto({
     required this.enrollment,
     required this.student,
     required this.parents,
+    this.reductionCodes,
     required this.serverUpdatedAt,
   });
 
@@ -49,6 +62,14 @@ class EnrollmentAggregateSnapshotDto {
           j['student'] as Map<String, dynamic>,
         ),
         parents: pullList(j['parents'], ParentSnapshotDto.fromJson),
+        // Volontairement hors de `pullList` : `null` et `[]` ne disent pas la
+        // même chose, et la distinction est ce qui protège les octrois.
+        reductionCodes: j['reductionCodes'] == null
+            ? null
+            : [
+                for (final code in (j['reductionCodes'] as List<dynamic>))
+                  if (code is String) code,
+              ],
         serverUpdatedAt: j['serverUpdatedAt'] as String,
       );
 }
@@ -89,13 +110,6 @@ class EnrollmentSnapshotDto {
   final String? medicalNotes;
   final String? cancellationReason;
 
-  /// Réductions octroyées (ADR-021 V1). **Nullable, et la nuance compte** :
-  /// `null` = l'agrégat ne porte pas la section (serveur antérieur au champ,
-  /// ou portion non communiquée) — on ne touche alors à rien en local ;
-  /// `[]` = ce dossier n'a aucune réduction, et c'est un ordre d'effacer.
-  /// Les replier l'un sur l'autre ferait perdre au premier pull les octrois
-  /// que le guichet vient de déclarer.
-  final List<String>? reductionCodes;
   final String? updatedAt; // ISO-8601 (LWW), optionnel au contrat
 
   const EnrollmentSnapshotDto({
@@ -124,7 +138,6 @@ class EnrollmentSnapshotDto {
     this.formerStudent = false,
     this.medicalNotes,
     this.cancellationReason,
-    this.reductionCodes,
     this.updatedAt,
   });
 
@@ -163,12 +176,6 @@ class EnrollmentSnapshotDto {
         cancellationReason: j['cancellationReason'] as String?,
         // Hors du repli sur la liste vide, comme les sections du bundle : ici
         // aussi c'est la distinction qui décide d'écrire ou de se taire.
-        reductionCodes: j['reductionCodes'] == null
-            ? null
-            : [
-                for (final code in (j['reductionCodes'] as List<dynamic>))
-                  if (code is String) code,
-              ],
         updatedAt: j['updatedAt'] as String?,
       );
 }

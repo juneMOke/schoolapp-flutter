@@ -2,20 +2,23 @@
 
 > **Contrat back : ADR-021, note « Réductions par élève », plan V1 du 31 août 2026.**
 >
-> 🔴 **Le back n'a rien livré.** Dernière migration `V106.0.0__grant_school_grid_assign.sql`,
-> zéro occurrence de `reduction` dans `src/`. Les deux routes et les deux sections
-> du bundle n'existent pas. **`openApi.yaml` ne fait donc PAS foi ici** — les noms
-> de champs de ce document sont *proposés*, à confronter à la spec dès que V107
-> est poussée (cf. §6).
+> ✅ **Le back a livré depuis** — `c71a259 feat(finance): remember which
+> reductions a student is entitled to`. `openApi.yaml` fait de nouveau foi, et
+> **les noms proposés par ce document étaient faux sur la descente du barème** :
+> une seule section racine `reductions`, lignes **imbriquées** dans leur type,
+> aucun `id`, et le taux nommé `percentage`. Le front est réaligné — cf. §6, qui
+> tient maintenant les réponses plutôt que les questions.
 >
 > ✅ **LES QUATRE LOTS SONT LIVRÉS** (2026-08-31) — RD-F0 `b6351b62`,
-> RD-F1 `875225a4`, RD-F2 `6e89fce2`, RD-F3. Schéma **v36**, analyze clean,
-> 15 mutations passées. Trois écarts au plan initial sont consignés en §7.
+> RD-F1 `875225a4` (réaligné depuis), RD-F2 `6e89fce2`, RD-F3. Schéma **v37**,
+> analyze clean, 15 mutations passées. Trois écarts au plan initial sont
+> consignés en §7.
 >
-> ✅ **Le contrat est entièrement additif** — un champ optionnel en entrée, deux
-> sections et une liste en sortie. Le front peut partir devant sans rien casser,
-> **à condition que l'absence des sections soit un non-événement** et pas une
-> erreur. C'est la contrainte n°1 de RD-F1.
+> ✅ **Le contrat est entièrement additif** — un champ optionnel en entrée, une
+> section et une liste en sortie. Le front peut partir devant sans rien casser,
+> **à condition que l'absence de la section soit un non-événement** et pas une
+> erreur. C'est la contrainte n°1 de RD-F1 — et c'est elle qui a rendu l'écart
+> de noms SILENCIEUX : le barème n'arrivait pas, et rien ne s'en plaignait.
 
 **Décisions actées.**
 
@@ -210,36 +213,49 @@ existent sans que personne ne les lise.
 
 ---
 
-## RD-F1 · ✅ `875225a4` · La descente du barème
+## RD-F1 · ✅ `875225a4`, réaligné · La descente du barème
 
-**Objectif.** Les deux sections racine parsées, stockées, purgées juste.
+**Objectif.** La section racine parsée, stockée, purgée juste.
 
-**Contrat** — `referential_pull_models.dart` :
+**Contrat** — `referential_pull_models.dart`, sur la forme réellement servie
+(`ReferentialBundle.reductions`, `ReductionSummaryDto`) :
 
 ```dart
 class ReferentialBundleDto {
   final RefSchoolDto school;
   final ReferentialYearBundleDto current;
   final ReferentialYearBundleDto? previous;
-  final List<RefReductionTypeDto>? reductionTypes;   // nullable : cf. piège 3
-  final List<RefReductionLineDto>? reductionLines;
+  final List<RefReductionDto>? reductions;   // nullable : cf. piège 3
   final String serverTime;
+}
+
+class RefReductionDto {
+  final String code;            // pas d'`id` : le serveur n'en donne aucun
+  final String label;
+  final bool active;
+  final List<RefReductionLineDto> lines;   // imbriquées, pas une 2ᵉ section
+}
+
+class RefReductionLineDto {
+  final String feeCode;
+  final double percentage;      // 0–100, ni id ni code de rattachement
 }
 ```
 
-Décodage **hors de `pullList`** — `j['reductionTypes'] == null ? null : pullList(…)`.
+Décodage **hors de `pullList`** — `j['reductions'] == null ? null : pullList(…)`.
+Les `lines`, elles, passent PAR `pullList` : leur absence ne veut rien dire
+d'autre que « ce type ne réduit encore rien ».
 
 **Application** — un `_applyReductionCatalog(body)` frère de
 `_applyBoutiqueCatalog`, mais **scopé école, pas année** :
 
-- les deux sections `null` → retour immédiat, **zéro écriture** ;
+- section `null` → retour immédiat, **zéro écriture** ;
 - sinon, dans une transaction : `DELETE … WHERE school_id = ?` puis insertion,
   `school_id` venant de `currentUser.schoolId ?? ''`.
 
-⚠️ Les deux sections se traitent **ensemble** : le serveur les caviarde derrière
-le même droit, donc l'une sans l'autre n'existe pas. Si le cas survient quand
-même, on applique celle qui est là et on laisse l'autre — jamais de purge sur une
-section absente.
+Les lignes sont **aplaties** en table à part, le code du type stampé au passage :
+deux tables locales, mais une seule section sur le fil — donc rien à joindre, et
+rien à désynchroniser. C'est la raison que le back donne lui-même d'imbriquer.
 
 **Lecture** — un `ReductionCatalogDao` avec une seule requête utile en V1 :
 
@@ -312,10 +328,19 @@ montant.
 
 **Objectif.** Ce que le serveur a gravé redescend et s'affiche.
 
-- `EnrollmentAggregateSnapshotDto` : `reductionCodes` sur l'objet `enrollment`,
-  **liste tolérante** (absente = pas de section, pas « aucune réduction »).
-- L'ACK (`ResponseEnrollment`) : idem, et il écrase le local — le serveur fait
-  foi sur ce qu'il a réellement gravé.
+- `EnrollmentAggregateSnapshotDto` : `reductionCodes` **à la racine de
+  l'agrégat**, à côté de `enrollment` et non dedans (l'octroi est une table à
+  part côté serveur), **liste tolérante** (absente = pas de section, pas
+  « aucune réduction »).
+- L'ACK : `reductionCodes` **à la racine de la réponse**, pas sur son bloc
+  `enrollment` — et il écrase le local, le serveur faisant foi sur ce qu'il a
+  réellement gravé. Sur un rejeu ce sont les octrois déjà en place.
+
+⚠️ Les deux niveaux ont d'abord été lus **dans** le bloc `enrollment`. Le champ
+y valait toujours `null`, donc « je n'en parle pas », donc « ne touche à rien » :
+la relecture était un silence parfait, que la règle de tolérance rendait
+indiscernable du cas normal. Deux tests épinglent maintenant le NIVEAU, pas
+seulement la règle.
 - Hydratation de `enrollment_reductions` **uniquement quand la section est
   portée**. Un delta pull qui ne la porte pas ne doit rien effacer : c'est le
   piège 3, transposé à l'inscription.
@@ -391,21 +416,47 @@ jour-là.
 
 ---
 
-## 6. À confirmer contre `openApi.yaml` dès que V107 est poussée
+## 6. Confronté à `openApi.yaml` — ce que le back a réellement livré
 
-Les noms ci-dessous sont **proposés**, pas relevés — le back n'a rien livré.
+Le back a livré après l'écriture de ce plan (`c71a259`). Les six points ouverts
+sont tranchés — plus un septième que personne n'avait pensé à poser —, et
+**cinq des sept étaient faux**. Le premier coûtait le barème entier, les deux
+derniers la relecture des octrois.
 
-1. `reductionTypes` / `reductionLines` — nom exact des deux sections racine.
-2. Les champs d'un type : `code`, `label`, et le nom du drapeau d'activité
-   (`active` ? `enabled` ?).
-3. Les champs d'une ligne : `reductionCode` ou `typeCode` ? `value` ou
-   `percentage` ? Type numérique (entier 0–100, ou décimal).
-4. `reductionCodes` sur l'`enrollment` : **au même niveau que `medicalNotes`**,
-   ou dans un objet à part ?
-5. L'ACK renvoie-t-il les codes sur `enrollment`, ou dans une section propre ?
-6. Le 422 sur un code inconnu : `detailCode` exact, et **est-il terminal** ? Un
-   code retiré du barème pendant que la tablette était hors ligne ne doit pas
-   condamner l'inscription entière — c'est la leçon de `422 AMBIGUOUS_EMERGENCY_CONTACT`.
+| | Proposé ici | Livré | Verdict |
+|---|---|---|---|
+| 1 | `reductionTypes` + `reductionLines`, deux sections racine | **une** section `reductions`, lignes **imbriquées** | ❌ réaligné |
+| 2 | `id`, `code`, `label`, `active` sur le type | `code`, `label`, `active`, `lines` — **pas d'`id`** | ❌ réaligné (`active` bon) |
+| 3 | `id`, `reductionCode`, `feeCode`, `value` sur la ligne | `feeCode`, `percentage` | ❌ réaligné |
+| 4 | `reductionCodes` au même niveau que `medicalNotes` | idem (`EnrollmentInput`, `EnrollmentAggregateSnapshot`) | ✅ |
+| 5 | l'ACK renvoie les codes sur `enrollment` | **à la racine** de la réponse, à côté de `enrollment`/`student`/`charges` | ❌ réaligné |
+| 7 | *(non posé)* le snapshot de pull, même question | **à la racine** de l'agrégat, à côté de `enrollment`/`student`/`parents` | ❌ réaligné |
+| 6 | 422 sur un code inconnu, terminal ? | **oui** : `UNKNOWN_REDUCTION_CODE`, levé pendant l'ingestion de l'agrégat | ⚠️ voir ci-dessous |
 
-Le point 6 est le seul qui puisse coûter une inscription au guichet. Les cinq
-autres coûtent un renommage.
+**Le point 6 était la bonne inquiétude.** `ReductionGrantPortImpl` refuse en 422
+tout code inconnu **ou désactivé**, et il le fait au milieu de l'ingestion de
+l'inscription : un code retiré du barème pendant que la tablette était hors ligne
+ne coûte pas la réduction, il coûte **le push de l'inscription entière**. Le back
+l'assume (« un défaut de référentiel doit se voir », même parti pris que
+`UNKNOWN_FEE_CODE_IN_TARIFF`), et le front l'encaisse déjà correctement :
+`enrollment_outbox_handler` classe tout 4xx hors 401/408/409/429 en **SYNC_ERROR
+terminal**, avec le motif du serveur — le dossier n'est ni perdu ni rejoué en
+boucle, il attend une correction et un re-push. Rien à changer ici, mais c'est le
+scénario à connaître avant d'ouvrir un écran de gestion du barème : **désactiver
+un type met en échec les inscriptions encore en file qui le portent.**
+
+**La leçon.** Aucun des cinq écarts n'a fait échouer quoi que ce soit : la
+section attendue n'arrivait simplement jamais, et « section absente =
+non-événement » — la protection n°1 de ce lot — l'a rendue muette. Le barème
+restait vide sur TOUTE école, la liste à cocher aussi, les octrois ne
+redescendaient jamais, et aucun test ne pouvait le voir : ils construisaient le
+bundle et l'agrégat dans le vocabulaire du front. **Une tolérance bien écrite
+transforme une erreur de contrat en silence** — c'est ce qui la rend précieuse
+au guichet et dangereuse en intégration. Un contrat deviné se vérifie contre la
+source, jamais contre ses propres fixtures.
+
+Corollaire de schéma : `id` n'était pas seulement inutile, il était **faux** —
+la clé d'un type est `(school_id, code)`, celle d'une ligne
+`(school_id, reduction_code, fee_code)`, exactement les contraintes du back. Le
+palier **v37** refait les deux tables sur cette forme (cache référentiel : jeté,
+pas recopié — le pull suivant le réécrit).

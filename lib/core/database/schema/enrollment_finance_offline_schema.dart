@@ -416,57 +416,60 @@ const TableSchema refFeeTariffsTable = TableSchema(
 /// un pull effacerait le barème de l'autre école sur une tablette partagée, et
 /// aucun filtre `academic_year_id` ne viendrait masquer la perte en « vide ».
 ///
-/// `active` : nom à confronter à `openApi.yaml` quand V107 sera poussée
-/// (cf. REDUCTIONS_PLAN.md §6) — le back n'a rien livré à l'écriture de ceci.
+/// **Aucun `id` : le serveur n'en donne pas.** `ReductionSummaryDto` ne porte
+/// que `code`, `label`, `active` et ses lignes — l'identité d'un type est son
+/// code dans son école, et c'est la clé primaire. Un id local fabriqué depuis
+/// ce couple n'aurait rien identifié de plus, et aurait laissé croire qu'il
+/// venait du contrat.
 const TableSchema refReductionTypesTable = TableSchema(
   name: 'ref_reduction_types',
   createTableSql: '''
     CREATE TABLE ref_reduction_types (
-      id TEXT PRIMARY KEY,
       school_id TEXT NOT NULL DEFAULT '',
       code TEXT NOT NULL,
       label TEXT NOT NULL,
       active INTEGER NOT NULL DEFAULT 1,
-      synced_at INTEGER NOT NULL DEFAULT 0
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, code)
     )
   ''',
-  createIndexSql: [
-    'CREATE UNIQUE INDEX idx_ref_reduction_types_school_code '
-        'ON ref_reduction_types(school_id, code)',
-  ],
+  createIndexSql: [],
 );
 
 /// `ref_reduction_lines` — le barème proprement dit : ce qu'une nature réduit,
 /// et de combien, rubrique par rubrique.
 ///
-/// `value` est un **pourcentage** (0–100), pas de l'argent : d'où le `REAL`, qui
-/// ne contredit pas la règle « argent = INTEGER centimes ». Rien ne le calcule
-/// en V1 — le front stocke ce qui descend sans le réinterpréter, et l'arrondi
-/// reste un problème de V2, déjà tranché côté back (HALF_UP au centime).
+/// `percentage` est un pourcentage (0–100), pas de l'argent : d'où le `REAL`,
+/// qui ne contredit pas la règle « argent = INTEGER centimes ». Rien ne le
+/// calcule en V1 — le front stocke ce qui descend sans le réinterpréter, et
+/// l'arrondi reste un problème de V2, déjà tranché côté back (HALF_UP au
+/// centime).
 ///
 /// La table est peuplée alors que **presque rien ne la lit en V1** : seul le
 /// filtre « ne proposer que les types qui réduisent réellement quelque chose »
 /// s'y appuie. C'est délibéré — la section descend de toute façon, et la jeter
 /// maintenant coûterait un palier de plus à la V2.
 ///
-/// Clé de jointure : `reduction_code`, jamais l'`id` du type. Le back a lui
-/// aussi choisi la FK sur `(school_id, code)`.
+/// **Table à plat, section imbriquée sur le fil.** Le serveur sert les lignes
+/// DANS leur type (`reductions[].lines[]`) et n'en donne ni id ni code de
+/// rattachement : le code du parent est stampé ici à l'aplatissement. Deux
+/// listes à joindre côté client seraient deux occasions de les désynchroniser —
+/// c'est la raison que le back donne lui-même de l'imbrication.
+///
+/// Clé : `(school_id, reduction_code, fee_code)`, comme la contrainte du back.
 const TableSchema refReductionLinesTable = TableSchema(
   name: 'ref_reduction_lines',
   createTableSql: '''
     CREATE TABLE ref_reduction_lines (
-      id TEXT PRIMARY KEY,
       school_id TEXT NOT NULL DEFAULT '',
       reduction_code TEXT NOT NULL,
       fee_code TEXT NOT NULL,
-      value REAL NOT NULL,
-      synced_at INTEGER NOT NULL DEFAULT 0
+      percentage REAL NOT NULL,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, reduction_code, fee_code)
     )
   ''',
-  createIndexSql: [
-    'CREATE UNIQUE INDEX idx_ref_reduction_lines_school_code_fee '
-        'ON ref_reduction_lines(school_id, reduction_code, fee_code)',
-  ],
+  createIndexSql: [],
 );
 
 /// `enrollment_reductions` — qui a droit à quoi. **Mémoire seule en V1** :

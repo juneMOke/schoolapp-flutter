@@ -12,7 +12,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 ///     Les deux tables de barème n'ont pas d'année — le barème descend à la
 ///     racine du bundle référentiel — donc `school_id` est la SEULE chose qui
 ///     empêche le pull d'une école d'écraser le barème de l'autre sur une
-///     tablette partagée. L'index unique le rend impossible à contourner par
+///     tablette partagée. La clé primaire le rend impossible à contourner par
 ///     mégarde.
 ///  2. **Aucun montant ne bouge.** La V1 ne calcule rien : `student_charges`
 ///     doit ressortir de la migration exactement comme elle y est entrée. Le
@@ -80,22 +80,24 @@ void main() {
     }
   });
 
-  test('l\'étape est idempotente et ne perd pas le barème déjà descendu', () async {
-    await _migrate(db);
-    await db.insert('ref_reduction_types', {
-      'id': 't1',
-      'school_id': 'A',
-      'code': 'STAFF_CHILD',
-      'label': 'Enfant du personnel',
-      'active': 1,
-      'synced_at': 1,
-    });
+  test(
+    'l\'étape est idempotente et ne perd pas le barème déjà descendu',
+    () async {
+      await _migrate(db);
+      await db.insert('ref_reduction_types', {
+        'school_id': 'A',
+        'code': 'STAFF_CHILD',
+        'label': 'Enfant du personnel',
+        'active': 1,
+        'synced_at': 1,
+      });
 
-    await _migrate(db);
+      await _migrate(db);
 
-    final rows = await db.query('ref_reduction_types');
-    expect(rows.single['code'], 'STAFF_CHILD');
-  });
+      final rows = await db.query('ref_reduction_types');
+      expect(rows.single['code'], 'STAFF_CHILD');
+    },
+  );
 
   test('deux écoles gardent chacune son barème sous le même code', () async {
     await _migrate(db);
@@ -106,7 +108,6 @@ void main() {
     // barème », faute d'un filtre d'année pour l'absorber.
     for (final schoolId in const ['A', 'B']) {
       await db.insert('ref_reduction_types', {
-        'id': 'type-$schoolId',
         'school_id': schoolId,
         'code': 'STAFF_CHILD',
         'label': 'Enfant du personnel',
@@ -114,11 +115,10 @@ void main() {
         'synced_at': 0,
       });
       await db.insert('ref_reduction_lines', {
-        'id': 'line-$schoolId',
         'school_id': schoolId,
         'reduction_code': 'STAFF_CHILD',
         'fee_code': 'MINERVAL',
-        'value': 50,
+        'percentage': 50,
         'synced_at': 0,
       });
     }
@@ -130,7 +130,6 @@ void main() {
   test('un même code deux fois dans une école est refusé', () async {
     await _migrate(db);
     await db.insert('ref_reduction_types', {
-      'id': 't1',
       'school_id': 'A',
       'code': 'STAFF_CHILD',
       'label': 'Enfant du personnel',
@@ -140,7 +139,6 @@ void main() {
 
     await expectLater(
       db.insert('ref_reduction_types', {
-        'id': 't2',
         'school_id': 'A',
         'code': 'STAFF_CHILD',
         'label': 'Doublon',
@@ -151,31 +149,34 @@ void main() {
     );
   });
 
-  test('un octroi ne se pose qu\'une fois par inscription et par code', () async {
-    await _migrate(db);
-    await db.insert('enrollment_reductions', {
-      'enrollment_id': 'e1',
-      'reduction_code': 'STAFF_CHILD',
-      'updated_at': 1,
-    });
-
-    await expectLater(
-      db.insert('enrollment_reductions', {
+  test(
+    'un octroi ne se pose qu\'une fois par inscription et par code',
+    () async {
+      await _migrate(db);
+      await db.insert('enrollment_reductions', {
         'enrollment_id': 'e1',
         'reduction_code': 'STAFF_CHILD',
+        'updated_at': 1,
+      });
+
+      await expectLater(
+        db.insert('enrollment_reductions', {
+          'enrollment_id': 'e1',
+          'reduction_code': 'STAFF_CHILD',
+          'updated_at': 2,
+        }),
+        throwsA(isA<DatabaseException>()),
+      );
+      // Une AUTRE réduction sur la même inscription reste possible : c'est bien
+      // le couple qui est unique, pas l'inscription.
+      await db.insert('enrollment_reductions', {
+        'enrollment_id': 'e1',
+        'reduction_code': 'SIBLING',
         'updated_at': 2,
-      }),
-      throwsA(isA<DatabaseException>()),
-    );
-    // Une AUTRE réduction sur la même inscription reste possible : c'est bien
-    // le couple qui est unique, pas l'inscription.
-    await db.insert('enrollment_reductions', {
-      'enrollment_id': 'e1',
-      'reduction_code': 'SIBLING',
-      'updated_at': 2,
-    });
-    expect((await db.query('enrollment_reductions')).length, 2);
-  });
+      });
+      expect((await db.query('enrollment_reductions')).length, 2);
+    },
+  );
 
   test('aucun montant ne bouge : `student_charges` sort intacte', () async {
     final before = await _columnsOf(db, 'student_charges');

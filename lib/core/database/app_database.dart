@@ -1036,6 +1036,45 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
+
+  if (upTo(37)) {
+    // v37 — le barème de réductions sur la forme que le serveur sert vraiment.
+    //
+    // La v36 a été écrite AVANT que le back ne livre l'ADR-021 : elle attendait
+    // deux sections à plat, chacune portant un `id`. Le contrat livré n'en donne
+    // aucun — un type est identifié par son code dans son école, une ligne par
+    // sa rubrique dans son type — et il nomme le taux `percentage`.
+    await _rebuildReductionCatalog(db, schema);
+  }
+}
+
+/// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée
+/// `percentage`.
+///
+/// **Refaites, pas migrées.** Ce sont des tables de cache référentiel : le pull
+/// du bundle les réécrit en entier, école par école, et rien d'autre ne les
+/// alimente. Recopier trois colonnes pour les faire écraser au prochain pull
+/// coûterait plus que la ligne qu'on économise. Aucune base de terrain n'a
+/// jamais porté la v36 — ce palier ne rattrape que les tablettes qui ont fait
+/// tourner la branche, et la seule conséquence y est un barème absent jusqu'au
+/// pull suivant.
+///
+/// Rejouable : se garde sur la forme réelle. La colonne `id` est la signature
+/// de la v36 ; sur une table déjà refaite, il n'y a rien à faire.
+Future<void> _rebuildReductionCatalog(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  for (final name in const ['ref_reduction_types', 'ref_reduction_lines']) {
+    if (!await _hasTable(db, name)) continue;
+    if (!await _hasColumn(db, name, 'id')) continue;
+    await db.execute('DROP TABLE $name');
+    final table = schema.firstWhere((t) => t.name == name);
+    await db.execute(table.createTableSql);
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
 }
 
 /// Étape v35 : `boutique_sale_lines.currency`, et `boutique_sales` sans montant.

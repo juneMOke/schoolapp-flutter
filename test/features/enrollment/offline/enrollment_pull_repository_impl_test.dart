@@ -119,8 +119,7 @@ void main() {
     bool withheldTariffs = false,
     List<RefBoutiqueArticleDto>? boutiqueArticles,
     bool withheldBoutique = true,
-    List<RefReductionTypeDto>? reductionTypes,
-    List<RefReductionLineDto>? reductionLines,
+    List<RefReductionDto>? reductions,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     current: ReferentialYearBundleDto(
@@ -150,11 +149,9 @@ void main() {
           : (boutiqueArticles ?? const []),
     ),
     previous: previous,
-    // Défaut `null` = sections absentes : c'est l'état réel du serveur tant
-    // que V107 n'est pas livrée, et le pull doit s'en accommoder sans rien
-    // faire.
-    reductionTypes: reductionTypes,
-    reductionLines: reductionLines,
+    // Défaut `null` = section absente : c'est ce que répond un serveur qui
+    // caviarde le barème, et le pull doit s'en accommoder sans rien faire.
+    reductions: reductions,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -264,7 +261,7 @@ void main() {
   // ailleurs, un pull qui range mal fait apparaître un référentiel VIDE (le
   // filtre d'année ne trouve rien) ; ici, il l'EFFACE.
   group('syncReferential — barème de réductions', () {
-    test('sections absentes → le seam n\'est pas appelé du tout', () async {
+    test('section absente → le seam n\'est pas appelé du tout', () async {
       when(
         () => api.pullReferential(any()),
       ).thenAnswer((_) async => httpOk(bundle()));
@@ -272,19 +269,16 @@ void main() {
       await repo.syncReferential();
 
       // `null` dit « pas communiqué » — le serveur caviarde pour qui n'a pas
-      // `finance.grid.read`, et c'est aussi ce que répond un serveur qui ne
-      // porte pas encore les sections. Appeler le seam avec deux listes vides
-      // y lirait un ordre de purge, et effacerait le barème dont dépend le
-      // guichet d'un autre poste sur la même tablette.
+      // `finance.grid.read`. Appeler le seam avec des listes vides y lirait un
+      // ordre de purge, et effacerait le barème dont dépend le guichet d'un
+      // autre poste sur la même tablette.
       expect(capturedReductionSchoolIds, isEmpty);
     });
 
-    test('sections présentes et vides → purge demandée', () async {
-      when(() => api.pullReferential(any())).thenAnswer(
-        (_) async => httpOk(
-          bundle(reductionTypes: const [], reductionLines: const []),
-        ),
-      );
+    test('section présente et vide → purge demandée', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle(reductions: const [])));
 
       await repo.syncReferential();
 
@@ -299,20 +293,14 @@ void main() {
       when(() => api.pullReferential(any())).thenAnswer(
         (_) async => httpOk(
           bundle(
-            reductionTypes: const [
-              RefReductionTypeDto(
-                id: 'rt-1',
+            reductions: const [
+              RefReductionDto(
                 code: 'STAFF_CHILD',
                 label: 'Enfant du personnel',
                 active: true,
-              ),
-            ],
-            reductionLines: const [
-              RefReductionLineDto(
-                id: 'rl-1',
-                reductionCode: 'STAFF_CHILD',
-                feeCode: 'MINERVAL',
-                value: 50,
+                lines: [
+                  RefReductionLineDto(feeCode: 'MINERVAL', percentage: 50),
+                ],
               ),
             ],
           ),
@@ -328,16 +316,18 @@ void main() {
       expect(capturedReductionTypes.single.schoolId, 'school-1');
       expect(capturedReductionTypes.single.code, 'STAFF_CHILD');
       expect(capturedReductionLines.single.schoolId, 'school-1');
-      expect(capturedReductionLines.single.value, 50.0);
+      expect(capturedReductionLines.single.percentage, 50.0);
+      // Le code de rattachement ne vient pas de la ligne — elle n'en porte
+      // pas : c'est l'aplatissement qui lui donne celui de son type.
+      expect(capturedReductionLines.single.reductionCode, 'STAFF_CHILD');
     });
 
-    test('une seule section portée → l\'autre est traitée comme vide', () async {
+    test('un type sans barème descend quand même, sans ligne', () async {
       when(() => api.pullReferential(any())).thenAnswer(
         (_) async => httpOk(
           bundle(
-            reductionTypes: const [
-              RefReductionTypeDto(
-                id: 'rt-1',
+            reductions: const [
+              RefReductionDto(
                 code: 'STAFF_CHILD',
                 label: 'Enfant du personnel',
                 active: true,
@@ -349,9 +339,9 @@ void main() {
 
       await repo.syncReferential();
 
-      // Le serveur caviarde les deux ensemble : ce cas ne devrait pas exister.
-      // S'il survient, on applique ce qui est là plutôt que de renoncer au
-      // barème entier — un type sans ligne ne sera de toute façon pas proposé.
+      // Un type qui ne réduit encore rien se range tel quel : c'est le DAO qui
+      // refuse de le proposer au guichet, pas le pull qui le jette. Le jour où
+      // le serveur lui pose une ligne, elle arrive avec lui.
       expect(capturedReductionTypes, hasLength(1));
       expect(capturedReductionLines, isEmpty);
     });
