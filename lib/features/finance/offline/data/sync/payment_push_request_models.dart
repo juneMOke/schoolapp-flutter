@@ -16,15 +16,35 @@ class PaymentAllocationInput {
   final String id;
 
   /// Créance visée : id réel, id **provisoire** (créance générée localement pour
-  /// un élève inscrit offline → le serveur remappe par `studentId + feeCode`),
-  /// ou `null` = « créance pas encore matérialisée côté client » → remap.
+  /// un élève inscrit offline → le serveur remappe par clé métier), ou `null` =
+  /// « créance pas encore matérialisée côté client » → remap.
   ///
   /// Ce n'est **PAS** une ligne d'avance/crédit (décision D) : le trop-perçu est
   /// détecté serveur après recompute et signalé via `overpayment`, jamais porté
   /// par une allocation.
   final String? studentChargeId;
 
-  /// Poste — **clé de remap serveur** (INSCRIPTION, MINERVAL_T1, …).
+  /// Ligne de grille visée. **Facultatif au contrat, et de bien meilleure
+  /// autorité que [studentChargeId]** : un tarif vient toujours du référentiel
+  /// servi par le serveur, il ne peut donc jamais être provisoire — même quand
+  /// la créance qu'il porte a été fabriquée hors ligne.
+  ///
+  /// C'est lui qui départage deux créances d'une même nature depuis qu'un niveau
+  /// peut en porter plusieurs (un minerval en sept tranches, des frais d'examen
+  /// en trois). Sans lui, le serveur ne devine pas : il refuse
+  /// (`AMBIGUOUS_FEE_CODE`) plutôt que d'imputer au hasard de l'argent
+  /// réellement reçu — le décalage ne se verrait qu'au relevé du parent.
+  ///
+  /// ⚠️ Il ne remplace pas [feeCode], il le **précise** : le serveur ne
+  /// verrouille comme candidates que les créances portant les `feeCode` de ce
+  /// payload. Un tarif juste accompagné d'une nature fausse ne trouve rien et
+  /// retombe sur le même refus. Les deux sortent de la MÊME créance.
+  ///
+  /// `null` reste légitime : créance *ad hoc*, hors grille.
+  final String? feeTariffId;
+
+  /// Poste — **clé de remap serveur** (INSCRIPTION, MINERVAL_T1, …), et repli
+  /// quand aucun tarif n'est désigné.
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -33,6 +53,7 @@ class PaymentAllocationInput {
   const PaymentAllocationInput({
     required this.id,
     this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,
@@ -42,16 +63,23 @@ class PaymentAllocationInput {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,
     'studentChargeId': studentChargeId,
+    if (feeTariffId != null) 'feeTariffId': feeTariffId,
     'feeCode': feeCode,
     'studentChargeLabel': studentChargeLabel,
     'amountInCents': amountInCents,
     'currency': currency,
   };
 
+  /// Le tarif se lit en `String?` : les payloads figés **avant** son
+  /// introduction n'en portent pas, et les refuser ici les ferait basculer en
+  /// `failed` — issue TERMINALE de l'outbox, sur du cash déjà encaissé et un
+  /// reçu déjà imprimé. Même règle que `payerPhoneNumber` et que les trois
+  /// formes de `amounts`.
   factory PaymentAllocationInput.fromJson(Map<String, dynamic> j) =>
       PaymentAllocationInput(
         id: j['id'] as String,
         studentChargeId: j['studentChargeId'] as String?,
+        feeTariffId: j['feeTariffId'] as String?,
         feeCode: j['feeCode'] as String,
         studentChargeLabel: (j['studentChargeLabel'] as String?) ?? '',
         amountInCents: (j['amountInCents'] as num).toInt(),

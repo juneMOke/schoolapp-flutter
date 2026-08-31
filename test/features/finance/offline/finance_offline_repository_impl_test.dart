@@ -263,6 +263,53 @@ void main() {
     );
   });
 
+  /// La ligne de grille payée doit atteindre LES DEUX destinations du même
+  /// geste : la colonne locale — c'est elle que lira la reprise des versements
+  /// bloqués — ET le payload d'outbox, qui la porte au serveur.
+  ///
+  /// N'en tenir qu'une, c'est retomber sur la nature du frais, que le serveur
+  /// refuse d'arbitrer dès qu'un niveau porte deux tranches d'un même minerval.
+  /// Et le versement est append-only : rien ne se corrige après coup.
+  test('recordPayment : la ligne de grille atteint la colonne locale ET '
+      'la file d\'attente', () async {
+    final result = await repo.recordPayment(
+      const RecordPaymentDraft(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        paidAt: '2026-07-06T10:00:00Z',
+        payerFirstName: 'Joseph',
+        payerLastName: 'Kabongo',
+        allocations: [
+          AllocationDraft(
+            feeTariffId: '1d763648-70e0-4272-8ca1-224db48adfd1',
+            feeCode: 'EXAMINATION',
+            studentChargeLabel: 'Organisation matériel examens — 2/3',
+            amountInCents: 500000,
+            currency: 'CDF',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isRight(), isTrue);
+    expect(
+      (await db.query('payment_allocations')).single['fee_tariff_id'],
+      '1d763648-70e0-4272-8ca1-224db48adfd1',
+    );
+
+    final payload =
+        jsonDecode((await db.query('outbox')).single['payload'] as String)
+            as Map<String, dynamic>;
+    final alloc =
+        (payload['allocations'] as List<dynamic>).single
+            as Map<String, dynamic>;
+    expect(alloc['feeTariffId'], '1d763648-70e0-4272-8ca1-224db48adfd1');
+    // La nature part avec : le serveur ne verrouille comme candidates que les
+    // créances portant les `feeCode` du payload — un tarif seul ne trouverait
+    // rien et retomberait sur le refus qu'on cherche à éviter.
+    expect(alloc['feeCode'], 'EXAMINATION');
+  });
+
   /// Un versement mis en file par une version ANTÉRIEURE de l'app n'a pas de
   /// numéro. Le refuser ici bloquerait définitivement de l'argent déjà
   /// encaissé, reçu déjà imprimé : la colonne et le contrat restent nullables.

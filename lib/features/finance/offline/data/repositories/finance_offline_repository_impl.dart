@@ -131,6 +131,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
               clientUuid: _idGenerator.newId(),
               paymentId: paymentId,
               studentChargeId: a.studentChargeId,
+              feeTariffId: a.feeTariffId,
               feeCode: a.feeCode,
               studentChargeLabel: a.studentChargeLabel,
               amountInCents: a.amountInCents,

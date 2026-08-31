@@ -9,6 +9,13 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
 class AllocationDraft {
   final String? studentChargeId; // réel | provisoire | null (avance)
+
+  /// Ligne de grille visée — `null` pour une créance *ad hoc*, hors grille.
+  ///
+  /// **De meilleure autorité que [studentChargeId]** sur le chemin de synchro :
+  /// un tarif vient toujours du référentiel servi par le serveur, il ne peut
+  /// donc jamais être provisoire.
+  final String? feeTariffId;
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -16,6 +23,7 @@ class AllocationDraft {
 
   const AllocationDraft({
     this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,

@@ -81,6 +81,47 @@ void main() {
         },
       );
 
+      /// Le tarif est ce qui départage deux tranches d'un même frais. Sans lui,
+      /// le serveur ne devine pas : il refuse (`AMBIGUOUS_FEE_CODE`) plutôt que
+      /// d'imputer au hasard de l'argent réellement reçu.
+      test('toJson : l\'allocation désigne la LIGNE DE GRILLE visée', () {
+        final json = PaymentAggregateRequest(
+          payment: tRequest.payment,
+          allocations: [
+            const PaymentAllocationInput(
+              id: 'a1',
+              studentChargeId: 'c1',
+              feeTariffId: '1d763648-70e0-4272-8ca1-224db48adfd1',
+              feeCode: 'EXAMINATION',
+              studentChargeLabel: 'Organisation matériel examens — 2/3',
+              amountInCents: 30000,
+              currency: 'USD',
+            ),
+          ],
+        ).toJson();
+
+        final alloc =
+            (json['allocations'] as List<dynamic>).single
+                as Map<String, dynamic>;
+        expect(alloc['feeTariffId'], '1d763648-70e0-4272-8ca1-224db48adfd1');
+        // La nature reste : le serveur ne verrouille comme candidates que les
+        // créances portant les `feeCode` du payload. Un tarif seul ne trouverait
+        // rien.
+        expect(alloc['feeCode'], 'EXAMINATION');
+      });
+
+      /// Une créance *ad hoc* n'a pas de ligne de grille, et la clé est alors
+      /// absente plutôt que `null` : le payload reste lisible par toutes les
+      /// versions, et le serveur retombe sur la nature — le comportement
+      /// d'avant, toujours juste tant qu'une seule créance la porte.
+      test('toJson : un frais hors grille n\'invente pas de tarif', () {
+        final alloc =
+            (tRequest.toJson()['allocations'] as List<dynamic>).single
+                as Map<String, dynamic>;
+
+        expect(alloc.containsKey('feeTariffId'), isFalse);
+      });
+
       test('round-trip fromJson (payload outbox relu après coupure)', () {
         final restored = PaymentAggregateRequest.fromJson(tRequest.toJson());
 

@@ -7,6 +7,16 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class CreatePaymentAllocationInput extends Equatable {
   final String studentChargeId;
+
+  /// Ligne de grille visée, quand le frais en désigne une.
+  ///
+  /// Sur le chemin de synchro, c'est **le** discriminant : un niveau peut porter
+  /// plusieurs lignes d'une même nature (un minerval en tranches), et le serveur
+  /// refuse alors d'imputer au hasard. `null` = créance *ad hoc*, hors grille.
+  ///
+  /// Le chemin en ligne du back-office ne le consomme pas : là, l'id de créance
+  /// vient d'une liste que le serveur a lui-même servie, et il fait autorité.
+  final String? feeTariffId;
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -14,6 +24,7 @@ class CreatePaymentAllocationInput extends Equatable {
 
   const CreatePaymentAllocationInput({
     required this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,
@@ -23,6 +34,7 @@ class CreatePaymentAllocationInput extends Equatable {
   @override
   List<Object?> get props => [
     studentChargeId,
+    feeTariffId,
     feeCode,
     studentChargeLabel,
     amountInCents,

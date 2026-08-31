@@ -10,7 +10,6 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -227,6 +226,9 @@ class _FacturationCreatePaymentViewState
         for (final entry in retained)
           CreatePaymentAllocationInput(
             studentChargeId: entry.charge.id,
+            // La ligne de grille, pas seulement la nature du frais : le serveur
+            // ne départage plus deux tranches d'un même minerval sans elle.
+            feeTariffId: designatedFeeTariffId(entry.charge),
             feeCode: entry.charge.feeCode,
             studentChargeLabel: entry.charge.label,
             amountInCents: entry.effectiveCents,
@@ -250,7 +252,10 @@ class _FacturationCreatePaymentViewState
       allocations: [
         for (final entry in retained)
           FacturationConfirmAllocationItem(
-            label: entry.charge.feeCode.localizedFeeLabel(l10n),
+            // Le libellé, pas la nature : le récapitulatif qu'on valide doit
+            // nommer LA tranche encaissée, pas la famille à laquelle elle
+            // appartient.
+            label: chargeDesignation(entry.charge, l10n),
             amount: _formatWithCurrency(
               entry.effectiveCents,
               entry.charge.currency,

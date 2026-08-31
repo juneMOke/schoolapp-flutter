@@ -91,10 +91,14 @@ class FinancePaymentWriteDao {
   /// matche plus) : le reçu est imprimé mais la créance réaffiche le montant
   /// entier — le parent peut payer deux fois.
   ///
-  /// On re-résout donc par la clé MÉTIER `(élève, année, fee_code)`, stable là
-  /// où l'uuid ne l'est pas. Sans cible locale, on renvoie `null` plutôt qu'un
-  /// id mort : c'est la sémantique du contrat (« créance pas encore
-  /// matérialisée ») et le serveur remappera par `studentId + feeCode`.
+  /// On re-résout donc par une clé MÉTIER, stable là où l'uuid ne l'est pas —
+  /// **le tarif d'abord**, la nature du frais ensuite. Le tarif désigne la ligne
+  /// de grille : c'est le seul discriminant depuis qu'un niveau porte plusieurs
+  /// créances d'une même nature (un minerval en sept tranches).
+  ///
+  /// Sans cible locale, on renvoie `null` plutôt qu'un id mort : c'est la
+  /// sémantique du contrat (« créance pas encore matérialisée ») et le serveur
+  /// remappera lui-même.
   Future<PaymentAllocationLocalModel> _resolveChargeLink(
     DatabaseExecutor txn,
     PaymentLocalModel payment,
@@ -112,22 +116,62 @@ class FinancePaymentWriteDao {
     );
     if (alive.isNotEmpty) return alloc; // l'uuid tient toujours
 
-    // Même règle que `_remapProvisionalCharge` : `null` est une valeur d'année
-    // à part entière, et sqflite refuse de la LIER (il avertit aujourd'hui,
-    // lèvera demain). Le SQL se branche donc, et jamais en `= ?` — qui ne
-    // rapprocherait plus aucune créance sans année, en silence.
     final annee = payment.academicYearId;
-    final resolved = await txn.query(
+    final tariffId = alloc.feeTariffId;
+    if (tariffId != null && tariffId.isNotEmpty) {
+      final byTariff = await _uniqueChargeId(
+        txn,
+        studentId: payment.studentId,
+        academicYearId: annee,
+        column: 'fee_tariff_id',
+        value: tariffId,
+      );
+      if (byTariff != null) return alloc.withStudentChargeId(byTariff);
+    }
+
+    // Repli : la nature seule. Elle ne départage plus deux tranches, donc on
+    // n'en retient une que si elle est SEULE — cf. [_uniqueChargeId].
+    return alloc.withStudentChargeId(
+      await _uniqueChargeId(
+        txn,
+        studentId: payment.studentId,
+        academicYearId: annee,
+        column: 'fee_code',
+        value: alloc.feeCode,
+      ),
+    );
+  }
+
+  /// L'id de l'UNIQUE créance de l'élève répondant au critère, ou `null` s'il y
+  /// en a zéro… **ou plusieurs**.
+  ///
+  /// Le `limit: 1` d'avant attrapait la première ligne que SQLite voulait bien
+  /// rendre. Avec sept tranches de minerval, il imputait donc de l'argent réel
+  /// sur une tranche tirée au sort, en silence, et le reçu imprimé derrière
+  /// portait ce mensonge. Ne rien lier a un sens au contrat — « créance pas
+  /// encore matérialisée », le serveur tranchera avec le tarif du payload ;
+  /// lier au hasard n'en a aucun.
+  Future<String?> _uniqueChargeId(
+    DatabaseExecutor txn, {
+    required String studentId,
+    required String? academicYearId,
+    required String column,
+    required String value,
+  }) async {
+    // `null` est une valeur d'année à part entière, et sqflite refuse de la
+    // LIER (il avertit aujourd'hui, lèvera demain). Le SQL se branche donc, et
+    // jamais en `= ?` — qui ne rapprocherait plus aucune créance sans année, en
+    // silence.
+    final rows = await txn.query(
       'student_charges',
       columns: ['id'],
-      where: annee == null
-          ? 'student_id = ? AND fee_code = ? AND academic_year_id IS NULL'
-          : 'student_id = ? AND fee_code = ? AND academic_year_id = ?',
-      whereArgs: [payment.studentId, alloc.feeCode, ?annee],
-      limit: 1,
+      where: academicYearId == null
+          ? 'student_id = ? AND $column = ? AND academic_year_id IS NULL'
+          : 'student_id = ? AND $column = ? AND academic_year_id = ?',
+      whereArgs: [studentId, value, ?academicYearId],
+      limit: 2, // 2 suffit à savoir qu'il y en a « plusieurs »
     );
-    final relinked = resolved.isEmpty ? null : resolved.first['id'] as String;
-    return alloc.withStudentChargeId(relinked);
+    return rows.length == 1 ? rows.first['id'] as String : null;
   }
 
   PaymentAggregateRequest _paymentRequest(
@@ -160,6 +204,10 @@ class FinancePaymentWriteDao {
           (a) => PaymentAllocationInput(
             id: a.id,
             studentChargeId: a.studentChargeId,
+            // Recopié depuis l'imputation, pas relu dans la grille : le tarif
+            // se fige à l'encaissement comme le libellé. Le payload ne doit pas
+            // dépendre de ce que la grille sera au moment du push.
+            feeTariffId: a.feeTariffId,
             feeCode: a.feeCode,
             studentChargeLabel: a.studentChargeLabel,
             amountInCents: a.amountInCents,

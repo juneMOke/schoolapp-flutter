@@ -12,7 +12,8 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 /// - `amounts` : ce qui est encaissé, une entrée par devise, repris tel quel
 ///   (money-grade, en cents) ;
 /// - chaque [CreatePaymentAllocationInput] devient une [AllocationDraft]
-///   (le `studentChargeId` réel est conservé).
+///   (le `studentChargeId` réel et le `feeTariffId` de la ligne de grille sont
+///   conservés).
 RecordPaymentDraft recordPaymentDraftFromRequest(
   PaymentsCreateRequested request,
 ) {
@@ -29,6 +30,7 @@ RecordPaymentDraft recordPaymentDraftFromRequest(
       for (final allocation in request.allocations)
         AllocationDraft(
           studentChargeId: allocation.studentChargeId,
+          feeTariffId: allocation.feeTariffId,
           feeCode: allocation.feeCode,
           studentChargeLabel: allocation.studentChargeLabel,
           amountInCents: allocation.amountInCents,
