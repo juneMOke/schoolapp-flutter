@@ -1,5 +1,9 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
 
 /// Met le reçu provisoire en **lignes de caractères**.
 ///
@@ -16,8 +20,6 @@ abstract final class TicketTextLayout {
   /// Largeur d'un ticket 80 mm en police A (12×24) sur une imprimante
   /// thermique standard. 58 mm donnerait 32, la police B 64.
   static const int defaultColumns = 48;
-
-  static const String _separator = '-';
 
   /// Rend le ticket. [columns] est le nombre de caractères par ligne.
   static List<String> render(
@@ -89,10 +91,13 @@ abstract final class TicketTextLayout {
     // ── Z5 — l'argent. Montant reçu et répartition sont des FAITS : ils
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas
     // un calcul). Seul le solde est incertain, et lui seul porte la mention.
-    _addPair(
+    // Une ligne PAR DEVISE : un versement peut solder une créance en dollars et
+    // une en francs. Les additionner imprimerait, sur la pièce que le payeur
+    // emporte, un chiffre qui n'est l'argent de personne.
+    _addMoneyBag(
       lines,
       model.labels.amountReceivedLabel,
-      formatAmount(model.amountReceivedInCents, model.currency),
+      model.amountReceived,
       width,
     );
 
@@ -110,7 +115,6 @@ abstract final class TicketTextLayout {
     // qu'on ferme, pas une comptabilité qu'on tient. Sans bloc « Répartition »,
     // le lecteur n'a aucune soustraction à faire, et une ligne d'avance seule
     // ne ferait que dupliquer le montant reçu deux lignes plus haut.
-    final advance = model.amountReceivedInCents - model.allocatedInCents;
     if (model.allocations.isNotEmpty) {
       lines.add('');
       lines.add(TicketCharset.printable(model.labels.allocationsLabel));
@@ -118,32 +122,28 @@ abstract final class TicketTextLayout {
         _addPair(
           lines,
           '  ${allocation.label}',
-          formatAmount(allocation.amountInCents, model.currency),
+          formatAmount(allocation.amountInCents, allocation.currency),
           width,
         );
       }
       // Un écart NÉGATIF (ventilation supérieure au reçu) est une saisie
-      // incohérente, pas une avance : on ne l'habille pas d'un libellé qui la
-      // ferait passer pour normale.
-      if (advance > 0) {
+      // incohérente, pas une avance : `advance` l'écarte devise par devise, et
+      // on ne l'habille pas d'un libellé qui la ferait passer pour normale.
+      for (final advance in model.advance.entries) {
+        if (advance.amountInCents <= 0) continue;
         _addPair(
           lines,
           '  ${model.labels.advanceLabel}',
-          formatAmount(advance, model.currency),
+          formatAmount(advance.amountInCents, advance.currency),
           width,
         );
       }
     }
 
-    final balance = model.remainingBalanceInCents;
-    if (balance != null) {
+    final balance = model.remainingBalance;
+    if (balance != null && balance.isNotEmpty) {
       lines.add(_rule(width));
-      _addPair(
-        lines,
-        model.labels.balanceLabel,
-        formatAmount(balance, model.currency),
-        width,
-      );
+      _addMoneyBag(lines, model.labels.balanceLabel, balance, width);
       lines.addAll(_wrapped(model.labels.balanceReservation, width));
     }
 
@@ -155,130 +155,80 @@ abstract final class TicketTextLayout {
     return lines;
   }
 
-  /// Montant en centimes → « 1 234,56 CDF ».
+  /// Un libellé, puis **une ligne par devise**.
+  ///
+  /// Le libellé ne se répète pas : il coiffe la première ligne, les suivantes
+  /// s'alignent sous elle. Sur 32 colonnes, le répéter mangerait la largeur du
+  /// montant — et un ticket se recompte, il ne se déchiffre pas.
+  static void _addMoneyBag(
+    List<String> lines,
+    String label,
+    MoneyBag bag,
+    int width,
+  ) {
+    if (bag.isEmpty) return;
+    var first = true;
+    for (final amount in bag.entries) {
+      _addPair(
+        lines,
+        first ? label : '',
+        formatAmount(amount.amountInCents, amount.currency),
+        width,
+      );
+      first = false;
+    }
+  }
+
+  /// Montant en centimes → « 1 234 FC », « 425,00 $ ».
+  ///
+  /// Façade sur [MoneyFormat], qui porte désormais la règle : les décimales se
+  /// décident sur la **devise**, et `CDF` s'écrit « FC ». Le ticket écrivait
+  /// jusqu'ici « 1 234,00 CDF » — deux décimales sur une devise qui n'en a pas,
+  /// et le code ISO à la place de l'abréviation d'usage.
   ///
   /// Formateur **pur**, sans données de locale à initialiser : le ticket doit
   /// pouvoir être rendu dans un test unitaire comme dans un isolat d'impression.
-  /// Espace insécable fine exclue à dessein — une imprimante thermique ne la
-  /// rend pas.
-  static String formatAmount(int cents, String currency) {
-    final negative = cents < 0;
-    final absolute = negative ? -cents : cents;
-    final units = (absolute ~/ 100).toString();
-    final decimals = (absolute % 100).toString().padLeft(2, '0');
-
-    final grouped = StringBuffer();
-    for (var i = 0; i < units.length; i++) {
-      if (i > 0 && (units.length - i) % 3 == 0) grouped.write(' ');
-      grouped.write(units[i]);
-    }
-
-    final sign = negative ? '-' : '';
-    final suffix = currency.trim().isEmpty ? '' : ' ${currency.trim()}';
-    return '$sign$grouped,$decimals$suffix';
-  }
+  /// L'espace de groupement est l'**ordinaire** — une imprimante thermique ne
+  /// rend pas l'insécable.
+  static String formatAmount(int cents, String currency) => MoneyFormat.format(
+    Money.parse(cents, currency),
+    space: MoneyFormat.thermalSpace,
+  );
 
   // ── Primitives de mise en page ──────────────────────────────────────────────
+  //
+  // Déléguées à `TicketTextPrimitives`, partagé avec le ticket de vente
+  // boutique : deux copies divergeraient au premier ajustement de largeur.
 
   static void _addOptional(
     List<String> lines,
     String label,
     String? value,
     int width,
-  ) {
-    final trimmed = value?.trim();
-    if (trimmed == null || trimmed.isEmpty) return;
-    lines.addAll(_wrapped('$label $trimmed', width));
-  }
+  ) => TicketTextPrimitives.addOptional(lines, label, value, width);
 
-  static String _rule(int width) => _separator * width;
+  static String _rule(int width) => TicketTextPrimitives.rule(width);
 
-  /// Bandeau pleine largeur, encadré d'espaces pour rester lisible.
-  static String _banner(String rawText, int width) {
-    final text = TicketCharset.printable(rawText);
-    final label = ' ${text.toUpperCase()} ';
-    if (label.length >= width) return label.trim();
-    final total = width - label.length;
-    final left = total ~/ 2;
-    return '${'*' * left}$label${'*' * (total - left)}';
-  }
+  static String _banner(String rawText, int width) =>
+      TicketTextPrimitives.banner(rawText, width);
 
   static List<String> _centered(String text, int width) =>
-      _wrapped(text, width).map((line) => _center(line, width)).toList();
+      TicketTextPrimitives.centered(text, width);
 
   static List<String> _centeredWrapped(String text, int width) =>
-      _centered(text, width);
+      TicketTextPrimitives.centeredWrapped(text, width);
 
-  static String _center(String line, int width) {
-    if (line.length >= width) return line;
-    final left = (width - line.length) ~/ 2;
-    return '${' ' * left}$line';
-  }
-
-  /// `label` à gauche, `value` à droite, comblé par des espaces.
-  ///
-  /// Si les deux ne tiennent pas sur une ligne, la valeur passe seule sur la
-  /// suivante, alignée à droite : un montant tronqué serait pire qu'un montant
-  /// reporté. La méthode AJOUTE des lignes plutôt que d'en renvoyer une seule —
-  /// une « ligne » porteuse d'un retour chariot casserait l'invariant de largeur
-  /// sur lequel repose tout le gabarit.
   static void _addPair(
     List<String> lines,
     String rawLabel,
     String rawValue,
     int width,
-  ) {
-    // Translittération AVANT toute mesure : `œ` → `oe` gagne un caractère, et
-    // mesurer d'abord décalerait la colonne des montants.
-    final label = TicketCharset.printable(rawLabel);
-    final value = TicketCharset.printable(rawValue);
-    final space = width - label.length - value.length;
-    if (space >= 1) {
-      lines.add('$label${' ' * space}$value');
-      return;
-    }
-    lines.addAll(_wrapped(label, width));
-    lines.add(value.length >= width ? value : value.padLeft(width));
-  }
+  ) => TicketTextPrimitives.addPair(lines, rawLabel, rawValue, width);
 
-  /// Date au format `JJ/MM/AAAA` — formateur PUR, sans données de locale à
-  /// initialiser : le ticket doit se rendre dans un test unitaire comme dans un
-  /// isolat d'impression.
-  static String _formatDate(DateTime at) =>
-      '${_two(at.day)}/${_two(at.month)}/${at.year}';
+  static String _formatDate(DateTime at) => TicketTextPrimitives.formatDate(at);
 
-  /// Heure au format `HH:MM`.
-  static String _formatTime(DateTime at) =>
-      '${_two(at.hour)}:${_two(at.minute)}';
+  static String _formatTime(DateTime at) => TicketTextPrimitives.formatTime(at);
 
-  static String _two(int value) => value.toString().padLeft(2, '0');
-
-  /// Découpe sur les espaces, sans jamais couper un mot au milieu — sauf s'il
-  /// dépasse à lui seul la largeur (une référence, typiquement).
-  static List<String> _wrapped(String text, int width) {
-    final source = TicketCharset.printable(text).trim();
-    if (source.isEmpty) return const <String>[];
-
-    final lines = <String>[];
-    var current = '';
-
-    for (final word in source.split(RegExp(r'\s+'))) {
-      if (current.isEmpty) {
-        current = word;
-      } else if (current.length + 1 + word.length <= width) {
-        current = '$current $word';
-      } else {
-        lines.add(current);
-        current = word;
-      }
-
-      while (current.length > width) {
-        lines.add(current.substring(0, width));
-        current = current.substring(width);
-      }
-    }
-
-    if (current.isNotEmpty) lines.add(current);
-    return lines;
-  }
+  static List<String> _wrapped(String text, int width) =>
+      TicketTextPrimitives.wrapped(text, width);
 }

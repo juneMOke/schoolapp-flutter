@@ -392,6 +392,978 @@ abstract class AppLocalizations {
   /// **'Your account does not have the rights needed to open the application. Contact your school administrator.'**
   String get splashForbiddenMessage;
 
+  /// Splash title when the school has no academic year — the pull succeeded, the school simply was never configured
+  ///
+  /// In en, this message translates to:
+  /// **'School not set up yet'**
+  String get splashNotProvisionedTitle;
+
+  /// Splash message for an unprovisioned school — neither an outage nor a missing right
+  ///
+  /// In en, this message translates to:
+  /// **'This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.'**
+  String get splashNotProvisionedMessage;
+
+  /// Splash action opening the provisioning wizard — shown only with school.provisioning.write
+  ///
+  /// In en, this message translates to:
+  /// **'Set up the school'**
+  String get splashNotProvisionedAction;
+
+  /// Splash message for an unprovisioned school without the permission to set it up: nothing to do from this device
+  ///
+  /// In en, this message translates to:
+  /// **'This school has no open academic year yet. Only school management can set it up — check with them before retrying.'**
+  String get splashNotProvisionedWaitMessage;
+
+  /// Provisioning wizard app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get configurationTitle;
+
+  /// Provisioning wizard app bar subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Bringing the school into service'**
+  String get configurationSubtitle;
+
+  /// Wizard step counter, right-aligned in the bar
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} / {total}'**
+  String configurationStepCounter(int current, int total);
+
+  /// Exit button tooltip — no confirmation, everything is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Leave setup'**
+  String get configurationExitTooltip;
+
+  /// Short label of step 1 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get configurationStepSchool;
+
+  /// Short label of step 2 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get configurationStepAcademicYear;
+
+  /// Short label of step 3 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Structure'**
+  String get configurationStepStructure;
+
+  /// Short label of step 4 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Fees'**
+  String get configurationStepFees;
+
+  /// Short label of step 5 in the stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Activation'**
+  String get configurationStepActivation;
+
+  /// Accessibility label of a stepper dot
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}, {title}'**
+  String configurationStepSemantics(int current, int total, String title);
+
+  /// Back button of the save bar
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get configurationBack;
+
+  /// Save button of the footer bar
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get configurationSave;
+
+  /// Advance button of the footer bar
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get configurationContinue;
+
+  /// Transient footer message while writing
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get configurationSaving;
+
+  /// Footer check on step 1, the only step that really writes
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get configurationSaved;
+
+  /// Footer check on steps 2 to 4, which only build a local draft
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get configurationDraftSaved;
+
+  /// Default footer message when the step provides no hint
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the required fields to continue'**
+  String get configurationSaveBarDefaultHint;
+
+  /// Step 1 card title
+  ///
+  /// In en, this message translates to:
+  /// **'School identity'**
+  String get configurationSchoolSectionTitle;
+
+  /// Step 1 card subtitle — says why these fields matter
+  ///
+  /// In en, this message translates to:
+  /// **'This information appears on certificates, receipts and report cards.'**
+  String get configurationSchoolSectionSubtitle;
+
+  /// School name field
+  ///
+  /// In en, this message translates to:
+  /// **'School name'**
+  String get configurationSchoolName;
+
+  /// Country field, read-only
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get configurationSchoolCountry;
+
+  /// City field, read-only
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get configurationSchoolCity;
+
+  /// Kinshasa district field
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get configurationSchoolDistrict;
+
+  /// Municipality field, cascading from the district
+  ///
+  /// In en, this message translates to:
+  /// **'Municipality'**
+  String get configurationSchoolMunicipality;
+
+  /// Municipality placeholder while no district is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a district first'**
+  String get configurationSchoolMunicipalityPlaceholder;
+
+  /// School address field
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get configurationSchoolAddress;
+
+  /// School phone field
+  ///
+  /// In en, this message translates to:
+  /// **'School phone'**
+  String get configurationSchoolPhone;
+
+  /// School email field
+  ///
+  /// In en, this message translates to:
+  /// **'School email'**
+  String get configurationSchoolEmail;
+
+  /// Footer message naming the required fields still empty
+  ///
+  /// In en, this message translates to:
+  /// **'Still needed: {fields}'**
+  String configurationSchoolMissingHint(String fields);
+
+  /// Note explaining why two fields cannot be edited
+  ///
+  /// In en, this message translates to:
+  /// **'Country and city are fixed: the application is deployed in Kinshasa.'**
+  String get configurationSchoolReadOnlyNote;
+
+  /// Step 2 card title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get configurationYearSectionTitle;
+
+  /// Step 2 card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'A first year is proposed from today\'s date — adjust the dates if needed.'**
+  String get configurationYearSectionSubtitle;
+
+  /// Origin badge while the proposal is untouched
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed automatically'**
+  String get configurationYearProposed;
+
+  /// Origin badge once a date or the label has changed
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get configurationYearEdited;
+
+  /// Link rebuilding the proposal from today's date
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the proposal'**
+  String get configurationYearRestore;
+
+  /// Start date field
+  ///
+  /// In en, this message translates to:
+  /// **'First day of class'**
+  String get configurationYearStart;
+
+  /// End date field
+  ///
+  /// In en, this message translates to:
+  /// **'End of year'**
+  String get configurationYearEnd;
+
+  /// Label of the indicative span between both dates
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get configurationYearDuration;
+
+  /// Indicative span, rounded to months
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {months} months'**
+  String configurationYearDurationValue(int months);
+
+  /// Shown when the end date does not follow the start date
+  ///
+  /// In en, this message translates to:
+  /// **'The end must follow the start'**
+  String get configurationYearRangeError;
+
+  /// Explicit pointer to another module — do not add terms here
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and semesters are set later, in Results.'**
+  String get configurationYearPeriodsNote;
+
+  /// Step 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles, levels and classes'**
+  String get configurationStructureTitle;
+
+  /// Cycle total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{cycle} other{cycles}}'**
+  String configurationTotalCycles(int count);
+
+  /// Level total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{level} other{levels}}'**
+  String configurationTotalLevels(int count);
+
+  /// Classroom total chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{class} other{classes}}'**
+  String configurationTotalClassrooms(int count);
+
+  /// Course total chip label — the teaching volume activation will generate
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{course} other{courses}}'**
+  String configurationTotalCourses(int count);
+
+  /// Cycle-wide setting, with no effect on levels carrying official grids
+  ///
+  /// In en, this message translates to:
+  /// **'Classes per level'**
+  String get configurationCycleClassroomsPerLevel;
+
+  /// Header counter of a fully deselected cycle
+  ///
+  /// In en, this message translates to:
+  /// **'Not offered'**
+  String get configurationCycleNotOffered;
+
+  /// Cycle header counter: open levels out of total, then classes
+  ///
+  /// In en, this message translates to:
+  /// **'{open} / {total} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}'**
+  String configurationCycleSummary(int open, int total, int classrooms);
+
+  /// Row of a level whose counter is zero
+  ///
+  /// In en, this message translates to:
+  /// **'Level not offered this year'**
+  String get configurationLevelNotOffered;
+
+  /// Amber warning under a level with no MINEDUC grid. Blocks nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No official grid — these classes will have no courses.'**
+  String get configurationLevelNoGrid;
+
+  /// Header of a level's stream row
+  ///
+  /// In en, this message translates to:
+  /// **'Grids served on {level}'**
+  String configurationSectionsServed(String level);
+
+  /// Course cost of a class following this grid
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} course} other{{count} courses}}'**
+  String configurationSectionCourses(int count);
+
+  /// Step 3 footer message — the only place the commitment is quantified before activation
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} class will be created for the year} other{{count} classes will be created for the year}}'**
+  String configurationStructureHint(int count);
+
+  /// Footer message when no class is open
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least one level'**
+  String get configurationStructureEmptyHint;
+
+  /// Step 3 empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No level selected'**
+  String get configurationStructureEmptyTitle;
+
+  /// Step 3 empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.'**
+  String get configurationStructureEmptyMessage;
+
+  /// Empty state action: rebuilds the proposal from the catalogue
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the proposal'**
+  String get configurationStructureRestore;
+
+  /// Step 4 title
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationFeesTitle;
+
+  /// Button opening the fee form
+  ///
+  /// In en, this message translates to:
+  /// **'New fee'**
+  String get configurationFeeNew;
+
+  /// Fee creation form title
+  ///
+  /// In en, this message translates to:
+  /// **'New fee'**
+  String get configurationFeeFormTitle;
+
+  /// Fee form title when editing
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fee'**
+  String get configurationFeeFormEditTitle;
+
+  /// Fee type field, served by the catalogue
+  ///
+  /// In en, this message translates to:
+  /// **'Fee type'**
+  String get configurationFeeType;
+
+  /// Disclosure for fee types outside the common ones
+  ///
+  /// In en, this message translates to:
+  /// **'Other types ({count})'**
+  String configurationFeeTypeOthers(int count);
+
+  /// Label field — the one printed on the collection note
+  ///
+  /// In en, this message translates to:
+  /// **'Label shown to parents'**
+  String get configurationFeeLabel;
+
+  /// Amount field, entered in units
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get configurationFeeAmount;
+
+  /// Currency selector next to the amount
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get configurationFeeCurrency;
+
+  /// Fee due date field
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get configurationFeeDueAt;
+
+  /// Scope field — the levels the fee is charged on
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get configurationFeeScope;
+
+  /// Scope mode: every level receiving at least one class
+  ///
+  /// In en, this message translates to:
+  /// **'All opened levels'**
+  String get configurationFeeScopeAll;
+
+  /// Scope mode: a chosen set of levels
+  ///
+  /// In en, this message translates to:
+  /// **'Selected levels'**
+  String get configurationFeeScopeSome;
+
+  /// Dynamic subtitle of the all-levels mode
+  ///
+  /// In en, this message translates to:
+  /// **'Will apply to {count, plural, one{{count} open level} other{{count} open levels}}'**
+  String configurationFeeScopeAllHint(int count);
+
+  /// Counter of levels held in the scope
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} / {total} selected'**
+  String configurationFeeScopeCount(int selected, int total);
+
+  /// Shortcut ticking every open level of a cycle
+  ///
+  /// In en, this message translates to:
+  /// **'Whole cycle'**
+  String get configurationFeeScopeWholeCycle;
+
+  /// Fee form submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Add the fee'**
+  String get configurationFeeAdd;
+
+  /// Fee form submit button when editing
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get configurationFeeUpdate;
+
+  /// Fee form dismiss button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get configurationFeeCancel;
+
+  /// Summary of how many fees were entered
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No fee defined} one{{count} fee defined} other{{count} fees defined}}'**
+  String configurationFeeCount(int count);
+
+  /// Total of entered fees, per currency — never summed across currencies
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue total: {total}'**
+  String configurationFeeCatalogTotal(String total);
+
+  /// Caption under a fee row amount
+  ///
+  /// In en, this message translates to:
+  /// **'per student'**
+  String get configurationFeePerStudent;
+
+  /// Scope summary of a fee row
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} level} other{{count} levels}}'**
+  String configurationFeeLevelsLabel(int count);
+
+  /// Due date summary of a fee row
+  ///
+  /// In en, this message translates to:
+  /// **'due {date}'**
+  String configurationFeeDueLabel(String date);
+
+  /// Toast after deleting a fee
+  ///
+  /// In en, this message translates to:
+  /// **'Fee \"{label}\" deleted'**
+  String configurationFeeDeleted(String label);
+
+  /// Toast after adding or updating a fee
+  ///
+  /// In en, this message translates to:
+  /// **'Fee \"{label}\" saved'**
+  String configurationFeeSaved(String label);
+
+  /// Step 4 empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No fees yet'**
+  String get configurationFeesEmptyTitle;
+
+  /// Step 4 empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.'**
+  String get configurationFeesEmptyMessage;
+
+  /// Step 4 empty state action
+  ///
+  /// In en, this message translates to:
+  /// **'Create the first fee'**
+  String get configurationFeesEmptyAction;
+
+  /// Footer message when no fee has been entered
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one fee to continue'**
+  String get configurationFeesEmptyHint;
+
+  /// Footer message while a sub-form is open
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the fee you are editing'**
+  String get configurationFeesDraftHint;
+
+  /// Footer message when step 4 is valid
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}'**
+  String configurationFeesValidHint(int count);
+
+  /// Step 5 title
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get configurationSummaryTitle;
+
+  /// Summary card shortcut back to its step
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get configurationSummaryEdit;
+
+  /// Identity summary card
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get configurationSummarySchool;
+
+  /// Year summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get configurationSummaryYear;
+
+  /// Structure summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Structure · {count, plural, one{{count} class} other{{count} classes}}'**
+  String configurationSummaryStructure(int count);
+
+  /// Fees summary card
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationSummaryFees;
+
+  /// Shown instead of a missing field — never a silent blank
+  ///
+  /// In en, this message translates to:
+  /// **'to be filled in'**
+  String get configurationSummaryMissing;
+
+  /// Cycle line in the structure summary
+  ///
+  /// In en, this message translates to:
+  /// **'{levels, plural, one{{levels} level} other{{levels} levels}} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}'**
+  String configurationSummaryCycleLine(int levels, int classrooms);
+
+  /// Added to a cycle whose levels carry no official grid
+  ///
+  /// In en, this message translates to:
+  /// **'no official grid'**
+  String get configurationSummaryNoGrid;
+
+  /// Activation check: the eight fields
+  ///
+  /// In en, this message translates to:
+  /// **'School identity complete'**
+  String get configurationCheckSchool;
+
+  /// Activation check: the date range
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year dated'**
+  String get configurationCheckYear;
+
+  /// Activation check: classes from the plan
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No class to open} one{{count} class ready to open} other{{count} classes ready to open}}'**
+  String configurationCheckClassrooms(int count);
+
+  /// Activation check: fees entered
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No fee attached to levels} one{{count} fee attached to levels} other{{count} fees attached to levels}}'**
+  String configurationCheckFees(int count);
+
+  /// Activation button — the journey's only structural write
+  ///
+  /// In en, this message translates to:
+  /// **'Bring the school into service'**
+  String get configurationActivate;
+
+  /// Button label while activating
+  ///
+  /// In en, this message translates to:
+  /// **'Activating…'**
+  String get configurationActivating;
+
+  /// Shown while the four checks do not pass
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the amber items to activate.'**
+  String get configurationActivateBlocked;
+
+  /// Activation failure toast. No data is lost
+  ///
+  /// In en, this message translates to:
+  /// **'Activation failed — try again.'**
+  String get configurationActivateFailed;
+
+  /// Success screen title
+  ///
+  /// In en, this message translates to:
+  /// **'{school} is in service'**
+  String configurationActivatedTitle(String school);
+
+  /// Success screen message
+  ///
+  /// In en, this message translates to:
+  /// **'The {year} year is open with {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} and {fees, plural, one{{fees} fee} other{{fees} fees}}. You can enrol your first students.'**
+  String configurationActivatedMessage(String year, int classrooms, int fees);
+
+  /// Primary exit of the success screen
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the dashboard'**
+  String get configurationGoHome;
+
+  /// Secondary exit of the success screen
+  ///
+  /// In en, this message translates to:
+  /// **'Review the setup'**
+  String get configurationReviewSetup;
+
+  /// Header of the plan warnings block
+  ///
+  /// In en, this message translates to:
+  /// **'Worth knowing before activating'**
+  String get configurationWarningsTitle;
+
+  /// Sidebar menu — school settings, once the school is in service
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get menuConfiguration;
+
+  /// Sub-menu of the Setup module
+  ///
+  /// In en, this message translates to:
+  /// **'School settings'**
+  String get subMenuConfigurationSchool;
+
+  /// Settings screen title, after the school is in service
+  ///
+  /// In en, this message translates to:
+  /// **'School setup'**
+  String get configurationSettingsTitle;
+
+  /// State banner: the school is set up
+  ///
+  /// In en, this message translates to:
+  /// **'{school} · in service'**
+  String configurationSettingsInService(String school);
+
+  /// State banner summary
+  ///
+  /// In en, this message translates to:
+  /// **'{year} year · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} · {levels, plural, one{{levels} level} other{{levels} levels}}'**
+  String configurationSettingsSummary(String year, int classrooms, int levels);
+
+  /// Disabled in V1 — the wizard cannot be replayed
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare next year'**
+  String get configurationSettingsNextYear;
+
+  /// Tooltip of the prepare-next-year button
+  ///
+  /// In en, this message translates to:
+  /// **'Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.'**
+  String get configurationSettingsNextYearTooltip;
+
+  /// Editable settings tab
+  ///
+  /// In en, this message translates to:
+  /// **'School identity'**
+  String get configurationSettingsTabIdentity;
+
+  /// Read-only settings tab
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles, levels and classes'**
+  String get configurationSettingsTabStructure;
+
+  /// Tariff tab, editable row by row
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get configurationSettingsTabFees;
+
+  /// Marker of a non-editable tab
+  ///
+  /// In en, this message translates to:
+  /// **'read-only'**
+  String get configurationSettingsReadOnly;
+
+  /// Why the structure tab is read-only
+  ///
+  /// In en, this message translates to:
+  /// **'The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.'**
+  String get configurationSettingsStructureReadOnlyNote;
+
+  /// Toast after saving in the settings
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get configurationSettingsSaved;
+
+  /// Settings save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get configurationSettingsSave;
+
+  /// Settings empty state when the academic context returns no year
+  ///
+  /// In en, this message translates to:
+  /// **'No open year'**
+  String get configurationSettingsNoYear;
+
+  /// Header of a level's tariff list
+  ///
+  /// In en, this message translates to:
+  /// **'Tariffs for {level}'**
+  String configurationSettingsTariffsForLevel(String level);
+
+  /// Note explaining the wizard's scope no longer exists in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Here a tariff carries a single level: each row is edited on its own.'**
+  String get configurationSettingsTariffOne;
+
+  /// Button adding a tariff on a level
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tariff'**
+  String get configurationTariffAdd;
+
+  /// Tariff edit dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit tariff'**
+  String get configurationTariffEdit;
+
+  /// Tariff creation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'New tariff'**
+  String get configurationTariffNew;
+
+  /// Tariff deletion action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete tariff'**
+  String get configurationTariffDelete;
+
+  /// Tariff deletion confirmation — a server write, unlike the wizard's draft
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{label}\"? Charges already generated are not affected.'**
+  String configurationTariffDeleteConfirm(String label);
+
+  /// Toast after writing a tariff
+  ///
+  /// In en, this message translates to:
+  /// **'Tariff saved'**
+  String get configurationTariffSaved;
+
+  /// Toast after deleting a tariff
+  ///
+  /// In en, this message translates to:
+  /// **'Tariff deleted'**
+  String get configurationTariffDeleted;
+
+  /// Shown when a level carries no tariff
+  ///
+  /// In en, this message translates to:
+  /// **'No tariff on this level'**
+  String get configurationTariffNone;
+
+  /// Empty state of step 4 when the fee type reference could not be served
+  ///
+  /// In en, this message translates to:
+  /// **'Fee types unavailable'**
+  String get configurationFeeTypesUnavailableTitle;
+
+  /// Message of the step 4 empty state when no fee type is served
+  ///
+  /// In en, this message translates to:
+  /// **'The fee type reference was not loaded. Reload it to enter the school fees.'**
+  String get configurationFeeTypesUnavailableMessage;
+
+  /// Label announced to screen readers while the provisioning wizard skeletons are on screen
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the step data'**
+  String get configurationLoadingA11yLabel;
+
+  /// Network error title in the wizard
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost'**
+  String get configurationErrorNetworkTitle;
+
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'The setup was not sent. Check your connection, then try again.'**
+  String get configurationErrorNetworkMessage;
+
+  /// 401 title
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired'**
+  String get configurationErrorSessionTitle;
+
+  /// 401 message — the local draft survives an expired session
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to pick up where you left off. Your entries are kept.'**
+  String get configurationErrorSessionMessage;
+
+  /// 403 title
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get configurationErrorForbiddenTitle;
+
+  /// 403 message — retrying cannot help
+  ///
+  /// In en, this message translates to:
+  /// **'Only the school owner can set up the school. Contact your school administrator.'**
+  String get configurationErrorForbiddenMessage;
+
+  /// 500 title
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not save'**
+  String get configurationErrorServerTitle;
+
+  /// 500 message
+  ///
+  /// In en, this message translates to:
+  /// **'Something broke. Try again, and quote the code below to support if it persists.'**
+  String get configurationErrorServerMessage;
+
+  /// 429 title
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests'**
+  String get configurationErrorRateTitle;
+
+  /// 429 message — definitely no Retry
+  ///
+  /// In en, this message translates to:
+  /// **'The server is asking for a pause. Wait a few moments before carrying on.'**
+  String get configurationErrorRateMessage;
+
+  /// 400 BUSINESS_RULE title
+  ///
+  /// In en, this message translates to:
+  /// **'This academic year already exists'**
+  String get configurationErrorYearExistsTitle;
+
+  /// Message for the already-existing-year refusal
+  ///
+  /// In en, this message translates to:
+  /// **'Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.'**
+  String get configurationErrorYearExistsMessage;
+
+  /// Action for the already-existing-year refusal — returns to step 2 with a purged draft
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the year'**
+  String get configurationErrorYearExistsAction;
+
+  /// Generic recovery action
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get configurationErrorRetry;
+
+  /// 401 action
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get configurationErrorSignIn;
+
+  /// 403 action
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get configurationErrorContact;
+
+  /// Label of the incident code to quote to support
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code'**
+  String get configurationErrorIncident;
+
+  /// Action for a 422 unknown-code — the cached catalogue is stale
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the referential'**
+  String get configurationErrorReloadCatalog;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:
@@ -643,6 +1615,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fee control'**
   String get subMenuFeeControl;
+
+  /// Shop till menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get menuBoutique;
+
+  /// Shop till counter sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases'**
+  String get subMenuBoutiquePurchases;
+
+  /// Shop sales history sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get subMenuBoutiqueHistory;
 
   /// Organization sub-menu title
   ///
@@ -2189,7 +3179,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'Six modules cover the life of the school — each card opens its dashboard or its pages.'**
+  /// **'These modules cover the life of the school — each card opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.
@@ -2203,6 +3193,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Revenue, invoicing and tracking of school fee collection.'**
   String get accueilModuleFinancesDescription;
+
+  /// No description provided for @accueilModuleBoutiqueDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sales of school items, and the counter\'s collection history.'**
+  String get accueilModuleBoutiqueDescription;
 
   /// No description provided for @accueilModuleClassesDescription.
   ///
@@ -2227,6 +3223,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily attendance, disciplinary records and student follow-up.'**
   String get accueilModuleDisciplinesDescription;
+
+  /// No description provided for @accueilModuleConfigurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'School identity, cycles and levels, and the school fee schedule.'**
+  String get accueilModuleConfigurationDescription;
 
   /// Module card subtitle: number of pages it gathers.
   ///
@@ -3404,6 +4406,108 @@ abstract class AppLocalizations {
   /// **'Not validated'**
   String get yearNotValidated;
 
+  /// No description provided for @yearValidationUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get yearValidationUnknown;
+
+  /// No description provided for @guardianEmergencyContactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get guardianEmergencyContactLabel;
+
+  /// No description provided for @guardianEmergencyContactBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get guardianEmergencyContactBadge;
+
+  /// No description provided for @guardianEmergencyContactHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One guardian per pupil: designating one clears the previous designation.'**
+  String get guardianEmergencyContactHint;
+
+  /// No description provided for @guardianEmergencyContactAmbiguous.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one guardian can be the emergency contact for this pupil.'**
+  String get guardianEmergencyContactAmbiguous;
+
+  /// No description provided for @guardianEmergencyContactSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact updated.'**
+  String get guardianEmergencyContactSaved;
+
+  /// No description provided for @guardianEmergencyContactCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact cleared.'**
+  String get guardianEmergencyContactCleared;
+
+  /// No description provided for @guardianEmergencyContactRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get guardianEmergencyContactRetry;
+
+  /// No description provided for @guardianEmergencyContactFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting the emergency contact failed.'**
+  String get guardianEmergencyContactFailed;
+
+  /// No description provided for @medicalNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Health information'**
+  String get medicalNotesLabel;
+
+  /// No description provided for @medicalNotesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies, ongoing treatment, what to do. Optional.'**
+  String get medicalNotesHelp;
+
+  /// No description provided for @medicalNotesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get medicalNotesSectionTitle;
+
+  /// No description provided for @formerStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Former pupil of this school'**
+  String get formerStudentLabel;
+
+  /// No description provided for @formerStudentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick if the child has already been enrolled in this school, even before the app.'**
+  String get formerStudentHelp;
+
+  /// No description provided for @formerStudentLockedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolment: the child comes from last year\'s file in this school.'**
+  String get formerStudentLockedHelp;
+
+  /// No description provided for @previousSchoolOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — leave blank if the child has not been to school yet.'**
+  String get previousSchoolOptionalHint;
+
+  /// No description provided for @averageOutOfRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'The average must be between 0 and 100.'**
+  String get averageOutOfRangeError;
+
   /// No description provided for @currentAcademicYearLabel.
   ///
   /// In en, this message translates to:
@@ -4130,6 +5234,42 @@ abstract class AppLocalizations {
   /// **'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.'**
   String get enrollmentReadOnlyMessage;
 
+  /// Header action opening the correction of an already completed record.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get enrollmentReeditAction;
+
+  /// Consultation banner shown when correcting is possible.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed record. You may correct it: saving will move it back to in progress and queue it for sending.'**
+  String get enrollmentReeditReadOnlyMessage;
+
+  /// Title of the dialog shown when leaving an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction not validated'**
+  String get enrollmentReeditExitTitle;
+
+  /// Body of the dialog shown when leaving an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.'**
+  String get enrollmentReeditExitMessage;
+
+  /// Button confirming departure from an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave anyway'**
+  String get enrollmentReeditExitConfirm;
+
+  /// Button returning to the correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume correction'**
+  String get enrollmentReeditExitResume;
+
   /// No description provided for @enrollmentEditableTitle.
   ///
   /// In en, this message translates to:
@@ -4237,6 +5377,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please save charge changes before continuing.'**
   String get studentChargesSaveHintBeforeContinue;
+
+  /// Title of the reductions section in the fees step of the enrolment wizard (ADR-021 V1). No rate is shown: ticking records a declaration, amounts do not move.
+  ///
+  /// In en, this message translates to:
+  /// **'Reductions'**
+  String get enrollmentReductionsSectionTitle;
 
   /// No description provided for @studentChargesTotalLabel.
   ///
@@ -4789,6 +5935,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{amount} due'**
   String facturationBalanceDuePill(String amount);
+
+  /// Billing AppBar pill when the balance is outstanding in SEVERAL currencies. No amount: two amounts do not fit in a pill, and showing only one would be false. The breakdown is in the cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance due'**
+  String get facturationBalanceDueMultiCurrencyPill;
 
   /// No description provided for @facturationBalanceUpToDatePill.
   ///
@@ -5585,6 +6737,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payer information'**
   String get facturationCreatePaymentPayerSectionTitle;
+
+  /// No description provided for @facturationCreatePaymentEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment collection'**
+  String get facturationCreatePaymentEyebrow;
+
+  /// No description provided for @facturationCreatePaymentContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection unavailable'**
+  String get facturationCreatePaymentContextErrorTitle;
+
+  /// No description provided for @facturationCreatePaymentContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The information required for this collection is missing. Go back to the student file and start the collection again.'**
+  String get facturationCreatePaymentContextErrorMessage;
 
   /// No description provided for @facturationCreatePaymentPayerLastNameLabel.
   ///
@@ -8556,6 +9726,24 @@ abstract class AppLocalizations {
   /// **'This year'**
   String get financeStatsPeriodYearCurrent;
 
+  /// Sub-heading naming the currency of the KPI block that follows. Only shown from two currencies on: on a single-currency school it would repeat what every amount already carries.
+  ///
+  /// In en, this message translates to:
+  /// **'In {currency}'**
+  String financeStatsCurrencyHeading(String currency);
+
+  /// Empty state of the Finance dashboard when no money circulated in the window. An empty state, never an error — and certainly not a zero in a currency nobody chose.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement in this period'**
+  String get financeStatsNoMovementLabel;
+
+  /// Subtitle of the Finance dashboard empty state.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing collected and nothing billed in this window. Widen the period to look further back.'**
+  String get financeStatsNoMovementDescription;
+
   /// No description provided for @financeStatsKpiCollected.
   ///
   /// In en, this message translates to:
@@ -8579,6 +9767,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collection rate'**
   String get financeStatsKpiCollectionRate;
+
+  /// Collection rate of one currency, when the dashboard carries several.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% · {currency}'**
+  String financeStatsKpiRateForCurrency(int rate, String currency);
 
   /// No description provided for @financeStatsSectionEvolution.
   ///
@@ -10703,6 +11897,1038 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enrolment not readable on this tablet: the certificate is unavailable here.'**
   String get documentsBlockedEnrollmentUnreadableNotice;
+
+  /// No description provided for @boutiqueEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Purchases'**
+  String get boutiqueEyebrow;
+
+  /// No description provided for @boutiqueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Till'**
+  String get boutiqueTitle;
+
+  /// No description provided for @boutiqueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sale of school items. No debt, no balance.'**
+  String get boutiqueSubtitle;
+
+  /// No description provided for @boutiqueSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search an item or a code…'**
+  String get boutiqueSearchPlaceholder;
+
+  /// No description provided for @boutiqueFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get boutiqueFilterAll;
+
+  /// No description provided for @boutiqueFamilyUniforme.
+  ///
+  /// In en, this message translates to:
+  /// **'Uniform'**
+  String get boutiqueFamilyUniforme;
+
+  /// No description provided for @boutiqueFamilyFournitures.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies'**
+  String get boutiqueFamilyFournitures;
+
+  /// No description provided for @boutiqueFamilyActivites.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get boutiqueFamilyActivites;
+
+  /// No description provided for @boutiqueFamilyActes.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get boutiqueFamilyActes;
+
+  /// No description provided for @boutiqueArticleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueArticleCount(int count);
+
+  /// No description provided for @boutiqueInCartBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in cart'**
+  String boutiqueInCartBadge(int count);
+
+  /// No description provided for @boutiqueLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'by level'**
+  String get boutiqueLevelBadge;
+
+  /// No description provided for @boutiquePriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} – {max}'**
+  String boutiquePriceRange(String min, String max);
+
+  /// No description provided for @boutiqueGridReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.'**
+  String get boutiqueGridReminder;
+
+  /// No description provided for @boutiqueCartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get boutiqueCartTitle;
+
+  /// No description provided for @boutiqueCartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart is empty. Tap an item to add it.'**
+  String get boutiqueCartEmpty;
+
+  /// No description provided for @boutiqueCartClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the cart'**
+  String get boutiqueCartClear;
+
+  /// No description provided for @boutiqueTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to collect'**
+  String get boutiqueTotalLabel;
+
+  /// No description provided for @boutiqueCollectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect in cash'**
+  String get boutiqueCollectAction;
+
+  /// No description provided for @boutiquePriceUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price unresolved'**
+  String get boutiquePriceUnresolved;
+
+  /// No description provided for @boutiqueLevelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Level required…'**
+  String get boutiqueLevelRequired;
+
+  /// No description provided for @boutiqueBeneficiaryPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get boutiqueBeneficiaryPlaceholder;
+
+  /// No description provided for @boutiqueSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get boutiqueSizeLabel;
+
+  /// No description provided for @boutiqueLineMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{unitPrice} × {quantity}'**
+  String boutiqueLineMeta(String unitPrice, int quantity);
+
+  /// No description provided for @boutiquePayerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiquePayerSection;
+
+  /// No description provided for @boutiquePayerKnownBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Known payer'**
+  String get boutiquePayerKnownBadge;
+
+  /// No description provided for @boutiquePayerPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiquePayerPhoneLabel;
+
+  /// No description provided for @boutiquePayerLastNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get boutiquePayerLastNameLabel;
+
+  /// No description provided for @boutiquePayerMiddleNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get boutiquePayerMiddleNameLabel;
+
+  /// No description provided for @boutiquePayerFirstNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get boutiquePayerFirstNameLabel;
+
+  /// No description provided for @boutiquePayerReceiptNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt is in the payer\'s name; recipients are attached to each line.'**
+  String get boutiquePayerReceiptNotice;
+
+  /// No description provided for @boutiquePayerUnknownNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown number — this payer will be added to the directory with the sale.'**
+  String get boutiquePayerUnknownNotice;
+
+  /// No description provided for @boutiqueBlockersPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Still missing:'**
+  String get boutiqueBlockersPrefix;
+
+  /// No description provided for @boutiqueBlockerEmptyCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart is empty'**
+  String get boutiqueBlockerEmptyCart;
+
+  /// No description provided for @boutiqueBlockerLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get boutiqueBlockerLastName;
+
+  /// No description provided for @boutiqueBlockerMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get boutiqueBlockerMiddleName;
+
+  /// No description provided for @boutiqueBlockerFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get boutiqueBlockerFirstName;
+
+  /// No description provided for @boutiqueBlockerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer\'s phone'**
+  String get boutiqueBlockerPhone;
+
+  /// No description provided for @boutiqueBlockerPhoneIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete phone'**
+  String get boutiqueBlockerPhoneIncomplete;
+
+  /// No description provided for @boutiqueBlockerLinesWithoutLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 line without a level} other{{count} lines without a level}}'**
+  String boutiqueBlockerLinesWithoutLevel(int count);
+
+  /// No description provided for @boutiqueBlockerMixedCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed currencies'**
+  String get boutiqueBlockerMixedCurrency;
+
+  /// No description provided for @boutiqueEmptyCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No item in the catalogue'**
+  String get boutiqueEmptyCatalogTitle;
+
+  /// No description provided for @boutiqueEmptyCatalogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop has no item yet. Create one in the catalogue to be able to make a sale.'**
+  String get boutiqueEmptyCatalogMessage;
+
+  /// No description provided for @boutiqueWithheldCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue not shared'**
+  String get boutiqueWithheldCatalogTitle;
+
+  /// No description provided for @boutiqueWithheldCatalogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.'**
+  String get boutiqueWithheldCatalogMessage;
+
+  /// No description provided for @boutiqueNoMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching item'**
+  String get boutiqueNoMatchTitle;
+
+  /// No description provided for @boutiqueNoMatchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for “{query}” in “{family}”. Broaden the search.'**
+  String boutiqueNoMatchMessage(String query, String family);
+
+  /// No description provided for @boutiqueNoMatchMessageAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for “{query}”. Broaden the search.'**
+  String boutiqueNoMatchMessageAll(String query);
+
+  /// No description provided for @boutiqueResetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get boutiqueResetFilters;
+
+  /// No description provided for @boutiqueUnsellableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item in this catalogue cannot be sold from this version of the app.} other{{count} items in this catalogue cannot be sold from this version of the app.}}'**
+  String boutiqueUnsellableNotice(int count);
+
+  /// No description provided for @boutiqueErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get boutiqueErrorNetworkTitle;
+
+  /// No description provided for @boutiqueErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.'**
+  String get boutiqueErrorNetwork;
+
+  /// No description provided for @boutiqueErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get boutiqueErrorUnauthorizedTitle;
+
+  /// No description provided for @boutiqueErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to resume the till. The cart is kept.'**
+  String get boutiqueErrorUnauthorized;
+
+  /// No description provided for @boutiqueErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get boutiqueErrorForbiddenTitle;
+
+  /// No description provided for @boutiqueErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account lacks the rights to run the shop till. Contact the head office.'**
+  String get boutiqueErrorForbidden;
+
+  /// No description provided for @boutiqueErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue unreadable'**
+  String get boutiqueErrorServerTitle;
+
+  /// No description provided for @boutiqueErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.'**
+  String get boutiqueErrorServer;
+
+  /// No description provided for @boutiqueErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get boutiqueErrorRetry;
+
+  /// No description provided for @boutiqueErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get boutiqueErrorReconnect;
+
+  /// No description provided for @boutiqueErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String boutiqueErrorIncidentCode(String code);
+
+  /// No description provided for @boutiqueBeneficiaryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Line recipient'**
+  String get boutiqueBeneficiaryEyebrow;
+
+  /// No description provided for @boutiqueBeneficiaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a student'**
+  String get boutiqueBeneficiaryTitle;
+
+  /// No description provided for @boutiqueBeneficiaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The student\'s level resolves the price automatically — you never enter an amount.'**
+  String get boutiqueBeneficiaryHint;
+
+  /// No description provided for @boutiqueBeneficiarySearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name, middle name or first name'**
+  String get boutiqueBeneficiarySearchLabel;
+
+  /// No description provided for @boutiqueBeneficiarySearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Dylan Ndombo'**
+  String get boutiqueBeneficiarySearchPlaceholder;
+
+  /// No description provided for @boutiqueBeneficiaryTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least 2 letters, or switch to “By level”.'**
+  String get boutiqueBeneficiaryTooShort;
+
+  /// No description provided for @boutiqueBeneficiaryNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{query}”. Check the spelling or search by level.'**
+  String boutiqueBeneficiaryNoResult(String query);
+
+  /// No description provided for @boutiqueBeneficiaryPickLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level to list its students.'**
+  String get boutiqueBeneficiaryPickLevel;
+
+  /// No description provided for @boutiqueBeneficiaryLevelEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled at this level.'**
+  String get boutiqueBeneficiaryLevelEmpty;
+
+  /// No description provided for @boutiqueBeneficiaryNotSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not synced yet — sell by level, without a recipient: the price is the same.'**
+  String get boutiqueBeneficiaryNotSynced;
+
+  /// No description provided for @boutiqueBeneficiaryNoLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment carries no level — sell by level, without a recipient.'**
+  String get boutiqueBeneficiaryNoLevel;
+
+  /// No description provided for @boutiqueBeneficiaryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The student list could not be read.'**
+  String get boutiqueBeneficiaryLoadFailed;
+
+  /// No description provided for @boutiquePayerDirectoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in the directory · {count, plural, one{1 sale} other{{count} sales}}'**
+  String boutiquePayerDirectoryCount(int count);
+
+  /// No description provided for @boutiquePayerUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get boutiquePayerUse;
+
+  /// No description provided for @boutiqueConfirmEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collection'**
+  String get boutiqueConfirmEyebrow;
+
+  /// No description provided for @boutiqueConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the sale'**
+  String get boutiqueConfirmTitle;
+
+  /// No description provided for @boutiqueConfirmPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiqueConfirmPayer;
+
+  /// No description provided for @boutiqueConfirmPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiqueConfirmPhone;
+
+  /// No description provided for @boutiqueConfirmArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get boutiqueConfirmArticles;
+
+  /// No description provided for @boutiqueConfirmMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get boutiqueConfirmMethod;
+
+  /// No description provided for @boutiqueConfirmMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get boutiqueConfirmMethodCash;
+
+  /// No description provided for @boutiqueConfirmAmountReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get boutiqueConfirmAmountReceived;
+
+  /// No description provided for @boutiqueConfirmNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The total is paid in one go: no partial payment, no shop debt.'**
+  String get boutiqueConfirmNotice;
+
+  /// No description provided for @boutiqueConfirmNewPayerPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'This payer is new: their number and identity join the directory with the sale.'**
+  String get boutiqueConfirmNewPayerPrefix;
+
+  /// No description provided for @boutiqueConfirmOfflineSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.'**
+  String get boutiqueConfirmOfflineSuffix;
+
+  /// No description provided for @boutiqueConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get boutiqueConfirmCancel;
+
+  /// No description provided for @boutiqueConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {total}'**
+  String boutiqueConfirmAction(String total);
+
+  /// No description provided for @boutiqueSaleRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected · {total}'**
+  String boutiqueSaleRecorded(String total);
+
+  /// No description provided for @boutiqueSaleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The sale could not be recorded. Nothing was collected — try again.'**
+  String get boutiqueSaleFailed;
+
+  /// No description provided for @editiqueViewerSaleReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt'**
+  String get editiqueViewerSaleReceiptTitle;
+
+  /// No description provided for @documentsHintSaleReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student\'s file.'**
+  String get documentsHintSaleReceipt;
+
+  /// No description provided for @boutiqueTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt — Shop'**
+  String get boutiqueTicketTitle;
+
+  /// No description provided for @boutiqueTicketProvisionalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional document'**
+  String get boutiqueTicketProvisionalBanner;
+
+  /// No description provided for @boutiqueTicketProvisionalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Final receipt sealed on sync.'**
+  String get boutiqueTicketProvisionalNotice;
+
+  /// No description provided for @boutiqueTicketSealedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed receipt — valid discharge'**
+  String get boutiqueTicketSealedNotice;
+
+  /// No description provided for @boutiqueTicketPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PAYER:'**
+  String get boutiqueTicketPayerLabel;
+
+  /// No description provided for @boutiqueTicketPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tel.'**
+  String get boutiqueTicketPhoneLabel;
+
+  /// No description provided for @boutiqueTicketCashierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier:'**
+  String get boutiqueTicketCashierLabel;
+
+  /// No description provided for @boutiqueTicketTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get boutiqueTicketTotalLabel;
+
+  /// No description provided for @boutiqueTicketCashReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash received'**
+  String get boutiqueTicketCashReceivedLabel;
+
+  /// No description provided for @boutiqueTicketRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get boutiqueTicketRemainingLabel;
+
+  /// No description provided for @boutiqueTicketBeneficiaryPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'for'**
+  String get boutiqueTicketBeneficiaryPrefix;
+
+  /// No description provided for @boutiqueTicketSizePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Sz.'**
+  String get boutiqueTicketSizePrefix;
+
+  /// No description provided for @boutiqueTicketUnitSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/ea'**
+  String get boutiqueTicketUnitSuffix;
+
+  /// No description provided for @boutiqueTicketNoRefundNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'No refund once the item is handed over.'**
+  String get boutiqueTicketNoRefundNotice;
+
+  /// No description provided for @boutiqueReceiptBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected · {total}'**
+  String boutiqueReceiptBannerTitle(String total);
+
+  /// No description provided for @boutiqueReceiptBannerProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'{reference} · provisional, will be sealed on sync'**
+  String boutiqueReceiptBannerProvisional(String reference);
+
+  /// No description provided for @boutiqueReceiptBannerSealed.
+  ///
+  /// In en, this message translates to:
+  /// **'{reference} · sealed'**
+  String boutiqueReceiptBannerSealed(String reference);
+
+  /// No description provided for @boutiqueReceiptPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get boutiqueReceiptPrint;
+
+  /// No description provided for @boutiqueReceiptNewSale.
+  ///
+  /// In en, this message translates to:
+  /// **'New sale'**
+  String get boutiqueReceiptNewSale;
+
+  /// No description provided for @boutiqueReceiptPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket could not be printed. The sale is recorded — you can try again.'**
+  String get boutiqueReceiptPrintFailed;
+
+  /// No description provided for @boutiqueReceiptPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed.'**
+  String get boutiqueReceiptPrinted;
+
+  /// No description provided for @boutiqueOpenCart.
+  ///
+  /// In en, this message translates to:
+  /// **'View the cart'**
+  String get boutiqueOpenCart;
+
+  /// No description provided for @boutiqueOpenCartWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'View the cart, {count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueOpenCartWithCount(int count);
+
+  /// No description provided for @boutiqueCartPageEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Cart'**
+  String get boutiqueCartPageEyebrow;
+
+  /// No description provided for @boutiqueBackToCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to catalogue'**
+  String get boutiqueBackToCatalog;
+
+  /// No description provided for @boutiqueAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get boutiqueAddToCart;
+
+  /// No description provided for @boutiqueAddOneMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one {article}'**
+  String boutiqueAddOneMore(String article);
+
+  /// No description provided for @boutiqueRemoveOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove one {article}'**
+  String boutiqueRemoveOne(String article);
+
+  /// No description provided for @boutiqueSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale collected'**
+  String get boutiqueSuccessTitle;
+
+  /// No description provided for @boutiqueSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The customer paid {total} in cash. Hand them their ticket.'**
+  String boutiqueSuccessMessage(String total);
+
+  /// No description provided for @boutiqueSuccessDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get boutiqueSuccessDone;
+
+  /// No description provided for @boutiqueHistoryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ History'**
+  String get boutiqueHistoryEyebrow;
+
+  /// No description provided for @boutiqueHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales history'**
+  String get boutiqueHistoryTitle;
+
+  /// No description provided for @boutiqueHistoryPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get boutiqueHistoryPeriodDay;
+
+  /// No description provided for @boutiqueHistoryPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get boutiqueHistoryPeriodWeek;
+
+  /// No description provided for @boutiqueHistoryPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get boutiqueHistoryPeriodMonth;
+
+  /// No description provided for @boutiqueHistoryPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get boutiqueHistoryPeriodYear;
+
+  /// No description provided for @boutiqueHistorySaleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 sale} other{{count} sales}}'**
+  String boutiqueHistorySaleCount(int count);
+
+  /// No description provided for @boutiqueHistoryArticleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueHistoryArticleCount(int count);
+
+  /// No description provided for @boutiqueHistoryPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}'**
+  String boutiqueHistoryPendingNotice(int count);
+
+  /// No description provided for @boutiqueHistoryPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get boutiqueHistoryPendingBadge;
+
+  /// No description provided for @boutiqueHistoryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale in this period'**
+  String get boutiqueHistoryEmptyTitle;
+
+  /// No description provided for @boutiqueHistoryEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was collected at the counter. Widen the period, or open the shop to collect.'**
+  String get boutiqueHistoryEmptyMessage;
+
+  /// No description provided for @boutiqueHistoryPayerUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer not recorded'**
+  String get boutiqueHistoryPayerUnknown;
+
+  /// No description provided for @boutiqueHistoryTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total collected'**
+  String get boutiqueHistoryTotalLabel;
+
+  /// No description provided for @boutiqueHistorySaleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {reference}'**
+  String boutiqueHistorySaleTime(String time, String reference);
+
+  /// No description provided for @boutiqueHistoryProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional ticket'**
+  String get boutiqueHistoryProvisional;
+
+  /// No description provided for @boutiqueHistoryErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History unreadable'**
+  String get boutiqueHistoryErrorServerTitle;
+
+  /// No description provided for @boutiqueHistoryErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.'**
+  String get boutiqueHistoryErrorServer;
+
+  /// No description provided for @boutiqueHistoryErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
+  String get boutiqueHistoryErrorNetwork;
+
+  /// No description provided for @boutiqueClearEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Cart'**
+  String get boutiqueClearEyebrow;
+
+  /// No description provided for @boutiqueClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the cart?'**
+  String get boutiqueClearTitle;
+
+  /// No description provided for @boutiqueClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The composed lines and the payer\'s identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.'**
+  String get boutiqueClearMessage;
+
+  /// No description provided for @boutiqueClearLinesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}} in the cart'**
+  String boutiqueClearLinesSummary(int count);
+
+  /// No description provided for @boutiqueClearPayerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer entered: {payer}'**
+  String boutiqueClearPayerSummary(String payer);
+
+  /// No description provided for @boutiqueClearCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the cart'**
+  String get boutiqueClearCancel;
+
+  /// No description provided for @boutiqueClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get boutiqueClearConfirm;
+
+  /// No description provided for @boutiqueSuccessEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Collection'**
+  String get boutiqueSuccessEyebrow;
+
+  /// No description provided for @boutiqueSaleDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Sale'**
+  String get boutiqueSaleDetailEyebrow;
+
+  /// No description provided for @boutiqueSaleDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale details'**
+  String get boutiqueSaleDetailTitle;
+
+  /// No description provided for @boutiqueSaleDetailBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to history'**
+  String get boutiqueSaleDetailBack;
+
+  /// No description provided for @boutiqueSaleDetailPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiqueSaleDetailPayer;
+
+  /// No description provided for @boutiqueSaleDetailPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get boutiqueSaleDetailPhone;
+
+  /// No description provided for @boutiqueSaleDetailSoldAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on'**
+  String get boutiqueSaleDetailSoldAt;
+
+  /// No description provided for @boutiqueSaleDetailCollectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected by'**
+  String get boutiqueSaleDetailCollectedBy;
+
+  /// No description provided for @boutiqueSaleDetailCollectedByUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier not recorded'**
+  String get boutiqueSaleDetailCollectedByUnknown;
+
+  /// No description provided for @boutiqueSaleDetailReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get boutiqueSaleDetailReceipt;
+
+  /// No description provided for @boutiqueSaleDetailLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Items sold'**
+  String get boutiqueSaleDetailLines;
+
+  /// No description provided for @boutiqueSaleDetailBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'for {name}'**
+  String boutiqueSaleDetailBeneficiary(String name);
+
+  /// No description provided for @boutiqueSaleDetailSizePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Size {size}'**
+  String boutiqueSaleDetailSizePrefix(String size);
+
+  /// No description provided for @boutiqueSaleDetailPrintTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the ticket'**
+  String get boutiqueSaleDetailPrintTicket;
+
+  /// No description provided for @boutiqueSaleDetailReprintTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint the ticket'**
+  String get boutiqueSaleDetailReprintTicket;
+
+  /// No description provided for @boutiqueSaleDetailTicketPrintedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed on {date}'**
+  String boutiqueSaleDetailTicketPrintedAt(String date);
+
+  /// No description provided for @boutiqueSaleDetailTicketNeverPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket never printed from this tablet.'**
+  String get boutiqueSaleDetailTicketNeverPrinted;
+
+  /// No description provided for @boutiqueSaleDetailOpenReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the sealed receipt'**
+  String get boutiqueSaleDetailOpenReceipt;
+
+  /// No description provided for @boutiqueSaleDetailReceiptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt will be sealed at synchronisation. The ticket stands in the meantime.'**
+  String get boutiqueSaleDetailReceiptPending;
+
+  /// No description provided for @boutiqueSaleDetailReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt'**
+  String get boutiqueSaleDetailReceiptTitle;
+
+  /// No description provided for @boutiqueSaleDetailNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale not found'**
+  String get boutiqueSaleDetailNotFoundTitle;
+
+  /// No description provided for @boutiqueSaleDetailNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale is no longer in this school\'s local database. Nothing is lost server-side if it had already been sent.'**
+  String get boutiqueSaleDetailNotFound;
+
+  /// No description provided for @boutiqueSaleDetailPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.'**
+  String get boutiqueSaleDetailPendingNotice;
 }
 
 class _AppLocalizationsDelegate

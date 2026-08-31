@@ -103,7 +103,21 @@ const TableSchema parentsTable = TableSchema(
   ],
 );
 
-/// `student_parent` — lien N-N élève ↔ tuteur, porteur du `relationship_type`.
+/// `student_parent` — lien N-N élève ↔ tuteur, porteur du `relationship_type`
+/// et du drapeau `emergency_contact`.
+///
+/// Les deux décrivent le COUPLE (élève, tuteur), jamais le tuteur seul : un
+/// tuteur est rapproché par téléphone, donc une même ligne `parents` sert toute
+/// une fratrie. Posé sur `parents`, « contact d'urgence » désignerait le même
+/// adulte pour tous les enfants de ce tuteur.
+///
+/// L'index unique PARTIEL tient l'invariant « au plus un contact d'urgence par
+/// élève » — miroir de `ux_emergency_contact_per_student` côté serveur (V101).
+/// Partiel, jamais contrainte unique : seules les lignes à 1 sont concernées,
+/// les tuteurs ordinaires (0) restent en nombre quelconque. Il est le FILET,
+/// pas la règle : le DAO démote puis promeut dans la même transaction, et
+/// l'index n'a le dernier mot que sur une écriture qui aurait échappé à ce
+/// chemin.
 const TableSchema studentParentTable = TableSchema(
   name: 'student_parent',
   createTableSql: '''
@@ -111,15 +125,33 @@ const TableSchema studentParentTable = TableSchema(
       student_id TEXT NOT NULL,
       parent_id TEXT NOT NULL,
       relationship_type TEXT NOT NULL DEFAULT 'OTHER',
+      emergency_contact INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (student_id, parent_id)
     )
   ''',
+  createIndexSql: [
+    'CREATE UNIQUE INDEX ux_emergency_contact_per_student '
+        'ON student_parent(student_id) WHERE emergency_contact = 1',
+  ],
 );
 
 /// `enrollments` — dossiers d'inscription (uuid client). `enrollment_date` =
 /// date terrain honorée serveur. `enrollment_code` rempli à l'ACK.
 /// `source_ref` = référence d'origine du dossier (contrat agrégat) : matricule
 /// (RE_ENROLLMENT), id de préinscription (PRE_ENROLLMENT), NULL (NEW).
+///
+/// `former_student` — le « nouveau / ancien » du formulaire, au sens « déjà
+/// élève de CETTE école ». **Délibérément distinct d'`enrollment_type`** :
+/// l'enum décrit le chemin technique suivi par le dossier, ce drapeau un fait
+/// déclaré au guichet. Les deux divergent dès qu'une école démarre sur
+/// l'application — tous ses anciens élèves y entrent en NEW_ENROLLMENT, faute
+/// de dossier N-1. NOT NULL, comme la colonne serveur.
+///
+/// `medical_notes` — texte libre sur la santé de l'enfant (allergies,
+/// traitement en cours, conduite à tenir). Porté par l'INSCRIPTION et non par
+/// l'élève : côté serveur `saveStudent` est un get-or-return, une note posée
+/// sur `students` serait figée à vie dès la première saisie. Donnée de santé :
+/// jamais journalisée, jamais imprimée.
 const TableSchema enrollmentsTable = TableSchema(
   name: 'enrollments',
   createTableSql: '''
@@ -142,6 +174,8 @@ const TableSchema enrollmentsTable = TableSchema(
       previous_rate REAL,
       previous_rank INTEGER,
       validated_previous_year INTEGER,
+      former_student INTEGER NOT NULL DEFAULT 0,
+      medical_notes TEXT,
       transfer_reason TEXT,
       cancellation_reason TEXT,
       emit_document INTEGER NOT NULL DEFAULT 1,
@@ -255,7 +289,16 @@ const TableSchema refSchoolLevelsTable = TableSchema(
 /// `ref_previous_year_students` — **cohorte de réinscription** (D3) : élèves N-1,
 /// bornée/statique + snapshot arriérés. `student_id` = id CANONIQUE réutilisé par
 /// le nouvel `enrollment` (cas RE) → aucun doublon d'élève.
-/// `previous_balance_in_cents` remplace le REAL de la spec (règle argent).
+/// Les arriérés N-1 vivent dans `ref_previous_year_student_balances` — une
+/// ligne PAR DEVISE. Ils tenaient ici en `previous_balance_in_cents` +
+/// `currency` : un scalaire étiqueté de la devise du premier poste, qui
+/// annonçait « 90 425,00 $ » à un élève devant 425,00 $ et 90 000 FC.
+///
+/// `medical_notes` est la fiche santé du dossier N-1, descendue pour que le
+/// guichet n'ait pas à la ressaisir. C'est une **proposition** : elle ne devient
+/// la valeur de la nouvelle inscription que si le poste la repousse dans son
+/// agrégat. Un canal qui la lit sans la renvoyer perd les allergies de l'enfant
+/// à chaque changement d'année.
 const TableSchema refPreviousYearStudentsTable = TableSchema(
   name: 'ref_previous_year_students',
   createTableSql: '''
@@ -273,8 +316,7 @@ const TableSchema refPreviousYearStudentsTable = TableSchema(
       previous_classroom_id TEXT,
       guardian_name TEXT,
       guardian_phone TEXT,
-      previous_balance_in_cents INTEGER NOT NULL DEFAULT 0,
-      currency TEXT,
+      medical_notes TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
     )
   ''',
@@ -283,6 +325,31 @@ const TableSchema refPreviousYearStudentsTable = TableSchema(
         'ON ref_previous_year_students(matriculation_number)',
     'CREATE INDEX idx_ref_previous_year_students_name '
         'ON ref_previous_year_students(last_name, surname)',
+  ],
+);
+
+/// `ref_previous_year_student_balances` — arriérés N-1, **une ligne par devise**.
+///
+/// Table fille plutôt qu'une colonne JSON : la cohorte se re-seede par lots, et
+/// un JSON obligerait à relire-modifier-réécrire une chaîne à chaque pull, là où
+/// une table fille se remplace par `DELETE` + `INSERT` sous le même index que le
+/// reste du seed.
+///
+/// **Aucune ligne = ne doit rien**, et jamais un zéro dans une unité que
+/// personne n'a choisie. C'est la même règle que la liste vide du contrat.
+const TableSchema refPreviousYearStudentBalancesTable = TableSchema(
+  name: 'ref_previous_year_student_balances',
+  createTableSql: '''
+    CREATE TABLE ref_previous_year_student_balances (
+      student_id TEXT NOT NULL,
+      currency TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      PRIMARY KEY (student_id, currency)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_prev_year_balances_student '
+        'ON ref_previous_year_student_balances(student_id)',
   ],
 );
 
@@ -336,6 +403,100 @@ const TableSchema refFeeTariffsTable = TableSchema(
   ''',
   createIndexSql: [
     'CREATE INDEX idx_ref_fee_tariffs_level ON ref_fee_tariffs(school_level_id)',
+  ],
+);
+
+/// `ref_reduction_types` — catalogue des natures de réduction (ADR-021 V1).
+///
+/// ⚠️ **Pas d'`academic_year_id`, et c'est structurel** : le barème descend à la
+/// RACINE du bundle référentiel, à côté de `school`, pas dans un slot d'année.
+/// La purge du pull ne peut donc PAS être scopée par année comme celle de
+/// [refFeeTariffsTable] — elle est scopée par **école**, et `school_id` est
+/// stampé depuis `CurrentUserContext`, jamais depuis le payload. Sans ce scope,
+/// un pull effacerait le barème de l'autre école sur une tablette partagée, et
+/// aucun filtre `academic_year_id` ne viendrait masquer la perte en « vide ».
+///
+/// **Aucun `id` : le serveur n'en donne pas.** `ReductionSummaryDto` ne porte
+/// que `code`, `label`, `active` et ses lignes — l'identité d'un type est son
+/// code dans son école, et c'est la clé primaire. Un id local fabriqué depuis
+/// ce couple n'aurait rien identifié de plus, et aurait laissé croire qu'il
+/// venait du contrat.
+const TableSchema refReductionTypesTable = TableSchema(
+  name: 'ref_reduction_types',
+  createTableSql: '''
+    CREATE TABLE ref_reduction_types (
+      school_id TEXT NOT NULL DEFAULT '',
+      code TEXT NOT NULL,
+      label TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, code)
+    )
+  ''',
+  createIndexSql: [],
+);
+
+/// `ref_reduction_lines` — le barème proprement dit : ce qu'une nature réduit,
+/// et de combien, rubrique par rubrique.
+///
+/// `percentage` est un pourcentage (0–100), pas de l'argent : d'où le `REAL`,
+/// qui ne contredit pas la règle « argent = INTEGER centimes ». Rien ne le
+/// calcule en V1 — le front stocke ce qui descend sans le réinterpréter, et
+/// l'arrondi reste un problème de V2, déjà tranché côté back (HALF_UP au
+/// centime).
+///
+/// La table est peuplée alors que **presque rien ne la lit en V1** : seul le
+/// filtre « ne proposer que les types qui réduisent réellement quelque chose »
+/// s'y appuie. C'est délibéré — la section descend de toute façon, et la jeter
+/// maintenant coûterait un palier de plus à la V2.
+///
+/// **Table à plat, section imbriquée sur le fil.** Le serveur sert les lignes
+/// DANS leur type (`reductions[].lines[]`) et n'en donne ni id ni code de
+/// rattachement : le code du parent est stampé ici à l'aplatissement. Deux
+/// listes à joindre côté client seraient deux occasions de les désynchroniser —
+/// c'est la raison que le back donne lui-même de l'imbrication.
+///
+/// Clé : `(school_id, reduction_code, fee_code)`, comme la contrainte du back.
+const TableSchema refReductionLinesTable = TableSchema(
+  name: 'ref_reduction_lines',
+  createTableSql: '''
+    CREATE TABLE ref_reduction_lines (
+      school_id TEXT NOT NULL DEFAULT '',
+      reduction_code TEXT NOT NULL,
+      fee_code TEXT NOT NULL,
+      percentage REAL NOT NULL,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, reduction_code, fee_code)
+    )
+  ''',
+  createIndexSql: [],
+);
+
+/// `enrollment_reductions` — qui a droit à quoi. **Mémoire seule en V1** :
+/// aucune créance n'en tient compte, aucun montant n'en dépend.
+///
+/// Pas de `sync_status` : cette table n'a **pas de flux propre**. Les codes
+/// voyagent dans l'agrégat d'inscription (`reductionCodes`), le serveur grave
+/// l'octroi et le renvoie — exactement le régime des créances. Rien n'est
+/// jamais poussé depuis ici, donc rien n'a à porter d'état de synchro.
+///
+/// ⚠️ Corollaire à retenir pour la V2 : côté serveur, poser un octroi ne touche
+/// PAS `enrollments.server_updated_at`. En V1 c'est sans effet — l'octroi est
+/// simultané à l'inscription, la ligne est neuve de toute façon. Dès que
+/// l'octroi se détachera, il sera invisible à notre pull sans flux à lui.
+const TableSchema enrollmentReductionsTable = TableSchema(
+  name: 'enrollment_reductions',
+  createTableSql: '''
+    CREATE TABLE enrollment_reductions (
+      enrollment_id TEXT NOT NULL,
+      reduction_code TEXT NOT NULL,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (enrollment_id, reduction_code)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_enrollment_reductions_enrollment '
+        'ON enrollment_reductions(enrollment_id)',
   ],
 );
 
@@ -414,6 +575,16 @@ const TableSchema studentChargesTable = TableSchema(
 /// destination : celle-ci est lue — elle remonte au serveur avec le versement
 /// et alimente l'annuaire de payeurs du guichet. La v27 n'a pas proscrit la
 /// PII, elle a proscrit la PII que personne ne lit.
+/// Les montants ne sont **pas** ici, et c'est le même choix que côté serveur :
+/// `amount_in_cents` + `currency` n'ont jamais été des propriétés du versement,
+/// seulement un résumé de ses imputations — qu'on pouvait stocker en scalaire
+/// tant qu'il n'y avait qu'une devise. Un passage au guichet qui solde une
+/// créance en dollars et une en francs n'a pas de montant unique.
+///
+/// Ils se dérivent de `payment_allocations`, dont la devise est NOT NULL depuis
+/// la création de la table. Le contrat de pull porte d'ailleurs la même
+/// garantie sur chaque imputation, « ce qui permet à un client de reconstruire
+/// le total par devise sans faire confiance à `amounts` ».
 const TableSchema paymentsTable = TableSchema(
   name: 'payments',
   createTableSql: '''
@@ -422,8 +593,6 @@ const TableSchema paymentsTable = TableSchema(
       client_uuid TEXT NOT NULL,
       student_id TEXT NOT NULL,
       academic_year_id TEXT,
-      amount_in_cents INTEGER NOT NULL,
-      currency TEXT NOT NULL,
       method TEXT NOT NULL DEFAULT 'CASH',
       paid_at TEXT NOT NULL,
       payer_first_name TEXT NOT NULL,
@@ -454,6 +623,13 @@ const TableSchema paymentsTable = TableSchema(
 /// `payment_allocations` — imputations d'un paiement sur des créances.
 /// Append-only immuable → PAS de `version`. `student_charge_id` peut pointer une
 /// créance réelle, provisoire, ou être NULL (avance / trop-perçu).
+///
+/// `fee_tariff_id` (v38) désigne la **ligne de grille** payée. Depuis que le
+/// serveur admet plusieurs lignes d'une même nature sur un niveau (minerval en
+/// tranches), `fee_code` ne départage plus deux créances : c'est le tarif qui le
+/// fait, et il est de meilleure autorité que `student_charge_id` — un tarif vient
+/// toujours du référentiel servi par le serveur, il ne peut jamais être
+/// provisoire. Nullable : une créance *ad hoc*, hors grille, n'en a pas.
 const TableSchema paymentAllocationsTable = TableSchema(
   name: 'payment_allocations',
   createTableSql: '''
@@ -462,6 +638,7 @@ const TableSchema paymentAllocationsTable = TableSchema(
       client_uuid TEXT NOT NULL,
       payment_id TEXT NOT NULL,
       student_charge_id TEXT,
+      fee_tariff_id TEXT,
       fee_code TEXT NOT NULL,
       student_charge_label TEXT NOT NULL,
       amount_in_cents INTEGER NOT NULL,
@@ -566,9 +743,13 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refSchoolLevelGroupsTable,
   refSchoolLevelsTable,
   refPreviousYearStudentsTable,
+  refPreviousYearStudentBalancesTable,
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,
+  refReductionTypesTable,
+  refReductionLinesTable,
+  enrollmentReductionsTable,
   studentChargesTable,
   paymentsTable,
   paymentAllocationsTable,

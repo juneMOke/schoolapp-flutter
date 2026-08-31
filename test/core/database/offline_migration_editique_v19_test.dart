@@ -89,8 +89,6 @@ void main() {
       'id': 'p-1',
       'client_uuid': 'p-1',
       'student_id': 's-1',
-      'amount_in_cents': 5000,
-      'currency': 'CDF',
       'paid_at': '2026-08-04',
       'payer_first_name': 'Amina',
       'payer_last_name': 'Mbala',

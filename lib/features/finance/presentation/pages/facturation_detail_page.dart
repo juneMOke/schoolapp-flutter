@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
-import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_money.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
@@ -25,7 +26,6 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
@@ -60,7 +60,6 @@ class FacturationDetailPage extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     final chargesBloc = context.read<StudentChargesBloc>();
     final paymentsBloc = context.read<PaymentsBloc>();
-    final financeOfflineBloc = context.read<FinanceOfflineBloc>();
 
     if (chargesBloc.state.status != StudentChargesStatus.success) {
       messenger.showSnackBar(
@@ -104,9 +103,15 @@ class FacturationDetailPage extends StatelessWidget {
     }
 
     if (!context.mounted) return;
-    await showFacturationCreatePaymentDialog(
-      context,
-      intent: FacturationCreatePaymentIntent(
+    // Écran plein empilé sur la fiche (spec MODALE-12 devenue une page) : le
+    // contexte d'affichage et les créances RELUES voyagent dans `extra`, l'élève
+    // et l'année dans le chemin — un lien profond reste résoluble.
+    final collected = await context.push<bool>(
+      AppRoutesNames.facturationCreatePaymentPath(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+      extra: FacturationCreatePaymentIntent(
         studentId: intent.studentId,
         academicYearId: intent.academicYearId,
         firstName: intent.firstName,
@@ -116,9 +121,27 @@ class FacturationDetailPage extends StatelessWidget {
         levelGroupName: intent.levelGroupName,
         studentCharges: charges,
       ),
-      paymentsBloc: paymentsBloc,
-      studentChargesBloc: chargesBloc,
-      financeOfflineBloc: financeOfflineBloc,
+    );
+
+    // `true` = un encaissement a été écrit. Le rafraîchissement se fait ICI,
+    // après le retour : la page de saisie a déjà rendu son écran de succès, et
+    // un échec de rechargement ne doit pas le contredire.
+    //
+    // `context.mounted` garde les deux BLoCs : capturés avant la navigation,
+    // ils sont fermés avec la fiche — la nourrir d'un événement après coup
+    // lèverait au lieu de rafraîchir quoi que ce soit.
+    if (collected != true || !context.mounted) return;
+    paymentsBloc.add(
+      PaymentsRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+    );
+    chargesBloc.add(
+      StudentChargesByAcademicYearRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
     );
   }
 
@@ -161,8 +184,7 @@ class FacturationDetailPage extends StatelessWidget {
         payerLastName: payment.payerLastName,
         payerMiddleName: payment.payerMiddleName,
         payerPhoneNumber: payment.payerPhoneNumber,
-        amountInCents: payment.amountInCents,
-        currency: payment.currency,
+        amounts: payment.amounts,
         paidAt: payment.paidAt,
         // Garde du reçu : tant que l'encaissement n'est pas remonté, son uuid
         // est inconnu du serveur et la demande de pièce répondrait 404.
@@ -182,12 +204,6 @@ class FacturationDetailPage extends StatelessWidget {
         BlocProvider<PaymentsBloc>(create: (_) => getIt<PaymentsBloc>()),
         BlocProvider<StudentChargesBloc>(
           create: (_) => getIt<StudentChargesBloc>(),
-        ),
-        // Chemin d'écriture offline-first de l'encaissement (file outbox).
-        // La lecture (paiements/créances) est servie en local par les repos
-        // offline-first liés en DI (BLoCs online ci-dessus inchangés).
-        BlocProvider<FinanceOfflineBloc>(
-          create: (_) => getIt<FinanceOfflineBloc>(),
         ),
         // Signal « un cycle de rafraîchissement vient d'aboutir » : c'est lui
         // qui remplace l'attente qu'on faisait subir à chaque lecture. Le
@@ -257,41 +273,26 @@ class FacturationDetailPage extends StatelessWidget {
                             final hasCharges =
                                 state.status == StudentChargesStatus.success &&
                                 state.studentCharges.isNotEmpty;
-                            final totalDue = hasCharges
-                                ? state.studentCharges.fold<double>(
-                                    0.0,
-                                    (sum, charge) =>
-                                        sum + charge.expectedAmountInCents,
-                                  )
-                                : 0.0;
+                            final charges = state.studentCharges;
+
+                            // Sommes PAR DEVISE. Un élève peut devoir en
+                            // dollars et en francs : additionner les deux
+                            // donnerait un chiffre que personne ne peut
+                            // vérifier, étiqueté avec la première devise venue.
+                            //
                             // Déjà payé & reste COMPOSÉS (miroir serveur +
                             // encaissements de ce poste non remontés), FRONT §5.
-                            final alreadyPaid = hasCharges
-                                ? state.studentCharges.fold<double>(
-                                    0.0,
-                                    (sum, charge) =>
-                                        sum + charge.paidTotalInCents,
-                                  )
-                                : 0.0;
-                            final remaining = hasCharges
-                                ? state.studentCharges.fold<double>(
-                                    0.0,
-                                    (sum, charge) =>
-                                        sum + charge.remainingInCents,
-                                  )
-                                : 0.0;
-                            final currency = hasCharges
-                                ? state.studentCharges.first.currency
-                                : '';
+                            final totalDue = charges.expectedBag;
+                            final alreadyPaid = charges.paidTotalBag;
+                            final remaining = charges.remainingBag;
 
                             // Tuiles de synthèse affichées directement sur la page
                             // (l'identité élève + classe vit déjà dans l'AppBar).
                             return FinanceDetailKpiBand(
                               hasCharges: hasCharges,
-                              totalDueCents: totalDue,
-                              alreadyPaidCents: alreadyPaid,
-                              remainingCents: remaining,
-                              currency: currency,
+                              totalDue: totalDue,
+                              alreadyPaid: alreadyPaid,
+                              remaining: remaining,
                             );
                           },
                         ),
@@ -401,23 +402,27 @@ class _BillingBalanceAppBarPill extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        // Solde = somme des restes COMPOSÉS (FRONT §5) : le miroir serveur seul
-        // ferait réapparaître un poste soldé localement comme dû.
-        final remaining = state.studentCharges.fold<double>(
-          0.0,
-          (sum, charge) => sum + charge.remainingInCents,
-        );
-        final hasBalance = remaining > 0;
-        final amount = formatMonetaryAmountWithCurrency(
-          amount: remaining / 100,
-          currency: state.studentCharges.first.currency,
-        );
+        // Solde = somme des restes COMPOSÉS (FRONT §5), PAR DEVISE : le miroir
+        // serveur seul ferait réapparaître un poste soldé localement comme dû.
+        //
+        // `withoutZeros` : une devise entièrement soldée n'a rien à dire dans
+        // une pastille d'alerte.
+        final remaining = state.studentCharges.remainingBag.withoutZeros;
+        final hasBalance = remaining.isNotEmpty;
+
+        // Une pastille est une alerte, pas un relevé : la place d'un seul
+        // montant. Au-delà d'une devise, elle dit qu'il reste quelque chose et
+        // laisse le détail aux cartes — n'en montrer qu'un des deux serait un
+        // mensonge, et les deux ne tiennent pas.
+        final sole = remaining.soleEntry;
 
         return FacturationBalancePill(
           hasBalance: hasBalance,
-          label: hasBalance
-              ? l10n.facturationBalanceDuePill(amount)
-              : l10n.facturationBalanceUpToDatePill,
+          label: !hasBalance
+              ? l10n.facturationBalanceUpToDatePill
+              : sole != null
+              ? l10n.facturationBalanceDuePill(MoneyFormat.format(sole))
+              : l10n.facturationBalanceDueMultiCurrencyPill,
         );
       },
     );

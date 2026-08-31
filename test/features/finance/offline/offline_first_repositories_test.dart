@@ -17,6 +17,8 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/pa
 import 'package:school_app_flutter/features/finance/offline/data/repositories/student_charges_offline_first_repository.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Délégué online factice : n'est appelé que pour les méthodes admin/create.
 class _FakeStudentChargesOnline implements StudentChargesRepository {
@@ -72,8 +74,7 @@ class _FakePaymentsOnline implements PaymentsRepository {
   Future<Either<Failure, Payment>> createPayment({
     required String studentId,
     required String academicYearId,
-    required int amountInCents,
-    required String currency,
+    required MoneyBag amounts,
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
@@ -86,8 +87,7 @@ class _FakePaymentsOnline implements PaymentsRepository {
         id: 'srv',
         studentId: studentId,
         academicYearId: academicYearId,
-        amountInCents: amountInCents,
-        currency: currency,
+        amounts: amounts,
         payerFirstName: payerFirstName,
         payerLastName: payerLastName,
         paidAt: DateTime.fromMillisecondsSinceEpoch(0),
@@ -160,8 +160,6 @@ void main() {
             clientUuid: 'p1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -230,8 +228,6 @@ void main() {
             clientUuid: 'p1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'Sarah',
             payerLastName: 'Moke',
@@ -269,8 +265,7 @@ void main() {
         await repo.createPayment(
           studentId: 's1',
           academicYearId: 'ay-1',
-          amountInCents: 30000,
-          currency: 'USD',
+          amounts: MoneyBag.of(const [Money(30000, 'USD')]),
           payerFirstName: 'S',
           payerLastName: 'M',
           allocations: const [],
@@ -331,8 +326,6 @@ void main() {
             clientUuid: 'p1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-08-19T09:00:00Z',
             payerFirstName: 'Sarah',
             payerLastName: 'Moke',

@@ -178,6 +178,51 @@ void main() {
       expect(draft.academicYearId, 'ay-2026');
     });
 
+    /// **Le piège de la réinscription.** La cohorte descend la fiche santé du
+    /// dossier N-1 comme une PROPOSITION : le serveur écrit ce que l'agrégat
+    /// lui envoie, donc un seed qui ne la reprend pas la fait disparaître au
+    /// changement d'année — pendant que le même élève réinscrit au guichet en
+    /// ligne, lui, la conserve. Deux canaux, une seule opération, deux
+    /// résultats opposés.
+    test('la fiche santé N-1 est reprise dans le brouillon', () {
+      final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+        candidate: const ReenrollmentCandidate(
+          studentId: 'stu-canonique',
+          matriculationNumber: 'KIN-2025-0001',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          gender: 'FEMALE',
+          dateOfBirth: '2015-04-02',
+          birthPlace: 'Kinshasa',
+          medicalNotes: 'Asthme — inhalateur dans le cartable.',
+        ),
+        academicYearId: 'ay-2026',
+      );
+
+      expect(draft.medicalNotes, 'Asthme — inhalateur dans le cartable.');
+    });
+
+    test('un dossier N-1 sans fiche santé ne propose rien', () {
+      final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+        candidate: candidate,
+        academicYearId: 'ay-2026',
+      );
+
+      expect(draft.medicalNotes, isNull);
+    });
+
+    /// Une réinscription vient d'un dossier de l'année précédente DANS cette
+    /// école : ancien élève par construction, pas par déclaration.
+    test('« ancien élève » est vrai par construction', () {
+      final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+        candidate: candidate,
+        academicYearId: 'ay-2026',
+      );
+
+      expect(draft.formerStudent, isTrue);
+    });
+
     test('matricule → matriculationNumber ET source_ref', () {
       final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
         candidate: candidate,

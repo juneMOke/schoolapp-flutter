@@ -19,12 +19,22 @@ class AcademicYearContextState extends Equatable {
   /// déconnecter — seul un changement de droits côté serveur y remédie.
   final bool insufficientPermissions;
 
+  /// L'école n'a **pas encore été paramétrée** : le pull a abouti et le serveur
+  /// ne connaît aucune année académique pour elle.
+  ///
+  /// Ni panne ni droit manquant — un établissement fraîchement souscrit. La
+  /// distinction porte l'écran : ce cas-là ne propose pas « Réessayer » (rien
+  /// dans ce geste ne crée une année) mais l'entrée dans l'assistant de
+  /// configuration, pour qui détient la permission de paramétrer.
+  final bool schoolNotProvisioned;
+
   const AcademicYearContextState({
     required this.status,
     this.context,
     this.errorMessage,
     this.sessionExpired = false,
     this.insufficientPermissions = false,
+    this.schoolNotProvisioned = false,
   });
 
   const AcademicYearContextState.initial()
@@ -32,7 +42,8 @@ class AcademicYearContextState extends Equatable {
       context = null,
       errorMessage = null,
       sessionExpired = false,
-      insufficientPermissions = false;
+      insufficientPermissions = false,
+      schoolNotProvisioned = false;
 
   bool get hasData => context != null;
 
@@ -52,6 +63,7 @@ class AcademicYearContextState extends Equatable {
     Object? errorMessage = const Object(),
     bool? sessionExpired,
     bool? insufficientPermissions,
+    bool? schoolNotProvisioned,
   }) {
     return AcademicYearContextState(
       status: status ?? this.status,
@@ -64,6 +76,7 @@ class AcademicYearContextState extends Equatable {
       sessionExpired: sessionExpired ?? this.sessionExpired,
       insufficientPermissions:
           insufficientPermissions ?? this.insufficientPermissions,
+      schoolNotProvisioned: schoolNotProvisioned ?? this.schoolNotProvisioned,
     );
   }
 
@@ -74,5 +87,6 @@ class AcademicYearContextState extends Equatable {
     errorMessage,
     sessionExpired,
     insufficientPermissions,
+    schoolNotProvisioned,
   ];
 }

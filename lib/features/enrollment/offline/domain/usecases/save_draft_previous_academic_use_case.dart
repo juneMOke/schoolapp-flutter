@@ -17,7 +17,9 @@ class SaveDraftPreviousAcademicUseCase {
     double? previousRate,
     int? previousRank,
     bool? validatedPreviousYear,
+    bool? formerStudent,
     String? transferReason,
+    String? reopenEnrollmentId,
   }) => _repository.saveDraftPreviousAcademic(
     enrollmentId: enrollmentId,
     previousSchoolName: previousSchoolName,
@@ -27,6 +29,8 @@ class SaveDraftPreviousAcademicUseCase {
     previousRate: previousRate,
     previousRank: previousRank,
     validatedPreviousYear: validatedPreviousYear,
+    formerStudent: formerStudent,
     transferReason: transferReason,
+    reopenEnrollmentId: reopenEnrollmentId,
   );
 }

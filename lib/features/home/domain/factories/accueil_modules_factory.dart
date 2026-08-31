@@ -30,10 +30,12 @@ class AccueilModulesFactory {
     final all = [
       _inscriptions(l10n),
       _finances(l10n),
+      _boutique(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
       _disciplines(l10n),
+      _configuration(l10n),
     ];
 
     final visible = <AccueilModule>[];
@@ -146,6 +148,34 @@ class AccueilModulesFactory {
     );
   }
 
+  /// La caisse boutique — une carte propre, comme le menu.
+  ///
+  /// Sans tableau de bord : la caisse a un guichet et un historique, pas de
+  /// synthèse ; sa page d'entrée est donc son premier sous-module (Achats).
+  static AccueilModule _boutique(AppLocalizations l10n) {
+    const menuId = MenuConstants.boutiqueMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuBoutique,
+      description: l10n.accueilModuleBoutiqueDescription,
+      icon: Icons.storefront_outlined,
+      accent: AppColors.accueilBoutiqueAccent,
+      softBackground: AppColors.accueilBoutiqueSoft,
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.boutiqueAchatsId,
+          title: l10n.subMenuBoutiquePurchases,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.boutiqueHistoriqueId,
+          title: l10n.subMenuBoutiqueHistory,
+        ),
+      ],
+    );
+  }
+
   static AccueilModule _classes(AppLocalizations l10n) {
     const menuId = MenuConstants.classesMenuId;
     return AccueilModule(
@@ -246,6 +276,28 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
+        ),
+      ],
+    );
+  }
+
+  /// Configuration — page unique, et la seule carte qui ne serve pas un métier
+  /// quotidien : elle n'apparaît qu'à qui détient `school.provisioning.write`,
+  /// c'est-à-dire à la direction.
+  static AccueilModule _configuration(AppLocalizations l10n) {
+    const menuId = MenuConstants.configurationMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuConfiguration,
+      description: l10n.accueilModuleConfigurationDescription,
+      icon: Icons.tune_rounded,
+      accent: AppColors.accueilConfigurationAccent,
+      softBackground: AppColors.accueilConfigurationSoft,
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.configurationSchoolId,
+          title: l10n.subMenuConfigurationSchool,
         ),
       ],
     );

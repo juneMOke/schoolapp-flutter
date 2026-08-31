@@ -38,9 +38,15 @@ class EnrollmentAggregateRequest {
         'previousRate': e.previousRate,
         'previousRank': e.previousRank,
         'validatedPreviousYear': e.validatedPreviousYear,
+        'formerStudent': e.formerStudent,
+        'medicalNotes': e.medicalNotes,
         // RE = matricule, PRE = id préinscription, NEW = null (posé au seed
         // du brouillon, transporté par le payload outbox).
         'sourceRef': e.sourceRef,
+        // Réductions déclarées au guichet (ADR-021 V1) — omis quand vide : un
+        // `[]` systématique dirait « retire tout » à un serveur qui ne porte
+        // pas encore le champ, et le dira demain à celui qui le porte.
+        if (e.reductionCodes.isNotEmpty) 'reductionCodes': e.reductionCodes,
       },
       'student': <String, dynamic>{
         'id': s.id,
@@ -69,6 +75,12 @@ class EnrollmentAggregateRequest {
               'phoneNumber': p.phoneNumber,
               'relationshipType': p.relationshipType,
               'email': p.email,
+              // **Omis quand nul, jamais aplati en `false`.** Le serveur lit
+              // l'absence comme « ne touche pas à la désignation en place » ;
+              // un `false` écrit par confort retirerait un contact d'urgence
+              // désigné depuis un autre poste, sans que personne l'ait demandé.
+              if (p.emergencyContact != null)
+                'emergencyContact': p.emergencyContact,
             },
           )
           .toList(),

@@ -83,12 +83,16 @@ void main() {
     String id, {
     String studentId = 's1',
     String feeCode = 'TUITION',
+    String? academicYearId,
+    String? feeTariffId,
     int expected = 100000,
     int paid = 0,
     String status = 'PARTIAL',
   }) => StudentChargeDto(
     id: id,
     studentId: studentId,
+    academicYearId: academicYearId,
+    feeTariffId: feeTariffId,
     feeCode: feeCode,
     label: feeCode,
     expectedAmountInCents: expected,
@@ -158,8 +162,6 @@ void main() {
           'id': 'pay1',
           'client_uuid': 'pay1',
           'student_id': 's1',
-          'amount_in_cents': 20000,
-          'currency': 'USD',
           'paid_at': '2026-07-06T10:00:00Z',
           'payer_first_name': 'S',
           'payer_last_name': 'M',
@@ -208,6 +210,149 @@ void main() {
       },
     );
 
+    /// Sept tranches de minerval, sept créances de MÊME nature. Sans le tarif,
+    /// la première canonique du lot avalait la provisoire — n'importe laquelle —
+    /// et emportait ses imputations : le parent voyait la 1/3 soldée et la 2/3,
+    /// qu'il venait de payer, toujours due.
+    test(
+      'trois tranches d\'un même frais : chaque canonique dissout SA jumelle, '
+      'par tarif — l\'argent ne change pas de tranche',
+      () async {
+        for (final tranche in [1, 2, 3]) {
+          await db.insert('student_charges', {
+            'id': 'prov-$tranche',
+            'student_id': 's1',
+            'academic_year_id': 'ay-1',
+            'fee_tariff_id': 'tarif-$tranche',
+            'fee_code': 'EXAMINATION',
+            'label': 'Organisation matériel examens — $tranche/3',
+            'expected_amount_in_cents': 500000,
+            'amount_paid_in_cents': 0,
+            'optimistic_paid_in_cents': 0,
+            'currency': 'CDF',
+            'status': 'DUE',
+            'sync_status': SyncState.provisional.dbValue,
+          });
+        }
+        await db.insert('payments', {
+          'id': 'pay1',
+          'client_uuid': 'pay1',
+          'student_id': 's1',
+          'paid_at': '2026-07-06T10:00:00Z',
+          'payer_first_name': 'S',
+          'payer_last_name': 'M',
+          'sync_status': 'PENDING_SYNC',
+        });
+        // Le guichet a encaissé la DEUXIÈME tranche — ni la première, ni la
+        // dernière : la seule qu'aucun repli implicite ne devinerait juste.
+        await db.insert('payment_allocations', {
+          'id': 'a1',
+          'client_uuid': 'a1',
+          'payment_id': 'pay1',
+          'student_charge_id': 'prov-2',
+          'fee_tariff_id': 'tarif-2',
+          'fee_code': 'EXAMINATION',
+          'student_charge_label': 'Organisation matériel examens — 2/3',
+          'amount_in_cents': 500000,
+          'currency': 'CDF',
+        });
+
+        await dao.upsertLedger(
+          charges: const [
+            StudentChargeLocalModel(
+              id: 'canon-1',
+              studentId: 's1',
+              academicYearId: 'ay-1',
+              feeTariffId: 'tarif-1',
+              feeCode: 'EXAMINATION',
+              label: 'Organisation matériel examens — 1/3',
+              expectedAmountInCents: 500000,
+              currency: 'CDF',
+              status: 'DUE',
+              syncStatus: 'SYNCED',
+            ),
+            StudentChargeLocalModel(
+              id: 'canon-2',
+              studentId: 's1',
+              academicYearId: 'ay-1',
+              feeTariffId: 'tarif-2',
+              feeCode: 'EXAMINATION',
+              label: 'Organisation matériel examens — 2/3',
+              expectedAmountInCents: 500000,
+              currency: 'CDF',
+              status: 'PARTIAL',
+              syncStatus: 'SYNCED',
+            ),
+            StudentChargeLocalModel(
+              id: 'canon-3',
+              studentId: 's1',
+              academicYearId: 'ay-1',
+              feeTariffId: 'tarif-3',
+              feeCode: 'EXAMINATION',
+              label: 'Organisation matériel examens — 3/3',
+              expectedAmountInCents: 500000,
+              currency: 'CDF',
+              status: 'DUE',
+              syncStatus: 'SYNCED',
+            ),
+          ],
+        );
+
+        // Les trois provisoires ont fondu : aucune tranche n'est facturée deux
+        // fois, et aucune n'a survécu au passage de sa voisine.
+        final rows = await db.query('student_charges', orderBy: 'id');
+        expect(rows.map((r) => r['id']), ['canon-1', 'canon-2', 'canon-3']);
+        // Et l'argent est resté sur la tranche encaissée.
+        expect(
+          (await db.query('payment_allocations')).single['student_charge_id'],
+          'canon-2',
+        );
+      },
+    );
+
+    /// Une base d'avant la v38, ou une créance *ad hoc* : la provisoire n'a pas
+    /// de tarif. Elle reste dissoute — un doublon survivant se lit comme un
+    /// frais dû de plus, ce qui est pire qu'une imputation approximative.
+    test(
+      'jumelle sans tarif (base d\'avant) : la nature suffit encore à la dissoudre',
+      () async {
+        await db.insert('student_charges', {
+          'id': 'prov-sans-tarif',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_code': 'TUITION',
+          'label': 'Scolarité',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'USD',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+
+        await dao.upsertLedger(
+          charges: const [
+            StudentChargeLocalModel(
+              id: 'server-canon',
+              studentId: 's1',
+              academicYearId: 'ay-1',
+              feeTariffId: 'tarif-1',
+              feeCode: 'TUITION',
+              label: 'Scolarité',
+              expectedAmountInCents: 500000,
+              currency: 'USD',
+              status: 'DUE',
+              syncStatus: 'SYNCED',
+            ),
+          ],
+        );
+
+        final rows = await db.query('student_charges');
+        expect(rows, hasLength(1));
+        expect(rows.single['id'], 'server-canon');
+      },
+    );
+
     test(
       'la créance SYNCED d\'une AUTRE année (même feeCode) n\'est jamais dissoute',
       () async {
@@ -253,8 +398,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'Jean',
             payerLastName: 'Dupont',
@@ -284,8 +427,6 @@ void main() {
               id: 'pay1',
               clientUuid: 'pay1',
               studentId: 's1',
-              amountInCents: 30000,
-              currency: 'USD',
               paidAt: '2026-07-06T10:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -311,8 +452,10 @@ void main() {
         expect(payment['payer_first_name'], 'Jean');
         expect(payment['payer_last_name'], 'Dupont');
         expect(payment['payer_middle_name'], 'K');
-        // Ce que le pull PORTE est bien appliqué (autorité serveur).
-        expect(payment['amount_in_cents'], 30000);
+        // Ce que le pull PORTE est bien appliqué (autorité serveur). Le
+        // montant n'en fait plus partie : il vit sur les imputations, dont le
+        // delta porte désormais la devise.
+        expect(payment['paid_at'], isNotNull);
 
         expect(
           (await db.query(
@@ -333,8 +476,6 @@ void main() {
               id: 'pay-autre-poste',
               clientUuid: 'pay-autre-poste',
               studentId: 's9',
-              amountInCents: 45000,
-              currency: 'USD',
               paidAt: '2026-07-06T11:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -346,7 +487,6 @@ void main() {
         final rows = await db.query('payments');
         expect(rows, hasLength(1));
         expect(rows.single['id'], 'pay-autre-poste');
-        expect(rows.single['amount_in_cents'], 45000);
         // Ligne inconnue : c'est celle du serveur, elle EST synchronisée.
         expect(rows.single['sync_status'], SyncState.synced.dbValue);
       },
@@ -362,8 +502,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -391,8 +529,6 @@ void main() {
               id: 'pay1',
               clientUuid: 'pay1',
               studentId: 's1',
-              amountInCents: 30000,
-              currency: 'USD',
               paidAt: '2026-07-06T10:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -504,8 +640,6 @@ void main() {
           clientUuid: 'pay1',
           studentId: 's1',
           academicYearId: 'ay-1',
-          amountInCents: 30000,
-          currency: 'USD',
           method: 'MOBILE_MONEY',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Sarah',
@@ -600,8 +734,6 @@ void main() {
             clientUuid: 'pay1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -651,8 +783,6 @@ void main() {
             clientUuid: 'pay1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 500,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -680,6 +810,127 @@ void main() {
       },
     );
 
+    /// Le tarif désigne la LIGNE DE GRILLE : c'est le seul discriminant quand
+    /// l'élève doit trois fois le même frais. La nature, elle, en rapproche
+    /// trois — et le `limit: 1` d'avant en retenait une au hasard de SQLite.
+    test(
+      'trois tranches en base, l\'imputation vise la 2/3 : le lien se re-résout '
+      'par le TARIF, pas au hasard de la nature',
+      () async {
+        for (final tranche in [1, 2, 3]) {
+          await db.insert('student_charges', {
+            'id': 'canon-$tranche',
+            'student_id': 's1',
+            'academic_year_id': 'ay-1',
+            'fee_tariff_id': 'tarif-$tranche',
+            'fee_code': 'EXAMINATION',
+            'label': 'Organisation matériel examens — $tranche/3',
+            'expected_amount_in_cents': 500000,
+            'amount_paid_in_cents': 0,
+            'optimistic_paid_in_cents': 0,
+            'currency': 'CDF',
+            'status': 'DUE',
+            'sync_status': SyncState.synced.dbValue,
+          });
+        }
+
+        await dao.recordPayment(
+          payment: const PaymentLocalModel(
+            id: 'pay1',
+            clientUuid: 'pay1',
+            studentId: 's1',
+            academicYearId: 'ay-1',
+            paidAt: '2026-07-06T10:00:00Z',
+            payerFirstName: 'S',
+            payerLastName: 'M',
+          ),
+          allocations: const [
+            PaymentAllocationLocalModel(
+              id: 'a1',
+              clientUuid: 'a1',
+              paymentId: 'pay1',
+              studentChargeId: 'prov-mort', // uuid dissous pendant la saisie
+              feeTariffId: 'tarif-2',
+              feeCode: 'EXAMINATION',
+              studentChargeLabel: 'Organisation matériel examens — 2/3',
+              amountInCents: 500000,
+              currency: 'CDF',
+            ),
+          ],
+          outboxEntryId: 'ob-1',
+          nowMs: 1000,
+        );
+
+        expect(
+          (await db.query('payment_allocations')).single['student_charge_id'],
+          'canon-2',
+        );
+        // Le payload poussé porte le MÊME lien que le miroir local : le
+        // diagnostic serveur ne peut pas diverger de ce que le guichet affiche.
+        final payload =
+            jsonDecode((await db.query('outbox')).single['payload'] as String)
+                as Map<String, dynamic>;
+        final alloc = (payload['allocations'] as List).single as Map;
+        expect(alloc['studentChargeId'], 'canon-2');
+        expect(alloc['feeTariffId'], 'tarif-2');
+      },
+    );
+
+    /// Sans tarif — payload d'avant, ou créance *ad hoc* — la nature reste le
+    /// seul repli. Elle ne tranche rien quand deux créances la portent : ne
+    /// rien lier a un sens au contrat (« pas encore matérialisée », le serveur
+    /// remappera), imputer au hasard n'en a aucun et le reçu imprimé le fige.
+    test('deux candidates de même nature, aucun tarif : le lien tombe à null — '
+        'jamais un tirage au sort', () async {
+      for (final tranche in [1, 2]) {
+        await db.insert('student_charges', {
+          'id': 'canon-$tranche',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-$tranche',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — $tranche/2',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.synced.dbValue,
+        });
+      }
+
+      await dao.recordPayment(
+        payment: const PaymentLocalModel(
+          id: 'pay1',
+          clientUuid: 'pay1',
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'S',
+          payerLastName: 'M',
+        ),
+        allocations: const [
+          PaymentAllocationLocalModel(
+            id: 'a1',
+            clientUuid: 'a1',
+            paymentId: 'pay1',
+            studentChargeId: 'prov-mort',
+            feeCode: 'EXAMINATION',
+            studentChargeLabel: 'Organisation matériel examens',
+            amountInCents: 500000,
+            currency: 'CDF',
+          ),
+        ],
+        outboxEntryId: 'ob-1',
+        nowMs: 1000,
+      );
+
+      expect(
+        (await db.query('payment_allocations')).single['student_charge_id'],
+        isNull,
+      );
+    });
+
     test(
       'uuid encore vivant : le lien est laissé intact (aucune requête inutile)',
       () async {
@@ -689,8 +940,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -917,6 +1166,45 @@ void main() {
       },
     );
 
+    /// Le vrai trou, et il est en amont du guichet : un élève inscrit hors
+    /// ligne ne devait qu'UNE tranche de minerval sur sept, sur l'appareil même
+    /// qui l'a inscrit, jusqu'au pull suivant. Aucun tarif dans le payload
+    /// d'encaissement ne répare cela — il désignerait une créance qui n'existe
+    /// pas localement.
+    test('plusieurs lignes de grille d\'une même nature → une créance PAR '
+        'LIGNE, et le rappel n\'en duplique aucune', () async {
+      for (final tranche in [1, 2, 3]) {
+        await insertTariff('t$tranche', 'EXAMINATION', 500000);
+      }
+
+      final charges = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 1000,
+      );
+
+      expect(charges, hasLength(3));
+      // Chacune désigne SA ligne de grille : c'est ce qui permettra au guichet
+      // de dire sur quelle tranche l'argent a été reçu.
+      expect(charges.map((c) => c.feeTariffId).toSet(), {'t1', 't2', 't3'});
+
+      // Deuxième entrée sur l'étape Frais du wizard : les mêmes trois, mêmes
+      // ids. La granularité par ligne de grille doit rester idempotente, sinon
+      // chaque visite ajouterait trois créances de plus.
+      final revisit = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 2000,
+      );
+      expect(
+        revisit.map((c) => c.id).toSet(),
+        charges.map((c) => c.id).toSet(),
+      );
+      expect(await db.query('student_charges'), hasLength(3));
+    });
+
     test('MÊME fee_code aux deux niveaux + imputée conservée → JAMAIS de '
         'doublon de frais dans l\'année', () async {
       await insertTariff('t1', 'TUITION', 100000);
@@ -1082,8 +1370,6 @@ void main() {
           id: 'pay1',
           clientUuid: 'pay1',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -1148,8 +1434,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1232,6 +1516,73 @@ void main() {
       },
     );
 
+    /// Le semis matérialise une créance PAR LIGNE DE GRILLE : trois tranches
+    /// d'examen, trois provisoires de même nature. L'accusé n'en concerne
+    /// qu'une — et la dissolution, si elle s'en tenait à la nature, effacerait
+    /// les deux autres et ré-imputerait leurs versements sur elle. Six créances
+    /// perdues sur sept dans le cas réel, sans un mot à l'écran.
+    test('l\'accusé d\'UNE tranche ne dissout que la sienne — les voisines '
+        'survivent avec leurs imputations', () async {
+      for (final tranche in [1, 2, 3]) {
+        await db.insert('student_charges', {
+          'id': 'prov-$tranche',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-$tranche',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — $tranche/3',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+      }
+      // Un versement encaissé sur la TROISIÈME tranche, qui n'est pas celle
+      // que l'accusé rapporte : il doit rester où il est.
+      await db.insert('payment_allocations', {
+        'id': 'alloc-3',
+        'client_uuid': 'alloc-3',
+        'payment_id': 'pay-autre',
+        'student_charge_id': 'prov-3',
+        'fee_tariff_id': 'tarif-3',
+        'fee_code': 'EXAMINATION',
+        'student_charge_label': 'Organisation matériel examens — 3/3',
+        'amount_in_cents': 500000,
+        'currency': 'CDF',
+      });
+
+      await dao.applyPaymentAck(
+        ackOf(
+          charges: [
+            ackCharge(
+              'canon-2',
+              academicYearId: 'ay-1',
+              feeTariffId: 'tarif-2',
+              feeCode: 'EXAMINATION',
+              expected: 500000,
+              paid: 500000,
+              status: 'PAID',
+            ),
+          ],
+        ),
+        nowMs: 5000,
+      );
+
+      final ids = (await db.query(
+        'student_charges',
+        columns: ['id'],
+        orderBy: 'id',
+      )).map((r) => r['id']).toList();
+      expect(ids, ['canon-2', 'prov-1', 'prov-3']);
+      expect(
+        (await db.query('payment_allocations')).single['student_charge_id'],
+        'prov-3',
+        reason: 'le versement de la 3/3 n\'a pas migré vers la 2/3',
+      );
+    });
+
     test(
       'la créance SYNCED d\'une AUTRE année (même élève, même feeCode) est '
       'INTOUCHABLE : le rollover ne détruit pas le grand-livre N-1',
@@ -1290,8 +1641,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1362,8 +1711,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1479,8 +1826,6 @@ void main() {
           'id': 'pay1',
           'client_uuid': 'pay1',
           'student_id': 's1',
-          'amount_in_cents': 30000,
-          'currency': 'USD',
           'paid_at': '2026-07-06T10:00:00Z',
           'payer_first_name': 'S',
           'payer_last_name': 'M',
@@ -1513,8 +1858,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1583,8 +1926,6 @@ void main() {
           id: 'pay-err',
           clientUuid: 'pay-err',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -1656,8 +1997,6 @@ void main() {
           id: 'pay1',
           clientUuid: 'pay1',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Ada',
           payerLastName: 'Lovelace',
@@ -1706,8 +2045,6 @@ void main() {
             id: 'pay2',
             clientUuid: 'pay2',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'Ada',
             payerLastName: 'Lovelace',

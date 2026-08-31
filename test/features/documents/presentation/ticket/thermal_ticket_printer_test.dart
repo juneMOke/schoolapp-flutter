@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -86,8 +88,7 @@ final TicketReceiptModel _model = TicketReceiptModel(
   studentFullName: 'Amina Ndombasi',
   provisionalReference: 'PROV-TAB1-0001',
   paidAt: DateTime(2026, 8, 12, 9, 30),
-  amountReceivedInCents: 2500000,
-  currency: 'CDF',
+  amountReceived: MoneyBag.of(const [Money(2500000, 'CDF')]),
   labels: const TicketLabels(
     documentTitle: 'Ticket de perception',
     provisionalBanner: 'Provisoire',

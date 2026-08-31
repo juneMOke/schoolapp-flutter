@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class FacturationPaymentDetailIntent extends Equatable {
   final String paymentId;
@@ -17,8 +18,11 @@ class FacturationPaymentDetailIntent extends Equatable {
   /// antérieurs au palier n'en portent pas, et un versement scellé avant que le
   /// contrat de synchro ne le descende non plus.
   final String? payerPhoneNumber;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui a été encaissé, **par devise**. Un passage au guichet peut solder
+  /// une créance en dollars et une en francs : c'est un acte, donc un versement
+  /// et un reçu — mais pas un montant unique.
+  final MoneyBag amounts;
   final DateTime paidAt;
 
   /// Encaissement pas encore remonté au serveur.
@@ -52,8 +56,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
-    required this.amountInCents,
-    required this.currency,
+    this.amounts = MoneyBag.empty,
     required this.paidAt,
     this.isPendingSync = false,
     this.cashierFullName,
@@ -75,8 +78,7 @@ class FacturationPaymentDetailIntent extends Equatable {
          payerFirstName: '',
          payerLastName: '',
          payerMiddleName: '',
-         amountInCents: 0,
-         currency: '',
+         amounts: MoneyBag.empty,
          paidAt: DateTime.fromMillisecondsSinceEpoch(0),
        );
 
@@ -110,8 +112,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
     payerPhoneNumber: payerPhoneNumber,
-    amountInCents: amountInCents,
-    currency: currency,
+    amounts: amounts,
     paidAt: paidAt,
     isPendingSync: isPendingSync,
     // Reconduit : un rechargement de route ne doit pas vider une ligne que
@@ -154,8 +155,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     payerLastName,
     payerMiddleName,
     payerPhoneNumber,
-    amountInCents,
-    currency,
+    amounts,
     paidAt,
     isPendingSync,
     cashierFullName,

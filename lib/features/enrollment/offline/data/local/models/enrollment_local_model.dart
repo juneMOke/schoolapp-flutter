@@ -33,6 +33,14 @@ class EnrollmentLocalModel {
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
+
+  /// « Ancien élève de cette école », déclaré au guichet. Colonne NOT NULL des
+  /// deux côtés : pas de tri-état ici, contrairement à
+  /// [validatedPreviousYear].
+  final bool formerStudent;
+
+  /// Fiche santé de l'enfant. Donnée de santé — jamais journalisée.
+  final String? medicalNotes;
   final String? transferReason;
   final String? cancellationReason;
   final bool emitDocument;
@@ -60,6 +68,8 @@ class EnrollmentLocalModel {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     this.transferReason,
     this.cancellationReason,
     this.emitDocument = true,
@@ -88,6 +98,8 @@ class EnrollmentLocalModel {
     'previous_rate': previousRate,
     'previous_rank': previousRank,
     'validated_previous_year': _boolToDb(validatedPreviousYear),
+    'former_student': _boolToDb(formerStudent),
+    'medical_notes': medicalNotes,
     'transfer_reason': transferReason,
     'cancellation_reason': cancellationReason,
     'emit_document': _boolToDb(emitDocument),
@@ -117,6 +129,10 @@ class EnrollmentLocalModel {
         previousRate: (m['previous_rate'] as num?)?.toDouble(),
         previousRank: m['previous_rank'] as int?,
         validatedPreviousYear: _boolFromDb(m['validated_previous_year']),
+        // Colonne NOT NULL DEFAULT 0, donc jamais nulle en base — le `?? false`
+        // ne couvre que les lectures partielles (SELECT sans la colonne).
+        formerStudent: _boolFromDb(m['former_student']) ?? false,
+        medicalNotes: m['medical_notes'] as String?,
         transferReason: m['transfer_reason'] as String?,
         cancellationReason: m['cancellation_reason'] as String?,
         emitDocument: _boolFromDb(m['emit_document']) ?? true,
@@ -144,6 +160,8 @@ class EnrollmentLocalModel {
     previousRate: previousRate,
     previousRank: previousRank,
     validatedPreviousYear: validatedPreviousYear,
+    formerStudent: formerStudent,
+    medicalNotes: medicalNotes,
     transferReason: transferReason,
     cancellationReason: cancellationReason,
     emitDocument: emitDocument,

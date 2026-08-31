@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _base = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -98,7 +100,6 @@ TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   studentFullName: 'Mbala Kasa Amina',
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 12, 14, 7),
-  amountReceivedInCents: 150000,
-  currency: 'CDF',
+  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
   labels: labels,
 );

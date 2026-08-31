@@ -7,9 +7,13 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
+    show StudentChargeDto;
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reduction_dao.dart';
 
 import '../../offline_full_db.dart';
 
@@ -144,6 +148,413 @@ void main() {
     );
   });
 
+  group('contact d\'urgence — le lien (élève, tuteur)', () {
+    ParentDraft designating(
+      bool? designation, {
+      String id = 'p1',
+      String phone = '+243111',
+    }) => ParentDraft(
+      parent: ParentLocalModel(
+        id: id,
+        firstName: 'Sarah',
+        lastName: 'Moke',
+        phoneNumber: phone,
+        updatedAt: 100,
+      ),
+      relationshipType: 'MOTHER',
+      emergencyContact: designation,
+    );
+
+    Future<Object?> designationOf(String parentId) async {
+      final rows = await db.query(
+        'student_parent',
+        columns: const ['emergency_contact'],
+        where: 'student_id = ? AND parent_id = ?',
+        whereArgs: ['s1', parentId],
+      );
+      return rows.single['emergency_contact'];
+    }
+
+    setUp(() async {
+      await draftDao.insertDraftStudent(student());
+      await draftDao.insertDraftEnrollment(enrollment());
+    });
+
+    test('la désignation s\'écrit sur le lien, pas sur le tuteur', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true),
+      ], nowMs: 1000);
+
+      expect(await designationOf('p1'), 1);
+      // La fiche du tuteur ne porte rien : un même adulte peut être le contact
+      // d'urgence d'un enfant et pas de son frère.
+      final parentColumns = await db.rawQuery('PRAGMA table_info(parents)');
+      expect(
+        parentColumns.map((c) => c['name']),
+        isNot(contains('emergency_contact')),
+      );
+    });
+
+    /// Le remplacement des tuteurs purge tous les liens de l'élève avant de les
+    /// réécrire. Sans la photo prise avant la purge, chaque passage sur l'étape
+    /// Tuteurs — pour corriger un numéro, ajouter un oncle — effacerait la
+    /// désignation en place. « Ne rien dire » n'est pas « non ».
+    test('un draft MUET conserve la désignation en place', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true),
+      ], nowMs: 1000);
+
+      await draftDao.replaceDraftParents('s1', [
+        designating(null),
+      ], nowMs: 2000);
+
+      expect(await designationOf('p1'), 1);
+    });
+
+    test('un draft à `false` retire la désignation', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true),
+      ], nowMs: 1000);
+
+      await draftDao.replaceDraftParents('s1', [
+        designating(false),
+      ], nowMs: 2000);
+
+      expect(await designationOf('p1'), 0);
+    });
+
+    test('un tuteur ajouté sans rien dire ne déloge personne', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true, id: 'p1', phone: '+243111'),
+      ], nowMs: 1000);
+
+      await draftDao.replaceDraftParents('s1', [
+        designating(null, id: 'p1', phone: '+243111'),
+        designating(null, id: 'p2', phone: '+243222'),
+      ], nowMs: 2000);
+
+      expect(await designationOf('p1'), 1);
+      expect(await designationOf('p2'), 0);
+    });
+
+    /// Refusé AVANT toute écriture, et pas laissé à l'index unique partiel :
+    /// les liens s'écrivent en `INSERT OR REPLACE`, sous lequel SQLite
+    /// SUPPRIME la ligne en conflit au lieu de lever. Le filet deviendrait un
+    /// destructeur silencieux — le tuteur désigné en premier disparaîtrait du
+    /// dossier, drapeau ET lien.
+    test(
+      'deux désignations dans le même dossier : refusé avant écriture',
+      () async {
+        await expectLater(
+          draftDao.replaceDraftParents('s1', [
+            designating(true, id: 'p1', phone: '+243111'),
+            designating(true, id: 'p2', phone: '+243222'),
+          ], nowMs: 1000),
+          throwsA(isA<AmbiguousEmergencyContactException>()),
+        );
+
+        // Rien n'a bougé : ni lien créé, ni lien détruit.
+        expect(await db.query('student_parent'), isEmpty);
+      },
+    );
+
+    /// Le refus ne doit pas non plus détruire ce qui existait déjà : la garde
+    /// précède la purge des liens, pas l'inverse.
+    test('un refus laisse le dossier intact', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true, id: 'p1', phone: '+243111'),
+      ], nowMs: 1000);
+
+      await expectLater(
+        draftDao.replaceDraftParents('s1', [
+          designating(true, id: 'p1', phone: '+243111'),
+          designating(true, id: 'p2', phone: '+243222'),
+        ], nowMs: 2000),
+        throwsA(isA<AmbiguousEmergencyContactException>()),
+      );
+
+      expect(await db.query('student_parent'), hasLength(1));
+      expect(await designationOf('p1'), 1);
+    });
+
+    /// Sur le fil : `true` sur le désigné, `false` sur les autres.
+    ///
+    /// **Ce test attendait l'inverse** — `true` ou rien — au motif qu'un
+    /// `false` projeté écraserait une désignation faite ailleurs. Le
+    /// raisonnement tenait pour un tuteur pris isolément ; il oubliait que la
+    /// base ne distingue pas « jamais désigné » de « retiré ». Le retrait
+    /// mourait donc au dernier saut : case décochée, lien local à 0, clé
+    /// absente du fil, serveur inchangé, et le pull suivant qui remet tout
+    /// comme avant. L'agrégat portant la liste COMPLÈTE des tuteurs, il n'y a
+    /// rien à préserver qu'il ne dise déjà.
+    // ── Réductions déclarées au guichet (ADR-021 V1) ────────────────────────
+    //
+    // Les codes vivent dans une table à part, pas sur la ligne d'inscription :
+    // c'est l'enfilage qui doit aller les chercher. Sans cela, le guichet
+    // cocherait, la base retiendrait, et rien ne partirait — l'écran serait
+    // muet sur la perte.
+    test('les codes déclarés partent avec l\'agrégat', () async {
+      await EnrollmentReductionDao(
+        db,
+      ).replaceFor('e1', const ['SIBLING', 'STAFF_CHILD'], nowMs: 1000);
+
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final command =
+          jsonDecode((await db.query('outbox')).single['payload'] as String)
+              as Map<String, dynamic>;
+      expect(
+        (command['enrollment'] as Map<String, dynamic>)['reductionCodes'],
+        ['SIBLING', 'STAFF_CHILD'],
+      );
+    });
+
+    test('aucune réduction déclarée → la clé ne part pas', () async {
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final command =
+          jsonDecode((await db.query('outbox')).single['payload'] as String)
+              as Map<String, dynamic>;
+      // Ni `[]` ni `null` : absente. Un `[]` dirait « retire tout » au serveur.
+      expect(
+        (command['enrollment'] as Map<String, dynamic>).containsKey(
+          'reductionCodes',
+        ),
+        isFalse,
+      );
+    });
+
+    test('le payload poussé dit la désignation ET le retrait', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(true, id: 'p1', phone: '+243111'),
+        designating(null, id: 'p2', phone: '+243222'),
+      ], nowMs: 1000);
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final entries = await db.query('outbox');
+      final command =
+          jsonDecode(entries.single['payload'] as String)
+              as Map<String, dynamic>;
+      final parents = (command['parents'] as List).cast<Map<String, dynamic>>();
+
+      final designated = parents.firstWhere((p) => p['clientId'] == 'p1');
+      final ordinary = parents.firstWhere((p) => p['clientId'] == 'p2');
+      expect(designated['emergencyContact'], isTrue);
+      expect(ordinary['emergencyContact'], isFalse);
+    });
+
+    /// Le cas qui donne son sens au `false` : un dossier où plus personne
+    /// n'est désigné doit le DIRE, sinon le serveur garde son désigné et le
+    /// pull suivant le réaffiche.
+    test('un dossier sans désignation pousse `false` partout', () async {
+      await draftDao.replaceDraftParents('s1', [
+        designating(null, id: 'p1', phone: '+243111'),
+        designating(null, id: 'p2', phone: '+243222'),
+      ], nowMs: 1000);
+      await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+      final entries = await db.query('outbox');
+      final command =
+          jsonDecode(entries.single['payload'] as String)
+              as Map<String, dynamic>;
+      final parents = (command['parents'] as List).cast<Map<String, dynamic>>();
+
+      expect(parents.map((p) => p['emergencyContact']), everyElement(isFalse));
+    });
+
+    test(
+      'la fiche santé et « ancien élève » partent avec l\'agrégat',
+      () async {
+        await db.update(
+          'enrollments',
+          {'former_student': 1, 'medical_notes': 'Asthme.'},
+          where: 'id = ?',
+          whereArgs: ['e1'],
+        );
+
+        await draftDao.finalizeDraft('e1', emitDocument: false, nowMs: 2000);
+
+        final entries = await db.query('outbox');
+        final command =
+            jsonDecode(entries.single['payload'] as String)
+                as Map<String, dynamic>;
+        final enrollmentJson = command['enrollment'] as Map<String, dynamic>;
+        expect(enrollmentJson['formerStudent'], isTrue);
+        expect(enrollmentJson['medicalNotes'], 'Asthme.');
+      },
+    );
+  });
+
+  /// La fiche santé suit la sémantique du serveur : omise elle est conservée,
+  /// vide elle est effacée. C'est ce qui la protège d'un appelant qui ne la
+  /// saisit pas — le seed lui-même, ou un chemin d'écriture qui l'ignore.
+  group('fiche santé — omise conservée, vide effacée', () {
+    setUp(() async {
+      await draftDao.insertDraftStudent(student());
+      await draftDao.insertDraftEnrollment(
+        const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          enrollmentDate: '2026-07-06',
+          medicalNotes: 'Allergie aux arachides.',
+          updatedAt: 100,
+        ),
+      );
+    });
+
+    Future<Object?> noteOf() async {
+      final rows = await db.query(
+        'enrollments',
+        columns: const ['medical_notes'],
+        where: 'id = ?',
+        whereArgs: ['e1'],
+      );
+      return rows.single['medical_notes'];
+    }
+
+    test('un re-save qui ne dit rien conserve la note', () async {
+      await draftDao.insertDraftEnrollment(
+        enrollment(), // pas de medicalNotes
+      );
+
+      expect(await noteOf(), 'Allergie aux arachides.');
+    });
+
+    test('une chaîne vide efface la note — mais il faut le dire', () async {
+      await draftDao.insertDraftEnrollment(
+        const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          enrollmentDate: '2026-07-06',
+          medicalNotes: '',
+          updatedAt: 200,
+        ),
+      );
+
+      expect(await noteOf(), isNull);
+    });
+
+    /// Une chaîne blanche vaut « vide », pas « renseignée avec des espaces » —
+    /// sans quoi la colonne porterait un texte qui se lirait comme une fiche
+    /// remplie sur l'écran d'à côté.
+    test('des espaces seuls valent une fiche vide', () async {
+      await draftDao.insertDraftEnrollment(
+        const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'NEW_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          enrollmentDate: '2026-07-06',
+          medicalNotes: '   ',
+          updatedAt: 200,
+        ),
+      );
+
+      expect(await noteOf(), isNull);
+    });
+  });
+
+  /// Reflet local d'une désignation déjà acquittée par le serveur (INT-7).
+  /// L'écran de consultation est 100 % local : sans lui, il garderait l'ancien
+  /// contact jusqu'au prochain pull.
+  group('applyEmergencyContactDesignation (reflet d\'un 204)', () {
+    late EnrollmentReconciliationDao reconciliationDao;
+
+    setUp(() async {
+      reconciliationDao = EnrollmentReconciliationDao(db);
+      await draftDao.insertDraftStudent(student());
+      for (final id in ['p1', 'p2']) {
+        await db.insert('parents', {
+          'id': id,
+          'first_name': 'T',
+          'last_name': id,
+          'phone_number': '+24390$id',
+          'updated_at': 0,
+        });
+        await db.insert('student_parent', {
+          'student_id': 's1',
+          'parent_id': id,
+          'relationship_type': 'OTHER',
+        });
+      }
+    });
+
+    Future<Map<String, Object?>> designations() async {
+      final rows = await db.query(
+        'student_parent',
+        where: 'student_id = ?',
+        whereArgs: ['s1'],
+      );
+      return {
+        for (final row in rows)
+          row['parent_id'] as String: row['emergency_contact'],
+      };
+    }
+
+    test('désigne, et démote dans la même transaction', () async {
+      await reconciliationDao.applyEmergencyContactDesignation(
+        studentId: 's1',
+        parentId: 'p1',
+      );
+      expect(await designations(), {'p1': 1, 'p2': 0});
+
+      // Désigner p2 doit démoter p1 : l'index unique partiel n'admet qu'une
+      // ligne à 1 par élève, et promouvoir sans démoter le violerait.
+      await reconciliationDao.applyEmergencyContactDesignation(
+        studentId: 's1',
+        parentId: 'p2',
+      );
+      expect(await designations(), {'p1': 0, 'p2': 1});
+    });
+
+    test(
+      'parentId null retire la désignation sans en poser d\'autre',
+      () async {
+        await reconciliationDao.applyEmergencyContactDesignation(
+          studentId: 's1',
+          parentId: 'p1',
+        );
+
+        await reconciliationDao.applyEmergencyContactDesignation(
+          studentId: 's1',
+          parentId: null,
+        );
+
+        expect(await designations(), {'p1': 0, 'p2': 0});
+      },
+    );
+
+    /// Le drapeau décrit le couple (élève, tuteur) : désigner un adulte pour
+    /// un enfant ne dit rien de ses frères et sœurs.
+    test('ne touche pas aux autres élèves', () async {
+      await db.insert('student_parent', {
+        'student_id': 's2',
+        'parent_id': 'p1',
+        'relationship_type': 'OTHER',
+        'emergency_contact': 1,
+      });
+
+      await reconciliationDao.applyEmergencyContactDesignation(
+        studentId: 's1',
+        parentId: null,
+      );
+
+      final other = await db.query(
+        'student_parent',
+        where: 'student_id = ?',
+        whereArgs: ['s2'],
+      );
+      expect(other.single['emergency_contact'], 1);
+    });
+  });
+
   group('applyEnrollmentAck (F4 remap)', () {
     test('COMMITTED : matricule, parent provisoire→canonique (parents ET '
         'student_parent), doc DEFINITIVE, SYNCED', () async {
@@ -197,6 +608,121 @@ void main() {
       expect(e['enrollment_code'], 'ETL-2026-001');
       expect(e['status'], 'ADMIN_COMPLETED');
     });
+
+    /// Le serveur matérialise les créances DANS la transaction d'inscription :
+    /// c'est le cas nominal de la rentrée, et l'accusé est le seul canal avant
+    /// le pull suivant. Les ignorer laissait le guichet encaisser sur des
+    /// créances provisoires — dont le serveur ne connaît pas les ids.
+    test('les créances autoritaires de l\'accusé remplacent les provisoires, '
+        'tranche par tranche', () async {
+      await seedPendingEnrollment(parents: [parent()]);
+      // Le semis local a matérialisé les deux tranches depuis la grille gelée.
+      for (final tranche in [1, 2]) {
+        await db.insert('student_charges', {
+          'id': 'prov-$tranche',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-$tranche',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — $tranche/2',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+      }
+      // Le guichet a encaissé la 2/2 AVANT que l'inscription ne parte.
+      await db.insert('payments', {
+        'id': 'pay-1',
+        'client_uuid': 'pay-1',
+        'student_id': 's1',
+        'paid_at': '2026-07-06T10:00:00Z',
+        'payer_first_name': 'S',
+        'payer_last_name': 'M',
+        'sync_status': 'PENDING_SYNC',
+      });
+      await db.insert('payment_allocations', {
+        'id': 'alloc-2',
+        'client_uuid': 'alloc-2',
+        'payment_id': 'pay-1',
+        'student_charge_id': 'prov-2',
+        'fee_tariff_id': 'tarif-2',
+        'fee_code': 'EXAMINATION',
+        'student_charge_label': 'Organisation matériel examens — 2/2',
+        'amount_in_cents': 500000,
+        'currency': 'CDF',
+      });
+
+      await ackDao.applyEnrollmentAck(
+        EnrollmentAggregateResponse(
+          enrollment: const ResponseEnrollment(id: 'e1'),
+          student: const ResponseStudent(id: 's1'),
+          charges: [
+            for (final tranche in [1, 2])
+              StudentChargeDto(
+                id: 'canon-$tranche',
+                studentId: 's1',
+                academicYearId: 'ay-1',
+                feeTariffId: 'tarif-$tranche',
+                feeCode: 'EXAMINATION',
+                label: 'Organisation matériel examens — $tranche/2',
+                expectedAmountInCents: 500000,
+                amountPaidInCents: 0,
+                currency: 'CDF',
+                status: 'UNPAID',
+              ),
+          ],
+        ),
+        enrollmentId: 'e1',
+        nowMs: 5000,
+      );
+
+      final charges = await db.query('student_charges', orderBy: 'id');
+      expect(charges.map((c) => c['id']), ['canon-1', 'canon-2']);
+      expect(charges.every((c) => c['sync_status'] == 'SYNCED'), isTrue);
+      // Le versement suit SA tranche : ni perdu, ni glissé sur la 1/2.
+      expect(
+        (await db.query('payment_allocations')).single['student_charge_id'],
+        'canon-2',
+      );
+    });
+
+    /// Pré-inscription, ou inscription sans niveau : le serveur n'a rien à
+    /// matérialiser. Ce n'est pas « l'élève ne doit rien » — donc on ne purge
+    /// surtout pas ce que le semis a posé.
+    test(
+      'accusé sans créance : le grand-livre local est laissé intact',
+      () async {
+        await seedPendingEnrollment(parents: [parent()]);
+        await db.insert('student_charges', {
+          'id': 'prov-1',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-1',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — 1/1',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+
+        await ackDao.applyEnrollmentAck(
+          const EnrollmentAggregateResponse(
+            enrollment: ResponseEnrollment(id: 'e1'),
+            student: ResponseStudent(id: 's1'),
+          ),
+          enrollmentId: 'e1',
+          nowMs: 5000,
+        );
+
+        expect((await db.query('student_charges')).single['id'], 'prov-1');
+      },
+    );
 
     test(
       'markEnrollmentSyncError (422) : SYNC_ERROR + message sur enrollment et '

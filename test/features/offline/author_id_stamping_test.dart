@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/classes/data/models/offline/classroo
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_aggregate_request.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_payload.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_push_request_models.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// ADR-010 D-05 / G-crit : le champ `authorId` doit voyager au **top-level** de
 /// chaque payload `/sync` (la garde serveur A3 lit `request.authorId()`), et
@@ -22,9 +23,8 @@ void main() {
         id: 'p1',
         studentId: 's1',
         academicYearId: 'ay1',
-        amountInCents: 1000,
-        currency: 'CDF',
         method: 'CASH',
+        amounts: MoneyBag.empty,
         paidAt: '2026-07-19T10:00:00Z',
       ),
       allocations: [],

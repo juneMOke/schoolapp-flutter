@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/money_bag_text.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/enrollment_reductions_section.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_error_state.dart';
@@ -35,6 +39,16 @@ class StudentChargesStepBody extends StatelessWidget {
   /// partagée. Même conséquence, autre remède : ici une synchronisation suffit.
   final bool feeGridUnavailable;
 
+  /// Inscription visée, pour les réductions déclarées au guichet (ADR-021).
+  /// Vide = la section ne s'affiche pas.
+  final String enrollmentId;
+
+  /// ⚠️ **Distinct d'[isEditable], qui ne parle que des MONTANTS.** L'étape
+  /// Frais est en lecture seule sur les créances (PARCOURS 21) alors même que
+  /// le wizard est en saisie : rebrancher les réductions sur le même drapeau
+  /// les rendrait décoratives dans le seul parcours où elles servent.
+  final bool reductionsEditable;
+
   const StudentChargesStepBody({
     super.key,
     required this.l10n,
@@ -49,6 +63,8 @@ class StudentChargesStepBody extends StatelessWidget {
     this.unavailableMessage,
     this.tariffsWithheld = false,
     this.feeGridUnavailable = false,
+    this.enrollmentId = '',
+    this.reductionsEditable = false,
   });
 
   // Le champ affiche/édite des unités monétaires ; on revient en cents (même
@@ -62,23 +78,40 @@ class StudentChargesStepBody extends StatelessWidget {
         : (parsed * 100).roundToDouble();
   }
 
-  double _computeTotalAmountInCents() {
-    return studentCharges.fold<double>(
-      0,
-      (sum, charge) => sum + _draftAmountInCentsFor(charge),
-    );
-  }
-
-  String _displayCurrency() {
-    if (studentCharges.isEmpty) {
-      return '';
-    }
-
-    return studentCharges.first.currency;
-  }
+  /// Le total du brouillon, **par devise**.
+  ///
+  /// Ce sont les montants SAISIS qui sont sommés, pas ceux de la grille : le
+  /// guichet peut ajuster une ligne, et le pied doit suivre. Chacun garde la
+  /// devise de sa créance — une ligne en francs ne vient pas gonfler le total
+  /// en dollars.
+  MoneyBag _totalBag() => MoneyBag.sumBy(
+    studentCharges,
+    (charge) =>
+        Money.parse(_draftAmountInCentsFor(charge).round(), charge.currency),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final charges = _buildCharges(context, l10n);
+    if (enrollmentId.isEmpty) return charges;
+
+    // La section vit HORS du `switch` : elle se lit dans le barème local, pas
+    // dans l'état des créances. La suspendre au chargement du grand-livre la
+    // ferait disparaître à chaque rafraîchissement — et à l'erreur, elle
+    // disparaîtrait pour une raison qui ne la concerne pas.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        EnrollmentReductionsSection(
+          enrollmentId: enrollmentId,
+          isEditable: reductionsEditable,
+        ),
+        charges,
+      ],
+    );
+  }
+
+  Widget _buildCharges(BuildContext context, AppLocalizations l10n) {
     if (unavailableMessage != null) {
       return StudentChargesErrorState(message: unavailableMessage!);
     }
@@ -134,11 +167,8 @@ class StudentChargesStepBody extends StatelessWidget {
                             textAlign: TextAlign.left,
                           ),
                         ),
-                        Text(
-                          formatMonetaryAmountWithCurrency(
-                            amount: _computeTotalAmountInCents() / 100,
-                            currency: _displayCurrency(),
-                          ),
+                        MoneyBagText(
+                          bag: _totalBag(),
                           style: AppTextStyles.totalAmountLora.copyWith(
                             color: AppColors.bleuArdoise,
                           ),

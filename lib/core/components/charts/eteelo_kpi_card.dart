@@ -12,10 +12,14 @@ class EteeloKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final values = data.displayValues;
+    final extraValues = values.length - 1;
+    final baseHeight = data.subline != null
+        ? AppDimensions.kpiCardHeightWithSubline
+        : AppDimensions.enrollmentStatsKpiCardHeight;
+
     final card = Container(
-      height: data.subline != null
-          ? AppDimensions.kpiCardHeightWithSubline
-          : AppDimensions.enrollmentStatsKpiCardHeight,
+      height: baseHeight + extraValues * AppDimensions.kpiCardExtraValueHeight,
       constraints: const BoxConstraints(
         minWidth: AppDimensions.enrollmentStatsKpiCardMinWidth,
       ),
@@ -65,21 +69,26 @@ class EteeloKpiCard extends StatelessWidget {
           // Garde-fou anti-débordement : les valeurs formatées (montants en
           // devise) peuvent être longues. `scaleDown` ne réduit que si besoin,
           // donc les compteurs entiers courts restent inchangés.
-          SizedBox(
-            width: double.infinity,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                data.displayValue,
-                maxLines: 1,
-                style: AppTextStyles.pageTitle.copyWith(
-                  color: data.accent,
-                  fontFeatures: AppTextStyles.tabularFigures,
+          // Une valeur par ligne. `scaleDown` ne réduit que si besoin, donc les
+          // compteurs entiers courts restent inchangés — et deux devises
+          // gardent chacune sa taille pleine au lieu d'être rétrécies ensemble
+          // sur une ligne unique.
+          for (final value in values)
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: AppTextStyles.pageTitle.copyWith(
+                    color: data.accent,
+                    fontFeatures: AppTextStyles.tabularFigures,
+                  ),
                 ),
               ),
             ),
-          ),
           // Sans sous-ligne : label en `Flexible` (rendu historique, 2 lignes,
           // anti-débordement). Avec sous-ligne : label compact (1 ligne) +
           // sous-ligne discrète (ex. « 510 élève-jours »), carte plus haute.

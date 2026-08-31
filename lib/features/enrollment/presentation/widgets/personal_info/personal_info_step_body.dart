@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -16,6 +17,13 @@ class PersonalInfoStepBody extends StatelessWidget {
   final TextEditingController lastNameController;
   final TextEditingController surnameController;
   final TextEditingController birthPlaceController;
+
+  /// Fiche santé de l'enfant. Le champ vit ici — c'est une donnée de l'élève,
+  /// pas de sa scolarité — mais la colonne est portée par l'INSCRIPTION : côté
+  /// serveur `saveStudent` est un get-or-return, et une note posée sur l'élève
+  /// serait figée à vie dès la première saisie. L'étape écrivant déjà les deux
+  /// tables, le formulaire n'a pas à s'en apercevoir.
+  final TextEditingController medicalNotesController;
   final String selectedNationality;
   final List<String> nationalityOptions;
   final Gender selectedGender;
@@ -42,6 +50,7 @@ class PersonalInfoStepBody extends StatelessWidget {
     required this.lastNameController,
     required this.surnameController,
     required this.birthPlaceController,
+    required this.medicalNotesController,
     required this.selectedNationality,
     required this.nationalityOptions,
     required this.selectedGender,
@@ -150,6 +159,25 @@ class PersonalInfoStepBody extends StatelessWidget {
                   helpMessage: l10n.genderHelp,
                   onChanged: onGenderChanged,
                   enabled: isEditable,
+                  readOnly: !isEditable,
+                ),
+                fullWidth: true,
+              ),
+              // Fiche santé — pleine largeur, en fin de bloc : c'est le seul
+              // champ libre de l'étape, et le seul qu'on relira un jour
+              // d'urgence.
+              WizardGridField(
+                EteeloTextInput(
+                  label: l10n.medicalNotesLabel,
+                  controller: medicalNotesController,
+                  placeholder: l10n.medicalNotesHelp,
+                  keyboardType: EteeloTextInputType.multiline,
+                  minLines: 3,
+                  maxLines: 5,
+                  // Le contrat serveur rejette au-delà de 2000 : mieux vaut
+                  // buter à la frappe que perdre la saisie sur un 422, qui
+                  // n'arriverait qu'après la finalisation du dossier.
+                  inputFormatters: [LengthLimitingTextInputFormatter(2000)],
                   readOnly: !isEditable,
                 ),
                 fullWidth: true,

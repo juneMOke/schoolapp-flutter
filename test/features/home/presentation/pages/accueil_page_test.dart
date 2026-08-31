@@ -34,6 +34,7 @@ const _tousDroits = <String>[
   'academics.result.read',
   'schedule.read',
   'editique.write',
+  'school.provisioning.write',
 ];
 
 /// La page d'accueil est montée sans `AcademicYearContextBloc` : les lectures
@@ -89,42 +90,45 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('affiche les six cartes modules et annonce leur page d\'entrée', (
-    tester,
-  ) async {
-    final semantics = tester.ensureSemantics();
-    await pumpAccueil(tester);
+  testWidgets(
+    'affiche les sept cartes modules et annonce leur page d\'entrée',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpAccueil(tester);
 
-    expect(find.byType(AccueilModuleCard), findsNWidgets(6));
+      expect(find.byType(AccueilModuleCard), findsNWidgets(7));
 
-    // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
-    // le tableau de bord quand il existe, sinon la première page du module.
-    const entryByModule = {
-      'Inscriptions': 'Tableau de bord',
-      'Finances': 'Tableau de bord',
-      'Classes': 'Tableau de bord',
-      'Cours': 'Emploi du temps',
-      'Résultats': 'Résultats par classe',
-      'Disciplines': 'Tableau de bord',
-    };
-    for (final module in entryByModule.entries) {
-      expect(
-        find.bySemanticsLabel('${module.key} — ouvrir ${module.value}'),
-        findsOneWidget,
-        reason: 'carte « ${module.key} »',
-      );
-    }
+      // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
+      // le tableau de bord quand il existe, sinon la première page du module.
+      const entryByModule = {
+        'Inscriptions': 'Tableau de bord',
+        'Finances': 'Tableau de bord',
+        'Classes': 'Tableau de bord',
+        'Cours': 'Emploi du temps',
+        'Résultats': 'Résultats par classe',
+        'Disciplines': 'Tableau de bord',
+        // Page unique : l'en-tête mène là où mène l'unique ligne.
+        'Configuration': 'Paramètres de l\'école',
+      };
+      for (final module in entryByModule.entries) {
+        expect(
+          find.bySemanticsLabel('${module.key} — ouvrir ${module.value}'),
+          findsOneWidget,
+          reason: 'carte « ${module.key} »',
+        );
+      }
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+    },
+  );
 
   testWidgets('annonce le nombre de pages de chaque module', (tester) async {
     await pumpAccueil(tester);
 
-    // Inscriptions : tableau de bord + 3 pages. Résultats : page unique, au
-    // singulier.
+    // Inscriptions : tableau de bord + 3 pages. Résultats et Configuration :
+    // page unique, au singulier.
     expect(find.text('4 pages'), findsOneWidget);
-    expect(find.text('1 page'), findsOneWidget);
+    expect(find.text('1 page'), findsNWidgets(2));
     // Cours a deux pages.
     expect(find.text('2 pages'), findsOneWidget);
     // Finances (tableau de bord + Facturations + Contrôle des frais), Classes
@@ -185,9 +189,9 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    // 4 + 3 + 3 + 2 + 1 + 3 sous-modules (spec §03, Finances passée à 3 avec
-    // le Contrôle des frais).
-    expect(find.byType(AccueilSubModuleRow), findsNWidgets(16));
+    // 4 + 3 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03, Finances passée à 3
+    // avec le Contrôle des frais, plus la carte Configuration).
+    expect(find.byType(AccueilSubModuleRow), findsNWidgets(17));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

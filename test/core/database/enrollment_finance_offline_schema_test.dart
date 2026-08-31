@@ -51,8 +51,13 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 16 tables', () {
-    expect(enrollmentFinanceOfflineTables, hasLength(16));
+  test('la liste exportée contient exactement 20 tables', () {
+    // +1 en v33 : `ref_previous_year_student_balances`, les arriérés N-1 sortis
+    // de la ligne de l'élève pour porter une entrée PAR DEVISE.
+    // +3 en v36 : le catalogue des réductions (`ref_reduction_types`,
+    // `ref_reduction_lines`) et la mémoire des octrois
+    // (`enrollment_reductions`) — ADR-021 V1.
+    expect(enrollmentFinanceOfflineTables, hasLength(20));
   });
 
   test(
@@ -91,7 +96,7 @@ void main() {
   );
 
   test(
-    'cohorte RE : ref_previous_year_students round-trip (student_id + cents)',
+    'cohorte RE : ref_previous_year_students round-trip (student_id)',
     () async {
       await db.insert('ref_previous_year_students', {
         'student_id': 'stu-N1',
@@ -102,8 +107,6 @@ void main() {
         'gender': 'FEMALE',
         'date_of_birth': '2013-05-02',
         'previous_school_level_id': 'lvl-6e',
-        'previous_balance_in_cents': 250000,
-        'currency': 'USD',
         'synced_at': 0,
       });
       final rows = await db.query(
@@ -115,11 +118,49 @@ void main() {
       // student_id est la clé canonique réutilisée par le nouvel enrollment (RE).
       expect(rows.first['student_id'], 'stu-N1');
       expect(rows.first['matriculation_number'], 'ETL-2024-0042');
-      // Argent en INTEGER centimes (jamais de flottant).
-      expect(rows.first['previous_balance_in_cents'], isA<int>());
-      expect(rows.first['previous_balance_in_cents'], 250000);
     },
   );
+
+  test('les arriérés N-1 portent UNE LIGNE PAR DEVISE', () async {
+    // La colonne scalaire étiquetait la somme de tous les postes avec la devise
+    // du premier : 425,00 $ et 90 000 FC s'annonçaient « 90 425,00 $ ».
+    for (final row in const [
+      {'student_id': 'stu-N1', 'currency': 'USD', 'amount_in_cents': 42500},
+      {'student_id': 'stu-N1', 'currency': 'CDF', 'amount_in_cents': 9000000},
+    ]) {
+      await db.insert('ref_previous_year_student_balances', row);
+    }
+
+    final rows = await db.query(
+      'ref_previous_year_student_balances',
+      where: 'student_id = ?',
+      whereArgs: ['stu-N1'],
+      orderBy: 'currency',
+    );
+
+    expect(rows, hasLength(2));
+    expect(rows.first['currency'], 'CDF');
+    // Argent en INTEGER centimes (jamais de flottant).
+    expect(rows.first['amount_in_cents'], isA<int>());
+    expect(rows.last['amount_in_cents'], 42500);
+  });
+
+  test('une devise ne peut figurer deux fois pour le même élève', () async {
+    await db.insert('ref_previous_year_student_balances', {
+      'student_id': 'stu-N1',
+      'currency': 'USD',
+      'amount_in_cents': 42500,
+    });
+
+    expect(
+      () => db.insert('ref_previous_year_student_balances', {
+        'student_id': 'stu-N1',
+        'currency': 'USD',
+        'amount_in_cents': 999,
+      }),
+      throwsA(anything),
+    );
+  });
 
   test('montants en INTEGER centimes : round-trip sans flottant', () async {
     await db.insert('ref_fee_tariffs', {

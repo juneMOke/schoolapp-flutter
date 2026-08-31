@@ -16,9 +16,29 @@ class EnrollmentSchoolDetail extends Equatable {
   /// dossier créé avant l'introduction de ce champ). Alimente le calcul
   /// auto de la classe cible.
   final String previousSchoolLevelId;
-  final double previousRate;
+
+  /// Moyenne de l'année précédente, **en pourcentage**. `null` = non
+  /// renseignée, ce qui n'est PAS `0` : un enfant qui entre en première année
+  /// de maternelle n'a pas de moyenne, il n'a pas eu zéro. Tout rendu doit
+  /// distinguer les deux.
+  final double? previousRate;
   final int? previousRank;
-  final bool validatedPreviousYear;
+
+  /// Année précédente validée. **Tri-état** : `null` = personne ne l'a dit,
+  /// et un dossier neuf part de là. Le rabattre sur `false` inventerait un
+  /// redoublement — et le calcul automatique de la classe cible s'en sert.
+  final bool? validatedPreviousYear;
+
+  /// L'enfant a-t-il DÉJÀ été élève de cette école ? Déclaré au guichet, et
+  /// **délibérément distinct du type d'inscription** : une école qui démarre
+  /// sur l'application inscrit tous ses anciens élèves en NEW_ENROLLMENT,
+  /// faute de dossier N-1. Jamais nul — la colonne ne l'est pas.
+  final bool formerStudent;
+
+  /// Fiche santé de l'enfant (allergies, traitement en cours, conduite à
+  /// tenir). **Donnée de santé** : jamais imprimée sur une pièce, jamais
+  /// journalisée, jamais recopiée dans un message d'erreur.
+  final String? medicalNotes;
   final String schoolLevelGroupId;
   final String schoolLevelId;
   final String? transferReason;
@@ -34,9 +54,11 @@ class EnrollmentSchoolDetail extends Equatable {
     required this.previousSchoolLevelGroup,
     required this.previousSchoolLevel,
     this.previousSchoolLevelId = '',
-    required this.previousRate,
+    this.previousRate,
     this.previousRank,
-    required this.validatedPreviousYear,
+    this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     required this.schoolLevelGroupId,
     required this.schoolLevelId,
     this.transferReason,
@@ -57,6 +79,8 @@ class EnrollmentSchoolDetail extends Equatable {
     previousRate,
     previousRank,
     validatedPreviousYear,
+    formerStudent,
+    medicalNotes,
     schoolLevelGroupId,
     schoolLevelId,
     transferReason,

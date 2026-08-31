@@ -1,24 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 void main() {
   group(
     'PaymentAggregateRequest — openapi_billing_sync §PaymentAggregateRequest',
     () {
-      const tRequest = PaymentAggregateRequest(
+      final tRequest = PaymentAggregateRequest(
         payment: PaymentInput(
           id: 'pay1',
           studentId: 's1',
           academicYearId: 'ay-1',
-          amountInCents: 30000,
-          currency: 'USD',
+          // Égal à la somme des imputations, devise par devise — c'est ce que
+          // le serveur vérifie (`ALLOCATION_SUM_MISMATCH`).
+          amounts: MoneyBag.of(const [Money(30000, 'USD')]),
           method: 'CASH',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Sarah',
           payerLastName: 'Moke',
         ),
         allocations: [
-          PaymentAllocationInput(
+          const PaymentAllocationInput(
             id: 'a1',
             studentChargeId: 'c1',
             feeCode: 'TUITION',
@@ -41,10 +44,14 @@ void main() {
             'pay1',
           ); // uuid client honoré = clé d'idempotence
           expect(payment['studentId'], 's1');
+          // `amounts[]` : une entrée par devise, centimes entiers — jamais un
+          // flottant, et jamais un scalaire qui prétendrait résumer deux unités.
+          final amounts = payment['amounts'] as List<dynamic>;
+          expect(amounts, isNotEmpty);
           expect(
-            payment['amountInCents'],
+            (amounts.first as Map<String, dynamic>)['amountInCents'],
             isA<int>(),
-          ); // centimes, jamais de float
+          );
           expect(payment['paidAt'], '2026-07-06T10:00:00Z');
           // Les champs de paiement ne sont plus à plat à la racine.
           expect(json['id'], isNull);
@@ -53,11 +60,10 @@ void main() {
       );
 
       test('toJson : method absent → défaut CASH', () {
-        const sansMethode = PaymentInput(
+        final sansMethode = PaymentInput(
           id: 'p',
           studentId: 's',
-          amountInCents: 1,
-          currency: 'USD',
+          amounts: MoneyBag.of(const [Money(1, 'USD')]),
           paidAt: 'x',
         );
         expect(sansMethode.toJson()['method'], 'CASH');
@@ -75,12 +81,53 @@ void main() {
         },
       );
 
+      /// Le tarif est ce qui départage deux tranches d'un même frais. Sans lui,
+      /// le serveur ne devine pas : il refuse (`AMBIGUOUS_FEE_CODE`) plutôt que
+      /// d'imputer au hasard de l'argent réellement reçu.
+      test('toJson : l\'allocation désigne la LIGNE DE GRILLE visée', () {
+        final json = PaymentAggregateRequest(
+          payment: tRequest.payment,
+          allocations: [
+            const PaymentAllocationInput(
+              id: 'a1',
+              studentChargeId: 'c1',
+              feeTariffId: '1d763648-70e0-4272-8ca1-224db48adfd1',
+              feeCode: 'EXAMINATION',
+              studentChargeLabel: 'Organisation matériel examens — 2/3',
+              amountInCents: 30000,
+              currency: 'USD',
+            ),
+          ],
+        ).toJson();
+
+        final alloc =
+            (json['allocations'] as List<dynamic>).single
+                as Map<String, dynamic>;
+        expect(alloc['feeTariffId'], '1d763648-70e0-4272-8ca1-224db48adfd1');
+        // La nature reste : le serveur ne verrouille comme candidates que les
+        // créances portant les `feeCode` du payload. Un tarif seul ne trouverait
+        // rien.
+        expect(alloc['feeCode'], 'EXAMINATION');
+      });
+
+      /// Une créance *ad hoc* n'a pas de ligne de grille, et la clé est alors
+      /// absente plutôt que `null` : le payload reste lisible par toutes les
+      /// versions, et le serveur retombe sur la nature — le comportement
+      /// d'avant, toujours juste tant qu'une seule créance la porte.
+      test('toJson : un frais hors grille n\'invente pas de tarif', () {
+        final alloc =
+            (tRequest.toJson()['allocations'] as List<dynamic>).single
+                as Map<String, dynamic>;
+
+        expect(alloc.containsKey('feeTariffId'), isFalse);
+      });
+
       test('round-trip fromJson (payload outbox relu après coupure)', () {
         final restored = PaymentAggregateRequest.fromJson(tRequest.toJson());
 
         expect(restored.payment.id, 'pay1');
         expect(restored.payment.studentId, 's1');
-        expect(restored.payment.amountInCents, 30000);
+        expect(restored.payment.amounts, tRequest.payment.amounts);
         expect(restored.allocations.single.studentChargeId, 'c1');
         expect(restored.allocations.single.feeCode, 'TUITION');
       });
@@ -121,7 +168,13 @@ void main() {
 
           expect(restored.payment.id, 'pay-legacy');
           expect(restored.payment.studentId, 's1');
-          expect(restored.payment.amountInCents, 30000);
+          // La forme SCALAIRE est relue en sac : un versement figé dans
+          // l'outbox par la version précédente doit remonter, sinon le cash
+          // encaissé — reçu déjà imprimé — ne repart jamais.
+          expect(
+            restored.payment.amounts,
+            MoneyBag.of(const [Money(30000, 'USD')]),
+          );
           expect(restored.payment.payerFirstName, 'Sarah');
           expect(restored.allocations.single.id, 'a1');
           expect(restored.allocations.single.feeCode, 'TUITION');
@@ -132,16 +185,15 @@ void main() {
 
       test('studentChargeId null (créance pas encore matérialisée) survit au '
           'round-trip → le serveur remappera par studentId + feeCode', () {
-        const avance = PaymentAggregateRequest(
+        final avance = PaymentAggregateRequest(
           payment: PaymentInput(
             id: 'p',
             studentId: 's',
-            amountInCents: 500,
-            currency: 'USD',
+            amounts: MoneyBag.of(const [Money(500, 'USD')]),
             paidAt: 'x',
           ),
           allocations: [
-            PaymentAllocationInput(
+            const PaymentAllocationInput(
               id: 'a',
               feeCode: 'INSCRIPTION',
               studentChargeLabel: 'Inscription',

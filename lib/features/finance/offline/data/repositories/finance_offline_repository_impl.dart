@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
@@ -68,21 +70,40 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
           : await _resolveCashier(cashierUid);
       final deviceId = await _resolveDeviceId();
       final paymentId = _idGenerator.newId();
-      final allocationsTotal = draft.allocations.fold<int>(
-        0,
-        (s, a) => s + a.amountInCents,
+      // Invariant FRONT §6 step7 / §8 : le total du paiement = Σ des
+      // allocations — **devise par devise**.
+      //
+      // Le serveur a resserré `ALLOCATION_SUM_MISMATCH` : un total juste
+      // globalement mais mal réparti est désormais refusé. La comparaison
+      // scalaire d'avant laissait passer 1 000 $ + 2 000 FC déclarés contre
+      // 2 000 $ + 1 000 FC imputés — le total « collait », la répartition non.
+      // Le 422 tombait alors sur de l'argent physiquement reçu, reçu déjà
+      // imprimé, et l'immobilisait en SYNC_ERROR. Ce fail-fast LOCAL est ce qui
+      // l'empêche d'arriver.
+      final allocationsBag = MoneyBag.sumBy(
+        draft.allocations,
+        (a) => Money.parse(a.amountInCents, a.currency),
       );
-      final total = draft.amountInCents ?? allocationsTotal;
-      // Invariant FRONT §6 step7 / §8 : le total du paiement = Σ des allocations.
-      // Fail-fast LOCAL plutôt que de subir un 422 serveur qui immobiliserait
-      // l'argent (paiement bloqué en SYNC_ERROR).
-      if (total != allocationsTotal) {
+      final declaredBag = draft.amounts ?? allocationsBag;
+
+      if (declaredBag != allocationsBag) {
         return Left(
           ValidationFailure(
-            'Total du paiement ($total) ≠ somme des allocations '
-            '($allocationsTotal).',
+            'Total du paiement ($declaredBag) ≠ somme des allocations '
+            '($allocationsBag), devise par devise.',
           ),
         );
+      }
+
+      // Un versement à deux devises est désormais un cas NOMINAL : c'est un
+      // acte de guichet, donc un versement, un reçu, une notification — pas
+      // deux. La garde qui l'interdisait ici a tenu la place le temps que le
+      // contrat porte `amounts[]`.
+      //
+      // Reste le refus du versement vide : rien à encaisser n'est pas un
+      // encaissement.
+      if (allocationsBag.isEmpty || allocationsBag.isAllZero) {
+        return const Left(ValidationFailure('Aucun montant à encaisser.'));
       }
 
       final payment = PaymentLocalModel(
@@ -90,8 +111,6 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         clientUuid: paymentId,
         studentId: draft.studentId,
         academicYearId: draft.academicYearId,
-        amountInCents: total,
-        currency: draft.currency,
         method: draft.method ?? 'CASH',
         paidAt: draft.paidAt,
         payerFirstName: draft.payerFirstName,
@@ -112,6 +131,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
               clientUuid: _idGenerator.newId(),
               paymentId: paymentId,
               studentChargeId: a.studentChargeId,
+              feeTariffId: a.feeTariffId,
               feeCode: a.feeCode,
               studentChargeLabel: a.studentChargeLabel,
               amountInCents: a.amountInCents,

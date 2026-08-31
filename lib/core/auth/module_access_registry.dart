@@ -60,6 +60,19 @@ const ModuleAccess kPaymentCollectAccess = ModuleAccess([
   Perm.editiqueWrite,
 ], requiresAll: true);
 
+/// Encaisser une vente boutique (`POST /sync/boutique/sales`), et réclamer son
+/// reçu (`POST /boutique/sales/{id}/receipt`).
+///
+/// **Conjonction**, pour la même raison que l'encaissement de frais : ces deux
+/// points d'entrée scellent une pièce numérotée en écrivant, et le serveur les
+/// garde littéralement par `@RequiresBothPermissions`. Les deux routes exigent
+/// la même paire — c'est pourquoi il n'y en a qu'une ici : réclamer un reçu
+/// n'est pas un geste plus léger qu'encaisser, c'est le même scellement.
+const ModuleAccess kBoutiqueCollectAccess = ModuleAccess([
+  Perm.boutiqueSaleWrite,
+  Perm.editiqueWrite,
+], requiresAll: true);
+
 /// Enregistrer un appel — le geste de celui qui constate (`POST /sync/attendance`).
 const ModuleAccess kAttendanceRecordAccess = ModuleAccess([
   Perm.attendanceWrite,
@@ -89,6 +102,7 @@ const ModuleAccess kAttendanceAmendAccess = ModuleAccess([
 const Map<String, ModuleAccess> kGuardedWriteActions = {
   'valider une inscription': kEnrollmentSubmitAccess,
   'encaisser un paiement': kPaymentCollectAccess,
+  'encaisser une vente boutique': kBoutiqueCollectAccess,
   'émettre une pièce': ModuleAccess([Perm.editiqueWrite]),
   'enregistrer un appel': kAttendanceRecordAccess,
   'corriger un appel d\'un jour révolu': kAttendanceAmendAccess,
@@ -136,6 +150,22 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // depuis cet écran reste atteignable.
     MenuConstants.feeControlId: ModuleAccess([Perm.financeChargeRead]),
   },
+  MenuConstants.boutiqueMenuId: {
+    // La caisse s'OUVRE sur la seule lecture des ventes — encaisser est gardé à
+    // part, par [kBoutiqueCollectAccess]. Exiger ici la paire d'écriture
+    // fermerait l'écran à qui a le droit de consulter la caisse du jour sans
+    // tenir le guichet.
+    //
+    // `boutique.catalog.read` n'y figure PAS, et c'est délibéré : sans elle le
+    // serveur caviarde la section `boutiqueArticles` du référentiel à `null`,
+    // et l'écran doit dire « catalogue non communiqué » — pas rester
+    // inatteignable. Un écran fermé n'apprend rien ; un écran qui nomme le
+    // droit manquant, si.
+    MenuConstants.boutiqueAchatsId: ModuleAccess([Perm.boutiqueSaleRead]),
+    // L'historique lit les MÊMES ventes, en local : même droit. Le distinguer
+    // n'inventerait qu'une permission que le serveur ne connaît pas.
+    MenuConstants.boutiqueHistoriqueId: ModuleAccess([Perm.boutiqueSaleRead]),
+  },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),
     MenuConstants.organisationId: ModuleAccess([Perm.classroomRead]),
@@ -157,6 +187,15 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   },
   MenuConstants.documentsMenuId: {
     MenuConstants.documentsStudentId: ModuleAccess([Perm.editiqueRead]),
+  },
+  // Les réglages de l'école, une fois celle-ci en service. Même exigence que
+  // l'assistant dont ils rouvrent les écrans : ce sont les mêmes champs, sur la
+  // même école — les fermer moins fort ici ouvrirait par la porte de derrière
+  // ce que `kStandaloneRouteAccess` garde par la porte d'entrée.
+  MenuConstants.configurationMenuId: {
+    MenuConstants.configurationSchoolId: ModuleAccess([
+      Perm.schoolProvisioningWrite,
+    ]),
   },
 };
 
@@ -196,11 +235,24 @@ bool canAccessMenu(String menuId, List<String>? permissions) {
 /// légitimement. L'écriture reste gardée sur ses propres boutons, par
 /// [kEnrollmentSubmitAccess].
 ///
-/// **Ne pas déclarer ces segments dans [kModuleAccessRegistry]** : le test
-/// d'accord menu↔garde exigerait alors qu'ils soient visibles au menu, où ils
-/// n'ont rien à faire.
+/// **Ne pas déclarer `enrollments` dans [kModuleAccessRegistry]** : le test
+/// d'accord menu↔garde exigerait alors qu'il soit visible au menu, où il n'a
+/// rien à faire. `configuration`, lui, y figure — et c'est délibéré : ses
+/// réglages sont bel et bien offerts au menu (cf. ci-dessus), et les deux
+/// déclarations exigent la même permission, si bien que l'accord tient.
 const Map<String, ModuleAccess> kStandaloneRouteAccess = {
   'enrollments': ModuleAccess([Perm.enrollmentRead]),
+  // L'assistant de mise en service : hors coquille parce qu'il doit être
+  // atteignable AVANT que l'école ait une année académique — donc avant que la
+  // coquille et son menu aient quoi que ce soit à afficher.
+  //
+  // Cette entrée garde AUSSI `/configuration/settings`, atteint en lien profond
+  // hors coquille : `canAccessLocation` s'arrête au premier segment. Le registre
+  // ci-dessus décide, lui, de la visibilité au menu et du rendu en coquille.
+  //
+  // `school.provisioning.write`, jamais `platform.school.provision` : cf.
+  // [Perm.schoolProvisioningWrite].
+  'configuration': ModuleAccess([Perm.schoolProvisioningWrite]),
 };
 
 /// Vrai si [location] est atteignable avec [permissions].

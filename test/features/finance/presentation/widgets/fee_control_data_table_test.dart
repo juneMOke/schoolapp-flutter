@@ -35,7 +35,7 @@ FeeControlRow row(
       gender: Gender.male,
     ),
   ),
-  aggregate: LocalFeeChargeAggregate(
+  aggregate: LocalFeeChargeAggregate.single(
     studentId: id,
     expectedInCents: expected,
     paidMirrorInCents: mirror,

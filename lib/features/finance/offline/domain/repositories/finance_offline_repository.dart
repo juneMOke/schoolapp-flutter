@@ -4,10 +4,18 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/l
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
 class AllocationDraft {
   final String? studentChargeId; // réel | provisoire | null (avance)
+
+  /// Ligne de grille visée — `null` pour une créance *ad hoc*, hors grille.
+  ///
+  /// **De meilleure autorité que [studentChargeId]** sur le chemin de synchro :
+  /// un tarif vient toujours du référentiel servi par le serveur, il ne peut
+  /// donc jamais être provisoire.
+  final String? feeTariffId;
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -15,6 +23,7 @@ class AllocationDraft {
 
   const AllocationDraft({
     this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,
@@ -26,7 +35,6 @@ class AllocationDraft {
 class RecordPaymentDraft {
   final String studentId;
   final String academicYearId;
-  final String currency;
   final String? method; // défaut CASH
   final String paidAt; // ISO-8601 — date terrain
   final String payerFirstName;
@@ -37,20 +45,26 @@ class RecordPaymentDraft {
   /// nullable dans le draft : les rejeux d'outbox et les tests d'avant la v28
   /// n'en portent pas.
   final String? payerPhoneNumber;
-  final int? amountInCents; // si null → Σ allocations
+
+  /// Ce que le guichet déclare encaisser, **par devise**. `null` → dérivé des
+  /// imputations.
+  ///
+  /// Déclaré ET dérivé sont comparés devise par devise avant écriture : c'est
+  /// le fail-fast qui évite un 422 `ALLOCATION_SUM_MISMATCH` sur de l'argent
+  /// déjà reçu.
+  final MoneyBag? amounts;
   final List<AllocationDraft> allocations;
 
   const RecordPaymentDraft({
     required this.studentId,
     required this.academicYearId,
-    required this.currency,
     this.method,
     required this.paidAt,
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
-    this.amountInCents,
+    this.amounts,
     required this.allocations,
   });
 }

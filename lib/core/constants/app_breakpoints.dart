@@ -10,6 +10,15 @@ class AppBreakpoints {
   static const double dataTablePhoneMax = 390.0;
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;
+
+  /// Assistant de mise en service — deux bascules seulement.
+  ///
+  /// À [configurationGridMax] les grilles de champs passent de quatre colonnes
+  /// à deux, puis à une sous [configurationCompactMax] ; c'est aussi là que le
+  /// stepper se réduit à ses seules pastilles. Un libellé tronqué au tiers ne
+  /// dit rien de plus qu'un numéro et prend la place du contenu.
+  static const double configurationGridMax = 900.0;
+  static const double configurationCompactMax = 560.0;
   // Connexion (spec §01) — split deux panneaux ≥ 900 ; empilé 560–900 ;
   // bandeau slim (lockup seul) < 560.
   static const double loginSplitMin = 900.0;
@@ -47,6 +56,11 @@ class AppBreakpoints {
   static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
+  // Barre d'encaissement de la page « Encaisser un paiement » : au-delà, le
+  // total et le bouton tiennent sur une même ligne ; en deçà, le bouton passe
+  // sous le total et prend toute la largeur — le CTA d'un guichet ne se
+  // discute pas avec un montant pour quelques dizaines de dp.
+  static const double financeCollectBarRowMin = 640.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

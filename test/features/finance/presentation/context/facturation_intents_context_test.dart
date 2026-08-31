@@ -4,6 +4,8 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// La règle, une fois pour les quatre intents de Facturation : **la classe est
 /// du contexte d'affichage, jamais une condition d'ouverture.**
@@ -86,8 +88,7 @@ void main() {
         payerFirstName: 'Jean',
         payerLastName: 'Kabongo',
         payerMiddleName: '',
-        amountInCents: 1000,
-        currency: 'CDF',
+        amounts: MoneyBag.of(const [Money(1000, 'CDF')]),
         paidAt: DateTime.fromMillisecondsSinceEpoch(0),
       );
 

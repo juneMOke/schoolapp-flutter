@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 
 void main() {
   late Database db;
@@ -72,7 +73,9 @@ void main() {
   ReenrollmentCandidateDto candidate({
     String studentId = 'stu-1',
     String? previousSchoolLevelId = 'lvl-0',
+    String? medicalNotes,
   }) => ReenrollmentCandidateDto(
+    medicalNotes: medicalNotes,
     studentId: studentId,
     matriculationNumber: 'KIN-2025-0001',
     firstName: 'Amina',
@@ -82,8 +85,7 @@ void main() {
     dateOfBirth: '2015-04-02',
     birthPlace: 'Kinshasa',
     previousSchoolLevelId: previousSchoolLevelId,
-    previousBalanceInCents: 12500,
-    currency: 'USD',
+    previousBalances: const [Money(12500, 'USD'), Money(9000000, 'CDF')],
   );
 
   PreEnrollmentDto preEnrollment({
@@ -686,8 +688,17 @@ void main() {
         final rows = await db.query('ref_previous_year_students');
         expect(rows, hasLength(1));
         expect(rows.single['student_id'], 'stu-2');
-        expect(rows.single['previous_balance_in_cents'], 12500);
         expect(rows.single['matriculation_number'], 'KIN-2025-0001');
+        // Les arriérés sont partis dans la table fille, une ligne par devise.
+        final balances = await db.query(
+          'ref_previous_year_student_balances',
+          where: 'student_id = ?',
+          whereArgs: ['stu-2'],
+          orderBy: 'currency',
+        );
+        expect(balances, hasLength(2));
+        expect(balances.first['currency'], 'CDF');
+        expect(balances.last['amount_in_cents'], 12500);
         expect(rows.single['synced_at'], 600);
       },
     );
@@ -709,6 +720,30 @@ void main() {
         expect(await db.query('ref_previous_year_students'), isEmpty);
       },
     );
+  });
+
+  /// La cohorte descend la fiche santé du dossier N-1 pour que le guichet ne
+  /// la ressaisisse pas. Elle doit atteindre le vivier local, sinon le seed du
+  /// brouillon RE n'a rien à proposer et l'enfant perd ses allergies au
+  /// changement d'année.
+  group('cohorte N-1 — fiche santé proposée', () {
+    test('la note descend jusqu\'au candidat lu', () async {
+      await seedDao.replaceReenrollmentCohort([
+        candidate(medicalNotes: 'Asthme — inhalateur dans le cartable.'),
+      ], syncedAt: 1);
+
+      final found = await seedDao.findReenrollmentCandidateByStudentId('stu-1');
+
+      expect(found?.medicalNotes, 'Asthme — inhalateur dans le cartable.');
+    });
+
+    test('un dossier N-1 sans note ne propose rien', () async {
+      await seedDao.replaceReenrollmentCohort([candidate()], syncedAt: 1);
+
+      final found = await seedDao.findReenrollmentCandidateByStudentId('stu-1');
+
+      expect(found?.medicalNotes, isNull);
+    });
   });
 
   group('searchReenrollmentCandidates', () {
@@ -1090,7 +1125,16 @@ void main() {
         expect(found.matriculationNumber, 'KIN-2025-0001');
         expect(found.firstName, 'Amina');
         expect(found.gender, 'FEMALE');
-        expect(found.previousBalanceInCents, 12500);
+        // Deux devises relues, triées par code : elles ne se somment jamais.
+        expect(found.previousBalances.length, 2);
+        expect(
+          found.previousBalances.amountIn('USD'),
+          const Money(12500, 'USD'),
+        );
+        expect(
+          found.previousBalances.amountIn('CDF'),
+          const Money(9000000, 'CDF'),
+        );
       },
     );
 
@@ -1183,6 +1227,8 @@ void main() {
       String studentId = 'stu-snap-1',
       String? updatedAt = '2026-07-08T09:00:00Z',
       String serverUpdatedAt = '2026-07-08T10:00:00Z',
+      bool formerStudent = false,
+      String? medicalNotes,
       List<ParentSnapshotDto> parents = const [
         ParentSnapshotDto(
           id: 'par-snap-1',
@@ -1206,6 +1252,8 @@ void main() {
         surname: 'Divine',
         dateOfBirth: '2015-05-05',
         gender: 'FEMALE',
+        formerStudent: formerStudent,
+        medicalNotes: medicalNotes,
         updatedAt: updatedAt,
       ),
       student: StudentSnapshotDto(
@@ -1251,6 +1299,179 @@ void main() {
         expect(list.single.syncState, SyncState.synced);
       },
     );
+
+    /// Une tablette neuve reconstitue le dossier à partir de ce seul agrégat.
+    /// Deux colonnes manquantes y seraient invisibles : « ancien élève »
+    /// tomberait à faux et la fiche santé à vide — indiscernables d'une
+    /// déclaration réelle, et personne ne saurait que l'information a existé.
+    test(
+      'hydratation : « ancien élève » et fiche santé atterrissent en base',
+      () async {
+        await reconciliationDao.upsertEnrollmentSnapshots([
+          aggregate(
+            formerStudent: true,
+            medicalNotes: 'Allergie aux arachides.',
+            parents: const [
+              ParentSnapshotDto(
+                id: 'par-snap-1',
+                firstName: 'Joseph',
+                lastName: 'Ilunga',
+                phoneNumber: '+243900000001',
+                relationshipType: 'FATHER',
+                emergencyContact: true,
+              ),
+            ],
+          ),
+        ], syncedAt: 1000);
+
+        final row = (await db.query('enrollments')).single;
+        expect(row['former_student'], 1);
+        expect(row['medical_notes'], 'Allergie aux arachides.');
+
+        final link = (await db.query('student_parent')).single;
+        expect(link['emergency_contact'], 1);
+      },
+    );
+
+    /// **Le piège que `INSERT OR REPLACE` tend à un index unique partiel.**
+    /// SQLite y résout les conflits de TOUTE contrainte d'unicité en
+    /// SUPPRIMANT la ligne en conflit, pas en refusant. Écrire le drapeau à 1
+    /// pendant l'upsert des liens ne faisait donc pas basculer un booléen :
+    /// cela faisait disparaître le LIEN du tuteur précédemment désigné — et
+    /// justement celui qu'on protège le plus, une fiche locale provisoire que
+    /// `_pruneStudentParentLinks` s'interdit de purger.
+    test(
+      'un tuteur LOCAL désigné n\'est pas détruit par la désignation du pull',
+      () async {
+        // Fiche provisoire, créée au guichet et pas encore poussée.
+        await db.insert('parents', {
+          'id': 'par-local',
+          'first_name': 'Marie',
+          'last_name': 'Locale',
+          'phone_number': '+243999999999',
+          'sync_status': 'PENDING_SYNC',
+          'updated_at': 0,
+        });
+        await db.insert('student_parent', {
+          'student_id': 'stu-snap-1',
+          'parent_id': 'par-local',
+          'relationship_type': 'MOTHER',
+          'emergency_contact': 1,
+        });
+
+        await reconciliationDao.upsertEnrollmentSnapshots([
+          aggregate(
+            parents: const [
+              ParentSnapshotDto(
+                id: 'par-snap-1',
+                firstName: 'Joseph',
+                lastName: 'Ilunga',
+                phoneNumber: '+243900000001',
+                relationshipType: 'FATHER',
+                emergencyContact: true,
+              ),
+            ],
+          ),
+        ], syncedAt: 1000);
+
+        final links = {
+          for (final row in await db.query('student_parent'))
+            row['parent_id'] as String: row['emergency_contact'],
+        };
+        // Le tuteur local a perdu la désignation — c'est normal, le serveur
+        // tranche — mais il a GARDÉ son lien.
+        expect(links.containsKey('par-local'), isTrue);
+        expect(links['par-local'], 0);
+        expect(links['par-snap-1'], 1);
+      },
+    );
+
+    /// Un back antérieur au champ n'envoie que des `null` : il ne dit RIEN, et
+    /// une désignation locale en attente de push ne doit pas mourir de son
+    /// silence.
+    test(
+      'un agrégat MUET sur le drapeau ne touche à aucune désignation',
+      () async {
+        await db.insert('parents', {
+          'id': 'par-snap-1',
+          'first_name': 'Joseph',
+          'last_name': 'Ilunga',
+          'phone_number': '+243900000001',
+          'sync_status': 'PENDING_SYNC',
+          'updated_at': 0,
+        });
+        await db.insert('student_parent', {
+          'student_id': 'stu-snap-1',
+          'parent_id': 'par-snap-1',
+          'relationship_type': 'FATHER',
+          'emergency_contact': 1,
+        });
+
+        await reconciliationDao.upsertEnrollmentSnapshots([
+          aggregate(), // emergencyContact non renseigné
+        ], syncedAt: 1000);
+
+        final row = (await db.query(
+          'student_parent',
+          where: 'parent_id = ?',
+          whereArgs: ['par-snap-1'],
+        )).single;
+        expect(row['emergency_contact'], 1);
+      },
+    );
+
+    /// Le serveur qui dit « personne » le dit avec des `false` explicites, et
+    /// cela doit redescendre : sinon une désignation retirée en ligne
+    /// resterait affichée sur la tablette.
+    test('un agrégat qui dit `false` partout démote en local', () async {
+      await db.insert('parents', {
+        'id': 'par-snap-1',
+        'first_name': 'Joseph',
+        'last_name': 'Ilunga',
+        'phone_number': '+243900000001',
+        'sync_status': 'SYNCED',
+        'updated_at': 0,
+      });
+      await db.insert('student_parent', {
+        'student_id': 'stu-snap-1',
+        'parent_id': 'par-snap-1',
+        'relationship_type': 'FATHER',
+        'emergency_contact': 1,
+      });
+
+      await reconciliationDao.upsertEnrollmentSnapshots([
+        aggregate(
+          parents: const [
+            ParentSnapshotDto(
+              id: 'par-snap-1',
+              firstName: 'Joseph',
+              lastName: 'Ilunga',
+              phoneNumber: '+243900000001',
+              relationshipType: 'FATHER',
+              emergencyContact: false,
+            ),
+          ],
+        ),
+      ], syncedAt: 1000);
+
+      final row = (await db.query(
+        'student_parent',
+        where: 'parent_id = ?',
+        whereArgs: ['par-snap-1'],
+      )).single;
+      expect(row['emergency_contact'], 0);
+    });
+
+    test('un agrégat qui ne désigne personne ne désigne personne', () async {
+      await reconciliationDao.upsertEnrollmentSnapshots([
+        aggregate(),
+      ], syncedAt: 1000);
+
+      final row = (await db.query('enrollments')).single;
+      expect(row['former_student'], 0);
+      expect(row['medical_notes'], isNull);
+      expect((await db.query('student_parent')).single['emergency_contact'], 0);
+    });
 
     test('gros payload (> taille de lot) : tout appliqué à travers plusieurs '
         'transactions (verrou relâché entre lots)', () async {

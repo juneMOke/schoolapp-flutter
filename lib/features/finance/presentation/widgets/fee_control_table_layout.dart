@@ -3,7 +3,8 @@ import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
@@ -106,12 +107,13 @@ class FeeControlTableLayout {
         .map((row) {
           final student = row.summary.student;
           final aggregate = row.aggregate;
-          final expected = money(aggregate.expectedInCents, aggregate.currency);
-          final paid = money(aggregate.paidTotalInCents, aggregate.currency);
-          final remaining = money(
-            aggregate.remainingInCents,
-            aggregate.currency,
-          );
+          // Une ligne par devise, jointes par « · » : la cellule d'un tableau
+          // ne s'empile pas. En pratique cet écran est borné à un frais et un
+          // niveau, donc à une devise — la jointure ne se voit jamais, et elle
+          // évite qu'une devise disparaisse en silence si elle se voyait.
+          final expected = money(aggregate.expected);
+          final paid = money(aggregate.paidTotal);
+          final remaining = money(aggregate.remaining);
           final statusCell = DataTableCellSpec(
             child: FeeStatusBadge(
               label: row.status.localizedLabel(l10n),
@@ -119,8 +121,13 @@ class FeeControlTableLayout {
             ),
           );
 
-          final paidColor = _paidColor(aggregate.paidTotalInCents);
-          final remainingColor = _remainingColor(aggregate.remainingInCents);
+          // Teintes sur un PRÉDICAT, pas sur un montant : « quelque chose a
+          // été payé », « il reste quelque chose » — dans n'importe quelle
+          // devise.
+          final paidColor = _paidColor(!aggregate.paidTotal.isAllZero);
+          final remainingColor = _remainingColor(
+            !aggregate.remaining.isAllZero,
+          );
 
           return DataTableRowSpec(
             // L'identité de ligne est l'ÉLÈVE : un candidat sans dossier porte un
@@ -183,16 +190,18 @@ class FeeControlTableLayout {
 
   /// Encaissé : la teinte « payé » dès qu'il y a de l'argent, gris sinon — un
   /// zéro en vert se lirait comme une bonne nouvelle.
-  static Color _paidColor(int paidInCents) => paidInCents > 0
+  static Color _paidColor(bool anythingPaid) => anythingPaid
       ? StudentChargeStatus.paid.badgeColor
       : AppColors.textSecondary;
 
   /// Reste : la teinte « à régler » tant qu'il en reste, « payé » à zéro. Ce
   /// sont les mêmes teintes que la pastille de statut de la même ligne.
-  static Color _remainingColor(int remainingInCents) => remainingInCents > 0
+  static Color _remainingColor(bool anythingDue) => anythingDue
       ? StudentChargeStatus.due.badgeColor
       : StudentChargeStatus.paid.badgeColor;
 
-  static String money(int cents, String currency) =>
-      formatMonetaryAmountWithCurrency(amount: cents / 100, currency: currency);
+  /// Un sac rendu sur une seule ligne de cellule. Vide → tiret : « aucune
+  /// créance » n'est pas « zéro dollar ».
+  static String money(MoneyBag bag) =>
+      bag.isEmpty ? '—' : bag.entries.map(MoneyFormat.format).join(' · ');
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_catalog_dao.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -14,6 +15,10 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reduction_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/repositories/reduction_grant_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/reduction_grant_repository.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/reduction_selection_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
@@ -125,6 +130,24 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentSeedDao>(
     () => EnrollmentSeedDao(getIt<Database>()),
   );
+  // Octrois de réduction (ADR-021 V1). Le CATALOGUE, lui, appartient à la
+  // Facturation : il est lu par un seam plutôt qu'un import direct, comme la
+  // grille tarifaire et le catalogue boutique au pull (invariant I-4).
+  getIt.registerLazySingleton<EnrollmentReductionDao>(
+    () => EnrollmentReductionDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ReductionGrantRepository>(
+    () => ReductionGrantRepositoryImpl(
+      dao: getIt<EnrollmentReductionDao>(),
+      readGrantable: (schoolId) =>
+          getIt<FinanceLocalDao>().grantableReductionsForSchool(schoolId),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt.registerFactory<ReductionSelectionCubit>(
+    () => ReductionSelectionCubit(getIt<ReductionGrantRepository>()),
+  );
+
   getIt.registerLazySingleton<EnrollmentReconciliationDao>(
     () => EnrollmentReconciliationDao(getIt<Database>()),
   );
@@ -263,8 +286,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     ),
   );
   // Pulls Inscription (référentiel / cohorte / préinscriptions / delta). La
-  // grille tarifaire du bundle référentiel est déléguée à la Facturation via
-  // un seam étroit (même précédent que le gate PAYMENT ci-dessous).
+  // grille tarifaire du bundle référentiel est déléguée à la Facturation, et le
+  // catalogue boutique à la caisse, via deux seams étroits (même précédent que
+  // le gate PAYMENT ci-dessous).
   getIt.registerLazySingleton<EnrollmentPullRepository>(
     () => EnrollmentPullRepositoryImpl(
       api: getIt<EnrollmentPullApi>(),
@@ -273,6 +297,28 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       reconciliationDao: getIt<EnrollmentReconciliationDao>(),
       replaceTariffs: (tariffs, academicYearIds) => getIt<FinanceLocalDao>()
           .replaceTariffsForYears(tariffs, academicYearIds: academicYearIds),
+      // Même seam, même raison : le bundle porte le catalogue de la caisse, et
+      // `enrollment` n'a rien à savoir de la boutique. Le `schoolId` est résolu
+      // à l'appel et non à l'enregistrement — la DI offline est montée AVANT
+      // l'authentification, l'école n'est pas encore connue ici.
+      replaceBoutiqueArticles: (articles, academicYearIds) =>
+          getIt<BoutiqueCatalogDao>().replaceArticlesForYears(
+            articles,
+            schoolId: getIt<CurrentUserContext>().schoolId ?? '',
+            academicYearIds: academicYearIds,
+          ),
+      // Troisième seam, et le seul scopé par ÉCOLE : le barème de réductions
+      // descend à la racine du bundle, sans année. Le `schoolId` est ici
+      // **résolu par le repository** et passé en argument, plutôt que relu dans
+      // la closure comme ci-dessus — une seule résolution, celle que le pull a
+      // déjà faite, donc aucun risque que la purge et l'insertion tombent sur
+      // deux écoles différentes si le contexte bascule pendant le cycle.
+      replaceReductionCatalog: (types, lines, schoolId) =>
+          getIt<FinanceLocalDao>().replaceReductionCatalogForSchool(
+            types,
+            lines,
+            schoolId: schoolId,
+          ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

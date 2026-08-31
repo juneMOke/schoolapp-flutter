@@ -4,7 +4,8 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/money_bag_text.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_money.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart'
     as enrollment;
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_mini_avatar.dart';
@@ -28,12 +29,9 @@ class SummaryCompactHeader extends StatelessWidget {
           prev.studentCharges != curr.studentCharges,
       builder: (context, state) {
         final charges = state.studentCharges;
-        // Somme en cents (comme FacturationChargeLine), converti au format.
-        final total = charges.fold<double>(
-          0,
-          (sum, charge) => sum + charge.expectedAmountInCents,
-        );
-        final currency = charges.isNotEmpty ? charges.first.currency : '';
+        // Total PAR DEVISE — même règle que la section détaillée : deux unités
+        // se lisent côte à côte, elles ne se somment pas.
+        final total = charges.expectedBag;
 
         return Container(
           width: double.infinity,
@@ -96,11 +94,8 @@ class SummaryCompactHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppDimensions.spacingXS),
-                  Text(
-                    formatMonetaryAmountWithCurrency(
-                      amount: total / 100,
-                      currency: currency,
-                    ),
+                  MoneyBagText(
+                    bag: total,
                     style: AppTextStyles.totalAmountLora.copyWith(
                       color: AppColors.terreCuite,
                     ),

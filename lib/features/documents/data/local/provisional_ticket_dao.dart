@@ -1,4 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
 ///
@@ -15,6 +17,27 @@ class ProvisionalTicketDao {
 
   const ProvisionalTicketDao(this._db);
 
+  /// Ce que le versement a encaissé, **par devise**, dérivé de ses imputations.
+  ///
+  /// Le versement portait un montant scalaire ; ce n'en était pas une propriété
+  /// mais le résumé de ses allocations. Sur un ticket, la distinction compte :
+  /// c'est la pièce que le payeur emporte.
+  Future<MoneyBag> _amountsOf(String paymentId) async {
+    final rows = await _db.rawQuery(
+      'SELECT currency, SUM(amount_in_cents) AS total '
+      'FROM payment_allocations WHERE payment_id = ? '
+      'GROUP BY currency ORDER BY currency',
+      [paymentId],
+    );
+    return MoneyBag.of([
+      for (final r in rows)
+        Money.parse(
+          (r['total'] as int?) ?? 0,
+          (r['currency'] as String?) ?? '',
+        ),
+    ]);
+  }
+
   /// Le paiement, avec le caissier et l'appareil stampés à l'encaissement.
   Future<TicketPaymentRow?> findPayment(String paymentId) async {
     final rows = await _db.query(
@@ -23,8 +46,6 @@ class ProvisionalTicketDao {
         'id',
         'student_id',
         'academic_year_id',
-        'amount_in_cents',
-        'currency',
         'paid_at',
         'cashier_first_name',
         'cashier_last_name',
@@ -42,8 +63,7 @@ class ProvisionalTicketDao {
       id: r['id'] as String,
       studentId: r['student_id'] as String,
       academicYearId: r['academic_year_id'] as String?,
-      amountInCents: (r['amount_in_cents'] as int?) ?? 0,
-      currency: (r['currency'] as String?) ?? '',
+      amounts: await _amountsOf(paymentId),
       paidAt: (r['paid_at'] as String?) ?? '',
       cashierFirstName: r['cashier_first_name'] as String?,
       cashierLastName: r['cashier_last_name'] as String?,
@@ -57,7 +77,12 @@ class ProvisionalTicketDao {
   Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
     final rows = await _db.query(
       'payment_allocations',
-      columns: const ['student_charge_label', 'fee_code', 'amount_in_cents'],
+      columns: const [
+        'student_charge_label',
+        'fee_code',
+        'amount_in_cents',
+        'currency',
+      ],
       where: 'payment_id = ?',
       whereArgs: [paymentId],
     );
@@ -71,6 +96,7 @@ class ProvisionalTicketDao {
                 ? r['student_charge_label'] as String
                 : (r['fee_code'] as String?) ?? '',
             amountInCents: (r['amount_in_cents'] as int?) ?? 0,
+            currency: (r['currency'] as String?) ?? '',
           ),
         )
         .toList(growable: false);
@@ -222,8 +248,10 @@ class TicketPaymentRow {
   final String id;
   final String studentId;
   final String? academicYearId;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui a été reçu, **par devise** — dérivé des imputations, comme partout
+  /// ailleurs depuis que le versement n'a plus de montant à lui.
+  final MoneyBag amounts;
   final String paidAt;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -234,8 +262,7 @@ class TicketPaymentRow {
     required this.id,
     required this.studentId,
     this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
+    required this.amounts,
     required this.paidAt,
     this.cashierFirstName,
     this.cashierLastName,
@@ -258,7 +285,14 @@ class TicketAllocationRow {
   final String label;
   final int amountInCents;
 
-  const TicketAllocationRow({required this.label, required this.amountInCents});
+  /// La devise de CETTE imputation — elle solde une créance, donc une seule.
+  final String currency;
+
+  const TicketAllocationRow({
+    required this.label,
+    required this.amountInCents,
+    required this.currency,
+  });
 }
 
 class TicketStudentRow {

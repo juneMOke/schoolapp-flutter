@@ -3,7 +3,9 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -15,22 +17,24 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// montant reste donc toujours visible, y compris dans une popin étroite.
 class FacturationPaymentDetailAllocationsTable extends StatelessWidget {
   final List<PaymentAllocation> allocations;
-  final int totalInCents;
-  final String currency;
 
   const FacturationPaymentDetailAllocationsTable({
     super.key,
     required this.allocations,
-    required this.totalInCents,
-    required this.currency,
   });
 
-  String _formatAmount(int cents) {
-    return formatMonetaryAmountWithCurrency(
-      amount: cents / 100,
-      currency: currency,
-    );
-  }
+  /// Chaque imputation porte SA devise — elle solde une créance, donc elle en
+  /// tient exactement une. La table recevait une devise unique pour toute la
+  /// répartition : juste tant que le versement n'en réglait qu'une.
+  String _formatAmount(PaymentAllocation allocation) => MoneyFormat.format(
+    Money.parse(allocation.amountInCents, allocation.currency),
+  );
+
+  /// Le total imputé, **par devise**, dérivé des lignes.
+  MoneyBag get _total => MoneyBag.sumBy(
+    allocations,
+    (a) => Money.parse(a.amountInCents, a.currency),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,7 @@ class FacturationPaymentDetailAllocationsTable extends StatelessWidget {
           ],
           _TotalAllocationRow(
             label: l10n.facturationPaymentAllocationsTotalLabel,
-            amount: _formatAmount(totalInCents),
+            amount: _total.entries.map(MoneyFormat.format).join(' · '),
           ),
         ],
       ),
@@ -64,7 +68,7 @@ class FacturationPaymentDetailAllocationsTable extends StatelessWidget {
 
 class _AllocationRow extends StatelessWidget {
   final PaymentAllocation allocation;
-  final String Function(int) formatAmount;
+  final String Function(PaymentAllocation) formatAmount;
   final AppLocalizations l10n;
 
   const _AllocationRow({
@@ -95,7 +99,7 @@ class _AllocationRow extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingM),
           Text(
-            formatAmount(allocation.amountInCents),
+            formatAmount(allocation),
             style: AppTextStyles.moneyTabular.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,

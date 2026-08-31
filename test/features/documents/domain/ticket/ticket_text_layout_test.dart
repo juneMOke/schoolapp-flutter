@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -27,8 +29,16 @@ TicketReceiptModel _model({
   String? cashierFullName = 'Jean Kabeya',
   int? remainingBalanceInCents = 250000,
   List<TicketAllocationLine> allocations = const [
-    TicketAllocationLine(label: 'Frais scolaires', amountInCents: 120000),
-    TicketAllocationLine(label: 'Fournitures', amountInCents: 30000),
+    TicketAllocationLine(
+      label: 'Frais scolaires',
+      amountInCents: 120000,
+      currency: 'CDF',
+    ),
+    TicketAllocationLine(
+      label: 'Fournitures',
+      amountInCents: 30000,
+      currency: 'CDF',
+    ),
   ],
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
@@ -39,10 +49,11 @@ TicketReceiptModel _model({
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
-  amountReceivedInCents: 150000,
+  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
   allocations: allocations,
-  remainingBalanceInCents: remainingBalanceInCents,
-  currency: 'CDF',
+  remainingBalance: remainingBalanceInCents == null
+      ? null
+      : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')]),
   labels: _labels,
 );
 
@@ -60,26 +71,44 @@ List<int> _amountsUnder(List<String> lines, String heading) {
   final amounts = <int>[];
   for (final line in lines.skip(start + 1)) {
     if (line.startsWith('-') || line.trim().isEmpty) break;
-    final match = RegExp(r'([\d ]+),(\d{2})\s+CDF\s*$').firstMatch(line);
+    // Les décimales sont facultatives : le franc n'en porte que s'il en a
+    // réellement, depuis que la règle d'écriture se décide sur la devise.
+    final match = RegExp(r'([\d ]+)(?:,(\d{2}))?\s+FC\s*$').firstMatch(line);
     if (match == null) continue;
     final units = int.parse(match.group(1)!.replaceAll(' ', ''));
-    amounts.add(units * 100 + int.parse(match.group(2)!));
+    amounts.add(units * 100 + int.parse(match.group(2) ?? '0'));
   }
   return amounts;
 }
 
 void main() {
   group('formatAmount', () {
-    test('groupe les milliers et garde deux décimales', () {
-      expect(TicketTextLayout.formatAmount(150000, 'CDF'), '1 500,00 CDF');
-      expect(TicketTextLayout.formatAmount(1234567, 'CDF'), '12 345,67 CDF');
-      expect(TicketTextLayout.formatAmount(5, 'CDF'), '0,05 CDF');
-      expect(TicketTextLayout.formatAmount(0, 'CDF'), '0,00 CDF');
+    // Le ticket suit désormais la règle du socle : les décimales se décident
+    // sur la DEVISE, et `CDF` s'écrit « FC ». Il imprimait jusqu'ici
+    // « 1 500,00 CDF » — deux décimales sur une devise qui n'en a pas, et le
+    // code ISO au lieu de l'abréviation que l'école emploie.
+    test('le franc rond n\'a pas de décimales, et s\'écrit FC', () {
+      expect(TicketTextLayout.formatAmount(150000, 'CDF'), '1 500 FC');
+      expect(TicketTextLayout.formatAmount(0, 'CDF'), '0 FC');
+    });
+
+    test('un franc qui porte des centimes réels les garde', () {
+      // Une convention d'écriture ne doit jamais arrondir sous les yeux du
+      // lecteur — sur un ticket moins qu'ailleurs.
+      expect(TicketTextLayout.formatAmount(1234567, 'CDF'), '12 345,67 FC');
+      expect(TicketTextLayout.formatAmount(5, 'CDF'), '0,05 FC');
     });
 
     test('gère un montant négatif et une devise absente', () {
-      expect(TicketTextLayout.formatAmount(-2500, 'USD'), '-25,00 USD');
+      expect(TicketTextLayout.formatAmount(-2500, 'USD'), r'-25,00 $');
       expect(TicketTextLayout.formatAmount(2500, '  '), '25,00');
+    });
+
+    test('groupe avec l\'espace ORDINAIRE, qu\'une ESC/POS sait rendre', () {
+      expect(
+        TicketTextLayout.formatAmount(150000, 'CDF').contains('\u00A0'),
+        isFalse,
+      );
     });
   });
 
@@ -170,9 +199,9 @@ void main() {
       final out = _flat(TicketTextLayout.render(_model()));
 
       expect(out, contains('Frais scolaires'));
-      expect(out, contains('1 200,00 CDF'));
+      expect(out, contains('1 200 FC'));
       expect(out, contains('Fournitures'));
-      expect(out, contains('300,00 CDF'));
+      expect(out, contains('300 FC'));
     });
 
     test('aligne les montants à droite', () {
@@ -180,7 +209,7 @@ void main() {
       final line = lines.firstWhere((l) => l.contains('Montant reçu'));
 
       expect(line.length, 48);
-      expect(line, endsWith('1 500,00 CDF'));
+      expect(line, endsWith('1 500 FC'));
     });
   });
 
@@ -325,22 +354,34 @@ void main() {
           // 150 000 reçus, 120 000 imputés.
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 120000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 120000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
       );
 
       expect(out, contains('Avance'));
-      expect(out, contains('300,00 CDF'));
+      expect(out, contains('300 FC'));
     });
 
     test('la ventilation imprimée somme au montant reçu', () {
       final lines = TicketTextLayout.render(
         _model(
           allocations: const [
-            TicketAllocationLine(label: 'Minerval', amountInCents: 100000),
-            TicketAllocationLine(label: 'Assurance', amountInCents: 20000),
+            TicketAllocationLine(
+              label: 'Minerval',
+              amountInCents: 100000,
+              currency: 'CDF',
+            ),
+            TicketAllocationLine(
+              label: 'Assurance',
+              amountInCents: 20000,
+              currency: 'CDF',
+            ),
           ],
         ),
       );
@@ -356,7 +397,11 @@ void main() {
         TicketTextLayout.render(
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 150000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 150000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
@@ -370,7 +415,11 @@ void main() {
         TicketTextLayout.render(
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 200000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 200000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
@@ -417,12 +466,15 @@ void main() {
       provisionalReference: 'PROV-A1B2C3',
       paidAt: DateTime(2026, 8, 4, 14, 7),
       cashierFullName: 'Ĳsselmeer Ǎmba',
-      amountReceivedInCents: 150000,
+      amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
       allocations: const [
-        TicketAllocationLine(label: 'Frais “scolaires”', amountInCents: 120000),
+        TicketAllocationLine(
+          label: 'Frais “scolaires”',
+          amountInCents: 120000,
+          currency: 'CDF',
+        ),
       ],
-      remainingBalanceInCents: 250000,
-      currency: 'CDF',
+      remainingBalance: MoneyBag.of(const [Money(250000, 'CDF')]),
       labels: _labels,
     );
 

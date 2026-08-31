@@ -93,6 +93,68 @@ void main() {
       'email': 'contact@etoile.cd',
     };
 
+    // ── Barème de réductions (ADR-021) — UNE section racine ──────────────────
+    //
+    // La distinction `null` / `[]` ne vit pas dans la fabrique Dart : elle vit
+    // sur le fil. Une fixture construite en Dart n'exerce jamais `fromJson`, et
+    // c'est précisément là que `pullList` replierait `null` sur la liste vide
+    // si quelqu'un l'y branchait — avec, au bout, une purge du barème d'une
+    // école déclenchée par un pull qui n'avait rien à dire.
+    test('section absente → null, jamais liste vide', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductions, isNull);
+    });
+
+    test('section présente et vide → [] (l\'école n\'a pas de barème)', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'reductions': <dynamic>[],
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductions, isEmpty);
+      expect(bundle.reductions, isNotNull);
+    });
+
+    // Le barème arrive IMBRIQUÉ : les lignes vivent dans leur type, et ne
+    // portent ni id ni code de rattachement. C'est la forme du serveur
+    // (`ReductionSummaryDto`), et le seul endroit où elle est exercée.
+    test('parse le barème imbriqué, `active` par défaut à true', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'reductions': [
+          {
+            'code': 'STAFF_CHILD',
+            'label': 'Enfant du personnel',
+            'active': false,
+            'lines': [
+              {'feeCode': 'MINERVAL', 'percentage': 50},
+            ],
+          },
+          // Serveur qui ne porte pas le drapeau : repli sur `true`. `false`
+          // masquerait tout un barème sur un champ simplement absent. Et un
+          // type sans `lines` reste lisible : il ne réduit simplement rien.
+          {'code': 'SIBLING', 'label': 'Fratrie'},
+        ],
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductions!.first.active, isFalse);
+      expect(bundle.reductions!.last.active, isTrue);
+      expect(bundle.reductions!.last.lines, isEmpty);
+      final line = bundle.reductions!.first.lines.single;
+      expect(line.feeCode, 'MINERVAL');
+      // Pourcentage, pas de l'argent : un entier sur le fil arrive en double.
+      expect(line.percentage, 50.0);
+    });
+
     test(
       'parse school + current + previous + serverTime (clé wire `current`)',
       () {
@@ -227,8 +289,11 @@ void main() {
             'dateOfBirth': '2013-05-02',
             'birthPlace': 'Kinshasa',
             'previousSchoolLevelId': 'lvl-6e',
-            'previousBalanceInCents': 250000,
-            'currency': 'USD',
+            'previousBalances': [
+              {'amountInCents': 250000, 'currency': 'USD'},
+              {'amountInCents': 9000000, 'currency': 'CDF'},
+            ],
+            'medicalNotes': 'Asthme — inhalateur dans le cartable.',
           },
         ],
         'nextCursorId': 'stu-N1',
@@ -240,13 +305,22 @@ void main() {
       final c = page.items.single;
       expect(c.studentId, 'stu-N1');
       expect(c.matriculationNumber, 'ETL-2025-000042');
-      expect(c.previousBalanceInCents, isA<int>());
-      expect(c.previousBalanceInCents, 250000);
+      // Une entrée PAR DEVISE. Le scalaire d'avant valait la somme de tous les
+      // postes, étiquetée de la devise du premier : un élève devant 2 500,00 $
+      // et 90 000 FC s'entendait annoncer « 92 500,00 $ ».
+      expect(c.previousBalances, hasLength(2));
+      expect(c.previousBalances.first.amountInCents, 250000);
+      expect(c.previousBalances.first.currency, 'USD');
+      expect(c.previousBalances.last.currency, 'CDF');
       // Pagination statique par studentId (ni watermark ni 304).
       expect(page.nextCursorId, 'stu-N1');
       expect(page.bootstrapComplete, isFalse);
       expect(page.totalCount, 120);
       expect(page.serverTime, '2026-07-08T09:00:00Z');
+      // Fiche santé N-1 : une PROPOSITION. Elle ne vaudra pour le nouveau
+      // dossier que si le poste la repousse dans son agrégat — sans quoi
+      // l'enfant perd ses allergies à chaque changement d'année.
+      expect(c.medicalNotes, 'Asthme — inhalateur dans le cartable.');
     });
 
     test('dernière page → bootstrapComplete=true, nextCursorId null', () {
@@ -260,7 +334,7 @@ void main() {
       expect(page.nextCursorId, isNull);
     });
 
-    test('bootstrapComplete/previousBalanceInCents absents → défauts sûrs', () {
+    test('bootstrapComplete/previousBalances absents → défauts sûrs', () {
       final page = ReenrollmentCohortPageDto.fromJson({
         'items': [
           {
@@ -276,7 +350,11 @@ void main() {
         ],
         'serverTime': 't',
       });
-      expect(page.items.single.previousBalanceInCents, 0);
+      // Absent = ne doit rien. JAMAIS un `[Money(0, 'USD')]` de repli : personne
+      // n'a choisi cette unité.
+      expect(page.items.single.previousBalances, isEmpty);
+      // Le dossier N-1 n'avait rien de renseigné : rien à proposer.
+      expect(page.items.single.medicalNotes, isNull);
       // Absence de bootstrapComplete → false (ne JAMAIS marquer complet à tort).
       expect(page.bootstrapComplete, isFalse);
     });
@@ -357,6 +435,8 @@ void main() {
                 'gender': 'FEMALE',
                 'previousRate': 82.5,
                 'validatedPreviousYear': true,
+                'formerStudent': true,
+                'medicalNotes': 'Allergie aux arachides.',
                 'updatedAt': '2026-07-08T09:00:00Z',
               },
               'student': {
@@ -376,6 +456,7 @@ void main() {
                   'lastName': 'Ilunga',
                   'phoneNumber': '+243900000001',
                   'relationshipType': 'FATHER',
+                  'emergencyContact': true,
                 },
               ],
               'serverUpdatedAt': '2026-07-08T10:00:00Z',
@@ -401,6 +482,9 @@ void main() {
         // figerait la ressource entière au prochain champ ajouté côté back.
         // C'est le parsing tolérant exigé partout ici.
         expect(agg.parents.single.relationshipType, 'FATHER');
+        expect(agg.enrollment.formerStudent, isTrue);
+        expect(agg.enrollment.medicalNotes, 'Allergie aux arachides.');
+        expect(agg.parents.single.emergencyContact, isTrue);
       },
     );
 
@@ -442,6 +526,99 @@ void main() {
       expect(agg.enrollment.cancellationReason, isNull);
       expect(agg.student.matriculationNumber, isNull);
       expect(agg.parents, isEmpty); // 'parents' absent → [] (pullList défensif)
+      // Le contrat donne `formerStudent` non nul, mais un back antérieur au
+      // champ ne doit pas faire tomber le pull entier : repli sur le type,
+      // ici NEW_ENROLLMENT.
+      expect(agg.enrollment.formerStudent, isFalse);
+      expect(agg.enrollment.medicalNotes, isNull);
+    });
+
+    test(
+      'snapshot d\'une RÉINSCRIPTION sans formerStudent → replié sur le type',
+      () {
+        final dto = EnrollmentSnapshotPageDto.fromJson({
+          'items': [
+            {
+              'enrollment': {
+                'id': 'enr-3',
+                'studentId': 'stu-3',
+                'academicYearId': 'ay-1',
+                'status': 'IN_PROGRESS',
+                'enrollmentType': 'RE_ENROLLMENT',
+                'enrollmentCode': 'ETL-2026-0003',
+                'enrollmentDate': '2026-07-03',
+                'firstName': 'A',
+                'lastName': 'B',
+                'surname': 'C',
+                'dateOfBirth': '2016-01-01',
+                'gender': 'MALE',
+              },
+              'student': {
+                'id': 'stu-3',
+                'firstName': 'A',
+                'lastName': 'B',
+                'surname': 'C',
+                'gender': 'MALE',
+                'dateOfBirth': '2016-01-01',
+              },
+              'serverUpdatedAt': '2026-07-08T10:00:00Z',
+            },
+          ],
+          'hasMore': false,
+          'serverTime': '2026-07-08T10:00:01Z',
+        });
+
+        expect(dto.items.single.enrollment.formerStudent, isTrue);
+      },
+    );
+
+    /// Le drapeau décrit le couple (élève, tuteur) : le serveur le rend nul
+    /// dans les vues sans élève de référence. Ici l'agrégat EN A un, mais un
+    /// back antérieur au champ n'envoie rien — et `null` doit rester `null`,
+    /// jamais devenir `false`, qui est une désignation retirée.
+    test('tuteur sans emergencyContact → null, pas false', () {
+      final dto = EnrollmentSnapshotPageDto.fromJson({
+        'items': [
+          {
+            'enrollment': {
+              'id': 'enr-4',
+              'studentId': 'stu-4',
+              'academicYearId': 'ay-1',
+              'status': 'IN_PROGRESS',
+              'enrollmentType': 'NEW_ENROLLMENT',
+              'enrollmentCode': 'ETL-2026-0004',
+              'enrollmentDate': '2026-07-04',
+              'firstName': 'A',
+              'lastName': 'B',
+              'surname': 'C',
+              'dateOfBirth': '2016-01-01',
+              'gender': 'MALE',
+            },
+            'student': {
+              'id': 'stu-4',
+              'firstName': 'A',
+              'lastName': 'B',
+              'surname': 'C',
+              'gender': 'MALE',
+              'dateOfBirth': '2016-01-01',
+            },
+            'parents': [
+              {
+                'id': 'par-4',
+                'firstName': 'Joseph',
+                'lastName': 'Ilunga',
+                'phoneNumber': '+243900000004',
+                'relationshipType': 'FATHER',
+              },
+            ],
+            'serverUpdatedAt': '2026-07-08T10:00:00Z',
+          },
+        ],
+        'hasMore': false,
+        'serverTime': '2026-07-08T10:00:01Z',
+      });
+
+      expect(dto.items.single.parents.single.emergencyContact, isNull);
     });
   });
 }

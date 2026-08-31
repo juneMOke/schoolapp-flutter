@@ -92,6 +92,847 @@
   "@splashForbiddenMessage": {
     "description": "Bootstrap screen message on 403 — retrying cannot help, only a rights change will"
   },
+  "splashNotProvisionedTitle": "School not set up yet",
+  "@splashNotProvisionedTitle": {
+    "description": "Splash title when the school has no academic year — the pull succeeded, the school simply was never configured"
+  },
+  "splashNotProvisionedMessage": "This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.",
+  "@splashNotProvisionedMessage": {
+    "description": "Splash message for an unprovisioned school — neither an outage nor a missing right"
+  },
+  "splashNotProvisionedAction": "Set up the school",
+  "@splashNotProvisionedAction": {
+    "description": "Splash action opening the provisioning wizard — shown only with school.provisioning.write"
+  },
+  "splashNotProvisionedWaitMessage": "This school has no open academic year yet. Only school management can set it up — check with them before retrying.",
+  "@splashNotProvisionedWaitMessage": {
+    "description": "Splash message for an unprovisioned school without the permission to set it up: nothing to do from this device"
+  },
+  "configurationTitle": "Setup",
+  "@configurationTitle": {
+      "description": "Provisioning wizard app bar title"
+  },
+  "configurationSubtitle": "Bringing the school into service",
+  "@configurationSubtitle": {
+      "description": "Provisioning wizard app bar subtitle"
+  },
+  "configurationStepCounter": "Step {current} / {total}",
+  "@configurationStepCounter": {
+      "description": "Wizard step counter, right-aligned in the bar",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationExitTooltip": "Leave setup",
+  "@configurationExitTooltip": {
+      "description": "Exit button tooltip — no confirmation, everything is saved"
+  },
+  "configurationStepSchool": "School",
+  "@configurationStepSchool": {
+      "description": "Short label of step 1 in the stepper"
+  },
+  "configurationStepAcademicYear": "Year",
+  "@configurationStepAcademicYear": {
+      "description": "Short label of step 2 in the stepper"
+  },
+  "configurationStepStructure": "Structure",
+  "@configurationStepStructure": {
+      "description": "Short label of step 3 in the stepper"
+  },
+  "configurationStepFees": "Fees",
+  "@configurationStepFees": {
+      "description": "Short label of step 4 in the stepper"
+  },
+  "configurationStepActivation": "Activation",
+  "@configurationStepActivation": {
+      "description": "Short label of step 5 in the stepper"
+  },
+  "configurationStepSemantics": "Step {current} of {total}, {title}",
+  "@configurationStepSemantics": {
+      "description": "Accessibility label of a stepper dot",
+      "placeholders": {
+          "current": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "title": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationBack": "Back",
+  "@configurationBack": {
+      "description": "Back button of the save bar"
+  },
+  "configurationSave": "Save",
+  "@configurationSave": {
+      "description": "Save button of the footer bar"
+  },
+  "configurationContinue": "Continue",
+  "@configurationContinue": {
+      "description": "Advance button of the footer bar"
+  },
+  "configurationSaving": "Saving…",
+  "@configurationSaving": {
+      "description": "Transient footer message while writing"
+  },
+  "configurationSaved": "Saved",
+  "@configurationSaved": {
+      "description": "Footer check on step 1, the only step that really writes"
+  },
+  "configurationDraftSaved": "Draft saved",
+  "@configurationDraftSaved": {
+      "description": "Footer check on steps 2 to 4, which only build a local draft"
+  },
+  "configurationSaveBarDefaultHint": "Fill in the required fields to continue",
+  "@configurationSaveBarDefaultHint": {
+      "description": "Default footer message when the step provides no hint"
+  },
+  "configurationSchoolSectionTitle": "School identity",
+  "@configurationSchoolSectionTitle": {
+      "description": "Step 1 card title"
+  },
+  "configurationSchoolSectionSubtitle": "This information appears on certificates, receipts and report cards.",
+  "@configurationSchoolSectionSubtitle": {
+      "description": "Step 1 card subtitle — says why these fields matter"
+  },
+  "configurationSchoolName": "School name",
+  "@configurationSchoolName": {
+      "description": "School name field"
+  },
+  "configurationSchoolCountry": "Country",
+  "@configurationSchoolCountry": {
+      "description": "Country field, read-only"
+  },
+  "configurationSchoolCity": "City",
+  "@configurationSchoolCity": {
+      "description": "City field, read-only"
+  },
+  "configurationSchoolDistrict": "District",
+  "@configurationSchoolDistrict": {
+      "description": "Kinshasa district field"
+  },
+  "configurationSchoolMunicipality": "Municipality",
+  "@configurationSchoolMunicipality": {
+      "description": "Municipality field, cascading from the district"
+  },
+  "configurationSchoolMunicipalityPlaceholder": "Pick a district first",
+  "@configurationSchoolMunicipalityPlaceholder": {
+      "description": "Municipality placeholder while no district is chosen"
+  },
+  "configurationSchoolAddress": "Address",
+  "@configurationSchoolAddress": {
+      "description": "School address field"
+  },
+  "configurationSchoolPhone": "School phone",
+  "@configurationSchoolPhone": {
+      "description": "School phone field"
+  },
+  "configurationSchoolEmail": "School email",
+  "@configurationSchoolEmail": {
+      "description": "School email field"
+  },
+  "configurationSchoolMissingHint": "Still needed: {fields}",
+  "@configurationSchoolMissingHint": {
+      "description": "Footer message naming the required fields still empty",
+      "placeholders": {
+          "fields": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSchoolReadOnlyNote": "Country and city are fixed: the application is deployed in Kinshasa.",
+  "@configurationSchoolReadOnlyNote": {
+      "description": "Note explaining why two fields cannot be edited"
+  },
+  "configurationYearSectionTitle": "Academic year",
+  "@configurationYearSectionTitle": {
+      "description": "Step 2 card title"
+  },
+  "configurationYearSectionSubtitle": "A first year is proposed from today's date — adjust the dates if needed.",
+  "@configurationYearSectionSubtitle": {
+      "description": "Step 2 card subtitle"
+  },
+  "configurationYearProposed": "Proposed automatically",
+  "@configurationYearProposed": {
+      "description": "Origin badge while the proposal is untouched"
+  },
+  "configurationYearEdited": "Edited",
+  "@configurationYearEdited": {
+      "description": "Origin badge once a date or the label has changed"
+  },
+  "configurationYearRestore": "Restore the proposal",
+  "@configurationYearRestore": {
+      "description": "Link rebuilding the proposal from today's date"
+  },
+  "configurationYearStart": "First day of class",
+  "@configurationYearStart": {
+      "description": "Start date field"
+  },
+  "configurationYearEnd": "End of year",
+  "@configurationYearEnd": {
+      "description": "End date field"
+  },
+  "configurationYearDuration": "Length",
+  "@configurationYearDuration": {
+      "description": "Label of the indicative span between both dates"
+  },
+  "configurationYearDurationValue": "≈ {months} months",
+  "@configurationYearDurationValue": {
+      "description": "Indicative span, rounded to months",
+      "placeholders": {
+          "months": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationYearRangeError": "The end must follow the start",
+  "@configurationYearRangeError": {
+      "description": "Shown when the end date does not follow the start date"
+  },
+  "configurationYearPeriodsNote": "Terms and semesters are set later, in Results.",
+  "@configurationYearPeriodsNote": {
+      "description": "Explicit pointer to another module — do not add terms here"
+  },
+  "configurationStructureTitle": "Cycles, levels and classes",
+  "@configurationStructureTitle": {
+      "description": "Step 3 title"
+  },
+  "configurationTotalCycles": "{count, plural, one{cycle} other{cycles}}",
+  "@configurationTotalCycles": {
+      "description": "Cycle total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalLevels": "{count, plural, one{level} other{levels}}",
+  "@configurationTotalLevels": {
+      "description": "Level total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalClassrooms": "{count, plural, one{class} other{classes}}",
+  "@configurationTotalClassrooms": {
+      "description": "Classroom total chip label",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationTotalCourses": "{count, plural, one{course} other{courses}}",
+  "@configurationTotalCourses": {
+      "description": "Course total chip label — the teaching volume activation will generate",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCycleClassroomsPerLevel": "Classes per level",
+  "@configurationCycleClassroomsPerLevel": {
+      "description": "Cycle-wide setting, with no effect on levels carrying official grids"
+  },
+  "configurationCycleNotOffered": "Not offered",
+  "@configurationCycleNotOffered": {
+      "description": "Header counter of a fully deselected cycle"
+  },
+  "configurationCycleSummary": "{open} / {total} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
+  "@configurationCycleSummary": {
+      "description": "Cycle header counter: open levels out of total, then classes",
+      "placeholders": {
+          "open": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationLevelNotOffered": "Level not offered this year",
+  "@configurationLevelNotOffered": {
+      "description": "Row of a level whose counter is zero"
+  },
+  "configurationLevelNoGrid": "No official grid — these classes will have no courses.",
+  "@configurationLevelNoGrid": {
+      "description": "Amber warning under a level with no MINEDUC grid. Blocks nothing"
+  },
+  "configurationSectionsServed": "Grids served on {level}",
+  "@configurationSectionsServed": {
+      "description": "Header of a level's stream row",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSectionCourses": "{count, plural, one{{count} course} other{{count} courses}}",
+  "@configurationSectionCourses": {
+      "description": "Course cost of a class following this grid",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureHint": "{count, plural, one{{count} class will be created for the year} other{{count} classes will be created for the year}}",
+  "@configurationStructureHint": {
+      "description": "Step 3 footer message — the only place the commitment is quantified before activation",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationStructureEmptyHint": "Tick at least one level",
+  "@configurationStructureEmptyHint": {
+      "description": "Footer message when no class is open"
+  },
+  "configurationStructureEmptyTitle": "No level selected",
+  "@configurationStructureEmptyTitle": {
+      "description": "Step 3 empty state title"
+  },
+  "configurationStructureEmptyMessage": "A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.",
+  "@configurationStructureEmptyMessage": {
+      "description": "Step 3 empty state message"
+  },
+  "configurationStructureRestore": "Restore the proposal",
+  "@configurationStructureRestore": {
+      "description": "Empty state action: rebuilds the proposal from the catalogue"
+  },
+  "configurationFeesTitle": "School fees",
+  "@configurationFeesTitle": {
+      "description": "Step 4 title"
+  },
+  "configurationFeeNew": "New fee",
+  "@configurationFeeNew": {
+      "description": "Button opening the fee form"
+  },
+  "configurationFeeFormTitle": "New fee",
+  "@configurationFeeFormTitle": {
+      "description": "Fee creation form title"
+  },
+  "configurationFeeFormEditTitle": "Edit fee",
+  "@configurationFeeFormEditTitle": {
+      "description": "Fee form title when editing"
+  },
+  "configurationFeeType": "Fee type",
+  "@configurationFeeType": {
+      "description": "Fee type field, served by the catalogue"
+  },
+  "configurationFeeTypeOthers": "Other types ({count})",
+  "@configurationFeeTypeOthers": {
+      "description": "Disclosure for fee types outside the common ones",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeLabel": "Label shown to parents",
+  "@configurationFeeLabel": {
+      "description": "Label field — the one printed on the collection note"
+  },
+  "configurationFeeAmount": "Amount",
+  "@configurationFeeAmount": {
+      "description": "Amount field, entered in units"
+  },
+  "configurationFeeCurrency": "Currency",
+  "@configurationFeeCurrency": {
+      "description": "Currency selector next to the amount"
+  },
+  "configurationFeeDueAt": "Due date",
+  "@configurationFeeDueAt": {
+      "description": "Fee due date field"
+  },
+  "configurationFeeScope": "Applies to",
+  "@configurationFeeScope": {
+      "description": "Scope field — the levels the fee is charged on"
+  },
+  "configurationFeeScopeAll": "All opened levels",
+  "@configurationFeeScopeAll": {
+      "description": "Scope mode: every level receiving at least one class"
+  },
+  "configurationFeeScopeSome": "Selected levels",
+  "@configurationFeeScopeSome": {
+      "description": "Scope mode: a chosen set of levels"
+  },
+  "configurationFeeScopeAllHint": "Will apply to {count, plural, one{{count} open level} other{{count} open levels}}",
+  "@configurationFeeScopeAllHint": {
+      "description": "Dynamic subtitle of the all-levels mode",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeCount": "{selected} / {total} selected",
+  "@configurationFeeScopeCount": {
+      "description": "Counter of levels held in the scope",
+      "placeholders": {
+          "selected": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeScopeWholeCycle": "Whole cycle",
+  "@configurationFeeScopeWholeCycle": {
+      "description": "Shortcut ticking every open level of a cycle"
+  },
+  "configurationFeeAdd": "Add the fee",
+  "@configurationFeeAdd": {
+      "description": "Fee form submit button"
+  },
+  "configurationFeeUpdate": "Update",
+  "@configurationFeeUpdate": {
+      "description": "Fee form submit button when editing"
+  },
+  "configurationFeeCancel": "Cancel",
+  "@configurationFeeCancel": {
+      "description": "Fee form dismiss button"
+  },
+  "configurationFeeCount": "{count, plural, =0{No fee defined} one{{count} fee defined} other{{count} fees defined}}",
+  "@configurationFeeCount": {
+      "description": "Summary of how many fees were entered",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeCatalogTotal": "Catalogue total: {total}",
+  "@configurationFeeCatalogTotal": {
+      "description": "Total of entered fees, per currency — never summed across currencies",
+      "placeholders": {
+          "total": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeePerStudent": "per student",
+  "@configurationFeePerStudent": {
+      "description": "Caption under a fee row amount"
+  },
+  "configurationFeeLevelsLabel": "{count, plural, one{{count} level} other{{count} levels}}",
+  "@configurationFeeLevelsLabel": {
+      "description": "Scope summary of a fee row",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationFeeDueLabel": "due {date}",
+  "@configurationFeeDueLabel": {
+      "description": "Due date summary of a fee row",
+      "placeholders": {
+          "date": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeDeleted": "Fee \"{label}\" deleted",
+  "@configurationFeeDeleted": {
+      "description": "Toast after deleting a fee",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeeSaved": "Fee \"{label}\" saved",
+  "@configurationFeeSaved": {
+      "description": "Toast after adding or updating a fee",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationFeesEmptyTitle": "No fees yet",
+  "@configurationFeesEmptyTitle": {
+      "description": "Step 4 empty state title"
+  },
+  "configurationFeesEmptyMessage": "Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.",
+  "@configurationFeesEmptyMessage": {
+      "description": "Step 4 empty state message"
+  },
+  "configurationFeesEmptyAction": "Create the first fee",
+  "@configurationFeesEmptyAction": {
+      "description": "Step 4 empty state action"
+  },
+  "configurationFeesEmptyHint": "Add at least one fee to continue",
+  "@configurationFeesEmptyHint": {
+      "description": "Footer message when no fee has been entered"
+  },
+  "configurationFeesDraftHint": "Finish the fee you are editing",
+  "@configurationFeesDraftHint": {
+      "description": "Footer message while a sub-form is open"
+  },
+  "configurationFeesValidHint": "{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}",
+  "@configurationFeesValidHint": {
+      "description": "Footer message when step 4 is valid",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryTitle": "Summary",
+  "@configurationSummaryTitle": {
+      "description": "Step 5 title"
+  },
+  "configurationSummaryEdit": "Edit",
+  "@configurationSummaryEdit": {
+      "description": "Summary card shortcut back to its step"
+  },
+  "configurationSummarySchool": "School",
+  "@configurationSummarySchool": {
+      "description": "Identity summary card"
+  },
+  "configurationSummaryYear": "Academic year",
+  "@configurationSummaryYear": {
+      "description": "Year summary card"
+  },
+  "configurationSummaryStructure": "Structure · {count, plural, one{{count} class} other{{count} classes}}",
+  "@configurationSummaryStructure": {
+      "description": "Structure summary card",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryFees": "School fees",
+  "@configurationSummaryFees": {
+      "description": "Fees summary card"
+  },
+  "configurationSummaryMissing": "to be filled in",
+  "@configurationSummaryMissing": {
+      "description": "Shown instead of a missing field — never a silent blank"
+  },
+  "configurationSummaryCycleLine": "{levels, plural, one{{levels} level} other{{levels} levels}} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
+  "@configurationSummaryCycleLine": {
+      "description": "Cycle line in the structure summary",
+      "placeholders": {
+          "levels": {
+              "type": "int"
+          },
+          "classrooms": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSummaryNoGrid": "no official grid",
+  "@configurationSummaryNoGrid": {
+      "description": "Added to a cycle whose levels carry no official grid"
+  },
+  "configurationCheckSchool": "School identity complete",
+  "@configurationCheckSchool": {
+      "description": "Activation check: the eight fields"
+  },
+  "configurationCheckYear": "Academic year dated",
+  "@configurationCheckYear": {
+      "description": "Activation check: the date range"
+  },
+  "configurationCheckClassrooms": "{count, plural, =0{No class to open} one{{count} class ready to open} other{{count} classes ready to open}}",
+  "@configurationCheckClassrooms": {
+      "description": "Activation check: classes from the plan",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationCheckFees": "{count, plural, =0{No fee attached to levels} one{{count} fee attached to levels} other{{count} fees attached to levels}}",
+  "@configurationCheckFees": {
+      "description": "Activation check: fees entered",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationActivate": "Bring the school into service",
+  "@configurationActivate": {
+      "description": "Activation button — the journey's only structural write"
+  },
+  "configurationActivating": "Activating…",
+  "@configurationActivating": {
+      "description": "Button label while activating"
+  },
+  "configurationActivateBlocked": "Complete the amber items to activate.",
+  "@configurationActivateBlocked": {
+      "description": "Shown while the four checks do not pass"
+  },
+  "configurationActivateFailed": "Activation failed — try again.",
+  "@configurationActivateFailed": {
+      "description": "Activation failure toast. No data is lost"
+  },
+  "configurationActivatedTitle": "{school} is in service",
+  "@configurationActivatedTitle": {
+      "description": "Success screen title",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationActivatedMessage": "The {year} year is open with {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} and {fees, plural, one{{fees} fee} other{{fees} fees}}. You can enrol your first students.",
+  "@configurationActivatedMessage": {
+      "description": "Success screen message",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "fees": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationGoHome": "Go to the dashboard",
+  "@configurationGoHome": {
+      "description": "Primary exit of the success screen"
+  },
+  "configurationReviewSetup": "Review the setup",
+  "@configurationReviewSetup": {
+      "description": "Secondary exit of the success screen"
+  },
+  "configurationWarningsTitle": "Worth knowing before activating",
+  "@configurationWarningsTitle": {
+      "description": "Header of the plan warnings block"
+  },
+  "menuConfiguration": "Setup",
+  "@menuConfiguration": {
+      "description": "Sidebar menu — school settings, once the school is in service"
+  },
+  "subMenuConfigurationSchool": "School settings",
+  "@subMenuConfigurationSchool": {
+      "description": "Sub-menu of the Setup module"
+  },
+  "configurationSettingsTitle": "School setup",
+  "@configurationSettingsTitle": {
+      "description": "Settings screen title, after the school is in service"
+  },
+  "configurationSettingsInService": "{school} · in service",
+  "@configurationSettingsInService": {
+      "description": "State banner: the school is set up",
+      "placeholders": {
+          "school": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsSummary": "{year} year · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} · {levels, plural, one{{levels} level} other{{levels} levels}}",
+  "@configurationSettingsSummary": {
+      "description": "State banner summary",
+      "placeholders": {
+          "year": {
+              "type": "String"
+          },
+          "classrooms": {
+              "type": "int"
+          },
+          "levels": {
+              "type": "int"
+          }
+      }
+  },
+  "configurationSettingsNextYear": "Prepare next year",
+  "@configurationSettingsNextYear": {
+      "description": "Disabled in V1 — the wizard cannot be replayed"
+  },
+  "configurationSettingsNextYearTooltip": "Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.",
+  "@configurationSettingsNextYearTooltip": {
+      "description": "Tooltip of the prepare-next-year button"
+  },
+  "configurationSettingsTabIdentity": "School identity",
+  "@configurationSettingsTabIdentity": {
+      "description": "Editable settings tab"
+  },
+  "configurationSettingsTabStructure": "Cycles, levels and classes",
+  "@configurationSettingsTabStructure": {
+      "description": "Read-only settings tab"
+  },
+  "configurationSettingsTabFees": "School fees",
+  "@configurationSettingsTabFees": {
+      "description": "Tariff tab, editable row by row"
+  },
+  "configurationSettingsReadOnly": "read-only",
+  "@configurationSettingsReadOnly": {
+      "description": "Marker of a non-editable tab"
+  },
+  "configurationSettingsStructureReadOnlyNote": "The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.",
+  "@configurationSettingsStructureReadOnlyNote": {
+      "description": "Why the structure tab is read-only"
+  },
+  "configurationSettingsSaved": "Changes saved",
+  "@configurationSettingsSaved": {
+      "description": "Toast after saving in the settings"
+  },
+  "configurationSettingsSave": "Save",
+  "@configurationSettingsSave": {
+      "description": "Settings save button"
+  },
+  "configurationSettingsNoYear": "No open year",
+  "@configurationSettingsNoYear": {
+      "description": "Settings empty state when the academic context returns no year"
+  },
+  "configurationSettingsTariffsForLevel": "Tariffs for {level}",
+  "@configurationSettingsTariffsForLevel": {
+      "description": "Header of a level's tariff list",
+      "placeholders": {
+          "level": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationSettingsTariffOne": "Here a tariff carries a single level: each row is edited on its own.",
+  "@configurationSettingsTariffOne": {
+      "description": "Note explaining the wizard's scope no longer exists in settings"
+  },
+  "configurationTariffAdd": "Add a tariff",
+  "@configurationTariffAdd": {
+      "description": "Button adding a tariff on a level"
+  },
+  "configurationTariffEdit": "Edit tariff",
+  "@configurationTariffEdit": {
+      "description": "Tariff edit dialog title"
+  },
+  "configurationTariffNew": "New tariff",
+  "@configurationTariffNew": {
+      "description": "Tariff creation dialog title"
+  },
+  "configurationTariffDelete": "Delete tariff",
+  "@configurationTariffDelete": {
+      "description": "Tariff deletion action"
+  },
+  "configurationTariffDeleteConfirm": "Delete \"{label}\"? Charges already generated are not affected.",
+  "@configurationTariffDeleteConfirm": {
+      "description": "Tariff deletion confirmation — a server write, unlike the wizard's draft",
+      "placeholders": {
+          "label": {
+              "type": "String"
+          }
+      }
+  },
+  "configurationTariffSaved": "Tariff saved",
+  "@configurationTariffSaved": {
+      "description": "Toast after writing a tariff"
+  },
+  "configurationTariffDeleted": "Tariff deleted",
+  "@configurationTariffDeleted": {
+      "description": "Toast after deleting a tariff"
+  },
+  "configurationTariffNone": "No tariff on this level",
+  "@configurationTariffNone": {
+      "description": "Shown when a level carries no tariff"
+  },
+  "configurationFeeTypesUnavailableTitle": "Fee types unavailable",
+  "@configurationFeeTypesUnavailableTitle": {
+      "description": "Empty state of step 4 when the fee type reference could not be served"
+  },
+  "configurationFeeTypesUnavailableMessage": "The fee type reference was not loaded. Reload it to enter the school fees.",
+  "@configurationFeeTypesUnavailableMessage": {
+      "description": "Message of the step 4 empty state when no fee type is served"
+  },
+  "configurationLoadingA11yLabel": "Loading the step data",
+  "@configurationLoadingA11yLabel": {
+      "description": "Label announced to screen readers while the provisioning wizard skeletons are on screen"
+  },
+  "configurationErrorNetworkTitle": "Connection lost",
+  "@configurationErrorNetworkTitle": {
+      "description": "Network error title in the wizard"
+  },
+  "configurationErrorNetworkMessage": "The setup was not sent. Check your connection, then try again.",
+  "@configurationErrorNetworkMessage": {
+      "description": "Network error message"
+  },
+  "configurationErrorSessionTitle": "Your session has expired",
+  "@configurationErrorSessionTitle": {
+      "description": "401 title"
+  },
+  "configurationErrorSessionMessage": "Sign in again to pick up where you left off. Your entries are kept.",
+  "@configurationErrorSessionMessage": {
+      "description": "401 message — the local draft survives an expired session"
+  },
+  "configurationErrorForbiddenTitle": "Access denied",
+  "@configurationErrorForbiddenTitle": {
+      "description": "403 title"
+  },
+  "configurationErrorForbiddenMessage": "Only the school owner can set up the school. Contact your school administrator.",
+  "@configurationErrorForbiddenMessage": {
+      "description": "403 message — retrying cannot help"
+  },
+  "configurationErrorServerTitle": "The server could not save",
+  "@configurationErrorServerTitle": {
+      "description": "500 title"
+  },
+  "configurationErrorServerMessage": "Something broke. Try again, and quote the code below to support if it persists.",
+  "@configurationErrorServerMessage": {
+      "description": "500 message"
+  },
+  "configurationErrorRateTitle": "Too many requests",
+  "@configurationErrorRateTitle": {
+      "description": "429 title"
+  },
+  "configurationErrorRateMessage": "The server is asking for a pause. Wait a few moments before carrying on.",
+  "@configurationErrorRateMessage": {
+      "description": "429 message — definitely no Retry"
+  },
+  "configurationErrorYearExistsTitle": "This academic year already exists",
+  "@configurationErrorYearExistsTitle": {
+      "description": "400 BUSINESS_RULE title"
+  },
+  "configurationErrorYearExistsMessage": "Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.",
+  "@configurationErrorYearExistsMessage": {
+      "description": "Message for the already-existing-year refusal"
+  },
+  "configurationErrorYearExistsAction": "Back to the year",
+  "@configurationErrorYearExistsAction": {
+      "description": "Action for the already-existing-year refusal — returns to step 2 with a purged draft"
+  },
+  "configurationErrorRetry": "Try again",
+  "@configurationErrorRetry": {
+      "description": "Generic recovery action"
+  },
+  "configurationErrorSignIn": "Sign in again",
+  "@configurationErrorSignIn": {
+      "description": "401 action"
+  },
+  "configurationErrorContact": "Contact the administrator",
+  "@configurationErrorContact": {
+      "description": "403 action"
+  },
+  "configurationErrorIncident": "Incident code",
+  "@configurationErrorIncident": {
+      "description": "Label of the incident code to quote to support"
+  },
+  "configurationErrorReloadCatalog": "Reload the referential",
+  "@configurationErrorReloadCatalog": {
+      "description": "Action for a 422 unknown-code — the cached catalogue is stale"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",
@@ -212,6 +1053,18 @@
   "subMenuFeeControl": "Fee control",
   "@subMenuFeeControl": {
     "description": "Fee control sub-menu title"
+  },
+  "menuBoutique": "Shop",
+  "@menuBoutique": {
+    "description": "Shop till menu title"
+  },
+  "subMenuBoutiquePurchases": "Purchases",
+  "@subMenuBoutiquePurchases": {
+    "description": "Shop till counter sub-menu title"
+  },
+  "subMenuBoutiqueHistory": "History",
+  "@subMenuBoutiqueHistory": {
+    "description": "Shop sales history sub-menu title"
   },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
@@ -881,13 +1734,15 @@
   },
   "accueilModulesEyebrow": "Your modules",
   "accueilModulesTitle": "Where would you like to go?",
-  "accueilModulesIntro": "Six modules cover the life of the school — each card opens its dashboard or its pages.",
+  "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
   "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
   "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
+  "accueilModuleConfigurationDescription": "School identity, cycles and levels, and the school fee schedule.",
   "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
   "@accueilModulePageCount": {
     "description": "Module card subtitle: number of pages it gathers.",
@@ -1192,6 +2047,23 @@
   "yearValidated": "Year validated",
   "yearValidatedHelp": "Indicates whether the student validated the previous school year.",
   "yearNotValidated": "Not validated",
+  "yearValidationUnknown": "Not specified",
+  "guardianEmergencyContactLabel": "Emergency contact",
+  "guardianEmergencyContactBadge": "Emergency",
+  "guardianEmergencyContactHint": "One guardian per pupil: designating one clears the previous designation.",
+  "guardianEmergencyContactAmbiguous": "Only one guardian can be the emergency contact for this pupil.",
+  "guardianEmergencyContactSaved": "Emergency contact updated.",
+  "guardianEmergencyContactCleared": "Emergency contact cleared.",
+  "guardianEmergencyContactRetry": "Retry",
+  "guardianEmergencyContactFailed": "Setting the emergency contact failed.",
+  "medicalNotesLabel": "Health information",
+  "medicalNotesHelp": "Allergies, ongoing treatment, what to do. Optional.",
+  "medicalNotesSectionTitle": "Health",
+  "formerStudentLabel": "Former pupil of this school",
+  "formerStudentHelp": "Tick if the child has already been enrolled in this school, even before the app.",
+  "formerStudentLockedHelp": "Re-enrolment: the child comes from last year's file in this school.",
+  "previousSchoolOptionalHint": "Optional — leave blank if the child has not been to school yet.",
+  "averageOutOfRangeError": "The average must be between 0 and 100.",
   "currentAcademicYearLabel": "Academic year",
   "currentAcademicYearHelp": "Target academic year.",
   "targetCycleLabel": "Target cycle",
@@ -1391,6 +2263,30 @@
   "enrollmentStatusCancelled": "Cancelled",
   "enrollmentReadOnlyTitle": "View-only mode",
   "enrollmentReadOnlyMessage": "Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.",
+  "enrollmentReeditAction": "Edit",
+  "@enrollmentReeditAction": {
+    "description": "Header action opening the correction of an already completed record."
+  },
+  "enrollmentReeditReadOnlyMessage": "Completed record. You may correct it: saving will move it back to in progress and queue it for sending.",
+  "@enrollmentReeditReadOnlyMessage": {
+    "description": "Consultation banner shown when correcting is possible."
+  },
+  "enrollmentReeditExitTitle": "Correction not validated",
+  "@enrollmentReeditExitTitle": {
+    "description": "Title of the dialog shown when leaving an unfinalised correction."
+  },
+  "enrollmentReeditExitMessage": "This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.",
+  "@enrollmentReeditExitMessage": {
+    "description": "Body of the dialog shown when leaving an unfinalised correction."
+  },
+  "enrollmentReeditExitConfirm": "Leave anyway",
+  "@enrollmentReeditExitConfirm": {
+    "description": "Button confirming departure from an unfinalised correction."
+  },
+  "enrollmentReeditExitResume": "Resume correction",
+  "@enrollmentReeditExitResume": {
+    "description": "Button returning to the correction."
+  },
   "enrollmentEditableTitle": "Edit mode",
   "enrollmentEditableMessage": "This enrollment is in progress (IN_PROGRESS). Information can be updated.",
   "studentChargesStepTitle": "Student charges",
@@ -1415,6 +2311,10 @@
   "studentChargesSavingAction": "Saving charges...",
   "studentChargesSaveSuccess": "Charges saved successfully.",
   "studentChargesSaveHintBeforeContinue": "Please save charge changes before continuing.",
+  "enrollmentReductionsSectionTitle": "Reductions",
+  "@enrollmentReductionsSectionTitle": {
+    "description": "Title of the reductions section in the fees step of the enrolment wizard (ADR-021 V1). No rate is shown: ticking records a declaration, amounts do not move."
+  },
   "studentChargesTotalLabel": "Total",
   "studentChargesHelperText": "Amounts can be updated later from the student's profile.",
   "studentChargesNetworkError": "Unable to load charges. Please check your internet connection.",
@@ -1546,6 +2446,10 @@
         "type": "String"
       }
     }
+  },
+  "facturationBalanceDueMultiCurrencyPill": "Balance due",
+  "@facturationBalanceDueMultiCurrencyPill": {
+    "description": "Billing AppBar pill when the balance is outstanding in SEVERAL currencies. No amount: two amounts do not fit in a pill, and showing only one would be false. The breakdown is in the cards."
   },
   "facturationBalanceUpToDatePill": "Up to date",
   "financePendingSyncBadge": "Pending sync",
@@ -1735,6 +2639,9 @@
   "facturationCreatePaymentHeroTitle": "New payment",
   "facturationCreatePaymentHeroSubtitle": "Fill in the payer information and allocations to record a payment.",
   "facturationCreatePaymentPayerSectionTitle": "Payer information",
+  "facturationCreatePaymentEyebrow": "Payment collection",
+  "facturationCreatePaymentContextErrorTitle": "Collection unavailable",
+  "facturationCreatePaymentContextErrorMessage": "The information required for this collection is missing. Go back to the student file and start the collection again.",
   "facturationCreatePaymentPayerLastNameLabel": "Last name",
   "facturationCreatePaymentPayerLastNameHint": "Enter last name",
   "facturationCreatePaymentPayerFirstNameLabel": "First name",
@@ -2597,10 +3504,31 @@
   "financeStatsPeriodWeekCurrent": "This week",
   "financeStatsPeriodMonthCurrent": "This month",
   "financeStatsPeriodYearCurrent": "This year",
+  "financeStatsCurrencyHeading": "In {currency}",
+  "@financeStatsCurrencyHeading": {
+    "description": "Sub-heading naming the currency of the KPI block that follows. Only shown from two currencies on: on a single-currency school it would repeat what every amount already carries.",
+    "placeholders": { "currency": { "type": "String" } }
+  },
+  "financeStatsNoMovementLabel": "No movement in this period",
+  "@financeStatsNoMovementLabel": {
+    "description": "Empty state of the Finance dashboard when no money circulated in the window. An empty state, never an error — and certainly not a zero in a currency nobody chose."
+  },
+  "financeStatsNoMovementDescription": "Nothing collected and nothing billed in this window. Widen the period to look further back.",
+  "@financeStatsNoMovementDescription": {
+    "description": "Subtitle of the Finance dashboard empty state."
+  },
   "financeStatsKpiCollected": "Total collected",
   "financeStatsKpiExpected": "Total expected",
   "financeStatsKpiOutstanding": "Outstanding",
   "financeStatsKpiCollectionRate": "Collection rate",
+  "financeStatsKpiRateForCurrency": "{rate}% · {currency}",
+  "@financeStatsKpiRateForCurrency": {
+    "description": "Collection rate of one currency, when the dashboard carries several.",
+    "placeholders": {
+      "rate": { "type": "int" },
+      "currency": { "type": "String" }
+    }
+  },
   "financeStatsSectionEvolution": "Collection evolution",
   "financeStatsLegendCurrentPeriod": "Current period",
   "financeStatsLegendOtherPeriods": "Other periods",
@@ -3367,5 +4295,283 @@
       }
     }
   },
-  "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here."
+  "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here.",
+  "boutiqueEyebrow": "Shop ▸ Purchases",
+  "boutiqueTitle": "Till",
+  "boutiqueSubtitle": "Cash sale of school items. No debt, no balance.",
+  "boutiqueSearchPlaceholder": "Search an item or a code…",
+  "boutiqueFilterAll": "All",
+  "boutiqueFamilyUniforme": "Uniform",
+  "boutiqueFamilyFournitures": "Supplies",
+  "boutiqueFamilyActivites": "Activities",
+  "boutiqueFamilyActes": "Administrative",
+  "boutiqueArticleCount": "{count, plural, one{1 item} other{{count} items}}",
+  "@boutiqueArticleCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueInCartBadge": "{count} in cart",
+  "@boutiqueInCartBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueLevelBadge": "by level",
+  "boutiquePriceRange": "{min} – {max}",
+  "@boutiquePriceRange": {
+    "placeholders": {
+      "min": { "type": "String" },
+      "max": { "type": "String" }
+    }
+  },
+  "boutiqueGridReminder": "Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.",
+  "boutiqueCartTitle": "Cart",
+  "boutiqueCartEmpty": "Cart is empty. Tap an item to add it.",
+  "boutiqueCartClear": "Empty the cart",
+  "boutiqueTotalLabel": "Total to collect",
+  "boutiqueCollectAction": "Collect in cash",
+  "boutiquePriceUnresolved": "Price unresolved",
+  "boutiqueLevelRequired": "Level required…",
+  "boutiqueBeneficiaryPlaceholder": "Recipient",
+  "boutiqueSizeLabel": "Size",
+  "boutiqueLineMeta": "{unitPrice} × {quantity}",
+  "@boutiqueLineMeta": {
+    "placeholders": {
+      "unitPrice": { "type": "String" },
+      "quantity": { "type": "int" }
+    }
+  },
+  "boutiquePayerSection": "Payer",
+  "boutiquePayerKnownBadge": "Known payer",
+  "boutiquePayerPhoneLabel": "Phone",
+  "boutiquePayerLastNameLabel": "Last name",
+  "boutiquePayerMiddleNameLabel": "Middle name",
+  "boutiquePayerFirstNameLabel": "First name",
+  "boutiquePayerReceiptNotice": "The receipt is in the payer's name; recipients are attached to each line.",
+  "boutiquePayerUnknownNotice": "Unknown number — this payer will be added to the directory with the sale.",
+  "boutiqueBlockersPrefix": "Still missing:",
+  "boutiqueBlockerEmptyCart": "Cart is empty",
+  "boutiqueBlockerLastName": "Last name",
+  "boutiqueBlockerMiddleName": "Middle name",
+  "boutiqueBlockerFirstName": "First name",
+  "boutiqueBlockerPhone": "Payer's phone",
+  "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
+  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
+  "@boutiqueBlockerLinesWithoutLevel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueBlockerMixedCurrency": "Mixed currencies",
+  "boutiqueEmptyCatalogTitle": "No item in the catalogue",
+  "boutiqueEmptyCatalogMessage": "The shop has no item yet. Create one in the catalogue to be able to make a sale.",
+  "boutiqueWithheldCatalogTitle": "Catalogue not shared",
+  "boutiqueWithheldCatalogMessage": "Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.",
+  "boutiqueNoMatchTitle": "No matching item",
+  "boutiqueNoMatchMessage": "Nothing for “{query}” in “{family}”. Broaden the search.",
+  "@boutiqueNoMatchMessage": {
+    "placeholders": {
+      "query": { "type": "String" },
+      "family": { "type": "String" }
+    }
+  },
+  "boutiqueNoMatchMessageAll": "Nothing for “{query}”. Broaden the search.",
+  "@boutiqueNoMatchMessageAll": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueResetFilters": "Reset filters",
+  "boutiqueUnsellableNotice": "{count, plural, one{1 item in this catalogue cannot be sold from this version of the app.} other{{count} items in this catalogue cannot be sold from this version of the app.}}",
+  "@boutiqueUnsellableNotice": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiqueErrorNetworkTitle": "No connection",
+  "boutiqueErrorNetwork": "The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.",
+  "boutiqueErrorUnauthorizedTitle": "Session expired",
+  "boutiqueErrorUnauthorized": "Sign in again to resume the till. The cart is kept.",
+  "boutiqueErrorForbiddenTitle": "Access denied",
+  "boutiqueErrorForbidden": "Your account lacks the rights to run the shop till. Contact the head office.",
+  "boutiqueErrorServerTitle": "Catalogue unreadable",
+  "boutiqueErrorServer": "The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.",
+  "boutiqueErrorRetry": "Try again",
+  "boutiqueErrorReconnect": "Sign in again",
+  "boutiqueErrorIncidentCode": "Incident code: {code}",
+  "@boutiqueErrorIncidentCode": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryEyebrow": "Line recipient",
+  "boutiqueBeneficiaryTitle": "Pick a student",
+  "boutiqueBeneficiaryHint": "The student's level resolves the price automatically — you never enter an amount.",
+  "boutiqueBeneficiarySearchLabel": "Last name, middle name or first name",
+  "boutiqueBeneficiarySearchPlaceholder": "e.g. Dylan Ndombo",
+  "boutiqueBeneficiaryTooShort": "Type at least 2 letters, or switch to “By level”.",
+  "boutiqueBeneficiaryNoResult": "No student matches “{query}”. Check the spelling or search by level.",
+  "@boutiqueBeneficiaryNoResult": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "boutiqueBeneficiaryPickLevel": "Pick a level to list its students.",
+  "boutiqueBeneficiaryLevelEmpty": "No student enrolled at this level.",
+  "boutiqueBeneficiaryNotSynced": "Enrolment not synced yet — sell by level, without a recipient: the price is the same.",
+  "boutiqueBeneficiaryNoLevel": "This enrolment carries no level — sell by level, without a recipient.",
+  "boutiqueBeneficiaryLoadFailed": "The student list could not be read.",
+  "boutiquePayerDirectoryCount": "Already in the directory · {count, plural, one{1 sale} other{{count} sales}}",
+  "@boutiquePayerDirectoryCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "boutiquePayerUse": "Use",
+  "boutiqueConfirmEyebrow": "Cash collection",
+  "boutiqueConfirmTitle": "Confirm the sale",
+  "boutiqueConfirmPayer": "Payer",
+  "boutiqueConfirmPhone": "Phone",
+  "boutiqueConfirmArticles": "Items",
+  "boutiqueConfirmMethod": "Method",
+  "boutiqueConfirmMethodCash": "Cash",
+  "boutiqueConfirmAmountReceived": "Amount received",
+  "boutiqueConfirmNotice": "The total is paid in one go: no partial payment, no shop debt.",
+  "boutiqueConfirmNewPayerPrefix": "This payer is new: their number and identity join the directory with the sale.",
+  "boutiqueConfirmOfflineSuffix": "Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.",
+  "boutiqueConfirmCancel": "Cancel",
+  "boutiqueConfirmAction": "Collect {total}",
+  "@boutiqueConfirmAction": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleRecorded": "Sale collected · {total}",
+  "@boutiqueSaleRecorded": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueSaleFailed": "The sale could not be recorded. Nothing was collected — try again.",
+  "editiqueViewerSaleReceiptTitle": "Sale receipt",
+  "documentsHintSaleReceipt": "Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student's file.",
+  "boutiqueTicketTitle": "Sale receipt — Shop",
+  "boutiqueTicketProvisionalBanner": "Provisional document",
+  "boutiqueTicketProvisionalNotice": "Final receipt sealed on sync.",
+  "boutiqueTicketSealedNotice": "Sealed receipt — valid discharge",
+  "boutiqueTicketPayerLabel": "PAYER:",
+  "boutiqueTicketPhoneLabel": "Tel.",
+  "boutiqueTicketCashierLabel": "Cashier:",
+  "boutiqueTicketTotalLabel": "TOTAL",
+  "boutiqueTicketCashReceivedLabel": "Cash received",
+  "boutiqueTicketRemainingLabel": "Remaining",
+  "boutiqueTicketBeneficiaryPrefix": "for",
+  "boutiqueTicketSizePrefix": "Sz.",
+  "boutiqueTicketUnitSuffix": "/ea",
+  "boutiqueTicketNoRefundNotice": "No refund once the item is handed over.",
+  "boutiqueReceiptBannerTitle": "Sale collected · {total}",
+  "@boutiqueReceiptBannerTitle": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerProvisional": "{reference} · provisional, will be sealed on sync",
+  "@boutiqueReceiptBannerProvisional": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptBannerSealed": "{reference} · sealed",
+  "@boutiqueReceiptBannerSealed": {
+    "placeholders": {
+      "reference": { "type": "String" }
+    }
+  },
+  "boutiqueReceiptPrint": "Print",
+  "boutiqueReceiptNewSale": "New sale",
+  "boutiqueReceiptPrintFailed": "The ticket could not be printed. The sale is recorded — you can try again.",
+  "boutiqueReceiptPrinted": "Ticket printed.",
+  "boutiqueOpenCart": "View the cart",
+  "boutiqueOpenCartWithCount": "View the cart, {count, plural, one{1 item} other{{count} items}}",
+  "boutiqueCartPageEyebrow": "Shop ▸ Cart",
+  "boutiqueBackToCatalog": "Back to catalogue",
+  "boutiqueAddToCart": "Add to cart",
+  "boutiqueAddOneMore": "Add one {article}",
+  "boutiqueRemoveOne": "Remove one {article}",
+  "boutiqueSuccessTitle": "Sale collected",
+  "boutiqueSuccessMessage": "The customer paid {total} in cash. Hand them their ticket.",
+  "boutiqueSuccessDone": "Done",
+  "@boutiqueAddOneMore": {
+    "placeholders": { "article": { "type": "String" } }
+  },
+  "@boutiqueRemoveOne": {
+    "placeholders": { "article": { "type": "String" } }
+  },
+  "@boutiqueSuccessMessage": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "boutiqueHistoryEyebrow": "Shop ▸ History",
+  "boutiqueHistoryTitle": "Sales history",
+  "boutiqueHistoryPeriodDay": "Today",
+  "boutiqueHistoryPeriodWeek": "This week",
+  "boutiqueHistoryPeriodMonth": "This month",
+  "boutiqueHistoryPeriodYear": "This year",
+  "boutiqueHistorySaleCount": "{count, plural, one{1 sale} other{{count} sales}}",
+  "boutiqueHistoryArticleCount": "{count, plural, one{1 item} other{{count} items}}",
+  "boutiqueHistoryPendingNotice": "{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}",
+  "boutiqueHistoryPendingBadge": "Pending",
+  "boutiqueHistoryEmptyTitle": "No sale in this period",
+  "boutiqueHistoryEmptyMessage": "Nothing was collected at the counter. Widen the period, or open the shop to collect.",
+  "boutiqueHistoryPayerUnknown": "Payer not recorded",
+  "boutiqueHistoryTotalLabel": "Total collected",
+  "boutiqueHistorySaleTime": "{time} · {reference}",
+  "boutiqueHistoryProvisional": "provisional ticket",
+  "@boutiqueHistorySaleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistoryArticleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistoryPendingNotice": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueHistorySaleTime": {"placeholders": {"time": {"type": "String"}, "reference": {"type": "String"}}},
+  "boutiqueHistoryErrorServerTitle": "History unreadable",
+  "boutiqueHistoryErrorServer": "The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.",
+  "boutiqueHistoryErrorNetwork": "History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
+  "boutiqueClearEyebrow": "Shop ▸ Cart",
+  "boutiqueClearTitle": "Empty the cart?",
+  "boutiqueClearMessage": "The composed lines and the payer's identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.",
+  "boutiqueClearLinesSummary": "{count, plural, one{1 item} other{{count} items}} in the cart",
+  "boutiqueClearPayerSummary": "Payer entered: {payer}",
+  "boutiqueClearCancel": "Keep the cart",
+  "boutiqueClearConfirm": "Empty",
+  "@boutiqueClearLinesSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@boutiqueClearPayerSummary": {"placeholders": {"payer": {"type": "String"}}},
+  "boutiqueSuccessEyebrow": "Shop ▸ Collection",
+  "boutiqueSaleDetailEyebrow": "Shop ▸ Sale",
+  "boutiqueSaleDetailTitle": "Sale details",
+  "boutiqueSaleDetailBack": "Back to history",
+  "boutiqueSaleDetailPayer": "Payer",
+  "boutiqueSaleDetailPhone": "Phone",
+  "boutiqueSaleDetailSoldAt": "Collected on",
+  "boutiqueSaleDetailCollectedBy": "Collected by",
+  "boutiqueSaleDetailCollectedByUnknown": "Cashier not recorded",
+  "boutiqueSaleDetailReceipt": "Receipt",
+  "boutiqueSaleDetailLines": "Items sold",
+  "boutiqueSaleDetailBeneficiary": "for {name}",
+  "boutiqueSaleDetailSizePrefix": "Size {size}",
+  "boutiqueSaleDetailPrintTicket": "Print the ticket",
+  "boutiqueSaleDetailReprintTicket": "Reprint the ticket",
+  "boutiqueSaleDetailTicketPrintedAt": "Ticket printed on {date}",
+  "boutiqueSaleDetailTicketNeverPrinted": "Ticket never printed from this tablet.",
+  "boutiqueSaleDetailOpenReceipt": "Open the sealed receipt",
+  "boutiqueSaleDetailReceiptPending": "The receipt will be sealed at synchronisation. The ticket stands in the meantime.",
+  "boutiqueSaleDetailReceiptTitle": "Sale receipt",
+  "boutiqueSaleDetailNotFoundTitle": "Sale not found",
+  "boutiqueSaleDetailNotFound": "This sale is no longer in this school's local database. Nothing is lost server-side if it had already been sent.",
+  "boutiqueSaleDetailPendingNotice": "This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.",
+  "@boutiqueSaleDetailBeneficiary": {"placeholders": {"name": {"type": "String"}}},
+  "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
+  "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@boutiqueOpenCartWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

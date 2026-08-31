@@ -25,6 +25,12 @@ class PersonalInfoStep extends StatefulWidget {
   /// Année scolaire courante (requise par l'écriture d'identité du brouillon NEW).
   final String academicYearId;
 
+  /// Fiche santé déjà portée par le dossier. Elle vit sur l'INSCRIPTION, pas
+  /// sur l'élève — mais se saisit ici, avec le reste de ce qui décrit l'enfant.
+  /// En réinscription, elle arrive du dossier N-1 par le seed : le guichet la
+  /// relit, la corrige au besoin, et elle repart avec l'agrégat.
+  final String? medicalNotes;
+
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -38,6 +44,7 @@ class PersonalInfoStep extends StatefulWidget {
     required this.studentDetail,
     required this.enrollmentId,
     this.academicYearId = '',
+    this.medicalNotes,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.onRefreshRequested,
@@ -56,11 +63,13 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
   late final TextEditingController _birthPlaceController;
+  late final TextEditingController _medicalNotesController;
 
   String _initialFirstName = '';
   String _initialLastName = '';
   String _initialSurname = '';
   String _initialBirthPlace = '';
+  String _initialMedicalNotes = '';
   String _initialNationality = '';
   Gender? _initialGender;
   DateTime? _initialDate;
@@ -103,6 +112,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController = TextEditingController();
     _surnameController = TextEditingController();
     _birthPlaceController = TextEditingController();
+    _medicalNotesController = TextEditingController();
 
     _initializeFromStudent(widget.studentDetail);
 
@@ -110,6 +120,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController.addListener(_onTextFieldChanged);
     _surnameController.addListener(_onTextFieldChanged);
     _birthPlaceController.addListener(_onTextFieldChanged);
+    _medicalNotesController.addListener(_onTextFieldChanged);
 
     _recomputeFormState(notifyParent: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -164,6 +175,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
       _selectedNationality = _resolveNationalityOrDefault(student.nationality);
       _selectedGender = student.gender;
       _selectedDate = _formatSelectedDate(student);
+      _medicalNotesController.text = widget.medicalNotes ?? '';
     } finally {
       _isHydratingFromDetail = false;
     }
@@ -175,6 +187,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _initialNationality = _selectedNationality.trim();
     _initialGender = student.gender;
     _initialDate = _formatSelectedDate(student);
+    _initialMedicalNotes = _medicalNotesController.text.trim();
   }
 
   /// Lieu de naissance : « Kinshasa » par défaut sur un formulaire ÉDITABLE
@@ -204,6 +217,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _initialNationality = _selectedNationality.trim();
     _initialGender = _selectedGender;
     _initialDate = _selectedDate;
+    _initialMedicalNotes = _medicalNotesController.text.trim();
   }
 
   void _recomputeFormState({bool notifyParent = true}) {
@@ -222,7 +236,8 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         _birthPlaceController.text.trim() != _initialBirthPlace ||
         _selectedNationality.trim() != _initialNationality ||
         _selectedGender != _initialGender ||
-        _selectedDate != _initialDate;
+        _selectedDate != _initialDate ||
+        _medicalNotesController.text.trim() != _initialMedicalNotes;
 
     if (_isValid != validNow) {
       _isValid = validNow;
@@ -256,10 +271,12 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController.removeListener(_onTextFieldChanged);
     _surnameController.removeListener(_onTextFieldChanged);
     _birthPlaceController.removeListener(_onTextFieldChanged);
+    _medicalNotesController.removeListener(_onTextFieldChanged);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
     _birthPlaceController.dispose();
+    _medicalNotesController.dispose();
     super.dispose();
   }
 
@@ -380,6 +397,10 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         schoolLevelId: null,
         schoolLevelGroupId: null,
         enrollmentDate: DateOnlyJsonHelper.toJson(DateTime.now()),
+        // Toujours envoyée — chaîne vide comprise. C'est ce qui rend la fiche
+        // EFFAÇABLE : `null` voudrait dire « je n'en parle pas » et laisserait
+        // en place ce que le guichet vient justement de retirer.
+        medicalNotes: _medicalNotesController.text.trim(),
       ),
     );
   }
@@ -420,6 +441,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         lastNameController: _lastNameController,
         surnameController: _surnameController,
         birthPlaceController: _birthPlaceController,
+        medicalNotesController: _medicalNotesController,
         selectedNationality: _selectedNationality,
         nationalityOptions: NationalityCatalog.withOptionalSelection(
           _selectedNationality,

@@ -8,6 +8,8 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
 
 /// Handler d'outbox de l'agrégat PAYMENT (FF-Lot 4).
 ///
@@ -137,14 +139,42 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
     if (status == null ||
         status >= 500 ||
         _transientStatuses.contains(status)) {
-      return OutboxDispatchResult.retry(_dioReason(e, status));
+      return OutboxDispatchResult.retry(_reasonOf(e, status));
     }
-    return OutboxDispatchResult.failed(_dioReason(e, status));
+
+    // Le statut seul ne suffit plus : le serveur NOMME la cause d'un 422, et
+    // toutes ne se traitent pas pareil. `UNKNOWN_FEE_CODE` veut le plus souvent
+    // dire « l'inscription de l'élève n'est pas encore remontée » — le paiement
+    // repartira seul, et le figer immobiliserait de l'argent qui n'avait qu'à
+    // attendre.
+    final detailCode = ApiErrorParser.detailCodeOf(e.response);
+    if (FinanceErrorCodes.isTransient(detailCode)) {
+      return OutboxDispatchResult.retry(_reasonOf(e, status));
+    }
+
+    return OutboxDispatchResult.failed(_reasonOf(e, status));
   }
 
-  String _dioReason(DioException e, int? status) {
+  /// Nomme la cause, en préférant le **code machine** à la phrase.
+  ///
+  /// Le message du serveur est rédigé pour un humain et se reformule ; le
+  /// `detailCode` est une valeur de fil. Sans lui, toutes les causes d'un 422 se
+  /// ressemblent, et la feuille de reprise ne peut offrir qu'un « contactez le
+  /// support » sur de l'argent déjà encaissé. C'est le patron que la caisse
+  /// boutique applique déjà.
+  String _reasonOf(DioException e, int? status) {
+    final detailCode = ApiErrorParser.detailCodeOf(e.response);
+    if (detailCode != null) {
+      final serverMessage = ApiErrorParser.serverMessageOf(e.response);
+      return serverMessage == null
+          ? detailCode
+          : '$detailCode — $serverMessage';
+    }
     final where = status != null ? 'HTTP $status' : 'réseau';
-    final detail = e.message ?? e.error?.toString();
+    final detail =
+        ApiErrorParser.serverMessageOf(e.response) ??
+        e.message ??
+        e.error?.toString();
     return detail == null || detail.isEmpty ? where : '$where — $detail';
   }
 }

@@ -2,7 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 
+/// Un nombre, mis en forme **sans sa devise** — et donc sans la règle qui en
+/// dépend.
+///
+/// Les décimales s'y décident encore sur la valeur, faute de savoir de quelle
+/// devise il s'agit. Ce n'est pas un oubli : cette fonction sert aussi à
+/// remplir un champ de saisie, où un « 425,00 » imposé serait pénible à
+/// corriger.
+///
+/// **Pour afficher de l'argent, utiliser `MoneyFormat.format`**, qui connaît la
+/// devise et applique sa règle.
 String formatMonetaryAmount(double amount) {
   final isInteger = amount == amount.roundToDouble();
   final raw = isInteger ? amount.toStringAsFixed(0) : amount.toStringAsFixed(2);
@@ -39,12 +51,16 @@ double? parseMonetaryAmount(String rawValue) {
   return double.tryParse(normalized);
 }
 
+/// Façade sur [MoneyFormat.format], le temps que les écrans portent des
+/// [Money] plutôt que des paires (double, String).
+///
+/// L'aller-retour cents → double → cents est l'héritage de cette signature ;
+/// l'arrondi le referme (`80,07` vaut `80.069999…` en binaire, et une
+/// troncature y emporterait le centime).
 String formatMonetaryAmountWithCurrency({
   required double amount,
   required String currency,
-}) {
-  return '${formatMonetaryAmount(amount)}\u00A0$currency';
-}
+}) => MoneyFormat.format(Money.parse((amount * 100).round(), currency));
 
 class CurrencyField extends StatelessWidget {
   final TextEditingController controller;

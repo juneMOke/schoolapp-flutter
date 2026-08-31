@@ -19,30 +19,39 @@ final tStats = FinanceStats(
     periodEnd: DateTime.utc(2026, 6, 30),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
   ),
-  kpis: const FinanceKpis(
-    collected: 300000,
-    expected: 400000,
-    outstanding: 100000,
-    collectionRate: 75,
-  ),
-  evolution: const FinanceEvolution(
-    granularity: FinanceEvolutionGranularity.month,
-    currentBucketIndex: 8,
-    buckets: <FinanceEvolutionBucket>[
-      FinanceEvolutionBucket(key: '2025-09', value: 12000, isCurrent: false),
-      FinanceEvolutionBucket(key: '2026-05', value: 18000, isCurrent: true),
-    ],
-  ),
-  distributionByFeeType: const FeeTypeDistribution(
-    items: <FeeTypeItem>[
-      FeeTypeItem(
-        code: 'TUITION',
-        collected: 200000,
-        expected: 240000,
-        collectionRate: 83,
+  byCurrency: const [
+    FinanceCurrencyBlock(
+      currency: 'USD',
+      kpis: FinanceKpis(
+        collected: 300000,
+        expected: 400000,
+        outstanding: 100000,
+        collectionRate: 75,
       ),
-    ],
-  ),
+      evolution: FinanceEvolution(
+        granularity: FinanceEvolutionGranularity.month,
+        currentBucketIndex: 8,
+        buckets: <FinanceEvolutionBucket>[
+          FinanceEvolutionBucket(
+            key: '2025-09',
+            value: 12000,
+            isCurrent: false,
+          ),
+          FinanceEvolutionBucket(key: '2026-05', value: 18000, isCurrent: true),
+        ],
+      ),
+      distributionByFeeType: FeeTypeDistribution(
+        items: <FeeTypeItem>[
+          FeeTypeItem(
+            code: 'TUITION',
+            collected: 200000,
+            expected: 240000,
+            collectionRate: 83,
+          ),
+        ],
+      ),
+    ),
+  ],
 );
 
 void main() {

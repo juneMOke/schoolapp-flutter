@@ -67,6 +67,19 @@ class SummaryGuardianCompactLine extends StatelessWidget {
                         color: AppColors.bleuArdoise,
                         size: StatusBadgeSize.small,
                       ),
+                    // Le tuteur principal et le contact d'urgence sont deux
+                    // rôles distincts, et souvent deux personnes : le premier
+                    // suit le dossier, le second se déplace. Les deux
+                    // pastilles peuvent donc coexister sur la même ligne.
+                    if (parent.emergencyContact) ...[
+                      const SizedBox(width: AppDimensions.spacingXS),
+                      StatusBadge(
+                        icon: Icons.emergency_outlined,
+                        label: l10n.guardianEmergencyContactBadge,
+                        color: AppColors.error,
+                        size: StatusBadgeSize.small,
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: AppDimensions.spacingXS),

@@ -25,10 +25,19 @@ class ParentDraft {
   /// inchangé).
   final bool linkedToExisting;
 
+  /// Désignation « contact d'urgence » **telle que l'écran la dit** : `true`
+  /// désigne, `false` retire, `null` ne dit rien — et « ne rien dire » n'est
+  /// pas « non ». Le remplacement des tuteurs efface puis réécrit tous les
+  /// liens de l'élève ; sans ce troisième état, chaque passage sur l'étape
+  /// Tuteurs effacerait une désignation posée ailleurs (cf.
+  /// `_replaceParentsIn`).
+  final bool? emergencyContact;
+
   const ParentDraft({
     required this.parent,
     required this.relationshipType,
     this.linkedToExisting = false,
+    this.emergencyContact,
   });
 }
 
@@ -114,6 +123,33 @@ class ParentPhoneConflictException implements Exception {
   final String phoneNumber;
   final String existingParentId;
   const ParentPhoneConflictException(this.phoneNumber, this.existingParentId);
+}
+
+/// Deux tuteurs désignés contact d'urgence pour le même élève.
+///
+/// Levée **avant toute écriture**, et non laissée à l'index unique partiel :
+/// les liens `student_parent` s'écrivent en `INSERT OR REPLACE` (clé composée
+/// élève+tuteur), et sous ce mode SQLite **supprime la ligne en conflit** au
+/// lieu de refuser. Le filet deviendrait alors un destructeur silencieux — le
+/// tuteur précédemment désigné disparaîtrait du dossier, pas seulement son
+/// drapeau.
+///
+/// Miroir local du `422 AMBIGUOUS_EMERGENCY_CONTACT` du serveur, et même
+/// doctrine : ce n'est pas un conflit entre deux postes mais une contradiction
+/// interne à une seule saisie. Rien à arbitrer, rien à rejouer — l'écran doit
+/// la corriger.
+class AmbiguousEmergencyContactException implements Exception {
+  final String studentId;
+  final int designatedCount;
+  const AmbiguousEmergencyContactException(
+    this.studentId,
+    this.designatedCount,
+  );
+
+  @override
+  String toString() =>
+      'AmbiguousEmergencyContactException(student: $studentId, '
+      'désignés: $designatedCount)';
 }
 
 /// Upsert d'un tuteur de l'étape Tuteurs — id fixé par l'UI, jamais généré
@@ -219,26 +255,34 @@ StudentPayload studentPayloadOf(StudentLocalModel s) => StudentPayload(
 );
 
 /// Projette un `EnrollmentLocalModel` en payload d'agrégat.
-EnrollmentPayload enrollmentPayloadOf(EnrollmentLocalModel e) =>
-    EnrollmentPayload(
-      id: e.id,
-      enrollmentType: e.enrollmentType,
-      status: e.status,
-      academicYearId: e.academicYearId,
-      schoolLevelId: e.schoolLevelId,
-      schoolLevelGroupId: e.schoolLevelGroupId,
-      enrollmentDate: e.enrollmentDate,
-      sourceRef: e.sourceRef,
-      previousSchoolName: e.previousSchoolName,
-      previousAcademicYear: e.previousAcademicYear,
-      previousSchoolLevelGroup: e.previousSchoolLevelGroup,
-      previousSchoolLevel: e.previousSchoolLevel,
-      previousRate: e.previousRate,
-      previousRank: e.previousRank,
-      validatedPreviousYear: e.validatedPreviousYear,
-      transferReason: e.transferReason,
-      cancellationReason: e.cancellationReason,
-    );
+///
+/// [reductionCodes] vient d'une table à part (`enrollment_reductions`) et non
+/// de la ligne : il est donc passé, pas dérivé.
+EnrollmentPayload enrollmentPayloadOf(
+  EnrollmentLocalModel e, {
+  List<String> reductionCodes = const [],
+}) => EnrollmentPayload(
+  id: e.id,
+  enrollmentType: e.enrollmentType,
+  status: e.status,
+  academicYearId: e.academicYearId,
+  schoolLevelId: e.schoolLevelId,
+  schoolLevelGroupId: e.schoolLevelGroupId,
+  enrollmentDate: e.enrollmentDate,
+  sourceRef: e.sourceRef,
+  previousSchoolName: e.previousSchoolName,
+  previousAcademicYear: e.previousAcademicYear,
+  previousSchoolLevelGroup: e.previousSchoolLevelGroup,
+  previousSchoolLevel: e.previousSchoolLevel,
+  previousRate: e.previousRate,
+  previousRank: e.previousRank,
+  validatedPreviousYear: e.validatedPreviousYear,
+  formerStudent: e.formerStudent,
+  medicalNotes: e.medicalNotes,
+  transferReason: e.transferReason,
+  cancellationReason: e.cancellationReason,
+  reductionCodes: reductionCodes,
+);
 
 /// Enfile **une** entrée outbox = l'agrégat inscription figé (student +
 /// enrollment + parents). `aggregate_id = enrollment.id` (clé d'idempotence).
@@ -253,8 +297,25 @@ Future<void> enqueueEnrollmentAggregate(
   String? schoolId,
   String? authorId,
 }) async {
+  // Les réductions déclarées au guichet (ADR-021 V1) sont FIGÉES ICI, dans la
+  // même transaction que l'enfilage : la commande d'outbox est un instantané,
+  // et une relecture au moment du push renverrait ce que l'écran affiche
+  // aujourd'hui plutôt que ce que le guichet a déclaré ce jour-là.
+  final reductionRows = await txn.query(
+    'enrollment_reductions',
+    columns: ['reduction_code'],
+    where: 'enrollment_id = ?',
+    whereArgs: [enrollment.id],
+    orderBy: 'reduction_code',
+  );
+
   final command = EnrollmentCommand(
-    enrollment: enrollmentPayloadOf(enrollment),
+    enrollment: enrollmentPayloadOf(
+      enrollment,
+      reductionCodes: [
+        for (final row in reductionRows) row['reduction_code'] as String,
+      ],
+    ),
     student: studentPayloadOf(student),
     parents: parents,
     emitDocument: emitDocument,

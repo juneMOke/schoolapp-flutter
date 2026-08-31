@@ -9,7 +9,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
@@ -118,7 +118,6 @@ Future<void> showFacturationPaymentDetailDialog(
             intent: intent,
             allocations: FacturationPaymentAllocationsSection(
               paymentId: intent.paymentId,
-              currency: intent.currency,
             ),
             receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
             receiptPending:
@@ -277,10 +276,8 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
-    final amount = formatMonetaryAmountWithCurrency(
-      amount: intent.amountInCents / 100,
-      currency: intent.currency,
-    );
+    // Deux devises se lisent côte à côte, jamais additionnées.
+    final amount = intent.amounts.entries.map(MoneyFormat.format).join(' · ');
     final date = MaterialLocalizations.of(
       context,
     ).formatFullDate(intent.paidAt);

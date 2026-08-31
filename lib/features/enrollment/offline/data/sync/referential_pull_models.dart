@@ -12,12 +12,32 @@ class ReferentialBundleDto {
   final RefSchoolDto school;
   final ReferentialYearBundleDto current;
   final ReferentialYearBundleDto? previous;
+
+  /// Barème de réductions (ADR-021) — **à la racine, pas dans un slot année**.
+  /// `reduction_type`/`reduction_line` n'ont pas d'`academic_year_id` : les
+  /// loger dans `current`/`previous` les dupliquerait à l'identique. Ils vont
+  /// à côté de [school], qui est là pour la même raison.
+  ///
+  /// **Une seule section, et les lignes du barème dedans.** Le serveur imbrique
+  /// (`reductions[].lines[]`) plutôt que de servir une seconde liste à plat :
+  /// personne n'a besoin d'une ligne sans son type, et deux listes à joindre
+  /// côté client sont deux occasions de les désynchroniser.
+  ///
+  /// **Nullable, et la nuance porte de l'argent**, comme [ReferentialYearBundleDto.feeTariffs] :
+  /// le serveur retire la section pour qui n'a pas `finance.grid.read` et
+  /// l'envoie à `null` plutôt qu'à `[]`. `null` = non communiqué,
+  /// `[]` = cette école n'a pas de barème. Replier l'un sur l'autre ferait
+  /// lire à la purge un ordre de tout supprimer — et ici elle est scopée par
+  /// ÉCOLE, donc sur une tablette partagée un pull sans ce droit effacerait le
+  /// barème dont dépend le guichet d'un autre poste.
+  final List<RefReductionDto>? reductions;
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
     required this.school,
     required this.current,
     this.previous,
+    this.reductions,
     required this.serverTime,
   });
 
@@ -32,7 +52,67 @@ class ReferentialBundleDto {
             : ReferentialYearBundleDto.fromJson(
                 j['previous'] as Map<String, dynamic>,
               ),
+        // Volontairement hors de `pullList`, qui replie `null` sur la liste
+        // vide : c'est exactement la distinction à préserver ici.
+        reductions: j['reductions'] == null
+            ? null
+            : pullList(j['reductions'], RefReductionDto.fromJson),
         serverTime: j['serverTime'] as String,
+      );
+}
+
+/// Une nature de réduction du barème de l'école, **et son barème avec elle**
+/// (`ReductionSummaryDto` côté serveur).
+///
+/// Pas d'`id` sur le fil : l'identité d'un type est son [code] dans son école,
+/// et le serveur a posé sa contrainte sur ce couple. Rien à fabriquer ici.
+class RefReductionDto {
+  final String code;
+  final String label;
+  final bool active;
+
+  /// Les rubriques que ce type réduit. Une section peut n'en porter aucune —
+  /// un type sans barème ne réduit rien, et le guichet ne le proposera pas.
+  final List<RefReductionLineDto> lines;
+
+  const RefReductionDto({
+    required this.code,
+    required this.label,
+    required this.active,
+    this.lines = const [],
+  });
+
+  factory RefReductionDto.fromJson(Map<String, dynamic> j) => RefReductionDto(
+    code: j['code'] as String,
+    label: j['label'] as String,
+    // Un serveur qui ne porterait pas le drapeau décrit un barème dont tout
+    // est utilisable : `true` est le repli sûr, `false` masquerait tout.
+    active: (j['active'] as bool?) ?? true,
+    // `pullList` replie `null` sur la liste vide, et c'est ce qu'on veut ici :
+    // contrairement à la section racine, une absence de lignes ne signifie
+    // rien d'autre que « ce type ne réduit encore rien ».
+    lines: pullList(j['lines'], RefReductionLineDto.fromJson),
+  );
+}
+
+/// Une ligne du barème : ce qu'une nature réduit, sur quelle rubrique.
+///
+/// Ni id ni code de rattachement : la ligne est **imbriquée dans son type**, et
+/// ne se lit jamais seule. C'est l'aplatissement local qui lui donne le code de
+/// son parent.
+///
+/// `percentage` est un pourcentage (0–100), pas de l'argent. Rien ne le calcule
+/// en V1 ; il descend, il se range, il attend la V2.
+class RefReductionLineDto {
+  final String feeCode;
+  final double percentage;
+
+  const RefReductionLineDto({required this.feeCode, required this.percentage});
+
+  factory RefReductionLineDto.fromJson(Map<String, dynamic> j) =>
+      RefReductionLineDto(
+        feeCode: j['feeCode'] as String,
+        percentage: (j['percentage'] as num).toDouble(),
       );
 }
 
@@ -90,11 +170,26 @@ class ReferentialYearBundleDto {
   /// dépend de cette distinction : voir `_applyReferential`.
   final List<RefFeeTariffDto>? feeTariffs;
 
+  /// Catalogue boutique **vendable** de l'année — nullable pour exactement la
+  /// même raison que [feeTariffs], et avec la même conséquence sur la purge
+  /// (ADR-020, décision F4). Le serveur le retire du bundle pour qui ne détient
+  /// pas `boutique.catalog.read` et l'envoie à `null` plutôt qu'à `[]`.
+  ///
+  /// La nuance décide de deux écrans distincts : `null` → « catalogue non
+  /// communiqué », `[]` → « la boutique n'a pas encore d'article ». Les replier
+  /// l'un sur l'autre ferait conclure au guichet que l'école n'a rien
+  /// paramétré, alors qu'il lui manque un droit.
+  ///
+  /// Les articles retirés de la vente n'y descendent pas : le poste reçoit ce
+  /// qu'il peut vendre.
+  final List<RefBoutiqueArticleDto>? boutiqueArticles;
+
   const ReferentialYearBundleDto({
     required this.academicYear,
     required this.schoolLevelGroups,
     required this.schoolLevels,
     required this.feeTariffs,
+    this.boutiqueArticles,
   });
 
   factory ReferentialYearBundleDto.fromJson(Map<String, dynamic> j) =>
@@ -112,6 +207,84 @@ class ReferentialYearBundleDto {
         feeTariffs: j['feeTariffs'] == null
             ? null
             : pullList(j['feeTariffs'], RefFeeTariffDto.fromJson),
+        boutiqueArticles: j['boutiqueArticles'] == null
+            ? null
+            : pullList(j['boutiqueArticles'], RefBoutiqueArticleDto.fromJson),
+      );
+}
+
+/// Un article du catalogue boutique, tel qu'il descend dans le bundle.
+///
+/// `pricingMode` descend **en clair**, et c'est indispensable : c'est la seule
+/// chose qui dise à la caisse si elle doit demander un niveau. Le déduire de la
+/// forme des prix conclurait « c'est plat » d'un article dont les cases
+/// coïncident aujourd'hui — chez La Fontaine, la Lacoste vaut 10 en primaire et
+/// 10 en CTEB — puis la vendrait au tarif primaire en humanités, où elle vaut
+/// 15.
+///
+/// Les deux enum restent en `String` ici : la traduction vers le domaine se fait
+/// au mapping, où l'inconnu se décide (`ArticleFamily.fromWire`,
+/// `PricingMode.fromWire`). Un DTO qui refuserait une valeur inédite ferait
+/// échouer tout le bundle sur un seul article servi par un serveur plus récent.
+class RefBoutiqueArticleDto {
+  final String id;
+  final String academicYearId;
+  final String code;
+  final String label;
+  final String? family;
+  final String? pricingMode;
+
+  /// Renseigné ssi `PRIX_UNIQUE`.
+  final int? unitPriceInCents;
+
+  /// Renseignée ssi `PRIX_PAR_NIVEAU`.
+  final List<RefBoutiqueLevelPriceDto> levelPrices;
+
+  final String currency;
+
+  const RefBoutiqueArticleDto({
+    required this.id,
+    required this.academicYearId,
+    required this.code,
+    required this.label,
+    this.family,
+    this.pricingMode,
+    this.unitPriceInCents,
+    this.levelPrices = const [],
+    required this.currency,
+  });
+
+  factory RefBoutiqueArticleDto.fromJson(Map<String, dynamic> j) =>
+      RefBoutiqueArticleDto(
+        id: j['id'] as String,
+        academicYearId: j['academicYearId'] as String,
+        code: j['code'] as String,
+        label: j['label'] as String,
+        family: j['family'] as String?,
+        pricingMode: j['pricingMode'] as String?,
+        unitPriceInCents: (j['unitPriceInCents'] as num?)?.toInt(),
+        levelPrices: pullList(
+          j['levelPrices'],
+          RefBoutiqueLevelPriceDto.fromJson,
+        ),
+        currency: (j['currency'] as String?) ?? 'USD',
+      );
+}
+
+/// Une case de la grille : un niveau, un prix en cents.
+class RefBoutiqueLevelPriceDto {
+  final String schoolLevelId;
+  final int priceInCents;
+
+  const RefBoutiqueLevelPriceDto({
+    required this.schoolLevelId,
+    required this.priceInCents,
+  });
+
+  factory RefBoutiqueLevelPriceDto.fromJson(Map<String, dynamic> j) =>
+      RefBoutiqueLevelPriceDto(
+        schoolLevelId: j['schoolLevelId'] as String,
+        priceInCents: (j['priceInCents'] as num).toInt(),
       );
 }
 

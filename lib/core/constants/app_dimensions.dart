@@ -26,8 +26,6 @@ class AppDimensions {
   static const facturationContentMaxWidth = 880.0;
   // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
   static const facturationModalMaxWidth = 520.0;
-  // Modale d'encaissement (spec MODALE-12 : centrée, largeur 560).
-  static const facturationCreatePaymentModalMaxWidth = 560.0;
   // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
   static const facturationCollectModalMaxWidth = 440.0;
   // Popin « Choisir un payeur » (encaissement). Ses tokens sont à elle et non
@@ -215,6 +213,11 @@ class AppDimensions {
 
   // Disciplines — tableau de bord des presences (attendance overview)
   static const kpiCardHeightWithSubline = 128.0;
+
+  /// Hauteur ajoutée par chaque valeur au-delà de la première, sur une carte KPI
+  /// qui empile plusieurs devises. Deux montants ne se somment pas : ils
+  /// s'écrivent l'un sous l'autre, et la carte grandit d'autant.
+  static const kpiCardExtraValueHeight = 22.0;
   static const attendanceOverviewTrendMinRate = 70.0;
   static const attendanceOverviewTrendMaxRate = 100.0;
   static const attendanceOverviewTargetRate = 95.0;

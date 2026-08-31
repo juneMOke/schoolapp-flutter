@@ -11,13 +11,19 @@ void main() {
       EditiqueDocumentType.enrollmentAttestation,
       EditiqueDocumentType.notePerception,
       EditiqueDocumentType.paymentReceipt,
+      // Le reçu de vente est FIGÉ côté serveur (`DocumentType.RV(true)`) : son
+      // émission est idempotente par `boutique_sales.receipt_document_id`, si
+      // bien qu'une réclamation rejouée rend le même reçu sans brûler un second
+      // numéro. C'est ce qui rend la route de réimpression sûre à appeler en
+      // boucle depuis un poste qui rattrape sa file.
+      EditiqueDocumentType.saleReceipt,
     ];
     const timestamped = <EditiqueDocumentType>[
       EditiqueDocumentType.accountStatement,
       EditiqueDocumentType.financialClearance,
     ];
 
-    test('AI, NP et RC sont archivées donc rejouables', () {
+    test('AI, NP, RC et RV sont archivées donc rejouables', () {
       for (final type in archived) {
         expect(type.isArchived, isTrue, reason: type.name);
         expect(type.isReplayable, isTrue, reason: type.name);
@@ -44,6 +50,7 @@ void main() {
       expect(EditiqueDocumentType.paymentReceipt.code, 'RC');
       expect(EditiqueDocumentType.accountStatement.code, 'RL');
       expect(EditiqueDocumentType.financialClearance.code, 'QT');
+      expect(EditiqueDocumentType.saleReceipt.code, 'RV');
     });
   });
 }

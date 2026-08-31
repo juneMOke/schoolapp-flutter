@@ -12,7 +12,9 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/models/reduction_catalog_local_models.dart';
 
 import '../../offline_full_db.dart';
 
@@ -24,6 +26,11 @@ void main() {
   late SyncMetaDao syncMeta;
   late List<FeeTariffLocalModel> capturedTariffs;
   late List<String> capturedYears;
+  late List<BoutiqueArticleLocalModel> capturedBoutiqueArticles;
+  late List<String> capturedBoutiqueYears;
+  late List<ReductionTypeLocalModel> capturedReductionTypes;
+  late List<ReductionLineLocalModel> capturedReductionLines;
+  late List<String> capturedReductionSchoolIds;
   late EnrollmentPullRepositoryImpl repo;
 
   const auth = <String, dynamic>{'requiresAuth': true};
@@ -36,6 +43,11 @@ void main() {
     syncMeta = SyncMetaDao(db);
     capturedTariffs = [];
     capturedYears = [];
+    capturedBoutiqueArticles = [];
+    capturedBoutiqueYears = [];
+    capturedReductionTypes = [];
+    capturedReductionLines = [];
+    capturedReductionSchoolIds = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
       api: api,
@@ -45,6 +57,15 @@ void main() {
       replaceTariffs: (tariffs, academicYearIds) async {
         capturedTariffs.addAll(tariffs);
         capturedYears = academicYearIds;
+      },
+      replaceBoutiqueArticles: (articles, academicYearIds) async {
+        capturedBoutiqueArticles.addAll(articles);
+        capturedBoutiqueYears = academicYearIds;
+      },
+      replaceReductionCatalog: (types, lines, schoolId) async {
+        capturedReductionTypes.addAll(types);
+        capturedReductionLines.addAll(lines);
+        capturedReductionSchoolIds.add(schoolId);
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
@@ -96,6 +117,9 @@ void main() {
     List<RefFeeTariffDto>? tariffs,
     ReferentialYearBundleDto? previous,
     bool withheldTariffs = false,
+    List<RefBoutiqueArticleDto>? boutiqueArticles,
+    bool withheldBoutique = true,
+    List<RefReductionDto>? reductions,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     current: ReferentialYearBundleDto(
@@ -120,8 +144,14 @@ void main() {
                     academicYearId: 'ay-1',
                   ),
                 ],
+      boutiqueArticles: withheldBoutique
+          ? null
+          : (boutiqueArticles ?? const []),
     ),
     previous: previous,
+    // Défaut `null` = section absente : c'est ce que répond un serveur qui
+    // caviarde le barème, et le pull doit s'en accommoder sans rien faire.
+    reductions: reductions,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -137,7 +167,6 @@ void main() {
     gender: 'FEMALE',
     dateOfBirth: '2015-04-02',
     birthPlace: 'Kinshasa',
-    previousBalanceInCents: 0,
   );
 
   ReenrollmentCohortPageDto cohortPage({
@@ -223,6 +252,100 @@ void main() {
     items: items ?? [aggregate()],
     page: page ?? env(nextWatermark: 'WM-SNAP'),
   );
+
+  // ── Barème de réductions (ADR-021 V1) ─────────────────────────────────────
+  //
+  // Le barème descend à la RACINE du bundle : les deux tables n'ont pas
+  // d'`academic_year_id`, donc la purge est scopée par ÉCOLE. C'est le seul
+  // référentiel du module dans ce cas, et cela lui retire le filet des autres :
+  // ailleurs, un pull qui range mal fait apparaître un référentiel VIDE (le
+  // filtre d'année ne trouve rien) ; ici, il l'EFFACE.
+  group('syncReferential — barème de réductions', () {
+    test('section absente → le seam n\'est pas appelé du tout', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      await repo.syncReferential();
+
+      // `null` dit « pas communiqué » — le serveur caviarde pour qui n'a pas
+      // `finance.grid.read`. Appeler le seam avec des listes vides y lirait un
+      // ordre de purge, et effacerait le barème dont dépend le guichet d'un
+      // autre poste sur la même tablette.
+      expect(capturedReductionSchoolIds, isEmpty);
+    });
+
+    test('section présente et vide → purge demandée', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle(reductions: const [])));
+
+      await repo.syncReferential();
+
+      // `[]` est une information : cette école n'a pas de barème. Le seam est
+      // appelé, il purgera.
+      expect(capturedReductionSchoolIds, ['school-1']);
+      expect(capturedReductionTypes, isEmpty);
+      expect(capturedReductionLines, isEmpty);
+    });
+
+    test('barème descendu → stampé de l\'école de la SESSION', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            reductions: const [
+              RefReductionDto(
+                code: 'STAFF_CHILD',
+                label: 'Enfant du personnel',
+                active: true,
+                lines: [
+                  RefReductionLineDto(feeCode: 'MINERVAL', percentage: 50),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // L'école vient de `CurrentUserContext`, JAMAIS du payload — le bundle
+      // porte pourtant `school.id = 'sch-1'`, et c'est bien `school-1`, celle
+      // de la session, qui sert de clé de purge.
+      expect(capturedReductionSchoolIds, ['school-1']);
+      expect(capturedReductionTypes.single.schoolId, 'school-1');
+      expect(capturedReductionTypes.single.code, 'STAFF_CHILD');
+      expect(capturedReductionLines.single.schoolId, 'school-1');
+      expect(capturedReductionLines.single.percentage, 50.0);
+      // Le code de rattachement ne vient pas de la ligne — elle n'en porte
+      // pas : c'est l'aplatissement qui lui donne celui de son type.
+      expect(capturedReductionLines.single.reductionCode, 'STAFF_CHILD');
+    });
+
+    test('un type sans barème descend quand même, sans ligne', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            reductions: const [
+              RefReductionDto(
+                code: 'STAFF_CHILD',
+                label: 'Enfant du personnel',
+                active: true,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // Un type qui ne réduit encore rien se range tel quel : c'est le DAO qui
+      // refuse de le proposer au guichet, pas le pull qui le jette. Le jour où
+      // le serveur lui pose une ligne, elle arrive avec lui.
+      expect(capturedReductionTypes, hasLength(1));
+      expect(capturedReductionLines, isEmpty);
+    });
+  });
 
   group('syncReferential (bundle always-200)', () {
     test(
@@ -348,6 +471,117 @@ void main() {
       },
     );
 
+    // ── section `boutiqueArticles` (ADR-020 F4) ───────────────────────────
+    //
+    // Même caviardage que la grille tarifaire, même piège, et une conséquence
+    // qui porte de l'argent : purger sur une section ABSENTE effacerait, sur
+    // une tablette partagée, le catalogue dont dépend la caisse d'un autre
+    // poste — qui vendrait alors sans savoir à quel prix.
+    test(
+      'catalogue retiré (null) → le seam boutique n\'est pas appelé',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle()));
+
+        final result = await repo.syncReferential();
+
+        expect(result.isRight(), isTrue);
+        expect(capturedBoutiqueArticles, isEmpty);
+        // Le point qui compte : AUCUNE année transmise, donc aucune purge.
+        expect(capturedBoutiqueYears, isEmpty);
+      },
+    );
+
+    test(
+      'catalogue présent mais vide ([]) → purge légitime de l\'année',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle(withheldBoutique: false)));
+
+        final result = await repo.syncReferential();
+
+        expect(result.isRight(), isTrue);
+        expect(capturedBoutiqueArticles, isEmpty);
+        // « La boutique n'a aucun article » est une information, à la
+        // différence de « je ne te montre pas le catalogue ».
+        expect(capturedBoutiqueYears, ['ay-1']);
+      },
+    );
+
+    test('un article descend avec sa grille et son mode déclaré', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            withheldBoutique: false,
+            boutiqueArticles: const [
+              RefBoutiqueArticleDto(
+                id: 'art-polo',
+                academicYearId: 'ay-1',
+                code: 'POLO',
+                label: 'Polo Lacoste',
+                family: 'UNIFORME',
+                pricingMode: 'PRIX_PAR_NIVEAU',
+                levelPrices: [
+                  RefBoutiqueLevelPriceDto(
+                    schoolLevelId: 'lvl-1',
+                    priceInCents: 1000,
+                  ),
+                  RefBoutiqueLevelPriceDto(
+                    schoolLevelId: 'lvl-2',
+                    priceInCents: 1500,
+                  ),
+                ],
+                currency: 'USD',
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final result = await repo.syncReferential();
+
+      expect(result.isRight(), isTrue);
+      final article = capturedBoutiqueArticles.single;
+      expect(article.id, 'art-polo');
+      // Le mode descend EN CLAIR : c'est la seule chose qui dira à la caisse
+      // qu'elle doit demander un niveau.
+      expect(article.pricingMode, 'PRIX_PAR_NIVEAU');
+      expect(article.levelPrices, {'lvl-1': 1000, 'lvl-2': 1500});
+    });
+
+    test('un article d\'une autre année est ignoré, jamais reclassé', () async {
+      // La purge est scopée par année. Ranger d'office cet article sous
+      // l'année du bundle rendrait invisible le catalogue de la sienne, sans
+      // qu'aucune requête n'échoue.
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            withheldBoutique: false,
+            boutiqueArticles: const [
+              RefBoutiqueArticleDto(
+                id: 'art-vieux',
+                academicYearId: 'ay-INTRUSE',
+                code: 'OLD',
+                label: 'Article d\'une autre année',
+                family: 'UNIFORME',
+                pricingMode: 'PRIX_UNIQUE',
+                unitPriceInCents: 500,
+                currency: 'USD',
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final result = await repo.syncReferential();
+
+      expect(result.isRight(), isTrue);
+      expect(capturedBoutiqueArticles, isEmpty);
+      expect(capturedBoutiqueYears, ['ay-1']);
+    });
+
     test(
       'portion retirée sur `current` seulement → seule l\'année de `previous` '
       'est purgée',
@@ -441,6 +675,8 @@ void main() {
         reconciliationDao: EnrollmentReconciliationDao(db),
         replaceTariffs: (_, _) async =>
             throw StateError('ref_fee_tariffs indisponible'),
+        replaceBoutiqueArticles: (_, _) async {},
+        replaceReductionCatalog: (_, _, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
         currentUser: CurrentUserContext()..set('u1', schoolId: 'school-1'),
@@ -634,7 +870,6 @@ void main() {
           'last_name': 'Moke',
           'gender': 'MALE',
           'date_of_birth': '2014-01-01',
-          'previous_balance_in_cents': 0,
           'synced_at': 1,
         });
         when(
@@ -663,7 +898,6 @@ void main() {
           'last_name': 'Roster',
           'gender': 'MALE',
           'date_of_birth': '2013-01-01',
-          'previous_balance_in_cents': 0,
           'synced_at': 1,
         });
         var call = 0;
@@ -870,6 +1104,8 @@ void main() {
           seedDao: EnrollmentSeedDao(db),
           reconciliationDao: EnrollmentReconciliationDao(db),
           replaceTariffs: (_, _) async {},
+          replaceBoutiqueArticles: (_, _) async {},
+          replaceReductionCatalog: (_, _, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,
           currentUser: CurrentUserContext()..set('u2', schoolId: schoolId),

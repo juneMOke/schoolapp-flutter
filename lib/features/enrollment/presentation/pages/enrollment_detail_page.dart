@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -69,6 +73,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   /// ne sont jamais dans le cache local `enrollments` par leur enrollmentId.
   bool get _isFirstRegistrationListing =>
       _effectiveIntent.origin == EnrollmentDetailOrigin.firstRegistration;
+
+  /// Correction d'un dossier complété en cours : la vue est la MÊME que la
+  /// consultation (l'agrégat local est déjà celui qu'il faut), seule la
+  /// politique change.
+  bool get _isCompletedReedition =>
+      _effectiveIntent.origin == EnrollmentDetailOrigin.completedReedition;
 
   // Mémoïsation de l'agrégat local : EnrollmentDetail n'est pas Equatable, donc
   // recréer une instance à chaque build resynchroniserait le stepper (perte de
@@ -157,9 +167,15 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   //    (`_forceLocalReadOnly`).
   void _onLocalDetail(BuildContext context, EnrollmentOfflineState state) {
     // Dossier LOCAL trouvé → bascule en consultation lecture seule.
+    // Pendant une correction, le dossier passe en DRAFT à la première
+    // sauvegarde — donc ni « écriture locale non synchronisée » ni « listing
+    // Première inscription ». Sans cette troisième porte, l'écran resterait
+    // sur l'agrégat d'AVANT la correction : le pire des états, celui qui a
+    // l'air enregistré.
     if (state is EnrollmentOfflineDetailLoaded &&
         (_forceLocalReadOnly ||
             _isFirstRegistrationListing ||
+            _isCompletedReedition ||
             isUnsyncedLocalWrite(state.detail.enrollment.syncState))) {
       setState(() => _localReadOnly = state.detail);
     }
@@ -261,6 +277,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
       case EnrollmentDetailOrigin.newFirstRegistration:
       case EnrollmentDetailOrigin.firstRegistration:
       case EnrollmentDetailOrigin.localDraftResume:
+      case EnrollmentDetailOrigin.completedReedition:
         _seededIntent = null;
     }
   }
@@ -324,8 +341,73 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     );
   }
 
-  // Vue LECTURE SEULE d'un dossier local non synchronisé : agrégat reconstruit
-  // depuis le local (mapper + bootstrap), rendu via le stepper en consultation.
+  /// Un dossier **complété** peut être rouvert pour correction ; un dossier
+  /// déjà dans la file d'envoi non — sa commande d'outbox est constituée, et le
+  /// rouvrir ferait diverger ce qui part de ce qui est en base. Un dossier
+  /// annulé non plus : on n'en corrige pas un, on en ouvre un autre.
+  bool get _canReedit {
+    final local = _localReadOnly;
+    if (local == null || _isCompletedReedition) return false;
+    final syncState = local.enrollment.syncState;
+    return (syncState == SyncState.synced ||
+            syncState == SyncState.syncError) &&
+        local.enrollment.status != OfflineEnrollmentStatus.cancelled;
+  }
+
+  /// Passage en correction. **N'écrit rien** : l'événement arme la session, et
+  /// la ré-ouverture du dossier en brouillon n'a lieu qu'à la première
+  /// sauvegarde d'étape, dans sa transaction. Ouvrir un dossier pour le
+  /// corriger sans rien y changer ne doit pas le sortir de la facturation.
+  void _enterReedition() {
+    final local = _localReadOnly;
+    if (local == null) return;
+    context.read<EnrollmentOfflineBloc>().add(
+      ReeditionSessionStarted(local.enrollment.id),
+    );
+    setState(() {
+      _effectiveIntent = EnrollmentDetailIntent.completedReedition(
+        enrollmentId: local.enrollment.id,
+        studentId: local.student.id,
+        enrollmentType: local.enrollment.enrollmentType.apiValue,
+      );
+      _policy = EnrollmentDetailPolicyResolver.fromIntent(_effectiveIntent);
+      _currentStep = 0;
+    });
+  }
+
+  /// Sortie d'une correction **non validée** : le dossier est resté en
+  /// brouillon, donc hors de la recherche « élèves réellement inscrits ». Le
+  /// dire au moment où l'on part est le seul moment où ça sert encore.
+  Future<void> _confirmReeditionExit() async {
+    final l10n = AppLocalizations.of(context)!;
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.enrollmentReeditExitTitle),
+        content: Text(l10n.enrollmentReeditExitMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.enrollmentReeditExitResume),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.enrollmentReeditExitConfirm),
+          ),
+        ],
+      ),
+    );
+    if (leave != true || !mounted) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.goNamed(AppRoutesNames.home);
+    }
+  }
+
+  // Vue d'un dossier local rendue par le stepper : consultation lecture seule,
+  // ou CORRECTION d'un dossier complété — même agrégat, même écran, seule la
+  // politique change (et avec elle ce qui est éditable).
   Widget _buildLocalReadOnly(BuildContext context, AppLocalizations l10n) {
     return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
       builder: (context, academicYearState) {
@@ -338,16 +420,41 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
             academicYearState.context,
           ),
         );
+        // La correction n'a rien enregistré tant que le dossier n'est pas passé
+        // en brouillon : c'est l'état de la base qui le dit, pas une intention
+        // mémorisée à l'écran.
+        final hasUnvalidatedCorrection =
+            _isCompletedReedition &&
+            _localReadOnly!.enrollment.syncState == SyncState.draft;
         return EnrollmentJourneyScaffold(
           modeLabel: _buildJourneyModeLabel(l10n),
           studentDisplayName: _localDraftDisplayName(detail, l10n),
           currentStep: _currentStep,
+          onExitRequested: hasUnvalidatedCorrection
+              ? _confirmReeditionExit
+              : null,
+          action: _canReedit
+              ? PermissionGate.access(
+                  kEnrollmentSubmitAccess,
+                  child: TextButton.icon(
+                    onPressed: _enterReedition,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: Text(l10n.enrollmentReeditAction),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textOnDark,
+                    ),
+                  ),
+                )
+              : null,
           body: EnrollmentDetailContentShell(
             child: EnrollmentStepperScope(
               enrollmentDetail: detail,
               detailIntent: _effectiveIntent,
-              detailPolicy: const LocalConsultationDetailPolicy(),
+              detailPolicy: _isCompletedReedition
+                  ? _policy
+                  : const LocalConsultationDetailPolicy(),
               onStepChanged: _onStepChanged,
+              correctionOffered: _canReedit,
             ),
           ),
         );
@@ -568,7 +675,11 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   String _buildJourneyModeLabel(AppLocalizations l10n) {
     return switch (_effectiveIntent.origin) {
       EnrollmentDetailOrigin.newFirstRegistration => l10n.journeyModeNew,
-      EnrollmentDetailOrigin.localDraftResume => l10n.journeyModeEdit,
+      EnrollmentDetailOrigin.localDraftResume ||
+      // Corriger un dossier complété, c'est l'ÉDITER : le libellé doit dire
+      // qu'on écrit, sinon la barre du haut annonce une consultation pendant
+      // qu'on modifie un dossier déjà parti au serveur.
+      EnrollmentDetailOrigin.completedReedition => l10n.journeyModeEdit,
       // Première inscription = consultation lecture seule locale (plus d'édition
       // d'un dossier synchronisé) → même libellé « Consulter » que RE/PRE.
       EnrollmentDetailOrigin.firstRegistration ||

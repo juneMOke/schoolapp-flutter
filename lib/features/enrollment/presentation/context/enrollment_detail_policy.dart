@@ -72,6 +72,17 @@ abstract class EnrollmentDetailPolicy {
   /// écriture possible). Dérivé de [isStepEditable] → toujours cohérent.
   bool get usesLocalDraft => !isReadOnlyConsultation;
 
+  /// La ré-hydratation entre étapes relit l'agrégat local **entier**
+  /// (`LoadLocalEnrollmentDetail`) plutôt que le brouillon par id
+  /// (`LoadDraftDetailRequested`).
+  ///
+  /// Vrai pour la correction d'un dossier complété, et pour elle seule : cet
+  /// écran est rendu depuis l'agrégat local (le même que la consultation), pas
+  /// depuis l'état « brouillon » de la page. Relire le mauvais des deux
+  /// laisserait l'écran sur les données d'avant la correction — enregistrée en
+  /// base, invisible à l'écran.
+  bool get refreshesFromLocalAggregate => false;
+
   /// Un dossier chargé du serveur doit être **photographié** en brouillon
   /// local avant l'édition (RE/PRE/reprise). Faux pour NEW (brouillon vierge)
   /// et pour la consultation.
@@ -165,6 +176,8 @@ class EnrollmentDetailPolicyResolver {
       EnrollmentDetailOrigin.localDraftResume => LocalDraftResumeDetailPolicy(
         enrollmentType: intent.enrollmentType,
       ),
+      EnrollmentDetailOrigin.completedReedition =>
+        CompletedReeditionDetailPolicy(enrollmentType: intent.enrollmentType),
     };
   }
 }
@@ -225,6 +238,75 @@ class LocalDraftResumeDetailPolicy extends EnrollmentDetailPolicy {
   @override
   bool isStepEditable(EnrollmentWizardStep step) =>
       step != EnrollmentWizardStep.summary;
+
+  @override
+  bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
+}
+
+/// Correction d'un dossier **déjà complété**.
+///
+/// Le dossier est en base, finalisé (`SYNCED`, parfois `SYNC_ERROR`) : aucun
+/// seed, aucun GET serveur — comme [LocalDraftResumeDetailPolicy], dont elle ne
+/// diffère que sur deux points, tous deux dictés par le fait que le dossier a
+/// déjà produit ses effets.
+///
+/// **Le niveau visé et les Frais restent en lecture seule.** Les créances ont
+/// été projetées à la confirmation, et leur matérialisation est idempotente :
+/// changer le niveau après coup laisserait l'élève inscrit dans un niveau et
+/// facturé sur la grille d'un autre, sans que rien ne le signale. Le serveur
+/// refuse d'ailleurs le changement (`422 LEVEL_CHANGE_NOT_SUPPORTED`) ; l'écran
+/// n'invite donc pas à une saisie qui serait rejetée. Changer de niveau reste
+/// possible — par le parcours qui sait le faire, pas par une correction de
+/// fiche.
+///
+/// **La finalisation écrit `IN_PROGRESS`.** C'est l'état local d'un dossier
+/// corrigé et remis dans la file d'envoi, pas encore parti ; le serveur, lui,
+/// re-dérive `COMPLETED` à l'ingestion et le pull le ramènera.
+///
+/// La ré-ouverture du dossier en brouillon n'est PAS portée ici : elle a lieu à
+/// la première sauvegarde d'étape, dans sa transaction
+/// (`ReeditionSessionStarted`). Ouvrir un dossier pour le consulter ne doit pas
+/// le sortir de la facturation.
+class CompletedReeditionDetailPolicy extends EnrollmentDetailPolicy {
+  /// Type réel du dossier corrigé (NEW/RE), porté par le listing au tap : sans
+  /// lui, un re-save d'identité écraserait le type par le défaut NEW.
+  final String? enrollmentType;
+
+  const CompletedReeditionDetailPolicy({this.enrollmentType});
+
+  @override
+  String get draftEnrollmentType => enrollmentType ?? super.draftEnrollmentType;
+
+  @override
+  String get draftStatus => 'IN_PROGRESS';
+
+  @override
+  String? get finalizeStatus => 'IN_PROGRESS';
+
+  @override
+  bool get refreshesFromLocalAggregate => true;
+
+  @override
+  EnrollmentDetail? detail(EnrollmentState state) => state.detail;
+
+  @override
+  EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
+
+  /// Inerte : le dossier est déjà en base locale (chargé par id).
+  @override
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {}
+
+  @override
+  bool isStepEditable(EnrollmentWizardStep step) => switch (step) {
+    EnrollmentWizardStep.summary => false,
+    EnrollmentWizardStep.targetAcademic => false,
+    EnrollmentWizardStep.studentCharges => false,
+    _ => true,
+  };
 
   @override
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;

@@ -59,18 +59,30 @@ void main() {
     ''');
   }
 
-  Future<void> seedPayment(String id) => db.insert('payments', {
-    'id': id,
-    'client_uuid': id,
-    'student_id': 's-1',
-    'academic_year_id': 'y-1',
-    'amount_in_cents': 150000,
-    'currency': 'CDF',
-    'paid_at': '2026-08-12T09:30:00.000Z',
-    'payer_first_name': 'Joseph',
-    'payer_last_name': 'Kabongo',
-    'updated_at': 0,
-  });
+  /// Le montant n'est écrit que si la colonne EXISTE encore.
+  ///
+  /// Ce helper sert des deux côtés de la migration : avant, la table est dans
+  /// sa forme d'époque et `amount_in_cents` y est `NOT NULL` ; après le palier
+  /// v34, elle ne l'a plus — le versement dérive ses montants de ses
+  /// imputations. Se caler sur la forme réelle évite de dupliquer le seed.
+  Future<void> seedPayment(String id) async {
+    final columns = {
+      for (final c in await db.rawQuery('PRAGMA table_info(payments)'))
+        c['name'] as String,
+    };
+    await db.insert('payments', {
+      'id': id,
+      'client_uuid': id,
+      'student_id': 's-1',
+      'academic_year_id': 'y-1',
+      'paid_at': '2026-08-12T09:30:00.000Z',
+      'payer_first_name': 'Joseph',
+      'payer_last_name': 'Kabongo',
+      'updated_at': 0,
+      if (columns.contains('amount_in_cents')) 'amount_in_cents': 150000,
+      if (columns.contains('currency')) 'currency': 'CDF',
+    });
+  }
 
   Future<Set<String>> columnNames() async {
     final columns = await db.rawQuery('PRAGMA table_info(payments)');

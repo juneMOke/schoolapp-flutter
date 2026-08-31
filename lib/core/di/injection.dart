@@ -7,6 +7,13 @@ import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
+import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
+import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
+import 'package:school_app_flutter/features/configuration/presentation/bloc/configuration_bloc.dart';
+import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
@@ -188,6 +195,8 @@ import 'package:school_app_flutter/features/student/data/repositories/student_re
 import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/create_parent_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/set_emergency_contact_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/unlink_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
@@ -340,23 +349,45 @@ Future<void> configureDependencies({
                 type: e.type,
               ),
             );
-          } else if (e.response?.statusCode == 400 ||
-              e.response?.statusCode == 422) {
+          } else if (e.response?.statusCode == 429) {
+            // Ni réseau ni panne : il faut ATTENDRE. Sans ce cas, un 429
+            // tombait dans `handler.next` et ressortait en échec réseau
+            // générique — donc en « Réessayer », c'est-à-dire l'invitation à
+            // reproduire exactement ce que le serveur vient de refuser.
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
                 response: e.response,
-                error: const ValidationFailure('Invalid request data'),
+                error: ApiErrorParser.tooManyRequestsFailure(e.response),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 400 ||
+              e.response?.statusCode == 422) {
+            // Reste une `ValidationFailure` par héritage : les appelants qui
+            // filtrent sur ce type continuent de la voir. Ce qu'elle porte en
+            // plus, c'est le `code` typé du serveur — sans lui, « cette année
+            // académique existe déjà » (BUSINESS_RULE, qui demande de purger un
+            // brouillon) et un champ mal rempli (VALIDATION, qui se corrige sur
+            // place) arrivaient à l'écran sous le même « Invalid request data ».
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: ApiErrorParser.validationFailure(e.response),
                 type: e.type,
               ),
             );
           } else if (e.response?.statusCode != null &&
               e.response!.statusCode! >= 500) {
+            // `incidentId` est la référence que l'utilisateur cite au support ;
+            // le serveur l'écrit dans son journal au même instant. En fabriquer
+            // une côté client donnerait un code que rien ne permet de retrouver.
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
                 response: e.response,
-                error: const ServerFailure('Server error'),
+                error: ApiErrorParser.serverFailure(e.response),
                 type: e.type,
               ),
             );
@@ -662,6 +693,8 @@ Future<void> configureDependencies({
         ParentRepositoryImpl(
               remoteDataSource: getIt<ParentRemoteDataSource>(),
               requiredAuth: getIt<Map<String, dynamic>>(),
+              connectivityService: getIt<ConnectivityService>(),
+              emergencyContactMirror: getIt<EnrollmentReconciliationDao>(),
             )
             as ParentRepository,
   );
@@ -678,11 +711,16 @@ Future<void> configureDependencies({
     () => UnlinkParentUseCase(getIt<ParentRepository>()),
   );
 
+  getIt.registerFactory<SetEmergencyContactUseCase>(
+    () => SetEmergencyContactUseCase(getIt<ParentRepository>()),
+  );
+
   getIt.registerFactory<ParentBloc>(
     () => ParentBloc(
       updateParentUseCase: getIt<UpdateParentUseCase>(),
       createParentUseCase: getIt<CreateParentUseCase>(),
       unlinkParentUseCase: getIt<UnlinkParentUseCase>(),
+      setEmergencyContactUseCase: getIt<SetEmergencyContactUseCase>(),
     ),
   );
 
@@ -999,6 +1037,36 @@ Future<void> configureDependencies({
           getIt<GetDisciplinaryCaseDetailUseCase>(),
       createDisciplinaryCaseUseCase: getIt<CreateDisciplinaryCaseUseCase>(),
     ),
+  );
+
+  // ── Configuration (mise en service de l'école) ──────────────────────────────
+  getIt.registerLazySingleton<ProvisioningRemoteDataSource>(
+    () => ProvisioningRemoteDataSource(getIt<Dio>()),
+  );
+
+  // Singleton, et c'est intentionnel : le repository porte le cache de session
+  // des deux catalogues (D-9 du plan). En `registerFactory`, chaque étape de
+  // l'assistant repartirait d'un cache vide et rappellerait le serveur.
+  getIt.registerLazySingleton<ProvisioningRepository>(
+    () => ProvisioningRepositoryImpl(
+      remote: getIt<ProvisioningRemoteDataSource>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  // `registerFactory` (règle non négociable) : le bloc porte le brouillon en
+  // cours d'édition. En singleton, rouvrir l'assistant reprendrait un état
+  // qu'on croyait quitté.
+  getIt.registerFactory<ConfigurationBloc>(
+    () => ConfigurationBloc(
+      repository: getIt<ProvisioningRepository>(),
+      draftRepository: getIt<ProvisioningDraftRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<SchoolIdentityFormCubit>(
+    () => SchoolIdentityFormCubit(repository: getIt<ProvisioningRepository>()),
   );
 
   // ── Academics (cours de l'enseignant connecté) ──────────────────────────────

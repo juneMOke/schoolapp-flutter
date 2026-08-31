@@ -22,18 +22,27 @@ class FinanceChargeSeedDao {
   /// une créance provisoire DUE. `dueFallback` = academicYear.endDate ; s'il
   /// n'est pas fourni, il est résolu depuis `ref_academic_years` (pré-caché).
   ///
-  /// **Idempotent par (élève, année), à granularité `fee_code`** — rappelable
-  /// à chaque entrée sur l'étape Frais du wizard :
+  /// **Idempotent par (élève, année), à granularité LIGNE DE GRILLE** —
+  /// rappelable à chaque entrée sur l'étape Frais du wizard :
   ///  - une créance NON provisoire existe (pull/ACK, y compris à année NULL,
   ///    rattachable à la lecture par année) → no-op : le grand-livre
   ///    autoritaire a la main ;
   ///  - les provisoires d'un AUTRE niveau, sans allocation de paiement, sont
   ///    purgées (changement de niveau cible) ; celles déjà imputées sont
   ///    conservées (money-grade : on ne supprime jamais une créance payée) ;
-  ///  - un tarif n'est inséré que si aucun `fee_code` identique ne subsiste
-  ///    (ni doublon de frais dans l'année, ni régénération d'une ligne du
-  ///    même niveau → ids stables entre deux visites, top-up des frais
-  ///    ajoutés à la grille).
+  ///  - un tarif du niveau visé n'est inséré que si aucune créance ne porte
+  ///    déjà **son id** (ids stables entre deux visites, top-up des lignes
+  ///    ajoutées à la grille) ;
+  ///  - une créance conservée d'un AUTRE niveau, elle, couvre sa NATURE
+  ///    entière — voir plus bas.
+  ///
+  /// ⚠️ La granularité était le `fee_code`, sur l'invariant « un frais par
+  /// nature et par année ». Le serveur l'a levé (V94) : un niveau porte
+  /// plusieurs lignes d'une même nature — un minerval en sept tranches, des
+  /// frais d'examen en trois. Dédoublonner par nature n'en semait qu'UNE, et
+  /// l'élève inscrit hors ligne ne devait qu'une tranche sur sept jusqu'au
+  /// pull suivant. Aucun `feeTariffId` dans le payload d'encaissement ne
+  /// répare cela : le trou est en amont du guichet.
   ///
   /// Renvoie les créances de l'élève pour l'année (conservées + générées).
   Future<List<LocalStudentCharge>> initializeChargesForStudent({
@@ -101,12 +110,32 @@ class FinanceChargeSeedDao {
         schoolLevelId: schoolLevelId,
         schoolLevelGroupId: schoolLevelGroupId,
       );
-      // Granularité fee_code : jamais deux créances du même frais dans
-      // l'année (invariant « fee_code unique DANS une année »).
-      final coveredFeeCodes = kept.map((c) => c.feeCode).toSet();
+      // Ce que le grand-livre local couvre déjà — et à quelle granularité.
+      //
+      // Sur le niveau VISÉ, la couverture se dit par ligne de grille : le
+      // niveau en porte plusieurs d'une même nature, et le `fee_code` n'en
+      // désigne plus une seule. C'est ce qui rend la régénération idempotente
+      // d'une visite à l'autre sans écraser les sept tranches en une.
+      final coveredTariffIds = <String>{};
+      // Une créance conservée d'un AUTRE niveau (elle est imputée : on ne
+      // supprime jamais une créance payée) couvre sa NATURE tout entière. Le
+      // tarif du nouveau niveau porte un autre id, mais c'est le même frais :
+      // le semer une seconde fois ferait devoir deux scolarités au même élève.
+      // Idem pour une créance sans tarif — base d'avant la grille en tranches :
+      // sa nature est tout ce qu'on sait d'elle.
+      final coveredFeeCodes = <String>{};
+      for (final charge in kept) {
+        final tariffId = charge.feeTariffId;
+        if (tariffId != null && charge.schoolLevelId == schoolLevelId) {
+          coveredTariffIds.add(tariffId);
+        } else {
+          coveredFeeCodes.add(charge.feeCode);
+        }
+      }
       for (final row in tariffs) {
         final tariff = FeeTariffLocalModel.fromMap(row);
-        if (!coveredFeeCodes.add(tariff.feeCode)) continue;
+        if (!coveredTariffIds.add(tariff.id)) continue;
+        if (coveredFeeCodes.contains(tariff.feeCode)) continue;
         final charge = StudentChargeLocalModel(
           id: _idGenerator.newId(),
           studentId: studentId,

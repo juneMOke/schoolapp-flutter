@@ -25,7 +25,6 @@ class AddressFormContent extends StatelessWidget {
   final String? districtErrorText;
   final String? municipalityErrorText;
   final String? addressErrorText;
-  final String? additionalAddressErrorText;
   final TextEditingController additionalAddressController;
   final bool showInlineSaveButton;
   final bool isLoading;
@@ -52,7 +51,6 @@ class AddressFormContent extends StatelessWidget {
     required this.districtErrorText,
     required this.municipalityErrorText,
     required this.addressErrorText,
-    required this.additionalAddressErrorText,
     required this.additionalAddressController,
     required this.showInlineSaveButton,
     required this.isLoading,
@@ -143,11 +141,11 @@ class AddressFormContent extends StatelessWidget {
               ),
             ),
             WizardGridField(
+              // Champ FACULTATIF : ni étoile, ni erreur possible — rien à
+              // signaler sur une ligne qu'on peut légitimement laisser vide.
               EteeloTextInput(
                 label: l10n.addressComplementary,
                 controller: additionalAddressController,
-                required: true,
-                errorText: additionalAddressErrorText,
                 placeholder: l10n.addressComplementaryPlaceholder,
                 readOnly: !isEditable,
               ),

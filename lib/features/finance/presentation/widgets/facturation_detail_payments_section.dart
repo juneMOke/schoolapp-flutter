@@ -8,7 +8,8 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
@@ -90,13 +91,13 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                   builder: (context, state) {
                     final canReadPayments =
                         holding != PermissionHolding.missing;
-                    final totalPaidInCents = state.payments.fold<int>(
-                      0,
-                      (sum, payment) => sum + payment.amountInCents,
+                    // Total PAR DEVISE : un passage au guichet peut solder une
+                    // créance en dollars et une en francs, et deux versements
+                    // de devises différentes ne s'additionnent pas.
+                    final totalPaid = state.payments.fold(
+                      MoneyBag.empty,
+                      (bag, payment) => bag + payment.amounts,
                     );
-                    final currency = state.payments.isNotEmpty
-                        ? state.payments.first.currency
-                        : '';
                     final String subtitle;
                     if (!canReadPayments) {
                       subtitle = l10n.facturationDetailPaymentsWithheldSubtitle;
@@ -104,10 +105,11 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                       subtitle = l10n
                           .facturationDetailPaymentsRecordedWithTotal(
                             state.payments.length,
-                            formatMonetaryAmountWithCurrency(
-                              amount: totalPaidInCents / 100,
-                              currency: currency,
-                            ),
+                            // Les devises se lisent côte à côte, séparées : ce
+                            // sous-titre est une ligne de texte, pas un total.
+                            totalPaid.entries
+                                .map(MoneyFormat.format)
+                                .join(' · '),
                           );
                     } else {
                       subtitle = l10n.facturationDetailPaymentsSectionSubtitle;

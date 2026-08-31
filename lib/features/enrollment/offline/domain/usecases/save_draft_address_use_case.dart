@@ -15,6 +15,7 @@ class SaveDraftAddressUseCase {
     String? municipality,
     String? neighborhood,
     String? address,
+    String? reopenEnrollmentId,
   }) => _repository.saveDraftAddress(
     studentId: studentId,
     city: city,
@@ -22,5 +23,6 @@ class SaveDraftAddressUseCase {
     municipality: municipality,
     neighborhood: neighborhood,
     address: address,
+    reopenEnrollmentId: reopenEnrollmentId,
   );
 }

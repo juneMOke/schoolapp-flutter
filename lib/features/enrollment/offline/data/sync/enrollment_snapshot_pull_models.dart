@@ -31,12 +31,25 @@ class EnrollmentAggregateSnapshotDto {
   final EnrollmentSnapshotDto enrollment;
   final StudentSnapshotDto student;
   final List<ParentSnapshotDto> parents;
+
+  /// Réductions octroyées (ADR-021 V1). **À la racine de l'agrégat**, à côté de
+  /// [enrollment] et non dedans : l'octroi vit dans sa propre table côté
+  /// serveur, et il descend ici plutôt que par un flux propre parce qu'il
+  /// voyage déjà dans la page de la ligne qu'il qualifie.
+  ///
+  /// **Nullable, et la nuance compte** : `null` = l'agrégat ne porte pas la
+  /// section (portion non communiquée) — on ne touche alors à rien en local ;
+  /// `[]` = ce dossier n'a aucune réduction, et c'est un ordre d'effacer. Les
+  /// replier l'un sur l'autre ferait perdre au premier pull les octrois que le
+  /// guichet vient de déclarer.
+  final List<String>? reductionCodes;
   final String serverUpdatedAt; // ISO-8601
 
   const EnrollmentAggregateSnapshotDto({
     required this.enrollment,
     required this.student,
     required this.parents,
+    this.reductionCodes,
     required this.serverUpdatedAt,
   });
 
@@ -49,6 +62,14 @@ class EnrollmentAggregateSnapshotDto {
           j['student'] as Map<String, dynamic>,
         ),
         parents: pullList(j['parents'], ParentSnapshotDto.fromJson),
+        // Volontairement hors de `pullList` : `null` et `[]` ne disent pas la
+        // même chose, et la distinction est ce qui protège les octrois.
+        reductionCodes: j['reductionCodes'] == null
+            ? null
+            : [
+                for (final code in (j['reductionCodes'] as List<dynamic>))
+                  if (code is String) code,
+              ],
         serverUpdatedAt: j['serverUpdatedAt'] as String,
       );
 }
@@ -79,7 +100,16 @@ class EnrollmentSnapshotDto {
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
+
+  /// « Ancien élève de cette école ». Le contrat le donne non nul (colonne
+  /// serveur NOT NULL), la lecture reste tolérante : un snapshot servi par un
+  /// back antérieur au champ ne doit pas faire tomber le pull entier.
+  final bool formerStudent;
+
+  /// Fiche santé déclarée à l'inscription.
+  final String? medicalNotes;
   final String? cancellationReason;
+
   final String? updatedAt; // ISO-8601 (LWW), optionnel au contrat
 
   const EnrollmentSnapshotDto({
@@ -105,6 +135,8 @@ class EnrollmentSnapshotDto {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     this.cancellationReason,
     this.updatedAt,
   });
@@ -133,7 +165,17 @@ class EnrollmentSnapshotDto {
         previousRate: (j['previousRate'] as num?)?.toDouble(),
         previousRank: (j['previousRank'] as num?)?.toInt(),
         validatedPreviousYear: j['validatedPreviousYear'] as bool?,
+        // Tolérance délibérée sur un champ que le contrat donne non nul : un
+        // back antérieur au champ ne doit pas faire tomber le pull. Le repli
+        // est le même que côté serveur — le type d'inscription est la seule
+        // information dont on dispose alors.
+        formerStudent:
+            (j['formerStudent'] as bool?) ??
+            (j['enrollmentType'] as String?) == 'RE_ENROLLMENT',
+        medicalNotes: j['medicalNotes'] as String?,
         cancellationReason: j['cancellationReason'] as String?,
+        // Hors du repli sur la liste vide, comme les sections du bundle : ici
+        // aussi c'est la distinction qui décide d'écrire ou de se taire.
         updatedAt: j['updatedAt'] as String?,
       );
 }
@@ -219,6 +261,11 @@ class ParentSnapshotDto {
   final String? email;
   final String relationshipType;
 
+  /// Tuteur à appeler en urgence **pour l'élève de cet agrégat**. Comme
+  /// [relationshipType], il décrit le couple (élève, tuteur) et non le tuteur :
+  /// le serveur le rend nul dans les vues sans élève de référence.
+  final bool? emergencyContact;
+
   const ParentSnapshotDto({
     required this.id,
     required this.firstName,
@@ -228,6 +275,7 @@ class ParentSnapshotDto {
     required this.phoneNumber,
     this.email,
     required this.relationshipType,
+    this.emergencyContact,
   });
 
   factory ParentSnapshotDto.fromJson(Map<String, dynamic> j) =>
@@ -240,5 +288,6 @@ class ParentSnapshotDto {
         phoneNumber: j['phoneNumber'] as String,
         email: j['email'] as String?,
         relationshipType: j['relationshipType'] as String,
+        emergencyContact: j['emergencyContact'] as bool?,
       );
 }

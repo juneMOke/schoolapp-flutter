@@ -25,11 +25,13 @@ class MenuFactory {
       _createAccueilMenu(l10n),
       _createInscriptionsMenu(l10n),
       _createFinancesMenu(l10n),
+      _createBoutiqueMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
       _createResultatsMenu(l10n),
       _createDocumentsMenu(l10n),
+      _createConfigurationMenu(l10n),
     ];
 
     final visible = <MenuItem>[];
@@ -47,6 +49,27 @@ class MenuFactory {
       visible.add(menu.copyWith(subMenus: subMenus));
     }
     return visible;
+  }
+
+  /// Menu Configuration — les réglages de l'école, une fois celle-ci en
+  /// service. Dernier de la liste : on n'y revient qu'exceptionnellement.
+  ///
+  /// L'assistant de mise en service n'y figure PAS : il précède l'existence
+  /// d'une année académique, donc l'existence même de cette barre latérale, et
+  /// s'atteint depuis le splash.
+  static MenuItem _createConfigurationMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.configurationMenuId,
+      title: l10n.menuConfiguration,
+      icon: Icons.tune_rounded,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.configurationSchoolId,
+          title: l10n.subMenuConfigurationSchool,
+          route: AppRoutesNames.configurationSettingsPath,
+        ),
+      ],
+    );
   }
 
   /// Menu Documents — l'éditique couvre trois domaines (Scolarité, Finances,
@@ -128,6 +151,32 @@ class MenuFactory {
           id: MenuConstants.feeControlId,
           title: l10n.subMenuFeeControl,
           route: AppRoutesNames.feeControl,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Boutique — la caisse point-de-vente (ADR-020).
+  ///
+  /// Un menu propre, et non un sous-menu de Finances : la caisse est **étanche**
+  /// à la scolarité (I-4). Une vente n'apparaît sur aucune note de perception,
+  /// n'alimente aucun poste dû, et son historique n'est pas celui des paiements
+  /// — la ranger sous Finances laissait entendre qu'elle s'y mêlait.
+  static MenuItem _createBoutiqueMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.boutiqueMenuId,
+      title: l10n.menuBoutique,
+      icon: Icons.storefront_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.boutiqueAchatsId,
+          title: l10n.subMenuBoutiquePurchases,
+          route: AppRoutesNames.boutiqueAchats,
+        ),
+        SubMenuItem(
+          id: MenuConstants.boutiqueHistoriqueId,
+          title: l10n.subMenuBoutiqueHistory,
+          route: AppRoutesNames.boutiqueHistorique,
         ),
       ],
     );

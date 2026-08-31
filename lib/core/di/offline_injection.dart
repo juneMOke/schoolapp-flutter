@@ -15,6 +15,7 @@ import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_outbox_tariff_backfill.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
@@ -28,8 +29,12 @@ import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart'
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
 import 'package:uuid/uuid.dart';
+import 'package:school_app_flutter/features/configuration/data/local/provisioning_draft_dao.dart';
+import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_draft_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
 ///
@@ -72,12 +77,37 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   }
   getIt.registerLazySingleton<Database>(() => resolvedDatabase);
 
+  // Reprise des versements enfilés AVANT que l'imputation ne désigne sa ligne
+  // de grille (v38). Sans elle, ils repartent en 422 `AMBIGUOUS_FEE_CODE` à
+  // chaque cycle, indéfiniment — de l'argent réellement encaissé, avec un reçu
+  // déjà remis au parent.
+  //
+  // Ici et pas dans le palier de schéma : c'est une reprise de DONNÉES, elle
+  // lit le grand-livre. Elle est idempotente, donc rejouable à chaque
+  // démarrage — un parc mis à jour par vagues n'a pas de « premier lancement »
+  // commun, et une base restaurée depuis une sauvegarde repasserait sinon à
+  // côté.
+  await PaymentOutboxTariffBackfill(resolvedDatabase).run();
+
   getIt.registerLazySingleton<OutboxDao>(() => OutboxDao(getIt<Database>()));
   getIt.registerLazySingleton<SyncMetaDao>(
     () => SyncMetaDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<AuthLocalDao>(
     () => AuthLocalDao(getIt<Database>()),
+  );
+
+  // Configuration — brouillon de mise en service. Pas un module offline (aucune
+  // outbox, aucun curseur) : seulement de la reprise de saisie, dans la base
+  // chiffrée parce que c'est là que vit tout ce qui doit survivre au processus.
+  getIt.registerLazySingleton<ProvisioningDraftDao>(
+    () => ProvisioningDraftDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ProvisioningDraftRepository>(
+    () => ProvisioningDraftRepositoryImpl(
+      dao: getIt<ProvisioningDraftDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
 
   // Uid courant (ADR-010 D-05) : alimenté par l'auth, lu au write-time par les
@@ -208,6 +238,7 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
   _registerSyncPlan(getIt);
+  registerBoutiqueOffline(getIt); // Boutique — caisse point-de-vente (ADR-020)
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)

@@ -36,8 +36,10 @@ class PaymentsAllocationsRequested extends PaymentsEvent {
 class PaymentsCreateRequested extends PaymentsEvent {
   final String studentId;
   final String academicYearId;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui est encaissé, **par devise** : un passage au guichet peut solder
+  /// une créance en dollars et une en francs.
+  final MoneyBag amounts;
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
@@ -50,8 +52,7 @@ class PaymentsCreateRequested extends PaymentsEvent {
   const PaymentsCreateRequested({
     required this.studentId,
     required this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
+    required this.amounts,
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
@@ -63,8 +64,7 @@ class PaymentsCreateRequested extends PaymentsEvent {
   List<Object?> get props => [
     studentId,
     academicYearId,
-    amountInCents,
-    currency,
+    amounts,
     payerFirstName,
     payerLastName,
     payerMiddleName,

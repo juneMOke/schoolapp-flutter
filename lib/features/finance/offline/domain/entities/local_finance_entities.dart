@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_offline_enums.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Tarif de la grille (référentiel gelé sur la saison). Montant en centimes.
 class LocalFeeTariff extends Equatable {
@@ -198,8 +199,13 @@ class LocalPayment extends Equatable {
   final String clientUuid;
   final String studentId;
   final String? academicYearId;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui a été encaissé, **une entrée par devise**, dérivé des imputations.
+  ///
+  /// Le versement portait un montant scalaire : un résumé de ses allocations,
+  /// juste tant qu'il n'y avait qu'une devise. Un passage au guichet qui solde
+  /// une créance en dollars et une en francs n'a pas de montant unique.
+  final MoneyBag amounts;
   final PaymentMethod method;
   final String paidAt; // ISO-8601
   final String payerFirstName;
@@ -236,8 +242,7 @@ class LocalPayment extends Equatable {
     required this.clientUuid,
     required this.studentId,
     this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
+    this.amounts = MoneyBag.empty,
     required this.method,
     required this.paidAt,
     required this.payerFirstName,
@@ -261,8 +266,7 @@ class LocalPayment extends Equatable {
     clientUuid,
     studentId,
     academicYearId,
-    amountInCents,
-    currency,
+    amounts,
     method,
     paidAt,
     payerFirstName,

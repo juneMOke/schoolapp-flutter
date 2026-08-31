@@ -17,6 +17,15 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 /// jamais vrai.
 typedef _ChargeKey = (String studentId, String? academicYearId, String feeCode);
 
+/// Une créance encore non remontée, candidate à la dissolution : son id, et la
+/// ligne de grille qu'elle porte.
+///
+/// Le tarif voyage avec l'id parce que la nature ne suffit plus à apparier une
+/// provisoire et sa canonique : depuis que le serveur admet plusieurs lignes
+/// d'une même nature sur un niveau, `(élève, année, fee_code)` désigne SEPT
+/// créances là où il en désignait une.
+typedef _PendingCharge = ({String id, String? feeTariffId});
+
 /// Application du miroir autoritaire du pull de masse (FF2) : grille tarifaire
 /// scopée par année + upsert du grand-livre (créances, paiements, allocations),
 /// avec dissolution des jumelles PROVISIONAL avant chaque créance canonique.
@@ -172,34 +181,44 @@ class FinanceLedgerSyncDao {
     );
   }
 
-  /// (clé métier → **ids**) des créances encore NON remontées : les seules
-  /// qu'une créance canonique peut légitimement dissoudre. Une ligne SYNCED est
+  /// (clé métier → **créances**) encore NON remontées : les seules qu'une
+  /// créance canonique peut légitimement dissoudre. Une ligne SYNCED est
   /// autoritaire et n'est jamais candidate.
   ///
-  /// Une LISTE par clé, pas un id : rien ne garantit l'unicité de
+  /// Une LISTE par clé, pas une créance : rien ne garantit l'unicité de
   /// `(student_id, academic_year_id, fee_code)` — la table n'a pas de
-  /// contrainte, et `initializeChargesForStudent` peut avoir tourné deux fois
-  /// (rejeu après crash, seconde passe de réinscription). Un
-  /// `Map<_ChargeKey, String>` écraserait silencieusement toutes les jumelles
-  /// sauf la dernière : une seule serait dissoute, l'autre survivrait à côté de
-  /// la canonique — le frais serait facturé deux fois.
-  Future<Map<_ChargeKey, List<String>>> _pendingChargeIndex(
+  /// contrainte, `initializeChargesForStudent` peut avoir tourné deux fois
+  /// (rejeu après crash, seconde passe de réinscription), et surtout un niveau
+  /// porte désormais plusieurs tranches d'un même frais. Une `Map` à valeur
+  /// unique écraserait silencieusement toutes les jumelles sauf la dernière :
+  /// une seule serait dissoute, les autres survivraient à côté des canoniques —
+  /// le frais serait facturé deux fois.
+  Future<Map<_ChargeKey, List<_PendingCharge>>> _pendingChargeIndex(
     DatabaseExecutor txn,
   ) async {
     final rows = await txn.query(
       'student_charges',
-      columns: ['id', 'student_id', 'academic_year_id', 'fee_code'],
+      columns: [
+        'id',
+        'student_id',
+        'academic_year_id',
+        'fee_code',
+        'fee_tariff_id',
+      ],
       where: 'sync_status <> ?',
       whereArgs: [SyncState.synced.dbValue],
     );
-    final index = <_ChargeKey, List<String>>{};
+    final index = <_ChargeKey, List<_PendingCharge>>{};
     for (final r in rows) {
       final key = (
         r['student_id'] as String,
         r['academic_year_id'] as String?,
         r['fee_code'] as String,
       );
-      (index[key] ??= <String>[]).add(r['id'] as String);
+      (index[key] ??= <_PendingCharge>[]).add((
+        id: r['id'] as String,
+        feeTariffId: r['fee_tariff_id'] as String?,
+      ));
     }
     return index;
   }
@@ -217,25 +236,54 @@ class FinanceLedgerSyncDao {
   Future<void> _dissolveProvisionalTwins(
     DatabaseExecutor txn,
     StudentChargeLocalModel canonical,
-    Map<_ChargeKey, List<String>> twins,
+    Map<_ChargeKey, List<_PendingCharge>> twins,
   ) async {
     final key = (
       canonical.studentId,
       canonical.academicYearId,
       canonical.feeCode,
     );
-    final ids = twins[key];
-    if (ids == null) return;
-    for (final twinId in ids) {
-      if (twinId == canonical.id) continue;
+    final candidates = twins[key];
+    if (candidates == null) return;
+
+    // La nature ouvre la porte, le TARIF désigne la jumelle. Sans ce filtre, la
+    // première tranche du lot avalait les imputations des six autres : rien
+    // n'était détruit, mais l'argent changeait de tranche — le parent voyait la
+    // 1/7 soldée et la 5/7, qu'il venait de payer, toujours due.
+    //
+    // Une provisoire SANS tarif reste candidate : c'est une créance *ad hoc*, ou
+    // une base d'avant la v38. Elle se fera avaler par la première canonique du
+    // lot, faute de mieux — mais laisser survivre un doublon serait pire, il se
+    // lit comme un frais dû de plus.
+    final tariffId = canonical.feeTariffId;
+    final dissolved = <_PendingCharge>[];
+    for (final twin in candidates) {
+      if (twin.id == canonical.id) continue;
+      if (tariffId != null &&
+          twin.feeTariffId != null &&
+          twin.feeTariffId != tariffId) {
+        continue; // une autre tranche du même frais : pas la nôtre
+      }
       await txn.update(
         'payment_allocations',
         {'student_charge_id': canonical.id},
         where: 'student_charge_id = ?',
-        whereArgs: [twinId],
+        whereArgs: [twin.id],
       );
-      await txn.delete('student_charges', where: 'id = ?', whereArgs: [twinId]);
+      await txn.delete(
+        'student_charges',
+        where: 'id = ?',
+        whereArgs: [twin.id],
+      );
+      dissolved.add(twin);
     }
-    twins.remove(key); // dissoutes : ne pas les rejouer sur une page suivante
+
+    // Retirer les dissoutes SEULEMENT : les tranches voisines attendent encore
+    // leur propre canonique, plus loin dans le même lot. Les oublier ici les
+    // laisserait vivantes à côté d'elle — le doublon que cette méthode existe
+    // pour empêcher. Et les rejouer serait pire : la deuxième dissolution
+    // repointerait les imputations déjà déplacées vers une AUTRE tranche.
+    candidates.removeWhere(dissolved.contains);
+    if (candidates.isEmpty) twins.remove(key);
   }
 }

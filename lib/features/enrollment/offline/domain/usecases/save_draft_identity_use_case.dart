@@ -25,6 +25,8 @@ class SaveDraftIdentityUseCase {
     String? schoolLevelId,
     String? schoolLevelGroupId,
     required String enrollmentDate,
+    String? medicalNotes,
+    String? reopenEnrollmentId,
   }) => _repository.saveDraftIdentity(
     enrollmentId: enrollmentId,
     studentId: studentId,
@@ -42,5 +44,7 @@ class SaveDraftIdentityUseCase {
     schoolLevelId: schoolLevelId,
     schoolLevelGroupId: schoolLevelGroupId,
     enrollmentDate: enrollmentDate,
+    medicalNotes: medicalNotes,
+    reopenEnrollmentId: reopenEnrollmentId,
   );
 }

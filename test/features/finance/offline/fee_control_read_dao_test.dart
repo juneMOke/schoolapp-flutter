@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 
 class _SeqIdGenerator extends IdGenerator {
   _SeqIdGenerator() : super(const Uuid());
@@ -51,6 +52,7 @@ void main() {
     int expected = 100000,
     int paid = 0,
     String? year = 'ay-1',
+    String currency = 'USD',
   }) => db.insert('student_charges', {
     'id': id,
     'student_id': studentId,
@@ -59,7 +61,7 @@ void main() {
     'expected_amount_in_cents': expected,
     'amount_paid_in_cents': paid,
     'optimistic_paid_in_cents': 0,
-    'currency': 'USD',
+    'currency': currency,
     'status': 'DUE',
     'sync_status': 'SYNCED',
     'academic_year_id': year,
@@ -75,8 +77,6 @@ void main() {
       'id': paymentId,
       'client_uuid': paymentId,
       'student_id': 's1',
-      'amount_in_cents': amount,
-      'currency': 'USD',
       'method': 'CASH',
       'paid_at': '2026-08-14T10:00:00',
       'payer_first_name': 'Payeur',
@@ -161,7 +161,7 @@ void main() {
 
       expect(rows.length, 1);
       expect(rows.single.studentId, 's1');
-      expect(rows.single.expectedInCents, 100000);
+      expect(rows.single.positions.single.expectedInCents, 100000);
     });
 
     test('le payé COMPOSÉ additionne le miroir serveur et les paiements non '
@@ -193,11 +193,74 @@ void main() {
         studentIds: const ['s1'],
       );
 
-      final row = rows.single;
+      final row = rows.single.positions.single;
       expect(row.paidMirrorInCents, 20000);
       expect(row.paidPendingInCents, 40000);
       expect(row.paidTotalInCents, 60000);
       expect(row.remainingInCents, 40000);
+    });
+
+    test(
+      'deux devises sur le même frais font DEUX positions, pas une',
+      () async {
+        // Le `GROUP BY` ne portait que `student_id`, et la devise sortait d'un
+        // `MIN()` : la plus petite alphabétiquement l'emportait, et les deux
+        // montants se retrouvaient additionnés sous elle. Ici, 1 000,00 $ et
+        // 90 000 FC auraient donné « 9 100 000 CDF ».
+        await insertCharge('c1', 's1', 'TUITION', expected: 100000);
+        await insertCharge(
+          'c2',
+          's1',
+          'TUITION',
+          expected: 9000000,
+          currency: 'CDF',
+        );
+
+        final rows = await dao.getFeeChargeAggregates(
+          academicYearId: 'ay-1',
+          feeCode: 'TUITION',
+          studentIds: const ['s1'],
+        );
+
+        // UNE ligne d'élève, DEUX positions — triées par code croissant.
+        expect(rows.length, 1);
+        final aggregate = rows.single;
+        expect(aggregate.positions.length, 2);
+        expect(aggregate.expected.amountIn('USD')?.amountInCents, 100000);
+        expect(aggregate.expected.amountIn('CDF')?.amountInCents, 9000000);
+        expect(aggregate.expected.isMultiCurrency, isTrue);
+      },
+    );
+
+    test('soldé en dollars mais débiteur en francs n\'est PAS soldé', () async {
+      await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 100000);
+      await insertCharge(
+        'c2',
+        's1',
+        'TUITION',
+        expected: 9000000,
+        currency: 'CDF',
+      );
+
+      final rows = await dao.getFeeChargeAggregates(
+        academicYearId: 'ay-1',
+        feeCode: 'TUITION',
+        studentIds: const ['s1'],
+      );
+
+      expect(rows.single.status, StudentChargeStatus.partial);
+    });
+
+    test('la devise est normalisée à la lecture', () async {
+      await insertCharge('c1', 's1', 'TUITION', currency: ' usd ');
+
+      final rows = await dao.getFeeChargeAggregates(
+        academicYearId: 'ay-1',
+        feeCode: 'TUITION',
+        studentIds: const ['s1'],
+      );
+
+      expect(rows.single.positions.single.currency, 'USD');
     });
 
     test('le reste est borné à zéro sur un trop-perçu', () async {
@@ -209,7 +272,7 @@ void main() {
         studentIds: const ['s1'],
       );
 
-      expect(rows.single.remainingInCents, 0);
+      expect(rows.single.positions.single.remainingInCents, 0);
     });
 
     test('une créance sans année est rattachée à l\'année demandée', () async {
@@ -238,8 +301,8 @@ void main() {
         );
 
         expect(rows.length, 1);
-        expect(rows.single.expectedInCents, 100000);
-        expect(rows.single.paidMirrorInCents, 15000);
+        expect(rows.single.positions.single.expectedInCents, 100000);
+        expect(rows.single.positions.single.paidMirrorInCents, 15000);
       },
     );
 

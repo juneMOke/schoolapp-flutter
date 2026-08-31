@@ -77,6 +77,13 @@ class ParentPayload {
   final String? email;
   final String relationshipType; // FATHER|MOTHER|GUARDIAN|GRANDPARENT|OTHER
 
+  /// Tuteur à appeler en urgence, pour CET élève. **Tri-état, et les trois
+  /// valeurs comptent** : `true` le désigne et démote les autres tuteurs de
+  /// l'élève, `false` retire celui-là seulement, `null` ne touche à rien. Un
+  /// `false` posé par confort à la place d'un `null` effacerait une désignation
+  /// faite ailleurs — d'où le type nullable, conservé jusqu'au fil.
+  final bool? emergencyContact;
+
   const ParentPayload({
     required this.clientId,
     required this.firstName,
@@ -85,6 +92,7 @@ class ParentPayload {
     required this.phoneNumber,
     this.email,
     required this.relationshipType,
+    this.emergencyContact,
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -95,6 +103,7 @@ class ParentPayload {
     'phoneNumber': phoneNumber,
     'email': email,
     'relationshipType': relationshipType,
+    'emergencyContact': emergencyContact,
   };
 
   factory ParentPayload.fromJson(Map<String, dynamic> j) => ParentPayload(
@@ -105,6 +114,10 @@ class ParentPayload {
     phoneNumber: j['phoneNumber'] as String,
     email: j['email'] as String?,
     relationshipType: (j['relationshipType'] as String?) ?? 'OTHER',
+    // Absent des payloads écrits avant l'existence du champ : `null` y est la
+    // bonne lecture — ces agrégats-là ne désignaient personne, et ne doivent
+    // rien démoter au push.
+    emergencyContact: j['emergencyContact'] as bool?,
   );
 }
 
@@ -128,8 +141,24 @@ class EnrollmentPayload {
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
+
+  /// « Ancien élève de cette école », déclaré au guichet — jamais nul, comme la
+  /// colonne serveur.
+  final bool formerStudent;
+
+  /// Fiche santé de l'enfant. Donnée de santé : ce payload dort en base
+  /// chiffrée, mais il ne doit apparaître dans aucun log ni message d'erreur.
+  final String? medicalNotes;
   final String? transferReason;
   final String? cancellationReason;
+
+  /// Réductions déclarées au guichet (ADR-021 V1). Codes seuls : le serveur
+  /// grave l'octroi, l'horodate et l'attribue à l'auteur de la session — même
+  /// principe que `Auditable.createdBy`, le client n'envoie rien de tout ça.
+  ///
+  /// **Mémoire seule** : aucune créance de ce payload n'en dépend, aucun
+  /// montant ne change.
+  final List<String> reductionCodes;
 
   const EnrollmentPayload({
     required this.id,
@@ -147,8 +176,11 @@ class EnrollmentPayload {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent = false,
+    this.medicalNotes,
     this.transferReason,
     this.cancellationReason,
+    this.reductionCodes = const [],
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -167,8 +199,15 @@ class EnrollmentPayload {
     'previousRate': previousRate,
     'previousRank': previousRank,
     'validatedPreviousYear': validatedPreviousYear,
+    'formerStudent': formerStudent,
+    'medicalNotes': medicalNotes,
     'transferReason': transferReason,
     'cancellationReason': cancellationReason,
+    // Omis quand vide, jamais `[]`. Le payload d'outbox se relit tel quel : y
+    // écrire une liste vide systématiquement ne dirait rien de plus, et la
+    // requête réseau qui en dérive dirait « retire tout » à un serveur qui,
+    // aujourd'hui, ne connaît pas encore le champ.
+    if (reductionCodes.isNotEmpty) 'reductionCodes': reductionCodes,
   };
 
   factory EnrollmentPayload.fromJson(Map<String, dynamic> j) =>
@@ -187,9 +226,28 @@ class EnrollmentPayload {
         previousSchoolLevel: j['previousSchoolLevel'] as String?,
         previousRate: (j['previousRate'] as num?)?.toDouble(),
         previousRank: j['previousRank'] as int?,
+        // **Payload écrit avant l'existence du champ** : une inscription
+        // confirmée dort peut-être déjà dans l'outbox sans cette clé. Un
+        // `as bool` y lèverait et bloquerait la file entière ; on retombe alors
+        // sur la seule information que ce payload porte — son type. Même repli
+        // que le serveur applique aux postes muets, et pour la même raison.
+        formerStudent:
+            (j['formerStudent'] as bool?) ??
+            (j['enrollmentType'] as String?) == 'RE_ENROLLMENT',
+        medicalNotes: j['medicalNotes'] as String?,
         validatedPreviousYear: j['validatedPreviousYear'] as bool?,
         transferReason: j['transferReason'] as String?,
         cancellationReason: j['cancellationReason'] as String?,
+        // **Payload écrit avant l'existence du champ** — même piège que
+        // `formerStudent` ci-dessus, même remède : une inscription confirmée
+        // dort peut-être déjà dans l'outbox sans cette clé, et un `as List` y
+        // lèverait en bloquant la file ENTIÈRE, pour un champ qui ne vaut
+        // aucun centime.
+        reductionCodes: [
+          for (final code
+              in (j['reductionCodes'] as List<dynamic>? ?? const []))
+            if (code is String) code,
+        ],
       );
 }
 

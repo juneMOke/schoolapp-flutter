@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_code_page.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -34,13 +36,20 @@ TicketReceiptModel _model({String schoolName = 'Institut Sacré-Cœur'}) =>
       provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
       paidAt: DateTime(2026, 8, 11, 14, 7),
       cashierFullName: 'Jean Kabeya',
-      amountReceivedInCents: 150000,
+      amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
       allocations: const [
-        TicketAllocationLine(label: 'Frais scolaires', amountInCents: 120000),
-        TicketAllocationLine(label: 'Fournitures', amountInCents: 30000),
+        TicketAllocationLine(
+          label: 'Frais scolaires',
+          amountInCents: 120000,
+          currency: 'CDF',
+        ),
+        TicketAllocationLine(
+          label: 'Fournitures',
+          amountInCents: 30000,
+          currency: 'CDF',
+        ),
       ],
-      remainingBalanceInCents: 250000,
-      currency: 'CDF',
+      remainingBalance: MoneyBag.of(const [Money(250000, 'CDF')]),
       labels: _labels,
     );
 

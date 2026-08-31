@@ -171,6 +171,707 @@ class AppLocalizationsFr extends AppLocalizations {
       'Votre compte ne dispose pas des droits nécessaires pour ouvrir l\'application. Contactez l\'administrateur de votre école.';
 
   @override
+  String get splashNotProvisionedTitle => 'École pas encore paramétrée';
+
+  @override
+  String get splashNotProvisionedMessage =>
+      'Cette école n\'a pas encore d\'année scolaire ouverte. La configuration déclare l\'année, les classes et les frais, puis met l\'établissement en service.';
+
+  @override
+  String get splashNotProvisionedAction => 'Configurer l\'école';
+
+  @override
+  String get splashNotProvisionedWaitMessage =>
+      'Cette école n\'a pas encore d\'année scolaire ouverte. Seule la direction peut la configurer — rapprochez-vous d\'elle avant de réessayer.';
+
+  @override
+  String get configurationTitle => 'Configuration';
+
+  @override
+  String get configurationSubtitle => 'Mise en service de l\'école';
+
+  @override
+  String configurationStepCounter(int current, int total) {
+    return 'Étape $current / $total';
+  }
+
+  @override
+  String get configurationExitTooltip => 'Quitter la configuration';
+
+  @override
+  String get configurationStepSchool => 'École';
+
+  @override
+  String get configurationStepAcademicYear => 'Année';
+
+  @override
+  String get configurationStepStructure => 'Structure';
+
+  @override
+  String get configurationStepFees => 'Frais';
+
+  @override
+  String get configurationStepActivation => 'Activation';
+
+  @override
+  String configurationStepSemantics(int current, int total, String title) {
+    return 'Étape $current sur $total, $title';
+  }
+
+  @override
+  String get configurationBack => 'Retour';
+
+  @override
+  String get configurationSave => 'Enregistrer';
+
+  @override
+  String get configurationContinue => 'Continuer';
+
+  @override
+  String get configurationSaving => 'Enregistrement…';
+
+  @override
+  String get configurationSaved => 'Enregistré';
+
+  @override
+  String get configurationDraftSaved => 'Brouillon enregistré';
+
+  @override
+  String get configurationSaveBarDefaultHint =>
+      'Complétez les champs obligatoires pour continuer';
+
+  @override
+  String get configurationSchoolSectionTitle => 'Identité de l\'école';
+
+  @override
+  String get configurationSchoolSectionSubtitle =>
+      'Ces informations apparaissent sur les attestations, reçus et bulletins.';
+
+  @override
+  String get configurationSchoolName => 'Dénomination de l\'école';
+
+  @override
+  String get configurationSchoolCountry => 'Pays';
+
+  @override
+  String get configurationSchoolCity => 'Ville';
+
+  @override
+  String get configurationSchoolDistrict => 'District';
+
+  @override
+  String get configurationSchoolMunicipality => 'Commune';
+
+  @override
+  String get configurationSchoolMunicipalityPlaceholder => 'District d\'abord';
+
+  @override
+  String get configurationSchoolAddress => 'Adresse';
+
+  @override
+  String get configurationSchoolPhone => 'Téléphone de l\'école';
+
+  @override
+  String get configurationSchoolEmail => 'E-mail de l\'école';
+
+  @override
+  String configurationSchoolMissingHint(String fields) {
+    return 'À compléter : $fields';
+  }
+
+  @override
+  String get configurationSchoolReadOnlyNote =>
+      'Pays et ville sont fixés : l\'application est déployée à Kinshasa.';
+
+  @override
+  String get configurationYearSectionTitle => 'Année académique';
+
+  @override
+  String get configurationYearSectionSubtitle =>
+      'Une première année est proposée d\'après la date du jour — ajustez les dates si besoin.';
+
+  @override
+  String get configurationYearProposed => 'Proposée automatiquement';
+
+  @override
+  String get configurationYearEdited => 'Modifiée';
+
+  @override
+  String get configurationYearRestore => 'Rétablir la proposition';
+
+  @override
+  String get configurationYearStart => 'Début des cours';
+
+  @override
+  String get configurationYearEnd => 'Fin de l\'année';
+
+  @override
+  String get configurationYearDuration => 'Durée';
+
+  @override
+  String configurationYearDurationValue(int months) {
+    return '≈ $months mois';
+  }
+
+  @override
+  String get configurationYearRangeError => 'La fin doit suivre le début';
+
+  @override
+  String get configurationYearPeriodsNote =>
+      'Le découpage en périodes (trimestres, semestres) se règle plus tard, dans Résultats.';
+
+  @override
+  String get configurationStructureTitle => 'Cycles, niveaux et classes';
+
+  @override
+  String configurationTotalCycles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cycles',
+      one: 'cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalLevels(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'niveaux',
+      one: 'niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'classes',
+      one: 'classe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cours',
+      one: 'cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationCycleClassroomsPerLevel => 'Classes par niveau';
+
+  @override
+  String get configurationCycleNotOffered => 'Non proposé';
+
+  @override
+  String configurationCycleSummary(int open, int total, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms classe',
+    );
+    return '$open / $total · $_temp0';
+  }
+
+  @override
+  String get configurationLevelNotOffered => 'Niveau non proposé cette année';
+
+  @override
+  String get configurationLevelNoGrid =>
+      'Aucun barème officiel — ces classes n\'auront aucun cours.';
+
+  @override
+  String configurationSectionsServed(String level) {
+    return 'Barèmes servis sur $level';
+  }
+
+  @override
+  String configurationSectionCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours',
+      one: '$count cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationStructureHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes seront créées pour l\'année',
+      one: '$count classe sera créée pour l\'année',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationStructureEmptyHint => 'Cochez au moins un niveau';
+
+  @override
+  String get configurationStructureEmptyTitle => 'Aucun niveau retenu';
+
+  @override
+  String get configurationStructureEmptyMessage =>
+      'Une école a besoin d\'au moins une classe pour ouvrir les inscriptions. Rétablissez la proposition par défaut ou cochez les niveaux que vous ouvrez.';
+
+  @override
+  String get configurationStructureRestore => 'Rétablir la proposition';
+
+  @override
+  String get configurationFeesTitle => 'Frais scolaires';
+
+  @override
+  String get configurationFeeNew => 'Nouveau frais';
+
+  @override
+  String get configurationFeeFormTitle => 'Nouveau frais';
+
+  @override
+  String get configurationFeeFormEditTitle => 'Modifier le frais';
+
+  @override
+  String get configurationFeeType => 'Type de frais';
+
+  @override
+  String configurationFeeTypeOthers(int count) {
+    return 'Autres types ($count)';
+  }
+
+  @override
+  String get configurationFeeLabel => 'Libellé affiché aux parents';
+
+  @override
+  String get configurationFeeAmount => 'Montant';
+
+  @override
+  String get configurationFeeCurrency => 'Devise';
+
+  @override
+  String get configurationFeeDueAt => 'Échéance';
+
+  @override
+  String get configurationFeeScope => 'Assiette';
+
+  @override
+  String get configurationFeeScopeAll => 'Tous les niveaux ouverts';
+
+  @override
+  String get configurationFeeScopeSome => 'Certains niveaux';
+
+  @override
+  String configurationFeeScopeAllHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux ouverts',
+      one: '$count niveau ouvert',
+    );
+    return 'S\'appliquera aux $_temp0';
+  }
+
+  @override
+  String configurationFeeScopeCount(int selected, int total) {
+    return '$selected / $total sélectionnés';
+  }
+
+  @override
+  String get configurationFeeScopeWholeCycle => 'Tout le cycle';
+
+  @override
+  String get configurationFeeAdd => 'Ajouter le frais';
+
+  @override
+  String get configurationFeeUpdate => 'Mettre à jour';
+
+  @override
+  String get configurationFeeCancel => 'Annuler';
+
+  @override
+  String configurationFeeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frais définis',
+      one: '$count frais défini',
+      zero: 'Aucun frais défini',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeCatalogTotal(String total) {
+    return 'Total catalogue : $total';
+  }
+
+  @override
+  String get configurationFeePerStudent => 'par élève';
+
+  @override
+  String configurationFeeLevelsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux',
+      one: '$count niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeDueLabel(String date) {
+    return 'échéance $date';
+  }
+
+  @override
+  String configurationFeeDeleted(String label) {
+    return 'Frais « $label » supprimé';
+  }
+
+  @override
+  String configurationFeeSaved(String label) {
+    return 'Frais « $label » enregistré';
+  }
+
+  @override
+  String get configurationFeesEmptyTitle => 'Aucun frais pour l\'instant';
+
+  @override
+  String get configurationFeesEmptyMessage =>
+      'Ajoutez au moins un frais — inscription, minerval, cantine — pour que la facturation puisse générer les notes de perception.';
+
+  @override
+  String get configurationFeesEmptyAction => 'Créer le premier frais';
+
+  @override
+  String get configurationFeesEmptyHint =>
+      'Ajoutez au moins un frais pour continuer';
+
+  @override
+  String get configurationFeesDraftHint =>
+      'Terminez le frais en cours d\'édition';
+
+  @override
+  String configurationFeesValidHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frais seront rattachés aux niveaux ouverts',
+      one: '$count frais sera rattaché aux niveaux ouverts',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationSummaryTitle => 'Récapitulatif';
+
+  @override
+  String get configurationSummaryEdit => 'Modifier';
+
+  @override
+  String get configurationSummarySchool => 'École';
+
+  @override
+  String get configurationSummaryYear => 'Année académique';
+
+  @override
+  String configurationSummaryStructure(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count classe',
+    );
+    return 'Structure · $_temp0';
+  }
+
+  @override
+  String get configurationSummaryFees => 'Frais scolaires';
+
+  @override
+  String get configurationSummaryMissing => 'à renseigner';
+
+  @override
+  String configurationSummaryCycleLine(int levels, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels niveaux',
+      one: '$levels niveau',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms classe',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSummaryNoGrid => 'aucun barème';
+
+  @override
+  String get configurationCheckSchool => 'Identité de l\'école complète';
+
+  @override
+  String get configurationCheckYear => 'Année académique datée';
+
+  @override
+  String configurationCheckClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes prêtes à ouvrir',
+      one: '$count classe prête à ouvrir',
+      zero: 'Aucune classe à ouvrir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationCheckFees(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frais rattachés aux niveaux',
+      one: '$count frais rattaché aux niveaux',
+      zero: 'Aucun frais rattaché aux niveaux',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationActivate => 'Activer l\'école';
+
+  @override
+  String get configurationActivating => 'Activation…';
+
+  @override
+  String get configurationActivateBlocked =>
+      'Complétez les points en ambre pour activer.';
+
+  @override
+  String get configurationActivateFailed =>
+      'L\'activation a échoué — réessayez.';
+
+  @override
+  String configurationActivatedTitle(String school) {
+    return '$school est en service';
+  }
+
+  @override
+  String configurationActivatedMessage(String year, int classrooms, int fees) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      fees,
+      locale: localeName,
+      other: '$fees frais',
+      one: '$fees frais',
+    );
+    return 'L\'année $year est ouverte avec $_temp0 et $_temp1. Vous pouvez inscrire vos premiers élèves.';
+  }
+
+  @override
+  String get configurationGoHome => 'Aller à l\'accueil';
+
+  @override
+  String get configurationReviewSetup => 'Revoir la configuration';
+
+  @override
+  String get configurationWarningsTitle => 'À savoir avant d\'activer';
+
+  @override
+  String get menuConfiguration => 'Configuration';
+
+  @override
+  String get subMenuConfigurationSchool => 'Paramètres de l\'école';
+
+  @override
+  String get configurationSettingsTitle => 'Configuration de l\'école';
+
+  @override
+  String configurationSettingsInService(String school) {
+    return '$school · en service';
+  }
+
+  @override
+  String configurationSettingsSummary(String year, int classrooms, int levels) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels niveaux',
+      one: '$levels niveau',
+    );
+    return 'Année $year · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSettingsNextYear => 'Préparer l\'année suivante';
+
+  @override
+  String get configurationSettingsNextYearTooltip =>
+      'Indisponible pour l\'instant : l\'assistant ne peut pas être rejoué, le serveur refuserait une année déjà ouverte. Un geste dédié reste à livrer.';
+
+  @override
+  String get configurationSettingsTabIdentity => 'Identité de l\'école';
+
+  @override
+  String get configurationSettingsTabStructure => 'Cycles, niveaux et classes';
+
+  @override
+  String get configurationSettingsTabFees => 'Frais scolaires';
+
+  @override
+  String get configurationSettingsReadOnly => 'lecture';
+
+  @override
+  String get configurationSettingsStructureReadOnlyNote =>
+      'La structure ne se modifie plus après la mise en service. Le serveur ne sait pas encore refuser proprement la suppression d\'un niveau peuplé : la câbler ici risquerait de casser des inscriptions en cours.';
+
+  @override
+  String get configurationSettingsSaved => 'Modifications enregistrées';
+
+  @override
+  String get configurationSettingsSave => 'Enregistrer';
+
+  @override
+  String get configurationSettingsNoYear => 'Aucune année ouverte';
+
+  @override
+  String configurationSettingsTariffsForLevel(String level) {
+    return 'Tarifs de $level';
+  }
+
+  @override
+  String get configurationSettingsTariffOne =>
+      'Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.';
+
+  @override
+  String get configurationTariffAdd => 'Ajouter un tarif';
+
+  @override
+  String get configurationTariffEdit => 'Modifier le tarif';
+
+  @override
+  String get configurationTariffNew => 'Nouveau tarif';
+
+  @override
+  String get configurationTariffDelete => 'Supprimer le tarif';
+
+  @override
+  String configurationTariffDeleteConfirm(String label) {
+    return 'Supprimer « $label » ? Les créances déjà générées ne sont pas touchées.';
+  }
+
+  @override
+  String get configurationTariffSaved => 'Tarif enregistré';
+
+  @override
+  String get configurationTariffDeleted => 'Tarif supprimé';
+
+  @override
+  String get configurationTariffNone => 'Aucun tarif sur ce niveau';
+
+  @override
+  String get configurationFeeTypesUnavailableTitle =>
+      'Types de frais indisponibles';
+
+  @override
+  String get configurationFeeTypesUnavailableMessage =>
+      'Le référentiel des types de frais n\'a pas été chargé. Rechargez-le pour saisir les frais de l\'école.';
+
+  @override
+  String get configurationLoadingA11yLabel =>
+      'Chargement des données de l\'étape';
+
+  @override
+  String get configurationErrorNetworkTitle => 'Connexion perdue';
+
+  @override
+  String get configurationErrorNetworkMessage =>
+      'La configuration n\'a pas été envoyée. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get configurationErrorSessionTitle => 'Votre session a expiré';
+
+  @override
+  String get configurationErrorSessionMessage =>
+      'Reconnectez-vous pour reprendre là où vous en étiez. Votre saisie est conservée.';
+
+  @override
+  String get configurationErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get configurationErrorForbiddenMessage =>
+      'Seul le promoteur peut configurer l\'école. Contactez l\'administrateur de votre établissement.';
+
+  @override
+  String get configurationErrorServerTitle =>
+      'Le serveur n\'a pas pu enregistrer';
+
+  @override
+  String get configurationErrorServerMessage =>
+      'Une panne est survenue. Réessayez, et citez le code ci-dessous au support si elle persiste.';
+
+  @override
+  String get configurationErrorRateTitle => 'Trop de demandes';
+
+  @override
+  String get configurationErrorRateMessage =>
+      'Le serveur demande une pause. Patientez quelques instants avant de reprendre.';
+
+  @override
+  String get configurationErrorYearExistsTitle =>
+      'Cette année scolaire existe déjà';
+
+  @override
+  String get configurationErrorYearExistsMessage =>
+      'Le paramétrage est un geste d\'amorçage : il n\'ajoute pas une année à une école qui en a déjà une. Reprenez à l\'étape de l\'année pour en déclarer une autre.';
+
+  @override
+  String get configurationErrorYearExistsAction => 'Revenir à l\'année';
+
+  @override
+  String get configurationErrorRetry => 'Réessayer';
+
+  @override
+  String get configurationErrorSignIn => 'Se reconnecter';
+
+  @override
+  String get configurationErrorContact => 'Contacter l\'administrateur';
+
+  @override
+  String get configurationErrorIncident => 'Code incident';
+
+  @override
+  String get configurationErrorReloadCatalog => 'Recharger le référentiel';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }
@@ -307,6 +1008,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subMenuFeeControl => 'Contrôle des frais';
+
+  @override
+  String get menuBoutique => 'Boutique';
+
+  @override
+  String get subMenuBoutiquePurchases => 'Achats';
+
+  @override
+  String get subMenuBoutiqueHistory => 'Historiques';
 
   @override
   String get subMenuOrganization => 'Composition\ndes classes';
@@ -1340,7 +2050,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Six modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
+      'Ces modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -1349,6 +2059,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilModuleFinancesDescription =>
       'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+
+  @override
+  String get accueilModuleBoutiqueDescription =>
+      'Vente au comptant d\'articles scolaires, et historique des encaissements du guichet.';
 
   @override
   String get accueilModuleClassesDescription =>
@@ -1365,6 +2079,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilModuleDisciplinesDescription =>
       'Présences du jour, dossiers de discipline et suivi des élèves.';
+
+  @override
+  String get accueilModuleConfigurationDescription =>
+      'Identité de l\'école, structure des cycles et niveaux, grille des frais scolaires.';
 
   @override
   String accueilModulePageCount(int count) {
@@ -2041,6 +2759,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yearNotValidated => 'Non validée';
 
   @override
+  String get yearValidationUnknown => 'Non renseignée';
+
+  @override
+  String get guardianEmergencyContactLabel => 'Contact d\'urgence';
+
+  @override
+  String get guardianEmergencyContactBadge => 'Urgence';
+
+  @override
+  String get guardianEmergencyContactHint =>
+      'Un seul tuteur par élève : en désigner un retire la désignation précédente.';
+
+  @override
+  String get guardianEmergencyContactAmbiguous =>
+      'Un seul tuteur peut être le contact d\'urgence de cet élève.';
+
+  @override
+  String get guardianEmergencyContactSaved => 'Contact d\'urgence mis à jour.';
+
+  @override
+  String get guardianEmergencyContactCleared => 'Contact d\'urgence retiré.';
+
+  @override
+  String get guardianEmergencyContactRetry => 'Réessayer';
+
+  @override
+  String get guardianEmergencyContactFailed =>
+      'La désignation du contact d\'urgence a échoué.';
+
+  @override
+  String get medicalNotesLabel => 'État de santé';
+
+  @override
+  String get medicalNotesHelp =>
+      'Allergies, traitement en cours, conduite à tenir. Facultatif.';
+
+  @override
+  String get medicalNotesSectionTitle => 'Santé';
+
+  @override
+  String get formerStudentLabel => 'Ancien élève de l\'école';
+
+  @override
+  String get formerStudentHelp =>
+      'Cochez si l\'enfant a déjà été inscrit dans cette école, même avant l\'application.';
+
+  @override
+  String get formerStudentLockedHelp =>
+      'Réinscription : l\'enfant vient d\'un dossier de l\'année précédente dans cette école.';
+
+  @override
+  String get previousSchoolOptionalHint =>
+      'Facultatif — laissez vide si l\'enfant n\'a pas encore été scolarisé.';
+
+  @override
+  String get averageOutOfRangeError =>
+      'La moyenne doit être comprise entre 0 et 100.';
+
+  @override
   String get currentAcademicYearLabel => 'Année académique';
 
   @override
@@ -2449,6 +3226,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.';
 
   @override
+  String get enrollmentReeditAction => 'Modifier';
+
+  @override
+  String get enrollmentReeditReadOnlyMessage =>
+      'Dossier complété. Vous pouvez le corriger : l\'enregistrement le repassera en cours et le remettra dans la file d\'envoi.';
+
+  @override
+  String get enrollmentReeditExitTitle => 'Correction non validée';
+
+  @override
+  String get enrollmentReeditExitMessage =>
+      'Ce dossier est en cours de correction et n\'a pas été validé. Tant qu\'il ne l\'est pas, l\'élève n\'apparaît plus dans la facturation.';
+
+  @override
+  String get enrollmentReeditExitConfirm => 'Quitter quand même';
+
+  @override
+  String get enrollmentReeditExitResume => 'Reprendre la correction';
+
+  @override
   String get enrollmentEditableTitle => 'Mode édition';
 
   @override
@@ -2507,6 +3304,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get studentChargesSaveHintBeforeContinue =>
       'Veuillez enregistrer les modifications des charges avant de continuer.';
+
+  @override
+  String get enrollmentReductionsSectionTitle => 'Réductions';
 
   @override
   String get studentChargesTotalLabel => 'Total';
@@ -2828,6 +3628,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String facturationBalanceDuePill(String amount) {
     return '$amount dû';
   }
+
+  @override
+  String get facturationBalanceDueMultiCurrencyPill => 'Solde dû';
 
   @override
   String get facturationBalanceUpToDatePill => 'À jour';
@@ -3322,6 +4125,17 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get facturationCreatePaymentPayerSectionTitle =>
       'Informations du payeur';
+
+  @override
+  String get facturationCreatePaymentEyebrow => 'Encaissement';
+
+  @override
+  String get facturationCreatePaymentContextErrorTitle =>
+      'Encaissement indisponible';
+
+  @override
+  String get facturationCreatePaymentContextErrorMessage =>
+      'Les informations nécessaires à cet encaissement ne sont pas disponibles. Revenez à la fiche de l\'élève puis relancez l\'encaissement.';
 
   @override
   String get facturationCreatePaymentPayerLastNameLabel => 'Nom';
@@ -5133,6 +5947,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeStatsPeriodYearCurrent => 'Cette année';
 
   @override
+  String financeStatsCurrencyHeading(String currency) {
+    return 'En $currency';
+  }
+
+  @override
+  String get financeStatsNoMovementLabel => 'Aucun mouvement sur la période';
+
+  @override
+  String get financeStatsNoMovementDescription =>
+      'Ni encaissement ni facturation sur cette fenêtre. Élargissez la période pour voir plus loin.';
+
+  @override
   String get financeStatsKpiCollected => 'Total encaissé';
 
   @override
@@ -5143,6 +5969,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financeStatsKpiCollectionRate => 'Taux de recouvrement';
+
+  @override
+  String financeStatsKpiRateForCurrency(int rate, String currency) {
+    return '$rate % · $currency';
+  }
 
   @override
   String get financeStatsSectionEvolution => 'Évolution des encaissements';
@@ -6468,4 +7299,668 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentsBlockedEnrollmentUnreadableNotice =>
       'Dossier illisible sur cette tablette : l\'attestation n\'est pas disponible ici.';
+
+  @override
+  String get boutiqueEyebrow => 'Boutique ▸ Achats';
+
+  @override
+  String get boutiqueTitle => 'Caisse';
+
+  @override
+  String get boutiqueSubtitle =>
+      'Vente au comptant d\'articles de l\'école. Aucune dette, aucun reste.';
+
+  @override
+  String get boutiqueSearchPlaceholder => 'Chercher un article ou un code…';
+
+  @override
+  String get boutiqueFilterAll => 'Toutes';
+
+  @override
+  String get boutiqueFamilyUniforme => 'Uniforme';
+
+  @override
+  String get boutiqueFamilyFournitures => 'Fournitures';
+
+  @override
+  String get boutiqueFamilyActivites => 'Activités';
+
+  @override
+  String get boutiqueFamilyActes => 'Actes';
+
+  @override
+  String boutiqueArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueInCartBadge(int count) {
+    return '$count au panier';
+  }
+
+  @override
+  String get boutiqueLevelBadge => 'par niveau';
+
+  @override
+  String boutiquePriceRange(String min, String max) {
+    return '$min – $max';
+  }
+
+  @override
+  String get boutiqueGridReminder =>
+      'Les prix viennent toujours de la grille du catalogue. À la caisse, on désigne un élève ou un niveau — jamais un montant.';
+
+  @override
+  String get boutiqueCartTitle => 'Panier';
+
+  @override
+  String get boutiqueCartEmpty =>
+      'Panier vide. Touchez un article pour l\'ajouter.';
+
+  @override
+  String get boutiqueCartClear => 'Vider le panier';
+
+  @override
+  String get boutiqueTotalLabel => 'Total à encaisser';
+
+  @override
+  String get boutiqueCollectAction => 'Encaisser en espèces';
+
+  @override
+  String get boutiquePriceUnresolved => 'Prix à résoudre';
+
+  @override
+  String get boutiqueLevelRequired => 'Niveau requis…';
+
+  @override
+  String get boutiqueBeneficiaryPlaceholder => 'Bénéficiaire';
+
+  @override
+  String get boutiqueSizeLabel => 'Taille';
+
+  @override
+  String boutiqueLineMeta(String unitPrice, int quantity) {
+    return '$unitPrice × $quantity';
+  }
+
+  @override
+  String get boutiquePayerSection => 'Payeur';
+
+  @override
+  String get boutiquePayerKnownBadge => 'Payeur connu';
+
+  @override
+  String get boutiquePayerPhoneLabel => 'Téléphone';
+
+  @override
+  String get boutiquePayerLastNameLabel => 'Nom';
+
+  @override
+  String get boutiquePayerMiddleNameLabel => 'Post-nom';
+
+  @override
+  String get boutiquePayerFirstNameLabel => 'Prénom';
+
+  @override
+  String get boutiquePayerReceiptNotice =>
+      'Le reçu est nominatif au payeur ; les élèves bénéficiaires s\'attachent à chaque ligne.';
+
+  @override
+  String get boutiquePayerUnknownNotice =>
+      'Numéro inconnu — ce payeur sera enregistré au répertoire avec la vente.';
+
+  @override
+  String get boutiqueBlockersPrefix => 'À compléter :';
+
+  @override
+  String get boutiqueBlockerEmptyCart => 'Panier vide';
+
+  @override
+  String get boutiqueBlockerLastName => 'Nom';
+
+  @override
+  String get boutiqueBlockerMiddleName => 'Post-nom';
+
+  @override
+  String get boutiqueBlockerFirstName => 'Prénom';
+
+  @override
+  String get boutiqueBlockerPhone => 'Téléphone du payeur';
+
+  @override
+  String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';
+
+  @override
+  String boutiqueBlockerLinesWithoutLevel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lignes sans niveau',
+      one: '1 ligne sans niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
+
+  @override
+  String get boutiqueEmptyCatalogTitle => 'Aucun article au catalogue';
+
+  @override
+  String get boutiqueEmptyCatalogMessage =>
+      'La boutique n\'a pas encore d\'article. Créez-en un dans le catalogue pour pouvoir encaisser une vente.';
+
+  @override
+  String get boutiqueWithheldCatalogTitle => 'Catalogue non communiqué';
+
+  @override
+  String get boutiqueWithheldCatalogMessage =>
+      'Votre compte n\'a pas le droit de lire le catalogue de la boutique. Demandez-le à la direction : sans lui, aucun article ne peut être vendu depuis ce poste.';
+
+  @override
+  String get boutiqueNoMatchTitle => 'Aucun article ne correspond';
+
+  @override
+  String boutiqueNoMatchMessage(String query, String family) {
+    return 'Rien pour « $query » dans « $family ». Élargissez la recherche.';
+  }
+
+  @override
+  String boutiqueNoMatchMessageAll(String query) {
+    return 'Rien pour « $query ». Élargissez la recherche.';
+  }
+
+  @override
+  String get boutiqueResetFilters => 'Réinitialiser les filtres';
+
+  @override
+  String boutiqueUnsellableNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count articles de ce catalogue ne sont pas vendables depuis cette version de l\'application.',
+      one:
+          '1 article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get boutiqueErrorNetwork =>
+      'Le catalogue n\'a pas pu être lu. Le panier en cours est conservé : une coupure ne fait pas perdre une vente en composition.';
+
+  @override
+  String get boutiqueErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get boutiqueErrorUnauthorized =>
+      'Reconnectez-vous pour reprendre la caisse. Le panier est conservé.';
+
+  @override
+  String get boutiqueErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get boutiqueErrorForbidden =>
+      'Votre compte n\'a pas les droits requis pour tenir la caisse boutique. Contactez la direction.';
+
+  @override
+  String get boutiqueErrorServerTitle => 'Catalogue illisible';
+
+  @override
+  String get boutiqueErrorServer =>
+      'Le catalogue local n\'a pas pu être lu. Réessayez ; s\'il ne revient pas, une synchronisation le reconstruira.';
+
+  @override
+  String get boutiqueErrorRetry => 'Réessayer';
+
+  @override
+  String get boutiqueErrorReconnect => 'Se reconnecter';
+
+  @override
+  String boutiqueErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get boutiqueBeneficiaryEyebrow => 'Bénéficiaire de la ligne';
+
+  @override
+  String get boutiqueBeneficiaryTitle => 'Désigner un élève';
+
+  @override
+  String get boutiqueBeneficiaryHint =>
+      'Le niveau de l\'élève résout le prix automatiquement — vous ne saisissez jamais de montant.';
+
+  @override
+  String get boutiqueBeneficiarySearchLabel => 'Nom, post-nom ou prénom';
+
+  @override
+  String get boutiqueBeneficiarySearchPlaceholder => 'ex. Dylan Ndombo';
+
+  @override
+  String get boutiqueBeneficiaryTooShort =>
+      'Tapez au moins 2 lettres, ou passez par « Par niveau ».';
+
+  @override
+  String boutiqueBeneficiaryNoResult(String query) {
+    return 'Aucun élève ne correspond à « $query ». Vérifiez l\'orthographe ou cherchez par niveau.';
+  }
+
+  @override
+  String get boutiqueBeneficiaryPickLevel =>
+      'Choisissez un niveau pour voir ses élèves.';
+
+  @override
+  String get boutiqueBeneficiaryLevelEmpty =>
+      'Aucun élève inscrit à ce niveau.';
+
+  @override
+  String get boutiqueBeneficiaryNotSynced =>
+      'Inscription pas encore synchronisée — vendez au niveau, sans bénéficiaire : le prix est le même.';
+
+  @override
+  String get boutiqueBeneficiaryNoLevel =>
+      'Cette inscription ne porte pas de niveau — vendez au niveau, sans bénéficiaire.';
+
+  @override
+  String get boutiqueBeneficiaryLoadFailed =>
+      'La liste des élèves n\'a pas pu être lue.';
+
+  @override
+  String boutiquePayerDirectoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+    );
+    return 'Déjà au répertoire · $_temp0';
+  }
+
+  @override
+  String get boutiquePayerUse => 'Utiliser';
+
+  @override
+  String get boutiqueConfirmEyebrow => 'Encaissement comptant';
+
+  @override
+  String get boutiqueConfirmTitle => 'Confirmer la vente';
+
+  @override
+  String get boutiqueConfirmPayer => 'Payeur';
+
+  @override
+  String get boutiqueConfirmPhone => 'Téléphone';
+
+  @override
+  String get boutiqueConfirmArticles => 'Articles';
+
+  @override
+  String get boutiqueConfirmMethod => 'Moyen';
+
+  @override
+  String get boutiqueConfirmMethodCash => 'Espèces';
+
+  @override
+  String get boutiqueConfirmAmountReceived => 'Montant reçu';
+
+  @override
+  String get boutiqueConfirmNotice =>
+      'Le total est payé en une fois : pas de paiement partiel, pas de créance boutique.';
+
+  @override
+  String get boutiqueConfirmNewPayerPrefix =>
+      'Ce payeur est nouveau : son numéro et son identité entrent au répertoire avec la vente.';
+
+  @override
+  String get boutiqueConfirmOfflineSuffix =>
+      'Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.';
+
+  @override
+  String get boutiqueConfirmCancel => 'Annuler';
+
+  @override
+  String boutiqueConfirmAction(String total) {
+    return 'Encaisser $total';
+  }
+
+  @override
+  String boutiqueSaleRecorded(String total) {
+    return 'Vente encaissée · $total';
+  }
+
+  @override
+  String get boutiqueSaleFailed =>
+      'La vente n\'a pas pu être enregistrée. Rien n\'a été encaissé — réessayez.';
+
+  @override
+  String get editiqueViewerSaleReceiptTitle => 'Reçu de vente';
+
+  @override
+  String get documentsHintSaleReceipt =>
+      'Reçu d\'une vente de la boutique. Il ne concerne ni le minerval ni les frais scolaires, et se retrouve depuis la caisse — pas depuis le dossier d\'un élève.';
+
+  @override
+  String get boutiqueTicketTitle => 'Reçu de vente — Boutique';
+
+  @override
+  String get boutiqueTicketProvisionalBanner => 'Document provisoire';
+
+  @override
+  String get boutiqueTicketProvisionalNotice =>
+      'Reçu définitif scellé à la synchronisation.';
+
+  @override
+  String get boutiqueTicketSealedNotice => 'Reçu scellé — vaut quittance';
+
+  @override
+  String get boutiqueTicketPayerLabel => 'PAYEUR :';
+
+  @override
+  String get boutiqueTicketPhoneLabel => 'Tél.';
+
+  @override
+  String get boutiqueTicketCashierLabel => 'Caissier :';
+
+  @override
+  String get boutiqueTicketTotalLabel => 'TOTAL';
+
+  @override
+  String get boutiqueTicketCashReceivedLabel => 'Espèces reçues';
+
+  @override
+  String get boutiqueTicketRemainingLabel => 'Reste à payer';
+
+  @override
+  String get boutiqueTicketBeneficiaryPrefix => 'pour';
+
+  @override
+  String get boutiqueTicketSizePrefix => 'T.';
+
+  @override
+  String get boutiqueTicketUnitSuffix => '/u';
+
+  @override
+  String get boutiqueTicketNoRefundNotice =>
+      'Aucun remboursement après remise de l\'article.';
+
+  @override
+  String boutiqueReceiptBannerTitle(String total) {
+    return 'Vente encaissée · $total';
+  }
+
+  @override
+  String boutiqueReceiptBannerProvisional(String reference) {
+    return '$reference · provisoire, sera scellé à la synchro';
+  }
+
+  @override
+  String boutiqueReceiptBannerSealed(String reference) {
+    return '$reference · scellé';
+  }
+
+  @override
+  String get boutiqueReceiptPrint => 'Imprimer';
+
+  @override
+  String get boutiqueReceiptNewSale => 'Nouvelle vente';
+
+  @override
+  String get boutiqueReceiptPrintFailed =>
+      'Le ticket n\'a pas pu être imprimé. La vente est enregistrée — vous pouvez réessayer.';
+
+  @override
+  String get boutiqueReceiptPrinted => 'Ticket imprimé.';
+
+  @override
+  String get boutiqueOpenCart => 'Voir le panier';
+
+  @override
+  String boutiqueOpenCartWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return 'Voir le panier, $_temp0';
+  }
+
+  @override
+  String get boutiqueCartPageEyebrow => 'Boutique ▸ Panier';
+
+  @override
+  String get boutiqueBackToCatalog => 'Retour au catalogue';
+
+  @override
+  String get boutiqueAddToCart => 'Ajouter au panier';
+
+  @override
+  String boutiqueAddOneMore(String article) {
+    return 'Ajouter un $article';
+  }
+
+  @override
+  String boutiqueRemoveOne(String article) {
+    return 'Retirer un $article';
+  }
+
+  @override
+  String get boutiqueSuccessTitle => 'Vente encaissée';
+
+  @override
+  String boutiqueSuccessMessage(String total) {
+    return 'Le client a payé $total en espèces. Remettez-lui son ticket.';
+  }
+
+  @override
+  String get boutiqueSuccessDone => 'Terminer';
+
+  @override
+  String get boutiqueHistoryEyebrow => 'Boutique ▸ Historiques';
+
+  @override
+  String get boutiqueHistoryTitle => 'Historique des ventes';
+
+  @override
+  String get boutiqueHistoryPeriodDay => 'Aujourd\'hui';
+
+  @override
+  String get boutiqueHistoryPeriodWeek => 'Cette semaine';
+
+  @override
+  String get boutiqueHistoryPeriodMonth => 'Ce mois';
+
+  @override
+  String get boutiqueHistoryPeriodYear => 'Cette année';
+
+  @override
+  String boutiqueHistorySaleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes ne sont pas encore parties au serveur.',
+      one: '1 vente n\'est pas encore partie au serveur.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueHistoryPendingBadge => 'En attente';
+
+  @override
+  String get boutiqueHistoryEmptyTitle => 'Aucune vente sur cette période';
+
+  @override
+  String get boutiqueHistoryEmptyMessage =>
+      'Rien n\'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.';
+
+  @override
+  String get boutiqueHistoryPayerUnknown => 'Payeur non renseigné';
+
+  @override
+  String get boutiqueHistoryTotalLabel => 'Total encaissé';
+
+  @override
+  String boutiqueHistorySaleTime(String time, String reference) {
+    return '$time · $reference';
+  }
+
+  @override
+  String get boutiqueHistoryProvisional => 'ticket provisoire';
+
+  @override
+  String get boutiqueHistoryErrorServerTitle => 'Historique illisible';
+
+  @override
+  String get boutiqueHistoryErrorServer =>
+      'La caisse locale n\'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c\'est leur relecture qui a échoué.';
+
+  @override
+  String get boutiqueHistoryErrorNetwork =>
+      'L\'historique se lit en local et n\'a pas besoin du réseau. Réessayez ; s\'il ne revient pas, c\'est la base locale qui est en cause.';
+
+  @override
+  String get boutiqueClearEyebrow => 'Boutique ▸ Panier';
+
+  @override
+  String get boutiqueClearTitle => 'Vider le panier ?';
+
+  @override
+  String get boutiqueClearMessage =>
+      'Les lignes composées et l\'identité du payeur seront effacées. Rien n\'a encore été encaissé — il n\'y a donc rien à annuler côté argent.';
+
+  @override
+  String boutiqueClearLinesSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0 au panier';
+  }
+
+  @override
+  String boutiqueClearPayerSummary(String payer) {
+    return 'Payeur saisi : $payer';
+  }
+
+  @override
+  String get boutiqueClearCancel => 'Garder le panier';
+
+  @override
+  String get boutiqueClearConfirm => 'Vider';
+
+  @override
+  String get boutiqueSuccessEyebrow => 'Boutique ▸ Encaissement';
+
+  @override
+  String get boutiqueSaleDetailEyebrow => 'Boutique ▸ Vente';
+
+  @override
+  String get boutiqueSaleDetailTitle => 'Détail de la vente';
+
+  @override
+  String get boutiqueSaleDetailBack => 'Retour à l\'historique';
+
+  @override
+  String get boutiqueSaleDetailPayer => 'Payeur';
+
+  @override
+  String get boutiqueSaleDetailPhone => 'Téléphone';
+
+  @override
+  String get boutiqueSaleDetailSoldAt => 'Encaissée le';
+
+  @override
+  String get boutiqueSaleDetailCollectedBy => 'Encaissé par';
+
+  @override
+  String get boutiqueSaleDetailCollectedByUnknown => 'Caissier non renseigné';
+
+  @override
+  String get boutiqueSaleDetailReceipt => 'Reçu';
+
+  @override
+  String get boutiqueSaleDetailLines => 'Articles vendus';
+
+  @override
+  String boutiqueSaleDetailBeneficiary(String name) {
+    return 'pour $name';
+  }
+
+  @override
+  String boutiqueSaleDetailSizePrefix(String size) {
+    return 'Taille $size';
+  }
+
+  @override
+  String get boutiqueSaleDetailPrintTicket => 'Imprimer le ticket';
+
+  @override
+  String get boutiqueSaleDetailReprintTicket => 'Réimprimer le ticket';
+
+  @override
+  String boutiqueSaleDetailTicketPrintedAt(String date) {
+    return 'Ticket imprimé le $date';
+  }
+
+  @override
+  String get boutiqueSaleDetailTicketNeverPrinted =>
+      'Ticket jamais imprimé depuis cette tablette.';
+
+  @override
+  String get boutiqueSaleDetailOpenReceipt => 'Ouvrir le reçu scellé';
+
+  @override
+  String get boutiqueSaleDetailReceiptPending =>
+      'Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.';
+
+  @override
+  String get boutiqueSaleDetailReceiptTitle => 'Reçu de vente';
+
+  @override
+  String get boutiqueSaleDetailNotFoundTitle => 'Vente introuvable';
+
+  @override
+  String get boutiqueSaleDetailNotFound =>
+      'Cette vente n\'est plus dans la base locale de cet établissement. Rien n\'est perdu côté serveur si elle y était déjà partie.';
+
+  @override
+  String get boutiqueSaleDetailPendingNotice =>
+      'Cette vente n\'est pas encore partie au serveur. Elle partira à la prochaine synchronisation, sans intervention.';
 }

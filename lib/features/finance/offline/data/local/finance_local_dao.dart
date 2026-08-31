@@ -9,9 +9,12 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/finan
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_ack_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payer_directory_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/reduction_catalog_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/models/reduction_catalog_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/grantable_reduction.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 
@@ -26,6 +29,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 ///  - pull autoritaire (FF2)         → [FinanceLedgerSyncDao]
 ///  - lectures                       → [FinanceLedgerReadDao]
 ///  - annuaire des payeurs           → [FinancePayerDirectoryDao]
+///  - barème de réductions (ADR-021) → [ReductionCatalogDao]
 ///
 /// Aucune méthode ne franchit deux responsabilités : chacune ouvre sa propre
 /// transaction dans son DAO, la garantie money-grade est portée là où elle vit.
@@ -36,6 +40,7 @@ class FinanceLocalDao {
   final FinanceLedgerSyncDao _sync;
   final FinanceLedgerReadDao _read;
   final FinancePayerDirectoryDao _payers;
+  final ReductionCatalogDao _reductions;
 
   FinanceLocalDao(Database db, IdGenerator idGenerator)
     : _write = FinancePaymentWriteDao(db),
@@ -43,7 +48,8 @@ class FinanceLocalDao {
       _seed = FinanceChargeSeedDao(db, idGenerator),
       _sync = FinanceLedgerSyncDao(db),
       _read = FinanceLedgerReadDao(db),
-      _payers = FinancePayerDirectoryDao(db);
+      _payers = FinancePayerDirectoryDao(db),
+      _reductions = ReductionCatalogDao(db);
 
   // ── Encaissement local-first (FF3) ─────────────────────────────────────────
 
@@ -100,6 +106,18 @@ class FinanceLocalDao {
     List<FeeTariffLocalModel> tariffs, {
     required List<String> academicYearIds,
   }) => _sync.replaceTariffsForYears(tariffs, academicYearIds: academicYearIds);
+
+  /// Barème de réductions du bundle (racine, scopé ÉCOLE et non année).
+  Future<void> replaceReductionCatalogForSchool(
+    List<ReductionTypeLocalModel> types,
+    List<ReductionLineLocalModel> lines, {
+    required String schoolId,
+  }) => _reductions.replaceForSchool(types, lines, schoolId: schoolId);
+
+  /// Réductions proposables au guichet pour cette école (ADR-021 V1).
+  Future<List<GrantableReduction>> grantableReductionsForSchool(
+    String schoolId,
+  ) => _reductions.grantableForSchool(schoolId);
 
   Future<void> upsertLedger({
     List<StudentChargeLocalModel> charges = const [],

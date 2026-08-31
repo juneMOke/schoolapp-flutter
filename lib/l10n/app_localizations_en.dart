@@ -169,6 +169,702 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account does not have the rights needed to open the application. Contact your school administrator.';
 
   @override
+  String get splashNotProvisionedTitle => 'School not set up yet';
+
+  @override
+  String get splashNotProvisionedMessage =>
+      'This school has no open academic year yet. Setup declares the year, the classes and the fees, then brings the school into service.';
+
+  @override
+  String get splashNotProvisionedAction => 'Set up the school';
+
+  @override
+  String get splashNotProvisionedWaitMessage =>
+      'This school has no open academic year yet. Only school management can set it up — check with them before retrying.';
+
+  @override
+  String get configurationTitle => 'Setup';
+
+  @override
+  String get configurationSubtitle => 'Bringing the school into service';
+
+  @override
+  String configurationStepCounter(int current, int total) {
+    return 'Step $current / $total';
+  }
+
+  @override
+  String get configurationExitTooltip => 'Leave setup';
+
+  @override
+  String get configurationStepSchool => 'School';
+
+  @override
+  String get configurationStepAcademicYear => 'Year';
+
+  @override
+  String get configurationStepStructure => 'Structure';
+
+  @override
+  String get configurationStepFees => 'Fees';
+
+  @override
+  String get configurationStepActivation => 'Activation';
+
+  @override
+  String configurationStepSemantics(int current, int total, String title) {
+    return 'Step $current of $total, $title';
+  }
+
+  @override
+  String get configurationBack => 'Back';
+
+  @override
+  String get configurationSave => 'Save';
+
+  @override
+  String get configurationContinue => 'Continue';
+
+  @override
+  String get configurationSaving => 'Saving…';
+
+  @override
+  String get configurationSaved => 'Saved';
+
+  @override
+  String get configurationDraftSaved => 'Draft saved';
+
+  @override
+  String get configurationSaveBarDefaultHint =>
+      'Fill in the required fields to continue';
+
+  @override
+  String get configurationSchoolSectionTitle => 'School identity';
+
+  @override
+  String get configurationSchoolSectionSubtitle =>
+      'This information appears on certificates, receipts and report cards.';
+
+  @override
+  String get configurationSchoolName => 'School name';
+
+  @override
+  String get configurationSchoolCountry => 'Country';
+
+  @override
+  String get configurationSchoolCity => 'City';
+
+  @override
+  String get configurationSchoolDistrict => 'District';
+
+  @override
+  String get configurationSchoolMunicipality => 'Municipality';
+
+  @override
+  String get configurationSchoolMunicipalityPlaceholder =>
+      'Pick a district first';
+
+  @override
+  String get configurationSchoolAddress => 'Address';
+
+  @override
+  String get configurationSchoolPhone => 'School phone';
+
+  @override
+  String get configurationSchoolEmail => 'School email';
+
+  @override
+  String configurationSchoolMissingHint(String fields) {
+    return 'Still needed: $fields';
+  }
+
+  @override
+  String get configurationSchoolReadOnlyNote =>
+      'Country and city are fixed: the application is deployed in Kinshasa.';
+
+  @override
+  String get configurationYearSectionTitle => 'Academic year';
+
+  @override
+  String get configurationYearSectionSubtitle =>
+      'A first year is proposed from today\'s date — adjust the dates if needed.';
+
+  @override
+  String get configurationYearProposed => 'Proposed automatically';
+
+  @override
+  String get configurationYearEdited => 'Edited';
+
+  @override
+  String get configurationYearRestore => 'Restore the proposal';
+
+  @override
+  String get configurationYearStart => 'First day of class';
+
+  @override
+  String get configurationYearEnd => 'End of year';
+
+  @override
+  String get configurationYearDuration => 'Length';
+
+  @override
+  String configurationYearDurationValue(int months) {
+    return '≈ $months months';
+  }
+
+  @override
+  String get configurationYearRangeError => 'The end must follow the start';
+
+  @override
+  String get configurationYearPeriodsNote =>
+      'Terms and semesters are set later, in Results.';
+
+  @override
+  String get configurationStructureTitle => 'Cycles, levels and classes';
+
+  @override
+  String configurationTotalCycles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cycles',
+      one: 'cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalLevels(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'levels',
+      one: 'level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'classes',
+      one: 'class',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationTotalCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'courses',
+      one: 'course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationCycleClassroomsPerLevel => 'Classes per level';
+
+  @override
+  String get configurationCycleNotOffered => 'Not offered';
+
+  @override
+  String configurationCycleSummary(int open, int total, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    return '$open / $total · $_temp0';
+  }
+
+  @override
+  String get configurationLevelNotOffered => 'Level not offered this year';
+
+  @override
+  String get configurationLevelNoGrid =>
+      'No official grid — these classes will have no courses.';
+
+  @override
+  String configurationSectionsServed(String level) {
+    return 'Grids served on $level';
+  }
+
+  @override
+  String configurationSectionCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses',
+      one: '$count course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationStructureHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes will be created for the year',
+      one: '$count class will be created for the year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationStructureEmptyHint => 'Tick at least one level';
+
+  @override
+  String get configurationStructureEmptyTitle => 'No level selected';
+
+  @override
+  String get configurationStructureEmptyMessage =>
+      'A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.';
+
+  @override
+  String get configurationStructureRestore => 'Restore the proposal';
+
+  @override
+  String get configurationFeesTitle => 'School fees';
+
+  @override
+  String get configurationFeeNew => 'New fee';
+
+  @override
+  String get configurationFeeFormTitle => 'New fee';
+
+  @override
+  String get configurationFeeFormEditTitle => 'Edit fee';
+
+  @override
+  String get configurationFeeType => 'Fee type';
+
+  @override
+  String configurationFeeTypeOthers(int count) {
+    return 'Other types ($count)';
+  }
+
+  @override
+  String get configurationFeeLabel => 'Label shown to parents';
+
+  @override
+  String get configurationFeeAmount => 'Amount';
+
+  @override
+  String get configurationFeeCurrency => 'Currency';
+
+  @override
+  String get configurationFeeDueAt => 'Due date';
+
+  @override
+  String get configurationFeeScope => 'Applies to';
+
+  @override
+  String get configurationFeeScopeAll => 'All opened levels';
+
+  @override
+  String get configurationFeeScopeSome => 'Selected levels';
+
+  @override
+  String configurationFeeScopeAllHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open levels',
+      one: '$count open level',
+    );
+    return 'Will apply to $_temp0';
+  }
+
+  @override
+  String configurationFeeScopeCount(int selected, int total) {
+    return '$selected / $total selected';
+  }
+
+  @override
+  String get configurationFeeScopeWholeCycle => 'Whole cycle';
+
+  @override
+  String get configurationFeeAdd => 'Add the fee';
+
+  @override
+  String get configurationFeeUpdate => 'Update';
+
+  @override
+  String get configurationFeeCancel => 'Cancel';
+
+  @override
+  String configurationFeeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees defined',
+      one: '$count fee defined',
+      zero: 'No fee defined',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeCatalogTotal(String total) {
+    return 'Catalogue total: $total';
+  }
+
+  @override
+  String get configurationFeePerStudent => 'per student';
+
+  @override
+  String configurationFeeLevelsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count levels',
+      one: '$count level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationFeeDueLabel(String date) {
+    return 'due $date';
+  }
+
+  @override
+  String configurationFeeDeleted(String label) {
+    return 'Fee \"$label\" deleted';
+  }
+
+  @override
+  String configurationFeeSaved(String label) {
+    return 'Fee \"$label\" saved';
+  }
+
+  @override
+  String get configurationFeesEmptyTitle => 'No fees yet';
+
+  @override
+  String get configurationFeesEmptyMessage =>
+      'Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.';
+
+  @override
+  String get configurationFeesEmptyAction => 'Create the first fee';
+
+  @override
+  String get configurationFeesEmptyHint => 'Add at least one fee to continue';
+
+  @override
+  String get configurationFeesDraftHint => 'Finish the fee you are editing';
+
+  @override
+  String configurationFeesValidHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees will be attached to the open levels',
+      one: '$count fee will be attached to the open levels',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationSummaryTitle => 'Summary';
+
+  @override
+  String get configurationSummaryEdit => 'Edit';
+
+  @override
+  String get configurationSummarySchool => 'School';
+
+  @override
+  String get configurationSummaryYear => 'Academic year';
+
+  @override
+  String configurationSummaryStructure(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+    );
+    return 'Structure · $_temp0';
+  }
+
+  @override
+  String get configurationSummaryFees => 'School fees';
+
+  @override
+  String get configurationSummaryMissing => 'to be filled in';
+
+  @override
+  String configurationSummaryCycleLine(int levels, int classrooms) {
+    String _temp0 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels levels',
+      one: '$levels level',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSummaryNoGrid => 'no official grid';
+
+  @override
+  String get configurationCheckSchool => 'School identity complete';
+
+  @override
+  String get configurationCheckYear => 'Academic year dated';
+
+  @override
+  String configurationCheckClassrooms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes ready to open',
+      one: '$count class ready to open',
+      zero: 'No class to open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String configurationCheckFees(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees attached to levels',
+      one: '$count fee attached to levels',
+      zero: 'No fee attached to levels',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configurationActivate => 'Bring the school into service';
+
+  @override
+  String get configurationActivating => 'Activating…';
+
+  @override
+  String get configurationActivateBlocked =>
+      'Complete the amber items to activate.';
+
+  @override
+  String get configurationActivateFailed => 'Activation failed — try again.';
+
+  @override
+  String configurationActivatedTitle(String school) {
+    return '$school is in service';
+  }
+
+  @override
+  String configurationActivatedMessage(String year, int classrooms, int fees) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      fees,
+      locale: localeName,
+      other: '$fees fees',
+      one: '$fees fee',
+    );
+    return 'The $year year is open with $_temp0 and $_temp1. You can enrol your first students.';
+  }
+
+  @override
+  String get configurationGoHome => 'Go to the dashboard';
+
+  @override
+  String get configurationReviewSetup => 'Review the setup';
+
+  @override
+  String get configurationWarningsTitle => 'Worth knowing before activating';
+
+  @override
+  String get menuConfiguration => 'Setup';
+
+  @override
+  String get subMenuConfigurationSchool => 'School settings';
+
+  @override
+  String get configurationSettingsTitle => 'School setup';
+
+  @override
+  String configurationSettingsInService(String school) {
+    return '$school · in service';
+  }
+
+  @override
+  String configurationSettingsSummary(String year, int classrooms, int levels) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classrooms,
+      locale: localeName,
+      other: '$classrooms classes',
+      one: '$classrooms class',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      levels,
+      locale: localeName,
+      other: '$levels levels',
+      one: '$levels level',
+    );
+    return '$year year · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get configurationSettingsNextYear => 'Prepare next year';
+
+  @override
+  String get configurationSettingsNextYearTooltip =>
+      'Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.';
+
+  @override
+  String get configurationSettingsTabIdentity => 'School identity';
+
+  @override
+  String get configurationSettingsTabStructure => 'Cycles, levels and classes';
+
+  @override
+  String get configurationSettingsTabFees => 'School fees';
+
+  @override
+  String get configurationSettingsReadOnly => 'read-only';
+
+  @override
+  String get configurationSettingsStructureReadOnlyNote =>
+      'The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.';
+
+  @override
+  String get configurationSettingsSaved => 'Changes saved';
+
+  @override
+  String get configurationSettingsSave => 'Save';
+
+  @override
+  String get configurationSettingsNoYear => 'No open year';
+
+  @override
+  String configurationSettingsTariffsForLevel(String level) {
+    return 'Tariffs for $level';
+  }
+
+  @override
+  String get configurationSettingsTariffOne =>
+      'Here a tariff carries a single level: each row is edited on its own.';
+
+  @override
+  String get configurationTariffAdd => 'Add a tariff';
+
+  @override
+  String get configurationTariffEdit => 'Edit tariff';
+
+  @override
+  String get configurationTariffNew => 'New tariff';
+
+  @override
+  String get configurationTariffDelete => 'Delete tariff';
+
+  @override
+  String configurationTariffDeleteConfirm(String label) {
+    return 'Delete \"$label\"? Charges already generated are not affected.';
+  }
+
+  @override
+  String get configurationTariffSaved => 'Tariff saved';
+
+  @override
+  String get configurationTariffDeleted => 'Tariff deleted';
+
+  @override
+  String get configurationTariffNone => 'No tariff on this level';
+
+  @override
+  String get configurationFeeTypesUnavailableTitle => 'Fee types unavailable';
+
+  @override
+  String get configurationFeeTypesUnavailableMessage =>
+      'The fee type reference was not loaded. Reload it to enter the school fees.';
+
+  @override
+  String get configurationLoadingA11yLabel => 'Loading the step data';
+
+  @override
+  String get configurationErrorNetworkTitle => 'Connection lost';
+
+  @override
+  String get configurationErrorNetworkMessage =>
+      'The setup was not sent. Check your connection, then try again.';
+
+  @override
+  String get configurationErrorSessionTitle => 'Your session has expired';
+
+  @override
+  String get configurationErrorSessionMessage =>
+      'Sign in again to pick up where you left off. Your entries are kept.';
+
+  @override
+  String get configurationErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get configurationErrorForbiddenMessage =>
+      'Only the school owner can set up the school. Contact your school administrator.';
+
+  @override
+  String get configurationErrorServerTitle => 'The server could not save';
+
+  @override
+  String get configurationErrorServerMessage =>
+      'Something broke. Try again, and quote the code below to support if it persists.';
+
+  @override
+  String get configurationErrorRateTitle => 'Too many requests';
+
+  @override
+  String get configurationErrorRateMessage =>
+      'The server is asking for a pause. Wait a few moments before carrying on.';
+
+  @override
+  String get configurationErrorYearExistsTitle =>
+      'This academic year already exists';
+
+  @override
+  String get configurationErrorYearExistsMessage =>
+      'Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.';
+
+  @override
+  String get configurationErrorYearExistsAction => 'Back to the year';
+
+  @override
+  String get configurationErrorRetry => 'Try again';
+
+  @override
+  String get configurationErrorSignIn => 'Sign in again';
+
+  @override
+  String get configurationErrorContact => 'Contact the administrator';
+
+  @override
+  String get configurationErrorIncident => 'Incident code';
+
+  @override
+  String get configurationErrorReloadCatalog => 'Reload the referential';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }
@@ -304,6 +1000,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subMenuFeeControl => 'Fee control';
+
+  @override
+  String get menuBoutique => 'Shop';
+
+  @override
+  String get subMenuBoutiquePurchases => 'Purchases';
+
+  @override
+  String get subMenuBoutiqueHistory => 'History';
 
   @override
   String get subMenuOrganization => 'Class\ncomposition';
@@ -1335,7 +2040,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Six modules cover the life of the school — each card opens its dashboard or its pages.';
+      'These modules cover the life of the school — each card opens its dashboard or its pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -1344,6 +2049,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleFinancesDescription =>
       'Revenue, invoicing and tracking of school fee collection.';
+
+  @override
+  String get accueilModuleBoutiqueDescription =>
+      'Cash sales of school items, and the counter\'s collection history.';
 
   @override
   String get accueilModuleClassesDescription =>
@@ -1360,6 +2069,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleDisciplinesDescription =>
       'Daily attendance, disciplinary records and student follow-up.';
+
+  @override
+  String get accueilModuleConfigurationDescription =>
+      'School identity, cycles and levels, and the school fee schedule.';
 
   @override
   String accueilModulePageCount(int count) {
@@ -2033,6 +2746,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearNotValidated => 'Not validated';
 
   @override
+  String get yearValidationUnknown => 'Not specified';
+
+  @override
+  String get guardianEmergencyContactLabel => 'Emergency contact';
+
+  @override
+  String get guardianEmergencyContactBadge => 'Emergency';
+
+  @override
+  String get guardianEmergencyContactHint =>
+      'One guardian per pupil: designating one clears the previous designation.';
+
+  @override
+  String get guardianEmergencyContactAmbiguous =>
+      'Only one guardian can be the emergency contact for this pupil.';
+
+  @override
+  String get guardianEmergencyContactSaved => 'Emergency contact updated.';
+
+  @override
+  String get guardianEmergencyContactCleared => 'Emergency contact cleared.';
+
+  @override
+  String get guardianEmergencyContactRetry => 'Retry';
+
+  @override
+  String get guardianEmergencyContactFailed =>
+      'Setting the emergency contact failed.';
+
+  @override
+  String get medicalNotesLabel => 'Health information';
+
+  @override
+  String get medicalNotesHelp =>
+      'Allergies, ongoing treatment, what to do. Optional.';
+
+  @override
+  String get medicalNotesSectionTitle => 'Health';
+
+  @override
+  String get formerStudentLabel => 'Former pupil of this school';
+
+  @override
+  String get formerStudentHelp =>
+      'Tick if the child has already been enrolled in this school, even before the app.';
+
+  @override
+  String get formerStudentLockedHelp =>
+      'Re-enrolment: the child comes from last year\'s file in this school.';
+
+  @override
+  String get previousSchoolOptionalHint =>
+      'Optional — leave blank if the child has not been to school yet.';
+
+  @override
+  String get averageOutOfRangeError => 'The average must be between 0 and 100.';
+
+  @override
   String get currentAcademicYearLabel => 'Academic year';
 
   @override
@@ -2433,6 +3204,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.';
 
   @override
+  String get enrollmentReeditAction => 'Edit';
+
+  @override
+  String get enrollmentReeditReadOnlyMessage =>
+      'Completed record. You may correct it: saving will move it back to in progress and queue it for sending.';
+
+  @override
+  String get enrollmentReeditExitTitle => 'Correction not validated';
+
+  @override
+  String get enrollmentReeditExitMessage =>
+      'This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.';
+
+  @override
+  String get enrollmentReeditExitConfirm => 'Leave anyway';
+
+  @override
+  String get enrollmentReeditExitResume => 'Resume correction';
+
+  @override
   String get enrollmentEditableTitle => 'Edit mode';
 
   @override
@@ -2492,6 +3283,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get studentChargesSaveHintBeforeContinue =>
       'Please save charge changes before continuing.';
+
+  @override
+  String get enrollmentReductionsSectionTitle => 'Reductions';
 
   @override
   String get studentChargesTotalLabel => 'Total';
@@ -2812,6 +3606,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String facturationBalanceDuePill(String amount) {
     return '$amount due';
   }
+
+  @override
+  String get facturationBalanceDueMultiCurrencyPill => 'Balance due';
 
   @override
   String get facturationBalanceUpToDatePill => 'Up to date';
@@ -3300,6 +4097,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerSectionTitle => 'Payer information';
+
+  @override
+  String get facturationCreatePaymentEyebrow => 'Payment collection';
+
+  @override
+  String get facturationCreatePaymentContextErrorTitle =>
+      'Collection unavailable';
+
+  @override
+  String get facturationCreatePaymentContextErrorMessage =>
+      'The information required for this collection is missing. Go back to the student file and start the collection again.';
 
   @override
   String get facturationCreatePaymentPayerLastNameLabel => 'Last name';
@@ -5078,6 +5886,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeStatsPeriodYearCurrent => 'This year';
 
   @override
+  String financeStatsCurrencyHeading(String currency) {
+    return 'In $currency';
+  }
+
+  @override
+  String get financeStatsNoMovementLabel => 'No movement in this period';
+
+  @override
+  String get financeStatsNoMovementDescription =>
+      'Nothing collected and nothing billed in this window. Widen the period to look further back.';
+
+  @override
   String get financeStatsKpiCollected => 'Total collected';
 
   @override
@@ -5088,6 +5908,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financeStatsKpiCollectionRate => 'Collection rate';
+
+  @override
+  String financeStatsKpiRateForCurrency(int rate, String currency) {
+    return '$rate% · $currency';
+  }
 
   @override
   String get financeStatsSectionEvolution => 'Collection evolution';
@@ -6402,4 +7227,667 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentsBlockedEnrollmentUnreadableNotice =>
       'Enrolment not readable on this tablet: the certificate is unavailable here.';
+
+  @override
+  String get boutiqueEyebrow => 'Shop ▸ Purchases';
+
+  @override
+  String get boutiqueTitle => 'Till';
+
+  @override
+  String get boutiqueSubtitle =>
+      'Cash sale of school items. No debt, no balance.';
+
+  @override
+  String get boutiqueSearchPlaceholder => 'Search an item or a code…';
+
+  @override
+  String get boutiqueFilterAll => 'All';
+
+  @override
+  String get boutiqueFamilyUniforme => 'Uniform';
+
+  @override
+  String get boutiqueFamilyFournitures => 'Supplies';
+
+  @override
+  String get boutiqueFamilyActivites => 'Activities';
+
+  @override
+  String get boutiqueFamilyActes => 'Administrative';
+
+  @override
+  String boutiqueArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueInCartBadge(int count) {
+    return '$count in cart';
+  }
+
+  @override
+  String get boutiqueLevelBadge => 'by level';
+
+  @override
+  String boutiquePriceRange(String min, String max) {
+    return '$min – $max';
+  }
+
+  @override
+  String get boutiqueGridReminder =>
+      'Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.';
+
+  @override
+  String get boutiqueCartTitle => 'Cart';
+
+  @override
+  String get boutiqueCartEmpty => 'Cart is empty. Tap an item to add it.';
+
+  @override
+  String get boutiqueCartClear => 'Empty the cart';
+
+  @override
+  String get boutiqueTotalLabel => 'Total to collect';
+
+  @override
+  String get boutiqueCollectAction => 'Collect in cash';
+
+  @override
+  String get boutiquePriceUnresolved => 'Price unresolved';
+
+  @override
+  String get boutiqueLevelRequired => 'Level required…';
+
+  @override
+  String get boutiqueBeneficiaryPlaceholder => 'Recipient';
+
+  @override
+  String get boutiqueSizeLabel => 'Size';
+
+  @override
+  String boutiqueLineMeta(String unitPrice, int quantity) {
+    return '$unitPrice × $quantity';
+  }
+
+  @override
+  String get boutiquePayerSection => 'Payer';
+
+  @override
+  String get boutiquePayerKnownBadge => 'Known payer';
+
+  @override
+  String get boutiquePayerPhoneLabel => 'Phone';
+
+  @override
+  String get boutiquePayerLastNameLabel => 'Last name';
+
+  @override
+  String get boutiquePayerMiddleNameLabel => 'Middle name';
+
+  @override
+  String get boutiquePayerFirstNameLabel => 'First name';
+
+  @override
+  String get boutiquePayerReceiptNotice =>
+      'The receipt is in the payer\'s name; recipients are attached to each line.';
+
+  @override
+  String get boutiquePayerUnknownNotice =>
+      'Unknown number — this payer will be added to the directory with the sale.';
+
+  @override
+  String get boutiqueBlockersPrefix => 'Still missing:';
+
+  @override
+  String get boutiqueBlockerEmptyCart => 'Cart is empty';
+
+  @override
+  String get boutiqueBlockerLastName => 'Last name';
+
+  @override
+  String get boutiqueBlockerMiddleName => 'Middle name';
+
+  @override
+  String get boutiqueBlockerFirstName => 'First name';
+
+  @override
+  String get boutiqueBlockerPhone => 'Payer\'s phone';
+
+  @override
+  String get boutiqueBlockerPhoneIncomplete => 'Incomplete phone';
+
+  @override
+  String boutiqueBlockerLinesWithoutLevel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines without a level',
+      one: '1 line without a level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Mixed currencies';
+
+  @override
+  String get boutiqueEmptyCatalogTitle => 'No item in the catalogue';
+
+  @override
+  String get boutiqueEmptyCatalogMessage =>
+      'The shop has no item yet. Create one in the catalogue to be able to make a sale.';
+
+  @override
+  String get boutiqueWithheldCatalogTitle => 'Catalogue not shared';
+
+  @override
+  String get boutiqueWithheldCatalogMessage =>
+      'Your account is not allowed to read the shop catalogue. Ask the head office for it: without it, nothing can be sold from this till.';
+
+  @override
+  String get boutiqueNoMatchTitle => 'No matching item';
+
+  @override
+  String boutiqueNoMatchMessage(String query, String family) {
+    return 'Nothing for “$query” in “$family”. Broaden the search.';
+  }
+
+  @override
+  String boutiqueNoMatchMessageAll(String query) {
+    return 'Nothing for “$query”. Broaden the search.';
+  }
+
+  @override
+  String get boutiqueResetFilters => 'Reset filters';
+
+  @override
+  String boutiqueUnsellableNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count items in this catalogue cannot be sold from this version of the app.',
+      one:
+          '1 item in this catalogue cannot be sold from this version of the app.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueErrorNetworkTitle => 'No connection';
+
+  @override
+  String get boutiqueErrorNetwork =>
+      'The catalogue could not be read. The cart in progress is kept: a network drop never loses a sale being composed.';
+
+  @override
+  String get boutiqueErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get boutiqueErrorUnauthorized =>
+      'Sign in again to resume the till. The cart is kept.';
+
+  @override
+  String get boutiqueErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get boutiqueErrorForbidden =>
+      'Your account lacks the rights to run the shop till. Contact the head office.';
+
+  @override
+  String get boutiqueErrorServerTitle => 'Catalogue unreadable';
+
+  @override
+  String get boutiqueErrorServer =>
+      'The local catalogue could not be read. Try again; if it does not come back, a sync will rebuild it.';
+
+  @override
+  String get boutiqueErrorRetry => 'Try again';
+
+  @override
+  String get boutiqueErrorReconnect => 'Sign in again';
+
+  @override
+  String boutiqueErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get boutiqueBeneficiaryEyebrow => 'Line recipient';
+
+  @override
+  String get boutiqueBeneficiaryTitle => 'Pick a student';
+
+  @override
+  String get boutiqueBeneficiaryHint =>
+      'The student\'s level resolves the price automatically — you never enter an amount.';
+
+  @override
+  String get boutiqueBeneficiarySearchLabel =>
+      'Last name, middle name or first name';
+
+  @override
+  String get boutiqueBeneficiarySearchPlaceholder => 'e.g. Dylan Ndombo';
+
+  @override
+  String get boutiqueBeneficiaryTooShort =>
+      'Type at least 2 letters, or switch to “By level”.';
+
+  @override
+  String boutiqueBeneficiaryNoResult(String query) {
+    return 'No student matches “$query”. Check the spelling or search by level.';
+  }
+
+  @override
+  String get boutiqueBeneficiaryPickLevel =>
+      'Pick a level to list its students.';
+
+  @override
+  String get boutiqueBeneficiaryLevelEmpty =>
+      'No student enrolled at this level.';
+
+  @override
+  String get boutiqueBeneficiaryNotSynced =>
+      'Enrolment not synced yet — sell by level, without a recipient: the price is the same.';
+
+  @override
+  String get boutiqueBeneficiaryNoLevel =>
+      'This enrolment carries no level — sell by level, without a recipient.';
+
+  @override
+  String get boutiqueBeneficiaryLoadFailed =>
+      'The student list could not be read.';
+
+  @override
+  String boutiquePayerDirectoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return 'Already in the directory · $_temp0';
+  }
+
+  @override
+  String get boutiquePayerUse => 'Use';
+
+  @override
+  String get boutiqueConfirmEyebrow => 'Cash collection';
+
+  @override
+  String get boutiqueConfirmTitle => 'Confirm the sale';
+
+  @override
+  String get boutiqueConfirmPayer => 'Payer';
+
+  @override
+  String get boutiqueConfirmPhone => 'Phone';
+
+  @override
+  String get boutiqueConfirmArticles => 'Items';
+
+  @override
+  String get boutiqueConfirmMethod => 'Method';
+
+  @override
+  String get boutiqueConfirmMethodCash => 'Cash';
+
+  @override
+  String get boutiqueConfirmAmountReceived => 'Amount received';
+
+  @override
+  String get boutiqueConfirmNotice =>
+      'The total is paid in one go: no partial payment, no shop debt.';
+
+  @override
+  String get boutiqueConfirmNewPayerPrefix =>
+      'This payer is new: their number and identity join the directory with the sale.';
+
+  @override
+  String get boutiqueConfirmOfflineSuffix =>
+      'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.';
+
+  @override
+  String get boutiqueConfirmCancel => 'Cancel';
+
+  @override
+  String boutiqueConfirmAction(String total) {
+    return 'Collect $total';
+  }
+
+  @override
+  String boutiqueSaleRecorded(String total) {
+    return 'Sale collected · $total';
+  }
+
+  @override
+  String get boutiqueSaleFailed =>
+      'The sale could not be recorded. Nothing was collected — try again.';
+
+  @override
+  String get editiqueViewerSaleReceiptTitle => 'Sale receipt';
+
+  @override
+  String get documentsHintSaleReceipt =>
+      'Receipt for a shop sale. It concerns neither tuition nor school fees, and is found from the till — not from a student\'s file.';
+
+  @override
+  String get boutiqueTicketTitle => 'Sale receipt — Shop';
+
+  @override
+  String get boutiqueTicketProvisionalBanner => 'Provisional document';
+
+  @override
+  String get boutiqueTicketProvisionalNotice => 'Final receipt sealed on sync.';
+
+  @override
+  String get boutiqueTicketSealedNotice => 'Sealed receipt — valid discharge';
+
+  @override
+  String get boutiqueTicketPayerLabel => 'PAYER:';
+
+  @override
+  String get boutiqueTicketPhoneLabel => 'Tel.';
+
+  @override
+  String get boutiqueTicketCashierLabel => 'Cashier:';
+
+  @override
+  String get boutiqueTicketTotalLabel => 'TOTAL';
+
+  @override
+  String get boutiqueTicketCashReceivedLabel => 'Cash received';
+
+  @override
+  String get boutiqueTicketRemainingLabel => 'Remaining';
+
+  @override
+  String get boutiqueTicketBeneficiaryPrefix => 'for';
+
+  @override
+  String get boutiqueTicketSizePrefix => 'Sz.';
+
+  @override
+  String get boutiqueTicketUnitSuffix => '/ea';
+
+  @override
+  String get boutiqueTicketNoRefundNotice =>
+      'No refund once the item is handed over.';
+
+  @override
+  String boutiqueReceiptBannerTitle(String total) {
+    return 'Sale collected · $total';
+  }
+
+  @override
+  String boutiqueReceiptBannerProvisional(String reference) {
+    return '$reference · provisional, will be sealed on sync';
+  }
+
+  @override
+  String boutiqueReceiptBannerSealed(String reference) {
+    return '$reference · sealed';
+  }
+
+  @override
+  String get boutiqueReceiptPrint => 'Print';
+
+  @override
+  String get boutiqueReceiptNewSale => 'New sale';
+
+  @override
+  String get boutiqueReceiptPrintFailed =>
+      'The ticket could not be printed. The sale is recorded — you can try again.';
+
+  @override
+  String get boutiqueReceiptPrinted => 'Ticket printed.';
+
+  @override
+  String get boutiqueOpenCart => 'View the cart';
+
+  @override
+  String boutiqueOpenCartWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return 'View the cart, $_temp0';
+  }
+
+  @override
+  String get boutiqueCartPageEyebrow => 'Shop ▸ Cart';
+
+  @override
+  String get boutiqueBackToCatalog => 'Back to catalogue';
+
+  @override
+  String get boutiqueAddToCart => 'Add to cart';
+
+  @override
+  String boutiqueAddOneMore(String article) {
+    return 'Add one $article';
+  }
+
+  @override
+  String boutiqueRemoveOne(String article) {
+    return 'Remove one $article';
+  }
+
+  @override
+  String get boutiqueSuccessTitle => 'Sale collected';
+
+  @override
+  String boutiqueSuccessMessage(String total) {
+    return 'The customer paid $total in cash. Hand them their ticket.';
+  }
+
+  @override
+  String get boutiqueSuccessDone => 'Done';
+
+  @override
+  String get boutiqueHistoryEyebrow => 'Shop ▸ History';
+
+  @override
+  String get boutiqueHistoryTitle => 'Sales history';
+
+  @override
+  String get boutiqueHistoryPeriodDay => 'Today';
+
+  @override
+  String get boutiqueHistoryPeriodWeek => 'This week';
+
+  @override
+  String get boutiqueHistoryPeriodMonth => 'This month';
+
+  @override
+  String get boutiqueHistoryPeriodYear => 'This year';
+
+  @override
+  String boutiqueHistorySaleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryArticleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueHistoryPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales have not reached the server yet.',
+      one: '1 sale has not reached the server yet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueHistoryPendingBadge => 'Pending';
+
+  @override
+  String get boutiqueHistoryEmptyTitle => 'No sale in this period';
+
+  @override
+  String get boutiqueHistoryEmptyMessage =>
+      'Nothing was collected at the counter. Widen the period, or open the shop to collect.';
+
+  @override
+  String get boutiqueHistoryPayerUnknown => 'Payer not recorded';
+
+  @override
+  String get boutiqueHistoryTotalLabel => 'Total collected';
+
+  @override
+  String boutiqueHistorySaleTime(String time, String reference) {
+    return '$time · $reference';
+  }
+
+  @override
+  String get boutiqueHistoryProvisional => 'provisional ticket';
+
+  @override
+  String get boutiqueHistoryErrorServerTitle => 'History unreadable';
+
+  @override
+  String get boutiqueHistoryErrorServer =>
+      'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.';
+
+  @override
+  String get boutiqueHistoryErrorNetwork =>
+      'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.';
+
+  @override
+  String get boutiqueClearEyebrow => 'Shop ▸ Cart';
+
+  @override
+  String get boutiqueClearTitle => 'Empty the cart?';
+
+  @override
+  String get boutiqueClearMessage =>
+      'The composed lines and the payer\'s identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.';
+
+  @override
+  String boutiqueClearLinesSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 in the cart';
+  }
+
+  @override
+  String boutiqueClearPayerSummary(String payer) {
+    return 'Payer entered: $payer';
+  }
+
+  @override
+  String get boutiqueClearCancel => 'Keep the cart';
+
+  @override
+  String get boutiqueClearConfirm => 'Empty';
+
+  @override
+  String get boutiqueSuccessEyebrow => 'Shop ▸ Collection';
+
+  @override
+  String get boutiqueSaleDetailEyebrow => 'Shop ▸ Sale';
+
+  @override
+  String get boutiqueSaleDetailTitle => 'Sale details';
+
+  @override
+  String get boutiqueSaleDetailBack => 'Back to history';
+
+  @override
+  String get boutiqueSaleDetailPayer => 'Payer';
+
+  @override
+  String get boutiqueSaleDetailPhone => 'Phone';
+
+  @override
+  String get boutiqueSaleDetailSoldAt => 'Collected on';
+
+  @override
+  String get boutiqueSaleDetailCollectedBy => 'Collected by';
+
+  @override
+  String get boutiqueSaleDetailCollectedByUnknown => 'Cashier not recorded';
+
+  @override
+  String get boutiqueSaleDetailReceipt => 'Receipt';
+
+  @override
+  String get boutiqueSaleDetailLines => 'Items sold';
+
+  @override
+  String boutiqueSaleDetailBeneficiary(String name) {
+    return 'for $name';
+  }
+
+  @override
+  String boutiqueSaleDetailSizePrefix(String size) {
+    return 'Size $size';
+  }
+
+  @override
+  String get boutiqueSaleDetailPrintTicket => 'Print the ticket';
+
+  @override
+  String get boutiqueSaleDetailReprintTicket => 'Reprint the ticket';
+
+  @override
+  String boutiqueSaleDetailTicketPrintedAt(String date) {
+    return 'Ticket printed on $date';
+  }
+
+  @override
+  String get boutiqueSaleDetailTicketNeverPrinted =>
+      'Ticket never printed from this tablet.';
+
+  @override
+  String get boutiqueSaleDetailOpenReceipt => 'Open the sealed receipt';
+
+  @override
+  String get boutiqueSaleDetailReceiptPending =>
+      'The receipt will be sealed at synchronisation. The ticket stands in the meantime.';
+
+  @override
+  String get boutiqueSaleDetailReceiptTitle => 'Sale receipt';
+
+  @override
+  String get boutiqueSaleDetailNotFoundTitle => 'Sale not found';
+
+  @override
+  String get boutiqueSaleDetailNotFound =>
+      'This sale is no longer in this school\'s local database. Nothing is lost server-side if it had already been sent.';
+
+  @override
+  String get boutiqueSaleDetailPendingNotice =>
+      'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.';
 }

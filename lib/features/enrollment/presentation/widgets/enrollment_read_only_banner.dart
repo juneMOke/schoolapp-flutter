@@ -12,7 +12,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// teinte d'information neutre (`AppColors.info`) — terre cuite reste réservé
 /// à l'action.
 class EnrollmentReadOnlyBanner extends StatelessWidget {
-  const EnrollmentReadOnlyBanner({super.key});
+  /// Une correction est proposée dans l'en-tête : le bandeau ne peut alors pas
+  /// annoncer « non modifiable » — il contredirait le bouton d'à côté.
+  final bool correctionOffered;
+
+  const EnrollmentReadOnlyBanner({super.key, this.correctionOffered = false});
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +33,19 @@ class EnrollmentReadOnlyBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.lock_outline_rounded,
+          Icon(
+            correctionOffered
+                ? Icons.edit_note_rounded
+                : Icons.lock_outline_rounded,
             size: 18,
             color: AppColors.info,
           ),
           const SizedBox(width: AppDimensions.spacingS),
           Expanded(
             child: Text(
-              l10n.enrollmentReadOnlyMessage,
+              correctionOffered
+                  ? l10n.enrollmentReeditReadOnlyMessage
+                  : l10n.enrollmentReadOnlyMessage,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,

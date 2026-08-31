@@ -71,7 +71,21 @@ Future<void> migrateOfflineDatabase(
     // `IF NOT EXISTS` : les tables déjà présentes sont ignorées, seules les
     // nouvelles sont créées (aucune donnée existante n'est touchée).
     for (final table in schema) {
+      final existed = await _hasTable(db, table.name);
       await db.execute(_asIfNotExists(table.createTableSql));
+      // **Les index d'une table préexistante ne sont PAS rejoués ici.** Cette
+      // étape lit le schéma d'AUJOURD'HUI, et une table déjà là porte la forme
+      // d'ALORS : un index d'aujourd'hui peut donc citer une colonne qu'elle
+      // n'a pas encore. C'est le cas de `ux_emergency_contact_per_student`
+      // (v32), qui filtre sur `student_parent.emergency_contact` — colonne
+      // ajoutée trente paliers plus loin. Sans cette garde, toute base montant
+      // de v1 échouait ici, et avec elle l'escalier entier.
+      //
+      // Rien n'est perdu : les index d'une table préexistante ont été créés
+      // avec elle, et ceux ajoutés depuis le sont par le palier qui les
+      // introduit (v17 pour `idx_parents_names`, v32 pour celui-ci). Ce palier
+      // ne doit poser que les index des tables qu'il vient, lui, de créer.
+      if (existed) continue;
       for (final indexSql in table.createIndexSql) {
         await db.execute(_indexAsIfNotExists(indexSql));
       }
@@ -714,6 +728,488 @@ Future<void> migrateOfflineDatabase(
         );
       }
     }
+  }
+
+  if (upTo(30)) {
+    // v30 — Configuration : `provisioning_drafts`, le brouillon de mise en
+    // service de l'école.
+    //
+    // Création pure, aucune donnée touchée : le module n'existait pas avant, et
+    // rien dans la base ne s'y rattache. Un appareil qui monte de v29 n'a
+    // simplement pas de brouillon, ce qui est l'état nominal d'une école déjà
+    // paramétrée.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'provisioning_drafts')) {
+      await db.execute('''
+        CREATE TABLE provisioning_drafts (
+          school_id TEXT NOT NULL,
+          user_id TEXT NOT NULL,
+          payload TEXT NOT NULL,
+          step INTEGER NOT NULL DEFAULT 0,
+          max_step INTEGER NOT NULL DEFAULT 0,
+          updated_at INTEGER NOT NULL,
+          PRIMARY KEY (school_id, user_id)
+        )
+      ''');
+    }
+  }
+  if (upTo(31)) {
+    // v31 — Boutique (ADR-020) : le catalogue et les ventes de la caisse
+    // point-de-vente.
+    //
+    // Création pure, aucune donnée touchée : le module n'existait pas. Un
+    // appareil qui monte de v30 reçoit quatre tables vides, et le premier
+    // bundle référentiel remplit le catalogue.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'ref_boutique_articles')) {
+      await db.execute('''
+        CREATE TABLE ref_boutique_articles (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          code TEXT NOT NULL,
+          label TEXT NOT NULL,
+          family TEXT NOT NULL,
+          pricing_mode TEXT NOT NULL,
+          unit_price_in_cents INTEGER,
+          currency TEXT NOT NULL,
+          updated_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_ref_boutique_articles_scope '
+        'ON ref_boutique_articles(school_id, academic_year_id)',
+      );
+    }
+    if (!await _hasTable(db, 'ref_boutique_article_level_prices')) {
+      await db.execute('''
+        CREATE TABLE ref_boutique_article_level_prices (
+          article_id TEXT NOT NULL,
+          school_level_id TEXT NOT NULL,
+          price_in_cents INTEGER NOT NULL,
+          PRIMARY KEY (article_id, school_level_id)
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_ref_boutique_level_prices_article '
+        'ON ref_boutique_article_level_prices(article_id)',
+      );
+    }
+    if (!await _hasTable(db, 'boutique_sales')) {
+      await db.execute('''
+        CREATE TABLE boutique_sales (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          payer_first_name TEXT,
+          payer_last_name TEXT NOT NULL,
+          payer_middle_name TEXT,
+          payer_phone_number TEXT,
+          payer_name TEXT,
+          collected_by_id TEXT,
+          collected_by_name TEXT,
+          total_in_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL,
+          sold_at TEXT NOT NULL,
+          receipt_document_id TEXT,
+          receipt_number TEXT,
+          device_id TEXT,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+          sync_error TEXT,
+          synced_at INTEGER,
+          server_updated_at TEXT,
+          updated_at INTEGER NOT NULL DEFAULT 0,
+          ticket_printed_at INTEGER
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_scope '
+        'ON boutique_sales(school_id, academic_year_id)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_sold_at ON boutique_sales(sold_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_boutique_sales_sync ON boutique_sales(sync_status)',
+      );
+    }
+    if (!await _hasTable(db, 'boutique_sale_lines')) {
+      await db.execute('''
+        CREATE TABLE boutique_sale_lines (
+          id TEXT PRIMARY KEY,
+          sale_id TEXT NOT NULL,
+          article_id TEXT NOT NULL,
+          article_label TEXT NOT NULL,
+          article_code TEXT,
+          beneficiary_student_id TEXT,
+          beneficiary_name TEXT,
+          school_level_id TEXT,
+          size TEXT,
+          quantity INTEGER NOT NULL,
+          unit_price_in_cents INTEGER NOT NULL,
+          line_total_in_cents INTEGER NOT NULL,
+          catalog_price_in_cents INTEGER,
+          position INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_boutique_sale_lines_sale '
+        'ON boutique_sale_lines(sale_id)',
+      );
+    }
+  }
+
+  if (upTo(32)) {
+    // v32 — Inscription : les quatre champs que le guichet saisit et que le
+    // dossier ne savait pas porter.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (await _hasTable(db, 'enrollments')) {
+      if (!await _hasColumn(db, 'enrollments', 'former_student')) {
+        // NOT NULL avec défaut : la colonne existe côté serveur sous la même
+        // contrainte, et un dossier sans déclaration n'est pas « inconnu » mais
+        // « pas ancien ».
+        await db.execute(
+          'ALTER TABLE enrollments '
+          'ADD COLUMN former_student INTEGER NOT NULL DEFAULT 0',
+        );
+        // Backfill best-effort, et strictement le même compromis que V100 côté
+        // serveur : le type d'inscription est la SEULE information que
+        // l'existant porte pour distinguer un ancien élève. Ce n'est pas que
+        // les deux notions soient synonymes — elles divergent dès qu'une école
+        // démarre sur l'application — c'est qu'aucune déclaration de guichet
+        // n'a jamais été possible sur ces lignes.
+        await db.execute(
+          'UPDATE enrollments SET former_student = 1 '
+          "WHERE enrollment_type = 'RE_ENROLLMENT'",
+        );
+      }
+      if (!await _hasColumn(db, 'enrollments', 'medical_notes')) {
+        await db.execute(
+          'ALTER TABLE enrollments ADD COLUMN medical_notes TEXT',
+        );
+      }
+    }
+
+    if (await _hasTable(db, 'student_parent')) {
+      if (!await _hasColumn(db, 'student_parent', 'emergency_contact')) {
+        await db.execute(
+          'ALTER TABLE student_parent '
+          'ADD COLUMN emergency_contact INTEGER NOT NULL DEFAULT 0',
+        );
+      }
+      // Index unique PARTIEL — il ne contraint que les lignes à 1. Créé APRÈS
+      // la colonne et jamais avant : sur une base existante, toutes les lignes
+      // valent 0, donc aucune ne le viole à la création.
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS ux_emergency_contact_per_student '
+        'ON student_parent(student_id) WHERE emergency_contact = 1',
+      );
+    }
+
+    if (await _hasTable(db, 'ref_previous_year_students') &&
+        !await _hasColumn(db, 'ref_previous_year_students', 'medical_notes')) {
+      // Reste NULL jusqu'au prochain pull de la cohorte : la fiche santé N-1
+      // n'est pas reconstituable localement, et une colonne vide se lit
+      // correctement « pas encore descendue ».
+      await db.execute(
+        'ALTER TABLE ref_previous_year_students ADD COLUMN medical_notes TEXT',
+      );
+    }
+  }
+
+  if (upTo(33)) {
+    // v33 — Multi-devise : les arriérés N-1 quittent la ligne de l'élève pour
+    // une table fille, une entrée PAR DEVISE.
+    //
+    // La colonne scalaire étiquetait la somme de tous les postes avec la devise
+    // du premier : un élève devant 425,00 $ et 90 000 FC se voyait annoncer
+    // « 90 425,00 $ ».
+    //
+    // **Recréée plutôt que reconstruite par copie.** `ref_previous_year_students`
+    // est 100 % dérivée de la synchro — le seed la remplace en bloc à chaque
+    // pull — donc rien n'est perdu à la vider, à condition de **rembobiner son
+    // curseur** : une purge sans rembobinage laisserait la cohorte vide jusqu'au
+    // prochain rollover d'année, et le guichet sans vivier de réinscription.
+    //
+    // Le curseur est scopé par année (`enrollment_reenrollment_cohort:<yearId>`),
+    // d'où le `LIKE` : on ne connaît pas ici l'année courante, et en laisser un
+    // seul debout suffirait à faire répondre 304 au prochain pull.
+    //
+    // **Rejouable**, et c'est ce que la garde suivante achète : l'étape se
+    // décide sur la FORME RÉELLE de la table — la colonne scalaire est-elle
+    // encore là ? — et non sur un drapeau. Un `DROP` inconditionnel
+    // redétruirait, à chaque rejeu, une cohorte fraîchement redescendue.
+    final hadScalarBalance =
+        await _hasTable(db, 'ref_previous_year_students') &&
+        await _hasColumn(
+          db,
+          'ref_previous_year_students',
+          'previous_balance_in_cents',
+        );
+
+    if (hadScalarBalance) {
+      await db.execute('DROP TABLE ref_previous_year_students');
+      // `sync_meta` manque sur les bases partielles des tests de palier : une
+      // migration qui suppose une table voisine cesse de monter le jour où
+      // quelqu'un la retire.
+      if (await _hasTable(db, 'sync_meta')) {
+        await db.delete(
+          'sync_meta',
+          where: 'resource = ? OR resource LIKE ?',
+          whereArgs: const [
+            'enrollment_reenrollment_cohort',
+            'enrollment_reenrollment_cohort:%',
+          ],
+        );
+      }
+    }
+
+    for (final name in const [
+      'ref_previous_year_students',
+      'ref_previous_year_student_balances',
+    ]) {
+      if (await _hasTable(db, name)) continue;
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(table.createTableSql);
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
+
+  if (upTo(34)) {
+    // v34 — Multi-devise : `payments` perd ses montants, qui se dérivent
+    // désormais de ses imputations.
+    //
+    // Ce n'étaient pas des propriétés du versement : un résumé de ses
+    // allocations, stockable en scalaire tant qu'il n'y avait qu'une devise. Un
+    // passage au guichet qui solde une créance en dollars ET une en francs n'a
+    // pas de montant unique.
+    //
+    // **Reconstruite avec COPIE**, jamais vidée : `payments` porte de l'argent
+    // encaissé, dont des lignes qui n'ont pas encore été poussées. En perdre une
+    // serait perdre un encaissement que le reçu papier atteste déjà.
+    await _dropPaymentScalarAmounts(db, schema);
+  }
+
+  if (upTo(35)) {
+    // v35 — Multi-devise à la caisse : la DEVISE descend sur la ligne, et la
+    // vente perd ses montants.
+    //
+    // C'est l'article qui est tarifé dans une unité, donc la ligne : un panier
+    // peut en mêler deux, et c'est un acte de caisse — une vente, un reçu, pas
+    // deux. La devise envoyée est celle **réellement encaissée**, enregistrée
+    // telle quelle et jamais déduite du catalogue : la caisse vend hors ligne
+    // sur une copie qui peut précéder un changement de devise, et déduire
+    // imprimerait des dollars sur un reçu dont le tiroir contient des francs.
+    await _moveBoutiqueCurrencyToLines(db, schema);
+  }
+
+  if (upTo(36)) {
+    // v36 — Réductions par élève (ADR-021 V1) : le catalogue du barème, et la
+    // mémoire de qui y a droit.
+    //
+    // **Trois tables neuves, aucune colonne touchée, aucun backfill.** La V1 ne
+    // calcule rien : `student_charges` garde exactement la forme qu'elle a, et
+    // les colonnes que le back ajoute de son côté (`gross_amount_in_cents`,
+    // `reduction_code`) ne descendent pas ici — rien ne les lirait.
+    //
+    // Les deux tables de barème n'ont pas d'année mais ont un `school_id` : le
+    // barème descend à la RACINE du bundle référentiel. Leur purge au pull sera
+    // donc scopée par école, et cette colonne est ce qui le rend possible.
+    for (final name in const [
+      'ref_reduction_types',
+      'ref_reduction_lines',
+      'enrollment_reductions',
+    ]) {
+      if (await _hasTable(db, name)) continue;
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(table.createTableSql);
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
+
+  if (upTo(37)) {
+    // v37 — le barème de réductions sur la forme que le serveur sert vraiment.
+    //
+    // La v36 a été écrite AVANT que le back ne livre l'ADR-021 : elle attendait
+    // deux sections à plat, chacune portant un `id`. Le contrat livré n'en donne
+    // aucun — un type est identifié par son code dans son école, une ligne par
+    // sa rubrique dans son type — et il nomme le taux `percentage`.
+    await _rebuildReductionCatalog(db, schema);
+  }
+
+  if (upTo(38)) {
+    // v38 — `payment_allocations.fee_tariff_id` : l'imputation dit désormais sur
+    // QUELLE LIGNE DE GRILLE l'argent a été reçu, plus seulement de quelle
+    // nature était le frais.
+    //
+    // Le serveur admet plusieurs lignes d'une même nature sur un niveau depuis
+    // V94 — un minerval en sept tranches — et refuse alors d'imputer au hasard
+    // (422 `AMBIGUOUS_FEE_CODE`). Le tarif est le seul discriminant utilisable
+    // des deux côtés : il vient du référentiel servi par le serveur, donc il ne
+    // peut jamais être provisoire, là où l'id de créance, lui, peut l'être.
+    //
+    // **Nullable, et aucun backfill ici.** Une créance *ad hoc* n'a légitimement
+    // pas de tarif. Et les imputations déjà en base n'en ont pas non plus : les
+    // renseigner suppose de retrouver la créance visée, ce qui n'est pas un
+    // geste de schéma — c'est la reprise des versements en attente, qui doit
+    // lire un grand-livre déjà juste et se rejouer seule.
+    if (await _hasTable(db, 'payment_allocations') &&
+        !await _hasColumn(db, 'payment_allocations', 'fee_tariff_id')) {
+      await db.execute(
+        'ALTER TABLE payment_allocations ADD COLUMN fee_tariff_id TEXT',
+      );
+    }
+  }
+}
+
+/// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée
+/// `percentage`.
+///
+/// **Refaites, pas migrées.** Ce sont des tables de cache référentiel : le pull
+/// du bundle les réécrit en entier, école par école, et rien d'autre ne les
+/// alimente. Recopier trois colonnes pour les faire écraser au prochain pull
+/// coûterait plus que la ligne qu'on économise. Aucune base de terrain n'a
+/// jamais porté la v36 — ce palier ne rattrape que les tablettes qui ont fait
+/// tourner la branche, et la seule conséquence y est un barème absent jusqu'au
+/// pull suivant.
+///
+/// Rejouable : se garde sur la forme réelle. La colonne `id` est la signature
+/// de la v36 ; sur une table déjà refaite, il n'y a rien à faire.
+Future<void> _rebuildReductionCatalog(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  for (final name in const ['ref_reduction_types', 'ref_reduction_lines']) {
+    if (!await _hasTable(db, name)) continue;
+    if (!await _hasColumn(db, name, 'id')) continue;
+    await db.execute('DROP TABLE $name');
+    final table = schema.firstWhere((t) => t.name == name);
+    await db.execute(table.createTableSql);
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
+}
+
+/// Étape v35 : `boutique_sale_lines.currency`, et `boutique_sales` sans montant.
+///
+/// La colonne de ligne est **backfillée depuis la vente** : ces lignes ont été
+/// encaissées dans la devise que la vente portait, et c'est la seule vérité
+/// disponible. Sans backfill, un `NOT NULL` sur des lignes existantes ferait
+/// échouer la montée sur une caisse qui a déjà vendu.
+///
+/// Rejouable : se garde sur la forme réelle des deux tables.
+Future<void> _moveBoutiqueCurrencyToLines(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const sales = 'boutique_sales';
+  const lines = 'boutique_sale_lines';
+  if (!await _hasTable(db, sales) || !await _hasTable(db, lines)) return;
+  if (!await _hasColumn(db, sales, 'currency')) return;
+
+  if (!await _hasColumn(db, lines, 'currency')) {
+    // Défaut vide plutôt qu'une devise inventée : le backfill qui suit le
+    // remplace par celle de la vente, et une ligne orpheline se lira « devise
+    // inconnue » — jamais « dollars » par accident.
+    await db.execute(
+      "ALTER TABLE $lines ADD COLUMN currency TEXT NOT NULL DEFAULT ''",
+    );
+    await db.execute(
+      'UPDATE $lines SET currency = ('
+      'SELECT s.currency FROM $sales s WHERE s.id = $lines.sale_id'
+      ') WHERE EXISTS ('
+      'SELECT 1 FROM $sales s WHERE s.id = $lines.sale_id)',
+    );
+  }
+
+  // La vente perd `total_in_cents` et `currency` : ils se dérivent des lignes.
+  final table = schema.firstWhere((t) => t.name == sales);
+  final sourceColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($sales)'))
+      c['name'] as String,
+  };
+  await db.execute('ALTER TABLE $sales RENAME TO ${sales}_v34');
+  await db.execute(table.createTableSql);
+  final targetColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($sales)'))
+      c['name'] as String,
+  };
+  final columnList = targetColumns.where(sourceColumns.contains).join(', ');
+  if (columnList.isNotEmpty) {
+    await db.execute(
+      'INSERT INTO $sales ($columnList) SELECT $columnList FROM ${sales}_v34',
+    );
+  }
+  await db.execute('DROP TABLE ${sales}_v34');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
+}
+
+/// Étape v34 : retire `amount_in_cents` et `currency` de `payments`.
+///
+/// SQLite ne sait pas supprimer une colonne avant 3.35 : on reconstruit la table
+/// et on recopie. **Les 23 colonnes de la forme v33, et elles seules** — la
+/// table source porte la forme d'AVANT cette étape, et un `SELECT` d'une colonne
+/// qu'elle n'a pas ferait lever la migration.
+///
+/// L'étape est rejouable : elle se garde sur la **forme réelle** de la table
+/// plutôt que sur un drapeau, et ne fait rien si les colonnes sont déjà parties.
+Future<void> _dropPaymentScalarAmounts(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const name = 'payments';
+  if (!await _hasTable(db, name)) return;
+  if (!await _hasColumn(db, name, 'amount_in_cents')) return;
+
+  // Les colonnes RÉELLEMENT présentes des deux côtés, jamais une liste figée.
+  //
+  // Une liste écrite à la main suppose que la table source a exactement la
+  // forme d'avant cette étape. C'est faux dès qu'une base part de plus loin :
+  // toutes les migrations tournent dans le même passage, et un test de palier
+  // ancien crée une `payments` qui n'a ni `academic_year_id` ni la moitié du
+  // reste. Le `SELECT` lève alors, et c'est toute la montée qui s'arrête — sur
+  // une table qui porte de l'argent.
+  //
+  // L'intersection règle les deux sens : une colonne que la source n'a pas
+  // reste à son défaut dans la table neuve, une colonne qu'elle a en trop est
+  // ignorée.
+  final table = schema.firstWhere((t) => t.name == name);
+  final sourceColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  // L'ancienne table emporte ses index en changeant de nom ; ils disparaissent
+  // avec elle au DROP, ce qui laisse les noms libres pour les index canoniques
+  // recréés en dernier.
+  await db.execute('ALTER TABLE $name RENAME TO ${name}_v33');
+  await db.execute(table.createTableSql);
+
+  final targetColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  final columnList = targetColumns.where(sourceColumns.contains).join(', ');
+  if (columnList.isNotEmpty) {
+    await db.execute(
+      'INSERT INTO $name ($columnList) SELECT $columnList FROM ${name}_v33',
+    );
+  }
+  await db.execute('DROP TABLE ${name}_v33');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
   }
 }
 

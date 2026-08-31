@@ -6,6 +6,8 @@ import 'package:pdf/pdf.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_geometry.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -32,13 +34,16 @@ TicketReceiptModel _model({int allocationCount = 2}) => TicketReceiptModel(
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: 'Jean Kabeya',
-  amountReceivedInCents: 150000,
+  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
   allocations: [
     for (var i = 0; i < allocationCount; i++)
-      TicketAllocationLine(label: 'Poste $i', amountInCents: 1000 * (i + 1)),
+      TicketAllocationLine(
+        label: 'Poste $i',
+        amountInCents: 1000 * (i + 1),
+        currency: 'CDF',
+      ),
   ],
-  remainingBalanceInCents: 250000,
-  currency: 'CDF',
+  remainingBalance: MoneyBag.of(const [Money(250000, 'CDF')]),
   labels: _labels,
 );
 
@@ -80,7 +85,7 @@ void main() {
   // LE défaut que les tests de gabarit ne pouvaient pas voir : il est
   // typographique, pas textuel. 48 caractères de Courier à une taille posée à
   // la main débordaient la largeur utile du rouleau, et `pw.Text` repliait la
-  // ligne en silence — « Montant reçu … 25 » puis « 000,00 CDF » en dessous, sur
+  // ligne en silence — « Montant reçu … 25 » puis « 000 FC » en dessous, sur
   // le papier remis au parent.
   test('une ligne pleine largeur tient sur UNE ligne imprimée', () {
     const courierAdvance = 0.6;
@@ -297,8 +302,10 @@ void main() {
         isNotEmpty,
         reason: 'extraction du flux de contenu en échec',
       );
-      // Le ticket entier, montants compris.
-      expect(mots, contains('CDF'));
+      // Le ticket entier, montants compris. Le franc s'imprime « FC » depuis
+      // que la règle d'écriture se décide sur la devise ; c'est cette
+      // abréviation-là qu'on cherche sur le papier.
+      expect(mots, contains('FC'));
       expect(_paintedWords(sheet), containsAll(mots));
     });
 
@@ -457,7 +464,6 @@ TicketReceiptModel _modelWithSingleLine(String studentName) =>
       studentFullName: studentName,
       provisionalReference: 'PROV-1',
       paidAt: DateTime(2026, 8, 4, 14, 7),
-      amountReceivedInCents: 2500000000,
-      currency: 'CDF',
+      amountReceived: MoneyBag.of(const [Money(2500000000, 'CDF')]),
       labels: _labels,
     );

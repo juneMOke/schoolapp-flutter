@@ -28,9 +28,12 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_coordinator_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
@@ -187,6 +190,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
         state.selectedSubMenuId == MenuConstants.feeControlId ||
+        state.selectedSubMenuId == MenuConstants.boutiqueAchatsId ||
+        state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
@@ -195,7 +200,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.myCoursesId ||
         state.selectedSubMenuId == MenuConstants.timetableId ||
         state.selectedSubMenuId == MenuConstants.resultatsClasseId ||
-        state.selectedSubMenuId == MenuConstants.documentsStudentId;
+        state.selectedSubMenuId == MenuConstants.documentsStudentId ||
+        state.selectedSubMenuId == MenuConstants.configurationSchoolId;
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -331,6 +337,19 @@ class _HomePageView extends StatelessWidget {
           key: ValueKey(MenuConstants.facturationsId),
           child: FacturationPage(),
         );
+      // Même page que la route hors coquille `/finances/boutique`. Elle peint
+      // son propre `AppPageBackground`, comme les réglages de Configuration, et
+      // s'insère donc ici telle quelle.
+      //
+      // ⚠️ Sans ce cas, la caisse tombait dans le `default` : le menu latéral y
+      // menait bel et bien, et l'écran répondait « page en cours de
+      // développement » — alors que la route existait et que le module était
+      // entier. Un sous-menu déclaré au registre DOIT avoir son cas ici.
+      case MenuConstants.boutiqueAchatsId:
+        return const BoutiquePage();
+
+      case MenuConstants.boutiqueHistoriqueId:
+        return const BoutiqueHistoryPage();
       case MenuConstants.feeControlId:
         return const FinanceFeatureScope(
           key: ValueKey(MenuConstants.feeControlId),
@@ -383,6 +402,12 @@ class _HomePageView extends StatelessWidget {
         return const ScheduleFeatureScope(child: ScheduleCoordinatorPage());
       case MenuConstants.resultatsClasseId:
         return const ResultatsFeatureScope(child: ResultatsCoordinatorPage());
+      // Même page que la route hors coquille `/configuration/settings`, qui
+      // reste servie pour le lien profond. Elle ne monte ni Scaffold ni AppBar
+      // — elle peint son propre `AppPageBackground` — donc elle s'insère ici
+      // telle quelle, sans chrome à démonter.
+      case MenuConstants.configurationSchoolId:
+        return const ConfigurationSettingsPage();
       default:
         return Container(
           width: double.infinity,

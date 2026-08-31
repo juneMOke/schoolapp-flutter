@@ -34,6 +34,14 @@ class SaveDraftIdentityRequested extends EnrollmentOfflineEvent {
   final String? schoolLevelGroupId;
   final String enrollmentDate;
 
+  /// Fiche santé de l'enfant, portée par l'INSCRIPTION même si elle se saisit
+  /// à l'étape Identité : côté serveur `saveStudent` est un get-or-return, et
+  /// une note posée sur l'élève serait figée à vie dès la première saisie.
+  ///
+  /// `null` = cette étape n'en dit rien (le brouillon garde ce qu'il a) ;
+  /// chaîne vide = le guichet la vide. Donnée de santé — jamais journalisée.
+  final String? medicalNotes;
+
   const SaveDraftIdentityRequested({
     required this.enrollmentId,
     required this.studentId,
@@ -51,6 +59,7 @@ class SaveDraftIdentityRequested extends EnrollmentOfflineEvent {
     this.schoolLevelId,
     this.schoolLevelGroupId,
     required this.enrollmentDate,
+    this.medicalNotes,
   });
 
   @override
@@ -71,6 +80,7 @@ class SaveDraftIdentityRequested extends EnrollmentOfflineEvent {
     schoolLevelId,
     schoolLevelGroupId,
     enrollmentDate,
+    medicalNotes,
   ];
 }
 
@@ -113,6 +123,11 @@ class SaveDraftPreviousAcademicRequested extends EnrollmentOfflineEvent {
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
+
+  /// « Ancien élève de cette école », déclaré au guichet. Omis (`null`), il
+  /// garde sa valeur : sa colonne est NOT NULL, et une étape qui ne le dit pas
+  /// ne doit pas le remettre à faux.
+  final bool? formerStudent;
   final String? transferReason;
 
   const SaveDraftPreviousAcademicRequested({
@@ -124,6 +139,7 @@ class SaveDraftPreviousAcademicRequested extends EnrollmentOfflineEvent {
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
+    this.formerStudent,
     this.transferReason,
   });
 
@@ -137,6 +153,7 @@ class SaveDraftPreviousAcademicRequested extends EnrollmentOfflineEvent {
     previousRate,
     previousRank,
     validatedPreviousYear,
+    formerStudent,
     transferReason,
   ];
 }
@@ -169,6 +186,22 @@ class SaveDraftGuardiansRequested extends EnrollmentOfflineEvent {
 
   @override
   List<Object?> get props => [studentId, parents.length];
+}
+
+/// Ouvre une **session de correction** d'un dossier déjà complété : le dossier
+/// nommé sera ré-ouvert (`SYNCED|SYNC_ERROR → DRAFT`) au moment de la première
+/// sauvegarde d'étape, dans sa transaction.
+///
+/// N'écrit rien par elle-même : tant qu'un dossier est en brouillon il sort de
+/// la recherche « élèves réellement inscrits » de la facturation, et ouvrir un
+/// dossier pour le consulter ne doit pas l'en sortir.
+class ReeditionSessionStarted extends EnrollmentOfflineEvent {
+  final String enrollmentId;
+
+  const ReeditionSessionStarted(this.enrollmentId);
+
+  @override
+  List<Object?> get props => [enrollmentId];
 }
 
 /// Charge le détail du brouillon.

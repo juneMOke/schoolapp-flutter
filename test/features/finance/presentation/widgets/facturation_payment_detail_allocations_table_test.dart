@@ -37,9 +37,9 @@ Future<void> _pump(WidgetTester tester) {
           child: SizedBox(
             width: 460,
             child: FacturationPaymentDetailAllocationsTable(
+              // Le total se dérive des lignes, et chacune porte SA devise :
+              // la table recevait une devise unique pour toute la répartition.
               allocations: _allocations,
-              totalInCents: 15000,
-              currency: 'USD',
             ),
           ),
         ),
@@ -59,7 +59,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     // 2 allocations + 1 total = 3 montants.
-    expect(find.textContaining('USD'), findsNWidgets(3));
+    // Le dollar s'abrège « $ ».
+    expect(find.textContaining(r'$'), findsNWidgets(3));
   });
 
   testWidgets(

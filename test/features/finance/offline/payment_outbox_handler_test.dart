@@ -18,6 +18,8 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sy
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_outbox_handler.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class MockFinanceSyncApi extends Mock implements FinanceSyncApi {}
 
@@ -39,8 +41,7 @@ void main() {
         payment: PaymentInput(
           id: 'x',
           studentId: 'x',
-          amountInCents: 0,
-          currency: 'USD',
+          amounts: MoneyBag.empty,
           paidAt: 'x',
         ),
         allocations: [],
@@ -72,8 +73,6 @@ void main() {
         clientUuid: 'pay1',
         studentId: 's1',
         academicYearId: 'ay-1',
-        amountInCents: 30000,
-        currency: 'USD',
         paidAt: '2026-07-06T10:00:00Z',
         payerFirstName: 'S',
         payerLastName: 'M',
@@ -220,7 +219,9 @@ void main() {
               as PaymentAggregateRequest;
       expect(sent.payment.id, 'pay1');
       expect(sent.payment.studentId, 's1');
-      expect(sent.payment.amountInCents, 30000);
+      // Dérivés des imputations, comme côté serveur : le versement n'a plus de
+      // montant à lui.
+      expect(sent.payment.amounts, MoneyBag.of(const [Money(30000, 'USD')]));
       expect(sent.allocations.single.feeCode, 'TUITION');
     },
   );
@@ -286,4 +287,83 @@ void main() {
       },
     );
   }
+
+  // ── Le serveur NOMME la cause d'un 422 ──────────────────────────────────────
+  //
+  // Le statut seul ne suffit plus : toutes les causes ne se traitent pas pareil,
+  // et ce classement décide si un encaissement repart tout seul ou s'immobilise
+  // en SYNC_ERROR. L'argent est déjà dans le tiroir, le reçu déjà imprimé.
+
+  DioException dio422(String? detailCode, {String? message}) => DioException(
+    requestOptions: RequestOptions(path: '/x'),
+    response: Response(
+      requestOptions: RequestOptions(path: '/x'),
+      statusCode: 422,
+      data: {'detailCode': ?detailCode, 'message': ?message},
+    ),
+  );
+
+  test(
+    'UNKNOWN_FEE_CODE → retry : l\'inscription n\'est pas encore remontée',
+    () async {
+      // Sur le chemin de synchro le serveur remappe par `studentId + feeCode` :
+      // ne rien trouver veut le plus souvent dire que les créances de l'élève
+      // n'existent pas encore côté serveur. Le figer immobiliserait de l'argent
+      // qui n'avait qu'à attendre.
+      when(
+        () => api.commitPayment(any(), any()),
+      ).thenThrow(dio422('UNKNOWN_FEE_CODE'));
+
+      final result = await handlerWithGate(
+        OutboxDependencyState.ready,
+      ).dispatch(await pendingEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+    },
+  );
+
+  for (final code in const [
+    'ALLOCATION_SUM_MISMATCH',
+    'CHARGE_CURRENCY_MISMATCH',
+    'AMBIGUOUS_FEE_CODE',
+  ]) {
+    test('$code → failed : aucune attente ne le corrigera', () async {
+      when(() => api.commitPayment(any(), any())).thenThrow(dio422(code));
+
+      final result = await handlerWithGate(
+        OutboxDependencyState.ready,
+      ).dispatch(await pendingEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+    });
+  }
+
+  test(
+    'un 422 sans detailCode reste failed — le défaut ne change pas',
+    () async {
+      when(() => api.commitPayment(any(), any())).thenThrow(dio422(null));
+
+      final result = await handlerWithGate(
+        OutboxDependencyState.ready,
+      ).dispatch(await pendingEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+    },
+  );
+
+  test('la raison porte le CODE machine, pas seulement le statut', () async {
+    // Sans lui, toutes les causes d'un 422 se ressemblent, et la feuille de
+    // reprise ne peut offrir qu'un « contactez le support » sur de l'argent
+    // déjà encaissé.
+    when(() => api.commitPayment(any(), any())).thenThrow(
+      dio422('ALLOCATION_SUM_MISMATCH', message: 'Répartition incohérente'),
+    );
+
+    final result = await handlerWithGate(
+      OutboxDependencyState.ready,
+    ).dispatch(await pendingEntry());
+
+    expect(result.error, contains('ALLOCATION_SUM_MISMATCH'));
+    expect(result.error, contains('Répartition incohérente'));
+  });
 }

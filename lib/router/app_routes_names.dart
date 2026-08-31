@@ -33,6 +33,28 @@ class AppRoutesNames {
   }) =>
       '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
 
+  /// Encaissement d'un paiement — écran plein poussé au-dessus de la fiche.
+  ///
+  /// Sous-route de la fiche : l'élève et l'année sont dans le chemin, et le
+  /// contexte d'affichage (identité, classe, créances relues juste avant)
+  /// voyage dans `extra`. Sans lui, la page se rabat sur sa carte de contexte
+  /// plutôt que d'encaisser au nom d'un inconnu.
+  static const String facturationCreatePayment =
+      '/finances/${MenuConstants.facturationsId}'
+      '/detail/:studentId/:academicYearId/encaissement';
+
+  static String facturationCreatePaymentPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}'
+      '/detail/$studentId/$academicYearId/encaissement';
+
+  static const String boutiqueAchats =
+      '/boutique/${MenuConstants.boutiqueAchatsId}';
+  static const String boutiqueHistorique =
+      '/boutique/${MenuConstants.boutiqueHistoriqueId}';
+
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';
@@ -74,6 +96,19 @@ class AppRoutesNames {
     required String academicYearId,
   }) =>
       '/disciplines/${MenuConstants.presencesId}/student/$studentId/$academicYearId';
+
+  /// Assistant de mise en service de l'école (module Configuration).
+  ///
+  /// Route de premier niveau, hors coquille : elle doit s'ouvrir alors que
+  /// l'école n'a pas encore d'année académique, c'est-à-dire au moment précis où
+  /// le reste de l'application n'a rien à montrer.
+  static const String configuration = 'configuration';
+  static const String configurationPath = '/configuration';
+
+  /// Réglages réouvrables, après mise en service. Même garde que l'assistant :
+  /// même geste, même autorité.
+  static const String configurationSettings = 'configuration-settings';
+  static const String configurationSettingsPath = '/configuration/settings';
 
   // Debug — galerie de composants (kDebugMode uniquement)
   static const String componentGallery = '/dev/components';

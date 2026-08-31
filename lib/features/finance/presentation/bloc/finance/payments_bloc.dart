@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/domain/usecases/create_payment_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 part 'payments_event.dart';
 part 'payments_state.dart';
@@ -130,8 +131,7 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
     final result = await _createPaymentUseCase(
       studentId: event.studentId,
       academicYearId: event.academicYearId,
-      amountInCents: event.amountInCents,
-      currency: event.currency,
+      amounts: event.amounts,
       payerFirstName: event.payerFirstName,
       payerLastName: event.payerLastName,
       payerMiddleName: event.payerMiddleName,

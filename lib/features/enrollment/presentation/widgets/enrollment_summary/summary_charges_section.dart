@@ -4,7 +4,8 @@ import 'package:school_app_flutter/core/components/buttons/secondary_button.dart
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/money_bag_text.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_money.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_charge_line.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_neutral_line.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_section_card.dart';
@@ -63,12 +64,10 @@ class SummaryChargesSection extends StatelessWidget {
           }
 
           final rows = state.studentCharges;
-          // Somme en cents (comme FacturationChargeLine), converti au format.
-          final total = rows.fold<double>(
-            0,
-            (sum, charge) => sum + charge.expectedAmountInCents,
-          );
-          final currency = rows.isNotEmpty ? rows.first.currency : '';
+          // Total PAR DEVISE : un dossier peut porter un minerval en dollars et
+          // une assurance en francs. Les additionner donnerait un chiffre que
+          // personne ne peut vérifier, étiqueté avec la première devise venue.
+          final total = rows.expectedBag;
 
           return Column(
             children: [
@@ -87,11 +86,8 @@ class SummaryChargesSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text(
-                    formatMonetaryAmountWithCurrency(
-                      amount: total / 100,
-                      currency: currency,
-                    ),
+                  MoneyBagText(
+                    bag: total,
                     style: AppTextStyles.totalAmountLora.copyWith(
                       fontSize: 18,
                       color: AppColors.terreCuite,

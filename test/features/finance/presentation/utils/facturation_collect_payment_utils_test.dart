@@ -1,17 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 
-StudentCharge charge({required double expected, required double paid}) {
+StudentCharge charge({
+  required double expected,
+  required double paid,
+  String feeTariffId = 't1',
+  String label = 'Organisation matériel examens — 2/3',
+}) {
   return StudentCharge(
     id: 'c1',
     studentId: 's1',
     academicYearId: 'y1',
     schoolLevelId: 'l1',
     schoolLevelGroupId: 'g1',
-    feeTariffId: 't1',
+    feeTariffId: feeTariffId,
     feeCode: 'TUITION',
-    label: 'Frais',
+    label: label,
     expectedAmountInCents: expected,
     amountPaidInCents: paid,
     currency: 'CDF',
@@ -20,6 +27,8 @@ StudentCharge charge({required double expected, required double paid}) {
 }
 
 void main() {
+  final AppLocalizations l10n = AppLocalizationsFr();
+
   group('chargeRemainingInCents', () {
     test('retourne attendu − payé', () {
       expect(
@@ -30,6 +39,47 @@ void main() {
 
     test('jamais négatif', () {
       expect(chargeRemainingInCents(charge(expected: 500000, paid: 600000)), 0);
+    });
+  });
+
+  group('designatedFeeTariffId', () {
+    test('rend la ligne de grille désignée par le frais', () {
+      expect(designatedFeeTariffId(charge(expected: 500000, paid: 0)), 't1');
+    });
+
+    /// Le pont depuis le grand-livre local replie l'absence de tarif sur `''`,
+    /// et c'est cette entité-là que lit le guichet. Envoyer la chaîne vide au
+    /// serveur ne serait ni un uuid ni un `null` : il ne saurait pas la lire
+    /// comme « créance hors grille », et l'imputation se jouerait sur un repli
+    /// que personne n'a demandé.
+    test('un frais hors grille ne désigne RIEN, pas une chaîne vide', () {
+      expect(
+        designatedFeeTariffId(
+          charge(expected: 500000, paid: 0, feeTariffId: ''),
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('chargeDesignation', () {
+    /// La nature seule rend trois lignes identiques dès qu'un niveau porte
+    /// plusieurs tranches d'un même frais : trois montants, trois échéances, et
+    /// aucun moyen de savoir laquelle on coche — ni laquelle on valide.
+    test('nomme LA tranche, pas la famille de frais', () {
+      expect(
+        chargeDesignation(charge(expected: 500000, paid: 0), l10n),
+        'Organisation matériel examens — 2/3',
+      );
+    });
+
+    /// Une créance *ad hoc* peut n'avoir aucun libellé : un frais sans nom du
+    /// tout serait pire que trop générique.
+    test('sans libellé, replie sur la nature du frais', () {
+      expect(
+        chargeDesignation(charge(expected: 500000, paid: 0, label: '  '), l10n),
+        l10n.studentChargeFeeCodeTuition,
+      );
     });
   });
 

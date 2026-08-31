@@ -31,6 +31,15 @@ class AppConstants {
   static const String parentUnlinkEndpoint =
       '/api/v1/parents/students/{studentId}/{parentId}';
 
+  /// Désignation du tuteur à appeler en urgence pour UN élève.
+  ///
+  /// Route distincte de [parentUpdateEndpoint] parce qu'elle porte un
+  /// `studentId`, que l'autre n'a pas : un tuteur est partagé par une fratrie
+  /// (rapproché par téléphone côté serveur), et `PUT /parents/{id}` applique
+  /// donc ce qu'il reçoit à TOUS les enfants de ce tuteur.
+  static const String parentEmergencyContactEndpoint =
+      '/api/v1/parents/students/{studentId}/emergency-contact';
+
   static const String enrollmentAcademicInfoEndpoint =
       '/api/v1/enrollments/{enrollmentId}/previous-school-info';
 
@@ -67,6 +76,25 @@ class AppConstants {
   static const String bootstrapPreviousYearEndpoint =
       '/api/v1/bootstrap/previous-year';
   static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
+
+  // ─── Configuration — mise en service de l'école ──────────────────────────
+  /// Catalogue du système éducatif. Référentiel figé, identique pour toutes les
+  /// écoles : sans paramètre, et gardé par une simple lecture.
+  static const String provisioningCatalogEndpoint =
+      '/api/v1/provisioning/catalog';
+
+  /// Simulation **et** activation : même route, même corps, même calcul. Seul
+  /// `?dryRun=true` décide si le résultat est écrit.
+  static const String provisioningApplyEndpoint = '/api/v1/provisioning/apply';
+
+  /// Catalogue des types de frais. Servi par le serveur, jamais figé côté
+  /// client : un code ajouté doit apparaître sans release de l'application.
+  static const String feeCodesEndpoint = '/api/v1/finance/fee-codes';
+
+  /// Identité de l'établissement. L'identifiant du chemin est confronté à celui
+  /// du jeton : un écart rend **403**, pas 404 — toujours passer le `schoolId`
+  /// de la session en cours.
+  static const String schoolByIdEndpoint = '/api/v1/schools/{schoolId}';
   static const String initializeStudentChargesEndpoint =
       '/api/v1/finance/student-charges/{studentId}/initialize-charges';
   static const String listStudentChargesByStudentAndAcademicYearEndpoint =
@@ -407,7 +435,46 @@ class AppConstants {
   // sans backfill : le tuteur de l'élève n'est PAS le payeur (c'est ce que la
   // saisie établit), donc rien de fiable à recopier dans le passé — NULL s'y
   // lit « on ne sait pas », et l'annuaire propose alors par l'identité seule.
-  static const int offlineDbSchemaVersion = 29;
+  // v30 (2026-08-28) : Configuration — `provisioning_drafts`, le brouillon de
+  // mise en service. Création pure, sans backfill : rien dans la base ne s'y
+  // rattachait, et une école déjà paramétrée n'a pas de brouillon — c'est son
+  // état nominal. Scopé `(school_id, user_id)` : la conception « une tablette,
+  // une école » a déjà produit dix flux à curseur nu, et celui-ci aboutit à une
+  // écriture irréversible.
+  // v31 (2026-08-29) : Boutique (ADR-020) — quatre tables, deux de référentiel
+  // (`ref_boutique_articles` + sa grille, remplacées en bloc par le bundle) et
+  // deux d'argent (`boutique_sales`, `boutique_sale_lines`). Création pure, sans
+  // backfill : le module n'existait pas. `catalog_price_in_cents` est nullable
+  // et JAMAIS zéro — `null` dit « le catalogue ne disait plus rien », zéro
+  // dirait « il disait gratuit ».
+  // v32 (2026-08-30) : Inscription — les quatre champs que le guichet saisit et
+  // que le dossier ne savait pas porter. `enrollments.former_student` (NOT NULL,
+  // backfillé depuis `enrollment_type = 'RE_ENROLLMENT'` — la seule information
+  // que l'existant porte, pas un synonyme) et `enrollments.medical_notes` ;
+  // `student_parent.emergency_contact` avec son index unique PARTIEL, miroir de
+  // `ux_emergency_contact_per_student` (V101 back) ; et
+  // `ref_previous_year_students.medical_notes`, la fiche santé N-1 proposée à la
+  // réinscription. Rien à faire ici pour rendre le bloc « école précédente »
+  // facultatif : ses colonnes sont nullables depuis toujours côté local — la
+  // contrainte vivait dans l'écran, pas en base.
+  // v36 (2026-08-31) : Réductions par élève (ADR-021 V1) — `ref_reduction_types`,
+  // `ref_reduction_lines` et `enrollment_reductions`. Création pure, sans
+  // backfill et sans toucher `student_charges` : la V1 ne calcule rien, aucun
+  // montant ne change. Les deux tables de barème portent un `school_id` et PAS
+  // d'`academic_year_id` — le barème descend à la racine du bundle, sa purge au
+  // pull est donc scopée par école et non par année.
+  // v37 (2026-08-31) : les deux tables du barème alignées sur le contrat livré
+  // (ADR-021 côté back) — plus d'`id`, la clé est `(school_id, code)` puis
+  // `(school_id, reduction_code, fee_code)`, et `value` devient `percentage`.
+  // Tables de cache refaites plutôt que migrées : le pull du bundle les réécrit
+  // en entier, et aucune base de terrain n'a jamais porté la v36.
+  // v38 (2026-08-31) : `payment_allocations.fee_tariff_id` — l'imputation
+  // désigne la LIGNE DE GRILLE payée, plus seulement la nature du frais. Un
+  // niveau porte plusieurs lignes d'une même nature (minerval en tranches)
+  // depuis V94 côté serveur, qui refuse alors d'imputer au hasard. Nullable
+  // (créance ad hoc) et sans backfill : renseigner le passé est la reprise des
+  // versements en attente, pas un geste de schéma.
+  static const int offlineDbSchemaVersion = 38;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -528,6 +595,34 @@ class AppConstants {
   /// À ne pas confondre avec [createPaymentEndpoint], le POST **en ligne** du
   /// module Facturation (forme à plat), qui reste en service hors offline.
   static const String syncPaymentsEndpoint = '/api/v1/sync/payments';
+
+  // ── Offline sync — Boutique (caisse point-de-vente, ADR-020) ──
+  /// Agrégat vente boutique :
+  ///  - **POST** = push idempotent de la vente et de son panier en un appel
+  ///    (uuid client honoré sur `sale.id`) — exige `boutique.sale.write` **et**
+  ///    `editique.write`, la soumission scellant le reçu ;
+  ///  - **GET** = pull KEYSET des ventes de l'année, dont celles de l'autre
+  ///    guichet, jeton `cursor` opaque, 304 applicatif.
+  ///
+  /// **Le catalogue ne passe pas par ici** : il descend dans la section
+  /// `boutiqueArticles` de [syncReferentialEndpoint], caviardée par
+  /// `boutique.catalog.read`.
+  static const String syncBoutiqueSalesEndpoint = '/api/v1/sync/boutique/sales';
+
+  /// Réclame (ou réimprime) le reçu de vente scellé — rend les **octets** du
+  /// PDF et pose l'en-tête `X-Document-Id`.
+  ///
+  /// Le scellement fait au push est *best-effort* : l'ACK peut rendre
+  /// `documents: []` sur un 201 parfaitement en ligne. Cette route est le
+  /// rattrapage immédiat ; le pull des ventes est le rattrapage différé.
+  /// Idempotente sous verrou — la rejouer ne brûle pas un second numéro.
+  static const String emitBoutiqueSaleReceiptEndpoint =
+      '/api/v1/boutique/sales/{saleId}/receipt';
+
+  /// Écarts constatés à l'ingestion des ventes (`PRICE_DIVERGENCE`,
+  /// `CATALOG_UNRESOLVABLE`), fenêtre `since` — écran de contrôle, hors V1.
+  static const String boutiqueSaleAnomaliesEndpoint =
+      '/api/v1/boutique/sales/anomalies';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

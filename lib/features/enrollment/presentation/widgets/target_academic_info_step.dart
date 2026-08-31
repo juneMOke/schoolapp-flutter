@@ -312,14 +312,23 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   /// que la donnée devient disponible — mais un choix manuel dans la même
   /// session ([_targetLevelManuallySet]) n'est lui jamais écrasé.
   ///
-  /// Ne s'applique QUE si l'Antécédents a déjà été confirmé
-  /// ([_hasConfirmedPreviousYearData]) : `validatedPreviousYear` vaut `false`
-  /// par défaut tant que rien n'a été saisi, ce qui n'est PAS la même chose
-  /// qu'un redoublement réel — pas de valeur inventée, on force la saisie.
+  /// Ne s'applique QUE si le verdict de l'année précédente a été prononcé
+  /// ([_hasConfirmedPreviousYearData]) : sans lui, le calcul ne saurait pas
+  /// distinguer un passage d'un redoublement, et trancherait à la place du
+  /// guichet.
   void _applyAutoTargetLevel(AcademicYearContext academicYearContext) {
     if (_targetLevelManuallySet) return;
     if (!_isPersistedTargetEmpty) return;
-    if (!_hasConfirmedPreviousYearData) return;
+    // **La garde était `previousRank != null`**, un proxy : le rang étant
+    // obligatoire pour enregistrer l'étape Antécédents, sa présence prouvait
+    // qu'un humain était passé par là — et donc que `validatedPreviousYear`,
+    // qui ne savait pas dire « non renseigné », reflétait une vraie saisie. Le
+    // rang est devenu facultatif : le proxy ne prouve plus rien, et le calcul
+    // aurait cessé de s'appliquer, sans un bruit, à tout dossier sans rang —
+    // c'est-à-dire à la plupart. Le champ dit désormais lui-même s'il a été
+    // renseigné.
+    final validatedPreviousYear = widget.enrollmentDetail.validatedPreviousYear;
+    if (validatedPreviousYear == null) return;
 
     final previousLevelLabel = widget.enrollmentDetail.previousSchoolLevel;
     if (previousLevelLabel.trim().isEmpty) return;
@@ -329,7 +338,7 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
       previousSchoolLevelLabel: previousLevelLabel,
       previousSchoolLevelGroupLabel:
           widget.enrollmentDetail.previousSchoolLevelGroup,
-      validatedPreviousYear: widget.enrollmentDetail.validatedPreviousYear,
+      validatedPreviousYear: validatedPreviousYear,
     );
     if (resolution == null) return;
     if (_selectedSchoolLevelGroupId == resolution.schoolLevelGroupId &&
@@ -356,13 +365,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   bool get _isPersistedTargetEmpty =>
       widget.enrollmentDetail.schoolLevelId.isEmpty &&
       widget.enrollmentDetail.schoolLevelGroupId.isEmpty;
-
-  /// `previousRank` n'est renseigné qu'après un enregistrement réussi de
-  /// l'étape Antécédents (moyenne + rang requis pour sauvegarder) — signal
-  /// fiable que `validatedPreviousYear` reflète une vraie saisie et pas le
-  /// défaut `false` d'un champ jamais rempli.
-  bool get _hasConfirmedPreviousYearData =>
-      widget.enrollmentDetail.previousRank != null;
 
   @override
   Widget build(BuildContext context) {

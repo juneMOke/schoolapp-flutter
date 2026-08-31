@@ -4,8 +4,11 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Lectures du grand-livre Facturation (sqflite). Aucune écriture, aucune
 /// transaction : le reste à payer se COMPOSE à la lecture, aucun solde stocké
@@ -54,7 +57,52 @@ class FinanceLedgerReadDao {
       whereArgs: [studentId],
       orderBy: 'paid_at DESC',
     );
-    return rows.map((r) => PaymentLocalModel.fromMap(r).toEntity()).toList();
+    if (rows.isEmpty) return const <LocalPayment>[];
+
+    final amounts = await _amountsOfPayments([
+      for (final r in rows) r['id'] as String,
+    ]);
+    return [
+      for (final r in rows)
+        PaymentLocalModel.fromMap(
+          r,
+        ).toEntity(amounts: amounts[r['id']] ?? MoneyBag.empty),
+    ];
+  }
+
+  /// Ce que chaque versement a encaissé, **par devise**, dérivé de ses
+  /// imputations.
+  ///
+  /// Le versement ne porte plus de montant à lui : ce n'en était pas une
+  /// propriété, seulement un résumé de ses allocations. Une requête pour tout
+  /// le lot plutôt qu'une par versement — N+1 requêtes sur une tablette se
+  /// sentent.
+  Future<Map<String, MoneyBag>> _amountsOfPayments(
+    List<String> paymentIds,
+  ) async {
+    if (paymentIds.isEmpty) return const {};
+    final placeholders = List.filled(paymentIds.length, '?').join(', ');
+    final rows = await _db.rawQuery(
+      'SELECT payment_id, currency, SUM(amount_in_cents) AS total '
+      'FROM payment_allocations '
+      'WHERE payment_id IN ($placeholders) '
+      'GROUP BY payment_id, currency '
+      'ORDER BY payment_id, currency',
+      paymentIds,
+    );
+    final byPayment = <String, List<Money>>{};
+    for (final r in rows) {
+      (byPayment[r['payment_id'] as String] ??= <Money>[]).add(
+        Money.parse(
+          (r['total'] as int?) ?? 0,
+          (r['currency'] as String?) ?? '',
+        ),
+      );
+    }
+    return {
+      for (final entry in byPayment.entries)
+        entry.key: MoneyBag.of(entry.value),
+    };
   }
 
   /// Reçu (RC) d'un paiement, tel qu'il est connu **localement**.
@@ -219,6 +267,7 @@ class FinanceLedgerReadDao {
       final rows = await _db.rawQuery(
         '''
         SELECT sc.student_id                    AS student_id,
+               sc.currency                      AS currency,
                SUM(sc.expected_amount_in_cents) AS expected,
                SUM(sc.amount_paid_in_cents)     AS paid_mirror,
                SUM(COALESCE((
@@ -227,25 +276,38 @@ class FinanceLedgerReadDao {
                  JOIN payments p ON p.id = pa.payment_id
                  WHERE pa.student_charge_id = sc.id
                    AND p.sync_status <> ?
-               ), 0))                           AS paid_pending,
-               MIN(sc.currency)                 AS currency
+               ), 0))                           AS paid_pending
         FROM student_charges sc
         WHERE sc.fee_code = ?
           AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
           AND sc.student_id IN ($placeholders)
-        GROUP BY sc.student_id
+        GROUP BY sc.student_id, sc.currency
+        ORDER BY sc.student_id, sc.currency
         ''',
         [SyncState.synced.dbValue, feeCode, academicYearId, ...batch],
       );
 
-      aggregates.addAll(
-        rows.map(
-          (r) => LocalFeeChargeAggregate(
-            studentId: r['student_id'] as String,
+      // Une LIGNE par (élève, devise) → une POSITION par devise, regroupées
+      // sous l'élève. Le `GROUP BY` porte la devise depuis que le `MIN()` a
+      // disparu : il étiquetait l'agrégat avec la devise la plus petite
+      // alphabétiquement, choisie au hasard des données.
+      final positionsByStudent = <String, List<FeeChargePosition>>{};
+      for (final r in rows) {
+        final studentId = r['student_id'] as String;
+        (positionsByStudent[studentId] ??= <FeeChargePosition>[]).add(
+          FeeChargePosition(
+            currency: CurrencyCode.normalize((r['currency'] as String?) ?? ''),
             expectedInCents: (r['expected'] as int?) ?? 0,
             paidMirrorInCents: (r['paid_mirror'] as int?) ?? 0,
             paidPendingInCents: (r['paid_pending'] as int?) ?? 0,
-            currency: (r['currency'] as String?) ?? '',
+          ),
+        );
+      }
+      aggregates.addAll(
+        positionsByStudent.entries.map(
+          (entry) => LocalFeeChargeAggregate(
+            studentId: entry.key,
+            positions: entry.value,
           ),
         ),
       );

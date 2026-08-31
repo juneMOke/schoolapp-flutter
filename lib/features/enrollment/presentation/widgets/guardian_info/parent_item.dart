@@ -21,6 +21,8 @@ class ParentItem extends StatefulWidget {
   final bool isExpanded;
   final VoidCallback? onToggleExpanded;
   final ValueChanged<bool?>? onPrimaryChanged;
+  final bool isEmergencyContact;
+  final ValueChanged<bool?>? onEmergencyContactChanged;
   final ParentItemStateChanged? onFormStateChanged;
   final ParentItemValueChanged? onValueChanged;
   final VoidCallback? onRemoveRequested;
@@ -42,6 +44,8 @@ class ParentItem extends StatefulWidget {
     required this.isExpanded,
     this.onToggleExpanded,
     this.onPrimaryChanged,
+    this.isEmergencyContact = false,
+    this.onEmergencyContactChanged,
     this.onFormStateChanged,
     this.onValueChanged,
     this.onRemoveRequested,
@@ -238,6 +242,7 @@ class _ParentItemState extends State<ParentItem> {
                   child: GuardianCardHeader(
                     parent: widget.parent,
                     isPrimary: widget.isPrimary,
+                    isEmergencyContact: widget.isEmergencyContact,
                     isExpanded: widget.isExpanded,
                     isComplete: state.valid,
                     onToggle: widget.onToggleExpanded,
@@ -289,6 +294,8 @@ class _ParentItemState extends State<ParentItem> {
                     isEditable: widget.isEditable,
                     isPrimary: widget.isPrimary,
                     onPrimaryChanged: widget.onPrimaryChanged,
+                    isEmergencyContact: widget.isEmergencyContact,
+                    onEmergencyContactChanged: widget.onEmergencyContactChanged,
                     identityReadOnly: widget.identityLocked,
                   ),
                 ],

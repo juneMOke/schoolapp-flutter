@@ -5,14 +5,15 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Bloc identité du payeur de la modale d'encaissement (spec MODALE-12).
+/// Bloc identité du payeur de la page d'encaissement (spec MODALE-12).
 ///
 /// Grille 3 colonnes (Nom · Post-nom · Prénom) qui s'empile sous une largeur
 /// contrainte, suivie du téléphone. Le Post-nom est le seul champ facultatif —
-/// les autres portent l'étoile du socle, et la validité est gardée par la
-/// modale (cf. `_payerValid`).
+/// les autres portent l'étoile du socle, et la validité est gardée par la page
+/// (cf. `_payerValid`).
 ///
 /// **Tous les champs sont ceux du socle** (`EteeloTextInput` /
 /// `EteeloPhoneInput`), libellé au-dessus du champ. Ils portaient jusqu'ici la
@@ -86,8 +87,17 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: l10n.facturationCreatePaymentPayerSectionTitle),
-        const SizedBox(height: AppDimensions.spacingS),
+        // Même en-tête que les autres sections Finance : la carte de la page
+        // remplace le bandeau sombre de l'ancienne popin.
+        FinanceSectionHeader(
+          icon: Icons.person_outline,
+          title: l10n.facturationCreatePaymentPayerSectionTitle,
+          accent: AppColors.bleuArdoise,
+          accentSoft: AppColors.surfaceAlt,
+        ),
+        const SizedBox(height: AppDimensions.spacingM),
+        const Divider(height: 1, color: AppColors.border),
+        const SizedBox(height: AppDimensions.spacingM),
         _PickPayerBar(
           help: l10n.facturationCreatePaymentPayerPickHelp,
           actionLabel: l10n.facturationCreatePaymentPayerPickAction,
@@ -131,37 +141,6 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
           readOnly: readOnly,
           errorText: phoneErrorText,
           dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.person_outline,
-          size: AppDimensions.detailHeaderIconSize,
-          color: AppColors.bleuArdoise,
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        // `Expanded` : le titre revient à la ligne au lieu de déborder. Dans la
-        // modale ouverte sur un téléphone étroit il ne reste que ~280 dp à
-        // cette ligne, quand le libellé en réclame 66 de plus.
-        Expanded(
-          child: Text(
-            title,
-            style: AppTextStyles.bodyStrong.copyWith(
-              color: AppColors.bleuProfond,
-            ),
-          ),
         ),
       ],
     );

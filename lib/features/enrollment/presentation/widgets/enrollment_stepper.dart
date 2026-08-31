@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -27,6 +28,10 @@ class EnrollmentStepper extends StatefulWidget {
   final List<EnrollmentStepHandler> stepHandlers;
   final ValueChanged<int>? onStepChanged;
 
+  /// L'en-tête propose une correction : le bandeau de consultation doit le dire
+  /// plutôt qu'annoncer un dossier « non modifiable ».
+  final bool correctionOffered;
+
   const EnrollmentStepper({
     super.key,
     required this.enrollmentDetail,
@@ -34,6 +39,7 @@ class EnrollmentStepper extends StatefulWidget {
     required this.detailPolicy,
     required this.stepHandlers,
     this.onStepChanged,
+    this.correctionOffered = false,
   });
 
   @override
@@ -178,7 +184,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               // Dossier en consultation lecture seule → bandeau d'avis au-dessus
               // de chaque étape. Exclut le cas Frais-verrouillé-en-création.
               stepBanner: widget.detailPolicy.isReadOnlyConsultation
-                  ? const EnrollmentReadOnlyBanner()
+                  ? EnrollmentReadOnlyBanner(
+                      correctionOffered: widget.correctionOffered,
+                    )
                   : null,
               controls: controls,
             );
@@ -272,6 +280,19 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   void _refreshAfterSave() {
     if (!mounted) return;
+
+    // Correction d'un dossier complété : l'écran est rendu depuis l'agrégat
+    // local entier, c'est donc lui qu'il faut relire. Passer par le détail de
+    // brouillon rechargerait une donnée que cette vue ne consomme pas, et
+    // l'écran resterait sur l'état d'avant la correction.
+    if (widget.detailPolicy.refreshesFromLocalAggregate) {
+      final enrollmentId = widget.enrollmentDetail.enrollmentDetail.id.trim();
+      if (enrollmentId.isEmpty) return;
+      context.read<EnrollmentOfflineBloc>().add(
+        LoadLocalEnrollmentDetail(enrollmentId),
+      );
+      return;
+    }
 
     // Parcours brouillon offline-first (tous les flux d'édition) : la
     // ré-hydratation entre étapes se fait depuis la base LOCALE (brouillon) et

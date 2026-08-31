@@ -26,6 +26,10 @@ void main() {
     Perm.financeGridRead: 'finance.grid.read',
     Perm.financeGridWrite: 'finance.grid.write',
     Perm.financeStatsRead: 'finance.stats.read',
+    Perm.boutiqueCatalogRead: 'boutique.catalog.read',
+    Perm.boutiqueCatalogWrite: 'boutique.catalog.write',
+    Perm.boutiqueSaleRead: 'boutique.sale.read',
+    Perm.boutiqueSaleWrite: 'boutique.sale.write',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -52,6 +56,7 @@ void main() {
     Perm.editiqueCancel: 'editique.cancel',
     Perm.schoolRead: 'school.read',
     Perm.schoolWrite: 'school.write',
+    Perm.schoolProvisioningWrite: 'school.provisioning.write',
     Perm.studentRead: 'student.read',
     Perm.studentWrite: 'student.write',
     Perm.teacherRead: 'teacher.read',
@@ -65,13 +70,49 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 49 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 54 permissions (v1.8 du catalogue serveur)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
     // migrer ; mais le serveur doit la connaître avant que cette release ne
     // pose la garde, sinon elle ferme une porte que personne ne peut ouvrir.
-    expect(Perm.values, hasLength(49));
+    //
+    // 49 → 50 : `school.provisioning.write`, semée par la migration serveur V93
+    // sur `DIRECTOR` et `SUPER_ADMIN`. Ajout également, et le serveur la connaît
+    // déjà — c'est le client qui rattrapait son retard.
+    //
+    // 50 → 54 : les quatre droits de la caisse boutique (ADR-020), semés sur
+    // tout le parc par la migration serveur V97. La scission `catalog` / `sale`
+    // n'est pas une symétrie de façade : la comptabilité tient la caisse et LIT
+    // le catalogue, mais ne l'écrit pas — sinon l'interdiction du prix libre à
+    // la caisse ne garderait plus rien.
+    expect(Perm.values, hasLength(54));
+  });
+
+  // La confusion coûteuse : deux permissions au nom voisin, dont une seule
+  // ouvre quoi que ce soit. Si un jour l'une prenait la valeur de l'autre, la
+  // garde du module Configuration se brancherait sur une impasse et le module
+  // resterait fermé à tout le monde, sans le dire.
+  test('provisionner SON école n\'est pas provisionner UNE école', () {
+    expect(
+      Perm.schoolProvisioningWrite.wire,
+      isNot(Perm.platformSchoolProvision.wire),
+    );
+    expect(Perm.schoolProvisioningWrite.wire, 'school.provisioning.write');
+    expect(Perm.platformSchoolProvision.wire, 'platform.school.provision');
+  });
+
+  // Contrepartie du test « périmètre plateforme inatteignable » ci-dessous :
+  // celle-ci, elle, DOIT arriver dans un ensemble effectif — c'est tout son
+  // objet. Le test tomberait si on la classait par erreur hors du modèle scopé.
+  test('provisionner son école est atteignable', () {
+    expect(
+      canAccess(
+        requires: const [Perm.schoolProvisioningWrite],
+        permissions: const ['school.provisioning.write'],
+      ),
+      isTrue,
+    );
   });
 
   // `platform.school.provision` n'appartient à aucune école : jamais semée,

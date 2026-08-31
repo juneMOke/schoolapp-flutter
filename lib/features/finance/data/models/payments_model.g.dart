@@ -10,8 +10,11 @@ PaymentModel _$PaymentModelFromJson(Map<String, dynamic> json) => PaymentModel(
   id: json['id'] as String,
   studentId: json['studentId'] as String,
   academicYearId: json['academicYearId'] as String,
-  amountInCents: (json['amountInCents'] as num).toInt(),
-  currency: json['currency'] as String,
+  amounts:
+      (json['amounts'] as List<dynamic>?)
+          ?.map((e) => MoneyModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   payerFirstName: json['payerFirstName'] as String,
   payerLastName: json['payerLastName'] as String,
   payerMiddleName: json['payerMiddleName'] as String?,
@@ -24,8 +27,7 @@ Map<String, dynamic> _$PaymentModelToJson(PaymentModel instance) =>
       'id': instance.id,
       'studentId': instance.studentId,
       'academicYearId': instance.academicYearId,
-      'amountInCents': instance.amountInCents,
-      'currency': instance.currency,
+      'amounts': instance.amounts,
       'payerFirstName': instance.payerFirstName,
       'payerLastName': instance.payerLastName,
       'payerMiddleName': instance.payerMiddleName,

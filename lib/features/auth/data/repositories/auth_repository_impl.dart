@@ -44,30 +44,67 @@ class AuthRepositoryImpl implements AuthRepository {
       } catch (_) {}
       return Right(session);
     } on DioException catch (e) {
+      // Le `NetworkFailure` est le DÉCLENCHEUR du repli login offline (bloc).
+      // Deux façons pour le serveur d'être injoignable, et la seconde porte
+      // pourtant un statut HTTP — d'où l'ordre : ces deux cas priment sur la
+      // panne que l'interceptor a pu poser dans `e.error`.
+      if (_isNetworkError(e) || _isUnreachableGateway(e)) {
+        return const Left(NetworkFailure('Network error occurred'));
+      }
       if (e.error is Failure) {
         return Left(e.error as Failure);
       }
-      // Le `NetworkFailure` est le DÉCLENCHEUR du repli login offline (bloc) :
-      // ne le produire que pour une vraie absence de réseau. Un statut HTTP non
-      // mappé par l'interceptor (ex. 429 rate-limit, 3xx inattendu) signifie
-      // que le serveur a répondu — basculer offline là-dessus contournerait le
-      // rate-limit et afficherait des bandeaux mensongers.
-      return _isNetworkError(e)
-          ? const Left(NetworkFailure('Network error occurred'))
-          : const Left(ServerFailure('Unexpected error occurred'));
+      // Le serveur a répondu autre chose (429 rate-limit, 3xx inattendu, 500) :
+      // basculer offline là-dessus contournerait le rate-limit et afficherait
+      // des bandeaux mensongers.
+      return const Left(ServerFailure('Unexpected error occurred'));
     } on StorageFailure catch (e) {
       return Left(e);
+    } on SocketException {
+      // La même panne, remontée nue par l'adaptateur plutôt qu'emballée par
+      // Dio. Sans ce cas elle finissait en « Erreur serveur », c'est-à-dire en
+      // refus de repli, sur une tablette simplement hors ligne.
+      return const Left(NetworkFailure('Network error occurred'));
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
 
+  /// Le serveur n'a **pas répondu**.
+  ///
+  /// Le critère est l'ABSENCE de réponse, jamais la nature exacte de la panne.
+  /// Énumérer les types (`connectionError`, les trois délais, `unknown` qui
+  /// emballe une `SocketException`) laissait tomber tout le reste — un
+  /// `badCertificate`, un `unknown` qui emballe une `PlatformException` ou une
+  /// `HandshakeException` — dans `ServerFailure` : l'écran affichait « Erreur
+  /// serveur. Réessayez dans un instant. » et le repli offline n'était même pas
+  /// tenté, sur un compte qui avait pourtant déjà ouvert une session ici.
+  ///
+  /// Le garde-fou d'origine tient toujours, et mieux : dès que le serveur a
+  /// répondu — 429, 3xx, 5xx — `response` n'est pas nul et le repli reste
+  /// fermé. Seule l'annulation volontaire est exclue en plus : elle ne dit rien
+  /// de l'état du réseau.
   static bool _isNetworkError(DioException e) =>
-      e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.sendTimeout ||
-      e.type == DioExceptionType.receiveTimeout ||
-      e.type == DioExceptionType.connectionError ||
-      (e.type == DioExceptionType.unknown && e.error is SocketException);
+      e.response == null && e.type != DioExceptionType.cancel;
+
+  /// Une passerelle a répondu **à la place** du back.
+  ///
+  /// 502, 503 et 504 disent « je n'ai pas pu joindre l'application », pas
+  /// « l'application refuse ». Pour l'agent devant sa tablette, c'est le même
+  /// événement qu'un câble arraché, et c'est le cas de terrain qui a fait
+  /// remonter ce défaut : back arrêté, réseau intact, nginx qui rend 502 —
+  /// l'écran disait « Erreur serveur » et le travail hors ligne devenait
+  /// inaccessible à un compte qui avait pourtant sa session locale.
+  ///
+  /// Le **500 reste une panne serveur** : là, l'application a répondu
+  /// elle-même, donc elle est joignable, et son refus n'est pas un cas de
+  /// repli.
+  ///
+  /// Aucun contournement de sécurité : le repli exige un compte déjà vu online
+  /// sur ce device, le mot de passe vérifié en Argon2id local, et une fenêtre
+  /// offline non expirée ni brûlée par une révocation.
+  static bool _isUnreachableGateway(DioException e) =>
+      const {502, 503, 504}.contains(e.response?.statusCode);
 
   @override
   Future<Either<Failure, AuthSessionSnapshot>> loginOffline({

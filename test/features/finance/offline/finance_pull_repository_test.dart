@@ -128,8 +128,6 @@ void main() {
       id: id,
       studentId: studentId,
       academicYearId: 'ay-1',
-      amountInCents: amount,
-      currency: 'CDF',
       method: 'CASH',
       paidAt: '2026-07-16T09:00:00Z',
       payerFirstName: 'Ada',
@@ -413,7 +411,7 @@ void main() {
   group('syncPayments — pull global §2.2', () {
     test(
       'paiements de l\'autre poste : upsert SYNCED + allocations rattachées au '
-      'paiement parent (devise héritée, libellé replié sur le fee_code)',
+      'paiement parent (chaque imputation porte SA devise et SON libellé)',
       () async {
         when(() => api.pullPayments(any(), any(), any(), any())).thenAnswer(
           (_) async => httpOk(
@@ -427,6 +425,11 @@ void main() {
                       studentChargeId: 'ch-1',
                       feeCode: 'SCOLARITE',
                       amountInCents: 20000,
+                      studentChargeLabel: 'SCOLARITE',
+                      // CDF, et non USD : une fixture en dollars ne pourrait
+                      // pas distinguer « la devise de l'imputation » d'un
+                      // défaut codé en dur.
+                      currency: 'CDF',
                     ),
                   ],
                 ),
@@ -451,7 +454,10 @@ void main() {
 
         final allocs = await db.query('payment_allocations');
         expect(allocs.single['payment_id'], 'pay-1'); // parent, absent du DTO
-        expect(allocs.single['currency'], 'CDF'); // héritée du paiement
+        // SA devise, pas celle du parent ni un défaut : l'imputation solde une
+        // créance, donc elle en tient exactement une. L'héritage était faux dès
+        // qu'un versement en portait deux — toutes prenaient la première.
+        expect(allocs.single['currency'], 'CDF');
         expect(allocs.single['student_charge_label'], 'SCOLARITE'); // repli
         expect(allocs.single['amount_in_cents'], 20000);
 

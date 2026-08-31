@@ -1,9 +1,14 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -16,7 +21,29 @@ class _FakeSyncStatusCubit extends Cubit<SyncStatusState>
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
 void main() {
+  late _MockAuthBloc authBloc;
+
+  setUp(() {
+    authBloc = _MockAuthBloc();
+    // Le menu du compte lit les permissions pour décider d'offrir
+    // « Paramètres ». Ces tests portent sur la pastille de synchro : un porteur
+    // sans droit suffit, et laisse cette entrée hors du chemin.
+    const authState = AuthState(
+      status: AuthStatus.authenticated,
+      permissions: <String>[],
+    );
+    when(() => authBloc.state).thenReturn(authState);
+    whenListen(
+      authBloc,
+      Stream<AuthState>.value(authState),
+      initialState: authState,
+    );
+  });
+
   Future<void> pumpActions(
     WidgetTester tester, {
     required SyncStatus status,
@@ -32,19 +59,24 @@ void main() {
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<SyncStatusCubit>(
-          // Clé discriminante : un second `pumpWidget` dans le MÊME test
-          // réutilise l'élément, et `BlocProvider` ne rejoue alors jamais son
-          // `create` — la nouvelle graine n'atteindrait pas l'arbre, et
-          // l'assertion passerait grâce à l'état du pump précédent.
-          key: ValueKey((status, hasHeldWork, hasIncompleteRead)),
-          create: (_) => _FakeSyncStatusCubit(
-            SyncStatusState(
-              status: status,
-              hasHeldWork: hasHeldWork,
-              hasIncompleteRead: hasIncompleteRead,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SyncStatusCubit>(
+              // Clé discriminante : un second `pumpWidget` dans le MÊME test
+              // réutilise l'élément, et `BlocProvider` ne rejoue alors jamais
+              // son `create` — la nouvelle graine n'atteindrait pas l'arbre, et
+              // l'assertion passerait grâce à l'état du pump précédent.
+              key: ValueKey((status, hasHeldWork, hasIncompleteRead)),
+              create: (_) => _FakeSyncStatusCubit(
+                SyncStatusState(
+                  status: status,
+                  hasHeldWork: hasHeldWork,
+                  hasIncompleteRead: hasIncompleteRead,
+                ),
+              ),
             ),
-          ),
+            BlocProvider<AuthBloc>.value(value: authBloc),
+          ],
           child: const Scaffold(body: TopBarActions(isCompact: false)),
         ),
       ),

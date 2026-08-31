@@ -7,21 +7,44 @@
 // NOTHING`) : un rejeu après coupure ne compte JAMAIS l'argent deux fois.
 // Centimes `int`, jamais de flottant.
 
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+
 /// Une imputation du versement sur une créance (spec `PaymentAllocationInput`).
 class PaymentAllocationInput {
   /// uuid client honoré (idempotence fine de l'allocation).
   final String id;
 
   /// Créance visée : id réel, id **provisoire** (créance générée localement pour
-  /// un élève inscrit offline → le serveur remappe par `studentId + feeCode`),
-  /// ou `null` = « créance pas encore matérialisée côté client » → remap.
+  /// un élève inscrit offline → le serveur remappe par clé métier), ou `null` =
+  /// « créance pas encore matérialisée côté client » → remap.
   ///
   /// Ce n'est **PAS** une ligne d'avance/crédit (décision D) : le trop-perçu est
   /// détecté serveur après recompute et signalé via `overpayment`, jamais porté
   /// par une allocation.
   final String? studentChargeId;
 
-  /// Poste — **clé de remap serveur** (INSCRIPTION, MINERVAL_T1, …).
+  /// Ligne de grille visée. **Facultatif au contrat, et de bien meilleure
+  /// autorité que [studentChargeId]** : un tarif vient toujours du référentiel
+  /// servi par le serveur, il ne peut donc jamais être provisoire — même quand
+  /// la créance qu'il porte a été fabriquée hors ligne.
+  ///
+  /// C'est lui qui départage deux créances d'une même nature depuis qu'un niveau
+  /// peut en porter plusieurs (un minerval en sept tranches, des frais d'examen
+  /// en trois). Sans lui, le serveur ne devine pas : il refuse
+  /// (`AMBIGUOUS_FEE_CODE`) plutôt que d'imputer au hasard de l'argent
+  /// réellement reçu — le décalage ne se verrait qu'au relevé du parent.
+  ///
+  /// ⚠️ Il ne remplace pas [feeCode], il le **précise** : le serveur ne
+  /// verrouille comme candidates que les créances portant les `feeCode` de ce
+  /// payload. Un tarif juste accompagné d'une nature fausse ne trouve rien et
+  /// retombe sur le même refus. Les deux sortent de la MÊME créance.
+  ///
+  /// `null` reste légitime : créance *ad hoc*, hors grille.
+  final String? feeTariffId;
+
+  /// Poste — **clé de remap serveur** (INSCRIPTION, MINERVAL_T1, …), et repli
+  /// quand aucun tarif n'est désigné.
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -30,6 +53,7 @@ class PaymentAllocationInput {
   const PaymentAllocationInput({
     required this.id,
     this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,
@@ -39,16 +63,23 @@ class PaymentAllocationInput {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,
     'studentChargeId': studentChargeId,
+    if (feeTariffId != null) 'feeTariffId': feeTariffId,
     'feeCode': feeCode,
     'studentChargeLabel': studentChargeLabel,
     'amountInCents': amountInCents,
     'currency': currency,
   };
 
+  /// Le tarif se lit en `String?` : les payloads figés **avant** son
+  /// introduction n'en portent pas, et les refuser ici les ferait basculer en
+  /// `failed` — issue TERMINALE de l'outbox, sur du cash déjà encaissé et un
+  /// reçu déjà imprimé. Même règle que `payerPhoneNumber` et que les trois
+  /// formes de `amounts`.
   factory PaymentAllocationInput.fromJson(Map<String, dynamic> j) =>
       PaymentAllocationInput(
         id: j['id'] as String,
         studentChargeId: j['studentChargeId'] as String?,
+        feeTariffId: j['feeTariffId'] as String?,
         feeCode: j['feeCode'] as String,
         studentChargeLabel: (j['studentChargeLabel'] as String?) ?? '',
         amountInCents: (j['amountInCents'] as num).toInt(),
@@ -64,9 +95,12 @@ class PaymentInput {
   final String? academicYearId;
   final String? classroomId;
 
-  /// Total du versement — doit égaler la somme des allocations.
-  final int amountInCents;
-  final String currency;
+  /// Ce qui est encaissé, **une entrée par devise**.
+  ///
+  /// Le serveur vérifie l'égalité avec les imputations **devise par devise**
+  /// (422 `ALLOCATION_SUM_MISMATCH`) : un total juste globalement mais mal
+  /// réparti est refusé. Ne jamais additionner deux entrées.
+  final MoneyBag amounts;
   final String? method; // 'CASH'…
   final String? details;
   final String? payerFirstName;
@@ -89,8 +123,7 @@ class PaymentInput {
     required this.studentId,
     this.academicYearId,
     this.classroomId,
-    required this.amountInCents,
-    required this.currency,
+    required this.amounts,
     this.method,
     this.details,
     this.payerFirstName,
@@ -106,8 +139,10 @@ class PaymentInput {
     'studentId': studentId,
     'academicYearId': academicYearId,
     'classroomId': classroomId,
-    'amountInCents': amountInCents,
-    'currency': currency,
+    'amounts': [
+      for (final amount in amounts.entries)
+        {'amountInCents': amount.amountInCents, 'currency': amount.currency},
+    ],
     'method': method ?? 'CASH',
     'details': details,
     'payerFirstName': payerFirstName,
@@ -123,8 +158,7 @@ class PaymentInput {
     studentId: j['studentId'] as String,
     academicYearId: j['academicYearId'] as String?,
     classroomId: j['classroomId'] as String?,
-    amountInCents: (j['amountInCents'] as num).toInt(),
-    currency: j['currency'] as String,
+    amounts: _amountsOf(j),
     method: j['method'] as String?,
     details: j['details'] as String?,
     payerFirstName: j['payerFirstName'] as String?,
@@ -134,6 +168,35 @@ class PaymentInput {
     externalReference: j['externalReference'] as String?,
     paidAt: j['paidAt'] as String,
   );
+
+  /// Relit les montants d'un payload d'outbox, **quelle que soit sa forme**.
+  ///
+  /// C'est la TROISIÈME forme que ce parseur doit tolérer, et pour la même
+  /// raison que les deux premières : une tablette mise à jour hors ligne porte
+  /// encore en file des versements écrits par la version précédente, avec un
+  /// `amountInCents` scalaire. Les refuser ici les ferait basculer en `failed`
+  /// — issue TERMINALE de l'outbox : le cash encaissé au guichet, reçu déjà
+  /// imprimé, ne remonterait JAMAIS et l'élève resterait débiteur.
+  ///
+  /// Le repli est conservé tant que des tablettes peuvent porter des versements
+  /// d'avant la bascule.
+  static MoneyBag _amountsOf(Map<String, dynamic> j) {
+    final raw = j['amounts'];
+    if (raw is List) {
+      return MoneyBag.of([
+        for (final entry in raw)
+          if (entry is Map<String, dynamic>)
+            Money.parse(
+              (entry['amountInCents'] as num?)?.toInt() ?? 0,
+              (entry['currency'] as String?) ?? '',
+            ),
+      ]);
+    }
+    // Forme scalaire — payload figé avant la bascule multi-devise.
+    final cents = (j['amountInCents'] as num?)?.toInt();
+    if (cents == null) return MoneyBag.empty;
+    return MoneyBag.from(Money.parse(cents, (j['currency'] as String?) ?? ''));
+  }
 }
 
 /// L'agrégat complet poussé en UN seul appel (spec `PaymentAggregateRequest`).

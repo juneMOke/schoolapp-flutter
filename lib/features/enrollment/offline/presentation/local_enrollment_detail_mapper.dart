@@ -63,6 +63,7 @@ EnrollmentDetail mapLocalToEnrollmentDetail(
             relationshipType: RelationshipType.fromString(
               parent.relationshipType.apiValue,
             ),
+            emergencyContact: parent.emergencyContact,
           ),
         )
         .toList(growable: false),
@@ -76,9 +77,14 @@ EnrollmentDetail mapLocalToEnrollmentDetail(
       previousSchoolLevelGroup: enrollment.previousSchoolLevelGroup ?? '',
       previousSchoolLevel: enrollment.previousSchoolLevel ?? '',
       previousSchoolLevelId: enrollment.previousSchoolLevelId ?? '',
-      previousRate: enrollment.previousRate ?? 0,
+      // Aucun repli : c'est ce `?? 0` qui rejouait, un cran plus bas, la
+      // fabrication que le serveur a supprimée — le résumé imprimait « 0% »
+      // pour un dossier où personne n'avait rien saisi.
+      previousRate: enrollment.previousRate,
       previousRank: enrollment.previousRank,
-      validatedPreviousYear: enrollment.validatedPreviousYear ?? false,
+      validatedPreviousYear: enrollment.validatedPreviousYear,
+      formerStudent: enrollment.formerStudent,
+      medicalNotes: enrollment.medicalNotes,
       schoolLevelGroupId: enrollment.schoolLevelGroupId ?? '',
       schoolLevelId: enrollment.schoolLevelId ?? '',
       transferReason: enrollment.transferReason,
@@ -130,9 +136,9 @@ EnrollmentDetail buildDraftSeedDetail({
       previousAcademicYear: '',
       previousSchoolLevelGroup: '',
       previousSchoolLevel: '',
-      previousRate: 0,
+      previousRate: null,
       previousRank: null,
-      validatedPreviousYear: false,
+      validatedPreviousYear: null,
       schoolLevelGroupId: '',
       schoolLevelId: '',
     ),

@@ -4,6 +4,8 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/offline/data/mappers/local_finance_online_mappers.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_offline_enums.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 void main() {
   group('LocalStudentCharge → StudentCharge', () {
@@ -51,8 +53,7 @@ void main() {
       id: 'p1',
       clientUuid: 'p1',
       studentId: 's1',
-      amountInCents: 30000,
-      currency: 'USD',
+      amounts: MoneyBag.of(const [Money(30000, 'USD')]),
       method: PaymentMethod.cash,
       paidAt: '2026-07-06T10:00:00Z',
       payerFirstName: 'Sarah',

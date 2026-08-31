@@ -476,7 +476,83 @@ void main() {
       expect(columns['previous_rank'], 3);
       expect(columns['validated_previous_year'], 1);
       expect(columns['transfer_reason'], 'Déménagement');
-      expect(columns.containsKey('previous_rate'), isFalse);
+      // **La colonne est écrite, à `null`.** Ce test attendait l'inverse —
+      // l'omission — du temps où le bloc était obligatoire et où l'on ne
+      // pouvait donc jamais avoir à le vider. Depuis qu'il est facultatif,
+      // omettre reviendrait à garder l'ancienne valeur : le champ vidé à
+      // l'écran resterait rempli en base, sans que rien le signale.
+      expect(columns.containsKey('previous_rate'), isTrue);
+      expect(columns['previous_rate'], isNull);
+    });
+
+    /// Le cas qui donne son sens au remplacement : une moyenne saisie par
+    /// erreur doit pouvoir être effacée. C'est la contrepartie assumée du bloc
+    /// devenu facultatif, et la même sémantique que le PUT du serveur.
+    test('un bloc vidé efface tout ce qu\'il couvre', () async {
+      when(
+        () => draftDao.updateDraftEnrollmentColumns(
+          any(),
+          any(),
+          nowMs: any(named: 'nowMs'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await repo.saveDraftPreviousAcademic(enrollmentId: 'e1');
+
+      final columns =
+          verify(
+                () => draftDao.updateDraftEnrollmentColumns(
+                  'e1',
+                  captureAny(),
+                  nowMs: clock,
+                ),
+              ).captured.single
+              as Map<String, Object?>;
+
+      for (final column in const [
+        'previous_school_name',
+        'previous_academic_year',
+        'previous_school_level_group',
+        'previous_school_level',
+        'previous_rate',
+        'previous_rank',
+        'validated_previous_year',
+      ]) {
+        expect(columns[column], isNull, reason: column);
+        expect(columns.containsKey(column), isTrue, reason: column);
+      }
+
+      // Deux champs échappent au remplacement. `transfer_reason` parce que
+      // cette étape ne le saisit pas — l'écrire viderait un motif posé
+      // ailleurs. `former_student` parce que sa colonne est NOT NULL.
+      expect(columns.containsKey('transfer_reason'), isFalse);
+      expect(columns.containsKey('former_student'), isFalse);
+    });
+
+    test('« ancien élève » s\'écrit en 0/1 quand il est déclaré', () async {
+      when(
+        () => draftDao.updateDraftEnrollmentColumns(
+          any(),
+          any(),
+          nowMs: any(named: 'nowMs'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await repo.saveDraftPreviousAcademic(
+        enrollmentId: 'e1',
+        formerStudent: true,
+      );
+
+      final columns =
+          verify(
+                () => draftDao.updateDraftEnrollmentColumns(
+                  'e1',
+                  captureAny(),
+                  nowMs: clock,
+                ),
+              ).captured.single
+              as Map<String, Object?>;
+      expect(columns['former_student'], 1);
     });
   });
 
@@ -627,6 +703,96 @@ void main() {
         }, (_) => fail('devrait échouer'));
       },
     );
+  });
+
+  group('contact d\'urgence — remontée typée', () {
+    /// Le DAO refuse deux désignations avant d'écrire ; le repository doit
+    /// nommer la cause. Rabattue sur un `StorageFailure`, la contradiction de
+    /// saisie deviendrait « échec de l'enregistrement » — l'écran ne saurait
+    /// pas quoi faire corriger, et l'utilisateur retenterait à l'identique.
+    test(
+      'AmbiguousEmergencyContactException → AmbiguousEmergencyContactFailure',
+      () async {
+        when(
+          () => draftDao.replaceDraftParents(
+            any(),
+            any(),
+            nowMs: any(named: 'nowMs'),
+            enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
+          ),
+        ).thenThrow(const AmbiguousEmergencyContactException('s1', 2));
+
+        final result = await repo.saveDraftGuardians(
+          studentId: 's1',
+          parents: const [
+            ConfirmParentDraft(
+              id: 'p1',
+              firstName: 'Sarah',
+              lastName: 'Moke',
+              phoneNumber: '+243111',
+              relationshipType: 'MOTHER',
+              emergencyContact: true,
+            ),
+          ],
+        );
+
+        expect(
+          result,
+          isA<Left<Failure, Unit>>().having(
+            (l) => l.value,
+            'failure',
+            isA<AmbiguousEmergencyContactFailure>(),
+          ),
+        );
+      },
+    );
+
+    test('la désignation traverse jusqu\'au ParentDraft du DAO', () async {
+      when(
+        () => draftDao.replaceDraftParents(
+          any(),
+          any(),
+          nowMs: any(named: 'nowMs'),
+          enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await repo.saveDraftGuardians(
+        studentId: 's1',
+        parents: const [
+          ConfirmParentDraft(
+            id: 'p1',
+            firstName: 'Sarah',
+            lastName: 'Moke',
+            phoneNumber: '+243111',
+            relationshipType: 'MOTHER',
+            emergencyContact: true,
+          ),
+          ConfirmParentDraft(
+            id: 'p2',
+            firstName: 'Joseph',
+            lastName: 'Moke',
+            phoneNumber: '+243222',
+            relationshipType: 'FATHER',
+          ),
+        ],
+      );
+
+      final captured =
+          verify(
+                () => draftDao.replaceDraftParents(
+                  's1',
+                  captureAny(),
+                  nowMs: any(named: 'nowMs'),
+                  enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
+                ),
+              ).captured.single
+              as List<ParentDraft>;
+
+      expect(captured.first.emergencyContact, isTrue);
+      // Le second ne dit rien — et « rien » n'est pas « non ».
+      expect(captured.last.emergencyContact, isNull);
+    });
   });
 
   group('searchParents', () {

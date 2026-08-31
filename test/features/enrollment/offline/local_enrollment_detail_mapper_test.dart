@@ -95,6 +95,70 @@ void main() {
       expect(enrollment.schoolLevelGroupId, 'group-1');
     });
 
+    /// **Le mapper est le dernier endroit où un « on ne sait pas » peut se
+    /// déguiser en valeur.** Il portait un `?? 0` et un `?? false` : le résumé
+    /// imprimait alors « 0% » et « Non » pour un dossier où personne n'avait
+    /// rien saisi — exactement la fabrication que le serveur a cessé de
+    /// produire, reproduite un cran plus bas.
+    ///
+    /// Les rendus ont leurs propres tests, mais ils construisent leur détail à
+    /// la main : sans ce cas-ci, réintroduire le repli ICI ne ferait rougir
+    /// personne.
+    test(
+      'un dossier sans antécédents projette des `null`, jamais des zéros',
+      () {
+        final detail = mapLocalToEnrollmentDetail(
+          LocalEnrollmentDetail(
+            enrollment: const LocalEnrollment(
+              id: 'enr-1',
+              studentId: 'stu-1',
+              enrollmentType: EnrollmentType.newEnrollment,
+              status: OfflineEnrollmentStatus.inProgress,
+              academicYearId: 'ay-1',
+              enrollmentDate: '2026-07-01',
+            ),
+            student: buildLocal().student,
+            parents: const [],
+          ),
+          levels: const [],
+          groups: const [],
+        );
+
+        final enrollment = detail.enrollmentDetail;
+        expect(enrollment.previousRate, isNull);
+        expect(enrollment.previousRank, isNull);
+        expect(enrollment.validatedPreviousYear, isNull);
+        // « Ancien élève » et la fiche santé traversent aussi, sans défaut
+        // inventé : faux et vide sont ici les valeurs réelles du dossier.
+        expect(enrollment.formerStudent, isFalse);
+        expect(enrollment.medicalNotes, isNull);
+      },
+    );
+
+    test('les champs de guichet remontent tels quels', () {
+      final detail = mapLocalToEnrollmentDetail(
+        LocalEnrollmentDetail(
+          enrollment: const LocalEnrollment(
+            id: 'enr-1',
+            studentId: 'stu-1',
+            enrollmentType: EnrollmentType.newEnrollment,
+            status: OfflineEnrollmentStatus.inProgress,
+            academicYearId: 'ay-1',
+            enrollmentDate: '2026-07-01',
+            formerStudent: true,
+            medicalNotes: 'Asthme.',
+          ),
+          student: buildLocal().student,
+          parents: const [],
+        ),
+        levels: const [],
+        groups: const [],
+      );
+
+      expect(detail.enrollmentDetail.formerStudent, isTrue);
+      expect(detail.enrollmentDetail.medicalNotes, 'Asthme.');
+    });
+
     test('fallback objet minimal quand le niveau est absent des listes', () {
       final detail = mapLocalToEnrollmentDetail(
         buildLocal(schoolLevelId: 'inconnu', schoolLevelGroupId: null),

@@ -20,6 +20,11 @@ abstract final class DocumentsCatalogLabels {
           l10n.editiqueViewerStatementTitle,
         EditiqueDocumentType.financialClearance =>
           l10n.editiqueViewerClearanceTitle,
+        // Le RV ne figure PAS au catalogue d'un élève : son sujet est le
+        // payeur, et il se retrouve depuis la caisse. Le cas est ici parce que
+        // le type est commun à toute l'imprimerie, pas parce qu'il s'affiche —
+        // `EditiqueCatalogEntry.all` ne le porte pas.
+        EditiqueDocumentType.saleReceipt => l10n.editiqueViewerSaleReceiptTitle,
       };
 
   /// Phrase d'aide : elle explique la **nature** en langage métier, pas la
@@ -33,6 +38,7 @@ abstract final class DocumentsCatalogLabels {
         EditiqueDocumentType.paymentReceipt => l10n.documentsHintReceipt,
         EditiqueDocumentType.accountStatement => l10n.documentsHintStatement,
         EditiqueDocumentType.financialClearance => l10n.documentsHintClearance,
+        EditiqueDocumentType.saleReceipt => l10n.documentsHintSaleReceipt,
       };
 
   static Color accentOf(EditiqueDocumentType type) => switch (type) {
@@ -41,6 +47,10 @@ abstract final class DocumentsCatalogLabels {
     EditiqueDocumentType.paymentReceipt ||
     EditiqueDocumentType.accountStatement => AppColors.terreCuite,
     EditiqueDocumentType.financialClearance => AppColors.vertSavane,
+    // L'accent de la caisse, pas celui des finances scolaires : la boutique est
+    // étanche à la scolarité (invariant I-4), et sa pièce ne doit pas se
+    // confondre avec un reçu de frais.
+    EditiqueDocumentType.saleReceipt => AppColors.boutiqueActivitesAccent,
   };
 
   static String groupTitleOf(

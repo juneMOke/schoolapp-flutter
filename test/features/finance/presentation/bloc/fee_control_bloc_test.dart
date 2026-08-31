@@ -61,7 +61,7 @@ LocalFeeChargeAggregate aggregate(
   int expected = 100000,
   int mirror = 0,
   int pending = 0,
-}) => LocalFeeChargeAggregate(
+}) => LocalFeeChargeAggregate.single(
   studentId: studentId,
   expectedInCents: expected,
   paidMirrorInCents: mirror,

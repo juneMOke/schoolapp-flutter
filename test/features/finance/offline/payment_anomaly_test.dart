@@ -33,8 +33,6 @@ void main() {
       'client_uuid': 'p-1',
       'student_id': 's-1',
       'academic_year_id': 'y-1',
-      'amount_in_cents': 150000,
-      'currency': 'CDF',
       'method': 'CASH',
       'paid_at': '2026-08-04T14:07:00.000',
       'payer_first_name': 'Papa',

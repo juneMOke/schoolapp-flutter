@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/finance/domain/usecases/create_payme
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class MockGetPaymentsUseCase extends Mock implements GetPaymentsUseCase {}
 
@@ -21,6 +23,9 @@ const _studentId = 'student-1';
 const _academicYearId = 'year-1';
 const _amountInCents = 150000;
 const _currency = 'USD';
+
+/// Ce qui est encaissé, par devise — le versement n'a plus de montant à lui.
+final _amounts = MoneyBag.of(const [Money(_amountInCents, _currency)]);
 const _payerFirstName = 'Jean';
 const _payerLastName = 'Dupont';
 const _payerMiddleName = 'Pierre';
@@ -38,8 +43,7 @@ final _createdPayment = Payment(
   id: 'payment-1',
   studentId: _studentId,
   academicYearId: _academicYearId,
-  amountInCents: _amountInCents,
-  currency: _currency,
+  amounts: _amounts,
   payerFirstName: _payerFirstName,
   payerLastName: _payerLastName,
   payerMiddleName: _payerMiddleName,
@@ -50,8 +54,7 @@ final _existingPayment = Payment(
   id: 'payment-existing',
   studentId: _studentId,
   academicYearId: _academicYearId,
-  amountInCents: 50000,
-  currency: _currency,
+  amounts: MoneyBag.of(const [Money(50000, _currency)]),
   payerFirstName: 'A',
   payerLastName: 'B',
   paidAt: DateTime(2026, 4, 24),
@@ -138,8 +141,7 @@ void main() {
           () => mockCreatePaymentUseCase.call(
             studentId: _studentId,
             academicYearId: _academicYearId,
-            amountInCents: _amountInCents,
-            currency: _currency,
+            amounts: _amounts,
             payerFirstName: _payerFirstName,
             payerLastName: _payerLastName,
             payerMiddleName: _payerMiddleName,
@@ -153,11 +155,10 @@ void main() {
         payments: [_existingPayment],
       ),
       act: (bloc) => bloc.add(
-        const PaymentsCreateRequested(
+        PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
-          amountInCents: _amountInCents,
-          currency: _currency,
+          amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,
           payerMiddleName: _payerMiddleName,
@@ -188,8 +189,7 @@ void main() {
           () => mockCreatePaymentUseCase.call(
             studentId: _studentId,
             academicYearId: _academicYearId,
-            amountInCents: _amountInCents,
-            currency: _currency,
+            amounts: _amounts,
             payerFirstName: _payerFirstName,
             payerLastName: _payerLastName,
             payerMiddleName: _payerMiddleName,
@@ -201,11 +201,10 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const PaymentsCreateRequested(
+        PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
-          amountInCents: _amountInCents,
-          currency: _currency,
+          amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,
           payerMiddleName: _payerMiddleName,
@@ -231,8 +230,7 @@ void main() {
           () => mockCreatePaymentUseCase.call(
             studentId: _studentId,
             academicYearId: _academicYearId,
-            amountInCents: _amountInCents,
-            currency: _currency,
+            amounts: _amounts,
             payerFirstName: _payerFirstName,
             payerLastName: _payerLastName,
             payerMiddleName: _payerMiddleName,
@@ -244,11 +242,10 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const PaymentsCreateRequested(
+        PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
-          amountInCents: _amountInCents,
-          currency: _currency,
+          amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,
           payerMiddleName: _payerMiddleName,

@@ -1,17 +1,24 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Une ligne de répartition du versement (zone Z5).
 class TicketAllocationLine extends Equatable {
   final String label;
   final int amountInCents;
 
+  /// La devise de CETTE imputation : elle solde une créance, donc elle en tient
+  /// exactement une. Scalaire, définitivement.
+  final String currency;
+
   const TicketAllocationLine({
     required this.label,
     required this.amountInCents,
+    required this.currency,
   });
 
   @override
-  List<Object?> get props => [label, amountInCents];
+  List<Object?> get props => [label, amountInCents, currency];
 }
 
 /// Libellés fixes du ticket, injectés depuis `AppLocalizations`.
@@ -130,15 +137,20 @@ class TicketReceiptModel extends Equatable {
   final String? cashierFullName;
 
   // ── Z5 : l'argent ───────────────────────────────────────────────────────────
-  final int amountReceivedInCents;
+  /// Ce que le guichet a reçu, **par devise**.
+  ///
+  /// Un passage au guichet peut solder une créance en dollars et une en francs :
+  /// c'est un acte, donc un versement et un reçu — mais pas un montant unique.
+  final MoneyBag amountReceived;
   final List<TicketAllocationLine> allocations;
 
   /// Solde restant **après** ce versement, tel que le local le compose. `null`
   /// quand il n'est pas calculable : mieux vaut omettre la ligne que d'imprimer
   /// un chiffre faux sur un papier remis à un parent.
-  final int? remainingBalanceInCents;
+  /// Le solde restant, **par devise**. `null` quand il n'est pas calculable —
+  /// le ticket omet alors la ligne, ce qu'il sait faire.
+  final MoneyBag? remainingBalance;
 
-  final String currency;
   final TicketLabels labels;
 
   const TicketReceiptModel({
@@ -150,10 +162,9 @@ class TicketReceiptModel extends Equatable {
     required this.provisionalReference,
     required this.paidAt,
     this.cashierFullName,
-    required this.amountReceivedInCents,
+    required this.amountReceived,
     this.allocations = const <TicketAllocationLine>[],
-    this.remainingBalanceInCents,
-    required this.currency,
+    this.remainingBalance,
     required this.labels,
   });
 
@@ -163,8 +174,29 @@ class TicketReceiptModel extends Equatable {
   /// anomalie de composition : un versement qui dépasse le dû est accepté
   /// (`PaymentAnomalyKind.overpayment`), le reçu définitif est scellé, et le
   /// ticket remis au parent reste valide. L'écart s'imprime en « avance ».
-  int get allocatedInCents =>
-      allocations.fold<int>(0, (sum, line) => sum + line.amountInCents);
+  MoneyBag get allocated => MoneyBag.sumBy(
+    allocations,
+    (line) => Money.parse(line.amountInCents, line.currency),
+  );
+
+  /// La part du reçu qu'aucune créance n'absorbe, **devise par devise**.
+  ///
+  /// La soustraction se fait ici et pas dans `MoneyBag` : soustraire deux sacs
+  /// en général pose une question sans bonne réponse — que faire d'une devise
+  /// présente à droite et pas à gauche ? Ici elle en a une : ce qui est imputé
+  /// sans avoir été reçu est une saisie incohérente, pas une avance, et ne
+  /// s'imprime pas.
+  MoneyBag get advance {
+    final imputed = allocated;
+    return MoneyBag.of([
+      for (final received in amountReceived.entries)
+        Money(
+          received.amountInCents -
+              (imputed.amountIn(received.currency)?.amountInCents ?? 0),
+          received.currency,
+        ),
+    ]).withoutZeros;
+  }
 
   @override
   List<Object?> get props => [
@@ -176,10 +208,9 @@ class TicketReceiptModel extends Equatable {
     provisionalReference,
     paidAt,
     cashierFullName,
-    amountReceivedInCents,
+    amountReceived,
     allocations,
-    remainingBalanceInCents,
-    currency,
+    remainingBalance,
     labels,
   ];
 }

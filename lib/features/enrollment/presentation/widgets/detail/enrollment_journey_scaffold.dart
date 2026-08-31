@@ -18,6 +18,10 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
   /// [EnrollmentJourneyAppBar.onExitRequested].
   final VoidCallback? onExitRequested;
 
+  /// Action de niveau dossier relayée à l'en-tête (voir
+  /// [EnrollmentJourneyAppBar.action]).
+  final Widget? action;
+
   const EnrollmentJourneyScaffold({
     super.key,
     required this.modeLabel,
@@ -25,6 +29,7 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
     required this.currentStep,
     required this.body,
     this.onExitRequested,
+    this.action,
   });
 
   @override
@@ -37,6 +42,7 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
         currentStep: currentStep,
         totalSteps: EnrollmentWizardStep.values.length,
         onExitRequested: onExitRequested,
+        action: action,
       ),
       body: body,
     );

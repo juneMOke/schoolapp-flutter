@@ -26,6 +26,12 @@ class GuardianInfoStepBody extends StatelessWidget {
   final ValueChanged<String>? onPrimaryParentChanged;
   final String? expandedParentId;
   final String? primaryParentId;
+
+  /// Tuteur désigné contact d'urgence, ou `null` si aucun. **Un seul id pour
+  /// toutes les cartes** : l'exclusivité vient de la forme de cet état, pas
+  /// d'une garde qu'on pourrait oublier d'écrire.
+  final String? emergencyContactParentId;
+  final ValueChanged<String?>? onEmergencyContactChanged;
   final bool isLoading;
   final bool canSave;
   final bool showInlineSaveButton;
@@ -48,6 +54,8 @@ class GuardianInfoStepBody extends StatelessWidget {
     this.onPrimaryParentChanged,
     this.expandedParentId,
     this.primaryParentId,
+    this.emergencyContactParentId,
+    this.onEmergencyContactChanged,
     this.isLoading = false,
     this.canSave = false,
     this.showInlineSaveButton = true,
@@ -113,6 +121,13 @@ class GuardianInfoStepBody extends StatelessWidget {
                         onPrimaryParentChanged?.call(parent.id);
                       }
                     },
+                    isEmergencyContact: emergencyContactParentId == parent.id,
+                    // Décocher retire la désignation sans en poser d'autre :
+                    // « aucun contact d'urgence » doit rester exprimable.
+                    onEmergencyContactChanged: (checked) =>
+                        onEmergencyContactChanged?.call(
+                          checked == true ? parent.id : null,
+                        ),
                     onFormStateChanged: onItemStateChanged,
                     onValueChanged: onItemValueChanged,
                     // Corbeille masquée s'il ne reste qu'un seul tuteur.
