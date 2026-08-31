@@ -12,12 +12,29 @@ class ReferentialBundleDto {
   final RefSchoolDto school;
   final ReferentialYearBundleDto current;
   final ReferentialYearBundleDto? previous;
+
+  /// Barème de réductions (ADR-021) — **à la racine, pas dans un slot année**.
+  /// `reduction_type`/`reduction_line` n'ont pas d'`academic_year_id` : les
+  /// loger dans `current`/`previous` les dupliquerait à l'identique. Ils vont
+  /// à côté de [school], qui est là pour la même raison.
+  ///
+  /// **Nullable, et la nuance porte de l'argent**, comme [ReferentialYearBundleDto.feeTariffs] :
+  /// le serveur retire les deux sections pour qui n'a pas `finance.grid.read`
+  /// et les envoie à `null` plutôt qu'à `[]`. `null` = non communiqué,
+  /// `[]` = cette école n'a pas de barème. Replier l'un sur l'autre ferait
+  /// lire à la purge un ordre de tout supprimer — et ici elle est scopée par
+  /// ÉCOLE, donc sur une tablette partagée un pull sans ce droit effacerait le
+  /// barème dont dépend le guichet d'un autre poste.
+  final List<RefReductionTypeDto>? reductionTypes;
+  final List<RefReductionLineDto>? reductionLines;
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
     required this.school,
     required this.current,
     this.previous,
+    this.reductionTypes,
+    this.reductionLines,
     required this.serverTime,
   });
 
@@ -32,7 +49,71 @@ class ReferentialBundleDto {
             : ReferentialYearBundleDto.fromJson(
                 j['previous'] as Map<String, dynamic>,
               ),
+        // Volontairement hors de `pullList`, qui replie `null` sur la liste
+        // vide : c'est exactement la distinction à préserver ici.
+        reductionTypes: j['reductionTypes'] == null
+            ? null
+            : pullList(j['reductionTypes'], RefReductionTypeDto.fromJson),
+        reductionLines: j['reductionLines'] == null
+            ? null
+            : pullList(j['reductionLines'], RefReductionLineDto.fromJson),
         serverTime: j['serverTime'] as String,
+      );
+}
+
+/// Une nature de réduction du barème de l'école.
+///
+/// ⚠️ **Noms de champs PROPOSÉS, pas relevés** : à l'écriture de ceci le back
+/// n'avait rien livré (V106 = dernière migration, zéro `reduction` dans `src`).
+/// `openApi.yaml` ne fait donc pas foi sur ce contrat — cf. REDUCTIONS_PLAN.md
+/// §6, qui liste ce qu'il faut confronter dès que V107 est poussée.
+class RefReductionTypeDto {
+  final String id;
+  final String code;
+  final String label;
+  final bool active;
+
+  const RefReductionTypeDto({
+    required this.id,
+    required this.code,
+    required this.label,
+    required this.active,
+  });
+
+  factory RefReductionTypeDto.fromJson(Map<String, dynamic> j) =>
+      RefReductionTypeDto(
+        id: j['id'] as String,
+        code: j['code'] as String,
+        label: j['label'] as String,
+        // Un serveur qui ne porterait pas le drapeau décrit un barème dont tout
+        // est utilisable : `true` est le repli sûr, `false` masquerait tout.
+        active: (j['active'] as bool?) ?? true,
+      );
+}
+
+/// Une ligne du barème : ce qu'une nature réduit, sur quelle rubrique.
+///
+/// `value` est un **pourcentage** (0–100), pas de l'argent. Rien ne le calcule
+/// en V1 ; il descend, il se range, il attend la V2.
+class RefReductionLineDto {
+  final String id;
+  final String reductionCode;
+  final String feeCode;
+  final double value;
+
+  const RefReductionLineDto({
+    required this.id,
+    required this.reductionCode,
+    required this.feeCode,
+    required this.value,
+  });
+
+  factory RefReductionLineDto.fromJson(Map<String, dynamic> j) =>
+      RefReductionLineDto(
+        id: j['id'] as String,
+        reductionCode: j['reductionCode'] as String,
+        feeCode: j['feeCode'] as String,
+        value: (j['value'] as num).toDouble(),
       );
 }
 

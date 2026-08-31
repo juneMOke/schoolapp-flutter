@@ -93,6 +93,74 @@ void main() {
       'email': 'contact@etoile.cd',
     };
 
+    // ── Barème de réductions (ADR-021) — les deux sections RACINE ────────────
+    //
+    // La distinction `null` / `[]` ne vit pas dans la fabrique Dart : elle vit
+    // sur le fil. Une fixture construite en Dart n'exerce jamais `fromJson`, et
+    // c'est précisément là que `pullList` replierait `null` sur la liste vide
+    // si quelqu'un l'y branchait — avec, au bout, une purge du barème d'une
+    // école déclenchée par un pull qui n'avait rien à dire.
+    test('sections absentes → null, jamais liste vide', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductionTypes, isNull);
+      expect(bundle.reductionLines, isNull);
+    });
+
+    test('sections présentes et vides → [] (l\'école n\'a pas de barème)', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'reductionTypes': <dynamic>[],
+        'reductionLines': <dynamic>[],
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductionTypes, isEmpty);
+      expect(bundle.reductionLines, isEmpty);
+      expect(bundle.reductionTypes, isNotNull);
+      expect(bundle.reductionLines, isNotNull);
+    });
+
+    test('parse le barème, `active` par défaut à true', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'reductionTypes': [
+          {
+            'id': 'rt-1',
+            'code': 'STAFF_CHILD',
+            'label': 'Enfant du personnel',
+            'active': false,
+          },
+          // Serveur qui ne porte pas le drapeau : repli sur `true`. `false`
+          // masquerait tout un barème sur un champ simplement absent.
+          {'id': 'rt-2', 'code': 'SIBLING', 'label': 'Fratrie'},
+        ],
+        'reductionLines': [
+          {
+            'id': 'rl-1',
+            'reductionCode': 'STAFF_CHILD',
+            'feeCode': 'MINERVAL',
+            'value': 50,
+          },
+        ],
+        'serverTime': '2026-07-08T10:00:00Z',
+      });
+
+      expect(bundle.reductionTypes!.first.active, isFalse);
+      expect(bundle.reductionTypes!.last.active, isTrue);
+      final line = bundle.reductionLines!.single;
+      expect(line.reductionCode, 'STAFF_CHILD');
+      expect(line.feeCode, 'MINERVAL');
+      // Pourcentage, pas de l'argent : un entier sur le fil arrive en double.
+      expect(line.value, 50.0);
+    });
+
     test(
       'parse school + current + previous + serverTime (clé wire `current`)',
       () {

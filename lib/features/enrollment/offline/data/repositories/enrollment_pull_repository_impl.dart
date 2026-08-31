@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/models/reduction_catalog_local_models.dart';
 
 /// Nom de ressource du flux des préinscriptions — identité du `PullHandler`
 /// devant le `PullCoordinator` et le plan de synchro (`kSyncPlanAliases`).
@@ -90,6 +91,20 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     List<String> academicYearIds,
   )
   replaceBoutiqueArticles;
+
+  /// Seam vers la Facturation pour le barème de réductions (ADR-021), pour la
+  /// même raison que [replaceTariffs].
+  ///
+  /// Signature **scopée école et non année**, et c'est ce qui la distingue des
+  /// deux autres : les tables du barème n'ont pas d'`academic_year_id` — il
+  /// descend à la racine du bundle. Passer une liste d'années ici n'aurait rien
+  /// à quoi correspondre.
+  final Future<void> Function(
+    List<ReductionTypeLocalModel> types,
+    List<ReductionLineLocalModel> lines,
+    String schoolId,
+  )
+  replaceReductionCatalog;
   final SyncMetaDao syncMetaDao;
   final Map<String, dynamic> requiredAuth;
   final CurrentUserContext currentUser;
@@ -120,6 +135,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.reconciliationDao,
     required this.replaceTariffs,
     required this.replaceBoutiqueArticles,
+    required this.replaceReductionCatalog,
     required this.syncMetaDao,
     required this.requiredAuth,
     required this.currentUser,
@@ -424,7 +440,10 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       if (body.previous?.feeTariffs != null) body.previous!,
     ];
     final boutiqueApplied = await _applyBoutiqueCatalog(body);
-    if (tariffBundles.isEmpty) return upserted + boutiqueApplied;
+    final reductionsApplied = await _applyReductionCatalog(body, syncedAt);
+    if (tariffBundles.isEmpty) {
+      return upserted + boutiqueApplied + reductionsApplied;
+    }
 
     final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
     final yearIds = <String>{
@@ -453,7 +472,65 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           .toList(growable: false),
       yearIds,
     );
-    return upserted + allTariffs.length + boutiqueApplied;
+    return upserted + allTariffs.length + boutiqueApplied + reductionsApplied;
+  }
+
+  /// Barème de réductions du bundle → Facturation, par le seam
+  /// [replaceReductionCatalog].
+  ///
+  /// **Même caviardage que la grille tarifaire, purge d'une autre nature.** Le
+  /// serveur retire les deux sections à qui n'a pas `finance.grid.read` et les
+  /// envoie à `null`, jamais à `[]`. Mais ces tables n'ont pas d'année : le
+  /// scope de la purge est l'ÉCOLE, et il n'existe donc aucun filtre d'année
+  /// pour amortir une erreur ici. Une section absente doit rester un
+  /// non-événement — c'est aussi ce qui permet à ce code d'exister avant que le
+  /// serveur ne porte les sections.
+  ///
+  /// Les deux sections se décident **ensemble** : elles sont caviardées par le
+  /// même droit, donc l'une sans l'autre n'existe pas côté serveur. Si le cas
+  /// survenait, on applique ce qui est là et on traite l'absente comme vide
+  /// plutôt que de renoncer au barème entier.
+  ///
+  /// `schoolId` vient de [currentUser], **jamais du payload** : c'est la clé de
+  /// purge, et la laisser au serveur reviendrait à lui confier de quoi effacer
+  /// le barème d'une école qu'il ne sait pas présente sur cette tablette.
+  Future<int> _applyReductionCatalog(
+    ReferentialBundleDto body,
+    int syncedAt,
+  ) async {
+    final types = body.reductionTypes;
+    final lines = body.reductionLines;
+    if (types == null && lines == null) return 0;
+
+    final schoolId = currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return 0;
+
+    await replaceReductionCatalog(
+      [
+        for (final type in types ?? const <RefReductionTypeDto>[])
+          ReductionTypeLocalModel(
+            id: type.id,
+            schoolId: schoolId,
+            code: type.code,
+            label: type.label,
+            active: type.active,
+            syncedAt: syncedAt,
+          ),
+      ],
+      [
+        for (final line in lines ?? const <RefReductionLineDto>[])
+          ReductionLineLocalModel(
+            id: line.id,
+            schoolId: schoolId,
+            reductionCode: line.reductionCode,
+            feeCode: line.feeCode,
+            value: line.value,
+            syncedAt: syncedAt,
+          ),
+      ],
+      schoolId,
+    );
+    return (types?.length ?? 0) + (lines?.length ?? 0);
   }
 
   /// Catalogue boutique du bundle → caisse, par le seam

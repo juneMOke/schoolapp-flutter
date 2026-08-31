@@ -285,6 +285,18 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
             schoolId: getIt<CurrentUserContext>().schoolId ?? '',
             academicYearIds: academicYearIds,
           ),
+      // Troisième seam, et le seul scopé par ÉCOLE : le barème de réductions
+      // descend à la racine du bundle, sans année. Le `schoolId` est ici
+      // **résolu par le repository** et passé en argument, plutôt que relu dans
+      // la closure comme ci-dessus — une seule résolution, celle que le pull a
+      // déjà faite, donc aucun risque que la purge et l'insertion tombent sur
+      // deux écoles différentes si le contexte bascule pendant le cycle.
+      replaceReductionCatalog: (types, lines, schoolId) =>
+          getIt<FinanceLocalDao>().replaceReductionCatalogForSchool(
+            types,
+            lines,
+            schoolId: schoolId,
+          ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

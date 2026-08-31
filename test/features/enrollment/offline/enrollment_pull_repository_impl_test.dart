@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/models/reduction_catalog_local_models.dart';
 
 import '../../offline_full_db.dart';
 
@@ -27,6 +28,9 @@ void main() {
   late List<String> capturedYears;
   late List<BoutiqueArticleLocalModel> capturedBoutiqueArticles;
   late List<String> capturedBoutiqueYears;
+  late List<ReductionTypeLocalModel> capturedReductionTypes;
+  late List<ReductionLineLocalModel> capturedReductionLines;
+  late List<String> capturedReductionSchoolIds;
   late EnrollmentPullRepositoryImpl repo;
 
   const auth = <String, dynamic>{'requiresAuth': true};
@@ -41,6 +45,9 @@ void main() {
     capturedYears = [];
     capturedBoutiqueArticles = [];
     capturedBoutiqueYears = [];
+    capturedReductionTypes = [];
+    capturedReductionLines = [];
+    capturedReductionSchoolIds = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
       api: api,
@@ -54,6 +61,11 @@ void main() {
       replaceBoutiqueArticles: (articles, academicYearIds) async {
         capturedBoutiqueArticles.addAll(articles);
         capturedBoutiqueYears = academicYearIds;
+      },
+      replaceReductionCatalog: (types, lines, schoolId) async {
+        capturedReductionTypes.addAll(types);
+        capturedReductionLines.addAll(lines);
+        capturedReductionSchoolIds.add(schoolId);
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
@@ -107,6 +119,8 @@ void main() {
     bool withheldTariffs = false,
     List<RefBoutiqueArticleDto>? boutiqueArticles,
     bool withheldBoutique = true,
+    List<RefReductionTypeDto>? reductionTypes,
+    List<RefReductionLineDto>? reductionLines,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     current: ReferentialYearBundleDto(
@@ -136,6 +150,11 @@ void main() {
           : (boutiqueArticles ?? const []),
     ),
     previous: previous,
+    // Défaut `null` = sections absentes : c'est l'état réel du serveur tant
+    // que V107 n'est pas livrée, et le pull doit s'en accommoder sans rien
+    // faire.
+    reductionTypes: reductionTypes,
+    reductionLines: reductionLines,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -236,6 +255,107 @@ void main() {
     items: items ?? [aggregate()],
     page: page ?? env(nextWatermark: 'WM-SNAP'),
   );
+
+  // ── Barème de réductions (ADR-021 V1) ─────────────────────────────────────
+  //
+  // Le barème descend à la RACINE du bundle : les deux tables n'ont pas
+  // d'`academic_year_id`, donc la purge est scopée par ÉCOLE. C'est le seul
+  // référentiel du module dans ce cas, et cela lui retire le filet des autres :
+  // ailleurs, un pull qui range mal fait apparaître un référentiel VIDE (le
+  // filtre d'année ne trouve rien) ; ici, il l'EFFACE.
+  group('syncReferential — barème de réductions', () {
+    test('sections absentes → le seam n\'est pas appelé du tout', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      await repo.syncReferential();
+
+      // `null` dit « pas communiqué » — le serveur caviarde pour qui n'a pas
+      // `finance.grid.read`, et c'est aussi ce que répond un serveur qui ne
+      // porte pas encore les sections. Appeler le seam avec deux listes vides
+      // y lirait un ordre de purge, et effacerait le barème dont dépend le
+      // guichet d'un autre poste sur la même tablette.
+      expect(capturedReductionSchoolIds, isEmpty);
+    });
+
+    test('sections présentes et vides → purge demandée', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(reductionTypes: const [], reductionLines: const []),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // `[]` est une information : cette école n'a pas de barème. Le seam est
+      // appelé, il purgera.
+      expect(capturedReductionSchoolIds, ['school-1']);
+      expect(capturedReductionTypes, isEmpty);
+      expect(capturedReductionLines, isEmpty);
+    });
+
+    test('barème descendu → stampé de l\'école de la SESSION', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            reductionTypes: const [
+              RefReductionTypeDto(
+                id: 'rt-1',
+                code: 'STAFF_CHILD',
+                label: 'Enfant du personnel',
+                active: true,
+              ),
+            ],
+            reductionLines: const [
+              RefReductionLineDto(
+                id: 'rl-1',
+                reductionCode: 'STAFF_CHILD',
+                feeCode: 'MINERVAL',
+                value: 50,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // L'école vient de `CurrentUserContext`, JAMAIS du payload — le bundle
+      // porte pourtant `school.id = 'sch-1'`, et c'est bien `school-1`, celle
+      // de la session, qui sert de clé de purge.
+      expect(capturedReductionSchoolIds, ['school-1']);
+      expect(capturedReductionTypes.single.schoolId, 'school-1');
+      expect(capturedReductionTypes.single.code, 'STAFF_CHILD');
+      expect(capturedReductionLines.single.schoolId, 'school-1');
+      expect(capturedReductionLines.single.value, 50.0);
+    });
+
+    test('une seule section portée → l\'autre est traitée comme vide', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            reductionTypes: const [
+              RefReductionTypeDto(
+                id: 'rt-1',
+                code: 'STAFF_CHILD',
+                label: 'Enfant du personnel',
+                active: true,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // Le serveur caviarde les deux ensemble : ce cas ne devrait pas exister.
+      // S'il survient, on applique ce qui est là plutôt que de renoncer au
+      // barème entier — un type sans ligne ne sera de toute façon pas proposé.
+      expect(capturedReductionTypes, hasLength(1));
+      expect(capturedReductionLines, isEmpty);
+    });
+  });
 
   group('syncReferential (bundle always-200)', () {
     test(
@@ -566,6 +686,7 @@ void main() {
         replaceTariffs: (_, _) async =>
             throw StateError('ref_fee_tariffs indisponible'),
         replaceBoutiqueArticles: (_, _) async {},
+        replaceReductionCatalog: (_, _, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
         currentUser: CurrentUserContext()..set('u1', schoolId: 'school-1'),
@@ -994,6 +1115,7 @@ void main() {
           reconciliationDao: EnrollmentReconciliationDao(db),
           replaceTariffs: (_, _) async {},
           replaceBoutiqueArticles: (_, _) async {},
+          replaceReductionCatalog: (_, _, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,
           currentUser: CurrentUserContext()..set('u2', schoolId: schoolId),
