@@ -90,7 +90,7 @@ class _EnrollmentReductionsView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppDimensions.spacingXS),
-              for (final option in state.options)
+              for (final option in state.entries)
                 _ReductionCheckbox(
                   label: option.label,
                   value: state.selected.contains(option.code),

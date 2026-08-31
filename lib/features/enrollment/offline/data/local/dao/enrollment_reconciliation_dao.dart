@@ -264,8 +264,43 @@ class EnrollmentReconciliationDao {
     // purge des liens vers des tuteurs SYNCED disparus du dossier serveur (les
     // liens vers un tuteur local protégé, non SYNCED, sont préservés).
     await _pruneStudentParentLinks(txn, e.studentId, resolvedParentIds);
+    await _applySnapshotReductions(txn, e, syncedAt);
 
     return wroteEnrollment;
+  }
+
+  /// Réductions octroyées portées par l'agrégat (ADR-021 V1) → local.
+  ///
+  /// **Écrit seulement si la section est portée.** `null` dit « je n'en parle
+  /// pas » — un serveur antérieur au champ, ou une portion non communiquée —
+  /// et effacer sur ce silence ferait perdre au premier pull les octrois que
+  /// le guichet vient de déclarer, avant même qu'ils soient poussés. `[]`, lui,
+  /// dit « ce dossier n'en a aucune », et c'est un ordre légitime d'effacer.
+  ///
+  /// Écrit **hors du verrou LWW de la ligne** : les octrois ne vivent pas sur
+  /// `enrollments`, et côté serveur en poser un ne touche même pas son
+  /// `server_updated_at`. Les suspendre à l'horodatage de l'inscription les
+  /// rendrait invisibles exactement dans le cas que la V2 va créer.
+  Future<void> _applySnapshotReductions(
+    DatabaseExecutor txn,
+    EnrollmentSnapshotDto e,
+    int syncedAt,
+  ) async {
+    final codes = e.reductionCodes;
+    if (codes == null) return;
+
+    await txn.delete(
+      'enrollment_reductions',
+      where: 'enrollment_id = ?',
+      whereArgs: [e.id],
+    );
+    for (final code in codes.toSet()) {
+      await txn.insert('enrollment_reductions', {
+        'enrollment_id': e.id,
+        'reduction_code': code,
+        'updated_at': syncedAt,
+      });
+    }
   }
 
   /// Reflète en local une désignation de contact d'urgence **déjà acquittée par

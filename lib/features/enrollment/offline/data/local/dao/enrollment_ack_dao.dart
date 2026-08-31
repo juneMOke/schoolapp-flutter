@@ -31,6 +31,9 @@ class EnrollmentAckDao {
 
       // Inscription : SYNCED (+ code / statut serveur).
       await _enrollmentAck(txn, nowMs, response, enrollmentId);
+
+      // Réductions réellement gravées (ADR-021 V1).
+      await _reductionAck(txn, nowMs, response, enrollmentId);
     });
   }
 
@@ -70,6 +73,40 @@ class EnrollmentAckDao {
       where: 'id = ?',
       whereArgs: [enrollmentId],
     );
+  }
+
+  /// Ce que le serveur a RÉELLEMENT gravé remplace ce qu'on a déclaré.
+  ///
+  /// Il a pu refuser un code qui avait quitté le barème pendant que la tablette
+  /// était hors ligne. Garder la déclaration ferait afficher au guichet une
+  /// réduction que personne n'a accordée — et le pull suivant, lui, dirait la
+  /// vérité : deux écrans contradictoires à quelques minutes d'intervalle.
+  ///
+  /// Section absente (`null`) = accusé d'un serveur antérieur au champ : on
+  /// garde la déclaration locale, faute de mieux. Elle repartira telle quelle
+  /// au prochain push, et le pull la corrigera quand le serveur saura en
+  /// parler.
+  Future<void> _reductionAck(
+    Transaction txn,
+    int nowMs,
+    EnrollmentAggregateResponse response,
+    String enrollmentId,
+  ) async {
+    final codes = response.enrollment.reductionCodes;
+    if (codes == null) return;
+
+    await txn.delete(
+      'enrollment_reductions',
+      where: 'enrollment_id = ?',
+      whereArgs: [enrollmentId],
+    );
+    for (final code in codes.toSet()) {
+      await txn.insert('enrollment_reductions', {
+        'enrollment_id': enrollmentId,
+        'reduction_code': code,
+        'updated_at': nowMs,
+      });
+    }
   }
 
   Future<void> _parentAck(

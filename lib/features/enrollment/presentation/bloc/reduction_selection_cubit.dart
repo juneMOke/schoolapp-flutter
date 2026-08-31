@@ -16,9 +16,30 @@ class ReductionSelectionState extends Equatable {
     this.selected = const {},
   });
 
+  /// Ce que la section affiche : le barème, **suivi des octrois orphelins**.
+  ///
+  /// Un code octroyé dont le type a quitté le barème — ou dont le barème n'est
+  /// pas communiqué faute de `finance.grid.read` — n'a pas d'option en face.
+  /// Ne montrer que le barème le rendrait alors **invisible** : la réduction
+  /// existerait en base, partirait dans l'agrégat, et l'écran de consultation
+  /// n'en dirait rien. Un dossier qui cache ce qu'il porte est pire qu'un
+  /// libellé laid.
+  ///
+  /// Faute de libellé, l'orphelin s'affiche sous son code. Le guichet peut au
+  /// moins le nommer à quelqu'un.
+  List<GrantableReduction> get entries {
+    final known = {for (final option in options) option.code};
+    final orphans = selected.where((code) => !known.contains(code)).toList()
+      ..sort();
+    return [
+      ...options,
+      for (final code in orphans) GrantableReduction(code: code, label: code),
+    ];
+  }
+
   /// Rien à montrer : ni barème, ni octroi hérité. La section s'escamote — un
   /// cadre vide ferait chercher au guichet ce qui manque.
-  bool get isEmpty => options.isEmpty;
+  bool get isEmpty => entries.isEmpty;
 
   ReductionSelectionState copyWith({
     ReductionSelectionStatus? status,

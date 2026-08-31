@@ -8,6 +8,10 @@
 > de champs de ce document sont *proposés*, à confronter à la spec dès que V107
 > est poussée (cf. §6).
 >
+> ✅ **LES QUATRE LOTS SONT LIVRÉS** (2026-08-31) — RD-F0 `b6351b62`,
+> RD-F1 `875225a4`, RD-F2 `6e89fce2`, RD-F3. Schéma **v36**, analyze clean,
+> 15 mutations passées. Trois écarts au plan initial sont consignés en §7.
+>
 > ✅ **Le contrat est entièrement additif** — un champ optionnel en entrée, deux
 > sections et une liste en sortie. Le front peut partir devant sans rien casser,
 > **à condition que l'absence des sections soit un non-événement** et pas une
@@ -146,7 +150,7 @@ jointure, et le problème n'existe pas.
 
 ---
 
-## RD-F0 · Schéma v36
+## RD-F0 · ✅ `b6351b62` · Schéma v36
 
 **Objectif.** Les trois tables locales, et rien d'autre.
 
@@ -206,7 +210,7 @@ existent sans que personne ne les lise.
 
 ---
 
-## RD-F1 · La descente du barème
+## RD-F1 · ✅ `875225a4` · La descente du barème
 
 **Objectif.** Les deux sections racine parsées, stockées, purgées juste.
 
@@ -257,7 +261,7 @@ bundle sans elles ne touche à rien.
 
 ---
 
-## RD-F2 · La saisie au guichet
+## RD-F2 · ✅ `6e89fce2` · La saisie au guichet
 
 **Objectif.** Cocher, retenir, envoyer.
 
@@ -304,7 +308,7 @@ montant.
 
 ---
 
-## RD-F3 · La relecture
+## RD-F3 · ✅ · La relecture
 
 **Objectif.** Ce que le serveur a gravé redescend et s'affiche.
 
@@ -352,6 +356,38 @@ après `gen-l10n`, sinon 3 clés = 1500 lignes de churn.
 
 Tests ciblés, quatre : le palier v36 · le tri-état + le scope école · l'aller-
 retour d'outbox y compris legacy · **les montants ne bougent pas**.
+
+---
+
+## 7. Ce que la mise en œuvre a changé au plan
+
+Trois choses que ce document n'avait pas vues, découvertes au câblage.
+
+### `isEditable` de l'étape Frais ne parle **que des montants**
+
+Le plan disait « on réutilise la garde existante ». C'est vrai du droit
+`finance.grid.read`, faux de l'éditabilité : `StudentChargesStepHandler` passe
+`isEditable: false` en permanence (PARCOURS 21 — l'étape est en lecture seule
+sur les créances), **y compris quand le wizard est en saisie**. Y brancher les
+cases les aurait rendues décoratives dans le seul parcours où elles servent, et
+le back V1 serait resté sans producteur. Elles portent donc leur propre
+`reductionsEditable`, dérivé de `detailPolicy.isReadOnlyConsultation`.
+
+### Un octroi orphelin serait resté invisible
+
+Le taux étant masqué, la section n'affichait que le barème. Un code octroyé dont
+le type a quitté le barème — ou dont le barème est caviardé faute de
+`finance.grid.read` — n'a **pas d'option en face** : il existait en base,
+partait dans l'agrégat, et l'écran n'en disait rien. Les orphelins s'affichent
+donc sous leur code, faute de libellé. Un dossier qui cache ce qu'il porte est
+pire qu'un libellé laid.
+
+### Les codes sont figés à l'enfilage, pas relus au push
+
+`enqueueEnrollmentAggregate` va les chercher **dans sa propre transaction**. La
+commande d'outbox est un instantané : une relecture au moment du push enverrait
+ce que l'écran affiche aujourd'hui plutôt que ce que le guichet a déclaré ce
+jour-là.
 
 ---
 

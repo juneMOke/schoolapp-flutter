@@ -88,6 +88,14 @@ class EnrollmentSnapshotDto {
   /// Fiche santé déclarée à l'inscription.
   final String? medicalNotes;
   final String? cancellationReason;
+
+  /// Réductions octroyées (ADR-021 V1). **Nullable, et la nuance compte** :
+  /// `null` = l'agrégat ne porte pas la section (serveur antérieur au champ,
+  /// ou portion non communiquée) — on ne touche alors à rien en local ;
+  /// `[]` = ce dossier n'a aucune réduction, et c'est un ordre d'effacer.
+  /// Les replier l'un sur l'autre ferait perdre au premier pull les octrois
+  /// que le guichet vient de déclarer.
+  final List<String>? reductionCodes;
   final String? updatedAt; // ISO-8601 (LWW), optionnel au contrat
 
   const EnrollmentSnapshotDto({
@@ -116,6 +124,7 @@ class EnrollmentSnapshotDto {
     this.formerStudent = false,
     this.medicalNotes,
     this.cancellationReason,
+    this.reductionCodes,
     this.updatedAt,
   });
 
@@ -152,6 +161,14 @@ class EnrollmentSnapshotDto {
             (j['enrollmentType'] as String?) == 'RE_ENROLLMENT',
         medicalNotes: j['medicalNotes'] as String?,
         cancellationReason: j['cancellationReason'] as String?,
+        // Hors du repli sur la liste vide, comme les sections du bundle : ici
+        // aussi c'est la distinction qui décide d'écrire ou de se taire.
+        reductionCodes: j['reductionCodes'] == null
+            ? null
+            : [
+                for (final code in (j['reductionCodes'] as List<dynamic>))
+                  if (code is String) code,
+              ],
         updatedAt: j['updatedAt'] as String?,
       );
 }

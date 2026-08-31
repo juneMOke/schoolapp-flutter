@@ -280,6 +280,33 @@ void main() {
       // révoquer une réduction parce qu'une liste a changé.
       expect(cubit.state.options.map((o) => o.code), ['STAFF_CHILD']);
       expect(cubit.state.selected, {'DISPARU'});
+      // …et il reste VISIBLE, sous son code faute de libellé. Ne montrer que
+      // le barème le cacherait : la réduction existerait en base, partirait
+      // dans l'agrégat, et l'écran n'en dirait rien.
+      expect(cubit.state.entries.map((e) => e.code), [
+        'STAFF_CHILD',
+        'DISPARU',
+      ]);
+      expect(cubit.state.entries.last.label, 'DISPARU');
+      await cubit.close();
+    });
+
+    test('barème non communiqué mais octroi présent → la section s\'affiche',
+        () async {
+      await dao.replaceFor('e1', const ['STAFF_CHILD'], nowMs: 1);
+      // `finance.grid.read` manquant : le serveur caviarde le barème, donc
+      // aucune option ne descend. La réduction, elle, est bien là.
+      final withheld = ReductionGrantRepositoryImpl(
+        dao: dao,
+        readGrantable: (_) async => const <GrantableReduction>[],
+        currentUser: CurrentUserContext()..set('u1', schoolId: 'A'),
+      );
+      final cubit = ReductionSelectionCubit(withheld);
+
+      await cubit.load('e1');
+
+      expect(cubit.state.isEmpty, isFalse);
+      expect(cubit.state.entries.single.code, 'STAFF_CHILD');
       await cubit.close();
     });
 
