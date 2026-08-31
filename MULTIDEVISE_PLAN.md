@@ -191,6 +191,19 @@ MD-1  formatage unifié
 MD-11 revue adversariale + mutations
 ```
 
+> ## ✅ TOUT EST LIVRÉ
+>
+> Les douze lots sont faits, contrats compris : le front est **aligné sur la
+> révision 4**. `flutter analyze` clean, **4 836 tests verts**, 20 mutations
+> prouvées. Schéma **v32 → v35**.
+>
+> Les quatre questions au back ont toutes trouvé leur réponse — deux dans
+> `openApi.yaml`, une en lisant `StudentChargeResolver`, une par la révision 4
+> elle-même. Il ne reste plus qu'à attendre le merge du back.
+>
+> Les deux gardes temporaires (guichet et caisse) ont été **levées** par les lots
+> qui ouvraient leurs contrats, comme annoncé.
+
 **Le pari : MD-0, MD-1, MD-2, MD-3, MD-5 et MD-6 avant tout lot de contrat.** Ils ne touchent aucun
 payload, ne dépendent d'aucun merge, et rendent le rendu **identique en
 mono-devise** — une liste à une entrée s'affiche comme le scalaire d'aujourd'hui
@@ -340,6 +353,18 @@ teste sur base ffi avec deux créances de devises différentes pour le même él
 
 ## MD-4 · Schéma v33 · montants dérivés des allocations
 
+> ### ✅ FINALEMENT JOUÉ, dans MD-8 — la spec a levé l'obstacle
+>
+> Le report ci-dessous tenait à une lecture du contrat de synchro. `openApi.yaml`
+> tranche : l'imputation d'un `PaymentDelta` porte **son propre** `currency`,
+> « toujours présent », et le back écrit noir sur blanc que c'est *« ce qui
+> permet à un client de reconstruire le total par devise du versement sans faire
+> confiance à `amounts` »*. La seule source manquante ne manquait pas.
+>
+> `payments` a donc perdu ses montants (palier v34), comme prévu à l'origine.
+>
+> ### Ce que le report disait (conservé — le raisonnement reste juste)
+>
 > ### 🔴 REPORTÉ — ce lot **ne peut pas** précéder MD-8
 >
 > Découvert en l'ouvrant. `PaymentPullAllocationDto` **ne porte pas** de
