@@ -121,9 +121,14 @@ class FinanceStatsKpiBand extends StatelessWidget {
 
   /// Part du total facturé par type de frais — la pastille en haut de carte.
   ///
-  /// `null` dès qu'il y a deux devises : la carte n'a qu'une pastille, et un
-  /// pourcentage unique posé sur deux montants désignerait l'un des deux sans
-  /// le dire.
+  /// `null` dans deux cas, et la pastille disparaît alors :
+  ///
+  /// - **deux devises** : la carte n'a qu'une pastille, et un pourcentage
+  ///   unique posé sur deux montants désignerait l'un des deux sans le dire ;
+  /// - **rien à rapporter** : sans répartition par type de frais, il n'y a pas
+  ///   de total dont on soit une part. La pastille affichait « 0 % », ce qui se
+  ///   lit comme un résultat — « rien n'a été facturé sur ces postes » — quand
+  ///   elle voulait dire qu'on ne sait pas.
   int? _soleShare(int Function(FinanceKpis kpis) pick) {
     if (blocks.length != 1) return null;
     final block = blocks.single;
@@ -131,7 +136,7 @@ class FinanceStatsKpiBand extends StatelessWidget {
       0,
       (sum, item) => sum + item.expected,
     );
-    if (total <= 0) return 0;
+    if (total <= 0) return null;
     return ((pick(block.kpis) * 100) / total).round();
   }
 }

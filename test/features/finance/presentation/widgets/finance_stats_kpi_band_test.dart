@@ -116,6 +116,30 @@ void main() {
     },
   );
 
+  testWidgets('sans répartition par frais : aucune pastille, pas un « 0 % »', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      900,
+      blocks: const [
+        FinanceCurrencyBlock(
+          currency: 'USD',
+          kpis: _kpis,
+          evolution: _emptyEvolution,
+          distributionByFeeType: FeeTypeDistribution(items: []),
+        ),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    // Le seul pourcentage restant est le taux de recouvrement. « 0 % » se
+    // lisait comme un résultat — rien de facturé sur ces postes — là où il n'y
+    // avait rien à rapporter du tout.
+    expect(find.text('62%'), findsOneWidget);
+    expect(find.text('0 %'), findsNothing);
+  });
+
   testWidgets('deux devises : les deux montants sur la MÊME carte', (
     tester,
   ) async {
