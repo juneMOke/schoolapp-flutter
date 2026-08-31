@@ -33,6 +33,23 @@ class AppRoutesNames {
   }) =>
       '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
 
+  /// Encaissement d'un paiement — écran plein poussé au-dessus de la fiche.
+  ///
+  /// Sous-route de la fiche : l'élève et l'année sont dans le chemin, et le
+  /// contexte d'affichage (identité, classe, créances relues juste avant)
+  /// voyage dans `extra`. Sans lui, la page se rabat sur sa carte de contexte
+  /// plutôt que d'encaisser au nom d'un inconnu.
+  static const String facturationCreatePayment =
+      '/finances/${MenuConstants.facturationsId}'
+      '/detail/:studentId/:academicYearId/encaissement';
+
+  static String facturationCreatePaymentPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}'
+      '/detail/$studentId/$academicYearId/encaissement';
+
   static const String boutiqueAchats =
       '/boutique/${MenuConstants.boutiqueAchatsId}';
   static const String boutiqueHistorique =

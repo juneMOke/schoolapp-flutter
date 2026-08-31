@@ -4107,6 +4107,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Informations du payeur';
 
   @override
+  String get facturationCreatePaymentEyebrow => 'Encaissement';
+
+  @override
+  String get facturationCreatePaymentContextErrorTitle =>
+      'Encaissement indisponible';
+
+  @override
+  String get facturationCreatePaymentContextErrorMessage =>
+      'Les informations nécessaires à cet encaissement ne sont pas disponibles. Revenez à la fiche de l\'élève puis relancez l\'encaissement.';
+
+  @override
   String get facturationCreatePaymentPayerLastNameLabel => 'Nom';
 
   @override

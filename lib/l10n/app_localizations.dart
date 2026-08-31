@@ -6702,6 +6702,24 @@ abstract class AppLocalizations {
   /// **'Payer information'**
   String get facturationCreatePaymentPayerSectionTitle;
 
+  /// No description provided for @facturationCreatePaymentEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment collection'**
+  String get facturationCreatePaymentEyebrow;
+
+  /// No description provided for @facturationCreatePaymentContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection unavailable'**
+  String get facturationCreatePaymentContextErrorTitle;
+
+  /// No description provided for @facturationCreatePaymentContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The information required for this collection is missing. Go back to the student file and start the collection again.'**
+  String get facturationCreatePaymentContextErrorMessage;
+
   /// No description provided for @facturationCreatePaymentPayerLastNameLabel.
   ///
   /// In en, this message translates to:

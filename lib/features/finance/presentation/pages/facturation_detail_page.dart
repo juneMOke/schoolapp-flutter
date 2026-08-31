@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -9,7 +10,6 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
-import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -26,7 +26,6 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
@@ -61,7 +60,6 @@ class FacturationDetailPage extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     final chargesBloc = context.read<StudentChargesBloc>();
     final paymentsBloc = context.read<PaymentsBloc>();
-    final financeOfflineBloc = context.read<FinanceOfflineBloc>();
 
     if (chargesBloc.state.status != StudentChargesStatus.success) {
       messenger.showSnackBar(
@@ -105,9 +103,15 @@ class FacturationDetailPage extends StatelessWidget {
     }
 
     if (!context.mounted) return;
-    await showFacturationCreatePaymentDialog(
-      context,
-      intent: FacturationCreatePaymentIntent(
+    // Écran plein empilé sur la fiche (spec MODALE-12 devenue une page) : le
+    // contexte d'affichage et les créances RELUES voyagent dans `extra`, l'élève
+    // et l'année dans le chemin — un lien profond reste résoluble.
+    final collected = await context.push<bool>(
+      AppRoutesNames.facturationCreatePaymentPath(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+      extra: FacturationCreatePaymentIntent(
         studentId: intent.studentId,
         academicYearId: intent.academicYearId,
         firstName: intent.firstName,
@@ -117,9 +121,27 @@ class FacturationDetailPage extends StatelessWidget {
         levelGroupName: intent.levelGroupName,
         studentCharges: charges,
       ),
-      paymentsBloc: paymentsBloc,
-      studentChargesBloc: chargesBloc,
-      financeOfflineBloc: financeOfflineBloc,
+    );
+
+    // `true` = un encaissement a été écrit. Le rafraîchissement se fait ICI,
+    // après le retour : la page de saisie a déjà rendu son écran de succès, et
+    // un échec de rechargement ne doit pas le contredire.
+    //
+    // `context.mounted` garde les deux BLoCs : capturés avant la navigation,
+    // ils sont fermés avec la fiche — la nourrir d'un événement après coup
+    // lèverait au lieu de rafraîchir quoi que ce soit.
+    if (collected != true || !context.mounted) return;
+    paymentsBloc.add(
+      PaymentsRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+    );
+    chargesBloc.add(
+      StudentChargesByAcademicYearRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
     );
   }
 
@@ -182,12 +204,6 @@ class FacturationDetailPage extends StatelessWidget {
         BlocProvider<PaymentsBloc>(create: (_) => getIt<PaymentsBloc>()),
         BlocProvider<StudentChargesBloc>(
           create: (_) => getIt<StudentChargesBloc>(),
-        ),
-        // Chemin d'écriture offline-first de l'encaissement (file outbox).
-        // La lecture (paiements/créances) est servie en local par les repos
-        // offline-first liés en DI (BLoCs online ci-dessus inchangés).
-        BlocProvider<FinanceOfflineBloc>(
-          create: (_) => getIt<FinanceOfflineBloc>(),
         ),
         // Signal « un cycle de rafraîchissement vient d'aboutir » : c'est lui
         // qui remplace l'attente qu'on faisait subir à chaque lecture. Le

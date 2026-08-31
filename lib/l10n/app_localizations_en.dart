@@ -4079,6 +4079,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentPayerSectionTitle => 'Payer information';
 
   @override
+  String get facturationCreatePaymentEyebrow => 'Payment collection';
+
+  @override
+  String get facturationCreatePaymentContextErrorTitle =>
+      'Collection unavailable';
+
+  @override
+  String get facturationCreatePaymentContextErrorMessage =>
+      'The information required for this collection is missing. Go back to the student file and start the collection again.';
+
+  @override
   String get facturationCreatePaymentPayerLastNameLabel => 'Last name';
 
   @override

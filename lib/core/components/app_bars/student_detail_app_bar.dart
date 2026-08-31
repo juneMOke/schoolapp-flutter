@@ -41,6 +41,14 @@ class StudentDetailAppBar extends StatelessWidget
   /// flèche de retour est la seule sortie.
   final bool showCloseButton;
 
+  /// Remplace la sortie par défaut (retour, sinon [fallbackRoute]).
+  ///
+  /// Un écran de SAISIE ne se quitte pas d'un tap : la page d'encaissement
+  /// branche ici sa confirmation de perte de saisie, la même que celle du
+  /// retour système. Sans ce crochet, la flèche `pop`ait directement — un
+  /// `PopScope` ne voit pas passer un `Navigator.pop` explicite.
+  final VoidCallback? onExit;
+
   const StudentDetailAppBar({
     super.key,
     required this.fullName,
@@ -50,6 +58,7 @@ class StudentDetailAppBar extends StatelessWidget
     required this.fallbackRoute,
     this.trailing,
     this.showCloseButton = false,
+    this.onExit,
   });
 
   @override
@@ -57,6 +66,11 @@ class StudentDetailAppBar extends StatelessWidget
       const Size.fromHeight(AppDimensions.topBarHeight + _dividerHeight);
 
   void _onExit(BuildContext context) {
+    final custom = onExit;
+    if (custom != null) {
+      custom();
+      return;
+    }
     if (context.canPop()) {
       context.pop();
       return;

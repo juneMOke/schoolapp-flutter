@@ -18,14 +18,10 @@ import 'package:school_app_flutter/features/finance/offline/presentation/bloc/pa
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charge_allocation_line.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-class _MockPaymentsBloc extends MockBloc<PaymentsEvent, PaymentsState>
-    implements PaymentsBloc {}
 
 class _MockFinanceOfflineBloc
     extends MockBloc<FinanceOfflineEvent, FinanceOfflineState>
@@ -44,7 +40,7 @@ class _FakePayerRepo implements FinanceOfflineRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('hors périmètre de cette modale');
+      throw UnimplementedError('hors périmètre de cette page');
 }
 
 /// Le téléphone du payeur est OBLIGATOIRE à l'encaissement.
@@ -54,15 +50,12 @@ class _FakePayerRepo implements FinanceOfflineRepository {
 /// vers le serveur en E.164 invalide, sans aucun moyen de rappeler le payeur —
 /// d'où une garde sur le CTA, et non un simple avertissement.
 void main() {
-  late _MockPaymentsBloc payments;
   late _MockFinanceOfflineBloc offline;
 
   late _FakePayerRepo payerRepo;
 
   setUp(() {
-    payments = _MockPaymentsBloc();
     offline = _MockFinanceOfflineBloc();
-    when(() => payments.state).thenReturn(const PaymentsState());
     when(() => offline.state).thenReturn(const FinanceOfflineInitial());
 
     payerRepo = _FakePayerRepo();
@@ -97,15 +90,12 @@ void main() {
 
     await tester.pumpWidget(
       MultiBlocProvider(
-        providers: [
-          BlocProvider<PaymentsBloc>.value(value: payments),
-          BlocProvider<FinanceOfflineBloc>.value(value: offline),
-        ],
+        providers: [BlocProvider<FinanceOfflineBloc>.value(value: offline)],
         child: MaterialApp(
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacturationCreatePaymentDialogView(
+          home: FacturationCreatePaymentView(
             intent: FacturationCreatePaymentIntent(
               studentId: 'stu-1',
               academicYearId: 'ay-1',
@@ -116,7 +106,6 @@ void main() {
               levelGroupName: 'Secondaire',
               studentCharges: [charge('1')],
             ),
-            onPaymentCreated: () {},
           ),
         ),
       ),

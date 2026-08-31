@@ -7,14 +7,11 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_action_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-class _MockPaymentsBloc extends MockBloc<PaymentsEvent, PaymentsState>
-    implements PaymentsBloc {}
 
 class _MockFinanceOfflineBloc
     extends MockBloc<FinanceOfflineEvent, FinanceOfflineState>
@@ -31,13 +28,10 @@ class _MockFinanceOfflineBloc
 /// clavier, et l'horizontal du titre de la section payeur, qui lui frappait dès
 /// qu'on ouvrait la modale sur un téléphone étroit — clavier ou pas.
 void main() {
-  late _MockPaymentsBloc payments;
   late _MockFinanceOfflineBloc offline;
 
   setUp(() {
-    payments = _MockPaymentsBloc();
     offline = _MockFinanceOfflineBloc();
-    when(() => payments.state).thenReturn(const PaymentsState());
     when(() => offline.state).thenReturn(const FinanceOfflineInitial());
   });
 
@@ -62,15 +56,12 @@ void main() {
 
     await tester.pumpWidget(
       MultiBlocProvider(
-        providers: [
-          BlocProvider<PaymentsBloc>.value(value: payments),
-          BlocProvider<FinanceOfflineBloc>.value(value: offline),
-        ],
+        providers: [BlocProvider<FinanceOfflineBloc>.value(value: offline)],
         child: MaterialApp(
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacturationCreatePaymentDialogView(
+          home: FacturationCreatePaymentView(
             intent: FacturationCreatePaymentIntent(
               studentId: 'stu-1',
               academicYearId: 'ay-1',
@@ -81,7 +72,6 @@ void main() {
               levelGroupName: 'Secondaire',
               studentCharges: [charge('1'), charge('2'), charge('3')],
             ),
-            onPaymentCreated: () {},
           ),
         ),
       ),
@@ -127,14 +117,16 @@ void main() {
     });
   }
 
-  testWidgets('paysage, clavier ouvert : le bouton d\'encaissement reste '
-      'atteignable en défilant', (tester) async {
+  testWidgets('paysage, clavier ouvert : la barre d\'encaissement tient '
+      'toujours sa place', (tester) async {
     ouvrirLeClavier(tester);
     await ouvrir(tester, const Size(731, 411));
 
     expect(tester.takeException(), isNull);
-    // Le pied a rejoint le défilement : il existe toujours, donc l'encaissement
-    // reste possible — c'est ce que le débordement mettait en péril.
+    // Le total et le CTA vivent dans la barre ancrée au bas de la page : ils ne
+    // partent pas avec le défilement du formulaire, et le clavier les remonte
+    // au lieu de les couvrir. Le corps, lui, défile.
+    expect(find.byType(FacturationCollectActionBar), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsWidgets);
     expect(find.byType(FacturationCreatePaymentPayerSection), findsOneWidget);
   });

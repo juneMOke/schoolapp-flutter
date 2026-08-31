@@ -26,8 +26,6 @@ class AppDimensions {
   static const facturationContentMaxWidth = 880.0;
   // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
   static const facturationModalMaxWidth = 520.0;
-  // Modale d'encaissement (spec MODALE-12 : centrée, largeur 560).
-  static const facturationCreatePaymentModalMaxWidth = 560.0;
   // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
   static const facturationCollectModalMaxWidth = 440.0;
   // Popin « Choisir un payeur » (encaissement). Ses tokens sont à elle et non

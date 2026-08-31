@@ -56,6 +56,11 @@ class AppBreakpoints {
   static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
+  // Barre d'encaissement de la page « Encaisser un paiement » : au-delà, le
+  // total et le bouton tiennent sur une même ligne ; en deçà, le bouton passe
+  // sous le total et prend toute la largeur — le CTA d'un guichet ne se
+  // discute pas avec un montant pour quelques dizaines de dp.
+  static const double financeCollectBarRowMin = 640.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

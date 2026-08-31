@@ -26,7 +26,9 @@ import 'package:school_app_flutter/features/documents/presentation/pages/documen
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/fee_control_page.dart';
@@ -361,6 +363,29 @@ class AppRouter {
 
                 return FacturationDetailPage(intent: intent);
               },
+              routes: [
+                // Encaissement : écran plein empilé SUR la fiche (`push`), qui
+                // rend `true` au succès pour que la fiche resynchronise ses
+                // listes. La garde de paramètres de la fiche s'applique aussi
+                // ici — les redirects de la pile matchée sont tous joués.
+                GoRoute(
+                  path: 'encaissement',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+
+                    final intent =
+                        FacturationCreatePaymentIntent.fromRouteContext(
+                          studentId: studentId,
+                          academicYearId: academicYearId,
+                          extra: state.extra,
+                        );
+
+                    return FacturationCreatePaymentPage(intent: intent);
+                  },
+                ),
+              ],
             ),
           ],
         ),
