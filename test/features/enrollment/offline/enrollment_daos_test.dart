@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
+    show StudentChargeDto;
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reduction_dao.dart';
 
 import '../../offline_full_db.dart';
@@ -301,10 +303,10 @@ void main() {
       final command =
           jsonDecode((await db.query('outbox')).single['payload'] as String)
               as Map<String, dynamic>;
-      expect((command['enrollment'] as Map<String, dynamic>)['reductionCodes'], [
-        'SIBLING',
-        'STAFF_CHILD',
-      ]);
+      expect(
+        (command['enrollment'] as Map<String, dynamic>)['reductionCodes'],
+        ['SIBLING', 'STAFF_CHILD'],
+      );
     });
 
     test('aucune réduction déclarée → la clé ne part pas', () async {
@@ -606,6 +608,121 @@ void main() {
       expect(e['enrollment_code'], 'ETL-2026-001');
       expect(e['status'], 'ADMIN_COMPLETED');
     });
+
+    /// Le serveur matérialise les créances DANS la transaction d'inscription :
+    /// c'est le cas nominal de la rentrée, et l'accusé est le seul canal avant
+    /// le pull suivant. Les ignorer laissait le guichet encaisser sur des
+    /// créances provisoires — dont le serveur ne connaît pas les ids.
+    test('les créances autoritaires de l\'accusé remplacent les provisoires, '
+        'tranche par tranche', () async {
+      await seedPendingEnrollment(parents: [parent()]);
+      // Le semis local a matérialisé les deux tranches depuis la grille gelée.
+      for (final tranche in [1, 2]) {
+        await db.insert('student_charges', {
+          'id': 'prov-$tranche',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-$tranche',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — $tranche/2',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+      }
+      // Le guichet a encaissé la 2/2 AVANT que l'inscription ne parte.
+      await db.insert('payments', {
+        'id': 'pay-1',
+        'client_uuid': 'pay-1',
+        'student_id': 's1',
+        'paid_at': '2026-07-06T10:00:00Z',
+        'payer_first_name': 'S',
+        'payer_last_name': 'M',
+        'sync_status': 'PENDING_SYNC',
+      });
+      await db.insert('payment_allocations', {
+        'id': 'alloc-2',
+        'client_uuid': 'alloc-2',
+        'payment_id': 'pay-1',
+        'student_charge_id': 'prov-2',
+        'fee_tariff_id': 'tarif-2',
+        'fee_code': 'EXAMINATION',
+        'student_charge_label': 'Organisation matériel examens — 2/2',
+        'amount_in_cents': 500000,
+        'currency': 'CDF',
+      });
+
+      await ackDao.applyEnrollmentAck(
+        EnrollmentAggregateResponse(
+          enrollment: const ResponseEnrollment(id: 'e1'),
+          student: const ResponseStudent(id: 's1'),
+          charges: [
+            for (final tranche in [1, 2])
+              StudentChargeDto(
+                id: 'canon-$tranche',
+                studentId: 's1',
+                academicYearId: 'ay-1',
+                feeTariffId: 'tarif-$tranche',
+                feeCode: 'EXAMINATION',
+                label: 'Organisation matériel examens — $tranche/2',
+                expectedAmountInCents: 500000,
+                amountPaidInCents: 0,
+                currency: 'CDF',
+                status: 'UNPAID',
+              ),
+          ],
+        ),
+        enrollmentId: 'e1',
+        nowMs: 5000,
+      );
+
+      final charges = await db.query('student_charges', orderBy: 'id');
+      expect(charges.map((c) => c['id']), ['canon-1', 'canon-2']);
+      expect(charges.every((c) => c['sync_status'] == 'SYNCED'), isTrue);
+      // Le versement suit SA tranche : ni perdu, ni glissé sur la 1/2.
+      expect(
+        (await db.query('payment_allocations')).single['student_charge_id'],
+        'canon-2',
+      );
+    });
+
+    /// Pré-inscription, ou inscription sans niveau : le serveur n'a rien à
+    /// matérialiser. Ce n'est pas « l'élève ne doit rien » — donc on ne purge
+    /// surtout pas ce que le semis a posé.
+    test(
+      'accusé sans créance : le grand-livre local est laissé intact',
+      () async {
+        await seedPendingEnrollment(parents: [parent()]);
+        await db.insert('student_charges', {
+          'id': 'prov-1',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tarif-1',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — 1/1',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': SyncState.provisional.dbValue,
+        });
+
+        await ackDao.applyEnrollmentAck(
+          const EnrollmentAggregateResponse(
+            enrollment: ResponseEnrollment(id: 'e1'),
+            student: ResponseStudent(id: 's1'),
+          ),
+          enrollmentId: 'e1',
+          nowMs: 5000,
+        );
+
+        expect((await db.query('student_charges')).single['id'], 'prov-1');
+      },
+    );
 
     test(
       'markEnrollmentSyncError (422) : SYNC_ERROR + message sur enrollment et '

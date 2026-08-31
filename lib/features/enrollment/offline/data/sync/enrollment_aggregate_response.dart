@@ -2,6 +2,9 @@
 // 201 création / 200 rejeu idempotent. Un rejet de validation N'arrive PAS ici
 // mais via un HTTP 422 (→ SYNC_ERROR côté handler).
 
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
+    show StudentChargeDto;
+
 /// Valeurs canoniques de l'inscription après commit serveur.
 class ResponseEnrollment {
   final String id;
@@ -123,6 +126,22 @@ class EnrollmentAggregateResponse {
   /// information.
   final List<String>? reductionCodes;
   final List<GeneratedDocumentDto> documents;
+
+  /// Créances **autoritaires** matérialisées par le serveur DANS la transaction
+  /// d'inscription (contrat `StudentChargeRef`).
+  ///
+  /// Le poste a généré les siennes en `PROVISIONAL` depuis sa grille gelée —
+  /// sans elles il ne pourrait rien encaisser pour l'élève qu'il vient
+  /// d'inscrire, or c'est le cas nominal de la rentrée. Elles ne sont jamais
+  /// poussées : elles attendent d'être REMPLACÉES, et c'est ici que ça se joue.
+  ///
+  /// Les ignorer laissait le guichet encaisser, entre l'accusé et le pull
+  /// suivant, sur des créances provisoires — dont le serveur ne connaît ni les
+  /// ids ni, avant que le semis ne les matérialise toutes, l'existence même.
+  ///
+  /// Vide est un cas NORMAL : pré-inscription, ou inscription sans niveau. Le
+  /// serveur n'a alors rien à matérialiser.
+  final List<StudentChargeDto> charges;
   final DeduplicationSignal? deduplication;
 
   const EnrollmentAggregateResponse({
@@ -131,6 +150,7 @@ class EnrollmentAggregateResponse {
     this.parents = const [],
     this.reductionCodes,
     this.documents = const [],
+    this.charges = const [],
     this.deduplication,
   });
 
@@ -153,6 +173,12 @@ class EnrollmentAggregateResponse {
             .map(
               (e) => GeneratedDocumentDto.fromJson(e as Map<String, dynamic>),
             )
+            .toList(),
+        // Même forme JSON que le delta du pull, donc même lecture : la
+        // normalisation (UNPAID → DUE, soldes autoritaires) ne doit pas exister
+        // en deux exemplaires.
+        charges: (j['charges'] as List<dynamic>? ?? const [])
+            .map((e) => StudentChargeDto.fromJson(e as Map<String, dynamic>))
             .toList(),
         deduplication: j['deduplication'] == null
             ? null

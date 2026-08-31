@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/provisional_charge_dissolver.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Réconciliation locale à partir de la réponse serveur (contrat
@@ -34,7 +35,52 @@ class EnrollmentAckDao {
 
       // Réductions réellement gravées (ADR-021 V1).
       await _reductionAck(txn, nowMs, response, enrollmentId);
+
+      // Créances autoritaires : elles remplacent les provisoires du semis.
+      await _chargesAck(txn, response, nowMs);
     });
+  }
+
+  /// Le grand-livre local prend l'autorité du serveur, dans la transaction même
+  /// de l'accusé.
+  ///
+  /// Le serveur matérialise les créances DANS la transaction d'inscription : ce
+  /// qui revient ici est la vérité, et le poste n'a plus à attendre le pull. Ce
+  /// qu'il attendait, entre-temps, c'était d'encaisser sur des créances
+  /// provisoires — dont les ids sont locaux et dont le semis, avant qu'il ne
+  /// matérialise chaque ligne de grille, ne fabriquait qu'une tranche sur sept.
+  ///
+  /// Chaque créance dissout d'abord sa jumelle provisoire (par tarif quand les
+  /// deux côtés en portent un : la nature ne départage plus deux tranches d'un
+  /// même minerval), puis s'écrit en REPLACE. Les imputations déjà posées
+  /// suivent l'id canonique — un encaissement fait avant le push n'est ni perdu
+  /// ni déplacé de tranche.
+  ///
+  /// `charges` vide est un cas NORMAL (pré-inscription, ou inscription sans
+  /// niveau) : rien à faire, et surtout rien à purger — le serveur n'a pas dit
+  /// que l'élève ne doit rien, il a dit qu'il n'avait rien à matérialiser.
+  Future<void> _chargesAck(
+    Transaction txn,
+    EnrollmentAggregateResponse response,
+    int nowMs,
+  ) async {
+    for (final charge in response.charges) {
+      await dissolveProvisionalTwins(
+        txn,
+        studentId: charge.studentId,
+        academicYearId: charge.academicYearId,
+        feeCode: charge.feeCode,
+        // Passé explicitement : la canonique n'est écrite qu'APRÈS, le repli
+        // qui la relit en base ne la trouverait donc pas.
+        feeTariffId: charge.feeTariffId,
+        realChargeId: charge.id,
+      );
+      await txn.insert(
+        'student_charges',
+        charge.toLocalModel(nowMs).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   Future<void> _documentAck(
