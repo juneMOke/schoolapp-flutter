@@ -106,12 +106,9 @@ class ReductionSelectionCubit extends Cubit<ReductionSelectionState> {
       enrollmentId,
       next.toList(growable: false)..sort(),
     );
-    result.fold(
-      (_) {
-        if (isClosed) return;
-        emit(state.copyWith(selected: previous));
-      },
-      (_) {},
-    );
+    result.fold((_) {
+      if (isClosed) return;
+      emit(state.copyWith(selected: previous));
+    }, (_) {});
   }
 }

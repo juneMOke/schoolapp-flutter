@@ -244,7 +244,8 @@ class EnrollmentPayload {
         // lèverait en bloquant la file ENTIÈRE, pour un champ qui ne vaut
         // aucun centime.
         reductionCodes: [
-          for (final code in (j['reductionCodes'] as List<dynamic>? ?? const []))
+          for (final code
+              in (j['reductionCodes'] as List<dynamic>? ?? const []))
             if (code is String) code,
         ],
       );

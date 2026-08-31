@@ -261,29 +261,28 @@ StudentPayload studentPayloadOf(StudentLocalModel s) => StudentPayload(
 EnrollmentPayload enrollmentPayloadOf(
   EnrollmentLocalModel e, {
   List<String> reductionCodes = const [],
-}) =>
-    EnrollmentPayload(
-      id: e.id,
-      enrollmentType: e.enrollmentType,
-      status: e.status,
-      academicYearId: e.academicYearId,
-      schoolLevelId: e.schoolLevelId,
-      schoolLevelGroupId: e.schoolLevelGroupId,
-      enrollmentDate: e.enrollmentDate,
-      sourceRef: e.sourceRef,
-      previousSchoolName: e.previousSchoolName,
-      previousAcademicYear: e.previousAcademicYear,
-      previousSchoolLevelGroup: e.previousSchoolLevelGroup,
-      previousSchoolLevel: e.previousSchoolLevel,
-      previousRate: e.previousRate,
-      previousRank: e.previousRank,
-      validatedPreviousYear: e.validatedPreviousYear,
-      formerStudent: e.formerStudent,
-      medicalNotes: e.medicalNotes,
-      transferReason: e.transferReason,
-      cancellationReason: e.cancellationReason,
-      reductionCodes: reductionCodes,
-    );
+}) => EnrollmentPayload(
+  id: e.id,
+  enrollmentType: e.enrollmentType,
+  status: e.status,
+  academicYearId: e.academicYearId,
+  schoolLevelId: e.schoolLevelId,
+  schoolLevelGroupId: e.schoolLevelGroupId,
+  enrollmentDate: e.enrollmentDate,
+  sourceRef: e.sourceRef,
+  previousSchoolName: e.previousSchoolName,
+  previousAcademicYear: e.previousAcademicYear,
+  previousSchoolLevelGroup: e.previousSchoolLevelGroup,
+  previousSchoolLevel: e.previousSchoolLevel,
+  previousRate: e.previousRate,
+  previousRank: e.previousRank,
+  validatedPreviousYear: e.validatedPreviousYear,
+  formerStudent: e.formerStudent,
+  medicalNotes: e.medicalNotes,
+  transferReason: e.transferReason,
+  cancellationReason: e.cancellationReason,
+  reductionCodes: reductionCodes,
+);
 
 /// Enfile **une** entrée outbox = l'agrégat inscription figé (student +
 /// enrollment + parents). `aggregate_id = enrollment.id` (clé d'idempotence).
