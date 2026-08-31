@@ -5,6 +5,8 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 FacturationPaymentDetailIntent _intent({
   bool isPendingSync = false,
@@ -23,8 +25,7 @@ FacturationPaymentDetailIntent _intent({
   payerLastName: 'Kabongo',
   payerMiddleName: 'Mwamba',
   payerPhoneNumber: payerPhoneNumber,
-  amountInCents: 15000,
-  currency: 'USD',
+  amounts: MoneyBag.of(const [Money(15000, 'USD')]),
   paidAt: DateTime(2025, 11, 8),
   isPendingSync: isPendingSync,
   cashierFullName: cashierFullName,

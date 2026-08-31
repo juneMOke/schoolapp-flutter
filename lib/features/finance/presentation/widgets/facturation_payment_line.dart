@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
@@ -50,10 +50,11 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
     final date = MaterialLocalizations.of(
       context,
     ).formatShortDate(widget.payment.paidAt);
-    final amount = formatMonetaryAmountWithCurrency(
-      amount: widget.payment.amountInCents / 100,
-      currency: widget.payment.currency,
-    );
+    // Un versement peut porter deux devises : elles se lisent côte à côte sur
+    // la ligne, jamais additionnées.
+    final amount = widget.payment.amounts.entries
+        .map(MoneyFormat.format)
+        .join(' · ');
 
     return Material(
       color: Colors.transparent,

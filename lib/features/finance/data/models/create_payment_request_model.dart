@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/finance/data/models/money_model.dart';
+
 class CreatePaymentAllocationRequestModel {
   final String studentChargeId;
   final String feeCode;
@@ -25,8 +27,11 @@ class CreatePaymentAllocationRequestModel {
 class CreatePaymentRequestModel {
   final String studentId;
   final String academicYearId;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui est encaissé, **une entrée par devise**. Le serveur le vérifie
+  /// contre les imputations DEVISE PAR DEVISE : un total juste globalement mais
+  /// mal réparti est refusé (`ALLOCATION_SUM_MISMATCH`).
+  final List<MoneyModel> amounts;
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
@@ -36,8 +41,7 @@ class CreatePaymentRequestModel {
   const CreatePaymentRequestModel({
     required this.studentId,
     required this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
+    required this.amounts,
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
@@ -48,8 +52,7 @@ class CreatePaymentRequestModel {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'studentId': studentId,
     'academicYearId': academicYearId,
-    'amountInCents': amountInCents,
-    'currency': currency,
+    'amounts': [for (final amount in amounts) amount.toJson()],
     'payerFirstName': payerFirstName,
     'payerLastName': payerLastName,
     'payerMiddleName': payerMiddleName,

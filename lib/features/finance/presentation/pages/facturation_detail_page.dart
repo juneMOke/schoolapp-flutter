@@ -162,8 +162,7 @@ class FacturationDetailPage extends StatelessWidget {
         payerLastName: payment.payerLastName,
         payerMiddleName: payment.payerMiddleName,
         payerPhoneNumber: payment.payerPhoneNumber,
-        amountInCents: payment.amountInCents,
-        currency: payment.currency,
+        amounts: payment.amounts,
         paidAt: payment.paidAt,
         // Garde du reçu : tant que l'encaissement n'est pas remonté, son uuid
         // est inconnu du serveur et la demande de pièce répondrait 404.

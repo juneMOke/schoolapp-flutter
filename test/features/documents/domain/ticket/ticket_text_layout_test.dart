@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -27,8 +29,16 @@ TicketReceiptModel _model({
   String? cashierFullName = 'Jean Kabeya',
   int? remainingBalanceInCents = 250000,
   List<TicketAllocationLine> allocations = const [
-    TicketAllocationLine(label: 'Frais scolaires', amountInCents: 120000),
-    TicketAllocationLine(label: 'Fournitures', amountInCents: 30000),
+    TicketAllocationLine(
+      label: 'Frais scolaires',
+      amountInCents: 120000,
+      currency: 'CDF',
+    ),
+    TicketAllocationLine(
+      label: 'Fournitures',
+      amountInCents: 30000,
+      currency: 'CDF',
+    ),
   ],
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
@@ -39,10 +49,11 @@ TicketReceiptModel _model({
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
-  amountReceivedInCents: 150000,
+  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
   allocations: allocations,
-  remainingBalanceInCents: remainingBalanceInCents,
-  currency: 'CDF',
+  remainingBalance: remainingBalanceInCents == null
+      ? null
+      : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')]),
   labels: _labels,
 );
 
@@ -343,7 +354,11 @@ void main() {
           // 150 000 reçus, 120 000 imputés.
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 120000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 120000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
@@ -357,8 +372,16 @@ void main() {
       final lines = TicketTextLayout.render(
         _model(
           allocations: const [
-            TicketAllocationLine(label: 'Minerval', amountInCents: 100000),
-            TicketAllocationLine(label: 'Assurance', amountInCents: 20000),
+            TicketAllocationLine(
+              label: 'Minerval',
+              amountInCents: 100000,
+              currency: 'CDF',
+            ),
+            TicketAllocationLine(
+              label: 'Assurance',
+              amountInCents: 20000,
+              currency: 'CDF',
+            ),
           ],
         ),
       );
@@ -374,7 +397,11 @@ void main() {
         TicketTextLayout.render(
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 150000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 150000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
@@ -388,7 +415,11 @@ void main() {
         TicketTextLayout.render(
           _model(
             allocations: const [
-              TicketAllocationLine(label: 'Minerval', amountInCents: 200000),
+              TicketAllocationLine(
+                label: 'Minerval',
+                amountInCents: 200000,
+                currency: 'CDF',
+              ),
             ],
           ),
         ),
@@ -435,12 +466,15 @@ void main() {
       provisionalReference: 'PROV-A1B2C3',
       paidAt: DateTime(2026, 8, 4, 14, 7),
       cashierFullName: 'Ĳsselmeer Ǎmba',
-      amountReceivedInCents: 150000,
+      amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
       allocations: const [
-        TicketAllocationLine(label: 'Frais “scolaires”', amountInCents: 120000),
+        TicketAllocationLine(
+          label: 'Frais “scolaires”',
+          amountInCents: 120000,
+          currency: 'CDF',
+        ),
       ],
-      remainingBalanceInCents: 250000,
-      currency: 'CDF',
+      remainingBalance: MoneyBag.of(const [Money(250000, 'CDF')]),
       labels: _labels,
     );
 

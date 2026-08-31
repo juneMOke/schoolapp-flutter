@@ -8,7 +8,6 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -95,10 +94,9 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                     // Total PAR DEVISE : un passage au guichet peut solder une
                     // créance en dollars et une en francs, et deux versements
                     // de devises différentes ne s'additionnent pas.
-                    final totalPaid = MoneyBag.sumBy(
-                      state.payments,
-                      (payment) =>
-                          Money.parse(payment.amountInCents, payment.currency),
+                    final totalPaid = state.payments.fold(
+                      MoneyBag.empty,
+                      (bag, payment) => bag + payment.amounts,
                     );
                     final String subtitle;
                     if (!canReadPayments) {

@@ -8,6 +8,8 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Geste d'encaissement money-grade local-first (FF3) : insère le paiement + ses
 /// allocations (append-only), émet un reçu provisoire et enfile l'outbox —
@@ -138,8 +140,14 @@ class FinancePaymentWriteDao {
       id: payment.id,
       studentId: payment.studentId,
       academicYearId: payment.academicYearId,
-      amountInCents: payment.amountInCents,
-      currency: payment.currency,
+      // Dérivés des imputations, comme côté serveur : le versement n'a plus de
+      // montant à lui. Le serveur vérifie l'égalité DEVISE PAR DEVISE
+      // (`ALLOCATION_SUM_MISMATCH`), et la dériver ici la rend vraie par
+      // construction plutôt que par discipline.
+      amounts: MoneyBag.sumBy(
+        allocations,
+        (a) => Money.parse(a.amountInCents, a.currency),
+      ),
       method: payment.method,
       paidAt: payment.paidAt,
       payerFirstName: payment.payerFirstName,

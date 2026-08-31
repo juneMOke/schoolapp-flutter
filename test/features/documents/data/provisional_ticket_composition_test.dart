@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockFinanceOfflineRepository extends Mock
     implements FinanceOfflineRepository {}
@@ -97,8 +99,8 @@ void main() {
       'client_uuid': 'p-1',
       'student_id': 's-1',
       'academic_year_id': 'y-1',
-      'amount_in_cents': 150000,
-      'currency': currency,
+      // Le versement ne porte plus de montant : il se dérive de ses
+      // imputations, insérées juste après.
       'method': 'CASH',
       'paid_at': '2026-08-04T14:07:00.000',
       'payer_first_name': 'Papa',
@@ -184,7 +186,7 @@ void main() {
     expect(model.matriculationNumber, 'MAT-0042');
     expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
     expect(model.cashierFullName, 'Jean Kabeya');
-    expect(model.amountReceivedInCents, 150000);
+    expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
     expect(model.allocations.single.label, 'Frais scolaires');
   });
 
@@ -224,10 +226,8 @@ void main() {
       );
 
       expect(
-        result
-            .getOrElse(() => throw StateError('échec'))
-            .remainingBalanceInCents,
-        250000,
+        result.getOrElse(() => throw StateError('échec')).remainingBalance,
+        MoneyBag.of(const [Money(250000, 'CDF')]),
       );
     },
   );
@@ -248,9 +248,7 @@ void main() {
       );
 
       expect(
-        result
-            .getOrElse(() => throw StateError('échec'))
-            .remainingBalanceInCents,
+        result.getOrElse(() => throw StateError('échec')).remainingBalance,
         isNull,
       );
     },
@@ -268,7 +266,7 @@ void main() {
     );
 
     expect(
-      result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
+      result.getOrElse(() => throw StateError('échec')).remainingBalance,
       isNull,
     );
   });
@@ -317,7 +315,7 @@ void main() {
     expect(model.matriculationNumber, isNull);
     // Le reste du ticket est intact — c'est bien un papier complet et anonyme
     // qui sortirait, pas un rendu cassé.
-    expect(model.amountReceivedInCents, 150000);
+    expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
     expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
   });
 
@@ -382,8 +380,8 @@ void main() {
 
     // 250 000 seulement — pas 350 000.
     expect(
-      result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
-      250000,
+      result.getOrElse(() => throw StateError('échec')).remainingBalance,
+      MoneyBag.of(const [Money(250000, 'CDF')]),
     );
   });
 
@@ -409,8 +407,8 @@ void main() {
     );
 
     expect(
-      result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
-      350000,
+      result.getOrElse(() => throw StateError('échec')).remainingBalance,
+      MoneyBag.of(const [Money(350000, 'CDF')]),
     );
   });
 
@@ -432,7 +430,7 @@ void main() {
     );
 
     expect(
-      result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
+      result.getOrElse(() => throw StateError('échec')).remainingBalance,
       isNull,
     );
   });

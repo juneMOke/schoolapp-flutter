@@ -158,8 +158,6 @@ void main() {
           'id': 'pay1',
           'client_uuid': 'pay1',
           'student_id': 's1',
-          'amount_in_cents': 20000,
-          'currency': 'USD',
           'paid_at': '2026-07-06T10:00:00Z',
           'payer_first_name': 'S',
           'payer_last_name': 'M',
@@ -253,8 +251,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'Jean',
             payerLastName: 'Dupont',
@@ -284,8 +280,6 @@ void main() {
               id: 'pay1',
               clientUuid: 'pay1',
               studentId: 's1',
-              amountInCents: 30000,
-              currency: 'USD',
               paidAt: '2026-07-06T10:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -311,8 +305,10 @@ void main() {
         expect(payment['payer_first_name'], 'Jean');
         expect(payment['payer_last_name'], 'Dupont');
         expect(payment['payer_middle_name'], 'K');
-        // Ce que le pull PORTE est bien appliqué (autorité serveur).
-        expect(payment['amount_in_cents'], 30000);
+        // Ce que le pull PORTE est bien appliqué (autorité serveur). Le
+        // montant n'en fait plus partie : il vit sur les imputations, dont le
+        // delta porte désormais la devise.
+        expect(payment['paid_at'], isNotNull);
 
         expect(
           (await db.query(
@@ -333,8 +329,6 @@ void main() {
               id: 'pay-autre-poste',
               clientUuid: 'pay-autre-poste',
               studentId: 's9',
-              amountInCents: 45000,
-              currency: 'USD',
               paidAt: '2026-07-06T11:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -346,7 +340,6 @@ void main() {
         final rows = await db.query('payments');
         expect(rows, hasLength(1));
         expect(rows.single['id'], 'pay-autre-poste');
-        expect(rows.single['amount_in_cents'], 45000);
         // Ligne inconnue : c'est celle du serveur, elle EST synchronisée.
         expect(rows.single['sync_status'], SyncState.synced.dbValue);
       },
@@ -362,8 +355,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -391,8 +382,6 @@ void main() {
               id: 'pay1',
               clientUuid: 'pay1',
               studentId: 's1',
-              amountInCents: 30000,
-              currency: 'USD',
               paidAt: '2026-07-06T10:00:00Z',
               payerFirstName: '',
               payerLastName: '',
@@ -504,8 +493,6 @@ void main() {
           clientUuid: 'pay1',
           studentId: 's1',
           academicYearId: 'ay-1',
-          amountInCents: 30000,
-          currency: 'USD',
           method: 'MOBILE_MONEY',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Sarah',
@@ -600,8 +587,6 @@ void main() {
             clientUuid: 'pay1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -651,8 +636,6 @@ void main() {
             clientUuid: 'pay1',
             studentId: 's1',
             academicYearId: 'ay-1',
-            amountInCents: 500,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -689,8 +672,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1082,8 +1063,6 @@ void main() {
           id: 'pay1',
           clientUuid: 'pay1',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -1148,8 +1127,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1290,8 +1267,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1362,8 +1337,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1479,8 +1452,6 @@ void main() {
           'id': 'pay1',
           'client_uuid': 'pay1',
           'student_id': 's1',
-          'amount_in_cents': 30000,
-          'currency': 'USD',
           'paid_at': '2026-07-06T10:00:00Z',
           'payer_first_name': 'S',
           'payer_last_name': 'M',
@@ -1513,8 +1484,6 @@ void main() {
             id: 'pay1',
             clientUuid: 'pay1',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'S',
             payerLastName: 'M',
@@ -1583,8 +1552,6 @@ void main() {
           id: 'pay-err',
           clientUuid: 'pay-err',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -1656,8 +1623,6 @@ void main() {
           id: 'pay1',
           clientUuid: 'pay1',
           studentId: 's1',
-          amountInCents: 30000,
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Ada',
           payerLastName: 'Lovelace',
@@ -1706,8 +1671,6 @@ void main() {
             id: 'pay2',
             clientUuid: 'pay2',
             studentId: 's1',
-            amountInCents: 30000,
-            currency: 'USD',
             paidAt: '2026-07-06T10:00:00Z',
             payerFirstName: 'Ada',
             payerLastName: 'Lovelace',

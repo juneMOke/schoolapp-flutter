@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_offline_enums.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Modèle de la table `payments`.
 class PaymentLocalModel {
@@ -8,8 +9,6 @@ class PaymentLocalModel {
   final String clientUuid;
   final String studentId;
   final String? academicYearId;
-  final int amountInCents;
-  final String currency;
   final String method;
   final String paidAt;
   final String payerFirstName;
@@ -56,8 +55,6 @@ class PaymentLocalModel {
     required this.clientUuid,
     required this.studentId,
     this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
     this.method = 'CASH',
     required this.paidAt,
     required this.payerFirstName,
@@ -83,8 +80,6 @@ class PaymentLocalModel {
     'client_uuid': clientUuid,
     'student_id': studentId,
     'academic_year_id': academicYearId,
-    'amount_in_cents': amountInCents,
-    'currency': currency,
     'method': method,
     'paid_at': paidAt,
     'payer_first_name': payerFirstName,
@@ -139,8 +134,6 @@ class PaymentLocalModel {
   Map<String, Object?> toPullPatch() => {
     'student_id': studentId,
     'academic_year_id': academicYearId,
-    'amount_in_cents': amountInCents,
-    'currency': currency,
     'paid_at': paidAt,
     if (receiptId != null) 'receipt_id': receiptId,
     // Écrits sous condition, comme `receipt_id` : le delta ne peut qu'AJOUTER
@@ -161,8 +154,6 @@ class PaymentLocalModel {
         clientUuid: m['client_uuid'] as String,
         studentId: m['student_id'] as String,
         academicYearId: m['academic_year_id'] as String?,
-        amountInCents: (m['amount_in_cents'] as int?) ?? 0,
-        currency: m['currency'] as String,
         method: (m['method'] as String?) ?? 'CASH',
         paidAt: m['paid_at'] as String,
         payerFirstName: m['payer_first_name'] as String,
@@ -183,13 +174,15 @@ class PaymentLocalModel {
         updatedAt: (m['updated_at'] as int?) ?? 0,
       );
 
-  LocalPayment toEntity() => LocalPayment(
+  /// [amounts] est **dérivé des imputations**, pas relu d'une colonne : le
+  /// versement n'a plus de montant à lui. L'appelant les fournit — c'est le DAO
+  /// de lecture qui fait la jointure, en un seul passage pour tout le lot.
+  LocalPayment toEntity({MoneyBag amounts = MoneyBag.empty}) => LocalPayment(
     id: id,
     clientUuid: clientUuid,
     studentId: studentId,
     academicYearId: academicYearId,
-    amountInCents: amountInCents,
-    currency: currency,
+    amounts: amounts,
     method: PaymentMethod.fromApiValue(method),
     paidAt: paidAt,
     payerFirstName: payerFirstName,

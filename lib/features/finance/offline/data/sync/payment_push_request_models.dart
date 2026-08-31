@@ -7,6 +7,9 @@
 // NOTHING`) : un rejeu après coupure ne compte JAMAIS l'argent deux fois.
 // Centimes `int`, jamais de flottant.
 
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+
 /// Une imputation du versement sur une créance (spec `PaymentAllocationInput`).
 class PaymentAllocationInput {
   /// uuid client honoré (idempotence fine de l'allocation).
@@ -64,9 +67,12 @@ class PaymentInput {
   final String? academicYearId;
   final String? classroomId;
 
-  /// Total du versement — doit égaler la somme des allocations.
-  final int amountInCents;
-  final String currency;
+  /// Ce qui est encaissé, **une entrée par devise**.
+  ///
+  /// Le serveur vérifie l'égalité avec les imputations **devise par devise**
+  /// (422 `ALLOCATION_SUM_MISMATCH`) : un total juste globalement mais mal
+  /// réparti est refusé. Ne jamais additionner deux entrées.
+  final MoneyBag amounts;
   final String? method; // 'CASH'…
   final String? details;
   final String? payerFirstName;
@@ -89,8 +95,7 @@ class PaymentInput {
     required this.studentId,
     this.academicYearId,
     this.classroomId,
-    required this.amountInCents,
-    required this.currency,
+    required this.amounts,
     this.method,
     this.details,
     this.payerFirstName,
@@ -106,8 +111,10 @@ class PaymentInput {
     'studentId': studentId,
     'academicYearId': academicYearId,
     'classroomId': classroomId,
-    'amountInCents': amountInCents,
-    'currency': currency,
+    'amounts': [
+      for (final amount in amounts.entries)
+        {'amountInCents': amount.amountInCents, 'currency': amount.currency},
+    ],
     'method': method ?? 'CASH',
     'details': details,
     'payerFirstName': payerFirstName,
@@ -123,8 +130,7 @@ class PaymentInput {
     studentId: j['studentId'] as String,
     academicYearId: j['academicYearId'] as String?,
     classroomId: j['classroomId'] as String?,
-    amountInCents: (j['amountInCents'] as num).toInt(),
-    currency: j['currency'] as String,
+    amounts: _amountsOf(j),
     method: j['method'] as String?,
     details: j['details'] as String?,
     payerFirstName: j['payerFirstName'] as String?,
@@ -134,6 +140,35 @@ class PaymentInput {
     externalReference: j['externalReference'] as String?,
     paidAt: j['paidAt'] as String,
   );
+
+  /// Relit les montants d'un payload d'outbox, **quelle que soit sa forme**.
+  ///
+  /// C'est la TROISIÈME forme que ce parseur doit tolérer, et pour la même
+  /// raison que les deux premières : une tablette mise à jour hors ligne porte
+  /// encore en file des versements écrits par la version précédente, avec un
+  /// `amountInCents` scalaire. Les refuser ici les ferait basculer en `failed`
+  /// — issue TERMINALE de l'outbox : le cash encaissé au guichet, reçu déjà
+  /// imprimé, ne remonterait JAMAIS et l'élève resterait débiteur.
+  ///
+  /// Le repli est conservé tant que des tablettes peuvent porter des versements
+  /// d'avant la bascule.
+  static MoneyBag _amountsOf(Map<String, dynamic> j) {
+    final raw = j['amounts'];
+    if (raw is List) {
+      return MoneyBag.of([
+        for (final entry in raw)
+          if (entry is Map<String, dynamic>)
+            Money.parse(
+              (entry['amountInCents'] as num?)?.toInt() ?? 0,
+              (entry['currency'] as String?) ?? '',
+            ),
+      ]);
+    }
+    // Forme scalaire — payload figé avant la bascule multi-devise.
+    final cents = (j['amountInCents'] as num?)?.toInt();
+    if (cents == null) return MoneyBag.empty;
+    return MoneyBag.from(Money.parse(cents, (j['currency'] as String?) ?? ''));
+  }
 }
 
 /// L'agrégat complet poussé en UN seul appel (spec `PaymentAggregateRequest`).

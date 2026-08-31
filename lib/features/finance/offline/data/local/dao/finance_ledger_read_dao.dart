@@ -7,6 +7,8 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Lectures du grand-livre Facturation (sqflite). Aucune écriture, aucune
 /// transaction : le reste à payer se COMPOSE à la lecture, aucun solde stocké
@@ -55,7 +57,52 @@ class FinanceLedgerReadDao {
       whereArgs: [studentId],
       orderBy: 'paid_at DESC',
     );
-    return rows.map((r) => PaymentLocalModel.fromMap(r).toEntity()).toList();
+    if (rows.isEmpty) return const <LocalPayment>[];
+
+    final amounts = await _amountsOfPayments([
+      for (final r in rows) r['id'] as String,
+    ]);
+    return [
+      for (final r in rows)
+        PaymentLocalModel.fromMap(
+          r,
+        ).toEntity(amounts: amounts[r['id']] ?? MoneyBag.empty),
+    ];
+  }
+
+  /// Ce que chaque versement a encaissé, **par devise**, dérivé de ses
+  /// imputations.
+  ///
+  /// Le versement ne porte plus de montant à lui : ce n'en était pas une
+  /// propriété, seulement un résumé de ses allocations. Une requête pour tout
+  /// le lot plutôt qu'une par versement — N+1 requêtes sur une tablette se
+  /// sentent.
+  Future<Map<String, MoneyBag>> _amountsOfPayments(
+    List<String> paymentIds,
+  ) async {
+    if (paymentIds.isEmpty) return const {};
+    final placeholders = List.filled(paymentIds.length, '?').join(', ');
+    final rows = await _db.rawQuery(
+      'SELECT payment_id, currency, SUM(amount_in_cents) AS total '
+      'FROM payment_allocations '
+      'WHERE payment_id IN ($placeholders) '
+      'GROUP BY payment_id, currency '
+      'ORDER BY payment_id, currency',
+      paymentIds,
+    );
+    final byPayment = <String, List<Money>>{};
+    for (final r in rows) {
+      (byPayment[r['payment_id'] as String] ??= <Money>[]).add(
+        Money.parse(
+          (r['total'] as int?) ?? 0,
+          (r['currency'] as String?) ?? '',
+        ),
+      );
+    }
+    return {
+      for (final entry in byPayment.entries)
+        entry.key: MoneyBag.of(entry.value),
+    };
   }
 
   /// Reçu (RC) d'un paiement, tel qu'il est connu **localement**.

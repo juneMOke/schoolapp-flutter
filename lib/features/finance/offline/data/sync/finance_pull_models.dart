@@ -112,8 +112,6 @@ class PaymentDto {
   final String id;
   final String studentId;
   final String? academicYearId;
-  final int amountInCents;
-  final String currency;
   final String? method;
   final String paidAt;
   final String payerFirstName;
@@ -144,8 +142,6 @@ class PaymentDto {
     required this.id,
     required this.studentId,
     this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
     this.method,
     required this.paidAt,
     required this.payerFirstName,
@@ -162,8 +158,6 @@ class PaymentDto {
     id: j['id'] as String,
     studentId: j['studentId'] as String,
     academicYearId: j['academicYearId'] as String?,
-    amountInCents: (j['amountInCents'] as num).toInt(),
-    currency: j['currency'] as String,
     method: j['method'] as String?,
     paidAt: j['paidAt'] as String,
     payerFirstName: (j['payerFirstName'] as String?) ?? '',
@@ -181,8 +175,6 @@ class PaymentDto {
     clientUuid: id,
     studentId: studentId,
     academicYearId: academicYearId,
-    amountInCents: amountInCents,
-    currency: currency,
     method: method ?? 'CASH',
     paidAt: paidAt,
     payerFirstName: payerFirstName,
@@ -221,19 +213,34 @@ class StudentChargePageDto implements KeysetPageDto<StudentChargeDto> {
 }
 
 /// Allocation NESTED du pull paiements (schéma minimal `PaymentDelta.allocations`
-/// : `id, studentChargeId?, feeCode, amountInCents`) — ni `paymentId` (parent),
-/// ni `studentChargeLabel`, ni `currency` (repris du paiement parent).
+/// : `id, studentChargeId?, feeCode, studentChargeLabel, amountInCents,
+/// currency`) — seul `paymentId` reste implicite, l'allocation étant imbriquée
+/// dans son versement.
+///
+/// **Chaque imputation porte sa propre devise, toujours présente** : elle solde
+/// une créance, donc elle en tient exactement une, et la colonne est NOT NULL
+/// depuis la création de la table côté serveur. C'est ce qui permet de
+/// reconstruire le total par devise du versement **sans faire confiance à
+/// `amounts`** — et ce qui a rendu possible de retirer le montant scalaire de
+/// `payments`.
+///
+/// Elle était auparavant reprise du paiement parent : faux dès qu'un versement
+/// en porte deux, toutes les imputations héritant de la première.
 class PaymentPullAllocationDto {
   final String id;
   final String? studentChargeId;
   final String feeCode;
+  final String studentChargeLabel;
   final int amountInCents;
+  final String currency;
 
   const PaymentPullAllocationDto({
     required this.id,
     this.studentChargeId,
     required this.feeCode,
+    required this.studentChargeLabel,
     required this.amountInCents,
+    required this.currency,
   });
 
   factory PaymentPullAllocationDto.fromJson(Map<String, dynamic> j) =>
@@ -241,23 +248,25 @@ class PaymentPullAllocationDto {
         id: j['id'] as String,
         studentChargeId: j['studentChargeId'] as String?,
         feeCode: j['feeCode'] as String,
+        // Le contrat le déclare requis ; le repli sur le `feeCode` reste, parce
+        // qu'un delta scellé avant l'évolution peut encore descendre.
+        studentChargeLabel:
+            (j['studentChargeLabel'] as String?) ?? j['feeCode'] as String,
         amountInCents: (j['amountInCents'] as num).toInt(),
+        currency: (j['currency'] as String?) ?? '',
       );
 
-  PaymentAllocationLocalModel toLocalModel({
-    required String paymentId,
-    required String currency,
-  }) => PaymentAllocationLocalModel(
-    id: id,
-    clientUuid: id,
-    paymentId: paymentId,
-    studentChargeId: studentChargeId,
-    feeCode: feeCode,
-    // Le pull ne porte pas le libellé de la créance → repli sur le fee_code.
-    studentChargeLabel: feeCode,
-    amountInCents: amountInCents,
-    currency: currency,
-  );
+  PaymentAllocationLocalModel toLocalModel({required String paymentId}) =>
+      PaymentAllocationLocalModel(
+        id: id,
+        clientUuid: id,
+        paymentId: paymentId,
+        studentChargeId: studentChargeId,
+        feeCode: feeCode,
+        studentChargeLabel: studentChargeLabel,
+        amountInCents: amountInCents,
+        currency: currency,
+      );
 }
 
 /// Item du pull paiements : un paiement (autoritaire, SYNCED) + ses allocations.
@@ -276,12 +285,8 @@ class PaymentDeltaDto {
         .toList(),
   );
 
-  List<PaymentAllocationLocalModel> allocationModels() => allocations
-      .map(
-        (a) =>
-            a.toLocalModel(paymentId: payment.id, currency: payment.currency),
-      )
-      .toList();
+  List<PaymentAllocationLocalModel> allocationModels() =>
+      allocations.map((a) => a.toLocalModel(paymentId: payment.id)).toList();
 }
 
 /// Page keyset des paiements (`GET /api/v1/sync/payments`).

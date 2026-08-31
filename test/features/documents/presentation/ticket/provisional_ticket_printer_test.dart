@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Le repli d'impression compose le ticket **pour le média que le spouleur
 /// annonce**, dans `onLayout`. Tout s'y joue : le format n'est plus imposé, il
@@ -208,8 +210,7 @@ TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   studentFullName: 'Mbala Kasa Amina',
   provisionalReference: 'PROV-A1B2C3',
   paidAt: DateTime(2026, 8, 4, 14, 7),
-  amountReceivedInCents: 150000,
-  currency: 'CDF',
+  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
   labels: labels,
 );
 

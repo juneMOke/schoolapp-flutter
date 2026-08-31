@@ -34,8 +34,6 @@ void main() {
       'client_uuid': id,
       'student_id': studentId,
       'academic_year_id': 'ay-1',
-      'amount_in_cents': 100000,
-      'currency': 'USD',
       'paid_at': paidAt,
       'payer_last_name': lastName,
       'payer_first_name': firstName,

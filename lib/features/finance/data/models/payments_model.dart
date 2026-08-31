@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/data/models/money_model.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 
 part 'payments_model.g.dart';
@@ -9,8 +11,10 @@ class PaymentModel extends Equatable {
   final String id;
   final String studentId;
   final String academicYearId;
-  final int amountInCents;
-  final String currency;
+
+  /// Ce qui a été encaissé, une entrée par devise — dérivé des imputations
+  /// côté serveur. Jamais additionné entre entrées.
+  final List<MoneyModel> amounts;
   final String payerFirstName;
   final String payerLastName;
   final String? payerMiddleName;
@@ -21,8 +25,7 @@ class PaymentModel extends Equatable {
     required this.id,
     required this.studentId,
     required this.academicYearId,
-    required this.amountInCents,
-    required this.currency,
+    this.amounts = const [],
     required this.payerFirstName,
     required this.payerLastName,
     this.payerMiddleName,
@@ -39,8 +42,7 @@ class PaymentModel extends Equatable {
     id: id,
     studentId: studentId,
     academicYearId: academicYearId,
-    amountInCents: amountInCents,
-    currency: currency,
+    amounts: MoneyBag.of([for (final a in amounts) a.toEntity()]),
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
@@ -53,8 +55,7 @@ class PaymentModel extends Equatable {
     id,
     studentId,
     academicYearId,
-    amountInCents,
-    currency,
+    amounts,
     payerFirstName,
     payerLastName,
     payerMiddleName,

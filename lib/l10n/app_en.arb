@@ -2784,10 +2784,6 @@
     }
   },
   "facturationCreatePaymentSettledChip": "Settled",
-  "facturationCreatePaymentMixedCurrency": "This payment mixes two currencies. Collect the fees in one currency first, then the others — one payment, one receipt, per currency.",
-  "@facturationCreatePaymentMixedCurrency": {
-    "description": "Warning in the collection dialog when the selected fees span several currencies. The server cannot yet accept a payment carrying several amounts: pushing it would strand it in a sync error, on money already received."
-  },
   "facturationCreatePaymentTotalToCollect": "Total to collect",
   "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -3477,6 +3473,19 @@
   "financeStatsPeriodWeekCurrent": "This week",
   "financeStatsPeriodMonthCurrent": "This month",
   "financeStatsPeriodYearCurrent": "This year",
+  "financeStatsCurrencyHeading": "In {currency}",
+  "@financeStatsCurrencyHeading": {
+    "description": "Sub-heading naming the currency of the KPI block that follows. Only shown from two currencies on: on a single-currency school it would repeat what every amount already carries.",
+    "placeholders": { "currency": { "type": "String" } }
+  },
+  "financeStatsNoMovementLabel": "No movement in this period",
+  "@financeStatsNoMovementLabel": {
+    "description": "Empty state of the Finance dashboard when no money circulated in the window. An empty state, never an error — and certainly not a zero in a currency nobody chose."
+  },
+  "financeStatsNoMovementDescription": "Nothing collected and nothing billed in this window. Widen the period to look further back.",
+  "@financeStatsNoMovementDescription": {
+    "description": "Subtitle of the Finance dashboard empty state."
+  },
   "financeStatsKpiCollected": "Total collected",
   "financeStatsKpiExpected": "Total expected",
   "financeStatsKpiOutstanding": "Outstanding",
@@ -4309,10 +4318,6 @@
   "boutiqueBlockerFirstName": "First name",
   "boutiqueBlockerPhone": "Payer's phone",
   "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
-  "boutiqueBlockerMixedCurrency": "The till cannot take two currencies together yet. Ring up one sale per currency.",
-  "@boutiqueBlockerMixedCurrency": {
-    "description": "TEMPORARY shop till blocker when the cart spans several currencies. The sale contract still carries a single scalar total: the server would seal a receipt whose total adds two units, and a sealed receipt cannot be corrected. Contract revision 4 will allow a mixed sale as one act — 'not yet', not 'never'."
-  },
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {

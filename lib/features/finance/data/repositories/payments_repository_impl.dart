@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/finance/data/models/create_payment_r
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/data/models/money_model.dart';
 
 class PaymentsRepositoryImpl implements PaymentsRepository {
   final PaymentsRemoteDataSource remoteDataSource;
@@ -43,8 +45,7 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
   Future<Either<Failure, Payment>> createPayment({
     required String studentId,
     required String academicYearId,
-    required int amountInCents,
-    required String currency,
+    required MoneyBag amounts,
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
@@ -57,8 +58,9 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
         CreatePaymentRequestModel(
           studentId: studentId,
           academicYearId: academicYearId,
-          amountInCents: amountInCents,
-          currency: currency,
+          amounts: [
+            for (final amount in amounts.entries) MoneyModel.fromEntity(amount),
+          ],
           payerFirstName: payerFirstName,
           payerLastName: payerLastName,
           payerMiddleName: payerMiddleName,

@@ -2732,10 +2732,6 @@
     }
   },
   "facturationCreatePaymentSettledChip": "Soldé",
-  "facturationCreatePaymentMixedCurrency": "Ce versement mêle deux devises. Encaissez d'abord les frais d'une devise, puis ceux de l'autre — un versement, un reçu, par devise.",
-  "@facturationCreatePaymentMixedCurrency": {
-    "description": "Avertissement de la modale d'encaissement quand les frais cochés portent plusieurs devises. Le serveur ne sait pas encore recevoir un versement à plusieurs montants : le pousser le bloquerait en erreur de synchro, sur de l'argent déjà reçu."
-  },
   "facturationCreatePaymentTotalToCollect": "Total à encaisser",
   "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -3432,6 +3428,19 @@
   "financeStatsPeriodWeekCurrent": "Cette semaine",
   "financeStatsPeriodMonthCurrent": "Ce mois",
   "financeStatsPeriodYearCurrent": "Cette année",
+  "financeStatsCurrencyHeading": "En {currency}",
+  "@financeStatsCurrencyHeading": {
+    "description": "Intertitre nommant la devise du bloc d'indicateurs qui suit. N'apparaît qu'à partir de deux devises : sur une école mono-devise il répéterait ce que chaque montant porte déjà.",
+    "placeholders": { "currency": { "type": "String" } }
+  },
+  "financeStatsNoMovementLabel": "Aucun mouvement sur la période",
+  "@financeStatsNoMovementLabel": {
+    "description": "État vide du tableau de bord Finances quand aucun argent n'a circulé sur la fenêtre. Un état vide, jamais une erreur — et surtout pas un zéro dans une devise que personne n'a choisie."
+  },
+  "financeStatsNoMovementDescription": "Ni encaissement ni facturation sur cette fenêtre. Élargissez la période pour voir plus loin.",
+  "@financeStatsNoMovementDescription": {
+    "description": "Sous-titre de l'état vide du tableau de bord Finances."
+  },
   "financeStatsKpiCollected": "Total encaissé",
   "financeStatsKpiExpected": "Total attendu",
   "financeStatsKpiOutstanding": "Reste à recouvrer",
@@ -4264,10 +4273,6 @@
   "boutiqueBlockerFirstName": "Prénom",
   "boutiqueBlockerPhone": "Téléphone du payeur",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
-  "boutiqueBlockerMixedCurrency": "La caisse ne sait pas encore encaisser deux devises ensemble. Faites une vente par devise.",
-  "@boutiqueBlockerMixedCurrency": {
-    "description": "Blocage TEMPORAIRE de la caisse boutique quand le panier porte plusieurs devises. Le contrat de vente ne porte encore qu'un total scalaire : le serveur scellerait un ticket dont le total additionne deux unités, et un ticket scellé ne se corrige pas. La révision 4 du contrat autorisera la vente mixte en un seul acte — « pas encore » et non « jamais »."
-  },
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {

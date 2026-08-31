@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 // La sur-couche d'encaissement est passée en offline-first : l'écriture transite
 // par [FinanceOfflineBloc] (RecordLocalPayment → outbox) et le succès allume la
@@ -28,15 +30,14 @@ class _MockFinanceOfflineBloc
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
 
-const _request = PaymentsCreateRequested(
+final _request = PaymentsCreateRequested(
   studentId: 's1',
   academicYearId: 'y1',
-  amountInCents: 700000,
-  currency: 'CDF',
+  amounts: MoneyBag.of(const [Money(700000, 'CDF')]),
   payerFirstName: 'Paul',
   payerLastName: 'Mukendi',
   payerMiddleName: null,
-  allocations: [
+  allocations: const [
     CreatePaymentAllocationInput(
       studentChargeId: 'c1',
       feeCode: 'TUITION',

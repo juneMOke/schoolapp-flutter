@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/fi
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class MockSyncEngine extends Mock implements SyncEngine {}
 
@@ -38,16 +40,16 @@ void main() {
   test('recordPayment : total ≠ Σ allocations → ValidationFailure, rien écrit '
       '(fail-fast, pas de 422 qui immobilise l\'argent)', () async {
     final result = await repo.recordPayment(
-      const RecordPaymentDraft(
+      RecordPaymentDraft(
         studentId: 's1',
         academicYearId: 'ay-1',
-        currency: 'USD',
         paidAt: '2026-07-06T10:00:00Z',
         payerFirstName: 'S',
         payerLastName: 'M',
-        amountInCents: 50000, // ≠ Σ allocations (30000)
+        // ≠ Σ allocations (30000)
+        amounts: MoneyBag.of(const [Money(50000, 'USD')]),
         allocations: [
-          AllocationDraft(
+          const AllocationDraft(
             feeCode: 'TUITION',
             studentChargeLabel: 'Scolarité',
             amountInCents: 30000,
@@ -72,22 +74,21 @@ void main() {
       // l'argent physiquement reçu, reçu déjà imprimé, et l'immobiliserait en
       // SYNC_ERROR.
       final result = await repo.recordPayment(
-        const RecordPaymentDraft(
+        RecordPaymentDraft(
           studentId: 's1',
           academicYearId: 'ay-1',
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
-          amountInCents: 300000,
+          amounts: MoneyBag.of(const [Money(300000, 'USD')]),
           allocations: [
-            AllocationDraft(
+            const AllocationDraft(
               feeCode: 'TUITION',
               studentChargeLabel: 'Scolarité',
               amountInCents: 100000,
               currency: 'USD',
             ),
-            AllocationDraft(
+            const AllocationDraft(
               feeCode: 'INSURANCE',
               studentChargeLabel: 'Assurance',
               amountInCents: 200000,
@@ -110,43 +111,53 @@ void main() {
     },
   );
 
-  test('recordPayment : deux devises dans un même versement → refus', () async {
-    // Le contrat de push porte encore un montant SCALAIRE (D2 non livré) : un
-    // versement mixte partirait avec un total unique, refusé par le serveur.
-    // Deux versements, deux reçus — dégradé, mais l'argent remonte.
-    final result = await repo.recordPayment(
-      const RecordPaymentDraft(
-        studentId: 's1',
-        academicYearId: 'ay-1',
-        currency: 'USD',
-        paidAt: '2026-07-06T10:00:00Z',
-        payerFirstName: 'S',
-        payerLastName: 'M',
-        allocations: [
-          AllocationDraft(
-            feeCode: 'TUITION',
-            studentChargeLabel: 'Scolarité',
-            amountInCents: 42500,
-            currency: 'USD',
-          ),
-          AllocationDraft(
-            feeCode: 'INSURANCE',
-            studentChargeLabel: 'Assurance',
-            amountInCents: 9000000,
-            currency: 'CDF',
-          ),
-        ],
-      ),
-    );
+  test(
+    'recordPayment : deux devises dans un même versement → ACCEPTÉ',
+    () async {
+      // TEST RETOURNÉ. La garde qui refusait ce cas a tenu la place le temps que
+      // le contrat porte `amounts[]` — « pas encore », jamais « jamais ».
+      //
+      // Un passage au guichet qui solde une créance en dollars et une en francs
+      // est un ACTE : un versement, un reçu, une notification. Imposer deux
+      // gestes au caissier serait laisser le schéma dicter le métier.
+      final result = await repo.recordPayment(
+        const RecordPaymentDraft(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'S',
+          payerLastName: 'M',
+          allocations: [
+            AllocationDraft(
+              feeCode: 'TUITION',
+              studentChargeLabel: 'Scolarité',
+              amountInCents: 42500,
+              currency: 'USD',
+            ),
+            AllocationDraft(
+              feeCode: 'INSURANCE',
+              studentChargeLabel: 'Assurance',
+              amountInCents: 9000000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+      );
 
-    expect(result.isLeft(), isTrue);
-    result.fold((f) {
-      expect(f, isA<ValidationFailure>());
-      expect(f.message, contains('plusieurs devises'));
-    }, (_) => fail('!'));
-    expect(await db.query('payments'), isEmpty);
-    expect(await db.query('outbox'), isEmpty);
-  });
+      expect(result.isRight(), isTrue);
+      // UN versement, et ses deux imputations — chacune dans sa devise.
+      expect(await db.query('payments'), hasLength(1));
+      final allocations = await db.query(
+        'payment_allocations',
+        orderBy: 'currency',
+      );
+      expect(allocations, hasLength(2));
+      expect(allocations.first['currency'], 'CDF');
+      expect(allocations.last['currency'], 'USD');
+      // UNE entrée d'outbox : un acte, un envoi.
+      expect(await db.query('outbox'), hasLength(1));
+    },
+  );
 
   test(
     'recordPayment : la devise vient des IMPUTATIONS, pas du brouillon',
@@ -157,7 +168,6 @@ void main() {
         const RecordPaymentDraft(
           studentId: 's1',
           academicYearId: 'ay-1',
-          currency: 'cdf',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -173,7 +183,9 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
-      expect((await db.query('payments')).single['currency'], 'CDF');
+      // Le versement ne porte plus de devise : elle vit sur ses imputations, où
+      // le serveur la vérifie (`allocation.currency == charge.currency`).
+      expect((await db.query('payment_allocations')).single['currency'], 'CDF');
     },
   );
 
@@ -184,7 +196,6 @@ void main() {
         const RecordPaymentDraft(
           studentId: 's1',
           academicYearId: 'ay-1',
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'S',
           payerLastName: 'M',
@@ -200,7 +211,11 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
-      expect((await db.query('payments')).single['amount_in_cents'], 30000);
+      // Le montant vit sur les imputations : `payments` n'en porte plus.
+      expect(
+        (await db.query('payment_allocations')).single['amount_in_cents'],
+        30000,
+      );
       // RC provisoire toujours émis à l'encaissement (FRONT §7).
       expect((await db.query('generated_documents')).single['doc_type'], 'RC');
       expect((await db.query('outbox')).single['aggregate_type'], 'PAYMENT');
@@ -218,7 +233,6 @@ void main() {
       const RecordPaymentDraft(
         studentId: 's1',
         academicYearId: 'ay-1',
-        currency: 'USD',
         paidAt: '2026-07-06T10:00:00Z',
         payerFirstName: 'Joseph',
         payerLastName: 'Kabongo',
@@ -259,7 +273,6 @@ void main() {
         const RecordPaymentDraft(
           studentId: 's1',
           academicYearId: 'ay-1',
-          currency: 'USD',
           paidAt: '2026-07-06T10:00:00Z',
           payerFirstName: 'Joseph',
           payerLastName: 'Kabongo',

@@ -37,9 +37,9 @@ Future<void> _pump(WidgetTester tester) {
           child: SizedBox(
             width: 460,
             child: FacturationPaymentDetailAllocationsTable(
+              // Le total se dérive des lignes, et chacune porte SA devise :
+              // la table recevait une devise unique pour toute la répartition.
               allocations: _allocations,
-              totalInCents: 15000,
-              currency: 'USD',
             ),
           ),
         ),

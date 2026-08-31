@@ -4432,10 +4432,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentSettledChip => 'Settled';
 
   @override
-  String get facturationCreatePaymentMixedCurrency =>
-      'This payment mixes two currencies. Collect the fees in one currency first, then the others — one payment, one receipt, per currency.';
-
-  @override
   String get facturationCreatePaymentTotalToCollect => 'Total to collect';
 
   @override
@@ -5854,6 +5850,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financeStatsPeriodYearCurrent => 'This year';
+
+  @override
+  String financeStatsCurrencyHeading(String currency) {
+    return 'In $currency';
+  }
+
+  @override
+  String get financeStatsNoMovementLabel => 'No movement in this period';
+
+  @override
+  String get financeStatsNoMovementDescription =>
+      'Nothing collected and nothing billed in this window. Widen the period to look further back.';
 
   @override
   String get financeStatsKpiCollected => 'Total collected';
@@ -7317,9 +7325,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueBlockerPhoneIncomplete => 'Incomplete phone';
 
   @override
-  String get boutiqueBlockerMixedCurrency => 'Mixed currencies';
-
-  @override
   String boutiqueBlockerLinesWithoutLevel(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -7329,6 +7334,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Mixed currencies';
 
   @override
   String get boutiqueEmptyCatalogTitle => 'No item in the catalogue';

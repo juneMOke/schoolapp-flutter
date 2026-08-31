@@ -5,6 +5,9 @@ import 'package:school_app_flutter/features/documents/data/local/provisional_tic
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
+import 'package:school_app_flutter/core/money/currency_code.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Assemble le ticket depuis les lignes locales.
 ///
@@ -107,21 +110,24 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           provisionalReference: reference ?? paymentId,
           paidAt: _parsePaidAt(payment.paidAt),
           cashierFullName: payment.cashierFullName,
-          amountReceivedInCents: payment.amountInCents,
+          amountReceived: payment.amounts,
           allocations: allocations
               .map(
                 (a) => TicketAllocationLine(
                   label: a.label,
                   amountInCents: a.amountInCents,
+                  currency: a.currency,
                 ),
               )
               .toList(growable: false),
-          remainingBalanceInCents: await _remainingBalance(
+          // Le solde des SEULES devises que ce versement a touchées : imprimer
+          // une dette en francs sur un ticket réglé en dollars ferait lire au
+          // payeur un chiffre qui ne le concerne pas.
+          remainingBalance: await _remainingBalances(
             studentId: payment.studentId,
             academicYearId: payment.academicYearId,
-            currency: payment.currency,
+            currencies: payment.amounts.currencies,
           ),
-          currency: payment.currency,
           labels: labels,
         ),
       );
@@ -139,34 +145,43 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   ///   élève réinscrit verrait son arriéré N-1 additionné au reste dû N, et le
   ///   ticket imprimerait un solde différent de celui affiché à l'écran au même
   ///   instant — sur un papier remis à un parent ;
-  /// - **la devise**, libre par ligne dans ce modèle : additionner des devises
-  ///   différentes produirait un chiffre faux.
+  /// - **les devises du versement** : le solde ne porte que sur celles que ce
+  ///   paiement a touchées. Imprimer une dette en francs sur un ticket réglé en
+  ///   dollars ferait lire au payeur un chiffre qui ne le concerne pas. Et le
+  ///   sac les garde séparées : additionner deux unités produirait un chiffre
+  ///   faux.
   ///
   /// `null` dès que la lecture échoue, que l'année est inconnue, ou qu'aucune
   /// créance ne correspond : le ticket omet alors la ligne, ce qu'il sait faire.
-  Future<int?> _remainingBalance({
+  Future<MoneyBag?> _remainingBalances({
     required String studentId,
     required String? academicYearId,
-    required String currency,
+    required Iterable<String> currencies,
   }) async {
     if (academicYearId == null || academicYearId.isEmpty) return null;
+    if (currencies.isEmpty) return null;
 
     final charges = await _finance.getCharges(studentId);
+    final wanted = {
+      for (final currency in currencies) CurrencyCode.normalize(currency),
+    };
 
-    return charges.fold<int?>((_) => null, (list) {
+    return charges.fold<MoneyBag?>((_) => null, (list) {
       // `belongsToYear` et pas une égalité stricte : une créance sans année
       // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
       // vivait ici imprimait une dette plus petite que celle de l'écran.
       final matching = list
           .where(
-            (c) => c.currency == currency && c.belongsToYear(academicYearId),
+            (c) =>
+                wanted.contains(CurrencyCode.normalize(c.currency)) &&
+                c.belongsToYear(academicYearId),
           )
           .toList(growable: false);
       if (matching.isEmpty) return null;
 
-      return matching.fold<int>(
-        0,
-        (sum, c) => sum + c.optimisticRemainingInCents,
+      return MoneyBag.sumBy(
+        matching,
+        (c) => Money.parse(c.optimisticRemainingInCents, c.currency),
       );
     });
   }

@@ -9,7 +9,8 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 /// - `paidAt` : horodatage terrain (UTC ISO-8601) posé au moment de la mise en
 ///   file locale ;
 /// - `method` : laissé nul → le repository applique le défaut CASH ;
-/// - `amountInCents` : montant total repris tel quel (money-grade, en cents) ;
+/// - `amounts` : ce qui est encaissé, une entrée par devise, repris tel quel
+///   (money-grade, en cents) ;
 /// - chaque [CreatePaymentAllocationInput] devient une [AllocationDraft]
 ///   (le `studentChargeId` réel est conservé).
 RecordPaymentDraft recordPaymentDraftFromRequest(
@@ -18,13 +19,12 @@ RecordPaymentDraft recordPaymentDraftFromRequest(
   return RecordPaymentDraft(
     studentId: request.studentId,
     academicYearId: request.academicYearId,
-    currency: request.currency,
     paidAt: DateTime.now().toUtc().toIso8601String(),
     payerFirstName: request.payerFirstName,
     payerLastName: request.payerLastName,
     payerMiddleName: request.payerMiddleName,
     payerPhoneNumber: request.payerPhoneNumber,
-    amountInCents: request.amountInCents,
+    amounts: request.amounts,
     allocations: [
       for (final allocation in request.allocations)
         AllocationDraft(

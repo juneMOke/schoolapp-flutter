@@ -84,9 +84,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         draft.allocations,
         (a) => Money.parse(a.amountInCents, a.currency),
       );
-      final declaredBag = draft.amountInCents == null
-          ? allocationsBag
-          : MoneyBag.of([Money.parse(draft.amountInCents!, draft.currency)]);
+      final declaredBag = draft.amounts ?? allocationsBag;
 
       if (declaredBag != allocationsBag) {
         return Left(
@@ -97,32 +95,22 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         );
       }
 
-      // Le contrat de push porte encore un montant scalaire (D2 non livré) : un
-      // versement à deux devises ne peut pas remonter. L'UI le refuse déjà
-      // (`_isMixedCurrency`) ; cette garde-ci ferme le chemin programmatique,
-      // parce que c'est ici que l'argent devient une écriture.
-      final sole = allocationsBag.soleEntry;
-      if (sole == null) {
-        return Left(
-          ValidationFailure(
-            'Un versement ne peut pas porter plusieurs devises tant que le '
-            'contrat de synchro n\'en accepte qu\'une ($allocationsBag).',
-          ),
-        );
+      // Un versement à deux devises est désormais un cas NOMINAL : c'est un
+      // acte de guichet, donc un versement, un reçu, une notification — pas
+      // deux. La garde qui l'interdisait ici a tenu la place le temps que le
+      // contrat porte `amounts[]`.
+      //
+      // Reste le refus du versement vide : rien à encaisser n'est pas un
+      // encaissement.
+      if (allocationsBag.isEmpty || allocationsBag.isAllZero) {
+        return const Left(ValidationFailure('Aucun montant à encaisser.'));
       }
-      final total = sole.amountInCents;
 
       final payment = PaymentLocalModel(
         id: paymentId,
         clientUuid: paymentId,
         studentId: draft.studentId,
         academicYearId: draft.academicYearId,
-        amountInCents: total,
-        // La devise vient des IMPUTATIONS, pas du brouillon : c'est elle qui
-        // fait foi côté serveur (`allocation.currency == charge.currency`), et
-        // les deux ne peuvent plus diverger puisqu'elles viennent d'être
-        // comparées.
-        currency: sole.currency,
         method: draft.method ?? 'CASH',
         paidAt: draft.paidAt,
         payerFirstName: draft.payerFirstName,

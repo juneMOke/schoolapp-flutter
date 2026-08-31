@@ -4,13 +4,14 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 Payment _payment({String? payerPhoneNumber = '+243816939060'}) => Payment(
   id: 'pay-1',
   studentId: 'stu-1',
   academicYearId: 'ay-1',
-  amountInCents: 15000,
-  currency: 'USD',
+  amounts: MoneyBag.of(const [Money(15000, 'USD')]),
   payerFirstName: 'Joseph',
   payerLastName: 'Kabongo',
   payerMiddleName: 'Mwamba',

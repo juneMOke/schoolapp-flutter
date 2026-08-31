@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/models/payment_local_model.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// L'encaisseur d'un versement, de la synchro jusqu'au nom affiché.
 ///
@@ -61,8 +63,6 @@ void main() {
           id: 'pay-1',
           clientUuid: 'pay-1',
           studentId: 's-1',
-          amountInCents: 150000,
-          currency: 'CDF',
           paidAt: '2026-08-24T09:30:00.000Z',
           payerFirstName: 'Joseph',
           payerLastName: 'Kabongo',
@@ -108,8 +108,7 @@ void main() {
       id: 'pay-1',
       studentId: 's-1',
       academicYearId: 'y-1',
-      amountInCents: 150000,
-      currency: 'CDF',
+      amounts: MoneyBag.of(const [Money(150000, 'CDF')]),
       payerFirstName: 'Joseph',
       payerLastName: 'Kabongo',
       paidAt: DateTime.utc(2026, 8, 24),

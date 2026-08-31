@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Modèles de ticket figés pour le banc d'impression thermique.
 ///
@@ -53,22 +55,35 @@ abstract final class TicketBenchFixtures {
     provisionalReference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
     paidAt: DateTime(2026, 8, 11, 14, 7),
     cashierFullName: 'Jean-Baptiste Kabeya wa Mukendi',
-    amountReceivedInCents: 12345678,
+    amountReceived: MoneyBag.of(const [Money(12345678, 'CDF')]),
     allocations: const [
-      TicketAllocationLine(label: 'Frais scolaires', amountInCents: 8000000),
+      TicketAllocationLine(
+        label: 'Frais scolaires',
+        amountInCents: 8000000,
+        currency: 'CDF',
+      ),
       TicketAllocationLine(
         label: 'Frais de fonctionnement et d’entretien annuel',
         amountInCents: 2500000,
+        currency: 'CDF',
       ),
-      TicketAllocationLine(label: 'Fournitures', amountInCents: 1000000),
-      TicketAllocationLine(label: 'Assurance scolaire', amountInCents: 745678),
+      TicketAllocationLine(
+        label: 'Fournitures',
+        amountInCents: 1000000,
+        currency: 'CDF',
+      ),
+      TicketAllocationLine(
+        label: 'Assurance scolaire',
+        amountInCents: 745678,
+        currency: 'CDF',
+      ),
       TicketAllocationLine(
         label: 'Participation aux activités parascolaires',
         amountInCents: 100000,
+        currency: 'CDF',
       ),
     ],
-    remainingBalanceInCents: 25000000,
-    currency: 'CDF',
+    remainingBalance: MoneyBag.of(const [Money(25000000, 'CDF')]),
     labels: labels,
   );
 
@@ -83,8 +98,7 @@ abstract final class TicketBenchFixtures {
     studentFullName: 'Amina Mbala',
     provisionalReference: 'PROV-A1B2C3D4-0001',
     paidAt: DateTime(2026, 8, 11, 8, 3),
-    amountReceivedInCents: 500000,
-    currency: 'CDF',
+    amountReceived: MoneyBag.of(const [Money(500000, 'CDF')]),
     labels: labels,
   );
 

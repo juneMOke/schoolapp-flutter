@@ -7274,12 +7274,6 @@ abstract class AppLocalizations {
   /// **'Settled'**
   String get facturationCreatePaymentSettledChip;
 
-  /// Warning in the collection dialog when the selected fees span several currencies. The server cannot yet accept a payment carrying several amounts: pushing it would strand it in a sync error, on money already received.
-  ///
-  /// In en, this message translates to:
-  /// **'This payment mixes two currencies. Collect the fees in one currency first, then the others — one payment, one receipt, per currency.'**
-  String get facturationCreatePaymentMixedCurrency;
-
   /// No description provided for @facturationCreatePaymentTotalToCollect.
   ///
   /// In en, this message translates to:
@@ -9672,6 +9666,24 @@ abstract class AppLocalizations {
   /// **'This year'**
   String get financeStatsPeriodYearCurrent;
 
+  /// Sub-heading naming the currency of the KPI block that follows. Only shown from two currencies on: on a single-currency school it would repeat what every amount already carries.
+  ///
+  /// In en, this message translates to:
+  /// **'In {currency}'**
+  String financeStatsCurrencyHeading(String currency);
+
+  /// Empty state of the Finance dashboard when no money circulated in the window. An empty state, never an error — and certainly not a zero in a currency nobody chose.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement in this period'**
+  String get financeStatsNoMovementLabel;
+
+  /// Subtitle of the Finance dashboard empty state.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing collected and nothing billed in this window. Widen the period to look further back.'**
+  String get financeStatsNoMovementDescription;
+
   /// No description provided for @financeStatsKpiCollected.
   ///
   /// In en, this message translates to:
@@ -12054,17 +12066,17 @@ abstract class AppLocalizations {
   /// **'Incomplete phone'**
   String get boutiqueBlockerPhoneIncomplete;
 
-  /// TEMPORARY shop till blocker when the cart spans several currencies. The sale contract still carries a single scalar total: the server would seal a receipt whose total adds two units, and a sealed receipt cannot be corrected. Contract revision 4 will allow a mixed sale as one act — 'not yet', not 'never'.
-  ///
-  /// In en, this message translates to:
-  /// **'Mixed currencies'**
-  String get boutiqueBlockerMixedCurrency;
-
   /// No description provided for @boutiqueBlockerLinesWithoutLevel.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, one{1 line without a level} other{{count} lines without a level}}'**
   String boutiqueBlockerLinesWithoutLevel(int count);
+
+  /// No description provided for @boutiqueBlockerMixedCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed currencies'**
+  String get boutiqueBlockerMixedCurrency;
 
   /// No description provided for @boutiqueEmptyCatalogTitle.
   ///

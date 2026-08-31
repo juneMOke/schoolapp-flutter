@@ -23,6 +23,8 @@ import 'package:school_app_flutter/features/documents/domain/usecases/build_prov
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -451,8 +453,7 @@ TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
       studentFullName: studentFullName,
       provisionalReference: 'PROV-TAB1-0001',
       paidAt: DateTime(2026, 8, 12, 9, 30),
-      amountReceivedInCents: 2500000,
-      currency: 'CDF',
+      amountReceived: MoneyBag.of(const [Money(2500000, 'CDF')]),
       labels: labels,
     );
 

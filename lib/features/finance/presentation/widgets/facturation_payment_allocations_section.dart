@@ -12,12 +12,10 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 
 class FacturationPaymentAllocationsSection extends StatelessWidget {
   final String paymentId;
-  final String currency;
 
   const FacturationPaymentAllocationsSection({
     super.key,
     required this.paymentId,
-    required this.currency,
   });
 
   void _retry(BuildContext context) {
@@ -101,11 +99,6 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
               );
             }
 
-            final totalPaid = allocations.fold<int>(
-              0,
-              (sum, item) => sum + item.amountInCents,
-            );
-
             return Column(
               key: const ValueKey('payment-allocations-content'),
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,8 +113,6 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacingM),
                 FacturationPaymentDetailAllocationsTable(
                   allocations: allocations,
-                  totalInCents: totalPaid,
-                  currency: currency,
                 ),
               ],
             );

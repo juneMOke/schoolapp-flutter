@@ -216,22 +216,6 @@ class _FacturationCreatePaymentDialogViewState
     (entry) => Money.parse(entry.effectiveCents, entry.charge.currency),
   );
 
-  /// Le versement en cours mêle deux devises.
-  ///
-  /// ## Pourquoi c'est refusé pour l'instant
-  ///
-  /// Le serveur ne sait pas encore recevoir un versement à plusieurs montants :
-  /// le contrat de push porte un `amountInCents` scalaire (D2 n'est pas livré),
-  /// et le payload est **reconstruit depuis la table au moment de l'envoi**, pas
-  /// figé à la saisie. Un versement mixte partirait donc avec un total unique,
-  /// que le serveur refuserait en `ALLOCATION_SUM_MISMATCH` — désormais vérifié
-  /// devise par devise. Le paiement basculerait en `SYNC_ERROR` : argent
-  /// physiquement reçu, reçu déjà imprimé, bloqué hors du grand-livre.
-  ///
-  /// Encaisser en deux fois est dégradé, mais l'argent remonte. **Cette garde
-  /// se retire avec MD-8**, dans le commit qui ouvre le contrat.
-  bool get _isMixedCurrency => _totalBag.isMultiCurrency;
-
   /// Le total, rendu sur une ligne — les devises séparées, jamais sommées.
   String _totalLabel() => _totalBag.entries.map(MoneyFormat.format).join(' · ');
 
@@ -312,14 +296,14 @@ class _FacturationCreatePaymentDialogViewState
 
   Future<void> _onCollect(AppLocalizations l10n) async {
     final bag = _totalBag;
-    final sole = bag.soleEntry;
-    // `soleEntry` nul couvre les trois refus d'un coup : rien à encaisser, et
-    // le mélange de devises que le serveur ne sait pas encore recevoir.
-    if (!_payerValid || sole == null || sole.amountInCents <= 0) {
+    final totalLabel = _totalLabel();
+    // Un versement mixte est un cas NOMINAL depuis que le contrat porte
+    // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
+    // Reste à refuser le versement vide — rien à encaisser n'est pas un
+    // encaissement.
+    if (!_payerValid || bag.isEmpty || bag.isAllZero) {
       return;
     }
-    final total = sole.amountInCents;
-    final currency = sole.currency;
 
     final retained = _entries.where((e) => e.effectiveCents > 0).toList();
     final offlineBloc = context.read<FinanceOfflineBloc>();
@@ -327,8 +311,7 @@ class _FacturationCreatePaymentDialogViewState
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
       academicYearId: widget.intent.academicYearId,
-      amountInCents: total,
-      currency: currency,
+      amounts: bag,
       payerFirstName: _firstNameController.text.trim(),
       payerLastName: _lastNameController.text.trim(),
       payerMiddleName: _middleNameController.text.trim().isEmpty
@@ -355,7 +338,7 @@ class _FacturationCreatePaymentDialogViewState
     final outcome = await showFacturationCreatePaymentConfirmDialog(
       context,
       financeOfflineBloc: offlineBloc,
-      totalLabel: _formatWithCurrency(total, currency),
+      totalLabel: totalLabel,
       studentName: _studentFullName(l10n),
       payerName: _payerFullName(l10n),
       payerPhone: _phoneController.text.trim(),
@@ -398,10 +381,8 @@ class _FacturationCreatePaymentDialogViewState
       builder: (context, state) {
         final isLoading = state.createStatus == PaymentsStatus.loading;
         final bag = _totalBag;
-        final mixed = _isMixedCurrency;
         final totalLabel = _totalLabel();
-        final canCollect =
-            _payerValid && !bag.isAllZero && !mixed && !isLoading;
+        final canCollect = _payerValid && !bag.isAllZero && !isLoading;
 
         return PopScope(
           // Bloque uniquement le retour système / `maybePop` (croix incluse) :
@@ -463,12 +444,6 @@ class _FacturationCreatePaymentDialogViewState
                     label: l10n.facturationCreatePaymentTotalToCollect,
                     amount: totalLabel,
                   ),
-                  // Dit POURQUOI le bouton est gris, plutôt que de le laisser
-                  // inerte sans explication devant un payeur qui attend.
-                  if (mixed)
-                    _MixedCurrencyNotice(
-                      message: l10n.facturationCreatePaymentMixedCurrency,
-                    ),
                   Padding(
                     padding: const EdgeInsets.all(AppDimensions.spacingM),
                     child: SizedBox(
@@ -609,48 +584,6 @@ class _AllSettledCard extends StatelessWidget {
 }
 
 /// Bandeau sombre totalisant en direct : billet or-doux + total.
-/// Dit pourquoi l'encaissement est bloqué quand le panier mêle deux devises.
-///
-/// Un bouton gris sans explication, devant un payeur qui attend, se règle par
-/// un appel au support. Une phrase qui nomme la cause **et** le geste — solder
-/// une devise, puis l'autre — se règle au guichet.
-class _MixedCurrencyNotice extends StatelessWidget {
-  final String message;
-
-  const _MixedCurrencyNotice({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: AppColors.feeStatusDueSoft,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingS,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: AppColors.feeStatusDue,
-            size: 18,
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.feeStatusDue,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TotalBand extends StatelessWidget {
   final String label;
   final String amount;

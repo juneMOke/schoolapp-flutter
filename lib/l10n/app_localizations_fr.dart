@@ -4469,10 +4469,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentSettledChip => 'Soldé';
 
   @override
-  String get facturationCreatePaymentMixedCurrency =>
-      'Ce versement mêle deux devises. Encaissez d\'abord les frais d\'une devise, puis ceux de l\'autre — un versement, un reçu, par devise.';
-
-  @override
   String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
 
   @override
@@ -5915,6 +5911,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financeStatsPeriodYearCurrent => 'Cette année';
+
+  @override
+  String financeStatsCurrencyHeading(String currency) {
+    return 'En $currency';
+  }
+
+  @override
+  String get financeStatsNoMovementLabel => 'Aucun mouvement sur la période';
+
+  @override
+  String get financeStatsNoMovementDescription =>
+      'Ni encaissement ni facturation sur cette fenêtre. Élargissez la période pour voir plus loin.';
 
   @override
   String get financeStatsKpiCollected => 'Total encaissé';
@@ -7390,9 +7398,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';
 
   @override
-  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
-
-  @override
   String boutiqueBlockerLinesWithoutLevel(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -7402,6 +7407,9 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get boutiqueBlockerMixedCurrency => 'Devises mélangées';
 
   @override
   String get boutiqueEmptyCatalogTitle => 'Aucun article au catalogue';

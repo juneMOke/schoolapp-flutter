@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
@@ -90,10 +91,13 @@ abstract final class TicketTextLayout {
     // ── Z5 — l'argent. Montant reçu et répartition sont des FAITS : ils
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas
     // un calcul). Seul le solde est incertain, et lui seul porte la mention.
-    _addPair(
+    // Une ligne PAR DEVISE : un versement peut solder une créance en dollars et
+    // une en francs. Les additionner imprimerait, sur la pièce que le payeur
+    // emporte, un chiffre qui n'est l'argent de personne.
+    _addMoneyBag(
       lines,
       model.labels.amountReceivedLabel,
-      formatAmount(model.amountReceivedInCents, model.currency),
+      model.amountReceived,
       width,
     );
 
@@ -111,7 +115,6 @@ abstract final class TicketTextLayout {
     // qu'on ferme, pas une comptabilité qu'on tient. Sans bloc « Répartition »,
     // le lecteur n'a aucune soustraction à faire, et une ligne d'avance seule
     // ne ferait que dupliquer le montant reçu deux lignes plus haut.
-    final advance = model.amountReceivedInCents - model.allocatedInCents;
     if (model.allocations.isNotEmpty) {
       lines.add('');
       lines.add(TicketCharset.printable(model.labels.allocationsLabel));
@@ -119,32 +122,28 @@ abstract final class TicketTextLayout {
         _addPair(
           lines,
           '  ${allocation.label}',
-          formatAmount(allocation.amountInCents, model.currency),
+          formatAmount(allocation.amountInCents, allocation.currency),
           width,
         );
       }
       // Un écart NÉGATIF (ventilation supérieure au reçu) est une saisie
-      // incohérente, pas une avance : on ne l'habille pas d'un libellé qui la
-      // ferait passer pour normale.
-      if (advance > 0) {
+      // incohérente, pas une avance : `advance` l'écarte devise par devise, et
+      // on ne l'habille pas d'un libellé qui la ferait passer pour normale.
+      for (final advance in model.advance.entries) {
+        if (advance.amountInCents <= 0) continue;
         _addPair(
           lines,
           '  ${model.labels.advanceLabel}',
-          formatAmount(advance, model.currency),
+          formatAmount(advance.amountInCents, advance.currency),
           width,
         );
       }
     }
 
-    final balance = model.remainingBalanceInCents;
-    if (balance != null) {
+    final balance = model.remainingBalance;
+    if (balance != null && balance.isNotEmpty) {
       lines.add(_rule(width));
-      _addPair(
-        lines,
-        model.labels.balanceLabel,
-        formatAmount(balance, model.currency),
-        width,
-      );
+      _addMoneyBag(lines, model.labels.balanceLabel, balance, width);
       lines.addAll(_wrapped(model.labels.balanceReservation, width));
     }
 
@@ -154,6 +153,30 @@ abstract final class TicketTextLayout {
     lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
 
     return lines;
+  }
+
+  /// Un libellé, puis **une ligne par devise**.
+  ///
+  /// Le libellé ne se répète pas : il coiffe la première ligne, les suivantes
+  /// s'alignent sous elle. Sur 32 colonnes, le répéter mangerait la largeur du
+  /// montant — et un ticket se recompte, il ne se déchiffre pas.
+  static void _addMoneyBag(
+    List<String> lines,
+    String label,
+    MoneyBag bag,
+    int width,
+  ) {
+    if (bag.isEmpty) return;
+    var first = true;
+    for (final amount in bag.entries) {
+      _addPair(
+        lines,
+        first ? label : '',
+        formatAmount(amount.amountInCents, amount.currency),
+        width,
+      );
+      first = false;
+    }
   }
 
   /// Montant en centimes → « 1 234 FC », « 425,00 $ ».

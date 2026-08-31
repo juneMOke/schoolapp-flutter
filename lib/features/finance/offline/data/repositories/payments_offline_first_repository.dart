@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/mappers/local_finance_online_mappers.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Implémentation **offline-first** de [PaymentsRepository] (Stratégie C).
 ///
@@ -75,8 +76,7 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
   Future<Either<Failure, Payment>> createPayment({
     required String studentId,
     required String academicYearId,
-    required int amountInCents,
-    required String currency,
+    required MoneyBag amounts,
     required String payerFirstName,
     required String payerLastName,
     String? payerMiddleName,
@@ -85,8 +85,7 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
   }) => _online.createPayment(
     studentId: studentId,
     academicYearId: academicYearId,
-    amountInCents: amountInCents,
-    currency: currency,
+    amounts: amounts,
     payerFirstName: payerFirstName,
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,

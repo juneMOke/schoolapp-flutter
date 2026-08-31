@@ -77,8 +77,6 @@ void main() {
       'id': paymentId,
       'client_uuid': paymentId,
       'student_id': 's1',
-      'amount_in_cents': amount,
-      'currency': 'USD',
       'method': 'CASH',
       'paid_at': '2026-08-14T10:00:00',
       'payer_first_name': 'Payeur',

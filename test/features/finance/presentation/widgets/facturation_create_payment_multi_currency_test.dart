@@ -43,17 +43,18 @@ class _FakePayerRepo implements FinanceOfflineRepository {
       throw UnimplementedError('hors périmètre de cette modale');
 }
 
-/// Un versement ne peut pas mêler deux devises — **pour l'instant**.
+/// Un versement peut mêler deux devises — c'est un **acte de guichet**, donc un
+/// versement, un reçu, une notification. Imposer deux gestes au caissier serait
+/// laisser le schéma dicter le métier.
 ///
-/// Le contrat de push porte encore un montant scalaire (D2 n'est pas livré), et
-/// le payload est reconstruit depuis la table au moment de l'envoi. Un versement
-/// mixte partirait donc avec un total unique, que le serveur refuserait en
-/// `ALLOCATION_SUM_MISMATCH` — désormais vérifié devise par devise. Le paiement
-/// basculerait en `SYNC_ERROR` : argent physiquement reçu, reçu déjà imprimé,
-/// bloqué hors du grand-livre.
+/// Ce que la bascule a fermé : le total sommait les allocations toutes devises
+/// confondues et retenait la première non vide. 425,00 $ + 90 000 FC — soit
+/// 9 042 500 centimes — s'affichaient « 90 425,00 $ » sur le bandeau or, sur le
+/// ticket imprimé, et partaient tels quels au serveur.
 ///
-/// Avant cette garde, rien n'empêchait le guichet de composer un tel versement,
-/// et le bandeau annonçait « 9 042 500 USD » pour 425,00 $ + 90 000 FC.
+/// La garde qui refusait le mélange a existé le temps que le contrat porte
+/// `amounts[]`. Ces tests-ci épinglent sa levée : la remettre passerait pour une
+/// correction.
 void main() {
   late _MockPaymentsBloc payments;
   late _MockFinanceOfflineBloc offline;
@@ -189,7 +190,7 @@ void main() {
     expect(find.textContaining('440,00'), findsWidgets);
   });
 
-  testWidgets('deux devises cochées : le CTA se ferme et s\'explique', (
+  testWidgets('deux devises cochées : l\'encaissement reste ouvert', (
     tester,
   ) async {
     await ouvrir(tester, [
@@ -200,9 +201,9 @@ void main() {
     await cocher(tester, 0);
     await cocher(tester, 1);
 
-    expect(collectEnabled(tester), isFalse);
-    // Un bouton gris sans explication se règle par un appel au support.
-    expect(find.textContaining('deux devises'), findsOneWidget);
+    expect(collectEnabled(tester), isTrue);
+    // Plus de blocage, donc plus d'explication à donner.
+    expect(find.textContaining('deux devises'), findsNothing);
   });
 
   testWidgets('les deux montants s\'affichent côte à côte, jamais sommés', (
@@ -228,9 +229,8 @@ void main() {
     expect(find.textContaining('90\u00A0000'), findsWidgets);
   });
 
-  testWidgets('décocher la seconde devise rouvre l\'encaissement', (
-    tester,
-  ) async {
+  testWidgets('tout décocher referme l\'encaissement', (tester) async {
+    // Rien à encaisser n'est pas un encaissement — le seul refus qui reste.
     await ouvrir(tester, [
       charge('1', 'SCOLARITE', 'USD', 42500),
       charge('2', 'ASSURANCE', 'CDF', 9000000),
@@ -238,11 +238,11 @@ void main() {
     await remplirPayeur(tester);
     await cocher(tester, 0);
     await cocher(tester, 1);
-    expect(collectEnabled(tester), isFalse);
+    expect(collectEnabled(tester), isTrue);
 
+    await cocher(tester, 0);
     await cocher(tester, 1);
 
-    expect(collectEnabled(tester), isTrue);
-    expect(find.textContaining('deux devises'), findsNothing);
+    expect(collectEnabled(tester), isFalse);
   });
 }
