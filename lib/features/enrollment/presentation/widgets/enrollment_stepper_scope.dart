@@ -21,12 +21,16 @@ class EnrollmentStepperScope extends StatefulWidget {
   final EnrollmentDetailPolicy detailPolicy;
   final ValueChanged<int>? onStepChanged;
 
+  /// Relayé au stepper : voir [EnrollmentStepper.correctionOffered].
+  final bool correctionOffered;
+
   const EnrollmentStepperScope({
     super.key,
     required this.enrollmentDetail,
     required this.detailIntent,
     required this.detailPolicy,
     this.onStepChanged,
+    this.correctionOffered = false,
   });
 
   @override
@@ -124,6 +128,7 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
           detailPolicy: widget.detailPolicy,
           stepHandlers: _stepHandlers,
           onStepChanged: widget.onStepChanged,
+          correctionOffered: widget.correctionOffered,
         ),
       ),
     );

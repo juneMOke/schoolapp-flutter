@@ -89,6 +89,30 @@ class EnrollmentOfflineBloc
     on<LoadDraftDetailRequested>(_onLoadDraftDetail);
     on<FinalizeDraftRequested>(_onFinalize);
     on<EnrollmentPullRequested>(_onPull);
+    on<ReeditionSessionStarted>(_onReeditionSessionStarted);
+  }
+
+  /// Dossier complété rouvert pour correction : l'id à ré-ouvrir **au moment de
+  /// la première sauvegarde d'étape**, et pas avant.
+  ///
+  /// L'armement n'écrit rien. C'est délibéré : tant qu'un dossier est en
+  /// brouillon il sort de la recherche « élèves réellement inscrits » de la
+  /// facturation, et ouvrir un dossier pour le consulter ne doit pas l'en
+  /// sortir. Seule une correction effectivement enregistrée le déclasse.
+  ///
+  /// Porté par le bloc plutôt que par chaque étape : les six écrans de saisie
+  /// n'ont pas à savoir dans quel parcours ils se trouvent, et la ré-ouverture
+  /// voyage ainsi dans la transaction de l'écriture — deux événements séparés
+  /// courraient l'un contre l'autre.
+  String? _reeditionEnrollmentId;
+
+  void _onReeditionSessionStarted(
+    ReeditionSessionStarted event,
+    Emitter<EnrollmentOfflineState> emit,
+  ) {
+    _reeditionEnrollmentId = event.enrollmentId.trim().isEmpty
+        ? null
+        : event.enrollmentId;
   }
 
   // ── Lecture du détail local ─────────────────────────────────────────────────
@@ -259,6 +283,7 @@ class EnrollmentOfflineBloc
       schoolLevelGroupId: event.schoolLevelGroupId,
       enrollmentDate: event.enrollmentDate,
       medicalNotes: event.medicalNotes,
+      reopenEnrollmentId: _reeditionEnrollmentId,
     );
     _emitStep(result, emit);
   }
@@ -275,6 +300,7 @@ class EnrollmentOfflineBloc
       municipality: event.municipality,
       neighborhood: event.neighborhood,
       address: event.address,
+      reopenEnrollmentId: _reeditionEnrollmentId,
     );
     _emitStep(result, emit);
   }
@@ -295,6 +321,7 @@ class EnrollmentOfflineBloc
       validatedPreviousYear: event.validatedPreviousYear,
       formerStudent: event.formerStudent,
       transferReason: event.transferReason,
+      reopenEnrollmentId: _reeditionEnrollmentId,
     );
     _emitStep(result, emit);
   }
@@ -308,6 +335,7 @@ class EnrollmentOfflineBloc
       enrollmentId: event.enrollmentId,
       schoolLevelId: event.schoolLevelId,
       schoolLevelGroupId: event.schoolLevelGroupId,
+      reopenEnrollmentId: _reeditionEnrollmentId,
     );
     _emitStep(result, emit);
   }
@@ -324,6 +352,7 @@ class EnrollmentOfflineBloc
     final result = await _saveGuardians(
       studentId: event.studentId,
       parents: event.parents,
+      reopenEnrollmentId: _reeditionEnrollmentId,
     );
     emit(
       result.fold(
@@ -363,6 +392,11 @@ class EnrollmentOfflineBloc
       emitDocument: event.emitDocument,
       finalStatus: event.finalStatus,
     );
+    // La correction est partie dans la file : il n'y a plus rien à ré-ouvrir,
+    // et un dossier PENDING_SYNC ne doit surtout pas l'être.
+    if (result.isRight()) {
+      _reeditionEnrollmentId = null;
+    }
     emit(
       result.fold(
         (f) => EnrollmentDraftFinalizeError(_map(f)),

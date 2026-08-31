@@ -2263,6 +2263,30 @@
   "enrollmentStatusCancelled": "Cancelled",
   "enrollmentReadOnlyTitle": "View-only mode",
   "enrollmentReadOnlyMessage": "Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.",
+  "enrollmentReeditAction": "Edit",
+  "@enrollmentReeditAction": {
+    "description": "Header action opening the correction of an already completed record."
+  },
+  "enrollmentReeditReadOnlyMessage": "Completed record. You may correct it: saving will move it back to in progress and queue it for sending.",
+  "@enrollmentReeditReadOnlyMessage": {
+    "description": "Consultation banner shown when correcting is possible."
+  },
+  "enrollmentReeditExitTitle": "Correction not validated",
+  "@enrollmentReeditExitTitle": {
+    "description": "Title of the dialog shown when leaving an unfinalised correction."
+  },
+  "enrollmentReeditExitMessage": "This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.",
+  "@enrollmentReeditExitMessage": {
+    "description": "Body of the dialog shown when leaving an unfinalised correction."
+  },
+  "enrollmentReeditExitConfirm": "Leave anyway",
+  "@enrollmentReeditExitConfirm": {
+    "description": "Button confirming departure from an unfinalised correction."
+  },
+  "enrollmentReeditExitResume": "Resume correction",
+  "@enrollmentReeditExitResume": {
+    "description": "Button returning to the correction."
+  },
   "enrollmentEditableTitle": "Edit mode",
   "enrollmentEditableMessage": "This enrollment is in progress (IN_PROGRESS). Information can be updated.",
   "studentChargesStepTitle": "Student charges",

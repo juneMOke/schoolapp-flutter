@@ -3204,6 +3204,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.';
 
   @override
+  String get enrollmentReeditAction => 'Edit';
+
+  @override
+  String get enrollmentReeditReadOnlyMessage =>
+      'Completed record. You may correct it: saving will move it back to in progress and queue it for sending.';
+
+  @override
+  String get enrollmentReeditExitTitle => 'Correction not validated';
+
+  @override
+  String get enrollmentReeditExitMessage =>
+      'This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.';
+
+  @override
+  String get enrollmentReeditExitConfirm => 'Leave anyway';
+
+  @override
+  String get enrollmentReeditExitResume => 'Resume correction';
+
+  @override
   String get enrollmentEditableTitle => 'Edit mode';
 
   @override

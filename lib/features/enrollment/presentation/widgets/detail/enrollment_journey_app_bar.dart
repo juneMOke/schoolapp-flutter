@@ -20,6 +20,11 @@ class EnrollmentJourneyAppBar extends StatelessWidget
   /// comportement historique (pop, sinon retour à l'accueil).
   final VoidCallback? onExitRequested;
 
+  /// Action de niveau DOSSIER (et non d'étape) : « Modifier » sur un dossier
+  /// complété. Posée ici plutôt que dans le corps de l'étape parce qu'elle ne
+  /// porte pas sur ce qu'on regarde, mais sur le dossier entier.
+  final Widget? action;
+
   const EnrollmentJourneyAppBar({
     super.key,
     required this.modeLabel,
@@ -27,6 +32,7 @@ class EnrollmentJourneyAppBar extends StatelessWidget
     required this.currentStep,
     required this.totalSteps,
     this.onExitRequested,
+    this.action,
   });
 
   @override
@@ -106,6 +112,10 @@ class EnrollmentJourneyAppBar extends StatelessWidget
                             color: AppColors.textOnDark.withValues(alpha: 0.78),
                           ),
                         ),
+                        if (action != null) ...[
+                          const SizedBox(width: AppSpacing.md),
+                          action!,
+                        ],
                         const SizedBox(width: AppSpacing.md),
                         _JourneyIconButton(
                           icon: Icons.close_rounded,

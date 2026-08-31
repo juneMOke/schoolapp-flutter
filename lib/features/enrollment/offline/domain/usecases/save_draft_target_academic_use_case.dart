@@ -13,9 +13,11 @@ class SaveDraftTargetAcademicUseCase {
     required String enrollmentId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? reopenEnrollmentId,
   }) => _repository.saveDraftTargetAcademic(
     enrollmentId: enrollmentId,
     schoolLevelId: schoolLevelId,
     schoolLevelGroupId: schoolLevelGroupId,
+    reopenEnrollmentId: reopenEnrollmentId,
   );
 }

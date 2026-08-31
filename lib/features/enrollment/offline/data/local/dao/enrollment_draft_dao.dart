@@ -17,8 +17,18 @@ class EnrollmentDraftDao {
   /// brouillon **seedé** RE/PRE), seules les colonnes d'identité sont mises à
   /// jour — jamais l'adresse ni un matricule déjà posé (le matricule n'est
   /// écrit que s'il est fourni). Sinon, insertion complète.
-  Future<void> insertDraftStudent(StudentLocalModel student) async {
+  Future<void> insertDraftStudent(
+    StudentLocalModel student, {
+    String? reopenEnrollmentId,
+  }) async {
     await _db.transaction((txn) async {
+      if (reopenEnrollmentId != null) {
+        await reopenFinalizedDossier(
+          txn,
+          reopenEnrollmentId,
+          nowMs: student.updatedAt,
+        );
+      }
       final existing = await txn.query(
         'students',
         columns: ['sync_status'],
@@ -64,8 +74,18 @@ class EnrollmentDraftDao {
     return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
   }
 
-  Future<void> insertDraftEnrollment(EnrollmentLocalModel enrollment) async {
+  Future<void> insertDraftEnrollment(
+    EnrollmentLocalModel enrollment, {
+    String? reopenEnrollmentId,
+  }) async {
     await _db.transaction((txn) async {
+      if (reopenEnrollmentId != null) {
+        await reopenFinalizedDossier(
+          txn,
+          reopenEnrollmentId,
+          nowMs: enrollment.updatedAt,
+        );
+      }
       final existing = await txn.query(
         'enrollments',
         columns: ['sync_status'],
@@ -172,37 +192,116 @@ class EnrollmentDraftDao {
     });
   }
 
+  /// Ré-ouvre pour correction un dossier **déjà finalisé** : `SYNCED|SYNC_ERROR
+  /// → DRAFT` sur l'inscription ET sur l'élève, id conservé.
+  ///
+  /// C'est ce qui rend un dossier complété modifiable : les UPDATE d'étape sont
+  /// gardés sur `DRAFT`, et sans cette bascule ils écriraient **zéro ligne** —
+  /// en silence, le guichet croyant avoir corrigé.
+  ///
+  /// La bascule n'est pas cosmétique, elle protège la correction en cours : le
+  /// pull est *write-preserving* et saute toute ligne qui n'est pas `SYNCED`
+  /// (`_isProtectedLocalWrite`). Laisser la ligne `SYNCED` pendant l'édition
+  /// exposerait chaque champ corrigé à être écrasé par la version serveur au
+  /// prochain pull.
+  ///
+  /// Contrepartie assumée : tant qu'il est `DRAFT`, le dossier sort de la
+  /// recherche « élèves réellement inscrits » de la facturation
+  /// (`sync_status IN (SYNCED, PENDING_SYNC, SYNC_ERROR)`). C'est pourquoi
+  /// l'appel est fait au moment de la **première sauvegarde d'étape**, dans sa
+  /// transaction, et pas à l'ouverture de l'écran : consulter un dossier ne
+  /// doit pas le sortir de la facturation.
+  ///
+  /// `PENDING_SYNC` est délibérément exclu : ce dossier est déjà dans la file
+  /// d'envoi, sa commande d'outbox est constituée, et le rouvrir ferait diverger
+  /// ce qui part de ce qui est en base.
+  ///
+  /// Idempotent : sur un dossier déjà `DRAFT`, aucune ligne ne bouge.
+  Future<void> reopenFinalizedDossier(
+    DatabaseExecutor txn,
+    String enrollmentId, {
+    required int nowMs,
+  }) async {
+    const reopenable = [SyncState.synced, SyncState.syncError];
+    final placeholders = List.filled(reopenable.length, '?').join(', ');
+    final states = [for (final state in reopenable) state.dbValue];
+
+    final rows = await txn.query(
+      'enrollments',
+      columns: ['student_id'],
+      where: 'id = ? AND sync_status IN ($placeholders)',
+      whereArgs: [enrollmentId, ...states],
+      limit: 1,
+    );
+    if (rows.isEmpty) return;
+
+    await txn.update(
+      'enrollments',
+      {'sync_status': SyncState.draft.dbValue, 'updated_at': nowMs},
+      where: 'id = ?',
+      whereArgs: [enrollmentId],
+    );
+    // L'élève ne suit que s'il est lui aussi finalisé : un élève déjà DRAFT
+    // (dossier d'une autre année en cours de saisie sur la même tablette) ne
+    // doit pas voir son état réécrit par la correction de celui-ci.
+    await txn.update(
+      'students',
+      {'sync_status': SyncState.draft.dbValue, 'updated_at': nowMs},
+      where: 'id = ? AND sync_status IN ($placeholders)',
+      whereArgs: [rows.first['student_id'], ...states],
+    );
+  }
+
   /// UPDATE **partiel colonne-à-colonne** d'un draft élève : n'écrit QUE les
   /// colonnes fournies (jamais un `toMap()` complet, qui écraserait à NULL les
   /// champs pas encore saisis). Gardé sur `sync_status = 'DRAFT'` pour ne jamais
   /// toucher un dossier déjà confirmé.
+  ///
+  /// [reopenEnrollmentId] : correction d'un dossier déjà finalisé — le dossier
+  /// est ré-ouvert **dans la même transaction**, juste avant l'écriture. Les
+  /// deux ne peuvent pas être séparés : ré-ouvrir puis écrire en deux temps
+  /// laisserait, si la seconde échoue, un dossier déclassé sans la moindre
+  /// correction pour le justifier.
   Future<void> updateDraftStudentColumns(
     String studentId,
     Map<String, Object?> columns, {
     required int nowMs,
+    String? reopenEnrollmentId,
   }) async {
     if (columns.isEmpty) return;
-    await _db.update(
-      'students',
-      {...columns, 'updated_at': nowMs},
-      where: 'id = ? AND sync_status = ?',
-      whereArgs: [studentId, SyncState.draft.dbValue],
-    );
+    await _db.transaction((txn) async {
+      if (reopenEnrollmentId != null) {
+        await reopenFinalizedDossier(txn, reopenEnrollmentId, nowMs: nowMs);
+      }
+      await txn.update(
+        'students',
+        {...columns, 'updated_at': nowMs},
+        where: 'id = ? AND sync_status = ?',
+        whereArgs: [studentId, SyncState.draft.dbValue],
+      );
+    });
   }
 
-  /// UPDATE partiel colonne-à-colonne d'un draft inscription (même garde-fou).
+  /// UPDATE partiel colonne-à-colonne d'un draft inscription (même garde-fou,
+  /// et même ré-ouverture optionnelle que [updateDraftStudentColumns]).
   Future<void> updateDraftEnrollmentColumns(
     String enrollmentId,
     Map<String, Object?> columns, {
     required int nowMs,
+    String? reopenEnrollmentId,
   }) async {
     if (columns.isEmpty) return;
-    await _db.update(
-      'enrollments',
-      {...columns, 'updated_at': nowMs},
-      where: 'id = ? AND sync_status = ?',
-      whereArgs: [enrollmentId, SyncState.draft.dbValue],
-    );
+    await _db.transaction((txn) async {
+      if (reopenEnrollmentId != null) {
+        await reopenFinalizedDossier(txn, reopenEnrollmentId, nowMs: nowMs);
+      }
+      await txn.update(
+        'enrollments',
+        {...columns, 'updated_at': nowMs},
+        where: 'id = ? AND sync_status = ?',
+        whereArgs: [enrollmentId, SyncState.draft.dbValue],
+      );
+    });
   }
 
   /// Remplace les tuteurs d'un draft (étape Tuteurs) : réétablit les liens
@@ -221,15 +320,19 @@ class EnrollmentDraftDao {
     List<ParentDraft> parents, {
     required int nowMs,
     bool enforcePhoneUniqueness = false,
+    String? reopenEnrollmentId,
   }) async {
-    await _db.transaction(
-      (txn) => _replaceParentsIn(
+    await _db.transaction((txn) async {
+      if (reopenEnrollmentId != null) {
+        await reopenFinalizedDossier(txn, reopenEnrollmentId, nowMs: nowMs);
+      }
+      return _replaceParentsIn(
         txn,
         studentId,
         parents,
         enforcePhoneUniqueness: enforcePhoneUniqueness,
-      ),
-    );
+      );
+    });
   }
 
   /// Corps partagé du remplacement des tuteurs (étape Tuteurs et [seedDraft]).

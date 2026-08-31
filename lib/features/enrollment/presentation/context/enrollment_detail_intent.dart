@@ -71,6 +71,22 @@ class EnrollmentDetailIntent extends Equatable {
          enrollmentType: enrollmentType,
        );
 
+  /// Correction d'un dossier **déjà complété**, ouvert depuis sa consultation.
+  /// L'`enrollmentId` est celui du dossier finalisé en base — conservé, c'est la
+  /// clé d'idempotence au push. `enrollmentType` porte la valeur RÉELLE du
+  /// dossier (NEW/RE) pour la même raison que la reprise de brouillon : sans
+  /// elle, un re-save d'identité écraserait le type par le défaut NEW.
+  const EnrollmentDetailIntent.completedReedition({
+    required String enrollmentId,
+    String? studentId,
+    String? enrollmentType,
+  }) : this(
+         origin: EnrollmentDetailOrigin.completedReedition,
+         enrollmentId: enrollmentId,
+         studentId: studentId,
+         enrollmentType: enrollmentType,
+       );
+
   EnrollmentDetailIntent withEnrollmentId(String enrollmentId) {
     return EnrollmentDetailIntent(
       origin: origin,
@@ -151,6 +167,16 @@ class EnrollmentDetailIntent extends Equatable {
       ),
       EnrollmentDetailOrigin.localDraftResume =>
         EnrollmentDetailIntent.localDraftResume(
+          enrollmentId: enrollmentId,
+          studentId: (studentId != null && studentId.isNotEmpty)
+              ? studentId
+              : null,
+          enrollmentType: (enrollmentType != null && enrollmentType.isNotEmpty)
+              ? enrollmentType
+              : null,
+        ),
+      EnrollmentDetailOrigin.completedReedition =>
+        EnrollmentDetailIntent.completedReedition(
           enrollmentId: enrollmentId,
           studentId: (studentId != null && studentId.isNotEmpty)
               ? studentId

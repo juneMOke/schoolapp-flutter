@@ -187,6 +187,15 @@ abstract class EnrollmentOfflineRepository {
     String? schoolLevelGroupId,
     required String enrollmentDate,
     String? medicalNotes,
+
+    /// [reopenEnrollmentId] — **correction d'un dossier déjà finalisé** : le
+    /// dossier est ré-ouvert (`SYNCED|SYNC_ERROR → DRAFT`) dans la transaction de
+    /// cette écriture, jamais avant. Ré-ouvrir à l'ouverture de l'écran sortirait
+    /// de la facturation un dossier qu'on ne fait que consulter ; ré-ouvrir dans
+    /// une transaction séparée laisserait, si l'écriture échoue, un dossier
+    /// déclassé sans la moindre correction pour le justifier. `null` (défaut) =
+    /// parcours de création, rien n'est ré-ouvert.
+    String? reopenEnrollmentId,
   });
 
   /// Étape Adresse : UPDATE partiel de l'élève DRAFT (colonnes non-null).
@@ -202,6 +211,7 @@ abstract class EnrollmentOfflineRepository {
     String? municipality,
     String? neighborhood,
     String? address,
+    String? reopenEnrollmentId,
   });
 
   /// Étape Antécédents : UPDATE partiel de l'inscription DRAFT (previous_*).
@@ -216,6 +226,7 @@ abstract class EnrollmentOfflineRepository {
     bool? validatedPreviousYear,
     bool? formerStudent,
     String? transferReason,
+    String? reopenEnrollmentId,
   });
 
   /// Étape Affectation : UPDATE partiel de l'inscription DRAFT (niveau visé).
@@ -223,12 +234,14 @@ abstract class EnrollmentOfflineRepository {
     required String enrollmentId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? reopenEnrollmentId,
   });
 
   /// Étape Tuteurs : remplace les tuteurs du brouillon (ids provisoires générés).
   Future<Either<Failure, Unit>> saveDraftGuardians({
     required String studentId,
     required List<ConfirmParentDraft> parents,
+    String? reopenEnrollmentId,
   });
 
   /// Recherche de tuteurs déjà connus en local (popin "Rechercher un

@@ -188,6 +188,22 @@ class SaveDraftGuardiansRequested extends EnrollmentOfflineEvent {
   List<Object?> get props => [studentId, parents.length];
 }
 
+/// Ouvre une **session de correction** d'un dossier déjà complété : le dossier
+/// nommé sera ré-ouvert (`SYNCED|SYNC_ERROR → DRAFT`) au moment de la première
+/// sauvegarde d'étape, dans sa transaction.
+///
+/// N'écrit rien par elle-même : tant qu'un dossier est en brouillon il sort de
+/// la recherche « élèves réellement inscrits » de la facturation, et ouvrir un
+/// dossier pour le consulter ne doit pas l'en sortir.
+class ReeditionSessionStarted extends EnrollmentOfflineEvent {
+  final String enrollmentId;
+
+  const ReeditionSessionStarted(this.enrollmentId);
+
+  @override
+  List<Object?> get props => [enrollmentId];
+}
+
 /// Charge le détail du brouillon.
 class LoadDraftDetailRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;

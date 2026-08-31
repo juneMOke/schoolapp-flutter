@@ -180,6 +180,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? schoolLevelGroupId,
     required String enrollmentDate,
     String? medicalNotes,
+    String? reopenEnrollmentId,
   }) => _guardUnit(() async {
     final now = _now();
     await _draftDao.insertDraftStudent(
@@ -195,6 +196,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         matriculationNumber: matriculationNumber,
         updatedAt: now,
       ),
+      reopenEnrollmentId: reopenEnrollmentId,
     );
     await _draftDao.insertDraftEnrollment(
       EnrollmentLocalModel(
@@ -209,6 +211,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         medicalNotes: medicalNotes,
         updatedAt: now,
       ),
+      reopenEnrollmentId: reopenEnrollmentId,
     );
   });
 
@@ -220,14 +223,20 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? municipality,
     String? neighborhood,
     String? address,
+    String? reopenEnrollmentId,
   }) => _guardUnit(
-    () => _draftDao.updateDraftStudentColumns(studentId, <String, Object?>{
-      'city': ?city,
-      'district': ?district,
-      'municipality': ?municipality,
-      'neighborhood': ?neighborhood,
-      'address': ?address,
-    }, nowMs: _now()),
+    () => _draftDao.updateDraftStudentColumns(
+      studentId,
+      <String, Object?>{
+        'city': ?city,
+        'district': ?district,
+        'municipality': ?municipality,
+        'neighborhood': ?neighborhood,
+        'address': ?address,
+      },
+      nowMs: _now(),
+      reopenEnrollmentId: reopenEnrollmentId,
+    ),
   );
 
   /// **Remplacement du bloc, pas mise à jour partielle.** Les sept champs
@@ -257,22 +266,27 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     bool? validatedPreviousYear,
     bool? formerStudent,
     String? transferReason,
+    String? reopenEnrollmentId,
   }) => _guardUnit(() {
     final validated = validatedPreviousYear == null
         ? null
         : (validatedPreviousYear ? 1 : 0);
-    return _draftDao
-        .updateDraftEnrollmentColumns(enrollmentId, <String, Object?>{
-          'previous_school_name': previousSchoolName,
-          'previous_academic_year': previousAcademicYear,
-          'previous_school_level_group': previousSchoolLevelGroup,
-          'previous_school_level': previousSchoolLevel,
-          'previous_rate': previousRate,
-          'previous_rank': previousRank,
-          'validated_previous_year': validated,
-          if (formerStudent != null) 'former_student': formerStudent ? 1 : 0,
-          'transfer_reason': ?transferReason,
-        }, nowMs: _now());
+    return _draftDao.updateDraftEnrollmentColumns(
+      enrollmentId,
+      <String, Object?>{
+        'previous_school_name': previousSchoolName,
+        'previous_academic_year': previousAcademicYear,
+        'previous_school_level_group': previousSchoolLevelGroup,
+        'previous_school_level': previousSchoolLevel,
+        'previous_rate': previousRate,
+        'previous_rank': previousRank,
+        'validated_previous_year': validated,
+        if (formerStudent != null) 'former_student': formerStudent ? 1 : 0,
+        'transfer_reason': ?transferReason,
+      },
+      nowMs: _now(),
+      reopenEnrollmentId: reopenEnrollmentId,
+    );
   });
 
   @override
@@ -280,12 +294,17 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     required String enrollmentId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? reopenEnrollmentId,
   }) => _guardUnit(
-    () =>
-        _draftDao.updateDraftEnrollmentColumns(enrollmentId, <String, Object?>{
-          'school_level_id': ?schoolLevelId,
-          'school_level_group_id': ?schoolLevelGroupId,
-        }, nowMs: _now()),
+    () => _draftDao.updateDraftEnrollmentColumns(
+      enrollmentId,
+      <String, Object?>{
+        'school_level_id': ?schoolLevelId,
+        'school_level_group_id': ?schoolLevelGroupId,
+      },
+      nowMs: _now(),
+      reopenEnrollmentId: reopenEnrollmentId,
+    ),
   );
 
   /// Étape Tuteurs : id porté par l'UI (jamais miné ici, contrairement à
@@ -296,6 +315,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   Future<Either<Failure, Unit>> saveDraftGuardians({
     required String studentId,
     required List<ConfirmParentDraft> parents,
+    String? reopenEnrollmentId,
   }) async {
     final now = _now();
     final drafts = parents.map((p) {
@@ -329,6 +349,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         drafts,
         nowMs: now,
         enforcePhoneUniqueness: true,
+        reopenEnrollmentId: reopenEnrollmentId,
       );
       return const Right(unit);
     } on ParentPhoneConflictException catch (e) {

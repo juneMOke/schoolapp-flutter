@@ -2211,6 +2211,30 @@
   "enrollmentStatusCancelled": "Annulé",
   "enrollmentReadOnlyTitle": "Mode consultation",
   "enrollmentReadOnlyMessage": "Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.",
+  "enrollmentReeditAction": "Modifier",
+  "@enrollmentReeditAction": {
+    "description": "Action d'en-tête ouvrant la correction d'un dossier déjà complété."
+  },
+  "enrollmentReeditReadOnlyMessage": "Dossier complété. Vous pouvez le corriger : l'enregistrement le repassera en cours et le remettra dans la file d'envoi.",
+  "@enrollmentReeditReadOnlyMessage": {
+    "description": "Bandeau de consultation quand la correction est possible."
+  },
+  "enrollmentReeditExitTitle": "Correction non validée",
+  "@enrollmentReeditExitTitle": {
+    "description": "Titre de la popin de sortie d'une correction non finalisée."
+  },
+  "enrollmentReeditExitMessage": "Ce dossier est en cours de correction et n'a pas été validé. Tant qu'il ne l'est pas, l'élève n'apparaît plus dans la facturation.",
+  "@enrollmentReeditExitMessage": {
+    "description": "Message de la popin de sortie d'une correction non finalisée."
+  },
+  "enrollmentReeditExitConfirm": "Quitter quand même",
+  "@enrollmentReeditExitConfirm": {
+    "description": "Bouton de sortie assumée de la popin de correction non validée."
+  },
+  "enrollmentReeditExitResume": "Reprendre la correction",
+  "@enrollmentReeditExitResume": {
+    "description": "Bouton de retour à la correction dans la popin de sortie."
+  },
   "enrollmentEditableTitle": "Mode édition",
   "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
   "studentChargesStepTitle": "Frais de l'élève",

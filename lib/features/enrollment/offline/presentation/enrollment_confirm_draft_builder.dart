@@ -203,12 +203,13 @@ abstract final class EnrollmentConfirmDraftBuilder {
       (value == null) ? null : _nullIfEmpty(value);
 
   static String _enrollmentType(EnrollmentDetailOrigin origin) {
-    // localDraftResume ne passe jamais par le seed (l'agrégat est déjà en base) ;
-    // groupé avec NEW pour l'exhaustivité.
+    // localDraftResume et completedReedition ne passent jamais par le seed
+    // (l'agrégat est déjà en base) ; groupés avec NEW pour l'exhaustivité.
     return switch (origin) {
       EnrollmentDetailOrigin.newFirstRegistration ||
       EnrollmentDetailOrigin.firstRegistration ||
-      EnrollmentDetailOrigin.localDraftResume => 'NEW_ENROLLMENT',
+      EnrollmentDetailOrigin.localDraftResume ||
+      EnrollmentDetailOrigin.completedReedition => 'NEW_ENROLLMENT',
       EnrollmentDetailOrigin.reRegistration => 'RE_ENROLLMENT',
       EnrollmentDetailOrigin.preRegistration => 'PRE_ENROLLMENT',
     };
@@ -219,6 +220,7 @@ abstract final class EnrollmentConfirmDraftBuilder {
       EnrollmentDetailOrigin.newFirstRegistration ||
       EnrollmentDetailOrigin.firstRegistration ||
       EnrollmentDetailOrigin.localDraftResume ||
+      EnrollmentDetailOrigin.completedReedition ||
       EnrollmentDetailOrigin.reRegistration ||
       EnrollmentDetailOrigin.preRegistration => 'IN_PROGRESS',
     };
@@ -236,6 +238,7 @@ abstract final class EnrollmentConfirmDraftBuilder {
       EnrollmentDetailOrigin.newFirstRegistration => null,
       EnrollmentDetailOrigin.firstRegistration ||
       EnrollmentDetailOrigin.localDraftResume ||
+      EnrollmentDetailOrigin.completedReedition ||
       EnrollmentDetailOrigin.reRegistration ||
       EnrollmentDetailOrigin.preRegistration => _nullIfEmpty(studentId),
     };

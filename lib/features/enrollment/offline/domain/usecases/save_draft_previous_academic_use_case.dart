@@ -19,6 +19,7 @@ class SaveDraftPreviousAcademicUseCase {
     bool? validatedPreviousYear,
     bool? formerStudent,
     String? transferReason,
+    String? reopenEnrollmentId,
   }) => _repository.saveDraftPreviousAcademic(
     enrollmentId: enrollmentId,
     previousSchoolName: previousSchoolName,
@@ -30,5 +31,6 @@ class SaveDraftPreviousAcademicUseCase {
     validatedPreviousYear: validatedPreviousYear,
     formerStudent: formerStudent,
     transferReason: transferReason,
+    reopenEnrollmentId: reopenEnrollmentId,
   );
 }

@@ -11,5 +11,10 @@ class SaveDraftGuardiansUseCase {
   Future<Either<Failure, Unit>> call({
     required String studentId,
     required List<ConfirmParentDraft> parents,
-  }) => _repository.saveDraftGuardians(studentId: studentId, parents: parents);
+    String? reopenEnrollmentId,
+  }) => _repository.saveDraftGuardians(
+    studentId: studentId,
+    parents: parents,
+    reopenEnrollmentId: reopenEnrollmentId,
+  );
 }

@@ -3226,6 +3226,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.';
 
   @override
+  String get enrollmentReeditAction => 'Modifier';
+
+  @override
+  String get enrollmentReeditReadOnlyMessage =>
+      'Dossier complété. Vous pouvez le corriger : l\'enregistrement le repassera en cours et le remettra dans la file d\'envoi.';
+
+  @override
+  String get enrollmentReeditExitTitle => 'Correction non validée';
+
+  @override
+  String get enrollmentReeditExitMessage =>
+      'Ce dossier est en cours de correction et n\'a pas été validé. Tant qu\'il ne l\'est pas, l\'élève n\'apparaît plus dans la facturation.';
+
+  @override
+  String get enrollmentReeditExitConfirm => 'Quitter quand même';
+
+  @override
+  String get enrollmentReeditExitResume => 'Reprendre la correction';
+
+  @override
   String get enrollmentEditableTitle => 'Mode édition';
 
   @override

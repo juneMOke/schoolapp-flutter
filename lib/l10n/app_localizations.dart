@@ -5234,6 +5234,42 @@ abstract class AppLocalizations {
   /// **'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.'**
   String get enrollmentReadOnlyMessage;
 
+  /// Header action opening the correction of an already completed record.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get enrollmentReeditAction;
+
+  /// Consultation banner shown when correcting is possible.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed record. You may correct it: saving will move it back to in progress and queue it for sending.'**
+  String get enrollmentReeditReadOnlyMessage;
+
+  /// Title of the dialog shown when leaving an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction not validated'**
+  String get enrollmentReeditExitTitle;
+
+  /// Body of the dialog shown when leaving an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'This record is being corrected and has not been validated. Until it is, the pupil no longer appears in billing.'**
+  String get enrollmentReeditExitMessage;
+
+  /// Button confirming departure from an unfinalised correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave anyway'**
+  String get enrollmentReeditExitConfirm;
+
+  /// Button returning to the correction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume correction'**
+  String get enrollmentReeditExitResume;
+
   /// No description provided for @enrollmentEditableTitle.
   ///
   /// In en, this message translates to:
