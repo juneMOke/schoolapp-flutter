@@ -15,6 +15,7 @@ import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_outbox_tariff_backfill.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
@@ -75,6 +76,18 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
     );
   }
   getIt.registerLazySingleton<Database>(() => resolvedDatabase);
+
+  // Reprise des versements enfilés AVANT que l'imputation ne désigne sa ligne
+  // de grille (v38). Sans elle, ils repartent en 422 `AMBIGUOUS_FEE_CODE` à
+  // chaque cycle, indéfiniment — de l'argent réellement encaissé, avec un reçu
+  // déjà remis au parent.
+  //
+  // Ici et pas dans le palier de schéma : c'est une reprise de DONNÉES, elle
+  // lit le grand-livre. Elle est idempotente, donc rejouable à chaque
+  // démarrage — un parc mis à jour par vagues n'a pas de « premier lancement »
+  // commun, et une base restaurée depuis une sauvegarde repasserait sinon à
+  // côté.
+  await PaymentOutboxTariffBackfill(resolvedDatabase).run();
 
   getIt.registerLazySingleton<OutboxDao>(() => OutboxDao(getIt<Database>()));
   getIt.registerLazySingleton<SyncMetaDao>(
