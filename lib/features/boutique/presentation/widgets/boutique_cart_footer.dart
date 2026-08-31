@@ -219,6 +219,5 @@ class _BlockerList extends StatelessWidget {
         CartBlockerKind.incompletePhone => l10n.boutiqueBlockerPhoneIncomplete,
         CartBlockerKind.linesWithoutLevel =>
           l10n.boutiqueBlockerLinesWithoutLevel(blocker.count),
-        CartBlockerKind.mixedCurrency => l10n.boutiqueBlockerMixedCurrency,
       };
 }

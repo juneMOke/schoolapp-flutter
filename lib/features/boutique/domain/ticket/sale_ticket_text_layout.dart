@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/boutique/presentation/helpers/boutiq
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Met le ticket de vente en **lignes de caractères**.
 ///
@@ -93,7 +94,7 @@ abstract final class SaleTicketTextLayout {
       TicketTextPrimitives.addPair(
         lines,
         '${line.quantity} x ${line.label}',
-        _amount(line.lineTotalInCents, model.currency),
+        _amount(line.lineTotalInCents, line.currency),
         width,
       );
       lines.addAll(TicketTextPrimitives.wrapped(_metaOf(line, model), width));
@@ -113,27 +114,15 @@ abstract final class SaleTicketTextLayout {
 
     // ── L'argent. Les trois lignes sont des FAITS, sans réserve : il n'y a
     // aucune imputation à arbitrer, aucun solde incertain.
-    TicketTextPrimitives.addPair(
-      lines,
-      model.labels.totalLabel,
-      _amount(model.totalInCents, model.currency),
-      width,
-    );
-    TicketTextPrimitives.addPair(
-      lines,
-      model.labels.cashReceivedLabel,
-      _amount(model.cashReceivedInCents, model.currency),
-      width,
-    );
+    // Une ligne PAR DEVISE, sur chacun des trois libellés : un panier qui règle
+    // 450,00 $ d'uniformes et 90 000 FC de manuels a deux totaux, pas un.
+    _addBag(lines, model.labels.totalLabel, model.totals, width);
+    _addBag(lines, model.labels.cashReceivedLabel, model.cashReceived, width);
     // ⚠️ TOUJOURS imprimé, et toujours à zéro : c'est la preuve visuelle du
     // comptant intégral (invariant I-5). L'escamoter parce qu'il vaut zéro
-    // retirerait au porteur la seule ligne qui atteste qu'il ne doit rien.
-    TicketTextPrimitives.addPair(
-      lines,
-      model.labels.remainingLabel,
-      _amount(model.remainingInCents, model.currency),
-      width,
-    );
+    // retirerait au porteur la seule ligne qui atteste qu'il ne doit rien —
+    // et il en faut une par devise encaissée, pour la même raison.
+    _addBag(lines, model.labels.remainingLabel, model.remaining, width);
 
     lines.add(TicketTextPrimitives.rule(width));
     lines.addAll(
@@ -157,9 +146,28 @@ abstract final class SaleTicketTextLayout {
   ///
   /// Un article à prix unique n'a ni niveau ni taille : il ne doit pas traîner
   /// un « · » qui ferait chercher une information absente.
+  /// Un libellé, puis une ligne par devise — le libellé ne se répète pas.
+  static void _addBag(
+    List<String> lines,
+    String label,
+    MoneyBag bag,
+    int width,
+  ) {
+    var first = true;
+    for (final amount in bag.entries) {
+      TicketTextPrimitives.addPair(
+        lines,
+        first ? label : '',
+        _amount(amount.amountInCents, amount.currency),
+        width,
+      );
+      first = false;
+    }
+  }
+
   static String _metaOf(SaleTicketLine line, SaleTicketModel model) {
     final parts = <String>[
-      '${_amount(line.unitPriceInCents, model.currency)} ${model.labels.unitSuffix}',
+      '${_amount(line.unitPriceInCents, line.currency)} ${model.labels.unitSuffix}',
       if (line.levelLabel != null && line.levelLabel!.trim().isNotEmpty)
         line.levelLabel!.trim(),
       if (line.size != null && line.size!.trim().isNotEmpty)

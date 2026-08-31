@@ -2,6 +2,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/provisional
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_model.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 
 /// L'école, telle que le ticket la nomme.
 class TicketSchoolIdentity {
@@ -57,6 +58,7 @@ class SaleTicketComposer {
             quantity: line.quantity,
             unitPriceInCents: line.unitPriceInCents,
             lineTotalInCents: line.lineTotalInCents,
+            currency: line.currency,
             // Le libellé du niveau est résolu par l'appelant, qui tient le
             // référentiel : le figer sur la ligne coûterait une colonne pour
             // une information que le catalogue porte déjà.
@@ -67,8 +69,8 @@ class SaleTicketComposer {
             beneficiaryName: line.beneficiaryName,
           ),
       ],
-      totalInCents: sale.totalInCents,
-      currency: sale.currency,
+      // Dérivés des lignes : la vente n'a plus de total à elle.
+      totals: recorded.lines.totals,
       labels: labels,
     );
   }

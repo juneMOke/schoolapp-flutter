@@ -12,13 +12,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// d'hier doit rester lisible après le retrait de l'article qu'elle porte.
 class BoutiqueSaleDetailLines extends StatelessWidget {
   final List<BoutiqueSaleLineLocalModel> lines;
-  final String currency;
 
-  const BoutiqueSaleDetailLines({
-    super.key,
-    required this.lines,
-    required this.currency,
-  });
+  const BoutiqueSaleDetailLines({super.key, required this.lines});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +22,7 @@ class BoutiqueSaleDetailLines extends StatelessWidget {
       children: [
         for (var i = 0; i < lines.length; i++) ...[
           if (i > 0) const Divider(height: 1, indent: 12, endIndent: 12),
-          _LineRow(line: lines[i], currency: currency),
+          _LineRow(line: lines[i]),
         ],
       ],
     );
@@ -36,9 +31,8 @@ class BoutiqueSaleDetailLines extends StatelessWidget {
 
 class _LineRow extends StatelessWidget {
   final BoutiqueSaleLineLocalModel line;
-  final String currency;
 
-  const _LineRow({required this.line, required this.currency});
+  const _LineRow({required this.line});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +40,7 @@ class _LineRow extends StatelessWidget {
     final theme = Theme.of(context);
     final meta = [
       l10n.boutiqueLineMeta(
-        BoutiqueMoneyFormat.compact(line.unitPriceInCents, currency),
+        BoutiqueMoneyFormat.compact(line.unitPriceInCents, line.currency),
         line.quantity,
       ),
       if ((line.size ?? '').trim().isNotEmpty)
@@ -105,7 +99,7 @@ class _LineRow extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingS),
           Text(
-            BoutiqueMoneyFormat.exact(line.lineTotalInCents, currency),
+            BoutiqueMoneyFormat.exact(line.lineTotalInCents, line.currency),
             style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.bleuProfond,

@@ -30,26 +30,6 @@ enum CartBlockerKind {
 
   /// n lignes dont le prix n'est pas résolu, faute de niveau.
   linesWithoutLevel,
-
-  /// Le panier mêle deux devises.
-  ///
-  /// ## Un blocage TEMPORAIRE, et qui se lèvera
-  ///
-  /// La révision 4 du contrat tranche l'inverse : une vente mixte sera **un
-  /// acte de caisse, une vente, un reçu** — `sale.amounts[]` remplace le
-  /// scalaire, et `currency` devient obligatoire sur chaque ligne. Imposer deux
-  /// gestes au caissier serait « laisser le schéma dicter le métier », dit le
-  /// back.
-  ///
-  /// Mais ce contrat n'est **pas encore fusionné**. Avec celui d'aujourd'hui,
-  /// la vente ne porte qu'un `totalInCents` scalaire, et l'invariant serveur
-  /// (`totalInCents == Σ lineTotalInCents`) est satisfait *numériquement* par la
-  /// somme brute de deux unités : le serveur scellerait, sans rien signaler, un
-  /// ticket dont le total ne veut rien dire. Un ticket scellé ne se corrige pas.
-  ///
-  /// ⇒ Ce blocage tient la place jusqu'au lot « caisse multi-devise », qui le
-  /// retire dans le commit même où il ouvre le contrat.
-  mixedCurrency,
 }
 
 /// Un manque, et ce qu'il faut pour l'énoncer.

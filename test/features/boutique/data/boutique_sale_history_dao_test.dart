@@ -14,8 +14,6 @@ Future<void> _insertSale(
   String payerLastName = 'Ndombo',
   String? payerMiddleName,
   String? payerFirstName,
-  int total = 1500,
-  String currency = 'USD',
   String syncStatus = 'SYNCED',
   String? receiptNumber,
 }) => db.insert('boutique_sales', {
@@ -27,8 +25,6 @@ Future<void> _insertSale(
   'payer_middle_name': payerMiddleName,
   'payer_first_name': payerFirstName,
   'payer_phone_number': '+243810220145',
-  'total_in_cents': total,
-  'currency': currency,
   'sold_at': soldAt,
   'receipt_number': receiptNumber,
   'sync_status': syncStatus,
@@ -41,6 +37,7 @@ Future<void> _insertLine(
   required String saleId,
   int quantity = 1,
   int position = 0,
+  String currency = 'USD',
 }) => db.insert('boutique_sale_lines', {
   'id': id,
   'sale_id': saleId,
@@ -49,6 +46,8 @@ Future<void> _insertLine(
   'quantity': quantity,
   'unit_price_in_cents': 1500,
   'line_total_in_cents': 1500 * quantity,
+  // C'est la LIGNE qui porte la devise : le total de la vente s'en dérive.
+  'currency': currency,
   'position': position,
 });
 
@@ -283,7 +282,8 @@ void main() {
         where: 'id = ?',
         whereArgs: ['s-1'],
       );
-      expect(rows.single['total_in_cents'], 1500);
+      // « et rien d'autre » : la ligne n'est pas touchée par ailleurs. Le
+      // montant a quitté la vente pour ses lignes, on vérifie donc ce qui reste.
       expect(rows.single['sync_status'], 'SYNCED');
     });
 

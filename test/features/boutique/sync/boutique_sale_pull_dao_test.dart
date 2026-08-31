@@ -4,6 +4,8 @@ import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_pul
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 BoutiqueSaleDeltaDto _delta({
   String id = 'vente-1',
@@ -22,8 +24,7 @@ BoutiqueSaleDeltaDto _delta({
   payerPhoneNumber: '+243810220145',
   collectedById: 'u2',
   collectedByName: collectedByName,
-  totalInCents: 3500,
-  currency: 'USD',
+  amounts: MoneyBag.of(const [Money(3500, 'USD')]),
   soldAt: '2026-08-29T11:42:00Z',
   receiptDocumentId: receiptDocumentId,
   lines:
@@ -36,6 +37,7 @@ BoutiqueSaleDeltaDto _delta({
           quantity: 1,
           unitPriceInCents: 1500,
           lineTotalInCents: 1500,
+          currency: 'USD',
         ),
       ],
   serverUpdatedAt: '2026-08-29T11:45:00Z',
@@ -61,7 +63,14 @@ void main() {
     expect(await apply([_delta()]), 1);
 
     final sale = (await db.query('boutique_sales')).single;
-    expect(sale['total_in_cents'], 3500);
+    // Le montant vit sur les lignes : la vente n'en porte plus. La fixture
+    // déclarait 3 500 pour une ligne à 1 500 — un écart que rien ne pouvait
+    // relever tant que la vente portait son propre total.
+    final lines = await db.query('boutique_sale_lines');
+    expect(
+      lines.fold<int>(0, (t, l) => t + (l['line_total_in_cents'] as int)),
+      1500,
+    );
     expect(sale['collected_by_name'], 'Moke Junior');
     expect(await db.query('boutique_sale_lines'), hasLength(1));
   });
@@ -136,6 +145,7 @@ void main() {
             quantity: 1,
             unitPriceInCents: 100,
             lineTotalInCents: 100,
+            currency: 'USD',
           ),
           BoutiqueSaleLineDeltaDto(
             id: 'l2',
@@ -143,6 +153,7 @@ void main() {
             quantity: 1,
             unitPriceInCents: 200,
             lineTotalInCents: 200,
+            currency: 'USD',
           ),
         ],
       ),
@@ -157,6 +168,7 @@ void main() {
             quantity: 1,
             unitPriceInCents: 100,
             lineTotalInCents: 100,
+            currency: 'USD',
           ),
         ],
       ),
@@ -178,6 +190,7 @@ void main() {
               quantity: 1,
               unitPriceInCents: 100,
               lineTotalInCents: 100,
+              currency: 'USD',
             ),
           ],
         ),

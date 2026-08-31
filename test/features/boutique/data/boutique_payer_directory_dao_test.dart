@@ -26,8 +26,6 @@ void main() {
     'payer_first_name': firstName,
     'payer_name': payerName,
     'payer_phone_number': phone,
-    'total_in_cents': 1000,
-    'currency': 'USD',
     'sold_at': soldAt,
   });
 

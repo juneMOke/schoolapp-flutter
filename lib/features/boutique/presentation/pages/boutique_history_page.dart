@@ -12,7 +12,6 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_filter.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_sale_tile.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
@@ -20,6 +19,7 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/states
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 
 /// L'historique des ventes du guichet — **lu en local, exclusivement**.
 ///
@@ -295,9 +295,9 @@ class _PeriodSummary extends StatelessWidget {
                   // Une ligne PAR devise : additionner des dollars et des francs
                   // donnerait un nombre qui ne veut rien dire, et un guichet le
                   // lirait comme un montant.
-                  for (final entry in totals.entries)
+                  for (final amount in totals.entries)
                     Text(
-                      BoutiqueMoneyFormat.exact(entry.value, entry.key),
+                      MoneyFormat.format(amount),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.bleuProfond,

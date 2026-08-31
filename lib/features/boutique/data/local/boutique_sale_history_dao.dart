@@ -2,6 +2,8 @@ import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_lo
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Lecture de la caisse : les ventes d'une fenêtre, la plus récente en tête.
 ///
@@ -34,8 +36,6 @@ class BoutiqueSaleHistoryDao {
         s.payer_middle_name AS payer_middle_name,
         s.payer_first_name AS payer_first_name,
         s.payer_phone_number AS payer_phone_number,
-        s.total_in_cents AS total_in_cents,
-        s.currency AS currency,
         s.sold_at AS sold_at,
         s.receipt_number AS receipt_number,
         s.sync_status AS sync_status,
@@ -43,7 +43,20 @@ class BoutiqueSaleHistoryDao {
           SELECT COALESCE(SUM(l.quantity), 0)
           FROM boutique_sale_lines l
           WHERE l.sale_id = s.id
-        ) AS article_count
+        ) AS article_count,
+        -- Les montants vivent sur les lignes depuis que la vente peut en mêler
+        -- deux : une entrée par devise, groupées ici plutôt que sommées.
+        (
+          SELECT group_concat(t.currency || ':' || t.total, '|')
+          FROM (
+            SELECT l.currency AS currency,
+                   SUM(l.line_total_in_cents) AS total
+            FROM boutique_sale_lines l
+            WHERE l.sale_id = s.id
+            GROUP BY l.currency
+            ORDER BY l.currency
+          ) t
+        ) AS amounts
       FROM boutique_sales s
       WHERE s.school_id = ?
         AND s.academic_year_id = ?
@@ -59,8 +72,7 @@ class BoutiqueSaleHistoryDao {
           id: row['id'] as String,
           payerName: _payerNameOf(row),
           payerPhoneNumber: row['payer_phone_number'] as String?,
-          totalInCents: (row['total_in_cents'] as num).toInt(),
-          currency: row['currency'] as String,
+          amounts: _amountsOf(row['amounts'] as String?),
           soldAt: row['sold_at'] as String,
           receiptNumber: row['receipt_number'] as String?,
           syncStatus: row['sync_status'] as String,
@@ -148,5 +160,21 @@ class BoutiqueSaleHistoryDao {
       row['payer_middle_name'] as String?,
       row['payer_first_name'] as String?,
     ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' ');
+  }
+
+  /// Relit les montants agrégés par le SQL : `USD:1500|CDF:90000`.
+  ///
+  /// Un `group_concat` plutôt qu'une seconde requête : l'historique se lit d'un
+  /// coup, et N+1 requêtes sur une tablette se sentent.
+  static MoneyBag _amountsOf(String? packed) {
+    if (packed == null || packed.isEmpty) return MoneyBag.empty;
+    return MoneyBag.of([
+      for (final part in packed.split('|'))
+        if (part.contains(':'))
+          Money.parse(
+            int.tryParse(part.split(':').last) ?? 0,
+            part.split(':').first,
+          ),
+    ]);
   }
 }

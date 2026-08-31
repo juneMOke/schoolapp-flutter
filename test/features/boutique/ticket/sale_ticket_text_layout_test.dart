@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_model.dart';
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_text_layout.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = SaleTicketLabels(
   documentTitle: 'Reçu de vente — Boutique',
@@ -43,16 +45,17 @@ SaleTicketModel _model({
           levelLabel: '1ère HUM',
           size: 'M',
           beneficiaryName: 'David Mwepu',
+          currency: 'USD',
         ),
         SaleTicketLine(
           label: 'Écusson brodé',
           quantity: 2,
           unitPriceInCents: 1000,
           lineTotalInCents: 2000,
+          currency: 'USD',
         ),
       ],
-  totalInCents: 3500,
-  currency: 'USD',
+  totals: MoneyBag.of(const [Money(3500, 'USD')]),
   labels: _labels,
 );
 
@@ -107,6 +110,7 @@ void main() {
             quantity: 2,
             unitPriceInCents: 1000,
             lineTotalInCents: 2000,
+            currency: 'USD',
           ),
         ],
       );
@@ -132,6 +136,7 @@ void main() {
             unitPriceInCents: 1500,
             lineTotalInCents: 1500,
             levelLabel: '1ère HUM',
+            currency: 'USD',
           ),
         ],
       );
@@ -156,6 +161,7 @@ void main() {
             quantity: 1,
             unitPriceInCents: 1000,
             lineTotalInCents: 1000,
+            currency: 'USD',
           ),
         ],
       ).join('\n');
@@ -226,10 +232,10 @@ void main() {
               quantity: 1,
               unitPriceInCents: 100,
               lineTotalInCents: 100,
+              currency: 'USD',
             ),
           ],
-          totalInCents: 100,
-          currency: 'USD',
+          totals: MoneyBag.of(const [Money(100, 'USD')]),
           labels: _labels,
         ),
       ).join('\n');

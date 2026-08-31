@@ -4,9 +4,12 @@
 /// **Tout est en cents.** Un `double` qui traverserait cette couche finirait par
 /// arrondir de l'argent, et le serveur vérifie l'arithmétique au centime :
 /// `lineTotalInCents == unitPriceInCents × quantity`, et
-/// `totalInCents == Σ lineTotalInCents`. Un écart rend `INCONSISTENT_TOTAL` —
-/// sur une vente déjà encaissée.
+/// `amounts` == Σ `lineTotalInCents` **devise par devise**. Un écart rend
+/// `INCONSISTENT_TOTAL` — sur une vente déjà encaissée.
 library;
+
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// La vente elle-même.
 class BoutiqueSaleInput {
@@ -29,8 +32,16 @@ class BoutiqueSaleInput {
   /// n'échoue jamais dessus.
   final String? payerPhoneNumber;
 
-  final int totalInCents;
-  final String currency;
+  /// Ce qui a été encaissé comptant, **une entrée par devise**.
+  ///
+  /// Un même panier règle 450,00 $ d'uniformes et 90 000 FC de manuels : c'est
+  /// un acte de caisse, donc une vente et un reçu — pas deux. Le serveur
+  /// contrôle que ces montants sont bien la somme des lignes **devise par
+  /// devise** (422 `INCONSISTENT_TOTAL`). Ne jamais additionner deux entrées.
+  ///
+  /// Une devise dont les lignes totalisent zéro — un article offert — n'a pas à
+  /// y figurer.
+  final MoneyBag amounts;
 
   /// Heure **métier** de la vente, potentiellement bien antérieure au push.
   /// Clampée sur l'horloge serveur, et jamais un curseur de synchro.
@@ -43,8 +54,7 @@ class BoutiqueSaleInput {
     this.payerFirstName,
     this.payerMiddleName,
     this.payerPhoneNumber,
-    required this.totalInCents,
-    required this.currency,
+    required this.amounts,
     required this.soldAt,
   });
 
@@ -61,8 +71,10 @@ class BoutiqueSaleInput {
       'payerMiddleName': payerMiddleName,
     if (payerPhoneNumber != null && payerPhoneNumber!.isNotEmpty)
       'payerPhoneNumber': payerPhoneNumber,
-    'totalInCents': totalInCents,
-    'currency': currency,
+    'amounts': [
+      for (final amount in amounts.entries)
+        {'amountInCents': amount.amountInCents, 'currency': amount.currency},
+    ],
     'soldAt': soldAt,
   };
 
@@ -74,10 +86,32 @@ class BoutiqueSaleInput {
         payerFirstName: j['payerFirstName'] as String?,
         payerMiddleName: j['payerMiddleName'] as String?,
         payerPhoneNumber: j['payerPhoneNumber'] as String?,
-        totalInCents: (j['totalInCents'] as num).toInt(),
-        currency: j['currency'] as String,
+        amounts: _amountsOf(j),
         soldAt: j['soldAt'] as String,
       );
+
+  /// Relit les montants **quelle que soit la forme** du payload.
+  ///
+  /// Une tablette mise à jour hors ligne porte encore en file des ventes
+  /// écrites par la version précédente, avec un `totalInCents` scalaire. Les
+  /// refuser les ferait basculer en `failed` — issue terminale de l'outbox :
+  /// l'argent encaissé, reçu déjà remis, ne remonterait jamais.
+  static MoneyBag _amountsOf(Map<String, dynamic> j) {
+    final raw = j['amounts'];
+    if (raw is List) {
+      return MoneyBag.of([
+        for (final entry in raw)
+          if (entry is Map<String, dynamic>)
+            Money.parse(
+              (entry['amountInCents'] as num?)?.toInt() ?? 0,
+              (entry['currency'] as String?) ?? '',
+            ),
+      ]);
+    }
+    final cents = (j['totalInCents'] as num?)?.toInt();
+    if (cents == null) return MoneyBag.empty;
+    return MoneyBag.from(Money.parse(cents, (j['currency'] as String?) ?? ''));
+  }
 }
 
 /// Une ligne du panier.
@@ -105,6 +139,20 @@ class BoutiqueSaleLineInput {
 
   final int lineTotalInCents;
 
+  /// La devise de CETTE ligne — c'est l'article qui est tarifé dans une unité,
+  /// donc un panier peut en mêler deux.
+  ///
+  /// **Envoyée par le poste et enregistrée telle quelle**, jamais déduite du
+  /// catalogue : la caisse vend hors ligne sur une copie qui peut précéder un
+  /// changement de devise, et déduire imprimerait des dollars sur un reçu dont
+  /// le tiroir contient des francs.
+  ///
+  /// Un écart de catalogue **ne refuse pas la vente** — l'argent est là, dans
+  /// l'unité encaissée, et aucun rafraîchissement ne l'y changerait : l'écart
+  /// part en anomalie. Seul un code hors de la liste close est refusé
+  /// (422 `UNKNOWN_CURRENCY`), et celui-là est un bug client.
+  final String currency;
+
   const BoutiqueSaleLineInput({
     required this.articleId,
     this.beneficiaryStudentId,
@@ -113,6 +161,7 @@ class BoutiqueSaleLineInput {
     required this.quantity,
     required this.unitPriceInCents,
     required this.lineTotalInCents,
+    required this.currency,
   });
 
   Map<String, dynamic> toJson() => {
@@ -123,6 +172,7 @@ class BoutiqueSaleLineInput {
     'quantity': quantity,
     'unitPriceInCents': unitPriceInCents,
     'lineTotalInCents': lineTotalInCents,
+    'currency': currency,
   };
 
   factory BoutiqueSaleLineInput.fromJson(Map<String, dynamic> j) =>
@@ -133,6 +183,10 @@ class BoutiqueSaleLineInput {
         size: j['size'] as String?,
         quantity: (j['quantity'] as num).toInt(),
         unitPriceInCents: (j['unitPriceInCents'] as num).toInt(),
+        // Repli vide plutôt qu'une devise inventée : une ligne figée par une
+        // version antérieure n'en portait pas, et écrire « USD » à sa place
+        // ferait imprimer des dollars sur un reçu qui n'en est pas.
+        currency: (j['currency'] as String?) ?? '',
         lineTotalInCents: (j['lineTotalInCents'] as num).toInt(),
       );
 }

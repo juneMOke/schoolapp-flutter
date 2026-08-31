@@ -237,7 +237,12 @@ void main() {
     // panier USD + CDF était donc encaissé et **scellé** avec un total qui ne
     // veut rien dire, sans que rien ne le signale au caissier — et un ticket
     // scellé ne se corrige pas.
-    test('deux devises empêchent d\'encaisser, et le disent', () {
+    test('deux devises n\'empêchent PAS d\'encaisser', () {
+      // TEST RETOURNÉ une troisième fois, et cette fois par le contrat : la
+      // vente porte `amounts[]` et chaque ligne SA devise. Un panier qui règle
+      // 450,00 $ d'uniformes et 90 000 FC de manuels est un acte de caisse —
+      // une vente, un reçu. Imposer deux gestes au caissier serait laisser le
+      // schéma dicter le métier.
       var cart = const BoutiqueCart().withPayer(_payeurComplet);
       cart = cart.addArticle(_ecusson(), keyOf: _key);
       cart = cart.addArticle(
@@ -245,24 +250,8 @@ void main() {
         keyOf: _key,
       );
 
-      expect(cart.canCollect, isFalse);
-      expect(
-        cart.blockers.map((b) => b.kind),
-        contains(CartBlockerKind.mixedCurrency),
-      );
-    });
-
-    test('le blocage vient EN DERNIER — il coûte le plus cher à réparer', () {
-      // Les manques d'identité se corrigent en tapant ; celui-ci demande de
-      // défaire le panier. L'ordre des blocages est une règle métier.
-      var cart = const BoutiqueCart();
-      cart = cart.addArticle(_ecusson(), keyOf: _key);
-      cart = cart.addArticle(
-        _ecusson(currency: 'CDF', id: 'art-journal-cdf'),
-        keyOf: _key,
-      );
-
-      expect(cart.blockers.last.kind, CartBlockerKind.mixedCurrency);
+      expect(cart.canCollect, isTrue);
+      expect(cart.blockers, isEmpty);
     });
 
     test('les totaux sont ventilés, jamais sommés', () {
@@ -279,7 +268,8 @@ void main() {
 
     test('la devise du panier est NULLE quand il en mêle deux', () {
       // Elle valait « celle de la première ligne » : une unité choisie au
-      // hasard de l'ordre d'ajout, sous laquelle la vente partait se sceller.
+      // hasard de l'ordre d'ajout. Nulle, elle force l'appelant à lire
+      // `totals` — qui, lui, dit la vérité.
       var cart = const BoutiqueCart().withPayer(_payeurComplet);
       cart = cart.addArticle(_ecusson(), keyOf: _key);
       cart = cart.addArticle(

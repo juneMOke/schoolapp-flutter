@@ -56,20 +56,14 @@ class BoutiqueCart extends Equatable {
 
   /// Vrai si le panier mélange deux devises.
   ///
-  /// ## Détecté depuis l'origine, bloqué le temps que le contrat arrive
+  /// ## Détecté, et désormais parfaitement licite
   ///
-  /// La décision produit du 2026-08-29 laissait encaisser un panier mixte, le
-  /// temps qu'une branche dédiée porte des totaux ventilés. C'est cette
-  /// branche-ci, et le prédicat gardé à son intention sert enfin — mais pas
-  /// pour interdire : pour **attendre**.
+  /// Le prédicat a servi trois fois : à bloquer, puis à laisser passer (décision
+  /// produit du 2026-08-29), puis à bloquer de nouveau le temps que le contrat
+  /// porte `amounts[]`. Il ne bloque plus rien — mais il reste **la** façon de
+  /// savoir si le panier mêle deux unités, ce dont l'affichage a besoin.
   ///
-  /// La révision 4 du contrat autorise la vente mixte et en fait un seul acte
-  /// de caisse (`sale.amounts[]`, `currency` par ligne). Tant qu'elle n'est pas
-  /// fusionnée, la vente ne part qu'avec un total scalaire : le serveur
-  /// scellerait un ticket additionnant deux unités, sans rien signaler au
-  /// caissier — et un ticket scellé ne se corrige pas.
-  ///
-  /// ⇒ Blocage temporaire, levé par le lot « caisse multi-devise ».
+  /// `totalInCents` n'est plus la vérité du panier : [totals] l'est.
   bool get isMultiCurrency => currencies.length > 1;
 
   /// Somme des quantités des lignes portant cet article — la pastille de la
@@ -110,13 +104,11 @@ class BoutiqueCart extends Equatable {
       );
     }
 
-    // Le mélange de devises vient EN DERNIER : les manques d'identité se
-    // corrigent en tapant, celui-ci demande de défaire le panier. On ne met pas
-    // en tête ce qui coûte le plus cher à réparer.
-    if (isMultiCurrency) {
-      blockers.add(const CartBlocker(CartBlockerKind.mixedCurrency));
-    }
-
+    // ⚠️ Le mélange de devises ne figure PAS ici, et cette fois pour de bon :
+    // le contrat porte `sale.amounts[]` et une `currency` par ligne. Un panier
+    // qui règle 450,00 $ d'uniformes et 90 000 FC de manuels est un acte de
+    // caisse — une vente, un reçu. Imposer deux gestes au caissier serait
+    // laisser le schéma dicter le métier.
     return blockers;
   }
 

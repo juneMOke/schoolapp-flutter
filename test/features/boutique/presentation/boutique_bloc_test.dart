@@ -61,8 +61,6 @@ const _recorded = RecordedSale(
     schoolId: 'E1',
     academicYearId: 'ay-1',
     payerLastName: 'Ndombo',
-    totalInCents: 1000,
-    currency: 'USD',
     soldAt: '2026-08-29T11:42:00Z',
     updatedAt: 0,
   ),

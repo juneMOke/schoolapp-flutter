@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_m
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = SaleTicketLabels(
   documentTitle: 'Reçu de vente',
@@ -37,8 +39,6 @@ RecordedSale _recorded({
     payerName: 'NDOMBO Lelo Willy',
     payerPhoneNumber: '+243810220145',
     collectedByName: collectedByName,
-    totalInCents: 1500,
-    currency: 'USD',
     soldAt: '2026-08-29T11:42:00Z',
     receiptNumber: receiptNumber,
     updatedAt: 0,
@@ -53,6 +53,7 @@ RecordedSale _recorded({
       quantity: 1,
       unitPriceInCents: 1500,
       lineTotalInCents: 1500,
+      currency: 'USD',
     ),
   ],
 );
@@ -103,7 +104,7 @@ void main() {
     final model = await compose(_recorded());
 
     expect(model.schoolName, isEmpty);
-    expect(model.totalInCents, 1500);
+    expect(model.totals, MoneyBag.of(const [Money(1500, 'USD')]));
   });
 
   test('l\'école connue nomme le ticket', () async {
@@ -149,7 +150,10 @@ void main() {
   test('💀 le reste est TOUJOURS zéro, et le reçu égale le total', () async {
     final model = await compose(_recorded());
 
-    expect(model.remainingInCents, 0);
-    expect(model.cashReceivedInCents, model.totalInCents);
+    // Zéro DANS CHAQUE devise encaissée : la preuve du comptant intégral vaut
+    // par unité, pas globalement.
+    expect(model.remaining.isAllZero, isTrue);
+    expect(model.remaining.currencies, model.totals.currencies);
+    expect(model.cashReceived, model.totals);
   });
 }

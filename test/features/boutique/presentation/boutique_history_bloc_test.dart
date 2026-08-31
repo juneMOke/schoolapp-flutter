@@ -7,6 +7,8 @@ import 'package:school_app_flutter/features/boutique/domain/entities/sale_histor
 import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockGetHistory extends Mock implements GetBoutiqueSalesHistoryUseCase {}
 
@@ -18,8 +20,7 @@ SaleHistoryEntry _sale({
 }) => SaleHistoryEntry(
   id: id,
   payerName: 'Ndombo Lelo Willy',
-  totalInCents: total,
-  currency: currency,
+  amounts: MoneyBag.of([Money.parse(total, currency)]),
   soldAt: '2026-08-30T09:00:00Z',
   syncStatus: syncStatus,
   articleCount: 2,
@@ -121,7 +122,10 @@ void main() {
       ],
     );
 
-    expect(state.totalsByCurrency, {'USD': 4000, 'CDF': 400000});
+    expect(
+      state.totalsByCurrency,
+      MoneyBag.of(const [Money(4000, 'USD'), Money(400000, 'CDF')]),
+    );
   });
 
   test('les ventes NON PARTIES se comptent à part', () {

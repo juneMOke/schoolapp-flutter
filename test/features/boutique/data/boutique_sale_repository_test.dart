@@ -115,7 +115,13 @@ void main() {
       // Le serveur vérifie `lineTotal == pu × qté` au centime, et rend
       // INCONSISTENT_TOTAL sinon — sur une vente déjà encaissée.
       expect(line['lineTotalInCents'], 3000);
-      expect((payload['sale'] as Map)['totalInCents'], 3000);
+      // Chaque ligne porte la devise DE SON ARTICLE, telle que la caisse l'a
+      // encaissée : le serveur l'enregistre sans la déduire du catalogue.
+      expect(line['currency'], 'USD');
+      // La vente porte `amounts[]` — une entrée par devise, jamais un scalaire
+      // qui prétendrait résumer deux unités.
+      final amounts = (payload['sale'] as Map)['amounts'] as List;
+      expect(amounts.single, {'amountInCents': 3000, 'currency': 'USD'});
     },
   );
 

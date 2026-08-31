@@ -22,13 +22,8 @@ class BoutiqueHistoryState extends Equatable {
   ///
   /// Jamais une somme unique : additionner des dollars et des francs donnerait
   /// un nombre qui ne veut rien dire, et un guichet le lirait comme un montant.
-  Map<String, int> get totalsByCurrency {
-    final totals = <String, int>{};
-    for (final sale in sales) {
-      totals[sale.currency] = (totals[sale.currency] ?? 0) + sale.totalInCents;
-    }
-    return totals;
-  }
+  MoneyBag get totalsByCurrency =>
+      sales.fold(MoneyBag.empty, (bag, sale) => bag + sale.amounts);
 
   /// Combien de ventes attendent encore de partir — ce que le guichet doit
   /// savoir avant d'éteindre la tablette.

@@ -30,8 +30,6 @@ BoutiqueSaleLocalModel _sale({
   payerFirstName: 'Willy',
   payerPhoneNumber: '+243810220145',
   collectedByName: collectedByName,
-  totalInCents: 3500,
-  currency: 'USD',
   soldAt: '2026-08-30T09:42:00Z',
   receiptNumber: receiptNumber,
   receiptDocumentId: receiptDocumentId,
@@ -49,6 +47,7 @@ const _line = BoutiqueSaleLineLocalModel(
   quantity: 2,
   unitPriceInCents: 1750,
   lineTotalInCents: 3500,
+  currency: 'USD',
 );
 
 SaleDetail _detail({

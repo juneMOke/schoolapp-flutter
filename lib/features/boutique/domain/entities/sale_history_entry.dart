@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Une vente telle que l'historique la montre : ce que le guichet a encaissé, à
 /// qui, quand, et si le serveur le sait.
@@ -15,8 +16,9 @@ class SaleHistoryEntry extends Equatable {
   final String payerName;
 
   final String? payerPhoneNumber;
-  final int totalInCents;
-  final String currency;
+
+  /// Ce que la vente a encaissé, **par devise** — dérivé de ses lignes.
+  final MoneyBag amounts;
 
   /// Horodatage **métier** de la vente, en ISO-8601 UTC. Une vente saisie hors
   /// ligne le lundi et synchronisée le mercredi appartient à la caisse du lundi.
@@ -38,8 +40,7 @@ class SaleHistoryEntry extends Equatable {
   const SaleHistoryEntry({
     required this.id,
     required this.payerName,
-    required this.totalInCents,
-    required this.currency,
+    required this.amounts,
     required this.soldAt,
     required this.syncStatus,
     required this.articleCount,
@@ -55,8 +56,7 @@ class SaleHistoryEntry extends Equatable {
     id,
     payerName,
     payerPhoneNumber,
-    totalInCents,
-    currency,
+    amounts,
     soldAt,
     receiptNumber,
     syncStatus,

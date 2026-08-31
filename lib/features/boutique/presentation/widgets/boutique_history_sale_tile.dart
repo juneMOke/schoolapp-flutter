@@ -3,8 +3,8 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 
 /// Une vente de l'historique.
 ///
@@ -93,10 +93,8 @@ class BoutiqueHistorySaleTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      BoutiqueMoneyFormat.exact(
-                        sale.totalInCents,
-                        sale.currency,
-                      ),
+                      // Deux devises se lisent côte à côte sur la tuile.
+                      sale.amounts.entries.map(MoneyFormat.format).join(' · '),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.bleuProfond,

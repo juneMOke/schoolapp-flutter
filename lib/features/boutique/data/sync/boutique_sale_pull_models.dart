@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Une vente telle qu'un delta de synchronisation la décrit.
 ///
@@ -31,8 +33,8 @@ class BoutiqueSaleDeltaDto {
   final String? collectedById;
   final String? collectedByName;
 
-  final int totalInCents;
-  final String currency;
+  /// Ce qui a été encaissé, **une entrée par devise**, dérivé des lignes.
+  final MoneyBag amounts;
   final String soldAt;
 
   /// `null` **tant que le reçu n'est pas scellé** : le poste sait alors qu'il
@@ -53,8 +55,7 @@ class BoutiqueSaleDeltaDto {
     this.payerPhoneNumber,
     this.collectedById,
     this.collectedByName,
-    required this.totalInCents,
-    required this.currency,
+    required this.amounts,
     required this.soldAt,
     this.receiptDocumentId,
     this.lines = const [],
@@ -72,8 +73,14 @@ class BoutiqueSaleDeltaDto {
         payerPhoneNumber: j['payerPhoneNumber'] as String?,
         collectedById: j['collectedById'] as String?,
         collectedByName: j['collectedByName'] as String?,
-        totalInCents: (j['totalInCents'] as num).toInt(),
-        currency: j['currency'] as String,
+        amounts: MoneyBag.of([
+          for (final raw in (j['amounts'] as List<dynamic>? ?? const []))
+            if (raw is Map<String, dynamic>)
+              Money.parse(
+                (raw['amountInCents'] as num?)?.toInt() ?? 0,
+                (raw['currency'] as String?) ?? '',
+              ),
+        ]),
         soldAt: j['soldAt'] as String,
         receiptDocumentId: j['receiptDocumentId'] as String?,
         lines: [
@@ -97,6 +104,9 @@ class BoutiqueSaleLineDeltaDto {
   final int unitPriceInCents;
   final int lineTotalInCents;
 
+  /// La devise de CETTE ligne, telle que la caisse l'a encaissée.
+  final String currency;
+
   const BoutiqueSaleLineDeltaDto({
     required this.id,
     required this.articleId,
@@ -107,6 +117,7 @@ class BoutiqueSaleLineDeltaDto {
     required this.quantity,
     required this.unitPriceInCents,
     required this.lineTotalInCents,
+    required this.currency,
   });
 
   factory BoutiqueSaleLineDeltaDto.fromJson(Map<String, dynamic> j) =>
@@ -120,6 +131,7 @@ class BoutiqueSaleLineDeltaDto {
         quantity: (j['quantity'] as num).toInt(),
         unitPriceInCents: (j['unitPriceInCents'] as num).toInt(),
         lineTotalInCents: (j['lineTotalInCents'] as num).toInt(),
+        currency: (j['currency'] as String?) ?? '',
       );
 }
 

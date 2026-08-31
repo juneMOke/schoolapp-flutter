@@ -22,6 +22,8 @@ import 'package:school_app_flutter/features/boutique/presentation/pages/boutique
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_sale_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockGetHistory extends Mock implements GetBoutiqueSalesHistoryUseCase {}
 
@@ -48,8 +50,7 @@ SaleHistoryEntry _sale({
 }) => SaleHistoryEntry(
   id: id,
   payerName: payer,
-  totalInCents: total,
-  currency: 'USD',
+  amounts: MoneyBag.of([Money(total, 'USD')]),
   soldAt: '2026-08-30T09:00:00Z',
   syncStatus: syncStatus,
   receiptNumber: receiptNumber,

@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/boutique/data/sync/boutique_sync_api
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockApi extends Mock implements BoutiqueSyncApi {}
 
@@ -23,13 +25,12 @@ const _saleId = 'vente-1';
 const _lineId = 'ligne-1';
 
 BoutiqueSaleRequest _request({String? beneficiaryId}) => BoutiqueSaleRequest(
-  sale: const BoutiqueSaleInput(
+  sale: BoutiqueSaleInput(
     id: _saleId,
     academicYearId: 'ay-1',
     payerLastName: 'Ndombo',
     payerFirstName: 'Willy',
-    totalInCents: 1500,
-    currency: 'USD',
+    amounts: MoneyBag.of(const [Money(1500, 'USD')]),
     soldAt: '2026-08-29T11:42:00Z',
   ),
   lines: [
@@ -40,6 +41,7 @@ BoutiqueSaleRequest _request({String? beneficiaryId}) => BoutiqueSaleRequest(
       quantity: 1,
       unitPriceInCents: 1500,
       lineTotalInCents: 1500,
+      currency: 'USD',
     ),
   ],
   authorId: 'u1',
@@ -89,8 +91,6 @@ void main() {
         schoolId: 'E1',
         academicYearId: 'ay-1',
         payerLastName: 'Ndombo',
-        totalInCents: 1500,
-        currency: 'USD',
         soldAt: '2026-08-29T11:42:00Z',
         updatedAt: 0,
       ),
@@ -103,6 +103,7 @@ void main() {
           quantity: 1,
           unitPriceInCents: 1500,
           lineTotalInCents: 1500,
+          currency: 'USD',
         ),
       ],
       request: _request(),
@@ -313,7 +314,6 @@ void main() {
       // tard pourquoi cet encaissement n'est jamais arrivé dans les livres.
       expect(row['sync_error'], contains(BoutiqueErrorCodes.unknownArticle));
       // Le montant reste lisible : l'argent reçu n'est jamais « reperdu ».
-      expect(row['total_in_cents'], 1500);
     });
 
     test('un 403 est TERMINAL', () async {

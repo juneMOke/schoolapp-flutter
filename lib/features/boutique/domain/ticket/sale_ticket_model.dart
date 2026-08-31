@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Une ligne du ticket de vente.
 class SaleTicketLine extends Equatable {
@@ -6,6 +8,10 @@ class SaleTicketLine extends Equatable {
   final int quantity;
   final int unitPriceInCents;
   final int lineTotalInCents;
+
+  /// La devise de CETTE ligne : c'est l'article qui est tarifé dans une unité,
+  /// donc un panier peut en mêler deux.
+  final String currency;
 
   /// Niveau qui a résolu le prix — absent sur un article à prix unique, où
   /// aucun niveau n'entre dans le calcul.
@@ -22,6 +28,7 @@ class SaleTicketLine extends Equatable {
     required this.quantity,
     required this.unitPriceInCents,
     required this.lineTotalInCents,
+    required this.currency,
     this.levelLabel,
     this.size,
     this.beneficiaryName,
@@ -33,6 +40,7 @@ class SaleTicketLine extends Equatable {
     quantity,
     unitPriceInCents,
     lineTotalInCents,
+    currency,
     levelLabel,
     size,
     beneficiaryName,
@@ -142,8 +150,12 @@ class SaleTicketModel extends Equatable {
   final String payerFullName;
   final String? payerPhoneNumber;
   final List<SaleTicketLine> lines;
-  final int totalInCents;
-  final String currency;
+
+  /// Le total, **par devise** — dérivé des lignes. Un panier qui règle
+  /// 450,00 $ d'uniformes et 90 000 FC de manuels n'a pas de total unique, et
+  /// les additionner imprimerait, sur le reçu remis au client, un chiffre qui
+  /// n'est l'argent de personne.
+  final MoneyBag totals;
   final SaleTicketLabels labels;
 
   const SaleTicketModel({
@@ -156,8 +168,7 @@ class SaleTicketModel extends Equatable {
     required this.payerFullName,
     this.payerPhoneNumber,
     required this.lines,
-    required this.totalInCents,
-    required this.currency,
+    required this.totals,
     required this.labels,
   });
 
@@ -165,12 +176,14 @@ class SaleTicketModel extends Equatable {
   ///
   /// Il n'y a donc ni champ de saisie, ni calcul de monnaie, ni écart possible —
   /// et c'est pourquoi le reste imprimé vaut toujours zéro.
-  int get cashReceivedInCents => totalInCents;
+  MoneyBag get cashReceived => totals;
 
   /// Toujours zéro (invariant I-5). Exposé comme une valeur plutôt qu'écrit en
   /// dur dans le gabarit : ce qui s'imprime est un fait du modèle, pas une
   /// constante de mise en page.
-  int get remainingInCents => 0;
+  /// Toujours zéro, **dans chaque devise encaissée** (invariant I-5).
+  MoneyBag get remaining =>
+      MoneyBag.of([for (final t in totals.entries) Money(0, t.currency)]);
 
   @override
   List<Object?> get props => [
@@ -183,8 +196,7 @@ class SaleTicketModel extends Equatable {
     payerFullName,
     payerPhoneNumber,
     lines,
-    totalInCents,
-    currency,
+    totals,
     labels,
   ];
 }

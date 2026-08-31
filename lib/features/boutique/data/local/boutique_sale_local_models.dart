@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+
 /// Une vente telle qu'elle est stockée localement.
 ///
 /// `id` est l'uuid **client** honoré par le serveur : il n'y a pas de
@@ -18,8 +21,6 @@ class BoutiqueSaleLocalModel {
 
   final String? collectedById;
   final String? collectedByName;
-  final int totalInCents;
-  final String currency;
 
   /// Heure **métier** de la vente (ISO-8601). C'est elle qui décide de quelle
   /// caisse la vente relève, pas sa date d'arrivée au serveur.
@@ -42,8 +43,6 @@ class BoutiqueSaleLocalModel {
     this.payerName,
     this.collectedById,
     this.collectedByName,
-    required this.totalInCents,
-    required this.currency,
     required this.soldAt,
     this.receiptDocumentId,
     this.receiptNumber,
@@ -63,8 +62,6 @@ class BoutiqueSaleLocalModel {
     'payer_name': payerName,
     'collected_by_id': collectedById,
     'collected_by_name': collectedByName,
-    'total_in_cents': totalInCents,
-    'currency': currency,
     'sold_at': soldAt,
     'receipt_document_id': receiptDocumentId,
     'receipt_number': receiptNumber,
@@ -85,8 +82,6 @@ class BoutiqueSaleLocalModel {
         payerName: map['payer_name'] as String?,
         collectedById: map['collected_by_id'] as String?,
         collectedByName: map['collected_by_name'] as String?,
-        totalInCents: (map['total_in_cents'] as num).toInt(),
-        currency: map['currency'] as String,
         soldAt: map['sold_at'] as String,
         receiptDocumentId: map['receipt_document_id'] as String?,
         receiptNumber: map['receipt_number'] as String?,
@@ -116,6 +111,9 @@ class BoutiqueSaleLineLocalModel {
   final int unitPriceInCents;
   final int lineTotalInCents;
 
+  /// La devise de cette ligne — celle de l'article tel qu'il a été vendu.
+  final String currency;
+
   /// Ce que le catalogue serveur disait — `null` quand il ne disait plus rien.
   /// **Jamais zéro**, qui se relirait « il disait gratuit ».
   final int? catalogPriceInCents;
@@ -135,6 +133,7 @@ class BoutiqueSaleLineLocalModel {
     required this.quantity,
     required this.unitPriceInCents,
     required this.lineTotalInCents,
+    required this.currency,
     this.catalogPriceInCents,
     this.position = 0,
   });
@@ -152,6 +151,7 @@ class BoutiqueSaleLineLocalModel {
     'quantity': quantity,
     'unit_price_in_cents': unitPriceInCents,
     'line_total_in_cents': lineTotalInCents,
+    'currency': currency,
     'catalog_price_in_cents': catalogPriceInCents,
     'position': position,
   };
@@ -170,7 +170,21 @@ class BoutiqueSaleLineLocalModel {
         quantity: (map['quantity'] as num).toInt(),
         unitPriceInCents: (map['unit_price_in_cents'] as num).toInt(),
         lineTotalInCents: (map['line_total_in_cents'] as num).toInt(),
+        currency: (map['currency'] as String?) ?? '',
         catalogPriceInCents: (map['catalog_price_in_cents'] as num?)?.toInt(),
         position: (map['position'] as num?)?.toInt() ?? 0,
       );
+}
+
+/// Les montants d'une vente, **dérivés de ses lignes**.
+///
+/// La vente portait un `total_in_cents` + `currency` scalaires ; ce n'étaient
+/// pas des propriétés de la vente mais le résumé de ses lignes, juste tant
+/// qu'un panier ne réglait qu'une unité. Un panier qui règle 450,00 $
+/// d'uniformes et 90 000 FC de manuels n'a pas de total unique.
+extension BoutiqueSaleLineTotals on Iterable<BoutiqueSaleLineLocalModel> {
+  MoneyBag get totals => MoneyBag.sumBy(
+    this,
+    (line) => Money.parse(line.lineTotalInCents, line.currency),
+  );
 }

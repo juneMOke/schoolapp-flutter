@@ -73,24 +73,13 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
       final soldAt = DateTime.now().toUtc().toIso8601String();
       final saleId = _ids.newId();
       final payer = cart.payer;
-      // `cart.currency` est nul si le panier mêle deux devises. Le contrat de
-      // vente ne porte qu'un `totalInCents` scalaire, et l'invariant serveur
-      // (`totalInCents == Σ lineTotalInCents`) serait satisfait *numériquement*
-      // par la somme brute de deux unités : le serveur scellerait un ticket
-      // dont le total ne veut rien dire, et un ticket scellé ne se corrige pas.
+      // La vente porte ses montants PAR DEVISE, et chaque ligne la sienne : un
+      // panier qui règle 450,00 $ d'uniformes et 90 000 FC de manuels est un
+      // acte de caisse — une vente, un reçu, pas deux.
       //
-      // Le repli « USD » qui vivait ici inventait cette unité. L'UI bloque déjà
-      // (`CartBlockerKind.mixedCurrency`) ; cette garde-ci ferme le chemin
-      // programmatique, parce que c'est ici que la vente devient une écriture.
-      final currency = cart.currency;
-      if (currency == null) {
-        return const Left(
-          ValidationFailure(
-            'Panier sans devise unique : une vente ne peut pas mêler deux '
-            'unités tant que le contrat n\'en porte qu\'une.',
-          ),
-        );
-      }
+      // Une devise dont les lignes totalisent zéro — un article offert — n'a
+      // pas à figurer dans `amounts` : `withoutZeros` s'en charge.
+      final amounts = cart.totals.withoutZeros;
       final deviceId = await _resolveDeviceId();
 
       final lines = <BoutiqueSaleLineLocalModel>[];
@@ -125,6 +114,9 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
             quantity: line.quantity,
             unitPriceInCents: unitPrice,
             lineTotalInCents: lineTotal,
+            // Celle de l'ARTICLE tel qu'il a été vendu : c'est ce que le tiroir
+            // a reçu, et aucun rafraîchissement du catalogue ne le changera.
+            currency: line.article.currency,
             position: index,
           ),
         );
@@ -137,6 +129,7 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
             quantity: line.quantity,
             unitPriceInCents: unitPrice,
             lineTotalInCents: lineTotal,
+            currency: line.article.currency,
           ),
         );
       }
@@ -164,8 +157,6 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
         ),
         collectedById: authorId,
         collectedByName: cashierName,
-        totalInCents: cart.totalInCents,
-        currency: currency,
         soldAt: soldAt,
         deviceId: deviceId,
         updatedAt: nowMs,
@@ -179,8 +170,7 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
           payerFirstName: sale.payerFirstName,
           payerMiddleName: sale.payerMiddleName,
           payerPhoneNumber: phone,
-          totalInCents: cart.totalInCents,
-          currency: currency,
+          amounts: amounts,
           soldAt: soldAt,
         ),
         lines: wireLines,

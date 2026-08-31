@@ -6,8 +6,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 
 /// Ce que le guichet voit une fois la vente écrite : elle est encaissée, et le
 /// seul geste qui reste est de remettre le ticket.
@@ -65,10 +66,7 @@ class _BoutiqueSaleSuccessDialogState extends State<BoutiqueSaleSuccessDialog> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sale = widget.sale;
-    final total = BoutiqueMoneyFormat.exact(
-      sale.sale.totalInCents,
-      sale.sale.currency,
-    );
+    final total = sale.lines.totals.entries.map(MoneyFormat.format).join(' · ');
     final receiptNumber = sale.sale.receiptNumber;
     final sealed = receiptNumber != null;
 

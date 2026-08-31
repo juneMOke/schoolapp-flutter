@@ -12,7 +12,6 @@ import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_detail_cubit.dart';
-import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/features/boutique/presentation/ticket/sale_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_detail_lines.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
@@ -20,6 +19,8 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/states
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 
 /// La fiche d'une vente déjà encaissée, ouverte depuis l'historique.
 ///
@@ -246,10 +247,7 @@ class _Body extends StatelessWidget {
         const SizedBox(height: AppDimensions.spacingS),
         _Card(
           padding: EdgeInsets.zero,
-          child: BoutiqueSaleDetailLines(
-            lines: detail.sale.lines,
-            currency: sale.currency,
-          ),
+          child: BoutiqueSaleDetailLines(lines: detail.sale.lines),
         ),
         const SizedBox(height: AppDimensions.spacingL),
         _Actions(
@@ -303,8 +301,6 @@ class _AmountBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final sale = detail.sale.sale;
-
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -336,10 +332,11 @@ class _AmountBanner extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        BoutiqueMoneyFormat.exact(
-                          sale.totalInCents,
-                          sale.currency,
-                        ),
+                        // Un total par devise, joints par « · » : le bandeau
+                        // est une ligne, et deux unités ne s'y additionnent pas.
+                        detail.sale.lines.totals.entries
+                            .map(MoneyFormat.format)
+                            .join(' · '),
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textOnDark,

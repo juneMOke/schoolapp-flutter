@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 part 'boutique_history_event.dart';
 part 'boutique_history_state.dart';

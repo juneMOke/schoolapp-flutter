@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockApi extends Mock implements BoutiqueSyncApi {}
 
@@ -20,8 +22,7 @@ BoutiqueSaleDeltaDto _sale(String id) => BoutiqueSaleDeltaDto(
   id: id,
   academicYearId: 'ay-1',
   payerLastName: 'Ndombo',
-  totalInCents: 1000,
-  currency: 'USD',
+  amounts: MoneyBag.of(const [Money(1000, 'USD')]),
   soldAt: '2026-08-29T11:42:00Z',
   serverUpdatedAt: '2026-08-29T11:45:00Z',
 );

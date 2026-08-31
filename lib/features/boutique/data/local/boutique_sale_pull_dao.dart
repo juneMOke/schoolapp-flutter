@@ -44,8 +44,6 @@ class BoutiqueSalePullDao {
           'payer_name': sale.payerName,
           'collected_by_id': sale.collectedById,
           'collected_by_name': sale.collectedByName,
-          'total_in_cents': sale.totalInCents,
-          'currency': sale.currency,
           'sold_at': sale.soldAt,
           'receipt_document_id': sale.receiptDocumentId,
           // ⚠️ Le delta ne porte PAS le numéro de la pièce, seulement son
@@ -83,6 +81,7 @@ class BoutiqueSalePullDao {
             'quantity': line.quantity,
             'unit_price_in_cents': line.unitPriceInCents,
             'line_total_in_cents': line.lineTotalInCents,
+            'currency': line.currency,
             'position': index,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
