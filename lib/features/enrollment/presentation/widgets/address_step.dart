@@ -523,12 +523,15 @@ class AddressStepState extends State<AddressStep> {
     final address = _addressController.text.trim();
     final additionalAddress = _selectedAdditionalAddress;
 
+    // L'adresse complémentaire (rue, avenue, numéro) est FACULTATIVE : dans les
+    // quartiers où rien n'est numéroté, l'exiger revenait à faire inventer une
+    // ligne pour franchir l'étape. Elle compte toujours dans `dirtyNow` — la
+    // saisir reste une modification à enregistrer.
     final validNow =
         city.isNotEmpty &&
         district.isNotEmpty &&
         municipality.isNotEmpty &&
-        address.isNotEmpty &&
-        additionalAddress.isNotEmpty;
+        address.isNotEmpty;
 
     final dirtyNow =
         city != _initialCity ||
@@ -575,9 +578,6 @@ class AddressStepState extends State<AddressStep> {
     }
     if (_addressController.text.trim().isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.neighborhood));
-    }
-    if (_selectedAdditionalAddress.isEmpty) {
-      errors.add(l10n.requiredFieldError(l10n.addressComplementary));
     }
     return errors;
   }
@@ -693,12 +693,6 @@ class AddressStepState extends State<AddressStep> {
           addressErrorText: _fieldError(
             _addressController.text,
             l10n.neighborhood,
-            l10n,
-            showValidation,
-          ),
-          additionalAddressErrorText: _fieldError(
-            _selectedAdditionalAddress,
-            l10n.addressComplementary,
             l10n,
             showValidation,
           ),
