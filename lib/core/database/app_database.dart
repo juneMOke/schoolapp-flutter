@@ -1046,6 +1046,30 @@ Future<void> migrateOfflineDatabase(
     // sa rubrique dans son type — et il nomme le taux `percentage`.
     await _rebuildReductionCatalog(db, schema);
   }
+
+  if (upTo(38)) {
+    // v38 — `payment_allocations.fee_tariff_id` : l'imputation dit désormais sur
+    // QUELLE LIGNE DE GRILLE l'argent a été reçu, plus seulement de quelle
+    // nature était le frais.
+    //
+    // Le serveur admet plusieurs lignes d'une même nature sur un niveau depuis
+    // V94 — un minerval en sept tranches — et refuse alors d'imputer au hasard
+    // (422 `AMBIGUOUS_FEE_CODE`). Le tarif est le seul discriminant utilisable
+    // des deux côtés : il vient du référentiel servi par le serveur, donc il ne
+    // peut jamais être provisoire, là où l'id de créance, lui, peut l'être.
+    //
+    // **Nullable, et aucun backfill ici.** Une créance *ad hoc* n'a légitimement
+    // pas de tarif. Et les imputations déjà en base n'en ont pas non plus : les
+    // renseigner suppose de retrouver la créance visée, ce qui n'est pas un
+    // geste de schéma — c'est la reprise des versements en attente, qui doit
+    // lire un grand-livre déjà juste et se rejouer seule.
+    if (await _hasTable(db, 'payment_allocations') &&
+        !await _hasColumn(db, 'payment_allocations', 'fee_tariff_id')) {
+      await db.execute(
+        'ALTER TABLE payment_allocations ADD COLUMN fee_tariff_id TEXT',
+      );
+    }
+  }
 }
 
 /// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée

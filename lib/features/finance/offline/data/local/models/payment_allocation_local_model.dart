@@ -6,6 +6,15 @@ class PaymentAllocationLocalModel {
   final String clientUuid;
   final String paymentId;
   final String? studentChargeId;
+
+  /// Ligne de grille payée (v38). **De meilleure autorité que
+  /// [studentChargeId]** : un tarif vient toujours du référentiel servi par le
+  /// serveur, il ne peut donc jamais être provisoire — même quand la créance
+  /// qu'il porte a été fabriquée hors ligne. C'est lui qui départage deux
+  /// tranches d'un même frais, que `fee_code` ne distingue plus.
+  ///
+  /// `null` est légitime : créance *ad hoc*, hors grille.
+  final String? feeTariffId;
   final String feeCode;
   final String studentChargeLabel;
   final int amountInCents;
@@ -16,6 +25,7 @@ class PaymentAllocationLocalModel {
     required this.clientUuid,
     required this.paymentId,
     this.studentChargeId,
+    this.feeTariffId,
     required this.feeCode,
     required this.studentChargeLabel,
     required this.amountInCents,
@@ -27,6 +37,7 @@ class PaymentAllocationLocalModel {
     'client_uuid': clientUuid,
     'payment_id': paymentId,
     'student_charge_id': studentChargeId,
+    'fee_tariff_id': feeTariffId,
     'fee_code': feeCode,
     'student_charge_label': studentChargeLabel,
     'amount_in_cents': amountInCents,
@@ -42,6 +53,7 @@ class PaymentAllocationLocalModel {
         clientUuid: clientUuid,
         paymentId: paymentId,
         studentChargeId: id,
+        feeTariffId: feeTariffId,
         feeCode: feeCode,
         studentChargeLabel: studentChargeLabel,
         amountInCents: amountInCents,
@@ -63,6 +75,11 @@ class PaymentAllocationLocalModel {
   /// propager effacerait le lien établi au versement ou par le remap de l'ACK.
   /// L'imputation disparaîtrait alors du détail du frais et, paiement encore
   /// pending, du `paid_pending` : le montant redeviendrait dû (FRONT §5).
+  ///
+  /// **`fee_tariff_id` en est exclu pour la même raison** : `PaymentDelta` ne le
+  /// porte pas, le DTO le laisse donc à `null`. L'écrire effacerait, au premier
+  /// pull qui repasse sur la ligne, le tarif figé à l'encaissement — celui-là
+  /// même qui dit sur quelle tranche l'argent a été reçu.
   Map<String, Object?> toPullPatch() => {
     'payment_id': paymentId,
     if (studentChargeId != null) 'student_charge_id': studentChargeId,
@@ -77,6 +94,7 @@ class PaymentAllocationLocalModel {
         clientUuid: m['client_uuid'] as String,
         paymentId: m['payment_id'] as String,
         studentChargeId: m['student_charge_id'] as String?,
+        feeTariffId: m['fee_tariff_id'] as String?,
         feeCode: m['fee_code'] as String,
         studentChargeLabel: m['student_charge_label'] as String,
         amountInCents: (m['amount_in_cents'] as int?) ?? 0,

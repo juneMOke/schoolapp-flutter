@@ -468,7 +468,13 @@ class AppConstants {
   // `(school_id, reduction_code, fee_code)`, et `value` devient `percentage`.
   // Tables de cache refaites plutôt que migrées : le pull du bundle les réécrit
   // en entier, et aucune base de terrain n'a jamais porté la v36.
-  static const int offlineDbSchemaVersion = 37;
+  // v38 (2026-08-31) : `payment_allocations.fee_tariff_id` — l'imputation
+  // désigne la LIGNE DE GRILLE payée, plus seulement la nature du frais. Un
+  // niveau porte plusieurs lignes d'une même nature (minerval en tranches)
+  // depuis V94 côté serveur, qui refuse alors d'imputer au hasard. Nullable
+  // (créance ad hoc) et sans backfill : renseigner le passé est la reprise des
+  // versements en attente, pas un geste de schéma.
+  static const int offlineDbSchemaVersion = 38;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

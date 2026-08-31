@@ -623,6 +623,13 @@ const TableSchema paymentsTable = TableSchema(
 /// `payment_allocations` — imputations d'un paiement sur des créances.
 /// Append-only immuable → PAS de `version`. `student_charge_id` peut pointer une
 /// créance réelle, provisoire, ou être NULL (avance / trop-perçu).
+///
+/// `fee_tariff_id` (v38) désigne la **ligne de grille** payée. Depuis que le
+/// serveur admet plusieurs lignes d'une même nature sur un niveau (minerval en
+/// tranches), `fee_code` ne départage plus deux créances : c'est le tarif qui le
+/// fait, et il est de meilleure autorité que `student_charge_id` — un tarif vient
+/// toujours du référentiel servi par le serveur, il ne peut jamais être
+/// provisoire. Nullable : une créance *ad hoc*, hors grille, n'en a pas.
 const TableSchema paymentAllocationsTable = TableSchema(
   name: 'payment_allocations',
   createTableSql: '''
@@ -631,6 +638,7 @@ const TableSchema paymentAllocationsTable = TableSchema(
       client_uuid TEXT NOT NULL,
       payment_id TEXT NOT NULL,
       student_charge_id TEXT,
+      fee_tariff_id TEXT,
       fee_code TEXT NOT NULL,
       student_charge_label TEXT NOT NULL,
       amount_in_cents INTEGER NOT NULL,
