@@ -457,7 +457,13 @@ class AppConstants {
   // réinscription. Rien à faire ici pour rendre le bloc « école précédente »
   // facultatif : ses colonnes sont nullables depuis toujours côté local — la
   // contrainte vivait dans l'écran, pas en base.
-  static const int offlineDbSchemaVersion = 35;
+  // v36 (2026-08-31) : Réductions par élève (ADR-021 V1) — `ref_reduction_types`,
+  // `ref_reduction_lines` et `enrollment_reductions`. Création pure, sans
+  // backfill et sans toucher `student_charges` : la V1 ne calcule rien, aucun
+  // montant ne change. Les deux tables de barème portent un `school_id` et PAS
+  // d'`academic_year_id` — le barème descend à la racine du bundle, sa purge au
+  // pull est donc scopée par école et non par année.
+  static const int offlineDbSchemaVersion = 36;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

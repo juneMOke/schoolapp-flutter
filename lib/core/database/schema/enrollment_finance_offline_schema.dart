@@ -406,6 +406,97 @@ const TableSchema refFeeTariffsTable = TableSchema(
   ],
 );
 
+/// `ref_reduction_types` — catalogue des natures de réduction (ADR-021 V1).
+///
+/// ⚠️ **Pas d'`academic_year_id`, et c'est structurel** : le barème descend à la
+/// RACINE du bundle référentiel, à côté de `school`, pas dans un slot d'année.
+/// La purge du pull ne peut donc PAS être scopée par année comme celle de
+/// [refFeeTariffsTable] — elle est scopée par **école**, et `school_id` est
+/// stampé depuis `CurrentUserContext`, jamais depuis le payload. Sans ce scope,
+/// un pull effacerait le barème de l'autre école sur une tablette partagée, et
+/// aucun filtre `academic_year_id` ne viendrait masquer la perte en « vide ».
+///
+/// `active` : nom à confronter à `openApi.yaml` quand V107 sera poussée
+/// (cf. REDUCTIONS_PLAN.md §6) — le back n'a rien livré à l'écriture de ceci.
+const TableSchema refReductionTypesTable = TableSchema(
+  name: 'ref_reduction_types',
+  createTableSql: '''
+    CREATE TABLE ref_reduction_types (
+      id TEXT PRIMARY KEY,
+      school_id TEXT NOT NULL DEFAULT '',
+      code TEXT NOT NULL,
+      label TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE UNIQUE INDEX idx_ref_reduction_types_school_code '
+        'ON ref_reduction_types(school_id, code)',
+  ],
+);
+
+/// `ref_reduction_lines` — le barème proprement dit : ce qu'une nature réduit,
+/// et de combien, rubrique par rubrique.
+///
+/// `value` est un **pourcentage** (0–100), pas de l'argent : d'où le `REAL`, qui
+/// ne contredit pas la règle « argent = INTEGER centimes ». Rien ne le calcule
+/// en V1 — le front stocke ce qui descend sans le réinterpréter, et l'arrondi
+/// reste un problème de V2, déjà tranché côté back (HALF_UP au centime).
+///
+/// La table est peuplée alors que **presque rien ne la lit en V1** : seul le
+/// filtre « ne proposer que les types qui réduisent réellement quelque chose »
+/// s'y appuie. C'est délibéré — la section descend de toute façon, et la jeter
+/// maintenant coûterait un palier de plus à la V2.
+///
+/// Clé de jointure : `reduction_code`, jamais l'`id` du type. Le back a lui
+/// aussi choisi la FK sur `(school_id, code)`.
+const TableSchema refReductionLinesTable = TableSchema(
+  name: 'ref_reduction_lines',
+  createTableSql: '''
+    CREATE TABLE ref_reduction_lines (
+      id TEXT PRIMARY KEY,
+      school_id TEXT NOT NULL DEFAULT '',
+      reduction_code TEXT NOT NULL,
+      fee_code TEXT NOT NULL,
+      value REAL NOT NULL,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE UNIQUE INDEX idx_ref_reduction_lines_school_code_fee '
+        'ON ref_reduction_lines(school_id, reduction_code, fee_code)',
+  ],
+);
+
+/// `enrollment_reductions` — qui a droit à quoi. **Mémoire seule en V1** :
+/// aucune créance n'en tient compte, aucun montant n'en dépend.
+///
+/// Pas de `sync_status` : cette table n'a **pas de flux propre**. Les codes
+/// voyagent dans l'agrégat d'inscription (`reductionCodes`), le serveur grave
+/// l'octroi et le renvoie — exactement le régime des créances. Rien n'est
+/// jamais poussé depuis ici, donc rien n'a à porter d'état de synchro.
+///
+/// ⚠️ Corollaire à retenir pour la V2 : côté serveur, poser un octroi ne touche
+/// PAS `enrollments.server_updated_at`. En V1 c'est sans effet — l'octroi est
+/// simultané à l'inscription, la ligne est neuve de toute façon. Dès que
+/// l'octroi se détachera, il sera invisible à notre pull sans flux à lui.
+const TableSchema enrollmentReductionsTable = TableSchema(
+  name: 'enrollment_reductions',
+  createTableSql: '''
+    CREATE TABLE enrollment_reductions (
+      enrollment_id TEXT NOT NULL,
+      reduction_code TEXT NOT NULL,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (enrollment_id, reduction_code)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_enrollment_reductions_enrollment '
+        'ON enrollment_reductions(enrollment_id)',
+  ],
+);
+
 /// `student_charges` — grand-livre de créances. `amount_paid_in_cents`/`status`
 /// sont AUTORITAIRES (écrits UNIQUEMENT par le pull ou l'ACK). Le solde
 /// optimiste d'affichage est porté à part par `optimistic_paid_in_cents`
@@ -645,6 +736,9 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,
+  refReductionTypesTable,
+  refReductionLinesTable,
+  enrollmentReductionsTable,
   studentChargesTable,
   paymentsTable,
   paymentAllocationsTable,

@@ -1010,6 +1010,32 @@ Future<void> migrateOfflineDatabase(
     // imprimerait des dollars sur un reçu dont le tiroir contient des francs.
     await _moveBoutiqueCurrencyToLines(db, schema);
   }
+
+  if (upTo(36)) {
+    // v36 — Réductions par élève (ADR-021 V1) : le catalogue du barème, et la
+    // mémoire de qui y a droit.
+    //
+    // **Trois tables neuves, aucune colonne touchée, aucun backfill.** La V1 ne
+    // calcule rien : `student_charges` garde exactement la forme qu'elle a, et
+    // les colonnes que le back ajoute de son côté (`gross_amount_in_cents`,
+    // `reduction_code`) ne descendent pas ici — rien ne les lirait.
+    //
+    // Les deux tables de barème n'ont pas d'année mais ont un `school_id` : le
+    // barème descend à la RACINE du bundle référentiel. Leur purge au pull sera
+    // donc scopée par école, et cette colonne est ce qui le rend possible.
+    for (final name in const [
+      'ref_reduction_types',
+      'ref_reduction_lines',
+      'enrollment_reductions',
+    ]) {
+      if (await _hasTable(db, name)) continue;
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(table.createTableSql);
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
 }
 
 /// Étape v35 : `boutique_sale_lines.currency`, et `boutique_sales` sans montant.

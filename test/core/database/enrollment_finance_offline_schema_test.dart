@@ -51,10 +51,13 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 17 tables', () {
+  test('la liste exportée contient exactement 20 tables', () {
     // +1 en v33 : `ref_previous_year_student_balances`, les arriérés N-1 sortis
     // de la ligne de l'élève pour porter une entrée PAR DEVISE.
-    expect(enrollmentFinanceOfflineTables, hasLength(17));
+    // +3 en v36 : le catalogue des réductions (`ref_reduction_types`,
+    // `ref_reduction_lines`) et la mémoire des octrois
+    // (`enrollment_reductions`) — ADR-021 V1.
+    expect(enrollmentFinanceOfflineTables, hasLength(20));
   });
 
   test(
