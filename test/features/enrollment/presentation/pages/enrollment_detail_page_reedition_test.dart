@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
@@ -176,7 +177,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   }
 
-  Finder modifier() => find.widgetWithText(TextButton, 'Modifier');
+  // Bouton PLEIN du design system, pas un texte posé sur la barre sombre : la
+  // seule porte de sortie de la lecture seule doit se voir comme une action.
+  Finder modifier() => find.widgetWithText(EteeloButton, 'Modifier');
 
   testWidgets('un dossier complété propose « Modifier »', (tester) async {
     await ouvrir(tester, dossier(syncState: SyncState.synced));
