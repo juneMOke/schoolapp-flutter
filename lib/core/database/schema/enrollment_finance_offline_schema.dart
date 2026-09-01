@@ -419,6 +419,60 @@ const TableSchema refFeeTariffsTable = TableSchema(
   ],
 );
 
+/// `ref_exchange_rates` — le taux de guichet paramétré par l'école, en série.
+///
+/// ⚠️ **Une série, jamais une valeur remplacée en place.** Une école qui change
+/// de taux à midi n'est pas un cas d'école à Kinshasa, et un versement encaissé
+/// hors ligne remonte parfois trois jours plus tard : on lit le taux qui valait
+/// à `paid_at`, pas celui d'aujourd'hui. D'où `effective_from` dans la clé.
+///
+/// **`rate_micros`, entier, jamais un `REAL`.** Le serveur stocke
+/// `numeric(18,6)` — six décimales, c'est exactement une micro-unité. Un
+/// flottant qui traverserait la couche métier finirait par arrondir de l'argent,
+/// et ici il l'arrondirait avant même de l'écrire. Même règle que
+/// `amount_in_cents`, pour la même raison. Le `REAL` de
+/// [refReductionLinesTable] ne s'applique pas : un pourcentage n'est pas un
+/// facteur monétaire.
+///
+/// **`base` est la devise de la CRÉANCE, `quote` la devise REÇUE.** Le pivot est
+/// la créance et non une référence unique de l'école : c'est la seule
+/// orientation qui rende l'invariant perçu/imputé vérifiable sans table de
+/// passage.
+///
+/// **Pas d'`id` : le serveur n'en donne pas** — même choix que
+/// [refReductionTypesTable]. L'identité d'un taux est sa paire dans son école à
+/// sa date ; un id local fabriqué depuis ce quadruplet n'aurait rien identifié
+/// de plus et aurait laissé croire qu'il venait du contrat.
+///
+/// **`school_id` n'est pas décoratif.** Dix flux portent déjà un curseur non
+/// scopé sur cette base ; un taux d'une école servi à la tablette d'une autre
+/// est un défaut d'argent, pas d'affichage. Il est stampé depuis
+/// `CurrentUserContext`, jamais depuis le payload.
+///
+/// `divergence_band_bp` est la bande de tolérance en points de base (200 = 2 %)
+/// paramétrée par l'école. `NULL` = « non communiquée » : le contrôle retombe
+/// alors sur le défaut de l'appelant, jamais sur zéro, qui signalerait tout.
+const TableSchema refExchangeRatesTable = TableSchema(
+  name: 'ref_exchange_rates',
+  createTableSql: '''
+    CREATE TABLE ref_exchange_rates (
+      school_id TEXT NOT NULL DEFAULT '',
+      base TEXT NOT NULL,
+      quote TEXT NOT NULL,
+      effective_from TEXT NOT NULL,
+      rate_micros INTEGER NOT NULL,
+      divergence_band_bp INTEGER,
+      set_by TEXT,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, base, quote, effective_from)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_exchange_rates_pair '
+        'ON ref_exchange_rates(school_id, base, quote, effective_from)',
+  ],
+);
+
 /// `ref_reduction_types` — catalogue des natures de réduction (ADR-021 V1).
 ///
 /// ⚠️ **Pas d'`academic_year_id`, et c'est structurel** : le barème descend à la
@@ -760,6 +814,7 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,
+  refExchangeRatesTable,
   refReductionTypesTable,
   refReductionLinesTable,
   enrollmentReductionsTable,

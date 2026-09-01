@@ -51,13 +51,15 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 20 tables', () {
+  test('la liste exportée contient exactement 21 tables', () {
     // +1 en v33 : `ref_previous_year_student_balances`, les arriérés N-1 sortis
     // de la ligne de l'élève pour porter une entrée PAR DEVISE.
     // +3 en v36 : le catalogue des réductions (`ref_reduction_types`,
     // `ref_reduction_lines`) et la mémoire des octrois
     // (`enrollment_reductions`) — ADR-021 V1.
-    expect(enrollmentFinanceOfflineTables, hasLength(20));
+    // +1 en v40 : `ref_exchange_rates`, le taux de guichet qui relie le PERÇU à
+    // l'IMPUTÉ — en série, scopé par école.
+    expect(enrollmentFinanceOfflineTables, hasLength(21));
   });
 
   test(

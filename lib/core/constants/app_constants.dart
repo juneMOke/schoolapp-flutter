@@ -501,7 +501,14 @@ class AppConstants {
   // sert déjà dans le bundle référentiel, le front le jetait : une créance ne
   // pouvait être nommée que par sa nature. Nullable et sans backfill — le pull
   // suivant réécrit la grille des années du bundle.
-  static const int offlineDbSchemaVersion = 39;
+  // v40 (2026-09-01) : le taux de guichet — `ref_exchange_rates`. La V2 de
+  // l'encaissement sépare ce qui est PERÇU (devise reçue) de ce qui est IMPUTÉ
+  // (devise de la créance) ; le nombre qui relie les deux doit être écrit
+  // quelque part, et lisible hors ligne. Table de cache référentiel, en SÉRIE
+  // (`effective_from`) : on lit le taux qui valait à `paid_at`, pas celui du
+  // jour du push. Aucun backfill — une table de cache se remplit au pull, elle
+  // ne se rattrape pas.
+  static const int offlineDbSchemaVersion = 40;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

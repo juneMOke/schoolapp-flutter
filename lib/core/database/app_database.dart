@@ -1090,6 +1090,37 @@ Future<void> migrateOfflineDatabase(
       await db.execute('ALTER TABLE ref_fee_tariffs ADD COLUMN code TEXT');
     }
   }
+  if (upTo(40)) {
+    // v40 — le taux de guichet (perçu ≠ imputé, lot F0). Table de cache
+    // référentiel, remplie par le pull : création pure, aucune donnée touchée.
+    //
+    // Un appareil qui monte de v39 reçoit une table vide, et n'ouvre donc
+    // aucune saisie bi-devise tant que le premier bundle n'a rien apporté —
+    // c'est le comportement voulu : le guichet PROPOSE un taux, il ne
+    // l'invente pas.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'ref_exchange_rates')) {
+      await db.execute('''
+        CREATE TABLE ref_exchange_rates (
+          school_id TEXT NOT NULL DEFAULT '',
+          base TEXT NOT NULL,
+          quote TEXT NOT NULL,
+          effective_from TEXT NOT NULL,
+          rate_micros INTEGER NOT NULL,
+          divergence_band_bp INTEGER,
+          set_by TEXT,
+          synced_at INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (school_id, base, quote, effective_from)
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ref_exchange_rates_pair '
+        'ON ref_exchange_rates(school_id, base, quote, effective_from)',
+      );
+    }
+  }
 }
 
 /// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée
