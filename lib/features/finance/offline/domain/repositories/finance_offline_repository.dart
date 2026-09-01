@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_tender_composition.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
 class AllocationDraft {
@@ -49,10 +50,25 @@ class RecordPaymentDraft {
   /// Ce que le guichet déclare encaisser, **par devise**. `null` → dérivé des
   /// imputations.
   ///
-  /// Déclaré ET dérivé sont comparés devise par devise avant écriture : c'est
-  /// le fail-fast qui évite un 422 `ALLOCATION_SUM_MISMATCH` sur de l'argent
-  /// déjà reçu.
+  /// ⚠️ **C'est de l'IMPUTÉ**, pas du perçu : la devise est celle de la créance
+  /// que chaque montant éteint. Déclaré ET dérivé sont comparés devise par
+  /// devise avant écriture — c'est le fail-fast qui évite un 422
+  /// `ALLOCATION_SUM_MISMATCH` sur de l'argent déjà reçu.
+  ///
+  /// Ce que le tiroir a réellement vu est dans [tenders], et rien ne relie les
+  /// deux sans le taux.
   final MoneyBag? amounts;
+
+  /// Ce qui est **entré dans le tiroir**, une entrée par couple (devise reçue,
+  /// devise de créance). `null` → identité : le parent a réglé dans la devise
+  /// de la créance, ce qui est le cas courant.
+  ///
+  /// Le couple perçu/imputé est vérifié par
+  /// `PaymentTenderComposition.check` avant écriture : sans cette épreuve,
+  /// encaisser 100 000 FC pour une créance de 50 \$ quand le taux du jour en vaut
+  /// 145 000 laisse la créance éteinte, la caisse cohérente, et 45 000 FC
+  /// partis.
+  final List<TenderDraft>? tenders;
   final List<AllocationDraft> allocations;
 
   const RecordPaymentDraft({
@@ -65,6 +81,7 @@ class RecordPaymentDraft {
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.amounts,
+    this.tenders,
     required this.allocations,
   });
 }

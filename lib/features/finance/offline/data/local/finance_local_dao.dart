@@ -56,6 +56,7 @@ class FinanceLocalDao {
   Future<void> recordPayment({
     required PaymentLocalModel payment,
     required List<PaymentAllocationLocalModel> allocations,
+    List<PaymentTenderLocalModel> tenders = const [],
     GeneratedDocumentLocalModel? receipt,
     required String outboxEntryId,
     String? schoolId,
@@ -64,6 +65,7 @@ class FinanceLocalDao {
   }) => _write.recordPayment(
     payment: payment,
     allocations: allocations,
+    tenders: tenders,
     receipt: receipt,
     outboxEntryId: outboxEntryId,
     schoolId: schoolId,

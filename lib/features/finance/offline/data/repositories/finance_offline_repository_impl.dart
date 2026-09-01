@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_tender_composition.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
@@ -106,6 +107,28 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         return const Left(ValidationFailure('Aucun montant à encaisser.'));
       }
 
+      // SECONDE garde, et elle porte sur autre chose que la première.
+      //
+      // Celle du dessus compare de l'imputé à de l'imputé — `amounts` est en
+      // devise de créance — et reste juste quoi qu'il arrive. Celle-ci confronte
+      // ce qui est entré dans le TIROIR à ce qui a été imputé, via le taux :
+      // sans elle, encaisser 100 000 FC pour une créance de 50 $ quand le taux
+      // du jour en vaut 145 000 laisse la créance éteinte, la caisse cohérente,
+      // et 45 000 FC partis — invisible à tout contrôle existant.
+      //
+      // `null` = le parent a réglé dans la devise de la créance : l'identité,
+      // c'est-à-dire le cas courant, qui ne coûte aucune arithmétique.
+      final tenderDrafts =
+          draft.tenders ??
+          PaymentTenderComposition.identityFor(allocationsBag.entries);
+      final violation = PaymentTenderComposition.check(
+        allocations: allocationsBag.entries,
+        tenders: tenderDrafts,
+      );
+      if (violation != null) {
+        return Left(ValidationFailure(violation.message));
+      }
+
       final payment = PaymentLocalModel(
         id: paymentId,
         clientUuid: paymentId,
@@ -140,6 +163,19 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
           )
           .toList();
 
+      final tenders = [
+        for (final tender in tenderDrafts)
+          PaymentTenderLocalModel(
+            id: _idGenerator.newId(),
+            clientUuid: _idGenerator.newId(),
+            paymentId: paymentId,
+            amountInCents: tender.amountInCents,
+            currency: tender.currency,
+            rateMicros: tender.rateMicros,
+            pivotCurrency: tender.pivotCurrency,
+          ),
+      ];
+
       final receipt = GeneratedDocumentLocalModel(
         id: _idGenerator.newId(),
         docDomain: 'PAYMENT',
@@ -154,6 +190,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       await _dao.recordPayment(
         payment: payment,
         allocations: allocations,
+        tenders: tenders,
         receipt: receipt,
         outboxEntryId: _idGenerator.newId(),
         // Garde-fou tenant de l'outbox : sans lui la colonne reste NULL et
