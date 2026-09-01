@@ -2,6 +2,7 @@ export '../../../../../core/components/fields/dropdown_field.dart';
 export '../../../../../core/components/fields/read_only_field.dart';
 export 'education_cycles_catalog.dart';
 export 'previous_academic_info_step_body.dart';
+export 'previous_year_options.dart';
 export 'former_student_checkbox.dart';
 export 'previous_year_fields.dart';
 export 'target_academic_info_step_body.dart';

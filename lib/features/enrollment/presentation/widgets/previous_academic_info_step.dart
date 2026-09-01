@@ -28,6 +28,15 @@ class PreviousAcademicInfoStep extends StatefulWidget {
   final bool isEditable;
   final EnrollmentStepSubmitController? stepController;
 
+  /// Libellé de l'année scolaire EN COURS dans l'école (« 2026-2027 »), tel que
+  /// le porte le contexte académique. Il ancre la liste des années antérieures
+  /// et la valeur proposée d'office ; absent, on retombe sur l'horloge.
+  final String? currentAcademicYearName;
+
+  /// Nom de l'établissement courant. Sert au seul geste « ancien élève » :
+  /// cocher la case dit que l'école précédente, c'est nous.
+  final String? schoolName;
+
   const PreviousAcademicInfoStep({
     super.key,
     required this.enrollmentDetail,
@@ -38,6 +47,8 @@ class PreviousAcademicInfoStep extends StatefulWidget {
     this.onRefreshRequested,
     this.isEditable = true,
     this.stepController,
+    this.currentAcademicYearName,
+    this.schoolName,
   });
 
   @override
@@ -82,6 +93,16 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   bool? _initialValidatedPreviousYear;
   bool _initialFormerStudent = false;
 
+  /// Vrai tant que l'année affichée vient de [_proposedYear] et non du dossier
+  /// ni du guichet — seul cas où elle a le droit d'être recalculée sous les
+  /// pieds de l'utilisateur (l'année de l'école arrivant après le premier
+  /// rendu).
+  bool _yearIsProposal = false;
+
+  /// Nom de l'école précédente tel qu'il était AVANT que « ancien élève » ne le
+  /// remplace, pour que décocher rende exactement ce qui avait été saisi.
+  String? _prevSchoolBeforeFormerStudent;
+
   bool _isDirty = false;
   bool _isValid = false;
   bool _showValidationHints = false;
@@ -102,41 +123,25 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   // Dropdown options
   // ---------------------------------------------------------------------------
 
-  /// Génère les 3 années scolaires les plus récentes selon l'année en cours.
-  /// Format : "YYYY-YYYY" (ex. "2025-2026").
-  static List<String> _buildYearOptions() {
-    final currentYear = DateTime.now().year;
-    return List<String>.unmodifiable([
-      '${currentYear - 1}-$currentYear',
-      '${currentYear - 2}-${currentYear - 1}',
-      '${currentYear - 3}-${currentYear - 2}',
-    ]);
-  }
+  List<String> get _yearOptions => PreviousYearOptions.build(
+    currentAcademicYearName: widget.currentAcademicYearName,
+  );
 
-  /// Résout [rawYear] parmi [options] en comparaison normalisée (ignore espaces
-  /// et tirets multiples).
+  /// L'année proposée d'office quand le dossier n'en porte aucune.
   ///
-  /// **Rend `null` quand le dossier ne dit rien**, et jamais `options.first`.
-  /// Le bloc « école précédente » étant facultatif, une liste qui se remplit
-  /// seule écrirait en base une année que personne n'a choisie — la même
-  /// fabrication que le serveur a cessé de produire, déplacée dans l'écran. Un
-  /// libellé illisible est conservé tel quel plutôt que remplacé : il vient
-  /// d'une vraie saisie, et le premier élément du catalogue serait une réponse
-  /// inventée à sa place.
-  static String? _resolveYear(String? rawYear, List<String> options) {
-    if (rawYear == null || rawYear.trim().isEmpty) return null;
-
-    final candidate = _normalizeYearKey(rawYear);
-    for (final opt in options) {
-      if (_normalizeYearKey(opt) == candidate) return opt;
-    }
-    return rawYear.trim();
-  }
-
-  static String _normalizeYearKey(String value) =>
-      value.replaceAll(RegExp(r'[\s\-–]+'), '-').trim();
-
-  List<String> get _yearOptions => _buildYearOptions();
+  /// **Une proposition, pas une saisie.** Elle n'entre pas dans le calcul du
+  /// « modifié » : l'étape s'ouvre propre, et un enfant jamais scolarisé la
+  /// traverse toujours sans rien enregistrer. Elle part avec le dossier dès que
+  /// le guichet touche quoi que ce soit d'autre dans le bloc — c'est-à-dire
+  /// exactement quand une scolarité antérieure est déclarée.
+  ///
+  /// Jamais en consultation : afficher une année qu'un dossier clos ne porte
+  /// pas ferait lire à l'écran autre chose que ce qui est en base.
+  String? get _proposedYear => widget.isEditable
+      ? PreviousYearOptions.previousOf(
+          currentAcademicYearName: widget.currentAcademicYearName,
+        )
+      : null;
 
   List<String> get _cycleOptions {
     final catalog = _cyclesCatalog;
@@ -287,10 +292,12 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }) {
     _isHydratingFromDetail = true;
     try {
-      _selectedYear = _resolveYear(
+      final storedYear = PreviousYearOptions.resolve(
         detail.previousAcademicYear,
-        _buildYearOptions(),
+        _yearOptions,
       );
+      _yearIsProposal = storedYear == null;
+      _selectedYear = storedYear ?? _proposedYear;
       _prevSchoolController.text = detail.previousSchoolName;
       _selectedCycle = detail.previousSchoolLevelGroup.isNotEmpty
           ? detail.previousSchoolLevelGroup
@@ -323,6 +330,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }
 
   void _markCurrentAsSavedSnapshot() {
+    _yearIsProposal = false;
     _initialPrevYear = _selectedYear ?? '';
     _initialPrevSchool = _prevSchoolController.text.trim();
     _initialPrevCycle = _selectedCycle?.trim() ?? '';
@@ -349,6 +357,20 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     if (oldWidget.stepController != widget.stepController) {
       oldWidget.stepController?.unbind(submitForm);
       widget.stepController?.bind(submitForm);
+    }
+
+    // L'année de l'école arrive du contexte académique, parfois après le
+    // premier rendu. Tant que l'année affichée n'est qu'une proposition, elle
+    // se réaligne ; dès que le dossier ou le guichet a tranché, on n'y touche
+    // plus.
+    if (oldWidget.currentAcademicYearName != widget.currentAcademicYearName &&
+        _yearIsProposal) {
+      final proposal = _proposedYear;
+      if (_selectedYear != proposal) {
+        setState(() => _selectedYear = proposal);
+        _initialPrevYear = proposal ?? '';
+        _recomputeFormState();
+      }
     }
 
     if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
@@ -423,7 +445,36 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }
 
   void _onYearChanged(String? year) {
-    setState(() => _selectedYear = year);
+    setState(() {
+      _selectedYear = year;
+      _yearIsProposal = false;
+    });
+    _recomputeFormState();
+  }
+
+  /// « Ancien élève » basculé au guichet.
+  ///
+  /// Cocher répond à la question « quelle école avant ? » : c'est la nôtre. On
+  /// remplit donc le champ École — et on retient ce qu'il contenait, pour que
+  /// décocher le rende intact. Une case cochée par HYDRATATION (réinscription)
+  /// ne passe pas par ici : elle ne doit rien réécrire dans un dossier existant.
+  void _onFormerStudentToggled(bool value) {
+    final schoolName = widget.schoolName?.trim() ?? '';
+
+    if (value) {
+      if (schoolName.isNotEmpty && _prevSchoolController.text != schoolName) {
+        _prevSchoolBeforeFormerStudent = _prevSchoolController.text;
+        _prevSchoolController.text = schoolName;
+      }
+    } else {
+      final previousText = _prevSchoolBeforeFormerStudent;
+      if (previousText != null && _prevSchoolController.text == schoolName) {
+        _prevSchoolController.text = previousText;
+      }
+      _prevSchoolBeforeFormerStudent = null;
+    }
+
+    setState(() => _formerStudent = value);
     _recomputeFormState();
   }
 
@@ -629,10 +680,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
         formerStudent: _formerStudent,
         formerStudentEditable: !_isReEnrollment,
         formerStudentChanged: _formerStudent != _initialFormerStudent,
-        onFormerStudentChanged: (value) {
-          setState(() => _formerStudent = value);
-          _recomputeFormState();
-        },
+        onFormerStudentChanged: _onFormerStudentToggled,
         showValidation: showValidation,
         isLoading: _isSaving,
         canSave: _canSave,
