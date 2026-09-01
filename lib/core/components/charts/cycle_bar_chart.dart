@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
@@ -12,10 +14,17 @@ import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 /// (via les tooltips épinglés de fl_chart, sans fond), à la couleur de la barre
 /// — utile pour un rendu « étiquette par barre » sans interaction. Par défaut
 /// off (rendu historique avec tooltip au survol sur fond sombre).
+///
+/// [verticalBottomLabels] pivote de 90° le libellé sous chaque barre. À activer
+/// quand les catégories sont nombreuses ou leurs libellés longs : à l'horizontale
+/// ils se chevauchent ou se replient sur deux lignes. La hauteur réservée sous
+/// l'axe est alors calculée sur le libellé le plus long — fl_chart contraint la
+/// hauteur du titre, un libellé plus large que la réserve serait replié.
 class CycleBarChart extends StatelessWidget {
   final List<BarChartItem> items;
   final Set<int> highlightedIndexes;
   final bool showValueLabels;
+  final bool verticalBottomLabels;
   final String Function(double value)? valueLabelFormatter;
 
   /// Couleur de l'étiquette de valeur par index (défaut : couleur de la barre).
@@ -27,9 +36,48 @@ class CycleBarChart extends StatelessWidget {
     required this.items,
     this.highlightedIndexes = const <int>{},
     this.showValueLabels = false,
+    this.verticalBottomLabels = false,
     this.valueLabelFormatter,
     this.valueLabelColorBuilder,
   });
+
+  /// Style du libellé sous l'axe pour la barre [index].
+  /// Sert aussi bien au rendu qu'à la mesure de la hauteur à réserver.
+  TextStyle _bottomLabelStyle(int index) {
+    final highlighted = highlightedIndexes.contains(index);
+    return AppTextStyles.caption.copyWith(
+      color: highlighted ? AppColors.textPrimary : AppColors.textSecondary,
+      fontWeight: highlighted ? FontWeight.w700 : FontWeight.w500,
+    );
+  }
+
+  /// Hauteur à réserver sous l'axe pour des libellés pivotés : la largeur du
+  /// libellé le plus long (au poids réellement rendu et à l'échelle de texte
+  /// courante), plafonnée pour qu'un code aberrant n'écrase pas le graphique.
+  double _verticalLabelExtent(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textDirection = Directionality.of(context);
+    // Mesurer avec le style effectivement peint : le Text du titre hérite du
+    // DefaultTextStyle ambiant (police du thème) avant d'appliquer le nôtre.
+    final ambientStyle = DefaultTextStyle.of(context).style;
+    var widest = 0.0;
+    for (var i = 0; i < items.length; i++) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: items[i].label,
+          style: ambientStyle.merge(_bottomLabelStyle(i)),
+        ),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        maxLines: 1,
+      )..layout();
+      widest = math.max(widest, painter.width);
+    }
+    return (widest + AppDimensions.spacingXS).clamp(
+      AppDimensions.enrollmentStatsChartBottomTitleHeight,
+      AppDimensions.enrollmentStatsChartVerticalLabelMaxExtent,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +87,18 @@ class CycleBarChart extends StatelessWidget {
     final topY = (maxVal * 1.25).ceilToDouble().clamp(10.0, double.infinity);
     final barWidth = (items.length > 4 ? 20.0 : 32.0);
 
+    // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur
+    // ce que l'axe lui prend, pour que les barres gardent leur amplitude.
+    final bottomReservedSize = verticalBottomLabels
+        ? _verticalLabelExtent(context)
+        : AppDimensions.enrollmentStatsChartBottomTitleHeight;
+    final chartHeight =
+        AppDimensions.enrollmentStatsChartSectionHeight +
+        (bottomReservedSize -
+            AppDimensions.enrollmentStatsChartBottomTitleHeight);
+
     return SizedBox(
-      height: AppDimensions.enrollmentStatsChartSectionHeight,
+      height: chartHeight,
       child: BarChart(
         BarChartData(
           maxY: topY,
@@ -116,28 +174,28 @@ class CycleBarChart extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 28,
+                reservedSize: bottomReservedSize,
                 getTitlesWidget: (value, meta) {
                   final idx = value.toInt();
                   if (idx < 0 || idx >= items.length) {
                     return const SizedBox.shrink();
                   }
+                  final label = Text(
+                    items[idx].label,
+                    style: _bottomLabelStyle(idx),
+                    textAlign: TextAlign.center,
+                    maxLines: verticalBottomLabels ? 1 : null,
+                    overflow: verticalBottomLabels
+                        ? TextOverflow.ellipsis
+                        : TextOverflow.clip,
+                  );
                   return Padding(
                     padding: const EdgeInsets.only(
                       top: AppDimensions.spacingXS,
                     ),
-                    child: Text(
-                      items[idx].label,
-                      style: AppTextStyles.caption.copyWith(
-                        color: highlightedIndexes.contains(idx)
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                        fontWeight: highlightedIndexes.contains(idx)
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    child: verticalBottomLabels
+                        ? RotatedBox(quarterTurns: 1, child: label)
+                        : label,
                   );
                 },
               ),
