@@ -41,6 +41,16 @@ abstract final class MoneyFormat {
   static int decimalsOf(String currency) =>
       CurrencyCode.normalize(currency) == CurrencyCode.cdf ? 0 : 2;
 
+  /// La **plus petite unité qui s'affiche** dans cette devise, en centimes :
+  /// 100 pour le franc (qui s'écrit sans décimales), 1 pour le dollar.
+  ///
+  /// C'est la tolérance d'arrondi de l'invariant perçu/imputé — « une unité
+  /// d'affichage de la devise reçue » (arbitrage n° 3 du plan back). Convertir
+  /// 30,00 $ à 1 666,67 donne 50 000,10 FC : refuser cet écart, c'est refuser
+  /// des versements justes.
+  static int displayUnitInCents(String currency) =>
+      decimalsOf(currency) == 0 ? 100 : 1;
+
   /// L'abréviation d'usage d'une devise.
   ///
   /// Le code ISO circule sur le fil ; c'est l'abréviation qui s'affiche. Une
