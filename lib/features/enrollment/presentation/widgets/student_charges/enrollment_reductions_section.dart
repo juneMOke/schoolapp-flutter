@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/reduction_selection_cubit.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les réductions déclarées au guichet (ADR-021 V1).
@@ -89,17 +90,31 @@ class _EnrollmentReductionsView extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              for (final option in state.entries)
-                _ReductionCheckbox(
-                  label: option.label,
-                  value: state.selected.contains(option.code),
-                  editable: isEditable,
-                  onTap: () => context.read<ReductionSelectionCubit>().toggle(
-                    enrollmentId,
-                    option.code,
-                  ),
-                ),
+              const SizedBox(height: AppDimensions.spacingS),
+              // Deux colonnes plutôt qu'une pile : un barème d'école porte
+              // couramment six à dix motifs, et empilés ils repoussaient les
+              // créances — la raison d'être de l'étape — sous la ligne de
+              // flottaison. La grille du wizard est réutilisée telle quelle,
+              // pour que ces cartes respirent comme les champs des autres
+              // étapes et retombent à une colonne sur un écran étroit.
+              WizardFieldsGrid(
+                maxColumns: 2,
+                spacing: AppDimensions.spacingS,
+                runSpacing: AppDimensions.spacingS,
+                fields: [
+                  for (final option in state.entries)
+                    WizardGridField(
+                      _ReductionTile(
+                        label: option.label,
+                        value: state.selected.contains(option.code),
+                        editable: isEditable,
+                        onTap: () => context
+                            .read<ReductionSelectionCubit>()
+                            .toggle(enrollmentId, option.code),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         );
@@ -108,13 +123,18 @@ class _EnrollmentReductionsView extends StatelessWidget {
   }
 }
 
-class _ReductionCheckbox extends StatelessWidget {
+/// Un motif de réduction, en carte cochable.
+///
+/// La carte porte la sélection sur toute sa surface (bordure et fond teintés) :
+/// une case à cocher seule, sur une ligne de texte nue, ne disait pas assez
+/// vite ce qui était retenu pour cette famille.
+class _ReductionTile extends StatelessWidget {
   final String label;
   final bool value;
   final bool editable;
   final VoidCallback onTap;
 
-  const _ReductionCheckbox({
+  const _ReductionTile({
     required this.label,
     required this.value,
     required this.editable,
@@ -129,37 +149,55 @@ class _ReductionCheckbox extends StatelessWidget {
       checked: value,
       enabled: editable,
       label: label,
-      child: InkWell(
-        onTap: editable ? onTap : null,
-        borderRadius: AppRadius.brSm,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: AppDimensions.spacingXS,
-          ),
-          child: Row(
-            children: [
-              // `IgnorePointer` plutôt que `onChanged: null` : la case garde sa
-              // pleine couleur en lecture seule, elle ne se grise pas.
-              IgnorePointer(
-                ignoring: !editable,
-                child: ExcludeFocus(
-                  excluding: !editable,
-                  child: Checkbox(
-                    value: value,
-                    onChanged: (_) => onTap(),
-                    activeColor: AppColors.bleuArdoise,
-                  ),
-                ),
+      child: Material(
+        color: value ? AppColors.bleuArdoiseSoft : AppColors.surface,
+        borderRadius: AppRadius.brMd,
+        child: InkWell(
+          onTap: editable ? onTap : null,
+          borderRadius: AppRadius.brMd,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: AppRadius.brMd,
+              border: Border.all(
+                color: value ? AppColors.bleuArdoise : AppColors.borderStrong,
+                width: value ? 1.5 : 1,
               ),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                right: AppDimensions.spacingM,
+                top: AppDimensions.spacingXS,
+                bottom: AppDimensions.spacingXS,
               ),
-            ],
+              child: Row(
+                children: [
+                  // `IgnorePointer` plutôt que `onChanged: null` : la case garde
+                  // sa pleine couleur en lecture seule, elle ne se grise pas.
+                  IgnorePointer(
+                    ignoring: !editable,
+                    child: ExcludeFocus(
+                      excluding: !editable,
+                      child: Checkbox(
+                        value: value,
+                        onChanged: (_) => onTap(),
+                        activeColor: AppColors.bleuArdoise,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: value ? FontWeight.w600 : FontWeight.w400,
+                        color: value
+                            ? AppColors.bleuArdoise
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
