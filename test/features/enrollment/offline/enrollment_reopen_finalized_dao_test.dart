@@ -55,11 +55,17 @@ void main() {
   /// Pose un dossier dans l'état de synchro voulu, sans passer par le
   /// finalize (qui n'atteint que PENDING_SYNC) : c'est SYNCED, l'état d'un
   /// dossier revenu du serveur, qui nous intéresse.
-  Future<void> seedFinalized(String syncStatus) async {
+  Future<void> seedFinalized(
+    String syncStatus, {
+    String businessStatus = 'IN_PROGRESS',
+  }) async {
     await draftDao.insertDraftStudent(student());
     await draftDao.insertDraftEnrollment(enrollment());
     await db.update('students', {'sync_status': syncStatus});
-    await db.update('enrollments', {'sync_status': syncStatus});
+    await db.update('enrollments', {
+      'sync_status': syncStatus,
+      'status': businessStatus,
+    });
   }
 
   Future<String?> syncStatusOf(String table, String id) async {
@@ -70,6 +76,16 @@ void main() {
       whereArgs: [id],
     );
     return rows.single['sync_status'] as String?;
+  }
+
+  Future<String?> businessStatusOf(String id) async {
+    final rows = await db.query(
+      'enrollments',
+      columns: ['status'],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return rows.single['status'] as String?;
   }
 
   Future<String?> cityOf(String id) async {
@@ -159,6 +175,48 @@ void main() {
 
       expect(await cityOf('s1'), 'Kinshasa');
       expect(await syncStatusOf('enrollments', 'e1'), SyncState.draft.dbValue);
+    });
+
+    /// Le statut métier n'est pas décoratif : c'est lui que l'écran de résumé
+    /// lit pour décider s'il reste quelque chose à valider. Il ne suivait la
+    /// ré-ouverture que par ricochet — l'étape Identité réécrit la ligne
+    /// inscription entière — de sorte que corriger la SEULE adresse laissait un
+    /// dossier `COMPLETED` déclassé en brouillon : le résumé proposait de
+    /// quitter, jamais de valider, et la correction restait en base sans
+    /// jamais partir.
+    test('le statut métier suit : un dossier complété redevient EN COURS, '
+        'même quand seule l\'adresse est corrigée', () async {
+      await seedFinalized(
+        SyncState.synced.dbValue,
+        businessStatus: 'COMPLETED',
+      );
+
+      await draftDao.updateDraftStudentColumns(
+        's1',
+        {'city': 'Kinshasa'},
+        nowMs: 200,
+        reopenEnrollmentId: 'e1',
+      );
+
+      expect(await businessStatusOf('e1'), 'IN_PROGRESS');
+      expect(await syncStatusOf('enrollments', 'e1'), SyncState.draft.dbValue);
+    });
+
+    test('un dossier que la ré-ouverture ne touche pas garde son statut '
+        'métier', () async {
+      await seedFinalized(
+        SyncState.pendingSync.dbValue,
+        businessStatus: 'COMPLETED',
+      );
+
+      await draftDao.updateDraftStudentColumns(
+        's1',
+        {'city': 'Kinshasa'},
+        nowMs: 200,
+        reopenEnrollmentId: 'e1',
+      );
+
+      expect(await businessStatusOf('e1'), 'COMPLETED');
     });
 
     test('l\'élève d\'un AUTRE dossier en cours de saisie n\'est pas '

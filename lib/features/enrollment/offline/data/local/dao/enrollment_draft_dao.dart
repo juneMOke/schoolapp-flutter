@@ -2,6 +2,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
 
 /// Écritures **DRAFT incrémentales** du wizard offline-first (M1) : chaque étape
@@ -216,6 +217,16 @@ class EnrollmentDraftDao {
   /// d'envoi, sa commande d'outbox est constituée, et le rouvrir ferait diverger
   /// ce qui part de ce qui est en base.
   ///
+  /// Le **statut métier** suit la même bascule (`→ IN_PROGRESS`). Il n'est pas
+  /// décoratif : c'est lui que l'écran de résumé lit pour décider s'il reste
+  /// quelque chose à valider. Le laisser à `COMPLETED` pendant la correction
+  /// rendait l'écran incohérent selon l'étape corrigée — l'étape Identité
+  /// réécrit la ligne inscription entière (et donc le statut), les autres non :
+  /// corriger la seule adresse laissait un dossier déclassé en brouillon que le
+  /// résumé proposait toujours de « quitter » au lieu de valider, la correction
+  /// restant alors en base sans jamais partir. C'est aussi l'état honnête d'un
+  /// dossier rouvert : il est sorti de la facturation, il n'est plus complété.
+  ///
   /// Idempotent : sur un dossier déjà `DRAFT`, aucune ligne ne bouge.
   Future<void> reopenFinalizedDossier(
     DatabaseExecutor txn,
@@ -237,7 +248,11 @@ class EnrollmentDraftDao {
 
     await txn.update(
       'enrollments',
-      {'sync_status': SyncState.draft.dbValue, 'updated_at': nowMs},
+      {
+        'sync_status': SyncState.draft.dbValue,
+        'status': OfflineEnrollmentStatus.inProgress.apiValue,
+        'updated_at': nowMs,
+      },
       where: 'id = ?',
       whereArgs: [enrollmentId],
     );
