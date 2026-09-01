@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/status/last_sync_label.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// État de synchronisation globale de l'application.
@@ -95,31 +96,13 @@ class SyncIndicator extends StatelessWidget {
     return pill;
   }
 
-  /// Texte relatif ("à l'instant" / "il y a N min/h/j") depuis [lastSyncAtMs]
-  /// (heure serveur) jusqu'à maintenant (horloge device — sert uniquement à
-  /// mesurer un écoulé, jamais à dater un évènement, donc pas de mélange
-  /// d'horloges problématique). `null` si aucune synchro connue.
-  String? _relativeLastSync(AppLocalizations l10n) {
-    final lastSync = lastSyncAtMs;
-    if (lastSync == null) return null;
-    // Clampé à 0 : l'horloge serveur peut être en avance sur une horloge
-    // device dérivée (tablette hors-ligne) — un écoulé négatif ne doit pas se
-    // lire comme "à l'instant" indéfiniment.
-    final rawElapsed = DateTime.now().millisecondsSinceEpoch - lastSync;
-    final elapsed = rawElapsed < 0 ? 0 : rawElapsed;
-    if (elapsed < Duration.millisecondsPerMinute) {
-      return l10n.syncLastSyncJustNow;
-    }
-    if (elapsed < Duration.millisecondsPerHour) {
-      return l10n.syncLastSyncMinutesAgo(
-        elapsed ~/ Duration.millisecondsPerMinute,
-      );
-    }
-    if (elapsed < Duration.millisecondsPerDay) {
-      return l10n.syncLastSyncHoursAgo(elapsed ~/ Duration.millisecondsPerHour);
-    }
-    return l10n.syncLastSyncDaysAgo(elapsed ~/ Duration.millisecondsPerDay);
-  }
+  /// Texte relatif depuis [lastSyncAtMs], `null` si aucune synchro connue.
+  ///
+  /// Le calcul vit dans [relativeLastSyncLabel] : la caisse l'affiche aussi,
+  /// sous son total, et deux formulations du même écoulé finiraient par se
+  /// contredire à quelques minutes près.
+  String? _relativeLastSync(AppLocalizations l10n) =>
+      relativeLastSyncLabel(l10n, lastSyncAtMs);
 
   _SyncAppearance _appearanceFor(SyncStatus status, AppLocalizations l10n) {
     return switch (status) {
