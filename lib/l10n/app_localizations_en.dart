@@ -2651,6 +2651,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requiredSemanticSuffix => 'required';
 
   @override
+  String get selectSearchPlaceholder => 'Search…';
+
+  @override
+  String get selectSearchClear => 'Clear search';
+
+  @override
+  String get selectNoOptionMatches => 'No option matches';
+
+  @override
+  String get selectNoOptionAvailable => 'No option available';
+
+  @override
+  String get selectOpenPanelSemantic => 'Open the option list';
+
+  @override
   String get dateHint => 'dd/mm/yyyy';
 
   @override

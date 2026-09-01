@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_option_tile.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -85,9 +87,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(2), 'Alain');
     await tester.pump();
 
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(EteeloSelectField));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(DropdownMenuItem<String>).last);
+    await tester.tap(find.byType(EteeloSelectOptionTile<String>).last);
     await tester.pumpAndSettle();
 
     expect(notifiedStatus, isNotNull);

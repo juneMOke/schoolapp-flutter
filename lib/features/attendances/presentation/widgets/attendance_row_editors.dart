@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
@@ -81,58 +82,24 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hasMissingReason = enabled && showValidationError;
-    final accent = hasMissingReason
-        ? AppColors.terreCuite.withValues(alpha: 0.65)
-        : AppColors.border;
 
-    return DropdownButtonFormField<AbsenceReason>(
-      initialValue: value,
+    return EteeloSelectInput<AbsenceReason>(
+      label: l10n.attendanceTableAbsenceReason,
+      value: value,
+      enabled: enabled,
       autofocus: autofocus,
-      isExpanded: true,
-      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      iconEnabledColor: AppColors.textSecondary,
-      iconDisabledColor: AppColors.textMuted,
-      dropdownColor: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-      style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        labelText: l10n.attendanceTableAbsenceReason,
-        helperText: enabled
-            ? (hasMissingReason ? l10n.attendanceReasonRequiredHint : null)
-            : l10n.attendanceReasonDisabledHint,
-        filled: true,
-        fillColor: enabled
-            ? AppColors.background
-            : AppColors.financeDetailMutedSurface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: BorderSide(color: accent),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: BorderSide(color: accent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: BorderSide(
-            color: hasMissingReason
-                ? AppColors.terreCuite
-                : AppColors.classesFocusRing,
-            width: 1.6,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.spacingS,
-          vertical: AppDimensions.spacingS,
-        ),
-      ),
+      minWidth: 0,
+      // Un motif manquant BLOQUE l'enregistrement : c'est une erreur de
+      // validation, elle passe donc par le canal d'erreur du design-system
+      // (bordure et texte rouges) et non par une aide grisée qu'on peut lire
+      // comme une simple suggestion.
+      errorText: hasMissingReason ? l10n.attendanceReasonRequiredHint : null,
+      helperText: enabled ? null : l10n.attendanceReasonDisabledHint,
       // La liste de SAISIE, pas le catalogue de transport : les congés de
       // salarié et le verdict `unjustified` n'y sont pas.
       //
-      // ⚠️ `unsupported` non plus — mais un `DropdownButtonFormField` dont la
-      // valeur courante n'est pas dans ses items **lève** (« exactly one item
-      // with value »). Quand la ligne porte un motif que cette version ignore,
-      // on l'ajoute donc à la liste, uniquement pour cette ligne, le temps que
+      // `unsupported` non plus — mais quand la ligne porte déjà un motif que
+      // cette version ignore, on l'ajoute pour cette ligne seule, le temps que
       // l'enseignant choisisse autre chose. Il le voit, l'enregistrement reste
       // bloqué, et rien n'est réécrit dans son dos.
       items:
@@ -142,16 +109,13 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
                   AbsenceReason.unsupported,
               ]
               .map(
-                (reason) => DropdownMenuItem<AbsenceReason>(
+                (reason) => EteeloSelectItem<AbsenceReason>(
                   value: reason,
-                  child: Text(
-                    AttendancePageHelpers.absenceReasonLabel(l10n, reason),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  label: AttendancePageHelpers.absenceReasonLabel(l10n, reason),
                 ),
               )
               .toList(growable: false),
-      onChanged: enabled ? onChanged : null,
+      onChanged: onChanged,
     );
   }
 }

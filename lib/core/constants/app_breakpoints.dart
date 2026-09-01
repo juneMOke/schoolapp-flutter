@@ -11,6 +11,13 @@ class AppBreakpoints {
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;
 
+  // Panneau d'options d'un select (`EteeloSelectPanelMode.adaptive`). Au-delà,
+  // popover ancré sous le champ : le formulaire reste visible autour du choix,
+  // et la liste s'ouvre là où l'œil est déjà. En deçà, feuille modale — un
+  // popover y serait à la fois trop étroit pour lire un libellé entier et trop
+  // bas pour être atteint au pouce.
+  static const double selectPopoverMin = detailCompactMax;
+
   /// Assistant de mise en service — deux bascules seulement.
   ///
   /// À [configurationGridMax] les grilles de champs passent de quatre colonnes

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_search_actions.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
@@ -40,43 +39,43 @@ class AttendanceSearchFields extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final fields = [
-      _AttendanceDropdownField(
+      _AttendanceSelectField(
         width: AppDimensions.attendanceCycleFieldWidth,
         label: l10n.attendanceCycleLabel,
         value: selectedCycleId,
         items: cycleOptions
             .map(
-              (option) => DropdownMenuItem<String>(
+              (option) => EteeloSelectItem<String>(
                 value: option.id,
-                child: Text(option.label, overflow: TextOverflow.ellipsis),
+                label: option.label,
               ),
             )
             .toList(growable: false),
         onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
       ),
-      _AttendanceDropdownField(
+      _AttendanceSelectField(
         width: AppDimensions.attendanceLevelFieldWidth,
         label: l10n.attendanceLevelLabel,
         value: selectedLevelKey,
         items: levelOptions
             .map(
-              (option) => DropdownMenuItem<String>(
+              (option) => EteeloSelectItem<String>(
                 value: option.key,
-                child: Text(option.label, overflow: TextOverflow.ellipsis),
+                label: option.label,
               ),
             )
             .toList(growable: false),
         onChanged: levelOptions.isEmpty ? null : onLevelChanged,
       ),
-      _AttendanceDropdownField(
+      _AttendanceSelectField(
         width: AppDimensions.attendanceClassFieldWidth,
         label: l10n.attendanceClassLabel,
         value: selectedClassroomId,
         items: classroomOptions
             .map(
-              (classroom) => DropdownMenuItem<String>(
+              (classroom) => EteeloSelectItem<String>(
                 value: classroom.id,
-                child: Text(classroom.name, overflow: TextOverflow.ellipsis),
+                label: classroom.name,
               ),
             )
             .toList(growable: false),
@@ -104,6 +103,10 @@ class AttendanceSearchFields extends StatelessWidget {
           curve: AppMotion.outCurve,
           child: canRenderSingleLine
               ? Row(
+                  // Les trois selects portent leur libellé AU-DESSUS du champ
+                  // (design-system) ; sans alignement bas, le bouton de date,
+                  // qui n'en a pas, flotterait au milieu de leur hauteur.
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     fields[0],
                     const SizedBox(width: AppDimensions.spacingS),
@@ -117,7 +120,7 @@ class AttendanceSearchFields extends StatelessWidget {
               : Wrap(
                   spacing: AppDimensions.spacingS,
                   runSpacing: AppDimensions.spacingS,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.end,
                   children: fields,
                 ),
         );
@@ -126,14 +129,14 @@ class AttendanceSearchFields extends StatelessWidget {
   }
 }
 
-class _AttendanceDropdownField extends StatelessWidget {
+class _AttendanceSelectField extends StatelessWidget {
   final double width;
   final String label;
   final String? value;
-  final List<DropdownMenuItem<String>> items;
+  final List<EteeloSelectItem<String>> items;
   final ValueChanged<String?>? onChanged;
 
-  const _AttendanceDropdownField({
+  const _AttendanceSelectField({
     required this.width,
     required this.label,
     required this.value,
@@ -145,48 +148,18 @@ class _AttendanceDropdownField extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      child: DropdownButtonFormField<String>(
-        initialValue: value,
-        // La valeur sélectionnée occupe toute la largeur du champ et s'ellipse
-        // au lieu de déborder (cas du libellé de cycle plus large que le champ).
-        isExpanded: true,
-        style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
-        decoration: _fieldDecoration(label),
+      child: EteeloSelectInput<String>(
+        label: label,
+        value: value,
         items: items,
-        onChanged: onChanged,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded),
-        iconEnabledColor: AppColors.textSecondary,
-        iconDisabledColor: AppColors.textMuted,
-        dropdownColor: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-      ),
-    );
-  }
-
-  InputDecoration _fieldDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: AppColors.background,
-      floatingLabelStyle: const TextStyle(color: AppColors.classesFocusRing),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: const BorderSide(color: AppColors.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: const BorderSide(
-          color: AppColors.classesFocusRing,
-          width: 1.6,
-        ),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingS,
+        // Une liste vide (référentiel pas encore descendu) grise le champ :
+        // c'est le repère « pas disponible » du design-system, pas un champ
+        // ouvert sur rien.
+        enabled: onChanged != null,
+        // Les largeurs du filtre d'appel (170 dp) sont plus étroites que le
+        // plancher par défaut du select : c'est la barre qui commande ici.
+        minWidth: 0,
+        onChanged: (selected) => onChanged?.call(selected),
       ),
     );
   }

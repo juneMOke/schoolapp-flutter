@@ -4220,6 +4220,36 @@ abstract class AppLocalizations {
   /// **'required'**
   String get requiredSemanticSuffix;
 
+  /// No description provided for @selectSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search…'**
+  String get selectSearchPlaceholder;
+
+  /// No description provided for @selectSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get selectSearchClear;
+
+  /// No description provided for @selectNoOptionMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No option matches'**
+  String get selectNoOptionMatches;
+
+  /// No description provided for @selectNoOptionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No option available'**
+  String get selectNoOptionAvailable;
+
+  /// No description provided for @selectOpenPanelSemantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the option list'**
+  String get selectOpenPanelSemantic;
+
   /// No description provided for @dateHint.
   ///
   /// In en, this message translates to:

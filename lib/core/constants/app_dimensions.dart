@@ -248,4 +248,9 @@ class AppDimensions {
   static const dossierBadgeMinSize = 19.0;
   // Hauteur du dégradé soft → surface du panneau d'onglet.
   static const dossierPanelTintHeight = 260.0;
+
+  // Boutique — sélecteur de niveau d'une ligne de panier walk-in. Il partage
+  // la rangée avec la puce bénéficiaire et le compteur : assez large pour un
+  // libellé de niveau, assez court pour que la rangée ne se replie pas.
+  static const boutiqueCartLevelSelectorWidth = 168.0;
 }

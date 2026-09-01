@@ -408,6 +408,52 @@ les chaînes i18n (titre/message/action) et câble les callbacks
 - L'erreur s'affiche **en place** (pas de snackbar redondant pour un échec de
   chargement).
 
+## Selects (listes de choix)
+
+**Un seul select dans l'application : `EteeloSelectInput`.** Aucun
+`DropdownButton` / `DropdownButtonFormField` Material ne subsiste dans `lib/`
+et il n'en faut pas de nouveau — le menu Material n'accepte ni recherche, ni
+coche, ni état vide, et ignore les tokens du design-system.
+
+Le composant se lit en deux pièces (`lib/core/widgets/eteelo_select/`) :
+
+| Pièce | Fichier | Rôle |
+|---|---|---|
+| Champ fermé | `eteelo_select_field.dart` | Repos, focus, erreur, chevron qui se retourne à l'ouverture. Identique quel que soit le panneau. |
+| Panneau ouvert | `eteelo_select_popover.dart` / `eteelo_select_sheet.dart` | Deux formes, **un seul contenu** : `eteelo_select_panel_body.dart` (recherche + liste + état vide + clavier). |
+
+### Ce qui est automatique (ne pas le recâbler à la main)
+
+- **Forme du panneau** — `EteeloSelectPanelMode.adaptive` par défaut : popover
+  ancré sous le champ au-delà de `AppBreakpoints.selectPopoverMin` (760),
+  feuille modale en deçà. Arbitré à chaque **ouverture**, pas à la construction.
+- **Recherche** — apparaît d'elle-même dès
+  `EteeloSelectConstants.searchThreshold` (8) options. Repli des accents, des
+  tirets et des apostrophes des **deux** côtés (`eteelo_select_search.dart`) :
+  « ngíri » trouve « Ngiri-Ngiri ». Tous les mots de la requête sont exigés,
+  dans n'importe quel ordre. Forcer via `searchable:` seulement si le seuil
+  ment (liste courte mais illisible, liste longue mais déjà filtrée en amont).
+- **Clavier** — flèches pour parcourir, Entrée pour choisir, Échap pour sortir ;
+  le champ fermé s'ouvre à Entrée / Espace / flèche bas.
+- **Doublons et valeur orpheline** — dédoublonnés par valeur, et une valeur
+  absente des options retombe sur le placeholder (cascade géo en cours de
+  chargement) au lieu de lever.
+- **Sélection** — fond teinté + coche sur l'option courante, et le panneau
+  **ouvre sur elle**. Un `itemBuilder` reprend la main : la ligne ne dessine
+  alors ni fond ni coche, c'est l'appelant qui les porte (il reçoit
+  `isSelected`).
+
+### Les paramètres qui se choisissent
+
+| Paramètre | Quand |
+|---|---|
+| `hideLabel` | Le champ est déjà nommé par son contexte (rangée de puces, barre précédée de « Trier », modale qui pose ses propres intitulés). Le libellé reste pour les lecteurs d'écran et pour titrer la feuille. |
+| `density: compact` | Sélecteur enchâssé dans une rangée déjà dense. Jamais pour un champ de formulaire. |
+| `helperText` | Précision sous le champ. Effacée par `errorText` — jamais les deux empilées. |
+| `placeholderTone: alert` | Champ **vide qui bloque** une suite (niveau d'une ligne de panier walk-in), quand un message d'erreur déplacerait toute la rangée. |
+| `minWidth: 0` | Le conteneur commande la largeur (barre de filtres à 170 dp) ; sinon le plancher de 180 déborde. |
+| `readOnly` vs `enabled: false` | `readOnly` garde la pleine couleur (valeur figée, consultable) ; `enabled: false` grise (repère « pas disponible », cascade en attente). |
+
 ## Formulaires de recherche
 
 ### Bascule de mode (recherche bi-mode)
