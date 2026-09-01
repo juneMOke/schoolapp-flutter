@@ -93,6 +93,31 @@ void main() {
       ).called(1);
     });
 
+    testWidgets('UN seul nom → recherche par nom, jamais repli sur le statut', (
+      tester,
+    ) async {
+      await dispatch(
+        tester,
+        const StandardSearchCommand(status: 'IN_PROGRESS', lastName: 'Ndiaye'),
+      );
+
+      // Le repli `LocalListByStatusRequested` ne porte AUCUN nom : y router une
+      // saisie partielle rendrait la liste entière sous les yeux de quelqu'un
+      // qui vient de taper un nom.
+      verify(
+        () => bloc.add(
+          const LocalListByStudentNameRequested(
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2025',
+            firstName: '',
+            lastName: 'Ndiaye',
+            surname: '',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
     testWidgets('date de naissance seule → recherche locale par DOB', (
       tester,
     ) async {

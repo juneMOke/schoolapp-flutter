@@ -58,6 +58,10 @@ class ClassesListPageHelpers {
   /// (`EnrollmentLocalListProjector`) : « kab » doit trouver « Kabongo » des
   /// deux côtés, sans quoi le même geste rendrait deux résultats différents
   /// selon qu'une classe est choisie ou non.
+  ///
+  /// Quand plusieurs noms sont remplis, ils se combinent en **OU** — même
+  /// règle que le listing des inscriptions, pour la même raison : le même
+  /// geste doit rendre le même résultat des deux côtés.
   static List<ClassroomMember> filterMembers(
     List<ClassroomMember> members,
     ClassesListSearchRequest request,
@@ -68,19 +72,11 @@ class ClassesListPageHelpers {
 
     return members
         .where(
-          (member) =>
-              SearchNormalizationHelper.contains(
-                member.studentFirstName,
-                request.firstName,
-              ) &&
-              SearchNormalizationHelper.contains(
-                member.studentLastName,
-                request.lastName,
-              ) &&
-              SearchNormalizationHelper.contains(
-                member.studentMiddleName,
-                request.surname,
-              ),
+          (member) => SearchNormalizationHelper.containsAny([
+            (member.studentFirstName, request.firstName),
+            (member.studentLastName, request.lastName),
+            (member.studentMiddleName, request.surname),
+          ]),
         )
         .toList(growable: false);
   }

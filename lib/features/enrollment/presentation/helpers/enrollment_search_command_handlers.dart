@@ -53,8 +53,13 @@ class EnrollmentSearchCommandHandlers {
         final lastName = command.lastName?.trim() ?? '';
         final surname = command.surname?.trim() ?? '';
         final dateOfBirth = command.dateOfBirth?.trim() ?? '';
-        final hasAllNames =
-            firstName.isNotEmpty && lastName.isNotEmpty && surname.isNotEmpty;
+        // UN seul nom suffit à ouvrir la recherche (les trois se combinent en
+        // OU côté projection). Exiger les trois ici renverrait une saisie
+        // partielle sur `LocalListByStatusRequested`, qui ne porte AUCUN nom :
+        // l'écran répondrait par la liste entière, comme si rien n'avait été
+        // tapé.
+        final hasAnyName =
+            firstName.isNotEmpty || lastName.isNotEmpty || surname.isNotEmpty;
         final hasDate = dateOfBirth.isNotEmpty;
 
         final academicYearId = screenCtx.academicYearId;
@@ -63,7 +68,7 @@ class EnrollmentSearchCommandHandlers {
         // réapparaître un dossier de réinscription (même statut PRE_REGISTERED).
         final enrollmentType = screenCtx.enrollmentType;
 
-        if (hasAllNames && hasDate) {
+        if (hasAnyName && hasDate) {
           bloc.add(
             LocalListByStudentNamesAndDateOfBirthRequested(
               firstName: firstName,
@@ -79,7 +84,7 @@ class EnrollmentSearchCommandHandlers {
           return;
         }
 
-        if (hasAllNames) {
+        if (hasAnyName) {
           bloc.add(
             LocalListByStudentNameRequested(
               firstName: firstName,

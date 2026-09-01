@@ -41,7 +41,7 @@ class FacturationDetailIntent extends Equatable {
   ///
   /// ⚠️ **La classe n'en fait délibérément pas partie**, alors qu'elle y était.
   /// Une recherche **par identité** n'exige aucun niveau (le formulaire bi-mode
-  /// arme sur « les trois noms **ou** un niveau »), le résumé d'élève n'en
+  /// arme sur « un nom **ou** un niveau »), le résumé d'élève n'en
   /// porte pas, et le seul niveau disponible est celui des derniers critères —
   /// vide dans ce mode. La fiche ouverte depuis un résultat de recherche par
   /// nom échouait donc cette condition et rendait une carte « contexte

@@ -102,13 +102,18 @@ class ClassesListSearchRequest extends Equatable {
       selectedLevel != null ||
       selectedClassroom != null;
 
-  /// Ce qui arme la recherche, par mode : un niveau d'un côté, les trois noms
-  /// de l'autre. L'affinage par nom du mode classe n'arme rien.
+  /// Ce qui arme la recherche, par mode : un niveau d'un côté, **au moins un**
+  /// nom de l'autre. L'affinage par nom du mode classe n'arme rien.
+  ///
+  /// Seconde garde après celle du bouton, et elle doit dire la même chose :
+  /// exiger ici les trois noms laisserait `ClassesListPage._handleSearch`
+  /// jeter en silence une recherche que le formulaire vient pourtant
+  /// d'autoriser — on taperait un nom, on cliquerait, et rien ne bougerait.
   bool get hasAnyCriteria => switch (mode) {
     SearchMode.level => selectedLevel != null,
     SearchMode.identity =>
-      firstName.trim().isNotEmpty &&
-          lastName.trim().isNotEmpty &&
+      firstName.trim().isNotEmpty ||
+          lastName.trim().isNotEmpty ||
           surname.trim().isNotEmpty,
   };
 

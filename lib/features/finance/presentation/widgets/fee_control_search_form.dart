@@ -14,7 +14,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Formulaire de recherche du Contrôle des frais.
 ///
 /// Il **n'enveloppe pas** `BiModeSearchForm` : celui-ci arme la recherche sur un
-/// « OU » (les trois noms **ou** un niveau), alors qu'ici la classe et le frais
+/// « OU » (un nom **ou** un niveau), alors qu'ici la classe et le frais
 /// sont obligatoires — un frais n'existe que rapporté à un niveau. Y faire
 /// entrer un troisième mode dénaturerait un composant que la Facturation, les
 /// Documents, la Ré- et la Pré-inscription partagent tous les quatre. On suit

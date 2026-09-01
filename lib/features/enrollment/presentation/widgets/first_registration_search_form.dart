@@ -106,9 +106,13 @@ class _FirstRegistrationSearchFormState
     super.dispose();
   }
 
-  bool _hasAllNames() =>
-      _firstNameController.text.trim().isNotEmpty &&
-      _lastNameController.text.trim().isNotEmpty &&
+  /// Un seul nom suffit à armer la recherche : les trois se combinent en OU
+  /// côté filtrage, exiger les trois ici rendrait ce OU inatteignable — on ne
+  /// peut pas chercher quelqu'un dont on ne connaît qu'un nom si le bouton
+  /// reste éteint tant que les deux autres sont vides.
+  bool _hasAnyName() =>
+      _firstNameController.text.trim().isNotEmpty ||
+      _lastNameController.text.trim().isNotEmpty ||
       _surnameController.text.trim().isNotEmpty;
 
   bool _hasLevel() =>
@@ -121,7 +125,7 @@ class _FirstRegistrationSearchFormState
       !widget.isLoading &&
       switch (_mode) {
         SearchMode.level => _hasLevel(),
-        SearchMode.identity => _hasAllNames(),
+        SearchMode.identity => _hasAnyName(),
       };
 
   List<SearchLevelOption> get _uniqueOptions {
@@ -160,7 +164,7 @@ class _FirstRegistrationSearchFormState
       );
       return;
     }
-    if (_mode == SearchMode.identity && _hasAllNames()) {
+    if (_mode == SearchMode.identity && _hasAnyName()) {
       widget.dispatch(
         StandardSearchCommand(
           firstName: _firstNameController.text.trim(),

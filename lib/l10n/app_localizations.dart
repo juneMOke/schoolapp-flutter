@@ -3485,7 +3485,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchModeIdentityHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.'**
+  /// **'One name is enough: last name, middle name or first name. To list a whole class, switch to “By class”.'**
   String get searchModeIdentityHint;
 
   /// No description provided for @searchRefineByNameLabel.
@@ -5717,7 +5717,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationSearchHelpBanner.
   ///
   /// In en, this message translates to:
-  /// **'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).'**
+  /// **'Search a whole class (cycle + level), or one specific student (one name is enough).'**
   String get facturationSearchHelpBanner;
 
   /// No description provided for @facturationSearchCycleLabel.

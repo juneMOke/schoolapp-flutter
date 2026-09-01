@@ -2237,7 +2237,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get searchModeIdentityHint =>
-      'Renseignez le nom, le post-nom et le prénom de l\'élève. Pour lister toute une classe, basculez sur « Par classe ».';
+      'Un seul nom suffit : nom, post-nom ou prénom. Pour lister toute une classe, basculez sur « Par classe ».';
 
   @override
   String get searchRefineByNameLabel => 'Affiner par nom (facultatif)';
@@ -3497,7 +3497,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationSearchHelpBanner =>
-      'Recherchez toute une classe (cycle + niveau), ou un élève précis (nom + post-nom + prénom).';
+      'Recherchez toute une classe (cycle + niveau), ou un élève précis (un seul nom suffit).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';

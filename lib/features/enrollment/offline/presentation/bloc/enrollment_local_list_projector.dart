@@ -27,14 +27,31 @@ class EnrollmentLocalPage {
 /// Le DAO local n'offre que des filtres grossiers (`getEnrollments(status)` /
 /// `searchByAcademicInfo(niveaux)`). On applique ici le reste des critères
 /// saisis (parties de nom en « contient » insensible à la casse et aux accents,
-/// DOB exacte) pour retrouver une sémantique de recherche fidèle à l'online,
-/// puis on projette chaque `LocalEnrollmentListItem` sur le `EnrollmentSummary`
-/// consommé par les widgets de résultats, et enfin on découpe la page demandée.
+/// DOB exacte), puis on projette chaque `LocalEnrollmentListItem` sur le
+/// `EnrollmentSummary` consommé par les widgets de résultats, et enfin on
+/// découpe la page demandée.
+///
+/// Les trois noms se combinent en **OU** : celui qui ne connaît que le prénom
+/// d'un élève le retrouve sans devoir inventer les deux autres. La DOB, elle,
+/// reste en **ET** — ce n'est pas un nom mais une précision, et l'ajouter au OU
+/// ferait remonter toute une classe d'âge dès qu'on la renseigne.
 class EnrollmentLocalListProjector {
   const EnrollmentLocalListProjector._();
 
-  static bool _contains(String? field, String? term) =>
-      SearchNormalizationHelper.contains(field, term);
+  /// Vrai si **l'un** des noms saisis retrouve la colonne qu'il vise.
+  /// Aucun nom saisi ⇒ vrai (cf. [SearchNormalizationHelper.containsAny]).
+  static bool _matchesNames(
+    String? itemFirstName,
+    String? itemLastName,
+    String? itemSurname, {
+    String? firstName,
+    String? lastName,
+    String? surname,
+  }) => SearchNormalizationHelper.containsAny([
+    (itemFirstName, firstName),
+    (itemLastName, lastName),
+    (itemSurname, surname),
+  ]);
 
   /// Filtre client-side puis mappe en résumés (ordre du DAO préservé).
   static List<EnrollmentSummary> project(
@@ -46,9 +63,16 @@ class EnrollmentLocalListProjector {
   }) {
     final dob = dateOfBirth?.trim() ?? '';
     return items
-        .where((i) => _contains(i.firstName, firstName))
-        .where((i) => _contains(i.lastName, lastName))
-        .where((i) => _contains(i.surname, surname))
+        .where(
+          (i) => _matchesNames(
+            i.firstName,
+            i.lastName,
+            i.surname,
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+          ),
+        )
         .where((i) => dob.isEmpty || i.dateOfBirth == dob)
         .map(localItemToEnrollmentSummary)
         .toList(growable: false);
@@ -87,9 +111,16 @@ class EnrollmentLocalListProjector {
     final dob = dateOfBirth?.trim() ?? '';
     return order
         .map((id) => byStudent[id]!)
-        .where((s) => _contains(s.student.firstName, firstName))
-        .where((s) => _contains(s.student.lastName, lastName))
-        .where((s) => _contains(s.student.surname, surname))
+        .where(
+          (s) => _matchesNames(
+            s.student.firstName,
+            s.student.lastName,
+            s.student.surname,
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+          ),
+        )
         .where((s) => dob.isEmpty || s.student.dateOfBirth == dob)
         .toList(growable: false);
   }
@@ -127,9 +158,16 @@ class EnrollmentLocalListProjector {
     final dob = dateOfBirth?.trim() ?? '';
     return order
         .map((id) => byId[id]!)
-        .where((s) => _contains(s.student.firstName, firstName))
-        .where((s) => _contains(s.student.lastName, lastName))
-        .where((s) => _contains(s.student.surname, surname))
+        .where(
+          (s) => _matchesNames(
+            s.student.firstName,
+            s.student.lastName,
+            s.student.surname,
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+          ),
+        )
         .where((s) => dob.isEmpty || s.student.dateOfBirth == dob)
         .toList(growable: false);
   }

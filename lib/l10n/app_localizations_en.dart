@@ -2226,7 +2226,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchModeIdentityHint =>
-      'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.';
+      'One name is enough: last name, middle name or first name. To list a whole class, switch to “By class”.';
 
   @override
   String get searchRefineByNameLabel => 'Refine by last name (optional)';
@@ -3476,7 +3476,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationSearchHelpBanner =>
-      'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).';
+      'Search a whole class (cycle + level), or one specific student (one name is enough).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';

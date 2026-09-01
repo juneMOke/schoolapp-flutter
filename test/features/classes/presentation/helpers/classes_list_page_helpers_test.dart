@@ -183,25 +183,55 @@ void main() {
         );
       });
 
-      test(
-        'les trois noms se conjuguent quand ils sont tous là (helper générique)',
-        () {
-          const request = ClassesListSearchRequest(
-            mode: SearchMode.level,
-            firstName: 'jean',
-            lastName: 'dup',
-            surname: 'cla',
-            selectedCycle: cycle,
-            selectedLevel: level,
-            selectedClassroom: null,
-          );
+      ClassesListSearchRequest namedBy({
+        String firstName = '',
+        String lastName = '',
+        String surname = '',
+      }) => ClassesListSearchRequest(
+        mode: SearchMode.level,
+        firstName: firstName,
+        lastName: lastName,
+        surname: surname,
+        selectedCycle: cycle,
+        selectedLevel: level,
+        selectedClassroom: null,
+      );
 
+      test(
+        'les trois noms se combinent en OU : le résultat est leur union',
+        () {
           expect(
-            ClassesListPageHelpers.filterMembers(members, request).single.id,
-            '1',
+            ClassesListPageHelpers.filterMembers(
+              members,
+              namedBy(firstName: 'jean', lastName: 'kabeya'),
+            ).map((m) => m.id),
+            ['1', '3'],
+            reason: 'sous l\'ancien ET, aucun membre ne portait les deux',
           );
         },
       );
+
+      test('un seul nom suffit — les colonnes vides ne retirent personne', () {
+        expect(
+          ClassesListPageHelpers.filterMembers(
+            members,
+            namedBy(firstName: 'sarah'),
+          ).map((m) => m.id),
+          ['2'],
+        );
+      });
+
+      test('OU strict par champ : chaque nom ne vise que sa colonne', () {
+        expect(
+          ClassesListPageHelpers.filterMembers(
+            members,
+            namedBy(
+              firstName: 'dupont',
+            ), // « Dupont » est un NOM, pas un prénom
+          ),
+          isEmpty,
+        );
+      });
     });
   });
 }
