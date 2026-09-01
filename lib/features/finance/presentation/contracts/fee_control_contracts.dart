@@ -58,6 +58,16 @@ class FeeControlSearchRequest extends Equatable {
 
   final String feeCode;
 
+  /// Libellé de la ligne de grille choisie, `''` quand la nature en porte
+  /// plusieurs — la puce de critère retombe alors sur la nature localisée, comme
+  /// le sélecteur. Transporté brut, sans être composé : la désignation se
+  /// fabrique à l'affichage, où `l10n` est disponible.
+  final String feeLabel;
+
+  /// Code de cette même ligne, `null` dès qu'il ne désigne plus une ligne
+  /// unique.
+  final String? feeTariffCode;
+
   final FeeControlPaymentFilter statusFilter;
   final String firstName;
   final String lastName;
@@ -68,6 +78,8 @@ class FeeControlSearchRequest extends Equatable {
     required this.schoolLevelId,
     this.classroomId,
     required this.feeCode,
+    this.feeLabel = '',
+    this.feeTariffCode,
     required this.statusFilter,
     required this.firstName,
     required this.lastName,
@@ -80,6 +92,8 @@ class FeeControlSearchRequest extends Equatable {
     schoolLevelId,
     classroomId,
     feeCode,
+    feeLabel,
+    feeTariffCode,
     statusFilter,
     firstName,
     lastName,
@@ -98,6 +112,17 @@ class FeeControlQuery extends Equatable {
   final String? classroomId;
 
   final String feeCode;
+
+  /// Libellé de la ligne de grille choisie, `''` quand la nature en porte
+  /// plusieurs — la puce de critère retombe alors sur la nature localisée, comme
+  /// le sélecteur. Transporté brut, sans être composé : la désignation se
+  /// fabrique à l'affichage, où `l10n` est disponible.
+  final String feeLabel;
+
+  /// Code de cette même ligne, `null` dès qu'il ne désigne plus une ligne
+  /// unique.
+  final String? feeTariffCode;
+
   final FeeControlPaymentFilter statusFilter;
   final String firstName;
   final String lastName;
@@ -111,6 +136,8 @@ class FeeControlQuery extends Equatable {
     required this.schoolLevelId,
     this.classroomId,
     required this.feeCode,
+    this.feeLabel = '',
+    this.feeTariffCode,
     required this.statusFilter,
     required this.firstName,
     required this.lastName,
@@ -125,6 +152,8 @@ class FeeControlQuery extends Equatable {
     schoolLevelId: schoolLevelId,
     classroomId: classroomId,
     feeCode: feeCode,
+    feeLabel: feeLabel,
+    feeTariffCode: feeTariffCode,
     statusFilter: statusFilter,
     firstName: firstName,
     lastName: lastName,
@@ -140,6 +169,8 @@ class FeeControlQuery extends Equatable {
     schoolLevelId,
     classroomId,
     feeCode,
+    feeLabel,
+    feeTariffCode,
     statusFilter,
     firstName,
     lastName,

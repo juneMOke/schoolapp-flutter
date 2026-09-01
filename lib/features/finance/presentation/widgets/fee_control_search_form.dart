@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -131,14 +132,18 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
       .where((option) => option.key == _selectedLevelKey)
       .firstOrNull;
 
-  LocalFeeTariff? get _selectedTariff => widget.tariffs
-      .where((tariff) => tariff.feeCode == _selectedFeeCode)
-      .firstOrNull;
+  /// La nature choisie, telle que le sélecteur la propose — et non la première
+  /// ligne de grille qui la porte : c'est l'option qui sait si son libellé et
+  /// son code désignent bien tout ce qui sera contrôlé.
+  FeeControlFeeOption? get _selectedFeeOption =>
+      feeControlFeeOptionFor(widget.tariffs, _selectedFeeCode);
 
   /// Classe ET frais : les deux sont obligatoires, les noms ne sont qu'un
   /// affinage.
   bool get _canSearch =>
-      !widget.isLoading && _selectedOption != null && _selectedTariff != null;
+      !widget.isLoading &&
+      _selectedOption != null &&
+      _selectedFeeOption != null;
 
   void _onCycleChanged(String? groupId) {
     setState(() {
@@ -209,15 +214,21 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
 
   void _submit() {
     final option = _selectedOption;
-    final tariff = _selectedTariff;
-    if (!_canSearch || option == null || tariff == null) return;
+    final fee = _selectedFeeOption;
+    if (!_canSearch || option == null || fee == null) return;
 
     widget.onSearch(
       FeeControlSearchRequest(
         schoolLevelGroupId: option.schoolLevelGroupId,
         schoolLevelId: option.schoolLevelId,
         classroomId: _selectedClassroomId,
-        feeCode: tariff.feeCode,
+        feeCode: fee.feeCode,
+        // Le libellé de la grille voyage avec la requête pour que la puce de
+        // critère nomme le frais comme le sélecteur l'a nommé. Le relire dans
+        // l'état au moment de l'affichage le ferait dériver dès que
+        // l'opérateur change de niveau après avoir cherché.
+        feeLabel: fee.tariffLabel,
+        feeTariffCode: fee.tariffCode,
         statusFilter: _statusFilter,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),

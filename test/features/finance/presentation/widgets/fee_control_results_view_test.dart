@@ -76,6 +76,23 @@ const tClassroomQuery = FeeControlQuery(
   size: 10,
 );
 
+/// La même recherche, avec ce que le sélecteur a réellement affiché : le
+/// libellé de la ligne de grille et son code.
+const tNamedQuery = FeeControlQuery(
+  academicYearId: 'ay-1',
+  schoolLevelGroupId: 'g1',
+  schoolLevelId: 'l1',
+  feeCode: 'TUITION',
+  feeLabel: 'Frais scolaires annuels',
+  feeTariffCode: 'SCO',
+  statusFilter: FeeControlPaymentFilter.settled,
+  firstName: '',
+  lastName: '',
+  surname: '',
+  page: 0,
+  size: 10,
+);
+
 /// La même recherche relancée sur un autre statut. Rien de ce qui décide du
 /// message de vide ne change (ni la maille, ni le périmètre, ni la
 /// répartition) : seule la puce de critère bouge. Une différence dans le
@@ -720,6 +737,61 @@ void main() {
         find.textContaining('Aucun élève ne correspond à ces critères'),
         findsOneWidget,
       );
+    });
+  });
+
+  /// La puce rappelle ce que l'opérateur a demandé. Elle affichait la nature
+  /// localisée pendant que le sélecteur, lui, propose le libellé de la grille :
+  /// cliquer « Frais scolaires annuels (SCO) » et se voir répondre « Frais de
+  /// scolarité » fait douter d'avoir cherché la bonne chose.
+  group('puce du frais', () {
+    testWidgets('reprend le libellé de la grille et son code', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // Les puces ne s'affichent qu'à vide : c'est là qu'elles expliquent
+      // pourquoi le tableau ne montre rien.
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: tNamedQuery,
+        ),
+        session: _complet,
+      );
+
+      expect(
+        find.text('Frais : Frais scolaires annuels (SCO)'),
+        findsOneWidget,
+      );
+    });
+
+    /// Sans libellé descendu — nature à plusieurs tranches, ou requête d'avant
+    /// ce lot rejouée depuis l'état — la puce retombe sur la nature. C'est le
+    /// repli que `feeDesignation` tient déjà : un frais sans nom du tout serait
+    /// pire que trop générique.
+    testWidgets('sans libellé, la nature localisée reprend la main', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: tQuery,
+        ),
+        session: _complet,
+      );
+
+      expect(find.text('Frais : Frais de scolarité'), findsOneWidget);
     });
   });
 }

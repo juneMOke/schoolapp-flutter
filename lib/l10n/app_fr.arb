@@ -2364,6 +2364,15 @@
   "feeControlFeeGridWithheld": "La grille tarifaire relève d'un module auquel ce profil n'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.",
   "feeControlFeeLoadFailed": "La liste des frais de ce niveau n'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l'application.",
   "feeControlFeeLoadRetry": "Réessayer",
+  "feeControlFeeTrancheCount": "{count, plural, one{{count} tranche} other{{count} tranches}}",
+  "@feeControlFeeTrancheCount": {
+    "description": "Nombre de lignes de grille regroupées sous une même nature dans le sélecteur de frais du Contrôle. Composé seulement au-delà de une : le contrôle porte sur la nature entière, tranches confondues.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlPaymentStatusLabel": "Statut de paiement",
   "feeControlPaymentStatusAll": "Tous",
   "feeControlViewDetailLabel": "Voir la fiche financière",

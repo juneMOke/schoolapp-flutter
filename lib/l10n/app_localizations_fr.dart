@@ -3576,6 +3576,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get feeControlFeeLoadRetry => 'Réessayer';
 
   @override
+  String feeControlFeeTrancheCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tranches',
+      one: '$count tranche',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get feeControlPaymentStatusLabel => 'Statut de paiement';
 
   @override

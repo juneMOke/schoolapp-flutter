@@ -5858,6 +5858,12 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get feeControlFeeLoadRetry;
 
+  /// Nombre de lignes de grille regroupées sous une même nature dans le sélecteur de frais du Contrôle. Composé seulement au-delà de une : le contrôle porte sur la nature entière, tranches confondues.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} instalment} other{{count} instalments}}'**
+  String feeControlFeeTrancheCount(int count);
+
   /// No description provided for @feeControlPaymentStatusLabel.
   ///
   /// In en, this message translates to:
