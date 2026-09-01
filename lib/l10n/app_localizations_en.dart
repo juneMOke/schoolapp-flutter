@@ -3164,6 +3164,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentStatusFilterLabel => 'Status';
 
   @override
+  String get enrollmentStatusFilterAll => 'All statuses';
+
+  @override
   String get enrollmentStatusInProgress => 'In Progress';
 
   @override

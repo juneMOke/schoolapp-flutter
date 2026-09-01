@@ -204,6 +204,43 @@ void main() {
       ).called(1);
     });
 
+    /// La discrimination Première inscription / Réinscription se joue sur
+    /// `status != null`, pas sur `status.isNotEmpty` : « Tous les statuts »
+    /// (chaîne vide) doit rester sur le vivier de la Première inscription, et
+    /// surtout pas basculer sur la cohorte N-1 de la Réinscription.
+    testWidgets(
+      'info académique + statut VIDE (« Tous ») reste sur la Première '
+      'inscription',
+      (tester) async {
+        await dispatch(
+          tester,
+          const AcademicInfoSearchCommand(
+            firstName: '',
+            lastName: '',
+            surname: '',
+            schoolLevelGroupId: 'grp-1',
+            schoolLevelId: 'lvl-2',
+            status: '',
+          ),
+        );
+
+        verify(
+          () => bloc.add(
+            const LocalListByAcademicInfoAndStatusRequested(
+              status: '',
+              academicYearId: 'ay-2025',
+              firstName: '',
+              lastName: '',
+              surname: '',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-2',
+              page: 0,
+            ),
+          ),
+        ).called(1);
+      },
+    );
+
     testWidgets(
       'info académique + statut (Première inscription) → recherche locale par '
       'niveau, bornée statut/type',

@@ -2186,6 +2186,10 @@
   },
   "enrollmentStudentColumnLabel": "Eleve",
   "enrollmentStatusFilterLabel": "Statut",
+  "enrollmentStatusFilterAll": "Tous les statuts",
+  "@enrollmentStatusFilterAll": {
+    "description": "Option par défaut du filtre de statut du listing Première inscription : aucun statut n'est imposé, tous les dossiers de l'année remontent."
+  },
   "enrollmentStatusInProgress": "En cours",
   "enrollmentDraftBadge": "Brouillon",
   "@enrollmentDraftBadge": {

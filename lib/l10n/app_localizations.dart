@@ -5156,6 +5156,12 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get enrollmentStatusFilterLabel;
 
+  /// Default option of the first-registration listing status filter: no status is enforced, every record of the year is listed.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get enrollmentStatusFilterAll;
+
   /// No description provided for @enrollmentStatusInProgress.
   ///
   /// In en, this message translates to:

@@ -122,6 +122,12 @@ class EnrollmentResultsBar extends StatelessWidget {
     }
     if (showStatusBadge && statusLabel != null) {
       final normalizedStatus = statusLabel!.trim().toUpperCase();
+      // Aucun statut imposé (« Tous ») : il n'y a pas de filtre actif à
+      // rappeler. Une pastille l'annoncerait comme une restriction, alors que
+      // c'est l'absence de restriction.
+      if (normalizedStatus.isEmpty) {
+        return const [];
+      }
       final isCompleted = normalizedStatus == 'COMPLETED';
       final statusText = isCompleted
           ? l10n.enrollmentStatusCompleted

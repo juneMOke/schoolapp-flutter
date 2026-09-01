@@ -124,6 +124,21 @@ void main() {
       verify: (_) => verify(() => getLocal(status: 'IN_PROGRESS')).called(1),
     );
 
+    /// « Tous les statuts » voyage comme chaîne VIDE de bout en bout : c'est
+    /// l'absence de clause `status`, pas un statut nommé « ALL » que la base ne
+    /// porte sur aucune ligne.
+    blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+      'statut vide (« Tous ») → aucune clause de statut n\'atteint la base',
+      setUp: () {
+        when(
+          () => getLocal(status: any(named: 'status')),
+        ).thenAnswer((_) async => Right([_item(enrollmentId: 'e1')]));
+      },
+      build: build,
+      act: (bloc) => bloc.add(const LocalListByStatusRequested(status: '')),
+      verify: (_) => verify(() => getLocal(status: null)).called(1),
+    );
+
     blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       'échec local → failure avec type d’erreur générique serveur',
       setUp: () {

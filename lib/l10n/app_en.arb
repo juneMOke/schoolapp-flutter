@@ -2238,6 +2238,10 @@
   },
   "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
+  "enrollmentStatusFilterAll": "All statuses",
+  "@enrollmentStatusFilterAll": {
+    "description": "Default option of the first-registration listing status filter: no status is enforced, every record of the year is listed."
+  },
   "enrollmentStatusInProgress": "In Progress",
   "enrollmentDraftBadge": "Draft",
   "@enrollmentDraftBadge": {

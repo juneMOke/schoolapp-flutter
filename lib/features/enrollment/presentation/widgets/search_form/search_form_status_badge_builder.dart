@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 Widget buildSearchFormStatusMenuItem({
@@ -79,6 +80,18 @@ StatusBadge _buildEnrollmentStatusBadge({
   required AppLocalizations l10n,
   required StatusBadgeSize size,
 }) {
+  // « Tous les statuts » n'EST pas un statut : le faire passer par
+  // `EnrollmentStatus.fromString` le replierait sur un statut réel (le défaut
+  // de l'enum) et l'option par défaut du filtre s'afficherait sous la pastille
+  // d'un dossier en attente. Pastille neutre, teinte de filtre.
+  if (statusValue == kEnrollmentStatusFilterAll) {
+    return StatusBadge(
+      icon: Icons.filter_alt_off_outlined,
+      label: label,
+      color: AppColors.bleuArdoise,
+      size: size,
+    );
+  }
   final status = EnrollmentStatus.fromString(statusValue);
   return switch (status) {
     EnrollmentStatus.preRegistered => StatusBadge.enrollmentPreRegistered(

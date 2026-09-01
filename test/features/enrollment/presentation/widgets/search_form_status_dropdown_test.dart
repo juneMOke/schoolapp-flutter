@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
@@ -16,7 +17,12 @@ void main() {
     );
   }
 
-  testWidgets('fallback status maps to first dropdown value', (tester) async {
+  // Un statut que le filtre ne connaît pas se replie sur la première option —
+  // désormais « Tous les statuts ». C'est le repli honnête : imposer à sa place
+  // un statut arbitraire cacherait des dossiers sans que personne l'ait demandé.
+  testWidgets('un statut inconnu se replie sur « Tous les statuts »', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       buildHarness(
         SearchForm(
@@ -34,7 +40,7 @@ void main() {
       find.byType(DropdownButton<String>),
     );
 
-    expect(dropdown.value, 'IN_PROGRESS');
+    expect(dropdown.value, kEnrollmentStatusFilterAll);
   });
 
   testWidgets('uses medium badge for selected item and small badges in menu', (

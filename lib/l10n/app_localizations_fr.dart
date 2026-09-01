@@ -3186,6 +3186,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentStatusFilterLabel => 'Statut';
 
   @override
+  String get enrollmentStatusFilterAll => 'Tous les statuts';
+
+  @override
   String get enrollmentStatusInProgress => 'En cours';
 
   @override
