@@ -6,8 +6,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Table « Répartition par frais » : une ligne par allocation (libellé du frais
@@ -88,7 +88,15 @@ class _AllocationRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              allocation.feeCode.localizedFeeLabel(l10n),
+              // Le libellé GELÉ à l'encaissement — ce que le guichet a validé
+              // ce jour-là — et le code de la tranche visée. La nature seule
+              // rendait indistinctes deux imputations d'un même minerval.
+              feeDesignation(
+                label: allocation.studentChargeLabel,
+                feeCode: allocation.feeCode,
+                feeTariffCode: allocation.feeTariffCode,
+                l10n: l10n,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.body.copyWith(

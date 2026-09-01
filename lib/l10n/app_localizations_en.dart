@@ -3421,6 +3421,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String chargeDesignationWithTariffCode(String label, String code) {
+    return '$label ($code)';
+  }
+
+  @override
   String get studentChargeFeeCodeFallback => 'School fee';
 
   @override

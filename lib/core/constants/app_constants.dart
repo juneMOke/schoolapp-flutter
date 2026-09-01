@@ -474,7 +474,12 @@ class AppConstants {
   // depuis V94 côté serveur, qui refuse alors d'imputer au hasard. Nullable
   // (créance ad hoc) et sans backfill : renseigner le passé est la reprise des
   // versements en attente, pas un geste de schéma.
-  static const int offlineDbSchemaVersion = 38;
+  // v39 (2026-08-31) : `ref_fee_tariffs.code` — ce qui distingue deux lignes de
+  // MÊME NATURE sur un niveau (« T1 »/« T2 » d'un minerval étalé). Le serveur le
+  // sert déjà dans le bundle référentiel, le front le jetait : une créance ne
+  // pouvait être nommée que par sa nature. Nullable et sans backfill — le pull
+  // suivant réécrit la grille des années du bundle.
+  static const int offlineDbSchemaVersion = 39;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

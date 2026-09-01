@@ -2365,6 +2365,18 @@
       }
     }
   },
+  "chargeDesignationWithTariffCode": "{label} ({code})",
+  "@chargeDesignationWithTariffCode": {
+    "description": "Désignation d'une créance : son libellé suivi du code de la ligne de grille dont elle dépend. Le code n'est composé que s'il distingue vraiment cette ligne de ses voisines.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "studentChargeFeeCodeFallback": "School fee",
   "facturationSearchTitle": "Search Students",
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",

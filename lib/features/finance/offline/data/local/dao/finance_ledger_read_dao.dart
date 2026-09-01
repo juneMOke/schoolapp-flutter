@@ -24,10 +24,40 @@ class FinanceLedgerReadDao {
   /// qui couvre PENDING_SYNC **ET** SYNC_ERROR (le cash d'un paiement en échec
   /// technique reste déduit → il ne réapparaît jamais « à payer »). Aucune
   /// colonne de solde stockée n'est lue : on dérive, on n'incrémente pas (§8).
+  ///
+  /// La ligne de grille est **nommée** au passage, par jointure sur la grille
+  /// locale (v39) : sans son code, sept tranches de minerval s'affichent sept
+  /// fois « Minerval ».
+  ///
+  /// ⚠️ **`LEFT JOIN`, jamais `JOIN`.** Une créance *ad hoc* n'a pas de tarif, et
+  /// le tarif d'une créance ancienne peut avoir quitté l'appareil (grille
+  /// caviardée sans `finance.grid.read`, année purgée par le pull). Une
+  /// jointure stricte ferait alors disparaître des lignes du grand-livre pour un
+  /// défaut d'affichage — sans commune mesure.
+  ///
+  /// La colonne jointe est préfixée `t_` : `sc.*` est relue par `fromMap`, et
+  /// une colonne homonyme la masquerait silencieusement.
+  ///
+  /// **L'ordre : nature, puis ÉCHÉANCE, puis code, puis id.** Le tri ne portait
+  /// que sur la nature — entre sept tranches d'un même minerval, il rendait donc
+  /// l'ordre d'insertion de SQLite, et le guichet lisait « 3/3, 1/3, 2/3 ». Les
+  /// nommer sans les ordonner n'aurait fait que déplacer le problème.
+  ///
+  /// L'échéance passe avant le code parce que c'est l'ordre dans lequel une
+  /// famille paie. Elle est nullable et SQLite place les `NULL` en TÊTE : une
+  /// tranche sans échéance serait remontée avant la première, d'où le
+  /// `(… IS NULL) ASC` explicite. `sc.id` ferme le tri — arbitraire, mais
+  /// **stable** : deux lectures rendent toujours la même page.
+  ///
+  /// ⚠️ Le code se trie lexicalement : « T10 » précéderait « T2 ». C'est
+  /// acceptable ici parce que l'échéance a déjà tranché dans tous les cas
+  /// réels — et un tri naturel coûterait plus qu'il ne rapporte tant qu'aucune
+  /// école ne dépasse neuf tranches d'une même nature.
   Future<List<LocalStudentCharge>> getChargesByStudent(String studentId) async {
     final rows = await _db.rawQuery(
       '''
       SELECT sc.*,
+             t.code AS t_fee_tariff_code,
              COALESCE((
                SELECT SUM(pa.amount_in_cents)
                FROM payment_allocations pa
@@ -36,16 +66,21 @@ class FinanceLedgerReadDao {
                  AND p.sync_status <> ?
              ), 0) AS paid_pending
       FROM student_charges sc
+      LEFT JOIN ref_fee_tariffs t ON t.id = sc.fee_tariff_id
       WHERE sc.student_id = ?
-      ORDER BY sc.fee_code ASC
+      ORDER BY sc.fee_code ASC,
+               (sc.due_at IS NULL) ASC, sc.due_at ASC,
+               (t.code IS NULL) ASC, t.code ASC,
+               sc.id ASC
       ''',
       [SyncState.synced.dbValue, studentId],
     );
     return rows
         .map(
-          (r) => StudentChargeLocalModel.fromMap(
-            r,
-          ).toEntity(paidPending: (r['paid_pending'] as int?) ?? 0),
+          (r) => StudentChargeLocalModel.fromMap(r).toEntity(
+            paidPending: (r['paid_pending'] as int?) ?? 0,
+            feeTariffCode: r['t_fee_tariff_code'] as String?,
+          ),
         )
         .toList();
   }
@@ -133,12 +168,18 @@ class FinanceLedgerReadDao {
   /// afficherait « payeur inconnu / pas de date »). `payment_id` NOT NULL → le
   /// JOIN n'écarte aucune ligne ; colonnes du paiement préfixées `p_` pour ne
   /// pas masquer celles de `pa.*` lues par `fromMap`.
+  ///
+  /// L'ordre suit celui du grand-livre : nature, puis code de tranche, puis
+  /// `pa.id` pour rester stable. L'échéance ne s'y invite pas — elle appartient
+  /// à la créance, et cette répartition-ci est la **photo d'un versement**, dont
+  /// les lignes n'ont d'ordre que celui qu'on leur donne.
   Future<List<LocalPaymentAllocation>> getAllocationsByPayment(
     String paymentId,
   ) async {
     final rows = await _db.rawQuery(
       '''
       SELECT pa.*,
+             t.code              AS t_fee_tariff_code,
              p.paid_at           AS p_paid_at,
              p.payer_first_name  AS p_payer_first_name,
              p.payer_last_name   AS p_payer_last_name,
@@ -146,8 +187,11 @@ class FinanceLedgerReadDao {
              p.payer_phone_number AS p_payer_phone_number
       FROM payment_allocations pa
       JOIN payments p ON p.id = pa.payment_id
+      LEFT JOIN ref_fee_tariffs t ON t.id = pa.fee_tariff_id
       WHERE pa.payment_id = ?
-      ORDER BY pa.fee_code ASC
+      ORDER BY pa.fee_code ASC,
+               (t.code IS NULL) ASC, t.code ASC,
+               pa.id ASC
       ''',
       [paymentId],
     );
@@ -159,6 +203,7 @@ class FinanceLedgerReadDao {
             payerMiddleName: r['p_payer_middle_name'] as String?,
             payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,
+            feeTariffCode: r['t_fee_tariff_code'] as String?,
           ),
         )
         .toList();
@@ -177,6 +222,7 @@ class FinanceLedgerReadDao {
     final rows = await _db.rawQuery(
       '''
       SELECT pa.*,
+             t.code              AS t_fee_tariff_code,
              p.paid_at           AS p_paid_at,
              p.payer_first_name  AS p_payer_first_name,
              p.payer_last_name   AS p_payer_last_name,
@@ -184,6 +230,7 @@ class FinanceLedgerReadDao {
              p.payer_phone_number AS p_payer_phone_number
       FROM payment_allocations pa
       JOIN payments p ON p.id = pa.payment_id
+      LEFT JOIN ref_fee_tariffs t ON t.id = pa.fee_tariff_id
       WHERE pa.student_charge_id = ?
       ORDER BY p.paid_at DESC, pa.fee_code ASC
       ''',
@@ -197,6 +244,7 @@ class FinanceLedgerReadDao {
             payerMiddleName: r['p_payer_middle_name'] as String?,
             payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,
+            feeTariffCode: r['t_fee_tariff_code'] as String?,
           ),
         )
         .toList();

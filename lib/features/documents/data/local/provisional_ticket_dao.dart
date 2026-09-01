@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/domain/fee_tariff_code.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
 ///
@@ -74,31 +75,54 @@ class ProvisionalTicketDao {
 
   /// Répartition ligne à ligne, dans l'ordre d'écriture — c'est une **saisie**
   /// du guichet (A-2), pas un calcul : elle s'imprime telle quelle.
+  ///
+  /// Le libellé est celui **gelé à l'encaissement** ; le code de la tranche est
+  /// joint depuis la grille (v39). Sans lui, deux versements sur deux tranches
+  /// d'un même minerval sortaient du même papier, mot pour mot.
+  ///
+  /// ⚠️ **`LEFT JOIN`, jamais `JOIN`** : le tarif peut avoir quitté l'appareil,
+  /// et perdre une ligne de répartition sur un ticket, c'est remettre à une
+  /// famille un papier dont le détail ne fait plus la somme.
+  ///
+  /// ⚠️ La composition « libellé (code) » est écrite ici, et pas via la clé
+  /// `chargeDesignationWithTariffCode` des écrans : ce DAO n'a pas d'`l10n` — le
+  /// ticket est **pur** par construction (« l'appelant traduit, le gabarit
+  /// arrange »), et ses libellés lui arrivent déjà traduits. Ce qui compte est
+  /// partagé : la règle qui décide si un code distingue quelque chose vient de
+  /// [meaningfulTariffCode], la même que les six écrans.
   Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
-    final rows = await _db.query(
-      'payment_allocations',
-      columns: const [
-        'student_charge_label',
-        'fee_code',
-        'amount_in_cents',
-        'currency',
-      ],
-      where: 'payment_id = ?',
-      whereArgs: [paymentId],
+    final rows = await _db.rawQuery(
+      '''
+      SELECT pa.student_charge_label,
+             pa.fee_code,
+             pa.amount_in_cents,
+             pa.currency,
+             t.code AS t_fee_tariff_code
+      FROM payment_allocations pa
+      LEFT JOIN ref_fee_tariffs t ON t.id = pa.fee_tariff_id
+      WHERE pa.payment_id = ?
+      ''',
+      [paymentId],
     );
 
     return rows
-        .map(
-          (r) => TicketAllocationRow(
-            label:
-                (r['student_charge_label'] as String?)?.trim().isNotEmpty ??
-                    false
-                ? r['student_charge_label'] as String
-                : (r['fee_code'] as String?) ?? '',
+        .map((r) {
+          final feeCode = (r['fee_code'] as String?) ?? '';
+          final frozen = (r['student_charge_label'] as String?)?.trim() ?? '';
+          // Un frais sans libellé retombe sur sa nature BRUTE (jamais traduite ici),
+          // comportement d'origine : le ticket préfère un code lisible à un blanc.
+          final base = frozen.isNotEmpty ? frozen : feeCode;
+          final code = meaningfulTariffCode(
+            code: r['t_fee_tariff_code'] as String?,
+            feeCode: feeCode,
+          );
+
+          return TicketAllocationRow(
+            label: code == null ? base : '$base ($code)',
             amountInCents: (r['amount_in_cents'] as int?) ?? 0,
             currency: (r['currency'] as String?) ?? '',
-          ),
-        )
+          );
+        })
         .toList(growable: false);
   }
 

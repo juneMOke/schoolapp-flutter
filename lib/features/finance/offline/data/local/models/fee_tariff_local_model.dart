@@ -7,6 +7,12 @@ class FeeTariffLocalModel {
   final String? schoolLevelId;
   final String? schoolLevelGroupId;
   final String feeCode;
+
+  /// Ce qui distingue deux lignes de **même nature** sur un niveau (v39).
+  /// `null` sur une base d'avant le palier, tant que le pull n'a pas réécrit la
+  /// grille — et sur un serveur qui ne sert pas encore le champ.
+  final String? code;
+
   final String label;
   final int amountInCents;
   final String currency;
@@ -21,6 +27,7 @@ class FeeTariffLocalModel {
     this.schoolLevelId,
     this.schoolLevelGroupId,
     required this.feeCode,
+    this.code,
     required this.label,
     required this.amountInCents,
     required this.currency,
@@ -36,6 +43,7 @@ class FeeTariffLocalModel {
     'school_level_id': schoolLevelId,
     'school_level_group_id': schoolLevelGroupId,
     'fee_code': feeCode,
+    'code': code,
     'label': label,
     'amount_in_cents': amountInCents,
     'currency': currency,
@@ -52,6 +60,7 @@ class FeeTariffLocalModel {
         schoolLevelId: m['school_level_id'] as String?,
         schoolLevelGroupId: m['school_level_group_id'] as String?,
         feeCode: m['fee_code'] as String,
+        code: m['code'] as String?,
         label: m['label'] as String,
         amountInCents: (m['amount_in_cents'] as int?) ?? 0,
         currency: m['currency'] as String,
@@ -64,6 +73,7 @@ class FeeTariffLocalModel {
   LocalFeeTariff toEntity() => LocalFeeTariff(
     id: id,
     feeCode: feeCode,
+    code: code,
     label: label,
     amountInCents: amountInCents,
     currency: currency,

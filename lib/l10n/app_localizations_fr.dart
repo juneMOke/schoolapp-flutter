@@ -3442,6 +3442,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String chargeDesignationWithTariffCode(String label, String code) {
+    return '$label ($code)';
+  }
+
+  @override
   String get studentChargeFeeCodeFallback => 'Frais scolaire';
 
   @override

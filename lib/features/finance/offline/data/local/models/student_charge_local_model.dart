@@ -93,22 +93,28 @@ class StudentChargeLocalModel {
   /// [paidPending] = Σ des allocations de ce poste non encore remontées,
   /// **composée à la lecture** par le DAO (FRONT §5). Absente (0) → créance
   /// sans encaissement local en attente (miroir serveur seul).
-  LocalStudentCharge toEntity({int paidPending = 0}) => LocalStudentCharge(
-    id: id,
-    studentId: studentId,
-    academicYearId: academicYearId,
-    schoolLevelId: schoolLevelId,
-    schoolLevelGroupId: schoolLevelGroupId,
-    feeTariffId: feeTariffId,
-    feeCode: feeCode,
-    label: label,
-    expectedAmountInCents: expectedAmountInCents,
-    amountPaidInCents: amountPaidInCents,
-    amountPaidPendingInCents: paidPending,
-    currency: currency,
-    status: StudentChargeStatusX.fromApiValue(status),
-    dueAt: dueAt,
-    version: version,
-    syncState: SyncState.fromDbValue(syncStatus),
-  );
+  ///
+  /// [feeTariffCode] = le code de la ligne de grille, lui aussi **composé à la
+  /// lecture** (v39) : `student_charges` ne le porte pas, il est joint depuis
+  /// `ref_fee_tariffs`. Absent → la désignation retombe sur le libellé seul.
+  LocalStudentCharge toEntity({int paidPending = 0, String? feeTariffCode}) =>
+      LocalStudentCharge(
+        id: id,
+        studentId: studentId,
+        academicYearId: academicYearId,
+        schoolLevelId: schoolLevelId,
+        schoolLevelGroupId: schoolLevelGroupId,
+        feeTariffId: feeTariffId,
+        feeTariffCode: feeTariffCode,
+        feeCode: feeCode,
+        label: label,
+        expectedAmountInCents: expectedAmountInCents,
+        amountPaidInCents: amountPaidInCents,
+        amountPaidPendingInCents: paidPending,
+        currency: currency,
+        status: StudentChargeStatusX.fromApiValue(status),
+        dueAt: dueAt,
+        version: version,
+        syncState: SyncState.fromDbValue(syncStatus),
+      );
 }

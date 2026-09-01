@@ -197,6 +197,34 @@ void main() {
       expect(bundle.previous, isNull);
     });
 
+    // `code` (V94 côté serveur) est ce qui distingue deux lignes de MÊME NATURE
+    // sur un niveau. Le champ arrivait déjà sur le fil et le DTO le jetait :
+    // c'est un décodage, pas une fixture Dart, qui doit l'épingler — une fixture
+    // construite à la main n'exerce jamais `fromJson`, et c'est ainsi que cinq
+    // noms devinés d'ADR-021 sont restés faux en silence.
+    test('`code` d\'un tarif est décodé depuis le fil', () {
+      final json = yearBundleJson(yearId: 'ay-1', current: true);
+      (json['feeTariffs'] as List).first['code'] = 'OM2';
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': json,
+        'serverTime': 't',
+      });
+      expect(bundle.current.feeTariffs!.single.code, 'OM2');
+    });
+
+    /// Un serveur d'avant V94 ne porte pas le champ. Le décoder en `null` plutôt
+    /// que de lever garde le pull ouvert : une section absente reste un
+    /// non-événement, et la désignation retombe sur le libellé seul.
+    test('`code` absent du tarif → null, sans lever', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-1', current: true),
+        'serverTime': 't',
+      });
+      expect(bundle.current.feeTariffs!.single.code, isNull);
+    });
+
     // ADR-014 §4 — la portion tarifaire est retirée du bundle pour qui n'a pas
     // `finance.grid.read`. `null` (non communiquée) et `[]` (réellement aucune)
     // ne doivent PAS se confondre : la purge locale se décide dessus.

@@ -383,6 +383,18 @@ const TableSchema refPreEnrollmentsTable = TableSchema(
 
 /// `ref_fee_tariffs` — grille tarifaire (référentiel gelé sur la saison).
 /// Montants en centimes. `version` pour le verrou optimiste / delta.
+///
+/// `code` (v39) est ce qui distingue deux lignes de **même nature** sur un même
+/// niveau : « T1 » et « T2 » d'un minerval étalé, « INFO » et « BIBLI » de deux
+/// frais scolaires. Le serveur l'admet depuis V94 et le sert déjà dans le
+/// bundle référentiel ; le front le jetait, si bien que sept tranches de
+/// minerval s'affichaient sept fois « Minerval ».
+///
+/// ⚠️ **Nullable, et jamais vide en base côté serveur.** Le serveur retombe sur
+/// la NATURE quand l'école ne saisit rien (`FeeTariffService.codeOuDefaut`) :
+/// un code qui vaut `fee_code` ne distingue donc rien et ne s'affiche pas. La
+/// colonne, elle, reste nullable pour les bases d'avant ce palier et pour un
+/// serveur qui ne servirait pas encore le champ.
 const TableSchema refFeeTariffsTable = TableSchema(
   name: 'ref_fee_tariffs',
   createTableSql: '''
@@ -392,6 +404,7 @@ const TableSchema refFeeTariffsTable = TableSchema(
       school_level_id TEXT,
       school_level_group_id TEXT,
       fee_code TEXT NOT NULL,
+      code TEXT,
       label TEXT NOT NULL,
       amount_in_cents INTEGER NOT NULL,
       currency TEXT NOT NULL,

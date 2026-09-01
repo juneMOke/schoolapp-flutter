@@ -461,6 +461,10 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
               schoolLevelId: t.schoolLevelId,
               schoolLevelGroupId: t.schoolLevelGroupId,
               feeCode: t.feeCode,
+              // Repli sur `null`, jamais sur la nature : un code qui vaut le
+              // `fee_code` ne distingue rien, et le fabriquer ici ferait passer
+              // « l'école n'a pas saisi de code » pour « elle en a saisi un ».
+              code: t.code,
               label: t.label ?? t.feeCode,
               amountInCents: t.amountInCents,
               currency: t.currency,

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/mappers/local_finance_online_mappers.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
     show StudentChargeDto;
@@ -1890,6 +1891,330 @@ void main() {
         expect(charge.amountPaidPendingInCents, 30000);
       },
     );
+  });
+
+  /// v39 — la créance est **nommée** par la ligne de grille dont elle dépend.
+  ///
+  /// `student_charges` ne porte pas le code : le serveur ne le sert que sur le
+  /// TARIF. Il se compose donc à la lecture, par jointure sur `fee_tariff_id`.
+  group('lectures — le code du tarif, composé au read (v39)', () {
+    Future<void> insertTariff(
+      String id, {
+      String? code,
+      String feeCode = 'EXAMINATION',
+      String label = 'Organisation matériel examens — 2/3',
+    }) => db.insert('ref_fee_tariffs', {
+      'id': id,
+      'academic_year_id': 'ay-1',
+      'school_level_id': 'lvl-1',
+      'school_level_group_id': 'grp-1',
+      'fee_code': feeCode,
+      'code': code,
+      'label': label,
+      'amount_in_cents': 500000,
+      'currency': 'CDF',
+    });
+
+    Future<void> insertChargeOnTariff(String id, {String? tariffId}) =>
+        db.insert('student_charges', {
+          'id': id,
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': tariffId,
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens — 2/3',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'sync_status': 'SYNCED',
+        });
+
+    test('le code de la ligne de grille remonte jusqu\'à la créance', () async {
+      await insertTariff('tar-om2', code: 'OM2');
+      await insertChargeOnTariff('c-om2', tariffId: 'tar-om2');
+
+      final charge = (await dao.getChargesByStudent('s1')).single;
+      expect(charge.feeTariffCode, 'OM2');
+    });
+
+    /// Une créance *ad hoc* est hors grille : elle n'a légitimement pas de
+    /// tarif, donc pas de code. Ce n'est pas une anomalie à signaler, c'est une
+    /// créance qui se nomme par son seul libellé.
+    test('créance sans tarif → code nul, et la ligne reste', () async {
+      await insertChargeOnTariff('c-adhoc');
+
+      final charges = await dao.getChargesByStudent('s1');
+      expect(charges, hasLength(1));
+      expect(charges.single.feeTariffCode, isNull);
+    });
+
+    /// LE test du lot. La grille est un CACHE : caviardée pour qui n'a pas
+    /// `finance.grid.read`, purgée année par année par le pull. Une jointure
+    /// STRICTE ferait alors disparaître des créances du grand-livre — de
+    /// l'argent dû, effacé de l'écran pour un défaut d'affichage.
+    test('tarif absent de l\'appareil → code nul, la créance survit', () async {
+      await insertChargeOnTariff('c-orpheline', tariffId: 'tar-jamais-pullé');
+
+      final charges = await dao.getChargesByStudent('s1');
+      expect(charges, hasLength(1), reason: 'LEFT JOIN, jamais JOIN');
+      expect(charges.single.id, 'c-orpheline');
+      expect(charges.single.feeTariffCode, isNull);
+      expect(charges.single.expectedAmountInCents, 500000);
+    });
+
+    /// Le tarif d'avant le pull qui a rempli la colonne : la ligne existe, son
+    /// code est vide. Rien ne doit lever, et la désignation retombe sur le
+    /// libellé — c'est-à-dire sur le comportement d'avant la v39.
+    test('tarif joint mais sans code → nul, sans lever', () async {
+      await insertTariff('tar-sans-code');
+      await insertChargeOnTariff('c-1', tariffId: 'tar-sans-code');
+
+      final charge = (await dao.getChargesByStudent('s1')).single;
+      expect(charge.feeTariffCode, isNull);
+    });
+
+    /// Deux tranches de la MÊME nature : c'est le cas qui a motivé tout le
+    /// chantier. Chacune doit rapporter SON code, pas celui de sa voisine.
+    test('deux tranches d\'une même nature portent chacune son code', () async {
+      await insertTariff('tar-om1', code: 'OM1');
+      await insertTariff('tar-om3', code: 'OM3');
+      await insertChargeOnTariff('c-om1', tariffId: 'tar-om1');
+      await insertChargeOnTariff('c-om3', tariffId: 'tar-om3');
+
+      final charges = await dao.getChargesByStudent('s1');
+      expect(charges, hasLength(2));
+      expect(
+        {for (final c in charges) c.id: c.feeTariffCode},
+        {'c-om1': 'OM1', 'c-om3': 'OM3'},
+      );
+    });
+
+    /// Le pont local→online aplatit `feeTariffId` absent en `''` (c'est la forme
+    /// qu'attendent les écrans de lecture). Le CODE, lui, ne doit pas l'être :
+    /// un écran n'en fait qu'une chose, décider s'il l'affiche, et `''` y
+    /// ajouterait un troisième cas.
+    test('le mapper online n\'aplatit pas le code en chaîne vide', () async {
+      await insertChargeOnTariff('c-adhoc');
+
+      final online = (await dao.getChargesByStudent(
+        's1',
+      )).single.toOnlineEntity();
+      expect(online.feeTariffCode, isNull);
+      expect(online.feeTariffId, '', reason: 'l\'id, lui, reste aplati');
+    });
+
+    /// v39 / NC-5 — **l'ordre des tranches**.
+    ///
+    /// Le tri ne portait que sur `fee_code` : entre sept tranches d'un même
+    /// minerval, il rendait l'ordre d'insertion de SQLite, et le guichet lisait
+    /// « 3/3, 1/3, 2/3 ». Les nommer sans les ordonner déplaçait le problème.
+    group('l\'ordre des tranches', () {
+      Future<void> insertTranche(
+        String id, {
+        required String code,
+        String? dueAt,
+      }) async {
+        await insertTariff('tar-$id', code: code);
+        await db.insert('student_charges', {
+          'id': id,
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_tariff_id': 'tar-$id',
+          'fee_code': 'EXAMINATION',
+          'label': 'Organisation matériel examens',
+          'expected_amount_in_cents': 500000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'due_at': dueAt,
+          'sync_status': 'SYNCED',
+        });
+      }
+
+      /// Insérées à REBOURS, exprès : si le tri tenait encore à l'ordre
+      /// d'insertion, ce test le dirait. C'est la seule façon de prouver que
+      /// c'est bien la clause `ORDER BY` qui travaille.
+      test(
+        'triées par échéance, quel que soit l\'ordre d\'insertion',
+        () async {
+          await insertTranche('c3', code: 'OM3', dueAt: '2027-05-31');
+          await insertTranche('c1', code: 'OM1', dueAt: '2026-11-30');
+          await insertTranche('c2', code: 'OM2', dueAt: '2027-02-28');
+
+          final charges = await dao.getChargesByStudent('s1');
+          expect([for (final c in charges) c.id], ['c1', 'c2', 'c3']);
+        },
+      );
+
+      /// SQLite place les `NULL` en TÊTE d'un `ORDER BY … ASC`. Sans le
+      /// `(due_at IS NULL) ASC` explicite, une tranche sans échéance passerait
+      /// devant la première — celle que la famille doit régler en premier.
+      test('une tranche sans échéance passe APRÈS celles qui en ont', () async {
+        await insertTranche('c-sans', code: 'OM9');
+        await insertTranche('c1', code: 'OM1', dueAt: '2026-11-30');
+
+        final charges = await dao.getChargesByStudent('s1');
+        expect([for (final c in charges) c.id], ['c1', 'c-sans']);
+      });
+
+      /// Même échéance sur deux tranches : c'est le code qui départage.
+      test('à échéance égale, le code départage', () async {
+        await insertTranche('cb', code: 'OM2', dueAt: '2027-02-28');
+        await insertTranche('ca', code: 'OM1', dueAt: '2027-02-28');
+
+        final charges = await dao.getChargesByStudent('s1');
+        expect([for (final c in charges) c.id], ['ca', 'cb']);
+      });
+
+      /// Rien pour départager : le tri doit rester **stable**, pas arbitraire.
+      /// Deux lectures de la même base rendent la même page — sinon un écran se
+      /// réorganise tout seul entre deux rafraîchissements.
+      test('sans échéance ni code, l\'ordre reste stable', () async {
+        await insertChargeOnTariff('z-charge');
+        await insertChargeOnTariff('a-charge');
+
+        final first = await dao.getChargesByStudent('s1');
+        final second = await dao.getChargesByStudent('s1');
+        expect([for (final c in first) c.id], ['a-charge', 'z-charge']);
+        expect([for (final c in second) c.id], [for (final c in first) c.id]);
+      });
+
+      /// La nature reste la clé de premier rang : les tranches d'un même frais
+      /// se suivent, elles ne s'entrelacent pas avec celles d'un autre.
+      test('la nature groupe avant tout le reste', () async {
+        await insertTranche('exam-2', code: 'OM2', dueAt: '2027-02-28');
+        await db.insert('student_charges', {
+          'id': 'tuition-1',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'fee_code': 'ASSURANCE',
+          'label': 'Assurance',
+          'expected_amount_in_cents': 10000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'CDF',
+          'status': 'DUE',
+          'due_at': '2026-09-30',
+          'sync_status': 'SYNCED',
+        });
+        await insertTranche('exam-1', code: 'OM1', dueAt: '2026-11-30');
+
+        final charges = await dao.getChargesByStudent('s1');
+        expect(
+          [for (final c in charges) c.id],
+          ['tuition-1', 'exam-1', 'exam-2'],
+        );
+      });
+    });
+
+    /// Les IMPUTATIONS aussi doivent nommer leur tranche : c'est le seul écran
+    /// qui dit ce que le guichet a réellement encaissé, et deux versements sur
+    /// deux tranches d'un même minerval s'y lisaient à l'identique.
+    ///
+    /// Le tarif vient de `payment_allocations.fee_tariff_id` (v38), FIGÉ à
+    /// l'encaissement — jamais relu depuis la créance, qui peut avoir bougé.
+    group('imputations', () {
+      Future<void> recordAllocation({String? tariffId}) async {
+        await db.insert('payments', {
+          'id': 'pay-1',
+          'client_uuid': 'pay-1',
+          'student_id': 's1',
+          'paid_at': '2026-07-06T10:00:00Z',
+          'payer_first_name': 'S',
+          'payer_last_name': 'M',
+          'sync_status': 'SYNCED',
+        });
+        await db.insert('payment_allocations', {
+          'id': 'alloc-1',
+          'client_uuid': 'alloc-1',
+          'payment_id': 'pay-1',
+          'student_charge_id': 'c-om2',
+          'fee_tariff_id': tariffId,
+          'fee_code': 'EXAMINATION',
+          'student_charge_label': 'Organisation matériel examens — 2/3',
+          'amount_in_cents': 500000,
+          'currency': 'CDF',
+        });
+      }
+
+      test('le code remonte sur les deux lectures', () async {
+        await insertTariff('tar-om2', code: 'OM2');
+        await recordAllocation(tariffId: 'tar-om2');
+
+        expect(
+          (await dao.getAllocationsByPayment('pay-1')).single.feeTariffCode,
+          'OM2',
+        );
+        expect(
+          (await dao.getAllocationsByCharge('c-om2')).single.feeTariffCode,
+          'OM2',
+        );
+      });
+
+      /// Même garde que pour les créances, et le même enjeu : une imputation
+      /// perdue, c'est de l'argent reçu qui disparaît de la répartition d'un
+      /// versement — donc d'un reçu.
+      test('tarif absent de l\'appareil → l\'imputation survit', () async {
+        await recordAllocation(tariffId: 'tar-jamais-pullé');
+
+        final allocations = await dao.getAllocationsByPayment('pay-1');
+        expect(allocations, hasLength(1), reason: 'LEFT JOIN, jamais JOIN');
+        expect(allocations.single.amountInCents, 500000);
+        expect(allocations.single.feeTariffCode, isNull);
+      });
+
+      /// La répartition d'un versement se triait sur la seule nature : deux
+      /// imputations d'un même minerval y sortaient dans l'ordre d'insertion.
+      /// L'échéance n'a pas sa place ici — elle appartient à la créance, et
+      /// ceci est la photo d'un versement.
+      test('répartition triée par nature puis code de tranche', () async {
+        await insertTariff('tar-om1', code: 'OM1');
+        await insertTariff('tar-om3', code: 'OM3');
+        await db.insert('payments', {
+          'id': 'pay-2',
+          'client_uuid': 'pay-2',
+          'student_id': 's1',
+          'paid_at': '2026-07-06T10:00:00Z',
+          'payer_first_name': 'S',
+          'payer_last_name': 'M',
+          'sync_status': 'SYNCED',
+        });
+        // Insérées à rebours, comme pour les créances.
+        for (final (id, tariff) in [('b', 'tar-om3'), ('a', 'tar-om1')]) {
+          await db.insert('payment_allocations', {
+            'id': id,
+            'client_uuid': id,
+            'payment_id': 'pay-2',
+            'student_charge_id': 'c-$id',
+            'fee_tariff_id': tariff,
+            'fee_code': 'EXAMINATION',
+            'student_charge_label': 'Organisation matériel examens',
+            'amount_in_cents': 500000,
+            'currency': 'CDF',
+          });
+        }
+
+        final allocations = await dao.getAllocationsByPayment('pay-2');
+        expect([for (final a in allocations) a.feeTariffCode], ['OM1', 'OM3']);
+      });
+
+      /// Versement d'avant la v38 : le payload était figé sans tarif, et la
+      /// reprise n'a rien pu apparier. La répartition se lit quand même.
+      test('imputation sans tarif → code nul, sans lever', () async {
+        await recordAllocation();
+
+        final allocation = (await dao.getAllocationsByPayment('pay-1')).single;
+        expect(allocation.feeTariffCode, isNull);
+        expect(
+          allocation.studentChargeLabel,
+          'Organisation matériel examens — 2/3',
+          reason: 'le libellé gelé, lui, ne dépend pas de la grille',
+        );
+      });
+    });
   });
 
   group('lectures — reste composé au read (FRONT §5)', () {

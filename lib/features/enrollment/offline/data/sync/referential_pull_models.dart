@@ -378,6 +378,15 @@ class RefSchoolLevelDto {
 class RefFeeTariffDto {
   final String id;
   final String feeCode;
+
+  /// Ce qui distingue deux lignes de **même nature** sur un niveau : « T1 » et
+  /// « T2 » d'un minerval étalé. Le serveur le sert depuis V94 et n'en écrit
+  /// jamais de vide — il retombe sur la nature quand l'école ne saisit rien.
+  ///
+  /// Nullable ici quand même : un serveur d'avant V94 ne le porte pas, et une
+  /// section absente doit rester un non-événement, jamais une file bloquée.
+  final String? code;
+
   final String? label;
   final String schoolLevelGroupId;
   final String schoolLevelId;
@@ -389,6 +398,7 @@ class RefFeeTariffDto {
   const RefFeeTariffDto({
     required this.id,
     required this.feeCode,
+    this.code,
     this.label,
     required this.schoolLevelGroupId,
     required this.schoolLevelId,
@@ -401,6 +411,7 @@ class RefFeeTariffDto {
   factory RefFeeTariffDto.fromJson(Map<String, dynamic> j) => RefFeeTariffDto(
     id: j['id'] as String,
     feeCode: j['feeCode'] as String,
+    code: j['code'] as String?,
     label: j['label'] as String?,
     schoolLevelGroupId: j['schoolLevelGroupId'] as String,
     schoolLevelId: j['schoolLevelId'] as String,

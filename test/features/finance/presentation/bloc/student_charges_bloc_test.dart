@@ -59,6 +59,39 @@ const tCharge = StudentCharge(
   status: StudentChargeStatus.partial,
 );
 
+/// La même créance, mais sur l'année PRÉCÉDENTE — celle qu'un réinscrit
+/// traînait sous ses frais de l'année en cours.
+const tPreviousYearCharge = StudentCharge(
+  id: 'charge-n-1',
+  studentId: tStudentId,
+  academicYearId: 'year-0',
+  schoolLevelId: tLevelId,
+  schoolLevelGroupId: 'group-1',
+  feeTariffId: 'tariff-0',
+  feeCode: 'TUITION',
+  label: 'Frais de scolarité 2025-2026',
+  expectedAmountInCents: 120000,
+  amountPaidInCents: 120000,
+  currency: 'USD',
+  status: StudentChargeStatus.paid,
+);
+
+/// Créance sans année : elle appartient à toutes, et la borne ne l'écarte pas.
+const tYearlessCharge = StudentCharge(
+  id: 'charge-sans-annee',
+  studentId: tStudentId,
+  academicYearId: '',
+  schoolLevelId: tLevelId,
+  schoolLevelGroupId: 'group-1',
+  feeTariffId: 'tariff-9',
+  feeCode: 'OTHER',
+  label: 'Frais exceptionnel',
+  expectedAmountInCents: 5000,
+  amountPaidInCents: 0,
+  currency: 'USD',
+  status: StudentChargeStatus.due,
+);
+
 const tUpdatedCharge = StudentCharge(
   id: 'charge-1',
   studentId: tStudentId,
@@ -204,6 +237,89 @@ void main() {
   });
 
   group('StudentChargesRequested', () {
+    /// LE défaut du lot. Ce chemin est celui de la CONSULTATION d'un dossier :
+    /// il ne portait aucune borne d'année, si bien qu'un réinscrit voyait ses
+    /// créances N-1 empilées sous celles de N — et additionnées dans le pied de
+    /// page de l'étape « Frais ». L'étape y étant en lecture seule, deux
+    /// minervals l'un sur l'autre ressemblaient à une grille chargée.
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'borne la lecture à l\'année du dossier',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge, tPreviousYearCharge]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          academicYearId: 'year-1',
+        ),
+      ),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge],
+        ),
+      ],
+    );
+
+    /// Une créance sans année appartient à TOUTES les années
+    /// (`LocalStudentCharge.belongsToYear`) : la borne ne doit pas l'écarter,
+    /// sinon c'est une dette réelle qui disparaît de l'écran.
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'une créance sans année survit à la borne',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge, tYearlessCharge]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          academicYearId: 'year-1',
+        ),
+      ),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge, tYearlessCharge],
+        ),
+      ],
+    );
+
+    /// Dossier sans année cible : pas de borne à donner. Mieux vaut le
+    /// comportement d'avant — toutes les créances — qu'un écran vide qui ferait
+    /// annoncer 0 F à une famille.
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'année vide → aucune borne, comportement dégradé assumé',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge, tPreviousYearCharge]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          academicYearId: '',
+        ),
+      ),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge, tPreviousYearCharge],
+        ),
+      ],
+    );
+
     blocTest<StudentChargesBloc, StudentChargesState>(
       'emits [loading, success] when student charges are loaded',
       setUp: () {
@@ -213,7 +329,13 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const StudentChargesRequested(studentId: tStudentId, levelId: tLevelId),
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          // Ces quatre-là éprouvent la transition d'état et le mapping
+          // des échecs, pas la borne d'année : chaîne vide = pas de borne.
+          academicYearId: '',
+        ),
       ),
       expect: () => const [
         StudentChargesState(status: StudentChargesStatus.loading),
@@ -233,7 +355,13 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const StudentChargesRequested(studentId: tStudentId, levelId: tLevelId),
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          // Ces quatre-là éprouvent la transition d'état et le mapping
+          // des échecs, pas la borne d'année : chaîne vide = pas de borne.
+          academicYearId: '',
+        ),
       ),
       expect: () => const [
         StudentChargesState(status: StudentChargesStatus.loading),
@@ -253,7 +381,13 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const StudentChargesRequested(studentId: tStudentId, levelId: tLevelId),
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          // Ces quatre-là éprouvent la transition d'état et le mapping
+          // des échecs, pas la borne d'année : chaîne vide = pas de borne.
+          academicYearId: '',
+        ),
       ),
       expect: () => const [
         StudentChargesState(status: StudentChargesStatus.loading),
@@ -273,7 +407,13 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const StudentChargesRequested(studentId: tStudentId, levelId: tLevelId),
+        const StudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          // Ces quatre-là éprouvent la transition d'état et le mapping
+          // des échecs, pas la borne d'année : chaîne vide = pas de borne.
+          academicYearId: '',
+        ),
       ),
       expect: () => const [
         StudentChargesState(status: StudentChargesStatus.loading),

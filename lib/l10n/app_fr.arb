@@ -2313,6 +2313,18 @@
       }
     }
   },
+  "chargeDesignationWithTariffCode": "{label} ({code})",
+  "@chargeDesignationWithTariffCode": {
+    "description": "Désignation d'une créance : son libellé suivi du code de la ligne de grille dont elle dépend. Le code n'est composé que s'il distingue vraiment cette ligne de ses voisines.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "studentChargeFeeCodeFallback": "Frais scolaire",
   "facturationSearchTitle": "Rechercher les élèves",
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",

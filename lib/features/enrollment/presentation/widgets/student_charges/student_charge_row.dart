@@ -3,8 +3,8 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class StudentChargeRow extends StatelessWidget {
@@ -33,10 +33,10 @@ class StudentChargeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final localizedLabel = studentCharge.feeCode.localizedFeeLabel(l10n);
-    final fallbackLabel = studentCharge.label.isNotEmpty
-        ? studentCharge.label
-        : studentCharge.feeCode;
+    // La cascade était INVERSE de celle du guichet : la nature d'abord, le
+    // libellé seulement si la nature était inconnue. Deux écrans, deux règles,
+    // la même donnée — et sur un minerval en tranches, sept lignes identiques.
+    final designation = chargeDesignation(studentCharge, l10n);
     final dueAt = studentCharge.dueAt == null
         ? null
         : DateTime.tryParse(studentCharge.dueAt!);
@@ -64,9 +64,7 @@ class StudentChargeRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  localizedLabel == l10n.studentChargeFeeCodeFallback
-                      ? fallbackLabel
-                      : localizedLabel,
+                  designation,
                   style: AppTextStyles.bodyStrong.copyWith(
                     color: AppColors.textPrimary,
                   ),

@@ -5618,6 +5618,12 @@ abstract class AppLocalizations {
   /// **'Due: {date}'**
   String studentChargeDueAtLabel(DateTime date);
 
+  /// Désignation d'une créance : son libellé suivi du code de la ligne de grille dont elle dépend. Le code n'est composé que s'il distingue vraiment cette ligne de ses voisines.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({code})'**
+  String chargeDesignationWithTariffCode(String label, String code);
+
   /// No description provided for @studentChargeFeeCodeFallback.
   ///
   /// In en, this message translates to:

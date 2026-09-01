@@ -9,6 +9,9 @@ StudentCharge _charge({
   StudentChargeStatus status = StudentChargeStatus.partial,
   double expected = 30000,
   double paid = 18000,
+  String label = 'Frais de scolarité',
+  String feeCode = 'TUITION',
+  String? feeTariffCode,
 }) {
   return StudentCharge(
     id: 'c1',
@@ -17,8 +20,9 @@ StudentCharge _charge({
     schoolLevelId: 'l1',
     schoolLevelGroupId: 'g1',
     feeTariffId: 't1',
-    feeCode: 'TUITION',
-    label: 'Frais de scolarité',
+    feeTariffCode: feeTariffCode,
+    feeCode: feeCode,
+    label: label,
     expectedAmountInCents: expected,
     amountPaidInCents: paid,
     currency: 'USD',
@@ -84,4 +88,55 @@ void main() {
       );
     },
   );
+
+  /// La ligne affichait la NATURE (« Frais de scolarité » pour tout `TUITION`) :
+  /// sur un minerval en sept tranches, sept lignes identiques, sept montants
+  /// différents, et rien pour savoir laquelle on ouvre.
+  group('la ligne nomme la tranche', () {
+    testWidgets('libellé du référentiel + code du tarif', (tester) async {
+      await _pumpInPageBackground(
+        tester,
+        FacturationChargeLine(
+          charge: _charge(
+            label: 'Organisation matériel examens — 2/3',
+            feeCode: 'EXAMINATION',
+            feeTariffCode: 'OM2',
+          ),
+          onViewRequested: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Organisation matériel examens — 2/3 (OM2)'),
+        findsOneWidget,
+      );
+    });
+
+    /// Une grille simple n'a pas de code à saisir et le serveur y met la nature.
+    /// « Frais de scolarité (TUITION) » serait du bruit sur toutes les écoles,
+    /// pour ne rien distinguer nulle part.
+    testWidgets('code égal à la nature → pas de parenthèse', (tester) async {
+      await _pumpInPageBackground(
+        tester,
+        FacturationChargeLine(
+          charge: _charge(feeTariffCode: 'TUITION'),
+          onViewRequested: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Frais de scolarité'), findsOneWidget);
+    });
+
+    testWidgets('sans code → le libellé seul', (tester) async {
+      await _pumpInPageBackground(
+        tester,
+        FacturationChargeLine(charge: _charge(), onViewRequested: () {}),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Frais de scolarité'), findsOneWidget);
+    });
+  });
 }

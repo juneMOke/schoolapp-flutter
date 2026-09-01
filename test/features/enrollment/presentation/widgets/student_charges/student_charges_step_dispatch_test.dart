@@ -15,7 +15,11 @@ class _MockStudentChargesBloc extends Mock implements StudentChargesBloc {}
 void main() {
   setUpAll(() {
     registerFallbackValue(
-      const StudentChargesRequested(studentId: 'x', levelId: 'x'),
+      const StudentChargesRequested(
+        studentId: 'x',
+        levelId: 'x',
+        academicYearId: 'x',
+      ),
     );
   });
 
