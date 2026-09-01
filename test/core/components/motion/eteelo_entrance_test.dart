@@ -44,6 +44,22 @@ void main() {
     expect(opacities(tester), everyElement(1.0));
   });
 
+  testWidgets('reduced-motion : en place et opaque des la premiere frame', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: EteeloEntrance(index: 3, child: Text('bloc')),
+        ),
+      ),
+    );
+
+    // L etat final est la base : le rang n y retarde rien.
+    expect(opacities(tester).single, 1.0);
+  });
+
   testWidgets('le rang est republie au contenu qui s anime lui-meme', (
     tester,
   ) async {

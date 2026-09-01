@@ -42,6 +42,7 @@ class EteeloEntrance extends StatefulWidget {
 class _EteeloEntranceState extends State<EteeloEntrance> {
   bool _visible = false;
   bool _scheduled = false;
+  bool _reduceMotion = false;
   Timer? _timer;
 
   @override
@@ -50,7 +51,8 @@ class _EteeloEntranceState extends State<EteeloEntrance> {
     if (_scheduled) return;
     _scheduled = true;
 
-    if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
+    _reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (_reduceMotion) {
       _visible = true;
       return;
     }
@@ -69,7 +71,9 @@ class _EteeloEntranceState extends State<EteeloEntrance> {
   Widget build(BuildContext context) => EntranceRank(
     index: widget.index,
     child: TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: _visible ? 1 : 0),
+      // En reduced-motion l'entrée n'a pas lieu du tout : partir de zéro la
+      // jouerait quand même, décalage en moins.
+      tween: Tween<double>(begin: _reduceMotion ? 1 : 0, end: _visible ? 1 : 0),
       duration: widget.duration,
       curve: AppMotion.outCurve,
       builder: (context, progress, child) => Opacity(
