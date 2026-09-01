@@ -16,6 +16,10 @@ extension LocalStudentChargeToOnline on LocalStudentCharge {
     schoolLevelId: schoolLevelId ?? '',
     schoolLevelGroupId: schoolLevelGroupId ?? '',
     feeTariffId: feeTariffId ?? '',
+    // Pas de repli sur `''` ici, contrairement à l'id juste au-dessus : un écran
+    // ne fait du code qu'une chose, décider s'il l'affiche, et `null` suffit à
+    // le dire. Aplatir ajouterait un troisième cas à distinguer pour rien.
+    feeTariffCode: feeTariffCode,
     feeCode: feeCode,
     label: label,
     expectedAmountInCents: expectedAmountInCents.toDouble(),
@@ -71,5 +75,6 @@ extension LocalPaymentAllocationToOnline on LocalPaymentAllocation {
     // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
     // malformée ou absente laisse `paidAt` nul (l'UI affiche « inconnu »).
     paidAt: paidAt == null ? null : DateTime.tryParse(paidAt!),
+    feeTariffCode: feeTariffCode,
   );
 }

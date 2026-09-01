@@ -8,6 +8,15 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 class LocalFeeTariff extends Equatable {
   final String id;
   final String feeCode;
+
+  /// Ce qui distingue deux lignes de **même nature** sur un niveau : « T1 » et
+  /// « T2 » d'un minerval étalé (v39).
+  ///
+  /// ⚠️ **Un code égal à [feeCode] ne distingue rien** : le serveur retombe sur
+  /// la nature quand l'école n'en saisit pas. Les écrans le traitent comme une
+  /// absence — c'est la règle de composition, pas une propriété de ce champ.
+  final String? code;
+
   final String label;
   final int amountInCents;
   final String currency;
@@ -20,6 +29,7 @@ class LocalFeeTariff extends Equatable {
   const LocalFeeTariff({
     required this.id,
     required this.feeCode,
+    this.code,
     required this.label,
     required this.amountInCents,
     required this.currency,
@@ -34,6 +44,7 @@ class LocalFeeTariff extends Equatable {
   List<Object?> get props => [
     id,
     feeCode,
+    code,
     label,
     amountInCents,
     currency,
@@ -58,6 +69,21 @@ class LocalStudentCharge extends Equatable {
   final String? schoolLevelId;
   final String? schoolLevelGroupId;
   final String? feeTariffId;
+
+  /// Le code de la ligne de grille dont cette créance dépend — « T2 », « OM2 »
+  /// — **composé à la lecture** par jointure sur [feeTariffId] (v39).
+  ///
+  /// Ce n'est pas une colonne de `student_charges` : le serveur ne sert le code
+  /// que sur le TARIF, jamais sur la créance. Il est donc `null` chaque fois que
+  /// la grille n'est pas jointe — créance *ad hoc* sans tarif, tarif absent de
+  /// cet appareil (grille caviardée, année purgée), base d'avant le pull qui a
+  /// rempli la colonne.
+  ///
+  /// ⚠️ **Un code égal à [feeCode] ne distingue rien** : le serveur retombe sur
+  /// la nature quand l'école n'en saisit pas. C'est la composition d'affichage
+  /// qui l'écarte, pas ce champ — ici on rapporte ce que la grille dit.
+  final String? feeTariffCode;
+
   final String feeCode;
   final String label;
   final int expectedAmountInCents;
@@ -77,6 +103,7 @@ class LocalStudentCharge extends Equatable {
     this.schoolLevelId,
     this.schoolLevelGroupId,
     this.feeTariffId,
+    this.feeTariffCode,
     required this.feeCode,
     required this.label,
     required this.expectedAmountInCents,
@@ -130,6 +157,7 @@ class LocalStudentCharge extends Equatable {
     schoolLevelId,
     schoolLevelGroupId,
     feeTariffId,
+    feeTariffCode,
     feeCode,
     label,
     expectedAmountInCents,
@@ -307,6 +335,15 @@ class LocalPaymentAllocation extends Equatable {
   final String? payerPhoneNumber;
   final String? paidAt;
 
+  /// Code de la ligne de grille sur laquelle l'argent a été reçu (v39), joint
+  /// depuis `ref_fee_tariffs` par `fee_tariff_id`.
+  ///
+  /// ⚠️ **Le LIBELLÉ, lui, est gelé** ([studentChargeLabel]) : c'est ce que le
+  /// guichet a validé le jour de l'encaissement, et il ne se recalcule pas. Le
+  /// code n'est joint que pour DÉSIGNER la tranche à l'écran — jamais pour
+  /// réécrire ce qui a été imprimé.
+  final String? feeTariffCode;
+
   const LocalPaymentAllocation({
     required this.id,
     required this.paymentId,
@@ -320,6 +357,7 @@ class LocalPaymentAllocation extends Equatable {
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.paidAt,
+    this.feeTariffCode,
   });
 
   @override
@@ -336,5 +374,6 @@ class LocalPaymentAllocation extends Equatable {
     payerMiddleName,
     payerPhoneNumber,
     paidAt,
+    feeTariffCode,
   ];
 }

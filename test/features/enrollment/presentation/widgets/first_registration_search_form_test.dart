@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_registration_search_form.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 const _options = [
@@ -52,6 +53,18 @@ Future<void> _pump(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  /// Le listing ouvre sans statut imposé : le champ doit le DIRE, et ne pas se
+  /// replier sur la pastille d'un statut réel — le guichet croirait alors
+  /// n'avoir sous les yeux qu'une part des dossiers.
+  testWidgets('statut vide → le champ annonce « Tous les statuts »', (
+    tester,
+  ) async {
+    await _pump(tester, dispatch: (_) {}, status: kEnrollmentStatusFilterAll);
+
+    expect(find.text('Tous les statuts'), findsOneWidget);
+    expect(find.text('En cours'), findsNothing);
+  });
 
   testWidgets(
     'rendu par défaut : bascule + cascade + statut, pas d\'identité',

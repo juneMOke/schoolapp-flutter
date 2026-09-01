@@ -11,8 +11,8 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
@@ -169,7 +169,14 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
           minPinnedHeight: 300,
           header: EteeloDialogDarkHeader(
             eyebrow: l10n.facturationChargeDetailHeroTitle,
-            title: intent.feeCode.localizedFeeLabel(l10n),
+            // La tranche, pas sa famille : c'est la ligne qu'on a ouverte, et
+            // deux tranches d'un même minerval ne se distinguent que là.
+            title: feeDesignation(
+              label: intent.chargeLabel,
+              feeCode: intent.feeCode,
+              feeTariffCode: intent.feeTariffCode,
+              l10n: l10n,
+            ),
             trailing: _StatusPill(
               status: status,
               label: status.localizedLabel(l10n),

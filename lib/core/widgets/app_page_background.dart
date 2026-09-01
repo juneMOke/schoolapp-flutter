@@ -38,6 +38,21 @@ class AppPageBackground extends StatelessWidget {
     return AppDimensions.spacingL;
   }
 
+  /// Marge basse du contenu. Un FAB flottant n'est pas dans le flux : il se
+  /// pose PAR-DESSUS les derniers dp de la page, à droite — là où le pied de
+  /// tableau range sa pagination. On lui réserve sa place plutôt que de le
+  /// laisser masquer ce qu'il recouvre.
+  EdgeInsets _contentPadding(BuildContext context) {
+    return EdgeInsets.fromLTRB(
+      _horizontalPadding(context),
+      AppDimensions.spacingL,
+      _horizontalPadding(context),
+      floatingActionButton == null
+          ? AppDimensions.spacingL
+          : AppDimensions.fabScrollClearance,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final content = Align(
@@ -88,20 +103,11 @@ class AppPageBackground extends StatelessWidget {
   Widget _buildScrollableContent(BuildContext context, Widget content) {
     if (scrollable) {
       return SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: _horizontalPadding(context),
-          vertical: AppDimensions.spacingL,
-        ),
+        padding: _contentPadding(context),
         child: content,
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: _horizontalPadding(context),
-        vertical: AppDimensions.spacingL,
-      ),
-      child: content,
-    );
+    return Padding(padding: _contentPadding(context), child: content);
   }
 }

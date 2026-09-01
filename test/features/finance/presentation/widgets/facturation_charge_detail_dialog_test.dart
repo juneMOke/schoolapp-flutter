@@ -5,8 +5,13 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 
-FacturationChargeDetailIntent _intent() => const FacturationChargeDetailIntent(
+FacturationChargeDetailIntent _intent({
+  String chargeLabel = '',
+  String feeCode = 'tuition',
+  String? feeTariffCode,
+}) => FacturationChargeDetailIntent(
   chargeId: 'c1',
   studentId: 'stu-1',
   academicYearId: 'ay-1',
@@ -15,14 +20,20 @@ FacturationChargeDetailIntent _intent() => const FacturationChargeDetailIntent(
   surname: 'Mwamba',
   levelName: '6e A',
   levelGroupName: 'Secondaire',
-  feeCode: 'tuition',
+  feeCode: feeCode,
+  chargeLabel: chargeLabel,
+  feeTariffCode: feeTariffCode,
   expectedAmountInCents: 30000,
   amountPaidInCents: 18000,
   currency: 'USD',
   chargeStatus: StudentChargeStatus.partial,
 );
 
-Future<void> _pump(WidgetTester tester, {required VoidCallback onPrint}) {
+Future<void> _pump(
+  WidgetTester tester, {
+  required VoidCallback onPrint,
+  FacturationChargeDetailIntent? intent,
+}) {
   return tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
@@ -31,7 +42,7 @@ Future<void> _pump(WidgetTester tester, {required VoidCallback onPrint}) {
       home: Scaffold(
         body: Center(
           child: FacturationChargeDetailDialogView(
-            intent: _intent(),
+            intent: intent ?? _intent(),
             allocations: const Text('ALLOC_SLOT'),
             onPrintStatements: onPrint,
           ),
@@ -124,5 +135,42 @@ void main() {
     // Le contenu reste ATTEIGNABLE : la coquille rend l'ensemble défilable au
     // lieu de rogner l'en-tête et le pied.
     expect(find.byType(EteeloDialogBody), findsOneWidget);
+  });
+
+  /// La popin titrait sur la NATURE : ouvrir la 2/3 d'un minerval affichait
+  /// « Minerval », comme la 1/3 et la 3/3. On ne savait pas laquelle on avait
+  /// sous les yeux.
+  group('le titre nomme la tranche', () {
+    testWidgets('libellé + code du tarif', (tester) async {
+      await _pump(
+        tester,
+        onPrint: () {},
+        intent: _intent(
+          chargeLabel: 'Organisation matériel examens — 2/3',
+          feeCode: 'EXAMINATION',
+          feeTariffCode: 'OM2',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Organisation matériel examens — 2/3 (OM2)'),
+        findsOneWidget,
+      );
+    });
+
+    /// La popin s'ouvre aussi PAR LA ROUTE : sans `extra`, l'intent est
+    /// `.invalid` et ne porte ni libellé ni code. Le titre doit alors retomber
+    /// sur la nature localisée — jamais sur une parenthèse vide, jamais sur un
+    /// titre blanc au-dessus d'une ligne parfaitement identifiée.
+    testWidgets('intent sans libellé → repli sur la nature localisée', (
+      tester,
+    ) async {
+      await _pump(tester, onPrint: () {});
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizationsFr();
+      expect(find.text(l10n.studentChargeFeeCodeTuition), findsOneWidget);
+    });
   });
 }

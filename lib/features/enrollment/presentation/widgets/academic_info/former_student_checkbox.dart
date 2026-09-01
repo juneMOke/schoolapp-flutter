@@ -12,6 +12,12 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// élèves y entrent en NEW_ENROLLMENT, faute de dossier N-1 en base, et le
 /// guichet doit pouvoir le contredire.
 ///
+/// **Posée sur une carte, et pas en case nue.** C'est la question qui commande
+/// la lecture de tout le bloc — perdue au milieu de six champs, elle ne se
+/// voyait pas, et le guichet la sautait. La carte lui donne la surface d'un
+/// champ, une bordure qui s'allume à la sélection et une cible tactile pleine
+/// largeur.
+///
 /// En réinscription, la case est **vraie et verrouillée** : l'élève vient d'un
 /// dossier de l'année précédente dans cette école, c'est un fait acquis et non
 /// une déclaration. Verrouillée en *lecture seule pleine couleur* — jamais
@@ -48,56 +54,67 @@ class FormerStudentCheckbox extends StatelessWidget {
       checked: value,
       enabled: editable,
       label: l10n.formerStudentLabel,
-      child: InkWell(
-        onTap: editable ? () => onChanged(!value) : null,
-        borderRadius: AppRadius.brSm,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: AppDimensions.spacingXS,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // `IgnorePointer` plutôt que `onChanged: null` : la case garde sa
-              // pleine couleur en lecture seule, elle ne se grise pas.
-              IgnorePointer(
-                ignoring: !editable,
-                child: ExcludeFocus(
-                  excluding: !editable,
-                  child: Checkbox(
-                    value: value,
-                    onChanged: (checked) => onChanged(checked ?? false),
-                    activeColor: AppColors.bleuArdoise,
-                  ),
-                ),
+      child: Material(
+        color: value ? AppColors.bleuArdoiseSoft : AppColors.surface,
+        borderRadius: AppRadius.brMd,
+        child: InkWell(
+          onTap: editable ? () => onChanged(!value) : null,
+          borderRadius: AppRadius.brMd,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: AppRadius.brMd,
+              border: Border.all(
+                color: value ? AppColors.bleuArdoise : AppColors.borderStrong,
+                width: value ? 1.5 : 1,
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: AppDimensions.spacingS),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.formerStudentLabel,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: isChanged
-                              ? AppColors.bleuArdoise
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        help,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingM,
+                vertical: AppDimensions.spacingS,
               ),
-            ],
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // `IgnorePointer` plutôt que `onChanged: null` : la case garde
+                  // sa pleine couleur en lecture seule, elle ne se grise pas.
+                  IgnorePointer(
+                    ignoring: !editable,
+                    child: ExcludeFocus(
+                      excluding: !editable,
+                      child: Checkbox(
+                        value: value,
+                        onChanged: (checked) => onChanged(checked ?? false),
+                        activeColor: AppColors.bleuArdoise,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.formerStudentLabel,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: value || isChanged
+                                ? AppColors.bleuArdoise
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          help,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

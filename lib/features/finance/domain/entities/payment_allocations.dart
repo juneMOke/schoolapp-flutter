@@ -22,6 +22,13 @@ class PaymentAllocation extends Equatable {
   final String? payerPhoneNumber;
   final DateTime? paidAt;
 
+  /// Code de la ligne de grille sur laquelle l'argent a été reçu (v39).
+  ///
+  /// Composé à la lecture locale par jointure sur la grille ; nul sur le chemin
+  /// online pur, que le serveur ne sert pas encore. Le LIBELLÉ, lui, reste celui
+  /// gelé à l'encaissement.
+  final String? feeTariffCode;
+
   const PaymentAllocation({
     required this.id,
     required this.paymentId,
@@ -35,6 +42,7 @@ class PaymentAllocation extends Equatable {
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.paidAt,
+    this.feeTariffCode,
   });
 
   @override
@@ -51,5 +59,6 @@ class PaymentAllocation extends Equatable {
     payerMiddleName,
     payerPhoneNumber,
     paidAt,
+    feeTariffCode,
   ];
 }

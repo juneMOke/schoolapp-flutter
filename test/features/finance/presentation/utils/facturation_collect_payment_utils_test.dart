@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 
 StudentCharge charge({
   required double expected,
@@ -27,8 +25,6 @@ StudentCharge charge({
 }
 
 void main() {
-  final AppLocalizations l10n = AppLocalizationsFr();
-
   group('chargeRemainingInCents', () {
     test('retourne attendu − payé', () {
       expect(
@@ -58,27 +54,6 @@ void main() {
           charge(expected: 500000, paid: 0, feeTariffId: ''),
         ),
         isNull,
-      );
-    });
-  });
-
-  group('chargeDesignation', () {
-    /// La nature seule rend trois lignes identiques dès qu'un niveau porte
-    /// plusieurs tranches d'un même frais : trois montants, trois échéances, et
-    /// aucun moyen de savoir laquelle on coche — ni laquelle on valide.
-    test('nomme LA tranche, pas la famille de frais', () {
-      expect(
-        chargeDesignation(charge(expected: 500000, paid: 0), l10n),
-        'Organisation matériel examens — 2/3',
-      );
-    });
-
-    /// Une créance *ad hoc* peut n'avoir aucun libellé : un frais sans nom du
-    /// tout serait pire que trop générique.
-    test('sans libellé, replie sur la nature du frais', () {
-      expect(
-        chargeDesignation(charge(expected: 500000, paid: 0, label: '  '), l10n),
-        l10n.studentChargeFeeCodeTuition,
       );
     });
   });

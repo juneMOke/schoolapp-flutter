@@ -110,6 +110,7 @@ class PaymentAllocationLocalModel {
     String? payerMiddleName,
     String? payerPhoneNumber,
     String? paidAt,
+    String? feeTariffCode,
   }) => LocalPaymentAllocation(
     id: id,
     paymentId: paymentId,
@@ -123,5 +124,6 @@ class PaymentAllocationLocalModel {
     payerMiddleName: payerMiddleName,
     payerPhoneNumber: payerPhoneNumber,
     paidAt: paidAt,
+    feeTariffCode: feeTariffCode,
   );
 }

@@ -3164,6 +3164,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentStatusFilterLabel => 'Status';
 
   @override
+  String get enrollmentStatusFilterAll => 'All statuses';
+
+  @override
   String get enrollmentStatusInProgress => 'In Progress';
 
   @override
@@ -3415,6 +3418,11 @@ class AppLocalizationsEn extends AppLocalizations {
     final String dateString = dateDateFormat.format(date);
 
     return 'Due: $dateString';
+  }
+
+  @override
+  String chargeDesignationWithTariffCode(String label, String code) {
+    return '$label ($code)';
   }
 
   @override
@@ -5683,7 +5691,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enrollment evolution';
 
   @override
-  String get enrollmentStatsSectionLevelEvolution => 'Evolution by level';
+  String get enrollmentStatsSectionLevelDistribution =>
+      'Enrollment distribution by class';
 
   @override
   String get enrollmentStatsSectionGenderEvolution => 'Evolution by gender';

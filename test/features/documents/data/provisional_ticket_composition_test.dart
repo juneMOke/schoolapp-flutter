@@ -434,6 +434,94 @@ void main() {
       isNull,
     );
   });
+
+  /// v39 — le papier remis à la famille doit nommer LA tranche encaissée.
+  ///
+  /// Avant, deux versements sur deux tranches d'un même minerval sortaient du
+  /// même ticket, mot pour mot : la répartition n'imprimait que le libellé gelé,
+  /// identique d'une tranche à l'autre quand l'école les nomme pareil.
+  group('la répartition imprimée nomme la tranche', () {
+    Future<void> seedTariff(String id, {String? code}) =>
+        db.insert('ref_fee_tariffs', {
+          'id': id,
+          'academic_year_id': 'y-1',
+          'school_level_id': 'lvl-1',
+          'school_level_group_id': 'grp-1',
+          'fee_code': 'TUITION',
+          'code': code,
+          'label': 'Minerval',
+          'amount_in_cents': 150000,
+          'currency': 'CDF',
+        });
+
+    Future<void> pointAllocationAt(String? tariffId) => db.update(
+      'payment_allocations',
+      {'fee_tariff_id': tariffId},
+      where: 'id = ?',
+      whereArgs: ['a-1'],
+    );
+
+    test('libellé gelé + code de la tranche', () async {
+      await seedPayment();
+      await seedTariff('tar-t2', code: 'T2');
+      await pointAllocationAt('tar-t2');
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines.single.label, 'Frais scolaires (T2)');
+    });
+
+    /// Une grille simple reçoit du serveur un code qui vaut la nature. Imprimer
+    /// « Frais scolaires (TUITION) » ajouterait du bruit sur tous les tickets de
+    /// toutes les écoles, pour ne rien distinguer nulle part.
+    test('code égal à la nature → pas de parenthèse', () async {
+      await seedPayment();
+      await seedTariff('tar-plain', code: 'TUITION');
+      await pointAllocationAt('tar-plain');
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines.single.label, 'Frais scolaires');
+    });
+
+    /// LE cas qui compte sur un papier : le tarif a quitté l'appareil (grille
+    /// caviardée, année purgée). Le ticket retombe sur le libellé seul — perdre
+    /// la LIGNE reviendrait à remettre un détail qui ne fait plus la somme.
+    test(
+      'tarif absent de l\'appareil → la ligne survit, sans parenthèse',
+      () async {
+        await seedPayment();
+        await pointAllocationAt('tar-jamais-pullé');
+
+        final lines = await dao.findAllocations('p-1');
+        expect(lines, hasLength(1), reason: 'LEFT JOIN, jamais JOIN');
+        expect(lines.single.label, 'Frais scolaires');
+        expect(lines.single.amountInCents, 150000);
+      },
+    );
+
+    test('imputation sans tarif → le libellé gelé, nu', () async {
+      await seedPayment();
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines.single.label, 'Frais scolaires');
+    });
+
+    /// Le repli d'origine, préservé : sans libellé gelé, le ticket imprime la
+    /// nature BRUTE plutôt qu'un blanc — et le code s'y ajoute quand même.
+    test('sans libellé gelé → la nature brute, code compris', () async {
+      await seedPayment();
+      await seedTariff('tar-t2', code: 'T2');
+      await pointAllocationAt('tar-t2');
+      await db.update(
+        'payment_allocations',
+        {'student_charge_label': '   '},
+        where: 'id = ?',
+        whereArgs: ['a-1'],
+      );
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines.single.label, 'TUITION (T2)');
+    });
+  });
 }
 
 /// L'identité d'appareil ne sert qu'au rattrapage d'impression : la composition

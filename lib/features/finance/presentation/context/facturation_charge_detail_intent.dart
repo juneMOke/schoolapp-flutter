@@ -13,6 +13,16 @@ class FacturationChargeDetailIntent extends Equatable {
   final String levelGroupName;
   // Charge detail fields
   final String feeCode;
+
+  /// Libellé de la créance et code de sa ligne de grille — de quoi la NOMMER,
+  /// et pas seulement dire de quelle nature elle est (v39).
+  ///
+  /// ⚠️ **Vides quand la popin s'ouvre par la route** (`fromRouteContext` sans
+  /// `extra` → [FacturationChargeDetailIntent.invalid]) : la désignation retombe
+  /// alors sur la nature localisée, comme le reste de la popin retombe sur
+  /// « contexte indisponible ». Jamais de parenthèse vide.
+  final String chargeLabel;
+  final String? feeTariffCode;
   final double expectedAmountInCents;
   final double amountPaidInCents;
   final String currency;
@@ -28,6 +38,8 @@ class FacturationChargeDetailIntent extends Equatable {
     required this.levelName,
     required this.levelGroupName,
     required this.feeCode,
+    this.chargeLabel = '',
+    this.feeTariffCode,
     required this.expectedAmountInCents,
     required this.amountPaidInCents,
     required this.currency,
@@ -48,6 +60,8 @@ class FacturationChargeDetailIntent extends Equatable {
          levelName: '',
          levelGroupName: '',
          feeCode: '',
+         chargeLabel: '',
+         feeTariffCode: null,
          expectedAmountInCents: 0,
          amountPaidInCents: 0,
          currency: '',
@@ -81,6 +95,8 @@ class FacturationChargeDetailIntent extends Equatable {
     levelName: levelName,
     levelGroupName: levelGroupName,
     feeCode: feeCode,
+    chargeLabel: chargeLabel,
+    feeTariffCode: feeTariffCode,
     expectedAmountInCents: expectedAmountInCents,
     amountPaidInCents: amountPaidInCents,
     currency: currency,
@@ -118,6 +134,8 @@ class FacturationChargeDetailIntent extends Equatable {
     levelName,
     levelGroupName,
     feeCode,
+    chargeLabel,
+    feeTariffCode,
     expectedAmountInCents,
     amountPaidInCents,
     currency,

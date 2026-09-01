@@ -5,12 +5,15 @@ import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleto
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_state.dart';
 import 'package:school_app_flutter/core/components/status/sync_errors_sheet.dart';
+import 'package:school_app_flutter/core/components/status/sync_held_tile.dart';
 import 'package:school_app_flutter/core/components/status/sync_incomplete_read_band.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -69,6 +72,7 @@ void main() {
     WidgetTester tester, {
     required OutboxErrorsState outbox,
     Size taille = _ecranCourt,
+    bool lectureIncomplete = true,
   }) async {
     tester.view.physicalSize = taille;
     tester.view.devicePixelRatio = 1.0;
@@ -89,10 +93,12 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<SyncStatusCubit>.value(
           value: _FakeSyncStatusCubit(
-            const SyncStatusState(
-              status: SyncStatus.partiallySynced,
-              hasIncompleteRead: true,
-              hasRetriableRead: true,
+            SyncStatusState(
+              status: lectureIncomplete
+                  ? SyncStatus.partiallySynced
+                  : SyncStatus.pendingUpload,
+              hasIncompleteRead: lectureIncomplete,
+              hasRetriableRead: lectureIncomplete,
             ),
           ),
           child: Scaffold(
@@ -168,6 +174,75 @@ void main() {
 
       expect(
         tester.getTopLeft(find.byType(EteeloEmptyResult)).dy,
+        lessThan(avant),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('porte « à envoyer » : des écritures RETENUES, aucune erreur', () {
+    /// Une écriture à moi que le moteur retient — la file de la pastille
+    /// « à envoyer », qui n'a rien à lister et tout à dire sous la liste.
+    OutboxEntry retenue(String id) => OutboxEntry(
+      id: id,
+      aggregateType: 'PAYMENT',
+      aggregateId: 'pay-$id',
+      operation: OutboxOperation.create,
+      payload: '{}',
+      createdAt: DateTime(2026, 8, 30).millisecondsSinceEpoch,
+      lastError: "En attente de l'inscription de l'élève",
+    );
+
+    OutboxErrorsState fileRetenue(int combien) => OutboxErrorsState(
+      status: OutboxErrorsStatus.loaded,
+      held: List.generate(combien, (i) => retenue('held-$i')),
+    );
+
+    testWidgets('la section des retenues ne déborde pas', (tester) async {
+      // La liste d'erreurs est VIDE : son `Expanded` ne rend rien au budget,
+      // et l'entête + les cartes de retenue sont à elles seules tout le
+      // contenu. C'est le débordement rapporté (101 px) : sans bandeau de
+      // lecture, il faut cinq retenues pour épuiser les 660 px — trois y
+      // tiennent encore, et le test serait vert des deux côtés du correctif.
+      await ouvrirLaFeuille(
+        tester,
+        outbox: fileRetenue(5),
+        lectureIncomplete: false,
+      );
+
+      expect(find.byType(SyncIncompleteReadBand), findsNothing);
+      expect(find.byType(SyncHeldTile), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('elle ne déborde pas non plus sous le bandeau de lecture', (
+      tester,
+    ) async {
+      await ouvrirLaFeuille(tester, outbox: fileRetenue(3));
+
+      expect(find.byType(SyncIncompleteReadBand), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('la dernière retenue reste ATTEIGNABLE au défilement', (
+      tester,
+    ) async {
+      // Un `ClipRect` ferait taire l'assertion en cachant le bas de la
+      // section. Ce que le correctif promet, c'est qu'on peut l'atteindre.
+      await ouvrirLaFeuille(
+        tester,
+        outbox: fileRetenue(6),
+        lectureIncomplete: false,
+      );
+
+      final vue = find.byType(CustomScrollView);
+      expect(vue, findsOneWidget);
+      final avant = tester.getTopLeft(find.byType(SyncHeldTile).first).dy;
+      await tester.dragFrom(tester.getCenter(vue), const Offset(0, -200));
+      await tester.pump();
+
+      expect(
+        tester.getTopLeft(find.byType(SyncHeldTile).first).dy,
         lessThan(avant),
       );
       expect(tester.takeException(), isNull);

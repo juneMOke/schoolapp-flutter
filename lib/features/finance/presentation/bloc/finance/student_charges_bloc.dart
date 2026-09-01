@@ -89,6 +89,12 @@ class StudentChargesBloc
     await _readCharges(
       studentId: event.studentId,
       levelId: event.levelId,
+      // Même borne que le flux brouillon, et pour la même raison : sans elle, un
+      // réinscrit voit ses créances N-1 sous celles de N. Ce chemin est celui de
+      // la CONSULTATION d'un dossier, où l'écart passait inaperçu — l'étape
+      // « Frais » y est en lecture seule, et deux minervals empilés ressemblent
+      // à une grille chargée.
+      scopedAcademicYearId: event.academicYearId,
       emit: emit,
     );
   }

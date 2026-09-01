@@ -1070,6 +1070,26 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+
+  if (upTo(39)) {
+    // v39 — `ref_fee_tariffs.code` : ce qui distingue deux lignes de MÊME
+    // NATURE sur un niveau (« T1 » et « T2 » d'un minerval étalé).
+    //
+    // Le serveur le sert déjà dans le bundle référentiel
+    // (`FeeTariffSummaryDto.code`) ; le front le jetait. Sans lui, la créance ne
+    // peut être nommée que par sa nature, et sept tranches de minerval
+    // s'affichent sept fois « Minerval » — au guichet comme sur le reçu.
+    //
+    // **Aucun backfill, et il n'en faut pas.** Un cache référentiel se jette, il
+    // ne se rattrape pas (leçon de v37) : `replaceTariffsForYears` réécrit
+    // chaque ligne des années du bundle au pull suivant. Entre ce palier et ce
+    // pull, `code` vaut NULL — la désignation retombe alors sur le libellé seul,
+    // c'est-à-dire sur le comportement d'aujourd'hui.
+    if (await _hasTable(db, 'ref_fee_tariffs') &&
+        !await _hasColumn(db, 'ref_fee_tariffs', 'code')) {
+      await db.execute('ALTER TABLE ref_fee_tariffs ADD COLUMN code TEXT');
+    }
+  }
 }
 
 /// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée

@@ -80,4 +80,60 @@ void main() {
       );
     },
   );
+
+  /// La table nommait la NATURE de chaque imputation. Deux versements sur deux
+  /// tranches d'un même minerval s'y lisaient à l'identique — et c'est le seul
+  /// écran qui dit ce que le guichet a réellement encaissé.
+  group('la répartition nomme la tranche', () {
+    testWidgets('libellé gelé + code de la tranche', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          locale: Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 460,
+                child: FacturationPaymentDetailAllocationsTable(
+                  allocations: [
+                    PaymentAllocation(
+                      id: 'a1',
+                      paymentId: 'p1',
+                      studentChargeId: 'c1',
+                      feeCode: 'EXAMINATION',
+                      studentChargeLabel: 'Organisation matériel examens — 2/3',
+                      feeTariffCode: 'OM2',
+                      amountInCents: 500000,
+                      currency: 'CDF',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Organisation matériel examens — 2/3 (OM2)'),
+        findsOneWidget,
+      );
+    });
+
+    /// Le libellé est celui GELÉ à l'encaissement, pas une nature relocalisée :
+    /// « Fournitures » est ce que le guichet a validé, et le papier remis à la
+    /// famille dit la même chose. La nature `supplies` n'a d'ailleurs pas de
+    /// traduction — elle retombait sur « Frais scolaire ».
+    testWidgets('sans code, le libellé gelé prime sur la nature', (
+      tester,
+    ) async {
+      await _pump(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fournitures'), findsOneWidget);
+      expect(find.text('Frais de scolarité'), findsOneWidget);
+    });
+  });
 }

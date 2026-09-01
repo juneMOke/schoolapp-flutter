@@ -18,14 +18,17 @@ class _MockDraftBloc extends Mock implements EnrollmentOfflineBloc {}
 
 /// Étape « Scolarité antérieure » — **le bloc est facultatif en entier**.
 ///
-/// Ce qui se joue ici n'est pas la validation d'un formulaire mais la
-/// disparition d'une fabrication. Trois listes déroulantes se remplissaient
-/// seules à l'ouverture (`_resolveYear` retombait sur `options.first`, le
-/// catalogue sur `firstCycle` puis `firstLevelForCycle`) : un dossier neuf
-/// s'ouvrait sur « 2025-2026 · Maternelle · 1ʳᵉ année », trois réponses que
-/// personne n'avait données. Tant que les champs étaient obligatoires, cela
-/// passait pour une commodité de saisie ; du jour où ils deviennent
-/// facultatifs, c'est de l'invention pure — et elle part en base.
+/// Trois listes déroulantes se remplissaient seules à l'ouverture : un dossier
+/// neuf s'ouvrait sur « 2025-2026 · Maternelle · 1ʳᵉ année », trois réponses
+/// que personne n'avait données, et qui partaient en base.
+///
+/// **L'année a depuis été rendue au guichet — mais en PROPOSITION, et elle
+/// seule.** Un enfant qui s'inscrit vient presque toujours de l'année qui vient
+/// de s'achever, et la redemander à chaque dossier était une corvée sans
+/// enjeu. Le cycle et le niveau, eux, restent vides : rien ne permet de les
+/// deviner. La différence tient dans le contrat que ces tests gardent : la
+/// proposition ne rend pas l'étape « modifiée », donc un enfant jamais
+/// scolarisé traverse toujours l'étape sans rien écrire.
 void main() {
   late _MockDraftBloc draftBloc;
   late EnrollmentStepperFlowBloc flowBloc;
@@ -73,6 +76,9 @@ void main() {
     EnrollmentSchoolDetail detail, {
     EnrollmentStepSubmitController? controller,
     String enrollmentType = 'NEW_ENROLLMENT',
+    String? currentAcademicYearName,
+    String? schoolName,
+    bool isEditable = true,
   }) => MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
@@ -91,11 +97,17 @@ void main() {
             showInlineSaveButton: false,
             flowStepIndex: 0,
             stepController: controller,
+            currentAcademicYearName: currentAcademicYearName,
+            schoolName: schoolName,
+            isEditable: isEditable,
           ),
         ),
       ),
     ),
   );
+
+  String prevSchoolText(WidgetTester tester) =>
+      tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text;
 
   List<String?> selectedValues(WidgetTester tester) => tester
       .widgetList<EteeloSelectInput<String>>(
@@ -104,13 +116,49 @@ void main() {
       .map((select) => select.value)
       .toList();
 
-  testWidgets('un dossier neuf ouvre l\'étape sur trois listes VIDES', (
+  testWidgets('un dossier neuf propose l\'année précédente, et rien d\'autre', (
     tester,
   ) async {
-    await tester.pumpWidget(buildStep(emptyDetail()));
+    await tester.pumpWidget(
+      buildStep(emptyDetail(), currentAcademicYearName: '2026-2027'),
+    );
     await tester.pump();
 
-    // Année, cycle, niveau : aucune valeur pré-choisie.
+    final values = selectedValues(tester);
+    // L'année qui précède celle de l'école — pas celle de l'horloge de la
+    // tablette, qui de janvier à août désigne l'année EN COURS.
+    expect(values.first, '2025-2026');
+    // Cycle et niveau restent vides : rien ne permet de les deviner.
+    expect(values.skip(1), everyElement(isNull));
+  });
+
+  /// La proposition n'est pas une saisie : l'étape s'ouvre PROPRE. Sans quoi
+  /// un enfant jamais scolarisé se verrait réclamer un enregistrement pour
+  /// franchir une étape où il n'a rien à déclarer.
+  testWidgets('l\'année proposée ne rend pas l\'étape « modifiée »', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildStep(emptyDetail(), currentAcademicYearName: '2026-2027'),
+    );
+    await tester.pump();
+
+    expect(flowBloc.state.stateOf(0).dirty, isFalse);
+  });
+
+  /// En consultation, l'écran ne montre que ce que le dossier porte : proposer
+  /// une année à un dossier clos qui n'en a pas ferait lire autre chose que la
+  /// base.
+  testWidgets('en lecture seule, aucune année n\'est proposée', (tester) async {
+    await tester.pumpWidget(
+      buildStep(
+        emptyDetail(),
+        currentAcademicYearName: '2026-2027',
+        isEditable: false,
+      ),
+    );
+    await tester.pump();
+
     expect(selectedValues(tester), everyElement(isNull));
   });
 
@@ -151,12 +199,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('École Saint-Joseph'), findsOneWidget);
-      // Le cycle et le niveau du dossier sont retenus tels quels — et l'année,
-      // que le dossier ne porte pas, reste vide plutôt que d'être inventée.
+      // Le cycle et le niveau du dossier sont retenus tels quels.
       final values = selectedValues(tester);
       expect(values, contains('Primaire'));
       expect(values, contains('P3'));
-      expect(values.first, isNull);
     },
   );
 
@@ -268,6 +314,73 @@ void main() {
       await tester.pump();
 
       expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+    });
+
+    /// Cocher la case répond à « quelle école avant ? » : c'est la nôtre. Le
+    /// guichet n'a donc plus à retaper le nom de sa propre école.
+    testWidgets('cocher remplit l\'école précédente avec la nôtre', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildStep(emptyDetail(), schoolName: 'Complexe scolaire Sacré-Cœur'),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+
+      expect(prevSchoolText(tester), 'Complexe scolaire Sacré-Cœur');
+    });
+
+    /// Le geste est réversible dans les deux sens : décocher ne laisse pas
+    /// derrière lui un nom d'école que personne n'a saisi, et ne fait pas non
+    /// plus disparaître celui qui l'avait été.
+    testWidgets('décocher rend le nom qui s\'y trouvait avant', (tester) async {
+      await tester.pumpWidget(
+        buildStep(emptyDetail(), schoolName: 'Complexe scolaire Sacré-Cœur'),
+      );
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField).at(0), 'EP Kimbanguiste');
+      await tester.pump();
+
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      expect(prevSchoolText(tester), 'Complexe scolaire Sacré-Cœur');
+
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      expect(prevSchoolText(tester), 'EP Kimbanguiste');
+    });
+
+    /// Une case cochée par HYDRATATION (réinscription) n'est pas un geste du
+    /// guichet : elle ne doit rien réécrire dans un dossier qui porte déjà son
+    /// école précédente.
+    testWidgets('la réinscription ne réécrit pas l\'école du dossier', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildStep(
+          const EnrollmentSchoolDetail(
+            id: 'enr-1',
+            status: EnrollmentStatus.inProgress,
+            academicYearId: 'ay-2026',
+            enrollmentCode: '',
+            previousSchoolName: 'EP Kimbanguiste',
+            previousAcademicYear: '',
+            previousSchoolLevelGroup: '',
+            previousSchoolLevel: '',
+            schoolLevelGroupId: '',
+            schoolLevelId: '',
+          ),
+          enrollmentType: 'RE_ENROLLMENT',
+          schoolName: 'Complexe scolaire Sacré-Cœur',
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+      expect(prevSchoolText(tester), 'EP Kimbanguiste');
     });
   });
 

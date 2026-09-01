@@ -2238,6 +2238,10 @@
   },
   "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
+  "enrollmentStatusFilterAll": "All statuses",
+  "@enrollmentStatusFilterAll": {
+    "description": "Default option of the first-registration listing status filter: no status is enforced, every record of the year is listed."
+  },
   "enrollmentStatusInProgress": "In Progress",
   "enrollmentDraftBadge": "Draft",
   "@enrollmentDraftBadge": {
@@ -2358,6 +2362,18 @@
       "date": {
         "type": "DateTime",
         "format": "yMMMd"
+      }
+    }
+  },
+  "chargeDesignationWithTariffCode": "{label} ({code})",
+  "@chargeDesignationWithTariffCode": {
+    "description": "Désignation d'une créance : son libellé suivi du code de la ligne de grille dont elle dépend. Le code n'est composé que s'il distingue vraiment cette ligne de ses voisines.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
       }
     }
   },
@@ -3383,7 +3399,7 @@
   "enrollmentStatsSectionCycle": "By cycle",
   "enrollmentStatsSectionGender": "By gender",
   "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
-  "enrollmentStatsSectionLevelEvolution": "Evolution by level",
+  "enrollmentStatsSectionLevelDistribution": "Enrollment distribution by class",
   "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
   "enrollmentStatsGenderMale": "Boys",
   "enrollmentStatsGenderFemale": "Girls",

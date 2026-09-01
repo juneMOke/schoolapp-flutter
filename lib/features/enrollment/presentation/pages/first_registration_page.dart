@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_current_year_bootstrap_builder.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_scaffold.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_registration_search_form.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,7 +34,10 @@ class FirstRegistrationPage extends StatefulWidget {
 }
 
 class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
-  String _effectiveStatus = 'IN_PROGRESS';
+  /// Aucun statut imposé à l'ouverture : le listing montre TOUS les dossiers
+  /// de l'année. Démarrer sur « En cours » masquait sans le dire les dossiers
+  /// complétés — ceux qu'on vient précisément consulter ou corriger.
+  String _effectiveStatus = kEnrollmentStatusFilterAll;
   EnrollmentListingViewMode _preferredViewMode = EnrollmentListingViewMode.auto;
   static const String _adminEmail = 'support@school.local';
 

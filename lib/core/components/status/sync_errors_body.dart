@@ -84,62 +84,101 @@ class SyncErrorsBody extends StatelessWidget {
             ),
           );
         }
+        // Une SEULE zone défilante, du premier échec au dernier bandeau.
+        //
+        // Le tout-venant de cette feuille n'est PAS une liste longue : c'est
+        // une liste vide surmontée d'une queue — l'entête « retenues », deux ou
+        // trois cartes, la bande « autre compte ». Cette queue était posée en
+        // enfants NON flexibles d'une `Column`, donc mesurée AVANT l'`Expanded`
+        // et jamais réduite : dès qu'elle dépassait la hauteur du corps, le
+        // rendu débordait au lieu de défiler, et l'`Expanded` de la liste
+        // tombait à zéro sans rien rendre au budget. C'est le chemin de la
+        // pastille « à envoyer », où il n'y a le plus souvent AUCUNE erreur à
+        // lister et où la queue est donc tout le contenu.
+        //
+        // Les slivers gardent la construction paresseuse des deux listes ; le
+        // reste passe en `SliverToBoxAdapter`, dans le même ordre qu'avant.
         return Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                itemCount: state.entries.length,
-                itemBuilder: (context, index) {
-                  final entry = state.entries[index];
-                  final foreign = isForeignOutboxAuthor(entry.payload, me);
-                  return SyncErrorTile(
-                    entry: entry,
-                    busy: state.busy,
-                    canRetry: canRetryEntry(
-                      aggregateType: entry.aggregateType,
-                      payload: entry.payload,
-                      currentUid: me,
+              child: CustomScrollView(
+                slivers: [
+                  SliverList.builder(
+                    itemCount: state.entries.length,
+                    itemBuilder: (context, index) {
+                      final entry = state.entries[index];
+                      final foreign = isForeignOutboxAuthor(entry.payload, me);
+                      return SyncErrorTile(
+                        entry: entry,
+                        busy: state.busy,
+                        canRetry: canRetryEntry(
+                          aggregateType: entry.aggregateType,
+                          payload: entry.payload,
+                          currentUid: me,
+                        ),
+                        isForeign: foreign,
+                        foreignAuthorName: foreign ? otherName : null,
+                        onRetry: () =>
+                            context.read<OutboxErrorsCubit>().retry(entry.id),
+                      );
+                    },
+                  ),
+                  // MES écritures retenues, avec leur motif. Sans cette
+                  // section, un paiement qui attend l'inscription de son élève
+                  // n'existe nulle part à l'écran : ni erreur (il n'en est pas
+                  // une), ni bande « autre compte » (il est à moi) — juste un
+                  // « à envoyer » muet.
+                  if (state.held.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            l10n.syncErrorsHeldTitle,
+                            style: AppTypography.titleSmall,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            l10n.syncErrorsHeldSubtitle,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                      ),
                     ),
-                    isForeign: foreign,
-                    foreignAuthorName: foreign ? otherName : null,
-                    onRetry: () =>
-                        context.read<OutboxErrorsCubit>().retry(entry.id),
-                  );
-                },
+                    SliverList.builder(
+                      itemCount: state.held.length,
+                      itemBuilder: (context, index) =>
+                          SyncHeldTile(entry: state.held[index]),
+                    ),
+                  ],
+                  // Explication de l'attente d'un autre compte, sous la liste :
+                  // ce n'est pas une erreur de l'utilisateur courant, ça ne
+                  // doit pas passer devant ses propres écritures à reprendre.
+                  if (!state.others.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: SyncOtherAccountBand(
+                          others: state.others,
+                          authors: state.otherAuthors,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            // MES écritures retenues, avec leur motif. Sans cette section, un
-            // paiement qui attend l'inscription de son élève n'existe nulle
-            // part à l'écran : ni erreur (il n'en est pas une), ni bande
-            // « autre compte » (il est à moi) — juste un « à envoyer » muet.
-            if (state.held.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.syncErrorsHeldTitle, style: AppTypography.titleSmall),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                l10n.syncErrorsHeldSubtitle,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              ...state.held.map((e) => SyncHeldTile(entry: e)),
-            ],
-            // Explication de l'attente d'un autre compte, sous la liste : ce
-            // n'est pas une erreur de l'utilisateur courant, ça ne doit pas
-            // passer devant ses propres écritures à reprendre.
-            if (!state.others.isEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              SyncOtherAccountBand(
-                others: state.others,
-                authors: state.otherAuthors,
-              ),
-            ],
             // « Tout réessayer » n'apparaît que s'il y a effectivement quelque
             // chose à rejouer PAR MOI : le prédicat porte sur `canRetryEntry`,
             // pas sur le seul type — sinon une liste entièrement composée
             // d'écritures d'un autre compte afficherait un bouton actif dont le
             // clic ne fait strictement rien.
+            //
+            // Reste HORS du défilement : c'est le geste de la feuille, il ne
+            // doit pas se gagner au scroll.
             if (state.entries.any(
               (e) => canRetryEntry(
                 aggregateType: e.aggregateType,

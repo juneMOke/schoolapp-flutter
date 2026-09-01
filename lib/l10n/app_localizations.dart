@@ -5156,6 +5156,12 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get enrollmentStatusFilterLabel;
 
+  /// Default option of the first-registration listing status filter: no status is enforced, every record of the year is listed.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get enrollmentStatusFilterAll;
+
   /// No description provided for @enrollmentStatusInProgress.
   ///
   /// In en, this message translates to:
@@ -5611,6 +5617,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Due: {date}'**
   String studentChargeDueAtLabel(DateTime date);
+
+  /// Désignation d'une créance : son libellé suivi du code de la ligne de grille dont elle dépend. Le code n'est composé que s'il distingue vraiment cette ligne de ses voisines.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({code})'**
+  String chargeDesignationWithTariffCode(String label, String code);
 
   /// No description provided for @studentChargeFeeCodeFallback.
   ///
@@ -9378,11 +9390,11 @@ abstract class AppLocalizations {
   /// **'Enrollment evolution'**
   String get enrollmentStatsSectionEvolutionEnrollments;
 
-  /// No description provided for @enrollmentStatsSectionLevelEvolution.
+  /// No description provided for @enrollmentStatsSectionLevelDistribution.
   ///
   /// In en, this message translates to:
-  /// **'Evolution by level'**
-  String get enrollmentStatsSectionLevelEvolution;
+  /// **'Enrollment distribution by class'**
+  String get enrollmentStatsSectionLevelDistribution;
 
   /// No description provided for @enrollmentStatsSectionGenderEvolution.
   ///

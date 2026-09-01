@@ -61,10 +61,20 @@ class _SummaryStepState extends State<SummaryStep> {
     super.dispose();
   }
 
+  /// Année du dossier, qui borne la lecture des créances. Vide = pas de borne
+  /// (dossier sans année cible) — le récapitulatif retombe alors sur toutes les
+  /// années, comme avant, plutôt que de n'afficher aucun frais.
+  String get _academicYearId =>
+      widget.enrollmentDetail.enrollmentDetail.academicYearId.trim();
+
   void _requestCharges() {
     if (!_canLoadCharges) return;
     _studentChargesBloc.add(
-      StudentChargesRequested(studentId: _studentId, levelId: _levelId),
+      StudentChargesRequested(
+        studentId: _studentId,
+        levelId: _levelId,
+        academicYearId: _academicYearId,
+      ),
     );
   }
 

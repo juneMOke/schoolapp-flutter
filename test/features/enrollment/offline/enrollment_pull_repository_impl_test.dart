@@ -428,6 +428,70 @@ void main() {
       },
     );
 
+    // Le code d'un tarif traverse le pull jusqu'au modèle local (v39). Sans lui
+    // en base, une créance ne peut être nommée que par sa nature, et sept
+    // tranches de minerval s'affichent sept fois « Minerval ».
+    test('le code d\'un tarif descend jusqu\'au modèle local', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            tariffs: const [
+              RefFeeTariffDto(
+                id: 'tar-om2',
+                feeCode: 'EXAMINATION',
+                code: 'OM2',
+                label: 'Organisation matériel examens — 2/3',
+                schoolLevelGroupId: 'grp-1',
+                schoolLevelId: 'lvl-1',
+                amountInCents: 500000,
+                currency: 'CDF',
+                academicYearId: 'ay-1',
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      expect(capturedTariffs.single.code, 'OM2');
+      expect(
+        capturedTariffs.single.label,
+        'Organisation matériel examens — 2/3',
+      );
+    });
+
+    /// Un serveur qui ne sert pas le champ laisse le code à `null` — **jamais
+    /// à la nature**. Le fabriquer ici ferait passer « l'école n'a pas saisi de
+    /// code » pour « elle en a saisi un », et l'écran afficherait
+    /// « Minerval (TUITION) » partout au lieu de se taire.
+    test('code absent du fil → null, pas la nature', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            tariffs: const [
+              RefFeeTariffDto(
+                id: 'tar-1',
+                feeCode: 'TUITION',
+                schoolLevelGroupId: 'grp-1',
+                schoolLevelId: 'lvl-1',
+                amountInCents: 450000,
+                currency: 'CDF',
+                academicYearId: 'ay-1',
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      expect(capturedTariffs.single.code, isNull);
+      // Le libellé, lui, garde son repli historique sur la nature : il est
+      // NOT NULL en base, là où le code est nullable.
+      expect(capturedTariffs.single.label, 'TUITION');
+    });
+
     // ADR-014 §4 — la grille tarifaire est retirée du bundle pour qui n'a pas
     // `finance.grid.read`. La purge scopée ne connaît que l'année, jamais le
     // compte : la déclencher sur une portion absente effacerait, sur une

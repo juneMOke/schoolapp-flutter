@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -378,26 +378,26 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   /// Sortie d'une correction **non validée** : le dossier est resté en
   /// brouillon, donc hors de la recherche « élèves réellement inscrits ». Le
   /// dire au moment où l'on part est le seul moment où ça sert encore.
+  ///
+  /// Même popin que la sortie du wizard ([_onExitRequested]) : c'est le même
+  /// geste — quitter un dossier dont le travail en cours n'est pas validé — et
+  /// il ne se présentait pas pareil. `AlertDialog` nu, deux liens de texte de
+  /// même poids, aucun repère de gravité : la charte de l'application veut une
+  /// carte à en-tête iconisé, un « rester » en bouton secondaire et un « partir »
+  /// en bouton plein rouge.
   Future<void> _confirmReeditionExit() async {
     final l10n = AppLocalizations.of(context)!;
-    final leave = await showDialog<bool>(
+    final leave = await showAppConfirmationDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.enrollmentReeditExitTitle),
-        content: Text(l10n.enrollmentReeditExitMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.enrollmentReeditExitResume),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.enrollmentReeditExitConfirm),
-          ),
-        ],
-      ),
+      title: l10n.enrollmentReeditExitTitle,
+      message: l10n.enrollmentReeditExitMessage,
+      confirmLabel: l10n.enrollmentReeditExitConfirm,
+      cancelLabel: l10n.enrollmentReeditExitResume,
+      isDestructive: true,
+      headerIcon: Icons.logout_rounded,
+      confirmIcon: Icons.logout_rounded,
     );
-    if (leave != true || !mounted) return;
+    if (!leave || !mounted) return;
     if (context.canPop()) {
       context.pop();
     } else {
@@ -433,16 +433,18 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           onExitRequested: hasUnvalidatedCorrection
               ? _confirmReeditionExit
               : null,
+          // Bouton PLEIN (terre cuite) et non un texte sur la barre sombre :
+          // c'est la seule porte de sortie de la lecture seule, et un libellé
+          // posé sur un dégradé bleu se lit comme un titre, pas comme une
+          // action — le guichet ne le voyait pas.
           action: _canReedit
               ? PermissionGate.access(
                   kEnrollmentSubmitAccess,
-                  child: TextButton.icon(
+                  child: EteeloButton.primary(
+                    label: l10n.enrollmentReeditAction,
+                    icon: Icons.edit_outlined,
+                    fullWidth: false,
                     onPressed: _enterReedition,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: Text(l10n.enrollmentReeditAction),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.textOnDark,
-                    ),
                   ),
                 )
               : null,

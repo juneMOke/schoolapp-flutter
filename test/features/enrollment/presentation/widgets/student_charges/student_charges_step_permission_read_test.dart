@@ -31,7 +31,11 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 void main() {
   setUpAll(() {
     registerFallbackValue(
-      const StudentChargesRequested(studentId: 'x', levelId: 'x'),
+      const StudentChargesRequested(
+        studentId: 'x',
+        levelId: 'x',
+        academicYearId: 'x',
+      ),
     );
   });
 

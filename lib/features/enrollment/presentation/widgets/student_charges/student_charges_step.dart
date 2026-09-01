@@ -236,6 +236,9 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       StudentChargesRequested(
         studentId: widget.studentId,
         levelId: widget.levelId,
+        // La MÊME borne que le flux brouillon juste au-dessus : la consultation
+        // d'un dossier ne doit pas montrer les créances des années passées.
+        academicYearId: widget.academicYearId,
       ),
     );
   }

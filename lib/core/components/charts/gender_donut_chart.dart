@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/donut_chart_section.dart';
@@ -26,6 +28,21 @@ class GenderDonutChart extends StatelessWidget {
   /// chiffres tabulaires.
   final TextStyle? centerValueStyle;
 
+  /// Hauteur totale du bloc (défaut :
+  /// [AppDimensions.enrollmentStatsChartSectionHeight]).
+  final double? height;
+
+  /// Colonnes de la légende en disposition large (défaut : 1). Au-delà d'une
+  /// poignée d'entrées, une colonne unique déborde la hauteur et n'est plus
+  /// atteignable qu'au défilement.
+  final int legendColumns;
+
+  /// Quand vrai, l'anneau prend toute la place qu'on lui laisse au lieu des
+  /// rayons fixes — [centerSpaceRadius] et [sectionRadius] sont alors ignorés.
+  /// Les proportions sont conservées : le trou central garde
+  /// [_centerSpaceRatio] du rayon, de quoi loger le total.
+  final bool expandToFit;
+
   const GenderDonutChart({
     super.key,
     required this.sections,
@@ -35,7 +52,16 @@ class GenderDonutChart extends StatelessWidget {
     this.sectionRadius,
     this.compactBelow,
     this.centerValueStyle,
+    this.height,
+    this.legendColumns = 1,
+    this.expandToFit = false,
   });
+
+  /// Part du rayon laissée au trou central quand [expandToFit] est demandé.
+  static const _centerSpaceRatio = 0.5;
+
+  /// Épaisseur d'anneau historique, hors [expandToFit].
+  static const _defaultSectionRadius = 38.0;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +71,7 @@ class GenderDonutChart extends StatelessWidget {
             constraints.maxWidth <
             (compactBelow ?? AppBreakpoints.detailCompactMax);
         return SizedBox(
-          height: AppDimensions.enrollmentStatsChartSectionHeight,
+          height: height ?? AppDimensions.enrollmentStatsChartSectionHeight,
           child: isCompact
               ? Column(
                   children: [
@@ -58,17 +84,7 @@ class GenderDonutChart extends StatelessWidget {
                   children: [
                     Expanded(flex: 3, child: _buildDonut()),
                     const SizedBox(width: AppDimensions.spacingL),
-                    Expanded(
-                      flex: 2,
-                      // Défilable : la légende peut compter de nombreuses lignes
-                      // (ex. motifs d'absence) et dépasser la hauteur fixe.
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: sections.map(_toLegendItem).toList(),
-                        ),
-                      ),
-                    ),
+                    Expanded(flex: 2, child: _buildLegendColumns()),
                   ],
                 ),
         );
@@ -76,15 +92,35 @@ class GenderDonutChart extends StatelessWidget {
     );
   }
 
-  Widget _buildDonut() => Stack(
+  Widget _buildDonut() => LayoutBuilder(
+    builder: (context, constraints) {
+      var center =
+          centerSpaceRadius ?? AppDimensions.enrollmentStatsDonutCenterRadius;
+      var ring = sectionRadius ?? _defaultSectionRadius;
+
+      // Le disque est borné par le plus petit côté : à hauteur donnée, c'est
+      // elle qui décide, sinon l'anneau déborderait de sa carte.
+      final available = math.min(constraints.maxWidth, constraints.maxHeight);
+      if (expandToFit && available.isFinite) {
+        final outer = available / 2 - AppDimensions.spacingS;
+        if (outer > 0) {
+          center = outer * _centerSpaceRatio;
+          ring = outer - center;
+        }
+      }
+      return _donutStack(center, ring);
+    },
+  );
+
+  Widget _donutStack(double centerRadius, double ringThickness) => Stack(
     alignment: Alignment.center,
     children: [
       PieChart(
         PieChartData(
-          sections: sections.map(_toSection).toList(),
-          centerSpaceRadius:
-              centerSpaceRadius ??
-              AppDimensions.enrollmentStatsDonutCenterRadius,
+          sections: [
+            for (final section in sections) _toSection(section, ringThickness),
+          ],
+          centerSpaceRadius: centerRadius,
           sectionsSpace: 2,
           startDegreeOffset: -90,
         ),
@@ -113,6 +149,31 @@ class GenderDonutChart extends StatelessWidget {
       ),
     ],
   );
+
+  /// Légende large : une ou plusieurs colonnes, chacune défilable — la légende
+  /// peut compter plus de lignes que la hauteur du bloc n'en tient.
+  Widget _buildLegendColumns() {
+    final columns = legendColumns < 1 ? 1 : legendColumns;
+    final perColumn = (sections.length / columns).ceil();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var c = 0; c < columns; c++)
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: sections
+                    .skip(c * perColumn)
+                    .take(perColumn)
+                    .map(_toLegendItem)
+                    .toList(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 
   Widget _buildLegendWrap() => Wrap(
     spacing: AppDimensions.spacingS,
@@ -144,12 +205,13 @@ class GenderDonutChart extends StatelessWidget {
         .toList(),
   );
 
-  PieChartSectionData _toSection(DonutChartSection s) => PieChartSectionData(
-    value: s.percent,
-    color: s.color,
-    title: '',
-    radius: sectionRadius ?? 38,
-  );
+  PieChartSectionData _toSection(DonutChartSection s, double ringThickness) =>
+      PieChartSectionData(
+        value: s.percent,
+        color: s.color,
+        title: '',
+        radius: ringThickness,
+      );
 
   Widget _toLegendItem(DonutChartSection s) => Tooltip(
     message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',
