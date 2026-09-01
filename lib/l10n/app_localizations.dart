@@ -9876,23 +9876,11 @@ abstract class AppLocalizations {
   /// **'Try another period to display more insights.'**
   String get financeStatsNoDataHint;
 
-  /// No description provided for @financeStatsErrorTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading error'**
-  String get financeStatsErrorTitle;
-
   /// No description provided for @financeStatsRetry.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get financeStatsRetry;
-
-  /// No description provided for @financeStatsRetryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Reload finance statistics'**
-  String get financeStatsRetryHint;
 
   /// No description provided for @financeStatsLoadingA11yLabel.
   ///
@@ -9933,19 +9921,14 @@ abstract class AppLocalizations {
   /// No description provided for @financeStatsFeeTypeItemA11yLabel.
   ///
   /// In en, this message translates to:
-  /// **'Type {code}, collected {collected}, expected {expected}, rate {rate}%'**
+  /// **'Type {code}, collected {collected}, expected {expected}, outstanding {outstanding}, rate {rate}%'**
   String financeStatsFeeTypeItemA11yLabel(
     String code,
     String collected,
     String expected,
+    String outstanding,
     int rate,
   );
-
-  /// No description provided for @financeStatsErrorA11yLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Finance statistics loading error: {message}'**
-  String financeStatsErrorA11yLabel(String message);
 
   /// No description provided for @financeStatsEmptyA11yLabel.
   ///
@@ -10006,6 +9989,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred while loading statistics.'**
   String get financeStatsUnknownError;
+
+  /// No description provided for @financeStatsErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get financeStatsErrorNetworkTitle;
+
+  /// No description provided for @financeStatsErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get financeStatsErrorUnauthorizedTitle;
+
+  /// No description provided for @financeStatsErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get financeStatsErrorForbiddenTitle;
+
+  /// No description provided for @financeStatsErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load'**
+  String get financeStatsErrorServerTitle;
+
+  /// No description provided for @financeStatsErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get financeStatsErrorReconnect;
+
+  /// To quote to support.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String financeStatsErrorIncidentCode(String code);
+
+  /// No description provided for @financeDashboardTabsA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance dashboard tabs'**
+  String get financeDashboardTabsA11yLabel;
+
+  /// No description provided for @financeDashboardTabRecoveryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get financeDashboardTabRecoveryLabel;
+
+  /// No description provided for @financeDashboardTabRecoveryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'What is still to be collected this year'**
+  String get financeDashboardTabRecoveryDescription;
+
+  /// No description provided for @financeDashboardTabTillLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till'**
+  String get financeDashboardTabTillLabel;
+
+  /// No description provided for @financeDashboardTabTillDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'What went into the drawer'**
+  String get financeDashboardTabTillDescription;
+
+  /// No description provided for @financeTillKpiTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Till total'**
+  String get financeTillKpiTotal;
+
+  /// No description provided for @financeTillKpiFees.
+  ///
+  /// In en, this message translates to:
+  /// **'School fees'**
+  String get financeTillKpiFees;
+
+  /// No description provided for @financeTillKpiBoutique.
+  ///
+  /// In en, this message translates to:
+  /// **'Boutique sales'**
+  String get financeTillKpiBoutique;
+
+  /// No description provided for @financeTillKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till indicators, by currency'**
+  String get financeTillKpiBandA11yLabel;
+
+  /// Outstanding amount for a fee code.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding: {amount}'**
+  String financeStatsFeeTypeOutstanding(String amount);
+
+  /// Collection rate when nothing was expected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not applicable'**
+  String get financeStatsRateNotApplicable;
+
+  /// Same, on a multi-currency dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Not applicable · {currency}'**
+  String financeStatsRateNotApplicableForCurrency(String currency);
+
+  /// Rate of a fee code with nothing expected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: not applicable'**
+  String get financeStatsFeeTypeRateNotApplicable;
+
+  /// Block of a currency the school bills in, with nothing circulating.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement in this currency'**
+  String get financeStatsCurrencyNoMovement;
+
+  /// No description provided for @financeStatsCurrencyNoMovementRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was billed or collected this school year.'**
+  String get financeStatsCurrencyNoMovementRecovery;
+
+  /// No description provided for @financeTillPeriodDayCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get financeTillPeriodDayCurrent;
+
+  /// Till window bounds, as returned by the server.
+  ///
+  /// In en, this message translates to:
+  /// **'From {start} to {end}'**
+  String financeTillWindow(String start, String end);
+
+  /// No description provided for @financeTillWindowDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day of {date}'**
+  String financeTillWindowDay(String date);
+
+  /// The time zone comes from the response.
+  ///
+  /// In en, this message translates to:
+  /// **'Day in the school\'s time zone · {zone}'**
+  String financeTillTimeZoneHint(String zone);
+
+  /// No description provided for @financeTillSectionBuckets.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash-in over time'**
+  String get financeTillSectionBuckets;
+
+  /// No description provided for @financeTillSectionFeeCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected fees by type'**
+  String get financeTillSectionFeeCodes;
+
+  /// No description provided for @financeTillBucketsChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash-in chart, by interval'**
+  String get financeTillBucketsChartA11yLabel;
+
+  /// No description provided for @financeTillFeeCodeSectionA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected fees broken down by type'**
+  String get financeTillFeeCodeSectionA11yLabel;
+
+  /// No description provided for @financeTillFeeCodeAmountA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {amount}'**
+  String financeTillFeeCodeAmountA11yLabel(String label, String amount);
+
+  /// The server only totals what reached it.
+  ///
+  /// In en, this message translates to:
+  /// **'As of the last sync · {relative}'**
+  String financeTillFreshnessNotice(String relative);
+
+  /// No description provided for @financeTillFreshnessNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never synced'**
+  String get financeTillFreshnessNever;
+
+  /// No description provided for @financeStatsCurrencyNoMovementTill.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing went into the drawer over this window.'**
+  String get financeStatsCurrencyNoMovementTill;
 
   /// No description provided for @enrollmentResults.
   ///

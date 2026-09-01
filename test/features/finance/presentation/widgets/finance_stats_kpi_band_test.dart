@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_kpi_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -13,22 +13,24 @@ const _kpis = FinanceKpis(
   collectionRate: 62,
 );
 
-const _distribution = FeeTypeDistribution(
-  items: [
-    FeeTypeItem(
-      code: 'TUITION',
-      collected: 1500000,
-      expected: 2500000,
-      collectionRate: 60,
-    ),
-    FeeTypeItem(
-      code: 'CANTEEN',
-      collected: 350000,
-      expected: 500000,
-      collectionRate: 70,
-    ),
-  ],
-);
+const _byFeeCode = <FeeTypeItem>[
+  FeeTypeItem(
+    code: 'TUITION',
+    label: 'Minerval',
+    collected: 1500000,
+    expected: 2500000,
+    outstanding: 1000000,
+    collectionRate: 60,
+  ),
+  FeeTypeItem(
+    code: 'CANTEEN',
+    label: 'Cantine',
+    collected: 350000,
+    expected: 500000,
+    outstanding: 150000,
+    collectionRate: 70,
+  ),
+];
 
 const _emptyEvolution = FinanceEvolution(
   granularity: FinanceEvolutionGranularity.month,
@@ -36,16 +38,16 @@ const _emptyEvolution = FinanceEvolution(
   currentBucketIndex: 0,
 );
 
-const _usd = FinanceCurrencyBlock(
+const _usd = RecoveryCurrencyBlock(
   currency: 'USD',
   kpis: _kpis,
-  evolution: _emptyEvolution,
-  distributionByFeeType: _distribution,
+  byFeeCode: _byFeeCode,
+  monthlyCollected: _emptyEvolution,
 );
 
 /// Deuxième devise : mêmes postes, montants propres. Le taux diffère du premier
 /// pour qu'un test ne puisse pas confondre les deux lignes.
-const _cdf = FinanceCurrencyBlock(
+const _cdf = RecoveryCurrencyBlock(
   currency: 'CDF',
   kpis: FinanceKpis(
     collected: 9000000,
@@ -53,14 +55,14 @@ const _cdf = FinanceCurrencyBlock(
     outstanding: 3000000,
     collectionRate: 75,
   ),
-  evolution: _emptyEvolution,
-  distributionByFeeType: _distribution,
+  byFeeCode: _byFeeCode,
+  monthlyCollected: _emptyEvolution,
 );
 
 Future<void> _pump(
   WidgetTester tester,
   double width, {
-  List<FinanceCurrencyBlock> blocks = const [_usd],
+  List<RecoveryCurrencyBlock> blocks = const [_usd],
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -123,11 +125,11 @@ void main() {
       tester,
       900,
       blocks: const [
-        FinanceCurrencyBlock(
+        RecoveryCurrencyBlock(
           currency: 'USD',
           kpis: _kpis,
-          evolution: _emptyEvolution,
-          distributionByFeeType: FeeTypeDistribution(items: []),
+          byFeeCode: [],
+          monthlyCollected: _emptyEvolution,
         ),
       ],
     );
@@ -209,5 +211,64 @@ void main() {
     // La carte n'a qu'une pastille ; posée sur deux montants elle en
     // désignerait un sans le dire. Elle reste en mono-devise (test ci-dessus).
     expect(find.textContaining('%'), findsNWidgets(2)); // les deux taux
+  });
+
+  testWidgets('rien d’attendu : « Sans objet », jamais un 100 % triomphant', (
+    tester,
+  ) async {
+    // Une devise que l'école facture mais où rien n'a circulé : le serveur la
+    // renvoie À ZÉRO plutôt que de l'omettre, avec un taux de 100 qui se lit
+    // « rien ne manque » — pas « tout a été recouvré ».
+    await _pump(
+      tester,
+      900,
+      blocks: const [
+        RecoveryCurrencyBlock(
+          currency: 'CDF',
+          kpis: FinanceKpis(
+            collected: 0,
+            expected: 0,
+            outstanding: 0,
+            collectionRate: 100,
+          ),
+          byFeeCode: [],
+          monthlyCollected: _emptyEvolution,
+        ),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sans objet'), findsOneWidget);
+    expect(find.text('100%'), findsNothing);
+  });
+
+  testWidgets('deux devises dont une dormante : chacune dit son sort', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      900,
+      blocks: const [
+        RecoveryCurrencyBlock(
+          currency: 'CDF',
+          kpis: FinanceKpis(
+            collected: 0,
+            expected: 0,
+            outstanding: 0,
+            collectionRate: 100,
+          ),
+          byFeeCode: [],
+          monthlyCollected: _emptyEvolution,
+        ),
+        _usd,
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    // La ligne dormante nomme sa devise comme les autres : deux mentions
+    // « Sans objet » empilées ne se rattacheraient à rien.
+    expect(find.text('Sans objet · FC'), findsOneWidget);
+    expect(find.text('62\u00A0% · \$'), findsOneWidget);
+    expect(find.text('100\u00A0% · FC'), findsNothing);
   });
 }

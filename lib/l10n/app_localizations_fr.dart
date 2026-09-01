@@ -6047,14 +6047,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Essayez une autre période pour afficher davantage d\'informations.';
 
   @override
-  String get financeStatsErrorTitle => 'Erreur de chargement';
-
-  @override
   String get financeStatsRetry => 'Réessayer';
-
-  @override
-  String get financeStatsRetryHint =>
-      'Relancer le chargement des statistiques financières';
 
   @override
   String get financeStatsLoadingA11yLabel =>
@@ -6087,14 +6080,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String code,
     String collected,
     String expected,
+    String outstanding,
     int rate,
   ) {
-    return 'Type $code, encaissé $collected, attendu $expected, taux $rate%';
-  }
-
-  @override
-  String financeStatsErrorA11yLabel(String message) {
-    return 'Erreur de chargement des statistiques financières : $message';
+    return 'Type $code, encaissé $collected, attendu $expected, reste dû $outstanding, taux $rate%';
   }
 
   @override
@@ -6136,6 +6125,130 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'Une erreur inattendue est survenue lors du chargement des statistiques.';
+
+  @override
+  String get financeStatsErrorNetworkTitle => 'Connexion indisponible';
+
+  @override
+  String get financeStatsErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get financeStatsErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get financeStatsErrorServerTitle => 'Chargement impossible';
+
+  @override
+  String get financeStatsErrorReconnect => 'Se reconnecter';
+
+  @override
+  String financeStatsErrorIncidentCode(String code) {
+    return 'Code d\'incident : $code';
+  }
+
+  @override
+  String get financeDashboardTabsA11yLabel =>
+      'Onglets du tableau de bord Finances';
+
+  @override
+  String get financeDashboardTabRecoveryLabel => 'Recouvrement';
+
+  @override
+  String get financeDashboardTabRecoveryDescription =>
+      'Ce qu\'il reste à encaisser cette année';
+
+  @override
+  String get financeDashboardTabTillLabel => 'Caisse';
+
+  @override
+  String get financeDashboardTabTillDescription =>
+      'Ce qui est entré dans le tiroir';
+
+  @override
+  String get financeTillKpiTotal => 'Total du tiroir';
+
+  @override
+  String get financeTillKpiFees => 'Frais scolaires';
+
+  @override
+  String get financeTillKpiBoutique => 'Ventes boutique';
+
+  @override
+  String get financeTillKpiBandA11yLabel =>
+      'Indicateurs de la caisse, par devise';
+
+  @override
+  String financeStatsFeeTypeOutstanding(String amount) {
+    return 'Reste dû : $amount';
+  }
+
+  @override
+  String get financeStatsRateNotApplicable => 'Sans objet';
+
+  @override
+  String financeStatsRateNotApplicableForCurrency(String currency) {
+    return 'Sans objet · $currency';
+  }
+
+  @override
+  String get financeStatsFeeTypeRateNotApplicable => 'Taux : sans objet';
+
+  @override
+  String get financeStatsCurrencyNoMovement =>
+      'Aucun mouvement dans cette devise';
+
+  @override
+  String get financeStatsCurrencyNoMovementRecovery =>
+      'Rien n\'a été facturé ni encaissé sur l\'année scolaire.';
+
+  @override
+  String get financeTillPeriodDayCurrent => 'Aujourd\'hui';
+
+  @override
+  String financeTillWindow(String start, String end) {
+    return 'Du $start au $end';
+  }
+
+  @override
+  String financeTillWindowDay(String date) {
+    return 'Journée du $date';
+  }
+
+  @override
+  String financeTillTimeZoneHint(String zone) {
+    return 'Journée à l\'heure de l\'école · $zone';
+  }
+
+  @override
+  String get financeTillSectionBuckets => 'Entrées de caisse';
+
+  @override
+  String get financeTillSectionFeeCodes => 'Répartition des frais encaissés';
+
+  @override
+  String get financeTillBucketsChartA11yLabel =>
+      'Graphique des entrées de caisse par intervalle';
+
+  @override
+  String get financeTillFeeCodeSectionA11yLabel =>
+      'Répartition des frais encaissés par poste';
+
+  @override
+  String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
+    return '$label : $amount';
+  }
+
+  @override
+  String financeTillFreshnessNotice(String relative) {
+    return 'Arrêté à la dernière synchro · $relative';
+  }
+
+  @override
+  String get financeTillFreshnessNever => 'Jamais synchronisé';
+
+  @override
+  String get financeStatsCurrencyNoMovementTill =>
+      'Rien n\'est entré dans le tiroir sur cette période.';
 
   @override
   String get enrollmentResults => 'Résultats';

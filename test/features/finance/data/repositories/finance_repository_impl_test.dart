@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,10 +7,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/models/fee_tariff_model.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_stats_response_model/finance_currency_block_model.dart';
+import 'package:school_app_flutter/features/finance/data/models/finance_recovery_response_model/finance_recovery_response_model.dart';
+import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/finance_till_response_model.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
 
 class MockFinanceRemoteDataSource extends Mock
     implements FinanceRemoteDataSource {}
@@ -21,53 +25,6 @@ const tTariffModel = FeeTariffModel(
   amount: 150000,
   currency: 'XOF',
   levelId: 'level-1',
-);
-
-final tFinanceStatsResponseModel = FinanceStatsResponseModel(
-  context: StatsContextModel(
-    schoolYear: '2025-2026',
-    period: 'month',
-    periodStart: DateTime.utc(2026, 5, 1),
-    periodEnd: DateTime.utc(2026, 5, 31),
-    generatedAt: DateTime.utc(2026, 5, 23, 8),
-  ),
-  byCurrency: [
-    const FinanceCurrencyBlockModel(
-      currency: 'USD',
-      kpis: FinanceKpisModel(
-        collected: 150000,
-        expected: 200000,
-        outstanding: 50000,
-        collectionRate: 75,
-      ),
-      evolution: FinanceEvolutionModel(
-        granularity: 'week',
-        currentBucketIndex: 1,
-        buckets: <FinanceEvolutionBucketModel>[
-          FinanceEvolutionBucketModel(
-            key: '2026-W20',
-            value: 50000,
-            isCurrent: false,
-          ),
-          FinanceEvolutionBucketModel(
-            key: '2026-W21',
-            value: 100000,
-            isCurrent: true,
-          ),
-        ],
-      ),
-      distributionByFeeType: FeeTypeDistributionModel(
-        items: <FeeTypeItemModel>[
-          FeeTypeItemModel(
-            code: 'TUITION',
-            collected: 120000,
-            expected: 150000,
-            collectionRate: 80,
-          ),
-        ],
-      ),
-    ),
-  ],
 );
 
 void main() {
@@ -97,60 +54,132 @@ void main() {
     });
   });
 
-  group('getFinanceStats', () {
-    test('returns Right(FinanceStats) when datasource succeeds', () async {
+  group('getFinanceRecovery', () {
+    /// Le modèle de réponse est **désérialisé depuis du JSON**, jamais
+    /// construit : c'est `fromJson` que la couche data doit exercer, et un
+    /// objet bâti en Dart ne le traverse pas.
+    final tRecoveryModel = FinanceRecoveryResponseModel.fromJson(
+      jsonDecode(_recoveryJson) as Map<String, dynamic>,
+    );
+
+    test('rend Right(FinanceRecovery) et n’envoie aucun paramètre', () async {
       when(
-        () => mockRemoteDataSource.getFinanceStats(
-          tRequiredAuth,
-          'month',
-          '2026-05',
-          null,
-        ),
-      ).thenAnswer((_) async => tFinanceStatsResponseModel);
+        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
+      ).thenAnswer((_) async => tRecoveryModel);
 
-      final result = await repository.getFinanceStats(
-        period: FinanceStatsPeriod.month,
-        month: '2026-05',
-      );
+      final result = await repository.getFinanceRecovery();
 
-      result.fold((_) => fail('Expected Right but got Left'), (stats) {
-        expect(stats.context.schoolYear, '2025-2026');
-        // Les indicateurs sont descendus d'un niveau : un bloc complet par
-        // devise, jamais une racine sous une unité que le serveur devrait élire.
-        final block = stats.byCurrency.single;
+      result.fold((_) => fail('Expected Right but got Left'), (recovery) {
+        expect(recovery.context.period, 'year');
+        final block = recovery.byCurrency.single;
         expect(block.currency, 'USD');
-        expect(block.kpis.collectionRate, 75);
-        expect(block.distributionByFeeType.items.first.code, 'TUITION');
+        expect(block.kpis.outstanding, 50000);
+        expect(block.byFeeCode.single.label, 'Minerval');
+        expect(block.monthlyCollected.buckets.single.key, '2026-05');
       });
 
       verify(
-        () => mockRemoteDataSource.getFinanceStats(
-          tRequiredAuth,
-          'month',
-          '2026-05',
-          null,
-        ),
+        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
       ).called(1);
     });
 
-    test('returns Left(Failure) when DioException carries Failure', () async {
-      const failure = ValidationFailure('Invalid request data');
+    test('rend Left(Failure) quand la DioException en porte une', () async {
+      const failure = UnauthorizedFailure('Forbidden');
       when(
-        () => mockRemoteDataSource.getFinanceStats(
-          tRequiredAuth,
-          'week',
-          null,
-          '2026-W21',
-        ),
+        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
       ).thenThrow(_dioException(error: failure));
 
-      final result = await repository.getFinanceStats(
-        period: FinanceStatsPeriod.week,
-        week: '2026-W21',
-      );
+      final result = await repository.getFinanceRecovery();
 
-      expect(result, const Left<Failure, FinanceStats>(failure));
+      expect(result, const Left<Failure, FinanceRecovery>(failure));
     });
+
+    test(
+      'une charge utile illisible devient une erreur, jamais un zéro',
+      () async {
+        when(
+          () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
+        ).thenThrow(TypeError());
+
+        final result = await repository.getFinanceRecovery();
+
+        result.fold(
+          (failure) => expect(failure, isA<ServerFailure>()),
+          (_) => fail(
+            'un tableau de bord d’argent préfère dire « erreur » que rendre un '
+            'encaissé fabriqué',
+          ),
+        );
+      },
+    );
+  });
+
+  group('getFinanceTill', () {
+    final tTillModel = FinanceTillResponseModel.fromJson(
+      jsonDecode(_tillJson) as Map<String, dynamic>,
+    );
+
+    test('rend Right(FinanceTill) et transmet la période demandée', () async {
+      when(
+        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'month'),
+      ).thenAnswer((_) async => tTillModel);
+
+      final result = await repository.getFinanceTill(period: TillPeriod.month);
+
+      result.fold((_) => fail('Expected Right but got Left'), (till) {
+        expect(till.timeZone, 'Africa/Kinshasa');
+        final block = till.byCurrency.single;
+        expect(block.summary.total, 123450);
+        expect(block.summary.boutique, 23450);
+        expect(block.buckets.single.key, '2026-05-15');
+      });
+
+      verify(
+        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'month'),
+      ).called(1);
+    });
+
+    test('le défaut est la journée — la question de la fermeture', () async {
+      when(
+        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+      ).thenAnswer((_) async => tTillModel);
+
+      await repository.getFinanceTill();
+
+      verify(
+        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+      ).called(1);
+    });
+
+    test('rend Left(Failure) quand la DioException en porte une', () async {
+      // Le serveur REFUSE une ancre incohérente en 400 plutôt que de l'ignorer :
+      // c'est cette famille-là qui remontera le jour où le sélecteur de date
+      // arrivera.
+      const failure = ValidationFailure('Invalid request data');
+      when(
+        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'week'),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.getFinanceTill(period: TillPeriod.week);
+
+      expect(result, const Left<Failure, FinanceTill>(failure));
+    });
+
+    test(
+      'une charge utile illisible devient une erreur, jamais un tiroir vide',
+      () async {
+        when(
+          () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+        ).thenThrow(TypeError());
+
+        final result = await repository.getFinanceTill();
+
+        result.fold(
+          (failure) => expect(failure, isA<ServerFailure>()),
+          (_) => fail('un caissier a le tiroir ouvert devant lui'),
+        );
+      },
+    );
   });
 }
 
@@ -161,3 +190,75 @@ DioException _dioException({Object? error}) {
     type: DioExceptionType.unknown,
   );
 }
+
+const String _recoveryJson = '''
+{
+  "context": {
+    "schoolYear": "2025-2026",
+    "period": "year",
+    "periodStart": "2025-09-01",
+    "periodEnd": "2026-08-31",
+    "generatedAt": "2026-05-23T08:00:00Z"
+  },
+  "byCurrency": [
+    {
+      "currency": "USD",
+      "kpis": {
+        "collected": 150000,
+        "expected": 200000,
+        "outstanding": 50000,
+        "collectionRate": 75
+      },
+      "byFeeCode": [
+        {
+          "code": "TUITION",
+          "label": "Minerval",
+          "collected": 120000,
+          "expected": 150000,
+          "outstanding": 30000,
+          "collectionRate": 80
+        }
+      ],
+      "monthlyCollected": {
+        "granularity": "month",
+        "currentBucketIndex": 8,
+        "buckets": [
+          { "key": "2026-05", "value": 100000, "isCurrent": true }
+        ]
+      }
+    }
+  ]
+}
+''';
+
+const String _tillJson = '''
+{
+  "context": {
+    "schoolYear": "2025-2026",
+    "period": "month",
+    "periodStart": "2026-05-01",
+    "periodEnd": "2026-05-31",
+    "generatedAt": "2026-05-23T08:00:00Z"
+  },
+  "timeZone": "Africa/Kinshasa",
+  "byCurrency": [
+    {
+      "currency": "USD",
+      "summary": {
+        "total": 123450,
+        "fees": 100000,
+        "boutique": 23450,
+        "byFeeCode": [
+          { "code": "TUITION", "label": "Minerval", "amount": 100000 }
+        ]
+      },
+      "buckets": [
+        {
+          "key": "2026-05-15", "total": 123450, "fees": 100000,
+          "boutique": 23450, "isCurrent": true
+        }
+      ]
+    }
+  ]
+}
+''';

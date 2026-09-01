@@ -108,7 +108,29 @@ class AppConstants {
       '/api/v1/finance/student-charges/{chargeId}/allocations';
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
-  static const String financeStatsEndpoint = '/api/v1/finance-stats';
+  // ── Pilotage financier : deux routes, deux natures ────────────────────────
+  //
+  // `/api/v1/finance-stats` a porté les deux et n'existe plus côté serveur : il
+  // mêlait un ÉTAT — où en est l'école de l'argent qu'elle doit encaisser cette
+  // année — et un FLUX — combien est entré dans le tiroir. Le sélecteur
+  // `period=week` demandait alors un attendu à la semaine ; les échéances
+  // tombant en fin de mois, il valait zéro, et l'écran annonçait « 0 attendu »
+  // un jour de guichet chargé.
+  //
+  // La permission ne les distingue pas : `finance.stats.read` ouvre les deux.
+
+  /// L'état : attendu, encaissé, reste dû et taux de l'année scolaire courante,
+  /// par devise et par poste de frais. **Aucun paramètre de requête** — l'école
+  /// vient du jeton, l'année est la courante. Un `period` envoyé par habitude
+  /// est ignoré, la réponse dira toujours `"year"`.
+  static const String financeRecoveryStatsEndpoint =
+      '/api/v1/finance-stats/recovery';
+
+  /// Le flux : ce qui est entré en caisse sur la fenêtre — frais scolaires
+  /// **et ventes boutique**. `period` (`day` par défaut) `day|week|month|year`,
+  /// et une ancre facultative (`date`, `month`, `week`) que le serveur REFUSE
+  /// en 400 si elle ne correspond pas à la période demandée.
+  static const String financeTillStatsEndpoint = '/api/v1/finance-stats/till';
 
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body

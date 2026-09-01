@@ -55,36 +55,59 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
   }
 
   @override
-  Future<FinanceStatsResponseModel> getFinanceStats(
+  Future<FinanceRecoveryResponseModel> getFinanceRecovery(
     Map<String, dynamic> extras,
-    String period,
-    String? month,
-    String? week,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{
-      r'period': period,
-      r'month': month,
-      r'week': week,
-    };
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<FinanceStatsResponseModel>(
+    final _options = _setStreamType<FinanceRecoveryResponseModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/finance-stats',
+            '/api/v1/finance-stats/recovery',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late FinanceStatsResponseModel _value;
+    late FinanceRecoveryResponseModel _value;
     try {
-      _value = FinanceStatsResponseModel.fromJson(_result.data!);
+      _value = FinanceRecoveryResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<FinanceTillResponseModel> getFinanceTill(
+    Map<String, dynamic> extras,
+    String period,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{r'period': period};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<FinanceTillResponseModel>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/finance-stats/till',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late FinanceTillResponseModel _value;
+    try {
+      _value = FinanceTillResponseModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

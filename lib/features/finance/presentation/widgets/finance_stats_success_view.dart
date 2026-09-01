@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_evolution_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_fee_type_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_kpi_band.dart';
@@ -36,7 +36,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// paraît que lorsqu'il y a quelque chose à distinguer, et les cartes gardent
 /// leur ligne unique.
 class FinanceStatsSuccessView extends StatelessWidget {
-  final FinanceStats stats;
+  final FinanceRecovery stats;
 
   const FinanceStatsSuccessView({super.key, required this.stats});
 
@@ -70,41 +70,115 @@ class FinanceStatsSuccessView extends StatelessWidget {
         for (final block in stats.byCurrency) ...[
           if (showCurrencyHeadings)
             _CurrencyHeading(currency: block.currency, l10n: l10n),
-          // Sur grand écran, Évolution et Répartition par frais se juxtaposent
-          // pour occuper l'espace (flex 2:3 → la répartition garde ≥2 colonnes) ;
-          // en dessous, elles s'empilent verticalement.
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final evolution = FinanceStatsEvolutionSection(
-                evolution: block.evolution,
-              );
-              final feeType = FinanceStatsFeeTypeSection(
-                distribution: block.distributionByFeeType,
-              );
-              if (constraints.maxWidth >=
-                  AppBreakpoints.financeStatsTwoColMin) {
-                return Row(
+          // Rien n'a été facturé NI encaissé dans cette devise : deux
+          // graphiques plats et une répartition vide ne disent pas ce qu'une
+          // phrase dit. Le serveur garde ces devises à zéro plutôt que de les
+          // omettre — leur absence se lirait comme une école qui aurait cessé
+          // de facturer dedans — donc le cas arrive à l'écran.
+          //
+          // ⚠️ Un bloc `attendu > 0, encaissé = 0` n'est PAS sans mouvement :
+          // il porte une créance entière à recouvrer, et c'est exactement ce
+          // que cet onglet doit montrer. La distinction vit sur l'entité.
+          if (block.hasNoMovement)
+            _CurrencyNoMovement(l10n: l10n)
+          else
+            // Sur grand écran, Évolution et Répartition par frais se juxtaposent
+            // pour occuper l'espace (flex 2:3 → la répartition garde ≥2 colonnes) ;
+            // en dessous, elles s'empilent verticalement.
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final evolution = FinanceStatsEvolutionSection(
+                  evolution: block.monthlyCollected,
+                );
+                final feeType = FinanceStatsFeeTypeSection(
+                  items: block.byFeeCode,
+                );
+                if (constraints.maxWidth >=
+                    AppBreakpoints.financeStatsTwoColMin) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 2, child: evolution),
+                      const SizedBox(width: AppDimensions.spacingL),
+                      Expanded(flex: 3, child: feeType),
+                    ],
+                  );
+                }
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 2, child: evolution),
-                    const SizedBox(width: AppDimensions.spacingL),
-                    Expanded(flex: 3, child: feeType),
+                    evolution,
+                    const SizedBox(height: AppDimensions.spacingL),
+                    feeType,
                   ],
                 );
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  evolution,
-                  const SizedBox(height: AppDimensions.spacingL),
-                  feeType,
-                ],
-              );
-            },
-          ),
+              },
+            ),
           const SizedBox(height: AppDimensions.spacingXL),
         ],
       ],
+    );
+  }
+}
+
+/// Ce qu'on affiche à la place des graphiques d'une devise dormante.
+///
+/// Discret à dessein : la devise garde sa place dans la bande KPI, ses
+/// montants à zéro y sont justes, et cette ligne dit seulement pourquoi il n'y
+/// a rien à tracer en dessous.
+class _CurrencyNoMovement extends StatelessWidget {
+  final AppLocalizations l10n;
+
+  const _CurrencyNoMovement({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      label:
+          '${l10n.financeStatsCurrencyNoMovement}. '
+          '${l10n.financeStatsCurrencyNoMovementRecovery}',
+      child: ExcludeSemantics(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppDimensions.spacingL),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(AppDimensions.spacingM),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.savings_outlined,
+                size: 18,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.financeStatsCurrencyNoMovement,
+                      style: AppTextStyles.bodyStrong.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingXS),
+                    Text(
+                      l10n.financeStatsCurrencyNoMovementRecovery,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

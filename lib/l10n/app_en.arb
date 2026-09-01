@@ -3589,9 +3589,7 @@
   },
   "financeStatsNoData": "No data available for this period",
   "financeStatsNoDataHint": "Try another period to display more insights.",
-  "financeStatsErrorTitle": "Loading error",
   "financeStatsRetry": "Retry",
-  "financeStatsRetryHint": "Reload finance statistics",
   "financeStatsLoadingA11yLabel": "Finance statistics are loading",
   "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
   "@financeStatsHeaderA11yLabel": {
@@ -3612,7 +3610,7 @@
   "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
   "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
   "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
-  "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, outstanding {outstanding}, rate {rate}%",
   "@financeStatsFeeTypeItemA11yLabel": {
     "placeholders": {
       "code": {
@@ -3624,16 +3622,11 @@
       "expected": {
         "type": "String"
       },
+      "outstanding": {
+        "type": "String"
+      },
       "rate": {
         "type": "int"
-      }
-    }
-  },
-  "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
-  "@financeStatsErrorA11yLabel": {
-    "placeholders": {
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -3647,6 +3640,50 @@
   "financeStatsStorageError": "A local error prevents displaying statistics.",
   "financeStatsAuthError": "An authentication error prevents loading statistics.",
   "financeStatsUnknownError": "An unexpected error occurred while loading statistics.",
+  "financeStatsErrorNetworkTitle": "No connection",
+  "financeStatsErrorUnauthorizedTitle": "Session expired",
+  "financeStatsErrorForbiddenTitle": "Access denied",
+  "financeStatsErrorServerTitle": "Could not load",
+  "financeStatsErrorReconnect": "Sign in again",
+  "financeStatsErrorIncidentCode": "Incident code: {code}",
+  "@financeStatsErrorIncidentCode": {"description": "To quote to support.", "placeholders": {"code": {"type": "String"}}},
+  "financeDashboardTabsA11yLabel": "Finance dashboard tabs",
+  "financeDashboardTabRecoveryLabel": "Recovery",
+  "financeDashboardTabRecoveryDescription": "What is still to be collected this year",
+  "financeDashboardTabTillLabel": "Till",
+  "financeDashboardTabTillDescription": "What went into the drawer",
+  "financeTillKpiTotal": "Till total",
+  "financeTillKpiFees": "School fees",
+  "financeTillKpiBoutique": "Boutique sales",
+  "financeTillKpiBandA11yLabel": "Till indicators, by currency",
+  "financeStatsFeeTypeOutstanding": "Outstanding: {amount}",
+  "@financeStatsFeeTypeOutstanding": {"description": "Outstanding amount for a fee code.", "placeholders": {"amount": {"type": "String"}}},
+  "financeStatsRateNotApplicable": "Not applicable",
+  "@financeStatsRateNotApplicable": {"description": "Collection rate when nothing was expected."},
+  "financeStatsRateNotApplicableForCurrency": "Not applicable · {currency}",
+  "@financeStatsRateNotApplicableForCurrency": {"description": "Same, on a multi-currency dashboard.", "placeholders": {"currency": {"type": "String"}}},
+  "financeStatsFeeTypeRateNotApplicable": "Rate: not applicable",
+  "@financeStatsFeeTypeRateNotApplicable": {"description": "Rate of a fee code with nothing expected."},
+  "financeStatsCurrencyNoMovement": "No movement in this currency",
+  "@financeStatsCurrencyNoMovement": {"description": "Block of a currency the school bills in, with nothing circulating."},
+  "financeStatsCurrencyNoMovementRecovery": "Nothing was billed or collected this school year.",
+  "financeTillPeriodDayCurrent": "Today",
+  "financeTillWindow": "From {start} to {end}",
+  "@financeTillWindow": {"description": "Till window bounds, as returned by the server.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "financeTillWindowDay": "Day of {date}",
+  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "financeTillTimeZoneHint": "Day in the school's time zone · {zone}",
+  "@financeTillTimeZoneHint": {"description": "The time zone comes from the response.", "placeholders": {"zone": {"type": "String"}}},
+  "financeTillSectionBuckets": "Cash-in over time",
+  "financeTillSectionFeeCodes": "Collected fees by type",
+  "financeTillBucketsChartA11yLabel": "Cash-in chart, by interval",
+  "financeTillFeeCodeSectionA11yLabel": "Collected fees broken down by type",
+  "financeTillFeeCodeAmountA11yLabel": "{label}: {amount}",
+  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "financeTillFreshnessNotice": "As of the last sync · {relative}",
+  "@financeTillFreshnessNotice": {"description": "The server only totals what reached it.", "placeholders": {"relative": {"type": "String"}}},
+  "financeTillFreshnessNever": "Never synced",
+  "financeStatsCurrencyNoMovementTill": "Nothing went into the drawer over this window.",
   "enrollmentResults": "Results",
   "sort": "Sort",
   "switchToTableView": "Switch to table view",

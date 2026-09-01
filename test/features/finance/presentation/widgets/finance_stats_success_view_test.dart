@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-FinanceCurrencyBlock _block(String currency, int collected) =>
-    FinanceCurrencyBlock(
+RecoveryCurrencyBlock _block(String currency, int collected) =>
+    RecoveryCurrencyBlock(
       currency: currency,
       kpis: FinanceKpis(
         collected: collected,
@@ -16,7 +16,7 @@ FinanceCurrencyBlock _block(String currency, int collected) =>
         outstanding: 400000 - collected,
         collectionRate: 50,
       ),
-      evolution: const FinanceEvolution(
+      monthlyCollected: const FinanceEvolution(
         granularity: FinanceEvolutionGranularity.month,
         currentBucketIndex: 1,
         buckets: [
@@ -24,19 +24,19 @@ FinanceCurrencyBlock _block(String currency, int collected) =>
           FinanceEvolutionBucket(key: '2026-05', value: 2000, isCurrent: true),
         ],
       ),
-      distributionByFeeType: const FeeTypeDistribution(
-        items: [
-          FeeTypeItem(
-            code: 'TUITION',
-            collected: 200000,
-            expected: 400000,
-            collectionRate: 50,
-          ),
-        ],
-      ),
+      byFeeCode: const [
+        FeeTypeItem(
+          code: 'TUITION',
+          label: 'Minerval',
+          collected: 200000,
+          expected: 400000,
+          outstanding: 200000,
+          collectionRate: 50,
+        ),
+      ],
     );
 
-FinanceStats _stats(List<FinanceCurrencyBlock> blocks) => FinanceStats(
+FinanceRecovery _stats(List<RecoveryCurrencyBlock> blocks) => FinanceRecovery(
   context: StatsContext(
     schoolYear: '2025-2026',
     period: 'year',
@@ -47,7 +47,54 @@ FinanceStats _stats(List<FinanceCurrencyBlock> blocks) => FinanceStats(
   byCurrency: blocks,
 );
 
-Future<void> _pump(WidgetTester tester, FinanceStats stats) async {
+/// Un bloc qui n'a **ni facturé ni encaissé** : la devise est dans la grille
+/// tarifaire, mais rien n'y a circulé sur l'année.
+RecoveryCurrencyBlock _dormant(String currency) => RecoveryCurrencyBlock(
+  currency: currency,
+  kpis: const FinanceKpis(
+    collected: 0,
+    expected: 0,
+    outstanding: 0,
+    collectionRate: 100,
+  ),
+  byFeeCode: const [],
+  monthlyCollected: const FinanceEvolution(
+    granularity: FinanceEvolutionGranularity.month,
+    currentBucketIndex: -1,
+    buckets: [],
+  ),
+);
+
+/// Rien n'est rentré, mais tout est à recouvrer. **Ce n'est pas** un bloc sans
+/// mouvement.
+RecoveryCurrencyBlock _owing(String currency) => RecoveryCurrencyBlock(
+  currency: currency,
+  kpis: const FinanceKpis(
+    collected: 0,
+    expected: 400000,
+    outstanding: 400000,
+    collectionRate: 0,
+  ),
+  byFeeCode: const [
+    FeeTypeItem(
+      code: 'TUITION',
+      label: 'Minerval',
+      collected: 0,
+      expected: 400000,
+      outstanding: 400000,
+      collectionRate: 0,
+    ),
+  ],
+  monthlyCollected: const FinanceEvolution(
+    granularity: FinanceEvolutionGranularity.month,
+    currentBucketIndex: 0,
+    buckets: [
+      FinanceEvolutionBucket(key: '2026-05', value: 0, isCurrent: true),
+    ],
+  ),
+);
+
+Future<void> _pump(WidgetTester tester, FinanceRecovery stats) async {
   await tester.binding.setSurfaceSize(const Size(1280, 2400));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
@@ -126,5 +173,32 @@ void main() {
     // Le bandeau affichait quatre chiffres sans unité : justes tant qu'il n'y
     // en avait qu'une, muets dès qu'il y en a deux.
     expect(find.textContaining('FC'), findsWidgets);
+  });
+
+  testWidgets('une devise dormante se DIT, au lieu de deux graphiques plats', (
+    tester,
+  ) async {
+    await _pump(tester, _stats([_dormant('CDF'), _block('USD', 200000)]));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Aucun mouvement dans cette devise'), findsOneWidget);
+    // La devise garde sa place dans la bande KPI : ses zéros y sont justes.
+    expect(find.byType(EteeloKpiCard), findsNWidgets(4));
+    expect(find.text('En FC'), findsOneWidget);
+    // Un seul jeu de graphiques : celui de la devise qui a bougé.
+    expect(find.text('Évolution des encaissements'), findsOneWidget);
+  });
+
+  testWidgets('une créance non payée n’est PAS un bloc sans mouvement', (
+    tester,
+  ) async {
+    await _pump(tester, _stats([_owing('USD')]));
+
+    expect(tester.takeException(), isNull);
+    // Rien n'est rentré, mais 4 000 $ sont à recouvrer : c'est exactement ce
+    // que cet onglet doit montrer, graphiques compris.
+    expect(find.text('Aucun mouvement dans cette devise'), findsNothing);
+    expect(find.text('Évolution des encaissements'), findsOneWidget);
+    expect(find.text('Minerval'), findsOneWidget);
   });
 }

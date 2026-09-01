@@ -3544,9 +3544,7 @@
   },
   "financeStatsNoData": "Aucune donnée disponible pour cette période",
   "financeStatsNoDataHint": "Essayez une autre période pour afficher davantage d'informations.",
-  "financeStatsErrorTitle": "Erreur de chargement",
   "financeStatsRetry": "Réessayer",
-  "financeStatsRetryHint": "Relancer le chargement des statistiques financières",
   "financeStatsLoadingA11yLabel": "Chargement des statistiques financières en cours",
   "financeStatsHeaderA11yLabel": "Tableau de bord finance, année scolaire {schoolYear}",
   "@financeStatsHeaderA11yLabel": {
@@ -3567,7 +3565,7 @@
   "financeStatsKpiBandA11yLabel": "Bandeau des indicateurs clés financiers",
   "financeStatsEvolutionChartA11yLabel": "Graphique d'évolution des montants encaissés",
   "financeStatsFeeTypeSectionA11yLabel": "Répartition des montants par type de frais",
-  "financeStatsFeeTypeItemA11yLabel": "Type {code}, encaissé {collected}, attendu {expected}, taux {rate}%",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, encaissé {collected}, attendu {expected}, reste dû {outstanding}, taux {rate}%",
   "@financeStatsFeeTypeItemA11yLabel": {
     "placeholders": {
       "code": {
@@ -3579,16 +3577,11 @@
       "expected": {
         "type": "String"
       },
+      "outstanding": {
+        "type": "String"
+      },
       "rate": {
         "type": "int"
-      }
-    }
-  },
-  "financeStatsErrorA11yLabel": "Erreur de chargement des statistiques financières : {message}",
-  "@financeStatsErrorA11yLabel": {
-    "placeholders": {
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -3602,6 +3595,50 @@
   "financeStatsStorageError": "Une erreur locale empêche l'affichage des statistiques.",
   "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
   "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques.",
+  "financeStatsErrorNetworkTitle": "Connexion indisponible",
+  "financeStatsErrorUnauthorizedTitle": "Session expirée",
+  "financeStatsErrorForbiddenTitle": "Accès refusé",
+  "financeStatsErrorServerTitle": "Chargement impossible",
+  "financeStatsErrorReconnect": "Se reconnecter",
+  "financeStatsErrorIncidentCode": "Code d'incident : {code}",
+  "@financeStatsErrorIncidentCode": {"description": "À citer au support. Porté par les seules erreurs serveur : c'est ce qui distingue une panne qu'on peut faire remonter d'une coupure de réseau.", "placeholders": {"code": {"type": "String"}}},
+  "financeDashboardTabsA11yLabel": "Onglets du tableau de bord Finances",
+  "financeDashboardTabRecoveryLabel": "Recouvrement",
+  "financeDashboardTabRecoveryDescription": "Ce qu'il reste à encaisser cette année",
+  "financeDashboardTabTillLabel": "Caisse",
+  "financeDashboardTabTillDescription": "Ce qui est entré dans le tiroir",
+  "financeTillKpiTotal": "Total du tiroir",
+  "financeTillKpiFees": "Frais scolaires",
+  "financeTillKpiBoutique": "Ventes boutique",
+  "financeTillKpiBandA11yLabel": "Indicateurs de la caisse, par devise",
+  "financeStatsFeeTypeOutstanding": "Reste dû : {amount}",
+  "@financeStatsFeeTypeOutstanding": {"description": "Reste dû d'un poste de frais. Sans lui, la carte affiche un encaissé supérieur à l'attendu à côté d'une barre incomplète, et rien n'explique l'écart.", "placeholders": {"amount": {"type": "String"}}},
+  "financeStatsRateNotApplicable": "Sans objet",
+  "@financeStatsRateNotApplicable": {"description": "Taux de recouvrement quand rien n'était attendu. Le serveur renvoie alors 100, qui se lit « rien ne manque » et non « tout a été recouvré »."},
+  "financeStatsRateNotApplicableForCurrency": "Sans objet · {currency}",
+  "@financeStatsRateNotApplicableForCurrency": {"description": "Idem, quand le tableau de bord porte plusieurs devises.", "placeholders": {"currency": {"type": "String"}}},
+  "financeStatsFeeTypeRateNotApplicable": "Taux : sans objet",
+  "@financeStatsFeeTypeRateNotApplicable": {"description": "Taux d'un poste de frais sur lequel rien n'était attendu."},
+  "financeStatsCurrencyNoMovement": "Aucun mouvement dans cette devise",
+  "@financeStatsCurrencyNoMovement": {"description": "Bloc d'une devise que l'école facture mais où rien n'a circulé. Le serveur la renvoie à zéro plutôt que de l'omettre : son absence se lirait comme une école qui aurait cessé de facturer dedans."},
+  "financeStatsCurrencyNoMovementRecovery": "Rien n'a été facturé ni encaissé sur l'année scolaire.",
+  "financeTillPeriodDayCurrent": "Aujourd'hui",
+  "financeTillWindow": "Du {start} au {end}",
+  "@financeTillWindow": {"description": "Bornes de la fenêtre de caisse, telles que le serveur les renvoie. Jamais recalculées côté tablette : la journée commence et finit dans le fuseau de l'école.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "financeTillWindowDay": "Journée du {date}",
+  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "financeTillTimeZoneHint": "Journée à l'heure de l'école · {zone}",
+  "@financeTillTimeZoneHint": {"description": "Le fuseau vient de la réponse. Un encaissement sonné à 00 h 20 au guichet porte un instant serveur de 23 h 20 Z la veille.", "placeholders": {"zone": {"type": "String"}}},
+  "financeTillSectionBuckets": "Entrées de caisse",
+  "financeTillSectionFeeCodes": "Répartition des frais encaissés",
+  "financeTillBucketsChartA11yLabel": "Graphique des entrées de caisse par intervalle",
+  "financeTillFeeCodeSectionA11yLabel": "Répartition des frais encaissés par poste",
+  "financeTillFeeCodeAmountA11yLabel": "{label} : {amount}",
+  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "financeTillFreshnessNotice": "Arrêté à la dernière synchro · {relative}",
+  "@financeTillFreshnessNotice": {"description": "Le serveur ne totalise que ce qui lui est parvenu : encaissements et ventes boutique passent par la file d'écritures. Hors ligne ou file non vidée, le total sous-compte, et cette ligne dit de quand il date.", "placeholders": {"relative": {"type": "String"}}},
+  "financeTillFreshnessNever": "Jamais synchronisé",
+  "financeStatsCurrencyNoMovementTill": "Rien n'est entré dans le tiroir sur cette période.",
   "enrollmentResults": "Résultats",
   "sort": "Trier",
   "switchToTableView": "Passer à la vue tableau",

@@ -5985,13 +5985,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try another period to display more insights.';
 
   @override
-  String get financeStatsErrorTitle => 'Loading error';
-
-  @override
   String get financeStatsRetry => 'Retry';
-
-  @override
-  String get financeStatsRetryHint => 'Reload finance statistics';
 
   @override
   String get financeStatsLoadingA11yLabel => 'Finance statistics are loading';
@@ -6023,14 +6017,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String code,
     String collected,
     String expected,
+    String outstanding,
     int rate,
   ) {
-    return 'Type $code, collected $collected, expected $expected, rate $rate%';
-  }
-
-  @override
-  String financeStatsErrorA11yLabel(String message) {
-    return 'Finance statistics loading error: $message';
+    return 'Type $code, collected $collected, expected $expected, outstanding $outstanding, rate $rate%';
   }
 
   @override
@@ -6070,6 +6060,125 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'An unexpected error occurred while loading statistics.';
+
+  @override
+  String get financeStatsErrorNetworkTitle => 'No connection';
+
+  @override
+  String get financeStatsErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get financeStatsErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get financeStatsErrorServerTitle => 'Could not load';
+
+  @override
+  String get financeStatsErrorReconnect => 'Sign in again';
+
+  @override
+  String financeStatsErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get financeDashboardTabsA11yLabel => 'Finance dashboard tabs';
+
+  @override
+  String get financeDashboardTabRecoveryLabel => 'Recovery';
+
+  @override
+  String get financeDashboardTabRecoveryDescription =>
+      'What is still to be collected this year';
+
+  @override
+  String get financeDashboardTabTillLabel => 'Till';
+
+  @override
+  String get financeDashboardTabTillDescription => 'What went into the drawer';
+
+  @override
+  String get financeTillKpiTotal => 'Till total';
+
+  @override
+  String get financeTillKpiFees => 'School fees';
+
+  @override
+  String get financeTillKpiBoutique => 'Boutique sales';
+
+  @override
+  String get financeTillKpiBandA11yLabel => 'Till indicators, by currency';
+
+  @override
+  String financeStatsFeeTypeOutstanding(String amount) {
+    return 'Outstanding: $amount';
+  }
+
+  @override
+  String get financeStatsRateNotApplicable => 'Not applicable';
+
+  @override
+  String financeStatsRateNotApplicableForCurrency(String currency) {
+    return 'Not applicable · $currency';
+  }
+
+  @override
+  String get financeStatsFeeTypeRateNotApplicable => 'Rate: not applicable';
+
+  @override
+  String get financeStatsCurrencyNoMovement => 'No movement in this currency';
+
+  @override
+  String get financeStatsCurrencyNoMovementRecovery =>
+      'Nothing was billed or collected this school year.';
+
+  @override
+  String get financeTillPeriodDayCurrent => 'Today';
+
+  @override
+  String financeTillWindow(String start, String end) {
+    return 'From $start to $end';
+  }
+
+  @override
+  String financeTillWindowDay(String date) {
+    return 'Day of $date';
+  }
+
+  @override
+  String financeTillTimeZoneHint(String zone) {
+    return 'Day in the school\'s time zone · $zone';
+  }
+
+  @override
+  String get financeTillSectionBuckets => 'Cash-in over time';
+
+  @override
+  String get financeTillSectionFeeCodes => 'Collected fees by type';
+
+  @override
+  String get financeTillBucketsChartA11yLabel => 'Cash-in chart, by interval';
+
+  @override
+  String get financeTillFeeCodeSectionA11yLabel =>
+      'Collected fees broken down by type';
+
+  @override
+  String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
+    return '$label: $amount';
+  }
+
+  @override
+  String financeTillFreshnessNotice(String relative) {
+    return 'As of the last sync · $relative';
+  }
+
+  @override
+  String get financeTillFreshnessNever => 'Never synced';
+
+  @override
+  String get financeStatsCurrencyNoMovementTill =>
+      'Nothing went into the drawer over this window.';
 
   @override
   String get enrollmentResults => 'Results';

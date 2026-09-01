@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.d
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Bande KPI du tableau de bord Finances — **toutes les devises sur la même
@@ -34,7 +34,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FinanceStatsKpiBand extends StatelessWidget {
   /// Les blocs du serveur, dans leur ordre — le même que celui des sections
   /// qui suivent.
-  final List<FinanceCurrencyBlock> blocks;
+  final List<RecoveryCurrencyBlock> blocks;
 
   const FinanceStatsKpiBand({super.key, required this.blocks})
     : assert(
@@ -106,16 +106,32 @@ class FinanceStatsKpiBand extends StatelessWidget {
   ///
   /// À plusieurs devises chaque ligne dit LAQUELLE elle commente : deux
   /// pourcentages nus empilés ne se rattacheraient à rien.
+  ///
+  /// **« Sans objet » quand rien n'était attendu.** Le serveur rend alors
+  /// `100`, qui se lit « rien ne manque » et non « tout a été recouvré » — et
+  /// les devises dormantes sont désormais renvoyées à zéro plutôt qu'absentes,
+  /// donc le cas se présente à l'écran, pas seulement en théorie.
   List<String> _rates(AppLocalizations l10n) {
     if (blocks.length == 1) {
-      return ['${blocks.single.kpis.collectionRate}%'];
+      final kpis = blocks.single.kpis;
+      return [
+        if (kpis.hasNoExpectation)
+          l10n.financeStatsRateNotApplicable
+        else
+          '${kpis.collectionRate}%',
+      ];
     }
     return [
       for (final block in blocks)
-        l10n.financeStatsKpiRateForCurrency(
-          block.kpis.collectionRate,
-          MoneyFormat.symbolOf(block.currency),
-        ),
+        if (block.kpis.hasNoExpectation)
+          l10n.financeStatsRateNotApplicableForCurrency(
+            MoneyFormat.symbolOf(block.currency),
+          )
+        else
+          l10n.financeStatsKpiRateForCurrency(
+            block.kpis.collectionRate,
+            MoneyFormat.symbolOf(block.currency),
+          ),
     ];
   }
 
@@ -132,7 +148,7 @@ class FinanceStatsKpiBand extends StatelessWidget {
   int? _soleShare(int Function(FinanceKpis kpis) pick) {
     if (blocks.length != 1) return null;
     final block = blocks.single;
-    final total = block.distributionByFeeType.items.fold<int>(
+    final total = block.byFeeCode.fold<int>(
       0,
       (sum, item) => sum + item.expected,
     );
