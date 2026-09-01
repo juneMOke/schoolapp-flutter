@@ -183,6 +183,7 @@ class AppDimensions {
   static const enrollmentStatsPeriodFilterHeight = 38.0;
   static const enrollmentStatsDonutCenterRadius = 48.0;
   static const enrollmentStatsDonutLegendRowHeight = 42.0;
+  static const enrollmentStatsLevelDonutMinHeight = 300.0;
   static const enrollmentStatsDonutMaxHeight = 360.0;
   static const enrollmentStatsHeaderTitleFontSize = 20.0;
 

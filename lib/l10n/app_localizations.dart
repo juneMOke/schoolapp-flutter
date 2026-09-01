@@ -9378,11 +9378,11 @@ abstract class AppLocalizations {
   /// **'Enrollment evolution'**
   String get enrollmentStatsSectionEvolutionEnrollments;
 
-  /// No description provided for @enrollmentStatsSectionLevelEvolution.
+  /// No description provided for @enrollmentStatsSectionLevelDistribution.
   ///
   /// In en, this message translates to:
-  /// **'Evolution by level'**
-  String get enrollmentStatsSectionLevelEvolution;
+  /// **'Enrollment distribution by class'**
+  String get enrollmentStatsSectionLevelDistribution;
 
   /// No description provided for @enrollmentStatsSectionGenderEvolution.
   ///

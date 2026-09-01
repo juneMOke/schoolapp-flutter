@@ -3338,7 +3338,7 @@
   "enrollmentStatsSectionCycle": "Par cycle",
   "enrollmentStatsSectionGender": "Par genre",
   "enrollmentStatsSectionEvolutionEnrollments": "Evolution des Inscritions",
-  "enrollmentStatsSectionLevelEvolution": "Evolution par niveau",
+  "enrollmentStatsSectionLevelDistribution": "Répartition des effectifs par classe",
   "enrollmentStatsSectionGenderEvolution": "Evolution par genre",
   "enrollmentStatsGenderMale": "Garçons",
   "enrollmentStatsGenderFemale": "Filles",

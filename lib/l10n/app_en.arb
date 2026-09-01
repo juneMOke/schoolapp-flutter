@@ -3383,7 +3383,7 @@
   "enrollmentStatsSectionCycle": "By cycle",
   "enrollmentStatsSectionGender": "By gender",
   "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
-  "enrollmentStatsSectionLevelEvolution": "Evolution by level",
+  "enrollmentStatsSectionLevelDistribution": "Enrollment distribution by class",
   "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
   "enrollmentStatsGenderMale": "Boys",
   "enrollmentStatsGenderFemale": "Girls",

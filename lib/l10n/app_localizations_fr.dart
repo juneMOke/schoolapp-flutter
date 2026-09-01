@@ -5736,7 +5736,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Evolution des Inscritions';
 
   @override
-  String get enrollmentStatsSectionLevelEvolution => 'Evolution par niveau';
+  String get enrollmentStatsSectionLevelDistribution =>
+      'Répartition des effectifs par classe';
 
   @override
   String get enrollmentStatsSectionGenderEvolution => 'Evolution par genre';
