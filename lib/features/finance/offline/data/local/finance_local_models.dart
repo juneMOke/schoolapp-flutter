@@ -6,4 +6,5 @@
 export 'package:school_app_flutter/features/finance/offline/data/local/models/fee_tariff_local_model.dart';
 export 'package:school_app_flutter/features/finance/offline/data/local/models/payment_allocation_local_model.dart';
 export 'package:school_app_flutter/features/finance/offline/data/local/models/payment_local_model.dart';
+export 'package:school_app_flutter/features/finance/offline/data/local/models/payment_tender_local_model.dart';
 export 'package:school_app_flutter/features/finance/offline/data/local/models/student_charge_local_model.dart';

@@ -508,7 +508,13 @@ class AppConstants {
   // (`effective_from`) : on lit le taux qui valait à `paid_at`, pas celui du
   // jour du push. Aucun backfill — une table de cache se remplit au pull, elle
   // ne se rattrape pas.
-  static const int offlineDbSchemaVersion = 40;
+  // v41 (2026-09-01) : `payment_tenders` — ce qui est entré dans le tiroir, à
+  // côté de ce qui a été imputé. Append-only, sœur de `payment_allocations`.
+  // **Backfill identité** (perçu = imputé, taux 1) sur tout l'historique local :
+  // le pull des paiements est un delta, il ne redescendra jamais les versements
+  // déjà en base, et un repli « pas de tender ⇒ lire les allocations » ferait
+  // deux voies de lecture — celles-là divergent toujours une fois.
+  static const int offlineDbSchemaVersion = 41;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

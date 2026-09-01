@@ -720,6 +720,65 @@ const TableSchema paymentAllocationsTable = TableSchema(
   ],
 );
 
+/// `payment_tenders` — ce qui est **entré dans le tiroir** pour un versement.
+///
+/// Sœur de [paymentAllocationsTable], à la même profondeur : une **liste**, pas
+/// un scalaire. Un parent peut tendre des dollars et des francs dans la même
+/// main, et deux créances de devises différentes imposent deux lignes de toute
+/// façon — c'est le modèle qui découpe, pas le geste du payeur.
+///
+/// Append-only immuable → **PAS de `version`**, comme les imputations.
+///
+/// ## Les deux axes, et pourquoi ils ne se confondent pas
+///
+/// L'imputation répond à « combien de sa dette a-t-il éteint », dans la devise
+/// de la **créance**. Le tender répond à « qu'est-ce qui est entré dans le
+/// tiroir », dans la devise **reçue**. Jusqu'ici les deux se confondaient parce
+/// qu'ils étaient toujours dans la même unité ; le jour où un franc règle un
+/// dollar, la caisse annoncerait des dollars sur une journée où le tiroir n'a vu
+/// que des francs.
+///
+/// ## `amount_in_cents` est le **net conservé**, jamais le montant présenté
+///
+/// 120 000 tendus, 5 000 rendus : on écrit 115 000. Sans cette règle, le total
+/// de caisse ne retombera jamais sur le comptage du tiroir, et le rapprochement
+/// de la V3 héritera d'un historique inexploitable.
+///
+/// ## `rate_micros` et `pivot_currency`
+///
+/// Le taux de guichet **gelé**, en micro-unités entières (`numeric(18,6)` côté
+/// serveur ; un flottant arrondirait de l'argent). `1 000 000` = taux 1, le cas
+/// où perçu et imputé se confondent — c'est ce que porte tout l'historique
+/// backfillé. `pivot_currency` est la devise de la **créance** contre laquelle
+/// ce taux s'applique : elle lève l'ambiguïté quand un versement porte deux
+/// devises reçues et deux devises de créance.
+///
+/// ## Aucun lien vers l'allocation, et c'est délibéré
+///
+/// Un versement de 112 000 FC qui solde 40 $ et 50 $ n'a pas comporté, dans la
+/// réalité, un paquet de billets pour l'un et un paquet pour l'autre. Stocker
+/// une correspondance enregistrerait une **proration comme si c'était une
+/// observation** — or une proration se recalcule (`allocation × taux`), elle ne
+/// se conserve pas.
+const TableSchema paymentTendersTable = TableSchema(
+  name: 'payment_tenders',
+  createTableSql: '''
+    CREATE TABLE payment_tenders (
+      id TEXT PRIMARY KEY,
+      client_uuid TEXT NOT NULL,
+      payment_id TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      rate_micros INTEGER NOT NULL DEFAULT 1000000,
+      pivot_currency TEXT NOT NULL
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_payment_tenders_payment '
+        'ON payment_tenders(payment_id)',
+  ],
+);
+
 // ── Documents (partagé Inscription / Facturation) ────────────────────────────
 
 /// `generated_documents` — éditique provisoire → définitive. Sert les deux
@@ -821,6 +880,7 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   studentChargesTable,
   paymentsTable,
   paymentAllocationsTable,
+  paymentTendersTable,
   paymentAnomaliesTable,
   generatedDocumentsTable,
 ];

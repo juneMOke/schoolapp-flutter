@@ -1121,6 +1121,86 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (upTo(41)) {
+    // v41 — `payment_tenders` : ce qui est ENTRÉ DANS LE TIROIR, à côté de ce
+    // qui a été imputé (lot F2).
+    //
+    // ## Le backfill n'est pas une commodité, c'est ce qui évite deux voies de
+    // lecture
+    //
+    // Le serveur écrit une ligne d'identité pour chaque paiement déjà en base
+    // (lot E1) — mais le pull des paiements est un DELTA par curseur : il ne
+    // redescend que ce qui bouge. Les versements déjà en base LOCALE ne seront
+    // donc jamais retouchés, et resteraient sans tender pour toujours.
+    //
+    // L'alternative serait un `if tenders is empty then payment_allocations` à
+    // la lecture. C'est exactement ce que le serveur s'interdit, et pour la même
+    // raison : deux voies de lecture divergent toujours une fois. Une
+    // réimpression de ticket, six mois plus tard, est le moment où ça se
+    // verrait.
+    //
+    // ## Identité : perçu = imputé, taux 1
+    //
+    // Une ligne par `(payment_id, currency)`, agrégée depuis les imputations.
+    // C'est vrai de tout l'historique : avant la V2, il n'existait aucun moyen
+    // d'encaisser dans une autre devise que celle de la créance.
+    //
+    // Rejouable : le `WHERE NOT EXISTS` garde le palier idempotent. Surtout pas
+    // d'`INSERT OR REPLACE` — la paire avec une clé d'unicité est une
+    // destruction silencieuse, déjà payée une fois sur les créances.
+    //
+    // DDL INLINE, jamais lu du schéma vivant.
+    if (!await _hasTable(db, 'payment_tenders')) {
+      await db.execute('''
+        CREATE TABLE payment_tenders (
+          id TEXT PRIMARY KEY,
+          client_uuid TEXT NOT NULL,
+          payment_id TEXT NOT NULL,
+          amount_in_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL,
+          rate_micros INTEGER NOT NULL DEFAULT 1000000,
+          pivot_currency TEXT NOT NULL
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_payment_tenders_payment '
+        'ON payment_tenders(payment_id)',
+      );
+    }
+    if (await _hasTable(db, 'payment_allocations')) {
+      // uuid v4 forgé en SQL pur (RFC 4122), comme le backfill des sessions de
+      // présence : aucune dépendance Dart, donc migration exerçable en ffi.
+      await db.execute('''
+        INSERT INTO payment_tenders
+          (id, client_uuid, payment_id, amount_in_cents, currency,
+           rate_micros, pivot_currency)
+        SELECT
+          lower(
+            hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-4' ||
+            substr(hex(randomblob(2)), 2) || '-' ||
+            substr('89ab', abs(random()) % 4 + 1, 1) ||
+            substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))
+          ),
+          lower(
+            hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-4' ||
+            substr(hex(randomblob(2)), 2) || '-' ||
+            substr('89ab', abs(random()) % 4 + 1, 1) ||
+            substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))
+          ),
+          a.payment_id,
+          SUM(a.amount_in_cents),
+          a.currency,
+          1000000,
+          a.currency
+        FROM payment_allocations a
+        WHERE NOT EXISTS (
+          SELECT 1 FROM payment_tenders t
+          WHERE t.payment_id = a.payment_id AND t.currency = a.currency
+        )
+        GROUP BY a.payment_id, a.currency
+      ''');
+    }
+  }
 }
 
 /// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée
