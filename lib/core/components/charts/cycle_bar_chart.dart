@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
+import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -99,127 +100,132 @@ class CycleBarChart extends StatelessWidget {
 
     return SizedBox(
       height: chartHeight,
-      child: BarChart(
-        BarChartData(
-          maxY: topY,
-          barTouchData: BarTouchData(
-            enabled: !showValueLabels,
-            handleBuiltInTouches: !showValueLabels,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (_) =>
-                  showValueLabels ? Colors.transparent : AppColors.surfaceDark,
-              tooltipRoundedRadius: 8,
-              tooltipPadding: showValueLabels
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              fitInsideVertically: true,
-              fitInsideHorizontally: true,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final item = items[group.x.toInt()];
-                if (showValueLabels) {
-                  // Étiquette permanente : valeur seule ; couleur dédiée si
-                  // fournie (sinon couleur de la barre).
-                  return BarTooltipItem(
-                    (valueLabelFormatter ??
-                        NumberFormatterHelper.formatYAxisLabel)(rod.toY),
-                    AppTextStyles.caption.copyWith(
-                      color:
-                          valueLabelColorBuilder?.call(group.x.toInt()) ??
-                          item.color,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: AppTextStyles.tabularFigures,
-                    ),
-                  );
-                }
-                return BarTooltipItem(
-                  '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
-                  AppTextStyles.caption.copyWith(
-                    color: AppColors.textOnDark,
-                    fontWeight: FontWeight.w600,
-                  ),
-                );
-              },
-            ),
-          ),
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: (topY / 4).clamp(1, double.infinity),
-            getDrawingHorizontalLine: (_) => const FlLine(
-              color: AppColors.enrollmentStatsChartGrid,
-              strokeWidth: 1,
-            ),
-          ),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 36,
-                getTitlesWidget: (value, meta) => Text(
-                  NumberFormatterHelper.formatYAxisLabel(value),
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                    fontFeatures: AppTextStyles.tabularFigures,
-                  ),
-                ),
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: bottomReservedSize,
-                getTitlesWidget: (value, meta) {
-                  final idx = value.toInt();
-                  if (idx < 0 || idx >= items.length) {
-                    return const SizedBox.shrink();
+      child: ChartEntrance(
+        builder: (context, motion) => BarChart(
+          BarChartData(
+            maxY: topY,
+            barTouchData: BarTouchData(
+              enabled: !showValueLabels,
+              handleBuiltInTouches: !showValueLabels,
+              touchTooltipData: BarTouchTooltipData(
+                getTooltipColor: (_) => showValueLabels
+                    ? Colors.transparent
+                    : AppColors.surfaceDark,
+                tooltipRoundedRadius: 8,
+                tooltipPadding: showValueLabels
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                fitInsideVertically: true,
+                fitInsideHorizontally: true,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final item = items[group.x.toInt()];
+                  if (showValueLabels) {
+                    // Étiquette permanente : valeur seule ; couleur dédiée si
+                    // fournie (sinon couleur de la barre).
+                    return BarTooltipItem(
+                      (valueLabelFormatter ??
+                          NumberFormatterHelper.formatYAxisLabel)(rod.toY),
+                      AppTextStyles.caption.copyWith(
+                        color:
+                            valueLabelColorBuilder?.call(group.x.toInt()) ??
+                            item.color,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: AppTextStyles.tabularFigures,
+                      ),
+                    );
                   }
-                  final label = Text(
-                    items[idx].label,
-                    style: _bottomLabelStyle(idx),
-                    textAlign: TextAlign.center,
-                    maxLines: verticalBottomLabels ? 1 : null,
-                    overflow: verticalBottomLabels
-                        ? TextOverflow.ellipsis
-                        : TextOverflow.clip,
-                  );
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppDimensions.spacingXS,
+                  return BarTooltipItem(
+                    '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
+                    AppTextStyles.caption.copyWith(
+                      color: AppColors.textOnDark,
+                      fontWeight: FontWeight.w600,
                     ),
-                    child: verticalBottomLabels
-                        ? RotatedBox(quarterTurns: 1, child: label)
-                        : label,
                   );
                 },
               ),
             ),
-          ),
-          barGroups: [
-            for (int i = 0; i < items.length; i++)
-              BarChartGroupData(
-                x: i,
-                showingTooltipIndicators: showValueLabels
-                    ? const [0]
-                    : const [],
-                barRods: [
-                  BarChartRodData(
-                    toY: items[i].value,
-                    color: items[i].color,
-                    width: barWidth,
-                    borderRadius: BorderRadius.circular(
-                      AppDimensions.enrollmentStatsChartBorderRadius,
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              horizontalInterval: (topY / 4).clamp(1, double.infinity),
+              getDrawingHorizontalLine: (_) => const FlLine(
+                color: AppColors.enrollmentStatsChartGrid,
+                strokeWidth: 1,
+              ),
+            ),
+            borderData: FlBorderData(show: false),
+            titlesData: FlTitlesData(
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 36,
+                  getTitlesWidget: (value, meta) => Text(
+                    NumberFormatterHelper.formatYAxisLabel(value),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontFeatures: AppTextStyles.tabularFigures,
                     ),
                   ),
-                ],
+                ),
               ),
-          ],
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: bottomReservedSize,
+                  getTitlesWidget: (value, meta) {
+                    final idx = value.toInt();
+                    if (idx < 0 || idx >= items.length) {
+                      return const SizedBox.shrink();
+                    }
+                    final label = Text(
+                      items[idx].label,
+                      style: _bottomLabelStyle(idx),
+                      textAlign: TextAlign.center,
+                      maxLines: verticalBottomLabels ? 1 : null,
+                      overflow: verticalBottomLabels
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.clip,
+                    );
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppDimensions.spacingXS,
+                      ),
+                      child: verticalBottomLabels
+                          ? RotatedBox(quarterTurns: 1, child: label)
+                          : label,
+                    );
+                  },
+                ),
+              ),
+            ),
+            barGroups: [
+              for (int i = 0; i < items.length; i++)
+                BarChartGroupData(
+                  x: i,
+                  showingTooltipIndicators: showValueLabels
+                      ? const [0]
+                      : const [],
+                  barRods: [
+                    BarChartRodData(
+                      toY: motion.lerpValue(items[i].value),
+                      color: items[i].color,
+                      width: barWidth,
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.enrollmentStatsChartBorderRadius,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          duration: motion.duration,
+          curve: motion.curve,
         ),
       ),
     );
