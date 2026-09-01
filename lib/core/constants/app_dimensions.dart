@@ -61,6 +61,10 @@ class AppDimensions {
   static const fabLabelGap = 9.0;
   // Décalage du FAB par rapport au bord (endFloat = 16 par défaut).
   static const fabEdgeOffset = 28.0;
+  // Hauteur à réserver sous le contenu d'une page qui porte un FAB flottant :
+  // sinon le FAB survole les derniers dp du contenu — typiquement la barre de
+  // pagination, posée à droite du pied de tableau, sous le FAB au pixel près.
+  static const fabScrollClearance = fabEdgeOffset + fabHeight + spacingS;
 
   // Pagination tokens
   static const paginationButtonSize = 32.0;
@@ -174,8 +178,12 @@ class AppDimensions {
   static const enrollmentStatsChartSectionHeight = 220.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
+  static const enrollmentStatsChartBottomTitleHeight = 28.0;
+  static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
   static const enrollmentStatsDonutCenterRadius = 48.0;
+  static const enrollmentStatsDonutLegendRowHeight = 42.0;
+  static const enrollmentStatsDonutMaxHeight = 360.0;
   static const enrollmentStatsHeaderTitleFontSize = 20.0;
 
   // Enrollment results bar tokens

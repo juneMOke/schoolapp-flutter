@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/core/widgets/page_background_halos.dart';
@@ -24,6 +25,46 @@ void main() {
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
+    });
+
+    testWidgets(
+      'réserve la place du FAB sous le contenu (pagination non masquée)',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: AppPageBackground(
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+              child: const SizedBox(height: 2000),
+            ),
+          ),
+        );
+
+        final scrollView = tester.widget<SingleChildScrollView>(
+          find.byType(SingleChildScrollView),
+        );
+        expect(
+          (scrollView.padding as EdgeInsets).bottom,
+          AppDimensions.fabScrollClearance,
+        );
+      },
+    );
+
+    testWidgets('sans FAB, la marge basse reste la marge de page', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: AppPageBackground(child: SizedBox(height: 2000)),
+        ),
+      );
+
+      final scrollView = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView),
+      );
+      expect((scrollView.padding as EdgeInsets).bottom, AppDimensions.spacingL);
     });
 
     testWidgets('style decorated empile les halos et le filigrane Kuba', (
