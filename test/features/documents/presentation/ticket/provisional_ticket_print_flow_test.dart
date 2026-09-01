@@ -453,7 +453,9 @@ TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
       studentFullName: studentFullName,
       provisionalReference: 'PROV-TAB1-0001',
       paidAt: DateTime(2026, 8, 12, 9, 30),
-      amountReceived: MoneyBag.of(const [Money(2500000, 'CDF')]),
+      tenders: TicketTenderLine.identityFrom(
+        MoneyBag.of(const [Money(2500000, 'CDF')]),
+      ),
       labels: labels,
     );
 

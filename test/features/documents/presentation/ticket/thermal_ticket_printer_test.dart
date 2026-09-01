@@ -88,7 +88,9 @@ final TicketReceiptModel _model = TicketReceiptModel(
   studentFullName: 'Amina Ndombasi',
   provisionalReference: 'PROV-TAB1-0001',
   paidAt: DateTime(2026, 8, 12, 9, 30),
-  amountReceived: MoneyBag.of(const [Money(2500000, 'CDF')]),
+  tenders: TicketTenderLine.identityFrom(
+    MoneyBag.of(const [Money(2500000, 'CDF')]),
+  ),
   labels: const TicketLabels(
     documentTitle: 'Ticket de perception',
     provisionalBanner: 'Provisoire',
@@ -98,6 +100,8 @@ final TicketReceiptModel _model = TicketReceiptModel(
     matriculationLabel: 'Matricule :',
     classroomLabel: 'Classe :',
     amountReceivedLabel: 'Montant reçu',
+    rateLabel: 'Taux',
+    derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
     balanceLabel: 'Solde',

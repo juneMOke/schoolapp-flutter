@@ -210,7 +210,9 @@ TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   studentFullName: 'Mbala Kasa Amina',
   provisionalReference: 'PROV-A1B2C3',
   paidAt: DateTime(2026, 8, 4, 14, 7),
-  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
+  tenders: TicketTenderLine.identityFrom(
+    MoneyBag.of(const [Money(150000, 'CDF')]),
+  ),
   labels: labels,
 );
 

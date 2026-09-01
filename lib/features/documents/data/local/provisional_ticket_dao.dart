@@ -39,6 +39,40 @@ class ProvisionalTicketDao {
     ]);
   }
 
+  /// Ce qui est **entré dans le tiroir** pour ce versement, ligne par ligne.
+  ///
+  /// Lu depuis `payment_tenders`, jamais dérivé des imputations : le champ
+  /// « montant reçu » du ticket portait de l'imputé, et le jour où un franc
+  /// règle un dollar il annoncerait des dollars à un parent qui a posé des
+  /// francs. Le backfill de la v41 garantit qu'aucun versement n'est sans
+  /// ligne — il n'y a donc **pas** de repli sur les allocations, qui ferait la
+  /// seconde voie de lecture qu'on s'interdit.
+  ///
+  /// Regroupé par (devise reçue, pivot, taux) : deux lignes d'une même pile de
+  /// billets s'impriment comme une seule, ce qu'elles étaient sur le comptoir.
+  Future<List<TicketTenderRow>> findTenders(String paymentId) async {
+    final rows = await _db.rawQuery(
+      'SELECT currency, pivot_currency, rate_micros, '
+      'SUM(amount_in_cents) AS total '
+      'FROM payment_tenders WHERE payment_id = ? '
+      'GROUP BY currency, pivot_currency, rate_micros '
+      'ORDER BY currency, pivot_currency',
+      [paymentId],
+    );
+    return [
+      for (final r in rows)
+        TicketTenderRow(
+          amountInCents: (r['total'] as int?) ?? 0,
+          currency: (r['currency'] as String?) ?? '',
+          rateMicros: (r['rate_micros'] as int?) ?? 1000000,
+          pivotCurrency:
+              (r['pivot_currency'] as String?) ??
+              (r['currency'] as String?) ??
+              '',
+        ),
+    ];
+  }
+
   /// Le paiement, avec le caissier et l'appareil stampés à l'encaissement.
   Future<TicketPaymentRow?> findPayment(String paymentId) async {
     final rows = await _db.query(
@@ -303,6 +337,21 @@ class TicketPaymentRow {
     ].where((p) => p != null && p.isNotEmpty).cast<String>();
     return parts.isEmpty ? null : parts.join(' ');
   }
+}
+
+/// Une ligne de `payment_tenders`, telle que le ticket la lit.
+class TicketTenderRow {
+  final int amountInCents;
+  final String currency;
+  final int rateMicros;
+  final String pivotCurrency;
+
+  const TicketTenderRow({
+    required this.amountInCents,
+    required this.currency,
+    required this.rateMicros,
+    required this.pivotCurrency,
+  });
 }
 
 class TicketAllocationRow {

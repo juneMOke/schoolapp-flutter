@@ -93,6 +93,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
         academicYearId: payment.academicYearId,
       );
       final allocations = await _dao.findAllocations(paymentId);
+      final tenders = await _dao.findTenders(paymentId);
       final reference = await _dao.findProvisionalNumber(paymentId);
 
       return Right(
@@ -110,7 +111,19 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           provisionalReference: reference ?? paymentId,
           paidAt: _parsePaidAt(payment.paidAt),
           cashierFullName: payment.cashierFullName,
-          amountReceived: payment.amounts,
+          // Ce que le TIROIR a vu, et non ce que les imputations totalisent :
+          // c'est toute la correction de ce lot. Le montant reçu du ticket en
+          // dérive (`TicketReceiptModel.amountReceived`), il n'est plus posable
+          // à la main.
+          tenders: [
+            for (final tender in tenders)
+              TicketTenderLine(
+                amountInCents: tender.amountInCents,
+                currency: tender.currency,
+                rateMicros: tender.rateMicros,
+                pivotCurrency: tender.pivotCurrency,
+              ),
+          ],
           allocations: allocations
               .map(
                 (a) => TicketAllocationLine(
@@ -126,6 +139,11 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           remainingBalance: await _remainingBalances(
             studentId: payment.studentId,
             academicYearId: payment.academicYearId,
+            // Les devises des CRÉANCES que ce versement a touchées : un solde
+            // se dit dans la devise où la dette existe, pas dans celle des
+            // billets posés. Un ticket réglé en francs sur une créance en
+            // dollars affiche donc un reste en dollars — c'est bien ce que le
+            // parent doit encore.
             currencies: payment.amounts.currencies,
           ),
           labels: labels,

@@ -12013,6 +12013,18 @@ abstract class AppLocalizations {
   /// **'Breakdown'**
   String get ticketAllocationsLabel;
 
+  /// No description provided for @ticketRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get ticketRateLabel;
+
+  /// No description provided for @ticketDerivedAmountPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'i.e.'**
+  String get ticketDerivedAmountPrefix;
+
   /// No description provided for @ticketAdvanceLabel.
   ///
   /// In en, this message translates to:

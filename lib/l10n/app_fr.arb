@@ -4292,6 +4292,8 @@
   "ticketClassroomLabel": "Classe :",
   "ticketAmountReceivedLabel": "Montant reçu",
   "ticketAllocationsLabel": "Répartition",
+  "ticketRateLabel": "Taux",
+  "ticketDerivedAmountPrefix": "soit",
   "ticketAdvanceLabel": "Avance (non imputée)",
   "ticketBalanceLabel": "Solde",
   "ticketBalanceReservation": "sous réserve de synchronisation",

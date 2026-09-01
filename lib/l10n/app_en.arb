@@ -4337,6 +4337,8 @@
   "ticketClassroomLabel": "Class:",
   "ticketAmountReceivedLabel": "Amount received",
   "ticketAllocationsLabel": "Breakdown",
+  "ticketRateLabel": "Rate",
+  "ticketDerivedAmountPrefix": "i.e.",
   "ticketAdvanceLabel": "Advance (unallocated)",
   "ticketBalanceLabel": "Balance",
   "ticketBalanceReservation": "subject to synchronisation",
