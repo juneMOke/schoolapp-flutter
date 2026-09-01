@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/motion/eteelo_entrance.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stats_cycle_section.dart';
@@ -13,16 +14,35 @@ class EnrollmentStatsSuccessView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Les blocs se posent en cascade, du haut vers le bas. Chaque rang est
+    // republié à son contenu : les graphiques attendent que leur carte soit là
+    // avant de se tracer.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        EnrollmentStatsKpiBand(kpis: stats.kpis),
+        EteeloEntrance(
+          index: 0,
+          child: EnrollmentStatsKpiBand(kpis: stats.kpis),
+        ),
         const SizedBox(height: AppDimensions.spacingL),
-        EnrollmentStatsEvolutionSection(evolution: stats.evolution),
+        EteeloEntrance(
+          index: 1,
+          child: EnrollmentStatsEvolutionSection(evolution: stats.evolution),
+        ),
         const SizedBox(height: AppDimensions.spacingL),
-        EnrollmentStatsCycleSection(distribution: stats.distributionByCycle),
+        EteeloEntrance(
+          index: 2,
+          child: EnrollmentStatsCycleSection(
+            distribution: stats.distributionByCycle,
+          ),
+        ),
         const SizedBox(height: AppDimensions.spacingL),
-        EnrollmentStatsGenderSection(distribution: stats.distributionByGender),
+        EteeloEntrance(
+          index: 3,
+          child: EnrollmentStatsGenderSection(
+            distribution: stats.distributionByGender,
+          ),
+        ),
         const SizedBox(height: AppDimensions.spacingXL),
       ],
     );
