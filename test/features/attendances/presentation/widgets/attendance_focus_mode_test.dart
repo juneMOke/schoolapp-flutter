@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
@@ -202,9 +203,9 @@ void main() {
     // élève coûte deux taps, une cible en coûte un.
     expect(find.byType(AttendanceReasonGrid), findsOneWidget);
     expect(
-      find.byType(DropdownButton<AbsenceReason>),
+      find.byType(EteeloSelectInput<AbsenceReason>),
       findsNothing,
-      reason: 'la carte Focus ne doit plus porter le dropdown de la liste',
+      reason: 'la carte Focus ne doit plus porter le select de la liste',
     );
     // Les cinq motifs de saisie sont des cibles, pas des entrées de menu.
     for (final motif in kSelectableAbsenceReasons) {

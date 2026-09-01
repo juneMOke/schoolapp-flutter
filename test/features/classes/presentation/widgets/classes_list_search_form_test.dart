@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
@@ -96,7 +98,7 @@ void main() {
     expect(find.text('Par classe'), findsOneWidget);
     expect(find.text('Par identité'), findsOneWidget);
     // Cycle + niveau + classe.
-    expect(find.byType(DropdownButton<String>), findsNWidgets(3));
+    expect(find.byType(EteeloSelectInput<String>), findsNWidgets(3));
     // Le seul champ texte du mode classe est l'affinage facultatif.
     expect(find.byType(EteeloTextInput), findsOneWidget);
     expect(find.text('Affiner par nom (facultatif)'), findsOneWidget);
@@ -108,7 +110,7 @@ void main() {
     await _pump(tester, onSearch: (_) {}, options: const []);
 
     expect(find.byType(EteeloTextInput), findsNWidgets(3));
-    expect(find.byType(DropdownButton<String>), findsNothing);
+    expect(find.byType(EteeloSelectInput<String>), findsNothing);
   });
 
   testWidgets('mode identité : trois champs, plus aucune liste', (
@@ -119,7 +121,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(EteeloTextInput), findsNWidgets(3));
-    expect(find.byType(DropdownButton<String>), findsNothing);
+    expect(find.byType(EteeloSelectInput<String>), findsNothing);
   });
 
   testWidgets(
@@ -154,7 +156,7 @@ void main() {
 
     await _selectCycle(tester);
     await _selectLevel(tester, '5ème');
-    await tester.tap(find.byType(DropdownButton<String>).at(2));
+    await tester.tap(find.byType(EteeloSelectField).at(2));
     await tester.pumpAndSettle();
     await tester.tap(find.text('5e A').last);
     await tester.pumpAndSettle();
@@ -173,10 +175,10 @@ void main() {
     await _selectCycle(tester);
     await _selectLevel(tester, '6ème');
 
-    final classroomDropdown = tester.widget<DropdownButton<String>>(
-      find.byType(DropdownButton<String>).at(2),
+    final classroomSelect = tester.widget<EteeloSelectInput<String>>(
+      find.byType(EteeloSelectInput<String>).at(2),
     );
-    expect(classroomDropdown.onChanged, isNull);
+    expect(classroomSelect.enabled, isFalse);
     expect(find.text('Aucune classe pour ce niveau'), findsOneWidget);
   });
 
@@ -188,7 +190,7 @@ void main() {
 
     await _selectCycle(tester);
     await _selectLevel(tester, '5ème');
-    await tester.tap(find.byType(DropdownButton<String>).at(2));
+    await tester.tap(find.byType(EteeloSelectField).at(2));
     await tester.pumpAndSettle();
     await tester.tap(find.text('5e A').last);
     await tester.pumpAndSettle();
@@ -297,7 +299,7 @@ void main() {
 
     expect(_searchButton(tester).onPressed, isNull);
     // Toujours en mode classe : effacer ne renvoie pas ailleurs.
-    expect(find.byType(DropdownButton<String>), findsNWidgets(3));
+    expect(find.byType(EteeloSelectInput<String>), findsNWidgets(3));
   });
 
   testWidgets('recherche en vol : listes et actions sont éteintes', (
@@ -319,10 +321,10 @@ void main() {
           .onPressed,
       isNull,
     );
-    final cycleDropdown = tester.widget<DropdownButton<String>>(
-      find.byType(DropdownButton<String>).first,
+    final cycleSelect = tester.widget<EteeloSelectInput<String>>(
+      find.byType(EteeloSelectInput<String>).first,
     );
-    expect(cycleDropdown.onChanged, isNull);
+    expect(cycleSelect.enabled, isFalse);
   });
 }
 
@@ -354,14 +356,14 @@ Future<void> _enterNames(WidgetTester tester) async {
 }
 
 Future<void> _selectCycle(WidgetTester tester) async {
-  await tester.tap(find.byType(DropdownButton<String>).at(0));
+  await tester.tap(find.byType(EteeloSelectField).at(0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Primaire').last);
   await tester.pumpAndSettle();
 }
 
 Future<void> _selectLevel(WidgetTester tester, String label) async {
-  await tester.tap(find.byType(DropdownButton<String>).at(1));
+  await tester.tap(find.byType(EteeloSelectField).at(1));
   await tester.pumpAndSettle();
   await tester.tap(find.text(label).last);
   await tester.pumpAndSettle();

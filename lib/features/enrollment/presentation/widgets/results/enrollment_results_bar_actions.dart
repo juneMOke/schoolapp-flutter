@@ -3,9 +3,9 @@ import 'package:school_app_flutter/core/components/controls/segmented_tab_filter
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -59,41 +59,29 @@ class EnrollmentResultsBarActions extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               SizedBox(
                 width: AppDimensions.enrollmentResultsSortSelectWidth,
-                child: DropdownButtonFormField<String>(
-                  initialValue: selectedSort,
-                  isDense: true,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    filled: true,
-                    fillColor: AppColors.surfaceAlt,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: AppRadius.brSm,
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
-                  ),
+                child: EteeloSelectInput<String>(
+                  // « Trier » est déjà écrit à gauche du champ : le select
+                  // n'ajoute pas un second intitulé au-dessus. Il le garde
+                  // pour les lecteurs d'écran et pour titrer la feuille.
+                  label: l10n.sort,
+                  hideLabel: true,
+                  density: EteeloSelectDensity.compact,
+                  value: selectedSort,
+                  enabled: !isLoading,
+                  minWidth: 0,
                   items: sortOptions
                       .map(
-                        (opt) => DropdownMenuItem<String>(
+                        (opt) => EteeloSelectItem<String>(
                           value: opt.value,
-                          child: Text(
-                            opt.label,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          label: opt.label,
                         ),
                       )
                       .toList(growable: false),
-                  onChanged: isLoading
-                      ? null
-                      : (value) {
-                          if (value != null) {
-                            onSortChanged?.call(value);
-                          }
-                        },
+                  onChanged: (value) {
+                    if (value != null) {
+                      onSortChanged?.call(value);
+                    }
+                  },
                 ),
               ),
             ],

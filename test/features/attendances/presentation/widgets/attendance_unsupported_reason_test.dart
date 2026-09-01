@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -150,39 +151,32 @@ void main() {
     expect(saveButton(tester).onPressed, isNotNull);
   });
 
-  testWidgets('la sentinelle est dans les items du dropdown de SA ligne', (
-    tester,
-  ) async {
-    // Un `DropdownButtonFormField` dont la valeur courante n'est pas dans ses
-    // items est un état invalide : retirer la sentinelle fait tomber le rendu
-    // de la ligne entière, donc AUSSI le cas du blocage ci-dessus. On l'affirme
-    // ici sur les ITEMS plutôt que sur un libellé affiché, pour que l'échec
-    // désigne la cause au lieu d'une conséquence.
+  testWidgets('la sentinelle est dans les options de SA ligne', (tester) async {
+    // Le select ne lève plus sur une valeur absente de ses options — mais la
+    // ligne afficherait alors un champ vide là où l'enseignant a mis un motif.
+    // On l'affirme sur les OPTIONS plutôt que sur un libellé affiché, pour que
+    // l'échec désigne la cause au lieu d'une conséquence.
     await pumpWithReason(tester, AbsenceReason.unsupported);
 
-    // `DropdownButtonFormField` n'expose pas ses items ; c'est le
-    // `DropdownButton` qu'il construit qui les porte.
-    final champ = tester.widget<DropdownButton<AbsenceReason>>(
-      find.byType(DropdownButton<AbsenceReason>),
+    final champ = tester.widget<EteeloSelectInput<AbsenceReason>>(
+      find.byType(EteeloSelectInput<AbsenceReason>),
     );
     expect(
-      champ.items?.map((i) => i.value),
+      champ.items.map((item) => item.value),
       contains(AbsenceReason.unsupported),
     );
   });
 
-  testWidgets('un motif connu n\'ajoute PAS la sentinelle aux items', (
+  testWidgets('un motif connu n\'ajoute PAS la sentinelle aux options', (
     tester,
   ) async {
     await pumpWithReason(tester, AbsenceReason.sickness);
 
-    // `DropdownButtonFormField` n'expose pas ses items ; c'est le
-    // `DropdownButton` qu'il construit qui les porte.
-    final champ = tester.widget<DropdownButton<AbsenceReason>>(
-      find.byType(DropdownButton<AbsenceReason>),
+    final champ = tester.widget<EteeloSelectInput<AbsenceReason>>(
+      find.byType(EteeloSelectInput<AbsenceReason>),
     );
     expect(
-      champ.items?.map((i) => i.value),
+      champ.items.map((item) => item.value),
       isNot(contains(AbsenceReason.unsupported)),
     );
   });

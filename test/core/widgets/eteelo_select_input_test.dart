@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_constants.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 
 void main() {
@@ -174,6 +176,122 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+    });
+    testWidgets('hideLabel : rien de peint, mais le champ reste nomme', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EteeloSelectInput<String>(
+              label: 'Trier',
+              hideLabel: true,
+              placeholder: 'Choisir',
+              value: null,
+              items: const [EteeloSelectItem(value: 'A', label: 'A-Z')],
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trier'), findsNothing);
+      expect(find.bySemanticsLabel('Trier'), findsOneWidget);
+      semantics.dispose();
+    });
+
+    testWidgets('l\'aide s\'affiche, et l\'erreur prend sa place', (
+      tester,
+    ) async {
+      Widget build({String? errorText}) => MaterialApp(
+        home: Scaffold(
+          body: EteeloSelectInput<String>(
+            label: 'Motif',
+            helperText: 'Renseigne par l\'enseignant',
+            errorText: errorText,
+            value: null,
+            items: const [EteeloSelectItem(value: 'A', label: 'Maladie')],
+            onChanged: (_) {},
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(build());
+      expect(find.text('Renseigne par l\'enseignant'), findsOneWidget);
+
+      await tester.pumpWidget(build(errorText: 'Motif obligatoire'));
+      await tester.pump();
+      // Empilees, l'aide se lirait comme une seconde erreur.
+      expect(find.text('Motif obligatoire'), findsOneWidget);
+      expect(find.text('Renseigne par l\'enseignant'), findsNothing);
+    });
+
+    testWidgets('densite compacte : gabarit de puce, pas de champ', (
+      tester,
+    ) async {
+      Widget build(EteeloSelectDensity density) => MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              child: EteeloSelectInput<String>(
+                label: 'Niveau',
+                hideLabel: true,
+                density: density,
+                minWidth: 0,
+                value: null,
+                items: const [EteeloSelectItem(value: 'A', label: 'P1')],
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(build(EteeloSelectDensity.compact));
+      final compact = tester.getSize(find.byType(EteeloSelectField)).height;
+
+      // Le conteneur du champ est animé : sans laisser la transition finir, on
+      // mesurerait une hauteur en cours de route.
+      await tester.pumpWidget(build(EteeloSelectDensity.standard));
+      await tester.pumpAndSettle();
+      final standard = tester.getSize(find.byType(EteeloSelectField)).height;
+
+      expect(compact, EteeloSelectConstants.fieldHeightCompact);
+      expect(standard, EteeloSelectConstants.fieldHeight);
+      expect(compact, lessThan(standard));
+    });
+
+    testWidgets('placeholder en alerte : un vide qui bloque se voit', (
+      tester,
+    ) async {
+      Widget build(EteeloSelectPlaceholderTone tone) => MaterialApp(
+        home: Scaffold(
+          body: EteeloSelectInput<String>(
+            label: 'Niveau',
+            hideLabel: true,
+            placeholder: 'Niveau requis',
+            placeholderTone: tone,
+            value: null,
+            items: const [EteeloSelectItem(value: 'A', label: 'P1')],
+            onChanged: (_) {},
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(build(EteeloSelectPlaceholderTone.muted));
+      expect(
+        tester.widget<Text>(find.text('Niveau requis')).style?.color,
+        AppColors.textMuted,
+      );
+
+      await tester.pumpWidget(build(EteeloSelectPlaceholderTone.alert));
+      await tester.pump();
+      final alerted = tester.widget<Text>(find.text('Niveau requis'));
+      expect(alerted.style?.color, AppColors.terreCuite);
+      expect(alerted.style?.fontWeight, FontWeight.w600);
     });
   });
 }

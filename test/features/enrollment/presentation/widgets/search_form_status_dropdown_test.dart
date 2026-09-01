@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -36,11 +38,11 @@ void main() {
       ),
     );
 
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byType(DropdownButton<String>),
+    final select = tester.widget<EteeloSelectInput<String>>(
+      find.byType(EteeloSelectInput<String>),
     );
 
-    expect(dropdown.value, kEnrollmentStatusFilterAll);
+    expect(select.value, kEnrollmentStatusFilterAll);
   });
 
   testWidgets('uses medium badge for selected item and small badges in menu', (
@@ -67,7 +69,7 @@ void main() {
       isTrue,
     );
 
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(EteeloSelectField));
     await tester.pumpAndSettle();
 
     final badgesAfterOpen = tester.widgetList<StatusBadge>(

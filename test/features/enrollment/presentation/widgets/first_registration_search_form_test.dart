@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_option_tile.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
@@ -79,8 +82,8 @@ void main() {
       // Le seul champ du mode classe : l'affinage facultatif.
       expect(find.byType(EteeloTextInput), findsOneWidget);
       expect(find.text('Affiner par nom (facultatif)'), findsOneWidget);
-      // 3 dropdowns : cycle + niveau (cascade) + statut (champ partagé).
-      expect(find.byType(DropdownButton<String>), findsNWidgets(3));
+      // 3 listes : cycle + niveau (cascade) + statut (champ partagé).
+      expect(find.byType(EteeloSelectInput<String>), findsNWidgets(3));
     },
   );
 
@@ -93,7 +96,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(EteeloTextInput), findsNWidgets(3));
     // La cascade s'efface, le statut demeure : il borne les DEUX modes.
-    expect(find.byType(DropdownButton<String>), findsOneWidget);
+    expect(find.byType(EteeloSelectInput<String>), findsOneWidget);
   });
 
   testWidgets('identité : StandardSearchCommand borné au statut actif', (
@@ -255,21 +258,21 @@ Future<void> _enterNames(WidgetTester tester) async {
 }
 
 Future<void> _selectPrimaire1ere(WidgetTester tester) async {
-  await tester.tap(find.byType(DropdownButton<String>).at(0));
+  await tester.tap(find.byType(EteeloSelectField).at(0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Primaire').last);
   await tester.pumpAndSettle();
 
-  await tester.tap(find.byType(DropdownButton<String>).at(1));
+  await tester.tap(find.byType(EteeloSelectField).at(1));
   await tester.pumpAndSettle();
   await tester.tap(find.text('1ère').last);
   await tester.pumpAndSettle();
 }
 
-/// Le champ statut est le DERNIER dropdown du formulaire, dans les deux modes.
+/// Le champ statut est la DERNIÈRE liste du formulaire, dans les deux modes.
 Future<void> _changeStatus(WidgetTester tester) async {
-  await tester.tap(find.byType(DropdownButton<String>).last);
+  await tester.tap(find.byType(EteeloSelectField).last);
   await tester.pumpAndSettle();
-  await tester.tap(find.byType(DropdownMenuItem<String>).last);
+  await tester.tap(find.byType(EteeloSelectOptionTile<String>).last);
   await tester.pumpAndSettle();
 }

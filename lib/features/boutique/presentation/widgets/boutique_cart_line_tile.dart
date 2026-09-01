@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_line.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_family_style.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
@@ -352,26 +353,31 @@ class _LevelSelector extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final unresolved = line.declaredLevelId == null;
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String?>(
+    return SizedBox(
+      width: AppDimensions.boutiqueCartLevelSelectorWidth,
+      child: EteeloSelectInput<String>(
+        // Enchâssé dans la rangée de puces de la ligne : pas d'intitulé
+        // au-dessus (la puce voisine dit déjà de quelle ligne il s'agit) et
+        // gabarit compact, sinon le sélecteur imposerait sa hauteur de champ
+        // de formulaire à toute la rangée.
+        label: l10n.schoolLevelLabel,
+        hideLabel: true,
+        density: EteeloSelectDensity.compact,
+        placeholder: l10n.boutiqueLevelRequired,
+        // Tant que le niveau manque, la ligne n'a pas de prix : le champ vide
+        // le dit lui-même, au lieu de laisser un « Choisir » gris de plus.
+        placeholderTone: unresolved
+            ? EteeloSelectPlaceholderTone.alert
+            : EteeloSelectPlaceholderTone.muted,
         value: line.declaredLevelId,
+        minWidth: 0,
         // Liste FERMÉE : le walk-in choisit un niveau, jamais un prix
         // (invariant I-2). Il n'y a aucun champ de montant sur cette ligne.
         items: [
           for (final level in levels)
-            DropdownMenuItem(value: level.id, child: Text(level.label)),
+            EteeloSelectItem<String>(value: level.id, label: level.label),
         ],
-        hint: Text(
-          l10n.boutiqueLevelRequired,
-          style: TextStyle(
-            color: unresolved
-                ? AppColors.boutiqueUnresolvedText
-                : AppColors.textMuted,
-            fontWeight: unresolved ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
         onChanged: onChanged,
-        isDense: true,
       ),
     );
   }

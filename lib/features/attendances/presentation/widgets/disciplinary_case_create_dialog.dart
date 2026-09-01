@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
-import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
@@ -19,10 +20,10 @@ import 'package:school_app_flutter/features/attendances/domain/entities/student_
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
-import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_dialog_shell.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class DisciplinaryCaseCreateDialog extends StatefulWidget {
   final String studentId;
@@ -550,19 +551,24 @@ class _DisciplinaryCaseCreateDialogState
       children: [
         _fieldLabel(l10n.disciplinaryFieldCategory),
         const SizedBox(height: AppDimensions.spacingXS),
-        DropdownButtonFormField<DisciplinaryCategory>(
-          initialValue: _category,
-          isExpanded: true,
-          decoration: _inputDecoration(),
+        EteeloSelectInput<DisciplinaryCategory>(
+          // Le libellé reste porté par `_fieldLabel`, comme pour les champs
+          // texte voisins : la modale garde UN seul style d'intitulé.
+          label: l10n.disciplinaryFieldCategory,
+          hideLabel: true,
+          value: _category,
+          enabled: !isLoading,
+          minWidth: 0,
           items: [
-            for (final c in categories)
-              DropdownMenuItem(value: c, child: Text(c.getDisplayName(l10n))),
+            for (final category in categories)
+              EteeloSelectItem<DisciplinaryCategory>(
+                value: category,
+                label: category.getDisplayName(l10n),
+              ),
           ],
-          onChanged: isLoading
-              ? null
-              : (value) {
-                  if (value != null) _onCategoryChanged(value, l10n);
-                },
+          onChanged: (value) {
+            if (value != null) _onCategoryChanged(value, l10n);
+          },
         ),
       ],
     );
@@ -614,19 +620,21 @@ class _DisciplinaryCaseCreateDialogState
       children: [
         _fieldLabel(l10n.disciplinaryFieldSanction),
         const SizedBox(height: AppDimensions.spacingXS),
-        DropdownButtonFormField<DisciplinarySanction>(
-          initialValue: _sanction,
-          isExpanded: true,
-          decoration: _inputDecoration(),
+        EteeloSelectInput<DisciplinarySanction>(
+          label: l10n.disciplinaryFieldSanction,
+          hideLabel: true,
+          value: _sanction,
+          enabled: !isLoading,
+          minWidth: 0,
           items: [
-            for (final s in sanctions)
-              DropdownMenuItem(value: s, child: Text(s.getDisplayName(l10n))),
+            for (final sanction in sanctions)
+              EteeloSelectItem<DisciplinarySanction>(
+                value: sanction,
+                label: sanction.getDisplayName(l10n),
+              ),
           ],
-          onChanged: isLoading
-              ? null
-              : (value) => setState(
-                  () => _sanction = value ?? DisciplinarySanction.unknown,
-                ),
+          onChanged: (value) =>
+              setState(() => _sanction = value ?? DisciplinarySanction.unknown),
         ),
       ],
     );

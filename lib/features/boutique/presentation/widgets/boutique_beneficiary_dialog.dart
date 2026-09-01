@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/search/search_mode_switch.dar
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/beneficiary_picker_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_line_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -118,14 +119,20 @@ class _BoutiqueBeneficiaryDialogState extends State<BoutiqueBeneficiaryDialog> {
                       onChanged: cubit.queryChanged,
                     )
                   else
-                    DropdownButtonFormField<String>(
-                      initialValue: state.schoolLevelId,
-                      decoration: const InputDecoration(),
+                    EteeloSelectInput<String>(
+                      // Le champ n'avait aucun intitulé : une liste de
+                      // niveaux ouverte sans rien dire de ce qu'elle sert à
+                      // filtrer. Le mode « par identité », lui, nomme son
+                      // champ.
+                      label: l10n.schoolLevelLabel,
+                      value: state.schoolLevelId,
+                      enabled: state.status != BeneficiaryPickerStatus.loading,
+                      minWidth: 0,
                       items: [
                         for (final level in widget.levels)
-                          DropdownMenuItem(
+                          EteeloSelectItem<String>(
                             value: level.id,
-                            child: Text(level.label),
+                            label: level.label,
                           ),
                       ],
                       onChanged: cubit.levelChanged,
