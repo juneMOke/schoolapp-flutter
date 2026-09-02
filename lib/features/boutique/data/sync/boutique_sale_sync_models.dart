@@ -8,8 +8,10 @@
 /// `INCONSISTENT_TOTAL` — sur une vente déjà encaissée.
 library;
 
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 
 /// La vente elle-même.
 class BoutiqueSaleInput {
@@ -22,8 +24,13 @@ class BoutiqueSaleInput {
   /// éditique fantôme et rendrait la vente invisible au pull.
   final String academicYearId;
 
-  /// Le seul champ d'identité **exigé** par le serveur.
-  final String payerLastName;
+  /// **Facultatif comme les deux autres** (V114 serveur). Le triplet entier
+  /// peut être omis : la vente est alors ANONYME, et son reçu n'imprime aucun
+  /// bloc payeur plutôt qu'un nom que personne n'a donné. Une vente au comptant
+  /// remet sa contrepartie sur-le-champ — aucune dette à rattacher, personne à
+  /// recontacter — et exiger un nom pour encaisser un cahier faisait taper
+  /// « X » au guichet : un champ rempli qui ne désigne personne.
+  final String? payerLastName;
 
   final String? payerFirstName;
   final String? payerMiddleName;
@@ -43,6 +50,17 @@ class BoutiqueSaleInput {
   /// y figurer.
   final MoneyBag amounts;
 
+  /// Ce qui est réellement **entré dans le tiroir**, une entrée par devise
+  /// reçue.
+  ///
+  /// **Facultatif au contrat** : absent, le serveur écrit l'identité — perçu =
+  /// vendu, taux 1 — depuis les lignes. Un poste d'un build antérieur continue
+  /// donc de vendre, et sa vente n'est jamais refusée pour ce champ.
+  ///
+  /// On l'envoie quand même, toujours : le repli serveur annoncerait des dollars
+  /// sur une journée où le tiroir n'a vu que des francs.
+  final List<TenderDraft> tenders;
+
   /// Heure **métier** de la vente, potentiellement bien antérieure au push.
   /// Clampée sur l'horloge serveur, et jamais un curseur de synchro.
   final String soldAt;
@@ -50,11 +68,12 @@ class BoutiqueSaleInput {
   const BoutiqueSaleInput({
     required this.id,
     required this.academicYearId,
-    required this.payerLastName,
+    this.payerLastName,
     this.payerFirstName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     required this.amounts,
+    this.tenders = const [],
     required this.soldAt,
   });
 
@@ -64,7 +83,8 @@ class BoutiqueSaleInput {
   Map<String, dynamic> toJson() => {
     'id': id,
     'academicYearId': academicYearId,
-    'payerLastName': payerLastName,
+    if (payerLastName != null && payerLastName!.isNotEmpty)
+      'payerLastName': payerLastName,
     if (payerFirstName != null && payerFirstName!.isNotEmpty)
       'payerFirstName': payerFirstName,
     if (payerMiddleName != null && payerMiddleName!.isNotEmpty)
@@ -75,6 +95,21 @@ class BoutiqueSaleInput {
       for (final amount in amounts.entries)
         {'amountInCents': amount.amountInCents, 'currency': amount.currency},
     ],
+    // Omis quand il n'y a rien à dire : le serveur écrit alors l'identité, ce
+    // qui est exactement vrai. Une liste vide sur le fil dirait « rien n'est
+    // entré » sur une vente encaissée.
+    if (tenders.isNotEmpty)
+      'tenders': [
+        for (final tender in tenders)
+          {
+            'amountInCents': tender.amountInCents,
+            'currency': tender.currency,
+            // Le taux en décimal, comme le `numeric(18,6)` du serveur : les
+            // micro-unités sont une convention LOCALE, elles ne voyagent pas.
+            'rate': tender.rateMicros / ExchangeRate.scale,
+            'pivotCurrency': tender.pivotCurrency,
+          },
+      ],
     'soldAt': soldAt,
   };
 
@@ -82,13 +117,42 @@ class BoutiqueSaleInput {
       BoutiqueSaleInput(
         id: j['id'] as String,
         academicYearId: j['academicYearId'] as String,
-        payerLastName: j['payerLastName'] as String,
+        payerLastName: j['payerLastName'] as String?,
         payerFirstName: j['payerFirstName'] as String?,
         payerMiddleName: j['payerMiddleName'] as String?,
         payerPhoneNumber: j['payerPhoneNumber'] as String?,
         amounts: _amountsOf(j),
+        tenders: _tendersOf(j),
         soldAt: j['soldAt'] as String,
       );
+
+  /// Relit les lignes d'encaissement, **sans jamais échouer**.
+  ///
+  /// Une tablette mise à jour hors ligne porte en file des ventes écrites par la
+  /// version précédente, qui n'en avaient aucune. Les refuser les ferait
+  /// basculer en `failed` — issue terminale de l'outbox : l'argent encaissé,
+  /// reçu déjà remis, ne remonterait jamais. Absentes, le serveur écrit
+  /// l'identité, et c'est exactement ce que valait cette vente-là.
+  static List<TenderDraft> _tendersOf(Map<String, dynamic> j) {
+    final raw = j['tenders'];
+    if (raw is! List) return const [];
+    return [
+      for (final entry in raw)
+        if (entry is Map<String, dynamic>)
+          TenderDraft(
+            amountInCents: (entry['amountInCents'] as num?)?.toInt() ?? 0,
+            currency: (entry['currency'] as String?) ?? '',
+            rateMicros:
+                (((entry['rate'] as num?)?.toDouble() ?? 1) *
+                        ExchangeRate.scale)
+                    .round(),
+            pivotCurrency:
+                (entry['pivotCurrency'] as String?) ??
+                (entry['currency'] as String?) ??
+                '',
+          ),
+    ];
+  }
 
   /// Relit les montants **quelle que soit la forme** du payload.
   ///

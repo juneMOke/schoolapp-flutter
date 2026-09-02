@@ -66,6 +66,12 @@ class BoutiqueState extends Equatable {
   /// remplacer l'écran — la vente est déjà composée.
   final Failure? saleFailure;
 
+  /// La série de taux de l'école, lue en local.
+  ///
+  /// **Vide = aucun taux paramétré**, et c'est le cas courant : le panneau
+  /// n'offre alors aucun choix de devise, et l'écran est celui d'avant.
+  final List<ExchangeRate> rates;
+
   const BoutiqueState({
     this.status = BoutiqueStatus.initial,
     this.catalog = const BoutiqueCatalog(articles: [], withheld: false),
@@ -77,7 +83,17 @@ class BoutiqueState extends Equatable {
     this.isCollecting = false,
     this.recordedSale,
     this.saleFailure,
+    this.rates = const [],
   });
+
+  /// Comment cette devise du panier peut être réglée — la sienne en tête.
+  ///
+  /// Moins de deux entrées ⇒ il n'y a rien à choisir, et le panneau n'affiche
+  /// aucun sélecteur.
+  List<String> tenderOptionsFor(String catalogCurrency) => TenderSettlement(
+    rates: rates,
+    at: DateTime.now(),
+  ).optionsFor(catalogCurrency);
 
   /// Le catalogue filtré, groupé par famille, dans l'ordre de l'énumération.
   ///
@@ -125,6 +141,7 @@ class BoutiqueState extends Equatable {
     bool clearRecordedSale = false,
     Failure? saleFailure,
     bool clearSaleFailure = false,
+    List<ExchangeRate>? rates,
   }) => BoutiqueState(
     status: status ?? this.status,
     catalog: catalog ?? this.catalog,
@@ -140,6 +157,7 @@ class BoutiqueState extends Equatable {
         ? null
         : (recordedSale ?? this.recordedSale),
     saleFailure: clearSaleFailure ? null : (saleFailure ?? this.saleFailure),
+    rates: rates ?? this.rates,
   );
 
   @override
@@ -154,5 +172,6 @@ class BoutiqueState extends Equatable {
     isCollecting,
     recordedSale,
     saleFailure,
+    rates,
   ];
 }

@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 
@@ -9,7 +11,13 @@ class BoutiqueSaleLocalModel {
   final String id;
   final String schoolId;
   final String academicYearId;
-  final String payerLastName;
+
+  /// Les trois noms sont NULLABLES (v43) : une vente au comptant remet sa
+  /// contrepartie sur-le-champ, et exiger un nom pour encaisser un cahier
+  /// faisait taper « X » au guichet. `null` — jamais `''` — quand rien n'a été
+  /// donné : c'est ce que le ticket et le reçu lisent pour escamoter le bloc
+  /// payeur au lieu d'imprimer un cadre creux.
+  final String? payerLastName;
   final String? payerMiddleName;
   final String? payerFirstName;
   final String? payerPhoneNumber;
@@ -36,7 +44,7 @@ class BoutiqueSaleLocalModel {
     required this.id,
     required this.schoolId,
     required this.academicYearId,
-    required this.payerLastName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerFirstName,
     this.payerPhoneNumber,
@@ -75,7 +83,7 @@ class BoutiqueSaleLocalModel {
         id: map['id'] as String,
         schoolId: map['school_id'] as String,
         academicYearId: map['academic_year_id'] as String,
-        payerLastName: map['payer_last_name'] as String,
+        payerLastName: map['payer_last_name'] as String?,
         payerMiddleName: map['payer_middle_name'] as String?,
         payerFirstName: map['payer_first_name'] as String?,
         payerPhoneNumber: map['payer_phone_number'] as String?,
@@ -186,5 +194,68 @@ extension BoutiqueSaleLineTotals on Iterable<BoutiqueSaleLineLocalModel> {
   MoneyBag get totals => MoneyBag.sumBy(
     this,
     (line) => Money.parse(line.lineTotalInCents, line.currency),
+  );
+}
+
+/// Une ligne d'encaissement d'une vente — ce qui est **entré dans le tiroir**.
+///
+/// Sœur de [BoutiqueSaleLineLocalModel], à la même profondeur : le panier dit ce
+/// qui a été vendu et dans quelle devise il est tarifé, celle-ci dit ce que le
+/// client a réellement posé. Les deux se confondaient tant que l'unité était la
+/// même ; depuis qu'un franc paie un cahier tarifé en dollars, les confondre
+/// ferait annoncer des dollars sur une journée où le tiroir n'a vu que des
+/// francs.
+class BoutiqueSaleTenderLocalModel {
+  final String id;
+  final String saleId;
+
+  /// Le **net conservé**, jamais le montant présenté : 120 000 tendus, 5 000
+  /// rendus, on écrit 115 000.
+  final int amountInCents;
+
+  /// La devise réellement posée au comptoir.
+  final String currency;
+
+  /// Le taux de guichet **gelé**, en micro-unités. `1 000 000` = taux 1, le cas
+  /// où perçu et vendu se confondent.
+  final int rateMicros;
+
+  /// La devise du **catalogue** que cette ligne règle.
+  final String pivotCurrency;
+
+  const BoutiqueSaleTenderLocalModel({
+    required this.id,
+    required this.saleId,
+    required this.amountInCents,
+    required this.currency,
+    this.rateMicros = ExchangeRate.scale,
+    required this.pivotCurrency,
+  });
+
+  factory BoutiqueSaleTenderLocalModel.fromMap(Map<String, Object?> map) =>
+      BoutiqueSaleTenderLocalModel(
+        id: (map['id'] as String?) ?? '',
+        saleId: (map['sale_id'] as String?) ?? '',
+        amountInCents: (map['amount_in_cents'] as num?)?.toInt() ?? 0,
+        currency: (map['currency'] as String?) ?? '',
+        rateMicros: (map['rate_micros'] as num?)?.toInt() ?? ExchangeRate.scale,
+        pivotCurrency: (map['pivot_currency'] as String?) ?? '',
+      );
+
+  Map<String, Object?> toMap() => <String, Object?>{
+    'id': id,
+    'sale_id': saleId,
+    'amount_in_cents': amountInCents,
+    'currency': currency,
+    'rate_micros': rateMicros,
+    'pivot_currency': pivotCurrency,
+  };
+
+  /// La ligne telle que le contrat la pousse.
+  TenderDraft toDraft() => TenderDraft(
+    amountInCents: amountInCents,
+    currency: currency,
+    rateMicros: rateMicros,
+    pivotCurrency: pivotCurrency,
   );
 }

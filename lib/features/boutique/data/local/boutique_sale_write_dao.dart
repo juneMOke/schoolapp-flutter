@@ -28,6 +28,7 @@ class BoutiqueSaleWriteDao {
     required String outboxEntryId,
     required String schoolId,
     required int nowMs,
+    List<BoutiqueSaleTenderLocalModel> tenders = const [],
   }) async {
     await _db.transaction((txn) async {
       await txn.insert(
@@ -39,6 +40,17 @@ class BoutiqueSaleWriteDao {
         await txn.insert(
           'boutique_sale_lines',
           line.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      // Les lignes d'encaissement dans la MÊME transaction que la vente et son
+      // panier : une vente enregistrée sans ce qui est entré dans le tiroir se
+      // relirait comme un encaissement dans la devise du catalogue, et la caisse
+      // du soir ne retomberait pas.
+      for (final tender in tenders) {
+        await txn.insert(
+          'boutique_sale_tenders',
+          tender.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }

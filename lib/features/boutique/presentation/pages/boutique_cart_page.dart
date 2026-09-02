@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_payer.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/cart_payer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/cart_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/beneficiary_picker_cubit.dart';
@@ -165,6 +166,13 @@ class _BoutiqueCartPageState extends State<BoutiqueCartPage> {
   /// La confirmation est un **récapitulatif non modifiable** : c'est là que le
   /// comptant intégral se voit à l'œil nu. Refuser ferme la modale et ne touche
   /// à rien.
+  /// Le payeur porte-t-il au moins un nom ?
+  static bool _hasName(CartPayer payer) => [
+    payer.lastName,
+    payer.middleName,
+    payer.firstName,
+  ].any((part) => part.trim().isNotEmpty);
+
   Future<void> _collect(BuildContext context, BoutiqueState state) async {
     final bloc = context.read<BoutiqueBloc>();
     final isOffline = await _isOffline();
@@ -175,7 +183,16 @@ class _BoutiqueCartPageState extends State<BoutiqueCartPage> {
       cart: state.cart,
       // « Nouveau » se lit sur l'absence de reconnaissance au répertoire : c'est
       // exactement ce que la phrase annonce au guichet.
-      payerIsNew: state.payerMatch == null,
+      //
+      // ⚠️ Sauf s'il n'y a PERSONNE : une vente anonyme n'entre au répertoire
+      // sous aucun nom, et annoncer « ce payeur est nouveau » promettrait un
+      // enregistrement qui n'aura pas lieu. Le répertoire se rapproche sur le
+      // NUMÉRO et se remplit avec un NOM — sans l'un des deux, il n'y a rien à
+      // annoncer.
+      payerIsNew:
+          state.payerMatch == null &&
+          state.cart.payer.matchKey != null &&
+          _hasName(state.cart.payer),
       isOffline: isOffline,
     );
     if (!confirmed) return;
@@ -256,6 +273,19 @@ class _BoutiqueCartPageState extends State<BoutiqueCartPage> {
             child: BoutiqueCartPanel(
               cart: state.cart,
               levels: widget.levels,
+              rates: state.rates,
+              onTenderCurrencyChanged: (catalogCurrency, currency) => bloc.add(
+                BoutiqueTenderCurrencyChanged(
+                  catalogCurrency: catalogCurrency,
+                  currency: currency,
+                ),
+              ),
+              onTenderedChanged: (catalogCurrency, cents) => bloc.add(
+                BoutiqueTenderAmountChanged(
+                  catalogCurrency: catalogCurrency,
+                  tenderedCents: cents,
+                ),
+              ),
               payerSection: BoutiquePayerSection(
                 payer: state.cart.payer,
                 match: state.payerMatch,

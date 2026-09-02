@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_tender_section.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -28,6 +30,15 @@ class BoutiqueCartPanel extends StatelessWidget {
   /// `null` une fois la vente encaissée — cf. [BoutiqueCartFooter.onClear].
   final VoidCallback? onClear;
 
+  /// La série de taux de l'école. Vide = aucun taux paramétré : le panneau
+  /// n'offre aucun choix de devise, et l'écran est celui d'avant.
+  final List<ExchangeRate> rates;
+
+  final void Function(String catalogCurrency, String currency)?
+  onTenderCurrencyChanged;
+  final void Function(String catalogCurrency, int? tenderedCents)?
+  onTenderedChanged;
+
   const BoutiqueCartPanel({
     super.key,
     required this.cart,
@@ -40,6 +51,9 @@ class BoutiqueCartPanel extends StatelessWidget {
     required this.onClearBeneficiary,
     required this.onCollect,
     required this.onClear,
+    this.rates = const [],
+    this.onTenderCurrencyChanged,
+    this.onTenderedChanged,
   });
 
   @override
@@ -114,6 +128,15 @@ class BoutiqueCartPanel extends StatelessWidget {
               ],
             ),
           const SizedBox(height: AppDimensions.spacingM),
+          // « Le client règle en… » — juste avant le total, dans l'ordre où la
+          // question se pose au comptoir : on sait ce qui est dû, on demande
+          // comment il paie, puis on encaisse.
+          BoutiqueTenderSection(
+            cart: cart,
+            rates: rates,
+            onCurrencyChanged: onTenderCurrencyChanged,
+            onTenderedChanged: onTenderedChanged,
+          ),
           // Le pied reste en place même sur un panier vide, avec « 0.00 $ » :
           // il montre où sera le bouton, plutôt que d'apparaître d'un coup sous
           // le doigt au premier article.

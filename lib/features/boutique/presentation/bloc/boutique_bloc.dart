@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/tender_settlement.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -29,15 +32,21 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
   final RecordBoutiqueSaleUseCase _recordSale;
   final IdGenerator _ids;
 
+  /// La série de taux de l'école. `null` = ce build ne la lit pas — le panneau
+  /// n'offre alors aucun choix de devise, ce qui est l'écran d'avant.
+  final ExchangeRateReader? _rates;
+
   BoutiqueBloc({
     required GetBoutiqueCatalogUseCase getCatalog,
     required FindBoutiquePayerUseCase findPayer,
     required RecordBoutiqueSaleUseCase recordSale,
     required IdGenerator ids,
+    ExchangeRateReader? rates,
   }) : _getCatalog = getCatalog,
        _findPayer = findPayer,
        _recordSale = recordSale,
        _ids = ids,
+       _rates = rates,
        super(const BoutiqueState()) {
     on<BoutiqueCatalogRequested>(_onCatalogRequested);
     on<BoutiqueQueryChanged>(_onQueryChanged);
@@ -53,9 +62,41 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     on<BoutiqueLineSizeChanged>(_onSizeChanged);
     on<BoutiquePayerChanged>(_onPayerChanged);
     on<BoutiquePayerFromDirectoryUsed>(_onPayerFromDirectoryUsed);
+    on<BoutiqueTenderCurrencyChanged>(_onTenderCurrencyChanged);
+    on<BoutiqueTenderAmountChanged>(_onTenderAmountChanged);
     on<BoutiqueCartCleared>(_onCartCleared);
     on<BoutiqueSaleSubmitted>(_onSaleSubmitted);
     on<BoutiqueNewSaleStarted>(_onNewSaleStarted);
+  }
+
+  /// « Le client règle en… », posé sur une devise du panier.
+  void _onTenderCurrencyChanged(
+    BoutiqueTenderCurrencyChanged event,
+    Emitter<BoutiqueState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        cart: state.cart.withTenderCurrency(
+          event.catalogCurrency,
+          event.currency,
+        ),
+      ),
+    );
+  }
+
+  /// Ce que le client a posé sur le comptoir pour cette devise du panier.
+  void _onTenderAmountChanged(
+    BoutiqueTenderAmountChanged event,
+    Emitter<BoutiqueState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        cart: state.cart.withTenderedAmount(
+          event.catalogCurrency,
+          event.tenderedCents,
+        ),
+      ),
+    );
   }
 
   /// Le pas « − » de la vignette. Ne touche qu'aux exemplaires non destinés :
@@ -75,6 +116,9 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
   ) async {
     emit(state.copyWith(status: BoutiqueStatus.loading, clearFailure: true));
     final result = await _getCatalog(event.academicYearId);
+    // Le taux descend avec le catalogue, et son échec ne fait rien échouer : une
+    // caisse sans taux vend exactement comme avant.
+    final rates = await _rates?.forCurrentSchool() ?? const <ExchangeRate>[];
     result.fold(
       (failure) => emit(
         state.copyWith(status: BoutiqueStatus.failure, failure: failure),
@@ -85,6 +129,7 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
         state.copyWith(
           status: BoutiqueStatus.ready,
           catalog: catalog,
+          rates: rates,
           clearFailure: true,
         ),
       ),
