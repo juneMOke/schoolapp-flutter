@@ -64,9 +64,34 @@ if [[ "$PUBSPEC_VERSION_LINE" == "$BASE_BUILD_NAME" ]]; then
   BASE_BUILD_NUMBER="1"
 fi
 
+# Normalise un tag SemVer (`v1.2.3` ou `1.2.3`) et le décompose dans les
+# variables globales MAJOR / MINOR / PATCH. Sort en erreur si le tag est
+# malformé : une version fournie à la main ne doit jamais être ignorée
+# en silence ni retomber discrètement sur le pubspec.
+parse_version_tag() {
+  local tag="${1#v}"
+  if [[ ! "$tag" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    echo "Tag de version invalide: '$1'. Attendu: vX.Y.Z ou X.Y.Z" >&2
+    exit 1
+  fi
+  MAJOR="${BASH_REMATCH[1]}"
+  MINOR="${BASH_REMATCH[2]}"
+  PATCH="${BASH_REMATCH[3]}"
+}
+
 case "$APP_ENV" in
   dev|staging)
-    BUILD_NAME="$BASE_BUILD_NAME"
+    # Un tag explicite prime sur le pubspec : c'est ce que l'opérateur a saisi
+    # dans le `workflow_dispatch`. Sans tag, on retombe sur `pubspec.yaml`.
+    if [[ -n "$VERSION_TAG" ]]; then
+      parse_version_tag "$VERSION_TAG"
+      BUILD_NAME="$MAJOR.$MINOR.$PATCH"
+    else
+      BUILD_NAME="$BASE_BUILD_NAME"
+    fi
+    # Le build number reste le numéro de run : Firebase App Distribution et le
+    # Play Store exigent une suite strictement croissante, qu'un même tag
+    # rejoué ne fournirait pas.
     BUILD_NUMBER="${GITHUB_RUN_NUMBER:-$BASE_BUILD_NUMBER}"
     ;;
   prod)
@@ -81,15 +106,7 @@ case "$APP_ENV" in
       exit 1
     fi
 
-    VERSION_TAG="${VERSION_TAG#v}"
-    if [[ "$VERSION_TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-      MAJOR="${BASH_REMATCH[1]}"
-      MINOR="${BASH_REMATCH[2]}"
-      PATCH="${BASH_REMATCH[3]}"
-    else
-      echo "Tag de version invalide: '$VERSION_TAG'. Attendu: vX.Y.Z ou X.Y.Z" >&2
-      exit 1
-    fi
+    parse_version_tag "$VERSION_TAG"
 
     BUILD_NAME="$MAJOR.$MINOR.$PATCH"
     BUILD_NUMBER="$((MAJOR * 1000000 + MINOR * 1000 + PATCH))"
