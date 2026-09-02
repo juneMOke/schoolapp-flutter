@@ -2,8 +2,9 @@
 # .githooks/pre-push
 #
 # Verifications lourdes avant chaque push :
-#   1. flutter analyze -- analyse statique complete
-#   2. flutter test    -- suite de tests unitaires
+#   1. dart format  -- l'ARBRE ENTIER, comme la CI
+#   2. flutter analyze -- analyse statique complete
+#   3. flutter test    -- suite de tests unitaires
 #
 # Ces verifications sont intentionnellement dans pre-push (pas pre-commit)
 # car elles sont plus longues. La CI les executera aussi en parallele.
@@ -14,7 +15,35 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 ERRORS=0
 # -----------------------------------------------------------------
-# 1. flutter analyze
+# 1. dart format -- l'ARBRE ENTIER, la meme commande que la CI
+#
+# EN PREMIER, parce que c'est la moins chere : elle rend son verdict en
+# secondes la ou analyze + test coutent vingt minutes. Echouer ici epargne
+# les deux autres.
+#
+# SUR L'ARBRE ENTIER ('.'), et c'est tout l'interet. Le pre-commit ne
+# formate que les fichiers STAGES : un fichier qui atteint un commit par un
+# chemin qui ne passe pas par lui -- amendement, rebase, --no-verify -- n'est
+# jamais formate. Il ne se voyait alors qu'en CI, apres vingt minutes et un
+# push. Meme commande que .github/workflows/flutter_ci.yml : le gabarit local
+# et celui du depot doivent dire la meme chose, sinon l'un des deux ment.
+#
+# --output=none : on VERIFIE, on ne reecrit pas. Un hook qui reformate sous
+# l'auteur les fichiers qu'il n'a pas touches pousserait dans son commit du
+# bruit qu'il n'a pas voulu.
+# -----------------------------------------------------------------
+echo "[pre-push] dart format (arbre entier)..."
+
+if dart format --output=none --set-exit-if-changed .; then
+  echo "[pre-push] OK Format OK."
+else
+  echo "[pre-push] FAILED Format FAILED -- push bloque."
+  echo "           Corrigez avec : dart format ."
+  ERRORS=$((ERRORS + 1))
+fi
+
+# -----------------------------------------------------------------
+# 2. flutter analyze
 # -----------------------------------------------------------------
 echo "[pre-push] flutter analyze..."
 if flutter analyze; then
@@ -24,7 +53,7 @@ else
   ERRORS=$((ERRORS + 1))
 fi
 # -----------------------------------------------------------------
-# 2. flutter test
+# 3. flutter test
 # -----------------------------------------------------------------
 echo "[pre-push] flutter test..."
 if flutter test; then
