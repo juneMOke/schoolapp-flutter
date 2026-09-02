@@ -2603,6 +2603,7 @@
   "facturationPaymentDetailHeroSubtitle": "Review this payment information and the breakdown of allocated amounts.",
   "facturationPaymentInfoSectionTitle": "Payment information",
   "facturationPaymentPayerLabel": "Payer",
+  "facturationPaymentPayerUnnamed": "No payer named",
   "facturationPaymentAmountLabel": "Total paid amount",
   "facturationPaymentPaidAtLabel": "Paid at",
   "facturationPaymentAmountPaidLabel": "Amount paid",
@@ -2708,6 +2709,7 @@
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
   "facturationCreatePaymentPayerPhoneLabel": "Payer's phone number",
+  "facturationCreatePaymentPayerOptionalNotice": "These details are optional: a payment can be collected without naming the payer. The receipt still carries the student and the fees settled.",
   "facturationCreatePaymentPayerPickAction": "Choose a payer",
   "facturationCreatePaymentPayerPickHelp": "Reuse a payer who has already been to the desk, or enter one below.",
   "facturationPayerSearchDialogEyebrow": "Collection",
@@ -2854,6 +2856,17 @@
       }
     }
   },
+  "boutiqueTenderCurrency": "Customer pays {due} in",
+  "@boutiqueTenderCurrency": {"placeholders": {"due": {"type": "String"}}},
+  "boutiqueTenderReceivedLabel": "Received at the counter",
+  "boutiqueTenderShortfall": "Still due · {amount}",
+  "@boutiqueTenderShortfall": {"placeholders": {"amount": {"type": "String"}}},
+  "boutiqueTenderChangeDue": "Change due · {amount}",
+  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "facturationCreatePaymentTenderCurrency": "Parent pays in",
+  "facturationCreatePaymentTenderAmountLabel": "Received at the counter",
+  "facturationCreatePaymentChangeDue": "Change due · {amount}",
+  "@facturationCreatePaymentChangeDue": {"placeholders": {"amount": {"type": "String"}}},
   "facturationCreatePaymentAmountToSettleLabel": "Amount to settle",
   "facturationCreatePaymentSettleAllAction": "Settle all",
   "facturationCreatePaymentAmountClampedWarning": "Amount capped to the remaining balance ({amount}).",
@@ -2874,6 +2887,50 @@
   },
   "facturationCreatePaymentSettledChip": "Settled",
   "facturationCreatePaymentTotalToCollect": "Total to collect",
+  "facturationSettlementLabel": "The parent pays in",
+  "exchangeRateSettingsTitle": "Counter exchange rate",
+  "exchangeRateSettingsSubtitle": "The rate offered to the cashier when a parent pays in another currency. Each save adds a step: payments already taken keep theirs.",
+  "exchangeRateSettingsFromLabel": "1 unit of",
+  "exchangeRateSettingsToLabel": "is worth, in",
+  "exchangeRateSettingsValueLabel": "Rate",
+  "exchangeRateSettingsSave": "Save rate",
+  "exchangeRateSettingsSaved": "Rate saved.",
+  "exchangeRateSettingsNone": "No rate set: at the counter, each fee is paid in its own currency.",
+  "exchangeRateSettingsCurrent": "In force: 1 {base} = {value} {quote}",
+  "@exchangeRateSettingsCurrent": {
+    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+  },
+  "facturationSettlementPerCharge": "Each fee",
+  "facturationSettlementRateLabel": "Today's rate",
+  "facturationSettlementCountedLabel": "Amount counted",
+  "facturationSettlementCountedHint": "Conversion: {expected}",
+  "@facturationSettlementCountedHint": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementCountedMismatch": "Too far from the conversion ({expected}). Adjust the amount or the rate.",
+  "@facturationSettlementCountedMismatch": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementRateEdit": "Change",
+  "facturationSettlementRateFieldLabel": "Applied rate",
+  "facturationSettlementRateHint": "{quote} for 1 {base}",
+  "@facturationSettlementRateHint": {
+    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+  },
+  "facturationSettlementRateDiverges": "This rate differs from the school's ({reference}). The payment can still be taken; it will be flagged.",
+  "@facturationSettlementRateDiverges": {
+    "placeholders": { "reference": { "type": "String" } }
+  },
+  "facturationSettlementNoRate": "No rate set: each fee is paid in its own currency.",
+  "facturationSettlementDerived": "i.e. {amount}",
+  "@facturationSettlementDerived": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationCreatePaymentToPerceive": "To collect",
+  "facturationCreatePaymentImputes": "settles {amount}",
+  "@facturationCreatePaymentImputes": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
     "placeholders": {
@@ -2900,6 +2957,17 @@
         "type": "String"
       },
       "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentenceNoPayer": "You are about to collect {amount} for {student}.",
+  "@facturationCreatePaymentConfirmSentenceNoPayer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
         "type": "String"
       }
     }
@@ -3703,9 +3771,16 @@
   "financeTillTimeZoneHint": "Day in the school's time zone · {zone}",
   "@financeTillTimeZoneHint": {"description": "The time zone comes from the response.", "placeholders": {"zone": {"type": "String"}}},
   "financeTillSectionBuckets": "Cash-in over time",
-  "financeTillSectionFeeCodes": "Collected fees by type",
   "financeTillBucketsChartA11yLabel": "Cash-in chart, by interval",
-  "financeTillFeeCodeSectionA11yLabel": "Collected fees broken down by type",
+  "financeTillImputationHeading": "What these payments settled",
+  "@financeTillImputationHeading": {"description": "Second half of the till screen, counted in charge currency."},
+  "financeTillImputationHint": "In charge currency: these amounts do not add up with the drawer's.",
+  "financeTillImputationCardTitle": "Charges settled in {currency}",
+  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillImputationTotal": "Settled total · {amount}",
+  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "financeTillImputationSectionA11yLabel": "Settlement by fee type, in {currency}",
+  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
   "financeTillFeeCodeAmountA11yLabel": "{label}: {amount}",
   "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
   "financeTillFreshnessNotice": "As of the last sync · {relative}",
@@ -4445,14 +4520,10 @@
   "boutiquePayerLastNameLabel": "Last name",
   "boutiquePayerMiddleNameLabel": "Middle name",
   "boutiquePayerFirstNameLabel": "First name",
-  "boutiquePayerReceiptNotice": "The receipt is in the payer's name; recipients are attached to each line.",
+  "boutiquePayerOptionalNotice": "These details are optional: a sale can be collected without naming the payer. When filled in, they appear on the receipt.",
   "boutiquePayerUnknownNotice": "Unknown number — this payer will be added to the directory with the sale.",
   "boutiqueBlockersPrefix": "Still missing:",
   "boutiqueBlockerEmptyCart": "Cart is empty",
-  "boutiqueBlockerLastName": "Last name",
-  "boutiqueBlockerMiddleName": "Middle name",
-  "boutiqueBlockerFirstName": "First name",
-  "boutiqueBlockerPhone": "Payer's phone",
   "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
   "@boutiqueBlockerLinesWithoutLevel": {

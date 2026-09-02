@@ -2551,6 +2551,7 @@
   "facturationPaymentDetailHeroSubtitle": "Consultez les informations de ce paiement et la répartition des montants alloués.",
   "facturationPaymentInfoSectionTitle": "Informations du paiement",
   "facturationPaymentPayerLabel": "Payeur",
+  "facturationPaymentPayerUnnamed": "Sans payeur nommé",
   "facturationPaymentAmountLabel": "Montant global payé",
   "facturationPaymentPaidAtLabel": "Date de paiement",
   "facturationPaymentAmountPaidLabel": "Montant versé",
@@ -2656,6 +2657,7 @@
   "facturationCreatePaymentPayerMiddleNameHint": "Entrez le post-nom",
   "facturationCreatePaymentPayerFieldRequired": "Ce champ est obligatoire",
   "facturationCreatePaymentPayerPhoneLabel": "Téléphone du payeur",
+  "facturationCreatePaymentPayerOptionalNotice": "Ces informations sont facultatives : un versement peut être encaissé sans nommer le payeur. Le reçu, lui, porte toujours l'élève et les frais réglés.",
   "facturationCreatePaymentPayerPickAction": "Choisir un payeur",
   "facturationCreatePaymentPayerPickHelp": "Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.",
   "facturationPayerSearchDialogEyebrow": "Encaissement",
@@ -2802,6 +2804,20 @@
       }
     }
   },
+  "boutiqueTenderCurrency": "Le client règle {due} en",
+  "@boutiqueTenderCurrency": {"description": "La question se pose par devise du panier : c'est le sous-total dû dans cette unité qui sert de point de départ.", "placeholders": {"due": {"type": "String"}}},
+  "boutiqueTenderReceivedLabel": "Reçu au comptoir",
+  "@boutiqueTenderReceivedLabel": {"description": "Pré-rempli par la conversion et modifiable : le client tend un billet rond, l'écart repart en monnaie rendue."},
+  "boutiqueTenderShortfall": "Il manque · {amount}",
+  "@boutiqueTenderShortfall": {"description": "Le client a posé moins que le dû. Une vente est comptant intégral : on le dit au comptoir plutôt que d'écrire une vente à moitié payée.", "placeholders": {"amount": {"type": "String"}}},
+  "boutiqueTenderChangeDue": "Monnaie à rendre · {amount}",
+  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "facturationCreatePaymentTenderCurrency": "Le parent règle en",
+  "@facturationCreatePaymentTenderCurrency": {"description": "La question se pose sur le frais coché, parce que c'est la devise de CE frais qui sert de point de départ."},
+  "facturationCreatePaymentTenderAmountLabel": "Reçu en caisse",
+  "@facturationCreatePaymentTenderAmountLabel": {"description": "Le montant posé sur le comptoir. Remplir ce champ calcule l'imputation, et inversement."},
+  "facturationCreatePaymentChangeDue": "Monnaie à rendre · {amount}",
+  "@facturationCreatePaymentChangeDue": {"description": "La conversion ne tombe pas juste : ce reliquat repart avec le parent, il n'entre pas dans le tiroir.", "placeholders": {"amount": {"type": "String"}}},
   "facturationCreatePaymentAmountToSettleLabel": "Montant à régler",
   "facturationCreatePaymentSettleAllAction": "Tout solder",
   "facturationCreatePaymentAmountClampedWarning": "Montant ramené au restant dû ({amount}).",
@@ -2822,6 +2838,50 @@
   },
   "facturationCreatePaymentSettledChip": "Soldé",
   "facturationCreatePaymentTotalToCollect": "Total à encaisser",
+  "facturationSettlementLabel": "Le parent règle en",
+  "exchangeRateSettingsTitle": "Taux de change du guichet",
+  "exchangeRateSettingsSubtitle": "Le taux proposé au caissier quand un parent règle dans une autre monnaie. Chaque enregistrement crée un palier : les versements déjà encaissés gardent le leur.",
+  "exchangeRateSettingsFromLabel": "1 unité de",
+  "exchangeRateSettingsToLabel": "vaut, en",
+  "exchangeRateSettingsValueLabel": "Taux",
+  "exchangeRateSettingsSave": "Enregistrer le taux",
+  "exchangeRateSettingsSaved": "Taux enregistré.",
+  "exchangeRateSettingsNone": "Aucun taux paramétré : au guichet, chaque frais se règle dans sa propre devise.",
+  "exchangeRateSettingsCurrent": "En vigueur : 1 {base} = {value} {quote}",
+  "@exchangeRateSettingsCurrent": {
+    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+  },
+  "facturationSettlementPerCharge": "Chaque frais",
+  "facturationSettlementRateLabel": "Taux du jour",
+  "facturationSettlementCountedLabel": "Montant compté",
+  "facturationSettlementCountedHint": "Conversion : {expected}",
+  "@facturationSettlementCountedHint": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementCountedMismatch": "Écart trop grand avec la conversion ({expected}). Ajustez le montant ou le taux.",
+  "@facturationSettlementCountedMismatch": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementRateEdit": "Modifier",
+  "facturationSettlementRateFieldLabel": "Taux appliqué",
+  "facturationSettlementRateHint": "{quote} pour 1 {base}",
+  "@facturationSettlementRateHint": {
+    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+  },
+  "facturationSettlementRateDiverges": "Ce taux s'écarte de celui de l'école ({reference}). L'encaissement reste possible ; il sera signalé.",
+  "@facturationSettlementRateDiverges": {
+    "placeholders": { "reference": { "type": "String" } }
+  },
+  "facturationSettlementNoRate": "Aucun taux paramétré : le règlement se fait dans la devise de chaque frais.",
+  "facturationSettlementDerived": "soit {amount}",
+  "@facturationSettlementDerived": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationCreatePaymentToPerceive": "À percevoir",
+  "facturationCreatePaymentImputes": "impute {amount}",
+  "@facturationCreatePaymentImputes": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
     "placeholders": {
@@ -2848,6 +2908,17 @@
         "type": "String"
       },
       "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentenceNoPayer": "Vous allez encaisser {amount} pour {student}.",
+  "@facturationCreatePaymentConfirmSentenceNoPayer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
         "type": "String"
       }
     }
@@ -3658,9 +3729,17 @@
   "financeTillTimeZoneHint": "Journée à l'heure de l'école · {zone}",
   "@financeTillTimeZoneHint": {"description": "Le fuseau vient de la réponse. Un encaissement sonné à 00 h 20 au guichet porte un instant serveur de 23 h 20 Z la veille.", "placeholders": {"zone": {"type": "String"}}},
   "financeTillSectionBuckets": "Entrées de caisse",
-  "financeTillSectionFeeCodes": "Répartition des frais encaissés",
   "financeTillBucketsChartA11yLabel": "Graphique des entrées de caisse par intervalle",
-  "financeTillFeeCodeSectionA11yLabel": "Répartition des frais encaissés par poste",
+  "financeTillImputationHeading": "Ce que ces versements ont éteint",
+  "@financeTillImputationHeading": {"description": "Titre de la seconde moitié de l'écran caisse. Elle compte dans la devise de la CRÉANCE, quand tout ce qui précède compte en devise reçue."},
+  "financeTillImputationHint": "En devise de créance : ces montants ne s'additionnent pas à ceux du tiroir.",
+  "@financeTillImputationHint": {"description": "Un versement de 115 000 FC qui solde 50 USD pèse en haut dans le bloc CDF et ici dans le bloc USD. Sans cette phrase, les deux moitiés se lisent comme un seul total, qui n'existe pas."},
+  "financeTillImputationCardTitle": "Créances réglées en {currency}",
+  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillImputationTotal": "Total imputé · {amount}",
+  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "financeTillImputationSectionA11yLabel": "Imputation par poste de frais, en {currency}",
+  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
   "financeTillFeeCodeAmountA11yLabel": "{label} : {amount}",
   "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
   "financeTillFreshnessNotice": "Arrêté à la dernière synchro · {relative}",
@@ -4400,14 +4479,10 @@
   "boutiquePayerLastNameLabel": "Nom",
   "boutiquePayerMiddleNameLabel": "Post-nom",
   "boutiquePayerFirstNameLabel": "Prénom",
-  "boutiquePayerReceiptNotice": "Le reçu est nominatif au payeur ; les élèves bénéficiaires s'attachent à chaque ligne.",
+  "boutiquePayerOptionalNotice": "Ces informations sont facultatives : une vente peut être encaissée sans nommer le payeur. Renseignées, elles figurent sur le reçu.",
   "boutiquePayerUnknownNotice": "Numéro inconnu — ce payeur sera enregistré au répertoire avec la vente.",
   "boutiqueBlockersPrefix": "À compléter :",
   "boutiqueBlockerEmptyCart": "Panier vide",
-  "boutiqueBlockerLastName": "Nom",
-  "boutiqueBlockerMiddleName": "Post-nom",
-  "boutiqueBlockerFirstName": "Prénom",
-  "boutiqueBlockerPhone": "Téléphone du payeur",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {

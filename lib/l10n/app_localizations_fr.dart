@@ -3870,6 +3870,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPayerLabel => 'Payeur';
 
   @override
+  String get facturationPaymentPayerUnnamed => 'Sans payeur nommé';
+
+  @override
   String get facturationPaymentAmountLabel => 'Montant global payé';
 
   @override
@@ -4224,6 +4227,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentPayerPhoneLabel => 'Téléphone du payeur';
 
   @override
+  String get facturationCreatePaymentPayerOptionalNotice =>
+      'Ces informations sont facultatives : un versement peut être encaissé sans nommer le payeur. Le reçu, lui, porte toujours l\'élève et les frais réglés.';
+
+  @override
   String get facturationCreatePaymentPayerPickAction => 'Choisir un payeur';
 
   @override
@@ -4543,6 +4550,35 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String boutiqueTenderCurrency(String due) {
+    return 'Le client règle $due en';
+  }
+
+  @override
+  String get boutiqueTenderReceivedLabel => 'Reçu au comptoir';
+
+  @override
+  String boutiqueTenderShortfall(String amount) {
+    return 'Il manque · $amount';
+  }
+
+  @override
+  String boutiqueTenderChangeDue(String amount) {
+    return 'Monnaie à rendre · $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentTenderCurrency => 'Le parent règle en';
+
+  @override
+  String get facturationCreatePaymentTenderAmountLabel => 'Reçu en caisse';
+
+  @override
+  String facturationCreatePaymentChangeDue(String amount) {
+    return 'Monnaie à rendre · $amount';
+  }
+
+  @override
   String get facturationCreatePaymentAmountToSettleLabel => 'Montant à régler';
 
   @override
@@ -4565,6 +4601,92 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
 
   @override
+  String get facturationSettlementLabel => 'Le parent règle en';
+
+  @override
+  String get exchangeRateSettingsTitle => 'Taux de change du guichet';
+
+  @override
+  String get exchangeRateSettingsSubtitle =>
+      'Le taux proposé au caissier quand un parent règle dans une autre monnaie. Chaque enregistrement crée un palier : les versements déjà encaissés gardent le leur.';
+
+  @override
+  String get exchangeRateSettingsFromLabel => '1 unité de';
+
+  @override
+  String get exchangeRateSettingsToLabel => 'vaut, en';
+
+  @override
+  String get exchangeRateSettingsValueLabel => 'Taux';
+
+  @override
+  String get exchangeRateSettingsSave => 'Enregistrer le taux';
+
+  @override
+  String get exchangeRateSettingsSaved => 'Taux enregistré.';
+
+  @override
+  String get exchangeRateSettingsNone =>
+      'Aucun taux paramétré : au guichet, chaque frais se règle dans sa propre devise.';
+
+  @override
+  String exchangeRateSettingsCurrent(String base, String value, String quote) {
+    return 'En vigueur : 1 $base = $value $quote';
+  }
+
+  @override
+  String get facturationSettlementPerCharge => 'Chaque frais';
+
+  @override
+  String get facturationSettlementRateLabel => 'Taux du jour';
+
+  @override
+  String get facturationSettlementCountedLabel => 'Montant compté';
+
+  @override
+  String facturationSettlementCountedHint(String expected) {
+    return 'Conversion : $expected';
+  }
+
+  @override
+  String facturationSettlementCountedMismatch(String expected) {
+    return 'Écart trop grand avec la conversion ($expected). Ajustez le montant ou le taux.';
+  }
+
+  @override
+  String get facturationSettlementRateEdit => 'Modifier';
+
+  @override
+  String get facturationSettlementRateFieldLabel => 'Taux appliqué';
+
+  @override
+  String facturationSettlementRateHint(String quote, String base) {
+    return '$quote pour 1 $base';
+  }
+
+  @override
+  String facturationSettlementRateDiverges(String reference) {
+    return 'Ce taux s\'écarte de celui de l\'école ($reference). L\'encaissement reste possible ; il sera signalé.';
+  }
+
+  @override
+  String get facturationSettlementNoRate =>
+      'Aucun taux paramétré : le règlement se fait dans la devise de chaque frais.';
+
+  @override
+  String facturationSettlementDerived(String amount) {
+    return 'soit $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentToPerceive => 'À percevoir';
+
+  @override
+  String facturationCreatePaymentImputes(String amount) {
+    return 'impute $amount';
+  }
+
+  @override
   String facturationCreatePaymentCollectAmountAction(String amount) {
     return 'Encaisser $amount';
   }
@@ -4581,6 +4703,14 @@ class AppLocalizationsFr extends AppLocalizations {
     String payer,
   ) {
     return 'Vous allez encaisser $amount pour $student, réglé par $payer.';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentenceNoPayer(
+    String amount,
+    String student,
+  ) {
+    return 'Vous allez encaisser $amount pour $student.';
   }
 
   @override
@@ -6248,15 +6378,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeTillSectionBuckets => 'Entrées de caisse';
 
   @override
-  String get financeTillSectionFeeCodes => 'Répartition des frais encaissés';
-
-  @override
   String get financeTillBucketsChartA11yLabel =>
       'Graphique des entrées de caisse par intervalle';
 
   @override
-  String get financeTillFeeCodeSectionA11yLabel =>
-      'Répartition des frais encaissés par poste';
+  String get financeTillImputationHeading => 'Ce que ces versements ont éteint';
+
+  @override
+  String get financeTillImputationHint =>
+      'En devise de créance : ces montants ne s\'additionnent pas à ceux du tiroir.';
+
+  @override
+  String financeTillImputationCardTitle(String currency) {
+    return 'Créances réglées en $currency';
+  }
+
+  @override
+  String financeTillImputationTotal(String amount) {
+    return 'Total imputé · $amount';
+  }
+
+  @override
+  String financeTillImputationSectionA11yLabel(String currency) {
+    return 'Imputation par poste de frais, en $currency';
+  }
 
   @override
   String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
@@ -7587,8 +7732,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiquePayerFirstNameLabel => 'Prénom';
 
   @override
-  String get boutiquePayerReceiptNotice =>
-      'Le reçu est nominatif au payeur ; les élèves bénéficiaires s\'attachent à chaque ligne.';
+  String get boutiquePayerOptionalNotice =>
+      'Ces informations sont facultatives : une vente peut être encaissée sans nommer le payeur. Renseignées, elles figurent sur le reçu.';
 
   @override
   String get boutiquePayerUnknownNotice =>
@@ -7599,18 +7744,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueBlockerEmptyCart => 'Panier vide';
-
-  @override
-  String get boutiqueBlockerLastName => 'Nom';
-
-  @override
-  String get boutiqueBlockerMiddleName => 'Post-nom';
-
-  @override
-  String get boutiqueBlockerFirstName => 'Prénom';
-
-  @override
-  String get boutiqueBlockerPhone => 'Téléphone du payeur';
 
   @override
   String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';

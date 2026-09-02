@@ -3847,6 +3847,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPayerLabel => 'Payer';
 
   @override
+  String get facturationPaymentPayerUnnamed => 'No payer named';
+
+  @override
   String get facturationPaymentAmountLabel => 'Total paid amount';
 
   @override
@@ -4195,6 +4198,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentPayerPhoneLabel => 'Payer\'s phone number';
 
   @override
+  String get facturationCreatePaymentPayerOptionalNotice =>
+      'These details are optional: a payment can be collected without naming the payer. The receipt still carries the student and the fees settled.';
+
+  @override
   String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
 
   @override
@@ -4506,6 +4513,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String boutiqueTenderCurrency(String due) {
+    return 'Customer pays $due in';
+  }
+
+  @override
+  String get boutiqueTenderReceivedLabel => 'Received at the counter';
+
+  @override
+  String boutiqueTenderShortfall(String amount) {
+    return 'Still due · $amount';
+  }
+
+  @override
+  String boutiqueTenderChangeDue(String amount) {
+    return 'Change due · $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentTenderCurrency => 'Parent pays in';
+
+  @override
+  String get facturationCreatePaymentTenderAmountLabel =>
+      'Received at the counter';
+
+  @override
+  String facturationCreatePaymentChangeDue(String amount) {
+    return 'Change due · $amount';
+  }
+
+  @override
   String get facturationCreatePaymentAmountToSettleLabel => 'Amount to settle';
 
   @override
@@ -4528,6 +4565,92 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentTotalToCollect => 'Total to collect';
 
   @override
+  String get facturationSettlementLabel => 'The parent pays in';
+
+  @override
+  String get exchangeRateSettingsTitle => 'Counter exchange rate';
+
+  @override
+  String get exchangeRateSettingsSubtitle =>
+      'The rate offered to the cashier when a parent pays in another currency. Each save adds a step: payments already taken keep theirs.';
+
+  @override
+  String get exchangeRateSettingsFromLabel => '1 unit of';
+
+  @override
+  String get exchangeRateSettingsToLabel => 'is worth, in';
+
+  @override
+  String get exchangeRateSettingsValueLabel => 'Rate';
+
+  @override
+  String get exchangeRateSettingsSave => 'Save rate';
+
+  @override
+  String get exchangeRateSettingsSaved => 'Rate saved.';
+
+  @override
+  String get exchangeRateSettingsNone =>
+      'No rate set: at the counter, each fee is paid in its own currency.';
+
+  @override
+  String exchangeRateSettingsCurrent(String base, String value, String quote) {
+    return 'In force: 1 $base = $value $quote';
+  }
+
+  @override
+  String get facturationSettlementPerCharge => 'Each fee';
+
+  @override
+  String get facturationSettlementRateLabel => 'Today\'s rate';
+
+  @override
+  String get facturationSettlementCountedLabel => 'Amount counted';
+
+  @override
+  String facturationSettlementCountedHint(String expected) {
+    return 'Conversion: $expected';
+  }
+
+  @override
+  String facturationSettlementCountedMismatch(String expected) {
+    return 'Too far from the conversion ($expected). Adjust the amount or the rate.';
+  }
+
+  @override
+  String get facturationSettlementRateEdit => 'Change';
+
+  @override
+  String get facturationSettlementRateFieldLabel => 'Applied rate';
+
+  @override
+  String facturationSettlementRateHint(String quote, String base) {
+    return '$quote for 1 $base';
+  }
+
+  @override
+  String facturationSettlementRateDiverges(String reference) {
+    return 'This rate differs from the school\'s ($reference). The payment can still be taken; it will be flagged.';
+  }
+
+  @override
+  String get facturationSettlementNoRate =>
+      'No rate set: each fee is paid in its own currency.';
+
+  @override
+  String facturationSettlementDerived(String amount) {
+    return 'i.e. $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentToPerceive => 'To collect';
+
+  @override
+  String facturationCreatePaymentImputes(String amount) {
+    return 'settles $amount';
+  }
+
+  @override
   String facturationCreatePaymentCollectAmountAction(String amount) {
     return 'Collect $amount';
   }
@@ -4544,6 +4667,14 @@ class AppLocalizationsEn extends AppLocalizations {
     String payer,
   ) {
     return 'You are about to collect $amount for $student, paid by $payer.';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentenceNoPayer(
+    String amount,
+    String student,
+  ) {
+    return 'You are about to collect $amount for $student.';
   }
 
   @override
@@ -6179,14 +6310,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeTillSectionBuckets => 'Cash-in over time';
 
   @override
-  String get financeTillSectionFeeCodes => 'Collected fees by type';
-
-  @override
   String get financeTillBucketsChartA11yLabel => 'Cash-in chart, by interval';
 
   @override
-  String get financeTillFeeCodeSectionA11yLabel =>
-      'Collected fees broken down by type';
+  String get financeTillImputationHeading => 'What these payments settled';
+
+  @override
+  String get financeTillImputationHint =>
+      'In charge currency: these amounts do not add up with the drawer\'s.';
+
+  @override
+  String financeTillImputationCardTitle(String currency) {
+    return 'Charges settled in $currency';
+  }
+
+  @override
+  String financeTillImputationTotal(String amount) {
+    return 'Settled total · $amount';
+  }
+
+  @override
+  String financeTillImputationSectionA11yLabel(String currency) {
+    return 'Settlement by fee type, in $currency';
+  }
 
   @override
   String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
@@ -7510,8 +7656,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiquePayerFirstNameLabel => 'First name';
 
   @override
-  String get boutiquePayerReceiptNotice =>
-      'The receipt is in the payer\'s name; recipients are attached to each line.';
+  String get boutiquePayerOptionalNotice =>
+      'These details are optional: a sale can be collected without naming the payer. When filled in, they appear on the receipt.';
 
   @override
   String get boutiquePayerUnknownNotice =>
@@ -7522,18 +7668,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueBlockerEmptyCart => 'Cart is empty';
-
-  @override
-  String get boutiqueBlockerLastName => 'Last name';
-
-  @override
-  String get boutiqueBlockerMiddleName => 'Middle name';
-
-  @override
-  String get boutiqueBlockerFirstName => 'First name';
-
-  @override
-  String get boutiqueBlockerPhone => 'Payer\'s phone';
 
   @override
   String get boutiqueBlockerPhoneIncomplete => 'Incomplete phone';

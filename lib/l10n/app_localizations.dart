@@ -6320,6 +6320,12 @@ abstract class AppLocalizations {
   /// **'Payer'**
   String get facturationPaymentPayerLabel;
 
+  /// No description provided for @facturationPaymentPayerUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'No payer named'**
+  String get facturationPaymentPayerUnnamed;
+
   /// No description provided for @facturationPaymentAmountLabel.
   ///
   /// In en, this message translates to:
@@ -6894,6 +6900,12 @@ abstract class AppLocalizations {
   /// **'Payer\'s phone number'**
   String get facturationCreatePaymentPayerPhoneLabel;
 
+  /// No description provided for @facturationCreatePaymentPayerOptionalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'These details are optional: a payment can be collected without naming the payer. The receipt still carries the student and the fees settled.'**
+  String get facturationCreatePaymentPayerOptionalNotice;
+
   /// No description provided for @facturationCreatePaymentPayerPickAction.
   ///
   /// In en, this message translates to:
@@ -7394,6 +7406,48 @@ abstract class AppLocalizations {
   /// **'Remaining {amount}'**
   String facturationCreatePaymentChargeRemaining(String amount);
 
+  /// No description provided for @boutiqueTenderCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer pays {due} in'**
+  String boutiqueTenderCurrency(String due);
+
+  /// No description provided for @boutiqueTenderReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the counter'**
+  String get boutiqueTenderReceivedLabel;
+
+  /// No description provided for @boutiqueTenderShortfall.
+  ///
+  /// In en, this message translates to:
+  /// **'Still due · {amount}'**
+  String boutiqueTenderShortfall(String amount);
+
+  /// No description provided for @boutiqueTenderChangeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Change due · {amount}'**
+  String boutiqueTenderChangeDue(String amount);
+
+  /// No description provided for @facturationCreatePaymentTenderCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent pays in'**
+  String get facturationCreatePaymentTenderCurrency;
+
+  /// No description provided for @facturationCreatePaymentTenderAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the counter'**
+  String get facturationCreatePaymentTenderAmountLabel;
+
+  /// No description provided for @facturationCreatePaymentChangeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Change due · {amount}'**
+  String facturationCreatePaymentChangeDue(String amount);
+
   /// No description provided for @facturationCreatePaymentAmountToSettleLabel.
   ///
   /// In en, this message translates to:
@@ -7430,6 +7484,144 @@ abstract class AppLocalizations {
   /// **'Total to collect'**
   String get facturationCreatePaymentTotalToCollect;
 
+  /// No description provided for @facturationSettlementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'The parent pays in'**
+  String get facturationSettlementLabel;
+
+  /// No description provided for @exchangeRateSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter exchange rate'**
+  String get exchangeRateSettingsTitle;
+
+  /// No description provided for @exchangeRateSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The rate offered to the cashier when a parent pays in another currency. Each save adds a step: payments already taken keep theirs.'**
+  String get exchangeRateSettingsSubtitle;
+
+  /// No description provided for @exchangeRateSettingsFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'1 unit of'**
+  String get exchangeRateSettingsFromLabel;
+
+  /// No description provided for @exchangeRateSettingsToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'is worth, in'**
+  String get exchangeRateSettingsToLabel;
+
+  /// No description provided for @exchangeRateSettingsValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get exchangeRateSettingsValueLabel;
+
+  /// No description provided for @exchangeRateSettingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save rate'**
+  String get exchangeRateSettingsSave;
+
+  /// No description provided for @exchangeRateSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate saved.'**
+  String get exchangeRateSettingsSaved;
+
+  /// No description provided for @exchangeRateSettingsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate set: at the counter, each fee is paid in its own currency.'**
+  String get exchangeRateSettingsNone;
+
+  /// No description provided for @exchangeRateSettingsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'In force: 1 {base} = {value} {quote}'**
+  String exchangeRateSettingsCurrent(String base, String value, String quote);
+
+  /// No description provided for @facturationSettlementPerCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Each fee'**
+  String get facturationSettlementPerCharge;
+
+  /// No description provided for @facturationSettlementRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rate'**
+  String get facturationSettlementRateLabel;
+
+  /// No description provided for @facturationSettlementCountedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount counted'**
+  String get facturationSettlementCountedLabel;
+
+  /// No description provided for @facturationSettlementCountedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion: {expected}'**
+  String facturationSettlementCountedHint(String expected);
+
+  /// No description provided for @facturationSettlementCountedMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Too far from the conversion ({expected}). Adjust the amount or the rate.'**
+  String facturationSettlementCountedMismatch(String expected);
+
+  /// No description provided for @facturationSettlementRateEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get facturationSettlementRateEdit;
+
+  /// No description provided for @facturationSettlementRateFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied rate'**
+  String get facturationSettlementRateFieldLabel;
+
+  /// No description provided for @facturationSettlementRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{quote} for 1 {base}'**
+  String facturationSettlementRateHint(String quote, String base);
+
+  /// No description provided for @facturationSettlementRateDiverges.
+  ///
+  /// In en, this message translates to:
+  /// **'This rate differs from the school\'s ({reference}). The payment can still be taken; it will be flagged.'**
+  String facturationSettlementRateDiverges(String reference);
+
+  /// No description provided for @facturationSettlementNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate set: each fee is paid in its own currency.'**
+  String get facturationSettlementNoRate;
+
+  /// No description provided for @facturationSettlementDerived.
+  ///
+  /// In en, this message translates to:
+  /// **'i.e. {amount}'**
+  String facturationSettlementDerived(String amount);
+
+  /// No description provided for @facturationCreatePaymentToPerceive.
+  ///
+  /// In en, this message translates to:
+  /// **'To collect'**
+  String get facturationCreatePaymentToPerceive;
+
+  /// No description provided for @facturationCreatePaymentImputes.
+  ///
+  /// In en, this message translates to:
+  /// **'settles {amount}'**
+  String facturationCreatePaymentImputes(String amount);
+
   /// No description provided for @facturationCreatePaymentCollectAmountAction.
   ///
   /// In en, this message translates to:
@@ -7450,6 +7642,15 @@ abstract class AppLocalizations {
     String amount,
     String student,
     String payer,
+  );
+
+  /// No description provided for @facturationCreatePaymentConfirmSentenceNoPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to collect {amount} for {student}.'**
+  String facturationCreatePaymentConfirmSentenceNoPayer(
+    String amount,
+    String student,
   );
 
   /// No description provided for @facturationCreatePaymentConfirmDistributionTitle.
@@ -10188,23 +10389,41 @@ abstract class AppLocalizations {
   /// **'Cash-in over time'**
   String get financeTillSectionBuckets;
 
-  /// No description provided for @financeTillSectionFeeCodes.
-  ///
-  /// In en, this message translates to:
-  /// **'Collected fees by type'**
-  String get financeTillSectionFeeCodes;
-
   /// No description provided for @financeTillBucketsChartA11yLabel.
   ///
   /// In en, this message translates to:
   /// **'Cash-in chart, by interval'**
   String get financeTillBucketsChartA11yLabel;
 
-  /// No description provided for @financeTillFeeCodeSectionA11yLabel.
+  /// Second half of the till screen, counted in charge currency.
   ///
   /// In en, this message translates to:
-  /// **'Collected fees broken down by type'**
-  String get financeTillFeeCodeSectionA11yLabel;
+  /// **'What these payments settled'**
+  String get financeTillImputationHeading;
+
+  /// No description provided for @financeTillImputationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In charge currency: these amounts do not add up with the drawer\'s.'**
+  String get financeTillImputationHint;
+
+  /// No description provided for @financeTillImputationCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges settled in {currency}'**
+  String financeTillImputationCardTitle(String currency);
+
+  /// No description provided for @financeTillImputationTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled total · {amount}'**
+  String financeTillImputationTotal(String amount);
+
+  /// No description provided for @financeTillImputationSectionA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement by fee type, in {currency}'**
+  String financeTillImputationSectionA11yLabel(String currency);
 
   /// No description provided for @financeTillFeeCodeAmountA11yLabel.
   ///
@@ -12361,11 +12580,11 @@ abstract class AppLocalizations {
   /// **'First name'**
   String get boutiquePayerFirstNameLabel;
 
-  /// No description provided for @boutiquePayerReceiptNotice.
+  /// No description provided for @boutiquePayerOptionalNotice.
   ///
   /// In en, this message translates to:
-  /// **'The receipt is in the payer\'s name; recipients are attached to each line.'**
-  String get boutiquePayerReceiptNotice;
+  /// **'These details are optional: a sale can be collected without naming the payer. When filled in, they appear on the receipt.'**
+  String get boutiquePayerOptionalNotice;
 
   /// No description provided for @boutiquePayerUnknownNotice.
   ///
@@ -12384,30 +12603,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cart is empty'**
   String get boutiqueBlockerEmptyCart;
-
-  /// No description provided for @boutiqueBlockerLastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last name'**
-  String get boutiqueBlockerLastName;
-
-  /// No description provided for @boutiqueBlockerMiddleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Middle name'**
-  String get boutiqueBlockerMiddleName;
-
-  /// No description provided for @boutiqueBlockerFirstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First name'**
-  String get boutiqueBlockerFirstName;
-
-  /// No description provided for @boutiqueBlockerPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Payer\'s phone'**
-  String get boutiqueBlockerPhone;
 
   /// No description provided for @boutiqueBlockerPhoneIncomplete.
   ///
