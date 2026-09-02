@@ -17,7 +17,19 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FacturationCollectActionBar extends StatelessWidget {
   /// Total à encaisser, déjà rendu par devise (« 425,00 $ · 90 000 FC »).
   /// Vide tant qu'aucun frais n'est retenu.
+  ///
+  /// C'est **ce que le tiroir va recevoir** dès qu'une devise de règlement est
+  /// choisie : le caissier compte des billets, et c'est ce chiffre-là qu'il
+  /// annonce au parent.
   final String totalLabel;
+
+  /// Ce que ce versement **impute**, en devise de créance, quand ce n'est pas la
+  /// même chose. `null` dans le cas courant, où les deux se confondent et où
+  /// répéter le montant n'apprendrait rien.
+  ///
+  /// En second, et en petit : c'est la hiérarchie du métier. Le comptable lit
+  /// l'imputation, le guichet compte ce qu'on lui tend.
+  final String? settledLabel;
 
   /// `null` éteint le CTA (payeur incomplet, rien à encaisser, confirmation
   /// déjà ouverte).
@@ -27,6 +39,7 @@ class FacturationCollectActionBar extends StatelessWidget {
     super.key,
     required this.totalLabel,
     required this.onCollect,
+    this.settledLabel,
   });
 
   @override
@@ -39,8 +52,14 @@ class FacturationCollectActionBar extends StatelessWidget {
     // blanc.
     final hasTotal = totalLabel.trim().isNotEmpty;
     final total = _TotalBand(
-      label: l10n.facturationCreatePaymentTotalToCollect,
+      // Le libellé change avec ce qu'il coiffe : « Total à encaisser » tant que
+      // perçu et imputé se confondent, « À percevoir » dès qu'ils divergent —
+      // auquel cas la ligne du dessous dit ce qui est éteint.
+      label: settledLabel == null
+          ? l10n.facturationCreatePaymentTotalToCollect
+          : l10n.facturationCreatePaymentToPerceive,
       amount: hasTotal ? totalLabel : l10n.facturationDetailUnknownValue,
+      settled: hasTotal ? settledLabel : null,
     );
 
     return SafeArea(
@@ -118,7 +137,10 @@ class _TotalBand extends StatelessWidget {
   final String label;
   final String amount;
 
-  const _TotalBand({required this.label, required this.amount});
+  /// L'imputé, rendu sous le perçu. `null` quand les deux se confondent.
+  final String? settled;
+
+  const _TotalBand({required this.label, required this.amount, this.settled});
 
   @override
   Widget build(BuildContext context) {
@@ -150,17 +172,36 @@ class _TotalBand extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingM),
           Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                amount,
-                style: AppTextStyles.totalAmountLora.copyWith(
-                  color: AppColors.textOnDark,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    amount,
+                    style: AppTextStyles.totalAmountLora.copyWith(
+                      color: AppColors.textOnDark,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-              ),
+                if (settled != null)
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.facturationCreatePaymentImputes(settled!),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textOnDark.withValues(alpha: 0.75),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

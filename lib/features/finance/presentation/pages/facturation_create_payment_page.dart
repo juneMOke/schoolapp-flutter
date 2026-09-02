@@ -4,14 +4,18 @@ import 'package:school_app_flutter/core/components/app_bars/student_detail_app_b
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
+import 'package:school_app_flutter/core/money/tender_settlement.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_settlement_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
@@ -47,9 +51,26 @@ class FacturationCreatePaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<FinanceOfflineBloc>(
-      create: (_) => getIt<FinanceOfflineBloc>(),
-      child: FacturationCreatePaymentView(intent: intent),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FinanceOfflineBloc>(
+          create: (_) => getIt<FinanceOfflineBloc>(),
+        ),
+        // La série de taux de l'école, chargée au montage. Vide tant que rien
+        // n'est paramétré : la bascule de devise n'apparaît alors pas, et
+        // l'écran est celui d'avant.
+        BlocProvider<ExchangeRatesCubit>(
+          create: (_) => getIt<ExchangeRatesCubit>()..load(),
+        ),
+      ],
+      // La vue ne lit pas le cubit elle-même : elle reçoit la série. C'est ce
+      // qui la garde montable seule — et sans taux, c'est-à-dire dans le cas
+      // courant, elle rend exactement l'écran d'avant.
+      child: BlocBuilder<ExchangeRatesCubit, ExchangeRatesState>(
+        buildWhen: (previous, current) => previous.rates != current.rates,
+        builder: (context, state) =>
+            FacturationCreatePaymentView(intent: intent, rates: state.rates),
+      ),
     );
   }
 }
@@ -58,7 +79,15 @@ class FacturationCreatePaymentPage extends StatelessWidget {
 class FacturationCreatePaymentView extends StatefulWidget {
   final FacturationCreatePaymentIntent intent;
 
-  const FacturationCreatePaymentView({super.key, required this.intent});
+  /// La série de taux de l'école. Vide = aucun taux paramétré : la bascule de
+  /// devise ne s'affiche pas, et l'écran est celui d'avant la V2.
+  final List<ExchangeRate> rates;
+
+  const FacturationCreatePaymentView({
+    super.key,
+    required this.intent,
+    this.rates = const [],
+  });
 
   @override
   State<FacturationCreatePaymentView> createState() =>
@@ -80,6 +109,25 @@ class _FacturationCreatePaymentViewState
   /// pour un seul acte de guichet.
   bool _collectInFlight = false;
 
+  /// Les taux corrigés à la main, **par paire** (`USD>CDF`) : un contrôleur et
+  /// un état d'édition chacun.
+  ///
+  /// Par paire, parce que deux frais de devises différentes n'ont pas « le »
+  /// même taux — mais jamais par ligne : deux lignes d'une même paire partagent
+  /// leur taux, et en écrire deux dans un seul versement est précisément ce que
+  /// la garde locale refuse.
+  final Map<String, TextEditingController> _rateControllers = {};
+  final Set<String> _editingRates = {};
+
+  /// Le texte que « Modifier » a **pré-rempli**, par paire.
+  ///
+  /// Sert à distinguer « le caissier a ouvert le champ » de « le caissier a
+  /// corrigé le taux ». Sans cette distinction, ouvrir le champ sans rien taper
+  /// appliquerait la valeur affichée — arrondie au centième — à la place du taux
+  /// du référentiel, qui en porte six. Un geste sans intention changerait le
+  /// montant encaissé.
+  final Map<String, String> _rateSeeds = {};
+
   @override
   void initState() {
     super.initState();
@@ -89,18 +137,33 @@ class _FacturationCreatePaymentViewState
     ];
     for (final entry in _entries) {
       entry.controller.addListener(_onChanged);
+      entry.tenderController.addListener(_onChanged);
     }
     _payer.addListener(_onChanged);
   }
 
   @override
   void dispose() {
+    for (final controller in _rateControllers.values) {
+      controller.dispose();
+    }
     _payer.dispose();
     for (final entry in _entries) {
       entry.dispose();
     }
     super.dispose();
   }
+
+  /// Le contrôleur de taux de cette paire, créé à la demande.
+  TextEditingController _rateControllerOf(String pairKey) =>
+      _rateControllers.putIfAbsent(pairKey, () {
+        final controller = TextEditingController();
+        // Sans écoute, corriger un taux ne rafraîchirait ni les montants
+        // dérivés, ni le total de la barre, ni le CTA : le caissier taperait
+        // dans un champ sans effet visible.
+        controller.addListener(_onChanged);
+        return controller;
+      });
 
   void _onChanged() {
     if (mounted) setState(() {});
@@ -144,32 +207,288 @@ class _FacturationCreatePaymentViewState
     setState(() {
       entry.selected = value;
       if (value) {
-        entry.controller.text = _formatPlain(entry.remainingInCents);
+        entry.tenderIsSource = false;
+        entry.writeDerived(
+          entry.controller,
+          _formatPlain(entry.remainingInCents),
+        );
+        _reflectTender(entry);
       } else {
         entry.controller.clear();
+        entry.tenderController.clear();
+        entry.tenderIsSource = false;
       }
     });
   }
 
   void _onSettleAll(FacturationChargeEntry entry) {
     setState(() {
-      entry.controller.text = _formatPlain(entry.remainingInCents);
+      entry.tenderIsSource = false;
+      entry.writeDerived(
+        entry.controller,
+        _formatPlain(entry.remainingInCents),
+      );
+      _reflectTender(entry);
     });
   }
 
-  /// Le total à encaisser, **par devise**.
+  /// L'état du règlement : les taux du référentiel, plus ceux corrigés.
   ///
-  /// C'était un entier unique, sommé sur toutes les lignes retenues, étiqueté
-  /// avec la première devise non vide rencontrée. Un versement soldant 425,00 $
-  /// et 90 000 FC s'affichait « 9 042 500 USD » — sur le bandeau or, sur le
-  /// ticket remis au parent, et dans le payload envoyé au serveur.
-  MoneyBag get _totalBag => MoneyBag.sumBy(
-    _entries.where((entry) => entry.effectiveCents > 0),
-    (entry) => Money.parse(entry.effectiveCents, entry.charge.currency),
+  /// Reconstruit à chaque rendu — il n'y a pas d'état à synchroniser, seulement
+  /// une devise par ligne et des taux par paire.
+  TenderSettlement _settlement() => TenderSettlement(
+    rates: widget.rates,
+    // Le taux qui vaut à l'heure du versement, pas celui d'aujourd'hui : un
+    // encaissement hors ligne remonte parfois trois jours plus tard.
+    at: DateTime.now(),
+    overriddenRates: {
+      for (final key in _editingRates) key: ?_rateMicrosOf(key),
+    },
   );
 
-  /// Le total, rendu sur une ligne — les devises séparées, jamais sommées.
-  String _totalLabel() => _totalBag.entries.map(MoneyFormat.format).join(' · ');
+  /// Le taux saisi pour cette paire, en micro-unités. `null` tant que rien n'a
+  /// été corrigé, ou quand la saisie n'est pas un nombre.
+  int? _rateMicrosOf(String pairKey) {
+    final raw = _rateControllers[pairKey]?.text ?? '';
+    // Champ ouvert mais intact : le référentiel garde la main.
+    if (raw == _rateSeeds[pairKey]) return null;
+    final parsed = parseMonetaryAmount(raw);
+    if (parsed == null || parsed <= 0) return null;
+    // Deux décimales, celles qui seront stockées : ce qui s'affiche, ce qui
+    // s'imprime et ce qui part sur le fil sont le même nombre.
+    return (parsed * 100).round() * (ExchangeRate.scale ~/ 100);
+  }
+
+  /// Le règlement d'une ligne : ce qu'elle éteint, ce que le tiroir garde, et
+  /// ce qui repart avec le parent.
+  ///
+  /// **Le champ que le caissier vient de taper fait foi.** S'il a saisi le
+  /// montant posé sur le comptoir, l'imputation se déduit vers le bas et
+  /// l'excédent devient de la monnaie à rendre ; s'il a saisi l'imputation, le
+  /// comptoir en découle exactement.
+  SettlementLine _lineOf(
+    TenderSettlement settlement,
+    FacturationChargeEntry entry,
+  ) {
+    final target = entry.effectiveTenderCurrency;
+    if (entry.isConverted && entry.tenderIsSource) {
+      final line = settlement.fromTender(
+        settledCurrency: entry.charge.currency,
+        tenderCurrency: target,
+        tenderedCents: entry.tenderedCents,
+      );
+      if (line.settledCents <= entry.remainingInCents) return line;
+      // Le parent a posé plus que ce que ce frais doit : on n'impute pas au-delà
+      // du restant, et le surplus repart avec lui. Le porter en imputation
+      // fabriquerait un trop-perçu que personne n'a décidé.
+      final capped = settlement.fromSettled(
+        settledCurrency: entry.charge.currency,
+        tenderCurrency: target,
+        settledCents: entry.remainingInCents,
+      );
+      return SettlementLine(
+        settledCurrency: capped.settledCurrency,
+        tenderCurrency: capped.tenderCurrency,
+        rate: capped.rate,
+        settledCents: capped.settledCents,
+        tenderCents: capped.tenderCents,
+        changeCents: entry.tenderedCents - capped.tenderCents,
+      );
+    }
+    return settlement.fromSettled(
+      settledCurrency: entry.charge.currency,
+      tenderCurrency: target,
+      settledCents: entry.effectiveCents,
+    );
+  }
+
+  /// Les lignes retenues — celles qui portent un montant d'un côté ou de
+  /// l'autre.
+  List<SettlementLine> _lines(TenderSettlement settlement) => [
+    for (final entry in _entries)
+      if (entry.selected &&
+          (entry.effectiveCents > 0 || entry.tenderedCents > 0))
+        _lineOf(settlement, entry),
+  ];
+
+  /// Recopie dans le champ du comptoir ce que l'imputation vaut, sans jamais
+  /// toucher au champ qui a le curseur.
+  void _reflectTender(FacturationChargeEntry entry) {
+    if (!entry.isConverted) {
+      entry.writeDerived(entry.tenderController, '');
+      return;
+    }
+    final line = _lineOf(_settlement(), entry);
+    entry.writeDerived(entry.tenderController, _formatPlain(line.tenderCents));
+  }
+
+  /// Le caissier a tapé l'imputation : le comptoir en découle.
+  void _onAllocationEdited(FacturationChargeEntry entry) {
+    setState(() {
+      entry.tenderIsSource = false;
+      _reflectTender(entry);
+    });
+  }
+
+  /// Le caissier a tapé ce qui est posé sur le comptoir : l'imputation en
+  /// découle, vers le bas.
+  void _onTenderEdited(FacturationChargeEntry entry) {
+    if (!entry.isConverted) return;
+    setState(() {
+      entry.tenderIsSource = true;
+      final line = _lineOf(_settlement(), entry);
+      entry.writeDerived(entry.controller, _formatPlain(line.settledCents));
+    });
+  }
+
+  /// Changer de devise sur une ligne : le montant imputé reste, le comptoir se
+  /// recalcule.
+  ///
+  /// L'imputation est ce que le caissier a décidé d'éteindre ; elle n'a aucune
+  /// raison de bouger parce que le parent sort d'autres billets.
+  void _onTenderCurrencyChanged(FacturationChargeEntry entry, String currency) {
+    setState(() {
+      entry.tenderCurrency = currency == entry.charge.currency
+          ? null
+          : currency;
+      entry.tenderIsSource = false;
+      _reflectTender(entry);
+    });
+  }
+
+  /// Le total **imputé**, par devise de créance — ce que ce versement éteint.
+  ///
+  /// C'était un entier unique, sommé sur toutes les lignes retenues, étiqueté
+  /// avec la première devise non vide rencontrée. Un versement soldant 425,00 \$
+  /// et 90 000 FC s'affichait « 9 042 500 USD » — sur le bandeau or, sur le
+  /// ticket remis au parent, et dans le payload envoyé au serveur.
+  MoneyBag _settledBag(TenderSettlement settlement) =>
+      settlement.settledBag(_lines(settlement));
+
+  /// Ce que le tiroir prend, par devise **reçue**.
+  MoneyBag _tenderBag(TenderSettlement settlement) =>
+      settlement.tenderBag(_lines(settlement));
+
+  /// Un total rendu sur une ligne — les devises séparées, jamais sommées.
+  String _bagLabel(MoneyBag bag) =>
+      bag.entries.map(MoneyFormat.format).join(' · ');
+
+  /// Vrai quand au moins une ligne convertit : c'est ce qui décide d'annoncer
+  /// le perçu en tête de la barre.
+  ///
+  /// « Converti » n'est pas « une devise a été choisie » : régler en dollars des
+  /// créances en dollars n'est pas une conversion.
+  bool _hasConversion(TenderSettlement settlement) =>
+      _lines(settlement).any((line) => line.isConverted);
+
+  /// Les taux à afficher — un par paire réellement convertie.
+  List<FacturationRatePair> _ratePairs(TenderSettlement settlement) {
+    final seen = <String>{};
+    final pairs = <FacturationRatePair>[];
+    for (final line in _lines(settlement)) {
+      final rate = line.rate;
+      if (rate == null) continue;
+      final key = TenderSettlement.pairKey(rate.base, rate.quote);
+      if (!seen.add(key)) continue;
+      pairs.add(
+        FacturationRatePair(
+          rate: rate,
+          referenceRate: settlement.referenceRateFor(rate.base, rate.quote),
+          controller: _rateControllerOf(key),
+          editing: _editingRates.contains(key),
+          onEdit: () => setState(() {
+            _editingRates.add(key);
+            final controller = _rateControllerOf(key);
+            if (controller.text.isEmpty) {
+              final seed = rate.formatted(space: '');
+              controller.text = seed;
+              _rateSeeds[key] = seed;
+            }
+          }),
+          diverges: settlement.divergesFor(rate.base, rate.quote),
+        ),
+      );
+    }
+    return pairs;
+  }
+
+  /// Le taux de cette ligne, rendu « 2 800 FC / \$ ».
+  String? _lineRateLabel(
+    TenderSettlement settlement,
+    FacturationChargeEntry entry,
+  ) {
+    final rate = _lineOf(settlement, entry).rate;
+    if (rate == null) return null;
+    return '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
+        '${MoneyFormat.symbolOf(rate.base)}';
+  }
+
+  /// Ce qui repart avec le parent sur cette ligne, ou `null`.
+  String? _lineChangeLabel(
+    TenderSettlement settlement,
+    FacturationChargeEntry entry,
+    AppLocalizations l10n,
+  ) {
+    final line = _lineOf(settlement, entry);
+    if (line.changeCents <= 0) return null;
+    return l10n.facturationCreatePaymentChangeDue(
+      _formatWithCurrency(line.changeCents, line.tenderCurrency),
+    );
+  }
+
+  /// Vrai quand le couple perçu/imputé ne tient pas — le CTA s'éteint alors.
+  ///
+  /// La garde est celle du chemin d'écriture, éprouvée ICI, pendant la saisie :
+  /// un refus après le geste se lit comme une panne alors que c'est une saisie
+  /// à corriger.
+  bool _tenderInvariantBroken(TenderSettlement settlement) {
+    final lines = _lines(settlement);
+    if (lines.isEmpty) return false;
+    return TenderComposition.check(
+          allocations: settlement.settledBag(lines).entries,
+          tenders: settlement.tendersFor(lines),
+        ) !=
+        null;
+  }
+
+  /// Vrai quand un frais est retenu et qu'AUCUN ne peut se régler dans une
+  /// autre monnaie.
+  ///
+  /// C'est la seule situation où « aucun taux paramétré » est vrai : sans frais
+  /// coché il n'y a pas encore de question, et avec une devise proposable la
+  /// bascule est là, sur la ligne.
+  bool _hasNoConvertibleCharge(TenderSettlement settlement) {
+    final retained = _entries.where((entry) => entry.selected);
+    if (retained.isEmpty) return false;
+    return retained.every(
+      (entry) => settlement.optionsFor(entry.charge.currency).length < 2,
+    );
+  }
+
+  /// Le taux du versement, rendu — `null` dès qu'il y en a plusieurs.
+  ///
+  /// La popin valide UN montant : y poser deux taux les ferait lire comme un
+  /// seul. Chaque ligne porte le sien, là où il s'applique.
+  String? _singleRateLabel(TenderSettlement settlement) {
+    final rates = <String>{
+      for (final line in _lines(settlement))
+        if (line.rate case final rate?)
+          '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
+              '${MoneyFormat.symbolOf(rate.base)}',
+    };
+    return rates.length == 1 ? rates.single : null;
+  }
+
+  /// Ce qu'une ligne fait entrer dans le tiroir, rendu — `null` quand elle ne
+  /// convertit pas.
+  String? _tenderLabelOf(
+    TenderSettlement settlement,
+    FacturationChargeEntry entry,
+  ) {
+    final line = _lineOf(settlement, entry);
+    if (!line.isConverted || line.tenderCents <= 0) return null;
+    return _formatWithCurrency(line.tenderCents, line.tenderCurrency);
+  }
 
   /// Ouvre l'annuaire local des payeurs et reprend celui qui en revient.
   Future<void> _pickPayer() async {
@@ -200,8 +519,14 @@ class _FacturationCreatePaymentViewState
   }
 
   Future<void> _onCollect(AppLocalizations l10n) async {
-    final bag = _totalBag;
-    final totalLabel = _totalLabel();
+    final settlement = _settlement();
+    final bag = _settledBag(settlement);
+    final converted = _hasConversion(settlement);
+    // Ce qu'on valide est ce que le parent va poser sur le comptoir : la popin
+    // annonce le PERÇU, et détaille dessous ce que ce versement éteint.
+    final totalLabel = converted
+        ? _bagLabel(_tenderBag(settlement))
+        : _bagLabel(bag);
     // Un versement mixte est un cas NOMINAL depuis que le contrat porte
     // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
     // Reste à refuser le versement vide — rien à encaisser n'est pas un
@@ -212,17 +537,24 @@ class _FacturationCreatePaymentViewState
 
     final retained = _entries.where((e) => e.effectiveCents > 0).toList();
     final offlineBloc = context.read<FinanceOfflineBloc>();
-    final middleName = _payer.middleName.text.trim();
     final phone = _payer.phone.text.trim();
 
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
       academicYearId: widget.intent.academicYearId,
+      // `amounts` reste l'IMPUTÉ — la devise de chaque créance. Ce que le
+      // tiroir reçoit voyage dans `tenders`, et rien ne relie les deux sans le
+      // taux.
       amounts: bag,
-      payerFirstName: _payer.firstName.text.trim(),
-      payerLastName: _payer.lastName.text.trim(),
-      payerMiddleName: middleName.isEmpty ? null : middleName,
-      payerPhoneNumber: phone.isEmpty ? null : phone,
+      tenders: settlement.tendersFor(_lines(settlement)),
+      // Les quatre partent en `null` quand rien n'a été saisi — jamais en `''`.
+      // « Pas de payeur » est un fait, pas un nom de longueur zéro : c'est la
+      // distinction que le serveur s'est donnée en V114, et une chaîne vide la
+      // ferait disparaître dès la première écriture.
+      payerFirstName: _payer.valueOf(_payer.firstName),
+      payerLastName: _payer.valueOf(_payer.lastName),
+      payerMiddleName: _payer.valueOf(_payer.middleName),
+      payerPhoneNumber: _payer.valueOf(_payer.phone),
       allocations: [
         for (final entry in retained)
           CreatePaymentAllocationInput(
@@ -247,8 +579,16 @@ class _FacturationCreatePaymentViewState
       context,
       financeOfflineBloc: offlineBloc,
       totalLabel: totalLabel,
+      // Le taux, sous le montant validé — et seulement quand il y en a UN à
+      // dire. Deux taux sur une ligne se liraient comme un seul, et le parent
+      // conteste au guichet le chiffre qu'il a lu.
+      rateLabel: _singleRateLabel(settlement),
       studentName: _studentFullName(l10n),
-      payerName: _payer.fullName(l10n.facturationDetailUnknownValue),
+      // `null` quand rien n'a été saisi : le récapitulatif escamote alors son
+      // bloc payeur au lieu d'y afficher un tiret. On valide ce qu'on a saisi,
+      // et un tiret dans un récapitulatif de validation se lit comme une donnée
+      // qu'on aurait perdue en route.
+      payerName: _payer.composedName,
       payerPhone: phone,
       allocations: [
         for (final entry in retained)
@@ -261,6 +601,7 @@ class _FacturationCreatePaymentViewState
               entry.effectiveCents,
               entry.charge.currency,
             ),
+            derivedAmount: _tenderLabelOf(settlement, entry),
           ),
       ],
       request: request,
@@ -284,8 +625,21 @@ class _FacturationCreatePaymentViewState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final settlement = _settlement();
+    // Un montant compté hors tolérance éteint le CTA : la garde locale le
+    // refuserait de toute façon, et un refus après le geste se lit comme une
+    // panne alors que c'est une saisie à corriger.
+    final allocations = _settledBag(settlement);
     final canCollect =
-        _payer.isValid && !_totalBag.isAllZero && !_collectInFlight;
+        _payer.isValid &&
+        !allocations.isAllZero &&
+        !_collectInFlight &&
+        !_tenderInvariantBroken(settlement);
+    // « Converti » n'est pas « une devise a été choisie » : régler en dollars
+    // des créances en dollars n'est pas une conversion. Ce qui compte est qu'un
+    // taux s'applique réellement quelque part — sinon la barre annoncerait « À
+    // percevoir » sur un versement où rien n'a bougé d'unité.
+    final converted = _hasConversion(settlement);
 
     return PopScope(
       // Bloque le retour système / `maybePop` : toute sortie passe par
@@ -315,7 +669,10 @@ class _FacturationCreatePaymentViewState
         // proposer d'encaisser sous une carte d'erreur n'a aucun sens.
         bottomNavigationBar: widget.intent.hasDisplayContext
             ? FacturationCollectActionBar(
-                totalLabel: _totalLabel(),
+                totalLabel: converted
+                    ? _bagLabel(_tenderBag(settlement))
+                    : _bagLabel(allocations),
+                settledLabel: converted ? _bagLabel(allocations) : null,
                 onCollect: canCollect ? () => _onCollect(l10n) : null,
               )
             : null,
@@ -327,14 +684,14 @@ class _FacturationCreatePaymentViewState
             constraints: const BoxConstraints(
               maxWidth: AppDimensions.facturationContentMaxWidth,
             ),
-            child: _body(l10n),
+            child: _body(l10n, settlement),
           ),
         ),
       ),
     );
   }
 
-  Widget _body(AppLocalizations l10n) {
+  Widget _body(AppLocalizations l10n, TenderSettlement settlement) {
     // Lien profond ouvert sans contexte : on n'encaisse pas au nom de quelqu'un
     // qu'on ne sait pas nommer. La fiche pose la même garde sur son propre
     // contexte.
@@ -370,6 +727,28 @@ class _FacturationCreatePaymentViewState
           entries: _entries,
           onToggle: _collectInFlight ? null : _onToggle,
           onSettleAll: _collectInFlight ? null : _onSettleAll,
+          // Le taux vit au-dessus des lignes : il est le même pour toutes
+          // celles d'une même paire, et l'écrire deux fois en ferait deux.
+          settlement: TenderSettlementSection(
+            pairs: _ratePairs(settlement),
+            enabled: !_collectInFlight,
+            // ⚠️ L'absence de taux se dit **quand elle est vraie**, jamais
+            // parce qu'aucune conversion n'est encore choisie. Le mesurer sur
+            // les paires converties faisait annoncer « aucun taux paramétré »
+            // sur un guichet qui venait d'en recevoir deux — le message le plus
+            // trompeur possible, puisqu'il désigne le paramétrage alors que
+            // tout est en place.
+            explainWhenUnavailable: _hasNoConvertibleCharge(settlement),
+          ),
+          currencyOptionsOf: (entry) =>
+              settlement.optionsFor(entry.charge.currency),
+          onTenderCurrencyChanged: _collectInFlight
+              ? null
+              : _onTenderCurrencyChanged,
+          onAllocationEdited: _collectInFlight ? null : _onAllocationEdited,
+          onTenderEdited: _collectInFlight ? null : _onTenderEdited,
+          rateLabelOf: (entry) => _lineRateLabel(settlement, entry),
+          changeLabelOf: (entry) => _lineChangeLabel(settlement, entry, l10n),
         ),
       ],
     );

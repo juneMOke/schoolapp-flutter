@@ -24,11 +24,42 @@ class FacturationCreatePaymentChargesSection extends StatelessWidget {
   final void Function(FacturationChargeEntry entry, bool value)? onToggle;
   final void Function(FacturationChargeEntry entry)? onSettleAll;
 
+  /// Une mention posée en tête de section — aujourd'hui l'absence de taux, qui
+  /// se dit plutôt que de laisser un écran où il ne se passe rien. `null` dans
+  /// le cas courant.
+  final Widget? settlement;
+
+  /// Les devises proposables pour CE frais, la sienne en tête. Moins de deux ⇒
+  /// la ligne n'affiche aucun sélecteur.
+  final List<String> Function(FacturationChargeEntry entry)? currencyOptionsOf;
+
+  /// Le taux appliqué à cette ligne, déjà rendu. `null` quand elle ne convertit
+  /// pas.
+  final String? Function(FacturationChargeEntry entry)? rateLabelOf;
+
+  /// La monnaie à rendre sur cette ligne, déjà rendue.
+  final String? Function(FacturationChargeEntry entry)? changeLabelOf;
+
+  /// La devise de règlement vient de changer sur cette ligne.
+  final void Function(FacturationChargeEntry entry, String currency)?
+  onTenderCurrencyChanged;
+
+  /// L'un des deux montants vient d'être tapé : l'autre se recalcule.
+  final void Function(FacturationChargeEntry entry)? onAllocationEdited;
+  final void Function(FacturationChargeEntry entry)? onTenderEdited;
+
   const FacturationCreatePaymentChargesSection({
     super.key,
     required this.entries,
     required this.onToggle,
     required this.onSettleAll,
+    this.settlement,
+    this.currencyOptionsOf,
+    this.rateLabelOf,
+    this.changeLabelOf,
+    this.onTenderCurrencyChanged,
+    this.onAllocationEdited,
+    this.onTenderEdited,
   });
 
   @override
@@ -51,6 +82,10 @@ class FacturationCreatePaymentChargesSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           const Divider(height: 1, color: AppColors.border),
           const SizedBox(height: AppDimensions.spacingM),
+          if (settlement != null) ...[
+            settlement!,
+            const SizedBox(height: AppDimensions.spacingM),
+          ],
           if (entries.isEmpty)
             const _AllSettledCard()
           else
@@ -59,8 +94,18 @@ class FacturationCreatePaymentChargesSection extends StatelessWidget {
                 charge: entries[i].charge,
                 selected: entries[i].selected,
                 amountController: entries[i].controller,
+                tenderController: entries[i].tenderController,
                 onSelectedChanged: (v) => onToggle?.call(entries[i], v),
                 onSettleAll: () => onSettleAll?.call(entries[i]),
+                currencyOptions:
+                    currencyOptionsOf?.call(entries[i]) ?? const [],
+                tenderCurrency: entries[i].effectiveTenderCurrency,
+                onTenderCurrencyChanged: (currency) =>
+                    onTenderCurrencyChanged?.call(entries[i], currency),
+                onAllocationEdited: () => onAllocationEdited?.call(entries[i]),
+                onTenderEdited: () => onTenderEdited?.call(entries[i]),
+                rateLabel: rateLabelOf?.call(entries[i]),
+                changeLabel: changeLabelOf?.call(entries[i]),
               ),
               if (i < entries.length - 1)
                 const SizedBox(height: AppDimensions.spacingS),

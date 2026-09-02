@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/payment_tender_composition.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';

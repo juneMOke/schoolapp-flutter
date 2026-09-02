@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -12,17 +14,62 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ligne de frais à régler de la modale d'encaissement (spec MODALE-12).
+/// Ligne de frais à régler de la page d'encaissement (spec MODALE-12).
 ///
 /// Repliée : case à cocher + libellé + statut + l'état « Dû / Déjà payé /
-/// Restant ». Cochée : champ « Montant à régler » (+ « Tout solder »),
-/// avertissement de dépassement, et restant après paiement recalculé en direct.
+/// Restant ». Cochée : **comment le parent règle ce frais**, le ou les montants,
+/// l'avertissement de dépassement, et le restant après paiement recalculé en
+/// direct.
+///
+/// ## Deux cases quand les unités diffèrent, une seule sinon
+///
+/// La question « le parent règle en quoi ? » se pose sur le frais, parce que
+/// c'est là qu'elle a une réponse : la devise de la créance est le point de
+/// départ. Tant qu'il règle dans cette devise-là, rien ne change — un champ, le
+/// même qu'avant. Dès qu'il en choisit une autre, la ligne montre les **deux**
+/// montants : ce qu'on impute, et ce qu'on compte au comptoir. Remplir l'un
+/// remplit l'autre.
+///
+/// C'est plus court à lire qu'une valeur dérivée en petit sous le champ, et
+/// surtout ça se manipule dans les deux sens : le caissier tape le billet posé
+/// devant lui, ou la part de dette qu'il éteint, selon ce que le parent dit.
 class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
   final StudentCharge charge;
   final bool selected;
   final TextEditingController amountController;
   final ValueChanged<bool> onSelectedChanged;
   final VoidCallback onSettleAll;
+
+  /// Les devises proposables pour CE frais, la sienne en tête. Moins de deux ⇒
+  /// aucun sélecteur : il n'y a rien à choisir.
+  final List<String> currencyOptions;
+
+  /// La devise de règlement retenue pour cette ligne.
+  final String tenderCurrency;
+
+  final ValueChanged<String> onTenderCurrencyChanged;
+
+  /// Le montant **posé sur le comptoir**, dans [tenderCurrency]. Utilisé
+  /// seulement quand les deux devises diffèrent.
+  final TextEditingController tenderController;
+
+  /// Le taux appliqué, déjà rendu (« 2 800 FC / \\$ »). `null` quand il n'y a
+  /// rien à convertir.
+  ///
+  /// C'est le chiffre que le parent conteste au guichet : il se lit sur la
+  /// ligne qu'il concerne, pas dans un encadré commun où deux frais réglés
+  /// différemment se confondraient.
+  final String? rateLabel;
+
+  /// La monnaie à rendre, déjà rendue. `null` quand la conversion tombe juste.
+  ///
+  /// 50 000 FC à 2 800 éteignent 17,85 \\$ et laissent 20 FC : ils repartent
+  /// avec le parent, ils n'entrent pas dans le tiroir.
+  final String? changeLabel;
+
+  /// L'un des deux montants vient d'être tapé : l'autre se recalcule.
+  final VoidCallback onAllocationEdited;
+  final VoidCallback onTenderEdited;
 
   const FacturationCreatePaymentChargeAllocationLine({
     super.key,
@@ -31,7 +78,21 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
     required this.amountController,
     required this.onSelectedChanged,
     required this.onSettleAll,
+    required this.tenderController,
+    required this.onAllocationEdited,
+    required this.onTenderEdited,
+    this.currencyOptions = const [],
+    this.tenderCurrency = '',
+    this.onTenderCurrencyChanged = _ignore,
+    this.rateLabel,
+    this.changeLabel,
   });
+
+  static void _ignore(String _) {}
+
+  /// Vrai quand cette ligne convertit — le seul cas à deux champs.
+  bool get _converted =>
+      tenderCurrency.isNotEmpty && tenderCurrency != charge.currency;
 
   String _format(num cents) => formatMonetaryAmountWithCurrency(
     amount: cents / 100,
@@ -118,25 +179,43 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: AppDimensions.spacingM),
-                      TextField(
-                        // La mise à jour du total/restant est portée par le
-                        // listener du controller côté modale ; pas d'onChanged
-                        // redondant ici.
+                      // « Le parent règle en… » — la question se pose ici,
+                      // après le frais et avant le montant, dans l'ordre où
+                      // elle se pose au comptoir.
+                      if (currencyOptions.length > 1) ...[
+                        _TenderCurrencyPicker(
+                          options: currencyOptions,
+                          selected: tenderCurrency,
+                          onSelected: onTenderCurrencyChanged,
+                          label: l10n.facturationCreatePaymentTenderCurrency,
+                        ),
+                        const SizedBox(height: AppDimensions.spacingM),
+                      ],
+                      _MoneyField(
                         controller: amountController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        style: AppTextStyles.moneyTabular.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: financeInputDecoration(
-                          label:
-                              l10n.facturationCreatePaymentAmountToSettleLabel,
-                          hint: l10n.facturationCreatePaymentAmountHint,
-                          accentColor: AppColors.bleuArdoise,
-                          readOnly: false,
-                        ).copyWith(suffixText: charge.currency),
+                        currency: charge.currency,
+                        label: l10n.facturationCreatePaymentAmountToSettleLabel,
+                        hint: l10n.facturationCreatePaymentAmountHint,
+                        onEdited: onAllocationEdited,
                       ),
+                      if (_converted) ...[
+                        const SizedBox(height: AppDimensions.spacingS),
+                        _MoneyField(
+                          controller: tenderController,
+                          currency: tenderCurrency,
+                          label: l10n.facturationCreatePaymentTenderAmountLabel,
+                          hint: l10n.facturationCreatePaymentAmountHint,
+                          accent: AppColors.terreCuiteDark,
+                          onEdited: onTenderEdited,
+                        ),
+                        if (rateLabel != null || changeLabel != null) ...[
+                          const SizedBox(height: AppDimensions.spacingXS),
+                          _ConversionCaption(
+                            rateLabel: rateLabel,
+                            changeLabel: changeLabel,
+                          ),
+                        ],
+                      ],
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -219,6 +298,142 @@ class _AllocationCheckbox extends StatelessWidget {
 }
 
 /// Pastille de statut compacte du frais (Soldé / Partiel / Impayé).
+/// « Le parent règle en… » — une bascule exclusive, jamais deux champs reliés
+/// par un « ou ».
+///
+/// La devise de règlement est un **mode** : on en choisit un, et seuls ses
+/// montants partent. Même règle que la recherche bi-mode, pour la même raison —
+/// deux blocs concurrents laisseraient croire qu'on peut panacher sur une même
+/// ligne, ce que le modèle ne sait pas représenter.
+class _TenderCurrencyPicker extends StatelessWidget {
+  final List<String> options;
+  final String selected;
+  final ValueChanged<String> onSelected;
+  final String label;
+
+  const _TenderCurrencyPicker({
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.badge.copyWith(
+            color: AppColors.terreCuite,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingXS),
+        SegmentedTabFilter<String>(
+          expand: true,
+          selected: selected,
+          onSelected: onSelected,
+          semanticsLabel: label,
+          options: [
+            for (final currency in options)
+              SegmentedTabOption<String>(
+                label: MoneyFormat.symbolOf(currency),
+                value: currency,
+                semanticLabel: currency,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Un montant, dans une devise nommée.
+///
+/// `onEdited` ne part qu'à la frappe de l'utilisateur : c'est ce qui permet à
+/// la page de recalculer l'AUTRE champ sans jamais réécrire celui qui a le
+/// curseur.
+class _MoneyField extends StatelessWidget {
+  final TextEditingController controller;
+  final String currency;
+  final String label;
+  final String hint;
+  final Color accent;
+  final VoidCallback onEdited;
+
+  const _MoneyField({
+    required this.controller,
+    required this.currency,
+    required this.label,
+    required this.hint,
+    required this.onEdited,
+    this.accent = AppColors.bleuArdoise,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: AppTextStyles.moneyTabular.copyWith(color: AppColors.textPrimary),
+      onChanged: (_) => onEdited(),
+      decoration: financeInputDecoration(
+        label: label,
+        hint: hint,
+        accentColor: accent,
+        readOnly: false,
+      ).copyWith(suffixText: currency),
+    );
+  }
+}
+
+/// Le taux appliqué, et ce qui repart avec le parent.
+///
+/// Les deux se lisent sur la ligne qu'ils concernent : deux frais réglés
+/// différemment ont deux taux, et un encadré commun les confondrait.
+class _ConversionCaption extends StatelessWidget {
+  final String? rateLabel;
+  final String? changeLabel;
+
+  const _ConversionCaption({this.rateLabel, this.changeLabel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppDimensions.spacingM,
+      runSpacing: AppDimensions.spacingXS,
+      children: [
+        if (rateLabel != null)
+          Text(
+            rateLabel!,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        if (changeLabel != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.savings_outlined,
+                size: 14,
+                color: AppColors.terreCuiteDark,
+              ),
+              const SizedBox(width: AppDimensions.spacingXS),
+              Text(
+                changeLabel!,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.terreCuiteDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
 class _StatusBadge extends StatelessWidget {
   final StudentChargeStatus status;
   final String label;

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -67,6 +68,10 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/fi
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_outbox_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_exchange_rates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/save_exchange_rate_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rate_settings_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
@@ -92,6 +97,7 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/fi
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync_finance_pulls_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
@@ -208,6 +214,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // provisoire est une projection de `payments` (ADR-012 D-3/RG-012-11).
       authorDirectory: getIt<AuthSessionManager>(),
       deviceIdentity: getIt<DeviceIdentityService>(),
+      // Poser un taux passe par le SERVEUR : le pull remplace la table en bloc,
+      // et un taux resté local disparaîtrait au premier cycle.
+      rates: getIt<ExchangeRateRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
 
@@ -251,12 +261,17 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       syncPayments: () => getIt<CoordinatorPaymentsSync>()(),
     ),
   );
+  getIt.registerLazySingleton<ExchangeRateRemoteDataSource>(
+    () => ExchangeRateRemoteDataSource(getIt<Dio>()),
+  );
   getIt.registerLazySingleton<FinancePullRepository>(
     () => FinancePullRepositoryImpl(
       api: getIt<FinancePullApi>(),
       dao: getIt<FinanceLocalDao>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      rates: getIt<ExchangeRateRemoteDataSource>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   if (getIt.isRegistered<StudentChargesRepository>()) {
@@ -466,6 +481,29 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetLocalPaymentsUseCase>(
     () => GetLocalPaymentsUseCase(getIt<FinanceOfflineRepository>()),
   );
+  getIt.registerFactory<GetExchangeRatesUseCase>(
+    () => GetExchangeRatesUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveExchangeRateUseCase>(
+    () => SaveExchangeRateUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<ExchangeRatesCubit>(
+    () => ExchangeRatesCubit(
+      getIt<GetExchangeRatesUseCase>(),
+      // Le pull des taux part au montage du scope Finance, donc APRÈS la
+      // première lecture : sans ce réveil, la bascule de devise n'apparaît
+      // jamais sur l'écran qui vient de s'ouvrir.
+      pullBus: getIt.isRegistered<PullCompletionBus>()
+          ? getIt<PullCompletionBus>()
+          : null,
+    ),
+  );
+  getIt.registerFactory<ExchangeRateSettingsCubit>(
+    () => ExchangeRateSettingsCubit(
+      getRates: getIt<GetExchangeRatesUseCase>(),
+      saveRate: getIt<SaveExchangeRateUseCase>(),
+    ),
+  );
   getIt.registerFactory<HasFeeGridUseCase>(
     () => HasFeeGridUseCase(getIt<FinanceOfflineRepository>()),
   );
@@ -618,6 +656,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // sens de panne conservateur.
   final financePullRepository = getIt<FinancePullRepository>();
   getIt<PullCoordinator>()
+    // Le taux AVANT les créances : c'est un référentiel, il ne dépend de rien,
+    // et le guichet en a besoin dès qu'un écran d'encaissement s'ouvre.
+    ..registerHandler(FinancePullHandler.exchangeRates(financePullRepository))
     ..registerHandler(FinancePullHandler.studentCharges(financePullRepository))
     ..registerHandler(FinancePullHandler.payments(financePullRepository));
 }

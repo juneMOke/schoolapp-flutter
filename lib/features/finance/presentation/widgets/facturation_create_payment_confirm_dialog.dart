@@ -28,9 +28,17 @@ class FacturationConfirmAllocationItem {
   final String label;
   final String amount;
 
+  /// Ce que cette ligne vaut **en devise reçue**, déjà rendu. `null` quand le
+  /// parent règle dans la devise de la créance.
+  ///
+  /// Le même nombre que sur l'écran de saisie et sur le ticket : trois
+  /// surfaces, un seul chiffre, sinon le parent recompte.
+  final String? derivedAmount;
+
   const FacturationConfirmAllocationItem({
     required this.label,
     required this.amount,
+    this.derivedAmount,
   });
 }
 
@@ -45,8 +53,9 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   BuildContext context, {
   required FinanceOfflineBloc financeOfflineBloc,
   required String totalLabel,
+  String? rateLabel,
   required String studentName,
-  required String payerName,
+  String? payerName,
   required String payerPhone,
   required List<FacturationConfirmAllocationItem> allocations,
   required PaymentsCreateRequested request,
@@ -62,6 +71,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
       value: financeOfflineBloc,
       child: _CollectFlowDialog(
         totalLabel: totalLabel,
+        rateLabel: rateLabel,
         studentName: studentName,
         payerName: payerName,
         payerPhone: payerPhone,
@@ -78,8 +88,19 @@ enum _Phase { confirm, processing, success, error }
 
 class _CollectFlowDialog extends StatefulWidget {
   final String totalLabel;
+
+  /// Le taux appliqué, déjà rendu (« 1 666,67 FC / \$ »). `null` quand perçu et
+  /// imputé sont dans la même unité — un « 1,00 » ferait chercher au caissier
+  /// ce qui a été converti.
+  final String? rateLabel;
+
   final String studentName;
-  final String payerName;
+
+  /// Le payeur, **quand il y en a un**. `null` sur un encaissement anonyme : la
+  /// phrase de confirmation se referme alors sur l'élève, au lieu de nommer un
+  /// tiret comme s'il s'agissait de quelqu'un.
+  final String? payerName;
+
   final String payerPhone;
   final List<FacturationConfirmAllocationItem> allocations;
   final PaymentsCreateRequested request;
@@ -87,8 +108,9 @@ class _CollectFlowDialog extends StatefulWidget {
 
   const _CollectFlowDialog({
     required this.totalLabel,
+    this.rateLabel,
     required this.studentName,
-    required this.payerName,
+    this.payerName,
     required this.payerPhone,
     required this.allocations,
     required this.request,
@@ -225,6 +247,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                 child: _phase == _Phase.confirm
                     ? _ConfirmBody(
                         totalLabel: widget.totalLabel,
+                        rateLabel: widget.rateLabel,
                         studentName: widget.studentName,
                         payerName: widget.payerName,
                         payerPhone: widget.payerPhone,
@@ -342,15 +365,17 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
 /// Corps de l'étape 1 : récapitulatif + répartition.
 class _ConfirmBody extends StatelessWidget {
   final String totalLabel;
+  final String? rateLabel;
   final String studentName;
-  final String payerName;
+  final String? payerName;
   final String payerPhone;
   final List<FacturationConfirmAllocationItem> allocations;
 
   const _ConfirmBody({
     required this.totalLabel,
+    this.rateLabel,
     required this.studentName,
-    required this.payerName,
+    this.payerName,
     required this.payerPhone,
     required this.allocations,
   });
@@ -379,13 +404,28 @@ class _ConfirmBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Text(
-          l10n.facturationCreatePaymentConfirmSentence(
-            totalLabel,
-            studentName,
-            payerName,
+        if (rateLabel != null) ...[
+          const SizedBox(height: AppDimensions.spacingXS),
+          Text(
+            '${l10n.facturationSettlementRateLabel} : $rateLabel',
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
+        ],
+        const SizedBox(height: AppDimensions.spacingM),
+        // Deux phrases, pas une phrase à trou : « réglé par - » nommerait un
+        // tiret comme on nomme quelqu'un, sur le dernier écran avant d'engager
+        // l'argent. Un encaissement sans payeur nommé se dit en entier.
+        Text(
+          payerName == null
+              ? l10n.facturationCreatePaymentConfirmSentenceNoPayer(
+                  totalLabel,
+                  studentName,
+                )
+              : l10n.facturationCreatePaymentConfirmSentence(
+                  totalLabel,
+                  studentName,
+                  payerName!,
+                ),
           style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
         ),
         // Le numéro sur SA ligne, hors de la phrase : c'est le dernier écran
@@ -567,6 +607,7 @@ class _DistributionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -582,6 +623,7 @@ class _DistributionList extends StatelessWidget {
                 vertical: AppDimensions.spacingS + 2,
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
@@ -594,11 +636,27 @@ class _DistributionList extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppDimensions.spacingM),
-                  Text(
-                    allocations[i].amount,
-                    style: AppTextStyles.moneyTabular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        allocations[i].amount,
+                        style: AppTextStyles.moneyTabular.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      // Ce que ce poste vaut sur le comptoir : la colonne somme
+                      // au perçu annoncé en tête, et le parent qui additionne
+                      // retombe dessus.
+                      if (allocations[i].derivedAmount case final derived?)
+                        Text(
+                          l10n.facturationSettlementDerived(derived),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.terreCuiteDark,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
