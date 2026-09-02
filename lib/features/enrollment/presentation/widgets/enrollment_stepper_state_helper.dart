@@ -94,7 +94,9 @@ class EnrollmentStepperStateHelper {
           (parent) =>
               parent.firstName.trim().isNotEmpty &&
               parent.lastName.trim().isNotEmpty &&
-              parent.phoneNumber.trim().isNotEmpty &&
+              // Le téléphone ne conditionne PLUS l'étape (V117) : un tuteur sans
+              // numéro existe, et la seule issue que la contrainte laissait à
+              // l'opérateur était d'en inventer un.
               (parent.email.trim().isEmpty ||
                   RegExp(
                     r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',

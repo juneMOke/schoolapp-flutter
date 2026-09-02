@@ -363,11 +363,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.lastName)}',
         );
       }
-      if (value.phoneNumber.trim().isEmpty) {
-        errors.add(
-          'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.phoneNumberLabel)}',
-        );
-      } else if (!ParentItemValue.isPhoneAcceptable(
+      // Le téléphone VIDE ne se reproche plus (V117) : ne rien mettre est une
+      // décision. Seul un numéro entamé et incomplet reste une faute de frappe,
+      // et c'est la branche ci-dessous qui la dit.
+      if (!ParentItemValue.isPhoneAcceptable(
         value.phoneNumber,
         initialPhone: parent.phoneNumber,
       )) {
@@ -460,7 +459,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             firstName: value.firstName.trim(),
             lastName: value.lastName.trim(),
             surname: value.surname.trim().isEmpty ? null : value.surname.trim(),
-            phoneNumber: value.phoneNumber.trim(),
+            // `null` et non `''` : le formulaire travaille sur des chaînes, la
+            // base et le fil ne connaissent que l'absence. Un `''` écrit ici
+            // annulerait toute la normalisation du palier — et ferait se
+            // reconnaître entre eux tous les tuteurs sans numéro.
+            phoneNumber: value.phoneNumber.trim().isEmpty
+                ? null
+                : value.phoneNumber.trim(),
             email: value.email.trim().isEmpty
                 ? null
                 : _normalizeEmailForApi(value.email),

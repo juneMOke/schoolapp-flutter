@@ -51,12 +51,16 @@ class ParentDraft {
 /// pas la même personne.
 Future<String?> findParentIdByPhone(
   DatabaseExecutor txn,
-  String rawPhone, {
+  String? rawPhone, {
   String? excludedId,
   String? whereSuffix,
   List<Object?> suffixArgs = const [],
 }) async {
-  final key = PhoneNumberSql.matchKeyOf(rawPhone);
+  final key = PhoneNumberSql.matchKeyOf(rawPhone ?? '');
+  // Un numéro absent ne rapproche RIEN, et cette ligne est ce qui l'empêche.
+  // Sans elle, la clé vide s'égalerait elle-même et tous les tuteurs sans numéro
+  // fusionneraient dans une seule fiche — le scénario que la V117 serveur décrit
+  // comme le pire des trois, parce qu'à l'intérieur d'une école « ça marche ».
   if (key.isEmpty) return null;
 
   final rows = await txn.rawQuery(
@@ -69,12 +73,79 @@ Future<String?> findParentIdByPhone(
 
   for (final row in rows) {
     final candidate = (row['phone_number'] as String?) ?? '';
-    if (PhoneNumberFormat.sameNumber(candidate, rawPhone)) {
+    if (PhoneNumberFormat.sameNumber(candidate, rawPhone ?? '')) {
       return row['id'] as String;
     }
   }
   return null;
 }
+
+/// Un tuteur déjà rattaché à un élève, photographié **avant** la purge des
+/// liens `student_parent`.
+///
+/// La photo est indispensable : `replaceDraftGuardians` efface tous les liens de
+/// l'élève avant de les réécrire, donc une requête posée pendant la boucle ne
+/// verrait plus personne — et la règle de rapprochement par nom ne rapprocherait
+/// jamais rien, recréant un doublon à chaque passage sur l'étape Tuteurs.
+class StudentGuardianSnapshot {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String? surname;
+  final String? phoneNumber;
+
+  const StudentGuardianSnapshot({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    this.surname,
+    this.phoneNumber,
+  });
+}
+
+/// Le tuteur SANS NUMÉRO déjà rattaché à cet élève et portant exactement ce
+/// nom — `null` si aucun.
+///
+/// Miroir du `GuardianMatcher` serveur (V117), et il doit le rester : deux
+/// écritures de la même règle divergeraient, et la divergence prendrait la forme
+/// la plus trompeuse qui soit — un tuteur réutilisé ici, recréé là-bas, ou
+/// l'inverse.
+///
+/// **Ce que la règle refuse de faire : traverser les dossiers.** Le téléphone
+/// prouvait qu'un tuteur de deux fratries était la même personne ; son absence
+/// ne prouve plus rien, et deux homonymes sans numéro dans deux familles ne sont
+/// rapprochés par rien. Conséquence assumée : un tuteur sans numéro n'est jamais
+/// partagé avec la fratrie.
+///
+/// Comparaison sur le nom tel qu'il est **écrit**, aux espaces et à la casse
+/// près. Ni phonétique, ni distance d'édition : un rapprochement approximatif
+/// fusionnerait deux personnes réelles sur une ressemblance, pour un coût sans
+/// commune mesure avec celui du doublon qu'il éviterait — et irréversible une
+/// fois les dossiers mêlés.
+String? findGuardianWithoutPhone(
+  List<StudentGuardianSnapshot> guardians,
+  ParentLocalModel p,
+) {
+  for (final guardian in guardians) {
+    if (_hasText(guardian.phoneNumber)) continue;
+    if (_sameName(guardian.firstName, p.firstName) &&
+        _sameName(guardian.lastName, p.lastName) &&
+        _sameName(guardian.surname, p.surname)) {
+      return guardian.id;
+    }
+  }
+  return null;
+}
+
+/// Absent et vide sont la même chose, sans quoi un tuteur créé sans post-nom ne
+/// se reconnaîtrait pas dans le même tuteur re-saisi avec un post-nom vide.
+bool _sameName(String? left, String? right) =>
+    _comparable(left) == _comparable(right);
+
+String? _comparable(String? value) =>
+    _hasText(value) ? value!.trim().toLowerCase() : null;
+
+bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 
 /// Get-or-create local d'un parent par `phone_number` (dédup fratrie sur la
 /// tablette). Renvoie l'id résolu (existant réutilisé, ou provisoire inséré).
@@ -82,15 +153,28 @@ Future<String?> findParentIdByPhone(
 /// [asDraft] : un parent NOUVEAU naît en `DRAFT` (au lieu du défaut
 /// `PENDING_SYNC` du modèle) ; un parent existant n'a que ses champs rafraîchis
 /// et n'est **jamais rétrogradé** (sync_status intact) quel que soit [asDraft].
+/// [studentGuardians] : les tuteurs déjà rattachés à l'élève, photographiés
+/// AVANT la purge des liens. Ils ne servent qu'au tuteur SANS numéro — celui
+/// qui n'a plus de clé — et à lui seul : avec un numéro, le get-or-create par
+/// téléphone est inchangé, et reste global à la tablette.
 Future<String> upsertParentByPhone(
   DatabaseExecutor txn,
   ParentLocalModel p, {
   required bool asDraft,
+  List<StudentGuardianSnapshot> studentGuardians = const [],
 }) async {
   // Rapprochement insensible au format d'écriture : une fiche héritée
   // ("0816939060") et la saisie du jour ("+243816939060") désignent le même
   // tuteur, sans quoi la dédup fratrie créerait un doublon.
-  final existingId = await findParentIdByPhone(txn, p.phoneNumber);
+  //
+  // Sans numéro, ce chemin ne rapproche rien (clé vide) et insérerait donc une
+  // fiche neuve À CHAQUE REJEU. La règle de nom, bornée au dossier de l'élève,
+  // est ce qui rend le rejeu idempotent sans jamais partager entre fratries.
+  final existingId =
+      await findParentIdByPhone(txn, p.phoneNumber) ??
+      (_hasText(p.phoneNumber)
+          ? null
+          : findGuardianWithoutPhone(studentGuardians, p));
   if (existingId != null) {
     final id = existingId;
     await txn.update(
@@ -194,13 +278,19 @@ Future<String> upsertDraftGuardianParent(
   // simple différence de mise en forme. La valeur STOCKÉE n'est jamais
   // modifiée, seule la comparaison l'est — s'applique aussi aux lignes
   // historiques déjà en base.
+  //
+  // Un tuteur SANS numéro ne déclenche jamais ce conflit : `findParentIdByPhone`
+  // rend `null` sur une clé vide. C'est voulu — « ce numéro appartient déjà à un
+  // autre tuteur » posé sur deux fiches qui n'ont pas de numéro serait
+  // incompréhensible, et l'écran n'aurait rien à corriger. Ce chemin-là upsert
+  // PAR ID, fixé par l'UI : son idempotence ne dépend pas du téléphone.
   final conflictId = await findParentIdByPhone(
     txn,
     p.phoneNumber,
     excludedId: p.id,
   );
   if (conflictId != null) {
-    throw ParentPhoneConflictException(p.phoneNumber, conflictId);
+    throw ParentPhoneConflictException(p.phoneNumber ?? '', conflictId);
   }
 
   final existing = await txn.query(

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Résultats de la popin « Rechercher un parent » : une fiche par ligne,
 /// sélection immédiate au tap.
@@ -35,6 +36,7 @@ class ParentSearchResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -82,8 +84,13 @@ class ParentSearchResultsList extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
+                        // Un tuteur sans numéro se dit, il ne se laisse pas
+                        // en blanc : dans une liste de résultats, une ligne
+                        // vide se lit comme un chargement qui n'a pas abouti.
                         Text(
-                          parent.phoneNumber,
+                          (parent.phoneNumber ?? '').trim().isEmpty
+                              ? l10n.guardianPhoneNumberAbsent
+                              : parent.phoneNumber!,
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary,
                           ),

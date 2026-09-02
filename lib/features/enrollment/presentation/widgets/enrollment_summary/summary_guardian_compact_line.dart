@@ -86,7 +86,7 @@ class SummaryGuardianCompactLine extends StatelessWidget {
                 Text(
                   [
                     relationshipLabel,
-                    parent.phoneNumber,
+                    parent.phoneNumber ?? '',
                   ].where((part) => part.trim().isNotEmpty).join(' • '),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textSecondary,

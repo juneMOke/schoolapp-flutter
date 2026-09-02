@@ -73,7 +73,10 @@ class ParentPayload {
   final String firstName;
   final String lastName;
   final String? surname; // serveur résout à lastName si absent
-  final String phoneNumber; // clé naturelle
+  /// Clé naturelle du tuteur **quand elle est là** — facultative depuis la V117
+  /// serveur. Absente, le rapprochement se fait par le nom, dans le dossier de
+  /// cet élève seulement, et le tuteur n'est jamais partagé avec la fratrie.
+  final String? phoneNumber;
   final String? email;
   final String relationshipType; // FATHER|MOTHER|GUARDIAN|GRANDPARENT|OTHER
 
@@ -89,7 +92,7 @@ class ParentPayload {
     required this.firstName,
     required this.lastName,
     this.surname,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.email,
     required this.relationshipType,
     this.emergencyContact,
@@ -111,7 +114,11 @@ class ParentPayload {
     firstName: j['firstName'] as String,
     lastName: j['lastName'] as String,
     surname: j['surname'] as String?,
-    phoneNumber: j['phoneNumber'] as String,
+    // `as String?` : un payload figé en file par une version ANTÉRIEURE en
+    // porte toujours un, mais un tuteur saisi sans numéro depuis la v45 n'en a
+    // pas. Un cast dur immobiliserait le dossier en `failed` — issue TERMINALE
+    // de l'outbox, sur une inscription déjà validée au guichet.
+    phoneNumber: j['phoneNumber'] as String?,
     email: j['email'] as String?,
     relationshipType: (j['relationshipType'] as String?) ?? 'OTHER',
     // Absent des payloads écrits avant l'existence du champ : `null` y est la

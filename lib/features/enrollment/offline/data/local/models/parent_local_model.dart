@@ -8,7 +8,10 @@ class ParentLocalModel {
   final String firstName;
   final String lastName;
   final String? surname;
-  final String phoneNumber;
+
+  /// Facultatif (v45). `null` — jamais `''` : sur cette table, une chaîne vide
+  /// partagée ferait se reconnaître entre eux tous les tuteurs sans numéro.
+  final String? phoneNumber;
   final String? email;
   final String? identificationNumber;
   final String syncStatus;
@@ -20,7 +23,7 @@ class ParentLocalModel {
     required this.firstName,
     required this.lastName,
     this.surname,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.email,
     this.identificationNumber,
     this.syncStatus = 'PENDING_SYNC',
@@ -46,7 +49,7 @@ class ParentLocalModel {
     firstName: m['first_name'] as String,
     lastName: m['last_name'] as String,
     surname: m['surname'] as String?,
-    phoneNumber: m['phone_number'] as String,
+    phoneNumber: m['phone_number'] as String?,
     email: m['email'] as String?,
     identificationNumber: m['identification_number'] as String?,
     syncStatus: (m['sync_status'] as String?) ?? 'PENDING_SYNC',

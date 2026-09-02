@@ -8,7 +8,7 @@ class LocalParent extends Equatable {
   final String firstName;
   final String lastName;
   final String? surname;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String? email;
   final String? identificationNumber;
   final OfflineRelationshipType relationshipType;
@@ -25,7 +25,7 @@ class LocalParent extends Equatable {
     required this.firstName,
     required this.lastName,
     this.surname,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.email,
     this.identificationNumber,
     this.relationshipType = OfflineRelationshipType.other,

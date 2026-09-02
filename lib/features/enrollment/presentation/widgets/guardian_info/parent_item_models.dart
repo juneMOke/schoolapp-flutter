@@ -29,7 +29,9 @@ class ParentItemValue extends Equatable {
       firstName: parent.firstName,
       lastName: parent.lastName,
       surname: parent.surname ?? '',
-      phoneNumber: parent.phoneNumber,
+      // Le formulaire travaille sur des chaînes : `null` y devient `''`, et
+      // c'est la couche d'écriture qui refait la distinction avant la base.
+      phoneNumber: parent.phoneNumber ?? '',
       email: parent.email,
       relationshipType: parent.relationshipType,
     );
@@ -70,12 +72,18 @@ class ParentItemValue extends Equatable {
         isEmailValid(normalizedEmail);
   }
 
-  /// Un téléphone est obligatoire ET complet : un numéro tronqué partirait
-  /// en base et vers le backend en E.164 invalide, sans moyen de rappeler le
-  /// tuteur. Seule exception, ci-dessus : la valeur héritée intacte.
+  /// Le téléphone n'est plus obligatoire (V117), mais reste exigé **complet dès
+  /// qu'il est entamé** : un numéro tronqué partirait en base et vers le backend
+  /// en E.164 invalide — le CHECK serveur le refuse — sans moyen de rappeler le
+  /// tuteur.
+  ///
+  /// Vide = acceptable. Ne rien mettre est une décision ; mettre la moitié d'un
+  /// numéro est une faute de frappe, et les deux ne se traitent pas pareil.
+  ///
+  /// Seule autre exception, ci-dessus : la valeur héritée intacte.
   static bool isPhoneAcceptable(String rawPhone, {String? initialPhone}) {
     final normalized = rawPhone.trim();
-    if (normalized.isEmpty) return false;
+    if (normalized.isEmpty) return true;
     if (PhoneNumberFormat.isValid(normalized)) return true;
     return initialPhone != null && normalized == initialPhone.trim();
   }
