@@ -29,6 +29,7 @@ class _Host extends StatefulWidget {
 
 class _HostState extends State<_Host> {
   final controller = TextEditingController();
+  final tenderController = TextEditingController();
   bool selected = false;
 
   @override
@@ -42,6 +43,7 @@ class _HostState extends State<_Host> {
 
   @override
   void dispose() {
+    tenderController.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -52,6 +54,11 @@ class _HostState extends State<_Host> {
       charge: _charge(),
       selected: selected,
       amountController: controller,
+      // Cette ligne ne convertit pas : le second champ reste inutilisé, et la
+      // ligne se comporte exactement comme avant la bascule bi-devise.
+      tenderController: tenderController,
+      onAllocationEdited: () {},
+      onTenderEdited: () {},
       onSelectedChanged: (v) => setState(() {
         selected = v;
         if (v) {

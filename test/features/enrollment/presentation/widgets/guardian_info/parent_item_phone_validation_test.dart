@@ -13,10 +13,19 @@ void main() {
   );
 
   group('ParentItemValue.isPhoneAcceptable', () {
-    test('exige un numéro complet pour une saisie neuve', () {
+    test('exige un numéro complet dès qu\'il est ENTAMÉ', () {
       expect(ParentItemValue.isPhoneAcceptable('+243816939060'), isTrue);
       expect(ParentItemValue.isPhoneAcceptable('+24381693'), isFalse);
-      expect(ParentItemValue.isPhoneAcceptable(''), isFalse);
+    });
+
+    /// Depuis la V117, un tuteur sans numéro existe : le parent qui n'a pas de
+    /// ligne, celui qui vient inscrire l'enfant d'un frère. L'exigence ne
+    /// laissait qu'une issue à l'opérateur — en inventer un — c'est-à-dire une
+    /// saisie fausse, et un message envoyé à un inconnu le jour où l'école
+    /// notifie.
+    test('un champ VIDE est acceptable : ne rien mettre est une décision', () {
+      expect(ParentItemValue.isPhoneAcceptable(''), isTrue);
+      expect(ParentItemValue.isPhoneAcceptable('   '), isTrue);
     });
 
     test(
@@ -44,8 +53,12 @@ void main() {
       );
     });
 
-    test('un numéro vidé reste refusé, même hérité vide', () {
-      expect(ParentItemValue.isPhoneAcceptable('', initialPhone: ''), isFalse);
+    test('un numéro vidé est accepté, hérité vide ou non', () {
+      expect(ParentItemValue.isPhoneAcceptable('', initialPhone: ''), isTrue);
+      expect(
+        ParentItemValue.isPhoneAcceptable('', initialPhone: '+243816939060'),
+        isTrue,
+      );
     });
   });
 

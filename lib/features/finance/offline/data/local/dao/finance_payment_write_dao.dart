@@ -25,6 +25,7 @@ class FinancePaymentWriteDao {
   Future<void> recordPayment({
     required PaymentLocalModel payment,
     required List<PaymentAllocationLocalModel> allocations,
+    List<PaymentTenderLocalModel> tenders = const [],
     GeneratedDocumentLocalModel? receipt,
     required String outboxEntryId,
     String? schoolId,
@@ -57,6 +58,20 @@ class FinancePaymentWriteDao {
         // lecture (getChargesByStudent) depuis les allocations des paiements
         // encore `sync_status <> 'SYNCED'` — auto-cicatrisant, on dérive, on
         // n'incrémente jamais.
+      }
+
+      // Ce qui est entré dans le TIROIR, à côté de ce qui a été imputé. Aucun
+      // lien entre les deux listes, et c'est délibéré : un versement de
+      // 112 000 FC qui solde 40 $ et 50 $ n'a pas comporté un paquet de billets
+      // pour l'un et un paquet pour l'autre. La part en devise reçue de chaque
+      // poste se DÉRIVE (`allocation × taux`) — une proration se recalcule,
+      // elle ne se conserve pas.
+      for (final tender in tenders) {
+        await txn.insert(
+          'payment_tenders',
+          tender.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
 
       if (receipt != null) {

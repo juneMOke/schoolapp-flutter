@@ -16,7 +16,8 @@ class MenuFactory {
   ///
   /// Les exigences viennent de `kModuleAccessRegistry`, partagé avec la grille
   /// d'accueil : c'est ce partage qui empêche la barre latérale et l'accueil de
-  /// diverger.
+  /// diverger. `isSubMenuOffered` y ajoute les écrans retirés par décision
+  /// produit (`kHiddenSubMenus`), pour la même raison de non-divergence.
   static List<MenuItem> createMenuItems(
     AppLocalizations l10n, {
     required List<String>? permissions,
@@ -43,7 +44,7 @@ class MenuFactory {
         continue;
       }
       final subMenus = menu.subMenus
-          .where((sub) => canAccessSubMenu(sub.id, permissions))
+          .where((sub) => isSubMenuOffered(sub.id, permissions))
           .toList(growable: false);
       if (subMenus.isEmpty) continue;
       visible.add(menu.copyWith(subMenus: subMenus));

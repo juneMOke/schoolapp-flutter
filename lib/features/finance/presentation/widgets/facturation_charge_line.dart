@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_progress_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -15,14 +16,24 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// En-tête (libellé + badge de statut), barre de progression et pied
 /// « Attendu · Payé · {reste} restant ». La ligne reste cliquable.
+///
+/// Depuis GF-3, elle vit aussi **sous** un en-tête de nature, comme tranche
+/// d'un accordéon : [dense] retire alors sa bordure, que le cadre du groupe
+/// porte déjà.
 class FacturationChargeLine extends StatelessWidget {
   final StudentCharge charge;
   final VoidCallback onViewRequested;
+
+  /// Rendue à l'intérieur d'un groupe : pas de bordure propre, le cadre du
+  /// groupe l'entoure déjà. Deux cadres emboîtés à deux pixels d'écart se
+  /// lisent comme une erreur de rendu.
+  final bool dense;
 
   const FacturationChargeLine({
     super.key,
     required this.charge,
     required this.onViewRequested,
+    this.dense = false,
   });
 
   String _formatAmount(double cents) => formatMonetaryAmountWithCurrency(
@@ -45,7 +56,11 @@ class FacturationChargeLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final status = charge.status;
+    // Statut COMPOSÉ (GF-4), jamais `charge.status`. Le miroir serveur n'est
+    // pas recalculé après un encaissement local : il disait encore « à régler »
+    // sur un frais que le guichet venait de solder, pendant que la jauge
+    // juste au-dessus affichait 100 %.
+    final status = charge.composedStatus;
     final visuals = status.visuals;
     // Reste COMPOSÉ (FRONT §5) : déjà borné à 0 par l'entité.
     final remaining = charge.remainingInCents;
@@ -64,7 +79,7 @@ class FacturationChargeLine extends StatelessWidget {
           padding: const EdgeInsets.all(AppDimensions.spacingM),
           decoration: BoxDecoration(
             borderRadius: AppRadius.brMd,
-            border: Border.all(color: AppColors.border),
+            border: dense ? null : Border.all(color: AppColors.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,9 +93,9 @@ class FacturationChargeLine extends StatelessWidget {
                 visuals: visuals,
               ),
               const SizedBox(height: AppDimensions.spacingM),
-              _ProgressBar(progress: _progress, fill: visuals.color),
+              FeeProgressBar(progress: _progress, fill: visuals.color),
               const SizedBox(height: AppDimensions.spacingS),
-              _Footer(
+              FeeAmountsRow(
                 expectedLabel: l10n.facturationDetailChargeExpectedAmountColumn,
                 paidLabel: l10n.facturationDetailChargePaidAmountColumn,
                 expected: _formatAmount(charge.expectedAmountInCents),
@@ -135,88 +150,6 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(width: AppDimensions.spacingS),
         FeeStatusBadge(label: statusLabel, visuals: visuals),
-      ],
-    );
-  }
-}
-
-class _ProgressBar extends StatelessWidget {
-  final double progress;
-  final Color fill;
-
-  const _ProgressBar({required this.progress, required this.fill});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: AppRadius.brPill,
-      child: LinearProgressIndicator(
-        value: progress,
-        minHeight: 7,
-        backgroundColor: AppColors.surfaceAlt,
-        valueColor: AlwaysStoppedAnimation<Color>(fill),
-      ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  final String expectedLabel;
-  final String paidLabel;
-  final String expected;
-  final String paid;
-  final String? remainingText;
-
-  const _Footer({
-    required this.expectedLabel,
-    required this.paidLabel,
-    required this.expected,
-    required this.paid,
-    required this.remainingText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mutedStyle = AppTextStyles.caption.copyWith(
-      color: AppColors.textMuted,
-    );
-    final strongStyle = AppTextStyles.caption.copyWith(
-      color: AppColors.textPrimary,
-      fontWeight: FontWeight.w700,
-    );
-
-    return Wrap(
-      spacing: AppDimensions.spacingS,
-      runSpacing: AppDimensions.spacingXS,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: '$expectedLabel ', style: mutedStyle),
-              TextSpan(text: expected, style: strongStyle),
-            ],
-          ),
-        ),
-        Text('·', style: mutedStyle),
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: '$paidLabel ', style: mutedStyle),
-              TextSpan(text: paid, style: strongStyle),
-            ],
-          ),
-        ),
-        if (remainingText != null) ...[
-          Text('·', style: mutedStyle),
-          Text(
-            remainingText!,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.feeStatusDue,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
       ],
     );
   }

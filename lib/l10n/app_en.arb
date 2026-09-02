@@ -812,6 +812,34 @@
   "@configurationSettingsTariffOne": {
       "description": "Note explaining the wizard's scope no longer exists in settings"
   },
+  "configurationSectionsTitle": "Fee sections",
+  "@configurationSectionsTitle": {
+      "description": "Titre de la carte de nommage des natures de frais"
+  },
+  "configurationSectionsSubtitle": "The name your school gives each fee nature. Every tariff of the same nature is shown under that title.",
+  "@configurationSectionsSubtitle": {
+      "description": "Sous-titre de la carte de nommage des sections"
+  },
+  "configurationSectionsSave": "Save sections",
+  "@configurationSectionsSave": {
+      "description": "Bouton d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsSaved": "Sections saved",
+  "@configurationSectionsSaved": {
+      "description": "Confirmation d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsHiddenHint": "Hidden: no longer offered for input, but still counted in the statistics.",
+  "@configurationSectionsHiddenHint": {
+      "description": "Explication de ce que masquer une section veut dire"
+  },
+  "configurationSectionsLabelRequired": "Every section must have a name.",
+  "@configurationSectionsLabelRequired": {
+      "description": "Refus d'enregistrer quand un titre de section est vide"
+  },
+  "configurationSectionsReorderHint": "Drag a section to move it up; this order is the tariff picker's.",
+  "@configurationSectionsReorderHint": {
+      "description": "Explication du reclassement des sections"
+  },
   "configurationTariffAdd": "Add a tariff",
   "@configurationTariffAdd": {
       "description": "Button adding a tariff on a level"
@@ -1815,7 +1843,7 @@
   "searchModeByClass": "By class",
   "searchModeByIdentity": "By identity",
   "searchModeClassHint": "Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.",
-  "searchModeIdentityHint": "Enter the student's last name, middle name and first name. To list a whole class, switch to “By class”.",
+  "searchModeIdentityHint": "One name is enough: last name, middle name or first name. To list a whole class, switch to “By class”.",
   "searchRefineByNameLabel": "Refine by last name (optional)",
   "searchRefineByNamePlaceholder": "Student's last name, even partial",
   "viewDetails": "View details",
@@ -2093,6 +2121,8 @@
   "identificationNumberLabel": "Identification number",
   "identificationNumberHelp": "Official identification number.",
   "phoneNumberLabel": "Phone",
+  "guardianPhoneNumberAbsent": "No phone number",
+  "guardianPhoneNumberOptionalNotice": "Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.",
   "phoneNumberHelp": "Guardian's phone number.",
   "phoneNumberCountryCodeLabel": "Country dialling code",
   "phoneNumberInvalidError": "Invalid phone number ({expectedDigits} digits expected after the dialling code).",
@@ -2392,7 +2422,7 @@
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
   "facturationEmptyEnrollmentWithheld": "The student list belongs to the Enrolment module, which this profile cannot access: no student can be shown here, whatever the criteria. Your administrator can grant that access.",
   "facturationEmptyTitle": "No student found",
-  "facturationSearchHelpBanner": "Search a whole class (cycle + level), or one specific student (last name + middle name + first name).",
+  "facturationSearchHelpBanner": "Search a whole class (cycle + level), or one specific student (one name is enough).",
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Level",
   "facturationSearchLevelPlaceholder": "Pick a cycle first",
@@ -2416,6 +2446,15 @@
   "feeControlFeeGridWithheld": "The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.",
   "feeControlFeeLoadFailed": "The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.",
   "feeControlFeeLoadRetry": "Try again",
+  "feeControlFeeTrancheCount": "{count, plural, one{{count} instalment} other{{count} instalments}}",
+  "@feeControlFeeTrancheCount": {
+    "description": "Nombre de lignes de grille regroupées sous une même nature dans le sélecteur de frais du Contrôle. Composé seulement au-delà de une : le contrôle porte sur la nature entière, tranches confondues.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlPaymentStatusLabel": "Payment status",
   "feeControlPaymentStatusAll": "All",
   "feeControlViewDetailLabel": "Open the financial record",
@@ -2566,6 +2605,7 @@
   "facturationPaymentDetailHeroSubtitle": "Review this payment information and the breakdown of allocated amounts.",
   "facturationPaymentInfoSectionTitle": "Payment information",
   "facturationPaymentPayerLabel": "Payer",
+  "facturationPaymentPayerUnnamed": "No payer named",
   "facturationPaymentAmountLabel": "Total paid amount",
   "facturationPaymentPaidAtLabel": "Paid at",
   "facturationPaymentAmountPaidLabel": "Amount paid",
@@ -2600,12 +2640,19 @@
   "facturationPaymentAllocationsUnknownError": "An unexpected error occurred while loading allocations.",
   "facturationDetailChargesSectionTitle": "Charges",
   "facturationDetailChargesSectionSubtitle": "Breakdown of expected, paid and remaining amounts.",
-  "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle",
+  "facturationDetailChargesSummary": "{feeCount, plural, =0{No fee} =1{1 fee} other{{feeCount} fees}} · {trancheCount, plural, =1{1 instalment} other{{trancheCount} instalments}} · {unsettledCount, plural, =0{all settled} =1{1 left to settle} other{{unsettledCount} left to settle}}",
   "@facturationDetailChargesSummary": {
+    "description": "Summary of the student fees section, folded by fee code (GF-5). Three levels, in order: fee codes, the instalments they carry, and those still to collect. That last count comes from the COMPOSED remaining, never from the mirrored status.",
     "placeholders": {
-      "totalCount": {},
-      "partialCount": {},
-      "dueCount": {}
+      "feeCount": {
+        "type": "int"
+      },
+      "trancheCount": {
+        "type": "int"
+      },
+      "unsettledCount": {
+        "type": "int"
+      }
     }
   },
   "facturationDetailChargesRetry": "Retry",
@@ -2671,6 +2718,7 @@
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
   "facturationCreatePaymentPayerPhoneLabel": "Payer's phone number",
+  "facturationCreatePaymentPayerOptionalNotice": "These details are optional: a payment can be collected without naming the payer. The receipt still carries the student and the fees settled.",
   "facturationCreatePaymentPayerPickAction": "Choose a payer",
   "facturationCreatePaymentPayerPickHelp": "Reuse a payer who has already been to the desk, or enter one below.",
   "facturationPayerSearchDialogEyebrow": "Collection",
@@ -2817,7 +2865,52 @@
       }
     }
   },
+  "boutiqueTenderCurrency": "Customer pays {due} in",
+  "@boutiqueTenderCurrency": {"placeholders": {"due": {"type": "String"}}},
+  "boutiqueTenderReceivedLabel": "Received at the counter",
+  "boutiqueTenderShortfall": "Still due · {amount}",
+  "@boutiqueTenderShortfall": {"placeholders": {"amount": {"type": "String"}}},
+  "boutiqueTenderChangeDue": "Change due · {amount}",
+  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "facturationCreatePaymentTenderCurrency": "Parent pays in",
+  "facturationCreatePaymentTenderAmountLabel": "Received at the counter",
+  "facturationCreatePaymentChangeDue": "Change due · {amount}",
+  "@facturationCreatePaymentChangeDue": {"placeholders": {"amount": {"type": "String"}}},
   "facturationCreatePaymentAmountToSettleLabel": "Amount to settle",
+  "facturationCreatePaymentGroupRemainingTranches": "{count, plural, =1{1 instalment left} other{{count} instalments left}}",
+  "@facturationCreatePaymentGroupRemainingTranches": {
+    "description": "Nombre de tranches ENCORE DUES sous une nature, à l'encaissement (GE-2). ⚠️ Volontairement libellé « restantes » et non « tranches » : la fiche annonce le total de la grille, cet écran ne monte que ce qui reste à payer. Un minerval en 7 tranches dont 4 sont soldées en affiche 3 ici.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupAmountLabel": "Amount settled",
+  "facturationCreatePaymentGroupAmountHint": "What the parent is paying on this fee",
+  "facturationCreatePaymentGroupVentilation": "Breakdown: {detail}",
+  "@facturationCreatePaymentGroupVentilation": {
+    "description": "Ce que le montant du groupe va imputer, tranche par tranche. Affiché même replié : le caissier valide une répartition, il doit la voir.",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupVentilationItem": "{label} {amount}",
+  "@facturationCreatePaymentGroupVentilationItem": {
+    "description": "Un élément de la ventilation : le code ou le libellé court de la tranche, puis son montant.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupExpandAction": "Show instalments",
+  "facturationCreatePaymentGroupCollapseAction": "Hide instalments",
   "facturationCreatePaymentSettleAllAction": "Settle all",
   "facturationCreatePaymentAmountClampedWarning": "Amount capped to the remaining balance ({amount}).",
   "@facturationCreatePaymentAmountClampedWarning": {
@@ -2837,6 +2930,50 @@
   },
   "facturationCreatePaymentSettledChip": "Settled",
   "facturationCreatePaymentTotalToCollect": "Total to collect",
+  "facturationSettlementLabel": "The parent pays in",
+  "exchangeRateSettingsTitle": "Counter exchange rate",
+  "exchangeRateSettingsSubtitle": "The rate offered to the cashier when a parent pays in another currency. Each save adds a step: payments already taken keep theirs.",
+  "exchangeRateSettingsFromLabel": "1 unit of",
+  "exchangeRateSettingsToLabel": "is worth, in",
+  "exchangeRateSettingsValueLabel": "Rate",
+  "exchangeRateSettingsSave": "Save rate",
+  "exchangeRateSettingsSaved": "Rate saved.",
+  "exchangeRateSettingsNone": "No rate set: at the counter, each fee is paid in its own currency.",
+  "exchangeRateSettingsCurrent": "In force: 1 {base} = {value} {quote}",
+  "@exchangeRateSettingsCurrent": {
+    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+  },
+  "facturationSettlementPerCharge": "Each fee",
+  "facturationSettlementRateLabel": "Today's rate",
+  "facturationSettlementCountedLabel": "Amount counted",
+  "facturationSettlementCountedHint": "Conversion: {expected}",
+  "@facturationSettlementCountedHint": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementCountedMismatch": "Too far from the conversion ({expected}). Adjust the amount or the rate.",
+  "@facturationSettlementCountedMismatch": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementRateEdit": "Change",
+  "facturationSettlementRateFieldLabel": "Applied rate",
+  "facturationSettlementRateHint": "{quote} for 1 {base}",
+  "@facturationSettlementRateHint": {
+    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+  },
+  "facturationSettlementRateDiverges": "This rate differs from the school's ({reference}). The payment can still be taken; it will be flagged.",
+  "@facturationSettlementRateDiverges": {
+    "placeholders": { "reference": { "type": "String" } }
+  },
+  "facturationSettlementNoRate": "No rate set: each fee is paid in its own currency.",
+  "facturationSettlementDerived": "i.e. {amount}",
+  "@facturationSettlementDerived": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationCreatePaymentToPerceive": "To collect",
+  "facturationCreatePaymentImputes": "settles {amount}",
+  "@facturationCreatePaymentImputes": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
     "placeholders": {
@@ -2863,6 +3000,17 @@
         "type": "String"
       },
       "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentenceNoPayer": "You are about to collect {amount} for {student}.",
+  "@facturationCreatePaymentConfirmSentenceNoPayer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
         "type": "String"
       }
     }
@@ -3580,9 +3728,7 @@
   },
   "financeStatsNoData": "No data available for this period",
   "financeStatsNoDataHint": "Try another period to display more insights.",
-  "financeStatsErrorTitle": "Loading error",
   "financeStatsRetry": "Retry",
-  "financeStatsRetryHint": "Reload finance statistics",
   "financeStatsLoadingA11yLabel": "Finance statistics are loading",
   "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
   "@financeStatsHeaderA11yLabel": {
@@ -3603,7 +3749,7 @@
   "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
   "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
   "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
-  "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, outstanding {outstanding}, rate {rate}%",
   "@financeStatsFeeTypeItemA11yLabel": {
     "placeholders": {
       "code": {
@@ -3615,16 +3761,11 @@
       "expected": {
         "type": "String"
       },
+      "outstanding": {
+        "type": "String"
+      },
       "rate": {
         "type": "int"
-      }
-    }
-  },
-  "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
-  "@financeStatsErrorA11yLabel": {
-    "placeholders": {
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -3638,6 +3779,57 @@
   "financeStatsStorageError": "A local error prevents displaying statistics.",
   "financeStatsAuthError": "An authentication error prevents loading statistics.",
   "financeStatsUnknownError": "An unexpected error occurred while loading statistics.",
+  "financeStatsErrorNetworkTitle": "No connection",
+  "financeStatsErrorUnauthorizedTitle": "Session expired",
+  "financeStatsErrorForbiddenTitle": "Access denied",
+  "financeStatsErrorServerTitle": "Could not load",
+  "financeStatsErrorReconnect": "Sign in again",
+  "financeStatsErrorIncidentCode": "Incident code: {code}",
+  "@financeStatsErrorIncidentCode": {"description": "To quote to support.", "placeholders": {"code": {"type": "String"}}},
+  "financeDashboardTabsA11yLabel": "Finance dashboard tabs",
+  "financeDashboardTabRecoveryLabel": "Recovery",
+  "financeDashboardTabRecoveryDescription": "What is still to be collected this year",
+  "financeDashboardTabTillLabel": "Till",
+  "financeDashboardTabTillDescription": "What went into the drawer",
+  "financeTillKpiTotal": "Till total",
+  "financeTillKpiFees": "School fees",
+  "financeTillKpiBoutique": "Boutique sales",
+  "financeTillKpiBandA11yLabel": "Till indicators, by currency",
+  "financeStatsFeeTypeOutstanding": "Outstanding: {amount}",
+  "@financeStatsFeeTypeOutstanding": {"description": "Outstanding amount for a fee code.", "placeholders": {"amount": {"type": "String"}}},
+  "financeStatsRateNotApplicable": "Not applicable",
+  "@financeStatsRateNotApplicable": {"description": "Collection rate when nothing was expected."},
+  "financeStatsRateNotApplicableForCurrency": "Not applicable · {currency}",
+  "@financeStatsRateNotApplicableForCurrency": {"description": "Same, on a multi-currency dashboard.", "placeholders": {"currency": {"type": "String"}}},
+  "financeStatsFeeTypeRateNotApplicable": "Rate: not applicable",
+  "@financeStatsFeeTypeRateNotApplicable": {"description": "Rate of a fee code with nothing expected."},
+  "financeStatsCurrencyNoMovement": "No movement in this currency",
+  "@financeStatsCurrencyNoMovement": {"description": "Block of a currency the school bills in, with nothing circulating."},
+  "financeStatsCurrencyNoMovementRecovery": "Nothing was billed or collected this school year.",
+  "financeTillPeriodDayCurrent": "Today",
+  "financeTillWindow": "From {start} to {end}",
+  "@financeTillWindow": {"description": "Till window bounds, as returned by the server.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "financeTillWindowDay": "Day of {date}",
+  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "financeTillTimeZoneHint": "Day in the school's time zone · {zone}",
+  "@financeTillTimeZoneHint": {"description": "The time zone comes from the response.", "placeholders": {"zone": {"type": "String"}}},
+  "financeTillSectionBuckets": "Cash-in over time",
+  "financeTillBucketsChartA11yLabel": "Cash-in chart, by interval",
+  "financeTillImputationHeading": "What these payments settled",
+  "@financeTillImputationHeading": {"description": "Second half of the till screen, counted in charge currency."},
+  "financeTillImputationHint": "In charge currency: these amounts do not add up with the drawer's.",
+  "financeTillImputationCardTitle": "Charges settled in {currency}",
+  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillImputationTotal": "Settled total · {amount}",
+  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "financeTillImputationSectionA11yLabel": "Settlement by fee type, in {currency}",
+  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillFeeCodeAmountA11yLabel": "{label}: {amount}",
+  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "financeTillFreshnessNotice": "As of the last sync · {relative}",
+  "@financeTillFreshnessNotice": {"description": "The server only totals what reached it.", "placeholders": {"relative": {"type": "String"}}},
+  "financeTillFreshnessNever": "Never synced",
+  "financeStatsCurrencyNoMovementTill": "Nothing went into the drawer over this window.",
   "enrollmentResults": "Results",
   "sort": "Sort",
   "switchToTableView": "Switch to table view",
@@ -4291,6 +4483,8 @@
   "ticketClassroomLabel": "Class:",
   "ticketAmountReceivedLabel": "Amount received",
   "ticketAllocationsLabel": "Breakdown",
+  "ticketRateLabel": "Rate",
+  "ticketDerivedAmountPrefix": "i.e.",
   "ticketAdvanceLabel": "Advance (unallocated)",
   "ticketBalanceLabel": "Balance",
   "ticketBalanceReservation": "subject to synchronisation",
@@ -4369,14 +4563,10 @@
   "boutiquePayerLastNameLabel": "Last name",
   "boutiquePayerMiddleNameLabel": "Middle name",
   "boutiquePayerFirstNameLabel": "First name",
-  "boutiquePayerReceiptNotice": "The receipt is in the payer's name; recipients are attached to each line.",
+  "boutiquePayerOptionalNotice": "These details are optional: a sale can be collected without naming the payer. When filled in, they appear on the receipt.",
   "boutiquePayerUnknownNotice": "Unknown number — this payer will be added to the directory with the sale.",
   "boutiqueBlockersPrefix": "Still missing:",
   "boutiqueBlockerEmptyCart": "Cart is empty",
-  "boutiqueBlockerLastName": "Last name",
-  "boutiqueBlockerMiddleName": "Middle name",
-  "boutiqueBlockerFirstName": "First name",
-  "boutiqueBlockerPhone": "Payer's phone",
   "boutiqueBlockerPhoneIncomplete": "Incomplete phone",
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
   "@boutiqueBlockerLinesWithoutLevel": {

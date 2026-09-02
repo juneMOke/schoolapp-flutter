@@ -35,13 +35,19 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
   static const double _medallionSize = 40;
   bool _hovered = false;
 
+  /// Le nom du payeur, ou la mention d'un versement encaissé sans le nommer.
+  ///
+  /// **Pas un tiret** : depuis la V114 serveur, l'absence de payeur est un CHOIX
+  /// du guichet et non une donnée manquante. Un tiret, ici en titre de ligne,
+  /// se lirait comme une valeur perdue et enverrait chercher ce qu'on n'a
+  /// jamais eu.
   String _payerFullName(AppLocalizations l10n) {
     final fullName = [
-      widget.payment.payerLastName,
+      widget.payment.payerLastName ?? '',
       widget.payment.payerMiddleName ?? '',
-      widget.payment.payerFirstName,
+      widget.payment.payerFirstName ?? '',
     ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
-    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+    return fullName.isEmpty ? l10n.facturationPaymentPayerUnnamed : fullName;
   }
 
   @override

@@ -25,6 +25,8 @@ SaleTicketModel _model({
   bool provisional = true,
   List<SaleTicketLine>? lines,
   String? cashier = 'Moke Junior',
+  String? payer = 'Ndombo Lelo Willy',
+  String? phone = '+243810220145',
 }) => SaleTicketModel(
   schoolName: 'Complexe Scolaire La Colombe',
   schoolAddress: '14, av. de la Justice · Gombe · Kinshasa',
@@ -32,8 +34,8 @@ SaleTicketModel _model({
   isProvisional: provisional,
   soldAt: DateTime(2026, 8, 29, 11, 42),
   cashierFullName: cashier,
-  payerFullName: 'Ndombo Lelo Willy',
-  payerPhoneNumber: '+243810220145',
+  payerFullName: payer,
+  payerPhoneNumber: phone,
   lines:
       lines ??
       const [
@@ -64,9 +66,74 @@ void main() {
     bool provisional = true,
     List<SaleTicketLine>? lines,
     String? cashier = 'Moke Junior',
+    String? payer = 'Ndombo Lelo Willy',
+    String? phone = '+243810220145',
   }) => SaleTicketTextLayout.render(
-    _model(provisional: provisional, lines: lines, cashier: cashier),
+    _model(
+      provisional: provisional,
+      lines: lines,
+      cashier: cashier,
+      payer: payer,
+      phone: phone,
+    ),
   );
+
+  group('vente anonyme — le bloc payeur disparaît', () {
+    /// Sur une pièce, un cadre laissé vide se lit comme une mention EFFACÉE, et
+    /// invite à chercher ce qu'on aurait retiré. Mieux vaut n'avoir rien à lire
+    /// que quelque chose à interpréter — et le reçu reste complet par ailleurs :
+    /// articles, total et référence prouvent l'achat, qui est précisément ce que
+    /// le porteur du papier vient prouver.
+    test('ni nom ni numéro : aucune trace du payeur, et rien d\'autre ne '
+        'bouge', () {
+      final ticket = render(payer: null, phone: null).join('\n');
+
+      expect(ticket, isNot(contains(_labels.payerLabel)));
+      expect(ticket, isNot(contains(_labels.phoneLabel)));
+      // La preuve d'achat, elle, est intacte.
+      expect(ticket, contains('PROV-000413'));
+      expect(ticket, contains('Polo Lacoste'));
+      expect(ticket, contains(_labels.totalLabel));
+    });
+
+    /// Il a été TAPÉ, donc il désigne quelqu'un. Même règle que le reçu scellé
+    /// rendu par le serveur : deux pièces du même acte qui ne disent pas la même
+    /// chose se paient au premier rapprochement de caisse.
+    test('téléphone seul : le bloc reste, sans ligne de nom', () {
+      final ticket = render(payer: null).join('\n');
+
+      expect(ticket, contains(_labels.phoneLabel));
+      expect(ticket, contains('+243810220145'));
+      expect(ticket, isNot(contains(_labels.payerLabel)));
+    });
+
+    test('nom seul : le bloc reste, sans ligne de numéro', () {
+      final ticket = render(phone: null).join('\n');
+
+      expect(ticket, contains(_labels.payerLabel));
+      expect(ticket, contains('NDOMBO LELO WILLY'));
+      expect(ticket, isNot(contains(_labels.phoneLabel)));
+    });
+
+    /// Le `''` que le pull écrivait avant la v43 vaut une absence, pas un nom.
+    test('un nom vide vaut une absence', () {
+      final ticket = render(payer: '   ', phone: null).join('\n');
+
+      expect(ticket, isNot(contains(_labels.payerLabel)));
+    });
+
+    /// Le ticket doit rester imprimable : chaque ligne tient dans le rouleau,
+    /// même quand un bloc entier a disparu.
+    test('aucune ligne ne dépasse la largeur, payeur absent', () {
+      for (final line in render(payer: null, phone: null)) {
+        expect(
+          line.length,
+          lessThanOrEqualTo(SaleTicketTextLayout.defaultColumns),
+          reason: 'ligne trop longue : "$line"',
+        );
+      }
+    });
+  });
 
   test('aucune ligne ne dépasse la largeur du rouleau', () {
     // L'invariant sur lequel repose tout le gabarit : une ligne trop longue

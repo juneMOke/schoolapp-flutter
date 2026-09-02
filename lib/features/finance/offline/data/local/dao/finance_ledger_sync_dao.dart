@@ -112,6 +112,7 @@ class FinanceLedgerSyncDao {
     List<StudentChargeLocalModel> charges = const [],
     List<PaymentLocalModel> payments = const [],
     List<PaymentAllocationLocalModel> allocations = const [],
+    List<PaymentTenderLocalModel> tenders = const [],
   }) async {
     await applyInBatches(
       _db,
@@ -149,6 +150,38 @@ class FinanceLedgerSyncDao {
             await txn.insert(
               'payment_allocations',
               a.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+        }
+      },
+    );
+
+    // Les lignes d'encaissement du versement descendu. **Même patron que les
+    // imputations** — patch puis insert — et pour la même raison : le versement
+    // peut déjà exister localement (c'est le nôtre, revenu par le delta), et un
+    // `INSERT OR REPLACE` sec écraserait ce que le poste sait et que le serveur
+    // ignore.
+    //
+    // ⚠️ Aucune purge des lignes absentes du delta : un versement d'avant
+    // l'alignement du contrat redescend sans tender, et effacer sur cette liste
+    // vide emporterait l'identité posée par le backfill de la v41 — le
+    // versement se relirait alors comme si rien n'était entré dans le tiroir.
+    await applyInBatches(
+      _db,
+      tenders,
+      apply: (txn, chunk) async {
+        for (final t in chunk) {
+          final patched = await txn.update(
+            'payment_tenders',
+            t.toPullPatch(),
+            where: 'id = ?',
+            whereArgs: [t.id],
+          );
+          if (patched == 0) {
+            await txn.insert(
+              'payment_tenders',
+              t.toMap(),
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
           }

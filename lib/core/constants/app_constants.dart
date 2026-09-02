@@ -102,13 +102,52 @@ class AppConstants {
   static const String listPaymentsByStudentAndAcademicYearEndpoint =
       '/api/v1/finance/payments/student/{studentId}/academic-year/{academicYearId}';
   static const String createPaymentEndpoint = '/api/v1/finance/payments';
+
+  /// Série des taux de guichet de l'école — `GET`, historique complet, le plus
+  /// récent d'abord. Le `schoolId` vient du jeton, jamais du corps.
+  ///
+  /// L'écran de **direction**, pas le guichet : le poste hors ligne reçoit son
+  /// taux par le flux de synchro ci-dessous.
+  static const String exchangeRatesEndpoint = '/api/v1/finance/exchange-rates';
+
+  /// Le taux de guichet du poste hors ligne — **bundle conditionnel**, pas un
+  /// keyset : rien à paginer, rien à reprendre, le client remplace en bloc.
+  ///
+  /// Réponse **enveloppée** (`{points, serverTime}`), et `304` quand l'`ETag`
+  /// renvoyé en `If-None-Match` concorde. Jamais 404 sur une école sans taux :
+  /// une liste vide est une réponse complète — « cette école ne publie aucun
+  /// taux » — et le guichet doit alors refuser la devise étrangère plutôt que
+  /// d'en fabriquer une.
+  static const String exchangeRatesSyncEndpoint = '/api/v1/sync/exchange-rates';
   static const String listPaymentAllocationsByPaymentIdEndpoint =
       '/api/v1/finance/payments/{paymentId}/allocations';
   static const String listPaymentAllocationsByChargeIdEndpoint =
       '/api/v1/finance/student-charges/{chargeId}/allocations';
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
-  static const String financeStatsEndpoint = '/api/v1/finance-stats';
+  // ── Pilotage financier : deux routes, deux natures ────────────────────────
+  //
+  // `/api/v1/finance-stats` a porté les deux et n'existe plus côté serveur : il
+  // mêlait un ÉTAT — où en est l'école de l'argent qu'elle doit encaisser cette
+  // année — et un FLUX — combien est entré dans le tiroir. Le sélecteur
+  // `period=week` demandait alors un attendu à la semaine ; les échéances
+  // tombant en fin de mois, il valait zéro, et l'écran annonçait « 0 attendu »
+  // un jour de guichet chargé.
+  //
+  // La permission ne les distingue pas : `finance.stats.read` ouvre les deux.
+
+  /// L'état : attendu, encaissé, reste dû et taux de l'année scolaire courante,
+  /// par devise et par poste de frais. **Aucun paramètre de requête** — l'école
+  /// vient du jeton, l'année est la courante. Un `period` envoyé par habitude
+  /// est ignoré, la réponse dira toujours `"year"`.
+  static const String financeRecoveryStatsEndpoint =
+      '/api/v1/finance-stats/recovery';
+
+  /// Le flux : ce qui est entré en caisse sur la fenêtre — frais scolaires
+  /// **et ventes boutique**. `period` (`day` par défaut) `day|week|month|year`,
+  /// et une ancre facultative (`date`, `month`, `week`) que le serveur REFUSE
+  /// en 400 si elle ne correspond pas à la période demandée.
+  static const String financeTillStatsEndpoint = '/api/v1/finance-stats/till';
 
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body
@@ -479,7 +518,42 @@ class AppConstants {
   // sert déjà dans le bundle référentiel, le front le jetait : une créance ne
   // pouvait être nommée que par sa nature. Nullable et sans backfill — le pull
   // suivant réécrit la grille des années du bundle.
-  static const int offlineDbSchemaVersion = 39;
+  // v40 (2026-09-01) : le taux de guichet — `ref_exchange_rates`. La V2 de
+  // l'encaissement sépare ce qui est PERÇU (devise reçue) de ce qui est IMPUTÉ
+  // (devise de la créance) ; le nombre qui relie les deux doit être écrit
+  // quelque part, et lisible hors ligne. Table de cache référentiel, en SÉRIE
+  // (`effective_from`) : on lit le taux qui valait à `paid_at`, pas celui du
+  // jour du push. Aucun backfill — une table de cache se remplit au pull, elle
+  // ne se rattrape pas.
+  // v41 (2026-09-01) : `payment_tenders` — ce qui est entré dans le tiroir, à
+  // côté de ce qui a été imputé. Append-only, sœur de `payment_allocations`.
+  // **Backfill identité** (perçu = imputé, taux 1) sur tout l'historique local :
+  // le pull des paiements est un delta, il ne redescendra jamais les versements
+  // déjà en base, et un repli « pas de tender ⇒ lire les allocations » ferait
+  // deux voies de lecture — celles-là divergent toujours une fois.
+  // v42 (2026-09-02) : `boutique_sale_tenders` — ce qui est entré dans le
+  // tiroir pour une vente, à côté de ce qui a été vendu. Symétrique de la v41,
+  // avec le même **backfill identité** (perçu = vendu, taux 1) : le pull des
+  // ventes est un delta, il ne redescendra jamais celles déjà en base.
+  // v43 (2026-09-02) : le payeur devient FACULTATIF des deux côtés du guichet
+  // (contrepartie de la V114 serveur). `payments.payer_first_name` /
+  // `payer_last_name` et `boutique_sales.payer_last_name` perdent leur
+  // `NOT NULL`, et les `''` hérités du repli de pull sont normalisés en `NULL` :
+  // « pas de payeur » est un fait, pas un nom de longueur zéro.
+  // v44 (2026-09-02) : `ref_fee_code_sections` — le titre que l'école donne à
+  // chaque nature de frais (V115 serveur), lisible HORS LIGNE. Cache
+  // d'affichage pur : aucune écriture ne le lit, le `code` qui part sur le fil
+  // vient toujours de la créance. Sans lui, la fiche d'un élève nommerait ses
+  // frais selon qu'on est passé ou non par Configuration dans la session — le
+  // cache mémoire du provisioning est froid pour un caissier. Aucun backfill :
+  // une table de cache se remplit au pull, elle ne se rattrape pas.
+  // v45 (2026-09-02) : `parents.phone_number` perd son `NOT NULL`
+  // (contrepartie de la V117 serveur). Un tuteur sans numéro existe réellement
+  // au guichet — le parent qui n'a pas de ligne, celui qui vient inscrire
+  // l'enfant d'un frère — et la contrainte ne laissait qu'une issue : en
+  // inventer un. Une saisie fausse, donc un message envoyé à un inconnu le jour
+  // où l'école notifie.
+  static const int offlineDbSchemaVersion = 45;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

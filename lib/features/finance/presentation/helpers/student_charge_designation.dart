@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/domain/fee_tariff_code.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_grouping.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Comment une créance se **nomme** à l'écran — un seul endroit, six écrans.
@@ -38,6 +39,59 @@ String chargeDesignation(StudentCharge charge, AppLocalizations l10n) =>
       feeTariffCode: charge.feeTariffCode,
       l10n: l10n,
     );
+
+/// Comment un **groupe de créances** se nomme (GF-2).
+///
+/// La règle est celle du sélecteur « Frais » du Contrôle, transposée d'une
+/// grille à ce que l'élève porte réellement :
+///
+/// | tranches portées | rendu |
+/// |---|---|
+/// | une | `Organisation matériel — 2/3 (OM2)` — la tranche EST la nature |
+/// | plusieurs | `Frais scolaires · 7 tranches` |
+///
+/// **Une seule tranche garde le libellé du TARIF**, jamais le titre de section.
+/// C'est un instantané gelé à la naissance de la créance — `SECTIONS_FRAIS_PLAN`
+/// le dit : renommer une section ne réécrit pas les tarifs posés. Le titre de
+/// l'école ne sert donc qu'à coiffer ce qu'aucun libellé de tranche ne peut
+/// nommer pour l'ensemble.
+///
+/// [schoolTitle] est ce que la direction a écrit, `null` quand cet appareil ne
+/// le connaît pas encore — auquel cas on retombe sur la nature localisée, ce que
+/// l'écran faisait déjà avant que ce cache existe.
+///
+/// ⚠️ Le compte annoncé est celui de **l'élève**, pas celui de la grille : un
+/// élève inscrit en cours d'année n'en porte pas sept.
+String chargeGroupDesignation(
+  StudentChargeGroup group,
+  AppLocalizations l10n, {
+  String? schoolTitle,
+}) {
+  if (group.isSingleTranche) {
+    return chargeDesignation(group.charges.single, l10n);
+  }
+
+  final title = schoolTitle?.trim();
+  final base = (title == null || title.isEmpty)
+      ? group.feeCode.localizedFeeLabel(l10n)
+      : title;
+
+  return '$base · ${l10n.feeControlFeeTrancheCount(group.trancheCount)}';
+}
+
+/// Comment une tranche se nomme **dans une ligne de ventilation** — court.
+///
+/// « T1 », « OM2 » : le code du tarif quand il distingue quelque chose. Une
+/// ventilation aligne trois ou sept éléments sur une ligne ; y répéter
+/// « Minerval — 1/7 » sept fois la rendrait illisible, et c'est le rang qui
+/// porte l'information.
+///
+/// Sans code utile — grille simple, créance *ad hoc* —, on retombe sur la
+/// désignation complète : mieux vaut long que muet, et ce cas ne produit qu'un
+/// seul élément de toute façon.
+String shortTrancheLabel(StudentCharge charge, AppLocalizations l10n) =>
+    meaningfulTariffCode(code: charge.feeTariffCode, feeCode: charge.feeCode) ??
+    chargeDesignation(charge, l10n);
 
 /// La même règle, sur les trois valeurs brutes.
 ///

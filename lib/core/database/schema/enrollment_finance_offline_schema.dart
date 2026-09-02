@@ -31,6 +31,9 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 ///
 /// Le tuteur, lui, garde son téléphone (`parents.phone_number`) — c'est la clé
 /// d'unicité applicative du rapprochement RE/PRE, pas un contact dormant.
+/// Facultatif depuis la v45, mais toujours une clé **quand il est là** : ce qui
+/// change est ce qui arrive quand il manque, pas ce qu'il vaut quand il est
+/// renseigné.
 const TableSchema studentsTable = TableSchema(
   name: 'students',
   createTableSql: '''
@@ -74,6 +77,28 @@ const TableSchema studentsTable = TableSchema(
 ///   PAR ID stable + garde stricte (`ParentPhoneConflictException` si un
 ///   AUTRE parent porte déjà ce téléphone) — la fusion silencieuse par
 ///   téléphone n'existe PAS sur ce chemin.
+/// **`phone_number` est NULLABLE (v45)**, à l'image de la V117 serveur. Un
+/// tuteur sans numéro existe au guichet : le parent qui n'a pas de ligne, celui
+/// qui vient inscrire l'enfant d'un frère, celui dont le numéro viendra plus
+/// tard. La contrainte ne laissait qu'une issue — en inventer un — c'est-à-dire
+/// une saisie fausse, et un message envoyé à un inconnu le jour où l'école
+/// notifie. Le modèle tolérait déjà l'élève SANS AUCUN tuteur ; « tuteur sans
+/// numéro » restait, seul, irreprésentable.
+///
+/// `NULL`, **jamais `''` et surtout jamais un placeholder**. Le serveur détaille
+/// pourquoi côté Postgres — un placeholder n'y est unique qu'une fois dans toute
+/// la base — mais la raison qui vaut ICI est plus simple et pire : le
+/// rapprochement local compare des numéros, et une valeur partagée fusionnerait
+/// tous les tuteurs sans numéro dans UNE fiche.
+///
+/// ⚠️ **Ce que l'absence retire.** Le téléphone n'est pas un contact dormant,
+/// c'est la clé d'unicité applicative du rapprochement RE/PRE. Sans lui, le
+/// tuteur n'a plus de clé : il est rapproché par son nom complet **à l'intérieur
+/// du dossier de son élève**, et jamais au-delà (cf. `findGuardianWithoutPhone`,
+/// miroir du `GuardianMatcher` serveur). Conséquence à assumer au guichet — un
+/// tuteur sans numéro **n'est jamais partagé avec la fratrie**. C'est
+/// précisément ce que le téléphone prouvait et que son absence ne prouve plus.
+///
 /// `identification_number` reste NULL en local (le serveur génère `PID-…`).
 /// L'`id` provisoire est remappé vers le canonique serveur à l'ACK.
 const TableSchema parentsTable = TableSchema(
@@ -84,7 +109,7 @@ const TableSchema parentsTable = TableSchema(
       first_name TEXT NOT NULL,
       last_name TEXT NOT NULL,
       surname TEXT,
-      phone_number TEXT NOT NULL,
+      phone_number TEXT,
       email TEXT,
       identification_number TEXT,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
@@ -419,6 +444,110 @@ const TableSchema refFeeTariffsTable = TableSchema(
   ],
 );
 
+/// `ref_exchange_rates` — le taux de guichet paramétré par l'école, en série.
+///
+/// ⚠️ **Une série, jamais une valeur remplacée en place.** Une école qui change
+/// de taux à midi n'est pas un cas d'école à Kinshasa, et un versement encaissé
+/// hors ligne remonte parfois trois jours plus tard : on lit le taux qui valait
+/// à `paid_at`, pas celui d'aujourd'hui. D'où `effective_from` dans la clé.
+///
+/// **`rate_micros`, entier, jamais un `REAL`.** Le serveur stocke
+/// `numeric(18,6)` — six décimales, c'est exactement une micro-unité. Un
+/// flottant qui traverserait la couche métier finirait par arrondir de l'argent,
+/// et ici il l'arrondirait avant même de l'écrire. Même règle que
+/// `amount_in_cents`, pour la même raison. Le `REAL` de
+/// [refReductionLinesTable] ne s'applique pas : un pourcentage n'est pas un
+/// facteur monétaire.
+///
+/// **`base` est la devise de la CRÉANCE, `quote` la devise REÇUE.** Le pivot est
+/// la créance et non une référence unique de l'école : c'est la seule
+/// orientation qui rende l'invariant perçu/imputé vérifiable sans table de
+/// passage.
+///
+/// **Pas d'`id` : le serveur n'en donne pas** — même choix que
+/// [refReductionTypesTable]. L'identité d'un taux est sa paire dans son école à
+/// sa date ; un id local fabriqué depuis ce quadruplet n'aurait rien identifié
+/// de plus et aurait laissé croire qu'il venait du contrat.
+///
+/// **`school_id` n'est pas décoratif.** Dix flux portent déjà un curseur non
+/// scopé sur cette base ; un taux d'une école servi à la tablette d'une autre
+/// est un défaut d'argent, pas d'affichage. Il est stampé depuis
+/// `CurrentUserContext`, jamais depuis le payload.
+///
+/// `divergence_band_bp` est la bande de tolérance en points de base (200 = 2 %)
+/// paramétrée par l'école. `NULL` = « non communiquée » : le contrôle retombe
+/// alors sur le défaut de l'appelant, jamais sur zéro, qui signalerait tout.
+const TableSchema refExchangeRatesTable = TableSchema(
+  name: 'ref_exchange_rates',
+  createTableSql: '''
+    CREATE TABLE ref_exchange_rates (
+      school_id TEXT NOT NULL DEFAULT '',
+      base TEXT NOT NULL,
+      quote TEXT NOT NULL,
+      effective_from TEXT NOT NULL,
+      rate_micros INTEGER NOT NULL,
+      divergence_band_bp INTEGER,
+      set_by TEXT,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, base, quote, effective_from)
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_exchange_rates_pair '
+        'ON ref_exchange_rates(school_id, base, quote, effective_from)',
+  ],
+);
+
+/// `ref_fee_code_sections` — le **titre** que l'école donne à chaque nature de
+/// frais (V115 serveur, `GET /finance/fee-codes`).
+///
+/// ## Un cache d'AFFICHAGE, et rien d'autre
+///
+/// Aucune écriture ne lit cette table. Le `code` qui part sur le fil vient
+/// toujours de la créance ou de la grille, **jamais d'ici** — c'est ce qui
+/// distingue ce cache du catalogue que `CONFIGURATION_PLAN.md` D-9 refuse de
+/// persister : là-bas, un catalogue vieilli alimenterait une écriture et sa
+/// divergence n'apparaîtrait qu'en 422, sur l'activation. Ici, un titre périmé
+/// affiche un ancien nom pendant un cycle de pull, et c'est tout ce qu'il peut
+/// faire.
+///
+/// **Pourquoi persister plutôt que garder en session** : `loadFeeCodes` n'est
+/// appelé que depuis Configuration, et le repository qui porte le cache est un
+/// lazy singleton. Le cache est donc froid pour un caissier — l'utilisateur du
+/// détail Facturation. Sans cette table, la fiche d'un élève afficherait le
+/// titre de l'école ou la nature localisée selon qu'on est passé ou non par
+/// Configuration dans la session.
+///
+/// **`active` est stocké et ne filtre RIEN ici.** Masquer une section dit « ne
+/// me la propose plus à la saisie », jamais « ne sais plus la nommer » : une
+/// créance posée sur une nature depuis masquée doit garder son titre. C'est le
+/// piège que `SECTIONS_FRAIS_PLAN.md` §3 a déjà rencontré sur le panneau des
+/// tarifs, et le pull passe pour cette raison par `includeHidden: true`.
+///
+/// **Pas d'`id`, comme [refReductionTypesTable]** : le serveur n'en donne pas.
+/// L'identité d'une section est son code dans son école, et c'est la clé
+/// primaire.
+///
+/// **`school_id` n'est pas décoratif** : sur une tablette partagée, le titre
+/// d'une école servi à l'autre est un contresens d'affichage sur une pièce
+/// d'argent. Il est stampé depuis `CurrentUserContext`, jamais depuis le
+/// payload.
+const TableSchema refFeeCodeSectionsTable = TableSchema(
+  name: 'ref_fee_code_sections',
+  createTableSql: '''
+    CREATE TABLE ref_fee_code_sections (
+      school_id TEXT NOT NULL DEFAULT '',
+      code TEXT NOT NULL,
+      label TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, code)
+    )
+  ''',
+  createIndexSql: [],
+);
+
 /// `ref_reduction_types` — catalogue des natures de réduction (ADR-021 V1).
 ///
 /// ⚠️ **Pas d'`academic_year_id`, et c'est structurel** : le barème descend à la
@@ -563,6 +692,21 @@ const TableSchema studentChargesTable = TableSchema(
 /// dans l'ACK de push ET dans le delta de pull. Seule clé permettant de
 /// re-télécharger un reçu définitif par `GET /editique/documents/{id}`.
 ///
+/// **Les quatre colonnes de payeur sont NULLABLES (v43).** Elles l'étaient déjà
+/// côté serveur depuis sa V10 — c'était l'arête HTTP, et elle seule, qui
+/// exigeait un nom et un prénom. Cette exigence se payait comptant au guichet :
+/// la file attend pendant qu'on demande son état civil à qui tend les billets,
+/// et le guichetier finit par taper « X ». Un champ qui a l'air renseigné et ne
+/// désigne personne est strictement pire qu'un champ vide. Les imputations
+/// nomment toujours l'élève et les créances soldées : c'est là qu'est
+/// l'imputabilité, pas dans le nom de qui a tendu l'argent.
+///
+/// Elles portent `NULL`, **jamais `''`** : « pas de payeur » est un fait, pas un
+/// nom de longueur zéro, et seul `NULL` se lit sans ambiguïté « rien à
+/// afficher ». Un repli sur `''` rendrait « pas de nom » indiscernable de « nom
+/// inconnu » au moment précis où l'annuaire doit choisir entre proposer ce
+/// payeur et le taire.
+///
 /// **`payer_phone_number` (v28)** : numéro E.164 du payeur, saisi au guichet.
 /// NULLABLE alors que la saisie l'exige — la colonne décrit aussi le passé :
 /// tout versement antérieur à la v28 et tout versement encaissé sur un poste
@@ -608,8 +752,8 @@ const TableSchema paymentsTable = TableSchema(
       academic_year_id TEXT,
       method TEXT NOT NULL DEFAULT 'CASH',
       paid_at TEXT NOT NULL,
-      payer_first_name TEXT NOT NULL,
-      payer_last_name TEXT NOT NULL,
+      payer_first_name TEXT,
+      payer_last_name TEXT,
       payer_middle_name TEXT,
       payer_phone_number TEXT,
       status TEXT,
@@ -663,6 +807,65 @@ const TableSchema paymentAllocationsTable = TableSchema(
         'ON payment_allocations(payment_id)',
     'CREATE INDEX idx_payment_allocations_charge '
         'ON payment_allocations(student_charge_id)',
+  ],
+);
+
+/// `payment_tenders` — ce qui est **entré dans le tiroir** pour un versement.
+///
+/// Sœur de [paymentAllocationsTable], à la même profondeur : une **liste**, pas
+/// un scalaire. Un parent peut tendre des dollars et des francs dans la même
+/// main, et deux créances de devises différentes imposent deux lignes de toute
+/// façon — c'est le modèle qui découpe, pas le geste du payeur.
+///
+/// Append-only immuable → **PAS de `version`**, comme les imputations.
+///
+/// ## Les deux axes, et pourquoi ils ne se confondent pas
+///
+/// L'imputation répond à « combien de sa dette a-t-il éteint », dans la devise
+/// de la **créance**. Le tender répond à « qu'est-ce qui est entré dans le
+/// tiroir », dans la devise **reçue**. Jusqu'ici les deux se confondaient parce
+/// qu'ils étaient toujours dans la même unité ; le jour où un franc règle un
+/// dollar, la caisse annoncerait des dollars sur une journée où le tiroir n'a vu
+/// que des francs.
+///
+/// ## `amount_in_cents` est le **net conservé**, jamais le montant présenté
+///
+/// 120 000 tendus, 5 000 rendus : on écrit 115 000. Sans cette règle, le total
+/// de caisse ne retombera jamais sur le comptage du tiroir, et le rapprochement
+/// de la V3 héritera d'un historique inexploitable.
+///
+/// ## `rate_micros` et `pivot_currency`
+///
+/// Le taux de guichet **gelé**, en micro-unités entières (`numeric(18,6)` côté
+/// serveur ; un flottant arrondirait de l'argent). `1 000 000` = taux 1, le cas
+/// où perçu et imputé se confondent — c'est ce que porte tout l'historique
+/// backfillé. `pivot_currency` est la devise de la **créance** contre laquelle
+/// ce taux s'applique : elle lève l'ambiguïté quand un versement porte deux
+/// devises reçues et deux devises de créance.
+///
+/// ## Aucun lien vers l'allocation, et c'est délibéré
+///
+/// Un versement de 112 000 FC qui solde 40 $ et 50 $ n'a pas comporté, dans la
+/// réalité, un paquet de billets pour l'un et un paquet pour l'autre. Stocker
+/// une correspondance enregistrerait une **proration comme si c'était une
+/// observation** — or une proration se recalcule (`allocation × taux`), elle ne
+/// se conserve pas.
+const TableSchema paymentTendersTable = TableSchema(
+  name: 'payment_tenders',
+  createTableSql: '''
+    CREATE TABLE payment_tenders (
+      id TEXT PRIMARY KEY,
+      client_uuid TEXT NOT NULL,
+      payment_id TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      rate_micros INTEGER NOT NULL DEFAULT 1000000,
+      pivot_currency TEXT NOT NULL
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_payment_tenders_payment '
+        'ON payment_tenders(payment_id)',
   ],
 );
 
@@ -760,12 +963,15 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,
+  refFeeCodeSectionsTable,
+  refExchangeRatesTable,
   refReductionTypesTable,
   refReductionLinesTable,
   enrollmentReductionsTable,
   studentChargesTable,
   paymentsTable,
   paymentAllocationsTable,
+  paymentTendersTable,
   paymentAnomaliesTable,
   generatedDocumentsTable,
 ];

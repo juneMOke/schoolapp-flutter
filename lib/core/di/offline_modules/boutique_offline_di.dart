@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -90,6 +91,7 @@ void registerBoutiqueOffline(GetIt getIt) {
       findPayer: getIt<FindBoutiquePayerUseCase>(),
       recordSale: getIt<RecordBoutiqueSaleUseCase>(),
       ids: getIt<IdGenerator>(),
+      rates: getIt<ExchangeRateReader>(),
     ),
   );
   // L'année est un PARAMÈTRE, pas une dépendance : elle vient du contexte
@@ -108,6 +110,7 @@ void registerBoutiqueOffline(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
       ids: getIt<IdGenerator>(),
       device: getIt<DeviceIdentityService>(),
+      rates: getIt<ExchangeRateReader>(),
     ),
   );
   getIt.registerFactory<RecordBoutiqueSaleUseCase>(

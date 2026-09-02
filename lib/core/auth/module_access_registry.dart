@@ -199,6 +199,39 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   },
 };
 
+/// Sous-modules **retirés de la navigation par décision produit**, sans rapport
+/// avec les droits (2026-09-01 : Réinscription et Pré-inscription, « pour le
+/// moment »).
+///
+/// Volontairement séparé de [kModuleAccessRegistry] : un écran masqué n'est pas
+/// un écran interdit. Les mêler dirait à un porteur légitime qu'il n'a pas le
+/// droit, là où l'écran est simplement retiré — et le jour où on le rétablit,
+/// on ne saurait plus lequel des deux motifs le tenait fermé.
+///
+/// Conséquences, à connaître avant d'y toucher :
+///  - les deux surfaces de navigation (barre latérale et grille d'accueil)
+///    lisent cette liste par [isSubMenuOffered], donc ne peuvent pas diverger ;
+///  - la **route reste gardée par les seules permissions** : un lien direct
+///    vers `/inscriptions/re-inscriptions` ouvre encore l'écran pour qui a
+///    `enrollment.read`. C'est délibéré — plus rien n'y mène dans l'UI, et
+///    fermer la route ici rendrait un refus de droits mensonger.
+///
+/// Pour rétablir un écran : retirer son identifiant de cette liste. Rien
+/// d'autre n'a été démonté.
+const Set<String> kHiddenSubMenus = {
+  MenuConstants.reInscriptionsId,
+  MenuConstants.preInscriptionsId,
+};
+
+/// Vrai si [subMenuId] doit être **offert par la navigation** : ni masqué par
+/// décision produit, ni fermé par les droits.
+///
+/// C'est ce que les deux fabriques appellent — jamais [canAccessSubMenu] en
+/// direct, qui ne répond qu'à la question des droits et sert la garde de route.
+bool isSubMenuOffered(String subMenuId, List<String>? permissions) =>
+    !kHiddenSubMenus.contains(subMenuId) &&
+    canAccessSubMenu(subMenuId, permissions);
+
 /// Vrai si [subMenuId] est accessible avec [permissions].
 ///
 /// Un sous-module **non déclaré** est visible : la table décrit ce qui est

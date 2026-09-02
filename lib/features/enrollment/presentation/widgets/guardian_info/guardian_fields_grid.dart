@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
@@ -120,12 +122,32 @@ class GuardianFieldsGrid extends StatelessWidget {
           ),
         ),
         WizardGridField(
-          EteeloPhoneInput(
-            label: l10n.phoneNumberLabel,
-            controller: phoneController,
-            required: true,
-            readOnly: !isEditable || identityReadOnly,
-            dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
+          // **Facultatif (V117).** Un tuteur sans numéro existe au guichet — le
+          // parent qui n'a pas de ligne, celui qui vient inscrire l'enfant d'un
+          // frère — et l'exigence ne laissait qu'une issue : en inventer un.
+          //
+          // La mention dit ce que l'absence coûte, parce que ce n'est pas rien
+          // et que ça ne se devine pas : ni notification, ni portail parent, et
+          // pas de reprise pour la fratrie. L'opérateur tranche en connaissance
+          // de cause au lieu d'être bloqué.
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EteeloPhoneInput(
+                label: l10n.phoneNumberLabel,
+                controller: phoneController,
+                readOnly: !isEditable || identityReadOnly,
+                dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
+              ),
+              const SizedBox(height: AppDimensions.spacingXS),
+              Text(
+                l10n.guardianPhoneNumberOptionalNotice,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
           ),
         ),
         WizardGridField(

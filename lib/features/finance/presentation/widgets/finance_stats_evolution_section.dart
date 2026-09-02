@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';

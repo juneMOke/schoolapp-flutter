@@ -17,7 +17,7 @@ class ConfirmParentDraft {
   final String firstName;
   final String lastName;
   final String? surname;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String? email;
   final String relationshipType; // valeur API SCREAMING_SNAKE
 
@@ -33,7 +33,7 @@ class ConfirmParentDraft {
     required this.firstName,
     required this.lastName,
     this.surname,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.email,
     this.relationshipType = 'OTHER',
     this.emergencyContact,

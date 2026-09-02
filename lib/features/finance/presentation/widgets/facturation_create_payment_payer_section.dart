@@ -11,9 +11,16 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Bloc identité du payeur de la page d'encaissement (spec MODALE-12).
 ///
 /// Grille 3 colonnes (Nom · Post-nom · Prénom) qui s'empile sous une largeur
-/// contrainte, suivie du téléphone. Le Post-nom est le seul champ facultatif —
-/// les autres portent l'étoile du socle, et la validité est gardée par la page
-/// (cf. `_payerValid`).
+/// contrainte, suivie du téléphone.
+///
+/// **Les quatre champs sont facultatifs** (V114 serveur) : aucune étoile, et
+/// une mention qui le dit. L'exigence se payait comptant au guichet — la file
+/// attend pendant qu'on demande son état civil à qui tend les billets, et le
+/// guichetier finit par taper « X ». Un payeur ABSENT vaut mieux qu'un payeur
+/// INVENTÉ : les imputations nomment toujours l'élève et les créances soldées.
+///
+/// Seul le FORMAT du numéro reste gardé, et seulement s'il est entamé
+/// (`phoneErrorText`).
 ///
 /// **Tous les champs sont ceux du socle** (`EteeloTextInput` /
 /// `EteeloPhoneInput`), libellé au-dessus du champ. Ils portaient jusqu'ici la
@@ -65,7 +72,6 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
       label: l10n.facturationCreatePaymentPayerLastNameLabel,
       placeholder: l10n.facturationCreatePaymentPayerLastNameHint,
       readOnly: readOnly,
-      required: true,
       textInputAction: TextInputAction.next,
     );
     final middleName = EteeloTextInput(
@@ -80,7 +86,6 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
       label: l10n.facturationCreatePaymentPayerFirstNameLabel,
       placeholder: l10n.facturationCreatePaymentPayerFirstNameHint,
       readOnly: readOnly,
-      required: true,
       textInputAction: TextInputAction.next,
     );
 
@@ -137,10 +142,17 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
         EteeloPhoneInput(
           controller: phoneController,
           label: l10n.facturationCreatePaymentPayerPhoneLabel,
-          required: true,
           readOnly: readOnly,
           errorText: phoneErrorText,
           dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
+        ),
+        const SizedBox(height: AppDimensions.spacingS),
+        // Dire que c'est facultatif VAUT l'espace : sans mention, un guichetier
+        // qui a toujours dû remplir ces champs continuera de les remplir, et
+        // l'assouplissement n'aura rien changé à la file d'attente.
+        Text(
+          l10n.facturationCreatePaymentPayerOptionalNotice,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
         ),
       ],
     );

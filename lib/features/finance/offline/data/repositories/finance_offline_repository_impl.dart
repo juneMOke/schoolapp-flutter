@@ -1,9 +1,14 @@
+import 'package:dio/dio.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/currency_code.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
@@ -36,6 +41,14 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
 
   final int Function() _now;
 
+  /// Publie le taux chez le serveur. `null` = ce build ne le fait pas — la pose
+  /// reste alors locale, et le pull l'effacera : c'est le régime des tests, pas
+  /// celui de l'application.
+  final ExchangeRateRemoteDataSource? _rates;
+
+  /// Les extras d'authentification exigés par l'intercepteur.
+  final Map<String, dynamic>? _requiredAuth;
+
   FinanceOfflineRepositoryImpl({
     required FinanceLocalDao dao,
     required IdGenerator idGenerator,
@@ -44,13 +57,17 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     OutboxAuthorDirectory? authorDirectory,
     DeviceIdentityService? deviceIdentity,
     int Function()? now,
+    ExchangeRateRemoteDataSource? rates,
+    Map<String, dynamic>? requiredAuth,
   }) : _dao = dao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
        _currentUser = currentUser,
        _authorDirectory = authorDirectory,
        _deviceIdentity = deviceIdentity,
-       _now = now ?? systemClock;
+       _now = now ?? systemClock,
+       _rates = rates,
+       _requiredAuth = requiredAuth;
 
   @override
   Future<Either<Failure, String>> recordPayment(
@@ -106,6 +123,28 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         return const Left(ValidationFailure('Aucun montant à encaisser.'));
       }
 
+      // SECONDE garde, et elle porte sur autre chose que la première.
+      //
+      // Celle du dessus compare de l'imputé à de l'imputé — `amounts` est en
+      // devise de créance — et reste juste quoi qu'il arrive. Celle-ci confronte
+      // ce qui est entré dans le TIROIR à ce qui a été imputé, via le taux :
+      // sans elle, encaisser 100 000 FC pour une créance de 50 $ quand le taux
+      // du jour en vaut 145 000 laisse la créance éteinte, la caisse cohérente,
+      // et 45 000 FC partis — invisible à tout contrôle existant.
+      //
+      // `null` = le parent a réglé dans la devise de la créance : l'identité,
+      // c'est-à-dire le cas courant, qui ne coûte aucune arithmétique.
+      final tenderDrafts =
+          draft.tenders ??
+          TenderComposition.identityFor(allocationsBag.entries);
+      final violation = TenderComposition.check(
+        allocations: allocationsBag.entries,
+        tenders: tenderDrafts,
+      );
+      if (violation != null) {
+        return Left(ValidationFailure(violation.message));
+      }
+
       final payment = PaymentLocalModel(
         id: paymentId,
         clientUuid: paymentId,
@@ -140,6 +179,19 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
           )
           .toList();
 
+      final tenders = [
+        for (final tender in tenderDrafts)
+          PaymentTenderLocalModel(
+            id: _idGenerator.newId(),
+            clientUuid: _idGenerator.newId(),
+            paymentId: paymentId,
+            amountInCents: tender.amountInCents,
+            currency: tender.currency,
+            rateMicros: tender.rateMicros,
+            pivotCurrency: tender.pivotCurrency,
+          ),
+      ];
+
       final receipt = GeneratedDocumentLocalModel(
         id: _idGenerator.newId(),
         docDomain: 'PAYMENT',
@@ -154,6 +206,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       await _dao.recordPayment(
         payment: payment,
         allocations: allocations,
+        tenders: tenders,
         receipt: receipt,
         outboxEntryId: _idGenerator.newId(),
         // Garde-fou tenant de l'outbox : sans lui la colonne reste NULL et
@@ -168,6 +221,130 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       return Right(paymentId);
     } catch (e) {
       return Left(StorageFailure('Échec de l\'encaissement local : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ExchangeRate>>> getExchangeRates() async {
+    try {
+      // Scopé depuis la session, jamais depuis un payload : un taux d'une école
+      // servi au guichet d'une autre est un défaut d'argent. Sans école
+      // résolue, le DAO rend une liste vide et la bascule reste éteinte — le
+      // guichet propose un taux, il ne l'invente pas.
+      final schoolId = _currentUser?.schoolId ?? '';
+      return Right(await _dao.exchangeRatesForSchool(schoolId));
+    } catch (_) {
+      // Une série illisible n'empêche pas d'encaisser : l'écran retombe sur le
+      // règlement dans la devise de la créance, qui n'a jamais cessé d'être
+      // offert. Une lecture ne fait pas échouer un versement.
+      return const Left(StorageFailure('Failed to read exchange rates'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, String>>> getFeeSectionTitles() async {
+    try {
+      // Scopé depuis la session, comme les taux : sur une tablette partagée, le
+      // titre d'une école servi à l'autre renommerait des frais qui ne sont pas
+      // les siens. Sans école résolue, le DAO rend une table vide et les écrans
+      // nomment par la nature localisée.
+      final schoolId = _currentUser?.schoolId ?? '';
+      return Right(await _dao.feeSectionTitlesForSchool(schoolId));
+    } catch (_) {
+      // Un cache illisible ne fait pas tomber une fiche : elle se nomme par la
+      // nature localisée, ce qu'elle faisait déjà avant que ce cache existe.
+      return const Left(StorageFailure('Failed to read fee section titles'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> saveExchangeRate({
+    required String base,
+    required String quote,
+    required int rateMicros,
+    required DateTime effectiveFrom,
+    int? divergenceBandBp,
+  }) async {
+    // Un taux nul ou négatif diviserait ou inverserait de l'argent, et une paire
+    // incomplète ne se résout jamais : on refuse ici plutôt que d'écrire une
+    // ligne que la lecture écarterait en silence — le paramétrage semblerait
+    // alors sans effet.
+    if (rateMicros <= 0) {
+      return const Left(ValidationFailure('Taux de guichet invalide.'));
+    }
+    final normalizedBase = CurrencyCode.normalize(base);
+    final normalizedQuote = CurrencyCode.normalize(quote);
+    if (normalizedBase.isEmpty || normalizedQuote.isEmpty) {
+      return const Left(ValidationFailure('Devises du taux incomplètes.'));
+    }
+    if (normalizedBase == normalizedQuote) {
+      return const Left(
+        ValidationFailure('Un taux relie deux devises différentes.'),
+      );
+    }
+    final schoolId = _currentUser?.schoolId ?? '';
+    if (schoolId.isEmpty) {
+      return const Left(
+        ValidationFailure('Aucune école résolue pour ce paramétrage.'),
+      );
+    }
+
+    try {
+      // Le serveur d'abord : c'est lui qui publie le taux, et le pull le
+      // redescendra à tous les postes. Écrire d'abord en local donnerait un
+      // guichet qui applique un taux que la direction croit posé — et que le
+      // premier cycle de synchro effacerait.
+      final publisher = _rates;
+      if (publisher != null) {
+        await publisher.publish(
+          _requiredAuth ?? const {},
+          base: normalizedBase,
+          quote: normalizedQuote,
+          rateMicros: rateMicros,
+          divergenceBandBp: divergenceBandBp,
+        );
+      }
+      await _dao.upsertExchangeRate(
+        ExchangeRateLocalModel(
+          schoolId: schoolId,
+          base: normalizedBase,
+          quote: normalizedQuote,
+          effectiveFrom: effectiveFrom.toUtc().toIso8601String(),
+          rateMicros: rateMicros,
+          divergenceBandBp: divergenceBandBp,
+          setBy: _currentUser?.uid,
+          syncedAt: _now(),
+        ),
+      );
+      return const Right(unit);
+    } on DioException catch (e) {
+      // Le serveur a refusé, ou la liaison a lâché. **Rien n'est écrit en
+      // local** : un taux qui s'afficherait posé sans exister chez le serveur
+      // disparaîtrait au premier pull, et la direction croirait avoir paramétré
+      // ce que le guichet n'a jamais eu.
+      final code = e.response?.statusCode;
+      if (code == 403) {
+        return const Left(
+          ValidationFailure(
+            'Ce compte ne peut pas poser de taux : demandez à la direction.',
+          ),
+        );
+      }
+      if (code == 422) {
+        return const Left(
+          ValidationFailure(
+            'Taux refusé : un taux ne se pose pas dans le passé, et une devise '
+            'vers elle-même n\'est pas un taux.',
+          ),
+        );
+      }
+      return const Left(
+        NetworkFailure(
+          'Taux non enregistré — la connexion est nécessaire pour le publier.',
+        ),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Échec de l\'écriture du taux : $e'));
     }
   }
 

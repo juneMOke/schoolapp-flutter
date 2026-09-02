@@ -1,6 +1,73 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+
+/// Une ligne de **perçu** : ce qui est entré dans le tiroir, dans son unité.
+///
+/// Complémentaire de [TicketAllocationLine], et dans l'autre devise. Une
+/// imputation éteint une créance, donc elle est en devise de créance ; un
+/// tender décrit une pile de billets, donc il est en devise reçue. [rateMicros]
+/// est le seul nombre qui relie les deux, et il est **gelé** au versement.
+class TicketTenderLine extends Equatable {
+  /// Le net conservé, jamais le montant présenté.
+  final int amountInCents;
+
+  /// La devise reçue.
+  final String currency;
+
+  /// Le taux appliqué, en micro-unités. `1 000 000` = perçu et imputé dans la
+  /// même unité, ce qui est le cas courant et tout l'historique.
+  final int rateMicros;
+
+  /// La devise de la créance contre laquelle ce taux s'applique.
+  final String pivotCurrency;
+
+  const TicketTenderLine({
+    required this.amountInCents,
+    required this.currency,
+    this.rateMicros = ExchangeRate.scale,
+    required this.pivotCurrency,
+  });
+
+  /// Les lignes de perçu d'un versement réglé **dans la devise de la créance** :
+  /// une par devise, taux 1.
+  ///
+  /// C'est le cas courant, et tout l'historique d'avant la V2 — la forme que le
+  /// backfill de la v41 écrit en base. Elle ne coûte aucune arithmétique et
+  /// n'imprime aucun taux.
+  static List<TicketTenderLine> identityFrom(MoneyBag bag) => [
+    for (final amount in bag.entries)
+      TicketTenderLine(
+        amountInCents: amount.amountInCents,
+        currency: amount.currency,
+        pivotCurrency: amount.currency,
+      ),
+  ];
+
+  /// Vrai quand cette ligne ne fait que redire l'imputation — le ticket
+  /// n'imprime alors **aucun taux** : un « 1,00 » sur un papier de guichet ferait
+  /// chercher au parent ce qui a été converti.
+  bool get isIdentity =>
+      rateMicros == ExchangeRate.scale && currency == pivotCurrency;
+
+  ExchangeRate get rate => ExchangeRate.parse(
+    base: pivotCurrency,
+    quote: currency,
+    rateMicros: rateMicros,
+    effectiveFrom: DateTime.utc(1970),
+  );
+
+  Money get amount => Money.parse(amountInCents, currency);
+
+  @override
+  List<Object?> get props => [
+    amountInCents,
+    currency,
+    rateMicros,
+    pivotCurrency,
+  ];
+}
 
 /// Une ligne de répartition du versement (zone Z5).
 class TicketAllocationLine extends Equatable {
@@ -42,6 +109,18 @@ class TicketLabels extends Equatable {
   final String matriculationLabel;
   final String classroomLabel;
   final String amountReceivedLabel;
+
+  /// « Taux » — imprimé **seulement** quand perçu et imputé ne sont pas dans la
+  /// même unité. C'est le chiffre que le parent conteste au guichet ; le laisser
+  /// déduire par division ferait apparaître un taux dérivé de l'arrondi
+  /// (2 847,3 là où le caissier a annoncé 2 850), ce qui fait amateur.
+  final String rateLabel;
+
+  /// « soit » — coiffe la valeur d'un poste **en devise reçue**, sous son
+  /// montant imputé. Sans ce mot, une seconde ligne de chiffres sous la première
+  /// se lirait comme un second montant dû.
+  final String derivedAmountPrefix;
+
   final String allocationsLabel;
 
   /// Part du montant reçu qu'aucune créance n'absorbe — imprimée comme dernière
@@ -69,6 +148,8 @@ class TicketLabels extends Equatable {
     required this.matriculationLabel,
     required this.classroomLabel,
     required this.amountReceivedLabel,
+    required this.rateLabel,
+    required this.derivedAmountPrefix,
     required this.allocationsLabel,
     required this.advanceLabel,
     required this.balanceLabel,
@@ -86,6 +167,8 @@ class TicketLabels extends Equatable {
     matriculationLabel,
     classroomLabel,
     amountReceivedLabel,
+    rateLabel,
+    derivedAmountPrefix,
     allocationsLabel,
     advanceLabel,
     balanceLabel,
@@ -137,11 +220,20 @@ class TicketReceiptModel extends Equatable {
   final String? cashierFullName;
 
   // ── Z5 : l'argent ───────────────────────────────────────────────────────────
-  /// Ce que le guichet a reçu, **par devise**.
+  /// Ce qui est entré dans le tiroir, ligne par ligne.
   ///
-  /// Un passage au guichet peut solder une créance en dollars et une en francs :
-  /// c'est un acte, donc un versement et un reçu — mais pas un montant unique.
-  final MoneyBag amountReceived;
+  /// ⚠️ **C'est la source du « montant reçu », et elle a changé.** Le champ
+  /// s'appelait déjà « reçu » mais portait de l'IMPUTÉ — il était alimenté par
+  /// `payment.amounts`, qui est en devise de créance. Tant que perçu et imputé
+  /// se confondaient, personne ne pouvait le voir ; le jour où un franc règle un
+  /// dollar, le ticket annonce « Montant reçu : 30,00 $ » à un parent qui vient
+  /// de poser 50 000 FC. Contrairement au reçu scellé, dont l'assertion serveur
+  /// refuse de rendre le document, celui-ci **s'imprime, faux**.
+  ///
+  /// [amountReceived] en dérive désormais, et n'est plus posable à la main :
+  /// c'est ce qui rend l'erreur impossible plutôt que déconseillée.
+  final List<TicketTenderLine> tenders;
+
   final List<TicketAllocationLine> allocations;
 
   /// Solde restant **après** ce versement, tel que le local le compose. `null`
@@ -162,11 +254,86 @@ class TicketReceiptModel extends Equatable {
     required this.provisionalReference,
     required this.paidAt,
     this.cashierFullName,
-    required this.amountReceived,
+    required this.tenders,
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
     required this.labels,
   });
+
+  /// Ce que le guichet a reçu, **par devise reçue**.
+  ///
+  /// Un passage au guichet peut solder une créance en dollars et une en francs :
+  /// c'est un acte, donc un versement et un reçu — mais pas un montant unique.
+  MoneyBag get amountReceived => MoneyBag.sumBy(
+    tenders,
+    (tender) => Money.parse(tender.amountInCents, tender.currency),
+  );
+
+  /// Le taux à imprimer pour ce pivot, `null` quand il n'y a rien à dire.
+  ///
+  /// Rien à dire couvre deux cas : le règlement est dans la devise de la créance
+  /// (taux 1), ou **deux règlements de devises différentes visent le même
+  /// pivot** — le modèle l'autorise, la saisie ne le produit pas, et imprimer
+  /// l'un des deux ferait recompter le parent sur un chiffre qui n'explique que
+  /// la moitié de la ligne.
+  TicketTenderLine? tenderForPivot(String pivotCurrency) {
+    final pivot = pivotCurrency.trim().toUpperCase();
+    final matching = tenders
+        .where((tender) => tender.pivotCurrency == pivot && !tender.isIdentity)
+        .toList(growable: false);
+    if (matching.length != 1) return null;
+    return matching.single;
+  }
+
+  /// Ce que ce poste représente **en devise reçue**, `null` quand il n'y a rien
+  /// à convertir.
+  ///
+  /// Dérivé (`allocation × taux`), jamais stocké : un versement de 112 000 FC
+  /// qui solde 40 $ et 50 $ n'a pas comporté un paquet de billets pour l'un et
+  /// un paquet pour l'autre. Stocker la correspondance enregistrerait une
+  /// proration comme si c'était une observation.
+  ///
+  /// **La dernière ligne d'un pivot absorbe le résidu d'arrondi**, pour que la
+  /// colonne dérivée somme exactement au perçu — sans quoi un parent qui
+  /// additionne trouve un écart que rien n'explique.
+  ///
+  /// ⚠️ Cette règle d'absorption doit être **la même que celle du reçu scellé**,
+  /// que le serveur compose de son côté : les deux pièces coexistent dans les
+  /// mains du même parent. Sens de l'arrondi et ordre de tri restent à confirmer
+  /// avec le back (question 4 de `FRONT_TENDERS_PLAN.md`).
+  Money? derivedAmountOf(TicketAllocationLine allocation) {
+    final pivot = allocation.currency.trim().toUpperCase();
+    final tender = tenderForPivot(pivot);
+    if (tender == null) return null;
+
+    final ofPivot = allocations
+        .where((line) => line.currency.trim().toUpperCase() == pivot)
+        .toList(growable: false);
+    final isLast = identical(ofPivot.last, allocation);
+    if (!isLast) {
+      return Money(
+        ExchangeRates.convertCents(allocation.amountInCents, tender.rate),
+        tender.currency,
+      );
+    }
+
+    // La dernière absorbe : on lui donne ce qui reste du perçu de ce pivot,
+    // et non sa propre conversion.
+    final received = tenders
+        .where(
+          (line) =>
+              line.pivotCurrency == pivot && line.currency == tender.currency,
+        )
+        .fold<int>(0, (sum, line) => sum + line.amountInCents);
+    final others = ofPivot
+        .take(ofPivot.length - 1)
+        .fold<int>(
+          0,
+          (sum, line) =>
+              sum + ExchangeRates.convertCents(line.amountInCents, tender.rate),
+        );
+    return Money(received - others, tender.currency);
+  }
 
   /// Somme des lignes de répartition. Dérivée, jamais stockée.
   ///
@@ -179,7 +346,12 @@ class TicketReceiptModel extends Equatable {
     (line) => Money.parse(line.amountInCents, line.currency),
   );
 
-  /// La part du reçu qu'aucune créance n'absorbe, **devise par devise**.
+  /// La part du reçu qu'aucune créance n'absorbe, **en devise reçue**.
+  ///
+  /// L'unité compte : l'avance est ce qui reste dans le tiroir, donc elle se dit
+  /// dans la monnaie que le parent a posée. L'imputé est converti au taux du
+  /// versement avant d'être retranché — soustraire des dollars imputés à des
+  /// francs reçus donnerait un nombre qui n'est l'argent de personne.
   ///
   /// La soustraction se fait ici et pas dans `MoneyBag` : soustraire deux sacs
   /// en général pose une question sans bonne réponse — que faire d'une devise
@@ -189,11 +361,14 @@ class TicketReceiptModel extends Equatable {
   MoneyBag get advance {
     final imputed = allocated;
     return MoneyBag.of([
-      for (final received in amountReceived.entries)
+      for (final tender in tenders)
         Money(
-          received.amountInCents -
-              (imputed.amountIn(received.currency)?.amountInCents ?? 0),
-          received.currency,
+          tender.amountInCents -
+              ExchangeRates.convertCents(
+                imputed.amountIn(tender.pivotCurrency)?.amountInCents ?? 0,
+                tender.rate,
+              ),
+          tender.currency,
         ),
     ]).withoutZeros;
   }
@@ -208,7 +383,7 @@ class TicketReceiptModel extends Equatable {
     provisionalReference,
     paidAt,
     cashierFullName,
-    amountReceived,
+    tenders,
     allocations,
     remainingBalance,
     labels,

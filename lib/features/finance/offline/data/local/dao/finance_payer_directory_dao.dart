@@ -69,8 +69,15 @@ class FinancePayerDirectoryDao {
   static const searchScanCap = 5000;
 
   /// Un versement sans identité exploitable n'est proposable à personne.
+  ///
+  /// Depuis la v43, ces colonnes sont NULLABLES : un versement peut avoir été
+  /// encaissé sans nommer le payeur, et il n'a alors rien à offrir à un
+  /// formulaire que ce répertoire existe pour remplir. Le `COALESCE` le dit —
+  /// `TRIM(NULL) <> ''` l'excluait déjà, mais par accident de SQL plutôt que par
+  /// intention lisible.
   static const _namedPayer =
-      "TRIM(payer_last_name) <> '' AND TRIM(payer_first_name) <> ''";
+      "TRIM(COALESCE(payer_last_name, '')) <> '' "
+      "AND TRIM(COALESCE(payer_first_name, '')) <> ''";
 
   /// Payeurs à proposer d'emblée pour [studentId] : ceux qui ont déjà payé
   /// pour cet élève, puis ses tuteurs déclarés.

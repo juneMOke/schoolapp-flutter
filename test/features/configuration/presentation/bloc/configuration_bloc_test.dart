@@ -89,7 +89,10 @@ void main() {
       () => repository.loadCatalog(forceRefresh: any(named: 'forceRefresh')),
     ).thenAnswer((_) async => const Right(_catalog));
     when(
-      () => repository.loadFeeCodes(forceRefresh: any(named: 'forceRefresh')),
+      () => repository.loadFeeCodes(
+        forceRefresh: any(named: 'forceRefresh'),
+        includeHidden: any(named: 'includeHidden'),
+      ),
     ).thenAnswer((_) async => const Right(<FeeCodeOption>[]));
     when(
       () => repository.simulate(any()),
@@ -130,8 +133,10 @@ void main() {
       'un catalogue de frais indisponible ne ferme pas l\'assistant',
       build: () {
         when(
-          () =>
-              repository.loadFeeCodes(forceRefresh: any(named: 'forceRefresh')),
+          () => repository.loadFeeCodes(
+            forceRefresh: any(named: 'forceRefresh'),
+            includeHidden: any(named: 'includeHidden'),
+          ),
         ).thenAnswer((_) async => const Left(NetworkFailure('coupure')));
         return build();
       },

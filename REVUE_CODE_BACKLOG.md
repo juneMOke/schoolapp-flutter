@@ -987,3 +987,27 @@ A RenderFlex overflowed by 62 pixels on the bottom.
 
 The relevant error-causing widget was:
 Column Column:file:///home/junethink/my_project/school_app_flutter/lib/core/components/skeletons/eteelo_list_skeleton.dart:73:18
+
+
+* `_rebuildTableInPlace` (app_database.dart) n'est prouvé que par ses APPELANTS.
+
+  Le helper reconstruit une table pour relâcher une contrainte que SQLite ne
+  sait pas retirer (rename / copy / drop), puis repose les index depuis le
+  schéma. Il le fait correctement — mais rien dans le helper lui-même ne le
+  vérifie, et il est privé, donc intestable en direct.
+
+  Couvert aujourd'hui : **v43** (`payments`, `boutique_sales`) et **v45**
+  (`parents`), chacun par un test d'index dans son propre fichier de migration.
+  **Non couverts : v33 et v34**, qui l'utilisent aussi.
+
+  Ce que ça coûte si un futur palier l'appelle sans écrire son test : une table
+  reconstruite sans ses index. Elle marche — elle rame. Sur `parents`, c'est le
+  rapprochement de tuteur et la recherche par téléphone qui se dégradent,
+  c'est-à-dire le chemin du guichet, et aucune assertion fonctionnelle n'en dit
+  quoi que ce soit. Le symptôme n'apparaît qu'en volume, des mois plus tard, sur
+  la tablette d'une école qui a beaucoup d'élèves.
+
+  Deux issues : rendre le helper public le temps d'un test qui lui est propre,
+  ou poser l'assertion d'index dans le patron de test de migration pour qu'un
+  nouveau palier l'hérite. La seconde évite d'élargir la surface publique pour
+  un test.

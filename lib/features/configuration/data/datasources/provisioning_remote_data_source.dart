@@ -27,9 +27,24 @@ abstract class ProvisioningRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
   );
 
-  /// Types de frais proposables. Le client n'en filtre aucun.
+  /// Les sections de frais de l'école : titre, ordre et visibilité (V115). Le
+  /// client n'en filtre aucune — c'est le serveur qui retire les masquées.
+  ///
+  /// [includeHidden] est réservé à l'écran de nommage, qui doit montrer ce qui
+  /// est masqué : sans lui, rétablir une section serait impossible.
   @GET(AppConstants.feeCodesEndpoint)
-  Future<List<FeeCodeModel>> getFeeCodes(@Extras() Map<String, dynamic> extras);
+  Future<List<FeeCodeModel>> getFeeCodes(
+    @Extras() Map<String, dynamic> extras,
+    @Query('includeHidden') bool includeHidden,
+  );
+
+  /// Nomme, classe et masque un lot de sections ; rend le catalogue complet
+  /// après coup, masquées comprises.
+  @POST(AppConstants.feeCodesEndpoint)
+  Future<List<FeeCodeModel>> saveFeeCodeSections(
+    @Extras() Map<String, dynamic> extras,
+    @Body() FeeCodeSectionsPayloadModel body,
+  );
 
   /// Identité de l'établissement, relue avant l'étape 1 — le formulaire est
   /// pré-rempli, jamais vide : l'école existe déjà.

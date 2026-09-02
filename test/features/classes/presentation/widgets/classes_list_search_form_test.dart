@@ -205,15 +205,37 @@ void main() {
     );
   });
 
-  testWidgets('identité : les trois noms sont requis pour armer', (
-    tester,
-  ) async {
-    await _pump(tester, onSearch: (_) {});
+  testWidgets('identité : un seul nom suffit à armer', (tester) async {
+    ClassesListSearchRequest? captured;
+    await _pump(tester, onSearch: (request) => captured = request);
     await _switchToIdentity(tester);
+
+    expect(
+      _searchButton(tester).onPressed,
+      isNull,
+      reason: 'aucun nom saisi : rien à chercher',
+    );
 
     await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
     await tester.pumpAndSettle();
-    expect(_searchButton(tester).onPressed, isNull);
+    expect(
+      _searchButton(tester).onPressed,
+      isNotNull,
+      reason:
+          'les noms se combinent en OU : en exiger trois pour armer '
+          'rendrait ce OU inatteignable',
+    );
+
+    await _search(tester);
+
+    // La page porte une SECONDE garde (`_handleSearch`) : si elle n'accordait
+    // pas ses exigences à celles du bouton, la recherche partirait du
+    // formulaire pour être jetée en silence — clic sans effet.
+    expect(
+      captured!.hasAnyCriteria,
+      isTrue,
+      reason: 'ce que le bouton arme, la page doit l\'accepter',
+    );
 
     await _enterNames(tester);
     expect(_searchButton(tester).onPressed, isNotNull);

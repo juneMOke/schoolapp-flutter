@@ -14,8 +14,12 @@ class Payment extends Equatable {
   /// francs n'a pas de montant unique — et les additionner donnerait un chiffre
   /// que personne ne peut vérifier.
   final MoneyBag amounts;
-  final String payerFirstName;
-  final String payerLastName;
+
+  /// Les trois `null` sur un encaissement ANONYME (V114 serveur) : l'argent a
+  /// été pris sans nommer qui le donnait, et c'est un cas nominal. `null`,
+  /// jamais `''`.
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro E.164 du payeur (v28). Nul est un état NORMAL : la saisie l'exige
@@ -48,8 +52,8 @@ class Payment extends Equatable {
     required this.studentId,
     required this.academicYearId,
     this.amounts = MoneyBag.empty,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     required this.paidAt,

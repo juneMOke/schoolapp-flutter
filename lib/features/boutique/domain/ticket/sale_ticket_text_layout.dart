@@ -75,19 +75,35 @@ abstract final class SaleTicketTextLayout {
     lines.add(TicketTextPrimitives.rule(width));
 
     // ── Le payeur : c'est LUI le sujet de la pièce, pas un élève.
-    lines.addAll(
-      TicketTextPrimitives.wrapped(
-        '${model.labels.payerLabel} ${model.payerFullName.toUpperCase()}',
+    //
+    // **Le bloc ENTIER disparaît sur une vente anonyme** — ni cadre vide, ni
+    // tiret. Sur une pièce, une mention laissée vide se lit comme une mention
+    // EFFACÉE, et invite à chercher ce qu'on aurait retiré ; mieux vaut n'avoir
+    // rien à lire que quelque chose à interpréter. Le reçu reste complet par
+    // ailleurs : articles, total et référence prouvent l'achat, qui est
+    // précisément ce que le porteur du papier vient prouver.
+    //
+    // Un téléphone seul GARDE le bloc : il a été tapé, donc il désigne
+    // quelqu'un. Même règle que le reçu scellé du serveur, et il le faut — deux
+    // pièces du même acte qui divergent se paient au rapprochement de caisse.
+    if (model.hasPayer) {
+      final payerName = model.payerFullName?.trim() ?? '';
+      if (payerName.isNotEmpty) {
+        lines.addAll(
+          TicketTextPrimitives.wrapped(
+            '${model.labels.payerLabel} ${payerName.toUpperCase()}',
+            width,
+          ),
+        );
+      }
+      TicketTextPrimitives.addOptional(
+        lines,
+        model.labels.phoneLabel,
+        model.payerPhoneNumber,
         width,
-      ),
-    );
-    TicketTextPrimitives.addOptional(
-      lines,
-      model.labels.phoneLabel,
-      model.payerPhoneNumber,
-      width,
-    );
-    lines.add(TicketTextPrimitives.rule(width));
+      );
+      lines.add(TicketTextPrimitives.rule(width));
+    }
 
     // ── Le panier.
     for (final line in model.lines) {

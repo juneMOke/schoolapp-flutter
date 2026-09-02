@@ -49,7 +49,10 @@ class SaleTicketComposer {
       isProvisional: sale.receiptNumber == null,
       soldAt: DateTime.tryParse(sale.soldAt)?.toLocal() ?? DateTime.now(),
       cashierFullName: sale.collectedByName,
-      payerFullName: sale.payerName ?? sale.payerLastName,
+      // `null` — jamais `''` — quand la vente est anonyme : c'est ce que le
+      // gabarit lit pour escamoter le bloc payeur entier. Le nom composé du
+      // serveur en priorité, le nom de famille saisi à défaut.
+      payerFullName: _trimmedOrNull(sale.payerName ?? sale.payerLastName),
       payerPhoneNumber: sale.payerPhoneNumber,
       lines: [
         for (final line in recorded.lines)
@@ -97,5 +100,14 @@ class SaleTicketComposer {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Rend `null` plutôt qu'une chaîne vide ou blanche.
+  ///
+  /// Les deux existent en base : `''` posé par le repli du pull d'avant la v43,
+  /// et des espaces laissés par une saisie. Ni l'un ni l'autre n'est un nom.
+  static String? _trimmedOrNull(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
   }
 }

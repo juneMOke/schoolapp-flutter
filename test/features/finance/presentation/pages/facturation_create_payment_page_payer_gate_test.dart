@@ -43,12 +43,20 @@ class _FakePayerRepo implements FinanceOfflineRepository {
       throw UnimplementedError('hors périmètre de cette page');
 }
 
-/// Le téléphone du payeur est OBLIGATOIRE à l'encaissement.
+/// Le payeur est FACULTATIF à l'encaissement — son numéro reste gardé sur le
+/// FORMAT.
 ///
-/// Ce n'est pas un confort d'affichage : le numéro est recopié sur le versement
-/// et n'est plus corrigeable après coup. Un numéro tronqué partirait en base et
-/// vers le serveur en E.164 invalide, sans aucun moyen de rappeler le payeur —
-/// d'où une garde sur le CTA, et non un simple avertissement.
+/// Depuis la V114 serveur, ni les noms ni le téléphone ne conditionnent le
+/// versement : l'exigence se payait comptant au guichet, où la file attend
+/// pendant qu'on demande son état civil à qui tend les billets, et où le
+/// guichetier finissait par taper « X ». Un payeur ABSENT vaut mieux qu'un
+/// payeur INVENTÉ.
+///
+/// Ce qui reste gardé, et par une garde sur le CTA plutôt qu'un avertissement :
+/// le numéro ENTAMÉ mais incomplet. Il est recopié sur le versement et n'est
+/// plus corrigeable après coup ; tronqué, il partirait en base et vers le
+/// serveur en E.164 invalide, sans aucun moyen de rappeler le payeur. Une
+/// absence est une décision, un numéro à moitié tapé est une faute de frappe.
 void main() {
   late _MockFinanceOfflineBloc offline;
 
@@ -177,13 +185,25 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('identité et montant ne suffisent pas : sans numéro, on '
-      'n\'encaisse pas', (tester) async {
+  testWidgets('identité sans numéro : on encaisse quand même', (tester) async {
     await ouvrir(tester);
     await remplirIdentite(tester);
     await cocherLePremierFrais(tester);
 
-    expect(collectEnabled(tester), isFalse);
+    expect(collectEnabled(tester), isTrue);
+  });
+
+  /// Le cas que la V114 a ouvert, et le seul qui compte vraiment au comptoir :
+  /// quelqu'un tend l'argent, on ne lui demande rien, et l'encaissement part.
+  /// Les imputations nomment toujours l'élève et les créances soldées — c'est
+  /// là qu'est l'imputabilité, pas dans le nom de qui a tendu les billets.
+  testWidgets('AUCUN champ de payeur : l\'encaissement part quand même', (
+    tester,
+  ) async {
+    await ouvrir(tester);
+    await cocherLePremierFrais(tester);
+
+    expect(collectEnabled(tester), isTrue);
   });
 
   testWidgets('un numéro COMPLET débloque l\'encaissement', (tester) async {

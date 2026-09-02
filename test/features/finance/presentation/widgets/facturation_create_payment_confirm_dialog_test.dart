@@ -77,7 +77,10 @@ void main() {
     await states.close();
   });
 
-  Future<FacturationCollectOutcome?> open(WidgetTester tester) async {
+  Future<FacturationCollectOutcome?> open(
+    WidgetTester tester, {
+    List<FacturationConfirmAllocationGroup>? allocations,
+  }) async {
     FacturationCollectOutcome? outcome;
     await tester.pumpWidget(
       // Le cubit de synchro est fourni AU-DESSUS de MaterialApp (comme à la
@@ -101,12 +104,16 @@ void main() {
                     payerName: 'Mukendi Paul',
                     payerPhone: '+243816939060',
                     request: _request,
-                    allocations: const [
-                      FacturationConfirmAllocationItem(
-                        label: 'Frais de scolarité',
-                        amount: '7 000 CDF',
-                      ),
-                    ],
+                    allocations:
+                        allocations ??
+                        const [
+                          // Une nature d'une seule tranche : pas d'enfant, la
+                          // ligne EST la tranche (GE-5).
+                          FacturationConfirmAllocationGroup(
+                            label: 'Frais de scolarité',
+                            amount: '7 000 CDF',
+                          ),
+                        ],
                   );
                 },
                 child: const Text('open'),
@@ -133,6 +140,61 @@ void main() {
     expect(find.text('Frais de scolarité'), findsOneWidget);
     expect(find.text('Modifier'), findsOneWidget);
     expect(find.text('Confirmer'), findsOneWidget);
+  });
+
+  testWidgets('GE-5 : les tranches sont listées SOUS le nom de leur nature', (
+    tester,
+  ) async {
+    // Le caissier valide une répartition. Ne montrer que « Minerval
+    // 120 000 » lui ferait signer une ventilation qu'il n'a pas vue — et
+    // c'est elle, pas le total, qui figurera sur la note de perception.
+    await open(
+      tester,
+      allocations: const [
+        FacturationConfirmAllocationGroup(
+          label: 'Minerval · 3 tranches',
+          amount: '120 000 FC',
+          items: [
+            FacturationConfirmAllocationItem(
+              label: 'Minerval — 1/3 (T1)',
+              amount: '50 000 FC',
+            ),
+            FacturationConfirmAllocationItem(
+              label: 'Minerval — 2/3 (T2)',
+              amount: '50 000 FC',
+            ),
+            FacturationConfirmAllocationItem(
+              label: 'Minerval — 3/3 (T3)',
+              amount: '20 000 FC',
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(find.text('Minerval · 3 tranches'), findsOneWidget);
+    expect(find.text('120 000 FC'), findsWidgets);
+    expect(find.text('Minerval — 1/3 (T1)'), findsOneWidget);
+    expect(find.text('Minerval — 2/3 (T2)'), findsOneWidget);
+    expect(find.text('Minerval — 3/3 (T3)'), findsOneWidget);
+    expect(find.text('20 000 FC'), findsOneWidget);
+  });
+
+  testWidgets('une nature d\'une seule tranche ne se redouble pas', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      allocations: const [
+        FacturationConfirmAllocationGroup(
+          label: 'Frais d\'examen (OM2)',
+          amount: '30 000 FC',
+        ),
+      ],
+    );
+
+    expect(find.text('Frais d\'examen (OM2)'), findsOneWidget);
+    expect(find.text('30 000 FC'), findsWidgets);
   });
 
   testWidgets('« Modifier » ferme la modale', (tester) async {

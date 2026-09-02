@@ -123,9 +123,13 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
         _selectedLevelKey,
       );
 
-  bool _hasAllNames() =>
-      _firstNameController.text.trim().isNotEmpty &&
-      _lastNameController.text.trim().isNotEmpty &&
+  /// Un seul nom suffit à armer la recherche : les trois se combinent en OU
+  /// côté filtrage, exiger les trois ici rendrait ce OU inatteignable — on ne
+  /// peut pas chercher quelqu'un dont on ne connaît qu'un nom si le bouton
+  /// reste éteint tant que les deux autres sont vides.
+  bool _hasAnyName() =>
+      _firstNameController.text.trim().isNotEmpty ||
+      _lastNameController.text.trim().isNotEmpty ||
       _surnameController.text.trim().isNotEmpty;
 
   /// Seul le mode actif arme la recherche : des noms saisis puis abandonnés au
@@ -134,7 +138,7 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       !widget.isSearching &&
       switch (_mode) {
         SearchMode.level => _selectedLevel != null,
-        SearchMode.identity => _hasAllNames(),
+        SearchMode.identity => _hasAnyName(),
       };
 
   void _submit() {

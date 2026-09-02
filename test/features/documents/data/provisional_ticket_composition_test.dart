@@ -28,6 +28,8 @@ const _labels = TicketLabels(
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
+  rateLabel: 'Taux',
+  derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
   balanceLabel: 'Solde',
@@ -119,6 +121,19 @@ void main() {
       'student_charge_label': 'Frais scolaires',
       'amount_in_cents': 150000,
       'currency': currency,
+    });
+    // Ce qui est ENTRÉ DANS LE TIROIR, écrit par le chemin d'encaissement à
+    // côté de l'imputation — et garanti sur tout l'historique par le backfill
+    // de la v41. Le montant reçu du ticket en vient : le dériver des
+    // imputations était le défaut que ce lot corrige.
+    await db.insert('payment_tenders', {
+      'id': 't-1',
+      'client_uuid': 't-1',
+      'payment_id': 'p-1',
+      'amount_in_cents': 150000,
+      'currency': currency,
+      'rate_micros': 1000000,
+      'pivot_currency': currency,
     });
     await db.insert('generated_documents', {
       'id': 'doc-1',

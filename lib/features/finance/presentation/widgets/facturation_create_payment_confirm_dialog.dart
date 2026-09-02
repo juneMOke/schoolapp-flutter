@@ -28,9 +28,46 @@ class FacturationConfirmAllocationItem {
   final String label;
   final String amount;
 
+  /// Ce que cette ligne vaut **en devise reçue**, déjà rendu. `null` quand le
+  /// parent règle dans la devise de la créance.
+  ///
+  /// Le même nombre que sur l'écran de saisie et sur le ticket : trois
+  /// surfaces, un seul chiffre, sinon le parent recompte.
+  final String? derivedAmount;
+
   const FacturationConfirmAllocationItem({
     required this.label,
     required this.amount,
+    this.derivedAmount,
+  });
+}
+
+/// Une **nature** dans le récapitulatif, et les tranches qu'elle règle (GE-5).
+///
+/// Le caissier valide une répartition : il doit voir ce qui sera réellement
+/// écrit, imputation par imputation. Ne montrer que « Minerval 120 000 » ferait
+/// signer une ventilation qu'il n'a pas vue — et c'est elle, pas le total, qui
+/// figurera sur la note de perception.
+///
+/// [items] est **vide quand la nature ne règle qu'une tranche** : la ligne est
+/// alors déjà la tranche, et la redoubler d'un enfant identique n'apprendrait
+/// rien. C'est la même règle que partout ailleurs dans ce chantier.
+class FacturationConfirmAllocationGroup {
+  final String label;
+  final String amount;
+
+  /// Ce que la nature vaut **en devise reçue**, déjà rendu. `null` quand le
+  /// parent règle dans la devise des créances.
+  final String? derivedAmount;
+
+  /// Les tranches réglées, dans l'ordre de la ventilation.
+  final List<FacturationConfirmAllocationItem> items;
+
+  const FacturationConfirmAllocationGroup({
+    required this.label,
+    required this.amount,
+    this.derivedAmount,
+    this.items = const [],
   });
 }
 
@@ -45,10 +82,11 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   BuildContext context, {
   required FinanceOfflineBloc financeOfflineBloc,
   required String totalLabel,
+  String? rateLabel,
   required String studentName,
-  required String payerName,
+  String? payerName,
   required String payerPhone,
-  required List<FacturationConfirmAllocationItem> allocations,
+  required List<FacturationConfirmAllocationGroup> allocations,
   required PaymentsCreateRequested request,
   VoidCallback? onDownloadReceipt,
 }) async {
@@ -62,6 +100,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
       value: financeOfflineBloc,
       child: _CollectFlowDialog(
         totalLabel: totalLabel,
+        rateLabel: rateLabel,
         studentName: studentName,
         payerName: payerName,
         payerPhone: payerPhone,
@@ -78,17 +117,29 @@ enum _Phase { confirm, processing, success, error }
 
 class _CollectFlowDialog extends StatefulWidget {
   final String totalLabel;
+
+  /// Le taux appliqué, déjà rendu (« 1 666,67 FC / \$ »). `null` quand perçu et
+  /// imputé sont dans la même unité — un « 1,00 » ferait chercher au caissier
+  /// ce qui a été converti.
+  final String? rateLabel;
+
   final String studentName;
-  final String payerName;
+
+  /// Le payeur, **quand il y en a un**. `null` sur un encaissement anonyme : la
+  /// phrase de confirmation se referme alors sur l'élève, au lieu de nommer un
+  /// tiret comme s'il s'agissait de quelqu'un.
+  final String? payerName;
+
   final String payerPhone;
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
   final PaymentsCreateRequested request;
   final VoidCallback? onDownloadReceipt;
 
   const _CollectFlowDialog({
     required this.totalLabel,
+    this.rateLabel,
     required this.studentName,
-    required this.payerName,
+    this.payerName,
     required this.payerPhone,
     required this.allocations,
     required this.request,
@@ -225,6 +276,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                 child: _phase == _Phase.confirm
                     ? _ConfirmBody(
                         totalLabel: widget.totalLabel,
+                        rateLabel: widget.rateLabel,
                         studentName: widget.studentName,
                         payerName: widget.payerName,
                         payerPhone: widget.payerPhone,
@@ -342,15 +394,17 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
 /// Corps de l'étape 1 : récapitulatif + répartition.
 class _ConfirmBody extends StatelessWidget {
   final String totalLabel;
+  final String? rateLabel;
   final String studentName;
-  final String payerName;
+  final String? payerName;
   final String payerPhone;
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
 
   const _ConfirmBody({
     required this.totalLabel,
+    this.rateLabel,
     required this.studentName,
-    required this.payerName,
+    this.payerName,
     required this.payerPhone,
     required this.allocations,
   });
@@ -379,13 +433,28 @@ class _ConfirmBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Text(
-          l10n.facturationCreatePaymentConfirmSentence(
-            totalLabel,
-            studentName,
-            payerName,
+        if (rateLabel != null) ...[
+          const SizedBox(height: AppDimensions.spacingXS),
+          Text(
+            '${l10n.facturationSettlementRateLabel} : $rateLabel',
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
+        ],
+        const SizedBox(height: AppDimensions.spacingM),
+        // Deux phrases, pas une phrase à trou : « réglé par - » nommerait un
+        // tiret comme on nomme quelqu'un, sur le dernier écran avant d'engager
+        // l'argent. Un encaissement sans payeur nommé se dit en entier.
+        Text(
+          payerName == null
+              ? l10n.facturationCreatePaymentConfirmSentenceNoPayer(
+                  totalLabel,
+                  studentName,
+                )
+              : l10n.facturationCreatePaymentConfirmSentence(
+                  totalLabel,
+                  studentName,
+                  payerName!,
+                ),
           style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
         ),
         // Le numéro sur SA ligne, hors de la phrase : c'est le dernier écran
@@ -559,9 +628,9 @@ class _ResultChip extends StatelessWidget {
   }
 }
 
-/// Répartition encadrée : une ligne par allocation (libellé + montant).
+/// Répartition encadrée : une ligne par nature, ses tranches en retrait.
 class _DistributionList extends StatelessWidget {
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
 
   const _DistributionList({required this.allocations});
 
@@ -576,36 +645,132 @@ class _DistributionList extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < allocations.length; i++) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.spacingM,
-                vertical: AppDimensions.spacingS + 2,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      allocations[i].label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingM),
-                  Text(
-                    allocations[i].amount,
-                    style: AppTextStyles.moneyTabular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _GroupRow(group: allocations[i]),
+            // Les tranches, en retrait sous leur nature. Elles ne sont rendues
+            // que quand la nature en règle plusieurs : sinon la ligne EST la
+            // tranche.
+            for (final item in allocations[i].items)
+              _AllocationRow(item: item, indented: true),
             if (i < allocations.length - 1)
               const Divider(height: 1, color: AppColors.border),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// L'en-tête d'une nature : son nom et ce qu'elle règle en tout.
+class _GroupRow extends StatelessWidget {
+  final FacturationConfirmAllocationGroup group;
+
+  const _GroupRow({required this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hasTranches = group.items.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingM,
+        vertical: AppDimensions.spacingS + 2,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              group.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: hasTranches
+                  ? AppTextStyles.bodyStrong.copyWith(
+                      color: AppColors.textPrimary,
+                    )
+                  : AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingM),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                group.amount,
+                style: AppTextStyles.moneyTabular.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              // Ce que cette nature vaut sur le comptoir : la colonne somme au
+              // perçu annoncé en tête, et le parent qui additionne retombe
+              // dessus.
+              if (group.derivedAmount case final derived?)
+                Text(
+                  l10n.facturationSettlementDerived(derived),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.terreCuiteDark,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une tranche réglée, sous sa nature.
+class _AllocationRow extends StatelessWidget {
+  final FacturationConfirmAllocationItem item;
+  final bool indented;
+
+  const _AllocationRow({required this.item, this.indented = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: indented
+            ? AppDimensions.spacingM + AppDimensions.spacingL
+            : AppDimensions.spacingM,
+        right: AppDimensions.spacingM,
+        bottom: AppDimensions.spacingS,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingM),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item.amount,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (item.derivedAmount case final derived?)
+                Text(
+                  l10n.facturationSettlementDerived(derived),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.terreCuiteDark,
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

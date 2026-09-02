@@ -15,8 +15,11 @@ class PaymentModel extends Equatable {
   /// Ce qui a été encaissé, une entrée par devise — dérivé des imputations
   /// côté serveur. Jamais additionné entre entrées.
   final List<MoneyModel> amounts;
-  final String payerFirstName;
-  final String payerLastName;
+
+  /// `nullable` depuis la V114 serveur : un encaissement peut avoir été pris
+  /// sans nommer qui donnait l'argent.
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
   final String? payerPhoneNumber;
   final DateTime paidAt;
@@ -26,8 +29,8 @@ class PaymentModel extends Equatable {
     required this.studentId,
     required this.academicYearId,
     this.amounts = const [],
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     required this.paidAt,

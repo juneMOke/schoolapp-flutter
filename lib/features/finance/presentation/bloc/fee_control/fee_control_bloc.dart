@@ -177,6 +177,8 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         schoolLevelId: request.schoolLevelId,
         classroomId: request.classroomId,
         feeCode: request.feeCode,
+        feeLabel: request.feeLabel,
+        feeTariffCode: request.feeTariffCode,
         statusFilter: request.statusFilter,
         firstName: request.firstName,
         lastName: request.lastName,

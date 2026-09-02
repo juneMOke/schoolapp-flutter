@@ -768,6 +768,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Here a tariff carries a single level: each row is edited on its own.';
 
   @override
+  String get configurationSectionsTitle => 'Fee sections';
+
+  @override
+  String get configurationSectionsSubtitle =>
+      'The name your school gives each fee nature. Every tariff of the same nature is shown under that title.';
+
+  @override
+  String get configurationSectionsSave => 'Save sections';
+
+  @override
+  String get configurationSectionsSaved => 'Sections saved';
+
+  @override
+  String get configurationSectionsHiddenHint =>
+      'Hidden: no longer offered for input, but still counted in the statistics.';
+
+  @override
+  String get configurationSectionsLabelRequired =>
+      'Every section must have a name.';
+
+  @override
+  String get configurationSectionsReorderHint =>
+      'Drag a section to move it up; this order is the tariff picker\'s.';
+
+  @override
   String get configurationTariffAdd => 'Add a tariff';
 
   @override
@@ -2226,7 +2251,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchModeIdentityHint =>
-      'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.';
+      'One name is enough: last name, middle name or first name. To list a whole class, switch to “By class”.';
 
   @override
   String get searchRefineByNameLabel => 'Refine by last name (optional)';
@@ -2873,6 +2898,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumberLabel => 'Phone';
 
   @override
+  String get guardianPhoneNumberAbsent => 'No phone number';
+
+  @override
+  String get guardianPhoneNumberOptionalNotice =>
+      'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.';
+
+  @override
   String get phoneNumberHelp => 'Guardian\'s phone number.';
 
   @override
@@ -3476,7 +3508,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationSearchHelpBanner =>
-      'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).';
+      'Search a whole class (cycle + level), or one specific student (one name is enough).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';
@@ -3552,6 +3584,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feeControlFeeLoadRetry => 'Try again';
+
+  @override
+  String feeControlFeeTrancheCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count instalments',
+      one: '$count instalment',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get feeControlPaymentStatusLabel => 'Payment status';
@@ -3811,6 +3854,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPayerLabel => 'Payer';
 
   @override
+  String get facturationPaymentPayerUnnamed => 'No payer named';
+
+  @override
   String get facturationPaymentAmountLabel => 'Total paid amount';
 
   @override
@@ -3922,18 +3968,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String facturationDetailChargesSummary(
-    num totalCount,
-    Object partialCount,
-    Object dueCount,
+    int feeCount,
+    int trancheCount,
+    int unsettledCount,
   ) {
     String _temp0 = intl.Intl.pluralLogic(
-      totalCount,
+      feeCount,
       locale: localeName,
-      other: '$totalCount charges',
-      one: '1 charge',
-      zero: '0 charge',
+      other: '$feeCount fees',
+      one: '1 fee',
+      zero: 'No fee',
     );
-    return '$_temp0 · $partialCount partial, $dueCount to settle';
+    String _temp1 = intl.Intl.pluralLogic(
+      trancheCount,
+      locale: localeName,
+      other: '$trancheCount instalments',
+      one: '1 instalment',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      unsettledCount,
+      locale: localeName,
+      other: '$unsettledCount left to settle',
+      one: '1 left to settle',
+      zero: 'all settled',
+    );
+    return '$_temp0 · $_temp1 · $_temp2';
   }
 
   @override
@@ -4157,6 +4216,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPhoneLabel => 'Payer\'s phone number';
+
+  @override
+  String get facturationCreatePaymentPayerOptionalNotice =>
+      'These details are optional: a payment can be collected without naming the payer. The receipt still carries the student and the fees settled.';
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
@@ -4470,7 +4533,74 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String boutiqueTenderCurrency(String due) {
+    return 'Customer pays $due in';
+  }
+
+  @override
+  String get boutiqueTenderReceivedLabel => 'Received at the counter';
+
+  @override
+  String boutiqueTenderShortfall(String amount) {
+    return 'Still due · $amount';
+  }
+
+  @override
+  String boutiqueTenderChangeDue(String amount) {
+    return 'Change due · $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentTenderCurrency => 'Parent pays in';
+
+  @override
+  String get facturationCreatePaymentTenderAmountLabel =>
+      'Received at the counter';
+
+  @override
+  String facturationCreatePaymentChangeDue(String amount) {
+    return 'Change due · $amount';
+  }
+
+  @override
   String get facturationCreatePaymentAmountToSettleLabel => 'Amount to settle';
+
+  @override
+  String facturationCreatePaymentGroupRemainingTranches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count instalments left',
+      one: '1 instalment left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupAmountLabel => 'Amount settled';
+
+  @override
+  String get facturationCreatePaymentGroupAmountHint =>
+      'What the parent is paying on this fee';
+
+  @override
+  String facturationCreatePaymentGroupVentilation(String detail) {
+    return 'Breakdown: $detail';
+  }
+
+  @override
+  String facturationCreatePaymentGroupVentilationItem(
+    String label,
+    String amount,
+  ) {
+    return '$label $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupExpandAction => 'Show instalments';
+
+  @override
+  String get facturationCreatePaymentGroupCollapseAction => 'Hide instalments';
 
   @override
   String get facturationCreatePaymentSettleAllAction => 'Settle all';
@@ -4492,6 +4622,92 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentTotalToCollect => 'Total to collect';
 
   @override
+  String get facturationSettlementLabel => 'The parent pays in';
+
+  @override
+  String get exchangeRateSettingsTitle => 'Counter exchange rate';
+
+  @override
+  String get exchangeRateSettingsSubtitle =>
+      'The rate offered to the cashier when a parent pays in another currency. Each save adds a step: payments already taken keep theirs.';
+
+  @override
+  String get exchangeRateSettingsFromLabel => '1 unit of';
+
+  @override
+  String get exchangeRateSettingsToLabel => 'is worth, in';
+
+  @override
+  String get exchangeRateSettingsValueLabel => 'Rate';
+
+  @override
+  String get exchangeRateSettingsSave => 'Save rate';
+
+  @override
+  String get exchangeRateSettingsSaved => 'Rate saved.';
+
+  @override
+  String get exchangeRateSettingsNone =>
+      'No rate set: at the counter, each fee is paid in its own currency.';
+
+  @override
+  String exchangeRateSettingsCurrent(String base, String value, String quote) {
+    return 'In force: 1 $base = $value $quote';
+  }
+
+  @override
+  String get facturationSettlementPerCharge => 'Each fee';
+
+  @override
+  String get facturationSettlementRateLabel => 'Today\'s rate';
+
+  @override
+  String get facturationSettlementCountedLabel => 'Amount counted';
+
+  @override
+  String facturationSettlementCountedHint(String expected) {
+    return 'Conversion: $expected';
+  }
+
+  @override
+  String facturationSettlementCountedMismatch(String expected) {
+    return 'Too far from the conversion ($expected). Adjust the amount or the rate.';
+  }
+
+  @override
+  String get facturationSettlementRateEdit => 'Change';
+
+  @override
+  String get facturationSettlementRateFieldLabel => 'Applied rate';
+
+  @override
+  String facturationSettlementRateHint(String quote, String base) {
+    return '$quote for 1 $base';
+  }
+
+  @override
+  String facturationSettlementRateDiverges(String reference) {
+    return 'This rate differs from the school\'s ($reference). The payment can still be taken; it will be flagged.';
+  }
+
+  @override
+  String get facturationSettlementNoRate =>
+      'No rate set: each fee is paid in its own currency.';
+
+  @override
+  String facturationSettlementDerived(String amount) {
+    return 'i.e. $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentToPerceive => 'To collect';
+
+  @override
+  String facturationCreatePaymentImputes(String amount) {
+    return 'settles $amount';
+  }
+
+  @override
   String facturationCreatePaymentCollectAmountAction(String amount) {
     return 'Collect $amount';
   }
@@ -4508,6 +4724,14 @@ class AppLocalizationsEn extends AppLocalizations {
     String payer,
   ) {
     return 'You are about to collect $amount for $student, paid by $payer.';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentenceNoPayer(
+    String amount,
+    String student,
+  ) {
+    return 'You are about to collect $amount for $student.';
   }
 
   @override
@@ -5974,13 +6198,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try another period to display more insights.';
 
   @override
-  String get financeStatsErrorTitle => 'Loading error';
-
-  @override
   String get financeStatsRetry => 'Retry';
-
-  @override
-  String get financeStatsRetryHint => 'Reload finance statistics';
 
   @override
   String get financeStatsLoadingA11yLabel => 'Finance statistics are loading';
@@ -6012,14 +6230,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String code,
     String collected,
     String expected,
+    String outstanding,
     int rate,
   ) {
-    return 'Type $code, collected $collected, expected $expected, rate $rate%';
-  }
-
-  @override
-  String financeStatsErrorA11yLabel(String message) {
-    return 'Finance statistics loading error: $message';
+    return 'Type $code, collected $collected, expected $expected, outstanding $outstanding, rate $rate%';
   }
 
   @override
@@ -6059,6 +6273,140 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'An unexpected error occurred while loading statistics.';
+
+  @override
+  String get financeStatsErrorNetworkTitle => 'No connection';
+
+  @override
+  String get financeStatsErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get financeStatsErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get financeStatsErrorServerTitle => 'Could not load';
+
+  @override
+  String get financeStatsErrorReconnect => 'Sign in again';
+
+  @override
+  String financeStatsErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get financeDashboardTabsA11yLabel => 'Finance dashboard tabs';
+
+  @override
+  String get financeDashboardTabRecoveryLabel => 'Recovery';
+
+  @override
+  String get financeDashboardTabRecoveryDescription =>
+      'What is still to be collected this year';
+
+  @override
+  String get financeDashboardTabTillLabel => 'Till';
+
+  @override
+  String get financeDashboardTabTillDescription => 'What went into the drawer';
+
+  @override
+  String get financeTillKpiTotal => 'Till total';
+
+  @override
+  String get financeTillKpiFees => 'School fees';
+
+  @override
+  String get financeTillKpiBoutique => 'Boutique sales';
+
+  @override
+  String get financeTillKpiBandA11yLabel => 'Till indicators, by currency';
+
+  @override
+  String financeStatsFeeTypeOutstanding(String amount) {
+    return 'Outstanding: $amount';
+  }
+
+  @override
+  String get financeStatsRateNotApplicable => 'Not applicable';
+
+  @override
+  String financeStatsRateNotApplicableForCurrency(String currency) {
+    return 'Not applicable · $currency';
+  }
+
+  @override
+  String get financeStatsFeeTypeRateNotApplicable => 'Rate: not applicable';
+
+  @override
+  String get financeStatsCurrencyNoMovement => 'No movement in this currency';
+
+  @override
+  String get financeStatsCurrencyNoMovementRecovery =>
+      'Nothing was billed or collected this school year.';
+
+  @override
+  String get financeTillPeriodDayCurrent => 'Today';
+
+  @override
+  String financeTillWindow(String start, String end) {
+    return 'From $start to $end';
+  }
+
+  @override
+  String financeTillWindowDay(String date) {
+    return 'Day of $date';
+  }
+
+  @override
+  String financeTillTimeZoneHint(String zone) {
+    return 'Day in the school\'s time zone · $zone';
+  }
+
+  @override
+  String get financeTillSectionBuckets => 'Cash-in over time';
+
+  @override
+  String get financeTillBucketsChartA11yLabel => 'Cash-in chart, by interval';
+
+  @override
+  String get financeTillImputationHeading => 'What these payments settled';
+
+  @override
+  String get financeTillImputationHint =>
+      'In charge currency: these amounts do not add up with the drawer\'s.';
+
+  @override
+  String financeTillImputationCardTitle(String currency) {
+    return 'Charges settled in $currency';
+  }
+
+  @override
+  String financeTillImputationTotal(String amount) {
+    return 'Settled total · $amount';
+  }
+
+  @override
+  String financeTillImputationSectionA11yLabel(String currency) {
+    return 'Settlement by fee type, in $currency';
+  }
+
+  @override
+  String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
+    return '$label: $amount';
+  }
+
+  @override
+  String financeTillFreshnessNotice(String relative) {
+    return 'As of the last sync · $relative';
+  }
+
+  @override
+  String get financeTillFreshnessNever => 'Never synced';
+
+  @override
+  String get financeStatsCurrencyNoMovementTill =>
+      'Nothing went into the drawer over this window.';
 
   @override
   String get enrollmentResults => 'Results';
@@ -7185,6 +7533,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAllocationsLabel => 'Breakdown';
 
   @override
+  String get ticketRateLabel => 'Rate';
+
+  @override
+  String get ticketDerivedAmountPrefix => 'i.e.';
+
+  @override
   String get ticketAdvanceLabel => 'Advance (unallocated)';
 
   @override
@@ -7359,8 +7713,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiquePayerFirstNameLabel => 'First name';
 
   @override
-  String get boutiquePayerReceiptNotice =>
-      'The receipt is in the payer\'s name; recipients are attached to each line.';
+  String get boutiquePayerOptionalNotice =>
+      'These details are optional: a sale can be collected without naming the payer. When filled in, they appear on the receipt.';
 
   @override
   String get boutiquePayerUnknownNotice =>
@@ -7371,18 +7725,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueBlockerEmptyCart => 'Cart is empty';
-
-  @override
-  String get boutiqueBlockerLastName => 'Last name';
-
-  @override
-  String get boutiqueBlockerMiddleName => 'Middle name';
-
-  @override
-  String get boutiqueBlockerFirstName => 'First name';
-
-  @override
-  String get boutiqueBlockerPhone => 'Payer\'s phone';
 
   @override
   String get boutiqueBlockerPhoneIncomplete => 'Incomplete phone';

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/components/charts/donut_chart_section.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -112,42 +113,49 @@ class GenderDonutChart extends StatelessWidget {
     },
   );
 
-  Widget _donutStack(double centerRadius, double ringThickness) => Stack(
-    alignment: Alignment.center,
-    children: [
-      PieChart(
-        PieChartData(
-          sections: [
-            for (final section in sections) _toSection(section, ringThickness),
-          ],
-          centerSpaceRadius: centerRadius,
-          sectionsSpace: 2,
-          startDegreeOffset: -90,
+  Widget _donutStack(
+    double centerRadius,
+    double ringThickness,
+  ) => ChartEntrance(
+    builder: (context, motion) => Stack(
+      alignment: Alignment.center,
+      children: [
+        PieChart(
+          PieChartData(
+            sections: _animatedSections(ringThickness, motion),
+            centerSpaceRadius: centerRadius,
+            sectionsSpace: 2,
+            startDegreeOffset: -90,
+          ),
+          duration: motion.duration,
+          curve: motion.curve,
         ),
-      ),
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$total',
-            style:
-                (centerValueStyle ??
-                        AppTextStyles.sectionTitle.copyWith(
-                          color: AppColors.textPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ))
-                    .copyWith(fontFeatures: AppTextStyles.tabularFigures),
-          ),
-          Text(
-            centerLabel,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textSecondary,
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              // Le total monte au rythme du balayage : le nombre et l'anneau
+              // disent la même chose au même instant.
+              '${(total * motion.progress).round()}',
+              style:
+                  (centerValueStyle ??
+                          AppTextStyles.sectionTitle.copyWith(
+                            color: AppColors.textPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ))
+                      .copyWith(fontFeatures: AppTextStyles.tabularFigures),
             ),
-          ),
-        ],
-      ),
-    ],
+            Text(
+              centerLabel,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 
   /// Légende large : une ou plusieurs colonnes, chacune défilable — la légende
@@ -205,13 +213,42 @@ class GenderDonutChart extends StatelessWidget {
         .toList(),
   );
 
-  PieChartSectionData _toSection(DonutChartSection s, double ringThickness) =>
+  /// Sections de l'anneau pour la frame courante, suivies d'une section
+  /// fantôme transparente qui porte la part pas encore déroulée.
+  ///
+  /// Mettre toutes les parts à l'échelle ne suffirait pas : un angle est une
+  /// proportion, l'anneau resterait plein. C'est le fantôme qui cède du terrain
+  /// aux vraies sections et fait tourner le balayage. Il garde au passage le
+  /// nombre de sections constant d'une passe à l'autre — fl_chart n'interpole
+  /// que deux listes de même longueur — et quitte le tracé une fois à valeur
+  /// nulle, fl_chart sautant les sections nulles.
+  List<PieChartSectionData> _animatedSections(
+    double ringThickness,
+    ChartMotion motion,
+  ) {
+    final sweep = sections.fold<double>(0, (sum, s) => sum + s.percent);
+    return [
+      for (final section in sections)
+        _toSection(section, ringThickness, motion.lerpValue(section.percent)),
       PieChartSectionData(
-        value: s.percent,
-        color: s.color,
+        value: sweep * (1 - motion.progress),
+        color: Colors.transparent,
         title: '',
         radius: ringThickness,
-      );
+      ),
+    ];
+  }
+
+  PieChartSectionData _toSection(
+    DonutChartSection s,
+    double ringThickness,
+    double value,
+  ) => PieChartSectionData(
+    value: value,
+    color: s.color,
+    title: '',
+    radius: ringThickness,
+  );
 
   Widget _toLegendItem(DonutChartSection s) => Tooltip(
     message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',

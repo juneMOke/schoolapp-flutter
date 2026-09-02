@@ -104,12 +104,44 @@ void main() {
       expect(result.map((s) => s.enrollmentId), ['e6']);
     });
 
-    test('critères combinés (ET)', () {
+    test('critères combinés (OU) : chaque nom élargit le résultat', () {
       final result = EnrollmentLocalListProjector.project(
         items,
         firstName: 'awa',
         lastName: 'sarr',
       );
+      // Sous l'ancien ET, seul e3 (Awa Sarr) sortait. Sous le OU, e1 sort
+      // aussi : son prénom suffit, même si son nom n'est pas « Sarr ».
+      expect(result.map((s) => s.enrollmentId), ['e1', 'e3']);
+    });
+
+    test('OU strict par champ : un nom saisi dans la mauvaise colonne ne '
+        'trouve rien', () {
+      final result = EnrollmentLocalListProjector.project(
+        items,
+        lastName: 'awa', // « Awa » est un PRÉNOM dans le vivier
+      );
+      expect(result, isEmpty);
+    });
+
+    test('un seul nom suffit — les deux autres restés vides ne retirent '
+        'personne', () {
+      final result = EnrollmentLocalListProjector.project(
+        items,
+        surname: 'fatou',
+      );
+      expect(result.map((s) => s.enrollmentId), ['e3']);
+    });
+
+    test('la DOB reste en ET : elle restreint le OU, elle ne s\'y ajoute '
+        'pas', () {
+      final result = EnrollmentLocalListProjector.project(
+        items,
+        firstName: 'awa',
+        dateOfBirth: '2010-01-01',
+      );
+      // e1 porte bien le prénom « Awa » mais pas cette date : si la DOB
+      // entrait dans le OU, toute la classe d'âge remonterait avec.
       expect(result.map((s) => s.enrollmentId), ['e3']);
     });
 

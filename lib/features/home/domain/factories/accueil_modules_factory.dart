@@ -23,6 +23,8 @@ class AccueilModulesFactory {
   ///
   /// Les exigences viennent de `kModuleAccessRegistry`, partagé avec la barre
   /// latérale : les deux surfaces montrent donc exactement le même périmètre.
+  /// `isSubMenuOffered` y ajoute les écrans retirés par décision produit
+  /// (`kHiddenSubMenus`), lus depuis la même source pour la même raison.
   static List<AccueilModule> create(
     AppLocalizations l10n, {
     required List<String>? permissions,
@@ -41,7 +43,7 @@ class AccueilModulesFactory {
     final visible = <AccueilModule>[];
     for (final module in all) {
       final subModules = module.subModules
-          .where((sub) => canAccessSubMenu(sub.target.subMenuId, permissions))
+          .where((sub) => isSubMenuOffered(sub.target.subMenuId, permissions))
           .toList(growable: false);
       if (subModules.isEmpty) continue;
       visible.add(module.copyWith(subModules: subModules));

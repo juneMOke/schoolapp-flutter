@@ -41,6 +41,29 @@ const _tariffs = [
   ),
 ];
 
+/// Deux lignes de grille sous la MÊME nature — ce qu'une école qui étale son
+/// minerval envoie. Le front ne sait pas encore poser un code au paramétrage :
+/// cette grille-là vient d'ailleurs, et c'est justement le cas que le sélecteur
+/// ne doit pas travestir.
+const _tranchedTariffs = [
+  LocalFeeTariff(
+    id: 't1',
+    feeCode: 'TUITION',
+    code: 'T1',
+    label: 'Minerval — 1/2',
+    amountInCents: 75000,
+    currency: 'USD',
+  ),
+  LocalFeeTariff(
+    id: 't2',
+    feeCode: 'TUITION',
+    code: 'T2',
+    label: 'Minerval — 2/2',
+    amountInCents: 75000,
+    currency: 'USD',
+  ),
+];
+
 const _classrooms = [
   OfflineClassroom(
     id: 'cls-1',
@@ -593,6 +616,104 @@ void main() {
 
       expect(find.textContaining(withheld), findsNothing);
       expect(find.textContaining(missing), findsNothing);
+    });
+  });
+
+  /// Le sélecteur affichait la NATURE localisée (« Frais de scolarité ») là où
+  /// l'école a écrit « Frais scolaire ». L'opérateur cherchait dans la liste un
+  /// intitulé qui n'y figurait pas, et le reste de Finance — détail
+  /// Facturation, encaissement — nommait déjà le même frais autrement.
+  group('nommage du frais', () {
+    testWidgets('une ligne unique est nommée par la grille, code compris', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, tariffs: _tariffs);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      final labels = _stringSelects(
+        tester,
+      )[3].items.map((item) => item.label).toList();
+      expect(labels.single, startsWith('Frais scolaire'));
+      expect(labels.single, contains('500,00'));
+    });
+
+    /// Le contrôle agrège les deux tranches (`SUM` sur `fee_code`). Emprunter
+    /// le libellé de la première annoncerait un contrôle sur « 1/2 » seul, et
+    /// afficherait la moitié de l'attendu.
+    testWidgets('plusieurs tranches → la nature, le compte et le total', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, tariffs: _tranchedTariffs);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      final items = _stringSelects(tester)[3].items;
+      // Une seule entrée : deux entrées de même valeur casseraient le
+      // sélecteur, et mèneraient de toute façon au même tableau.
+      expect(items.single.value, 'TUITION');
+      expect(items.single.label, isNot(contains('1/2')));
+      expect(items.single.label, contains('2 tranches'));
+      expect(items.single.label, contains('500,00'));
+    });
+
+    testWidgets(
+      'la désignation descend dans la requête, pas seulement à l\'écran',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        FeeControlSearchRequest? emitted;
+        await _pumpForm(
+          tester,
+          tariffs: _tariffs,
+          onSearch: (request) => emitted = request,
+        );
+        await _selectCycle(tester, 'g1');
+        await _selectLevel(tester, 'g1::l1');
+        await _selectFee(tester, 'TUITION');
+        await tester.tap(_searchButton);
+        await tester.pumpAndSettle();
+
+        expect(emitted!.feeCode, 'TUITION');
+        expect(emitted!.feeLabel, 'Frais scolaire');
+      },
+    );
+
+    /// Ce que la puce de critère affichera. Un libellé emprunté à la première
+    /// tranche y rappellerait « Minerval — 1/2 » pour un contrôle qui porte sur
+    /// les deux.
+    testWidgets('à plusieurs tranches, la requête ne porte aucun libellé', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      FeeControlSearchRequest? emitted;
+      await _pumpForm(
+        tester,
+        tariffs: _tranchedTariffs,
+        onSearch: (request) => emitted = request,
+      );
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+      await _selectFee(tester, 'TUITION');
+      await tester.tap(_searchButton);
+      await tester.pumpAndSettle();
+
+      expect(emitted!.feeCode, 'TUITION');
+      expect(emitted!.feeLabel, isEmpty);
+      expect(emitted!.feeTariffCode, isNull);
     });
   });
 }

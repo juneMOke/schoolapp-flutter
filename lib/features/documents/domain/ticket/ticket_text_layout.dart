@@ -101,6 +101,21 @@ abstract final class TicketTextLayout {
       width,
     );
 
+    // Le taux, sous le montant reçu, et **seulement** quand les deux unités
+    // divergent. C'est le chiffre que le parent conteste au guichet : le laisser
+    // déduire par division lui ferait lire un taux dérivé de l'arrondi. Un
+    // « 1,00 » sur un règlement ordinaire, à l'inverse, ferait chercher ce qui a
+    // été converti — d'où le filtre sur l'identité.
+    for (final tender in model.tenders) {
+      if (tender.isIdentity) continue;
+      _addPair(
+        lines,
+        model.labels.rateLabel,
+        _formatRate(tender, width),
+        width,
+      );
+    }
+
     // Part du montant reçu qu'aucune créance n'absorbe. Elle EXISTE : un
     // versement peut dépasser le dû (`isOptimisticallyOverpaid`), le paiement
     // est alors accepté et le ticket reste valide.
@@ -123,6 +138,18 @@ abstract final class TicketTextLayout {
           lines,
           '  ${allocation.label}',
           formatAmount(allocation.amountInCents, allocation.currency),
+          width,
+        );
+        // Ce que ce poste vaut dans la monnaie posée sur le comptoir. Sur une
+        // ligne à part, jamais dans une troisième colonne : le gabarit fait 48
+        // caractères en 80 mm et **32 en 58 mm**, où « libellé + montant » prend
+        // déjà toute la largeur.
+        final derived = model.derivedAmountOf(allocation);
+        if (derived == null) continue;
+        _addPair(
+          lines,
+          '    ${model.labels.derivedAmountPrefix}',
+          formatAmount(derived.amountInCents, derived.currency),
           width,
         );
       }
@@ -177,6 +204,24 @@ abstract final class TicketTextLayout {
       );
       first = false;
     }
+  }
+
+  /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».
+  ///
+  /// Deux décimales, celles-là mêmes qui sont stockées — la saisie est
+  /// contrainte au centième pour que l'imprimé et le stocké soient le MÊME
+  /// nombre. Un taux arrondi à l'affichage ne ferait pas retomber le parent sur
+  /// son total.
+  ///
+  /// Sur un ticket étroit, la forme « FC / \$ » cède à la seule devise reçue : la
+  /// paire tient rarement à droite de « Taux » en 32 colonnes, et c'est le
+  /// nombre qui compte.
+  static String _formatRate(TicketTenderLine tender, int width) {
+    final value = tender.rate.formatted(space: MoneyFormat.thermalSpace);
+    final quote = MoneyFormat.symbolOf(tender.currency);
+    if (width < 40) return '$value $quote';
+    final base = MoneyFormat.symbolOf(tender.pivotCurrency);
+    return '$value $quote / $base';
   }
 
   /// Montant en centimes → « 1 234 FC », « 425,00 $ ».

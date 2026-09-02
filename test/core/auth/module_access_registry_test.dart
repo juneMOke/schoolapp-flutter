@@ -71,6 +71,15 @@ void main() {
       for (final sub in module.subModules) sub.target.subMenuId,
   };
 
+  /// Ce que les DROITS accordent, indépendamment du masquage produit
+  /// (`kHiddenSubMenus`). Les assertions de politique passent par ici : un
+  /// écran retiré de la navigation n'a rien perdu de ses exigences.
+  Set<String> grantedSubMenuIds(List<String>? permissions) => {
+    for (final subMenus in kModuleAccessRegistry.values)
+      for (final id in subMenus.keys)
+        if (canAccessSubMenu(id, permissions)) id,
+  };
+
   group('cohérence du registre', () {
     // Le registre est la source unique : tout sous-menu réellement offert doit
     // y figurer, sinon il échappe au filtrage sans que rien ne le signale — la
@@ -90,9 +99,14 @@ void main() {
 
       expect(menuSubMenuIds(tousDroits).difference(declared), isEmpty);
       expect(accueilSubMenuIds(tousDroits).difference(declared), isEmpty);
-      // …et rien n'est déclaré pour un écran qui n'existe plus.
+      // …et rien n'est déclaré pour un écran qui n'existe plus. Les écrans
+      // masqués par décision produit sont exemptés : ils existent toujours,
+      // gardent leurs exigences, et leur route reste gardée par elles — c'est
+      // seulement la navigation qui ne les propose plus.
       expect(
-        declared.difference(menuSubMenuIds(tousDroits)),
+        declared
+            .difference(menuSubMenuIds(tousDroits))
+            .difference(kHiddenSubMenus),
         isEmpty,
         reason: 'entrée orpheline dans kModuleAccessRegistry',
       );
@@ -163,7 +177,13 @@ void main() {
       expect(ids, isNot(contains(MenuConstants.myCoursesId)));
       expect(ids, isNot(contains(MenuConstants.presencesId)));
       // `enrollment.read` sans `enrollment.write` : les listes, pas le wizard.
-      expect(ids, contains(MenuConstants.reInscriptionsId));
+      // L'assertion porte sur le DROIT, pas sur le menu : les deux listes
+      // d'inscription sont masquées par décision produit (`kHiddenSubMenus`),
+      // ce qui ne retire rien à ce que la comptabilité a le droit de lire.
+      expect(
+        grantedSubMenuIds(_comptabilite),
+        contains(MenuConstants.reInscriptionsId),
+      );
       expect(ids, isNot(contains(MenuConstants.premiereInscriptionId)));
     });
 
@@ -171,8 +191,14 @@ void main() {
     // `editique.write`, l'écriture partirait à l'outbox pour y être rejetée
     // définitivement — mieux vaut ne pas ouvrir la porte.
     test('inscription sans editique.write : le wizard reste fermé', () {
-      final ids = menuSubMenuIds(const ['enrollment.read', 'enrollment.write']);
-      expect(ids, contains(MenuConstants.reInscriptionsId));
+      const sansEditique = ['enrollment.read', 'enrollment.write'];
+      final ids = menuSubMenuIds(sansEditique);
+      // Le droit de lire les listes est bien là (elles sont masquées ailleurs,
+      // cf. `kHiddenSubMenus`) ; c'est le wizard, et lui seul, qui reste fermé.
+      expect(
+        grantedSubMenuIds(sansEditique),
+        contains(MenuConstants.reInscriptionsId),
+      );
       expect(ids, isNot(contains(MenuConstants.premiereInscriptionId)));
 
       final avecEditique = menuSubMenuIds(const [
@@ -242,6 +268,91 @@ void main() {
       expect(classes.subModules.any((s) => s.isDashboard), isFalse);
       // L'entrée retombe sur la première page réellement atteignable.
       expect(classes.entry.target.subMenuId, MenuConstants.organisationId);
+    });
+  });
+
+  // Écrans retirés de la navigation par décision produit (2026-09-01), sans
+  // rapport avec les droits. Ce qui suit fixe la frontière entre les deux
+  // motifs de fermeture : sans ces tests, rétablir un écran se ferait à
+  // l'aveugle, et « masqué » finirait par se confondre avec « interdit ».
+  group('écrans masqués par décision produit', () {
+    // Tous les droits déclarés : si un masqué apparaît malgré ça, c'est bien le
+    // masquage qui a lâché, pas une permission qui manque.
+    final tousDroits = [
+      for (final subMenus in kModuleAccessRegistry.values)
+        for (final access in subMenus.values)
+          for (final perm in access.requires) perm.wire,
+    ];
+
+    test('ni la barre latérale ni l\'accueil ne les proposent', () {
+      for (final id in kHiddenSubMenus) {
+        expect(
+          menuSubMenuIds(tousDroits),
+          isNot(contains(id)),
+          reason: '$id ne doit plus figurer dans la barre latérale',
+        );
+        expect(
+          accueilSubMenuIds(tousDroits),
+          isNot(contains(id)),
+          reason: '$id ne doit plus figurer dans la grille d\'accueil',
+        );
+      }
+    });
+
+    test('les deux surfaces masquent EXACTEMENT les mêmes', () {
+      // Elles lisent `isSubMenuOffered`, donc la même liste. Le vérifier tient
+      // l'invariant du fichier : une tuile offerte d'un côté et absente de
+      // l'autre serait pire que les deux absences.
+      final declared = {
+        for (final subMenus in kModuleAccessRegistry.values) ...subMenus.keys,
+      };
+      final manquantsMenu = declared.difference(menuSubMenuIds(tousDroits));
+      final manquantsAccueil = declared.difference(
+        accueilSubMenuIds(tousDroits),
+      );
+      expect(manquantsMenu, equals(kHiddenSubMenus));
+      // L'accueil ne porte pas Documents (menu propre) : on l'écarte de la
+      // comparaison, il n'a jamais été de son périmètre.
+      expect(
+        manquantsAccueil.difference({MenuConstants.documentsStudentId}),
+        equals(kHiddenSubMenus),
+      );
+    });
+
+    test('leurs DROITS sont intacts — masqué n\'est pas interdit', () {
+      for (final id in kHiddenSubMenus) {
+        expect(
+          canAccessSubMenu(id, tousDroits),
+          isTrue,
+          reason: '$id est retiré de la navigation, pas de la politique',
+        );
+        expect(
+          canAccessSubMenu(id, const []),
+          isFalse,
+          reason: '$id garde ses exigences face à un porteur sans droit',
+        );
+      }
+    });
+
+    test('leur route reste gardée par les seules permissions', () {
+      // Décision assumée : plus rien n'y mène dans l'UI, mais un lien direct
+      // ouvre encore l'écran pour qui en a le droit. Fermer la route ici
+      // rendrait le refus mensonger — il parlerait de droits absents là où
+      // l'écran est simplement retiré.
+      expect(
+        canAccessLocation(
+          Uri.parse('/inscriptions/${MenuConstants.reInscriptionsId}'),
+          tousDroits,
+        ),
+        isTrue,
+      );
+      expect(
+        canAccessLocation(
+          Uri.parse('/inscriptions/${MenuConstants.preInscriptionsId}'),
+          const [],
+        ),
+        isFalse,
+      );
     });
   });
 
@@ -333,6 +444,19 @@ void main() {
         final visibles = menuSubMenuIds(permissions);
         for (final entry in kModuleAccessRegistry.entries) {
           for (final subMenuId in entry.value.keys) {
+            // Un écran masqué par décision produit quitte le menu sans que ses
+            // droits bougent : la garde continue de l'autoriser. C'est la SEULE
+            // divergence tolérée, et seulement dans ce sens-là — la surface
+            // n'offre jamais ce que la garde refuse, qui est le sens dangereux.
+            if (kHiddenSubMenus.contains(subMenuId)) {
+              expect(
+                visibles,
+                isNot(contains(subMenuId)),
+                reason:
+                    '$subMenuId est masqué : il ne doit pas revenir au menu',
+              );
+              continue;
+            }
             expect(
               allows('/${entry.key}/$subMenuId', permissions),
               visibles.contains(subMenuId),

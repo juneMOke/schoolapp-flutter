@@ -5,14 +5,13 @@ import 'package:school_app_flutter/core/components/search/search_level_cascade.d
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_page_helpers.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -34,6 +33,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// affirmait sur l'école ce qui n'était vrai que de l'appareil, et le frais
 /// étant **obligatoire** ici, la recherche restait fermée sans que rien
 /// n'explique pourquoi ni n'offre d'issue.
+///
+/// Ce que la liste contient et comment chaque entrée se nomme est tranché par
+/// [buildFeeControlFeeOptions] : une entrée par nature — la maille de la mesure
+/// — nommée par la ligne de grille de l'école quand la nature n'en porte
+/// qu'une, comme partout ailleurs en Finance.
 class FeeControlFeeField extends StatelessWidget {
   final List<LocalFeeTariff> tariffs;
   final String? selectedFeeCode;
@@ -65,20 +69,13 @@ class FeeControlFeeField extends StatelessWidget {
     required this.onRetry,
   });
 
-  /// Un `fee_code` n'apparaît qu'une fois : la grille peut porter à la fois un
-  /// tarif de niveau et un tarif de cycle du même code, et deux entrées de même
-  /// valeur casseraient le sélecteur.
-  List<LocalFeeTariff> get _uniqueTariffs {
-    final seen = <String>{};
-    return tariffs
-        .where((tariff) => seen.add(tariff.feeCode))
-        .toList(growable: false);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final items = _uniqueTariffs;
+    // Une entrée par NATURE — la maille de la mesure, cf.
+    // `buildFeeControlFeeOptions`. Elle est nommée par la ligne de grille
+    // quand la nature n'en porte qu'une.
+    final items = buildFeeControlFeeOptions(tariffs);
     final enabled = hasLevel && !isLoading && items.isNotEmpty;
 
     final String? errorText;
@@ -108,7 +105,7 @@ class FeeControlFeeField extends StatelessWidget {
     final field = EteeloSelectInput<String>(
       label: l10n.feeControlFeeLabel,
       placeholder: hasLevel ? null : l10n.feeControlFeePlaceholder,
-      value: items.any((tariff) => tariff.feeCode == selectedFeeCode)
+      value: items.any((option) => option.feeCode == selectedFeeCode)
           ? selectedFeeCode
           : null,
       enabled: enabled,
@@ -116,9 +113,9 @@ class FeeControlFeeField extends StatelessWidget {
       onChanged: onChanged,
       items: items
           .map(
-            (tariff) => EteeloSelectItem<String>(
-              value: tariff.feeCode,
-              label: _itemLabel(tariff, l10n),
+            (option) => EteeloSelectItem<String>(
+              value: option.feeCode,
+              label: feeControlFeeOptionLabel(option, l10n),
             ),
           )
           .toList(growable: false),
@@ -153,19 +150,6 @@ class FeeControlFeeField extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// Libellé + montant. Le libellé est celui du **code de frais** localisé
-  /// (`localizedFeeLabel`), exactement comme les lignes de frais du détail
-  /// Facturation — et non le `label` brut de la grille, qui varie d'un
-  /// établissement à l'autre et ne se traduit pas. Le montant lève l'ambiguïté
-  /// entre deux frais de noms proches sans obliger à ouvrir la grille.
-  static String _itemLabel(LocalFeeTariff tariff, AppLocalizations l10n) {
-    final amount = formatMonetaryAmountWithCurrency(
-      amount: tariff.amountInCents / 100,
-      currency: tariff.currency,
-    );
-    return '${tariff.feeCode.localizedFeeLabel(l10n)} · $amount';
   }
 }
 

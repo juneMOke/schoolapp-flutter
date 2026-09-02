@@ -6,7 +6,7 @@ class ParentSummary {
   final String lastName;
   final String? surname;
   final String identificationNumber;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String email;
   final RelationshipType relationshipType;
 
@@ -22,7 +22,7 @@ class ParentSummary {
     required this.lastName,
     this.surname,
     required this.identificationNumber,
-    required this.phoneNumber,
+    this.phoneNumber,
     required this.email,
     required this.relationshipType,
     this.emergencyContact = false,

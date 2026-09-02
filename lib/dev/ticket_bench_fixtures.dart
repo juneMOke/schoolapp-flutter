@@ -27,6 +27,8 @@ abstract final class TicketBenchFixtures {
     matriculationLabel: 'Matricule :',
     classroomLabel: 'Classe :',
     amountReceivedLabel: 'Montant reçu',
+    rateLabel: 'Taux',
+    derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
     balanceLabel: 'Solde',
@@ -55,7 +57,9 @@ abstract final class TicketBenchFixtures {
     provisionalReference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
     paidAt: DateTime(2026, 8, 11, 14, 7),
     cashierFullName: 'Jean-Baptiste Kabeya wa Mukendi',
-    amountReceived: MoneyBag.of(const [Money(12345678, 'CDF')]),
+    tenders: TicketTenderLine.identityFrom(
+      MoneyBag.of(const [Money(12345678, 'CDF')]),
+    ),
     allocations: const [
       TicketAllocationLine(
         label: 'Frais scolaires',
@@ -98,7 +102,9 @@ abstract final class TicketBenchFixtures {
     studentFullName: 'Amina Mbala',
     provisionalReference: 'PROV-A1B2C3D4-0001',
     paidAt: DateTime(2026, 8, 11, 8, 3),
-    amountReceived: MoneyBag.of(const [Money(500000, 'CDF')]),
+    tenders: TicketTenderLine.identityFrom(
+      MoneyBag.of(const [Money(500000, 'CDF')]),
+    ),
     labels: labels,
   );
 

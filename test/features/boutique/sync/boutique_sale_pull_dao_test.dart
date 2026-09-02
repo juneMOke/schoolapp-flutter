@@ -14,6 +14,7 @@ BoutiqueSaleDeltaDto _delta({
   String? payerLastName = 'Ndombo',
   String? collectedByName = 'Moke Junior',
   List<BoutiqueSaleLineDeltaDto>? lines,
+  List<BoutiqueSaleTenderDeltaDto> tenders = const [],
 }) => BoutiqueSaleDeltaDto(
   id: id,
   academicYearId: 'ay-1',
@@ -40,6 +41,7 @@ BoutiqueSaleDeltaDto _delta({
           currency: 'USD',
         ),
       ],
+  tenders: tenders,
   serverUpdatedAt: '2026-08-29T11:45:00Z',
 );
 
@@ -206,5 +208,109 @@ void main() {
   test('une page vide n\'écrit rien', () async {
     expect(await apply([]), 0);
     expect(await db.query('boutique_sales'), isEmpty);
+  });
+
+  group('les lignes d’encaissement de l’autre poste', () {
+    test('descendent avec la vente : le tiroir dit ce qu’il a pris', () async {
+      // `amounts` dit ce que la vente a SOLDÉ, en devise de catalogue ; ceci dit
+      // ce qui a été PERÇU. Sans ces lignes, une vente encaissée en francs sur
+      // l’autre poste se relit ici en dollars — et les deux caisses divergent.
+      await apply([
+        _delta(
+          tenders: const [
+            BoutiqueSaleTenderDeltaDto(
+              id: 'tnd-1',
+              amountInCents: 9800000,
+              currency: 'CDF',
+              rate: 2800,
+              pivotCurrency: 'USD',
+            ),
+          ],
+        ),
+      ]);
+
+      final rows = await db.query('boutique_sale_tenders');
+      expect(rows, hasLength(1));
+      expect(rows.single['amount_in_cents'], 9800000);
+      expect(rows.single['currency'], 'CDF');
+      expect(rows.single['pivot_currency'], 'USD');
+      expect(rows.single['rate_micros'], 2800000000);
+    });
+
+    test(
+      'un taux absent vaut l’identité, et le pivot suit la devise',
+      () async {
+        await apply([
+          _delta(
+            tenders: const [
+              BoutiqueSaleTenderDeltaDto(
+                id: 'tnd-1',
+                amountInCents: 3500,
+                currency: 'USD',
+              ),
+            ],
+          ),
+        ]);
+
+        final row = (await db.query('boutique_sale_tenders')).single;
+        expect(row['rate_micros'], 1000000);
+        expect(row['pivot_currency'], 'USD');
+      },
+    );
+
+    test('le serveur fait autorité : les lignes sont REMPLACÉES', () async {
+      await apply([
+        _delta(
+          tenders: const [
+            BoutiqueSaleTenderDeltaDto(
+              id: 'tnd-1',
+              amountInCents: 100,
+              currency: 'USD',
+            ),
+            BoutiqueSaleTenderDeltaDto(
+              id: 'tnd-2',
+              amountInCents: 200,
+              currency: 'USD',
+            ),
+          ],
+        ),
+      ]);
+      await apply([
+        _delta(
+          tenders: const [
+            BoutiqueSaleTenderDeltaDto(
+              id: 'tnd-1',
+              amountInCents: 3500,
+              currency: 'USD',
+            ),
+          ],
+        ),
+      ]);
+
+      final rows = await db.query('boutique_sale_tenders');
+      expect(rows, hasLength(1));
+      expect(rows.single['amount_in_cents'], 3500);
+    });
+
+    test(
+      'une vente d’AVANT le contrat n’efface pas l’identité de la migration',
+      () async {
+        // Le backfill de la v42 a écrit « perçu = vendu, taux 1 » sur tout
+        // l’historique local. Purger sur une liste vide l’effacerait, et la
+        // vente se relirait comme si rien n’était entré dans le tiroir.
+        await db.insert('boutique_sale_tenders', {
+          'id': 'tnd-legacy',
+          'sale_id': 'vente-1',
+          'amount_in_cents': 3500,
+          'currency': 'USD',
+          'rate_micros': 1000000,
+          'pivot_currency': 'USD',
+        });
+
+        await apply([_delta()]);
+
+        expect(await db.query('boutique_sale_tenders'), hasLength(1));
+      },
+    );
   });
 }

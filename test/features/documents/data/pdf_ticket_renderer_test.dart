@@ -18,6 +18,8 @@ const _labels = TicketLabels(
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
+  rateLabel: 'Taux',
+  derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
   balanceLabel: 'Solde',
@@ -34,7 +36,9 @@ TicketReceiptModel _model({int allocationCount = 2}) => TicketReceiptModel(
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: 'Jean Kabeya',
-  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
+  tenders: TicketTenderLine.identityFrom(
+    MoneyBag.of(const [Money(150000, 'CDF')]),
+  ),
   allocations: [
     for (var i = 0; i < allocationCount; i++)
       TicketAllocationLine(
@@ -464,6 +468,8 @@ TicketReceiptModel _modelWithSingleLine(String studentName) =>
       studentFullName: studentName,
       provisionalReference: 'PROV-1',
       paidAt: DateTime(2026, 8, 4, 14, 7),
-      amountReceived: MoneyBag.of(const [Money(2500000000, 'CDF')]),
+      tenders: TicketTenderLine.identityFrom(
+        MoneyBag.of(const [Money(2500000000, 'CDF')]),
+      ),
       labels: _labels,
     );

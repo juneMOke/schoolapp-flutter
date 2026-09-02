@@ -143,7 +143,7 @@ class GuardianCardHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '${_relationshipLabel(l10n, parent.relationshipType)} • ${parent.phoneNumber.trim().isEmpty ? '—' : parent.phoneNumber}',
+                '${_relationshipLabel(l10n, parent.relationshipType)} • ${(parent.phoneNumber ?? '').trim().isEmpty ? l10n.guardianPhoneNumberAbsent : parent.phoneNumber!}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.bodySmall.copyWith(

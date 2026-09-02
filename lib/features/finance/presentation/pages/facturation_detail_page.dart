@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment.dart
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_money.dart';
@@ -218,6 +219,13 @@ class FacturationDetailPage extends StatelessWidget {
         // Fraîcheur du grand-livre (ADR-002) affichée sous les totaux.
         BlocProvider<LedgerFreshnessCubit>(
           create: (_) => getIt<LedgerFreshnessCubit>(),
+        ),
+        // Titres de sections écrits par l'école (GF-2), pour coiffer les
+        // natures qui portent plusieurs tranches. Lecture locale, sans état
+        // d'erreur : un catalogue absent laisse les frais nommés par la nature
+        // localisée, ce qu'ils étaient déjà avant que ce cache existe.
+        BlocProvider<FeeSectionTitlesCubit>(
+          create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
         // Garde d'éditique : le relevé prend le studentId dans son URL, or un
         // élève saisi hors ligne porte un uuid client que le serveur ignore.

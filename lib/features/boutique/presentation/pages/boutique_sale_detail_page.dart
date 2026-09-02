@@ -187,6 +187,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final sale = detail.sale.sale;
+    final payerName = _payerNameOf(detail);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,10 +205,18 @@ class _Body extends StatelessWidget {
         _Card(
           child: Column(
             children: [
+              // La ligne RESTE, même anonyme : on a ouvert ce détail POUR
+              // savoir, et une ligne absente laisserait croire à un oubli
+              // d'affichage. Le ticket, lui, escamote son bloc — une pièce
+              // remise au client et un écran de consultation n'ont pas le même
+              // lecteur ni le même enjeu.
               _InfoRow(
                 icon: Icons.person_outline_rounded,
                 label: l10n.boutiqueSaleDetailPayer,
-                value: _payerNameOf(detail),
+                value: payerName.isEmpty
+                    ? l10n.boutiqueHistoryPayerUnknown
+                    : payerName,
+                muted: payerName.isEmpty,
               ),
               if ((sale.payerPhoneNumber ?? '').trim().isNotEmpty)
                 _InfoRow(
@@ -262,13 +271,14 @@ class _Body extends StatelessWidget {
   }
 
   /// Le nom composé rendu par le serveur en priorité ; à défaut, les champs
-  /// saisis dans l'ordre où le guichet les a remplis.
+  /// saisis dans l'ordre où le guichet les a remplis. Vide si la vente est
+  /// anonyme — c'est l'appelant qui décide quoi en dire.
   static String _payerNameOf(SaleDetail detail) {
     final sale = detail.sale.sale;
     final composed = sale.payerName;
     if (composed != null && composed.trim().isNotEmpty) return composed;
     return [
-      sale.payerLastName,
+      sale.payerLastName ?? '',
       sale.payerMiddleName ?? '',
       sale.payerFirstName ?? '',
     ].where((part) => part.trim().isNotEmpty).join(' ');

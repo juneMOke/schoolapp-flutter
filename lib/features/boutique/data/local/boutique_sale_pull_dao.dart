@@ -34,10 +34,16 @@ class BoutiqueSalePullDao {
           'school_id': schoolId,
           'academic_year_id': sale.academicYearId,
           // Le triplet peut être vide sur une vente d'avant l'alignement du
-          // contrat : on retombe alors sur le nom composé, qui existe toujours.
-          // Le redécouper serait une invention — « Ndombo Lelo Willy » ne se
-          // redécoupe pas sans se tromper.
-          'payer_last_name': sale.payerLastName ?? sale.payerName ?? '',
+          // contrat : on retombe alors sur le nom composé. Le redécouper serait
+          // une invention — « Ndombo Lelo Willy » ne se redécoupe pas sans se
+          // tromper.
+          //
+          // ⚠️ Et si les deux sont vides, la colonne reste `NULL` : la vente est
+          // ANONYME (V114 serveur), pas au nom vide. Jusqu'à la v43 le
+          // `NOT NULL` forçait un repli sur `''`, et le ticket imprimait alors
+          // un cadre « Payeur » creux — qui se lit comme une mention effacée,
+          // pas comme une absence.
+          'payer_last_name': sale.payerLastName ?? sale.payerName,
           'payer_middle_name': sale.payerMiddleName,
           'payer_first_name': sale.payerFirstName,
           'payer_phone_number': sale.payerPhoneNumber,
@@ -84,6 +90,42 @@ class BoutiqueSalePullDao {
             'currency': line.currency,
             'position': index,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        // ⚠️ **Remplacées seulement quand le serveur en envoie.**
+        //
+        // Une vente d'avant l'alignement du contrat redescend sans ligne
+        // d'encaissement. Purger sur cette liste vide effacerait l'identité que
+        // le backfill de la v42 a posée — et la vente se relirait comme si rien
+        // n'était entré dans le tiroir, sur un poste où le ticket doit encore
+        // pouvoir se réimprimer.
+        //
+        // Quand il en envoie, en revanche, il fait autorité : la fusion
+        // laisserait vivre une ligne locale que l'ingestion a écartée, et la
+        // caisse du soir ne retomberait plus.
+        if (sale.tenders.isNotEmpty) {
+          await txn.delete(
+            'boutique_sale_tenders',
+            where: 'sale_id = ?',
+            whereArgs: [sale.id],
+          );
+          for (final tender in sale.tenders) {
+            await txn.insert(
+              'boutique_sale_tenders',
+              {
+                'id': tender.id,
+                'sale_id': sale.id,
+                'amount_in_cents': tender.amountInCents,
+                'currency': tender.currency,
+                'rate_micros': tender.rateMicros,
+                // Le pivot vaut la devise reçue quand le serveur le tait : c'est
+                // le cas d'un règlement sans conversion, où les deux se
+                // confondent.
+                'pivot_currency': tender.pivotCurrency ?? tender.currency,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         }
       }
     });

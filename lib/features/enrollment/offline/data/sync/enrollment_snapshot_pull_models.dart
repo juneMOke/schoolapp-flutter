@@ -257,7 +257,13 @@ class ParentSnapshotDto {
   final String lastName;
   final String? surname;
   final String? identificationNumber;
-  final String phoneNumber;
+
+  /// `null` sur un tuteur SANS NUMÉRO (V117 serveur). Le cast était dur
+  /// (`as String`) : le premier tuteur sans numéro descendu par le pull faisait
+  /// LEVER l'hydratation du dossier — sur une donnée que le serveur a désormais
+  /// le droit de ne pas avoir.
+  final String? phoneNumber;
+
   final String? email;
   final String relationshipType;
 
@@ -272,7 +278,7 @@ class ParentSnapshotDto {
     required this.lastName,
     this.surname,
     this.identificationNumber,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.email,
     required this.relationshipType,
     this.emergencyContact,
@@ -285,7 +291,7 @@ class ParentSnapshotDto {
         lastName: j['lastName'] as String,
         surname: j['surname'] as String?,
         identificationNumber: j['identificationNumber'] as String?,
-        phoneNumber: j['phoneNumber'] as String,
+        phoneNumber: j['phoneNumber'] as String?,
         email: j['email'] as String?,
         relationshipType: j['relationshipType'] as String,
         emergencyContact: j['emergencyContact'] as bool?,

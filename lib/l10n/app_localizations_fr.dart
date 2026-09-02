@@ -772,6 +772,31 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.';
 
   @override
+  String get configurationSectionsTitle => 'Sections de frais';
+
+  @override
+  String get configurationSectionsSubtitle =>
+      'Le nom que votre école donne à chaque nature. Tous les tarifs d\'une même nature s\'affichent sous ce titre.';
+
+  @override
+  String get configurationSectionsSave => 'Enregistrer les sections';
+
+  @override
+  String get configurationSectionsSaved => 'Sections enregistrées';
+
+  @override
+  String get configurationSectionsHiddenHint =>
+      'Masquée : plus proposée à la saisie, mais toujours comptée dans les statistiques.';
+
+  @override
+  String get configurationSectionsLabelRequired =>
+      'Chaque section doit porter un nom.';
+
+  @override
+  String get configurationSectionsReorderHint =>
+      'Glissez une section pour la remonter ; l\'ordre est celui du sélecteur de tarifs.';
+
+  @override
   String get configurationTariffAdd => 'Ajouter un tarif';
 
   @override
@@ -2237,7 +2262,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get searchModeIdentityHint =>
-      'Renseignez le nom, le post-nom et le prénom de l\'élève. Pour lister toute une classe, basculez sur « Par classe ».';
+      'Un seul nom suffit : nom, post-nom ou prénom. Pour lister toute une classe, basculez sur « Par classe ».';
 
   @override
   String get searchRefineByNameLabel => 'Affiner par nom (facultatif)';
@@ -2887,6 +2912,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumberLabel => 'Téléphone';
 
   @override
+  String get guardianPhoneNumberAbsent => 'Sans numéro';
+
+  @override
+  String get guardianPhoneNumberOptionalNotice =>
+      'Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n\'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.';
+
+  @override
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
 
   @override
@@ -3497,7 +3529,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationSearchHelpBanner =>
-      'Recherchez toute une classe (cycle + niveau), ou un élève précis (nom + post-nom + prénom).';
+      'Recherchez toute une classe (cycle + niveau), ou un élève précis (un seul nom suffit).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';
@@ -3574,6 +3606,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get feeControlFeeLoadRetry => 'Réessayer';
+
+  @override
+  String feeControlFeeTrancheCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tranches',
+      one: '$count tranche',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get feeControlPaymentStatusLabel => 'Statut de paiement';
@@ -3834,6 +3877,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPayerLabel => 'Payeur';
 
   @override
+  String get facturationPaymentPayerUnnamed => 'Sans payeur nommé';
+
+  @override
   String get facturationPaymentAmountLabel => 'Montant global payé';
 
   @override
@@ -3946,18 +3992,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String facturationDetailChargesSummary(
-    num totalCount,
-    Object partialCount,
-    Object dueCount,
+    int feeCount,
+    int trancheCount,
+    int unsettledCount,
   ) {
     String _temp0 = intl.Intl.pluralLogic(
-      totalCount,
+      feeCount,
       locale: localeName,
-      other: '$totalCount charges',
-      one: '1 charge',
-      zero: '0 charge',
+      other: '$feeCount frais',
+      one: '1 frais',
+      zero: 'Aucun frais',
     );
-    return '$_temp0 · $partialCount partielle(s), $dueCount à régler';
+    String _temp1 = intl.Intl.pluralLogic(
+      trancheCount,
+      locale: localeName,
+      other: '$trancheCount tranches',
+      one: '1 tranche',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      unsettledCount,
+      locale: localeName,
+      other: '$unsettledCount restent à régler',
+      one: '1 reste à régler',
+      zero: 'tout est soldé',
+    );
+    return '$_temp0 · $_temp1 · $_temp2';
   }
 
   @override
@@ -4186,6 +4245,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPhoneLabel => 'Téléphone du payeur';
+
+  @override
+  String get facturationCreatePaymentPayerOptionalNotice =>
+      'Ces informations sont facultatives : un versement peut être encaissé sans nommer le payeur. Le reçu, lui, porte toujours l\'élève et les frais réglés.';
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choisir un payeur';
@@ -4507,7 +4570,75 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String boutiqueTenderCurrency(String due) {
+    return 'Le client règle $due en';
+  }
+
+  @override
+  String get boutiqueTenderReceivedLabel => 'Reçu au comptoir';
+
+  @override
+  String boutiqueTenderShortfall(String amount) {
+    return 'Il manque · $amount';
+  }
+
+  @override
+  String boutiqueTenderChangeDue(String amount) {
+    return 'Monnaie à rendre · $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentTenderCurrency => 'Le parent règle en';
+
+  @override
+  String get facturationCreatePaymentTenderAmountLabel => 'Reçu en caisse';
+
+  @override
+  String facturationCreatePaymentChangeDue(String amount) {
+    return 'Monnaie à rendre · $amount';
+  }
+
+  @override
   String get facturationCreatePaymentAmountToSettleLabel => 'Montant à régler';
+
+  @override
+  String facturationCreatePaymentGroupRemainingTranches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tranches restantes',
+      one: '1 tranche restante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupAmountLabel => 'Montant réglé';
+
+  @override
+  String get facturationCreatePaymentGroupAmountHint =>
+      'Ce que le parent règle sur ce frais';
+
+  @override
+  String facturationCreatePaymentGroupVentilation(String detail) {
+    return 'Ventilation : $detail';
+  }
+
+  @override
+  String facturationCreatePaymentGroupVentilationItem(
+    String label,
+    String amount,
+  ) {
+    return '$label $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupExpandAction =>
+      'Détailler les tranches';
+
+  @override
+  String get facturationCreatePaymentGroupCollapseAction =>
+      'Replier les tranches';
 
   @override
   String get facturationCreatePaymentSettleAllAction => 'Tout solder';
@@ -4529,6 +4660,92 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
 
   @override
+  String get facturationSettlementLabel => 'Le parent règle en';
+
+  @override
+  String get exchangeRateSettingsTitle => 'Taux de change du guichet';
+
+  @override
+  String get exchangeRateSettingsSubtitle =>
+      'Le taux proposé au caissier quand un parent règle dans une autre monnaie. Chaque enregistrement crée un palier : les versements déjà encaissés gardent le leur.';
+
+  @override
+  String get exchangeRateSettingsFromLabel => '1 unité de';
+
+  @override
+  String get exchangeRateSettingsToLabel => 'vaut, en';
+
+  @override
+  String get exchangeRateSettingsValueLabel => 'Taux';
+
+  @override
+  String get exchangeRateSettingsSave => 'Enregistrer le taux';
+
+  @override
+  String get exchangeRateSettingsSaved => 'Taux enregistré.';
+
+  @override
+  String get exchangeRateSettingsNone =>
+      'Aucun taux paramétré : au guichet, chaque frais se règle dans sa propre devise.';
+
+  @override
+  String exchangeRateSettingsCurrent(String base, String value, String quote) {
+    return 'En vigueur : 1 $base = $value $quote';
+  }
+
+  @override
+  String get facturationSettlementPerCharge => 'Chaque frais';
+
+  @override
+  String get facturationSettlementRateLabel => 'Taux du jour';
+
+  @override
+  String get facturationSettlementCountedLabel => 'Montant compté';
+
+  @override
+  String facturationSettlementCountedHint(String expected) {
+    return 'Conversion : $expected';
+  }
+
+  @override
+  String facturationSettlementCountedMismatch(String expected) {
+    return 'Écart trop grand avec la conversion ($expected). Ajustez le montant ou le taux.';
+  }
+
+  @override
+  String get facturationSettlementRateEdit => 'Modifier';
+
+  @override
+  String get facturationSettlementRateFieldLabel => 'Taux appliqué';
+
+  @override
+  String facturationSettlementRateHint(String quote, String base) {
+    return '$quote pour 1 $base';
+  }
+
+  @override
+  String facturationSettlementRateDiverges(String reference) {
+    return 'Ce taux s\'écarte de celui de l\'école ($reference). L\'encaissement reste possible ; il sera signalé.';
+  }
+
+  @override
+  String get facturationSettlementNoRate =>
+      'Aucun taux paramétré : le règlement se fait dans la devise de chaque frais.';
+
+  @override
+  String facturationSettlementDerived(String amount) {
+    return 'soit $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentToPerceive => 'À percevoir';
+
+  @override
+  String facturationCreatePaymentImputes(String amount) {
+    return 'impute $amount';
+  }
+
+  @override
   String facturationCreatePaymentCollectAmountAction(String amount) {
     return 'Encaisser $amount';
   }
@@ -4545,6 +4762,14 @@ class AppLocalizationsFr extends AppLocalizations {
     String payer,
   ) {
     return 'Vous allez encaisser $amount pour $student, réglé par $payer.';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentenceNoPayer(
+    String amount,
+    String student,
+  ) {
+    return 'Vous allez encaisser $amount pour $student.';
   }
 
   @override
@@ -6036,14 +6261,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Essayez une autre période pour afficher davantage d\'informations.';
 
   @override
-  String get financeStatsErrorTitle => 'Erreur de chargement';
-
-  @override
   String get financeStatsRetry => 'Réessayer';
-
-  @override
-  String get financeStatsRetryHint =>
-      'Relancer le chargement des statistiques financières';
 
   @override
   String get financeStatsLoadingA11yLabel =>
@@ -6076,14 +6294,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String code,
     String collected,
     String expected,
+    String outstanding,
     int rate,
   ) {
-    return 'Type $code, encaissé $collected, attendu $expected, taux $rate%';
-  }
-
-  @override
-  String financeStatsErrorA11yLabel(String message) {
-    return 'Erreur de chargement des statistiques financières : $message';
+    return 'Type $code, encaissé $collected, attendu $expected, reste dû $outstanding, taux $rate%';
   }
 
   @override
@@ -6125,6 +6339,145 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'Une erreur inattendue est survenue lors du chargement des statistiques.';
+
+  @override
+  String get financeStatsErrorNetworkTitle => 'Connexion indisponible';
+
+  @override
+  String get financeStatsErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get financeStatsErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get financeStatsErrorServerTitle => 'Chargement impossible';
+
+  @override
+  String get financeStatsErrorReconnect => 'Se reconnecter';
+
+  @override
+  String financeStatsErrorIncidentCode(String code) {
+    return 'Code d\'incident : $code';
+  }
+
+  @override
+  String get financeDashboardTabsA11yLabel =>
+      'Onglets du tableau de bord Finances';
+
+  @override
+  String get financeDashboardTabRecoveryLabel => 'Recouvrement';
+
+  @override
+  String get financeDashboardTabRecoveryDescription =>
+      'Ce qu\'il reste à encaisser cette année';
+
+  @override
+  String get financeDashboardTabTillLabel => 'Caisse';
+
+  @override
+  String get financeDashboardTabTillDescription =>
+      'Ce qui est entré dans le tiroir';
+
+  @override
+  String get financeTillKpiTotal => 'Total du tiroir';
+
+  @override
+  String get financeTillKpiFees => 'Frais scolaires';
+
+  @override
+  String get financeTillKpiBoutique => 'Ventes boutique';
+
+  @override
+  String get financeTillKpiBandA11yLabel =>
+      'Indicateurs de la caisse, par devise';
+
+  @override
+  String financeStatsFeeTypeOutstanding(String amount) {
+    return 'Reste dû : $amount';
+  }
+
+  @override
+  String get financeStatsRateNotApplicable => 'Sans objet';
+
+  @override
+  String financeStatsRateNotApplicableForCurrency(String currency) {
+    return 'Sans objet · $currency';
+  }
+
+  @override
+  String get financeStatsFeeTypeRateNotApplicable => 'Taux : sans objet';
+
+  @override
+  String get financeStatsCurrencyNoMovement =>
+      'Aucun mouvement dans cette devise';
+
+  @override
+  String get financeStatsCurrencyNoMovementRecovery =>
+      'Rien n\'a été facturé ni encaissé sur l\'année scolaire.';
+
+  @override
+  String get financeTillPeriodDayCurrent => 'Aujourd\'hui';
+
+  @override
+  String financeTillWindow(String start, String end) {
+    return 'Du $start au $end';
+  }
+
+  @override
+  String financeTillWindowDay(String date) {
+    return 'Journée du $date';
+  }
+
+  @override
+  String financeTillTimeZoneHint(String zone) {
+    return 'Journée à l\'heure de l\'école · $zone';
+  }
+
+  @override
+  String get financeTillSectionBuckets => 'Entrées de caisse';
+
+  @override
+  String get financeTillBucketsChartA11yLabel =>
+      'Graphique des entrées de caisse par intervalle';
+
+  @override
+  String get financeTillImputationHeading => 'Ce que ces versements ont éteint';
+
+  @override
+  String get financeTillImputationHint =>
+      'En devise de créance : ces montants ne s\'additionnent pas à ceux du tiroir.';
+
+  @override
+  String financeTillImputationCardTitle(String currency) {
+    return 'Créances réglées en $currency';
+  }
+
+  @override
+  String financeTillImputationTotal(String amount) {
+    return 'Total imputé · $amount';
+  }
+
+  @override
+  String financeTillImputationSectionA11yLabel(String currency) {
+    return 'Imputation par poste de frais, en $currency';
+  }
+
+  @override
+  String financeTillFeeCodeAmountA11yLabel(String label, String amount) {
+    return '$label : $amount';
+  }
+
+  @override
+  String financeTillFreshnessNotice(String relative) {
+    return 'Arrêté à la dernière synchro · $relative';
+  }
+
+  @override
+  String get financeTillFreshnessNever => 'Jamais synchronisé';
+
+  @override
+  String get financeStatsCurrencyNoMovementTill =>
+      'Rien n\'est entré dans le tiroir sur cette période.';
 
   @override
   String get enrollmentResults => 'Résultats';
@@ -7257,6 +7610,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAllocationsLabel => 'Répartition';
 
   @override
+  String get ticketRateLabel => 'Taux';
+
+  @override
+  String get ticketDerivedAmountPrefix => 'soit';
+
+  @override
   String get ticketAdvanceLabel => 'Avance (non imputée)';
 
   @override
@@ -7432,8 +7791,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiquePayerFirstNameLabel => 'Prénom';
 
   @override
-  String get boutiquePayerReceiptNotice =>
-      'Le reçu est nominatif au payeur ; les élèves bénéficiaires s\'attachent à chaque ligne.';
+  String get boutiquePayerOptionalNotice =>
+      'Ces informations sont facultatives : une vente peut être encaissée sans nommer le payeur. Renseignées, elles figurent sur le reçu.';
 
   @override
   String get boutiquePayerUnknownNotice =>
@@ -7444,18 +7803,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueBlockerEmptyCart => 'Panier vide';
-
-  @override
-  String get boutiqueBlockerLastName => 'Nom';
-
-  @override
-  String get boutiqueBlockerMiddleName => 'Post-nom';
-
-  @override
-  String get boutiqueBlockerFirstName => 'Prénom';
-
-  @override
-  String get boutiqueBlockerPhone => 'Téléphone du payeur';
 
   @override
   String get boutiqueBlockerPhoneIncomplete => 'Téléphone incomplet';

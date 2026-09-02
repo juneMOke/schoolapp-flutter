@@ -10,8 +10,8 @@ class FacturationPaymentDetailIntent extends Equatable {
   final String surname;
   final String levelName;
   final String levelGroupName;
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro E.164 du payeur (v28). `null` est un état NORMAL : les versements
@@ -52,8 +52,8 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.surname,
     required this.levelName,
     required this.levelGroupName,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.amounts = MoneyBag.empty,

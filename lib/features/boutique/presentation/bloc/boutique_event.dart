@@ -146,6 +146,39 @@ class BoutiquePayerFromDirectoryUsed extends BoutiqueEvent {
 
 /// Vide lignes **et** payeur. Sans confirmation : le panier n'est pas encore un
 /// engagement.
+/// Le client règle CETTE devise du panier dans une autre monnaie.
+///
+/// [catalogCurrency] est la devise dans laquelle les articles sont tarifés —
+/// le pivot. Choisir cette même devise annule la conversion.
+class BoutiqueTenderCurrencyChanged extends BoutiqueEvent {
+  final String catalogCurrency;
+  final String currency;
+
+  const BoutiqueTenderCurrencyChanged({
+    required this.catalogCurrency,
+    required this.currency,
+  });
+
+  @override
+  List<Object?> get props => [catalogCurrency, currency];
+}
+
+/// Ce que le client a **posé sur le comptoir** pour cette devise du panier.
+///
+/// `null` remet le montant converti exact — le défaut.
+class BoutiqueTenderAmountChanged extends BoutiqueEvent {
+  final String catalogCurrency;
+  final int? tenderedCents;
+
+  const BoutiqueTenderAmountChanged({
+    required this.catalogCurrency,
+    this.tenderedCents,
+  });
+
+  @override
+  List<Object?> get props => [catalogCurrency, tenderedCents];
+}
+
 class BoutiqueCartCleared extends BoutiqueEvent {
   const BoutiqueCartCleared();
 }

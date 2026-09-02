@@ -32,8 +32,12 @@ class CreatePaymentRequestModel {
   /// contre les imputations DEVISE PAR DEVISE : un total juste globalement mais
   /// mal réparti est refusé (`ALLOCATION_SUM_MISMATCH`).
   final List<MoneyModel> amounts;
-  final String payerFirstName;
-  final String payerLastName;
+
+  /// Les trois noms sont FACULTATIFS depuis la V114 serveur : `null` quand
+  /// l'argent a été pris sans nommer qui le donnait. Ses colonnes l'étaient
+  /// depuis la V10 — c'était l'arête HTTP, et elle seule, qui les exigeait.
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
   final String? payerPhoneNumber;
   final List<CreatePaymentAllocationRequestModel> allocations;
@@ -42,8 +46,8 @@ class CreatePaymentRequestModel {
     required this.studentId,
     required this.academicYearId,
     required this.amounts,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     required this.allocations,

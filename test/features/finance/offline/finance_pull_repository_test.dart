@@ -8,12 +8,15 @@ import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_pull_outcome.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_pull_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart';
 
@@ -21,17 +24,23 @@ import '../../offline_full_db.dart';
 
 class MockFinancePullApi extends Mock implements FinancePullApi {}
 
+class MockExchangeRateRemoteDataSource extends Mock
+    implements ExchangeRateRemoteDataSource {}
+
 void main() {
   late Database db;
   late MockFinancePullApi api;
   late SyncMetaDao syncMeta;
   late FinanceLocalDao dao;
+  late MockExchangeRateRemoteDataSource ratesApi;
+  late CurrentUserContext user;
   late FinancePullRepositoryImpl repo;
 
   const auth = <String, dynamic>{'requiresAuth': true};
   const limit = FinancePullRepositoryImpl.pageLimit;
   const chargesResource = FinancePullRepositoryImpl.chargesResource;
   const paymentsResource = FinancePullRepositoryImpl.paymentsResource;
+  const ratesResource = FinancePullRepositoryImpl.exchangeRatesResource;
   var clock = 10000;
 
   setUp(() async {
@@ -41,12 +50,16 @@ void main() {
     // Le pull n'engendre aucun id (les modèles arrivent identifiés du serveur) :
     // le générateur réel suffit, aucun besoin de le rendre déterministe ici.
     dao = FinanceLocalDao(db, const IdGenerator(Uuid()));
+    ratesApi = MockExchangeRateRemoteDataSource();
+    user = CurrentUserContext()..set('uid-1', schoolId: 'school-1');
     clock = 10000;
     repo = FinancePullRepositoryImpl(
       api: api,
       dao: dao,
       syncMetaDao: syncMeta,
       requiredAuth: auth,
+      rates: ratesApi,
+      currentUser: user,
       now: () => clock,
     );
   });
@@ -123,6 +136,7 @@ void main() {
     String studentId = 'stu-1',
     int amount = 20000,
     List<PaymentPullAllocationDto> allocations = const [],
+    List<PaymentPullTenderDto> tenders = const [],
   }) => PaymentDeltaDto(
     payment: PaymentDto(
       id: id,
@@ -134,6 +148,7 @@ void main() {
       payerLastName: 'Lovelace',
     ),
     allocations: allocations,
+    tenders: tenders,
   );
 
   void stubCharges(List<HttpResponse<StudentChargePageDto>> pages) {
@@ -559,6 +574,104 @@ void main() {
     );
 
     test(
+      'les lignes d’encaissement de l’AUTRE poste descendent avec le versement',
+      () async {
+        // Sans elles, un versement de 50 \$ encaissé en francs se relit ici en
+        // dollars : le tiroir local dérive de celui du serveur, la dérive même
+        // que ce flux existe pour borner.
+        when(() => api.pullPayments(any(), any(), any(), any())).thenAnswer(
+          (_) async => httpOk(
+            PaymentPageDto(
+              items: [
+                paymentDelta(
+                  'pay-1',
+                  tenders: const [
+                    PaymentPullTenderDto(
+                      id: 'tnd-1',
+                      amountInCents: 14000000,
+                      currency: 'CDF',
+                      rate: 2800,
+                      pivotCurrency: 'USD',
+                    ),
+                  ],
+                ),
+              ],
+              page: env(nextWatermark: 'WM1'),
+            ),
+          ),
+        );
+
+        await repo.syncPayments();
+
+        final rows = await db.query('payment_tenders');
+        expect(rows, hasLength(1));
+        expect(rows.single['amount_in_cents'], 14000000);
+        expect(rows.single['currency'], 'CDF');
+        expect(rows.single['pivot_currency'], 'USD');
+        expect(rows.single['rate_micros'], 2800000000);
+      },
+    );
+
+    test('un versement d’avant le contrat descend SANS tender, et n’efface pas '
+        'l’identité posée par la migration', () async {
+      // Le backfill de la v41 a écrit « perçu = imputé, taux 1 » sur tout
+      // l'historique local. Purger sur une liste vide effacerait ce travail,
+      // et le versement se relirait comme si rien n'était entré dans le
+      // tiroir.
+      await db.insert('payment_tenders', {
+        'id': 'tnd-legacy',
+        'client_uuid': 'tnd-legacy',
+        'payment_id': 'pay-1',
+        'amount_in_cents': 20000,
+        'currency': 'USD',
+        'rate_micros': 1000000,
+        'pivot_currency': 'USD',
+      });
+      when(() => api.pullPayments(any(), any(), any(), any())).thenAnswer(
+        (_) async => httpOk(
+          PaymentPageDto(
+            items: [paymentDelta('pay-1')],
+            page: env(nextWatermark: 'WM1'),
+          ),
+        ),
+      );
+
+      await repo.syncPayments();
+
+      expect(await db.query('payment_tenders'), hasLength(1));
+    });
+
+    test('un taux absent sur le fil vaut l’identité, jamais zéro', () async {
+      // Un taux nul diviserait ou inverserait de l'argent : le repli est 1,
+      // le cas où perçu et imputé se confondent.
+      when(() => api.pullPayments(any(), any(), any(), any())).thenAnswer(
+        (_) async => httpOk(
+          PaymentPageDto(
+            items: [
+              paymentDelta(
+                'pay-1',
+                tenders: const [
+                  PaymentPullTenderDto(
+                    id: 'tnd-1',
+                    amountInCents: 20000,
+                    currency: 'USD',
+                  ),
+                ],
+              ),
+            ],
+            page: env(nextWatermark: 'WM1'),
+          ),
+        ),
+      );
+
+      await repo.syncPayments();
+
+      final row = (await db.query('payment_tenders')).single;
+      expect(row['rate_micros'], 1000000);
+      expect(row['pivot_currency'], 'USD');
+    });
+
+    test(
       'les deux ressources ont des cycles indépendants (jetons distincts)',
       () async {
         await syncMeta.setCursor(chargesResource, cursor: 'CH', syncedAt: 1);
@@ -577,5 +690,216 @@ void main() {
         expect(await syncMeta.getCursor(chargesResource), 'CH'); // intact
       },
     );
+  });
+
+  group('syncExchangeRates — série référentielle, hors keyset', () {
+    Future<void> seed({
+      required String schoolId,
+      String base = 'USD',
+      String quote = 'CDF',
+      String effectiveFrom = '2026-01-01T00:00:00Z',
+      int rateMicros = 2500000000,
+    }) => db.insert('ref_exchange_rates', {
+      'school_id': schoolId,
+      'base': base,
+      'quote': quote,
+      'effective_from': effectiveFrom,
+      'rate_micros': rateMicros,
+      'synced_at': 1,
+    });
+
+    ExchangeRatePullDto point({
+      String pivot = 'USD',
+      String recue = 'CDF',
+      double taux = 2800,
+      double? tolerance = 2,
+      String depuis = '2026-09-01T06:00:00Z',
+    }) => ExchangeRatePullDto(
+      devisePivot: pivot,
+      deviseRecue: recue,
+      taux: taux,
+      tolerancePourcent: tolerance,
+      enVigueurDepuis: depuis,
+    );
+
+    test('la série remplace le cache EN BLOC, scopée à l’école de la session : '
+        'le palier périmé disparaît, celui de l’autre école reste', () async {
+      await seed(schoolId: 'school-1'); // palier que le serveur ne sert plus
+      await seed(schoolId: 'school-2', rateMicros: 2000000000);
+      when(() => ratesApi.fetch(any(), etag: any(named: 'etag'))).thenAnswer(
+        (_) async => ExchangeRatePullResult(
+          points: [
+            point(),
+            point(depuis: '2026-09-01T12:00:00Z', taux: 2900),
+          ],
+          etag: 'W/"v1"',
+        ),
+      );
+
+      final outcome = right(await repo.syncExchangeRates());
+
+      expect(outcome.upserted, 2);
+      expect(outcome.notModified, isFalse);
+      expect(outcome.cursor, 'W/"v1"'); // l'empreinte du bundle
+
+      final mine = await db.query(
+        'ref_exchange_rates',
+        where: 'school_id = ?',
+        whereArgs: ['school-1'],
+        orderBy: 'effective_from',
+      );
+      expect(mine, hasLength(2));
+      expect(mine.first['effective_from'], '2026-09-01T06:00:00Z');
+      expect(mine.first['rate_micros'], 2800000000);
+      // 2 % → 200 points de base, sans virgule à traîner.
+      expect(mine.first['divergence_band_bp'], 200);
+      expect(mine.first['synced_at'], clock);
+
+      // L’autre école n’a pas été touchée : une purge non scopée viderait le
+      // guichet de la seconde école sur la même tablette.
+      final others = await db.query(
+        'ref_exchange_rates',
+        where: 'school_id = ?',
+        whereArgs: ['school-2'],
+      );
+      expect(others, hasLength(1));
+
+      expect(await syncMeta.getSyncedAt(ratesResource), clock);
+    });
+
+    test(
+      'une panne réseau ne vide pas le cache : le guichet garde le taux qu’il a',
+      () async {
+        await seed(schoolId: 'school-1');
+        when(
+          () => ratesApi.fetch(any(), etag: any(named: 'etag')),
+        ).thenThrow(network());
+
+        final failure = left(await repo.syncExchangeRates());
+
+        expect(failure, isA<ServerFailure>());
+        expect(await db.query('ref_exchange_rates'), hasLength(1));
+      },
+    );
+
+    test(
+      'sans école résolue : rien n’est demandé au serveur, rien n’est effacé',
+      () async {
+        await seed(schoolId: 'school-1');
+        user.set(
+          'uid-1',
+        ); // session sans schoolId (backend hérité, claim absent)
+
+        final outcome = right(await repo.syncExchangeRates());
+
+        expect(outcome.notModified, isTrue);
+        verifyNever(() => ratesApi.fetch(any(), etag: any(named: 'etag')));
+        expect(await db.query('ref_exchange_rates'), hasLength(1));
+      },
+    );
+
+    test('un point inexploitable s’écarte sans emporter la série, et n’est pas '
+        'compté comme écrit', () async {
+      when(() => ratesApi.fetch(any(), etag: any(named: 'etag'))).thenAnswer(
+        (_) async => ExchangeRatePullResult(
+          points: [
+            point(),
+            point(pivot: 'USD', recue: 'USD'), // une devise vers elle-même
+            point(taux: 0, depuis: '2026-09-02T06:00:00Z'), // taux nul
+          ],
+        ),
+      );
+
+      final outcome = right(await repo.syncExchangeRates());
+
+      expect(outcome.upserted, 1);
+      expect(await db.query('ref_exchange_rates'), hasLength(1));
+    });
+
+    test('l’empreinte repart en `If-None-Match` au cycle suivant', () async {
+      // Mémorisée SOUS L'ÉCOLE : sur une tablette partagée, renvoyer
+      // l'empreinte de l'école d'à côté vaudrait un 304 — donc aucun taux, et
+      // une table pourtant marquée fraîche.
+      await syncMeta.setCursor(
+        '$ratesResource:school-1',
+        cursor: 'W/"v0"',
+        syncedAt: 1,
+      );
+      when(() => ratesApi.fetch(any(), etag: any(named: 'etag'))).thenAnswer(
+        (_) async => const ExchangeRatePullResult(notModified: true),
+      );
+
+      await repo.syncExchangeRates();
+
+      final sent = verify(
+        () => ratesApi.fetch(any(), etag: captureAny(named: 'etag')),
+      ).captured;
+      expect(sent, ['W/"v0"']);
+    });
+
+    test(
+      '304 : le cache est CONSERVÉ — « rien n’a changé » n’est pas « plus de '
+      'taux »',
+      () async {
+        await seed(schoolId: 'school-1');
+        when(() => ratesApi.fetch(any(), etag: any(named: 'etag'))).thenAnswer(
+          (_) async =>
+              const ExchangeRatePullResult(notModified: true, etag: 'W/"v0"'),
+        );
+
+        final outcome = right(await repo.syncExchangeRates());
+
+        expect(outcome.notModified, isTrue);
+        expect(
+          await db.query('ref_exchange_rates'),
+          hasLength(1),
+          reason:
+              'purger sur un 304 éteindrait la bascule de devise d’un guichet '
+              'sans qu’aucune écriture n’ait eu lieu',
+        );
+        // La fraîcheur avance quand même : le cycle a bien eu lieu.
+        expect(await syncMeta.getSyncedAt(ratesResource), clock);
+      },
+    );
+
+    test(
+      'l’empreinte d’une AUTRE école ne se renvoie pas : chacune a la sienne',
+      () async {
+        await syncMeta.setCursor(
+          '$ratesResource:school-2',
+          cursor: 'W/"autre"',
+          syncedAt: 1,
+        );
+        when(
+          () => ratesApi.fetch(any(), etag: any(named: 'etag')),
+        ).thenAnswer((_) async => const ExchangeRatePullResult());
+
+        await repo.syncExchangeRates();
+
+        final sent = verify(
+          () => ratesApi.fetch(any(), etag: captureAny(named: 'etag')),
+        ).captured;
+        expect(
+          sent,
+          [null],
+          reason:
+              'renvoyer l’empreinte de school-2 vaudrait un 304 : school-1 '
+              'n’aurait jamais de taux, et sa table serait marquée fraîche',
+        );
+      },
+    );
+
+    test('série vide servie : le cache local est vidé, pas conservé', () async {
+      await seed(schoolId: 'school-1');
+      when(
+        () => ratesApi.fetch(any(), etag: any(named: 'etag')),
+      ).thenAnswer((_) async => const ExchangeRatePullResult());
+
+      right(await repo.syncExchangeRates());
+
+      // Une école qui retire son taux doit éteindre la bascule du guichet ; un
+      // cache conservé ferait encaisser au taux d’avant, indéfiniment.
+      expect(await db.query('ref_exchange_rates'), isEmpty);
+    });
   });
 }

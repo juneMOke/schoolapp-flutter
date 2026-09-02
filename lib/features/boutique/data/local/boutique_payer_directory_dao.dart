@@ -30,6 +30,20 @@ class BoutiquePayerDirectoryDao {
   /// depuis des mois.
   static const int searchScanCap = 400;
 
+  /// Une vente ANONYME n'est proposable à personne.
+  ///
+  /// Depuis la V114 serveur, une vente peut n'avoir qu'un numéro et aucun nom.
+  /// Elle porterait une entrée de répertoire sans identité — un nom vide, un
+  /// compteur de ventes et un bouton « Utiliser » qui ne remplirait rien. Le
+  /// répertoire existe pour éviter de retaper une identité : sans identité, il
+  /// n'a rien à offrir.
+  ///
+  /// `TRIM(...) <> ''` autant que `IS NOT NULL` : les deux écritures existent en
+  /// base, `''` étant le repli du pull d'avant la v43.
+  static const _namedPayer =
+      "(TRIM(COALESCE(payer_last_name, '')) <> '' "
+      "OR TRIM(COALESCE(payer_name, '')) <> '')";
+
   /// Les payeurs de cette école dont le numéro se rapproche de [phoneNumber].
   ///
   /// Rend une liste vide sous le seuil de chiffres significatifs : **on ne juge
@@ -50,6 +64,7 @@ class BoutiquePayerDirectoryDao {
       '  FROM boutique_sales '
       ' WHERE school_id = ? '
       '   AND payer_phone_number IS NOT NULL '
+      '   AND $_namedPayer '
       "   AND ${PhoneNumberSql.digitsOnly('payer_phone_number')} LIKE ? "
       ' GROUP BY payer_phone_number, payer_last_name, payer_middle_name, '
       '          payer_first_name, payer_name '

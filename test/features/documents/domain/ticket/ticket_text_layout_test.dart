@@ -14,6 +14,8 @@ const _labels = TicketLabels(
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
+  rateLabel: 'Taux',
+  derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
   balanceLabel: 'Solde',
@@ -49,7 +51,9 @@ TicketReceiptModel _model({
   provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
-  amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
+  tenders: TicketTenderLine.identityFrom(
+    MoneyBag.of(const [Money(150000, 'CDF')]),
+  ),
   allocations: allocations,
   remainingBalance: remainingBalanceInCents == null
       ? null
@@ -466,7 +470,9 @@ void main() {
       provisionalReference: 'PROV-A1B2C3',
       paidAt: DateTime(2026, 8, 4, 14, 7),
       cashierFullName: 'Ĳsselmeer Ǎmba',
-      amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
+      tenders: TicketTenderLine.identityFrom(
+        MoneyBag.of(const [Money(150000, 'CDF')]),
+      ),
       allocations: const [
         TicketAllocationLine(
           label: 'Frais “scolaires”',

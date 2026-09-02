@@ -4,6 +4,11 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
+import 'package:school_app_flutter/core/money/tender_settlement.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
@@ -25,17 +30,23 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
   final DeviceIdentityService _device;
   final Clock _now;
 
+  /// La série de taux, relue **ici** et non reçue de l'écran : l'UI ne peut pas
+  /// fabriquer un couple perçu/vendu que la base ne justifierait pas.
+  final ExchangeRateReader? _rates;
+
   const BoutiqueSaleRepositoryImpl({
     required BoutiqueSaleWriteDao dao,
     required CurrentUserContext currentUser,
     required IdGenerator ids,
     required DeviceIdentityService device,
     Clock now = systemClock,
+    ExchangeRateReader? rates,
   }) : _dao = dao,
        _currentUser = currentUser,
        _ids = ids,
        _device = device,
-       _now = now;
+       _now = now,
+       _rates = rates;
 
   @override
   Future<Either<Failure, RecordedSale>> recordSale({
@@ -142,7 +153,7 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
         id: saleId,
         schoolId: schoolId,
         academicYearId: academicYearId,
-        payerLastName: payer.lastName.trim(),
+        payerLastName: _orNull(payer.lastName),
         payerMiddleName: _orNull(payer.middleName),
         payerFirstName: _orNull(payer.firstName),
         payerPhoneNumber: phone,
@@ -162,6 +173,27 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
         updatedAt: nowMs,
       );
 
+      // Ce qui est ENTRÉ DANS LE TIROIR, à côté de ce qui a été vendu.
+      final settlement = TenderSettlement(
+        rates: await _rates?.forCurrentSchool() ?? const <ExchangeRate>[],
+        at: DateTime.parse(soldAt),
+      );
+      final settlementLines = [
+        for (final due in amounts.entries) _settle(settlement, cart, due),
+      ];
+      final tenders = settlement.tendersFor(settlementLines);
+
+      // Fail-fast LOCAL sur le couple perçu/vendu, comme au guichet : un refus
+      // serveur arriverait sur une vente déjà encaissée et l'immobiliserait en
+      // SYNC_ERROR, sans rien que le comptoir puisse corriger.
+      final violation = TenderComposition.check(
+        allocations: amounts.entries,
+        tenders: tenders,
+      );
+      if (violation != null) {
+        return Left(ValidationFailure(violation.message));
+      }
+
       final request = BoutiqueSaleRequest(
         sale: BoutiqueSaleInput(
           id: saleId,
@@ -171,6 +203,7 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
           payerMiddleName: sale.payerMiddleName,
           payerPhoneNumber: phone,
           amounts: amounts,
+          tenders: tenders,
           soldAt: soldAt,
         ),
         lines: wireLines,
@@ -184,6 +217,17 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
         outboxEntryId: _ids.newId(),
         schoolId: schoolId,
         nowMs: nowMs,
+        tenders: [
+          for (final tender in tenders)
+            BoutiqueSaleTenderLocalModel(
+              id: _ids.newId(),
+              saleId: saleId,
+              amountInCents: tender.amountInCents,
+              currency: tender.currency,
+              rateMicros: tender.rateMicros,
+              pivotCurrency: tender.pivotCurrency,
+            ),
+        ],
       );
 
       return Right(RecordedSale(sale: sale, lines: lines));
@@ -194,17 +238,61 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
     }
   }
 
+  /// Le règlement d'une devise du panier, tel que le comptoir l'a décidé.
+  ///
+  /// Sans devise de règlement choisie, c'est l'identité : le client paie dans la
+  /// devise du catalogue, il n'y a ni taux ni conversion.
+  ///
+  /// ⚠️ **Le montant dû n'est jamais négociable ici** — et c'est la différence
+  /// avec le guichet. Une vente est comptant **intégral** (invariant I-5, aucune
+  /// colonne de reste sur `boutique_sales`) : ce qui entre dans le tiroir vaut
+  /// toujours le prix du panier converti. Le montant saisi au comptoir ne sert
+  /// qu'à une chose, rendre la monnaie : posé au-dessus du dû, l'excédent
+  /// repart avec le client ; posé en dessous, il ne fabrique pas une vente à
+  /// moitié payée — l'écran le signale, et le tiroir garde le compte juste.
+  SettlementLine _settle(
+    TenderSettlement settlement,
+    BoutiqueCart cart,
+    Money due,
+  ) {
+    final tender = cart.tenderFor(due.currency);
+    final target = tender.currency.isEmpty ? due.currency : tender.currency;
+    final line = settlement.fromSettled(
+      settledCurrency: due.currency,
+      tenderCurrency: target,
+      settledCents: due.amountInCents,
+    );
+    final tendered = tender.tenderedCents ?? 0;
+    if (tendered <= line.tenderCents) return line;
+    return SettlementLine(
+      settledCurrency: line.settledCurrency,
+      tenderCurrency: line.tenderCurrency,
+      rate: line.rate,
+      settledCents: line.settledCents,
+      tenderCents: line.tenderCents,
+      changeCents: tendered - line.tenderCents,
+    );
+  }
+
   /// `NOM Post-nom Prénom`, nom en capitales — l'ordre RDC, et celui que le
   /// serveur applique.
-  static String _composePayerName(
+  /// `null` quand le triplet entier est vide — **jamais `''`**.
+  ///
+  /// C'est ce que le ticket lit pour escamoter son bloc payeur, et c'est la
+  /// règle que le serveur s'est donnée en V114 : « pas de payeur » est un fait,
+  /// pas un nom de longueur zéro. Une chaîne vide ferait imprimer un cadre
+  /// creux, qui sur une pièce se lit comme une mention effacée.
+  static String? _composePayerName(
     String lastName,
     String middleName,
     String firstName,
-  ) => [
-    lastName.trim().toUpperCase(),
-    middleName.trim(),
-    firstName.trim(),
-  ].where((part) => part.isNotEmpty).join(' ');
+  ) => _orNull(
+    [
+      lastName.trim().toUpperCase(),
+      middleName.trim(),
+      firstName.trim(),
+    ].where((part) => part.isNotEmpty).join(' '),
+  );
 
   static String? _orNull(String value) {
     final trimmed = value.trim();

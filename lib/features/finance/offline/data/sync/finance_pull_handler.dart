@@ -29,6 +29,17 @@ class FinancePullHandler implements PullHandler {
     this._pull,
   );
 
+  /// La série des taux de guichet.
+  ///
+  /// `finance.grid.read` — le même droit que la grille tarifaire : un taux dit
+  /// à quel prix l'école encaisse, c'est du paramétrage, pas un encaissement.
+  /// Un caissier qui ne l'a pas lit la grille sans le taux, et son écran ne
+  /// propose alors que la devise de chaque frais.
+  FinancePullHandler.exchangeRates(FinancePullRepository repository)
+    : this._(FinancePullRepositoryImpl.exchangeRatesResource, const [
+        Perm.financeGridRead,
+      ], repository.syncExchangeRates);
+
   /// Créances autoritaires du roster (le plus gros volume, §2.1).
   ///
   /// `finance.charge.read` — distinct de la caisse : le secrétariat lit ce

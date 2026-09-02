@@ -30,6 +30,20 @@ String? designatedFeeTariffId(StudentCharge charge) {
   return tariffId.isEmpty ? null : tariffId;
 }
 
+/// Un montant en cents tel qu'il s'écrit **dans un champ de saisie** : sans
+/// devise, sans séparateur de milliers, et sans décimales quand il n'en porte
+/// pas.
+///
+/// Vit ici, et non dans la page, parce que deux surfaces l'écrivent désormais —
+/// la ligne de tranche et le montant d'un groupe qui se ventile sur elle. Deux
+/// formateurs finiraient par diverger, et le champ afficherait « 50000 » d'un
+/// côté et « 50000.00 » de l'autre pour la même somme.
+String formatPlainAmount(int cents) {
+  final amount = cents / 100;
+  final isInteger = amount == amount.roundToDouble();
+  return isInteger ? amount.toStringAsFixed(0) : amount.toStringAsFixed(2);
+}
+
 /// Saisie monétaire convertie en cents (0 si vide, invalide ou ≤ 0).
 int parseAmountToCents(String rawAmount) {
   final parsed = parseMonetaryAmount(rawAmount);

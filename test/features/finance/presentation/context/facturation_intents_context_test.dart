@@ -10,7 +10,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 /// La règle, une fois pour les quatre intents de Facturation : **la classe est
 /// du contexte d'affichage, jamais une condition d'ouverture.**
 ///
-/// Une recherche par identité (les trois noms, aucun niveau) ne transmet aucune
+/// Une recherche par identité (un nom, aucun niveau) ne transmet aucune
 /// classe — le résumé d'élève n'en porte pas, et les derniers critères de
 /// recherche, seule autre source, sont vides dans ce mode. L'exiger fermait la
 /// fiche d'un élève parfaitement identifié.

@@ -78,11 +78,11 @@ class _AllocationRow extends StatelessWidget {
   /// l'élève), même convention que la ligne de versement.
   String _payerFullName() {
     final fullName = [
-      allocation.payerLastName,
+      allocation.payerLastName ?? '',
       allocation.payerMiddleName ?? '',
-      allocation.payerFirstName,
+      allocation.payerFirstName ?? '',
     ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
-    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+    return fullName.isEmpty ? l10n.facturationPaymentPayerUnnamed : fullName;
   }
 
   @override

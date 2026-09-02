@@ -241,11 +241,11 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
 
   String _payerFullName(AppLocalizations l10n) {
     final fullName = [
-      intent.payerLastName,
+      intent.payerLastName ?? '',
       intent.payerMiddleName ?? '',
-      intent.payerFirstName,
+      intent.payerFirstName ?? '',
     ].map((v) => v.trim()).where((v) => v.isNotEmpty).join(' ');
-    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+    return fullName.isEmpty ? l10n.facturationPaymentPayerUnnamed : fullName;
   }
 
   /// Numéro de pièce affichable, ou un libellé neutre.

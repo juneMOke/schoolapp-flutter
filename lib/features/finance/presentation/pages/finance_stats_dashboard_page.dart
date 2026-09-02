@@ -3,15 +3,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/extensions/finance_stats_error_l10n_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_dashboard_tabs.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_recovery_tab.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_dashboard_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_error_view.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_loading_view.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_period_filter.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_success_view.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Le tableau de bord Finances — **deux onglets, deux questions**.
+///
+/// « Où en est-on de l'argent qu'on doit encaisser cette année ? » et « combien
+/// est entré dans le tiroir ? » ne se posent jamais en même temps. Elles ont
+/// pourtant partagé un écran et un sélecteur de période, jusqu'à ce que le
+/// serveur les sépare en deux routes.
+///
+/// La page reste **la même** — même chemin, même entrée de menu, même
+/// permission. Un sous-menu séparé aurait buté sur un droit : la caisse se lit
+/// sous `finance.stats.read`, qu'un caissier boutique ne détient pas ; il
+/// n'aurait pas vu le total de ses propres ventes dans un menu qui lui est
+/// ouvert.
 class FinanceStatsDashboardPage extends StatefulWidget {
   const FinanceStatsDashboardPage({super.key});
 
@@ -21,10 +32,33 @@ class FinanceStatsDashboardPage extends StatefulWidget {
 }
 
 class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
+  FinanceDashboardTab _tab = FinanceDashboardTab.recovery;
+
+  /// L'onglet Caisse n'a encore jamais été ouvert.
+  ///
+  /// **Chargement paresseux, et ce n'est pas une micro-optimisation :** deux
+  /// appels au montage, sur une liaison de guichet, c'est deux fois le délai
+  /// avant le premier chiffre — pour un écran dont on ne lit qu'une moitié.
+  bool _tillRequested = false;
+
   @override
   void initState() {
     super.initState();
-    context.read<FinanceStatsBloc>().add(const FinanceStatsRequested());
+    context.read<FinanceRecoveryBloc>().add(const FinanceRecoveryRequested());
+  }
+
+  void _onTabSelected(FinanceDashboardTab tab) {
+    if (tab == _tab) return;
+
+    // La caisse se demande **une fois**, à la première ouverture. Les allers et
+    // retours suivants entre les onglets ne rappellent rien : ce que l'écran
+    // affiche est ce qui a été lu, et la ligne de fraîcheur dira son âge.
+    if (tab == FinanceDashboardTab.till && !_tillRequested) {
+      _tillRequested = true;
+      context.read<FinanceTillBloc>().add(const FinanceTillRequested());
+    }
+
+    setState(() => _tab = tab);
   }
 
   @override
@@ -33,94 +67,31 @@ class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
 
     return AppPageBackground(
       scrollable: true,
-      child: BlocConsumer<FinanceStatsBloc, FinanceStatsState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status || prev.errorType != curr.errorType,
-        listener: (context, state) {
-          if (state.status == FinanceStatsStatus.error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorType.localizedMessage(l10n))),
-            );
-          }
-        },
-        buildWhen: (prev, curr) =>
-            prev.status != curr.status ||
-            prev.stats != curr.stats ||
-            prev.selectedPeriod != curr.selectedPeriod,
-        builder: (context, state) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FinanceStatsDashboardHeader(state: state, l10n: l10n),
-              const SizedBox(height: AppDimensions.spacingL),
-              _FinanceStatsContextFilterRow(state: state),
-              const SizedBox(height: AppDimensions.spacingL),
-              AnimatedSwitcher(
-                duration: AppMotion.standard,
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                child: KeyedSubtree(
-                  key: ValueKey<FinanceStatsStatus>(state.status),
-                  child: _buildBody(context, state, l10n),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBody(
-    BuildContext context,
-    FinanceStatsState state,
-    AppLocalizations l10n,
-  ) {
-    return switch (state.status) {
-      FinanceStatsStatus.loading => const FinanceStatsLoadingView(),
-      FinanceStatsStatus.success => FinanceStatsSuccessView(
-        stats: state.stats!,
-      ),
-      FinanceStatsStatus.error => FinanceStatsErrorView(
-        message: state.errorType.localizedMessage(l10n),
-        onRetry: () => context.read<FinanceStatsBloc>().add(
-          const FinanceStatsRefreshRequested(),
-        ),
-        l10n: l10n,
-      ),
-      FinanceStatsStatus.initial => const SizedBox.shrink(),
-    };
-  }
-}
-
-class _FinanceStatsContextFilterRow extends StatelessWidget {
-  final FinanceStatsState state;
-
-  const _FinanceStatsContextFilterRow({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final schoolYear =
-        state.stats?.context.schoolYear ??
-        l10n.financeStatsSchoolYearUnavailable;
-
-    return Semantics(
-      container: true,
-      label: l10n.financeStatsContextSchoolYear(schoolYear),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        runSpacing: AppDimensions.spacingM,
-        spacing: AppDimensions.spacingM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ExcludeSemantics(
-            child: Text(
-              l10n.financeStatsContextSchoolYear(schoolYear),
-              style: Theme.of(context).textTheme.bodyMedium,
+          BlocBuilder<FinanceRecoveryBloc, FinanceRecoveryState>(
+            buildWhen: (prev, curr) => prev.recovery != curr.recovery,
+            builder: (context, state) => FinanceStatsDashboardHeader(
+              schoolYear: state.recovery?.context.schoolYear,
+              l10n: l10n,
             ),
           ),
-          const FinanceStatsPeriodFilter(),
+          const SizedBox(height: AppDimensions.spacingL),
+          FinanceDashboardTabs(selected: _tab, onSelected: _onTabSelected),
+          const SizedBox(height: AppDimensions.spacingL),
+          AnimatedSwitcher(
+            duration: AppMotion.standard,
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: KeyedSubtree(
+              key: ValueKey<FinanceDashboardTab>(_tab),
+              child: switch (_tab) {
+                FinanceDashboardTab.recovery => const FinanceRecoveryTab(),
+                FinanceDashboardTab.till => const FinanceTillTab(),
+              },
+            ),
+          ),
         ],
       ),
     );

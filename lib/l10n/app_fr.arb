@@ -812,6 +812,34 @@
   "@configurationSettingsTariffOne": {
       "description": "Note expliquant que l'assiette de l'assistant n'existe plus dans les réglages"
   },
+  "configurationSectionsTitle": "Sections de frais",
+  "@configurationSectionsTitle": {
+      "description": "Titre de la carte de nommage des natures de frais"
+  },
+  "configurationSectionsSubtitle": "Le nom que votre école donne à chaque nature. Tous les tarifs d'une même nature s'affichent sous ce titre.",
+  "@configurationSectionsSubtitle": {
+      "description": "Sous-titre de la carte de nommage des sections"
+  },
+  "configurationSectionsSave": "Enregistrer les sections",
+  "@configurationSectionsSave": {
+      "description": "Bouton d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsSaved": "Sections enregistrées",
+  "@configurationSectionsSaved": {
+      "description": "Confirmation d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsHiddenHint": "Masquée : plus proposée à la saisie, mais toujours comptée dans les statistiques.",
+  "@configurationSectionsHiddenHint": {
+      "description": "Explication de ce que masquer une section veut dire"
+  },
+  "configurationSectionsLabelRequired": "Chaque section doit porter un nom.",
+  "@configurationSectionsLabelRequired": {
+      "description": "Refus d'enregistrer quand un titre de section est vide"
+  },
+  "configurationSectionsReorderHint": "Glissez une section pour la remonter ; l'ordre est celui du sélecteur de tarifs.",
+  "@configurationSectionsReorderHint": {
+      "description": "Explication du reclassement des sections"
+  },
   "configurationTariffAdd": "Ajouter un tarif",
   "@configurationTariffAdd": {
       "description": "Bouton d'ajout d'un tarif sur un niveau"
@@ -1761,7 +1789,7 @@
   "searchModeByClass": "Par classe",
   "searchModeByIdentity": "Par identité",
   "searchModeClassHint": "Choisissez un cycle puis un niveau pour lister toute la classe ; un nom, même partiel, y restreint la liste. Pour retrouver un élève sans connaître sa classe, basculez sur « Par identité ».",
-  "searchModeIdentityHint": "Renseignez le nom, le post-nom et le prénom de l'élève. Pour lister toute une classe, basculez sur « Par classe ».",
+  "searchModeIdentityHint": "Un seul nom suffit : nom, post-nom ou prénom. Pour lister toute une classe, basculez sur « Par classe ».",
   "searchRefineByNameLabel": "Affiner par nom (facultatif)",
   "searchRefineByNamePlaceholder": "Nom de l'élève, même partiel",
   "viewDetails": "Voir les détails",
@@ -2041,6 +2069,8 @@
   "identificationNumberLabel": "Numéro d'identification",
   "identificationNumberHelp": "Numéro d'identification officiel.",
   "phoneNumberLabel": "Téléphone",
+  "guardianPhoneNumberAbsent": "Sans numéro",
+  "guardianPhoneNumberOptionalNotice": "Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.",
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
   "phoneNumberCountryCodeLabel": "Indicatif pays",
   "phoneNumberInvalidError": "Numéro de téléphone invalide ({expectedDigits} chiffres attendus après l'indicatif).",
@@ -2340,7 +2370,7 @@
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
   "facturationEmptyEnrollmentWithheld": "La liste des élèves relève du module Inscription, auquel ce profil n'a pas accès : aucun élève ne peut être affiché ici, quels que soient les critères. Votre administrateur peut ouvrir cet accès.",
   "facturationEmptyTitle": "Aucun élève trouvé",
-  "facturationSearchHelpBanner": "Recherchez toute une classe (cycle + niveau), ou un élève précis (nom + post-nom + prénom).",
+  "facturationSearchHelpBanner": "Recherchez toute une classe (cycle + niveau), ou un élève précis (un seul nom suffit).",
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Niveau",
   "facturationSearchLevelPlaceholder": "Choisissez un cycle",
@@ -2364,6 +2394,15 @@
   "feeControlFeeGridWithheld": "La grille tarifaire relève d'un module auquel ce profil n'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.",
   "feeControlFeeLoadFailed": "La liste des frais de ce niveau n'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l'application.",
   "feeControlFeeLoadRetry": "Réessayer",
+  "feeControlFeeTrancheCount": "{count, plural, one{{count} tranche} other{{count} tranches}}",
+  "@feeControlFeeTrancheCount": {
+    "description": "Nombre de lignes de grille regroupées sous une même nature dans le sélecteur de frais du Contrôle. Composé seulement au-delà de une : le contrôle porte sur la nature entière, tranches confondues.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlPaymentStatusLabel": "Statut de paiement",
   "feeControlPaymentStatusAll": "Tous",
   "feeControlViewDetailLabel": "Voir la fiche financière",
@@ -2514,6 +2553,7 @@
   "facturationPaymentDetailHeroSubtitle": "Consultez les informations de ce paiement et la répartition des montants alloués.",
   "facturationPaymentInfoSectionTitle": "Informations du paiement",
   "facturationPaymentPayerLabel": "Payeur",
+  "facturationPaymentPayerUnnamed": "Sans payeur nommé",
   "facturationPaymentAmountLabel": "Montant global payé",
   "facturationPaymentPaidAtLabel": "Date de paiement",
   "facturationPaymentAmountPaidLabel": "Montant versé",
@@ -2548,12 +2588,19 @@
   "facturationPaymentAllocationsUnknownError": "Une erreur inattendue est survenue lors du chargement des allocations.",
   "facturationDetailChargesSectionTitle": "Frais de l'élève",
   "facturationDetailChargesSectionSubtitle": "Répartition des montants attendus, payés et restants.",
-  "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partielle(s), {dueCount} à régler",
+  "facturationDetailChargesSummary": "{feeCount, plural, =0{Aucun frais} =1{1 frais} other{{feeCount} frais}} · {trancheCount, plural, =1{1 tranche} other{{trancheCount} tranches}} · {unsettledCount, plural, =0{tout est soldé} =1{1 reste à régler} other{{unsettledCount} restent à régler}}",
   "@facturationDetailChargesSummary": {
+    "description": "Résumé de la section « Frais de l'élève », replié par nature (GF-5). Trois mailles, dans cet ordre : les natures, les tranches qu'elles portent, et celles qu'il reste à encaisser. Ce dernier compte est celui du RESTE COMPOSÉ, jamais du statut miroir — un frais soldé au guichet et pas encore remonté n'est plus à régler.",
     "placeholders": {
-      "totalCount": {},
-      "partialCount": {},
-      "dueCount": {}
+      "feeCount": {
+        "type": "int"
+      },
+      "trancheCount": {
+        "type": "int"
+      },
+      "unsettledCount": {
+        "type": "int"
+      }
     }
   },
   "facturationDetailChargesRetry": "Réessayer",
@@ -2619,6 +2666,7 @@
   "facturationCreatePaymentPayerMiddleNameHint": "Entrez le post-nom",
   "facturationCreatePaymentPayerFieldRequired": "Ce champ est obligatoire",
   "facturationCreatePaymentPayerPhoneLabel": "Téléphone du payeur",
+  "facturationCreatePaymentPayerOptionalNotice": "Ces informations sont facultatives : un versement peut être encaissé sans nommer le payeur. Le reçu, lui, porte toujours l'élève et les frais réglés.",
   "facturationCreatePaymentPayerPickAction": "Choisir un payeur",
   "facturationCreatePaymentPayerPickHelp": "Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.",
   "facturationPayerSearchDialogEyebrow": "Encaissement",
@@ -2765,7 +2813,55 @@
       }
     }
   },
+  "boutiqueTenderCurrency": "Le client règle {due} en",
+  "@boutiqueTenderCurrency": {"description": "La question se pose par devise du panier : c'est le sous-total dû dans cette unité qui sert de point de départ.", "placeholders": {"due": {"type": "String"}}},
+  "boutiqueTenderReceivedLabel": "Reçu au comptoir",
+  "@boutiqueTenderReceivedLabel": {"description": "Pré-rempli par la conversion et modifiable : le client tend un billet rond, l'écart repart en monnaie rendue."},
+  "boutiqueTenderShortfall": "Il manque · {amount}",
+  "@boutiqueTenderShortfall": {"description": "Le client a posé moins que le dû. Une vente est comptant intégral : on le dit au comptoir plutôt que d'écrire une vente à moitié payée.", "placeholders": {"amount": {"type": "String"}}},
+  "boutiqueTenderChangeDue": "Monnaie à rendre · {amount}",
+  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "facturationCreatePaymentTenderCurrency": "Le parent règle en",
+  "@facturationCreatePaymentTenderCurrency": {"description": "La question se pose sur le frais coché, parce que c'est la devise de CE frais qui sert de point de départ."},
+  "facturationCreatePaymentTenderAmountLabel": "Reçu en caisse",
+  "@facturationCreatePaymentTenderAmountLabel": {"description": "Le montant posé sur le comptoir. Remplir ce champ calcule l'imputation, et inversement."},
+  "facturationCreatePaymentChangeDue": "Monnaie à rendre · {amount}",
+  "@facturationCreatePaymentChangeDue": {"description": "La conversion ne tombe pas juste : ce reliquat repart avec le parent, il n'entre pas dans le tiroir.", "placeholders": {"amount": {"type": "String"}}},
   "facturationCreatePaymentAmountToSettleLabel": "Montant à régler",
+  "facturationCreatePaymentGroupRemainingTranches": "{count, plural, =1{1 tranche restante} other{{count} tranches restantes}}",
+  "@facturationCreatePaymentGroupRemainingTranches": {
+    "description": "Nombre de tranches ENCORE DUES sous une nature, à l'encaissement (GE-2). ⚠️ Volontairement libellé « restantes » et non « tranches » : la fiche annonce le total de la grille, cet écran ne monte que ce qui reste à payer. Un minerval en 7 tranches dont 4 sont soldées en affiche 3 ici.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupAmountLabel": "Montant réglé",
+  "facturationCreatePaymentGroupAmountHint": "Ce que le parent règle sur ce frais",
+  "facturationCreatePaymentGroupVentilation": "Ventilation : {detail}",
+  "@facturationCreatePaymentGroupVentilation": {
+    "description": "Ce que le montant du groupe va imputer, tranche par tranche. Affiché même replié : le caissier valide une répartition, il doit la voir.",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupVentilationItem": "{label} {amount}",
+  "@facturationCreatePaymentGroupVentilationItem": {
+    "description": "Un élément de la ventilation : le code ou le libellé court de la tranche, puis son montant.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupExpandAction": "Détailler les tranches",
+  "facturationCreatePaymentGroupCollapseAction": "Replier les tranches",
   "facturationCreatePaymentSettleAllAction": "Tout solder",
   "facturationCreatePaymentAmountClampedWarning": "Montant ramené au restant dû ({amount}).",
   "@facturationCreatePaymentAmountClampedWarning": {
@@ -2785,6 +2881,50 @@
   },
   "facturationCreatePaymentSettledChip": "Soldé",
   "facturationCreatePaymentTotalToCollect": "Total à encaisser",
+  "facturationSettlementLabel": "Le parent règle en",
+  "exchangeRateSettingsTitle": "Taux de change du guichet",
+  "exchangeRateSettingsSubtitle": "Le taux proposé au caissier quand un parent règle dans une autre monnaie. Chaque enregistrement crée un palier : les versements déjà encaissés gardent le leur.",
+  "exchangeRateSettingsFromLabel": "1 unité de",
+  "exchangeRateSettingsToLabel": "vaut, en",
+  "exchangeRateSettingsValueLabel": "Taux",
+  "exchangeRateSettingsSave": "Enregistrer le taux",
+  "exchangeRateSettingsSaved": "Taux enregistré.",
+  "exchangeRateSettingsNone": "Aucun taux paramétré : au guichet, chaque frais se règle dans sa propre devise.",
+  "exchangeRateSettingsCurrent": "En vigueur : 1 {base} = {value} {quote}",
+  "@exchangeRateSettingsCurrent": {
+    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+  },
+  "facturationSettlementPerCharge": "Chaque frais",
+  "facturationSettlementRateLabel": "Taux du jour",
+  "facturationSettlementCountedLabel": "Montant compté",
+  "facturationSettlementCountedHint": "Conversion : {expected}",
+  "@facturationSettlementCountedHint": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementCountedMismatch": "Écart trop grand avec la conversion ({expected}). Ajustez le montant ou le taux.",
+  "@facturationSettlementCountedMismatch": {
+    "placeholders": { "expected": { "type": "String" } }
+  },
+  "facturationSettlementRateEdit": "Modifier",
+  "facturationSettlementRateFieldLabel": "Taux appliqué",
+  "facturationSettlementRateHint": "{quote} pour 1 {base}",
+  "@facturationSettlementRateHint": {
+    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+  },
+  "facturationSettlementRateDiverges": "Ce taux s'écarte de celui de l'école ({reference}). L'encaissement reste possible ; il sera signalé.",
+  "@facturationSettlementRateDiverges": {
+    "placeholders": { "reference": { "type": "String" } }
+  },
+  "facturationSettlementNoRate": "Aucun taux paramétré : le règlement se fait dans la devise de chaque frais.",
+  "facturationSettlementDerived": "soit {amount}",
+  "@facturationSettlementDerived": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationCreatePaymentToPerceive": "À percevoir",
+  "facturationCreatePaymentImputes": "impute {amount}",
+  "@facturationCreatePaymentImputes": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
     "placeholders": {
@@ -2811,6 +2951,17 @@
         "type": "String"
       },
       "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentenceNoPayer": "Vous allez encaisser {amount} pour {student}.",
+  "@facturationCreatePaymentConfirmSentenceNoPayer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
         "type": "String"
       }
     }
@@ -3535,9 +3686,7 @@
   },
   "financeStatsNoData": "Aucune donnée disponible pour cette période",
   "financeStatsNoDataHint": "Essayez une autre période pour afficher davantage d'informations.",
-  "financeStatsErrorTitle": "Erreur de chargement",
   "financeStatsRetry": "Réessayer",
-  "financeStatsRetryHint": "Relancer le chargement des statistiques financières",
   "financeStatsLoadingA11yLabel": "Chargement des statistiques financières en cours",
   "financeStatsHeaderA11yLabel": "Tableau de bord finance, année scolaire {schoolYear}",
   "@financeStatsHeaderA11yLabel": {
@@ -3558,7 +3707,7 @@
   "financeStatsKpiBandA11yLabel": "Bandeau des indicateurs clés financiers",
   "financeStatsEvolutionChartA11yLabel": "Graphique d'évolution des montants encaissés",
   "financeStatsFeeTypeSectionA11yLabel": "Répartition des montants par type de frais",
-  "financeStatsFeeTypeItemA11yLabel": "Type {code}, encaissé {collected}, attendu {expected}, taux {rate}%",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, encaissé {collected}, attendu {expected}, reste dû {outstanding}, taux {rate}%",
   "@financeStatsFeeTypeItemA11yLabel": {
     "placeholders": {
       "code": {
@@ -3570,16 +3719,11 @@
       "expected": {
         "type": "String"
       },
+      "outstanding": {
+        "type": "String"
+      },
       "rate": {
         "type": "int"
-      }
-    }
-  },
-  "financeStatsErrorA11yLabel": "Erreur de chargement des statistiques financières : {message}",
-  "@financeStatsErrorA11yLabel": {
-    "placeholders": {
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -3593,6 +3737,58 @@
   "financeStatsStorageError": "Une erreur locale empêche l'affichage des statistiques.",
   "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
   "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques.",
+  "financeStatsErrorNetworkTitle": "Connexion indisponible",
+  "financeStatsErrorUnauthorizedTitle": "Session expirée",
+  "financeStatsErrorForbiddenTitle": "Accès refusé",
+  "financeStatsErrorServerTitle": "Chargement impossible",
+  "financeStatsErrorReconnect": "Se reconnecter",
+  "financeStatsErrorIncidentCode": "Code d'incident : {code}",
+  "@financeStatsErrorIncidentCode": {"description": "À citer au support. Porté par les seules erreurs serveur : c'est ce qui distingue une panne qu'on peut faire remonter d'une coupure de réseau.", "placeholders": {"code": {"type": "String"}}},
+  "financeDashboardTabsA11yLabel": "Onglets du tableau de bord Finances",
+  "financeDashboardTabRecoveryLabel": "Recouvrement",
+  "financeDashboardTabRecoveryDescription": "Ce qu'il reste à encaisser cette année",
+  "financeDashboardTabTillLabel": "Caisse",
+  "financeDashboardTabTillDescription": "Ce qui est entré dans le tiroir",
+  "financeTillKpiTotal": "Total du tiroir",
+  "financeTillKpiFees": "Frais scolaires",
+  "financeTillKpiBoutique": "Ventes boutique",
+  "financeTillKpiBandA11yLabel": "Indicateurs de la caisse, par devise",
+  "financeStatsFeeTypeOutstanding": "Reste dû : {amount}",
+  "@financeStatsFeeTypeOutstanding": {"description": "Reste dû d'un poste de frais. Sans lui, la carte affiche un encaissé supérieur à l'attendu à côté d'une barre incomplète, et rien n'explique l'écart.", "placeholders": {"amount": {"type": "String"}}},
+  "financeStatsRateNotApplicable": "Sans objet",
+  "@financeStatsRateNotApplicable": {"description": "Taux de recouvrement quand rien n'était attendu. Le serveur renvoie alors 100, qui se lit « rien ne manque » et non « tout a été recouvré »."},
+  "financeStatsRateNotApplicableForCurrency": "Sans objet · {currency}",
+  "@financeStatsRateNotApplicableForCurrency": {"description": "Idem, quand le tableau de bord porte plusieurs devises.", "placeholders": {"currency": {"type": "String"}}},
+  "financeStatsFeeTypeRateNotApplicable": "Taux : sans objet",
+  "@financeStatsFeeTypeRateNotApplicable": {"description": "Taux d'un poste de frais sur lequel rien n'était attendu."},
+  "financeStatsCurrencyNoMovement": "Aucun mouvement dans cette devise",
+  "@financeStatsCurrencyNoMovement": {"description": "Bloc d'une devise que l'école facture mais où rien n'a circulé. Le serveur la renvoie à zéro plutôt que de l'omettre : son absence se lirait comme une école qui aurait cessé de facturer dedans."},
+  "financeStatsCurrencyNoMovementRecovery": "Rien n'a été facturé ni encaissé sur l'année scolaire.",
+  "financeTillPeriodDayCurrent": "Aujourd'hui",
+  "financeTillWindow": "Du {start} au {end}",
+  "@financeTillWindow": {"description": "Bornes de la fenêtre de caisse, telles que le serveur les renvoie. Jamais recalculées côté tablette : la journée commence et finit dans le fuseau de l'école.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "financeTillWindowDay": "Journée du {date}",
+  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "financeTillTimeZoneHint": "Journée à l'heure de l'école · {zone}",
+  "@financeTillTimeZoneHint": {"description": "Le fuseau vient de la réponse. Un encaissement sonné à 00 h 20 au guichet porte un instant serveur de 23 h 20 Z la veille.", "placeholders": {"zone": {"type": "String"}}},
+  "financeTillSectionBuckets": "Entrées de caisse",
+  "financeTillBucketsChartA11yLabel": "Graphique des entrées de caisse par intervalle",
+  "financeTillImputationHeading": "Ce que ces versements ont éteint",
+  "@financeTillImputationHeading": {"description": "Titre de la seconde moitié de l'écran caisse. Elle compte dans la devise de la CRÉANCE, quand tout ce qui précède compte en devise reçue."},
+  "financeTillImputationHint": "En devise de créance : ces montants ne s'additionnent pas à ceux du tiroir.",
+  "@financeTillImputationHint": {"description": "Un versement de 115 000 FC qui solde 50 USD pèse en haut dans le bloc CDF et ici dans le bloc USD. Sans cette phrase, les deux moitiés se lisent comme un seul total, qui n'existe pas."},
+  "financeTillImputationCardTitle": "Créances réglées en {currency}",
+  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillImputationTotal": "Total imputé · {amount}",
+  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "financeTillImputationSectionA11yLabel": "Imputation par poste de frais, en {currency}",
+  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillFeeCodeAmountA11yLabel": "{label} : {amount}",
+  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "financeTillFreshnessNotice": "Arrêté à la dernière synchro · {relative}",
+  "@financeTillFreshnessNotice": {"description": "Le serveur ne totalise que ce qui lui est parvenu : encaissements et ventes boutique passent par la file d'écritures. Hors ligne ou file non vidée, le total sous-compte, et cette ligne dit de quand il date.", "placeholders": {"relative": {"type": "String"}}},
+  "financeTillFreshnessNever": "Jamais synchronisé",
+  "financeStatsCurrencyNoMovementTill": "Rien n'est entré dans le tiroir sur cette période.",
   "enrollmentResults": "Résultats",
   "sort": "Trier",
   "switchToTableView": "Passer à la vue tableau",
@@ -4246,6 +4442,8 @@
   "ticketClassroomLabel": "Classe :",
   "ticketAmountReceivedLabel": "Montant reçu",
   "ticketAllocationsLabel": "Répartition",
+  "ticketRateLabel": "Taux",
+  "ticketDerivedAmountPrefix": "soit",
   "ticketAdvanceLabel": "Avance (non imputée)",
   "ticketBalanceLabel": "Solde",
   "ticketBalanceReservation": "sous réserve de synchronisation",
@@ -4324,14 +4522,10 @@
   "boutiquePayerLastNameLabel": "Nom",
   "boutiquePayerMiddleNameLabel": "Post-nom",
   "boutiquePayerFirstNameLabel": "Prénom",
-  "boutiquePayerReceiptNotice": "Le reçu est nominatif au payeur ; les élèves bénéficiaires s'attachent à chaque ligne.",
+  "boutiquePayerOptionalNotice": "Ces informations sont facultatives : une vente peut être encaissée sans nommer le payeur. Renseignées, elles figurent sur le reçu.",
   "boutiquePayerUnknownNotice": "Numéro inconnu — ce payeur sera enregistré au répertoire avec la vente.",
   "boutiqueBlockersPrefix": "À compléter :",
   "boutiqueBlockerEmptyCart": "Panier vide",
-  "boutiqueBlockerLastName": "Nom",
-  "boutiqueBlockerMiddleName": "Post-nom",
-  "boutiqueBlockerFirstName": "Prénom",
-  "boutiqueBlockerPhone": "Téléphone du payeur",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {

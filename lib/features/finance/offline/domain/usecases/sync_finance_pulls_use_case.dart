@@ -54,6 +54,7 @@ class SyncFinancePullsUseCase {
   const SyncFinancePullsUseCase(this._coordinator);
 
   Future<PullRunReport> call() => _coordinator.pullSubset(const {
+    FinancePullRepositoryImpl.exchangeRatesResource,
     FinancePullRepositoryImpl.chargesResource,
     FinancePullRepositoryImpl.paymentsResource,
   });

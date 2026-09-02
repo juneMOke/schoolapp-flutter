@@ -157,6 +157,14 @@ void main() {
       for (final sub in menu.subMenus) sub.id,
   };
 
+  /// Ce que les DROITS accordent, hors masquage produit (`kHiddenSubMenus`) :
+  /// un écran retiré de la navigation garde toutes ses exigences.
+  Set<String> grantedSubMenus(List<String> permissions) => {
+    for (final subMenus in kModuleAccessRegistry.values)
+      for (final id in subMenus.keys)
+        if (canAccessSubMenu(id, permissions)) id,
+  };
+
   bool can(ModuleAccess access, List<String> permissions) => canAccess(
     requires: access.requires,
     permissions: permissions,
@@ -189,9 +197,13 @@ void main() {
   group('chaque rôle garde son métier', () {
     test('secrétariat : instruit les dossiers et délivre les pièces', () {
       final ids = visibleSubMenus(_secretariat);
+      final droits = grantedSubMenus(_secretariat);
       expect(ids, contains(MenuConstants.premiereInscriptionId));
-      expect(ids, contains(MenuConstants.reInscriptionsId));
-      expect(ids, contains(MenuConstants.preInscriptionsId));
+      // Réinscription et Pré-inscription sont masquées par décision produit
+      // (`kHiddenSubMenus`) : le secrétariat en garde le DROIT, la navigation
+      // ne les lui propose simplement plus.
+      expect(droits, contains(MenuConstants.reInscriptionsId));
+      expect(droits, contains(MenuConstants.preInscriptionsId));
       expect(ids, contains(MenuConstants.inscriptionsDashboardId));
       expect(ids, contains(MenuConstants.documentsStudentId));
 
@@ -308,12 +320,15 @@ void main() {
       }
     });
 
-    test('direction : rien ne lui est masqué', () {
+    test('direction : rien ne lui est masqué, hors retraits produit', () {
       final ids = visibleSubMenus(_direction);
       final tous = {
         for (final subMenus in kModuleAccessRegistry.values) ...subMenus.keys,
       };
-      expect(ids, equals(tous));
+      // La direction détient tout : le seul écart au périmètre complet est le
+      // masquage produit, qui ne dépend d'aucun droit et vaut pour tous.
+      expect(ids, equals(tous.difference(kHiddenSubMenus)));
+      expect(grantedSubMenus(_direction), equals(tous));
       for (final action in kGuardedWriteActions.entries) {
         expect(can(action.value, _direction), isTrue, reason: action.key);
       }

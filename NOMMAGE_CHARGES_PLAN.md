@@ -362,6 +362,22 @@ présent plan sert les écoles dont la grille est posée ailleurs.
 `fee_code` avec des `SUM` : une position par nature, tranches confondues. C'est
 cohérent avec ce que l'écran promet ; ne pas le « corriger » sans demande.
 
+> **Amendement (2026-09-01)** — la *mesure* reste par nature, mais le sélecteur
+> de frais ne l'annonce plus avec la nature localisée : il emprunte le libellé
+> et le code de la ligne de grille dès que la nature n'en porte qu'une
+> (`buildFeeControlFeeOptions`, `feeControlFeeOptionLabel`). L'écran affichait
+> « Frais de scolarité » là où l'école a écrit « Frais scolaires annuels », et
+> le reste de Finance nommait déjà le même frais autrement. Quand la nature
+> porte plusieurs tranches, l'entrée retombe sur la nature et **dit le nombre de
+> tranches** au lieu d'emprunter le nom de la première : la maille du contrôle
+> reste visible dans son propre libellé. La puce de critère suit, via
+> `FeeControlQuery.feeLabel` / `.feeTariffCode`.
+>
+> Ce qui reste écarté, et sans lequel ce n'est qu'un nommage : **contrôler UNE
+> tranche**. Il faudrait joindre par `fee_tariff_id`, nullable au pull
+> (`StudentChargeDto.feeTariffId`) — une créance descendue sans tarif
+> disparaîtrait du contrôle, en silence, sur de l'argent.
+
 **Le calcul des réductions** — toujours V2, rien ici ne le touche.
 
 ---

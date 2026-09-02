@@ -3,7 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 
 class FinanceRepositoryImpl implements FinanceRepository {
@@ -36,17 +38,30 @@ class FinanceRepositoryImpl implements FinanceRepository {
   }
 
   @override
-  Future<Either<Failure, FinanceStats>> getFinanceStats({
-    FinanceStatsPeriod period = FinanceStatsPeriod.year,
-    String? month,
-    String? week,
+  Future<Either<Failure, FinanceRecovery>> getFinanceRecovery() async {
+    try {
+      final response = await remoteDataSource.getFinanceRecovery(requiredAuth);
+      return Right(response.toEntity());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      // Une charge utile illisible passe par ici : `fromJson` lève sur un
+      // `kpis` absent, et l'écran doit dire « erreur », jamais « 0 encaissé ».
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, FinanceTill>> getFinanceTill({
+    TillPeriod period = TillPeriod.day,
   }) async {
     try {
-      final response = await remoteDataSource.getFinanceStats(
+      final response = await remoteDataSource.getFinanceTill(
         requiredAuth,
         period.apiValue,
-        month,
-        week,
       );
       return Right(response.toEntity());
     } on DioException catch (e) {
@@ -55,6 +70,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
       }
       return const Left(NetworkFailure('Network error occurred'));
     } catch (_) {
+      // `fromJson` lève sur un `summary` absent : mieux vaut dire « erreur »
+      // que rendre un tiroir vide à qui l'a ouvert devant lui.
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }

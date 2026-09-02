@@ -45,6 +45,13 @@ class SettingsTariffsPanel extends StatefulWidget {
 
 class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
   List<FeeTariff>? _tariffs;
+
+  /// Le catalogue **complet**, masquées comprises.
+  ///
+  /// Un tarif peut porter une nature que l'école a depuis masquée : sans elle
+  /// dans cette liste, sa ligne s'afficherait sous son code brut (« BOARDING »)
+  /// au lieu du titre que la direction avait écrit. Le sélecteur, lui, ne reçoit
+  /// que les sections encore attribuables — cf. [_selectableFeeCodes].
   List<FeeCodeOption> _feeCodes = const <FeeCodeOption>[];
   bool _loading = false;
 
@@ -70,7 +77,7 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
     final result = await repository.loadTariffs(widget.levelId);
     // Le catalogue de frais est en cache de session : ce second appel ne coûte
     // rien après la première ouverture.
-    final codes = await repository.loadFeeCodes();
+    final codes = await repository.loadFeeCodes(includeHidden: true);
     // `mounted` après l'await : le panneau peut avoir été replié, ou l'onglet
     // changé, pendant que la requête volait.
     if (!mounted) return;
@@ -86,6 +93,40 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
         _tariffs = tariffs;
       }),
     );
+  }
+
+  /// Les sections que le formulaire peut encore proposer.
+  List<FeeCodeOption> get _selectableFeeCodes => [
+    for (final option in _feeCodes)
+      if (option.active) option,
+  ];
+
+  /// Les tarifs du niveau, **regroupés sous le titre de leur section**.
+  ///
+  /// C'est la raison d'être du regroupement : sept tranches de minerval
+  /// s'affichaient sept fois de suite, chacune surmontée du même code brut
+  /// « TUITION ». Elles tiennent désormais sous un seul titre, celui que l'école
+  /// a écrit.
+  ///
+  /// L'ordre est celui du serveur — donc celui que l'école a choisi. Une nature
+  /// que le catalogue ne sert pas du tout (serveur plus vieux, code retiré)
+  /// n'est pas perdue : elle ferme la liste sous son code, qui reste affichable.
+  List<({String title, List<FeeTariff> lines})> get _sections {
+    final tariffs = _tariffs ?? const <FeeTariff>[];
+    final byCode = <String, List<FeeTariff>>{};
+    for (final tariff in tariffs) {
+      byCode.putIfAbsent(tariff.feeCode, () => <FeeTariff>[]).add(tariff);
+    }
+
+    final sections = <({String title, List<FeeTariff> lines})>[];
+    for (final option in _feeCodes) {
+      final lines = byCode.remove(option.code);
+      if (lines != null) sections.add((title: option.label, lines: lines));
+    }
+    for (final entry in byCode.entries) {
+      sections.add((title: entry.key, lines: entry.value));
+    }
+    return sections;
   }
 
   @override
@@ -136,40 +177,48 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
                 ),
               ),
             ),
-          for (final tariff in _tariffs ?? const <FeeTariff>[])
+          for (final section in _sections) ...[
+            // Le titre de la SECTION, pas le code brut : c'est ce que l'école a
+            // écrit, et c'est sous lui que ses tranches se lisent comme un tout.
             Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(tariff.label, style: AppTypography.bodyMedium),
-                        Text(
-                          tariff.feeCode,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    FeeAmount.display(tariff.amountInCents, tariff.currency),
-                    style: AppTypography.money,
-                  ),
-                  IconButton(
-                    onPressed: _writing ? null : () => _edit(tariff),
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                  ),
-                  IconButton(
-                    onPressed: _writing ? null : () => _delete(tariff),
-                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                  ),
-                ],
+              padding: const EdgeInsets.only(
+                top: AppSpacing.sm,
+                bottom: AppSpacing.xs,
+              ),
+              child: Text(
+                section.title,
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.textMuted,
+                ),
               ),
             ),
+            for (final tariff in section.lines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        tariff.label,
+                        style: AppTypography.bodyMedium,
+                      ),
+                    ),
+                    Text(
+                      FeeAmount.display(tariff.amountInCents, tariff.currency),
+                      style: AppTypography.money,
+                    ),
+                    IconButton(
+                      onPressed: _writing ? null : () => _edit(tariff),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                    ),
+                    IconButton(
+                      onPressed: _writing ? null : () => _delete(tariff),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+          ],
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
@@ -192,7 +241,7 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
     final result = await showDialog<TariffEditResult>(
       context: context,
       builder: (_) => TariffEditDialog(
-        feeCodes: _feeCodes,
+        feeCodes: _selectableFeeCodes,
         levelName: widget.levelName,
         initial: tariff,
       ),

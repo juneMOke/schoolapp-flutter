@@ -384,6 +384,28 @@ class EnrollmentDraftDao {
             (link['emergency_contact'] as int? ?? 0) != 0,
     };
 
+    // **Lue AVANT la purge, elle aussi**, et pour une raison voisine : c'est la
+    // seule clé qui reste à un tuteur SANS NUMÉRO (v45). Interrogée après le
+    // `delete`, elle ne verrait plus aucun tuteur, la règle de nom ne
+    // rapprocherait jamais rien, et chaque passage sur l'étape Tuteurs
+    // recréerait une fiche.
+    final studentGuardians = [
+      for (final row in await txn.rawQuery(
+        'SELECT p.id, p.first_name, p.last_name, p.surname, p.phone_number '
+        '  FROM student_parent sp '
+        '  JOIN parents p ON p.id = sp.parent_id '
+        ' WHERE sp.student_id = ?',
+        [studentId],
+      ))
+        StudentGuardianSnapshot(
+          id: row['id'] as String,
+          firstName: (row['first_name'] as String?) ?? '',
+          lastName: (row['last_name'] as String?) ?? '',
+          surname: row['surname'] as String?,
+          phoneNumber: row['phone_number'] as String?,
+        ),
+    ];
+
     await txn.delete(
       'student_parent',
       where: 'student_id = ?',
@@ -397,7 +419,12 @@ class EnrollmentDraftDao {
               linkedToExisting: draft.linkedToExisting,
               asDraft: true,
             )
-          : await upsertParentByPhone(txn, draft.parent, asDraft: true);
+          : await upsertParentByPhone(
+              txn,
+              draft.parent,
+              asDraft: true,
+              studentGuardians: studentGuardians,
+            );
       final designated =
           draft.emergencyContact ?? previousDesignation[resolvedId] ?? false;
       await txn.insert('student_parent', {

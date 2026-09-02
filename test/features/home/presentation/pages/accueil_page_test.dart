@@ -125,15 +125,16 @@ void main() {
   testWidgets('annonce le nombre de pages de chaque module', (tester) async {
     await pumpAccueil(tester);
 
-    // Inscriptions : tableau de bord + 3 pages. Résultats et Configuration :
-    // page unique, au singulier.
-    expect(find.text('4 pages'), findsOneWidget);
+    // Inscriptions : tableau de bord + Première inscription — Réinscription et
+    // Pré-inscription sont masquées (`kHiddenSubMenus`). Résultats et
+    // Configuration : page unique, au singulier.
     expect(find.text('1 page'), findsNWidgets(2));
-    // Cours a deux pages.
-    expect(find.text('2 pages'), findsOneWidget);
+    // Cours et Inscriptions en ont deux.
+    expect(find.text('2 pages'), findsNWidgets(2));
     // Finances (tableau de bord + Facturations + Contrôle des frais), Classes
     // et Disciplines en ont trois.
     expect(find.text('3 pages'), findsNWidgets(3));
+    expect(find.text('4 pages'), findsNothing);
   });
 
   testWidgets('l\'en-tête d\'une carte ouvre le tableau de bord du module', (
@@ -173,15 +174,13 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    await tester.tap(find.text('Pré-inscriptions'));
+    // Le témoin était « Pré-inscriptions », masquée depuis (`kHiddenSubMenus`).
+    await tester.tap(find.text('Contrôle des frais'));
     await tester.pumpAndSettle();
 
     // La ligne absorbe le tap : on atterrit sur le sous-écran, pas sur le
     // tableau de bord de la carte parente.
-    expect(
-      navigationBloc.state.selectedSubMenuId,
-      MenuConstants.preInscriptionsId,
-    );
+    expect(navigationBloc.state.selectedSubMenuId, MenuConstants.feeControlId);
   });
 
   testWidgets('chaque page de chaque module a sa ligne dans un pied de carte', (
@@ -189,9 +188,11 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    // 4 + 3 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03, Finances passée à 3
-    // avec le Contrôle des frais, plus la carte Configuration).
-    expect(find.byType(AccueilSubModuleRow), findsNWidgets(17));
+    // 2 + 3 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03, Finances passée à 3
+    // avec le Contrôle des frais, plus la carte Configuration). Inscriptions
+    // est descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées
+    // par décision produit (`kHiddenSubMenus`).
+    expect(find.byType(AccueilSubModuleRow), findsNWidgets(15));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

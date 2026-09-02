@@ -88,7 +88,10 @@ class _GuardianPhoneConflictDialogState
   /// rattacherait le mauvais parent à l'élève.
   List<LocalParent> _holdersOf(List<LocalParent> results) => results
       .where(
-        (p) => PhoneNumberFormat.sameNumber(p.phoneNumber, widget.phoneNumber),
+        (p) => PhoneNumberFormat.sameNumber(
+          p.phoneNumber ?? '',
+          widget.phoneNumber,
+        ),
       )
       .toList(growable: false);
 

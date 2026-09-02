@@ -72,7 +72,13 @@ class EnrollmentAggregateRequest {
               'firstName': p.firstName,
               'lastName': p.lastName,
               'surname': p.surname ?? p.lastName,
-              'phoneNumber': p.phoneNumber,
+              // **Omis quand nul, jamais aplati en `''`.** Le serveur accepte
+              // le tuteur sans numéro depuis la V117, mais une chaîne vide n'y
+              // est pas « pas de numéro » : elle échouerait au CHECK E.164, et
+              // pire, elle deviendrait une clé que tous les tuteurs sans numéro
+              // partageraient.
+              if ((p.phoneNumber ?? '').trim().isNotEmpty)
+                'phoneNumber': p.phoneNumber!.trim(),
               'relationshipType': p.relationshipType,
               'email': p.email,
               // **Omis quand nul, jamais aplati en `false`.** Le serveur lit

@@ -7,7 +7,11 @@ class UpdatedParentResponse {
   final String lastName;
   final String? surname;
   final String identificationNumber;
-  final String phoneNumber;
+
+  /// Facultatif depuis la V117 serveur : `null` quand le tuteur n'a pas de
+  /// numéro. Le cast était dur — la première réponse d'un tuteur sans numéro
+  /// aurait fait lever la mise à jour.
+  final String? phoneNumber;
   final String email;
   final String relationshipType;
 
@@ -17,7 +21,7 @@ class UpdatedParentResponse {
     required this.lastName,
     this.surname,
     required this.identificationNumber,
-    required this.phoneNumber,
+    this.phoneNumber,
     required this.email,
     required this.relationshipType,
   });
@@ -29,7 +33,7 @@ class UpdatedParentResponse {
         lastName: json['lastName'] as String,
         surname: json['surname'] as String?,
         identificationNumber: json['identificationNumber'] as String,
-        phoneNumber: json['phoneNumber'] as String,
+        phoneNumber: json['phoneNumber'] as String?,
         email: json['email'] as String,
         relationshipType: json['relationshipType'] as String,
       );

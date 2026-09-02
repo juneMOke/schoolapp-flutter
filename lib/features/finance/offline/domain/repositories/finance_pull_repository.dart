@@ -20,4 +20,11 @@ abstract class FinancePullRepository {
   /// Paiements + leurs allocations (§2.2), **y compris ceux de l'autre poste de
   /// perception** — c'est l'anti-divergence de snapshot. UPSERT `SYNCED`.
   Future<Either<Failure, FinancePullOutcome>> syncPayments();
+
+  /// La série des taux de guichet de l'école, mise en cache local.
+  ///
+  /// Remplacement **en bloc**, scopé par école : c'est un référentiel, il se
+  /// jette et se réécrit, il ne se rattrape pas. Sans ce pull, un guichet hors
+  /// ligne n'a aucun taux et la bascule de devise ne s'allume jamais.
+  Future<Either<Failure, FinancePullOutcome>> syncExchangeRates();
 }

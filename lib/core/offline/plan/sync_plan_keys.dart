@@ -89,6 +89,19 @@ abstract final class SyncPlanKeys {
   static const String classroomClassrooms = 'classroom.classrooms';
   static const String classroomMembers = 'classroom.members';
   static const String classroomTransfers = 'classroom.transfers';
+
+  /// Le taux de guichet de l'école — **un BUNDLE, pas un keyset**.
+  ///
+  /// Rien à paginer, rien à reprendre : le client remplace en bloc, et la
+  /// fraîcheur se négocie par `ETag` / `If-None-Match`. Le jeton mémorisé sous
+  /// cette clé est donc une **empreinte**, pas un curseur de progression.
+  ///
+  /// Le serveur l'entraîne par les droits d'ÉCRITURE des deux caisses
+  /// (`finance.payment.write`, `boutique.sale.write`) et non par
+  /// `finance.grid.read` seul : un poste qui encaisse sans connaître le taux
+  /// publié en invente un, et le serveur lui reproche ensuite une anomalie sur
+  /// chaque encaissement pris de bonne foi.
+  static const String financeExchangeRates = 'finance.exchange-rates';
   static const String financeStudentCharges = 'finance.student-charges';
   static const String financePayments = 'finance.payments';
   static const String attendanceRecords = 'attendance.records';
@@ -123,6 +136,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.classroomClassrooms: ['classrooms'],
   SyncPlanKeys.classroomMembers: ['classroom_members'],
   SyncPlanKeys.classroomTransfers: ['classroom_transfers'],
+  SyncPlanKeys.financeExchangeRates: ['finance_exchange_rates'],
   SyncPlanKeys.financeStudentCharges: ['finance_student_charges'],
   SyncPlanKeys.financePayments: ['finance_payments'],
   SyncPlanKeys.attendanceRecords: ['attendance'],

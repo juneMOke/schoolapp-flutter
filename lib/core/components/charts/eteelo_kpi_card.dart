@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.d
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 
 /// Carte KPI générique affichant un indicateur chiffré avec accent couleur.
 class EteeloKpiCard extends StatelessWidget {
@@ -135,8 +136,8 @@ class EteeloKpiCard extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey('${data.label}-${data.displayValue}-${data.percent}'),
       tween: Tween(begin: 0.97, end: 1),
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
+      duration: AppMotion.standard,
+      curve: AppMotion.outCurve,
       builder: (context, scale, child) => Opacity(
         opacity: scale,
         child: Transform.scale(scale: scale, child: child),

@@ -18,6 +18,8 @@ const _labels = TicketLabels(
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
+  rateLabel: 'Taux',
+  derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
   balanceLabel: 'Solde',
@@ -36,7 +38,9 @@ TicketReceiptModel _model({String schoolName = 'Institut Sacré-Cœur'}) =>
       provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
       paidAt: DateTime(2026, 8, 11, 14, 7),
       cashierFullName: 'Jean Kabeya',
-      amountReceived: MoneyBag.of(const [Money(150000, 'CDF')]),
+      tenders: TicketTenderLine.identityFrom(
+        MoneyBag.of(const [Money(150000, 'CDF')]),
+      ),
       allocations: const [
         TicketAllocationLine(
           label: 'Frais scolaires',

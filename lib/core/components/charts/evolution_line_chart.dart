@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/components/charts/line_chart_point.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -47,14 +48,32 @@ class EvolutionLineChart extends StatelessWidget {
     this.leftLabelFormatter,
   });
 
+  /// Points visibles à la progression [progress] : la courbe se trace de
+  /// gauche à droite au lieu d'apparaître d'un bloc.
+  ///
+  /// La tête est interpolée entre les deux points qui l'encadrent, sinon le
+  /// tracé avancerait par à-coups d'un point au suivant. Le domaine, lui, reste
+  /// celui des données réelles : l'échelle ne bouge pas pendant le tracé, et la
+  /// courbe garde sa forme définitive dès le premier pixel.
+  List<FlSpot> _sweptSpots(double progress) {
+    final head = (points.length - 1) * progress;
+    final spots = <FlSpot>[
+      for (int i = 0; i < points.length && i <= head; i++)
+        FlSpot(i.toDouble(), points[i].value),
+    ];
+    final last = head.floor();
+    if (last < points.length - 1 && head > last) {
+      final ratio = head - last;
+      final from = points[last].value;
+      final to = points[last + 1].value;
+      spots.add(FlSpot(head, from + (to - from) * ratio));
+    }
+    return spots;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (points.isEmpty) return const SizedBox.shrink();
-
-    final spots = [
-      for (int i = 0; i < points.length; i++)
-        FlSpot(i.toDouble(), points[i].value),
-    ];
 
     final dynamicMax = points
         .map((p) => p.value)
@@ -71,122 +90,126 @@ class EvolutionLineChart extends StatelessWidget {
 
     return SizedBox(
       height: AppDimensions.enrollmentStatsChartSectionHeight,
-      child: LineChart(
-        LineChartData(
-          minX: 0,
-          maxX: (points.length - 1).toDouble(),
-          minY: resolvedMinY,
-          maxY: resolvedMaxY,
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: gridInterval,
-            getDrawingHorizontalLine: (_) => const FlLine(
-              color: AppColors.enrollmentStatsChartGrid,
-              strokeWidth: 1,
+      child: ChartEntrance(
+        builder: (context, motion) => LineChart(
+          LineChartData(
+            minX: 0,
+            maxX: (points.length - 1).toDouble(),
+            minY: resolvedMinY,
+            maxY: resolvedMaxY,
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              horizontalInterval: gridInterval,
+              getDrawingHorizontalLine: (_) => const FlLine(
+                color: AppColors.enrollmentStatsChartGrid,
+                strokeWidth: 1,
+              ),
             ),
-          ),
-          extraLinesData: targetLine == null
-              ? const ExtraLinesData()
-              : ExtraLinesData(
-                  horizontalLines: [
-                    HorizontalLine(
-                      y: targetLine!,
-                      color: targetColor,
-                      strokeWidth: 1.3,
-                      dashArray: const [5, 4],
-                      label: targetLineLabel == null
-                          ? HorizontalLineLabel()
-                          : HorizontalLineLabel(
-                              show: true,
-                              alignment: Alignment.topRight,
-                              style: AppTextStyles.caption.copyWith(
-                                color: targetColor,
-                                fontWeight: FontWeight.w600,
+            extraLinesData: targetLine == null
+                ? const ExtraLinesData()
+                : ExtraLinesData(
+                    horizontalLines: [
+                      HorizontalLine(
+                        y: targetLine!,
+                        color: targetColor,
+                        strokeWidth: 1.3,
+                        dashArray: const [5, 4],
+                        label: targetLineLabel == null
+                            ? HorizontalLineLabel()
+                            : HorizontalLineLabel(
+                                show: true,
+                                alignment: Alignment.topRight,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: targetColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                labelResolver: (_) => targetLineLabel!,
                               ),
-                              labelResolver: (_) => targetLineLabel!,
-                            ),
+                      ),
+                    ],
+                  ),
+            borderData: FlBorderData(show: false),
+            titlesData: FlTitlesData(
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 36,
+                  interval: hasFixedDomain ? gridInterval : null,
+                  getTitlesWidget: (value, meta) => Text(
+                    (leftLabelFormatter ??
+                        NumberFormatterHelper.formatYAxisLabel)(value),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontFeatures: AppTextStyles.tabularFigures,
                     ),
-                  ],
-                ),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 36,
-                interval: hasFixedDomain ? gridInterval : null,
-                getTitlesWidget: (value, meta) => Text(
-                  (leftLabelFormatter ??
-                      NumberFormatterHelper.formatYAxisLabel)(value),
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                    fontFeatures: AppTextStyles.tabularFigures,
                   ),
                 ),
               ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 24,
-                getTitlesWidget: (value, meta) {
-                  final idx = value.toInt();
-                  if (idx < 0 || idx >= points.length) {
-                    return const SizedBox.shrink();
-                  }
-                  return Text(
-                    points[idx].label,
-                    style: AppTextStyles.caption.copyWith(
-                      color: points[idx].isHighlighted
-                          ? highlightColor
-                          : AppColors.textSecondary,
-                      fontWeight: points[idx].isHighlighted
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                  );
-                },
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 24,
+                  getTitlesWidget: (value, meta) {
+                    final idx = value.toInt();
+                    if (idx < 0 || idx >= points.length) {
+                      return const SizedBox.shrink();
+                    }
+                    return Text(
+                      points[idx].label,
+                      style: AppTextStyles.caption.copyWith(
+                        color: points[idx].isHighlighted
+                            ? highlightColor
+                            : AppColors.textSecondary,
+                        fontWeight: points[idx].isHighlighted
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
+            lineBarsData: [
+              LineChartBarData(
+                spots: _sweptSpots(motion.progress),
+                isCurved: true,
+                color: lineColor,
+                barWidth: 2.5,
+                isStrokeCapRound: true,
+                dotData: FlDotData(
+                  show: true,
+                  checkToShowDot: (spot, _) =>
+                      points[spot.x.toInt()].isHighlighted,
+                  getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                    radius: 5,
+                    color: highlightColor,
+                    strokeWidth: 2,
+                    strokeColor: Colors.white,
+                  ),
+                ),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      lineColor.withValues(alpha: 0.18),
+                      lineColor.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: lineColor,
-              barWidth: 2.5,
-              isStrokeCapRound: true,
-              dotData: FlDotData(
-                show: true,
-                checkToShowDot: (spot, _) =>
-                    points[spot.x.toInt()].isHighlighted,
-                getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                  radius: 5,
-                  color: highlightColor,
-                  strokeWidth: 2,
-                  strokeColor: Colors.white,
-                ),
-              ),
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    lineColor.withValues(alpha: 0.18),
-                    lineColor.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          duration: motion.duration,
+          curve: motion.curve,
         ),
       ),
     );

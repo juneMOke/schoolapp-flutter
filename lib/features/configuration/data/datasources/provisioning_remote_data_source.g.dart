@@ -50,14 +50,51 @@ class _ProvisioningRemoteDataSource implements ProvisioningRemoteDataSource {
   }
 
   @override
-  Future<List<FeeCodeModel>> getFeeCodes(Map<String, dynamic> extras) async {
+  Future<List<FeeCodeModel>> getFeeCodes(
+    Map<String, dynamic> extras,
+    bool includeHidden,
+  ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'includeHidden': includeHidden};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<List<FeeCodeModel>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/finance/fee-codes',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<FeeCodeModel> _value;
+    try {
+      _value = _result.data!
+          .map((dynamic i) => FeeCodeModel.fromJson(i as Map<String, dynamic>))
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<List<FeeCodeModel>> saveFeeCodeSections(
+    Map<String, dynamic> extras,
+    FeeCodeSectionsPayloadModel body,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<List<FeeCodeModel>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
             '/api/v1/finance/fee-codes',

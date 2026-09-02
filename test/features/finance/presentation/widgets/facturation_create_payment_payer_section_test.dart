@@ -99,7 +99,12 @@ void main() {
         .map((t) => (t.textSpan! as TextSpan).text ?? '');
   }
 
-  testWidgets('les champs obligatoires portent l\'étoile, le post-nom non', (
+  /// Depuis la V114 serveur, **aucun** champ de payeur n'est obligatoire :
+  /// l'exigence se payait comptant au guichet, où le guichetier finissait par
+  /// taper « X » pour faire avancer la file. Une étoile survivante promettrait
+  /// un blocage qui n'existe plus, et ferait chercher une information que
+  /// personne ne demande.
+  testWidgets('aucun champ de la section ne porte plus d\'étoile', (
     tester,
   ) async {
     final lastNameController = TextEditingController();
@@ -120,18 +125,16 @@ void main() {
       phoneController: phoneController,
     );
 
-    final etoiles = libellesEtoiles(tester).toList();
-
-    expect(etoiles, contains('Nom'));
-    expect(etoiles, contains('Prénom'));
-    expect(etoiles, contains('Téléphone du payeur'));
-    // Le post-nom reste facultatif : lui coller une étoile ferait chercher au
-    // guichetier une information que personne ne lui demande.
     expect(
-      etoiles.any((label) => label.startsWith('Post-nom')),
-      isFalse,
-      reason: 'le post-nom est le seul champ facultatif de la section',
+      libellesEtoiles(tester),
+      isEmpty,
+      reason: 'le payeur est facultatif de bout en bout',
     );
+
+    // Et la facultativité se DIT : sans mention, un guichetier qui a toujours
+    // dû remplir ces champs continuera de les remplir, et l'assouplissement
+    // n'aura rien changé à la file d'attente.
+    expect(find.textContaining('facultatives'), findsOneWidget);
   });
 
   testWidgets('le bouton « Choisir un payeur » remonte le geste', (

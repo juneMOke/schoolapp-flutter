@@ -7,9 +7,9 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_page_helpers.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_data_table.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_search_invitation_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/states/fee_control_results_empty_state.dart';
@@ -203,10 +203,19 @@ class FeeControlResultsView extends StatelessWidget {
 
     final chips = <String>[];
     if (query.feeCode.trim().isNotEmpty) {
-      // Libellé localisé du code de frais — le même que la ligne de frais du
-      // détail Facturation.
+      // La MÊME désignation que le sélecteur : le libellé de la grille et son
+      // code quand ils désignent une ligne unique, la nature localisée sinon.
+      // Une puce qui rappelle « Minerval » là où l'opérateur a cliqué « Frais
+      // scolaires annuels (SCO) » lui fait douter de ce qu'il a demandé.
       chips.add(
-        l10n.feeControlCriteriaFee(query.feeCode.localizedFeeLabel(l10n)),
+        l10n.feeControlCriteriaFee(
+          feeDesignation(
+            label: query.feeLabel,
+            feeCode: query.feeCode,
+            feeTariffCode: query.feeTariffCode,
+            l10n: l10n,
+          ),
+        ),
       );
     }
     // Nom de la classe plutôt que son id — l'id ne dit rien à personne. Le

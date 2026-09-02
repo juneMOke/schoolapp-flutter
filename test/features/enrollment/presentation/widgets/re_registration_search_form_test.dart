@@ -256,10 +256,14 @@ void main() {
     expect(_searchButton(tester).onPressed, isNull);
 
     await _switchToIdentity(tester);
-    // Un seul nom rempli → toujours désactivé (il en faut 3).
+    // Aucun nom rempli → toujours désactivé.
+    expect(_searchButton(tester).onPressed, isNull);
+
+    // Un seul nom suffit désormais : les trois se combinent en OU, celui qui
+    // ne connaît que le nom d'un élève doit pouvoir chercher.
     await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
     await tester.pumpAndSettle();
-    expect(_searchButton(tester).onPressed, isNull);
+    expect(_searchButton(tester).onPressed, isNotNull);
   });
 
   testWidgets('un niveau armé ne survit pas à la bascule vers l\'identité', (

@@ -63,6 +63,23 @@ extension StudentChargeStatusUiX on StudentChargeStatus {
   };
 }
 
+extension StudentChargeComposedStatusX on StudentCharge {
+  /// Le statut **réellement affichable** d'une créance (GF-4).
+  ///
+  /// ⚠️ **Ce n'est pas `status`.** Celui-là est le miroir serveur, et **rien ne
+  /// le recalcule après un encaissement local** : aucun DAO ne le réécrit. Dans
+  /// la fenêtre où un versement n'est pas remonté, il dit encore « à régler »
+  /// sur un frais que le guichet vient de solder — sous une jauge, elle,
+  /// composée, qui affiche 100 %. La ligne se contredisait donc elle-même, à
+  /// dix pixels d'écart.
+  ///
+  /// FRONT §6/§8 : le composé décide, le miroir jamais.
+  StudentChargeStatus get composedStatus => feeStatusFromAmounts(
+    expectedAmountInCents: expectedAmountInCents,
+    amountPaidInCents: paidTotalInCents,
+  );
+}
+
 /// Dérivation cohérente du statut à partir du couple (attendu, payé) en cents.
 ///
 /// Utile pour anticiper l'UI sans attendre un aller-retour backend (ex. impact

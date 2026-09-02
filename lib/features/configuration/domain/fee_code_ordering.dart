@@ -20,8 +20,11 @@ class FeeCodeOrdering {
 
   /// Les types du quotidien d'une école, dans l'ordre où on les saisit.
   ///
-  /// Idéalement servi par le serveur (`displayOrder`) : le jour où il l'est,
-  /// cette liste disparaît sans que rien d'autre ne bouge.
+  /// **Un repli, plus une décision.** Depuis V115 le serveur sert le rang que
+  /// l'école a choisi ; cette liste ne sert donc plus que devant un
+  /// établissement qui n'a rien classé — et devant un serveur antérieur, qui ne
+  /// sert aucun rang. Dès que l'école a parlé, [isConfigured] le voit et cette
+  /// constante ne s'applique plus.
   static const List<String> preferred = [
     'REGISTRATION',
     'TUITION',
@@ -33,8 +36,32 @@ class FeeCodeOrdering {
     'EXAMINATION',
   ];
 
-  /// Les types usuels effectivement servis, dans l'ordre de [preferred].
+  /// L'école a-t-elle nommé, classé ou masqué ses sections ?
+  ///
+  /// Se lit dans ce que le serveur sert, sans champ supplémentaire : une école
+  /// qui n'a rien paramétré reçoit les rangs `0, 1, … n-1`, dans cet ordre et
+  /// sans trou. Un rang qui ne vaut pas sa position signifie donc qu'une
+  /// décision a été prise — une section hissée en tête, ou une autre masquée qui
+  /// laisse un trou dans la suite.
+  ///
+  /// C'est ce qui permet de ne pas imposer l'ordre du serveur à une école qui ne
+  /// l'a pas choisi : les vingt-trois natures de l'énumération, servies à plat,
+  /// noieraient les trois qu'un directeur saisit réellement.
+  static bool isConfigured(List<FeeCodeOption> served) {
+    for (var index = 0; index < served.length; index++) {
+      if (served[index].sortOrder != index) return true;
+    }
+    return false;
+  }
+
+  /// Les sections à montrer d'emblée.
+  ///
+  /// **L'ordre de l'école prime** : dès qu'elle a classé ou masqué quoi que ce
+  /// soit, tout est montré dans l'ordre servi et le dépliant disparaît — reléguer
+  /// derrière « Autres types » une section qu'elle vient de hisser en tête serait
+  /// défaire sous ses yeux ce qu'elle vient de décider.
   static List<FeeCodeOption> common(List<FeeCodeOption> served) {
+    if (isConfigured(served)) return served;
     final byCode = {for (final option in served) option.code: option};
     return [
       for (final code in preferred)
@@ -42,14 +69,17 @@ class FeeCodeOrdering {
     ];
   }
 
-  /// Tout le reste, dans l'ordre du serveur.
+  /// Tout le reste, dans l'ordre du serveur — vide dès que l'école a classé.
   ///
   /// Le dépliant « Autres types » : un directeur qui facture un laboratoire ou
   /// une bibliothèque n'a aucune raison de se le voir refuser par l'écran.
-  static List<FeeCodeOption> others(List<FeeCodeOption> served) => [
-    for (final option in served)
-      if (!preferred.contains(option.code)) option,
-  ];
+  static List<FeeCodeOption> others(List<FeeCodeOption> served) {
+    if (isConfigured(served)) return const <FeeCodeOption>[];
+    return [
+      for (final option in served)
+        if (!preferred.contains(option.code)) option,
+    ];
+  }
 }
 
 /// Montants indicatifs, en centimes, pour les types les plus courants.

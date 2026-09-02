@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class FinanceStatsDashboardHeader extends StatelessWidget {
-  final FinanceStatsState state;
+  /// L'année scolaire du contexte, `null` tant que rien n'est chargé.
+  ///
+  /// Lue sur le **recouvrement** : c'est le seul des deux onglets dont la
+  /// réponse porte toujours l'année entière. La caisse, elle, dit sa fenêtre —
+  /// une journée, une semaine — et n'a pas vocation à nommer l'exercice.
+  final String? schoolYear;
+
   final AppLocalizations l10n;
 
   const FinanceStatsDashboardHeader({
     super.key,
-    required this.state,
+    required this.schoolYear,
     required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
-    final schoolYear = state.stats?.context.schoolYear;
     final effectiveSchoolYear =
         schoolYear ?? l10n.financeStatsSchoolYearUnavailable;
 

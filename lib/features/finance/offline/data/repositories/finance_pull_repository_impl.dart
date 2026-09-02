@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
@@ -47,9 +49,20 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
   final Map<String, dynamic> _requiredAuth;
   final Clock _now;
 
+  /// La série des taux, lue chez le serveur (route dédiée, hors flux de sync).
+  final ExchangeRateRemoteDataSource _rates;
+
+  /// L'école courante, lue dans la session : le taux est scopé, et le scope ne
+  /// vient jamais du corps de la réponse.
+  final CurrentUserContext? _currentUser;
+
   /// Clés `sync_meta` (une par ressource ; jetons distincts, cycles indépendants).
   static const String chargesResource = 'finance_student_charges';
   static const String paymentsResource = 'finance_payments';
+
+  /// Le taux de guichet. Ressource **référentielle**, pas keyset : le serveur
+  /// sert la série complète, et le cache local est remplacé en bloc.
+  static const String exchangeRatesResource = 'finance_exchange_rates';
 
   /// Taille de page (défaut serveur 100, borné [1, 500]).
   static const int pageLimit = 100;
@@ -77,11 +90,15 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
     required FinanceLocalDao dao,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
+    required ExchangeRateRemoteDataSource rates,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
   }) : _api = api,
        _dao = dao,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
+       _rates = rates,
+       _currentUser = currentUser,
        _now = now;
 
   /// Sérialise les cycles d'une ressource — en **chaînant**, jamais en
@@ -156,6 +173,90 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
       );
 
   @override
+  Future<Either<Failure, FinancePullOutcome>> syncExchangeRates() =>
+      _guarded(exchangeRatesResource, _pullExchangeRates);
+
+  /// Le taux de guichet : un appel, une série, un remplacement en bloc.
+  ///
+  /// Pas de curseur et pas de pagination — la route sert l'historique complet.
+  /// Le scope école vient de la session, jamais du corps : un taux d'une école
+  /// servi au guichet d'une autre est un défaut d'argent.
+  ///
+  /// Sans école résolue, on ne touche à rien plutôt que d'écrire sous la clé
+  /// vide, où aucune lecture scopée ne retrouverait la ligne.
+  Future<Either<Failure, FinancePullOutcome>> _pullExchangeRates() async {
+    final syncedAt = _now();
+    final schoolId = _currentUser?.schoolId ?? '';
+    if (schoolId.isEmpty) {
+      return Right(FinancePullOutcome.notModifiedAt(syncedAt, null));
+    }
+    try {
+      // Le jeton mémorisé est ici une **empreinte**, pas un curseur de reprise :
+      // le bundle ne se pagine pas, il se compare. On le renvoie tel quel, comme
+      // les flux keyset renvoient le leur.
+      //
+      // ⚠️ **Scopée par école, et c'est ce qui la rend utilisable sur une
+      // tablette partagée.** `sync_meta` ne connaît que le nom de la ressource,
+      // alors que le cache des taux, lui, est scopé. Sans ce préfixe, l'école B
+      // renverrait l'empreinte de l'école A, recevrait un 304 — donc rien —, et
+      // sa table resterait vide en étant marquée fraîche : une bascule de devise
+      // qui ne s'allume jamais, sans que rien ne le dise.
+      final cursorKey = '$exchangeRatesResource:$schoolId';
+      final known = await _syncMetaDao.getCursor(cursorKey);
+      final result = await _rates.fetch(_requiredAuth, etag: known);
+
+      if (result.notModified) {
+        // ⚠️ **Ne rien purger.** Un 304 dit « rien n'a changé », jamais « cette
+        // école n'a plus de taux » : vider le cache ici éteindrait la bascule de
+        // devise d'un guichet sans qu'aucune écriture n'ait eu lieu.
+        await _syncMetaDao.setCursor(
+          cursorKey,
+          cursor: result.etag ?? known,
+          syncedAt: syncedAt,
+        );
+        // La fraîcheur du FLUX reste lisible sous son nom nu : c'est elle que
+        // le rapport de pull et l'écran de synchro interrogent.
+        await _syncMetaDao.setCursor(
+          exchangeRatesResource,
+          cursor: result.etag ?? known,
+          syncedAt: syncedAt,
+        );
+        return Right(FinancePullOutcome.notModifiedAt(syncedAt, result.etag));
+      }
+
+      // Les points inexploitables sont déjà écartés ici : le rapport de pull
+      // compte ce qui est ENTRÉ en base, pas ce que le serveur a servi.
+      final models = [
+        for (final point in result.points)
+          ?point.toLocalModel(schoolId: schoolId, syncedAt: syncedAt),
+      ];
+      await _dao.replaceExchangeRatesForSchool(models, schoolId: schoolId);
+      await _syncMetaDao.setCursor(
+        cursorKey,
+        cursor: result.etag,
+        syncedAt: syncedAt,
+      );
+      await _syncMetaDao.setCursor(
+        exchangeRatesResource,
+        cursor: result.etag,
+        syncedAt: syncedAt,
+      );
+      return Right(
+        FinancePullOutcome(
+          upserted: models.length,
+          notModified: false,
+          syncedAt: syncedAt,
+          cursor: result.etag,
+        ),
+      );
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message ?? e.toString()));
+    } catch (e) {
+      return Left(StorageFailure('Taux de guichet illisibles : $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, FinancePullOutcome>> syncPayments() =>
       _guarded(paymentsResource, _pullPayments);
 
@@ -172,6 +273,10 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
             allocations: page.items
                 .expand((i) => i.allocationModels())
                 .toList(),
+            // Ce que le tiroir de l'AUTRE poste a pris : sans elles, un
+            // versement de 50 $ encaissé en francs se relit ici en dollars, et
+            // les deux caisses divergent.
+            tenders: page.items.expand((i) => i.tenderModels()).toList(),
           );
           return page.items.length;
         },
