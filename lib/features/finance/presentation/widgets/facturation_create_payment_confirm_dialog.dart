@@ -42,6 +42,35 @@ class FacturationConfirmAllocationItem {
   });
 }
 
+/// Une **nature** dans le récapitulatif, et les tranches qu'elle règle (GE-5).
+///
+/// Le caissier valide une répartition : il doit voir ce qui sera réellement
+/// écrit, imputation par imputation. Ne montrer que « Minerval 120 000 » ferait
+/// signer une ventilation qu'il n'a pas vue — et c'est elle, pas le total, qui
+/// figurera sur la note de perception.
+///
+/// [items] est **vide quand la nature ne règle qu'une tranche** : la ligne est
+/// alors déjà la tranche, et la redoubler d'un enfant identique n'apprendrait
+/// rien. C'est la même règle que partout ailleurs dans ce chantier.
+class FacturationConfirmAllocationGroup {
+  final String label;
+  final String amount;
+
+  /// Ce que la nature vaut **en devise reçue**, déjà rendu. `null` quand le
+  /// parent règle dans la devise des créances.
+  final String? derivedAmount;
+
+  /// Les tranches réglées, dans l'ordre de la ventilation.
+  final List<FacturationConfirmAllocationItem> items;
+
+  const FacturationConfirmAllocationGroup({
+    required this.label,
+    required this.amount,
+    this.derivedAmount,
+    this.items = const [],
+  });
+}
+
 /// Sur-couche d'encaissement en 2 étapes (spec MODALE 12/17) — Confirmation
 /// puis Résultat (processing → succès | échec). Le paiement n'est ajouté
 /// qu'au succès ; aucun débit silencieux en cas d'échec.
@@ -57,7 +86,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   required String studentName,
   String? payerName,
   required String payerPhone,
-  required List<FacturationConfirmAllocationItem> allocations,
+  required List<FacturationConfirmAllocationGroup> allocations,
   required PaymentsCreateRequested request,
   VoidCallback? onDownloadReceipt,
 }) async {
@@ -102,7 +131,7 @@ class _CollectFlowDialog extends StatefulWidget {
   final String? payerName;
 
   final String payerPhone;
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
   final PaymentsCreateRequested request;
   final VoidCallback? onDownloadReceipt;
 
@@ -369,7 +398,7 @@ class _ConfirmBody extends StatelessWidget {
   final String studentName;
   final String? payerName;
   final String payerPhone;
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
 
   const _ConfirmBody({
     required this.totalLabel,
@@ -599,15 +628,14 @@ class _ResultChip extends StatelessWidget {
   }
 }
 
-/// Répartition encadrée : une ligne par allocation (libellé + montant).
+/// Répartition encadrée : une ligne par nature, ses tranches en retrait.
 class _DistributionList extends StatelessWidget {
-  final List<FacturationConfirmAllocationItem> allocations;
+  final List<FacturationConfirmAllocationGroup> allocations;
 
   const _DistributionList({required this.allocations});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -617,53 +645,132 @@ class _DistributionList extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < allocations.length; i++) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.spacingM,
-                vertical: AppDimensions.spacingS + 2,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      allocations[i].label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingM),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        allocations[i].amount,
-                        style: AppTextStyles.moneyTabular.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      // Ce que ce poste vaut sur le comptoir : la colonne somme
-                      // au perçu annoncé en tête, et le parent qui additionne
-                      // retombe dessus.
-                      if (allocations[i].derivedAmount case final derived?)
-                        Text(
-                          l10n.facturationSettlementDerived(derived),
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.terreCuiteDark,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _GroupRow(group: allocations[i]),
+            // Les tranches, en retrait sous leur nature. Elles ne sont rendues
+            // que quand la nature en règle plusieurs : sinon la ligne EST la
+            // tranche.
+            for (final item in allocations[i].items)
+              _AllocationRow(item: item, indented: true),
             if (i < allocations.length - 1)
               const Divider(height: 1, color: AppColors.border),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// L'en-tête d'une nature : son nom et ce qu'elle règle en tout.
+class _GroupRow extends StatelessWidget {
+  final FacturationConfirmAllocationGroup group;
+
+  const _GroupRow({required this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hasTranches = group.items.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingM,
+        vertical: AppDimensions.spacingS + 2,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              group.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: hasTranches
+                  ? AppTextStyles.bodyStrong.copyWith(
+                      color: AppColors.textPrimary,
+                    )
+                  : AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingM),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                group.amount,
+                style: AppTextStyles.moneyTabular.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              // Ce que cette nature vaut sur le comptoir : la colonne somme au
+              // perçu annoncé en tête, et le parent qui additionne retombe
+              // dessus.
+              if (group.derivedAmount case final derived?)
+                Text(
+                  l10n.facturationSettlementDerived(derived),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.terreCuiteDark,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une tranche réglée, sous sa nature.
+class _AllocationRow extends StatelessWidget {
+  final FacturationConfirmAllocationItem item;
+  final bool indented;
+
+  const _AllocationRow({required this.item, this.indented = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: indented
+            ? AppDimensions.spacingM + AppDimensions.spacingL
+            : AppDimensions.spacingM,
+        right: AppDimensions.spacingM,
+        bottom: AppDimensions.spacingS,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingM),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item.amount,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (item.derivedAmount case final derived?)
+                Text(
+                  l10n.facturationSettlementDerived(derived),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.terreCuiteDark,
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

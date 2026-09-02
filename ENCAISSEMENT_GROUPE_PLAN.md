@@ -129,9 +129,9 @@ l'exprimer forcerait le caissier à mentir sur la répartition.
 | **GE-2** | La section « Frais à régler » rend des groupes ; un groupe d'une tranche reste une ligne nue | ✅ |
 | **GE-3** | Le pont vers la requête : la ventilation produit les imputations, `_lines()` suit les tranches | ✅ |
 | **GE-4** | Devise de règlement et taux au niveau du groupe (une conversion, pas N) | ✅ |
-| **GE-5** | Confirmation : tranches groupées sous leur nature ; ticket aligné | ⬜ |
-| **GE-6** | l10n de finition FR + EN | ⬜ |
-| **GE-7** | Contre-épreuve bout-en-bout de la requête produite | ⬜ |
+| **GE-5** | Confirmation : tranches groupées sous leur nature ; ticket aligné | ✅ |
+| **GE-6** | l10n FR + EN — livrée **au fil des lots**, pas en lot séparé | ✅ |
+| **GE-7** | Contre-épreuve bout-en-bout de la requête produite | ✅ |
 
 ### Ce que la mise en œuvre a appris
 
@@ -151,12 +151,33 @@ l'exprimer forcerait le caissier à mentir sur la répartition.
   d'une tranche affichait deux sélecteurs qui se contredisaient. Règle posée —
   *dès que les tranches commandent, la nature cesse d'être l'unité de règlement*
   et ses contrôles disparaissent. Le mélange reste atteignable en dépliant.
+- 🔴 **La contre-épreuve a trouvé un défaut — dans elle-même.** Ses deux
+  premiers cas ciblaient `find.byType(TextField).first`, qui attrape le premier
+  champ de la PAGE : celui du payeur. Le montant tapé n'atteignait jamais la
+  nature, l'écran gardait la valeur posée par la case à cocher, et le test lisait
+  un chiffre juste pour une raison fausse. Écrite avec des attentes moins
+  précises, elle serait passée du premier coup sans rien prouver. Le champ se
+  cible désormais par son intitulé.
 - ⚠️ **Une fixture qui dit « deux frais » doit donner deux natures.** Un test du
   règlement multi-devise donnait le même `fee_code` à ses deux créances : sans
   conséquence sur un écran plat, il décrivait un minerval en deux tranches dès
   que l'écran a replié. C'est le test qui a trouvé le défaut ci-dessus.
 
-## 6. Hors périmètre
+## 6. Ce que la contre-épreuve établit
+
+Sur la requête réellement dispatchée, pas sur des intermédiaires :
+
+1. **Les deux chemins de saisie produisent la même requête.** Groupé (une nature,
+   un montant) et tranche par tranche (déplié, trois montants) passent par la
+   même assertion. Si les deux divergeaient, le groupement cesserait d'être une
+   affordance de saisie pour devenir **une seconde façon d'écrire de l'argent**.
+2. **Aucune imputation vide ne part.** Un règlement partiel n'envoie que les
+   tranches réellement atteintes — un versement porteur d'imputations vides
+   serait refusé, et le refus arriverait *après* que l'argent soit dans le
+   tiroir.
+3. **Chaque imputation porte son `fee_tariff_id`.**
+
+## 7. Hors périmètre
 
 - **L'étape « Frais » du wizard d'inscription** : elle crée des créances, elle
   n'en solde pas. Rien à replier.

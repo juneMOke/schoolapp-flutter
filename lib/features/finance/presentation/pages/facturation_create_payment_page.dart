@@ -367,13 +367,7 @@ class _FacturationCreatePaymentViewState
       group.writeTenderAmount(null);
       return;
     }
-    final settlement = _settlement();
-    var total = 0;
-    for (final tranche in group.tranches) {
-      if (tranche.effectiveCents <= 0) continue;
-      total += _lineOf(settlement, tranche).tenderCents;
-    }
-    group.writeTenderAmount(total);
+    group.writeTenderAmount(_groupTenderCents(_settlement(), group));
   }
 
   /// L'état du règlement : les taux du référentiel, plus ceux corrigés.
@@ -604,6 +598,70 @@ class _FacturationCreatePaymentViewState
     );
   }
 
+  /// Le récapitulatif à valider : une entrée par nature réglée, ses tranches
+  /// dessous.
+  ///
+  /// Une nature qui ne règle qu'une tranche n'expose pas d'enfant : la ligne EST
+  /// la tranche, et la redoubler n'apprendrait rien.
+  List<FacturationConfirmAllocationGroup> _confirmGroups(
+    TenderSettlement settlement,
+    AppLocalizations l10n,
+  ) => [
+    for (final group in _groups)
+      if (group.allocatedCents > 0)
+        FacturationConfirmAllocationGroup(
+          label: group.isSingleTranche
+              ? chargeDesignation(group.tranches.single.charge, l10n)
+              : chargeGroupDesignation(
+                  group.asChargeGroup,
+                  l10n,
+                  schoolTitle: widget.sectionTitles.titleOf(group.feeCode),
+                ),
+          amount: _formatWithCurrency(group.allocatedCents, group.currency),
+          derivedAmount: _groupTenderLabel(settlement, group),
+          items: group.isSingleTranche
+              ? const []
+              : [
+                  for (final tranche in group.tranches)
+                    if (tranche.effectiveCents > 0)
+                      FacturationConfirmAllocationItem(
+                        label: chargeDesignation(tranche.charge, l10n),
+                        amount: _formatWithCurrency(
+                          tranche.effectiveCents,
+                          tranche.charge.currency,
+                        ),
+                        derivedAmount: _tenderLabelOf(settlement, tranche),
+                      ),
+                ],
+        ),
+  ];
+
+  /// Ce qu'une nature fait entrer dans le tiroir, rendu — `null` sans
+  /// conversion.
+  String? _groupTenderLabel(
+    TenderSettlement settlement,
+    FacturationChargeGroupEntry group,
+  ) {
+    final kept = _groupTenderCents(settlement, group);
+    if (kept <= 0) return null;
+    return _formatWithCurrency(kept, group.effectiveTenderCurrency);
+  }
+
+  /// Ce que le tiroir conserve pour cette nature : la somme de ce que ses
+  /// tranches y font entrer — donc exactement ce que `tendersFor` agrégera.
+  int _groupTenderCents(
+    TenderSettlement settlement,
+    FacturationChargeGroupEntry group,
+  ) {
+    if (!group.isConverted) return 0;
+    var total = 0;
+    for (final tranche in group.tranches) {
+      if (tranche.effectiveCents <= 0) continue;
+      total += _lineOf(settlement, tranche).tenderCents;
+    }
+    return total;
+  }
+
   /// Le taux d'une NATURE, rendu « 2 800 FC / $ ».
   ///
   /// Un seul taux pour tout le groupe : ses tranches partagent la devise de
@@ -635,12 +693,7 @@ class _FacturationCreatePaymentViewState
     AppLocalizations l10n,
   ) {
     if (!group.isConverted || !group.tenderIsSource) return null;
-    var kept = 0;
-    for (final tranche in group.tranches) {
-      if (tranche.effectiveCents <= 0) continue;
-      kept += _lineOf(settlement, tranche).tenderCents;
-    }
-    final change = group.tenderedCents - kept;
+    final change = group.tenderedCents - _groupTenderCents(settlement, group);
     if (change <= 0) return null;
     return l10n.facturationCreatePaymentChangeDue(
       _formatWithCurrency(change, group.effectiveTenderCurrency),
@@ -801,20 +854,11 @@ class _FacturationCreatePaymentViewState
       // qu'on aurait perdue en route.
       payerName: _payer.composedName,
       payerPhone: phone,
-      allocations: [
-        for (final entry in retained)
-          FacturationConfirmAllocationItem(
-            // Le libellé, pas la nature : le récapitulatif qu'on valide doit
-            // nommer LA tranche encaissée, pas la famille à laquelle elle
-            // appartient.
-            label: chargeDesignation(entry.charge, l10n),
-            amount: _formatWithCurrency(
-              entry.effectiveCents,
-              entry.charge.currency,
-            ),
-            derivedAmount: _tenderLabelOf(settlement, entry),
-          ),
-      ],
+      // Les tranches, SOUS le nom de leur nature (GE-5). Le caissier valide une
+      // répartition : ne montrer que « Minerval 120 000 » lui ferait signer une
+      // ventilation qu'il n'a pas vue, et c'est elle — pas le total — qui
+      // figurera sur la note de perception.
+      allocations: _confirmGroups(settlement, l10n),
       request: request,
     );
 
