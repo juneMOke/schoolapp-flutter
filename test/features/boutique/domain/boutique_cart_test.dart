@@ -171,18 +171,29 @@ void main() {
       expect(cart.blockers.map((b) => b.kind), [CartBlockerKind.emptyCart]);
     });
 
-    test('l\'ordre est celui du formulaire, pas l\'ordre de découverte', () {
+    test('payeur entièrement vide : plus AUCUN blocage d\'identité', () {
+      // Depuis la V114 serveur, l'identité du payeur ne conditionne plus
+      // l'encaissement : ni nom, ni post-nom, ni prénom, ni même le fait
+      // d'avoir un numéro. Seule la ligne sans niveau reste — elle, empêche
+      // toujours de savoir COMBIEN encaisser.
       final cart = const BoutiqueCart()
           .addArticle(_polo(), keyOf: _key)
           .withPayer(const CartPayer());
 
       expect(cart.blockers.map((b) => b.kind), [
-        CartBlockerKind.missingLastName,
-        CartBlockerKind.missingMiddleName,
-        CartBlockerKind.missingFirstName,
-        CartBlockerKind.missingPhone,
         CartBlockerKind.linesWithoutLevel,
       ]);
+    });
+
+    /// Le cas que la V114 a ouvert : quelqu'un achète un cahier, on ne lui
+    /// demande rien, et la vente part. Aucune dette à rattacher, personne à
+    /// recontacter — la contrepartie est remise sur-le-champ.
+    test('panier garni, payeur entièrement vide : on encaisse', () {
+      var cart = const BoutiqueCart().addArticle(_ecusson(), keyOf: _key);
+      cart = cart.withPayer(const CartPayer());
+
+      expect(cart.blockers, isEmpty);
+      expect(cart.canCollect, isTrue);
     });
 
     test('téléphone entamé mais court : « incomplet », pas « absent »', () {

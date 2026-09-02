@@ -15,6 +15,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// Les champs restent **éditables après « Utiliser »** : corriger une
 /// orthographe ne casse pas le rattachement, puisque la clé reste le numéro.
+///
+/// **Tous facultatifs** (V114 serveur) : aucune étoile, et une mention qui le
+/// dit. Une vente au comptant remet sa contrepartie sur-le-champ — il n'y a ni
+/// dette à rattacher ni personne à recontacter — et exiger un nom pour
+/// encaisser un cahier faisait taper « X » au guichet, un champ rempli qui ne
+/// désigne personne. Le nom reste précieux quand il est là, et il le sera dans
+/// l'immense majorité des cas : un uniforme se vend à un parent qu'on connaît.
+/// Il cesse simplement de conditionner l'encaissement.
 class BoutiquePayerSection extends StatelessWidget {
   final CartPayer payer;
 
@@ -76,7 +84,6 @@ class BoutiquePayerSection extends StatelessWidget {
         EteeloPhoneInput(
           controller: phoneController,
           label: l10n.boutiquePayerPhoneLabel,
-          required: true,
           onChanged: onPhoneChanged,
         ),
         if (match != null) ...[
@@ -96,7 +103,6 @@ class BoutiquePayerSection extends StatelessWidget {
               child: EteeloTextInput(
                 controller: lastNameController,
                 label: l10n.boutiquePayerLastNameLabel,
-                required: true,
                 onChanged: onLastNameChanged,
               ),
             ),
@@ -105,7 +111,6 @@ class BoutiquePayerSection extends StatelessWidget {
               child: EteeloTextInput(
                 controller: middleNameController,
                 label: l10n.boutiquePayerMiddleNameLabel,
-                required: true,
                 onChanged: onMiddleNameChanged,
               ),
             ),
@@ -115,12 +120,14 @@ class BoutiquePayerSection extends StatelessWidget {
         EteeloTextInput(
           controller: firstNameController,
           label: l10n.boutiquePayerFirstNameLabel,
-          required: true,
           onChanged: onFirstNameChanged,
         ),
         const SizedBox(height: AppDimensions.spacingS),
+        // Dire que c'est facultatif VAUT l'espace : sans mention, un guichetier
+        // qui a toujours dû remplir ces champs continuera de les remplir, et
+        // l'assouplissement n'aura rien changé à la file d'attente.
         Text(
-          l10n.boutiquePayerReceiptNotice,
+          l10n.boutiquePayerOptionalNotice,
           style: theme.textTheme.bodySmall?.copyWith(
             color: AppColors.textMuted,
           ),

@@ -11,21 +11,21 @@ import 'package:equatable/equatable.dart';
 /// et ne se traduirait jamais.
 enum CartBlockerKind {
   /// Panier vide. **Seul** : quand il est là, les autres manques sont muets —
-  /// on ne reproche pas au guichet de n'avoir pas nommé le payeur d'une vente
-  /// qui n'existe pas encore.
+  /// on ne reproche pas au guichet un numéro inachevé sur une vente qui n'existe
+  /// pas encore.
   emptyCart,
 
-  missingLastName,
-  missingMiddleName,
-  missingFirstName,
-
-  /// Téléphone absent.
-  missingPhone,
-
-  /// Téléphone entamé mais trop court. Distinct de [missingPhone] : « vous
-  /// n'avez pas fini » n'est pas « vous n'avez rien mis », et le second
-  /// reprocherait au guichet de n'avoir pas commencé ce qu'il est en train de
-  /// taper.
+  /// Téléphone entamé mais trop court.
+  ///
+  /// **Le seul manque de payeur qui bloque encore.** Depuis la V114 serveur,
+  /// l'identité entière est facultative : une vente au comptant remet sa
+  /// contrepartie sur-le-champ, et exiger un nom pour encaisser un cahier
+  /// faisait taper « X » au guichet. Mais un numéro à moitié tapé n'est pas une
+  /// absence, c'est une faute de frappe — et c'est la clé de rapprochement du
+  /// répertoire, donc ce qui rendrait ce payeur introuvable demain.
+  ///
+  /// « Vous n'avez pas fini » n'est pas « vous n'avez rien mis » : ne rien
+  /// mettre est désormais un choix, qu'on ne reproche plus.
   incompletePhone,
 
   /// n lignes dont le prix n'est pas résolu, faute de niveau.

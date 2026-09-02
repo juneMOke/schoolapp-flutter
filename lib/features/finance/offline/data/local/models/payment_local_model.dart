@@ -11,8 +11,8 @@ class PaymentLocalModel {
   final String? academicYearId;
   final String method;
   final String paidAt;
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro E.164 du payeur (v28). Nul pour tout versement antérieur au palier
@@ -57,8 +57,8 @@ class PaymentLocalModel {
     this.academicYearId,
     this.method = 'CASH',
     required this.paidAt,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.status,
@@ -156,8 +156,12 @@ class PaymentLocalModel {
         academicYearId: m['academic_year_id'] as String?,
         method: (m['method'] as String?) ?? 'CASH',
         paidAt: m['paid_at'] as String,
-        payerFirstName: m['payer_first_name'] as String,
-        payerLastName: m['payer_last_name'] as String,
+        // `as String?` et non `as String` : la colonne est nullable depuis la
+        // v43, et un cast dur ferait LEVER la lecture d'un versement anonyme —
+        // là où rien ne manque, où tout est normal, et où l'écran n'aurait
+        // aucun moyen de le dire.
+        payerFirstName: m['payer_first_name'] as String?,
+        payerLastName: m['payer_last_name'] as String?,
         payerMiddleName: m['payer_middle_name'] as String?,
         payerPhoneNumber: m['payer_phone_number'] as String?,
         status: m['status'] as String?,

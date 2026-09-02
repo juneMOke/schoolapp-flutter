@@ -212,10 +212,6 @@ class _BlockerList extends StatelessWidget {
   static String _labelOf(CartBlocker blocker, AppLocalizations l10n) =>
       switch (blocker.kind) {
         CartBlockerKind.emptyCart => l10n.boutiqueBlockerEmptyCart,
-        CartBlockerKind.missingLastName => l10n.boutiqueBlockerLastName,
-        CartBlockerKind.missingMiddleName => l10n.boutiqueBlockerMiddleName,
-        CartBlockerKind.missingFirstName => l10n.boutiqueBlockerFirstName,
-        CartBlockerKind.missingPhone => l10n.boutiqueBlockerPhone,
         CartBlockerKind.incompletePhone => l10n.boutiqueBlockerPhoneIncomplete,
         CartBlockerKind.linesWithoutLevel =>
           l10n.boutiqueBlockerLinesWithoutLevel(blocker.count),

@@ -101,10 +101,18 @@ class BoutiqueConfirmDialog extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    // La ligne RESTE, même anonyme, et le dit en toutes
+                    // lettres : c'est le dernier écran avant d'engager
+                    // l'argent, et la seule occasion de remarquer qu'on
+                    // voulait nommer quelqu'un. Une ligne escamotée, ou pire
+                    // une valeur vide, laisserait le doute intact. Le ticket,
+                    // lui, escamote — il est lu APRÈS, par le client.
                     _Row(
                       icon: Icons.person_outline_rounded,
                       label: l10n.boutiqueConfirmPayer,
-                      value: _payerNameOf(cart),
+                      value: _payerNameOf(cart).isEmpty
+                          ? l10n.boutiqueHistoryPayerUnknown
+                          : _payerNameOf(cart),
                     ),
                     if (payer.phoneNumber.trim().isNotEmpty)
                       _Row(

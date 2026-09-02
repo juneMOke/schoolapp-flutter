@@ -13,8 +13,8 @@ class PaymentAllocation extends Equatable {
   /// (détail d'un frais §16). Repliés depuis le paiement joint : la source
   /// online (backend) ne les porte pas encore → valeurs par défaut vides /
   /// nulles, l'UI retombe alors sur « valeur inconnue ».
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro du payeur (v28), même repli et même réserve que ci-dessus : la

@@ -236,8 +236,12 @@ class LocalPayment extends Equatable {
   final MoneyBag amounts;
   final PaymentMethod method;
   final String paidAt; // ISO-8601
-  final String payerFirstName;
-  final String payerLastName;
+  /// Identité du payeur — les trois `null` sur un encaissement ANONYME (V114
+  /// serveur / v43 locale). L'exigence se payait comptant au guichet, et le
+  /// guichetier finissait par taper « X » : un champ rempli qui ne désigne
+  /// personne. `null`, jamais `''`.
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro E.164 du payeur (v28), nul quand le versement est antérieur au
@@ -273,8 +277,8 @@ class LocalPayment extends Equatable {
     this.amounts = MoneyBag.empty,
     required this.method,
     required this.paidAt,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.status,
@@ -326,8 +330,8 @@ class LocalPaymentAllocation extends Equatable {
   /// Identité du payeur et date (ISO-8601 local) du paiement joint. Renseignés
   /// par les lectures qui joignent la table `payments` (détail d'un frais) ;
   /// vides / nulls sinon (l'imputation seule ne les porte pas).
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro du payeur, replié depuis le paiement porteur (v28). Nul pour un

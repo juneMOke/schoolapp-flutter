@@ -15,8 +15,8 @@ PaymentModel _$PaymentModelFromJson(Map<String, dynamic> json) => PaymentModel(
           ?.map((e) => MoneyModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
-  payerFirstName: json['payerFirstName'] as String,
-  payerLastName: json['payerLastName'] as String,
+  payerFirstName: json['payerFirstName'] as String?,
+  payerLastName: json['payerLastName'] as String?,
   payerMiddleName: json['payerMiddleName'] as String?,
   payerPhoneNumber: json['payerPhoneNumber'] as String?,
   paidAt: DateTime.parse(json['paidAt'] as String),

@@ -147,7 +147,14 @@ class SaleTicketModel extends Equatable {
 
   final DateTime soldAt;
   final String? cashierFullName;
-  final String payerFullName;
+
+  /// Le payeur, **quand il y en a un** (V114 serveur / v43 locale).
+  ///
+  /// `null` sur une vente anonyme — et `null`, jamais `''` : le gabarit escamote
+  /// alors le bloc payeur ENTIER plutôt que d'imprimer un cadre vide, qui sur
+  /// une pièce se lit comme une mention effacée. Un téléphone seul suffit à
+  /// garder le bloc : il a été saisi, donc il désigne quelqu'un.
+  final String? payerFullName;
   final String? payerPhoneNumber;
   final List<SaleTicketLine> lines;
 
@@ -165,7 +172,7 @@ class SaleTicketModel extends Equatable {
     required this.isProvisional,
     required this.soldAt,
     this.cashierFullName,
-    required this.payerFullName,
+    this.payerFullName,
     this.payerPhoneNumber,
     required this.lines,
     required this.totals,
@@ -177,6 +184,15 @@ class SaleTicketModel extends Equatable {
   /// Il n'y a donc ni champ de saisie, ni calcul de monnaie, ni écart possible —
   /// et c'est pourquoi le reste imprimé vaut toujours zéro.
   MoneyBag get cashReceived => totals;
+
+  /// Y a-t-il un payeur à imprimer ?
+  ///
+  /// Le nom OU le numéro suffit. C'est la même règle que le reçu scellé, et il
+  /// le faut : deux pièces du même acte qui ne disent pas la même chose se
+  /// paient au premier rapprochement de caisse.
+  bool get hasPayer =>
+      (payerFullName?.trim().isNotEmpty ?? false) ||
+      (payerPhoneNumber?.trim().isNotEmpty ?? false);
 
   /// Toujours zéro (invariant I-5). Exposé comme une valeur plutôt qu'écrit en
   /// dur dans le gabarit : ce qui s'imprime est un fait du modèle, pas une

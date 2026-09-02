@@ -198,8 +198,8 @@ class FinanceLedgerReadDao {
     return rows
         .map(
           (r) => PaymentAllocationLocalModel.fromMap(r).toEntity(
-            payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
-            payerLastName: (r['p_payer_last_name'] as String?) ?? '',
+            payerFirstName: r['p_payer_first_name'] as String?,
+            payerLastName: r['p_payer_last_name'] as String?,
             payerMiddleName: r['p_payer_middle_name'] as String?,
             payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,
@@ -239,8 +239,8 @@ class FinanceLedgerReadDao {
     return rows
         .map(
           (r) => PaymentAllocationLocalModel.fromMap(r).toEntity(
-            payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
-            payerLastName: (r['p_payer_last_name'] as String?) ?? '',
+            payerFirstName: r['p_payer_first_name'] as String?,
+            payerLastName: r['p_payer_last_name'] as String?,
             payerMiddleName: r['p_payer_middle_name'] as String?,
             payerPhoneNumber: r['p_payer_phone_number'] as String?,
             paidAt: r['p_paid_at'] as String?,

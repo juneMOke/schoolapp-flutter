@@ -1,5 +1,4 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -218,15 +217,7 @@ abstract final class TicketTextLayout {
   /// paire tient rarement à droite de « Taux » en 32 colonnes, et c'est le
   /// nombre qui compte.
   static String _formatRate(TicketTenderLine tender, int width) {
-    final value = MoneyFormat.amountOnly(
-      Money(
-        (tender.rateMicros ~/ (ExchangeRate.scale ~/ 100)),
-        // Deux décimales, quelle que soit la devise : un taux n'est pas un
-        // montant, il ne suit pas la règle d'écriture du franc.
-        '',
-      ),
-      space: MoneyFormat.thermalSpace,
-    );
+    final value = tender.rate.formatted(space: MoneyFormat.thermalSpace);
     final quote = MoneyFormat.symbolOf(tender.currency);
     if (width < 40) return '$value $quote';
     final base = MoneyFormat.symbolOf(tender.pivotCurrency);

@@ -103,10 +103,15 @@ class PaymentAllocationLocalModel {
 
   /// Le payeur et la date sont repliés depuis le paiement JOINT par l'appelant
   /// (ils ne sont pas des colonnes de `payment_allocations`) ; absents, l'entité
-  /// les laisse vides / nuls.
+  /// les laisse nuls.
+  ///
+  /// Les trois noms sont `String?` sans défaut : depuis la V114 serveur, un
+  /// encaissement peut n'en porter aucun. Un défaut `''` confondrait « le
+  /// versement n'a pas été joint » avec « le versement n'a pas de payeur », et
+  /// l'écran ne peut choisir sa mention qu'en les distinguant.
   LocalPaymentAllocation toEntity({
-    String payerFirstName = '',
-    String payerLastName = '',
+    String? payerFirstName,
+    String? payerLastName,
     String? payerMiddleName,
     String? payerPhoneNumber,
     String? paidAt,
