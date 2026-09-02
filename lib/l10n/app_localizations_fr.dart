@@ -2912,6 +2912,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumberLabel => 'Téléphone';
 
   @override
+  String get guardianPhoneNumberAbsent => 'Sans numéro';
+
+  @override
+  String get guardianPhoneNumberOptionalNotice =>
+      'Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n\'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.';
+
+  @override
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
 
   @override

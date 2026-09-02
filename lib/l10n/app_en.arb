@@ -2121,6 +2121,8 @@
   "identificationNumberLabel": "Identification number",
   "identificationNumberHelp": "Official identification number.",
   "phoneNumberLabel": "Phone",
+  "guardianPhoneNumberAbsent": "No phone number",
+  "guardianPhoneNumberOptionalNotice": "Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.",
   "phoneNumberHelp": "Guardian's phone number.",
   "phoneNumberCountryCodeLabel": "Country dialling code",
   "phoneNumberInvalidError": "Invalid phone number ({expectedDigits} digits expected after the dialling code).",

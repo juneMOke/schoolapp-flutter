@@ -2898,6 +2898,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumberLabel => 'Phone';
 
   @override
+  String get guardianPhoneNumberAbsent => 'No phone number';
+
+  @override
+  String get guardianPhoneNumberOptionalNotice =>
+      'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.';
+
+  @override
   String get phoneNumberHelp => 'Guardian\'s phone number.';
 
   @override

@@ -4682,6 +4682,18 @@ abstract class AppLocalizations {
   /// **'Phone'**
   String get phoneNumberLabel;
 
+  /// No description provided for @guardianPhoneNumberAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'No phone number'**
+  String get guardianPhoneNumberAbsent;
+
+  /// No description provided for @guardianPhoneNumberOptionalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.'**
+  String get guardianPhoneNumberOptionalNotice;
+
   /// No description provided for @phoneNumberHelp.
   ///
   /// In en, this message translates to:

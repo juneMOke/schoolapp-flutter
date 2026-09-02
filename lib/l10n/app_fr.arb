@@ -2069,6 +2069,8 @@
   "identificationNumberLabel": "Numéro d'identification",
   "identificationNumberHelp": "Numéro d'identification officiel.",
   "phoneNumberLabel": "Téléphone",
+  "guardianPhoneNumberAbsent": "Sans numéro",
+  "guardianPhoneNumberOptionalNotice": "Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.",
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
   "phoneNumberCountryCodeLabel": "Indicatif pays",
   "phoneNumberInvalidError": "Numéro de téléphone invalide ({expectedDigits} chiffres attendus après l'indicatif).",
