@@ -303,10 +303,7 @@ void main() {
     test('un versement sans rien à imputer ni rien à recevoir tient', () {
       // Le refus du versement vide appartient à l'appelant, pas à l'invariant.
       expect(
-        TenderComposition.check(
-          allocations: const [],
-          tenders: const [],
-        ),
+        TenderComposition.check(allocations: const [], tenders: const []),
         isNull,
       );
     });
