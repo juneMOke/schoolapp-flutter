@@ -96,9 +96,11 @@ jobs:
           APP_ENV: prod
           VERSION_TAG: ${{ inputs.version_tag }}
         run: |
-          while IFS='=' read -r key value; do
-            echo "$key=$value" >> "$GITHUB_OUTPUT"
-          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
+          # Substitution de commande, et non `< <(…)` : sur un tag invalide le
+          # script sort en erreur, et l'étape doit échouer avec lui plutôt que
+          # de laisser passer un build_name vide.
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Android release signing
         env:
@@ -177,9 +179,11 @@ jobs:
           APP_ENV: prod
           VERSION_TAG: ${{ inputs.version_tag }}
         run: |
-          while IFS='=' read -r key value; do
-            echo "$key=$value" >> "$GITHUB_OUTPUT"
-          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
+          # Substitution de commande, et non `< <(…)` : sur un tag invalide le
+          # script sort en erreur, et l'étape doit échouer avec lui plutôt que
+          # de laisser passer un build_name vide.
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Android release signing
         uses: ./.github/actions/prepare-android-signing
@@ -245,9 +249,11 @@ jobs:
           APP_ENV: prod
           VERSION_TAG: ${{ inputs.version_tag }}
         run: |
-          while IFS='=' read -r key value; do
-            echo "$key=$value" >> "$GITHUB_OUTPUT"
-          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
+          # Substitution de commande, et non `< <(…)` : sur un tag invalide le
+          # script sort en erreur, et l'étape doit échouer avec lui plutôt que
+          # de laisser passer un build_name vide.
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
 
       # ── A configurer avec votre setup de signing ──
       # Voir build_ios.yml pour les options Fastlane match / certificats secrets.

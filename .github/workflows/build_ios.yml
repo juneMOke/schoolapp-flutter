@@ -21,7 +21,7 @@ on:
           - ad-hoc
           - app-store
       version_tag:
-        description: 'Tag SemVer à utiliser pour prod (ex: v1.2.3)'
+        description: 'Tag SemVer (ex: v1.2.3) — obligatoire en prod, remplace la version du pubspec en dev/staging'
         required: false
         type: string
 
@@ -121,9 +121,11 @@ jobs:
           APP_ENV: ${{ needs.resolve-config.outputs.app_env }}
           VERSION_TAG: ${{ inputs.version_tag }}
         run: |
-          while IFS='=' read -r key value; do
-            echo "$key=$value" >> "$GITHUB_OUTPUT"
-          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
+          # Substitution de commande, et non `< <(…)` : sur un tag invalide le
+          # script sort en erreur, et l'étape doit échouer avec lui plutôt que
+          # de laisser passer un build_name vide.
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
 
       # ── Signing (ajuster selon votre setup certificates/provisioning) ──
       #
