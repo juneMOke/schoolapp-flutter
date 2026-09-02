@@ -4,8 +4,9 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/l
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/payment_tender_composition.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
 class AllocationDraft {
@@ -38,8 +39,8 @@ class RecordPaymentDraft {
   final String academicYearId;
   final String? method; // défaut CASH
   final String paidAt; // ISO-8601 — date terrain
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro E.164 du payeur. Requis à la saisie (le CTA reste gris sans lui),
@@ -64,7 +65,7 @@ class RecordPaymentDraft {
   /// de la créance, ce qui est le cas courant.
   ///
   /// Le couple perçu/imputé est vérifié par
-  /// `PaymentTenderComposition.check` avant écriture : sans cette épreuve,
+  /// `TenderComposition.check` avant écriture : sans cette épreuve,
   /// encaisser 100 000 FC pour une créance de 50 \$ quand le taux du jour en vaut
   /// 145 000 laisse la créance éteinte, la caisse cohérente, et 45 000 FC
   /// partis.
@@ -76,8 +77,8 @@ class RecordPaymentDraft {
     required this.academicYearId,
     this.method,
     required this.paidAt,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.amounts,
@@ -90,6 +91,34 @@ class RecordPaymentDraft {
 abstract class FinanceOfflineRepository {
   /// Encaisse un paiement en local-first. Renvoie l'id du paiement (uuid client).
   Future<Either<Failure, String>> recordPayment(RecordPaymentDraft draft);
+
+  /// La série de taux de guichet de l'école, telle que le référentiel la sert.
+  ///
+  /// Liste vide = « aucun taux » — et l'écran en tire la seule conclusion sûre :
+  /// il n'ouvre pas la bascule de devise. Le guichet PROPOSE un taux, il ne
+  /// l'invente pas.
+  ///
+  /// Lecture locale, jamais d'erreur métier : une série illisible se réduit à
+  /// une liste vide, elle ne fait pas échouer un encaissement.
+  Future<Either<Failure, List<ExchangeRate>>> getExchangeRates();
+
+  /// Pose un taux de guichet dans la série de l'école.
+  ///
+  /// **Publié sur le serveur, puis mis en cache local** — dans cet ordre, et
+  /// jamais l'un sans l'autre. Le pull remplace la table en bloc : un taux écrit
+  /// seulement ici disparaîtrait au premier cycle réussi, et la bascule de
+  /// devise du guichet s'éteindrait sans un mot.
+  ///
+  /// Ce n'est pas de l'outbox : un taux ne s'applique pas avant d'exister. Sans
+  /// réseau, la pose **échoue et le dit** — c'est un geste de direction, pas un
+  /// encaissement qu'on ne peut pas refuser.
+  Future<Either<Failure, Unit>> saveExchangeRate({
+    required String base,
+    required String quote,
+    required int rateMicros,
+    required DateTime effectiveFrom,
+    int? divergenceBandBp,
+  });
 
   /// Payeurs à proposer d'emblée pour cet élève : ceux qui ont déjà payé pour
   /// lui, puis ses tuteurs déclarés. Lecture locale, jamais d'erreur métier.

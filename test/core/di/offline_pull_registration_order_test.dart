@@ -40,7 +40,7 @@ import '../../features/offline_full_db.dart';
 /// `PullCoordinator` qui **retient l'ordre d'enregistrement**.
 ///
 /// C'est le seul moyen d'observer cet ordre depuis un test : le registre est
-/// privé, et `pullAll()` est inutilisable ici (les vingt handlers réels
+/// privé, et `pullAll()` est inutilisable ici (les vingt et un handlers réels
 /// taperaient le réseau). L'ordre retenu est bien celui d'exécution — le
 /// coordinateur itère `_handlers.values`, et une `LinkedHashMap` rend ses
 /// valeurs dans l'ordre d'insertion des clés.
@@ -81,7 +81,7 @@ class _AlwaysOffline implements ConnectivityService {
 
 /// L'ordre d'enregistrement des `PullHandler` sur le `PullCoordinator` **est**
 /// leur ordre d'exécution, et personne ne l'observait : on pouvait permuter les
-/// dix-neuf flux sans faire rougir un seul test, alors que quatre de ces arêtes
+/// vingt flux sans faire rougir un seul test, alors que quatre de ces arêtes
 /// décident du sens de la panne (ADR-015 K).
 ///
 /// Ce test monte la DI offline **réelle** (`registerOfflineModules`) plutôt
@@ -201,6 +201,18 @@ void main() {
       },
     );
 
+    // Le taux est un référentiel : il ne dépend de rien, et le guichet en a
+    // besoin dès qu'un écran d'encaissement s'ouvre. Tiré après les créances,
+    // il arriverait après le premier rendu — la bascule de devise resterait
+    // éteinte sur le versement qu'on est en train de saisir.
+    test('le taux de guichet précède les créances', () {
+      expectBefore(
+        FinancePullRepositoryImpl.exchangeRatesResource,
+        FinancePullRepositoryImpl.chargesResource,
+        'sans taux au premier rendu, la bascule de devise reste éteinte',
+      );
+    });
+
     // CORRECTIF B — le bundle était enregistré DERNIER des six.
     test('le référentiel de notes précède les cours', () {
       expectBefore(
@@ -233,11 +245,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('vingt handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(20));
+    test('vingt et un handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(21));
       expect(
         order().toSet(),
-        hasLength(20),
+        hasLength(21),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -254,10 +266,10 @@ void main() {
       expect(socles, [EnrollmentPullRepositoryImpl.referentialResource]);
     });
 
-    // Les dix-huit autres restent gouvernés par leur permission : sans cette
+    // Les vingt autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
-    test('les dix-neuf autres flux déclarent tous une exigence de lecture', () {
+    test('les vingt autres flux déclarent tous une exigence de lecture', () {
       final sansExigence = coordinator.registered
           .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
           .map((h) => h.resource)
@@ -266,7 +278,7 @@ void main() {
       // Une exigence vide serait pire qu'un oubli : `canAccess` refuse sur
       // exigence vide, le flux ne descendrait plus jamais.
       expect(sansExigence, isEmpty);
-      expect(coordinator.registered.where((h) => !h.isBaseline), hasLength(19));
+      expect(coordinator.registered.where((h) => !h.isBaseline), hasLength(20));
     });
 
     // Les autres handlers, notamment ceux du même module, ne doivent pas
@@ -291,15 +303,16 @@ void main() {
 
   // Garde-fou du harnais : si un jour un registrar cessait d'enregistrer ses
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
-  // arêtes qu'ils ne trouveraient plus. On vérifie donc que les dix-neuf
+  // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les vingt ressources attendues sont toutes enregistrées', () {
+  test('les vingt et une ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       EnrollmentPullRepositoryImpl.referentialResource,
       EnrollmentPullRepositoryImpl.cohortResource,
       EnrollmentPullRepositoryImpl.preEnrollmentsResource,
       EnrollmentPullRepositoryImpl.snapshotsResource,
       EnrollmentPullRepositoryImpl.deltaResource,
+      FinancePullRepositoryImpl.exchangeRatesResource,
       FinancePullRepositoryImpl.chargesResource,
       FinancePullRepositoryImpl.paymentsResource,
       kClassroomsResource,

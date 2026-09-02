@@ -50,7 +50,7 @@ class _RecordingPullCoordinator extends PullCoordinator {
   }
 }
 
-/// Les dix-neuf constantes de [SyncPlanKeys], référencées **par leur symbole**.
+/// Les vingt constantes de [SyncPlanKeys], référencées **par leur symbole**.
 ///
 /// Une liste de chaînes recopiées ne prouverait rien ; ces références-là ne
 /// compilent que tant que les constantes existent, et la comparaison
@@ -64,6 +64,7 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.classroomClassrooms,
   SyncPlanKeys.classroomMembers,
   SyncPlanKeys.classroomTransfers,
+  SyncPlanKeys.financeExchangeRates,
   SyncPlanKeys.financeStudentCharges,
   SyncPlanKeys.financePayments,
   SyncPlanKeys.attendanceRecords,
@@ -222,18 +223,18 @@ void main() {
     );
   });
 
-  // ── Le compte : dix-neuf clés, vingt ressources ───────────────────────────
+  // ── Le compte : vingt clés, vingt et une ressources ───────────────────────
 
-  test('dix-neuf clés de plan pour vingt ressources de handler', () {
-    expect(kSyncPlanAliases.length, 19);
-    expect(registeredResources.length, 20);
+  test('vingt clés de plan pour vingt et une ressources de handler', () {
+    expect(kSyncPlanAliases.length, 20);
+    expect(registeredResources.length, 21);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 20);
-    // Vingt ressources aliasées ET vingt handlers : les deux ensembles
-    // coïncident donc exactement (F-I1a + F-I1b + ce compte).
+    expect(aliased.length, 21);
+    // Vingt et une ressources aliasées ET autant de handlers : les deux
+    // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
   });
 
@@ -249,12 +250,12 @@ void main() {
   });
 
   test(
-    'les dix-neuf constantes déclarées sont exactement les clés de la table',
+    'les vingt constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 19);
+      expect(_kDeclaredPlanKeys.length, 20);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        19,
+        20,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -327,7 +328,7 @@ void main() {
 
   test('et ce sont les cinq SEULES que la règle mécanique manque', () {
     // La démonstration que la table doit exister, et qu'elle n'en fait pas
-    // trop : sur les dix-neuf couples (clé, ressource), `.`/`-` → `_` en donne
+    // trop : sur les vingt couples (clé, ressource), `.`/`-` → `_` en donne
     // quatorze et manque exactement ces cinq-là. Si un jour la liste des
     // manquants change sans que personne l'ait décidé, c'est ici que ça se voit
     // — et « remplaçons la table par une règle » redevient un refus argumenté.
@@ -405,12 +406,12 @@ void main() {
     );
   });
 
-  test('isCursorKeyPrefix : faux pour les douze ressources à clé nue', () {
+  test('isCursorKeyPrefix : faux pour les treize ressources à clé nue', () {
     final bare = registeredResources.toSet().difference(
       _kSuffixedCursorResources,
     );
 
-    expect(bare.length, 12);
+    expect(bare.length, 13);
     for (final resource in bare) {
       expect(
         isCursorKeyPrefix(resource),

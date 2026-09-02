@@ -13,7 +13,10 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/steps/school_identity_step.dart';
+import 'package:school_app_flutter/features/configuration/presentation/widgets/fee_sections_settings_card.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/settings_structure_view.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rate_settings_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/exchange_rate_settings_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Onglets des réglages, après mise en service.
@@ -125,13 +128,35 @@ class _ConfigurationSettingsPageState extends State<ConfigurationSettingsPage> {
                                 SettingsStructureView(
                                   bundles: academicContext.schoolLevelGroups,
                                 ),
-                              ConfigurationSettingsTab.fees =>
-                                SettingsStructureView(
-                                  bundles: academicContext.schoolLevelGroups,
-                                  showTariffs: true,
-                                  academicYearId:
-                                      academicContext.academicYear.id,
-                                ),
+                              // Le taux de guichet EN TÊTE de l'onglet Frais :
+                              // c'est ce qui rend la grille encaissable dans
+                              // une autre monnaie, et sans lui la bascule du
+                              // guichet n'apparaît jamais.
+                              ConfigurationSettingsTab.fees => Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  BlocProvider<ExchangeRateSettingsCubit>(
+                                    create: (_) =>
+                                        getIt<ExchangeRateSettingsCubit>()
+                                          ..load(),
+                                    child: const ExchangeRateSettingsCard(),
+                                  ),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  // Le nommage des sections AVANT la grille :
+                                  // c'est le vocabulaire sous lequel les tarifs
+                                  // s'affichent juste en dessous, et le lire
+                                  // après les avoir parcourus serait le lire
+                                  // trop tard.
+                                  const FeeSectionsSettingsCard(),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  SettingsStructureView(
+                                    bundles: academicContext.schoolLevelGroups,
+                                    showTariffs: true,
+                                    academicYearId:
+                                        academicContext.academicYear.id,
+                                  ),
+                                ],
+                              ),
                             },
                           ),
                         ),
