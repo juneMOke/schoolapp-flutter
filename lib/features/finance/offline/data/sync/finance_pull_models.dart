@@ -1,6 +1,7 @@
 // DTOs de pull delta (FF-Lot 2). Grille tarifaire + grand-livre autoritaire.
 // Réponses serveur (fromJson) → converties en modèles locaux au upsert.
 
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 
@@ -114,8 +115,8 @@ class PaymentDto {
   final String? academicYearId;
   final String? method;
   final String paidAt;
-  final String payerFirstName;
-  final String payerLastName;
+  final String? payerFirstName;
+  final String? payerLastName;
   final String? payerMiddleName;
 
   /// Numéro du payeur (v28). Absent des deltas scellés avant l'évolution du
@@ -144,8 +145,8 @@ class PaymentDto {
     this.academicYearId,
     this.method,
     required this.paidAt,
-    required this.payerFirstName,
-    required this.payerLastName,
+    this.payerFirstName,
+    this.payerLastName,
     this.payerMiddleName,
     this.payerPhoneNumber,
     this.status,
@@ -160,8 +161,12 @@ class PaymentDto {
     academicYearId: j['academicYearId'] as String?,
     method: j['method'] as String?,
     paidAt: j['paidAt'] as String,
-    payerFirstName: (j['payerFirstName'] as String?) ?? '',
-    payerLastName: (j['payerLastName'] as String?) ?? '',
+    // ⚠️ **Aucun repli sur `''`.** Le serveur rend `null` sur un encaissement
+    // anonyme (V114), et le replier écrirait en base un nom de longueur zéro —
+    // c'est-à-dire la confusion même que la V114 a supprimée. `null` reste
+    // `null` jusqu'à l'écran.
+    payerFirstName: j['payerFirstName'] as String?,
+    payerLastName: j['payerLastName'] as String?,
     payerMiddleName: j['payerMiddleName'] as String?,
     payerPhoneNumber: j['payerPhoneNumber'] as String?,
     status: j['status'] as String?,
@@ -274,7 +279,25 @@ class PaymentDeltaDto {
   final PaymentDto payment;
   final List<PaymentPullAllocationDto> allocations;
 
-  const PaymentDeltaDto({required this.payment, required this.allocations});
+  /// Ce qui est réellement **entré dans le tiroir**, une entrée par devise
+  /// reçue.
+  ///
+  /// Les imputations disent ce que le versement a **éteint**, en devise de
+  /// créance ; celles-ci disent ce qui a été **perçu**. Sans elles, le second
+  /// poste voit un versement de 50 USD sans aucun moyen de savoir qu'il a été
+  /// encaissé en francs — et son tiroir local dérive de celui du serveur, la
+  /// dérive même que ce flux existe pour borner.
+  ///
+  /// Vides sur un versement d'avant l'alignement du contrat : le poste retombe
+  /// alors sur l'identité écrite par le backfill de la v41, jamais sur une
+  /// lecture des imputations.
+  final List<PaymentPullTenderDto> tenders;
+
+  const PaymentDeltaDto({
+    required this.payment,
+    required this.allocations,
+    this.tenders = const [],
+  });
 
   factory PaymentDeltaDto.fromJson(Map<String, dynamic> j) => PaymentDeltaDto(
     payment: PaymentDto.fromJson(j),
@@ -283,10 +306,75 @@ class PaymentDeltaDto {
           (e) => PaymentPullAllocationDto.fromJson(e as Map<String, dynamic>),
         )
         .toList(),
+    tenders: [
+      for (final raw in (j['tenders'] as List<dynamic>? ?? const []))
+        if (raw is Map<String, dynamic>) PaymentPullTenderDto.fromJson(raw),
+    ],
   );
 
   List<PaymentAllocationLocalModel> allocationModels() =>
       allocations.map((a) => a.toLocalModel(paymentId: payment.id)).toList();
+
+  List<PaymentTenderLocalModel> tenderModels() =>
+      tenders.map((t) => t.toLocalModel(paymentId: payment.id)).toList();
+}
+
+/// Une ligne d'encaissement, telle qu'elle redescend.
+///
+/// **Aucun lien vers une imputation**, comme en base : le payeur a posé une
+/// somme, pas un billet par poste. La correspondance se dérive du taux, elle ne
+/// se transporte pas.
+class PaymentPullTenderDto {
+  final String id;
+
+  /// Le **net conservé**, jamais le montant présenté.
+  final int amountInCents;
+
+  final String currency;
+
+  /// Le taux appliqué, en **décimal** sur le fil. `null` vaut 1.
+  final double? rate;
+
+  /// La devise de la **créance** réglée. `null` vaut [currency].
+  final String? pivotCurrency;
+
+  const PaymentPullTenderDto({
+    required this.id,
+    required this.amountInCents,
+    required this.currency,
+    this.rate,
+    this.pivotCurrency,
+  });
+
+  /// Lecture **tolérante** : refuser une ligne mal formée ferait perdre le
+  /// versement entier au pull, alors qu'il est déjà encaissé et déjà imprimé.
+  factory PaymentPullTenderDto.fromJson(Map<String, dynamic> j) =>
+      PaymentPullTenderDto(
+        id: (j['id'] as String?) ?? '',
+        amountInCents: (j['amountInCents'] as num?)?.toInt() ?? 0,
+        currency: (j['currency'] as String?) ?? '',
+        rate: (j['rate'] as num?)?.toDouble(),
+        pivotCurrency: j['pivotCurrency'] as String?,
+      );
+
+  PaymentTenderLocalModel toLocalModel({required String paymentId}) {
+    final value = rate;
+    return PaymentTenderLocalModel(
+      id: id,
+      // Le versement descendu porte l'identifiant SERVEUR : c'est lui qui fait
+      // foi ici, il n'y a pas d'uuid client à remapper.
+      clientUuid: id,
+      paymentId: paymentId,
+      amountInCents: amountInCents,
+      currency: currency,
+      // Un taux absent, nul ou négatif vaut l'identité : il diviserait ou
+      // inverserait de l'argent.
+      rateMicros: (value == null || value <= 0)
+          ? ExchangeRate.scale
+          : (value * ExchangeRate.scale).round(),
+      pivotCurrency: pivotCurrency ?? currency,
+    );
+  }
 }
 
 /// Page keyset des paiements (`GET /api/v1/sync/payments`).

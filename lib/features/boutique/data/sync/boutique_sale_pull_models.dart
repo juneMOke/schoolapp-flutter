@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -43,6 +44,19 @@ class BoutiqueSaleDeltaDto {
   final String? receiptDocumentId;
 
   final List<BoutiqueSaleLineDeltaDto> lines;
+
+  /// Ce qui est réellement **entré dans le tiroir**, une entrée par devise
+  /// reçue.
+  ///
+  /// `amounts` dit ce que la vente a **soldé**, en devise de catalogue ; ceci
+  /// dit ce qui a été **perçu**. Les deux ne s'additionnent pas et ne se
+  /// convertissent pas l'un dans l'autre.
+  ///
+  /// Vide sur une vente d'avant l'alignement du contrat : le poste retombe
+  /// alors sur l'identité écrite par le backfill de la v42 — jamais sur une
+  /// lecture des lignes, qui ferait deux voies de lecture.
+  final List<BoutiqueSaleTenderDeltaDto> tenders;
+
   final String serverUpdatedAt;
 
   const BoutiqueSaleDeltaDto({
@@ -59,6 +73,7 @@ class BoutiqueSaleDeltaDto {
     required this.soldAt,
     this.receiptDocumentId,
     this.lines = const [],
+    this.tenders = const [],
     required this.serverUpdatedAt,
   });
 
@@ -88,8 +103,64 @@ class BoutiqueSaleDeltaDto {
             if (line is Map<String, dynamic>)
               BoutiqueSaleLineDeltaDto.fromJson(line),
         ],
+        tenders: [
+          for (final tender in (j['tenders'] as List<dynamic>? ?? const []))
+            if (tender is Map<String, dynamic>)
+              BoutiqueSaleTenderDeltaDto.fromJson(tender),
+        ],
         serverUpdatedAt: j['serverUpdatedAt'] as String,
       );
+}
+
+/// Une ligne d'encaissement, telle qu'elle redescend.
+///
+/// **Aucun lien vers une ligne du panier**, comme en base : le client a posé une
+/// somme, pas un billet par article. La part de chaque ligne se dérive du taux,
+/// elle ne se transporte pas.
+class BoutiqueSaleTenderDeltaDto {
+  final String id;
+
+  /// Le **net conservé**, jamais le montant présenté.
+  final int amountInCents;
+
+  /// La devise réellement tendue.
+  final String currency;
+
+  /// Le taux appliqué, en **décimal** sur le fil — les micro-unités sont une
+  /// convention locale. `null` vaut 1, licite quand les deux devises sont la
+  /// même.
+  final double? rate;
+
+  /// La devise du **catalogue** que cette entrée règle. `null` vaut [currency].
+  final String? pivotCurrency;
+
+  const BoutiqueSaleTenderDeltaDto({
+    required this.id,
+    required this.amountInCents,
+    required this.currency,
+    this.rate,
+    this.pivotCurrency,
+  });
+
+  /// Lecture **tolérante** : un poste qui refuserait une ligne d'encaissement
+  /// mal formée perdrait la vente entière au pull, alors qu'elle est déjà
+  /// encaissée et déjà remise.
+  factory BoutiqueSaleTenderDeltaDto.fromJson(Map<String, dynamic> j) =>
+      BoutiqueSaleTenderDeltaDto(
+        id: (j['id'] as String?) ?? '',
+        amountInCents: (j['amountInCents'] as num?)?.toInt() ?? 0,
+        currency: (j['currency'] as String?) ?? '',
+        rate: (j['rate'] as num?)?.toDouble(),
+        pivotCurrency: j['pivotCurrency'] as String?,
+      );
+
+  /// Le taux en micro-unités, tel que la base le porte. Un taux absent, nul ou
+  /// négatif vaut l'identité : il diviserait ou inverserait de l'argent.
+  int get rateMicros {
+    final value = rate;
+    if (value == null || value <= 0) return ExchangeRate.scale;
+    return (value * ExchangeRate.scale).round();
+  }
 }
 
 /// Une ligne du panier, telle qu'elle redescend.
