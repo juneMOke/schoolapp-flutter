@@ -812,6 +812,34 @@
   "@configurationSettingsTariffOne": {
       "description": "Note explaining the wizard's scope no longer exists in settings"
   },
+  "configurationSectionsTitle": "Fee sections",
+  "@configurationSectionsTitle": {
+      "description": "Titre de la carte de nommage des natures de frais"
+  },
+  "configurationSectionsSubtitle": "The name your school gives each fee nature. Every tariff of the same nature is shown under that title.",
+  "@configurationSectionsSubtitle": {
+      "description": "Sous-titre de la carte de nommage des sections"
+  },
+  "configurationSectionsSave": "Save sections",
+  "@configurationSectionsSave": {
+      "description": "Bouton d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsSaved": "Sections saved",
+  "@configurationSectionsSaved": {
+      "description": "Confirmation d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsHiddenHint": "Hidden: no longer offered for input, but still counted in the statistics.",
+  "@configurationSectionsHiddenHint": {
+      "description": "Explication de ce que masquer une section veut dire"
+  },
+  "configurationSectionsLabelRequired": "Every section must have a name.",
+  "@configurationSectionsLabelRequired": {
+      "description": "Refus d'enregistrer quand un titre de section est vide"
+  },
+  "configurationSectionsReorderHint": "Drag a section to move it up; this order is the tariff picker's.",
+  "@configurationSectionsReorderHint": {
+      "description": "Explication du reclassement des sections"
+  },
   "configurationTariffAdd": "Add a tariff",
   "@configurationTariffAdd": {
       "description": "Button adding a tariff on a level"

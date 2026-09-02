@@ -14,13 +14,21 @@ import 'package:school_app_flutter/features/configuration/domain/entities/school
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_exchange_rates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/save_exchange_rate_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rate_settings_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 
 class _MockRepository extends Mock implements ProvisioningRepository {}
+
+class _MockGetExchangeRates extends Mock implements GetExchangeRatesUseCase {}
+
+class _MockSaveExchangeRate extends Mock implements SaveExchangeRateUseCase {}
 
 class _MockAcademicYearContextBloc
     extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
@@ -87,8 +95,14 @@ void main() {
     when(
       () => repository.saveSchoolIdentity(any()),
     ).thenAnswer((_) async => const Right(_identity));
+    // `includeHidden` compris : la carte de nommage des sections demande le
+    // catalogue COMPLET, faute de quoi rétablir une section masquée serait
+    // impossible depuis l'écran qui sert à les gérer.
     when(
-      () => repository.loadFeeCodes(),
+      () => repository.loadFeeCodes(
+        forceRefresh: any(named: 'forceRefresh'),
+        includeHidden: any(named: 'includeHidden'),
+      ),
     ).thenAnswer((_) async => const Right(<FeeCodeOption>[]));
     when(() => repository.loadTariffs(any())).thenAnswer(
       (_) async => const Left(ServerFailure('non sollicité par ce test')),
@@ -97,6 +111,17 @@ void main() {
     getIt.registerFactory<ProvisioningRepository>(() => repository);
     getIt.registerFactory<SchoolIdentityFormCubit>(
       () => SchoolIdentityFormCubit(repository: repository),
+    );
+
+    // L'onglet « Frais scolaires » porte aussi le taux de guichet : sans ce
+    // cubit dans le conteneur, l'onglet lève au montage.
+    final getRates = _MockGetExchangeRates();
+    when(getRates.call).thenAnswer((_) async => const Right(<ExchangeRate>[]));
+    getIt.registerFactory<ExchangeRateSettingsCubit>(
+      () => ExchangeRateSettingsCubit(
+        getRates: getRates,
+        saveRate: _MockSaveExchangeRate(),
+      ),
     );
 
     yearBloc = _MockAcademicYearContextBloc();

@@ -23,10 +23,23 @@ abstract class ProvisioningRepository {
     bool forceRefresh = false,
   });
 
-  /// Types de frais proposables, mis en cache comme le catalogue.
+  /// Les sections de frais de l'école — titre, ordre et visibilité (V115).
+  ///
+  /// Mise en cache de session **seulement pour la liste visible**, celle des
+  /// sélecteurs. [includeHidden] est l'écran de nommage : il part toujours au
+  /// serveur, parce qu'il est l'écran depuis lequel on vient d'écrire.
   Future<Either<Failure, List<FeeCodeOption>>> loadFeeCodes({
     bool forceRefresh = false,
+    bool includeHidden = false,
   });
+
+  /// Écrit un lot de décisions de nommage et rend le catalogue complet.
+  ///
+  /// Les sections **absentes** du lot ne sont pas touchées : le geste nomme et
+  /// classe, il ne remet pas le catalogue à zéro.
+  Future<Either<Failure, List<FeeCodeOption>>> saveFeeCodeSections(
+    List<FeeCodeSectionEdit> sections,
+  );
 
   /// Identité de l'établissement de la session.
   Future<Either<Failure, SchoolIdentity>> loadSchoolIdentity();

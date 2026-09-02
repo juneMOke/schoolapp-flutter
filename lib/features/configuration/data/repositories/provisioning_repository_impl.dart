@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
+import 'package:school_app_flutter/features/configuration/data/models/fee_code_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/fee_tariff_payload_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/provisioning_request_model.dart';
 import 'package:school_app_flutter/features/configuration/data/models/school_identity_model.dart';
@@ -59,17 +60,57 @@ class ProvisioningRepositoryImpl implements ProvisioningRepository {
   @override
   Future<Either<Failure, List<FeeCodeOption>>> loadFeeCodes({
     bool forceRefresh = false,
+    bool includeHidden = false,
   }) async {
-    final cached = _feeCodesCache;
-    if (cached != null && !forceRefresh) return Right(cached);
+    // Le catalogue complet n'est jamais mis en cache : c'est celui de l'écran de
+    // nommage, qui le relit juste après avoir écrit dessus. Le servir depuis la
+    // mémoire y afficherait l'état d'avant l'écriture.
+    if (!includeHidden) {
+      final cached = _feeCodesCache;
+      if (cached != null && !forceRefresh) return Right(cached);
+    }
 
     return _guard(() async {
-      final models = await _remote.getFeeCodes(_requiredAuth);
-      final codes = models.map((model) => model.toEntity()).toList();
-      _feeCodesCache = codes;
+      final models = await _remote.getFeeCodes(_requiredAuth, includeHidden);
+      final codes = _toEntities(models);
+      if (!includeHidden) _feeCodesCache = codes;
       return codes;
     });
   }
+
+  @override
+  Future<Either<Failure, List<FeeCodeOption>>> saveFeeCodeSections(
+    List<FeeCodeSectionEdit> sections,
+  ) async {
+    return _guard(() async {
+      final models = await _remote.saveFeeCodeSections(
+        _requiredAuth,
+        FeeCodeSectionsPayloadModel(
+          sections: [
+            for (final section in sections)
+              FeeCodeSectionInputModel(
+                code: section.code,
+                label: section.label,
+                active: section.active,
+                sortOrder: section.sortOrder,
+              ),
+          ],
+        ),
+      );
+      // Le cache des sélecteurs est **périmé par construction** : on vient de
+      // renommer. Le laisser en place ferait afficher l'ancien titre au
+      // formulaire de tarif jusqu'à la fin de la session.
+      _feeCodesCache = null;
+      return _toEntities(models);
+    });
+  }
+
+  /// Le rang de repli est la position servie : le serveur trie déjà, et un
+  /// serveur antérieur à V115 n'envoie aucun rang.
+  static List<FeeCodeOption> _toEntities(List<FeeCodeModel> models) => [
+    for (final (index, model) in models.indexed)
+      model.toEntity(fallbackSortOrder: index),
+  ];
 
   @override
   Future<Either<Failure, SchoolIdentity>> loadSchoolIdentity() async {

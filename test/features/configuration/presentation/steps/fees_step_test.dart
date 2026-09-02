@@ -55,10 +55,10 @@ const _catalog = ProvisioningCatalog(
 
 /// Le catalogue de frais tel que le serveur le sert : les usuels ET le reste.
 const _feeCodes = <FeeCodeOption>[
-  FeeCodeOption(code: 'TUITION', label: 'Minerval'),
-  FeeCodeOption(code: 'CANTEEN', label: 'Cantine'),
-  FeeCodeOption(code: 'LAB_FEE', label: 'Laboratoire'),
-  FeeCodeOption(code: 'LIBRARY', label: 'Bibliothèque'),
+  FeeCodeOption(code: 'TUITION', label: 'Minerval', sortOrder: 0),
+  FeeCodeOption(code: 'CANTEEN', label: 'Cantine', sortOrder: 1),
+  FeeCodeOption(code: 'LAB_FEE', label: 'Laboratoire', sortOrder: 2),
+  FeeCodeOption(code: 'LIBRARY', label: 'Bibliothèque', sortOrder: 3),
 ];
 
 void main() {
@@ -311,7 +311,10 @@ void main() {
       () => repository.loadCatalog(forceRefresh: any(named: 'forceRefresh')),
     ).thenAnswer((_) async => const Right(_catalog));
     when(
-      () => repository.loadFeeCodes(forceRefresh: any(named: 'forceRefresh')),
+      () => repository.loadFeeCodes(
+        forceRefresh: any(named: 'forceRefresh'),
+        includeHidden: any(named: 'includeHidden'),
+      ),
     ).thenAnswer((_) async => const Right(_feeCodes));
 
     seed(feeCodes: const <FeeCodeOption>[]);

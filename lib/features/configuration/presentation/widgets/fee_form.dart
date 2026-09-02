@@ -77,8 +77,14 @@ class _FeeFormState extends State<FeeForm> {
     _currency = initial?.currency ?? 'USD';
     _dueAt = initial?.dueAt ?? widget.defaultDueAt;
     _scope = initial?.appliesTo ?? const FeeScopeInput.allOpenedLevels();
+    // Le dépliant s'ouvre sur le type en cours de modification s'il y est
+    // relégué — jamais d'après la constante locale, qui ne décide plus rien dès
+    // que l'école a classé ses sections.
     _showOtherTypes =
-        initial != null && !FeeCodeOrdering.preferred.contains(initial.feeCode);
+        initial != null &&
+        FeeCodeOrdering.others(
+          widget.feeCodes,
+        ).any((option) => option.code == initial.feeCode);
   }
 
   @override

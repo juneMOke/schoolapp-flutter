@@ -1190,6 +1190,48 @@ abstract class AppLocalizations {
   /// **'Here a tariff carries a single level: each row is edited on its own.'**
   String get configurationSettingsTariffOne;
 
+  /// Titre de la carte de nommage des natures de frais
+  ///
+  /// In en, this message translates to:
+  /// **'Fee sections'**
+  String get configurationSectionsTitle;
+
+  /// Sous-titre de la carte de nommage des sections
+  ///
+  /// In en, this message translates to:
+  /// **'The name your school gives each fee nature. Every tariff of the same nature is shown under that title.'**
+  String get configurationSectionsSubtitle;
+
+  /// Bouton d'enregistrement du nommage des sections
+  ///
+  /// In en, this message translates to:
+  /// **'Save sections'**
+  String get configurationSectionsSave;
+
+  /// Confirmation d'enregistrement du nommage des sections
+  ///
+  /// In en, this message translates to:
+  /// **'Sections saved'**
+  String get configurationSectionsSaved;
+
+  /// Explication de ce que masquer une section veut dire
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden: no longer offered for input, but still counted in the statistics.'**
+  String get configurationSectionsHiddenHint;
+
+  /// Refus d'enregistrer quand un titre de section est vide
+  ///
+  /// In en, this message translates to:
+  /// **'Every section must have a name.'**
+  String get configurationSectionsLabelRequired;
+
+  /// Explication du reclassement des sections
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a section to move it up; this order is the tariff picker\'s.'**
+  String get configurationSectionsReorderHint;
+
   /// Button adding a tariff on a level
   ///
   /// In en, this message translates to:

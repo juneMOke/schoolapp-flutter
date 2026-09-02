@@ -2,8 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
 import 'package:school_app_flutter/features/configuration/domain/fee_code_ordering.dart';
 
+/// Le catalogue d'une école qui n'a rien paramétré : le serveur sert alors les
+/// rangs `0, 1, … n-1`, dans cet ordre et sans trou.
 List<FeeCodeOption> _served(List<String> codes) => [
-  for (final code in codes) FeeCodeOption(code: code, label: code),
+  for (final (index, code) in codes.indexed)
+    FeeCodeOption(code: code, label: code, sortOrder: index),
 ];
 
 void main() {
@@ -77,6 +80,46 @@ void main() {
         'LAB_FEE',
         'LIBRARY',
       ]);
+    });
+  });
+
+  group("l'ordre de l'école prime sur la constante locale", () {
+    test('une école qui n\'a rien paramétré garde la mise en tête locale', () {
+      // Rangs 0,1,2 servis dans l'ordre : rien n'a été décidé, les vingt-trois
+      // natures de l'énumération noieraient sinon les trois qu'on saisit.
+      final served = _served(['CANTEEN', 'TUITION', 'REGISTRATION']);
+
+      expect(FeeCodeOrdering.isConfigured(served), isFalse);
+      expect(FeeCodeOrdering.common(served).first.code, 'REGISTRATION');
+    });
+
+    test('un rang choisi fait tout basculer dans l\'ordre servi', () {
+      // La cantine hissée en tête : la reléguer derrière « Autres types »
+      // défaisait sous les yeux du directeur ce qu'il venait de décider.
+      const served = [
+        FeeCodeOption(code: 'CANTEEN', label: 'Cantine', sortOrder: 0),
+        FeeCodeOption(code: 'TUITION', label: 'Minerval', sortOrder: 0),
+        FeeCodeOption(code: 'LAB_FEE', label: 'Laboratoire', sortOrder: 11),
+      ];
+
+      expect(FeeCodeOrdering.isConfigured(served), isTrue);
+      expect(FeeCodeOrdering.common(served).map((o) => o.code), [
+        'CANTEEN',
+        'TUITION',
+        'LAB_FEE',
+      ]);
+      expect(FeeCodeOrdering.others(served), isEmpty);
+    });
+
+    test('une section masquée laisse un trou, qui suffit à le voir', () {
+      // Le serveur ne sert pas les masquées : le rang saute, et c'est le seul
+      // signe qu'une décision a été prise — aucun champ supplémentaire.
+      const served = [
+        FeeCodeOption(code: 'TUITION', label: 'Minerval', sortOrder: 0),
+        FeeCodeOption(code: 'CANTEEN', label: 'Cantine', sortOrder: 5),
+      ];
+
+      expect(FeeCodeOrdering.isConfigured(served), isTrue);
     });
   });
 

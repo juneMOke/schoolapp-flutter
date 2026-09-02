@@ -768,6 +768,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Here a tariff carries a single level: each row is edited on its own.';
 
   @override
+  String get configurationSectionsTitle => 'Fee sections';
+
+  @override
+  String get configurationSectionsSubtitle =>
+      'The name your school gives each fee nature. Every tariff of the same nature is shown under that title.';
+
+  @override
+  String get configurationSectionsSave => 'Save sections';
+
+  @override
+  String get configurationSectionsSaved => 'Sections saved';
+
+  @override
+  String get configurationSectionsHiddenHint =>
+      'Hidden: no longer offered for input, but still counted in the statistics.';
+
+  @override
+  String get configurationSectionsLabelRequired =>
+      'Every section must have a name.';
+
+  @override
+  String get configurationSectionsReorderHint =>
+      'Drag a section to move it up; this order is the tariff picker\'s.';
+
+  @override
   String get configurationTariffAdd => 'Add a tariff';
 
   @override

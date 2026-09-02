@@ -812,6 +812,34 @@
   "@configurationSettingsTariffOne": {
       "description": "Note expliquant que l'assiette de l'assistant n'existe plus dans les réglages"
   },
+  "configurationSectionsTitle": "Sections de frais",
+  "@configurationSectionsTitle": {
+      "description": "Titre de la carte de nommage des natures de frais"
+  },
+  "configurationSectionsSubtitle": "Le nom que votre école donne à chaque nature. Tous les tarifs d'une même nature s'affichent sous ce titre.",
+  "@configurationSectionsSubtitle": {
+      "description": "Sous-titre de la carte de nommage des sections"
+  },
+  "configurationSectionsSave": "Enregistrer les sections",
+  "@configurationSectionsSave": {
+      "description": "Bouton d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsSaved": "Sections enregistrées",
+  "@configurationSectionsSaved": {
+      "description": "Confirmation d'enregistrement du nommage des sections"
+  },
+  "configurationSectionsHiddenHint": "Masquée : plus proposée à la saisie, mais toujours comptée dans les statistiques.",
+  "@configurationSectionsHiddenHint": {
+      "description": "Explication de ce que masquer une section veut dire"
+  },
+  "configurationSectionsLabelRequired": "Chaque section doit porter un nom.",
+  "@configurationSectionsLabelRequired": {
+      "description": "Refus d'enregistrer quand un titre de section est vide"
+  },
+  "configurationSectionsReorderHint": "Glissez une section pour la remonter ; l'ordre est celui du sélecteur de tarifs.",
+  "@configurationSectionsReorderHint": {
+      "description": "Explication du reclassement des sections"
+  },
   "configurationTariffAdd": "Ajouter un tarif",
   "@configurationTariffAdd": {
       "description": "Bouton d'ajout d'un tarif sur un niveau"

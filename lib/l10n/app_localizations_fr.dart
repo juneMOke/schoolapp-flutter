@@ -772,6 +772,31 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.';
 
   @override
+  String get configurationSectionsTitle => 'Sections de frais';
+
+  @override
+  String get configurationSectionsSubtitle =>
+      'Le nom que votre école donne à chaque nature. Tous les tarifs d\'une même nature s\'affichent sous ce titre.';
+
+  @override
+  String get configurationSectionsSave => 'Enregistrer les sections';
+
+  @override
+  String get configurationSectionsSaved => 'Sections enregistrées';
+
+  @override
+  String get configurationSectionsHiddenHint =>
+      'Masquée : plus proposée à la saisie, mais toujours comptée dans les statistiques.';
+
+  @override
+  String get configurationSectionsLabelRequired =>
+      'Chaque section doit porter un nom.';
+
+  @override
+  String get configurationSectionsReorderHint =>
+      'Glissez une section pour la remonter ; l\'ordre est celui du sélecteur de tarifs.';
+
+  @override
   String get configurationTariffAdd => 'Ajouter un tarif';
 
   @override
