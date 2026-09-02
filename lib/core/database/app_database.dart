@@ -1311,6 +1311,54 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
+  if (upTo(45)) {
+    // v45 — le téléphone du TUTEUR devient facultatif (contrepartie V117).
+    //
+    // Même geste qu'à la v43 pour le payeur, sur une donnée qui ne joue pas le
+    // même rôle : le payeur n'était qu'un nom recopié sur un versement, le
+    // tuteur est une PERSONNE que la fratrie partage, et son numéro est la clé
+    // qui prouve que c'est la même. Relâcher la contrainte ne retire pas cette
+    // clé — elle vaut toujours autant quand elle est là ; elle ouvre le cas où
+    // elle manque, que le rapprochement par nom traite désormais dans le seul
+    // dossier de l'élève.
+    //
+    await _relaxGuardianPhoneNumber(db, schema);
+  }
+}
+
+/// Étape v45 : `parents.phone_number` perd son `NOT NULL`.
+///
+/// Reconstruction rename/copy/drop — SQLite ne sait pas relâcher une contrainte
+/// de colonne — sur le patron déjà éprouvé aux paliers v33, v34 et v43, dont
+/// cette étape réutilise [_rebuildTableInPlace] tel quel.
+///
+/// ## Les `''` deviennent `NULL`, et ce n'est pas cosmétique
+///
+/// Sur `parents`, la chaîne vide est plus dangereuse qu'ailleurs : le
+/// rapprochement local compare des NUMÉROS, et une valeur partagée par tous les
+/// tuteurs sans numéro les ferait tous se reconnaître les uns dans les autres.
+/// C'est exactement la fusion que le serveur décrit en V117 — une fiche unique
+/// où le portail parent ouvrirait l'accès aux dossiers de tous les enfants.
+///
+/// En pratique `findParentIdByPhone` se garde déjà sur la clé vide et n'aurait
+/// rien fusionné. La normalisation n'est donc pas un correctif : elle retire la
+/// possibilité même, plutôt que de la laisser dépendre d'une garde qu'un
+/// prochain appelant pourrait oublier.
+///
+/// Rejouable : se garde sur la forme réelle de la table.
+Future<void> _relaxGuardianPhoneNumber(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const table = 'parents';
+  if (!await _hasTable(db, table)) return;
+
+  if (await _isColumnNotNull(db, table, 'phone_number')) {
+    await _rebuildTableInPlace(db, schema, table, suffix: 'v44');
+  }
+  await db.execute(
+    "UPDATE $table SET phone_number = NULL WHERE TRIM(phone_number) = ''",
+  );
 }
 
 /// Étape v43 : les colonnes d'identité du payeur perdent leur `NOT NULL`.

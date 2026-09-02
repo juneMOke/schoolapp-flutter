@@ -254,6 +254,30 @@ void main() {
     });
   });
 
+  /// La reconstruction rename/copy/drop ne doit pas laisser une table nue.
+  ///
+  /// `_rebuildTableInPlace` repose les index, mais rien ne le prouvait — ni ici,
+  /// ni aux paliers v33 et v34 qui l'utilisent aussi. Une table qui perd ses
+  /// index marche encore : elle rame. Sur `payments` et `boutique_sales`, ce
+  /// sont les lectures du guichet et de la caisse qui se dégradent, sans qu'une
+  /// seule assertion fonctionnelle en dise quoi que ce soit.
+  test('la reconstruction repose les index des deux tables', () async {
+    await createLegacyPayments();
+    await createLegacySales();
+    await migrateFrom(42);
+
+    Future<Set<String>> indexesOf(String table) async => {
+      for (final row in await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'index' "
+        "AND tbl_name = '$table'",
+      ))
+        row['name'] as String,
+    };
+
+    expect(await indexesOf('payments'), isNotEmpty);
+    expect(await indexesOf('boutique_sales'), isNotEmpty);
+  });
+
   test('le palier est rejouable sur une base déjà en v43', () async {
     await createLegacySales();
     await db.insert('boutique_sales', {

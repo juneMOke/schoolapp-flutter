@@ -547,7 +547,13 @@ class AppConstants {
   // frais selon qu'on est passé ou non par Configuration dans la session — le
   // cache mémoire du provisioning est froid pour un caissier. Aucun backfill :
   // une table de cache se remplit au pull, elle ne se rattrape pas.
-  static const int offlineDbSchemaVersion = 44;
+  // v45 (2026-09-02) : `parents.phone_number` perd son `NOT NULL`
+  // (contrepartie de la V117 serveur). Un tuteur sans numéro existe réellement
+  // au guichet — le parent qui n'a pas de ligne, celui qui vient inscrire
+  // l'enfant d'un frère — et la contrainte ne laissait qu'une issue : en
+  // inventer un. Une saisie fausse, donc un message envoyé à un inconnu le jour
+  // où l'école notifie.
+  static const int offlineDbSchemaVersion = 45;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

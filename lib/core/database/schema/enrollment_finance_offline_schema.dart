@@ -31,6 +31,9 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 ///
 /// Le tuteur, lui, garde son téléphone (`parents.phone_number`) — c'est la clé
 /// d'unicité applicative du rapprochement RE/PRE, pas un contact dormant.
+/// Facultatif depuis la v45, mais toujours une clé **quand il est là** : ce qui
+/// change est ce qui arrive quand il manque, pas ce qu'il vaut quand il est
+/// renseigné.
 const TableSchema studentsTable = TableSchema(
   name: 'students',
   createTableSql: '''
@@ -74,6 +77,28 @@ const TableSchema studentsTable = TableSchema(
 ///   PAR ID stable + garde stricte (`ParentPhoneConflictException` si un
 ///   AUTRE parent porte déjà ce téléphone) — la fusion silencieuse par
 ///   téléphone n'existe PAS sur ce chemin.
+/// **`phone_number` est NULLABLE (v45)**, à l'image de la V117 serveur. Un
+/// tuteur sans numéro existe au guichet : le parent qui n'a pas de ligne, celui
+/// qui vient inscrire l'enfant d'un frère, celui dont le numéro viendra plus
+/// tard. La contrainte ne laissait qu'une issue — en inventer un — c'est-à-dire
+/// une saisie fausse, et un message envoyé à un inconnu le jour où l'école
+/// notifie. Le modèle tolérait déjà l'élève SANS AUCUN tuteur ; « tuteur sans
+/// numéro » restait, seul, irreprésentable.
+///
+/// `NULL`, **jamais `''` et surtout jamais un placeholder**. Le serveur détaille
+/// pourquoi côté Postgres — un placeholder n'y est unique qu'une fois dans toute
+/// la base — mais la raison qui vaut ICI est plus simple et pire : le
+/// rapprochement local compare des numéros, et une valeur partagée fusionnerait
+/// tous les tuteurs sans numéro dans UNE fiche.
+///
+/// ⚠️ **Ce que l'absence retire.** Le téléphone n'est pas un contact dormant,
+/// c'est la clé d'unicité applicative du rapprochement RE/PRE. Sans lui, le
+/// tuteur n'a plus de clé : il est rapproché par son nom complet **à l'intérieur
+/// du dossier de son élève**, et jamais au-delà (cf. `findGuardianWithoutPhone`,
+/// miroir du `GuardianMatcher` serveur). Conséquence à assumer au guichet — un
+/// tuteur sans numéro **n'est jamais partagé avec la fratrie**. C'est
+/// précisément ce que le téléphone prouvait et que son absence ne prouve plus.
+///
 /// `identification_number` reste NULL en local (le serveur génère `PID-…`).
 /// L'`id` provisoire est remappé vers le canonique serveur à l'ACK.
 const TableSchema parentsTable = TableSchema(
@@ -84,7 +109,7 @@ const TableSchema parentsTable = TableSchema(
       first_name TEXT NOT NULL,
       last_name TEXT NOT NULL,
       surname TEXT,
-      phone_number TEXT NOT NULL,
+      phone_number TEXT,
       email TEXT,
       identification_number TEXT,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
