@@ -4595,6 +4595,45 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentAmountToSettleLabel => 'Montant à régler';
 
   @override
+  String facturationCreatePaymentGroupRemainingTranches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tranches restantes',
+      one: '1 tranche restante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupAmountLabel => 'Montant réglé';
+
+  @override
+  String get facturationCreatePaymentGroupAmountHint =>
+      'Ce que le parent règle sur ce frais';
+
+  @override
+  String facturationCreatePaymentGroupVentilation(String detail) {
+    return 'Ventilation : $detail';
+  }
+
+  @override
+  String facturationCreatePaymentGroupVentilationItem(
+    String label,
+    String amount,
+  ) {
+    return '$label $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentGroupExpandAction =>
+      'Détailler les tranches';
+
+  @override
+  String get facturationCreatePaymentGroupCollapseAction =>
+      'Replier les tranches';
+
+  @override
   String get facturationCreatePaymentSettleAllAction => 'Tout solder';
 
   @override

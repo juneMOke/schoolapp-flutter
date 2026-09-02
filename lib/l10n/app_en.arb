@@ -2875,6 +2875,40 @@
   "facturationCreatePaymentChangeDue": "Change due · {amount}",
   "@facturationCreatePaymentChangeDue": {"placeholders": {"amount": {"type": "String"}}},
   "facturationCreatePaymentAmountToSettleLabel": "Amount to settle",
+  "facturationCreatePaymentGroupRemainingTranches": "{count, plural, =1{1 instalment left} other{{count} instalments left}}",
+  "@facturationCreatePaymentGroupRemainingTranches": {
+    "description": "Nombre de tranches ENCORE DUES sous une nature, à l'encaissement (GE-2). ⚠️ Volontairement libellé « restantes » et non « tranches » : la fiche annonce le total de la grille, cet écran ne monte que ce qui reste à payer. Un minerval en 7 tranches dont 4 sont soldées en affiche 3 ici.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupAmountLabel": "Amount settled",
+  "facturationCreatePaymentGroupAmountHint": "What the parent is paying on this fee",
+  "facturationCreatePaymentGroupVentilation": "Breakdown: {detail}",
+  "@facturationCreatePaymentGroupVentilation": {
+    "description": "Ce que le montant du groupe va imputer, tranche par tranche. Affiché même replié : le caissier valide une répartition, il doit la voir.",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupVentilationItem": "{label} {amount}",
+  "@facturationCreatePaymentGroupVentilationItem": {
+    "description": "Un élément de la ventilation : le code ou le libellé court de la tranche, puis son montant.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentGroupExpandAction": "Show instalments",
+  "facturationCreatePaymentGroupCollapseAction": "Hide instalments",
   "facturationCreatePaymentSettleAllAction": "Settle all",
   "facturationCreatePaymentAmountClampedWarning": "Amount capped to the remaining balance ({amount}).",
   "@facturationCreatePaymentAmountClampedWarning": {

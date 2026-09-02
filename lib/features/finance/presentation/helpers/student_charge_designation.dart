@@ -79,6 +79,20 @@ String chargeGroupDesignation(
   return '$base · ${l10n.feeControlFeeTrancheCount(group.trancheCount)}';
 }
 
+/// Comment une tranche se nomme **dans une ligne de ventilation** — court.
+///
+/// « T1 », « OM2 » : le code du tarif quand il distingue quelque chose. Une
+/// ventilation aligne trois ou sept éléments sur une ligne ; y répéter
+/// « Minerval — 1/7 » sept fois la rendrait illisible, et c'est le rang qui
+/// porte l'information.
+///
+/// Sans code utile — grille simple, créance *ad hoc* —, on retombe sur la
+/// désignation complète : mieux vaut long que muet, et ce cas ne produit qu'un
+/// seul élément de toute façon.
+String shortTrancheLabel(StudentCharge charge, AppLocalizations l10n) =>
+    meaningfulTariffCode(code: charge.feeTariffCode, feeCode: charge.feeCode) ??
+    chargeDesignation(charge, l10n);
+
 /// La même règle, sur les trois valeurs brutes.
 ///
 /// Une **imputation** ne porte pas de `StudentCharge` : elle a le libellé GELÉ à

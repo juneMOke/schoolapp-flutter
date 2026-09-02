@@ -7454,6 +7454,51 @@ abstract class AppLocalizations {
   /// **'Amount to settle'**
   String get facturationCreatePaymentAmountToSettleLabel;
 
+  /// Nombre de tranches ENCORE DUES sous une nature, à l'encaissement (GE-2). ⚠️ Volontairement libellé « restantes » et non « tranches » : la fiche annonce le total de la grille, cet écran ne monte que ce qui reste à payer. Un minerval en 7 tranches dont 4 sont soldées en affiche 3 ici.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 instalment left} other{{count} instalments left}}'**
+  String facturationCreatePaymentGroupRemainingTranches(int count);
+
+  /// No description provided for @facturationCreatePaymentGroupAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount settled'**
+  String get facturationCreatePaymentGroupAmountLabel;
+
+  /// No description provided for @facturationCreatePaymentGroupAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the parent is paying on this fee'**
+  String get facturationCreatePaymentGroupAmountHint;
+
+  /// Ce que le montant du groupe va imputer, tranche par tranche. Affiché même replié : le caissier valide une répartition, il doit la voir.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown: {detail}'**
+  String facturationCreatePaymentGroupVentilation(String detail);
+
+  /// Un élément de la ventilation : le code ou le libellé court de la tranche, puis son montant.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {amount}'**
+  String facturationCreatePaymentGroupVentilationItem(
+    String label,
+    String amount,
+  );
+
+  /// No description provided for @facturationCreatePaymentGroupExpandAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Show instalments'**
+  String get facturationCreatePaymentGroupExpandAction;
+
+  /// No description provided for @facturationCreatePaymentGroupCollapseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide instalments'**
+  String get facturationCreatePaymentGroupCollapseAction;
+
   /// No description provided for @facturationCreatePaymentSettleAllAction.
   ///
   /// In en, this message translates to:

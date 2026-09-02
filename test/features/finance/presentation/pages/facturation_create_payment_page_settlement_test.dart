@@ -71,14 +71,23 @@ void main() {
 
   tearDown(() async => getIt.reset());
 
-  StudentCharge charge(String id, String currency, int cents) => StudentCharge(
+  /// [feeCode] distingue deux NATURES. Depuis GE-2, deux créances de même
+  /// nature se replient sous un même en-tête : une fixture qui dit « deux
+  /// frais » doit donc leur donner deux natures, sans quoi elle décrit un
+  /// minerval en deux tranches.
+  StudentCharge charge(
+    String id,
+    String currency,
+    int cents, {
+    String feeCode = 'MINERVAL',
+  }) => StudentCharge(
     id: id,
     studentId: 'stu-1',
     academicYearId: 'ay-1',
     schoolLevelId: 'lvl-1',
     schoolLevelGroupId: 'grp-1',
     feeTariffId: 'tar-$id',
-    feeCode: 'MINERVAL',
+    feeCode: feeCode,
     label: 'Minerval $id',
     expectedAmountInCents: cents.toDouble(),
     amountPaidInCents: 0,
@@ -352,7 +361,10 @@ void main() {
     (tester) async {
       await ouvrir(
         tester,
-        [charge('1', 'USD', 3000), charge('2', 'USD', 2000)],
+        [
+          charge('1', 'USD', 3000),
+          charge('2', 'USD', 2000, feeCode: 'CANTEEN'),
+        ],
         rates: [_usdVersCdf],
       );
       await cocher(tester, 0);

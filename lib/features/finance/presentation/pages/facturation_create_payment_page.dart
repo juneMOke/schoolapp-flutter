@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_group_entry.dart';
 import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/core/money/tender_settlement.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_settlement_section.dart';
@@ -62,14 +64,28 @@ class FacturationCreatePaymentPage extends StatelessWidget {
         BlocProvider<ExchangeRatesCubit>(
           create: (_) => getIt<ExchangeRatesCubit>()..load(),
         ),
+        // Les titres de sections écrits par l'école, pour nommer les natures
+        // comme la fiche les nomme. Lecture locale, sans état d'erreur : un
+        // catalogue absent laisse la nature localisée.
+        BlocProvider<FeeSectionTitlesCubit>(
+          create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
+        ),
       ],
       // La vue ne lit pas le cubit elle-même : elle reçoit la série. C'est ce
       // qui la garde montable seule — et sans taux, c'est-à-dire dans le cas
       // courant, elle rend exactement l'écran d'avant.
       child: BlocBuilder<ExchangeRatesCubit, ExchangeRatesState>(
         buildWhen: (previous, current) => previous.rates != current.rates,
-        builder: (context, state) =>
-            FacturationCreatePaymentView(intent: intent, rates: state.rates),
+        builder: (context, rates) =>
+            BlocBuilder<FeeSectionTitlesCubit, FeeSectionTitlesState>(
+              buildWhen: (previous, current) =>
+                  previous.titles != current.titles,
+              builder: (context, titles) => FacturationCreatePaymentView(
+                intent: intent,
+                rates: rates.rates,
+                sectionTitles: titles,
+              ),
+            ),
       ),
     );
   }
@@ -83,10 +99,15 @@ class FacturationCreatePaymentView extends StatefulWidget {
   /// devise ne s'affiche pas, et l'écran est celui d'avant la V2.
   final List<ExchangeRate> rates;
 
+  /// Les titres de sections écrits par l'école. Vide = on nomme par la nature
+  /// localisée, c'est-à-dire l'écran d'avant.
+  final FeeSectionTitlesState sectionTitles;
+
   const FacturationCreatePaymentView({
     super.key,
     required this.intent,
     this.rates = const [],
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -99,6 +120,14 @@ class _FacturationCreatePaymentViewState
   final _payer = FacturationPayerFormController();
 
   late final List<FacturationChargeEntry> _entries;
+
+  /// Les natures, repliées sur les mêmes entrées.
+  ///
+  /// ⚠️ **Une vue, pas une seconde liste de vérité.** `_entries` reste ce qui
+  /// porte les contrôleurs, ce qui est disposé, et surtout ce qui produit les
+  /// imputations envoyées au serveur : la requête sortante est identique à
+  /// celle d'une saisie tranche par tranche.
+  late final List<FacturationChargeGroupEntry> _groups;
 
   /// Anti double-dialogue : un second déclencheur (retour système pendant que
   /// la flèche a déjà ouvert la confirmation) est ignoré.
@@ -135,9 +164,14 @@ class _FacturationCreatePaymentViewState
       for (final charge in widget.intent.unpaidCharges)
         if (chargeRemainingInCents(charge) > 0) FacturationChargeEntry(charge),
     ];
+    _groups = groupPayableEntries(_entries);
     for (final entry in _entries) {
       entry.controller.addListener(_onChanged);
       entry.tenderController.addListener(_onChanged);
+    }
+    for (final group in _groups) {
+      group.controller.addListener(_onChanged);
+      group.tenderController.addListener(_onChanged);
     }
     _payer.addListener(_onChanged);
   }
@@ -148,6 +182,11 @@ class _FacturationCreatePaymentViewState
       controller.dispose();
     }
     _payer.dispose();
+    // Les groupes d'abord : ils ne possèdent que leurs propres contrôleurs, et
+    // les tranches leur survivent le temps de cette boucle.
+    for (final group in _groups) {
+      group.dispose();
+    }
     for (final entry in _entries) {
       entry.dispose();
     }
@@ -194,12 +233,6 @@ class _FacturationCreatePaymentViewState
     }
   }
 
-  String _formatPlain(int cents) {
-    final amount = cents / 100;
-    final isInteger = amount == amount.roundToDouble();
-    return isInteger ? amount.toStringAsFixed(0) : amount.toStringAsFixed(2);
-  }
-
   String _formatWithCurrency(int cents, String currency) =>
       formatMonetaryAmountWithCurrency(amount: cents / 100, currency: currency);
 
@@ -210,7 +243,7 @@ class _FacturationCreatePaymentViewState
         entry.tenderIsSource = false;
         entry.writeDerived(
           entry.controller,
-          _formatPlain(entry.remainingInCents),
+          formatPlainAmount(entry.remainingInCents),
         );
         _reflectTender(entry);
       } else {
@@ -218,6 +251,7 @@ class _FacturationCreatePaymentViewState
         entry.tenderController.clear();
         entry.tenderIsSource = false;
       }
+      _handOverToTranches(entry);
     });
   }
 
@@ -226,10 +260,120 @@ class _FacturationCreatePaymentViewState
       entry.tenderIsSource = false;
       entry.writeDerived(
         entry.controller,
-        _formatPlain(entry.remainingInCents),
+        formatPlainAmount(entry.remainingInCents),
       );
       _reflectTender(entry);
     });
+  }
+
+  // ── Les gestes d'une NATURE (GE-3) ─────────────────────────────────────────
+
+  /// Le groupe qui porte cette tranche.
+  ///
+  /// Résolu par recherche, et non par un pointeur remontant depuis la tranche :
+  /// un lien de l'enfant vers le parent créerait un cycle de propriété entre
+  /// deux objets dont l'un ne possède déjà pas l'autre, et ce genre de lien
+  /// survit à un `dispose()`. La liste tient au plus une vingtaine d'entrées.
+  FacturationChargeGroupEntry? _groupOf(FacturationChargeEntry entry) {
+    for (final group in _groups) {
+      if (group.tranches.contains(entry)) return group;
+    }
+    return null;
+  }
+
+  void _onGroupToggle(FacturationChargeGroupEntry group, bool value) {
+    setState(() {
+      group.groupIsSource = true;
+      if (!value) {
+        group.clear();
+        return;
+      }
+      // Cocher une nature la solde : c'est ce que fait déjà la case d'une
+      // ligne, et le caissier corrige ensuite s'il encaisse moins.
+      group.controller.text = formatPlainAmount(group.capInCents);
+      group.applyCascade(group.controller.text);
+      _reflectGroupTender(group);
+    });
+  }
+
+  void _onGroupSettleAll(FacturationChargeGroupEntry group) {
+    setState(() {
+      group.groupIsSource = true;
+      group.controller.text = formatPlainAmount(group.capInCents);
+      group.applyCascade(group.controller.text);
+      _reflectGroupTender(group);
+    });
+  }
+
+  /// Le caissier a tapé le montant de la nature : la cascade écrit les tranches.
+  void _onGroupAmountEdited(FacturationChargeGroupEntry group) {
+    setState(() {
+      group.groupIsSource = true;
+      group.tenderIsSource = false;
+      group.applyCascade(group.controller.text);
+      _reflectGroupTender(group);
+    });
+  }
+
+  /// Le caissier a tapé ce qui est posé sur le comptoir.
+  ///
+  /// **Une seule conversion, au niveau de la nature**, puis la cascade en devise
+  /// de créance. Convertir tranche par tranche tronquerait N fois là où une
+  /// seule troncature suffit — et le parent verrait un total qui ne retombe pas
+  /// sur ce qu'il a posé.
+  void _onGroupTenderEdited(FacturationChargeGroupEntry group) {
+    setState(() {
+      group.groupIsSource = true;
+      group.tenderIsSource = true;
+      final settlement = _settlement();
+      final line = settlement.fromTender(
+        settledCurrency: group.currency,
+        tenderCurrency: group.effectiveTenderCurrency,
+        tenderedCents: group.tenderedCents,
+      );
+      // Borné au restant de la nature : le surplus repart avec le parent, il ne
+      // s'impute pas. Le porter en imputation fabriquerait un trop-perçu que
+      // personne n'a décidé.
+      final settled = line.settledCents > group.capInCents
+          ? group.capInCents
+          : line.settledCents;
+      group.applyCascadeCents(settled);
+      group.writeGroupAmount(settled);
+    });
+  }
+
+  void _onGroupTenderCurrencyChanged(
+    FacturationChargeGroupEntry group,
+    String currency,
+  ) {
+    setState(() {
+      group.setTenderCurrency(currency);
+      group.tenderIsSource = false;
+      _reflectGroupTender(group);
+    });
+  }
+
+  void _onGroupToggleExpanded(FacturationChargeGroupEntry group) {
+    setState(() => group.expanded = !group.expanded);
+  }
+
+  /// Recopie dans le comptoir de la nature ce que ses tranches font entrer.
+  ///
+  /// Somme des `tenderCents` des lignes — donc exactement ce que
+  /// `tendersFor` agrégera pour le serveur. Recalculer autrement afficherait un
+  /// chiffre que le versement ne portera pas.
+  void _reflectGroupTender(FacturationChargeGroupEntry group) {
+    if (!group.isConverted) {
+      group.writeTenderAmount(null);
+      return;
+    }
+    final settlement = _settlement();
+    var total = 0;
+    for (final tranche in group.tranches) {
+      if (tranche.effectiveCents <= 0) continue;
+      total += _lineOf(settlement, tranche).tenderCents;
+    }
+    group.writeTenderAmount(total);
   }
 
   /// L'état du règlement : les taux du référentiel, plus ceux corrigés.
@@ -319,7 +463,10 @@ class _FacturationCreatePaymentViewState
       return;
     }
     final line = _lineOf(_settlement(), entry);
-    entry.writeDerived(entry.tenderController, _formatPlain(line.tenderCents));
+    entry.writeDerived(
+      entry.tenderController,
+      formatPlainAmount(line.tenderCents),
+    );
   }
 
   /// Le caissier a tapé l'imputation : le comptoir en découle.
@@ -327,7 +474,20 @@ class _FacturationCreatePaymentViewState
     setState(() {
       entry.tenderIsSource = false;
       _reflectTender(entry);
+      // La source bascule : le caissier a désigné UNE tranche, le montant de la
+      // nature n'est plus qu'un total affiché. Sans cette bascule, la prochaine
+      // ventilation écraserait la saisie qu'il vient de faire.
+      _handOverToTranches(entry);
     });
+  }
+
+  /// Rend la main aux tranches sur la nature qui porte [entry].
+  void _handOverToTranches(FacturationChargeEntry entry) {
+    final group = _groupOf(entry);
+    if (group == null) return;
+    group.groupIsSource = false;
+    group.reflectFromTranches();
+    _reflectGroupTender(group);
   }
 
   /// Le caissier a tapé ce qui est posé sur le comptoir : l'imputation en
@@ -337,7 +497,11 @@ class _FacturationCreatePaymentViewState
     setState(() {
       entry.tenderIsSource = true;
       final line = _lineOf(_settlement(), entry);
-      entry.writeDerived(entry.controller, _formatPlain(line.settledCents));
+      entry.writeDerived(
+        entry.controller,
+        formatPlainAmount(line.settledCents),
+      );
+      _handOverToTranches(entry);
     });
   }
 
@@ -353,6 +517,10 @@ class _FacturationCreatePaymentViewState
           : currency;
       entry.tenderIsSource = false;
       _reflectTender(entry);
+      // La devise d'une tranche est un geste ciblé : la nature cesse d'être
+      // l'unité de règlement, et son sélecteur disparaît. Deux devises
+      // concurrentes pour un même versement ne se lisent pas.
+      _handOverToTranches(entry);
     });
   }
 
@@ -433,6 +601,49 @@ class _FacturationCreatePaymentViewState
     if (line.changeCents <= 0) return null;
     return l10n.facturationCreatePaymentChangeDue(
       _formatWithCurrency(line.changeCents, line.tenderCurrency),
+    );
+  }
+
+  /// Le taux d'une NATURE, rendu « 2 800 FC / $ ».
+  ///
+  /// Un seul taux pour tout le groupe : ses tranches partagent la devise de
+  /// créance, donc la paire. C'est ce qui remplace les N taux identiques que
+  /// l'écran affichait, une fois par tranche.
+  String? _groupRateLabel(
+    TenderSettlement settlement,
+    FacturationChargeGroupEntry group,
+  ) {
+    if (!group.isConverted) return null;
+    final rate = settlement.rateFor(
+      group.currency,
+      group.effectiveTenderCurrency,
+    );
+    if (rate == null) return null;
+    return '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
+        '${MoneyFormat.symbolOf(rate.base)}';
+  }
+
+  /// Ce qui repart avec le parent sur cette nature, ou `null`.
+  ///
+  /// **Calculée au groupe**, et pas comme la somme des monnaies de ses
+  /// tranches : les tranches ne rendent rien quand c'est le groupe qui porte le
+  /// comptoir. L'excédent est ce que le parent a posé moins ce que le tiroir
+  /// conserve.
+  String? _groupChangeLabel(
+    TenderSettlement settlement,
+    FacturationChargeGroupEntry group,
+    AppLocalizations l10n,
+  ) {
+    if (!group.isConverted || !group.tenderIsSource) return null;
+    var kept = 0;
+    for (final tranche in group.tranches) {
+      if (tranche.effectiveCents <= 0) continue;
+      kept += _lineOf(settlement, tranche).tenderCents;
+    }
+    final change = group.tenderedCents - kept;
+    if (change <= 0) return null;
+    return l10n.facturationCreatePaymentChangeDue(
+      _formatWithCurrency(change, group.effectiveTenderCurrency),
     );
   }
 
@@ -724,7 +935,23 @@ class _FacturationCreatePaymentViewState
         ),
         const SizedBox(height: AppDimensions.detailSectionSpacing),
         FacturationCreatePaymentChargesSection(
-          entries: _entries,
+          groups: _groups,
+          schoolTitleOf: widget.sectionTitles.titleOf,
+          onGroupToggle: _collectInFlight ? null : _onGroupToggle,
+          onGroupSettleAll: _collectInFlight ? null : _onGroupSettleAll,
+          onGroupAmountEdited: _collectInFlight ? null : _onGroupAmountEdited,
+          onGroupTenderEdited: _collectInFlight ? null : _onGroupTenderEdited,
+          onGroupToggleExpanded: _collectInFlight
+              ? null
+              : _onGroupToggleExpanded,
+          onGroupTenderCurrencyChanged: _collectInFlight
+              ? null
+              : _onGroupTenderCurrencyChanged,
+          groupCurrencyOptionsOf: (group) =>
+              settlement.optionsFor(group.currency),
+          groupRateLabelOf: (group) => _groupRateLabel(settlement, group),
+          groupChangeLabelOf: (group) =>
+              _groupChangeLabel(settlement, group, l10n),
           onToggle: _collectInFlight ? null : _onToggle,
           onSettleAll: _collectInFlight ? null : _onSettleAll,
           // Le taux vit au-dessus des lignes : il est le même pour toutes
