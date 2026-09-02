@@ -242,6 +242,22 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   }
 
   @override
+  Future<Either<Failure, Map<String, String>>> getFeeSectionTitles() async {
+    try {
+      // Scopé depuis la session, comme les taux : sur une tablette partagée, le
+      // titre d'une école servi à l'autre renommerait des frais qui ne sont pas
+      // les siens. Sans école résolue, le DAO rend une table vide et les écrans
+      // nomment par la nature localisée.
+      final schoolId = _currentUser?.schoolId ?? '';
+      return Right(await _dao.feeSectionTitlesForSchool(schoolId));
+    } catch (_) {
+      // Un cache illisible ne fait pas tomber une fiche : elle se nomme par la
+      // nature localisée, ce qu'elle faisait déjà avant que ce cache existe.
+      return const Left(StorageFailure('Failed to read fee section titles'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> saveExchangeRate({
     required String base,
     required String quote,

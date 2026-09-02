@@ -540,7 +540,14 @@ class AppConstants {
   // `payer_last_name` et `boutique_sales.payer_last_name` perdent leur
   // `NOT NULL`, et les `''` hérités du repli de pull sont normalisés en `NULL` :
   // « pas de payeur » est un fait, pas un nom de longueur zéro.
-  static const int offlineDbSchemaVersion = 43;
+  // v44 (2026-09-02) : `ref_fee_code_sections` — le titre que l'école donne à
+  // chaque nature de frais (V115 serveur), lisible HORS LIGNE. Cache
+  // d'affichage pur : aucune écriture ne le lit, le `code` qui part sur le fil
+  // vient toujours de la créance. Sans lui, la fiche d'un élève nommerait ses
+  // frais selon qu'on est passé ou non par Configuration dans la session — le
+  // cache mémoire du provisioning est froid pour un caissier. Aucun backfill :
+  // une table de cache se remplit au pull, elle ne se rattrape pas.
+  static const int offlineDbSchemaVersion = 44;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

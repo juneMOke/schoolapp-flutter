@@ -3985,18 +3985,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String facturationDetailChargesSummary(
-    num totalCount,
-    Object partialCount,
-    Object dueCount,
+    int feeCount,
+    int trancheCount,
+    int unsettledCount,
   ) {
     String _temp0 = intl.Intl.pluralLogic(
-      totalCount,
+      feeCount,
       locale: localeName,
-      other: '$totalCount charges',
-      one: '1 charge',
-      zero: '0 charge',
+      other: '$feeCount frais',
+      one: '1 frais',
+      zero: 'Aucun frais',
     );
-    return '$_temp0 · $partialCount partielle(s), $dueCount à régler';
+    String _temp1 = intl.Intl.pluralLogic(
+      trancheCount,
+      locale: localeName,
+      other: '$trancheCount tranches',
+      one: '1 tranche',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      unsettledCount,
+      locale: localeName,
+      other: '$unsettledCount restent à régler',
+      one: '1 reste à régler',
+      zero: 'tout est soldé',
+    );
+    return '$_temp0 · $_temp1 · $_temp2';
   }
 
   @override

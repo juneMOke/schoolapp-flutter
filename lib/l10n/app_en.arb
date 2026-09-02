@@ -2638,12 +2638,19 @@
   "facturationPaymentAllocationsUnknownError": "An unexpected error occurred while loading allocations.",
   "facturationDetailChargesSectionTitle": "Charges",
   "facturationDetailChargesSectionSubtitle": "Breakdown of expected, paid and remaining amounts.",
-  "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle",
+  "facturationDetailChargesSummary": "{feeCount, plural, =0{No fee} =1{1 fee} other{{feeCount} fees}} · {trancheCount, plural, =1{1 instalment} other{{trancheCount} instalments}} · {unsettledCount, plural, =0{all settled} =1{1 left to settle} other{{unsettledCount} left to settle}}",
   "@facturationDetailChargesSummary": {
+    "description": "Summary of the student fees section, folded by fee code (GF-5). Three levels, in order: fee codes, the instalments they carry, and those still to collect. That last count comes from the COMPOSED remaining, never from the mirrored status.",
     "placeholders": {
-      "totalCount": {},
-      "partialCount": {},
-      "dueCount": {}
+      "feeCount": {
+        "type": "int"
+      },
+      "trancheCount": {
+        "type": "int"
+      },
+      "unsettledCount": {
+        "type": "int"
+      }
     }
   },
   "facturationDetailChargesRetry": "Retry",

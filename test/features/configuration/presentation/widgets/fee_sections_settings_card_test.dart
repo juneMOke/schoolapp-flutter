@@ -5,11 +5,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/fee_code_section_cache_repository.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/fee_sections_settings_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockRepository extends Mock implements ProvisioningRepository {}
+
+class _MockCache extends Mock implements FeeCodeSectionCacheRepository {}
 
 /// Le catalogue d'une école qui n'a encore rien décidé : rangs `0, 1, 2`.
 const _served = <FeeCodeOption>[
@@ -24,11 +27,20 @@ const _served = <FeeCodeOption>[
 
 void main() {
   late _MockRepository repository;
+  late _MockCache cache;
 
-  setUpAll(() => registerFallbackValue(const <FeeCodeSectionEdit>[]));
+  setUpAll(() {
+    registerFallbackValue(const <FeeCodeSectionEdit>[]);
+    registerFallbackValue(const <FeeCodeOption>[]);
+  });
 
   setUp(() {
     repository = _MockRepository();
+    cache = _MockCache();
+    when(
+      () => cache.cacheFeeCodeSections(any()),
+    ).thenAnswer((_) async => const Right(unit));
+    getIt.registerFactory<FeeCodeSectionCacheRepository>(() => cache);
     when(
       () => repository.loadFeeCodes(
         forceRefresh: any(named: 'forceRefresh'),
@@ -129,6 +141,38 @@ void main() {
     expect(sent.single.code, 'TUITION');
     expect(sent.single.active, isFalse);
     expect(sent.single.label, isNull);
+  });
+
+  testWidgets('un renommage réussi met À JOUR le cache local des titres', (
+    tester,
+  ) async {
+    // Sans cette écriture, la Facturation afficherait l'ancien titre jusqu'au
+    // prochain cycle de pull — un délai que rien à l'écran n'explique, alors
+    // que la direction vient de renommer sous ses yeux.
+    await pump(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'Frais annuels');
+    await tester.pump();
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    verify(() => cache.cacheFeeCodeSections(_served)).called(1);
+  });
+
+  testWidgets('un refus du serveur n\'écrit RIEN dans le cache local', (
+    tester,
+  ) async {
+    when(
+      () => repository.saveFeeCodeSections(any()),
+    ).thenAnswer((_) async => const Left(ValidationFailure('refus')));
+
+    await pump(tester);
+    await tester.enterText(find.byType(TextField).first, 'Frais annuels');
+    await tester.pump();
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    verifyNever(() => cache.cacheFeeCodeSections(any()));
   });
 
   testWidgets('le refus du serveur est montré tel qu\'il est venu', (

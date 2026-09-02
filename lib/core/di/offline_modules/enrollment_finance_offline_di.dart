@@ -5,6 +5,10 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_catalog_dao.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/fees/local/fee_code_section_dao.dart';
+import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
+import 'package:school_app_flutter/features/configuration/data/repositories/fee_code_section_cache_repository_impl.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/fee_code_section_cache_repository.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
@@ -69,6 +73,9 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sy
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_outbox_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_exchange_rates_use_case.dart';
+import 'package:school_app_flutter/features/configuration/domain/usecases/refresh_fee_section_titles_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_section_titles_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/save_exchange_rate_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rate_settings_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
@@ -176,6 +183,24 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<FinanceLocalDao>(
     () => FinanceLocalDao(getIt<Database>(), getIt<IdGenerator>()),
+  );
+
+  // Titres de sections de frais (GF-0) — cache d'AFFICHAGE, lu par les écrans
+  // qui nomment un frais, écrit par le pull et par l'écran de nommage.
+  //
+  // Le DAO vit dans `core/` et non dans une feature parce qu'il a deux rives qui
+  // ne se connaissent pas : Configuration le remplit, Finance le lit, et aucune
+  // des deux n'importe l'autre. Même placement qu'`ExchangeRateDao`.
+  getIt.registerLazySingleton<FeeCodeSectionDao>(
+    () => FeeCodeSectionDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<FeeCodeSectionCacheRepository>(
+    () => FeeCodeSectionCacheRepositoryImpl(
+      remote: getIt<ProvisioningRemoteDataSource>(),
+      dao: getIt<FeeCodeSectionDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
   );
 
   // ── APIs Retrofit de synchro ────────────────────────────────────────────────
@@ -486,6 +511,27 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<SaveExchangeRateUseCase>(
     () => SaveExchangeRateUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeSectionTitlesUseCase>(
+    () => GetFeeSectionTitlesUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<RefreshFeeSectionTitlesUseCase>(
+    () =>
+        RefreshFeeSectionTitlesUseCase(getIt<FeeCodeSectionCacheRepository>()),
+  );
+  getIt.registerFactory<FeeSectionTitlesCubit>(
+    () => FeeSectionTitlesCubit(
+      getTitles: getIt<GetFeeSectionTitlesUseCase>(),
+      // ⚠️ **Pas un `PullHandler`, et ce n'est pas un raccourci.**
+      // `/finance/fee-codes` n'est pas un flux de synchro : il n'est pas dans
+      // l'énumération serveur, donc il n'a pas de clé de plan. Sous un plan
+      // valide, `PullCoordinator` saute tout handler hors plan
+      // (`outOfPlan`) — le catalogue ne serait JAMAIS descendu. Et lui
+      // fabriquer une clé produirait exactement le défaut que
+      // `sync_plan_keys.dart` existe à prévenir : une clé jamais présente au
+      // plan.
+      refreshTitles: getIt<RefreshFeeSectionTitlesUseCase>(),
+    ),
   );
   getIt.registerFactory<ExchangeRatesCubit>(
     () => ExchangeRatesCubit(

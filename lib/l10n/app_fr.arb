@@ -2586,12 +2586,19 @@
   "facturationPaymentAllocationsUnknownError": "Une erreur inattendue est survenue lors du chargement des allocations.",
   "facturationDetailChargesSectionTitle": "Frais de l'élève",
   "facturationDetailChargesSectionSubtitle": "Répartition des montants attendus, payés et restants.",
-  "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partielle(s), {dueCount} à régler",
+  "facturationDetailChargesSummary": "{feeCount, plural, =0{Aucun frais} =1{1 frais} other{{feeCount} frais}} · {trancheCount, plural, =1{1 tranche} other{{trancheCount} tranches}} · {unsettledCount, plural, =0{tout est soldé} =1{1 reste à régler} other{{unsettledCount} restent à régler}}",
   "@facturationDetailChargesSummary": {
+    "description": "Résumé de la section « Frais de l'élève », replié par nature (GF-5). Trois mailles, dans cet ordre : les natures, les tranches qu'elles portent, et celles qu'il reste à encaisser. Ce dernier compte est celui du RESTE COMPOSÉ, jamais du statut miroir — un frais soldé au guichet et pas encore remonté n'est plus à régler.",
     "placeholders": {
-      "totalCount": {},
-      "partialCount": {},
-      "dueCount": {}
+      "feeCount": {
+        "type": "int"
+      },
+      "trancheCount": {
+        "type": "int"
+      },
+      "unsettledCount": {
+        "type": "int"
+      }
     }
   },
   "facturationDetailChargesRetry": "Réessayer",

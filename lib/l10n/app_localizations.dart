@@ -6512,14 +6512,14 @@ abstract class AppLocalizations {
   /// **'Breakdown of expected, paid and remaining amounts.'**
   String get facturationDetailChargesSectionSubtitle;
 
-  /// No description provided for @facturationDetailChargesSummary.
+  /// Summary of the student fees section, folded by fee code (GF-5). Three levels, in order: fee codes, the instalments they carry, and those still to collect. That last count comes from the COMPOSED remaining, never from the mirrored status.
   ///
   /// In en, this message translates to:
-  /// **'{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle'**
+  /// **'{feeCount, plural, =0{No fee} =1{1 fee} other{{feeCount} fees}} · {trancheCount, plural, =1{1 instalment} other{{trancheCount} instalments}} · {unsettledCount, plural, =0{all settled} =1{1 left to settle} other{{unsettledCount} left to settle}}'**
   String facturationDetailChargesSummary(
-    num totalCount,
-    Object partialCount,
-    Object dueCount,
+    int feeCount,
+    int trancheCount,
+    int unsettledCount,
   );
 
   /// No description provided for @facturationDetailChargesRetry.

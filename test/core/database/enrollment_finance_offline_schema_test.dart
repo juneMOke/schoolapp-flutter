@@ -61,7 +61,9 @@ void main() {
     // l'IMPUTÉ — en série, scopé par école.
     // +1 en v41 : `payment_tenders`, ce qui est entré dans le tiroir — sœur
     // append-only de `payment_allocations`.
-    expect(enrollmentFinanceOfflineTables, hasLength(22));
+    // +1 en v44 : `ref_fee_code_sections`, le titre que l'école donne à chaque
+    // nature de frais — cache d'AFFICHAGE, qu'aucune écriture ne lit.
+    expect(enrollmentFinanceOfflineTables, hasLength(23));
   });
 
   test(

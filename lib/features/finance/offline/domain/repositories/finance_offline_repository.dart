@@ -102,6 +102,22 @@ abstract class FinanceOfflineRepository {
   /// une liste vide, elle ne fait pas échouer un encaissement.
   Future<Either<Failure, List<ExchangeRate>>> getExchangeRates();
 
+  /// Les **titres de sections** que l'école a écrits, indexés par nature.
+  ///
+  /// Table vide = « on ne connaît aucun titre » — et l'écran en tire la seule
+  /// conclusion sûre : il nomme par la nature localisée. C'est le repli, et il
+  /// est **stable** : un cache vide dit toujours la même chose, là où le cache
+  /// mémoire du provisioning répondait selon qu'on était passé ou non par
+  /// Configuration dans la session.
+  ///
+  /// ⚠️ **Une section masquée garde son titre.** Masquer dit « ne me la propose
+  /// plus à la saisie », jamais « ne sais plus la nommer » : une créance posée
+  /// avant le masquage existe toujours, et c'est elle qu'on affiche.
+  ///
+  /// Lecture locale, jamais d'erreur métier : un cache illisible se réduit à une
+  /// table vide, il ne fait pas échouer l'affichage d'une fiche.
+  Future<Either<Failure, Map<String, String>>> getFeeSectionTitles();
+
   /// Pose un taux de guichet dans la série de l'école.
   ///
   /// **Publié sur le serveur, puis mis en cache local** — dans cet ordre, et

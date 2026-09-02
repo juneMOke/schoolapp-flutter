@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart' as constants;
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -7,6 +9,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/fee_code.dart';
+import 'package:school_app_flutter/features/configuration/domain/repositories/fee_code_section_cache_repository.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_repository.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_error_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
@@ -151,6 +154,18 @@ class _FeeSectionsSettingsCardState extends State<FeeSectionsSettingsCard> {
       (failure) => AppSnackBar.showError(context, failure.message),
       (sections) {
         setState(() => _adopt(sections));
+        // Le cache local des titres suit **immédiatement** (GF-0). Attendre le
+        // prochain cycle de pull ferait afficher l'ancien titre en Facturation
+        // alors que la direction vient de le changer sous ses yeux — et le
+        // temps d'attente ne dépendrait de rien qu'elle puisse observer.
+        //
+        // Volontairement non attendu, et sans `mounted` derrière : l'écriture
+        // ne rend rien à l'écran, et son échec est déjà absorbé par le
+        // repository. Le renommage, lui, a bien eu lieu côté serveur — c'est ce
+        // que le message de succès annonce.
+        unawaited(
+          getIt<FeeCodeSectionCacheRepository>().cacheFeeCodeSections(sections),
+        );
         AppSnackBar.showSuccess(context, l10n.configurationSectionsSaved);
       },
     );

@@ -9,10 +9,12 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/st
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_line.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_grouping.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_group_accordion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class FacturationDetailChargesSection extends StatelessWidget {
+class FacturationDetailChargesSection extends StatefulWidget {
   final String studentId;
   final String academicYearId;
   final ValueChanged<StudentCharge> onViewChargeRequested;
@@ -24,11 +26,36 @@ class FacturationDetailChargesSection extends StatelessWidget {
     required this.onViewChargeRequested,
   });
 
+  @override
+  State<FacturationDetailChargesSection> createState() =>
+      _FacturationDetailChargesSectionState();
+}
+
+class _FacturationDetailChargesSectionState
+    extends State<FacturationDetailChargesSection> {
+  /// Les natures dépliées, par `fee_code`.
+  ///
+  /// ⚠️ **Cet état vit AU-DESSUS du `BlocConsumer`, et c'est le piège du lot.**
+  /// Cette section est relue en **silence** à chaque signal de
+  /// `LedgerRevalidationCubit` et après chaque encaissement. Porté dans le
+  /// `builder`, l'état se reconstruirait à chaque émission et replierait tout
+  /// sous les doigts de l'opérateur, sans qu'il ait rien fait.
+  ///
+  /// Clé sur le `fee_code` et non sur l'index : le pli suit la nature, pas sa
+  /// position — une créance qui disparaît ne doit pas déplier sa voisine.
+  final Set<String> _expanded = <String>{};
+
+  void _toggle(String feeCode) {
+    setState(() {
+      if (!_expanded.remove(feeCode)) _expanded.add(feeCode);
+    });
+  }
+
   void _retry(BuildContext context) {
     context.read<StudentChargesBloc>().add(
       StudentChargesByAcademicYearRequested(
-        studentId: studentId,
-        academicYearId: academicYearId,
+        studentId: widget.studentId,
+        academicYearId: widget.academicYearId,
       ),
     );
   }
@@ -59,20 +86,25 @@ class FacturationDetailChargesSection extends StatelessWidget {
                 prev.studentCharges != curr.studentCharges ||
                 prev.errorType != curr.errorType,
             builder: (context, state) {
-              final partialCount = state.studentCharges
-                  .where(
-                    (charge) => charge.status == StudentChargeStatus.partial,
-                  )
-                  .length;
-              final dueCount = state.studentCharges
-                  .where((charge) => charge.status == StudentChargeStatus.due)
+              // Trois mailles : les natures, les tranches qu'elles portent,
+              // et ce qu'il reste à encaisser.
+              //
+              // ⚠️ Le dernier compte vient du **reste composé**, jamais de
+              // `charge.status` — que rien ne recalcule après un encaissement
+              // local. Il annonçait « 2 à régler » au-dessus de deux lignes que
+              // le guichet venait de solder (FRONT §6/§8).
+              final natureCount = groupChargesByFeeCode(
+                state.studentCharges,
+              ).length;
+              final unsettledCount = state.studentCharges
+                  .where((charge) => charge.remainingInCents > 0)
                   .length;
 
               final subtitle = state.status == StudentChargesStatus.success
                   ? l10n.facturationDetailChargesSummary(
+                      natureCount,
                       state.studentCharges.length,
-                      partialCount,
-                      dueCount,
+                      unsettledCount,
                     )
                   : l10n.facturationDetailChargesSectionSubtitle;
 
@@ -117,25 +149,34 @@ class FacturationDetailChargesSection extends StatelessWidget {
                         );
                       }
 
-                      return Column(
-                        key: const ValueKey('charges-lines'),
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (
-                            var i = 0;
-                            i < state.studentCharges.length;
-                            i++
-                          ) ...[
-                            FacturationChargeLine(
-                              charge: state.studentCharges[i],
-                              onViewRequested: () => onViewChargeRequested(
-                                state.studentCharges[i],
+                      final groups = groupChargesByFeeCode(
+                        state.studentCharges,
+                      );
+
+                      return BlocBuilder<
+                        FeeSectionTitlesCubit,
+                        FeeSectionTitlesState
+                      >(
+                        buildWhen: (prev, curr) => prev.titles != curr.titles,
+                        builder: (context, titles) => Column(
+                          key: const ValueKey('charges-lines'),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < groups.length; i++) ...[
+                              FacturationChargeGroupAccordion(
+                                key: ValueKey('group-${groups[i].feeCode}'),
+                                group: groups[i],
+                                schoolTitle: titles.titleOf(groups[i].feeCode),
+                                expanded: _expanded.contains(groups[i].feeCode),
+                                onToggle: () => _toggle(groups[i].feeCode),
+                                onViewChargeRequested:
+                                    widget.onViewChargeRequested,
                               ),
-                            ),
-                            if (i < state.studentCharges.length - 1)
-                              const SizedBox(height: AppDimensions.spacingS),
+                              if (i < groups.length - 1)
+                                const SizedBox(height: AppDimensions.spacingS),
+                            ],
                           ],
-                        ],
+                        ),
                       );
                     }(),
                   ),

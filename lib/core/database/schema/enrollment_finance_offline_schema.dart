@@ -473,6 +473,56 @@ const TableSchema refExchangeRatesTable = TableSchema(
   ],
 );
 
+/// `ref_fee_code_sections` — le **titre** que l'école donne à chaque nature de
+/// frais (V115 serveur, `GET /finance/fee-codes`).
+///
+/// ## Un cache d'AFFICHAGE, et rien d'autre
+///
+/// Aucune écriture ne lit cette table. Le `code` qui part sur le fil vient
+/// toujours de la créance ou de la grille, **jamais d'ici** — c'est ce qui
+/// distingue ce cache du catalogue que `CONFIGURATION_PLAN.md` D-9 refuse de
+/// persister : là-bas, un catalogue vieilli alimenterait une écriture et sa
+/// divergence n'apparaîtrait qu'en 422, sur l'activation. Ici, un titre périmé
+/// affiche un ancien nom pendant un cycle de pull, et c'est tout ce qu'il peut
+/// faire.
+///
+/// **Pourquoi persister plutôt que garder en session** : `loadFeeCodes` n'est
+/// appelé que depuis Configuration, et le repository qui porte le cache est un
+/// lazy singleton. Le cache est donc froid pour un caissier — l'utilisateur du
+/// détail Facturation. Sans cette table, la fiche d'un élève afficherait le
+/// titre de l'école ou la nature localisée selon qu'on est passé ou non par
+/// Configuration dans la session.
+///
+/// **`active` est stocké et ne filtre RIEN ici.** Masquer une section dit « ne
+/// me la propose plus à la saisie », jamais « ne sais plus la nommer » : une
+/// créance posée sur une nature depuis masquée doit garder son titre. C'est le
+/// piège que `SECTIONS_FRAIS_PLAN.md` §3 a déjà rencontré sur le panneau des
+/// tarifs, et le pull passe pour cette raison par `includeHidden: true`.
+///
+/// **Pas d'`id`, comme [refReductionTypesTable]** : le serveur n'en donne pas.
+/// L'identité d'une section est son code dans son école, et c'est la clé
+/// primaire.
+///
+/// **`school_id` n'est pas décoratif** : sur une tablette partagée, le titre
+/// d'une école servi à l'autre est un contresens d'affichage sur une pièce
+/// d'argent. Il est stampé depuis `CurrentUserContext`, jamais depuis le
+/// payload.
+const TableSchema refFeeCodeSectionsTable = TableSchema(
+  name: 'ref_fee_code_sections',
+  createTableSql: '''
+    CREATE TABLE ref_fee_code_sections (
+      school_id TEXT NOT NULL DEFAULT '',
+      code TEXT NOT NULL,
+      label TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, code)
+    )
+  ''',
+  createIndexSql: [],
+);
+
 /// `ref_reduction_types` — catalogue des natures de réduction (ADR-021 V1).
 ///
 /// ⚠️ **Pas d'`academic_year_id`, et c'est structurel** : le barème descend à la
@@ -888,6 +938,7 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   refPreEnrollmentsTable,
   // Facturation
   refFeeTariffsTable,
+  refFeeCodeSectionsTable,
   refExchangeRatesTable,
   refReductionTypesTable,
   refReductionLinesTable,

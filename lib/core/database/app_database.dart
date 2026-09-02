@@ -1281,6 +1281,36 @@ Future<void> migrateOfflineDatabase(
     // colonne, et ce palier n'ouvre une porte que pour les écritures suivantes.
     await _relaxPayerIdentity(db, schema);
   }
+  if (upTo(44)) {
+    // v44 — `ref_fee_code_sections` : le titre que l'école donne à chaque
+    // nature de frais, lisible hors ligne (GF-0).
+    //
+    // Création pure, aucune donnée touchée. Un appareil qui monte de v43 reçoit
+    // une table vide, et nomme donc ses frais par la nature localisée jusqu'au
+    // premier pull — c'est le repli voulu, et il est **stable** : un cache vide
+    // dit toujours la même chose, là où le cache mémoire du provisioning
+    // répondait selon qu'on était passé ou non par Configuration.
+    //
+    // Aucun backfill : il n'y a rien à rattraper. Les titres n'ont jamais été
+    // en base, et le seul endroit d'où on pourrait les tirer est la route
+    // qu'interroge précisément le pull.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'ref_fee_code_sections')) {
+      await db.execute('''
+        CREATE TABLE ref_fee_code_sections (
+          school_id TEXT NOT NULL DEFAULT '',
+          code TEXT NOT NULL,
+          label TEXT NOT NULL,
+          active INTEGER NOT NULL DEFAULT 1,
+          sort_order INTEGER NOT NULL DEFAULT 0,
+          synced_at INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (school_id, code)
+        )
+      ''');
+    }
+  }
 }
 
 /// Étape v43 : les colonnes d'identité du payeur perdent leur `NOT NULL`.
