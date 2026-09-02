@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/payment_tender_composition.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 
 /// L'invariant qui rend le couple perçu/imputé auditable.
 ///
@@ -14,7 +14,7 @@ const int _taux166667 = 1666670000;
 void main() {
   group('identityFor — le cas courant ne coûte aucune arithmétique', () {
     test('une devise, un règlement, taux 1', () {
-      final tenders = PaymentTenderComposition.identityFor(const [
+      final tenders = TenderComposition.identityFor(const [
         Money(3000, 'USD'),
         Money(1500, 'USD'),
       ]);
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('deux devises de créance font deux lignes, jamais une somme', () {
-      final tenders = PaymentTenderComposition.identityFor(const [
+      final tenders = TenderComposition.identityFor(const [
         Money(3000, 'USD'),
         Money(9000000, 'CDF'),
       ]);
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('les devises sont normalisées avant regroupement', () {
-      final tenders = PaymentTenderComposition.identityFor([
+      final tenders = TenderComposition.identityFor([
         Money.parse(3000, ' usd '),
         const Money(1500, 'USD'),
       ]);
@@ -49,9 +49,9 @@ void main() {
     test('l’identité satisfait toujours l’invariant', () {
       const allocations = [Money(3000, 'USD'), Money(9000000, 'CDF')];
       expect(
-        PaymentTenderComposition.check(
+        TenderComposition.check(
           allocations: allocations,
-          tenders: PaymentTenderComposition.identityFor(allocations),
+          tenders: TenderComposition.identityFor(allocations),
         ),
         isNull,
       );
@@ -63,7 +63,7 @@ void main() {
       // 3000 × 1 666,67 = 5 000 010 centimes de franc pour 5 000 000 reçus :
       // 10 centimes d'écart, sous l'unité d'affichage du franc. Refuser cet
       // écart, c'est refuser un versement juste.
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(3000, 'USD')],
         tenders: const [
           TenderDraft(
@@ -78,9 +78,9 @@ void main() {
       expect(violation, isNull);
     });
 
-    test('un franc de trop passe, deux ne passent pas', () {
+    test('l’écart se mesure APRÈS conversion, en centimes de créance', () {
       TenderInvariantViolation? verdict(int received) =>
-          PaymentTenderComposition.check(
+          TenderComposition.check(
             allocations: const [Money(3000, 'USD')],
             tenders: [
               TenderDraft(
@@ -92,38 +92,80 @@ void main() {
             ],
           );
 
-      // Attendu : 5 000 010. La tolérance vaut 1 FC = 100 centimes.
+      // 30,00 \$ dus, soit 50 000,10 FC à 1 666,67. La tolérance vaut
+      // `max(1, 100 ÷ 1 666,67)` = **1 centime de dollar** — pas un franc :
+      // c'est la règle du serveur, qui compare côté créance.
+      //
+      // Un franc de trop disparaît donc dans la division (16,67 FC valent un
+      // centime) ; il faut deux centimes de dollar d'écart pour être refusé.
       expect(verdict(5000110), isNull);
-      expect(verdict(5000111), isNotNull);
+      expect(verdict(5001678), isNull, reason: 'un centime : admis');
+      expect(verdict(5003345), isNotNull, reason: 'deux centimes : refusé');
     });
 
     test(
-      'la tolérance du dollar est cent fois plus fine que celle du franc',
+      'une créance en FRANCS réglée en dollars admet bien plus qu’un centime',
       () {
-        // 1 cent de dollar, contre 1 franc entier : la tolérance se lit sur la
-        // devise REÇUE, pas sur celle de la créance.
-        final violation = PaymentTenderComposition.check(
-          allocations: const [Money(5000000, 'CDF')],
+        // Le cas que le cahier de recette exerce (P3-37), et celui qu'un
+        // centime forfaitaire refuserait à tort : l'unité d'affichage du
+        // dollar — un cent — vaut ~2 299 centimes de franc au taux courant.
+        // C'est là que le plancher `max(1, …)` ne sert PAS, et que la formule
+        // du serveur diverge d'une tolérance fixe.
+        final violation = TenderComposition.check(
+          allocations: const [Money(9000000, 'CDF')],
           tenders: const [
             TenderDraft(
-              // 50 000 FC à 0,0006 $/FC = 30,00 $ ; on en reçoit 30,02 $.
-              amountInCents: 3002,
+              // 90 000 FC à 0,000435 \$/FC = 39,15 \$ ; le comptoir en compte
+              // 39,16 — un cent de plus, soit ~23 FC une fois reconverti.
+              amountInCents: 3916,
               currency: 'USD',
-              rateMicros: 600,
+              rateMicros: 435,
               pivotCurrency: 'CDF',
             ),
           ],
         );
 
-        expect(violation, isNotNull);
+        expect(
+          violation,
+          isNull,
+          reason:
+              'le serveur l’accepte : refuser ici éteindrait le CTA sur un '
+              'versement parfaitement valide',
+        );
       },
     );
+
+    test('un écart qui dépasse la tolérance de SA ligne est refusé', () {
+      // 50 000 FC dus à 0,0006 \$/FC = 30,00 \$ ; on en reçoit 30,60. La
+      // tolérance vaut `max(1, 1 ÷ 0,0006)` = 1 666 centimes de franc, et
+      // l'écart reconverti en vaut 100 000 : soixante fois trop.
+      final violation = TenderComposition.check(
+        allocations: const [Money(5000000, 'CDF')],
+        tenders: const [
+          TenderDraft(
+            amountInCents: 3060,
+            currency: 'USD',
+            rateMicros: 600,
+            pivotCurrency: 'CDF',
+          ),
+        ],
+      );
+
+      expect(violation, isNotNull);
+      expect(
+        violation.toString(),
+        contains('admis'),
+        reason:
+            'le message porte les deux nombres, comme le 422 du serveur : '
+            'l’écart et ce qui était admis',
+      );
+    });
 
     test('la fuite du taux est refusée', () {
       // 100 000 FC encaissés pour une créance de 50 $ quand le taux du jour en
       // vaut 145 000 : la créance s'éteint, la caisse est cohérente, et
       // 45 000 FC sont partis. C'est le seul risque NOUVEAU de la V2.
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(5000, 'USD')],
         tenders: const [
           TenderDraft(
@@ -144,7 +186,7 @@ void main() {
       () {
         // Une pile de billets posée en deux fois n'est pas une décision : deux
         // lignes de même pivot et de même unité se somment.
-        final violation = PaymentTenderComposition.check(
+        final violation = TenderComposition.check(
           allocations: const [Money(3000, 'USD')],
           tenders: const [
             TenderDraft(
@@ -167,7 +209,7 @@ void main() {
     );
 
     test('deux taux pour la même paire sont refusés', () {
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(3000, 'USD')],
         tenders: const [
           TenderDraft(
@@ -190,7 +232,7 @@ void main() {
 
     test('une créance imputée sans rien de reçu est refusée', () {
       // De l'argent aurait éteint une dette sans jamais entrer dans le tiroir.
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(3000, 'USD'), Money(9000000, 'CDF')],
         tenders: const [
           TenderDraft(
@@ -205,7 +247,7 @@ void main() {
     });
 
     test('un règlement adossé à une créance absente est refusé', () {
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(3000, 'USD')],
         tenders: const [
           TenderDraft(
@@ -221,7 +263,7 @@ void main() {
 
     test('un taux nul ou négatif est refusé', () {
       for (final micros in const [0, -1666670000]) {
-        final violation = PaymentTenderComposition.check(
+        final violation = TenderComposition.check(
           allocations: const [Money(3000, 'USD')],
           tenders: [
             TenderDraft(
@@ -238,7 +280,7 @@ void main() {
 
     test('un versement mixte — francs sur une créance en dollars, dollars sur '
         'une créance en dollars — tient pivot par pivot', () {
-      final violation = PaymentTenderComposition.check(
+      final violation = TenderComposition.check(
         allocations: const [Money(3000, 'USD'), Money(9000000, 'CDF')],
         tenders: const [
           TenderDraft(
@@ -261,7 +303,7 @@ void main() {
     test('un versement sans rien à imputer ni rien à recevoir tient', () {
       // Le refus du versement vide appartient à l'appelant, pas à l'invariant.
       expect(
-        PaymentTenderComposition.check(
+        TenderComposition.check(
           allocations: const [],
           tenders: const [],
         ),

@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/local/exchange_rate_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_charge_seed_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_read_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_sync_dao.dart';
@@ -30,6 +32,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 ///  - lectures                       → [FinanceLedgerReadDao]
 ///  - annuaire des payeurs           → [FinancePayerDirectoryDao]
 ///  - barème de réductions (ADR-021) → [ReductionCatalogDao]
+///  - taux de guichet                → [ExchangeRateDao]
 ///
 /// Aucune méthode ne franchit deux responsabilités : chacune ouvre sa propre
 /// transaction dans son DAO, la garantie money-grade est portée là où elle vit.
@@ -41,6 +44,7 @@ class FinanceLocalDao {
   final FinanceLedgerReadDao _read;
   final FinancePayerDirectoryDao _payers;
   final ReductionCatalogDao _reductions;
+  final ExchangeRateDao _rates;
 
   FinanceLocalDao(Database db, IdGenerator idGenerator)
     : _write = FinancePaymentWriteDao(db),
@@ -49,7 +53,24 @@ class FinanceLocalDao {
       _sync = FinanceLedgerSyncDao(db),
       _read = FinanceLedgerReadDao(db),
       _payers = FinancePayerDirectoryDao(db),
-      _reductions = ReductionCatalogDao(db);
+      _reductions = ReductionCatalogDao(db),
+      _rates = ExchangeRateDao(db);
+
+  // ── Taux de guichet ────────────────────────────────────────────────────────
+
+  /// Cf. `ExchangeRateDao.upsert`.
+  Future<void> upsertExchangeRate(ExchangeRateLocalModel rate) =>
+      _rates.upsert(rate);
+
+  /// Cf. `ExchangeRateDao.replaceForSchool`.
+  Future<void> replaceExchangeRatesForSchool(
+    List<ExchangeRateLocalModel> rates, {
+    required String schoolId,
+  }) => _rates.replaceForSchool(rates, schoolId: schoolId);
+
+  /// Cf. `ExchangeRateDao.ratesForSchool`.
+  Future<List<ExchangeRate>> exchangeRatesForSchool(String schoolId) =>
+      _rates.ratesForSchool(schoolId);
 
   // ── Encaissement local-first (FF3) ─────────────────────────────────────────
 
@@ -125,10 +146,12 @@ class FinanceLocalDao {
     List<StudentChargeLocalModel> charges = const [],
     List<PaymentLocalModel> payments = const [],
     List<PaymentAllocationLocalModel> allocations = const [],
+    List<PaymentTenderLocalModel> tenders = const [],
   }) => _sync.upsertLedger(
     charges: charges,
     payments: payments,
     allocations: allocations,
+    tenders: tenders,
   );
 
   // ── Lectures ────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
-import 'package:school_app_flutter/features/finance/offline/data/local/models/exchange_rate_local_model.dart';
+import 'package:school_app_flutter/core/money/local/exchange_rate_local_model.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Le taux de guichet en local : écriture par le pull, lecture par le guichet.
@@ -46,6 +46,26 @@ class ExchangeRateDao {
       }
       await batch.commit(noResult: true);
     });
+  }
+
+  /// Pose un taux dans la série de cette école.
+  ///
+  /// `INSERT OR REPLACE` sur la clé (école, paire, instant d'effet) : reposer le
+  /// même taux au même instant corrige la saisie plutôt que d'empiler deux
+  /// paliers à la même seconde. Ce n'est **pas** le cas dangereux de la paire
+  /// « OR REPLACE + index unique partiel » : la clé est la clé primaire
+  /// déclarée, et le remplacement est exactement ce qu'on veut.
+  ///
+  /// [schoolId] vide = appelant sans école résolue : on n'écrit rien. Une ligne
+  /// posée sous la clé `''` serait invisible à toute lecture scopée, et le
+  /// paramétrage semblerait n'avoir aucun effet.
+  Future<void> upsert(ExchangeRateLocalModel rate) async {
+    if (rate.schoolId.isEmpty) return;
+    await _db.insert(
+      'ref_exchange_rates',
+      rate.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   /// La série de cette école, prête à être résolue par [ExchangeRates.at].

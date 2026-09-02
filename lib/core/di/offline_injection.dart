@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
+import 'package:school_app_flutter/core/money/local/exchange_rate_dao.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -90,6 +92,15 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   await PaymentOutboxTariffBackfill(resolvedDatabase).run();
 
   getIt.registerLazySingleton<OutboxDao>(() => OutboxDao(getIt<Database>()));
+  // Le taux de guichet est un référentiel d'ÉCOLE, pas un objet de la
+  // Facturation : les deux caisses le lisent, et le loger dans l'une obligerait
+  // l'autre à en dépendre.
+  getIt.registerLazySingleton<ExchangeRateReader>(
+    () => ExchangeRateReader(
+      dao: ExchangeRateDao(getIt<Database>()),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
   getIt.registerLazySingleton<SyncMetaDao>(
     () => SyncMetaDao(getIt<Database>()),
   );

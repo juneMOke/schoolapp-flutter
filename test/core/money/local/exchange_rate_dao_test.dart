@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
-import 'package:school_app_flutter/features/finance/offline/data/local/dao/exchange_rate_dao.dart';
-import 'package:school_app_flutter/features/finance/offline/data/local/models/exchange_rate_local_model.dart';
+import 'package:school_app_flutter/core/money/local/exchange_rate_dao.dart';
+import 'package:school_app_flutter/core/money/local/exchange_rate_local_model.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
-import '../../offline_full_db.dart';
+import '../../../features/offline_full_db.dart';
 
 /// Le taux de guichet en local — écriture par le pull, lecture au guichet.
 ///

@@ -21,6 +21,79 @@ ExchangeRate _rate({
 );
 
 void main() {
+  group('at — le repli d’horloge, sur demande seulement', () {
+    final demain = ExchangeRate(
+      base: 'USD',
+      quote: 'CDF',
+      rateMicros: 2800000000,
+      effectiveFrom: DateTime.utc(2026, 9, 2),
+    );
+
+    test('sans repli, aucun point commencé ne résout rien', () {
+      expect(
+        ExchangeRates.at(
+          [demain],
+          base: 'USD',
+          quote: 'CDF',
+          moment: DateTime.utc(2026, 9, 1),
+        ),
+        isNull,
+        reason:
+            'l’écran de direction doit dire « aucun taux en vigueur » plutôt '
+            'que d’afficher celui de demain comme s’il valait',
+      );
+    });
+
+    test('avec repli, le plus ancien vaut mieux que rien', () {
+      // Une tablette dont l’horloge retarde voit tous les points dans son
+      // futur. Sans ce repli elle n’aurait plus aucun taux, alors qu’elle vient
+      // d’en recevoir la série — et un guichet sans taux invente.
+      expect(
+        ExchangeRates.at(
+          [demain],
+          base: 'USD',
+          quote: 'CDF',
+          moment: DateTime.utc(2026, 9, 1),
+          fallbackToEarliest: true,
+        )?.rateMicros,
+        2800000000,
+      );
+    });
+
+    test('le repli ne prend PAS le pas sur un point en vigueur', () {
+      final hier = ExchangeRate(
+        base: 'USD',
+        quote: 'CDF',
+        rateMicros: 2500000000,
+        effectiveFrom: DateTime.utc(2026, 8, 31),
+      );
+
+      expect(
+        ExchangeRates.at(
+          [hier, demain],
+          base: 'USD',
+          quote: 'CDF',
+          moment: DateTime.utc(2026, 9, 1),
+          fallbackToEarliest: true,
+        )?.rateMicros,
+        2500000000,
+      );
+    });
+
+    test('le repli ne franchit jamais la paire', () {
+      expect(
+        ExchangeRates.at(
+          [demain],
+          base: 'EUR',
+          quote: 'CDF',
+          moment: DateTime.utc(2026, 9, 1),
+          fallbackToEarliest: true,
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('convertCents — la conversion se fait en centimes des deux côtés', () {
     test('30,00 \$ valent 50 000,10 FC au taux de 1 666,67', () {
       // Le chiffre exact de l'arbitrage n° 3 : le franc s'affiche sans

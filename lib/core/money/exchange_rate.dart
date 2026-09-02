@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 
 /// Le taux de guichet qui relie **ce qui est perçu** à **ce qui est imputé**.
 ///
@@ -103,6 +104,27 @@ final class ExchangeRate extends Equatable {
   /// total.
   double get rateForDisplay => rateMicros / scale;
 
+  /// Le taux écrit : « 1 666,67 ».
+  ///
+  /// Passe par [MoneyFormat] pour le groupement des milliers et la virgule
+  /// décimale, mais **sans devise** : un taux n'est pas un montant, il ne suit
+  /// pas la règle d'écriture du franc, qui lui retirerait ses décimales.
+  ///
+  /// Une seule implémentation, parce que ce nombre s'affiche au guichet ET
+  /// s'imprime sur le ticket : deux copies divergeraient au premier ajustement,
+  /// et le parent lirait deux taux pour un seul versement.
+  /// Le taux rendu au centième, **arrondi et non tronqué**.
+  ///
+  /// La colonne stocke six décimales ; l'écran et le ticket en montrent deux.
+  /// Tronquer faisait imprimer 1 666,66 pour un taux de 1 666,666 7 — un
+  /// centime SOUS ce qui a servi au calcul, et le parent qui recompte ne
+  /// retombe pas sur son total. C'est précisément l'invariant que le ticket
+  /// promet.
+  String formatted({String space = MoneyFormat.nbsp}) => MoneyFormat.amountOnly(
+    Money(((rateMicros / (scale ~/ 100)).round()), ''),
+    space: space,
+  );
+
   @override
   List<Object?> get props => [
     base,
@@ -134,21 +156,43 @@ abstract final class ExchangeRates {
     required String base,
     required String quote,
     required DateTime moment,
+    bool fallbackToEarliest = false,
   }) {
     final wantedBase = CurrencyCode.normalize(base);
     final wantedQuote = CurrencyCode.normalize(quote);
     final instant = moment.toUtc();
 
     ExchangeRate? best;
+    ExchangeRate? earliest;
     for (final rate in rates) {
       if (rate.base != wantedBase || rate.quote != wantedQuote) continue;
       final from = rate.effectiveFrom.toUtc();
+      // Le plus ancien de la paire, retenu au cas où AUCUN point n'aurait
+      // commencé — voir le repli ci-dessous.
+      if (earliest == null || from.isBefore(earliest.effectiveFrom.toUtc())) {
+        earliest = rate;
+      }
       if (from.isAfter(instant)) continue;
       if (best == null || from.isAfter(best.effectiveFrom.toUtc())) {
         best = rate;
       }
     }
-    return best;
+    // ⚠️ **Aucun point commencé ⇒ le plus ancien, mais seulement pour qui le
+    // demande.**
+    //
+    // Le serveur ne descend que les points résolvables : celui en vigueur, et
+    // ceux datés au-delà. Une tablette dont l'horloge RETARDE sur la sienne voit
+    // donc tous les points dans son futur — et sans repli elle n'aurait plus
+    // aucun taux, alors qu'elle vient d'en recevoir une série complète. Un
+    // guichet sans taux invente, et un taux inventé est exactement ce que le
+    // contrôle de divergence lui reprocherait.
+    //
+    // Le repli se **demande** et n'est pas le défaut : il a un revers — un
+    // premier taux programmé pour demain s'applique dès aujourd'hui — que seul
+    // le guichet a intérêt à payer. L'écran de direction, lui, doit dire la
+    // vérité stricte : « aucun taux en vigueur » est une information juste.
+    if (best != null || !fallbackToEarliest) return best;
+    return earliest;
   }
 
   /// Ce que [pivotCents] — un montant dans la devise de la créance — vaut dans
@@ -179,4 +223,28 @@ abstract final class ExchangeRates {
   /// tout l'objet de l'opération.
   static Money convert(Money amount, ExchangeRate rate) =>
       Money(convertCents(amount.amountInCents, rate), rate.quote);
+
+  /// Ce qu'un montant **tendu** peut éteindre, exprimé dans la devise de la
+  /// créance — l'opération inverse de [convertCents].
+  ///
+  /// **Arrondi vers le bas, jamais au plus proche.** Une créance ne s'éteint
+  /// que jusqu'où l'argent va : 50 000 FC à 2 800 valent 17,857… \$, on impute
+  /// 17,85 et non 17,86 — arrondir au plus proche éteindrait huit centimes que
+  /// personne n'a posés sur le comptoir, et le serveur refuserait le couple
+  /// (l'écart dépasse l'unité d'affichage tolérée).
+  ///
+  /// Ce qui reste — ici 20 FC — est de la **monnaie à rendre**, pas un
+  /// trop-perçu : le tender est le net conservé.
+  static int settledCentsFrom(int tenderedCents, ExchangeRate rate) {
+    if (rate.rateMicros <= 0) return 0;
+    if (rate.rateMicros == ExchangeRate.scale) return tenderedCents;
+    final negative = tenderedCents < 0;
+    final absolute = BigInt.from(negative ? -tenderedCents : tenderedCents);
+    final result =
+        (absolute *
+                BigInt.from(ExchangeRate.scale) ~/
+                BigInt.from(rate.rateMicros))
+            .toInt();
+    return negative ? -result : result;
+  }
 }

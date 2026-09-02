@@ -3,8 +3,14 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 
-/// Ce que le guichet déclare avoir **reçu**, avant que le repo ne lui donne un
+/// Ce qu'un comptoir déclare avoir **reçu**, avant que le repo ne lui donne un
 /// identifiant.
+///
+/// Vit dans le socle monétaire et non dans la Facturation : la caisse boutique
+/// pose exactement la même question — « qu'est-ce qui est entré dans le tiroir,
+/// à côté de ce que ça a réglé » — et son pivot est la devise du catalogue là où
+/// celui du versement est la devise de la créance. Le loger dans l'un des deux
+/// modules obligerait l'autre à en dépendre.
 ///
 /// Une entrée par couple (devise reçue, pivot) : on découpe quand l'unité ou le
 /// taux change, **jamais quand seul le geste change**. Un parent qui pose
@@ -53,17 +59,48 @@ class TenderInvariantViolation {
   String toString() => message;
 }
 
-/// L'invariant qui rend le couple perçu/imputé auditable, et la composition qui
+/// L'invariant qui rend le couple perçu/réglé auditable, et la composition qui
 /// va avec.
+///
+/// Vaut pour un **versement** (pivot = devise de la créance) comme pour une
+/// **vente** (pivot = devise du catalogue) : c'est la même égalité, et la faire
+/// vivre deux fois la ferait diverger une fois.
 ///
 /// ## Ce que l'invariant dit
 ///
-/// `Σ(allocation × taux)` par pivot `==` `Σ(tender)` de ce pivot, **comparé dans
-/// la devise reçue**. C'est la même égalité que celle du serveur, prise par
-/// l'autre bout : lui divise le perçu par le taux, on multiplie l'imputé. La
-/// différence n'est pas cosmétique — la tolérance est définie dans la devise
-/// **reçue** (« une unité d'affichage »), et comparer côté pivot obligerait à
-/// convertir la tolérance elle-même.
+/// `Σ(tender ÷ taux)` par pivot `==` `Σ(allocation)` de ce pivot, **comparé
+/// dans la devise de la créance**. Mot pour mot la règle du serveur
+/// (`Encaissements.exigerInvariant`) : côté créance, pivot par pivot, jamais
+/// globalement — compenser un excédent en dollars par un manque en francs est
+/// précisément l'erreur que ce contrôle existe pour voir.
+///
+/// ## La tolérance, et pourquoi elle n'a pas besoin d'unité commune
+///
+/// `Σ max(1, unité d'affichage de la devise REÇUE ÷ taux)`, **une par ligne
+/// d'encaissement**.
+///
+/// L'écart naît là où l'arrondi se produit : le parent pose 50 000 FC ronds,
+/// pas 50 000,10 — donc dans la devise reçue. On l'y borne, puis chaque ligne
+/// le porte au pivot par **son** taux. Aucune unité reçue commune n'est donc
+/// nécessaire, même quand une créance est réglée en deux monnaies : chaque
+/// règlement apporte la sienne.
+///
+/// Le plancher d'un centime de pivot fait tout le travail dans le sens
+/// dominant : une créance en dollars réglée en francs admet
+/// `max(1, 100 ÷ 2900) = 1` centime. Dans l'autre sens il ne sert pas, et c'est
+/// ce qui compte : une créance en francs réglée en dollars admet
+/// `1 ÷ 0,000435 ≈ 2 299` centimes de franc, là où un centime forfaitaire
+/// refuserait un versement que le serveur accepte sans broncher.
+///
+/// ## À ne pas confondre avec la bande du taux
+///
+/// Deux tolérances, deux unités, deux conséquences. Celle-ci porte sur
+/// l'**arrondi de conversion**, se compte en centimes, et un dépassement
+/// **refuse** le versement (422 `TENDER_SUM_MISMATCH`). La bande de
+/// [ExchangeRate.divergenceBandBp] porte sur l'**écart au taux publié**, se
+/// compte en pourcent, et ne refuse jamais rien — elle consigne une anomalie.
+/// Les fusionner ferait refuser des versements justes, ou taire un vrai écart
+/// d'arbitrage.
 ///
 /// ## Pourquoi une tolérance
 ///
@@ -76,7 +113,27 @@ class TenderInvariantViolation {
 /// Ce n'est **pas** la garde qui compare `amounts` aux imputations. Celle-là
 /// compare de l'imputé à de l'imputé et reste juste ; celle-ci est la seconde,
 /// et elle n'existait nulle part.
-abstract final class PaymentTenderComposition {
+abstract final class TenderComposition {
+  /// L'écart admis pour UNE ligne d'encaissement, en centimes de pivot.
+  ///
+  /// `max(1, unité d'affichage de la devise reçue ÷ taux)` — la formule du
+  /// serveur, au même arrondi.
+  ///
+  /// ⚠️ **Arrondi au plus proche, et non le plancher de
+  /// [ExchangeRates.settledCentsFrom].** Les deux conversions inverses ne
+  /// servent pas la même chose : à la SAISIE, tronquer est juste — on n'éteint
+  /// que ce que l'argent couvre, le reste est de la monnaie à rendre. Ici on
+  /// mesure une tolérance, et tronquer la rendrait plus stricte que celle du
+  /// serveur d'un centime, sans raison.
+  static int _lineToleranceInPivot(TenderDraft tender) {
+    final unit = MoneyFormat.displayUnitInCents(tender.currency);
+    final micros = BigInt.from(tender.rateMicros);
+    if (micros <= BigInt.zero) return 1;
+    final scaled = BigInt.from(unit) * BigInt.from(ExchangeRate.scale);
+    final rounded = ((scaled + micros ~/ BigInt.two) ~/ micros).toInt();
+    return rounded < 1 ? 1 : rounded;
+  }
+
   /// Les lignes de perçu d'un versement dont le règlement suit exactement les
   /// imputations : une par devise, taux 1.
   ///
@@ -169,19 +226,29 @@ abstract final class PaymentTenderComposition {
       }
     }
 
-    for (final entry in receivedByPair.entries) {
-      final tender = rateOfPair[entry.key]!;
-      final pivot = CurrencyCode.normalize(tender.pivotCurrency);
-      final received = CurrencyCode.normalize(tender.currency);
-      final imputed = imputedByPivot[pivot] ?? 0;
-      final expected = ExchangeRates.convertCents(imputed, tender.rate);
-      final gap = (entry.value - expected).abs();
-      final tolerance = MoneyFormat.displayUnitInCents(received);
+    // Le contrôle, pivot par pivot, **côté créance** — la règle du serveur.
+    for (final pivot in imputedByPivot.keys) {
+      final imputed = imputedByPivot[pivot]!;
+      final keys = rateOfPair.keys
+          .where((key) => key.startsWith('$pivot>'))
+          .toList();
+
+      var settled = 0;
+      var tolerance = 0;
+      for (final key in keys) {
+        final tender = rateOfPair[key]!;
+        settled += ExchangeRates.settledCentsFrom(
+          receivedByPair[key]!,
+          tender.rate,
+        );
+        tolerance += _lineToleranceInPivot(tender);
+      }
+
+      final gap = (settled - imputed).abs();
       if (gap > tolerance) {
         return TenderInvariantViolation(
-          'Perçu (${entry.value} $received) ≠ imputé converti '
-          '($expected $received) au taux ${tender.rate.rateForDisplay} : '
-          'écart de $gap centimes, au-delà de la tolérance de $tolerance.',
+          'Perçu converti ($settled $pivot) ≠ dû ($imputed $pivot) : écart de '
+          '$gap centimes, $tolerance admis.',
         );
       }
     }
