@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -7,17 +6,26 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_fee_code_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_imputation_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_freshness_caption.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_kpi_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ce qui est entré dans le tiroir sur la fenêtre.
+/// Ce qui est entré dans le tiroir sur la fenêtre — **puis ce que ça a
+/// éteint**.
 ///
 /// Même composition que le recouvrement — bande KPI commune, puis un jeu de
 /// sections par devise — parce que c'est le même écran et qu'il se lit de la
 /// même façon. Ce qui diffère est ce qu'on y compte : ici rien n'est dû, rien
 /// n'est attendu, et la moitié boutique existe.
+///
+/// **L'écran porte deux unités, et il le dit.** Le haut compte en devise
+/// **reçue** : c'est ce que le caissier rapproche de ses billets. Le bas compte
+/// en devise de **créance** : c'est ce que la direction lit. Les deux ne
+/// s'additionnent pas — un même versement de 115 000 FC qui solde 50 USD pèse
+/// en haut dans le bloc CDF et en bas dans le bloc USD — d'où la séparation
+/// franche, un titre qui nomme l'unité, et aucun total commun nulle part.
 class FinanceTillSuccessView extends StatelessWidget {
   final FinanceTill till;
 
@@ -32,7 +40,7 @@ class FinanceTillSuccessView extends StatelessWidget {
       children: [
         _WindowCaption(till: till, l10n: l10n),
         const SizedBox(height: AppDimensions.spacingM),
-        if (till.byCurrency.isEmpty)
+        if (till.encaisse.isEmpty)
           // Ni catalogue, ni grille, ni mouvement : le serveur ne renvoie aucun
           // bloc. C'est un état vide, pas une erreur — et surtout pas un zéro
           // dans une unité que personne n'a choisie.
@@ -47,48 +55,80 @@ class FinanceTillSuccessView extends StatelessWidget {
             ),
           )
         else ...[
-          FinanceTillKpiBand(blocks: till.byCurrency),
+          FinanceTillKpiBand(blocks: till.encaisse),
           const SizedBox(height: AppDimensions.spacingS),
           const FinanceTillFreshnessCaption(),
           const SizedBox(height: AppDimensions.spacingL),
-          for (final block in till.byCurrency) ...[
-            if (till.byCurrency.length > 1)
+          for (final block in till.encaisse) ...[
+            if (till.encaisse.length > 1)
               _CurrencyHeading(currency: block.currency, l10n: l10n),
             if (block.hasNoMovement)
               _CurrencyNoMovement(l10n: l10n)
             else
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final buckets = FinanceTillBucketsSection(
-                    buckets: block.buckets,
-                  );
-                  final feeCodes = FinanceTillFeeCodeSection(
-                    items: block.summary.byFeeCode,
-                  );
-                  if (constraints.maxWidth >=
-                      AppBreakpoints.financeStatsTwoColMin) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(flex: 2, child: buckets),
-                        const SizedBox(width: AppDimensions.spacingL),
-                        Expanded(flex: 3, child: feeCodes),
-                      ],
-                    );
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buckets,
-                      const SizedBox(height: AppDimensions.spacingL),
-                      feeCodes,
-                    ],
-                  );
-                },
-              ),
+              FinanceTillBucketsSection(buckets: block.buckets),
             const SizedBox(height: AppDimensions.spacingXL),
           ],
+          // La ventilation par poste n'est plus une colonne du bloc de devise
+          // reçue : elle se compte dans la devise des créances. Elle descend
+          // donc sous son propre titre, qui nomme l'unité — la seule chose qui
+          // empêche de lire un total commun là où il n'en existe aucun.
+          if (till.impute.isNotEmpty || _hasFees(till)) ...[
+            _ImputationHeading(l10n: l10n),
+            const SizedBox(height: AppDimensions.spacingM),
+            if (till.impute.isEmpty)
+              // Des frais sont entrés sans qu'aucune imputation ne descende :
+              // on le montre sous le titre, plutôt que d'escamoter la section,
+              // où la lacune passerait pour une journée sans frais.
+              FinanceStatsEmptyState(
+                message: l10n.financeStatsNoData,
+                hint: l10n.financeStatsNoDataHint,
+                semanticLabel: l10n.financeStatsEmptyA11yLabel,
+              )
+            else
+              for (final imputation in till.impute) ...[
+                FinanceTillImputationSection(imputation: imputation),
+                const SizedBox(height: AppDimensions.spacingL),
+              ],
+          ],
         ],
+      ],
+    );
+  }
+}
+
+/// Des frais sont entrés dans le tiroir sur la fenêtre — donc quelque chose a
+/// été imputé, et l'absence de bloc d'imputation est une lacune, pas un état.
+bool _hasFees(FinanceTill till) =>
+    till.encaisse.any((block) => block.summary.fees > 0);
+
+/// Sépare les deux unités de l'écran, et nomme celle qui commence.
+///
+/// Sans ce titre, les montants du bas se lisent dans la continuité de la bande
+/// KPI — c'est-à-dire dans la mauvaise devise, et sur un total qui n'existe pas.
+class _ImputationHeading extends StatelessWidget {
+  final AppLocalizations l10n;
+
+  const _ImputationHeading({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.financeTillImputationHeading,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingXS),
+        Text(
+          l10n.financeTillImputationHint,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+        ),
       ],
     );
   }

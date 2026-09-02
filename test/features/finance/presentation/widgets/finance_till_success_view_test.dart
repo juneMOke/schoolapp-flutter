@@ -24,15 +24,7 @@ TillCurrencyBlock _block(
   List<TillBucket>? buckets,
 }) => TillCurrencyBlock(
   currency: currency,
-  summary: TillSummary(
-    total: fees + boutique,
-    fees: fees,
-    boutique: boutique,
-    byFeeCode: [
-      if (fees > 0)
-        TillFeeCodeAmount(code: 'TUITION', label: 'Minerval', amount: fees),
-    ],
-  ),
+  summary: TillSummary(total: fees + boutique, fees: fees, boutique: boutique),
   buckets:
       buckets ??
       [
@@ -46,8 +38,18 @@ TillCurrencyBlock _block(
       ],
 );
 
+/// Ce que les versements ont éteint, dans la devise d'une créance.
+TillImputation _imputation(String currency, int total) => TillImputation(
+  currency: currency,
+  total: total,
+  byFeeCode: [
+    TillFeeCodeAmount(code: 'TUITION', label: 'Minerval', amount: total),
+  ],
+);
+
 FinanceTill _till(
   List<TillCurrencyBlock> blocks, {
+  List<TillImputation>? impute,
   String period = 'day',
   DateTime? start,
   DateTime? end,
@@ -61,7 +63,17 @@ FinanceTill _till(
     generatedAt: DateTime.utc(2026, 5, 15, 18, 4),
   ),
   timeZone: timeZone,
-  byCurrency: blocks,
+  encaisse: blocks,
+  // Le cas courant : l'école n'encaisse que dans la devise de ses créances, et
+  // chaque bloc reçu a son pendant imputé. Les tests qui éprouvent la bascule
+  // de devise passent leur propre liste.
+  impute:
+      impute ??
+      [
+        for (final block in blocks)
+          if (block.summary.fees > 0)
+            _imputation(block.currency, block.summary.fees),
+      ],
 );
 
 /// Le tiroir, à l'écran.
@@ -186,14 +198,56 @@ void main() {
     expect(find.text('Reste à recouvrer'), findsNothing);
   });
 
-  testWidgets('la ventilation ne couvre que les frais', (tester) async {
+  testWidgets('la ventilation descend sous son propre titre', (tester) async {
     await pump(tester, _till([_block('USD')]));
 
-    expect(find.text('Répartition des frais encaissés'), findsOneWidget);
+    expect(find.text('Ce que ces versements ont éteint'), findsOneWidget);
+    expect(find.text('Créances réglées en \$'), findsOneWidget);
     expect(find.text('Minerval'), findsOneWidget);
     // La part boutique n'a aucun poste : elle vit dans sa carte, entière.
     expect(find.text('Boutique'), findsNothing);
   });
+
+  testWidgets(
+    'les deux unités se nomment, et rien ne les additionne : un tiroir en '
+    'francs qui solde des créances en dollars',
+    (tester) async {
+      await pump(
+        tester,
+        _till(
+          [_block('CDF', fees: 11500000, boutique: 0)],
+          impute: [_imputation('USD', 5000)],
+        ),
+      );
+
+      // En haut, la devise reçue. En bas, celle des créances — et le titre le
+      // dit, sans quoi les montants du bas se lisent dans la mauvaise unité.
+      expect(find.text('Créances réglées en \$'), findsOneWidget);
+      expect(
+        find.text(
+          'En devise de créance : ces montants ne s\'additionnent pas à ceux '
+          'du tiroir.',
+        ),
+        findsOneWidget,
+      );
+      // Aucune ligne ne prétend faire la somme des deux.
+      expect(find.text('Créances réglées en FC'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'des frais entrés sans aucune imputation : la lacune se voit, elle ne '
+    's’escamote pas',
+    (tester) async {
+      await pump(tester, _till([_block('USD')], impute: const []));
+
+      expect(find.text('Ce que ces versements ont éteint'), findsOneWidget);
+      expect(
+        find.text('Aucune donnée disponible pour cette période'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('une devise sans mouvement se dit, au lieu d’un axe plat', (
     tester,

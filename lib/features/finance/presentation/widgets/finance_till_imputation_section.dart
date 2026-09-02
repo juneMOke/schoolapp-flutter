@@ -3,41 +3,62 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ce que chaque poste de frais a rapporté dans la fenêtre.
+/// Ce que les versements de la fenêtre ont **éteint**, dans une devise de
+/// **créance**, poste par poste.
 ///
-/// **Un montant, et rien d'autre** : ni attendu, ni reste dû, ni taux, ni barre
-/// de progression. La caisse compte ce qui est entré dans le tiroir ; ce qu'il
-/// reste à recouvrer sur ce poste est la question de l'onglet d'à côté, et l'y
-/// mêler ferait lire un taux là où le caissier cherche un montant à rapprocher
-/// de ses billets.
+/// ⚠️ **Une autre unité que le tiroir.** Depuis qu'un parent règle 50 USD en
+/// tendant 115 000 FC, ces montants ne s'additionnent pas à ceux de la bande
+/// KPI et ne s'y recoupent pas ligne à ligne : le même versement pèse dans le
+/// bloc CDF de l'encaisse et dans le bloc USD d'ici. Le titre de la carte le
+/// dit — c'est la seule chose qui empêche de lire un total commun là où il n'en
+/// existe aucun.
 ///
-/// ⚠️ La somme de ces montants vaut la moitié **frais**, jamais le total : une
-/// vente boutique n'est imputée sur aucune créance, elle n'a donc aucun poste,
-/// et sa contribution reste entière dans la carte « Ventes boutique ».
-class FinanceTillFeeCodeSection extends StatelessWidget {
-  final List<TillFeeCodeAmount> items;
+/// **Un montant, et rien d'autre** : ni attendu, ni reste dû, ni taux. Ce qu'il
+/// reste à recouvrer sur un poste est la question de l'onglet d'à côté.
+class FinanceTillImputationSection extends StatelessWidget {
+  final TillImputation imputation;
 
-  const FinanceTillFeeCodeSection({super.key, required this.items});
+  const FinanceTillImputationSection({super.key, required this.imputation});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final symbol = MoneyFormat.symbolOf(imputation.currency);
+    // Les décimales se décident sur la DEVISE, jamais sur la valeur : 425,00 \$
+    // ne doit pas se rendre « 425 » sous un titre qui annonce des dollars,
+    // pendant que les cartes dessous portent leurs centimes.
+    final total = MoneyFormat.format(
+      Money.parse(imputation.total, imputation.currency),
+    );
 
     return FinanceStatsChartCard(
-      title: l10n.financeTillSectionFeeCodes,
-      child: items.isEmpty
-          ? FinanceStatsEmptyState(
+      title: l10n.financeTillImputationCardTitle(symbol),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.financeTillImputationTotal(total),
+            style: AppTextStyles.bodyStrong.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacingM),
+          if (imputation.byFeeCode.isEmpty)
+            FinanceStatsEmptyState(
               message: l10n.financeStatsNoData,
               hint: l10n.financeStatsNoDataHint,
               semanticLabel: l10n.financeStatsEmptyA11yLabel,
             )
-          : LayoutBuilder(
+          else
+            LayoutBuilder(
               builder: (context, constraints) {
                 final cardWidth =
                     constraints.maxWidth >=
@@ -50,12 +71,12 @@ class FinanceTillFeeCodeSection extends StatelessWidget {
 
                 return Semantics(
                   container: true,
-                  label: l10n.financeTillFeeCodeSectionA11yLabel,
+                  label: l10n.financeTillImputationSectionA11yLabel(symbol),
                   child: Wrap(
                     spacing: AppDimensions.spacingM,
                     runSpacing: AppDimensions.spacingM,
                     children: [
-                      for (final item in items)
+                      for (final item in imputation.byFeeCode)
                         SizedBox(
                           width: cardWidth,
                           child: _TillFeeCodeCard(item: item),
@@ -65,6 +86,8 @@ class FinanceTillFeeCodeSection extends StatelessWidget {
                 );
               },
             ),
+        ],
+      ),
     );
   }
 }

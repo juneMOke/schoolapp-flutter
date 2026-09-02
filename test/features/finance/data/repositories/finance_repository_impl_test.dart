@@ -128,7 +128,7 @@ void main() {
 
       result.fold((_) => fail('Expected Right but got Left'), (till) {
         expect(till.timeZone, 'Africa/Kinshasa');
-        final block = till.byCurrency.single;
+        final block = till.encaisse.single;
         expect(block.summary.total, 123450);
         expect(block.summary.boutique, 23450);
         expect(block.buckets.single.key, '2026-05-15');
@@ -241,22 +241,24 @@ const String _tillJson = '''
     "generatedAt": "2026-05-23T08:00:00Z"
   },
   "timeZone": "Africa/Kinshasa",
-  "byCurrency": [
+  "encaisse": [
     {
       "currency": "USD",
-      "summary": {
-        "total": 123450,
-        "fees": 100000,
-        "boutique": 23450,
-        "byFeeCode": [
-          { "code": "TUITION", "label": "Minerval", "amount": 100000 }
-        ]
-      },
+      "summary": { "total": 123450, "fees": 100000, "boutique": 23450 },
       "buckets": [
         {
           "key": "2026-05-15", "total": 123450, "fees": 100000,
           "boutique": 23450, "isCurrent": true
         }
+      ]
+    }
+  ],
+  "impute": [
+    {
+      "currency": "USD",
+      "total": 100000,
+      "byFeeCode": [
+        { "code": "TUITION", "label": "Minerval", "amount": 100000 }
       ]
     }
   ]

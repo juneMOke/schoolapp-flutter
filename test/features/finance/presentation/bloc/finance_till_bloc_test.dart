@@ -19,17 +19,10 @@ FinanceTill _till(String period) => FinanceTill(
     generatedAt: DateTime.utc(2026, 5, 15, 18, 4),
   ),
   timeZone: 'Africa/Kinshasa',
-  byCurrency: const [
+  encaisse: const [
     TillCurrencyBlock(
       currency: 'USD',
-      summary: TillSummary(
-        total: 123450,
-        fees: 100000,
-        boutique: 23450,
-        byFeeCode: <TillFeeCodeAmount>[
-          TillFeeCodeAmount(code: 'TUITION', label: 'Minerval', amount: 100000),
-        ],
-      ),
+      summary: TillSummary(total: 123450, fees: 100000, boutique: 23450),
       buckets: <TillBucket>[
         TillBucket(
           key: '2026-05-15',
@@ -38,6 +31,15 @@ FinanceTill _till(String period) => FinanceTill(
           boutique: 23450,
           isCurrent: true,
         ),
+      ],
+    ),
+  ],
+  impute: const [
+    TillImputation(
+      currency: 'USD',
+      total: 100000,
+      byFeeCode: <TillFeeCodeAmount>[
+        TillFeeCodeAmount(code: 'TUITION', label: 'Minerval', amount: 100000),
       ],
     ),
   ],

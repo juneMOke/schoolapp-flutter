@@ -14,6 +14,11 @@ FinanceTill _entity(String raw) =>
 /// n'y est attendu, aucun taux n'y est calculé ; en revanche deux moitiés s'y
 /// additionnent, et c'est le seul endroit du pilotage financier où une somme
 /// est un invariant qu'on peut vérifier.
+///
+/// Depuis la bascule perçu/imputé, la réponse porte **deux tableaux** : ce qui
+/// est entré (devise **reçue**) et ce que ça a éteint (devise de **créance**).
+/// Ils ne se déduisent pas l'un de l'autre, et les tests qui suivent
+/// l'imposent.
 void main() {
   group('forme', () {
     test(
@@ -26,12 +31,12 @@ void main() {
         expect(till.context.periodEnd, DateTime.parse('2026-05-15'));
         expect(till.timeZone, 'Africa/Kinshasa');
         expect(till.hasTimeZone, isTrue);
-        expect(till.byCurrency.map((block) => block.currency), ['CDF', 'USD']);
+        expect(till.encaisse.map((block) => block.currency), ['CDF', 'USD']);
       },
     );
 
     test('le total et ses deux moitiés arrivent entiers', () {
-      final usd = _entity(tillDayJson).byCurrency.last;
+      final usd = _entity(tillDayJson).encaisse.last;
 
       expect(usd.summary.total, 123450);
       expect(usd.summary.fees, 100000);
@@ -39,30 +44,9 @@ void main() {
       expect(usd.summary.total, usd.summary.fees + usd.summary.boutique);
     });
 
-    test('la ventilation ne couvre que les frais, jamais le total', () {
-      final usd = _entity(tillDayJson).byCurrency.last;
-
-      final ventilated = usd.summary.byFeeCode.fold<int>(
-        0,
-        (sum, line) => sum + line.amount,
-      );
-      expect(ventilated, usd.summary.fees);
-      expect(
-        ventilated,
-        isNot(usd.summary.total),
-        reason:
-            'une vente boutique n’est imputée sur aucune créance : elle n’a '
-            'aucun poste de frais et reste entière dans `boutique`',
-      );
-      expect(usd.summary.byFeeCode.map((line) => line.label), [
-        'Minerval',
-        "Frais d'inscription",
-      ]);
-    });
-
     test('le total du résumé vaut la somme des barres', () {
       for (final raw in [tillDayJson, tillMonthJson, tillYearJson]) {
-        for (final block in _entity(raw).byCurrency) {
+        for (final block in _entity(raw).encaisse) {
           final summed = block.buckets.fold<int>(
             0,
             (sum, bucket) => sum + bucket.total,
@@ -80,16 +64,81 @@ void main() {
     });
   });
 
+  group('l’imputation — l’autre unité', () {
+    test('chaque bloc est cohérent en interne : le total vaut ses lignes', () {
+      for (final imputation in _entity(tillDayJson).impute) {
+        final ventilated = imputation.byFeeCode.fold<int>(
+          0,
+          (sum, line) => sum + line.amount,
+        );
+        expect(imputation.total, ventilated);
+      }
+    });
+
+    test('l’imputé ne se déduit PAS de l’encaissé : les deux comptent dans des '
+        'unités différentes', () {
+      final till = _entity(tillDayJson);
+      final usdReceived = till.encaisse
+          .firstWhere((block) => block.currency == 'USD')
+          .summary
+          .fees;
+      final usdSettled = till.impute
+          .firstWhere((imputation) => imputation.currency == 'USD')
+          .total;
+
+      expect(
+        usdSettled,
+        greaterThan(usdReceived),
+        reason:
+            'une partie des créances en dollars a été réglée en francs : '
+            'recontrôler « imputé == frais encaissés » serait rétablir '
+            'l’erreur que la bascule corrige',
+      );
+    });
+
+    test('la boutique ne s’impute nulle part', () {
+      final till = _entity(tillDayJson);
+      final boutique = till.encaisse.fold<int>(
+        0,
+        (sum, block) => sum + block.summary.boutique,
+      );
+      final settled = till.impute.fold<int>(
+        0,
+        (sum, imputation) => sum + imputation.total,
+      );
+
+      expect(boutique, greaterThan(0));
+      expect(
+        till.impute
+            .expand((imputation) => imputation.byFeeCode)
+            .map((line) => line.code),
+        isNot(contains('BOUTIQUE')),
+      );
+      expect(settled, isNot(0));
+    });
+
+    test('les postes gardent l’ordre du serveur, et leur libellé', () {
+      final usd = _entity(
+        tillDayJson,
+      ).impute.firstWhere((imputation) => imputation.currency == 'USD');
+
+      expect(usd.byFeeCode.map((line) => line.label), [
+        'Minerval',
+        "Frais d'inscription",
+      ]);
+    });
+  });
+
   group('l’axe', () {
     test('une journée rend une barre, pas zéro', () {
-      final buckets = _entity(tillDayJson).byCurrency.first.buckets;
+      final buckets = _entity(tillDayJson).encaisse.first.buckets;
 
       expect(buckets.single.key, '2026-05-15');
       expect(buckets.single.isCurrent, isTrue);
     });
 
     test('un mois se lit jour par jour : 31 barres, une seule courante', () {
-      final buckets = _entity(tillMonthJson).byCurrency.single.buckets;
+      final buckets = _entity(tillMonthJson).encaisse.single.buckets;
 
       expect(buckets.length, 31);
       expect(
@@ -104,7 +153,7 @@ void main() {
     });
 
     test('seul l’axe annuel replie ses clés en mois', () {
-      final buckets = _entity(tillYearJson).byCurrency.single.buckets;
+      final buckets = _entity(tillYearJson).encaisse.single.buckets;
 
       expect(buckets.length, 12);
       expect(buckets.first.key, '2025-09');
@@ -120,7 +169,7 @@ void main() {
     test(
       'un intervalle creux rend une barre à zéro, jamais une barre absente',
       () {
-        final buckets = _entity(tillMonthJson).byCurrency.single.buckets;
+        final buckets = _entity(tillMonthJson).encaisse.single.buckets;
 
         expect(buckets.where((bucket) => bucket.total == 0), isNotEmpty);
       },
@@ -129,10 +178,11 @@ void main() {
 
   group('le bloc à zéro', () {
     test('une journée creuse se dit, elle ne disparaît pas', () {
-      final block = _entity(tillEmptyDayJson).byCurrency.single;
+      final till = _entity(tillEmptyDayJson);
+      final block = till.encaisse.single;
 
       expect(block.hasNoMovement, isTrue);
-      expect(block.summary.byFeeCode, isEmpty);
+      expect(till.impute, isEmpty, reason: 'rien reçu, donc rien éteint');
       expect(
         block.buckets,
         isNotEmpty,
@@ -145,15 +195,18 @@ void main() {
     test('une seule vente boutique suffit à faire un mouvement', () {
       final block = _entity(
         _jsonWith(total: 5000, fees: 0, boutique: 5000),
-      ).byCurrency.single;
+      ).encaisse.single;
 
       expect(block.hasNoMovement, isFalse);
       expect(block.summary.fees, 0);
       expect(block.summary.boutique, 5000);
     });
 
-    test('la liste vide reste une lecture valide', () {
-      expect(_entity(statsNoCurrencyJson).byCurrency, isEmpty);
+    test('les deux listes vides restent une lecture valide', () {
+      final till = _entity(tillNoCurrencyJson);
+
+      expect(till.encaisse, isEmpty);
+      expect(till.impute, isEmpty);
     });
   });
 
@@ -172,24 +225,24 @@ void main() {
     });
 
     test('un libellé absent retombe sur le code', () {
-      final block = _entity(
+      final imputation = _entity(
         _jsonWith(feeCodeLine: '{ "code": "UNIFORM", "amount": 100000 }'),
-      ).byCurrency.single;
+      ).impute.single;
 
-      expect(block.summary.byFeeCode.single.label, 'UNIFORM');
+      expect(imputation.byFeeCode.single.label, 'UNIFORM');
     });
 
     test('le code de devise est normalisé, jamais refusé', () {
-      expect(
-        _entity(_jsonWith(currency: 'cdf')).byCurrency.single.currency,
-        'CDF',
-      );
+      final till = _entity(_jsonWith(currency: 'cdf'));
+
+      expect(till.encaisse.single.currency, 'CDF');
+      expect(till.impute.single.currency, 'CDF');
     });
 
     test('les montants flottants redeviennent des centimes entiers', () {
       final block = _entity(
         _jsonWith(total: 123450, fees: 100000, boutique: 23450, floating: true),
-      ).byCurrency.single;
+      ).encaisse.single;
 
       expect(block.summary.total, 123450);
       expect(block.summary.boutique, 23450);
@@ -197,7 +250,7 @@ void main() {
     });
 
     test('un axe absent rend un graphique vide, pas une erreur', () {
-      final block = _entity(_jsonWith(withBuckets: false)).byCurrency.single;
+      final block = _entity(_jsonWith(withBuckets: false)).encaisse.single;
 
       expect(block.buckets, isEmpty);
       expect(
@@ -206,6 +259,16 @@ void main() {
         reason: 'l’axe est un ornement, le total du tiroir est le chiffre',
       );
     });
+
+    test(
+      'l’imputation absente cède : l’écran perd une section, pas son chiffre',
+      () {
+        final till = _entity(_jsonWith(withImpute: false));
+
+        expect(till.impute, isEmpty);
+        expect(till.encaisse.single.summary.total, 123450);
+      },
+    );
 
     test('un résumé absent lève — jamais un tiroir vide fabriqué', () {
       expect(
@@ -217,13 +280,59 @@ void main() {
               "generatedAt": "2026-05-15T18:04:11Z"
             },
             "timeZone": "Africa/Kinshasa",
-            "byCurrency": [{ "currency": "USD", "buckets": [] }]
+            "encaisse": [{ "currency": "USD", "buckets": [] }],
+            "impute": []
           }
         '''),
         throwsA(isA<TypeError>()),
         reason:
             'dire « rien n’est entré aujourd’hui » à un caissier qui a le '
             'tiroir ouvert devant lui est pire que dire « erreur »',
+      );
+    });
+
+    test(
+      'un total d’imputation absent lève : il ne se refabrique pas depuis ses '
+      'lignes',
+      () {
+        expect(
+          () => _entity(_jsonWith(imputationTotal: 'null')),
+          throwsA(isA<TypeError>()),
+          reason:
+              'sommer les lignes pour reconstituer le total masquerait '
+              'précisément le jour où les deux divergent',
+        );
+      },
+    );
+  });
+
+  group('la rupture de contrat', () {
+    test('un corps d’hier (`byCurrency`) LÈVE — il ne se lit pas comme une '
+        'journée creuse', () {
+      expect(
+        () => _entity(tillLegacyByCurrencyJson),
+        throwsA(isA<FormatException>()),
+        reason:
+            'ce corps porte 90 000 FC bien réels ; une tolérance sur '
+            '`encaisse` les afficherait comme « aucun mouvement », et '
+            'personne ne saurait que le serveur est resté en arrière',
+      );
+    });
+
+    test('aucune voie de lecture de secours n’est conservée', () {
+      final legacy = decodeFixture(tillLegacyByCurrencyJson);
+
+      expect(
+        legacy.containsKey('byCurrency'),
+        isTrue,
+        reason: 'la fixture doit bien porter l’ancienne clé',
+      );
+      expect(
+        () => FinanceTillResponseModel.fromJson(legacy),
+        throwsA(isA<FormatException>()),
+        reason:
+            'un repli `encaisse ?? byCurrency` ferait vivre deux contrats à '
+            'la fois, et l’écran montrerait de l’imputé sous le mot encaissé',
       );
     });
   });
@@ -239,8 +348,10 @@ String _jsonWith({
   int fees = 100000,
   int boutique = 23450,
   String? feeCodeLine,
+  String? imputationTotal,
   bool withTimeZone = true,
   bool withBuckets = true,
+  bool withImpute = true,
   bool floating = false,
 }) {
   String amount(int value) => floating ? '$value.0' : '$value';
@@ -257,6 +368,19 @@ String _jsonWith({
         ]
       '''
       : 'null';
+  final impute = withImpute
+      ? '''
+    "impute": [
+      {
+        "currency": "$currency",
+        "total": ${imputationTotal ?? amount(fees)},
+        "byFeeCode": [${feeCodeLine ?? '''
+          { "code": "TUITION", "label": "Minerval", "amount": ${amount(fees)} }
+        '''}]
+      }
+    ],
+  '''
+      : '';
 
   return '''
   {
@@ -266,16 +390,14 @@ String _jsonWith({
       "generatedAt": "2026-05-15T18:04:11Z"
     },
     $timeZone
-    "byCurrency": [
+    $impute
+    "encaisse": [
       {
         "currency": "$currency",
         "summary": {
           "total": ${amount(total)},
           "fees": ${amount(fees)},
-          "boutique": ${amount(boutique)},
-          "byFeeCode": [${feeCodeLine ?? '''
-            { "code": "TUITION", "label": "Minerval", "amount": ${amount(fees)} }
-          '''}]
+          "boutique": ${amount(boutique)}
         },
         "buckets": $buckets
       }

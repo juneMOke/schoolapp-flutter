@@ -1,16 +1,24 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_fee_code_amount.dart';
 
-/// Ce qui est entré en caisse sur la fenêtre, dans une devise.
+/// Ce qui est entré en caisse sur la fenêtre, dans une devise **reçue**.
 ///
 /// **[total] vaut toujours `fees + boutique`**, par construction : les deux
 /// moitiés sont comptées sur la même fenêtre d'instants et dans le même fuseau.
 /// C'est l'invariant que l'écran affiche, et le seul que le caissier puisse
 /// vérifier contre son tiroir.
+///
+/// ⚠️ **La ventilation par nature de frais ne vit plus ici.** Elle relève de
+/// l'imputation — donc de la devise de la **créance** — et depuis qu'un parent
+/// règle 50 USD en tendant 115 000 FC, les deux ne se comptent plus dans la
+/// même unité. Les empiler dans ce résumé donnait un total qui ne retombait pas
+/// sur la somme des lignes affichées dessous.
 class TillSummary extends Equatable {
   final int total;
 
-  /// Les frais scolaires encaissés, en centimes.
+  /// Les frais scolaires encaissés, en centimes, **en devise reçue** : lus sur
+  /// les lignes d'encaissement, pas sur les imputations. Grouper sur la devise
+  /// de la créance faisait annoncer « 50 USD encaissés » un jour où le tiroir
+  /// n'avait vu que des francs.
   final int fees;
 
   /// Les ventes boutique, en centimes — datées de leur **temps métier**
@@ -22,22 +30,12 @@ class TillSummary extends Equatable {
   /// guichet, dans le même tiroir, le même jour.
   final int boutique;
 
-  /// La ventilation de la moitié **frais uniquement**, triée par montant
-  /// décroissant.
-  ///
-  /// ⚠️ La somme des [TillFeeCodeAmount.amount] vaut [fees], **jamais**
-  /// [total] : une vente boutique n'est imputée sur aucune créance, elle n'a
-  /// donc aucun poste de frais, et sa contribution reste entière dans
-  /// [boutique].
-  final List<TillFeeCodeAmount> byFeeCode;
-
   const TillSummary({
     required this.total,
     required this.fees,
     required this.boutique,
-    required this.byFeeCode,
   });
 
   @override
-  List<Object?> get props => [total, fees, boutique, byFeeCode];
+  List<Object?> get props => [total, fees, boutique];
 }

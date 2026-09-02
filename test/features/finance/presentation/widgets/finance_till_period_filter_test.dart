@@ -22,7 +22,8 @@ final _till = FinanceTill(
     generatedAt: DateTime.utc(2026, 5, 15, 18),
   ),
   timeZone: 'Africa/Kinshasa',
-  byCurrency: const [],
+  encaisse: const [],
+  impute: const [],
 );
 
 /// La fenêtre que la caisse totalise.

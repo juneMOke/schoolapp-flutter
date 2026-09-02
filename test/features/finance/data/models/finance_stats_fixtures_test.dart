@@ -106,7 +106,7 @@ void main() {
         tillEmptyDayJson,
         tillYearJson,
       ]) {
-        for (final block in decodeFixture(raw)['byCurrency'] as List) {
+        for (final block in decodeFixture(raw)['encaisse'] as List) {
           final map = block as Map<String, dynamic>;
           final summary = map['summary'] as Map<String, dynamic>;
           expect(
@@ -128,7 +128,7 @@ void main() {
         tillEmptyDayJson,
         tillYearJson,
       ]) {
-        for (final block in decodeFixture(raw)['byCurrency'] as List) {
+        for (final block in decodeFixture(raw)['encaisse'] as List) {
           final map = block as Map<String, dynamic>;
           final summed = (map['buckets'] as List).fold<num>(
             0,
@@ -140,18 +140,62 @@ void main() {
       }
     });
 
-    test('`summary.byFeeCode` somme à `fees`, jamais à `total`', () {
+    test('un bloc d’imputation somme exactement à son total', () {
       for (final raw in [tillDayJson, tillMonthJson, tillYearJson]) {
-        for (final block in decodeFixture(raw)['byCurrency'] as List) {
-          final summary =
-              (block as Map<String, dynamic>)['summary']
-                  as Map<String, dynamic>;
-          final summed = (summary['byFeeCode'] as List).fold<num>(
+        for (final block in decodeFixture(raw)['impute'] as List) {
+          final map = block as Map<String, dynamic>;
+          final summed = (map['byFeeCode'] as List).fold<num>(
             0,
             (sum, line) =>
                 sum + ((line as Map<String, dynamic>)['amount'] as num),
           );
-          expect(summed, summary['fees']);
+          expect(
+            summed,
+            map['total'],
+            reason:
+                'chaque bloc reste cohérent en interne : le total y retombe '
+                'sur la somme de ce qu’il affiche dessous',
+          );
+        }
+      }
+    });
+
+    test('l’imputé ne se déduit pas de l’encaissé — la fixture nominale porte '
+        'l’écart', () {
+      final json = decodeFixture(tillDayJson);
+      final usdReceived =
+          ((json['encaisse'] as List)
+                      .map((b) => b as Map<String, dynamic>)
+                      .firstWhere((b) => b['currency'] == 'USD')['summary']
+                  as Map<String, dynamic>)['fees']
+              as num;
+      final usdSettled =
+          (json['impute'] as List)
+                  .map((b) => b as Map<String, dynamic>)
+                  .firstWhere((b) => b['currency'] == 'USD')['total']
+              as num;
+
+      expect(
+        usdSettled,
+        greaterThan(usdReceived),
+        reason:
+            'une créance en dollars réglée en francs : c’est le cas qui a '
+            'fait scinder la réponse en deux tableaux, et la fixture doit '
+            'le porter — sans quoi un contrôle « imputé == frais » '
+            'repasserait au vert',
+      );
+    });
+
+    test('la boutique n’apparaît dans aucune imputation', () {
+      for (final raw in [tillDayJson, tillMonthJson, tillYearJson]) {
+        for (final block in decodeFixture(raw)['impute'] as List) {
+          final codes = ((block as Map<String, dynamic>)['byFeeCode'] as List)
+              .map((line) => (line as Map<String, dynamic>)['code']);
+          expect(
+            codes,
+            isNot(contains('BOUTIQUE')),
+            reason: 'une vente comptant n’est imputée sur aucune créance',
+          );
         }
       }
     });
@@ -163,7 +207,7 @@ void main() {
         tillEmptyDayJson,
         tillYearJson,
       ]) {
-        for (final block in decodeFixture(raw)['byCurrency'] as List) {
+        for (final block in decodeFixture(raw)['encaisse'] as List) {
           expect(
             (block as Map<String, dynamic>)['buckets'],
             isNotEmpty,
@@ -177,7 +221,7 @@ void main() {
 
     test('la clé est journalière partout sauf sur l’axe annuel', () {
       for (final raw in [tillDayJson, tillMonthJson, tillEmptyDayJson]) {
-        for (final block in decodeFixture(raw)['byCurrency'] as List) {
+        for (final block in decodeFixture(raw)['encaisse'] as List) {
           for (final bucket
               in (block as Map<String, dynamic>)['buckets'] as List) {
             expect(
@@ -188,7 +232,7 @@ void main() {
         }
       }
 
-      for (final block in decodeFixture(tillYearJson)['byCurrency'] as List) {
+      for (final block in decodeFixture(tillYearJson)['encaisse'] as List) {
         for (final bucket
             in (block as Map<String, dynamic>)['buckets'] as List) {
           expect(
@@ -201,7 +245,7 @@ void main() {
 
     test('le mois se lit jour par jour : 31 barres, une seule courante', () {
       final block =
-          (decodeFixture(tillMonthJson)['byCurrency'] as List).single
+          (decodeFixture(tillMonthJson)['encaisse'] as List).single
               as Map<String, dynamic>;
       final buckets = block['buckets'] as List;
 
@@ -227,10 +271,31 @@ void main() {
   });
 
   group('commun', () {
-    test('`byCurrency` vide est une réponse valide, pas une erreur', () {
-      final json = decodeFixture(statsNoCurrencyJson);
-      expect(json['byCurrency'], isEmpty);
-      expect(json['context'], isA<Map<String, dynamic>>());
+    test('une liste de devises vide est une réponse valide, pas une erreur', () {
+      final recovery = decodeFixture(statsNoCurrencyJson);
+      expect(recovery['byCurrency'], isEmpty);
+      expect(recovery['context'], isA<Map<String, dynamic>>());
+
+      // Côté caisse, les DEUX tableaux sont vides — et c'est bien un état, pas
+      // le corps d'un serveur resté sur l'ancien contrat, qui lui LÈVE.
+      final till = decodeFixture(tillNoCurrencyJson);
+      expect(till['encaisse'], isEmpty);
+      expect(till['impute'], isEmpty);
+      expect(till.containsKey('byCurrency'), isFalse);
+    });
+
+    test('la fixture d’hier porte bien l’ancienne clé, et rien d’autre', () {
+      final legacy = decodeFixture(tillLegacyByCurrencyJson);
+
+      expect(legacy['byCurrency'], isNotEmpty);
+      expect(legacy.containsKey('encaisse'), isFalse);
+      expect(
+        legacy.containsKey('impute'),
+        isFalse,
+        reason:
+            'c’est ce corps-là que la lecture doit refuser : il porte de '
+            'l’argent réel sous un nom que le client ne lit plus',
+      );
     });
 
     test('les bornes de fenêtre sont des dates nues, pas des instants', () {

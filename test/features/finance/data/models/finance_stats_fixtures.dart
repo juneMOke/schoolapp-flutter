@@ -217,17 +217,20 @@ const String recoveryOverCollectedJson = '''
 // Caisse — GET /api/v1/finance-stats/till
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Le cas nominal de la caisse : une journée, deux devises, des ventes boutique
-/// en dollars et rien que des frais en francs.
+/// Le cas nominal de la caisse : une journée, deux devises reçues, des ventes
+/// boutique en dollars et rien que des frais en francs.
 ///
 /// Deux invariants s'y lisent : `summary.total == fees + boutique`, et
 /// `summary.total == somme des buckets[].total`. Le second est le seul des deux
 /// qui vaille comme contrôle de cohérence — voir `monthlyCollected` côté
 /// recouvrement, qui n'en est pas un.
 ///
-/// `summary.byFeeCode` ne ventile que la moitié **frais** : une vente boutique
-/// n'est imputée sur aucune créance. La somme des `amount` vaut `fees`, jamais
-/// `total`.
+/// ⚠️ **`impute` ne se déduit pas de `encaisse`, et cette fixture l'impose** :
+/// le bloc USD de l'imputation (1 500,00 $) dépasse la moitié frais du bloc USD
+/// de l'encaisse (1 000,00 $), parce qu'une partie des créances en dollars a
+/// été réglée **en francs**. Toute tentative de recontrôler « imputé == frais
+/// encaissés » rougit ici, et c'est fait exprès : c'est précisément ce que la
+/// bascule perçu/imputé rend faux.
 const String tillDayJson = '''
 {
   "context": {
@@ -238,17 +241,10 @@ const String tillDayJson = '''
     "generatedAt": "2026-05-15T18:04:11Z"
   },
   "timeZone": "Africa/Kinshasa",
-  "byCurrency": [
+  "encaisse": [
     {
       "currency": "CDF",
-      "summary": {
-        "total": 9000000,
-        "fees": 9000000,
-        "boutique": 0,
-        "byFeeCode": [
-          { "code": "TUITION", "label": "Minerval", "amount": 9000000 }
-        ]
-      },
+      "summary": { "total": 9000000, "fees": 9000000, "boutique": 0 },
       "buckets": [
         {
           "key": "2026-05-15",
@@ -261,19 +257,7 @@ const String tillDayJson = '''
     },
     {
       "currency": "USD",
-      "summary": {
-        "total": 123450,
-        "fees": 100000,
-        "boutique": 23450,
-        "byFeeCode": [
-          { "code": "TUITION", "label": "Minerval", "amount": 70000 },
-          {
-            "code": "REGISTRATION",
-            "label": "Frais d'inscription",
-            "amount": 30000
-          }
-        ]
-      },
+      "summary": { "total": 123450, "fees": 100000, "boutique": 23450 },
       "buckets": [
         {
           "key": "2026-05-15",
@@ -281,6 +265,27 @@ const String tillDayJson = '''
           "fees": 100000,
           "boutique": 23450,
           "isCurrent": true
+        }
+      ]
+    }
+  ],
+  "impute": [
+    {
+      "currency": "CDF",
+      "total": 6000000,
+      "byFeeCode": [
+        { "code": "TUITION", "label": "Minerval", "amount": 6000000 }
+      ]
+    },
+    {
+      "currency": "USD",
+      "total": 150000,
+      "byFeeCode": [
+        { "code": "TUITION", "label": "Minerval", "amount": 120000 },
+        {
+          "code": "REGISTRATION",
+          "label": "Frais d'inscription",
+          "amount": 30000
         }
       ]
     }
@@ -328,18 +333,24 @@ String _tillMonth() {
     "generatedAt": "2026-05-15T18:04:11Z"
   },
   "timeZone": "Africa/Kinshasa",
-  "byCurrency": [
+  "encaisse": [
     {
       "currency": "USD",
       "summary": {
         "total": ${fees + boutique},
         "fees": $fees,
-        "boutique": $boutique,
-        "byFeeCode": [
-          { "code": "TUITION", "label": "Minerval", "amount": $fees }
-        ]
+        "boutique": $boutique
       },
       "buckets": [${buckets.join(', ')}]
+    }
+  ],
+  "impute": [
+    {
+      "currency": "USD",
+      "total": $fees,
+      "byFeeCode": [
+        { "code": "TUITION", "label": "Minerval", "amount": $fees }
+      ]
     }
   ]
 }
@@ -351,7 +362,9 @@ String _tillMonth() {
 ///
 /// C'est le cas le plus fréquent de l'onglet Caisse, et celui qui rendait une
 /// planche de zéros tant que l'état vide de l'écran pendait à
-/// `byCurrency.isEmpty`.
+/// `encaisse.isEmpty`.
+///
+/// `impute` y est **vide** : rien n'a été encaissé, donc rien n'a été éteint.
 const String tillEmptyDayJson = '''
 {
   "context": {
@@ -362,10 +375,10 @@ const String tillEmptyDayJson = '''
     "generatedAt": "2026-05-17T19:00:00Z"
   },
   "timeZone": "Africa/Kinshasa",
-  "byCurrency": [
+  "encaisse": [
     {
       "currency": "USD",
-      "summary": { "total": 0, "fees": 0, "boutique": 0, "byFeeCode": [] },
+      "summary": { "total": 0, "fees": 0, "boutique": 0 },
       "buckets": [
         {
           "key": "2026-05-17",
@@ -376,7 +389,8 @@ const String tillEmptyDayJson = '''
         }
       ]
     }
-  ]
+  ],
+  "impute": []
 }
 ''';
 
@@ -393,17 +407,19 @@ const String tillYearJson = '''
     "generatedAt": "2026-05-15T18:04:11Z"
   },
   "timeZone": "Africa/Kinshasa",
-  "byCurrency": [
+  "impute": [
     {
       "currency": "USD",
-      "summary": {
-        "total": 3600000,
-        "fees": 3400000,
-        "boutique": 200000,
-        "byFeeCode": [
-          { "code": "TUITION", "label": "Minerval", "amount": 3400000 }
-        ]
-      },
+      "total": 3400000,
+      "byFeeCode": [
+        { "code": "TUITION", "label": "Minerval", "amount": 3400000 }
+      ]
+    }
+  ],
+  "encaisse": [
+    {
+      "currency": "USD",
+      "summary": { "total": 3600000, "fees": 3400000, "boutique": 200000 },
       "buckets": [
         { "key": "2025-09", "total": 900000, "fees": 880000, "boutique": 20000, "isCurrent": false },
         { "key": "2025-10", "total": 700000, "fees": 660000, "boutique": 40000, "isCurrent": false },
@@ -417,6 +433,68 @@ const String tillYearJson = '''
         { "key": "2026-06", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false },
         { "key": "2026-07", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false },
         { "key": "2026-08", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false }
+      ]
+    }
+  ]
+}
+''';
+
+/// Ni grille tarifaire, ni catalogue, ni mouvement : **les deux tableaux sont
+/// vides**, et c'est l'état vide légitime de l'écran caisse.
+///
+/// À ne pas confondre avec [tillLegacyByCurrencyJson], qui est vide **par
+/// accident de contrat** et doit lever.
+const String tillNoCurrencyJson = '''
+{
+  "context": {
+    "schoolYear": "2025-2026",
+    "period": "year",
+    "periodStart": "2025-09-01",
+    "periodEnd": "2026-08-31",
+    "generatedAt": "2026-05-22T08:00:00Z"
+  },
+  "timeZone": "Africa/Kinshasa",
+  "encaisse": [],
+  "impute": []
+}
+''';
+
+/// **Le corps de l'ancien contrat**, servi par un serveur pas encore déployé :
+/// `byCurrency[]`, et aucune des deux clés d'aujourd'hui.
+///
+/// Il porte pourtant 90 000 FC bien réels. Une tolérance `?? const []` sur
+/// `encaisse` en ferait un écran « aucun mouvement aujourd'hui » devant un
+/// caissier qui a le tiroir plein — le mode de panne silencieux que ce lot
+/// interdit. La lecture doit **lever**.
+const String tillLegacyByCurrencyJson = '''
+{
+  "context": {
+    "schoolYear": "2025-2026",
+    "period": "day",
+    "periodStart": "2026-05-15",
+    "periodEnd": "2026-05-15",
+    "generatedAt": "2026-05-15T18:04:11Z"
+  },
+  "timeZone": "Africa/Kinshasa",
+  "byCurrency": [
+    {
+      "currency": "CDF",
+      "summary": {
+        "total": 9000000,
+        "fees": 9000000,
+        "boutique": 0,
+        "byFeeCode": [
+          { "code": "TUITION", "label": "Minerval", "amount": 9000000 }
+        ]
+      },
+      "buckets": [
+        {
+          "key": "2026-05-15",
+          "total": 9000000,
+          "fees": 9000000,
+          "boutique": 0,
+          "isCurrent": true
+        }
       ]
     }
   ]
