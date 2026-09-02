@@ -617,6 +617,21 @@ const TableSchema studentChargesTable = TableSchema(
 /// dans l'ACK de push ET dans le delta de pull. Seule clé permettant de
 /// re-télécharger un reçu définitif par `GET /editique/documents/{id}`.
 ///
+/// **Les quatre colonnes de payeur sont NULLABLES (v43).** Elles l'étaient déjà
+/// côté serveur depuis sa V10 — c'était l'arête HTTP, et elle seule, qui
+/// exigeait un nom et un prénom. Cette exigence se payait comptant au guichet :
+/// la file attend pendant qu'on demande son état civil à qui tend les billets,
+/// et le guichetier finit par taper « X ». Un champ qui a l'air renseigné et ne
+/// désigne personne est strictement pire qu'un champ vide. Les imputations
+/// nomment toujours l'élève et les créances soldées : c'est là qu'est
+/// l'imputabilité, pas dans le nom de qui a tendu l'argent.
+///
+/// Elles portent `NULL`, **jamais `''`** : « pas de payeur » est un fait, pas un
+/// nom de longueur zéro, et seul `NULL` se lit sans ambiguïté « rien à
+/// afficher ». Un repli sur `''` rendrait « pas de nom » indiscernable de « nom
+/// inconnu » au moment précis où l'annuaire doit choisir entre proposer ce
+/// payeur et le taire.
+///
 /// **`payer_phone_number` (v28)** : numéro E.164 du payeur, saisi au guichet.
 /// NULLABLE alors que la saisie l'exige — la colonne décrit aussi le passé :
 /// tout versement antérieur à la v28 et tout versement encaissé sur un poste
@@ -662,8 +677,8 @@ const TableSchema paymentsTable = TableSchema(
       academic_year_id TEXT,
       method TEXT NOT NULL DEFAULT 'CASH',
       paid_at TEXT NOT NULL,
-      payer_first_name TEXT NOT NULL,
-      payer_last_name TEXT NOT NULL,
+      payer_first_name TEXT,
+      payer_last_name TEXT,
       payer_middle_name TEXT,
       payer_phone_number TEXT,
       status TEXT,

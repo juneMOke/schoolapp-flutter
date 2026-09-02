@@ -102,6 +102,23 @@ class AppConstants {
   static const String listPaymentsByStudentAndAcademicYearEndpoint =
       '/api/v1/finance/payments/student/{studentId}/academic-year/{academicYearId}';
   static const String createPaymentEndpoint = '/api/v1/finance/payments';
+
+  /// Série des taux de guichet de l'école — `GET`, historique complet, le plus
+  /// récent d'abord. Le `schoolId` vient du jeton, jamais du corps.
+  ///
+  /// L'écran de **direction**, pas le guichet : le poste hors ligne reçoit son
+  /// taux par le flux de synchro ci-dessous.
+  static const String exchangeRatesEndpoint = '/api/v1/finance/exchange-rates';
+
+  /// Le taux de guichet du poste hors ligne — **bundle conditionnel**, pas un
+  /// keyset : rien à paginer, rien à reprendre, le client remplace en bloc.
+  ///
+  /// Réponse **enveloppée** (`{points, serverTime}`), et `304` quand l'`ETag`
+  /// renvoyé en `If-None-Match` concorde. Jamais 404 sur une école sans taux :
+  /// une liste vide est une réponse complète — « cette école ne publie aucun
+  /// taux » — et le guichet doit alors refuser la devise étrangère plutôt que
+  /// d'en fabriquer une.
+  static const String exchangeRatesSyncEndpoint = '/api/v1/sync/exchange-rates';
   static const String listPaymentAllocationsByPaymentIdEndpoint =
       '/api/v1/finance/payments/{paymentId}/allocations';
   static const String listPaymentAllocationsByChargeIdEndpoint =
@@ -514,7 +531,16 @@ class AppConstants {
   // le pull des paiements est un delta, il ne redescendra jamais les versements
   // déjà en base, et un repli « pas de tender ⇒ lire les allocations » ferait
   // deux voies de lecture — celles-là divergent toujours une fois.
-  static const int offlineDbSchemaVersion = 41;
+  // v42 (2026-09-02) : `boutique_sale_tenders` — ce qui est entré dans le
+  // tiroir pour une vente, à côté de ce qui a été vendu. Symétrique de la v41,
+  // avec le même **backfill identité** (perçu = vendu, taux 1) : le pull des
+  // ventes est un delta, il ne redescendra jamais celles déjà en base.
+  // v43 (2026-09-02) : le payeur devient FACULTATIF des deux côtés du guichet
+  // (contrepartie de la V114 serveur). `payments.payer_first_name` /
+  // `payer_last_name` et `boutique_sales.payer_last_name` perdent leur
+  // `NOT NULL`, et les `''` hérités du repli de pull sont normalisés en `NULL` :
+  // « pas de payeur » est un fait, pas un nom de longueur zéro.
+  static const int offlineDbSchemaVersion = 43;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

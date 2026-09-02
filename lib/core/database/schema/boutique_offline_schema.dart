@@ -88,6 +88,17 @@ const TableSchema refBoutiqueArticleLevelPricesTable = TableSchema(
 /// Le payeur est en trois champs, comme sur `payments` et comme le serveur les
 /// accepte depuis sa V99 : le nom composé qui s'imprime est **dérivé serveur**,
 /// et ne remonte que par le delta.
+///
+/// **Les quatre colonnes sont NULLABLES (v43)**, à l'image de la V114 serveur
+/// qui a retiré le `NOT NULL` de `payer_name`. Une vente au comptant remet sa
+/// contrepartie sur-le-champ : aucune dette à rattacher, personne à
+/// recontacter. Exiger un nom pour encaisser un cahier faisait taper « X » au
+/// guichet — mieux vaut un payeur ABSENT qu'un payeur INVENTÉ.
+///
+/// `NULL`, **jamais `''`** : jusqu'à la v43 le pull repliait sur `''` pour
+/// satisfaire le `NOT NULL`, et une vente anonyme descendue du delta se
+/// relisait alors comme une vente au nom vide — assez pour imprimer un bloc
+/// payeur creux sur le ticket. Le palier normalise ces `''` hérités.
 const TableSchema boutiqueSalesTable = TableSchema(
   name: 'boutique_sales',
   createTableSql: '''
@@ -96,7 +107,7 @@ const TableSchema boutiqueSalesTable = TableSchema(
       school_id TEXT NOT NULL,
       academic_year_id TEXT NOT NULL,
       payer_first_name TEXT,
-      payer_last_name TEXT NOT NULL,
+      payer_last_name TEXT,
       payer_middle_name TEXT,
       payer_phone_number TEXT,
       payer_name TEXT,
@@ -164,10 +175,58 @@ const TableSchema boutiqueSaleLinesTable = TableSchema(
   ],
 );
 
+/// `boutique_sale_tenders` — ce qui est **entré dans le tiroir** pour une vente.
+///
+/// Sœur de [boutiqueSaleLinesTable], à la même profondeur : une **liste**, pas
+/// un scalaire. Un client peut poser des francs pour des cahiers tarifés en
+/// dollars, et deux devises de catalogue imposent deux lignes de toute façon —
+/// c'est le modèle qui découpe, pas le geste.
+///
+/// Append-only immuable → **PAS de `version`**, comme les lignes du panier.
+///
+/// ## Les deux axes, et pourquoi ils ne se confondent pas
+///
+/// La ligne de panier répond à « qu'est-ce qui a été vendu, et à quel prix »,
+/// dans la devise du **catalogue**. Le tender répond à « qu'est-ce qui est entré
+/// dans le tiroir », dans la devise **reçue**. Les deux se confondaient tant que
+/// l'unité était la même ; le jour où un franc paie un dollar, la caisse
+/// annoncerait des dollars sur une journée où le tiroir n'a vu que des francs.
+///
+/// ## `amount_in_cents` est le **net conservé**, jamais le montant présenté
+///
+/// 120 000 tendus, 5 000 rendus : on écrit 115 000. Même règle que
+/// `payment_tenders`, et pour la même raison — sans elle, le total de caisse ne
+/// retombe jamais sur le comptage du tiroir.
+///
+/// ## Aucun lien vers la ligne de panier, et c'est délibéré
+///
+/// Une liasse posée pour un panier de trois articles n'a pas été découpée
+/// article par article. Stocker une correspondance enregistrerait une proration
+/// comme si c'était une observation — or une proration se recalcule
+/// (`ligne × taux`), elle ne se conserve pas.
+const TableSchema boutiqueSaleTendersTable = TableSchema(
+  name: 'boutique_sale_tenders',
+  createTableSql: '''
+    CREATE TABLE boutique_sale_tenders (
+      id TEXT PRIMARY KEY,
+      sale_id TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      rate_micros INTEGER NOT NULL DEFAULT 1000000,
+      pivot_currency TEXT NOT NULL
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_boutique_sale_tenders_sale '
+        'ON boutique_sale_tenders(sale_id)',
+  ],
+);
+
 /// Tables de la caisse boutique.
 const List<TableSchema> boutiqueOfflineTables = [
   refBoutiqueArticlesTable,
   refBoutiqueArticleLevelPricesTable,
   boutiqueSalesTable,
   boutiqueSaleLinesTable,
+  boutiqueSaleTendersTable,
 ];

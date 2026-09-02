@@ -1201,6 +1201,196 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
+  if (upTo(42)) {
+    // v42 — `boutique_sale_tenders` : ce qui est ENTRÉ DANS LE TIROIR pour une
+    // vente, à côté de ce qui a été vendu. Symétrique exact de la v41.
+    //
+    // **Le backfill obéit à la même logique**, et pour la même raison : le pull
+    // des ventes est un delta par curseur, il ne redescendra jamais celles qui
+    // sont déjà en base locale. Sans identité posée ici, elles resteraient sans
+    // tender pour toujours — et la seule issue serait un « pas de tender ⇒ lire
+    // les lignes » à la lecture, c'est-à-dire deux voies qui divergeront.
+    //
+    // Identité : perçu = vendu, taux 1. C'est vrai de tout l'historique — avant
+    // ce lot, la caisse boutique n'avait aucun moyen d'encaisser dans une autre
+    // devise que celle du catalogue.
+    //
+    // Rejouable : `WHERE NOT EXISTS` garde le palier idempotent. Jamais
+    // d'`INSERT OR REPLACE` — la paire avec une clé d'unicité est une
+    // destruction silencieuse.
+    //
+    // DDL INLINE, jamais lue du schéma vivant.
+    if (!await _hasTable(db, 'boutique_sale_tenders')) {
+      await db.execute('''
+        CREATE TABLE boutique_sale_tenders (
+          id TEXT PRIMARY KEY,
+          sale_id TEXT NOT NULL,
+          amount_in_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL,
+          rate_micros INTEGER NOT NULL DEFAULT 1000000,
+          pivot_currency TEXT NOT NULL
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_boutique_sale_tenders_sale '
+        'ON boutique_sale_tenders(sale_id)',
+      );
+    }
+    if (await _hasTable(db, 'boutique_sale_lines')) {
+      // uuid v4 forgé en SQL pur (RFC 4122) : aucune dépendance Dart, donc
+      // migration exerçable en ffi.
+      await db.execute('''
+        INSERT INTO boutique_sale_tenders
+          (id, sale_id, amount_in_cents, currency, rate_micros, pivot_currency)
+        SELECT
+          lower(
+            hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-4' ||
+            substr(hex(randomblob(2)), 2) || '-' ||
+            substr('89ab', abs(random()) % 4 + 1, 1) ||
+            substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))
+          ),
+          l.sale_id,
+          SUM(l.line_total_in_cents),
+          l.currency,
+          1000000,
+          l.currency
+        FROM boutique_sale_lines l
+        WHERE NOT EXISTS (
+          SELECT 1 FROM boutique_sale_tenders t
+          WHERE t.sale_id = l.sale_id AND t.currency = l.currency
+        )
+        GROUP BY l.sale_id, l.currency
+      ''');
+    }
+  }
+  if (upTo(43)) {
+    // v43 — le payeur devient FACULTATIF, des deux côtés du guichet.
+    //
+    // Contrepartie de la V114 serveur : `payments.payer_first_name` /
+    // `payer_last_name` et `boutique_sales.payer_last_name` perdent leur
+    // `NOT NULL`. Côté serveur ces colonnes étaient nullables depuis sa V10 —
+    // c'était l'arête HTTP, et elle seule, qui exigeait un nom. Ici c'était le
+    // schéma lui-même.
+    //
+    // Ce que l'exigence coûtait : la file attend pendant qu'on demande son état
+    // civil à quelqu'un qui achète un cahier, et le guichetier tape « X » pour
+    // avancer. Le champ a alors l'air renseigné et ne désigne personne — pire
+    // qu'un champ vide, parce qu'on ne peut plus distinguer les deux.
+    //
+    // **Aucune donnée n'est perdue** : la reconstruction recopie colonne pour
+    // colonne, et ce palier n'ouvre une porte que pour les écritures suivantes.
+    await _relaxPayerIdentity(db, schema);
+  }
+}
+
+/// Étape v43 : les colonnes d'identité du payeur perdent leur `NOT NULL`.
+///
+/// SQLite ne sait pas relâcher une contrainte de colonne : on reconstruit les
+/// deux tables sur leur forme d'aujourd'hui et on recopie. Même patron qu'aux
+/// paliers v33/v34, et pour la même raison.
+///
+/// ## Les `''` hérités deviennent `NULL`
+///
+/// C'est la moitié utile du palier. `boutique_sale_pull_dao` repliait sur `''`
+/// pour satisfaire le `NOT NULL` quand le delta descendait une vente sans nom :
+/// une vente anonyme se relisait donc comme une vente au nom VIDE. Assez pour
+/// qu'un ticket imprime un cadre « Payeur » creux — sur une pièce, un cadre vide
+/// se lit comme une mention effacée, pas comme une absence.
+///
+/// `NULL` et `''` ne disent pas la même chose et ne doivent pas cohabiter :
+/// « pas de payeur » est un fait, pas un nom de longueur zéro. C'est la règle
+/// que le serveur s'est donnée en V114, et deux écritures pour un même fait
+/// divergent toujours une fois.
+///
+/// Le téléphone n'est pas normalisé : il est nullable depuis la v28 et n'a
+/// jamais eu de repli sur `''`.
+///
+/// Rejouable : se garde sur la forme réelle des tables. Sur une base déjà en
+/// v43, `_isColumnNotNull` rend faux et il n'y a rien à faire — mais la
+/// normalisation, elle, est idempotente et se rejoue sans dommage.
+Future<void> _relaxPayerIdentity(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const targets = <String, List<String>>{
+    'payments': ['payer_first_name', 'payer_last_name'],
+    'boutique_sales': ['payer_first_name', 'payer_last_name', 'payer_name'],
+  };
+
+  for (final entry in targets.entries) {
+    final name = entry.key;
+    if (!await _hasTable(db, name)) continue;
+
+    // La reconstruction ne se déclenche que si la contrainte est encore là.
+    final constrained = [
+      for (final column in entry.value)
+        if (await _isColumnNotNull(db, name, column)) column,
+    ];
+    if (constrained.isNotEmpty) {
+      await _rebuildTableInPlace(db, schema, name, suffix: 'v42');
+    }
+
+    // Puis la normalisation, sur toutes les colonnes d'identité — y compris
+    // celles qui étaient déjà nullables : `payer_name` accueillait le même
+    // repli sans avoir jamais porté de `NOT NULL`.
+    for (final column in entry.value) {
+      if (!await _hasColumn(db, name, column)) continue;
+      await db.execute(
+        "UPDATE $name SET $column = NULL WHERE TRIM($column) = ''",
+      );
+    }
+  }
+}
+
+/// La colonne existe-t-elle avec un `NOT NULL` ?
+///
+/// Lu du PRAGMA plutôt que du DDL : c'est la forme RÉELLE de la table sur cette
+/// tablette-là, la seule chose qu'un palier rejouable ait le droit de croire.
+Future<bool> _isColumnNotNull(
+  DatabaseExecutor db,
+  String table,
+  String column,
+) async {
+  for (final info in await db.rawQuery('PRAGMA table_info($table)')) {
+    if (info['name'] == column) return (info['notnull'] as int? ?? 0) == 1;
+  }
+  return false;
+}
+
+/// Reconstruit [name] sur sa forme d'aujourd'hui, en recopiant les colonnes
+/// **communes aux deux formes**.
+///
+/// Un `SELECT` d'une colonne que la table source n'a pas ferait lever la
+/// migration ; une colonne que la nouvelle forme n'a plus n'a rien à recevoir.
+/// L'intersection est donc la seule liste sûre — et c'est exactement ce que
+/// font déjà les étapes v33/v34.
+Future<void> _rebuildTableInPlace(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+  String name, {
+  required String suffix,
+}) async {
+  final table = schema.firstWhere((t) => t.name == name);
+  final sourceColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  await db.execute('ALTER TABLE $name RENAME TO ${name}_$suffix');
+  await db.execute(table.createTableSql);
+  final targetColumns = {
+    for (final c in await db.rawQuery('PRAGMA table_info($name)'))
+      c['name'] as String,
+  };
+  final columnList = targetColumns.where(sourceColumns.contains).join(', ');
+  if (columnList.isNotEmpty) {
+    await db.execute(
+      'INSERT INTO $name ($columnList) SELECT $columnList FROM ${name}_$suffix',
+    );
+  }
+  await db.execute('DROP TABLE ${name}_$suffix');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
 }
 
 /// Étape v37 : les deux tables du barème refaites sans `id`, et `value` renommée
