@@ -7,44 +7,45 @@
 >
 > | Lot | État |
 > |---|---|
-> | F0 · le taux hors ligne (v40) | ✅ socle, table et DAO livrés · ⛔ **le remplissage attend la question 1** |
-> | F1 · le paramétrage (Configuration) | ⏸ attend E0 |
+> | F0 · le taux hors ligne (v40) | ✅ **livré et branché** sur le flux `finance.exchange-rates` (bundle + ETag) |
+> | F1 · le paramétrage (Configuration) | ✅ **livré** — le taux est PUBLIÉ chez le serveur, puis mis en cache |
+> | **U1–U4 · le guichet bi-devise** | ✅ **livré** — bascule, taux, dérivées, barre à deux niveaux, popin |
 > | F2 · la ligne d'encaissement locale (v41) | ✅ **livré** — table, backfill identité, modèle |
-> | F2′ · `tenders[]` dans le `PaymentDelta` | ⛔ **ne devine aucun nom** — attend E7 |
-> | F3 · le chemin d'écriture + la seconde garde | ✅ **partie locale livrée** · ⛔ l'émission sur le fil attend E2 |
-> | F3′ · la boutique | ⏸ attend E5 |
+> | F2′ · `tenders[]` dans le `PaymentDelta` | 🟡 **débloqué** — le back le porte depuis le 01/09 |
+> | F3 · le chemin d'écriture + la seconde garde | ✅ **partie locale livrée** · 🟡 l'émission sur le fil est débloquée (`TenderInput`) |
+> | F3′ · la boutique | ✅ **livré** — v42, `tenders[]` sur le fil, choix de devise par devise du panier |
 > | F4 · le ticket thermique | ✅ **livré** — perçu, taux, répartition dérivée, avance en devise reçue |
-> | F5 · l'écran caisse | ⏸ attend E4 — **rupture de lecture** |
-> | F6 · la divergence de taux | ⏸ attend E3 + le contrat du signal |
+> | F5 · l'écran caisse | ✅ **livré** — `encaisse[]` + `impute[]`, aucune voie de secours |
+> | F6 · la divergence de taux | 🟡 **débloqué** — `RATE_DIVERGENCE` et son `fee_code` nullable sont au contrat |
 > | F7 · les surfaces de relecture | ⏸ — |
 >
-> **Ce qui est en place et tourne :** `core/money/exchange_rate.dart` (taux en
-> micro-unités entières, série résolue à `paidAt`, conversion half-up en
-> `BigInt`) · `MoneyFormat.displayUnitInCents` (la tolérance de l'invariant) ·
-> `ref_exchange_rates` (v40) et son DAO scopé école · `payment_tenders` (v41)
-> avec **backfill identité** de tout l'historique local ·
-> `PaymentTenderComposition` (composition par pivot + l'invariant du taux) ·
-> le chemin d'écriture qui écrit les deux listes en une transaction ·
-> le **ticket thermique** qui imprime le perçu, le taux et la répartition
-> dérivée, résidu absorbé par la dernière ligne.
+> ### Le canal du taux — tranché le 2026-09-02
 >
-> **Six mutations prouvées** : arrondi tronqué, tolérance uniforme, invariant
-> désarmé, purge non scopée, résidu non absorbé, taux imprimé sur un règlement
-> ordinaire — toutes rougissent.
+> Le back a déclaré **un flux à lui** : `finance.exchange-rates`, `SyncMode.BUNDLE`,
+> scope école, propriété `finance.grid.read`, endpoint
+> `GET /api/v1/sync/exchange-rates`, **entraîné par les droits d'ÉCRITURE des
+> deux caisses** (`finance.payment.write`, `boutique.sale.write`) — parce qu'un
+> poste qui encaisse sans connaître le taux publié en invente un, et se voit
+> ensuite reprocher une anomalie sur chaque encaissement pris de bonne foi.
 >
-> **Origine :** plan back « Perçu et imputé », lots E0→E7, six arbitrages
-> tranchés le 01/09 — <https://claude.ai/code/artifact/b7f4b47c-1712-40fb-9da9-015e7315651c>.
-> Version illustrée de ce plan-ci (maquettes de l'écran et du ticket) :
-> <https://claude.ai/code/artifact/9b59cdc4-06d3-4a53-9729-e56ef3ae4a18>.
+> Ni keyset ni section du socle référentiel : le socle est gelé sur la saison et
+> n'a pas d'ETag, alors qu'un taux bouge dans la journée. L'y loger ferait
+> retélécharger deux années de cycles et de tarifs pour rafraîchir un nombre.
 >
-> **Docs de contexte :** `MULTIDEVISE_PLAN.md` (le socle `core/money` qu'on
-> étend) · `FACTURATION_OFFLINE_PLAN.md` (le patron d'encaissement) ·
-> `ENCAISSEMENT_TARIF_PLAN.md` (le dernier passage sur ce chemin d'écriture) ·
-> `BOUTIQUE_PLAN.md` (la caisse jumelle) · `AGENTS.md` · `CLAUDE.md`.
+> **Côté front** : réponse **enveloppée** (`{points, serverTime}` — une lecture à
+> plat rendrait une série vide en silence), `ETag` mémorisé **par école** et
+> renvoyé en `If-None-Match`, **304 qui ne purge rien**, et repli de résolution
+> sur le point le plus ancien quand l'horloge de la tablette retarde (sans quoi
+> elle n'aurait plus aucun taux alors qu'elle vient d'en recevoir la série).
 >
-> **Vérifié dans l'arbre** au 2026-09-01 sur `feat/configuration-provisioning`,
-> schéma local **v39** ; back lu en local sur `fix/finance-outstanding-per-charge`
-> (`~/my_project/eteelo-backend`).
+> ⚠️ **Deux défauts APRÈS la réception, trouvés sur un appel réel** — le pull
+> marchait, l'écran mentait :
+> 1. `ExchangeRatesCubit` lisait le cache **une seule fois**, au montage, alors
+>    que le pull part au même instant et écrit après. La série restait vide pour
+>    toute la durée de l'écran. Il est maintenant abonné au `PullCompletionBus`.
+> 2. « Aucun taux paramétré » se mesurait sur les **conversions en cours** et non
+>    sur les **taux disponibles** : le message s'affichait dès qu'un frais était
+>    coché, taux ou pas.
 
 ---
 
@@ -599,9 +600,135 @@ caisse — c'est-à-dire la V3.
 
 ---
 
+
+### Livré le 2026-09-01 — lots U1 à U4
+
+| Lot | Ce qui tourne |
+|---|---|
+| U1 | `FacturationSettlement` — objet pur : options de règlement, taux, conversion, composition des tenders, contrôle de divergence |
+| U2 | `getExchangeRates` (repo, usecase, DI) + `ExchangeRatesCubit`, chargé au montage |
+| U3 | `FacturationSettlementSection` — la bascule, la ligne de taux, l'avertissement |
+| U4 | La dérivée par ligne de frais, la barre basse à deux niveaux, la popin de confirmation |
+
+**Quatre décisions prises en écrivant, qu'aucune ne figurait dans le plan :**
+
+- **La vue ne lit pas le cubit, elle reçoit la série.** Monter
+  `FacturationCreatePaymentView` sur un `context.watch` aurait cassé les vingt-six
+  tests qui l'instancient seule. Le paramètre `rates` par défaut vide dit la même
+  chose que la réalité : sans taux, l'écran d'avant.
+- **« Converti » n'est pas « une devise a été choisie ».** Régler en dollars des
+  créances en dollars n'est pas une conversion, et la barre annonçait « À
+  percevoir » sur un versement où rien n'avait bougé d'unité. Le prédicat porte
+  sur *un taux s'applique quelque part*.
+- **Le repli « chaque frais » devient un segment explicite dès qu'il y a
+  plusieurs devises de créance.** Sur un seul pivot, le repli porte déjà un nom :
+  la devise de ce pivot. Sur deux, il n'en a aucun — et sans segment pour le
+  représenter, un caissier qui a converti par erreur n'avait aucun moyen de
+  revenir en arrière.
+- **La mise en forme du taux vit sur `ExchangeRate.formatted()`.** Elle avait été
+  écrite deux fois — une pour le ticket, une pour l'écran. Deux copies auraient
+  divergé au premier ajustement, et le parent aurait lu deux taux pour un seul
+  versement.
+
+**Ce que l'UI ne peut pas encore faire, et pourquoi c'est voulu :** elle est
+**dormante par construction**. La bascule ne s'allume que si `ref_exchange_rates`
+porte un taux, et cette table reste vide tant que la question 1 n'est pas
+tranchée. Rien ne peut donc rendre l'écran caisse faux avant que quelqu'un
+paramètre un taux — moment où F5 devra être livré.
+
+### Livré le 2026-09-02 — F5, l'écran caisse sur deux blocs
+
+Le back a livré ses six lots le 01/09 au soir : les noms ne se devinent plus,
+ils se lisent (`FinanceTillStatsResponse`, `TillImputationDto`,
+`TillSummaryDto` sans `byFeeCode`). La bascule est donc franche.
+
+| Couche | Ce qui change |
+|---|---|
+| Entités | `FinanceTill.byCurrency` → `encaisse` + `impute` · `TillSummary` perd `byFeeCode` · `TillImputation` neuve |
+| Modèles | `TillImputationModel` neuf · `encaisse` **lève** si absent, `impute` cède à vide |
+| Écran | les barres prennent la largeur du bloc de devise reçue ; la ventilation descend sous un titre qui nomme son unité |
+| l10n | `financeTillImputationHeading` / `Hint` / `CardTitle` / `Total` / `SectionA11yLabel` · `financeTillSectionFeeCodes` et `financeTillFeeCodeSectionA11yLabel` **supprimées** (« frais encaissés » était devenu faux : c'est de l'imputé) |
+
+**Trois décisions prises en écrivant :**
+
+- **Aucune voie de lecture de secours, et un test qui l'épingle.** La fixture
+  `tillLegacyByCurrencyJson` porte le corps d'hier, 90 000 FC bien réels : la
+  lecture doit **lever**. Un `?? const []` en aurait fait « aucun mouvement
+  aujourd'hui » devant un caissier au tiroir plein — et personne n'aurait su que
+  le serveur était resté en arrière. ⇒ **l'écran caisse exige le back à jour**,
+  c'est le prix assumé de la bascule.
+- **La fixture nominale porte l'écart, exprès.** Le bloc USD d'`impute`
+  (1 500,00 $) dépasse la moitié frais du bloc USD d'`encaisse` (1 000,00 $) :
+  des créances en dollars réglées en francs. Toute tentative de recontrôler
+  « imputé == frais encaissés » rougit — c'est précisément l'égalité que la
+  bascule rend fausse.
+- **Le total d'imputation ne se refabrique pas depuis ses lignes.** Il lève.
+  Sommer les postes pour reconstituer le total masquerait le seul jour qui
+  compte : celui où les deux divergent.
+
+**Une lacune se voit au lieu de s'escamoter** : des frais entrés sans aucun bloc
+d'imputation affichent la section avec son état vide, jamais rien du tout.
+
+**Deux mutations prouvées** : tolérance rétablie sur `encaisse` (2 tests
+rougissent), titre d'unité retiré de l'écran (3 tests rougissent).
+
+### Livré le 2026-09-02 — le guichet par frais, puis la boutique
+
+**Le choix de devise se pose sur la ligne, pas sur le versement.** La bascule
+globale a été retirée : chaque frais coché demande « le parent règle en quoi ? »,
+et quand la réponse change d'unité, la ligne montre **deux champs couplés** —
+l'imputé et le reçu. Remplir l'un remplit l'autre, et le champ que le caissier
+tape n'est jamais réécrit.
+
+| | Guichet | Boutique |
+|---|---|---|
+| Où se pose la question | par **frais** | par **devise du panier** |
+| Ce qui se saisit | l'imputé **et** le reçu | le reçu seul — le prix ne se négocie pas |
+| L'écart d'arrondi | imputation calée au centime **inférieur**, le reste en monnaie à rendre | monnaie à rendre au-dessus du dû, **« Il manque X »** en dessous |
+
+**Quatre décisions prises en écrivant :**
+
+- **Le montant reçu ne peut pas être librement rond.** 50 000 FC à 2 800 valent
+  17,857 $ : ni 17,85 ni 17,86 ne retombent sur 50 000, et le serveur n'admet
+  qu'une unité d'écart. L'imputation se cale donc au centime inférieur et la
+  différence **repart avec le parent** — c'est déjà la règle du contrat (« 120 000
+  tendus, 5 000 rendus : on écrit 115 000 »), pas une invention.
+- **Une vente boutique est comptant INTÉGRAL, et le guichet ne l'est pas.**
+  `boutique_sales` n'a aucune colonne de reste : un client qui pose moins que le
+  dû n'a pas payé, il ne « fait pas de monnaie ». Le tiroir garde donc toujours
+  le prix converti, et l'écran dit ce qui manque. Copier le guichet aurait écrit
+  des ventes à moitié payées qu'aucune colonne ne sait porter.
+- **L'invariant local refusait un cas que le nouveau guichet rend possible.**
+  Une même créance réglée moitié en francs moitié en dollars se comparait paire
+  par paire. Elle se compare désormais **côté créance** dès qu'un pivot est
+  réglé de deux façons — le seul régime où l'unité du serveur n'existe pas.
+  ✅ **Répondu par le back le 2026-09-02, et le front est aligné dessus** :
+  `Encaissements.exigerInvariant` compare **côté créance**, pivot par pivot, avec
+  une tolérance **accumulée par ligne** — `max(1, versPivot(unité d'affichage de
+  la devise reçue))`. Aucune unité reçue commune n'est nécessaire : l'écart naît
+  dans la devise reçue, on l'y borne, chaque ligne le porte au pivot par SON
+  taux. ⚠️ Un centime forfaitaire — ce que le front faisait — **refuse des
+  versements que le serveur accepte** : une créance en francs réglée en dollars
+  admet ~2 299 centimes de franc, pas 1 (cas P3-37 du cahier de recette).
+- **Trois remontées au socle**, parce que la boutique en avait autant besoin :
+  `core/money/tender_composition.dart` (l'invariant), `tender_settlement.dart`
+  (le règlement par ligne, vocabulaire neutre), `local/exchange_rate_dao.dart` +
+  `ExchangeRateReader` (le taux est un référentiel d'**école**).
+
+**Cinq mutations prouvées** : plancher d'imputation remplacé par l'arrondi au
+plus proche, champ source réécrit sous les doigts, lignes d'encaissement non
+fusionnées par paire, tiroir qui garderait l'excédent d'une vente, règlement
+orphelin survivant à la ligne supprimée.
+
 ## 6. Ce qu'on demande au back
 
-### 1 · Par quel canal le taux descend-il sur une tablette hors ligne ? — **bloquant**
+### 1 · Par quel canal le taux descend-il sur une tablette hors ligne ? — ✅ **TRANCHÉE**
+
+> **Réponse lue dans le back** (`ExchangeRateController`) : une route dédiée,
+> `GET /api/v1/finance/exchange-rates`, sous `finance.grid.read`, qui sert la
+> série complète. Le taux ne voyage dans **aucun** bundle ni delta : le front
+> l'appelle lui-même (`ExchangeRateRemoteDataSource`, Dio direct) et remplace
+> son cache local **en bloc, scopé école**. Pull enregistré avant les créances.
 
 E0 décrit un CRUD direction, pas un flux de synchro. Un taux illisible sans
 réseau rend E2, E3 et toute la saisie inatteignables là où elles servent.
