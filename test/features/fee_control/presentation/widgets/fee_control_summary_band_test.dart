@@ -76,6 +76,56 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
+  testWidgets('n\'annonce « 100 % » que si PERSONNE ne reste — 249 soldés sur '
+      '250 restent à 99 %', (tester) async {
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await _pumpBand(
+      tester,
+      const FeeControlState(
+        status: EnrollmentLoadStatus.success,
+        studentsInScope: 250,
+        breakdown: FeeControlBreakdown(settled: 249, partial: 1),
+        lastQuery: tQuery,
+      ),
+    );
+
+    // La carte est visée par sa clé — `label-valeur-part` — et non par le texte
+    // « 99 % » : trois cartes portent une part, et la part d'une autre pourrait
+    // satisfaire l'attente sans que celle-ci soit juste.
+    //
+    // Un arrondi ordinaire écrirait ici « 100 % » : le préfet lirait « niveau
+    // en règle » et le dernier débiteur sortirait du radar.
+    expect(find.byKey(const ValueKey('Payé-249-99')), findsOneWidget);
+    expect(find.byKey(const ValueKey('Payé-249-100')), findsNothing);
+  });
+
+  testWidgets('n\'annonce « 0 % » que si PERSONNE n\'y est — 1 soldé sur 400 '
+      'monte à 1 %', (tester) async {
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await _pumpBand(
+      tester,
+      const FeeControlState(
+        status: EnrollmentLoadStatus.success,
+        studentsInScope: 400,
+        breakdown: FeeControlBreakdown(settled: 1, none: 399),
+        lastQuery: tQuery,
+      ),
+    );
+
+    // Afficher « 0 % » effacerait le seul élève qui a payé. La carte « Partiel »,
+    // elle, est bel et bien à zéro et l'annonce — c'est exact, et c'est
+    // pourquoi le contrôle porte sur la carte, pas sur le texte.
+    expect(find.byKey(const ValueKey('Payé-1-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('Payé-1-0')), findsNothing);
+    expect(find.byKey(const ValueKey('Partiel-0-0')), findsOneWidget);
+  });
+
   testWidgets(
     'les compteurs ignorent le filtre : soldés, partiels et sans paiement '
     'restent annoncés même quand le tableau n\'en montre qu\'un',

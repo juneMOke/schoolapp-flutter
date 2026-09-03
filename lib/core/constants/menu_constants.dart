@@ -47,6 +47,10 @@ class MenuConstants {
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
 
+  /// Synthèse du module Contrôle des frais : pour un frais, quelle part des
+  /// élèves est en ordre, et quels groupes décrochent.
+  static const String feeControlDashboardId = 'controle-frais-dashboard';
+
   /// Page nominative du module Contrôle des frais. Identifiant distinct de
   /// celui du menu qui le porte : la route de coquille vaut
   /// `/{menu}/{sousMenu}`, et deux segments identiques n'auraient nommé qu'une

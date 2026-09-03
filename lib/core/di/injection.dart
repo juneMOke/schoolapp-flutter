@@ -124,6 +124,7 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
@@ -181,9 +182,12 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_student_
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_positions_by_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_bloc.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
@@ -885,6 +889,18 @@ Future<void> configureDependencies({
       hasFeeGrid: getIt<HasFeeGridUseCase>(),
       getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
       getRoster: getIt<GetOfflineRosterUseCase>(),
+    ),
+  );
+
+  // Tableau de bord du Contrôle des frais — même lecture locale, mais la
+  // population n'est pas donnée : elle est découverte dans le grand-livre.
+  getIt.registerFactory<FeeControlDashboardBloc>(
+    () => FeeControlDashboardBloc(
+      getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
+      getPositions: getIt<GetFeeChargePositionsByLevelUseCase>(),
+      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
+      getRosters: getIt<GetComposedRostersUseCase>(),
+      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
   );
 

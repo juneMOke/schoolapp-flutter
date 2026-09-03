@@ -3661,6 +3661,96 @@ class AppLocalizationsEn extends AppLocalizations {
       'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.';
 
   @override
+  String get feeControlDashboardCycleAll => 'All cycles';
+
+  @override
+  String get feeControlDashboardRankingTitle => 'Where each level stands';
+
+  @override
+  String get feeControlDashboardRankingHint =>
+      'The levels furthest behind come first.';
+
+  @override
+  String feeControlDashboardGroupTally(int settled, int total) {
+    return '$settled of $total';
+  }
+
+  @override
+  String feeControlDashboardGroupA11y(
+    String level,
+    int percent,
+    int settled,
+    int total,
+  ) {
+    return '$level: $percent% settled, $settled of $total students concerned';
+  }
+
+  @override
+  String get feeControlDashboardLevelUnknown => 'Level not recorded';
+
+  @override
+  String get feeControlDashboardLevelMissing =>
+      'Level missing from the reference data';
+
+  @override
+  String get feeControlDashboardNoFeesTitle => 'No fee billed';
+
+  @override
+  String get feeControlDashboardNoFeesDescription =>
+      'No charge exists on this device for this year. Sync, then reopen the dashboard.';
+
+  @override
+  String get feeControlDashboardEmptyTitle => 'No student concerned';
+
+  @override
+  String get feeControlDashboardEmptyDescription =>
+      'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.';
+
+  @override
+  String get feeControlDashboardExpand => 'Show the classes of this level';
+
+  @override
+  String get feeControlDashboardCollapse => 'Hide the classes';
+
+  @override
+  String get feeControlDashboardUnassigned => 'Unassigned';
+
+  @override
+  String get feeControlDashboardClassesLoading =>
+      'Loading this level’s classes…';
+
+  @override
+  String get feeControlDashboardClassroomsMissing =>
+      'The class composition for this level has not reached this device. Sync, then reopen the level.';
+
+  @override
+  String get feeControlDashboardClassroomsWithheld =>
+      'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.';
+
+  @override
+  String get feeControlDashboardClassesFailed =>
+      'The classes of this level could not be read on this device.';
+
+  @override
+  String feeControlDashboardUnbilled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count enrolled students do not carry this fee',
+      one: '$count enrolled student does not carry this fee',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlDashboardRemaining(String amounts) {
+    return 'Left to collect: $amounts';
+  }
+
+  @override
+  String get feeControlDashboardOpenControl => 'View students';
+
+  @override
   String feeControlCriteriaFee(String label) {
     return 'Fee: $label';
   }

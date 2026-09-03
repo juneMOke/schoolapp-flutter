@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_summary_cards.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Bandeau de synthèse du Contrôle des frais : où en est la classe sur le frais
@@ -53,68 +50,14 @@ class FeeControlSummaryBand extends StatelessWidget {
                   child: Semantics(
                     container: true,
                     label: l10n.feeControlSummaryA11yLabel,
-                    child: EteeloKpiBand(cards: _cards(state, l10n)),
+                    child: EteeloKpiBand(
+                      cards: feeControlSummaryCards(state.breakdown, l10n),
+                    ),
                   ),
                 )
               : const SizedBox.shrink(key: ValueKey('fee-control-summary-off')),
         );
       },
-    );
-  }
-
-  static List<EteeloKpiCardData> _cards(
-    FeeControlState state,
-    AppLocalizations l10n,
-  ) {
-    final breakdown = state.breakdown;
-    final total = breakdown.total;
-
-    return [
-      EteeloKpiCardData(
-        label: l10n.feeControlSummaryStudents,
-        value: total,
-        accent: AppColors.bleuArdoise,
-        accentSoft: AppColors.billingHelpSurface,
-        icon: Icons.groups_outlined,
-      ),
-      // Les trois autres cartes portent les libellés de statut de créance du
-      // détail Facturation : « Payé » / « Partiel » / « À régler ». Un même état
-      // ne doit pas changer de nom d'un écran à l'autre.
-      _statusCard(
-        count: breakdown.settled,
-        total: total,
-        status: StudentChargeStatus.paid,
-        l10n: l10n,
-      ),
-      _statusCard(
-        count: breakdown.partial,
-        total: total,
-        status: StudentChargeStatus.partial,
-        l10n: l10n,
-      ),
-      _statusCard(
-        count: breakdown.none,
-        total: total,
-        status: StudentChargeStatus.due,
-        l10n: l10n,
-      ),
-    ];
-  }
-
-  static EteeloKpiCardData _statusCard({
-    required int count,
-    required int total,
-    required StudentChargeStatus status,
-    required AppLocalizations l10n,
-  }) {
-    final visuals = status.visuals;
-    return EteeloKpiCardData(
-      label: status.localizedLabel(l10n),
-      value: count,
-      percent: total <= 0 ? 0 : ((count * 100) / total).round(),
-      accent: visuals.color,
-      accentSoft: visuals.soft,
-      icon: visuals.icon,
     );
   }
 }

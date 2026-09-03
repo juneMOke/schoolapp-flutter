@@ -86,6 +86,7 @@ const Map<String, String> _constants = {
   'premiereInscriptionId': 'premiere-inscription',
   'financesDashboardId': 'finances-dashboard',
   'facturationsId': 'facturations',
+  'feeControlDashboardId': 'controle-frais-dashboard',
   'feeControlId': 'controle-frais-eleves',
   'boutiqueAchatsId': 'boutique-achats',
   'boutiqueHistoriqueId': 'boutique-historique',

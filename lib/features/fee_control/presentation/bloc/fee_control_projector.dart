@@ -4,6 +4,24 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 
+/// Part de [count] sur [total], en pourcentage entier **prêt à afficher**.
+///
+/// ⚠️ **100 % ne s'écrit que si personne ne reste, 0 % que si personne n'y
+/// est.** Un arrondi ordinaire annonce « 100 % » sur 249 soldés pour 250
+/// concernés : le préfet lit « niveau en règle » et le dernier débiteur
+/// disparaît du radar. Symétriquement, un seul élève soldé sur 400 ne doit pas
+/// s'annoncer « 0 % » — c'est effacer le seul qui a payé. D'où le clamp à
+/// [1, 99] entre les deux bornes, qui restent exactes.
+///
+/// Une seule fonction pour tout le module : le bandeau du contrôle et le
+/// classement du tableau de bord doivent arrondir pareil, sans quoi le même
+/// niveau s'annonce à 100 % sur un écran et à 99 % sur l'autre.
+int feeSharePercent(int count, int total) {
+  if (total <= 0 || count <= 0) return 0;
+  if (count >= total) return 100;
+  return (count * 100 / total).round().clamp(1, 99);
+}
+
 /// Répartition des élèves d'une classe sur le frais contrôlé.
 ///
 /// Comptée sur la population **concernée** (ceux qui portent une créance de ce
@@ -25,6 +43,14 @@ class FeeControlBreakdown extends Equatable {
   int get total => settled + partial + none;
 
   bool get isEmpty => total == 0;
+
+  /// Part d'élèves **en ordre**, en pourcentage entier prêt à afficher
+  /// (cf. [feeSharePercent]).
+  ///
+  /// Pour **comparer** deux répartitions, ne pas passer par ce nombre : il crée
+  /// des ex æquo qui n'existent pas (99,4 % et 99,8 % y valent tous deux 99).
+  /// Le classement du tableau de bord compare les fractions exactes.
+  int get settledPercent => feeSharePercent(settled, total);
 
   @override
   List<Object?> get props => [settled, partial, none];

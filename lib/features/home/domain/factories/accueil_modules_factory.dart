@@ -13,8 +13,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// est neutralisé). Les titres de cartes réutilisent les titres de menus.
 ///
 /// Plusieurs modules n'ont pas de tableau de bord (Cours, Résultats, Boutique,
-/// Contrôle des frais, Configuration) : leur page d'entrée est simplement leur
-/// premier sous-module (cf. `AccueilModule.entry`).
+/// Configuration) : leur page d'entrée est simplement leur premier sous-module
+/// (cf. `AccueilModule.entry`).
 class AccueilModulesFactory {
   const AccueilModulesFactory._();
 
@@ -149,9 +149,10 @@ class AccueilModulesFactory {
 
   /// Le contrôle des frais — une carte propre, comme le menu.
   ///
-  /// Finances porte les gestes de caisse ; ce module n'en accomplit aucun — il
-  /// regarde qui a réglé. Une seule page pour l'instant, donc pas de tableau de
-  /// bord : l'en-tête mène droit à l'écran de contrôle.
+  /// La synthèse d'abord, les noms ensuite : l'en-tête ouvre le tableau de
+  /// bord, qui pose la question, et la seconde ligne mène à l'écran qui donne
+  /// les noms. Finances porte les gestes de caisse ; ce module n'en accomplit
+  /// aucun — il regarde qui a réglé.
   static AccueilModule _feeControl(AppLocalizations l10n) {
     const menuId = MenuConstants.feeControlMenuId;
     return AccueilModule(
@@ -162,6 +163,11 @@ class AccueilModulesFactory {
       accent: AppColors.accueilFeeControlAccent,
       softBackground: AppColors.accueilFeeControlSoft,
       subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.feeControlDashboardId,
+        ),
         _page(
           menuId: menuId,
           subMenuId: MenuConstants.feeControlId,

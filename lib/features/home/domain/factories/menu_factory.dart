@@ -168,6 +168,11 @@ class MenuFactory {
       icon: Icons.fact_check_outlined,
       subMenus: [
         SubMenuItem(
+          id: MenuConstants.feeControlDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.feeControlDashboard,
+        ),
+        SubMenuItem(
           id: MenuConstants.feeControlId,
           title: l10n.subMenuFeeControl,
           route: AppRoutesNames.feeControl,

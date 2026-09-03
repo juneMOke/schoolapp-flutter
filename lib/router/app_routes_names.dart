@@ -50,6 +50,8 @@ class AppRoutesNames {
 
   /// Contrôle des frais — module propre depuis 2026-09-02 : le chemin ne
   /// passe plus par `/finances`.
+  static const String feeControlDashboard =
+      '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlDashboardId}';
   static const String feeControl =
       '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlId}';
 

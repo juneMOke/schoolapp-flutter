@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_dashboard_contracts.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -52,8 +53,14 @@ class FeeControlSearchForm extends StatefulWidget {
   final ValueChanged<FeeControlSearchRequest> onSearch;
   final VoidCallback onClear;
 
+  /// Critères posés d'avance, quand l'écran est ouvert depuis le tableau de
+  /// bord. Lus **une seule fois**, au montage : ce sont des valeurs initiales,
+  /// pas un pilotage — l'utilisateur reste maître du formulaire ensuite.
+  final FeeControlIntent? initial;
+
   const FeeControlSearchForm({
     super.key,
+    this.initial,
     required this.options,
     required this.tariffs,
     required this.classrooms,
@@ -82,6 +89,20 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
   FeeControlPaymentFilter _statusFilter = FeeControlPaymentFilter.all;
 
   @override
+  void initState() {
+    super.initState();
+    final initial = widget.initial;
+    if (initial == null) return;
+    _selectedGroupId = initial.schoolLevelGroupId;
+    _selectedLevelKey = SearchLevelOption.keyFor(
+      schoolLevelGroupId: initial.schoolLevelGroupId,
+      schoolLevelId: initial.schoolLevelId,
+    );
+    _selectedClassroomId = initial.classroomId;
+    _selectedFeeCode = initial.feeCode;
+  }
+
+  @override
   void didUpdateWidget(covariant FeeControlSearchForm oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -95,12 +116,20 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
         !widget.options.any((o) => o.schoolLevelGroupId == _selectedGroupId);
     // La grille change avec le niveau : un frais qui n'y figure plus doit
     // disparaître, sinon le bouton resterait armé sur un code fantôme.
+    //
+    // ⚠️ **Jamais pendant le chargement.** La liste est alors vide parce qu'on
+    // ne sait pas encore, pas parce que le frais a disparu : invalider ici
+    // effacerait une sélection légitime — celle que le tableau de bord vient de
+    // poser, dont la grille n'est pas encore descendue.
     final feeStale =
         _selectedFeeCode != null &&
+        !widget.isTariffsLoading &&
         !widget.tariffs.any((t) => t.feeCode == _selectedFeeCode);
-    // Même raison pour la classe : les classes suivent le niveau.
+    // Même raison pour la classe, et même garde : les classes suivent le
+    // niveau, et leur chargement n'est pas leur absence.
     final classroomStale =
         _selectedClassroomId != null &&
+        !widget.isClassroomsLoading &&
         !widget.classrooms.any((c) => c.id == _selectedClassroomId);
 
     if (levelStale || groupStale || feeStale || classroomStale) {

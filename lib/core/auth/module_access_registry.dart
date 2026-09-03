@@ -151,6 +151,11 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // ouverte depuis cet écran reste atteignable — alors même que le contrôle a
   // quitté le module Finances pour le sien.
   MenuConstants.feeControlMenuId: {
+    // La synthèse ne lit rien de plus que la page nominative — les mêmes
+    // créances, comptées au lieu d'être listées. Lui demander un droit de
+    // statistiques (`finance.stats.read`) la fermerait au secrétariat, qui est
+    // précisément celui qui contrôle.
+    MenuConstants.feeControlDashboardId: ModuleAccess([Perm.financeChargeRead]),
     MenuConstants.feeControlId: ModuleAccess([Perm.financeChargeRead]),
   },
   MenuConstants.boutiqueMenuId: {

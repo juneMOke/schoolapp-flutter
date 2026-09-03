@@ -18,7 +18,19 @@ class SearchLevelOption {
     required this.label,
   });
 
-  String get key => '$schoolLevelGroupId::$schoolLevelId';
+  String get key => keyFor(
+    schoolLevelGroupId: schoolLevelGroupId,
+    schoolLevelId: schoolLevelId,
+  );
+
+  /// La même clé, **sans option en main** — pour un appelant qui ne tient qu'un
+  /// couple d'identifiants (un écran qui pré-remplit un formulaire, par
+  /// exemple). Le format n'est écrit qu'ici : recopié ailleurs, il divergerait
+  /// au premier changement, et la sélection ne retrouverait plus son option.
+  static String keyFor({
+    required String schoolLevelGroupId,
+    required String schoolLevelId,
+  }) => '$schoolLevelGroupId::$schoolLevelId';
 }
 
 /// Critères émis par le formulaire au moment de la recherche.

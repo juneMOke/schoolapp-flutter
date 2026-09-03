@@ -3683,6 +3683,95 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève de ce niveau ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne leur est pas applicable.';
 
   @override
+  String get feeControlDashboardCycleAll => 'Tous les cycles';
+
+  @override
+  String get feeControlDashboardRankingTitle => 'Où en est chaque niveau';
+
+  @override
+  String get feeControlDashboardRankingHint =>
+      'Les niveaux les plus en retard d\'abord.';
+
+  @override
+  String feeControlDashboardGroupTally(int settled, int total) {
+    return '$settled sur $total';
+  }
+
+  @override
+  String feeControlDashboardGroupA11y(
+    String level,
+    int percent,
+    int settled,
+    int total,
+  ) {
+    return '$level : $percent % en ordre, $settled sur $total élèves concernés';
+  }
+
+  @override
+  String get feeControlDashboardLevelUnknown => 'Niveau non renseigné';
+
+  @override
+  String get feeControlDashboardLevelMissing => 'Niveau absent du référentiel';
+
+  @override
+  String get feeControlDashboardNoFeesTitle => 'Aucun frais facturé';
+
+  @override
+  String get feeControlDashboardNoFeesDescription =>
+      'Aucune créance n\'existe sur cet appareil pour cette année. Synchronisez, puis rouvrez le tableau de bord.';
+
+  @override
+  String get feeControlDashboardEmptyTitle => 'Aucun élève concerné';
+
+  @override
+  String get feeControlDashboardEmptyDescription =>
+      'Personne ne porte ce frais dans ce périmètre : il n\'a pas encore été généré, ou il ne s\'applique pas ici.';
+
+  @override
+  String get feeControlDashboardExpand => 'Voir les classes de ce niveau';
+
+  @override
+  String get feeControlDashboardCollapse => 'Masquer les classes';
+
+  @override
+  String get feeControlDashboardUnassigned => 'Non répartis';
+
+  @override
+  String get feeControlDashboardClassesLoading =>
+      'Chargement des classes de ce niveau…';
+
+  @override
+  String get feeControlDashboardClassroomsMissing =>
+      'La composition des classes de ce niveau n\'est pas descendue sur cet appareil. Synchronisez, puis rouvrez le niveau.';
+
+  @override
+  String get feeControlDashboardClassroomsWithheld =>
+      'La composition des classes relève d\'un module auquel ce profil n\'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.';
+
+  @override
+  String get feeControlDashboardClassesFailed =>
+      'Les classes de ce niveau n\'ont pas pu être lues sur cet appareil.';
+
+  @override
+  String feeControlDashboardUnbilled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves inscrits ne portent pas ce frais',
+      one: '$count élève inscrit ne porte pas ce frais',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlDashboardRemaining(String amounts) {
+    return 'Reste à recouvrer : $amounts';
+  }
+
+  @override
+  String get feeControlDashboardOpenControl => 'Voir les élèves';
+
+  @override
   String feeControlCriteriaFee(String label) {
     return 'Frais : $label';
   }

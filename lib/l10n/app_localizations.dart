@@ -6026,6 +6026,137 @@ abstract class AppLocalizations {
   /// **'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.'**
   String get feeControlNoChargeForLevelDescription;
 
+  /// No description provided for @feeControlDashboardCycleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All cycles'**
+  String get feeControlDashboardCycleAll;
+
+  /// No description provided for @feeControlDashboardRankingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where each level stands'**
+  String get feeControlDashboardRankingTitle;
+
+  /// No description provided for @feeControlDashboardRankingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The levels furthest behind come first.'**
+  String get feeControlDashboardRankingHint;
+
+  /// No description provided for @feeControlDashboardGroupTally.
+  ///
+  /// In en, this message translates to:
+  /// **'{settled} of {total}'**
+  String feeControlDashboardGroupTally(int settled, int total);
+
+  /// No description provided for @feeControlDashboardGroupA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{level}: {percent}% settled, {settled} of {total} students concerned'**
+  String feeControlDashboardGroupA11y(
+    String level,
+    int percent,
+    int settled,
+    int total,
+  );
+
+  /// No description provided for @feeControlDashboardLevelUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Level not recorded'**
+  String get feeControlDashboardLevelUnknown;
+
+  /// No description provided for @feeControlDashboardLevelMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Level missing from the reference data'**
+  String get feeControlDashboardLevelMissing;
+
+  /// No description provided for @feeControlDashboardNoFeesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee billed'**
+  String get feeControlDashboardNoFeesTitle;
+
+  /// No description provided for @feeControlDashboardNoFeesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No charge exists on this device for this year. Sync, then reopen the dashboard.'**
+  String get feeControlDashboardNoFeesDescription;
+
+  /// No description provided for @feeControlDashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student concerned'**
+  String get feeControlDashboardEmptyTitle;
+
+  /// No description provided for @feeControlDashboardEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.'**
+  String get feeControlDashboardEmptyDescription;
+
+  /// No description provided for @feeControlDashboardExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the classes of this level'**
+  String get feeControlDashboardExpand;
+
+  /// No description provided for @feeControlDashboardCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the classes'**
+  String get feeControlDashboardCollapse;
+
+  /// No description provided for @feeControlDashboardUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get feeControlDashboardUnassigned;
+
+  /// No description provided for @feeControlDashboardClassesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading this level’s classes…'**
+  String get feeControlDashboardClassesLoading;
+
+  /// No description provided for @feeControlDashboardClassroomsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The class composition for this level has not reached this device. Sync, then reopen the level.'**
+  String get feeControlDashboardClassroomsMissing;
+
+  /// No description provided for @feeControlDashboardClassroomsWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.'**
+  String get feeControlDashboardClassroomsWithheld;
+
+  /// No description provided for @feeControlDashboardClassesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The classes of this level could not be read on this device.'**
+  String get feeControlDashboardClassesFailed;
+
+  /// No description provided for @feeControlDashboardUnbilled.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} enrolled student does not carry this fee} other{{count} enrolled students do not carry this fee}}'**
+  String feeControlDashboardUnbilled(int count);
+
+  /// No description provided for @feeControlDashboardRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to collect: {amounts}'**
+  String feeControlDashboardRemaining(String amounts);
+
+  /// No description provided for @feeControlDashboardOpenControl.
+  ///
+  /// In en, this message translates to:
+  /// **'View students'**
+  String get feeControlDashboardOpenControl;
+
   /// Criteria chip recalling the controlled fee.
   ///
   /// In en, this message translates to:
