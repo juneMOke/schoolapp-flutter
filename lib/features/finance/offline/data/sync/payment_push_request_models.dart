@@ -7,6 +7,8 @@
 // NOTHING`) : un rejeu après coupure ne compte JAMAIS l'argent deux fois.
 // Centimes `int`, jamais de flottant.
 
+import 'package:school_app_flutter/core/money/currency_code.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 
@@ -87,6 +89,87 @@ class PaymentAllocationInput {
       );
 }
 
+/// Ce qui est réellement entré dans le TIROIR (spec `TenderInput`), une entrée
+/// par couple (devise reçue, devise de créance).
+///
+/// Le complémentaire de [PaymentAllocationInput] : l'imputation dit ce que le
+/// versement a ÉTEINT, en devise de créance ; celle-ci dit ce qui a été PERÇU,
+/// en devise reçue. Tant que l'école n'encaissait que la devise de fixation de
+/// ses frais, les deux se confondaient — elles cessent de se confondre dès qu'un
+/// parent règle 50 $ en posant 115 000 FC.
+///
+/// **Ne pas l'émettre n'est pas neutre.** Le serveur ne refuse pas un versement
+/// muet : il écrit l'identité — perçu = imputé, taux 1 — c'est-à-dire qu'il
+/// consigne des DOLLARS dans un tiroir qui n'a vu que des francs. La caisse du
+/// jour, le contrôle de divergence de taux et le second poste lisent alors tous
+/// la même chose, et elle est fausse.
+class PaymentTenderInput {
+  /// uuid client honoré, comme celui de l'allocation.
+  ///
+  /// **Requis pour que le rejeu ne duplique rien**, et pas seulement côté
+  /// serveur : le pull redescend les lignes d'encaissement par leur id, et une
+  /// ligne écrite sous un id inventé par le serveur s'INSÈRE à côté de la nôtre
+  /// au lieu de la corriger. Le versement se relit alors avec deux fois ce qui
+  /// est entré dans le tiroir — et le ticket, qui somme cette table, l'imprime.
+  final String id;
+
+  /// Le **net conservé**, jamais le montant présenté : 120 000 tendus,
+  /// 5 000 rendus, on écrit 115 000.
+  final int amountInCents;
+
+  /// La devise réellement tendue.
+  final String currency;
+
+  /// Le taux de guichet **gelé**, en micro-unités — convention LOCALE, qui ne
+  /// voyage pas telle quelle (cf. [toJson]).
+  final int rateMicros;
+
+  /// La devise de la **créance** que cette ligne éteint.
+  final String pivotCurrency;
+
+  const PaymentTenderInput({
+    required this.id,
+    required this.amountInCents,
+    required this.currency,
+    this.rateMicros = ExchangeRate.scale,
+    required this.pivotCurrency,
+  });
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    if (id.isNotEmpty) 'id': id,
+    'amountInCents': amountInCents,
+    'currency': currency,
+    // Le taux en décimal, comme le `numeric(18,6)` du serveur : les
+    // micro-unités sont une convention locale, elles ne voyagent pas. Émis
+    // TOUJOURS, même à 1 — c'est le chiffre imprimé sur le papier remis au
+    // parent, il ne se re-résout pas.
+    'rate': rateMicros / ExchangeRate.scale,
+    'pivotCurrency': pivotCurrency,
+  };
+
+  /// Relit une ligne d'un payload d'outbox, **sans jamais échouer**.
+  ///
+  /// `rate` absent vaut 1 et `pivotCurrency` absent vaut la devise reçue :
+  /// c'est l'identité, et c'est exactement ce que valait tout encaissement
+  /// avant ce champ. Refuser ici ferait basculer l'entrée en `failed` — issue
+  /// TERMINALE de l'outbox, sur du cash déjà encaissé et un reçu déjà imprimé.
+  factory PaymentTenderInput.fromJson(Map<String, dynamic> j) {
+    final currency = CurrencyCode.normalize((j['currency'] as String?) ?? '');
+    final pivot = CurrencyCode.normalize((j['pivotCurrency'] as String?) ?? '');
+    final rate = (j['rate'] as num?)?.toDouble();
+    final micros = rate == null
+        ? ExchangeRate.scale
+        : (rate * ExchangeRate.scale).round();
+    return PaymentTenderInput(
+      id: (j['id'] as String?) ?? '',
+      amountInCents: (j['amountInCents'] as num?)?.toInt() ?? 0,
+      currency: currency,
+      rateMicros: micros <= 0 ? ExchangeRate.scale : micros,
+      pivotCurrency: pivot.isEmpty ? currency : pivot,
+    );
+  }
+}
+
 /// L'encaissement lui-même (spec `PaymentInput`).
 class PaymentInput {
   /// uuid CLIENT = id serveur honoré (clé d'idempotence money-grade).
@@ -101,6 +184,16 @@ class PaymentInput {
   /// (422 `ALLOCATION_SUM_MISMATCH`) : un total juste globalement mais mal
   /// réparti est refusé. Ne jamais additionner deux entrées.
   final MoneyBag amounts;
+
+  /// Ce qui est entré dans le TIROIR, une entrée par couple (devise reçue,
+  /// pivot) — cf. [PaymentTenderInput].
+  ///
+  /// Vide **uniquement** pour un payload figé par une version antérieure : le
+  /// chemin d'écriture en pose toujours, l'identité comprise. Le serveur
+  /// retombe alors sur l'identité, ce qui était exactement vrai de ce
+  /// versement-là.
+  final List<PaymentTenderInput> tenders;
+
   final String? method; // 'CASH'…
   final String? details;
   final String? payerFirstName;
@@ -124,6 +217,7 @@ class PaymentInput {
     this.academicYearId,
     this.classroomId,
     required this.amounts,
+    this.tenders = const [],
     this.method,
     this.details,
     this.payerFirstName,
@@ -143,6 +237,12 @@ class PaymentInput {
       for (final amount in amounts.entries)
         {'amountInCents': amount.amountInCents, 'currency': amount.currency},
     ],
+    // Omis quand il n'y a rien à dire — le serveur écrit alors l'identité.
+    // Une liste VIDE sur le fil dirait « rien n'est entré » sur un versement
+    // encaissé. Les lignes non positives sont écartées : le serveur les refuse
+    // (`@Positive`) et un 422 est TERMINAL pour de l'argent déjà pris.
+    if (_declarableTenders.isNotEmpty)
+      'tenders': [for (final tender in _declarableTenders) tender.toJson()],
     'method': method ?? 'CASH',
     'details': details,
     'payerFirstName': payerFirstName,
@@ -159,6 +259,7 @@ class PaymentInput {
     academicYearId: j['academicYearId'] as String?,
     classroomId: j['classroomId'] as String?,
     amounts: _amountsOf(j),
+    tenders: _tendersOf(j),
     method: j['method'] as String?,
     details: j['details'] as String?,
     payerFirstName: j['payerFirstName'] as String?,
@@ -168,6 +269,24 @@ class PaymentInput {
     externalReference: j['externalReference'] as String?,
     paidAt: j['paidAt'] as String,
   );
+
+  List<PaymentTenderInput> get _declarableTenders =>
+      tenders.where((tender) => tender.amountInCents > 0).toList();
+
+  /// Relit les lignes d'encaissement d'un payload d'outbox, **sans jamais
+  /// échouer**.
+  ///
+  /// Absentes sur tout versement mis en file avant ce champ : le serveur écrira
+  /// l'identité pour lui, comme il le faisait déjà. Les refuser ici les ferait
+  /// basculer en `failed` — issue terminale, sur du cash déjà encaissé.
+  static List<PaymentTenderInput> _tendersOf(Map<String, dynamic> j) {
+    final raw = j['tenders'];
+    if (raw is! List) return const [];
+    return [
+      for (final entry in raw)
+        if (entry is Map<String, dynamic>) PaymentTenderInput.fromJson(entry),
+    ];
+  }
 
   /// Relit les montants d'un payload d'outbox, **quelle que soit sa forme**.
   ///

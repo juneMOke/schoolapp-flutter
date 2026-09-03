@@ -82,7 +82,7 @@ class FinancePaymentWriteDao {
         );
       }
 
-      final request = _paymentRequest(payment, linked, authorId);
+      final request = _paymentRequest(payment, linked, tenders, authorId);
       final entry = OutboxEntry(
         id: outboxEntryId,
         aggregateType: 'PAYMENT',
@@ -192,6 +192,7 @@ class FinancePaymentWriteDao {
   PaymentAggregateRequest _paymentRequest(
     PaymentLocalModel payment,
     List<PaymentAllocationLocalModel> allocations,
+    List<PaymentTenderLocalModel> tenders,
     String? authorId,
   ) => PaymentAggregateRequest(
     authorId: authorId,
@@ -207,6 +208,22 @@ class FinancePaymentWriteDao {
         allocations,
         (a) => Money.parse(a.amountInCents, a.currency),
       ),
+      // Ce qui est entré dans le TIROIR, à côté de ce qui a été imputé — et
+      // TOUJOURS, y compris quand les deux se confondent. Un versement muet
+      // n'est pas refusé par le serveur : il y écrit l'identité, donc des
+      // dollars pour un tiroir qui n'a vu que des francs. Les mêmes lignes que
+      // celles écrites juste au-dessus, avec les MÊMES identifiants : c'est ce
+      // qui fait que le delta de pull les corrige au lieu de les doubler.
+      tenders: [
+        for (final tender in tenders)
+          PaymentTenderInput(
+            id: tender.id,
+            amountInCents: tender.amountInCents,
+            currency: tender.currency,
+            rateMicros: tender.rateMicros,
+            pivotCurrency: tender.pivotCurrency,
+          ),
+      ],
       method: payment.method,
       paidAt: payment.paidAt,
       payerFirstName: payment.payerFirstName,

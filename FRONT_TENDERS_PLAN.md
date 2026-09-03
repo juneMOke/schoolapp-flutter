@@ -12,7 +12,7 @@
 > | **U1–U4 · le guichet bi-devise** | ✅ **livré** — bascule, taux, dérivées, barre à deux niveaux, popin |
 > | F2 · la ligne d'encaissement locale (v41) | ✅ **livré** — table, backfill identité, modèle |
 > | F2′ · `tenders[]` dans le `PaymentDelta` | 🟡 **débloqué** — le back le porte depuis le 01/09 |
-> | F3 · le chemin d'écriture + la seconde garde | ✅ **partie locale livrée** · 🟡 l'émission sur le fil est débloquée (`TenderInput`) |
+> | F3 · le chemin d'écriture + la seconde garde | ✅ **livré** — local ET fil : `payment.tenders[]` part sur chaque versement, identité comprise, avec l'uuid client de la ligne locale |
 > | F3′ · la boutique | ✅ **livré** — v42, `tenders[]` sur le fil, choix de devise par devise du panier |
 > | F4 · le ticket thermique | ✅ **livré** — perçu, taux, répartition dérivée, avance en devise reçue |
 > | F5 · l'écran caisse | ✅ **livré** — `encaisse[]` + `impute[]`, aucune voie de secours |
@@ -423,6 +423,15 @@ l'invariant du taux.
   qu'une seule ligne de code ne bouge**.
 - **On envoie `rate` explicitement**, même quand le serveur saurait le résoudre :
   c'est le chiffre imprimé sur le papier remis au parent, il ne se re-résout pas.
+- **On envoie `tenders` TOUJOURS, l'identité comprise.** Se taire n'est pas
+  neutre : le serveur écrit alors l'identité, c'est-à-dire qu'il consigne des
+  DOLLARS dans un tiroir qui n'a vu que des francs. La caisse du jour, la
+  divergence de taux et le second poste lisent tous cette affirmation-là.
+- **Chaque ligne poussée porte l'uuid de la ligne LOCALE.** Le serveur honore cet
+  id comme celui de l'allocation ; sans lui il en invente un, le pull redescend
+  la ligne sous CET id, et l'upsert — qui apparie par id — l'INSÈRE à côté de la
+  nôtre. Le versement se relirait avec deux fois ce qui est entré dans le
+  tiroir, et le ticket, qui somme cette table, l'imprimerait.
 
 **Deux temps.** D'abord **sans UI** : taux 1 partout, perçu = imputé, le format
 part sur le fil et s'exerce en production sur du trafic réel. L'UI n'ouvre
