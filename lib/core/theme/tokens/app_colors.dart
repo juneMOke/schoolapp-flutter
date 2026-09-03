@@ -187,6 +187,12 @@ class AppColors {
   static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
   static const accueilFinancesAccent = vertSavane; // #3D6B4A
   static const accueilFinancesSoft = Color(0xFFEDF5EF);
+
+  /// Le contrôle des frais : un vert-de-gris sourd, voisin du vert Finances
+  /// sans s'y confondre — la parenté dit le domaine partagé, l'écart dit que
+  /// c'est un regard et non un guichet.
+  static const accueilFeeControlAccent = Color(0xFF2F6B62);
+  static const accueilFeeControlSoft = Color(0xFFE9F2F0);
   // Or profond propre à l'Accueil : l'or-doux de marque (#D9A24E) est trop
   // clair pour porter un titre ou une icône sur fond papier (spec §03).
   /// La caisse boutique : un cuivre chaud, distinct du vert Finances — la

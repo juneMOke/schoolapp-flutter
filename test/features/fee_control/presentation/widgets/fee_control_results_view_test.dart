@@ -15,11 +15,11 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_data_table.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_results_view.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_search_invitation_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/states/fee_control_results_empty_state.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_bloc.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_data_table.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_results_view.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_search_invitation_card.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/states/fee_control_results_empty_state.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 

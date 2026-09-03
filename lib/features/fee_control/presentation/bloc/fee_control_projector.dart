@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 
 /// Répartition des élèves d'une classe sur le frais contrôlé.
 ///

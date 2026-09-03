@@ -144,10 +144,13 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
       Perm.financeChargeRead,
       Perm.financePaymentRead,
     ]),
-    // Le contrôle ne lit que des créances et leur solde : `finance.charge.read`
-    // suffit, et c'est exactement ce que détient le secrétariat. Qui le détient
-    // franchit aussi la disjonction ci-dessus, donc la fiche financière ouverte
-    // depuis cet écran reste atteignable.
+  },
+  // Le contrôle ne lit que des créances et leur solde : `finance.charge.read`
+  // suffit, et c'est exactement ce que détient le secrétariat. Qui le détient
+  // franchit aussi la disjonction de la Facturation, donc la fiche financière
+  // ouverte depuis cet écran reste atteignable — alors même que le contrôle a
+  // quitté le module Finances pour le sien.
+  MenuConstants.feeControlMenuId: {
     MenuConstants.feeControlId: ModuleAccess([Perm.financeChargeRead]),
   },
   MenuConstants.boutiqueMenuId: {

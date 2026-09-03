@@ -1024,7 +1024,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get subMenuFeeControl => 'Fee control';
+  String get menuFeeControl => 'Fee control';
+
+  @override
+  String get subMenuFeeControl => 'Control by fee';
 
   @override
   String get menuBoutique => 'Shop';
@@ -2074,6 +2077,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleFinancesDescription =>
       'Revenue, invoicing and tracking of school fee collection.';
+
+  @override
+  String get accueilModuleFeeControlDescription =>
+      'For a given fee: who has settled it, who has paid only part of it, who has paid nothing.';
 
   @override
   String get accueilModuleBoutiqueDescription =>

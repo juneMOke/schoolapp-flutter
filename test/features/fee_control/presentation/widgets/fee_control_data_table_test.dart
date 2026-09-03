@@ -7,10 +7,10 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_data_table.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_data_table.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 

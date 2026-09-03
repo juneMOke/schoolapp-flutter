@@ -5,15 +5,16 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Construit les 6 cartes modules de la page d'accueil avec leur copy localisée,
+/// Construit les cartes modules de la page d'accueil avec leur copy localisée,
 /// leurs accents (spec §03) et leur mappage de navigation (spec §11).
 ///
 /// Les libellés de sous-modules réutilisent les titres de sous-menus existants
 /// pour rester cohérents avec la sidebar (le `\n` de « Composition des classes »
 /// est neutralisé). Les titres de cartes réutilisent les titres de menus.
 ///
-/// Deux modules n'ont pas de tableau de bord (Cours, Résultats) : leur page
-/// d'entrée est simplement leur premier sous-module (cf. `AccueilModule.entry`).
+/// Plusieurs modules n'ont pas de tableau de bord (Cours, Résultats, Boutique,
+/// Contrôle des frais, Configuration) : leur page d'entrée est simplement leur
+/// premier sous-module (cf. `AccueilModule.entry`).
 class AccueilModulesFactory {
   const AccueilModulesFactory._();
 
@@ -32,6 +33,7 @@ class AccueilModulesFactory {
     final all = [
       _inscriptions(l10n),
       _finances(l10n),
+      _feeControl(l10n),
       _boutique(l10n),
       _classes(l10n),
       _cours(l10n),
@@ -141,6 +143,25 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.facturationsId,
           title: l10n.subMenuBilling,
         ),
+      ],
+    );
+  }
+
+  /// Le contrôle des frais — une carte propre, comme le menu.
+  ///
+  /// Finances porte les gestes de caisse ; ce module n'en accomplit aucun — il
+  /// regarde qui a réglé. Une seule page pour l'instant, donc pas de tableau de
+  /// bord : l'en-tête mène droit à l'écran de contrôle.
+  static AccueilModule _feeControl(AppLocalizations l10n) {
+    const menuId = MenuConstants.feeControlMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuFeeControl,
+      description: l10n.accueilModuleFeeControlDescription,
+      icon: Icons.fact_check_outlined,
+      accent: AppColors.accueilFeeControlAccent,
+      softBackground: AppColors.accueilFeeControlSoft,
+      subModules: [
         _page(
           menuId: menuId,
           subMenuId: MenuConstants.feeControlId,

@@ -14,18 +14,18 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_projector.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_tariffs_resolver.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_projector.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_tariffs_resolver.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 
 // Un seul import suffit aux widgets du Contrôle des frais pour l'état, le
 // statut de chargement et les contrats de recherche.
 export 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_load_status.dart';
 // `FeeControlBreakdown` fait partie de la surface publique de l'état (bandeau
 // de synthèse), même si son calcul vit dans le projecteur.
-export 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_projector.dart'
+export 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_projector.dart'
     show FeeControlBreakdown;
-export 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+export 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 
 part 'fee_control_event.dart';
 part 'fee_control_state.dart';

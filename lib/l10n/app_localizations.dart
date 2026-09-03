@@ -1652,10 +1652,16 @@ abstract class AppLocalizations {
   /// **'Billing'**
   String get subMenuBilling;
 
-  /// Fee control sub-menu title
+  /// Fee control menu title
   ///
   /// In en, this message translates to:
   /// **'Fee control'**
+  String get menuFeeControl;
+
+  /// Fee control sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Control by fee'**
   String get subMenuFeeControl;
 
   /// Shop till menu title
@@ -3235,6 +3241,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Revenue, invoicing and tracking of school fee collection.'**
   String get accueilModuleFinancesDescription;
+
+  /// No description provided for @accueilModuleFeeControlDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'For a given fee: who has settled it, who has paid only part of it, who has paid nothing.'**
+  String get accueilModuleFeeControlDescription;
 
   /// No description provided for @accueilModuleBoutiqueDescription.
   ///

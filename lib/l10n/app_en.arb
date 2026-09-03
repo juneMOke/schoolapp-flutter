@@ -1078,7 +1078,11 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "subMenuFeeControl": "Fee control",
+  "menuFeeControl": "Fee control",
+  "@menuFeeControl": {
+    "description": "Fee control menu title"
+  },
+  "subMenuFeeControl": "Control by fee",
   "@subMenuFeeControl": {
     "description": "Fee control sub-menu title"
   },
@@ -1765,6 +1769,7 @@
   "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
   "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",

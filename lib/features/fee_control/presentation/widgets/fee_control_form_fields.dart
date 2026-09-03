@@ -10,9 +10,9 @@ import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_fee_options.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_page_helpers.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_fee_options.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_page_helpers.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Sélecteur du frais à contrôler, alimenté par la grille du niveau choisi.

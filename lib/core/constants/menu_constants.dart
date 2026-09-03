@@ -19,6 +19,14 @@ class MenuConstants {
   // sous-menu de Finances qui en mentirait sur la portée.
   static const String documentsMenuId = 'documents';
 
+  /// Le contrôle des frais — un menu PROPRE, et non un sous-menu de Finances.
+  /// Finances est le module de l'ARGENT QUI ENTRE : facturer, encaisser, en
+  /// rendre compte. Le contrôle, lui, ne touche à aucun de ces gestes : il
+  /// interroge un frais et répond qui l'a réglé. C'est une surveillance, pas
+  /// une opération de caisse — et le ranger sous Finances laissait croire
+  /// qu'on pouvait y encaisser.
+  static const String feeControlMenuId = 'controle-frais';
+
   /// La caisse boutique (ADR-020) — un menu PROPRE, et non un sous-menu de
   /// Finances : c'est une caisse **étanche** à la scolarité (I-4), qui n'alimente
   /// aucun poste dû, et la ranger sous Finances laissait croire le contraire.
@@ -38,7 +46,12 @@ class MenuConstants {
 
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
-  static const String feeControlId = 'controle-frais';
+
+  /// Page nominative du module Contrôle des frais. Identifiant distinct de
+  /// celui du menu qui le porte : la route de coquille vaut
+  /// `/{menu}/{sousMenu}`, et deux segments identiques n'auraient nommé qu'une
+  /// redondance.
+  static const String feeControlId = 'controle-frais-eleves';
 
   /// Le guichet : catalogue, panier, encaissement.
   static const String boutiqueAchatsId = 'boutique-achats';

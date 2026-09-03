@@ -31,7 +31,8 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/fee_control_page.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_feature_scope.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -389,6 +390,15 @@ class AppRouter {
             ),
           ],
         ),
+      ],
+    ),
+    // Le contrôle des frais a son propre menu et son propre scope : il ne
+    // partage plus celui de Finances. Les deux hydratent les mêmes caches, mais
+    // le contrôle n'a que faire de l'`EnrollmentLocalListBloc` que Finances
+    // fournit — il interroge le local par son propre bloc.
+    ShellRoute(
+      builder: (context, state, child) => FeeControlFeatureScope(child: child),
+      routes: [
         GoRoute(
           path: AppRoutesNames.feeControl,
           builder: (context, state) => const FeeControlPage(),

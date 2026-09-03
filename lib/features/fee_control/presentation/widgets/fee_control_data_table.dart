@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_table_layout.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_table_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Tableau du Contrôle des frais : identité de l'élève **et** sa position sur

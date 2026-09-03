@@ -1032,7 +1032,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuBilling => 'Facturations';
 
   @override
-  String get subMenuFeeControl => 'Contrôle des frais';
+  String get menuFeeControl => 'Contrôle des frais';
+
+  @override
+  String get subMenuFeeControl => 'Contrôle par frais';
 
   @override
   String get menuBoutique => 'Boutique';
@@ -2084,6 +2087,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilModuleFinancesDescription =>
       'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+
+  @override
+  String get accueilModuleFeeControlDescription =>
+      'Pour un frais donné, qui l\'a soldé, qui n\'a versé qu\'une part, qui n\'a rien versé.';
 
   @override
   String get accueilModuleBoutiqueDescription =>

@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';

@@ -6,8 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_summary_band.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_bloc.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_summary_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class MockFeeControlBloc extends MockBloc<FeeControlEvent, FeeControlState>

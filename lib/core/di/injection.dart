@@ -183,7 +183,7 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/s
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/fee_control/fee_control_bloc.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';

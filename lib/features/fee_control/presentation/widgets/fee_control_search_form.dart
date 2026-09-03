@@ -6,9 +6,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_fee_options.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/fee_control_form_fields.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_fee_options.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/widgets/fee_control_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Formulaire de recherche du Contrôle des frais.

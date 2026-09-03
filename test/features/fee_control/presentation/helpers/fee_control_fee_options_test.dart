@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/fee_control_fee_options.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 

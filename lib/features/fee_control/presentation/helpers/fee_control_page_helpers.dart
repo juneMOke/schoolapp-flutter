@@ -1,7 +1,7 @@
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
