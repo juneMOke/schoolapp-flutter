@@ -4,6 +4,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/step_handler
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler_registry.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 
+import 'duplicate_guard_double.dart';
+
 void main() {
   group('EnrollmentStepHandlerRegistry', () {
     test('create retourne des handlers ordonnes et uniques par step', () {
@@ -96,5 +98,6 @@ EnrollmentStepHandlerDependencies _buildDependencies() {
     academicTargetInfoController: EnrollmentStepSubmitController(),
     studentChargesController: EnrollmentStepSubmitController(),
     guardianInfoController: EnrollmentStepSubmitController(),
+    duplicateGuard: inertDuplicateGuard(),
   );
 }

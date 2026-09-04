@@ -27,6 +27,8 @@ import 'package:school_app_flutter/features/student/domain/entities/student_deta
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import 'duplicate_guard_double.dart';
+
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
 
 class _MockFlowBloc extends Mock implements EnrollmentStepperFlowBloc {}
@@ -107,7 +109,10 @@ void main() {
           })
         >[
           (
-            buildHandler: (c) => PersonalInfoStepHandler(controller: c),
+            buildHandler: (c) => PersonalInfoStepHandler(
+              controller: c,
+              duplicateGuard: inertDuplicateGuard(),
+            ),
             title: 'personal-info',
             // Sous-titre retiré (doublon avec le titre) → désormais vide.
             subtitle: '',

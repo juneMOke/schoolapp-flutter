@@ -52,6 +52,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   // « Rien à valider » : dossier serveur clos, OU consultation lecture seule
   // (dont un dossier LOCAL non synchronisé ouvert depuis le listing). Dans ces
   // cas le résumé propose « retour » et ne finalise jamais.
+  /// Vrai pendant qu'une étape pose son dernier mot (cf.
+  /// [EnrollmentStepHandler.confirmBeforeContinue]).
+  bool _confirming = false;
+
   bool get _isEnrollmentAlreadyCompleted =>
       widget.enrollmentDetail.enrollmentDetail.status ==
           EnrollmentStatus.completed ||
@@ -221,11 +225,17 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     _showHint(AppLocalizations.of(context)!.stepForwardHint);
   }
 
-  void _onContinuePressed({
+  Future<void> _onContinuePressed({
     required EnrollmentStepHandler handler,
     required HandlerFlowContext flowContext,
     required bool isEditable,
-  }) {
+  }) async {
+    // Une étape peut demander un dernier mot (sonde de doublon) : la question
+    // est asynchrone, donc le bouton reste tapable pendant la lecture locale
+    // qui précède la popin. Sans ce verrou, deux tapes rapides lanceraient deux
+    // confrontations et empileraient deux popins.
+    if (_confirming) return;
+
     final l10n = AppLocalizations.of(context)!;
     final result = handler.continueFlow(
       HandlerContinueContext(
@@ -244,12 +254,32 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       _showHint(result.hintKey!);
     }
 
-    if (result.status == StepContinueStatus.advance &&
-        result.nextStepIndex != null) {
-      context.read<EnrollmentStepperFlowBloc>().add(
-        EnrollmentStepperCurrentStepChanged(result.nextStepIndex!),
-      );
+    if (result.status != StepContinueStatus.advance ||
+        result.nextStepIndex == null) {
+      return;
     }
+
+    _confirming = true;
+    final bool confirmed;
+    try {
+      confirmed = await handler.confirmBeforeContinue(
+        HandlerConfirmContext(
+          context: context,
+          detail: widget.enrollmentDetail,
+          intent: widget.detailIntent,
+          detailPolicy: widget.detailPolicy,
+          l10n: l10n,
+        ),
+      );
+    } finally {
+      _confirming = false;
+    }
+
+    if (!mounted || !confirmed) return;
+
+    context.read<EnrollmentStepperFlowBloc>().add(
+      EnrollmentStepperCurrentStepChanged(result.nextStepIndex!),
+    );
   }
 
   void _showHint(String message) {

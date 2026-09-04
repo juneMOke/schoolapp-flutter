@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
@@ -11,6 +12,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler_registry.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/probe_enrollment_duplicates_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/enrollment_duplicate_guard.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -47,6 +50,12 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
   late final EnrollmentStepSubmitController _studentChargesController;
   late final EnrollmentStepSubmitController _guardianInfoController;
 
+  /// Sonde de doublon de l'étape Identité. Créée **ici** parce que sa mémoire
+  /// est celle d'une session de saisie : ce que le guichet vient d'assumer ne
+  /// doit pas lui être redemandé au prochain aller-retour d'étape, et doit
+  /// l'être à nouveau au dossier suivant.
+  late final EnrollmentDuplicateGuard _duplicateGuard;
+
   EnrollmentStepFlowPlan _buildFlowPlan(EnrollmentDetail detail) {
     return EnrollmentStepHandlerRegistry.buildPlanFromHandlers(
       handlers: _stepHandlers,
@@ -63,6 +72,12 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
     _academicTargetInfoController = EnrollmentStepSubmitController();
     _studentChargesController = EnrollmentStepSubmitController();
     _guardianInfoController = EnrollmentStepSubmitController();
+    // `.lazy` et non la sonde en main : ce wizard se monte en consultation, en
+    // réédition, en réinscription — des parcours qui ne l'interrogeront jamais.
+    // Le conteneur n'est touché qu'au moment où la question se pose vraiment.
+    _duplicateGuard = EnrollmentDuplicateGuard.lazy(
+      () => getIt<ProbeEnrollmentDuplicatesUseCase>(),
+    );
 
     final handlerDependencies = EnrollmentStepHandlerDependencies(
       personalInfoController: _personalInfoController,
@@ -71,6 +86,7 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
       academicTargetInfoController: _academicTargetInfoController,
       studentChargesController: _studentChargesController,
       guardianInfoController: _guardianInfoController,
+      duplicateGuard: _duplicateGuard,
     );
     _stepHandlers = EnrollmentStepHandlerRegistry.create(handlerDependencies);
 

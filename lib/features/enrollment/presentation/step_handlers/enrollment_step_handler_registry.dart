@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/step_handler
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/student_charges_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/summary_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/target_academic_step_handler.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/enrollment_duplicate_guard.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 
@@ -18,6 +19,12 @@ class EnrollmentStepHandlerDependencies {
   final EnrollmentStepSubmitController studentChargesController;
   final EnrollmentStepSubmitController guardianInfoController;
 
+  /// Sonde de doublon de l'étape Identité. **Requise** : la rendre optionnelle
+  /// ferait d'un oubli de câblage une fonctionnalité muette, et personne ne
+  /// s'en apercevrait — c'est exactement ce qu'une garde ne doit pas pouvoir
+  /// devenir.
+  final EnrollmentDuplicateGuard duplicateGuard;
+
   const EnrollmentStepHandlerDependencies({
     required this.personalInfoController,
     required this.addressController,
@@ -25,6 +32,7 @@ class EnrollmentStepHandlerDependencies {
     required this.academicTargetInfoController,
     required this.studentChargesController,
     required this.guardianInfoController,
+    required this.duplicateGuard,
   });
 }
 
@@ -76,7 +84,10 @@ class EnrollmentStepHandlerRegistry {
     EnrollmentStepHandlerDependencies dependencies,
   ) {
     final handlers = <EnrollmentStepHandler>[
-      PersonalInfoStepHandler(controller: dependencies.personalInfoController),
+      PersonalInfoStepHandler(
+        controller: dependencies.personalInfoController,
+        duplicateGuard: dependencies.duplicateGuard,
+      ),
       AddressStepHandler(controller: dependencies.addressController),
       PreviousAcademicStepHandler(
         controller: dependencies.academicInfoController,
