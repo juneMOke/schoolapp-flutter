@@ -7,6 +7,8 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_duplicate_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/duplicate/known_student_identity.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
@@ -22,6 +24,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   final EnrollmentDraftDao _draftDao;
   final EnrollmentSeedDao _seedDao;
   final ParentSearchDao _parentSearchDao;
+  final EnrollmentDuplicateDao _duplicateDao;
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
   final CurrentUserContext? _currentUser;
@@ -32,6 +35,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     required EnrollmentDraftDao draftDao,
     required EnrollmentSeedDao seedDao,
     required ParentSearchDao parentSearchDao,
+    required EnrollmentDuplicateDao duplicateDao,
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
     CurrentUserContext? currentUser,
@@ -40,6 +44,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
        _draftDao = draftDao,
        _seedDao = seedDao,
        _parentSearchDao = parentSearchDao,
+       _duplicateDao = duplicateDao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
        _currentUser = currentUser,
@@ -510,6 +515,37 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   @override
   Future<Either<Failure, bool>> isStudentKnownToServer(String studentId) =>
       _guardRead(() => _readDao.isStudentKnownToServer(studentId));
+
+  @override
+  Future<Either<Failure, List<KnownStudentIdentity>>> loadDuplicateProbeCorpus({
+    required String studentId,
+    required String enrollmentId,
+    String? academicYearId,
+  }) => _guardRead(() async {
+    // Année non fournie → l'année courante locale. Non résolue (référentiel
+    // non pullé), la source « dossiers de l'année » est sautée plutôt que
+    // devinée : interroger sans scope mélangerait les exercices, et une autre
+    // école avec eux — `enrollments` n'a pas de `school_id`, l'année est la
+    // seule prise.
+    final yearId = academicYearId ?? await _seedDao.findCurrentAcademicYearId();
+
+    final currentYear = yearId == null
+        ? const <KnownStudentIdentity>[]
+        : await _duplicateDao.currentYearIdentities(
+            academicYearId: yearId,
+            excludedStudentId: studentId,
+            excludedEnrollmentId: enrollmentId,
+          );
+
+    // La cohorte N-1 parle même sans année résolue : elle est bornée par
+    // construction (le pull la remplace en bloc), et c'est elle qui porte le
+    // signal le plus utile — « cet enfant relève de la Réinscription ».
+    final cohort = await _duplicateDao.previousYearCohortIdentities(
+      excludedStudentId: studentId,
+    );
+
+    return [...currentYear, ...cohort];
+  });
 
   @override
   Future<Either<Failure, ReenrollmentSearchResult>> searchReenrollmentCohort({

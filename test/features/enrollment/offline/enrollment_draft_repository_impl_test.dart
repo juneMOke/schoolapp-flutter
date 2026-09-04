@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_duplicate_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -22,6 +23,9 @@ class MockEnrollmentDraftDao extends Mock implements EnrollmentDraftDao {}
 class MockEnrollmentSeedDao extends Mock implements EnrollmentSeedDao {}
 
 class MockParentSearchDao extends Mock implements ParentSearchDao {}
+
+class MockEnrollmentDuplicateDao extends Mock
+    implements EnrollmentDuplicateDao {}
 
 class MockIdGenerator extends Mock implements IdGenerator {}
 
@@ -81,6 +85,7 @@ void main() {
       draftDao: draftDao,
       seedDao: seedDao,
       parentSearchDao: parentSearchDao,
+      duplicateDao: MockEnrollmentDuplicateDao(),
       idGenerator: idGen,
       syncEngine: syncEngine,
       now: () => clock,
