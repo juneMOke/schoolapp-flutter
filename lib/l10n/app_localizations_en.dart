@@ -8353,4 +8353,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boutiqueSaleDetailPendingNotice =>
       'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.';
+
+  @override
+  String get enrollmentDuplicateDialogEyebrow => 'Check';
+
+  @override
+  String get enrollmentDuplicateDialogTitle => 'This pupil may already exist';
+
+  @override
+  String get enrollmentDuplicateDialogMessage =>
+      'A pupil with the same details is already in our records. Make sure this is not the same child before you continue.';
+
+  @override
+  String enrollmentDuplicateIdentityLine(String name, String dateOfBirth) {
+    return '$name · born on $dateOfBirth';
+  }
+
+  @override
+  String get enrollmentDuplicateSourceCurrentYear =>
+      'Enrolment for the current year';
+
+  @override
+  String get enrollmentDuplicateSourcePreviousYear =>
+      'Last year\'s pupil — belongs to Re-enrolment';
+
+  @override
+  String enrollmentDuplicateOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count other pupils',
+      one: 'and $count other pupil',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDuplicateFixAction => 'Fix the details';
+
+  @override
+  String get enrollmentDuplicateContinueAction => 'Continue anyway';
 }

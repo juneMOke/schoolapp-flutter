@@ -8430,4 +8430,45 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get boutiqueSaleDetailPendingNotice =>
       'Cette vente n\'est pas encore partie au serveur. Elle partira à la prochaine synchronisation, sans intervention.';
+
+  @override
+  String get enrollmentDuplicateDialogEyebrow => 'Vérification';
+
+  @override
+  String get enrollmentDuplicateDialogTitle =>
+      'Cet élève existe peut-être déjà';
+
+  @override
+  String get enrollmentDuplicateDialogMessage =>
+      'Un élève portant les mêmes informations figure déjà dans nos données. Vérifiez qu\'il ne s\'agit pas du même enfant avant de poursuivre.';
+
+  @override
+  String enrollmentDuplicateIdentityLine(String name, String dateOfBirth) {
+    return '$name · né(e) le $dateOfBirth';
+  }
+
+  @override
+  String get enrollmentDuplicateSourceCurrentYear =>
+      'Dossier de l\'année en cours';
+
+  @override
+  String get enrollmentDuplicateSourcePreviousYear =>
+      'Élève de l\'an dernier — relève de la Réinscription';
+
+  @override
+  String enrollmentDuplicateOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'et $count autres élèves',
+      one: 'et $count autre élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDuplicateFixAction => 'Corriger la saisie';
+
+  @override
+  String get enrollmentDuplicateContinueAction => 'Continuer quand même';
 }

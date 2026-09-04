@@ -4770,5 +4770,25 @@
     "placeholders": {
       "count": { "type": "int" }
     }
+  },
+  "enrollmentDuplicateDialogEyebrow": "Vérification",
+  "enrollmentDuplicateDialogTitle": "Cet élève existe peut-être déjà",
+  "enrollmentDuplicateDialogMessage": "Un élève portant les mêmes informations figure déjà dans nos données. Vérifiez qu'il ne s'agit pas du même enfant avant de poursuivre.",
+  "enrollmentDuplicateIdentityLine": "{name} · né(e) le {dateOfBirth}",
+  "enrollmentDuplicateSourceCurrentYear": "Dossier de l'année en cours",
+  "enrollmentDuplicateSourcePreviousYear": "Élève de l'an dernier — relève de la Réinscription",
+  "enrollmentDuplicateOthers": "{count, plural, one{et {count} autre élève} other{et {count} autres élèves}}",
+  "enrollmentDuplicateFixAction": "Corriger la saisie",
+  "enrollmentDuplicateContinueAction": "Continuer quand même",
+  "@enrollmentDuplicateIdentityLine": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "dateOfBirth": { "type": "String" }
+    }
+  },
+  "@enrollmentDuplicateOthers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
   }
 }

@@ -13607,6 +13607,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.'**
   String get boutiqueSaleDetailPendingNotice;
+
+  /// No description provided for @enrollmentDuplicateDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get enrollmentDuplicateDialogEyebrow;
+
+  /// No description provided for @enrollmentDuplicateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This pupil may already exist'**
+  String get enrollmentDuplicateDialogTitle;
+
+  /// No description provided for @enrollmentDuplicateDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A pupil with the same details is already in our records. Make sure this is not the same child before you continue.'**
+  String get enrollmentDuplicateDialogMessage;
+
+  /// No description provided for @enrollmentDuplicateIdentityLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · born on {dateOfBirth}'**
+  String enrollmentDuplicateIdentityLine(String name, String dateOfBirth);
+
+  /// No description provided for @enrollmentDuplicateSourceCurrentYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment for the current year'**
+  String get enrollmentDuplicateSourceCurrentYear;
+
+  /// No description provided for @enrollmentDuplicateSourcePreviousYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Last year\'s pupil — belongs to Re-enrolment'**
+  String get enrollmentDuplicateSourcePreviousYear;
+
+  /// No description provided for @enrollmentDuplicateOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{and {count} other pupil} other{and {count} other pupils}}'**
+  String enrollmentDuplicateOthers(int count);
+
+  /// No description provided for @enrollmentDuplicateFixAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the details'**
+  String get enrollmentDuplicateFixAction;
+
+  /// No description provided for @enrollmentDuplicateContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue anyway'**
+  String get enrollmentDuplicateContinueAction;
 }
 
 class _AppLocalizationsDelegate

@@ -4814,5 +4814,25 @@
     "placeholders": {
       "count": { "type": "int" }
     }
+  },
+  "enrollmentDuplicateDialogEyebrow": "Check",
+  "enrollmentDuplicateDialogTitle": "This pupil may already exist",
+  "enrollmentDuplicateDialogMessage": "A pupil with the same details is already in our records. Make sure this is not the same child before you continue.",
+  "enrollmentDuplicateIdentityLine": "{name} · born on {dateOfBirth}",
+  "enrollmentDuplicateSourceCurrentYear": "Enrolment for the current year",
+  "enrollmentDuplicateSourcePreviousYear": "Last year's pupil — belongs to Re-enrolment",
+  "enrollmentDuplicateOthers": "{count, plural, one{and {count} other pupil} other{and {count} other pupils}}",
+  "enrollmentDuplicateFixAction": "Fix the details",
+  "enrollmentDuplicateContinueAction": "Continue anyway",
+  "@enrollmentDuplicateIdentityLine": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "dateOfBirth": { "type": "String" }
+    }
+  },
+  "@enrollmentDuplicateOthers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
   }
 }
