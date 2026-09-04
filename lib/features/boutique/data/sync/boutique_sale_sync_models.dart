@@ -95,9 +95,16 @@ class BoutiqueSaleInput {
       for (final amount in amounts.entries)
         {'amountInCents': amount.amountInCents, 'currency': amount.currency},
     ],
-    // Omis quand il n'y a rien à dire : le serveur écrit alors l'identité, ce
-    // qui est exactement vrai. Une liste vide sur le fil dirait « rien n'est
-    // entré » sur une vente encaissée.
+    // Une liste vide sur le fil dirait « rien n'est entré » sur une vente
+    // encaissée : la clé s'omet plutôt.
+    //
+    // ⚠️ **Se taire n'est plus neutre** depuis le contrat du 2026-09-04. Le
+    // serveur écrit toujours l'identité pour un acte muet, mais il la marque
+    // désormais `DERIVED` — un postulat, et non un constat de comptoir — et
+    // chaque acte silencieux produit une ligne d'arbitrage
+    // `TENDER_UNDECLARED` dans les écoles qui publient un taux de guichet.
+    // `tendersFor` compose donc au moins l'identité pour toute vente non
+    // vide : ce garde-fou ne couvre plus qu'un panier sans aucune ligne.
     if (tenders.isNotEmpty)
       'tenders': [
         for (final tender in tenders)

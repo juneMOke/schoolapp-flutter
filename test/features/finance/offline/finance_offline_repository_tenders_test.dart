@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -64,6 +66,18 @@ void main() {
     amountInCents: 3000,
     currency: 'USD',
   );
+
+  /// Ce qui part réellement sur le fil pour ce versement.
+  Future<Map<String, dynamic>> pushedPayment(String paymentId) async {
+    final entry = (await db.query(
+      'outbox',
+      where: 'aggregate_type = ? AND aggregate_id = ?',
+      whereArgs: ['PAYMENT', paymentId],
+    )).single;
+    final payload =
+        jsonDecode(entry['payload'] as String) as Map<String, dynamic>;
+    return payload['payment'] as Map<String, dynamic>;
+  }
 
   Future<List<Map<String, Object?>>> tendersOf(String paymentId) => db.query(
     'payment_tenders',
@@ -212,4 +226,108 @@ void main() {
       expect(await db.query('payment_tenders'), isEmpty);
     },
   );
+
+  /// Le perçu ne sert à rien tant qu'il reste dans la tablette.
+  ///
+  /// Le serveur ne refuse pas un versement qui ne déclare rien : il écrit
+  /// l'identité — perçu = imputé, taux 1. Se taire, ce n'est donc pas « ne rien
+  /// dire », c'est affirmer que le tiroir a vu la devise de la créance. La
+  /// caisse du jour, le contrôle de divergence de taux et le second poste
+  /// lisent tous cette affirmation-là.
+  group('ce que le tiroir a vu part sur le fil', () {
+    test(
+      'un règlement converti est DÉCLARÉ, avec sa devise et son taux',
+      () async {
+        final result = await repo.recordPayment(
+          draft(
+            allocations: [dollars],
+            tenders: const [
+              TenderDraft(
+                amountInCents: 5000000,
+                currency: 'CDF',
+                rateMicros: _taux166667,
+                pivotCurrency: 'USD',
+              ),
+            ],
+          ),
+        );
+
+        final paymentId = result.getOrElse(() => '');
+        final payment = await pushedPayment(paymentId);
+        final tender =
+            (payment['tenders'] as List<dynamic>).single
+                as Map<String, dynamic>;
+
+        expect(tender['amountInCents'], 5000000);
+        expect(tender['currency'], 'CDF');
+        expect(tender['pivotCurrency'], 'USD');
+        // Le taux voyage en DÉCIMAL (`numeric(18,6)` serveur) : les micro-unités
+        // sont une convention locale.
+        expect(tender['rate'], closeTo(1666.67, 0.000001));
+
+        // `amounts` n'a pas bougé d'axe : il reste l'IMPUTÉ, en devise de
+        // créance. Les deux listes ne se recoupent pas — c'est tout l'intérêt.
+        final amounts =
+            (payment['amounts'] as List<dynamic>).single
+                as Map<String, dynamic>;
+        expect(amounts['currency'], 'USD');
+        expect(amounts['amountInCents'], 3000);
+      },
+    );
+
+    test('l\'identité aussi est déclarée — un versement muet ferait écrire au '
+        'serveur ce que le tiroir n\'a pas vu', () async {
+      final result = await repo.recordPayment(draft(allocations: [dollars]));
+
+      final payment = await pushedPayment(result.getOrElse(() => ''));
+      final tender =
+          (payment['tenders'] as List<dynamic>).single as Map<String, dynamic>;
+
+      expect(tender['amountInCents'], 3000);
+      expect(tender['currency'], 'USD');
+      expect(tender['pivotCurrency'], 'USD');
+      expect(tender['rate'], 1.0);
+    });
+
+    /// Le serveur honore l'uuid client d'une ligne d'encaissement comme celui
+    /// d'une allocation. Sans lui, il en invente un, le pull redescend la ligne
+    /// sous CET id, et l'upsert local — qui apparie par id — l'INSÈRE à côté de
+    /// la nôtre : le versement se relit alors avec deux fois ce qui est entré
+    /// dans le tiroir, et le ticket, qui somme cette table, l'imprime.
+    test('la ligne poussée porte l\'id de la ligne locale', () async {
+      final result = await repo.recordPayment(draft(allocations: [dollars]));
+
+      final paymentId = result.getOrElse(() => '');
+      final local = await tendersOf(paymentId);
+      final payment = await pushedPayment(paymentId);
+      final tender =
+          (payment['tenders'] as List<dynamic>).single as Map<String, dynamic>;
+
+      expect(tender['id'], local.single['id']);
+      expect(tender['id'], isNotNull);
+    });
+
+    test('deux devises de créance font deux lignes sur le fil', () async {
+      final result = await repo.recordPayment(
+        draft(
+          allocations: [
+            dollars,
+            const AllocationDraft(
+              feeCode: 'FRAIS_VISITE',
+              studentChargeLabel: 'Visite médicale',
+              amountInCents: 9000000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+      );
+
+      final payment = await pushedPayment(result.getOrElse(() => ''));
+      final tenders = (payment['tenders'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+
+      expect(tenders.map((t) => t['currency']), ['CDF', 'USD']);
+      expect(tenders.map((t) => t['amountInCents']), [9000000, 3000]);
+    });
+  });
 }

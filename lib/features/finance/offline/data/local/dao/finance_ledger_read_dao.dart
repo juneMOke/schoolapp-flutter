@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_t
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -361,6 +362,141 @@ class FinanceLedgerReadDao {
       );
     }
     return aggregates;
+  }
+
+  /// Natures de frais **réellement facturées** sur l'année (tableau de bord du
+  /// Contrôle des frais).
+  ///
+  /// Lues dans le grand-livre, et **non dans la grille tarifaire**, pour deux
+  /// raisons qui vont dans le même sens. D'abord la grille peut ne pas être sur
+  /// l'appareil — caviardée faute de `finance.grid.read`, ou simplement pas
+  /// encore descendue — alors que les créances, elles, sont là : l'écran
+  /// resterait vide en ayant tout ce qu'il faut pour répondre. Ensuite la
+  /// population mesurée vient des créances : lister un frais que personne ne
+  /// porte n'offrirait qu'une sélection qui ne rend rien.
+  ///
+  /// `academic_year_id IS NULL` est inclus : une créance sans année appartient à
+  /// toutes les années (cf. `LocalStudentCharge.belongsToYear`).
+  ///
+  /// Rend des **codes de nature**, que l'appelant nomme par
+  /// `localizedFeeLabel`. Surtout pas le `label` d'une ligne : l'écran est
+  /// école-wide, deux niveaux portent le même `fee_code` sous des libellés
+  /// différents, et en retenir un serait le choisir au hasard des données —
+  /// le défaut du `MIN(currency)` déjà corrigé ici même.
+  ///
+  /// **Triées par nombre de créances, la plus portée en tête.** L'écran ouvre
+  /// sur la première : un tableau de bord se lit, il ne se remplit pas. Un tri
+  /// alphabétique le ferait ouvrir sur « ASSUR » — douze élèves — quand la
+  /// question du matin porte sur le minerval. Le `fee_code` ferme le tri, pour
+  /// que deux natures à égalité gardent un ordre **stable**.
+  Future<List<String>> getFeeCodesForYear(String academicYearId) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT fee_code, COUNT(*) AS charges
+      FROM student_charges
+      WHERE academic_year_id = ? OR academic_year_id IS NULL
+      GROUP BY fee_code
+      ORDER BY charges DESC, fee_code
+      ''',
+      [academicYearId],
+    );
+    return rows.map((r) => r['fee_code'] as String).toList(growable: false);
+  }
+
+  /// Position de **toute la population** sur un frais, ventilée par niveau
+  /// (tableau de bord du Contrôle des frais).
+  ///
+  /// Même arithmétique que [getFeeChargeAggregates] — miroir serveur plus les
+  /// allocations des paiements non encore remontés — mais la population n'est
+  /// pas donnée : elle est **découverte**. D'où l'absence de `student_id IN (…)`,
+  /// donc de lots d'identifiants, donc de liste à composer en amont.
+  ///
+  /// `GROUP BY` sur `(élève, niveau, devise)` :
+  ///  - la **devise** parce qu'un `MIN()` étiquetterait l'agrégat de la devise
+  ///    la plus petite alphabétiquement ;
+  ///  - le **niveau** parce qu'un élève qui change de niveau en cours d'année
+  ///    porte le même frais deux fois, et doit bel et bien à chacun. Il compte
+  ///    donc dans les deux — ce qui garantit que le total de l'école reste la
+  ///    somme de ses niveaux (FCD, D5). Cas rare, mais l'écrire évite qu'on
+  ///    « corrige » un jour un écart qui n'en est pas un.
+  ///
+  /// [schoolLevelGroupId] borne au cycle. ⚠️ Le filtre est **ajouté au SQL**
+  /// plutôt qu'écrit `(? IS NULL OR …)` : sqflite refuse `null` dans
+  /// `whereArgs` et lèverait à l'exécution — le défaut latent connu de deux DAO
+  /// voisins. Ici la clause n'existe que si le cycle existe.
+  ///
+  /// ⚠️ Aucun index ne couvre `fee_code` ni `school_level_id` : la requête
+  /// scanne `student_charges`. C'est assumé — un index coûterait une migration,
+  /// arbitrage déjà rendu pour cet écran — mais c'est à mesurer sur une base
+  /// peuplée avant d'en dépendre. La sous-requête d'allocations, elle, s'appuie
+  /// sur `idx_payment_allocations_charge`, qui existe.
+  Future<List<LocalFeeLevelAggregate>> getFeeChargePositionsByLevel({
+    required String academicYearId,
+    required String feeCode,
+    String? schoolLevelGroupId,
+  }) async {
+    final args = <Object>[
+      SyncState.synced.dbValue,
+      feeCode,
+      academicYearId,
+      ?schoolLevelGroupId,
+    ];
+    final cycleClause = schoolLevelGroupId == null
+        ? ''
+        : 'AND sc.school_level_group_id = ?';
+
+    final rows = await _db.rawQuery('''
+      SELECT sc.student_id                    AS student_id,
+             sc.school_level_id               AS school_level_id,
+             sc.currency                      AS currency,
+             SUM(sc.expected_amount_in_cents) AS expected,
+             SUM(sc.amount_paid_in_cents)     AS paid_mirror,
+             SUM(COALESCE((
+               SELECT SUM(pa.amount_in_cents)
+               FROM payment_allocations pa
+               JOIN payments p ON p.id = pa.payment_id
+               WHERE pa.student_charge_id = sc.id
+                 AND p.sync_status <> ?
+             ), 0))                           AS paid_pending
+      FROM student_charges sc
+      WHERE sc.fee_code = ?
+        AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
+        $cycleClause
+      GROUP BY sc.student_id, sc.school_level_id, sc.currency
+      ORDER BY sc.student_id, sc.school_level_id, sc.currency
+      ''', args);
+
+    // Une LIGNE par (élève, niveau, devise) → un agrégat par (élève, niveau),
+    // portant une position par devise. Deux Map imbriquées plutôt qu'une clé
+    // concaténée : un identifiant n'a pas à promettre qu'il ne contient pas le
+    // séparateur qu'on aurait choisi.
+    final byStudent = <String, Map<String?, List<FeeChargePosition>>>{};
+    for (final r in rows) {
+      final studentId = r['student_id'] as String;
+      final levelId = r['school_level_id'] as String?;
+      final positions = (byStudent[studentId] ??= {})[levelId] ??=
+          <FeeChargePosition>[];
+      positions.add(
+        FeeChargePosition(
+          currency: CurrencyCode.normalize((r['currency'] as String?) ?? ''),
+          expectedInCents: (r['expected'] as int?) ?? 0,
+          paidMirrorInCents: (r['paid_mirror'] as int?) ?? 0,
+          paidPendingInCents: (r['paid_pending'] as int?) ?? 0,
+        ),
+      );
+    }
+
+    return [
+      for (final student in byStudent.entries)
+        for (final level in student.value.entries)
+          LocalFeeLevelAggregate(
+            schoolLevelId: level.key,
+            charge: LocalFeeChargeAggregate(
+              studentId: student.key,
+              positions: level.value,
+            ),
+          ),
+    ];
   }
 
   /// Taille des lots d'identifiants. SQLite plafonne les variables liées d'une

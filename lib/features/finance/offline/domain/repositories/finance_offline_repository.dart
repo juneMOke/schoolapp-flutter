@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
@@ -200,5 +201,20 @@ abstract class FinanceOfflineRepository {
     required String academicYearId,
     required String feeCode,
     required List<String> studentIds,
+  });
+
+  /// Natures de frais réellement facturées sur l'année — la liste que le
+  /// tableau de bord du Contrôle des frais propose à la sélection.
+  Future<Either<Failure, List<String>>> getFeeCodesForYear(
+    String academicYearId,
+  );
+
+  /// Position de TOUTE la population sur le frais [feeCode], ventilée par
+  /// niveau, éventuellement bornée au cycle [schoolLevelGroupId].
+  Future<Either<Failure, List<LocalFeeLevelAggregate>>>
+  getFeeChargePositionsByLevel({
+    required String academicYearId,
+    required String feeCode,
+    String? schoolLevelGroupId,
   });
 }

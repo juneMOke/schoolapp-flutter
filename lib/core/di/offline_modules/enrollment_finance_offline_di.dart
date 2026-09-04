@@ -17,6 +17,7 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_duplicate_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
@@ -51,6 +52,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/list_cache
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_reenrollment_candidate_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/is_student_known_to_server_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/probe_enrollment_duplicates_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/probe_reenrollment_dossier_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_address_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_guardians_use_case.dart';
@@ -82,6 +84,8 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ex
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_positions_by_level_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
@@ -181,6 +185,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<ParentSearchDao>(
     () => ParentSearchDao(getIt<Database>()),
   );
+  // Sonde de doublon d'inscription (popin de l'étape 1, Première inscription) :
+  // lecture seule, projection au strict nécessaire, DAO dédié — sa discipline
+  // de lecture n'est pas celle des listes (cf. DOUBLON_INSCRIPTION_PLAN.md §5).
+  getIt.registerLazySingleton<EnrollmentDuplicateDao>(
+    () => EnrollmentDuplicateDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<FinanceLocalDao>(
     () => FinanceLocalDao(getIt<Database>(), getIt<IdGenerator>()),
   );
@@ -224,6 +234,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       draftDao: getIt<EnrollmentDraftDao>(),
       seedDao: getIt<EnrollmentSeedDao>(),
       parentSearchDao: getIt<ParentSearchDao>(),
+      duplicateDao: getIt<EnrollmentDuplicateDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
       currentUser: getIt<CurrentUserContext>(),
@@ -394,6 +405,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<IsStudentKnownToServerUseCase>(
     () => IsStudentKnownToServerUseCase(getIt<EnrollmentOfflineRepository>()),
   );
+  // Sonde de doublon : « cet enfant est-il déjà dans nos bases ? », posée après
+  // l'étape Identité d'une Première inscription. Jamais bloquante.
+  getIt.registerFactory<ProbeEnrollmentDuplicatesUseCase>(
+    () =>
+        ProbeEnrollmentDuplicatesUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
   // ── Anomalies d'encaissement (ADR-012 D-5, amendé) ─────────────────────────
   // Hors de l'outbox et hors de la pastille de synchro : une anomalie survit à
   // la synchro réussie qui l'a révélée, et ne s'éteint que sur accusé explicite.
@@ -558,6 +575,13 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetFeeChargeAggregatesUseCase>(
     () => GetFeeChargeAggregatesUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeCodesForYearUseCase>(
+    () => GetFeeCodesForYearUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeChargePositionsByLevelUseCase>(
+    () =>
+        GetFeeChargePositionsByLevelUseCase(getIt<FinanceOfflineRepository>()),
   );
 
   getIt.registerFactory<InitializeChargesUseCase>(

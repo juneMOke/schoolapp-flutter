@@ -1078,7 +1078,11 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "subMenuFeeControl": "Fee control",
+  "menuFeeControl": "Fee control",
+  "@menuFeeControl": {
+    "description": "Fee control menu title"
+  },
+  "subMenuFeeControl": "Control by fee",
   "@subMenuFeeControl": {
     "description": "Fee control sub-menu title"
   },
@@ -1765,6 +1769,7 @@
   "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
   "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
@@ -2471,6 +2476,31 @@
   "feeControlNoChargeDescription": "No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.",
   "feeControlEmptyNoEnrollmentForLevel": "No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.",
   "feeControlNoChargeForLevelDescription": "No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.",
+  "feeControlDashboardCycleAll": "All cycles",
+  "feeControlDashboardRankingTitle": "Where each level stands",
+  "feeControlDashboardRankingHint": "The levels furthest behind come first.",
+  "feeControlDashboardGroupTally": "{settled} of {total}",
+  "@feeControlDashboardGroupTally": {"placeholders": {"settled": {"type": "int"}, "total": {"type": "int"}}},
+  "feeControlDashboardGroupA11y": "{level}: {percent}% settled, {settled} of {total} students concerned",
+  "@feeControlDashboardGroupA11y": {"placeholders": {"level": {"type": "String"}, "percent": {"type": "int"}, "settled": {"type": "int"}, "total": {"type": "int"}}},
+  "feeControlDashboardLevelUnknown": "Level not recorded",
+  "feeControlDashboardLevelMissing": "Level missing from the reference data",
+  "feeControlDashboardNoFeesTitle": "No fee billed",
+  "feeControlDashboardNoFeesDescription": "No charge exists on this device for this year. Sync, then reopen the dashboard.",
+  "feeControlDashboardEmptyTitle": "No student concerned",
+  "feeControlDashboardEmptyDescription": "Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.",
+  "feeControlDashboardExpand": "Show the classes of this level",
+  "feeControlDashboardCollapse": "Hide the classes",
+  "feeControlDashboardUnassigned": "Unassigned",
+  "feeControlDashboardClassesLoading": "Loading this level’s classes…",
+  "feeControlDashboardClassroomsMissing": "The class composition for this level has not reached this device. Sync, then reopen the level.",
+  "feeControlDashboardClassroomsWithheld": "Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.",
+  "feeControlDashboardClassesFailed": "The classes of this level could not be read on this device.",
+  "feeControlDashboardUnbilled": "{count, plural, one{{count} enrolled student does not carry this fee} other{{count} enrolled students do not carry this fee}}",
+  "@feeControlDashboardUnbilled": {"placeholders": {"count": {"type": "int"}}},
+  "feeControlDashboardRemaining": "Left to collect: {amounts}",
+  "@feeControlDashboardRemaining": {"placeholders": {"amounts": {"type": "String"}}},
+  "feeControlDashboardOpenControl": "View students",
   "feeControlCriteriaFee": "Fee: {label}",
   "@feeControlCriteriaFee": {
     "description": "Criteria chip recalling the controlled fee.",
@@ -4781,6 +4811,26 @@
   "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
   "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
   "@boutiqueOpenCartWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "enrollmentDuplicateDialogEyebrow": "Check",
+  "enrollmentDuplicateDialogTitle": "This pupil may already exist",
+  "enrollmentDuplicateDialogMessage": "A pupil with the same details is already in our records. Make sure this is not the same child before you continue.",
+  "enrollmentDuplicateIdentityLine": "{name} · born on {dateOfBirth}",
+  "enrollmentDuplicateSourceCurrentYear": "Enrolment for the current year",
+  "enrollmentDuplicateSourcePreviousYear": "Last year's pupil — belongs to Re-enrolment",
+  "enrollmentDuplicateOthers": "{count, plural, one{and {count} other pupil} other{and {count} other pupils}}",
+  "enrollmentDuplicateFixAction": "Fix the details",
+  "enrollmentDuplicateContinueAction": "Continue anyway",
+  "@enrollmentDuplicateIdentityLine": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "dateOfBirth": { "type": "String" }
+    }
+  },
+  "@enrollmentDuplicateOthers": {
     "placeholders": {
       "count": { "type": "int" }
     }

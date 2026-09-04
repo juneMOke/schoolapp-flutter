@@ -26,6 +26,7 @@ class MenuFactory {
       _createAccueilMenu(l10n),
       _createInscriptionsMenu(l10n),
       _createFinancesMenu(l10n),
+      _createFeeControlMenu(l10n),
       _createBoutiqueMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
@@ -147,6 +148,29 @@ class MenuFactory {
           id: MenuConstants.facturationsId,
           title: l10n.subMenuBilling,
           route: AppRoutesNames.facturations,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Contrôle des frais — un menu propre, et non un sous-menu de Finances.
+  ///
+  /// Finances porte les gestes de caisse : facturer, encaisser, en rendre
+  /// compte. Le contrôle n'en accomplit aucun — il interroge un frais et
+  /// répond qui l'a réglé, en lecture seule. C'est le regard du secrétariat
+  /// sur le recouvrement, qui n'a d'ailleurs que `finance.charge.read` : le
+  /// laisser sous Finances lui ouvrait un module dont il ne touche qu'un
+  /// écran.
+  static MenuItem _createFeeControlMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.feeControlMenuId,
+      title: l10n.menuFeeControl,
+      icon: Icons.fact_check_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.feeControlDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.feeControlDashboard,
         ),
         SubMenuItem(
           id: MenuConstants.feeControlId,

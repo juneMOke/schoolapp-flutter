@@ -91,18 +91,21 @@ void main() {
   }
 
   testWidgets(
-    'affiche les sept cartes modules et annonce leur page d\'entrée',
+    'affiche les huit cartes modules et annonce leur page d\'entrée',
     (tester) async {
       final semantics = tester.ensureSemantics();
       await pumpAccueil(tester);
 
-      expect(find.byType(AccueilModuleCard), findsNWidgets(7));
+      expect(find.byType(AccueilModuleCard), findsNWidgets(8));
 
       // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
       // le tableau de bord quand il existe, sinon la première page du module.
       const entryByModule = {
         'Inscriptions': 'Tableau de bord',
         'Finances': 'Tableau de bord',
+        // Module propre depuis 2026-09-02. Depuis qu'il a un tableau de bord,
+        // l'en-tête y mène — la synthèse d'abord, les noms ensuite.
+        'Contrôle des frais': 'Tableau de bord',
         'Classes': 'Tableau de bord',
         'Cours': 'Emploi du temps',
         'Résultats': 'Résultats par classe',
@@ -125,15 +128,14 @@ void main() {
   testWidgets('annonce le nombre de pages de chaque module', (tester) async {
     await pumpAccueil(tester);
 
-    // Inscriptions : tableau de bord + Première inscription — Réinscription et
-    // Pré-inscription sont masquées (`kHiddenSubMenus`). Résultats et
-    // Configuration : page unique, au singulier.
+    // Résultats et Configuration : page unique, au singulier.
     expect(find.text('1 page'), findsNWidgets(2));
-    // Cours et Inscriptions en ont deux.
-    expect(find.text('2 pages'), findsNWidgets(2));
-    // Finances (tableau de bord + Facturations + Contrôle des frais), Classes
-    // et Disciplines en ont trois.
-    expect(find.text('3 pages'), findsNWidgets(3));
+    // Cours, Inscriptions (Réinscription et Pré-inscription masquées par
+    // `kHiddenSubMenus`), Finances (tableau de bord + Facturations) et Contrôle
+    // des frais (tableau de bord + contrôle par frais) en ont deux.
+    expect(find.text('2 pages'), findsNWidgets(4));
+    // Classes et Disciplines en ont trois.
+    expect(find.text('3 pages'), findsNWidgets(2));
     expect(find.text('4 pages'), findsNothing);
   });
 
@@ -175,7 +177,9 @@ void main() {
     await pumpAccueil(tester);
 
     // Le témoin était « Pré-inscriptions », masquée depuis (`kHiddenSubMenus`).
-    await tester.tap(find.text('Contrôle des frais'));
+    // « Contrôle par frais » est la LIGNE : la carte qui la porte s'intitule
+    // « Contrôle des frais », et viser ce dernier texte trouverait les deux.
+    await tester.tap(find.text('Contrôle par frais'));
     await tester.pumpAndSettle();
 
     // La ligne absorbe le tap : on atterrit sur le sous-écran, pas sur le
@@ -188,11 +192,12 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    // 2 + 3 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03, Finances passée à 3
-    // avec le Contrôle des frais, plus la carte Configuration). Inscriptions
-    // est descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées
-    // par décision produit (`kHiddenSubMenus`).
-    expect(find.byType(AccueilSubModuleRow), findsNWidgets(15));
+    // 2 + 2 + 2 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03 ; Finances redescendue
+    // à 2, le Contrôle des frais ayant emporté sa page dans son propre module,
+    // où il en a depuis deux ; plus la carte Configuration). Inscriptions est
+    // descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées par
+    // décision produit (`kHiddenSubMenus`).
+    expect(find.byType(AccueilSubModuleRow), findsNWidgets(16));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

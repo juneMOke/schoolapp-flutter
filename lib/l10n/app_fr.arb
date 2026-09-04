@@ -1048,7 +1048,8 @@
   "subMenuReRegistrations": "Réinscriptions",
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
-  "subMenuFeeControl": "Contrôle des frais",
+  "menuFeeControl": "Contrôle des frais",
+  "subMenuFeeControl": "Contrôle par frais",
   "menuBoutique": "Boutique",
   "subMenuBoutiquePurchases": "Achats",
   "subMenuBoutiqueHistory": "Historiques",
@@ -1711,6 +1712,7 @@
   "accueilModulesIntro": "Ces modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
+  "accueilModuleFeeControlDescription": "Pour un frais donné, qui l'a soldé, qui n'a versé qu'une part, qui n'a rien versé.",
   "accueilModuleBoutiqueDescription": "Vente au comptant d'articles scolaires, et historique des encaissements du guichet.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
   "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
@@ -2419,6 +2421,31 @@
   "feeControlNoChargeDescription": "Aucun élève de cette classe ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne s'applique pas à ce niveau.",
   "feeControlEmptyNoEnrollmentForLevel": "Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d'être saisies ailleurs, synchronisez puis relancez le contrôle.",
   "feeControlNoChargeForLevelDescription": "Aucun élève de ce niveau ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne leur est pas applicable.",
+  "feeControlDashboardCycleAll": "Tous les cycles",
+  "feeControlDashboardRankingTitle": "Où en est chaque niveau",
+  "feeControlDashboardRankingHint": "Les niveaux les plus en retard d'abord.",
+  "feeControlDashboardGroupTally": "{settled} sur {total}",
+  "@feeControlDashboardGroupTally": {"placeholders": {"settled": {"type": "int"}, "total": {"type": "int"}}},
+  "feeControlDashboardGroupA11y": "{level} : {percent} % en ordre, {settled} sur {total} élèves concernés",
+  "@feeControlDashboardGroupA11y": {"placeholders": {"level": {"type": "String"}, "percent": {"type": "int"}, "settled": {"type": "int"}, "total": {"type": "int"}}},
+  "feeControlDashboardLevelUnknown": "Niveau non renseigné",
+  "feeControlDashboardLevelMissing": "Niveau absent du référentiel",
+  "feeControlDashboardNoFeesTitle": "Aucun frais facturé",
+  "feeControlDashboardNoFeesDescription": "Aucune créance n'existe sur cet appareil pour cette année. Synchronisez, puis rouvrez le tableau de bord.",
+  "feeControlDashboardEmptyTitle": "Aucun élève concerné",
+  "feeControlDashboardEmptyDescription": "Personne ne porte ce frais dans ce périmètre : il n'a pas encore été généré, ou il ne s'applique pas ici.",
+  "feeControlDashboardExpand": "Voir les classes de ce niveau",
+  "feeControlDashboardCollapse": "Masquer les classes",
+  "feeControlDashboardUnassigned": "Non répartis",
+  "feeControlDashboardClassesLoading": "Chargement des classes de ce niveau…",
+  "feeControlDashboardClassroomsMissing": "La composition des classes de ce niveau n'est pas descendue sur cet appareil. Synchronisez, puis rouvrez le niveau.",
+  "feeControlDashboardClassroomsWithheld": "La composition des classes relève d'un module auquel ce profil n'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.",
+  "feeControlDashboardClassesFailed": "Les classes de ce niveau n'ont pas pu être lues sur cet appareil.",
+  "feeControlDashboardUnbilled": "{count, plural, one{{count} élève inscrit ne porte pas ce frais} other{{count} élèves inscrits ne portent pas ce frais}}",
+  "@feeControlDashboardUnbilled": {"placeholders": {"count": {"type": "int"}}},
+  "feeControlDashboardRemaining": "Reste à recouvrer : {amounts}",
+  "@feeControlDashboardRemaining": {"placeholders": {"amounts": {"type": "String"}}},
+  "feeControlDashboardOpenControl": "Voir les élèves",
   "feeControlCriteriaFee": "Frais : {label}",
   "@feeControlCriteriaFee": {
     "description": "Puce de critère rappelant le frais contrôlé.",
@@ -4740,6 +4767,26 @@
   "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
   "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
   "@boutiqueOpenCartWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "enrollmentDuplicateDialogEyebrow": "Vérification",
+  "enrollmentDuplicateDialogTitle": "Cet élève existe peut-être déjà",
+  "enrollmentDuplicateDialogMessage": "Un élève portant les mêmes informations figure déjà dans nos données. Vérifiez qu'il ne s'agit pas du même enfant avant de poursuivre.",
+  "enrollmentDuplicateIdentityLine": "{name} · né(e) le {dateOfBirth}",
+  "enrollmentDuplicateSourceCurrentYear": "Dossier de l'année en cours",
+  "enrollmentDuplicateSourcePreviousYear": "Élève de l'an dernier — relève de la Réinscription",
+  "enrollmentDuplicateOthers": "{count, plural, one{et {count} autre élève} other{et {count} autres élèves}}",
+  "enrollmentDuplicateFixAction": "Corriger la saisie",
+  "enrollmentDuplicateContinueAction": "Continuer quand même",
+  "@enrollmentDuplicateIdentityLine": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "dateOfBirth": { "type": "String" }
+    }
+  },
+  "@enrollmentDuplicateOthers": {
     "placeholders": {
       "count": { "type": "int" }
     }

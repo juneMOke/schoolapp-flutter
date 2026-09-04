@@ -129,6 +129,25 @@ void main() {
     },
   );
 
+  /// ⚠️ Le test voisin éprouve la table LOCALE ; celui-ci éprouve le FIL, et ce
+  /// n'est pas la même promesse. Depuis le contrat du 2026-09-04, une vente qui
+  /// ne déclare rien se voit écrire l'identité par le serveur, marquée
+  /// `DERIVED` : un postulat indiscernable d'un constat, qui vaut une ligne
+  /// d'arbitrage `TENDER_UNDECLARED` partout où l'école publie un taux de
+  /// guichet. Déclarer l'identité est ce qui transforme la ligne en observation.
+  test('l\'identité part sur le FIL — se taire la ferait écrire au serveur, '
+      'et elle ne vaudrait plus constat', () async {
+    await repo().recordSale(cart: cart(), academicYearId: 'ay-1');
+
+    final sale = await pushedSale();
+    final tender = (sale['tenders'] as List).single as Map<String, dynamic>;
+
+    expect(tender['amountInCents'], 5000);
+    expect(tender['currency'], 'USD');
+    expect(tender['pivotCurrency'], 'USD');
+    expect(tender['rate'], closeTo(1, 1e-9));
+  });
+
   test(
     'réglé en francs : le tiroir garde des FRANCS, la vente reste en dollars',
     () async {

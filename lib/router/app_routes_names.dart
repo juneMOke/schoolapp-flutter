@@ -25,8 +25,6 @@ class AppRoutesNames {
   static const String facturationDetail =
       '/finances/${MenuConstants.facturationsId}/detail/:studentId/:academicYearId';
 
-  static const String feeControl = '/finances/${MenuConstants.feeControlId}';
-
   static String facturationDetailPath({
     required String studentId,
     required String academicYearId,
@@ -49,6 +47,13 @@ class AppRoutesNames {
   }) =>
       '/finances/${MenuConstants.facturationsId}'
       '/detail/$studentId/$academicYearId/encaissement';
+
+  /// Contrôle des frais — module propre depuis 2026-09-02 : le chemin ne
+  /// passe plus par `/finances`.
+  static const String feeControlDashboard =
+      '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlDashboardId}';
+  static const String feeControl =
+      '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlId}';
 
   static const String boutiqueAchats =
       '/boutique/${MenuConstants.boutiqueAchatsId}';

@@ -1024,7 +1024,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get subMenuFeeControl => 'Fee control';
+  String get menuFeeControl => 'Fee control';
+
+  @override
+  String get subMenuFeeControl => 'Control by fee';
 
   @override
   String get menuBoutique => 'Shop';
@@ -2074,6 +2077,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleFinancesDescription =>
       'Revenue, invoicing and tracking of school fee collection.';
+
+  @override
+  String get accueilModuleFeeControlDescription =>
+      'For a given fee: who has settled it, who has paid only part of it, who has paid nothing.';
 
   @override
   String get accueilModuleBoutiqueDescription =>
@@ -3652,6 +3659,96 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feeControlNoChargeForLevelDescription =>
       'No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.';
+
+  @override
+  String get feeControlDashboardCycleAll => 'All cycles';
+
+  @override
+  String get feeControlDashboardRankingTitle => 'Where each level stands';
+
+  @override
+  String get feeControlDashboardRankingHint =>
+      'The levels furthest behind come first.';
+
+  @override
+  String feeControlDashboardGroupTally(int settled, int total) {
+    return '$settled of $total';
+  }
+
+  @override
+  String feeControlDashboardGroupA11y(
+    String level,
+    int percent,
+    int settled,
+    int total,
+  ) {
+    return '$level: $percent% settled, $settled of $total students concerned';
+  }
+
+  @override
+  String get feeControlDashboardLevelUnknown => 'Level not recorded';
+
+  @override
+  String get feeControlDashboardLevelMissing =>
+      'Level missing from the reference data';
+
+  @override
+  String get feeControlDashboardNoFeesTitle => 'No fee billed';
+
+  @override
+  String get feeControlDashboardNoFeesDescription =>
+      'No charge exists on this device for this year. Sync, then reopen the dashboard.';
+
+  @override
+  String get feeControlDashboardEmptyTitle => 'No student concerned';
+
+  @override
+  String get feeControlDashboardEmptyDescription =>
+      'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.';
+
+  @override
+  String get feeControlDashboardExpand => 'Show the classes of this level';
+
+  @override
+  String get feeControlDashboardCollapse => 'Hide the classes';
+
+  @override
+  String get feeControlDashboardUnassigned => 'Unassigned';
+
+  @override
+  String get feeControlDashboardClassesLoading =>
+      'Loading this level’s classes…';
+
+  @override
+  String get feeControlDashboardClassroomsMissing =>
+      'The class composition for this level has not reached this device. Sync, then reopen the level.';
+
+  @override
+  String get feeControlDashboardClassroomsWithheld =>
+      'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.';
+
+  @override
+  String get feeControlDashboardClassesFailed =>
+      'The classes of this level could not be read on this device.';
+
+  @override
+  String feeControlDashboardUnbilled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count enrolled students do not carry this fee',
+      one: '$count enrolled student does not carry this fee',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlDashboardRemaining(String amounts) {
+    return 'Left to collect: $amounts';
+  }
+
+  @override
+  String get feeControlDashboardOpenControl => 'View students';
 
   @override
   String feeControlCriteriaFee(String label) {
@@ -8256,4 +8353,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boutiqueSaleDetailPendingNotice =>
       'This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.';
+
+  @override
+  String get enrollmentDuplicateDialogEyebrow => 'Check';
+
+  @override
+  String get enrollmentDuplicateDialogTitle => 'This pupil may already exist';
+
+  @override
+  String get enrollmentDuplicateDialogMessage =>
+      'A pupil with the same details is already in our records. Make sure this is not the same child before you continue.';
+
+  @override
+  String enrollmentDuplicateIdentityLine(String name, String dateOfBirth) {
+    return '$name · born on $dateOfBirth';
+  }
+
+  @override
+  String get enrollmentDuplicateSourceCurrentYear =>
+      'Enrolment for the current year';
+
+  @override
+  String get enrollmentDuplicateSourcePreviousYear =>
+      'Last year\'s pupil — belongs to Re-enrolment';
+
+  @override
+  String enrollmentDuplicateOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count other pupils',
+      one: 'and $count other pupil',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDuplicateFixAction => 'Fix the details';
+
+  @override
+  String get enrollmentDuplicateContinueAction => 'Continue anyway';
 }

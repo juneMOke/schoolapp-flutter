@@ -208,6 +208,115 @@ void main() {
     },
   );
 
+  /// Le PERÇU sur le fil — l'autre axe de l'encaissement.
+  ///
+  /// ⚠️ Ces cas se jugent depuis du **JSON brut**, jamais depuis une requête
+  /// construite en Dart : l'outbox stocke du texte, et le handler relit ce texte
+  /// avant de pousser. Un `toJson` juste au-dessus d'un `fromJson` qui perd les
+  /// lignes d'encaissement produirait un fil muet sans faire rougir un seul
+  /// test de sérialisation.
+  group('PaymentInput.tenders — ce qui est entré dans le tiroir', () {
+    Map<String, dynamic> payloadWithTenders() => <String, dynamic>{
+      'payment': {
+        'id': 'pay1',
+        'studentId': 's1',
+        'academicYearId': 'ay-1',
+        'amounts': [
+          {'amountInCents': 3000, 'currency': 'USD'},
+        ],
+        'tenders': [
+          {
+            'id': 'tender-1',
+            'amountInCents': 5000000,
+            'currency': 'CDF',
+            'rate': 1666.67,
+            'pivotCurrency': 'USD',
+          },
+        ],
+        'method': 'CASH',
+        'paidAt': '2026-09-01T10:00:00Z',
+      },
+      'allocations': [
+        {
+          'id': 'a1',
+          'studentChargeId': 'c1',
+          'feeCode': 'MINERVAL_T1',
+          'studentChargeLabel': 'Minerval — tranche 1',
+          'amountInCents': 3000,
+          'currency': 'USD',
+        },
+      ],
+    };
+
+    test('un payload d\'outbox relu repart avec son perçu INTACT', () {
+      // Le chemin réel du push : `outbox.payload` → `fromJson` → `toJson`.
+      final pushedAgain = PaymentAggregateRequest.fromJson(
+        payloadWithTenders(),
+      ).toJson();
+
+      final payment = pushedAgain['payment'] as Map<String, dynamic>;
+      final tender =
+          (payment['tenders'] as List<dynamic>).single as Map<String, dynamic>;
+
+      expect(tender['id'], 'tender-1');
+      expect(tender['amountInCents'], 5000000);
+      expect(tender['currency'], 'CDF');
+      expect(tender['pivotCurrency'], 'USD');
+      expect(tender['rate'], closeTo(1666.67, 0.000001));
+    });
+
+    /// Absent ≠ vide : le serveur écrit l'identité pour un versement muet, ce
+    /// qui était exactement vrai de tout versement figé avant ce champ. Refuser
+    /// ici basculerait l'entrée en `failed` — issue TERMINALE, sur du cash déjà
+    /// encaissé et un reçu déjà imprimé.
+    test('un payload d\'avant ce champ se relit, et ne prétend rien', () {
+      final legacy = payloadWithTenders();
+      (legacy['payment'] as Map<String, dynamic>).remove('tenders');
+
+      final restored = PaymentAggregateRequest.fromJson(legacy);
+
+      expect(restored.payment.tenders, isEmpty);
+      // Et la clé reste ABSENTE du fil : une liste vide dirait « rien n'est
+      // entré » sur un versement encaissé.
+      final payment = restored.toJson()['payment'] as Map<String, dynamic>;
+      expect(payment.containsKey('tenders'), isFalse);
+    });
+
+    /// `rate` absent et `pivotCurrency` absent valent l'identité, jamais un
+    /// refus : c'est ce que valait tout encaissement avant la conversion.
+    test('une ligne sans taux ni pivot se relit comme une identité', () {
+      final payload = payloadWithTenders();
+      (payload['payment'] as Map<String, dynamic>)['tenders'] = [
+        {'id': 't', 'amountInCents': 3000, 'currency': 'usd'},
+      ];
+
+      final tender = PaymentAggregateRequest.fromJson(
+        payload,
+      ).payment.tenders.single;
+
+      expect(tender.currency, 'USD'); // normalisée, jamais rejetée
+      expect(tender.pivotCurrency, 'USD');
+      expect(tender.rateMicros, 1000000);
+    });
+
+    /// Le serveur refuse une ligne à zéro (`@Positive`) et un 422 est TERMINAL :
+    /// l'argent est déjà dans le tiroir, le reçu déjà imprimé. On ne déclare
+    /// donc que ce qui est réellement entré — le serveur retombera sur
+    /// l'identité pour le reste.
+    test('une ligne non positive ne part pas sur le fil', () {
+      final payload = payloadWithTenders();
+      (payload['payment'] as Map<String, dynamic>)['tenders'] = [
+        {'id': 't0', 'amountInCents': 0, 'currency': 'USD'},
+      ];
+
+      final payment =
+          PaymentAggregateRequest.fromJson(payload).toJson()['payment']
+              as Map<String, dynamic>;
+
+      expect(payment.containsKey('tenders'), isFalse);
+    });
+  });
+
   group(
     'PaymentAggregateResponse — openapi_billing_sync §PaymentAggregateResponse',
     () {

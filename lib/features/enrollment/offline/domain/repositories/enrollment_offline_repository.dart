@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/duplicate/known_student_identity.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 
 /// Draft d'un tuteur saisi.
@@ -330,6 +331,22 @@ abstract class EnrollmentOfflineRepository {
   /// pièces d'éditique scopées élève : un uuid client encore en attente de
   /// synchro produit un 404. **Fail-closed** — inconnu vaut « non ».
   Future<Either<Failure, bool>> isStudentKnownToServer(String studentId);
+
+  /// Corpus de la **sonde de doublon d'inscription** : les identités déjà
+  /// connues de la tablette — dossiers de l'année courante **et** cohorte N-1 —
+  /// le brouillon en cours exclu.
+  ///
+  /// Ne rapproche rien : le corpus part brut, la règle vit dans le usecase.
+  ///
+  /// [academicYearId] non fourni → résolu via l'année courante locale
+  /// (`is_current`). Non résolue (référentiel non pullé) → la source « dossiers
+  /// de l'année » est **vide**, la cohorte N-1 parle seule. Une tablette qui
+  /// n'a rien reçu se tait donc, au lieu de conclure.
+  Future<Either<Failure, List<KnownStudentIdentity>>> loadDuplicateProbeCorpus({
+    required String studentId,
+    required String enrollmentId,
+    String? academicYearId,
+  });
 
   Future<Either<Failure, LocalEnrollmentDetail>> getDetail(String enrollmentId);
 

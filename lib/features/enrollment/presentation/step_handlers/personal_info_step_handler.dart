@@ -3,13 +3,22 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/enrollment_duplicate_guard.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info_step.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PersonalInfoStepHandler extends BaseEnrollmentStepHandler {
   final EnrollmentStepSubmitController controller;
 
-  PersonalInfoStepHandler({required this.controller});
+  /// Sonde de doublon : « cet enfant est-il déjà dans nos bases ? ». Elle se
+  /// pose en quittant l'étape, pas en l'enregistrant — un enregistrement se
+  /// rejoue à chaque correction, la question ne le doit pas.
+  final EnrollmentDuplicateGuard duplicateGuard;
+
+  PersonalInfoStepHandler({
+    required this.controller,
+    required this.duplicateGuard,
+  });
 
   @override
   EnrollmentWizardStep get step => EnrollmentWizardStep.personalInfo;
@@ -58,6 +67,18 @@ class PersonalInfoStepHandler extends BaseEnrollmentStepHandler {
     controller.submitForm();
     return const StepSubmitResult.dispatched();
   }
+
+  /// Le dernier mot de l'étape Identité : la sonde de doublon.
+  ///
+  /// `false` retient le guichet sur l'étape — la popin lui a déjà dit pourquoi,
+  /// et c'est lui qui vient de choisir d'y retourner.
+  @override
+  Future<bool> confirmBeforeContinue(HandlerConfirmContext confirm) =>
+      duplicateGuard.allowContinue(
+        context: confirm.context,
+        detail: confirm.detail,
+        detailPolicy: confirm.detailPolicy,
+      );
 
   @override
   Widget buildContent(HandlerBuildContext context) {

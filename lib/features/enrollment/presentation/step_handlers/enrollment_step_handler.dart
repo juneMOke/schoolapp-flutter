@@ -97,6 +97,28 @@ class HandlerSubmitContext {
   });
 }
 
+/// Contexte du dernier mot avant de quitter une étape (cf.
+/// [EnrollmentStepHandler.confirmBeforeContinue]).
+///
+/// Volontairement plus pauvre que [HandlerSubmitContext] : cette question-là
+/// n'écrit rien et n'a donc besoin d'aucun BLoC — seulement de quoi lire le
+/// dossier et parler à l'écran.
+class HandlerConfirmContext {
+  final BuildContext context;
+  final EnrollmentDetail detail;
+  final EnrollmentDetailIntent intent;
+  final EnrollmentDetailPolicy detailPolicy;
+  final AppLocalizations l10n;
+
+  const HandlerConfirmContext({
+    required this.context,
+    required this.detail,
+    required this.intent,
+    required this.detailPolicy,
+    required this.l10n,
+  });
+}
+
 class HandlerBuildContext {
   final EnrollmentDetail detail;
   final EnrollmentDetailIntent intent;
@@ -270,6 +292,16 @@ abstract class EnrollmentStepHandler {
   }
 
   Future<StepSubmitResult> submit(HandlerSubmitContext context);
+
+  /// Dernier mot avant de quitter l'étape, une fois [continueFlow] décidé
+  /// qu'on avance. `false` retient le guichet sur l'étape **sans rien dire** :
+  /// c'est à l'implémentation d'avoir déjà expliqué pourquoi.
+  ///
+  /// `true` par défaut — une étape qui n'a rien à demander laisse passer.
+  /// Asynchrone parce que le seul usage à ce jour, la sonde de doublon, lit la
+  /// base locale puis pose une question à l'écran.
+  Future<bool> confirmBeforeContinue(HandlerConfirmContext context) async =>
+      true;
 
   Widget buildContent(HandlerBuildContext context);
 }

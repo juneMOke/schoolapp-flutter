@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
@@ -464,6 +465,25 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       academicYearId: academicYearId,
       feeCode: feeCode,
       studentIds: studentIds,
+    ),
+  );
+
+  @override
+  Future<Either<Failure, List<String>>> getFeeCodesForYear(
+    String academicYearId,
+  ) => _guard(() => _dao.getFeeCodesForYear(academicYearId));
+
+  @override
+  Future<Either<Failure, List<LocalFeeLevelAggregate>>>
+  getFeeChargePositionsByLevel({
+    required String academicYearId,
+    required String feeCode,
+    String? schoolLevelGroupId,
+  }) => _guard(
+    () => _dao.getFeeChargePositionsByLevel(
+      academicYearId: academicYearId,
+      feeCode: feeCode,
+      schoolLevelGroupId: schoolLevelGroupId,
     ),
   );
 

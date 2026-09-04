@@ -23,7 +23,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/re_reg
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/fee_control_page.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_feature_scope.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_dashboard_page.dart';
+import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -189,6 +191,7 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
+        state.selectedSubMenuId == MenuConstants.feeControlDashboardId ||
         state.selectedSubMenuId == MenuConstants.feeControlId ||
         state.selectedSubMenuId == MenuConstants.boutiqueAchatsId ||
         state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
@@ -327,11 +330,15 @@ class _HomePageView extends StatelessWidget {
           child: FirstRegistrationPage(),
         );
       // Key distinct par sous-menu : sans elle, Flutter réutilise le même
-      // Element `FinanceFeatureScope` (même type, même emplacement dans le
-      // switch) en basculant entre Facturation et Contrôle des frais. Son State
-      // n'est alors jamais remonté, donc `initState` — et les pulls Finance +
-      // Inscription qu'il déclenche pour hydrater le cache local, sa raison
-      // d'être — ne rejouent pas en entrant sur le second écran.
+      // Element quand DEUX cas de ce switch rendent le même type de scope au
+      // même emplacement. Son State n'est alors jamais remonté, donc
+      // `initState` — et les pulls Finance + Inscription qu'il déclenche pour
+      // hydrater le cache local, sa raison d'être — ne rejouent pas en entrant
+      // sur le second écran. C'est ce qui arrivait entre Facturation et
+      // Contrôle des frais, avant que ce dernier devienne un module à part.
+      // La Facturation est aujourd'hui seule sous `FinanceFeatureScope` ; la
+      // clé reste, pour que le piège ne se rouvre pas au prochain écran ajouté
+      // sous ce scope.
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(
           key: ValueKey(MenuConstants.facturationsId),
@@ -350,8 +357,21 @@ class _HomePageView extends StatelessWidget {
 
       case MenuConstants.boutiqueHistoriqueId:
         return const BoutiqueHistoryPage();
+      // Scope PROPRE depuis que le contrôle est un module à part : plus rien
+      // ne le partage avec la Facturation, donc plus de `ValueKey` à poser
+      // pour empêcher Flutter de recycler l'`Element` de l'autre écran — les
+      // deux types diffèrent, le State ne peut plus être réutilisé.
+      // Deux écrans, deux `Key` : ils partagent le MÊME type de scope au même
+      // emplacement du switch, et sans clé Flutter recyclerait l'Element en
+      // basculant de l'un à l'autre — son State ne serait jamais remonté, donc
+      // les pulls d'hydratation ne rejoueraient pas.
+      case MenuConstants.feeControlDashboardId:
+        return const FeeControlFeatureScope(
+          key: ValueKey(MenuConstants.feeControlDashboardId),
+          child: FeeControlDashboardPage(),
+        );
       case MenuConstants.feeControlId:
-        return const FinanceFeatureScope(
+        return const FeeControlFeatureScope(
           key: ValueKey(MenuConstants.feeControlId),
           child: FeeControlPage(),
         );
