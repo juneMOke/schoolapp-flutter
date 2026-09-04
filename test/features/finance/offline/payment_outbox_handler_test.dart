@@ -326,6 +326,11 @@ void main() {
     'ALLOCATION_SUM_MISMATCH',
     'CHARGE_CURRENCY_MISMATCH',
     'AMBIGUOUS_FEE_CODE',
+    // Les deux refus de la déclaration d'encaissement (contrat du 2026-09-04).
+    // Ils ne sont PAS transitoires : la même déclaration sera refusée à
+    // l'identique au rejeu, et chaque tentative gaspillée rapproche du poison.
+    'TENDER_SUM_MISMATCH',
+    'UNKNOWN_TENDER_PIVOT',
   ]) {
     test('$code → failed : aucune attente ne le corrigera', () async {
       when(() => api.commitPayment(any(), any())).thenThrow(dio422(code));

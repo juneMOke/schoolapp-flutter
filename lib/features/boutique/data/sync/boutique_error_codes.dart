@@ -31,10 +31,27 @@ abstract final class BoutiqueErrorCodes {
   /// pas.
   static const String priceUnresolvable = 'PRICE_UNRESOLVABLE';
 
+  /// Le perçu déclaré, converti au taux fourni, n'éteint pas ce que la vente
+  /// vaut — vérifié **par devise pivot**, à une unité d'affichage près.
+  ///
+  /// Même famille que [inconsistentTotal] : le panier a calculé faux. Le
+  /// `TenderComposition.check` posé avant l'écriture existe pour que ce refus
+  /// n'arrive jamais sur une vente déjà encaissée.
+  static const String tenderSumMismatch = 'TENDER_SUM_MISMATCH';
+
+  /// Le pivot déclaré n'est soldé par aucune ligne du panier.
+  ///
+  /// La déclaration dit « ces francs éteignent des dollars » alors qu'aucune
+  /// ligne vendue n'est en dollars. Le panier désigne mal, l'attente n'y peut
+  /// rien.
+  static const String unknownTenderPivot = 'UNKNOWN_TENDER_PIVOT';
+
   /// Vrai si la cause est un défaut de composition du panier, donc à corriger
   /// dans l'application et non au guichet.
   static bool isClientDefect(String? detailCode) =>
       detailCode == inconsistentTotal ||
       detailCode == unknownArticle ||
-      detailCode == unknownAcademicYear;
+      detailCode == unknownAcademicYear ||
+      detailCode == tenderSumMismatch ||
+      detailCode == unknownTenderPivot;
 }

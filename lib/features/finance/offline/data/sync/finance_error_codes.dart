@@ -58,6 +58,24 @@ abstract final class FinanceErrorCodes {
   /// support » pour l'autre.
   static const String unknownStudentCharge = 'UNKNOWN_STUDENT_CHARGE';
 
+  /// Le perçu déclaré, une fois converti au taux fourni, n'éteint pas ce qui
+  /// est dû. Vérifié **par devise pivot** et à une unité d'affichage près
+  /// (1 FC, 0,01 $) : un excédent sur un pivot ne compense pas un manque sur un
+  /// autre.
+  ///
+  /// Défaut de composition, exactement comme [allocationSumMismatch] : le rejeu
+  /// donnerait le même refus. `TenderComposition.check` existe pour que ce refus
+  /// n'arrive jamais jusqu'ici — s'il tombe, c'est que le fail-fast local a un
+  /// trou, pas que le guichet a mal compté.
+  static const String tenderSumMismatch = 'TENDER_SUM_MISMATCH';
+
+  /// Le pivot déclaré n'est soldé par aucune imputation du versement.
+  ///
+  /// La ligne dit « ces francs éteignent une créance en dollars » quand aucune
+  /// imputation du versement ne porte sur des dollars. Le panier désigne un
+  /// pivot qu'il n'aurait pas dû : aucune attente ne lève cela.
+  static const String unknownTenderPivot = 'UNKNOWN_TENDER_PIVOT';
+
   /// Vrai si la cause peut se résoudre **en attendant**, sans geste au guichet.
   ///
   /// Le POST est idempotent sur `payment.id` : rejouer ne compte jamais l'argent
@@ -72,5 +90,7 @@ abstract final class FinanceErrorCodes {
   static bool isClientDefect(String? detailCode) =>
       detailCode == allocationSumMismatch ||
       detailCode == chargeCurrencyMismatch ||
-      detailCode == ambiguousFeeCode;
+      detailCode == ambiguousFeeCode ||
+      detailCode == tenderSumMismatch ||
+      detailCode == unknownTenderPivot;
 }

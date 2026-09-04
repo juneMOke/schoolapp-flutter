@@ -3,7 +3,7 @@
 > **Statut :** plan écrit le **2026-09-01**. **Tout ce qui ne dépend d'aucun nom
 > de contrat est livré** — schéma local **v39 → v41**, 96 tests neufs,
 > **suite complète 5 330 verts**, `flutter analyze` clean sur tout l'arbre.
-> Non commité.
+> F3 — l'émission sur le fil — est **commité** le 2026-09-04 (`34cec226`).
 >
 > | Lot | État |
 > |---|---|
@@ -46,6 +46,93 @@
 > 2. « Aucun taux paramétré » se mesurait sur les **conversions en cours** et non
 >    sur les **taux disponibles** : le message s'affichait dès qu'un frais était
 >    coché, taux ou pas.
+
+---
+
+## 0. La provenance des encaissements — contrat du 2026-09-04
+
+> Migrations back **V118 · V119 · V120**, branche `fix/finance-outstanding-per-charge`,
+> **commité, pas encore déployé.** Audit front fait le 2026-09-04.
+
+Le serveur distingue désormais ce que le guichet a **dit** avoir pris de ce
+qu'il a **supposé** faute de déclaration. Chaque ligne de `tenders[]` qui
+redescend porte un `source` : `DECLARED` (un poste l'a dit — une observation) ou
+`DERIVED` (personne ne l'a dit, le serveur a posé l'identité). **Tout
+l'historique est marqué `DERIVED`**, la seule valeur qui ne prétend rien.
+
+Ce qui rendait ce champ nécessaire vaut d'être retenu : ne rien déclarer était
+la voie la **moins risquée** pour qui pourrait empocher un écart de change. La
+caisse annonçait « encaissé en dollars » sans que personne l'ait vu, et le
+contrôle de taux, qui ne sait juger qu'une conversion déclarée, ne se
+déclenchait jamais sur un poste silencieux.
+
+### Ce qui ne nous touche pas — vérifié, pas supposé
+
+- **`motif` gagne `RATE_DIVERGENCE` et `TENDER_UNDECLARED`** sur
+  `GET /finance/arbitrages/payments`. L'app **n'appelle jamais cet endpoint** :
+  aucune constante, aucun client. Sa propre liste d'anomalies vient de l'**ACK
+  du push** (`OverpaymentSignal`), pas de là. Et `PaymentAnomalyKind.fromDbValue`
+  retombe déjà sur `unknown` — aucun `enum.byName()` strict à faire lever.
+- **`anomalyType` gagne `TENDER_UNDECLARED`** sur `GET /boutique/sales/anomalies`.
+  L'URL existe dans `AppConstants` mais **rien ne l'appelle** (« écran de
+  contrôle, hors V1 »). Pas de parseur à casser.
+- **`source` est additif** : les DTO de pull ignorent les clés inconnues.
+
+⚠️ **`excessInCents` n'est plus toujours strictement positif.** Sur les deux
+faits du contrôle des encaissements il vaut `0` quand le fait n'est pas
+chiffrable — deux taux dans un même versement, un taux appliqué sans taux
+publié, rien de déclaré. **Zéro veut dire « il y a quelque chose à instruire »,
+jamais « rien ne manque »** : le jour où un écran lira les arbitrages, un filtre
+`> 0` ferait disparaître exactement les cas à regarder. Le bandeau local, lui,
+ne filtre pas dessus (vérifié) — il lit l'ACK, dont le trop-perçu reste positif.
+
+### Ce que le back attend de nous — et où on en est
+
+**Déclarer `tenders` sur les deux POST, y compris quand l'argent est entré dans
+la devise de ce qu'il éteint.** C'est la déclaration qui transforme la ligne en
+observation. ✅ **Tenu des deux côtés pour tout acte neuf** : au guichet
+`draft.tenders ?? TenderComposition.identityFor(...)`, en boutique
+`settlement.tendersFor(...)` compose la ligne d'identité même en mono-devise.
+Un test épingle désormais l'identité **sur le fil** de chaque chemin — le test
+voisin n'éprouvait que la table locale, ce qui n'est pas la même promesse.
+
+Reste un trou **assumé** : une entrée d'outbox mise en file *avant* ce champ
+part encore sans `tenders`, donc `DERIVED`. La refuser la ferait basculer en
+`failed` — issue terminale sur du cash déjà encaissé.
+
+**Les deux refus de la déclaration** sont nommés dans les deux catalogues
+(`FinanceErrorCodes`, `BoutiqueErrorCodes`) et classés **défauts de
+composition** : jamais transitoires, donc jamais rejoués jusqu'au poison.
+
+- `422 TENDER_SUM_MISMATCH` — le perçu déclaré, converti, n'éteint pas ce qui est
+  dû. Vérifié **par devise pivot**, à une unité d'affichage près (1 FC, 0,01 $) :
+  un excédent sur un pivot ne compense pas un manque sur un autre.
+- `422 UNKNOWN_TENDER_PIVOT` — le pivot déclaré n'est soldé par aucune imputation
+  du versement, ni par aucune ligne du panier.
+
+`TenderComposition.check` existe pour que ces deux-là n'arrivent jamais jusqu'au
+serveur : s'ils tombent, c'est que le fail-fast local a un trou.
+
+### `source` en base — DIFFÉRÉ, décidé le 2026-09-04
+
+Le champ **n'est pas porté** dans `payment_tenders` : ni migration, ni règle
+d'affichage. Arbitrage du user.
+
+Ce qui rouvrira la question : le ticket thermique **somme la table locale**.
+Réimprimer un versement redescendu du serveur imprimerait donc un `DERIVED` —
+un postulat du serveur — comme un constat de comptoir, faux dès qu'un parent a
+réglé en francs une créance en dollars. Tant qu'aucun écran ne montre le perçu
+d'un versement **ancien**, la dette dort. Le jour où l'un le fera, il faudra la
+colonne, le pull qui la lit, et la règle qui tait une ligne dérivée au lieu de
+la présenter comme observée.
+
+### Le levier, et le calendrier
+
+Le contrôle **ne s'arme que là où l'école publie un taux de guichet** — pas
+d'interrupteur par école. Au 2026-09-04, base de dev : **2 écoles** publient un
+taux, et `payment_tenders` compte 17 608 lignes, **dont aucune déclarée par un
+client**. L'app déclarant déjà pour tout acte neuf, le déploiement n'attend rien
+de nous.
 
 ---
 
