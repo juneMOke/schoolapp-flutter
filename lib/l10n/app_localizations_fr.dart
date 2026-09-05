@@ -8474,4 +8474,344 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentDuplicateContinueAction => 'Continuer quand même';
+
+  @override
+  String get enrollmentDashboardOvertitle => 'Inscriptions';
+
+  @override
+  String get enrollmentDashboardTitle => 'Tableau de bord';
+
+  @override
+  String enrollmentDashboardSubtitle(String schoolYear, String generatedOn) {
+    return 'Année scolaire $schoolYear · au $generatedOn · effectif inscrit, répartition par niveau et rythme d\'inscription';
+  }
+
+  @override
+  String get enrollmentDashboardSubtitleNoYear =>
+      'Effectif inscrit, répartition par niveau et rythme d\'inscription';
+
+  @override
+  String get enrollmentDashboardLoadingA11yLabel =>
+      'Chargement du tableau de bord des inscriptions';
+
+  @override
+  String enrollmentDashboardEmptyTitle(String window) {
+    return 'Aucune inscription · $window';
+  }
+
+  @override
+  String get enrollmentDashboardEmptyWidestMessage =>
+      'C\'est la fenêtre la plus large : il n\'y a rien à élargir. Aucun élève n\'a encore été inscrit pour cette année scolaire.';
+
+  @override
+  String get enrollmentDashboardEmptyNarrowMessage =>
+      'Élargissez la fenêtre pour voir davantage d\'inscriptions, ou enregistrez une première inscription.';
+
+  @override
+  String get enrollmentDashboardEmptyOpenFirstRegistration =>
+      'Ouvrir Première inscription';
+
+  @override
+  String get enrollmentDashboardEmptySeeWholeYear => 'Voir l\'année entière';
+
+  @override
+  String get enrollmentDashboardErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get enrollmentDashboardErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get enrollmentDashboardErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get enrollmentDashboardErrorServerTitle => 'Chargement impossible';
+
+  @override
+  String get enrollmentDashboardErrorRetry => 'Réessayer';
+
+  @override
+  String enrollmentDashboardErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get enrollmentDashboardNetworkError =>
+      'Vérifiez votre connexion internet, puis réessayez.';
+
+  @override
+  String get enrollmentDashboardNotFoundError =>
+      'Aucune statistique n\'est disponible pour cette année scolaire.';
+
+  @override
+  String get enrollmentDashboardValidationError =>
+      'La fenêtre demandée est invalide.';
+
+  @override
+  String get enrollmentDashboardUnauthorizedError =>
+      'Vous n\'avez pas le droit de consulter le pilotage des inscriptions. Contactez votre administrateur.';
+
+  @override
+  String get enrollmentDashboardInvalidCredentialsError =>
+      'Votre session a expiré. Reconnectez-vous pour continuer.';
+
+  @override
+  String get enrollmentDashboardServerError =>
+      'Le serveur n\'a pas pu répondre. Réessayez dans un instant.';
+
+  @override
+  String get enrollmentDashboardStorageError =>
+      'Les données locales n\'ont pas pu être lues.';
+
+  @override
+  String get enrollmentDashboardAuthError => 'L\'authentification a échoué.';
+
+  @override
+  String get enrollmentDashboardUnknownError =>
+      'Une erreur inattendue est survenue.';
+
+  @override
+  String get enrollmentDashboardWindowDay => 'Aujourd\'hui';
+
+  @override
+  String get enrollmentDashboardWindowWeek => 'Cette semaine';
+
+  @override
+  String get enrollmentDashboardWindowMonth => 'Ce mois';
+
+  @override
+  String get enrollmentDashboardWindowYear => 'Année';
+
+  @override
+  String get enrollmentDashboardWindowCustom => 'Période précise';
+
+  @override
+  String get enrollmentDashboardWindowTabsA11yLabel => 'Fenêtre de temps';
+
+  @override
+  String enrollmentDashboardRangeFromTo(String from, String to) {
+    return 'Du $from au $to';
+  }
+
+  @override
+  String enrollmentDashboardRangeSchoolYear(String schoolYear) {
+    return 'Année scolaire $schoolYear';
+  }
+
+  @override
+  String get enrollmentDashboardRangeSinceOpening =>
+      'Depuis l\'ouverture des inscriptions';
+
+  @override
+  String get enrollmentDashboardRangeFieldFrom => 'Du';
+
+  @override
+  String get enrollmentDashboardRangeFieldTo => 'Au';
+
+  @override
+  String get enrollmentDashboardHeadcountOvertitle =>
+      'Élèves inscrits · toujours présents';
+
+  @override
+  String enrollmentDashboardHeadcountCaption(int count, String schoolYear) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'élèves · année $schoolYear',
+      one: 'élève · année $schoolYear',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardHeadcountExclusion =>
+      'Total cumulé depuis l\'ouverture des inscriptions, hors demandes en ligne non validées';
+
+  @override
+  String enrollmentDashboardHeadcountA11yLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves inscrits',
+      one: '1 élève inscrit',
+      zero: 'Aucun élève inscrit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String enrollmentDashboardKpiEnrollments(String window) {
+    return 'Inscriptions · $window';
+  }
+
+  @override
+  String get enrollmentDashboardKpiEnrollmentsSubline =>
+      'Élèves enregistrés sur la fenêtre choisie';
+
+  @override
+  String get enrollmentDashboardKpiFirst => 'Premières inscriptions';
+
+  @override
+  String enrollmentDashboardKpiFirstSubline(int percent) {
+    return '$percent % des inscriptions de la période · élèves venus de l\'extérieur';
+  }
+
+  @override
+  String get enrollmentDashboardKpiRe => 'Réinscriptions';
+
+  @override
+  String enrollmentDashboardKpiReSubline(int percent) {
+    return '$percent % des inscriptions de la période · élèves déjà connus';
+  }
+
+  @override
+  String get enrollmentDashboardKpiPre => 'Pré-inscriptions en attente';
+
+  @override
+  String get enrollmentDashboardKpiPreSubline =>
+      'Demandes reçues en ligne, à vérifier puis valider';
+
+  @override
+  String get enrollmentDashboardKpiNoneOnWindow => 'Aucune sur la période';
+
+  @override
+  String get enrollmentDashboardKpiNoOnlineRequest =>
+      'Aucune demande en ligne à traiter';
+
+  @override
+  String get enrollmentDashboardKpiNote =>
+      'Une pré-inscription validée devient une première inscription à la date de validation.';
+
+  @override
+  String get enrollmentDashboardPaceTitle => 'Rythme d\'inscription';
+
+  @override
+  String enrollmentDashboardPaceA11yLabel(int count) {
+    return 'Rythme d\'inscription, $count barres';
+  }
+
+  @override
+  String enrollmentDashboardStudentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: '0 élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardGenderTitle => 'Filles / Garçons';
+
+  @override
+  String get enrollmentDashboardSubtitleDay => 'du jour';
+
+  @override
+  String get enrollmentDashboardSubtitlePeriod => 'de la période';
+
+  @override
+  String get enrollmentDashboardGenderGirls => 'Filles';
+
+  @override
+  String get enrollmentDashboardGenderBoys => 'Garçons';
+
+  @override
+  String get enrollmentDashboardGenderOther => 'Autre';
+
+  @override
+  String enrollmentDashboardGenderNote(int windowShare, int totalShare) {
+    return '$windowShare % de filles sur la fenêtre, $totalShare % sur l\'effectif complet. Le second chiffre évite de surinterpréter un petit échantillon.';
+  }
+
+  @override
+  String get enrollmentDashboardTypeTitle => 'Par type';
+
+  @override
+  String get enrollmentDashboardTypeFirst => 'Première inscription';
+
+  @override
+  String get enrollmentDashboardTypeRe => 'Réinscription';
+
+  @override
+  String get enrollmentDashboardTypeNote =>
+      'Seules les premières inscriptions font croître l\'effectif ; les réinscriptions le reconduisent.';
+
+  @override
+  String get enrollmentDashboardLevelTitle => 'Répartition par niveau';
+
+  @override
+  String enrollmentDashboardLevelSubtitle(String when) {
+    return 'Où sont allés les élèves inscrits $when';
+  }
+
+  @override
+  String enrollmentDashboardLevelCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux concernés',
+      one: '1 niveau concerné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardLevelEmpty =>
+      'Aucun niveau n\'a reçu d\'inscription sur cette fenêtre.';
+
+  @override
+  String get enrollmentDashboardLevelToday => 'aujourd\'hui';
+
+  @override
+  String get enrollmentDashboardCycleTitle => 'Par cycle';
+
+  @override
+  String get enrollmentDashboardInsightsTitle => 'Lectures & alertes';
+
+  @override
+  String get enrollmentDashboardInsightPeakDay => 'Jour le plus fort';
+
+  @override
+  String get enrollmentDashboardInsightPeakWeek => 'Semaine la plus forte';
+
+  @override
+  String get enrollmentDashboardInsightPeakMonth => 'Mois le plus fort';
+
+  @override
+  String enrollmentDashboardInsightPeakBody(String label, String count) {
+    return '$label — $count';
+  }
+
+  @override
+  String get enrollmentDashboardInsightParityTitle => 'Parité';
+
+  @override
+  String enrollmentDashboardInsightParityBalanced(int share) {
+    return '$share % de filles : la répartition est équilibrée.';
+  }
+
+  @override
+  String enrollmentDashboardInsightParitySkewed(int share) {
+    return '$share % de filles : la répartition penche d\'un côté.';
+  }
+
+  @override
+  String get enrollmentDashboardInsightPreTitle =>
+      'Demandes en ligne à traiter';
+
+  @override
+  String enrollmentDashboardInsightPreBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count demandes attendent une vérification.',
+      one: '1 demande attend une vérification.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardInsightPreAction =>
+      'Ouvrir les pré-inscriptions';
 }

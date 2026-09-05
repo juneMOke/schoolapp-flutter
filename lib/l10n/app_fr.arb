@@ -4791,5 +4791,235 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "enrollmentDashboardOvertitle": "Inscriptions",
+  "enrollmentDashboardTitle": "Tableau de bord",
+  "enrollmentDashboardSubtitle": "Année scolaire {schoolYear} · au {generatedOn} · effectif inscrit, répartition par niveau et rythme d'inscription",
+  "@enrollmentDashboardSubtitle": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardSubtitleNoYear": "Effectif inscrit, répartition par niveau et rythme d'inscription",
+  "enrollmentDashboardLoadingA11yLabel": "Chargement du tableau de bord des inscriptions",
+  "enrollmentDashboardEmptyTitle": "Aucune inscription · {window}",
+  "@enrollmentDashboardEmptyTitle": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEmptyWidestMessage": "C'est la fenêtre la plus large : il n'y a rien à élargir. Aucun élève n'a encore été inscrit pour cette année scolaire.",
+  "enrollmentDashboardEmptyNarrowMessage": "Élargissez la fenêtre pour voir davantage d'inscriptions, ou enregistrez une première inscription.",
+  "enrollmentDashboardEmptyOpenFirstRegistration": "Ouvrir Première inscription",
+  "enrollmentDashboardEmptySeeWholeYear": "Voir l'année entière",
+  "enrollmentDashboardErrorNetworkTitle": "Pas de connexion",
+  "enrollmentDashboardErrorUnauthorizedTitle": "Session expirée",
+  "enrollmentDashboardErrorForbiddenTitle": "Accès refusé",
+  "enrollmentDashboardErrorServerTitle": "Chargement impossible",
+  "enrollmentDashboardErrorRetry": "Réessayer",
+  "enrollmentDashboardErrorIncidentCode": "Code incident : {code}",
+  "@enrollmentDashboardErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardNetworkError": "Vérifiez votre connexion internet, puis réessayez.",
+  "enrollmentDashboardNotFoundError": "Aucune statistique n'est disponible pour cette année scolaire.",
+  "enrollmentDashboardValidationError": "La fenêtre demandée est invalide.",
+  "enrollmentDashboardUnauthorizedError": "Vous n'avez pas le droit de consulter le pilotage des inscriptions. Contactez votre administrateur.",
+  "enrollmentDashboardInvalidCredentialsError": "Votre session a expiré. Reconnectez-vous pour continuer.",
+  "enrollmentDashboardServerError": "Le serveur n'a pas pu répondre. Réessayez dans un instant.",
+  "enrollmentDashboardStorageError": "Les données locales n'ont pas pu être lues.",
+  "enrollmentDashboardAuthError": "L'authentification a échoué.",
+  "enrollmentDashboardUnknownError": "Une erreur inattendue est survenue.",
+  "enrollmentDashboardWindowDay": "Aujourd'hui",
+  "enrollmentDashboardWindowWeek": "Cette semaine",
+  "enrollmentDashboardWindowMonth": "Ce mois",
+  "enrollmentDashboardWindowYear": "Année",
+  "enrollmentDashboardWindowCustom": "Période précise",
+  "enrollmentDashboardWindowTabsA11yLabel": "Fenêtre de temps",
+  "enrollmentDashboardRangeFromTo": "Du {from} au {to}",
+  "@enrollmentDashboardRangeFromTo": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardRangeSchoolYear": "Année scolaire {schoolYear}",
+  "@enrollmentDashboardRangeSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardRangeSinceOpening": "Depuis l'ouverture des inscriptions",
+  "enrollmentDashboardRangeFieldFrom": "Du",
+  "enrollmentDashboardRangeFieldTo": "Au",
+  "enrollmentDashboardHeadcountOvertitle": "Élèves inscrits · toujours présents",
+  "enrollmentDashboardHeadcountCaption": "{count, plural, =1{élève · année {schoolYear}} other{élèves · année {schoolYear}}}",
+  "@enrollmentDashboardHeadcountCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardHeadcountExclusion": "Total cumulé depuis l'ouverture des inscriptions, hors demandes en ligne non validées",
+  "enrollmentDashboardHeadcountA11yLabel": "{count, plural, =0{Aucun élève inscrit} =1{1 élève inscrit} other{{count} élèves inscrits}}",
+  "@enrollmentDashboardHeadcountA11yLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiEnrollments": "Inscriptions · {window}",
+  "@enrollmentDashboardKpiEnrollments": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardKpiEnrollmentsSubline": "Élèves enregistrés sur la fenêtre choisie",
+  "enrollmentDashboardKpiFirst": "Premières inscriptions",
+  "enrollmentDashboardKpiFirstSubline": "{percent} % des inscriptions de la période · élèves venus de l'extérieur",
+  "@enrollmentDashboardKpiFirstSubline": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiRe": "Réinscriptions",
+  "enrollmentDashboardKpiReSubline": "{percent} % des inscriptions de la période · élèves déjà connus",
+  "@enrollmentDashboardKpiReSubline": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiPre": "Pré-inscriptions en attente",
+  "enrollmentDashboardKpiPreSubline": "Demandes reçues en ligne, à vérifier puis valider",
+  "enrollmentDashboardKpiNoneOnWindow": "Aucune sur la période",
+  "enrollmentDashboardKpiNoOnlineRequest": "Aucune demande en ligne à traiter",
+  "enrollmentDashboardKpiNote": "Une pré-inscription validée devient une première inscription à la date de validation.",
+  "enrollmentDashboardPaceTitle": "Rythme d'inscription",
+  "enrollmentDashboardPaceA11yLabel": "Rythme d'inscription, {count} barres",
+  "@enrollmentDashboardPaceA11yLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardStudentsCount": "{count, plural, =0{0 élève} =1{1 élève} other{{count} élèves}}",
+  "@enrollmentDashboardStudentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardGenderTitle": "Filles / Garçons",
+  "enrollmentDashboardSubtitleDay": "du jour",
+  "enrollmentDashboardSubtitlePeriod": "de la période",
+  "enrollmentDashboardGenderGirls": "Filles",
+  "enrollmentDashboardGenderBoys": "Garçons",
+  "enrollmentDashboardGenderOther": "Autre",
+  "enrollmentDashboardGenderNote": "{windowShare} % de filles sur la fenêtre, {totalShare} % sur l'effectif complet. Le second chiffre évite de surinterpréter un petit échantillon.",
+  "@enrollmentDashboardGenderNote": {
+    "placeholders": {
+      "windowShare": {
+        "type": "int"
+      },
+      "totalShare": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardTypeTitle": "Par type",
+  "enrollmentDashboardTypeFirst": "Première inscription",
+  "enrollmentDashboardTypeRe": "Réinscription",
+  "enrollmentDashboardTypeNote": "Seules les premières inscriptions font croître l'effectif ; les réinscriptions le reconduisent.",
+  "enrollmentDashboardLevelTitle": "Répartition par niveau",
+  "enrollmentDashboardLevelSubtitle": "Où sont allés les élèves inscrits {when}",
+  "@enrollmentDashboardLevelSubtitle": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardLevelCount": "{count, plural, =1{1 niveau concerné} other{{count} niveaux concernés}}",
+  "@enrollmentDashboardLevelCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardLevelEmpty": "Aucun niveau n'a reçu d'inscription sur cette fenêtre.",
+  "enrollmentDashboardLevelToday": "aujourd'hui",
+  "enrollmentDashboardCycleTitle": "Par cycle",
+  "enrollmentDashboardInsightsTitle": "Lectures & alertes",
+  "enrollmentDashboardInsightPeakDay": "Jour le plus fort",
+  "enrollmentDashboardInsightPeakWeek": "Semaine la plus forte",
+  "enrollmentDashboardInsightPeakMonth": "Mois le plus fort",
+  "enrollmentDashboardInsightPeakBody": "{label} — {count}",
+  "@enrollmentDashboardInsightPeakBody": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardInsightParityTitle": "Parité",
+  "enrollmentDashboardInsightParityBalanced": "{share} % de filles : la répartition est équilibrée.",
+  "@enrollmentDashboardInsightParityBalanced": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightParitySkewed": "{share} % de filles : la répartition penche d'un côté.",
+  "@enrollmentDashboardInsightParitySkewed": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightPreTitle": "Demandes en ligne à traiter",
+  "enrollmentDashboardInsightPreBody": "{count, plural, =1{1 demande attend une vérification.} other{{count} demandes attendent une vérification.}}",
+  "@enrollmentDashboardInsightPreBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightPreAction": "Ouvrir les pré-inscriptions"
 }

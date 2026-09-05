@@ -4835,5 +4835,235 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "enrollmentDashboardOvertitle": "Enrolments",
+  "enrollmentDashboardTitle": "Dashboard",
+  "enrollmentDashboardSubtitle": "School year {schoolYear} · as of {generatedOn} · enrolled headcount, breakdown by level and enrolment pace",
+  "@enrollmentDashboardSubtitle": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardSubtitleNoYear": "Enrolled headcount, breakdown by level and enrolment pace",
+  "enrollmentDashboardLoadingA11yLabel": "Loading the enrolments dashboard",
+  "enrollmentDashboardEmptyTitle": "No enrolment · {window}",
+  "@enrollmentDashboardEmptyTitle": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEmptyWidestMessage": "This is the widest window: there is nothing left to widen. No student has been enrolled yet for this school year.",
+  "enrollmentDashboardEmptyNarrowMessage": "Widen the window to see more enrolments, or record a first enrolment.",
+  "enrollmentDashboardEmptyOpenFirstRegistration": "Open First enrolment",
+  "enrollmentDashboardEmptySeeWholeYear": "See the whole year",
+  "enrollmentDashboardErrorNetworkTitle": "No connection",
+  "enrollmentDashboardErrorUnauthorizedTitle": "Session expired",
+  "enrollmentDashboardErrorForbiddenTitle": "Access denied",
+  "enrollmentDashboardErrorServerTitle": "Unable to load",
+  "enrollmentDashboardErrorRetry": "Retry",
+  "enrollmentDashboardErrorIncidentCode": "Incident code: {code}",
+  "@enrollmentDashboardErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardNetworkError": "Check your internet connection, then try again.",
+  "enrollmentDashboardNotFoundError": "No statistics are available for this school year.",
+  "enrollmentDashboardValidationError": "The requested window is invalid.",
+  "enrollmentDashboardUnauthorizedError": "You are not allowed to view enrolment analytics. Contact your administrator.",
+  "enrollmentDashboardInvalidCredentialsError": "Your session has expired. Sign in again to continue.",
+  "enrollmentDashboardServerError": "The server could not respond. Try again in a moment.",
+  "enrollmentDashboardStorageError": "Local data could not be read.",
+  "enrollmentDashboardAuthError": "Authentication failed.",
+  "enrollmentDashboardUnknownError": "An unexpected error occurred.",
+  "enrollmentDashboardWindowDay": "Today",
+  "enrollmentDashboardWindowWeek": "This week",
+  "enrollmentDashboardWindowMonth": "This month",
+  "enrollmentDashboardWindowYear": "Year",
+  "enrollmentDashboardWindowCustom": "Custom range",
+  "enrollmentDashboardWindowTabsA11yLabel": "Time window",
+  "enrollmentDashboardRangeFromTo": "From {from} to {to}",
+  "@enrollmentDashboardRangeFromTo": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardRangeSchoolYear": "School year {schoolYear}",
+  "@enrollmentDashboardRangeSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardRangeSinceOpening": "Since enrolments opened",
+  "enrollmentDashboardRangeFieldFrom": "From",
+  "enrollmentDashboardRangeFieldTo": "To",
+  "enrollmentDashboardHeadcountOvertitle": "Enrolled students · still present",
+  "enrollmentDashboardHeadcountCaption": "{count, plural, =1{student · year {schoolYear}} other{students · year {schoolYear}}}",
+  "@enrollmentDashboardHeadcountCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardHeadcountExclusion": "Running total since enrolments opened, excluding unvalidated online requests",
+  "enrollmentDashboardHeadcountA11yLabel": "{count, plural, =0{No student enrolled} =1{1 student enrolled} other{{count} students enrolled}}",
+  "@enrollmentDashboardHeadcountA11yLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiEnrollments": "Enrolments · {window}",
+  "@enrollmentDashboardKpiEnrollments": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardKpiEnrollmentsSubline": "Students recorded within the chosen window",
+  "enrollmentDashboardKpiFirst": "First enrolments",
+  "enrollmentDashboardKpiFirstSubline": "{percent}% of the period's enrolments · students from outside",
+  "@enrollmentDashboardKpiFirstSubline": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiRe": "Re-enrolments",
+  "enrollmentDashboardKpiReSubline": "{percent}% of the period's enrolments · students already known",
+  "@enrollmentDashboardKpiReSubline": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardKpiPre": "Pending pre-enrolments",
+  "enrollmentDashboardKpiPreSubline": "Requests received online, to check then validate",
+  "enrollmentDashboardKpiNoneOnWindow": "None in this period",
+  "enrollmentDashboardKpiNoOnlineRequest": "No online request to handle",
+  "enrollmentDashboardKpiNote": "A validated pre-enrolment becomes a first enrolment on its validation date.",
+  "enrollmentDashboardPaceTitle": "Enrolment pace",
+  "enrollmentDashboardPaceA11yLabel": "Enrolment pace, {count} bars",
+  "@enrollmentDashboardPaceA11yLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardStudentsCount": "{count, plural, =0{0 students} =1{1 student} other{{count} students}}",
+  "@enrollmentDashboardStudentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardGenderTitle": "Girls / Boys",
+  "enrollmentDashboardSubtitleDay": "for the day",
+  "enrollmentDashboardSubtitlePeriod": "for the period",
+  "enrollmentDashboardGenderGirls": "Girls",
+  "enrollmentDashboardGenderBoys": "Boys",
+  "enrollmentDashboardGenderOther": "Other",
+  "enrollmentDashboardGenderNote": "{windowShare}% girls in this window, {totalShare}% across the whole headcount. The second figure guards against over-reading a small sample.",
+  "@enrollmentDashboardGenderNote": {
+    "placeholders": {
+      "windowShare": {
+        "type": "int"
+      },
+      "totalShare": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardTypeTitle": "By type",
+  "enrollmentDashboardTypeFirst": "First enrolment",
+  "enrollmentDashboardTypeRe": "Re-enrolment",
+  "enrollmentDashboardTypeNote": "Only first enrolments grow the headcount; re-enrolments carry it over.",
+  "enrollmentDashboardLevelTitle": "Breakdown by level",
+  "enrollmentDashboardLevelSubtitle": "Where the students enrolled {when} went",
+  "@enrollmentDashboardLevelSubtitle": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardLevelCount": "{count, plural, =1{1 level involved} other{{count} levels involved}}",
+  "@enrollmentDashboardLevelCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardLevelEmpty": "No level received an enrolment in this window.",
+  "enrollmentDashboardLevelToday": "today",
+  "enrollmentDashboardCycleTitle": "By cycle",
+  "enrollmentDashboardInsightsTitle": "Readings & alerts",
+  "enrollmentDashboardInsightPeakDay": "Busiest day",
+  "enrollmentDashboardInsightPeakWeek": "Busiest week",
+  "enrollmentDashboardInsightPeakMonth": "Busiest month",
+  "enrollmentDashboardInsightPeakBody": "{label} — {count}",
+  "@enrollmentDashboardInsightPeakBody": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardInsightParityTitle": "Parity",
+  "enrollmentDashboardInsightParityBalanced": "{share}% girls: the split is balanced.",
+  "@enrollmentDashboardInsightParityBalanced": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightParitySkewed": "{share}% girls: the split leans one way.",
+  "@enrollmentDashboardInsightParitySkewed": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightPreTitle": "Online requests to handle",
+  "enrollmentDashboardInsightPreBody": "{count, plural, =1{1 request is awaiting a check.} other{{count} requests are awaiting a check.}}",
+  "@enrollmentDashboardInsightPreBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardInsightPreAction": "Open pre-enrolments"
 }

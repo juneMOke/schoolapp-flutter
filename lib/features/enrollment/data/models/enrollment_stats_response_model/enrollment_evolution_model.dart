@@ -5,11 +5,15 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 class EnrollmentEvolutionModel {
   final String granularity;
   final int currentBucketIndex;
+  final String? axisStart;
+  final String? axisEnd;
   final List<EvolutionBucketModel> buckets;
 
   const EnrollmentEvolutionModel({
     required this.granularity,
     required this.currentBucketIndex,
+    this.axisStart,
+    this.axisEnd,
     required this.buckets,
   });
 
@@ -17,6 +21,8 @@ class EnrollmentEvolutionModel {
     return EnrollmentEvolutionModel(
       granularity: json['granularity'] as String,
       currentBucketIndex: (json['currentBucketIndex'] as num).toInt(),
+      axisStart: json['axisStart'] as String?,
+      axisEnd: json['axisEnd'] as String?,
       buckets: (json['buckets'] as List<dynamic>)
           .map(
             (bucket) =>
@@ -29,14 +35,23 @@ class EnrollmentEvolutionModel {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'granularity': granularity,
     'currentBucketIndex': currentBucketIndex,
+    'axisStart': axisStart,
+    'axisEnd': axisEnd,
     'buckets': buckets.map((bucket) => bucket.toJson()).toList(growable: false),
   };
 
   EnrollmentEvolution toEntity() => EnrollmentEvolution(
     granularity: _parseGranularity(granularity),
     currentBucketIndex: currentBucketIndex,
+    axisStart: _parseDate(axisStart),
+    axisEnd: _parseDate(axisEnd),
     buckets: buckets.map((bucket) => bucket.toEntity()).toList(growable: false),
   );
+
+  /// `2026-09-01` → date. Nulle si le serveur ne la porte pas : l'axe est une
+  /// information d'appoint, son absence ne doit pas faire échouer la lecture.
+  static DateTime? _parseDate(String? value) =>
+      value == null ? null : DateTime.tryParse(value);
 
   EvolutionGranularity _parseGranularity(String value) => switch (value) {
     'week' => EvolutionGranularity.week,
