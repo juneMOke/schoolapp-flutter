@@ -32,6 +32,19 @@ class CycleBarChart extends StatelessWidget {
   /// Permet ex. un libellé neutre sur les barres atténuées et coloré sur le pic.
   final Color Function(int index)? valueLabelColorBuilder;
 
+  /// Plancher du domaine haut de l'axe, avant la marge de 25 %.
+  ///
+  /// Le défaut de 10 existe pour qu'une série minuscule ne dessine pas des
+  /// barres pleine hauteur sur un axe de 1 ou 2 — ce qui donnerait à un jour
+  /// creux l'allure d'un pic. Il convient aux séries financières, comptées en
+  /// centimes, où il n'est jamais atteint.
+  ///
+  /// Il ne convient PAS aux petits comptages : à 1 à 3 inscriptions par jour,
+  /// un plancher de 10 écrase toutes les barres contre l'axe, tous les jours,
+  /// et le rythme devient illisible précisément là où il compte. Ces
+  /// appelants-là passent un plancher plus bas.
+  final double minTop;
+
   const CycleBarChart({
     super.key,
     required this.items,
@@ -40,6 +53,7 @@ class CycleBarChart extends StatelessWidget {
     this.verticalBottomLabels = false,
     this.valueLabelFormatter,
     this.valueLabelColorBuilder,
+    this.minTop = 10.0,
   });
 
   /// Style du libellé sous l'axe pour la barre [index].
@@ -85,7 +99,7 @@ class CycleBarChart extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     final maxVal = items.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final topY = (maxVal * 1.25).ceilToDouble().clamp(10.0, double.infinity);
+    final topY = (maxVal * 1.25).ceilToDouble().clamp(minTop, double.infinity);
     final barWidth = (items.length > 4 ? 20.0 : 32.0);
 
     // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur

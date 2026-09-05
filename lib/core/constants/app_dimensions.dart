@@ -253,4 +253,65 @@ class AppDimensions {
   // la rangée avec la puce bénéficiaire et le compteur : assez large pour un
   // libellé de niveau, assez court pour que la rangée ne se replie pas.
   static const boutiqueCartLevelSelectorWidth = 168.0;
+
+  // ── Tableau de bord Inscriptions (refonte) ───────────────────────────────
+  // « 1 px CSS = 1 dp Flutter » : les valeurs ci-dessous reprennent la spec du
+  // design system telle quelle. Préfixées `enrollmentDashboard` pour ne pas se
+  // confondre avec les tokens `enrollmentStats` de l'écran précédent, qui
+  // vivent encore le temps de la migration.
+
+  /// Bandeau d'effectif — le seul repère qui subsiste à l'état vide.
+  static const enrollmentDashboardBannerPaddingV = 22.0;
+  static const enrollmentDashboardBannerPaddingH = 26.0;
+  static const enrollmentDashboardBannerGap = 18.0;
+
+  /// Le total en 64 dp : le seul chiffre de l'écran à cette taille. Il répond à
+  /// « combien », la première des trois lectures.
+  static const enrollmentDashboardHeadcountFontSize = 64.0;
+  static const enrollmentDashboardBannerIconSize = 15.0;
+
+  /// Interlettrage du sur-titre en majuscules. La spec l'exprime en `.09em` sur
+  /// un label-small (11 dp) — soit ~1 dp, la valeur portée ici puisque Flutter
+  /// compte l'interlettrage en dp et non en cadratins.
+  static const enrollmentDashboardOvertitleLetterSpacing = 1.0;
+
+  /// Onglets de fenêtre. 44 dp est une **cible tactile**, pas une hauteur
+  /// décorative : « le choix de la période est l'action la plus fréquente de
+  /// l'écran, il ne doit jamais être confondu avec un filtre secondaire ».
+  static const enrollmentDashboardTabMinHeight = 44.0;
+  static const enrollmentDashboardTabsPadding = 6.0;
+  static const enrollmentDashboardTabsRadius = 14.0;
+  static const enrollmentDashboardTabRadius = 10.0;
+  static const enrollmentDashboardTabIconSize = 16.0;
+  static const enrollmentDashboardTabGap = 8.0;
+  static const enrollmentDashboardTabPaddingH = 18.0;
+
+  /// Champs Du/Au de la fenêtre personnalisée.
+  static const enrollmentDashboardDateFieldWidth = 150.0;
+
+  /// Barres. Le rayon 999 fait la pilule quelle que soit la hauteur.
+  static const enrollmentDashboardSplitBarHeight = 16.0;
+  static const enrollmentDashboardRowBarHeight = 9.0;
+  static const enrollmentDashboardRowLabelWidth = 132.0;
+  static const enrollmentDashboardPillRadius = 999.0;
+
+  /// Rythme : barres à coins doux.
+  static const enrollmentDashboardPaceBarRadius = 6.0;
+
+  /// Plancher du domaine haut du graphique de rythme.
+  ///
+  /// Le défaut du socle est 10 — invisible en finance (montants en centimes),
+  /// dévastateur ici : une école qui inscrit 1 à 3 élèves par jour verrait
+  /// toutes ses barres écrasées contre l'axe, tous les jours. À 4, une journée
+  /// à 1 inscription occupe encore le quart de la hauteur.
+  static const enrollmentDashboardPaceMinTop = 4.0;
+
+  /// Liste nominative du jour.
+  static const enrollmentDashboardDayAvatarSize = 30.0;
+  static const enrollmentDashboardTypePillIconSize = 13.0;
+
+  /// Lectures & alertes : cartes qui s'enroulent, jamais rendues « pour remplir
+  /// la ligne » — chacune a sa condition.
+  static const enrollmentDashboardInsightMinWidth = 250.0;
+  static const enrollmentDashboardInsightBadgeSize = 28.0;
 }
