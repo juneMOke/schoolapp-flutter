@@ -50,6 +50,14 @@ class PaymentLocalModel {
   final int? syncedAt;
   final int updatedAt;
 
+  /// L'extourne, en millisecondes epoch. `null` = versement en vigueur.
+  ///
+  /// Descendue par le pull, jamais écrite au guichet : ce poste encaisse, il
+  /// n'annule pas. Une ligne annulée reste affichée — barrée — plutôt que de
+  /// disparaître, et surtout elle cesse de compter dans la caisse et dans le
+  /// solde des créances.
+  final int? cancelledAt;
+
   const PaymentLocalModel({
     required this.id,
     required this.clientUuid,
@@ -73,6 +81,7 @@ class PaymentLocalModel {
     this.syncError,
     this.syncedAt,
     this.updatedAt = 0,
+    this.cancelledAt,
   });
 
   Map<String, Object?> toMap() => {
@@ -98,6 +107,7 @@ class PaymentLocalModel {
     'sync_error': syncError,
     'synced_at': syncedAt,
     'updated_at': updatedAt,
+    'cancelled_at': cancelledAt,
   };
 
   /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
@@ -145,6 +155,11 @@ class PaymentLocalModel {
     // ticket ne se réécrit pas depuis le réseau.
     if (collectedById != null) 'collected_by_id': collectedById,
     if (collectedByName != null) 'collected_by_name': collectedByName,
+    // Écrite sous condition, et jamais effacée : une extourne ne se défait pas.
+    // Un payload qui omettrait le champ — poste resté en arrière, delta scellé
+    // avant l'évolution du contrat — remettrait sinon en vigueur un versement
+    // annulé, et le ferait recompter dans la caisse.
+    if (cancelledAt != null) 'cancelled_at': cancelledAt,
     'updated_at': updatedAt,
   };
 
@@ -176,12 +191,14 @@ class PaymentLocalModel {
         syncError: m['sync_error'] as String?,
         syncedAt: m['synced_at'] as int?,
         updatedAt: (m['updated_at'] as int?) ?? 0,
+        cancelledAt: m['cancelled_at'] as int?,
       );
 
   /// [amounts] est **dérivé des imputations**, pas relu d'une colonne : le
   /// versement n'a plus de montant à lui. L'appelant les fournit — c'est le DAO
   /// de lecture qui fait la jointure, en un seul passage pour tout le lot.
   LocalPayment toEntity({MoneyBag amounts = MoneyBag.empty}) => LocalPayment(
+    cancelledAt: cancelledAt,
     id: id,
     clientUuid: clientUuid,
     studentId: studentId,

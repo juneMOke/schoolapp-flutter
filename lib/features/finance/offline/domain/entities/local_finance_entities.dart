@@ -252,6 +252,13 @@ class LocalPayment extends Equatable {
   /// Caissier ayant encaissé — uid et nom dénormalisé (v19). Alimentent la
   /// zone Z3 du ticket provisoire : sur une pièce non scellée, l'imputabilité
   /// humaine se substitue à l'imputabilité cryptographique (RG-012-11).
+  /// L'extourne (V122), en millisecondes epoch. `null` = versement en vigueur.
+  ///
+  /// Descendue par le pull, jamais écrite au guichet : ce poste encaisse, il
+  /// n'annule pas. La ligne reste affichée — barrée — plutôt que de disparaître,
+  /// et elle cesse de compter dans les soldes.
+  final int? cancelledAt;
+
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -270,6 +277,7 @@ class LocalPayment extends Equatable {
   final SyncState syncState;
 
   const LocalPayment({
+    this.cancelledAt,
     required this.id,
     required this.clientUuid,
     required this.studentId,

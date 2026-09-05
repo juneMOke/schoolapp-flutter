@@ -61,6 +61,7 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
     final amount = widget.payment.amounts.entries
         .map(MoneyFormat.format)
         .join(' · ');
+    final cancelled = widget.payment.isCancelled;
 
     return Material(
       color: Colors.transparent,
@@ -104,7 +105,12 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.titleSmall.copyWith(
-                        color: AppColors.textPrimary,
+                        color: cancelled
+                            ? AppColors.textMuted
+                            : AppColors.textPrimary,
+                        decoration: cancelled
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -120,6 +126,12 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                       const SizedBox(height: AppDimensions.spacingXS),
                       const FinancePendingSyncBadge(),
                     ],
+                    // Extourné côté serveur. La ligne RESTE : la famille garde
+                    // son papier, et une ligne absente ne lui explique rien.
+                    if (cancelled) ...[
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      const _PaymentCancelledBadge(),
+                    ],
                   ],
                 ),
               ),
@@ -127,7 +139,14 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
               Text(
                 '+ $amount',
                 style: AppTextStyles.moneyTabular.copyWith(
-                  color: AppColors.feeStatusPaid,
+                  // Barré ET démonétisé : le vert dit « encaissé », et un
+                  // encaissement extourné ne l'est plus. Garder la couleur en
+                  // ne barrant que le trait laisserait lire un total qui ne
+                  // compte plus nulle part.
+                  color: cancelled
+                      ? AppColors.textMuted
+                      : AppColors.feeStatusPaid,
+                  decoration: cancelled ? TextDecoration.lineThrough : null,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -197,6 +216,46 @@ class _PaymentMeta extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Pastille « versement annulé » — l'extourne, vue depuis l'historique.
+///
+/// Même forme que la pastille de synchro, autre sens : celle-ci ne dit pas « pas
+/// encore parti » mais « ne compte plus ». Elle accompagne le barré plutôt que de
+/// le remplacer — un trait seul se lit comme un défaut d'affichage.
+class _PaymentCancelledBadge extends StatelessWidget {
+  const _PaymentCancelledBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingS,
+        vertical: AppDimensions.spacingXS,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: AppRadius.brPill,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.block_outlined,
+            size: 13,
+            color: AppColors.textMuted,
+          ),
+          const SizedBox(width: AppDimensions.spacingXS),
+          Text(
+            l10n.facturationPaymentCancelledBadge,
+            style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
+          ),
+        ],
+      ),
     );
   }
 }

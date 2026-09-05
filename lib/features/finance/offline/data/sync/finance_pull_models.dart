@@ -2,6 +2,7 @@
 // Réponses serveur (fromJson) → converties en modèles locaux au upsert.
 
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 
@@ -139,6 +140,13 @@ class PaymentDto {
   final String? collectedById;
   final String? collectedByName;
 
+  /// L'extourne (V122), ISO-8601. `null` = versement en vigueur.
+  ///
+  /// C'est ce qui permet de **barrer** un encaissement au lieu de le voir
+  /// disparaître : une ligne supprimée n'a plus de `server_updated_at` à
+  /// comparer et ne peut être annoncée par aucun delta.
+  final String? cancelledAt;
+
   const PaymentDto({
     required this.id,
     required this.studentId,
@@ -153,6 +161,7 @@ class PaymentDto {
     this.receiptId,
     this.collectedById,
     this.collectedByName,
+    this.cancelledAt,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -173,6 +182,7 @@ class PaymentDto {
     receiptId: j['receiptId'] as String?,
     collectedById: j['collectedById'] as String?,
     collectedByName: j['collectedByName'] as String?,
+    cancelledAt: j['cancelledAt'] as String?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -193,6 +203,7 @@ class PaymentDto {
     syncStatus: 'SYNCED',
     syncedAt: now,
     updatedAt: now,
+    cancelledAt: EpochIsoHelper.tryToEpochMs(cancelledAt),
   );
 }
 

@@ -27,7 +27,7 @@
 /// **Tout `PullHandler` enregistré est couvert par exactement une [planKeyOf],
 /// et toute clé de [kSyncPlanAliases] couvre au moins un handler.**
 ///
-/// Dix-neuf clés pour vingt handlers, et ce n'est pas une erreur de compte :
+/// Vingt clés pour vingt-et-un handlers, et ce n'est pas une erreur de compte :
 /// `enrollment.snapshots` porte **deux** ressources, l'hydratant et le delta.
 /// Le serveur les a fusionnées sous une clé unique précisément pour rendre leur
 /// arête d'ordre indéclarable, donc incassable.
@@ -76,12 +76,19 @@
 /// flux, seulement un **préfixe** de clé de curseur. Voir [isCursorKeyPrefix].
 library;
 
-/// Les dix-neuf clés de flux du contrat, dans l'ordre de l'énumération serveur.
+/// Les vingt clés de flux du contrat, dans l'ordre de l'énumération serveur.
 ///
 /// Recopiées de `SyncStream.java`, **jamais** du catalogue en Markdown : le
 /// catalogue est un relevé daté, l'énumération est ce qui est déployé.
 abstract final class SyncPlanKeys {
   static const String schoolReferential = 'school.referential';
+
+  /// Le registre des disparitions (V121) — **le second flux de socle**, servi
+  /// sans garde de permission pour la même raison que le référentiel : un profil
+  /// qui ne le reçoit pas garde indéfiniment des lignes que le serveur a
+  /// retirées. Descendu juste derrière lui, et avant tous les flux dont il
+  /// enlève des lignes : retirer précède ce qui recrée.
+  static const String syncTombstones = 'sync.tombstones';
   static const String enrollmentSnapshots = 'enrollment.snapshots';
   static const String enrollmentReenrollmentCohort =
       'enrollment.reenrollment-cohort';
@@ -130,6 +137,7 @@ abstract final class SyncPlanKeys {
 /// un ensemble n'a pas d'ordre à préserver.
 const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.schoolReferential: ['enrollment_referential'],
+  SyncPlanKeys.syncTombstones: ['sync_tombstones'],
   SyncPlanKeys.enrollmentSnapshots: ['enrollment_snapshots', 'enrollments'],
   SyncPlanKeys.enrollmentReenrollmentCohort: ['enrollment_reenrollment_cohort'],
   SyncPlanKeys.enrollmentPreEnrollments: ['enrollment_pre_enrollments'],

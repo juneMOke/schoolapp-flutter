@@ -47,6 +47,14 @@ class Payment extends Equatable {
   final String? cashierFirstName;
   final String? cashierLastName;
 
+  /// Le versement a été **extourné** côté serveur.
+  ///
+  /// Il reste dans l'historique, barré : le faire disparaître serait retomber
+  /// dans le défaut que l'extourne existe à corriger — une ligne absente ne dit
+  /// rien, et la famille, elle, garde son papier. Il ne compte plus dans les
+  /// soldes, que le serveur a déjà recalculés de son côté.
+  final bool isCancelled;
+
   const Payment({
     required this.id,
     required this.studentId,
@@ -58,6 +66,7 @@ class Payment extends Equatable {
     this.payerPhoneNumber,
     required this.paidAt,
     this.isPendingSync = false,
+    this.isCancelled = false,
     this.cashierFirstName,
     this.cashierLastName,
     this.collectedByName,

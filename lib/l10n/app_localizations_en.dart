@@ -7590,6 +7590,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get facturationPaymentCancelledBadge => 'Reversed';
+
+  @override
   String facturationReceiptCancelledNotice(String date) {
     return 'Receipt cancelled by the school on $date.';
   }
