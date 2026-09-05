@@ -4485,6 +4485,7 @@
       }
     }
   },
+  "facturationPaymentCancelledBadge": "Reversed",
   "facturationReceiptCancelledNotice": "Receipt cancelled by the school on {date}.",
   "@facturationReceiptCancelledNotice": {
     "placeholders": {

@@ -4441,6 +4441,7 @@
       }
     }
   },
+  "facturationPaymentCancelledBadge": "Versement annulé",
   "facturationReceiptCancelledNotice": "Reçu annulé le {date} par l'établissement.",
   "@facturationReceiptCancelledNotice": {
     "placeholders": {

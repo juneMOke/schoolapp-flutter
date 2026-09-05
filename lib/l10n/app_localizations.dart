@@ -12405,6 +12405,12 @@ abstract class AppLocalizations {
   /// **'Document cancelled by the school on {date} — {reason}'**
   String documentsCancelledWithReasonNotice(String date, String reason);
 
+  /// No description provided for @facturationPaymentCancelledBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversed'**
+  String get facturationPaymentCancelledBadge;
+
   /// No description provided for @facturationReceiptCancelledNotice.
   ///
   /// In en, this message translates to:

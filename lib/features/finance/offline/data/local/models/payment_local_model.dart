@@ -198,6 +198,7 @@ class PaymentLocalModel {
   /// versement n'a plus de montant à lui. L'appelant les fournit — c'est le DAO
   /// de lecture qui fait la jointure, en un seul passage pour tout le lot.
   LocalPayment toEntity({MoneyBag amounts = MoneyBag.empty}) => LocalPayment(
+    cancelledAt: cancelledAt,
     id: id,
     clientUuid: clientUuid,
     studentId: studentId,

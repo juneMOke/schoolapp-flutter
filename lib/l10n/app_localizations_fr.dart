@@ -7666,6 +7666,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get facturationPaymentCancelledBadge => 'Versement annulé';
+
+  @override
   String facturationReceiptCancelledNotice(String date) {
     return 'Reçu annulé le $date par l\'établissement.';
   }
