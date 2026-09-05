@@ -105,6 +105,11 @@ class FinanceLocalDao {
     nowMs: nowMs,
   );
 
+  /// Efface un versement que le serveur déclare supprimé (T6) — cf.
+  /// `FinancePaymentWriteDao.deleteTombstonedPayment`.
+  Future<void> deleteTombstonedPayment(String paymentId) =>
+      _write.deleteTombstonedPayment(paymentId);
+
   // ── ACK / remap (FF4) ──────────────────────────────────────────────────────
 
   Future<void> applyPaymentAck(

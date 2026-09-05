@@ -56,6 +56,13 @@ class FinanceLedgerReadDao {
   /// école ne dépasse neuf tranches d'une même nature.
   Future<List<LocalStudentCharge>> getChargesByStudent(String studentId) async {
     final rows = await _db.rawQuery(
+      // `cancelled_at IS NULL` : un encaissement extourné ne compte plus, ni ici
+      // ni dans les deux agrégats par devise plus bas. Le cas n'est pas
+      // théorique — une ligne restée en SYNC_ERROR localement peut avoir été
+      // annulée côté serveur, et sans ce filtre le poste continuerait de déduire
+      // un montant que la caisse ne connaît plus. La sortir de `paid_pending`
+      // rend la créance à son état réel, celui que le serveur vient de
+      // recalculer de son côté.
       '''
       SELECT sc.*,
              t.code AS t_fee_tariff_code,
@@ -64,6 +71,7 @@ class FinanceLedgerReadDao {
                FROM payment_allocations pa
                JOIN payments p ON p.id = pa.payment_id
                WHERE pa.student_charge_id = sc.id
+                 AND p.cancelled_at IS NULL
                  AND p.sync_status <> ?
              ), 0) AS paid_pending
       FROM student_charges sc
@@ -324,6 +332,7 @@ class FinanceLedgerReadDao {
                  FROM payment_allocations pa
                  JOIN payments p ON p.id = pa.payment_id
                  WHERE pa.student_charge_id = sc.id
+                   AND p.cancelled_at IS NULL
                    AND p.sync_status <> ?
                ), 0))                           AS paid_pending
         FROM student_charges sc
@@ -456,6 +465,7 @@ class FinanceLedgerReadDao {
                FROM payment_allocations pa
                JOIN payments p ON p.id = pa.payment_id
                WHERE pa.student_charge_id = sc.id
+                 AND p.cancelled_at IS NULL
                  AND p.sync_status <> ?
              ), 0))                           AS paid_pending
       FROM student_charges sc

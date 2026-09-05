@@ -104,6 +104,22 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
       await _dao.applyPaymentAck(ack, nowMs: _now());
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
+      // Le serveur déclare l'agrégat SUPPRIMÉ (T6). L'identifiant d'un versement
+      // vient du poste : un versement purgé côté serveur dont l'accusé s'est
+      // perdu repartirait à l'identique et serait recréé, défaisant la purge.
+      //
+      // On efface la ligne locale plutôt que de la figer en SYNC_ERROR : la
+      // composition des créances compte les versements non synchronisés — pour
+      // que l'argent reçu ne soit jamais « reperdu » — et une ligne que le
+      // serveur ne reprendra JAMAIS y déduirait indéfiniment un montant que la
+      // caisse ne connaît plus. `acked` ne dit pas ici « le serveur a encaissé »
+      // mais « le serveur a tranché » : dans les deux cas l'entrée d'outbox n'a
+      // plus rien à faire, et c'est la seule issue qui la retire.
+      if (ApiErrorParser.detailCodeOf(e.response) ==
+          FinanceErrorCodes.aggregateTombstoned) {
+        await _dao.deleteTombstonedPayment(request.payment.id);
+        return const OutboxDispatchResult.acked();
+      }
       return _classifyDioError(e);
     } catch (e) {
       // Échec LOCAL (ex. `applyPaymentAck`) après un POST possiblement acquitté :

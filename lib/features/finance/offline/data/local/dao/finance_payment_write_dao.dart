@@ -248,4 +248,33 @@ class FinancePaymentWriteDao {
         )
         .toList(),
   );
+
+  /// Efface un encaissement que le serveur déclare **supprimé** (T6).
+  ///
+  /// Le cas est étroit et réel : l'identifiant d'un versement est fabriqué par
+  /// le poste, si bien qu'un versement purgé côté serveur dont l'accusé s'est
+  /// perdu repartirait à l'identique. Le serveur refuse alors la remontée par un
+  /// `410 AGGREGATE_TOMBSTONED`.
+  ///
+  /// **Le laisser en `SYNC_ERROR` serait le pire des deux.** La composition des
+  /// créances compte les versements non synchronisés — `SYNC_ERROR` compris,
+  /// pour que l'argent reçu ne soit jamais « reperdu » à l'écran. Une ligne que
+  /// le serveur ne reprendra jamais y déduirait donc indéfiniment un montant que
+  /// la caisse ne connaît plus, et la créance s'afficherait payée alors qu'elle
+  /// ne l'est pas.
+  Future<void> deleteTombstonedPayment(String paymentId) async {
+    await _db.transaction((txn) async {
+      await txn.delete(
+        'payment_allocations',
+        where: 'payment_id = ?',
+        whereArgs: [paymentId],
+      );
+      await txn.delete(
+        'payment_tenders',
+        where: 'payment_id = ?',
+        whereArgs: [paymentId],
+      );
+      await txn.delete('payments', where: 'id = ?', whereArgs: [paymentId]);
+    });
+  }
 }

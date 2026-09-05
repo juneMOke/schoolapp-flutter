@@ -1324,6 +1324,23 @@ Future<void> migrateOfflineDatabase(
     //
     await _relaxGuardianPhoneNumber(db, schema);
   }
+
+  if (upTo(46)) {
+    // v46 — l'extourne d'un encaissement (T3/T4).
+    //
+    // Jusqu'ici, retirer un versement se faisait en le SUPPRIMANT côté serveur.
+    // Le pull delta n'a aucun moyen d'annoncer une ligne absente : le poste qui
+    // l'avait tirée la gardait, et sa caisse comptait de l'argent qui n'existait
+    // plus. Le versement porte désormais sa date d'annulation, descendue par le
+    // flux ordinaire comme n'importe quelle mise à jour.
+    //
+    // Colonne nullable, aucun backfill : `NULL` signifie « en vigueur », ce qui
+    // est vrai de tout l'historique — aucune extourne n'a jamais été enregistrée.
+    if (await _hasTable(db, 'payments') &&
+        !await _hasColumn(db, 'payments', 'cancelled_at')) {
+      await db.execute('ALTER TABLE payments ADD COLUMN cancelled_at INTEGER');
+    }
+  }
 }
 
 /// Étape v45 : `parents.phone_number` perd son `NOT NULL`.

@@ -768,7 +768,8 @@ const TableSchema paymentsTable = TableSchema(
       sync_error TEXT,
       synced_at INTEGER,
       updated_at INTEGER NOT NULL DEFAULT 0,
-      ticket_printed_at INTEGER
+      ticket_printed_at INTEGER,
+      cancelled_at INTEGER
     )
   ''',
   createIndexSql: [

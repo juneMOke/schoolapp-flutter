@@ -76,6 +76,15 @@ abstract final class FinanceErrorCodes {
   /// pivot qu'il n'aurait pas dû : aucune attente ne lève cela.
   static const String unknownTenderPivot = 'UNKNOWN_TENDER_PIVOT';
 
+  /// L'agrégat a été **supprimé côté serveur** : le recréer défairait une purge
+  /// que quelqu'un a instruite.
+  ///
+  /// Rendu avec un `410 Gone`, et non un 4xx ordinaire : le poste doit en tirer
+  /// une conséquence définitive plutôt que d'attendre. Ni transitoire — rejouer
+  /// donnera toujours le même refus — ni défaut de composition : le versement
+  /// était juste, c'est sa contrepartie serveur qui n'existe plus.
+  static const String aggregateTombstoned = 'AGGREGATE_TOMBSTONED';
+
   /// Vrai si la cause peut se résoudre **en attendant**, sans geste au guichet.
   ///
   /// Le POST est idempotent sur `payment.id` : rejouer ne compte jamais l'argent
