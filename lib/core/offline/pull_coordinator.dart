@@ -10,6 +10,8 @@ import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_cycle_guard.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/core/offline/pull_run_report.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart'
+    show kTombstonesResource;
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 
 // Ré-exporté : le rapport a été sorti d'ici pour tenir la cible de taille, et
@@ -108,9 +110,21 @@ class PullCoordinator {
   ///
   /// Une ressource demandée mais non enregistrée est ignorée en silence : c'est
   /// un écran qui demande plus que ce que son APK sait tirer, pas une panne.
+  ///
+  /// **Le registre des disparitions est joint d'office**, quel que soit
+  /// l'ensemble demandé. Ce n'est pas une commodité : sans lui, un écran
+  /// appliquerait les créations de son cycle sans les retraits, et rouvrirait
+  /// exactement le trou que ce flux existe à fermer — un élève purgé, une
+  /// créance supprimée, réapparus le temps d'un montage d'écran. L'ajouter aux
+  /// huit sites d'appel aurait marché aujourd'hui et aurait été oublié au
+  /// neuvième ; ici, la garantie ne dépend de la mémoire de personne.
+  ///
+  /// Il reste soumis au même cycle que les autres : hors ligne, sans jetons ou
+  /// hors plan, il ne part pas plus que le reste.
   Future<PullRunReport> pullSubset(Set<String> resources) async {
+    final requested = {...resources, kTombstonesResource};
     final selected = _handlers.values
-        .where((h) => resources.contains(h.resource))
+        .where((h) => requested.contains(h.resource))
         .toList(growable: false);
     if (selected.isEmpty) return const PullRunReport();
     return _runCycle(selected);

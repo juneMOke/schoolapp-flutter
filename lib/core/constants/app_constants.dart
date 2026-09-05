@@ -553,7 +553,7 @@ class AppConstants {
   // l'enfant d'un frère — et la contrainte ne laissait qu'une issue : en
   // inventer un. Une saisie fausse, donc un message envoyé à un inconnu le jour
   // où l'école notifie.
-  static const int offlineDbSchemaVersion = 45;
+  static const int offlineDbSchemaVersion = 46;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -721,6 +721,13 @@ class AppConstants {
   /// `limit`. Ressource **indépendante** de [syncClassroomMembersEndpoint] (curseur
   /// séparé, pas de synchro artificielle entre les deux flux).
   static const String syncClassroomsEndpoint = '/api/v1/sync/classrooms';
+
+  /// Le registre des disparitions (V121) : ce qui a été supprimé, ou a quitté la
+  /// portée de ce poste. Servi **sans garde de permission**, comme le socle
+  /// référentiel — tout profil détient localement quelque chose qui peut être
+  /// supprimé, et le garder derrière un droit laisserait aveugle exactement le
+  /// profil qui ne l'a pas. Sans année en paramètre : une disparition n'en a pas.
+  static const String syncTombstonesEndpoint = '/api/v1/sync/tombstones';
 
   /// Pull KEYSET du roster (`ref_classroom_members`), même contrat que
   /// [syncClassroomsEndpoint] mais ressource indépendante (curseur séparé,

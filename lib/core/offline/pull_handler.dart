@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 /// Issue d'un pull delta d'une ressource (diagnostic / agrégation par le
 /// coordinateur). Miroir *lecture* de `OutboxDispatchResult` (qui, lui, pousse).
 enum PullResult {
-  /// Delta appliqué : des lignes ont été upsertées localement.
+  /// Delta appliqué : des lignes ont été upsertées **ou retirées** localement.
   updated,
 
   /// Rien de plus récent côté serveur (304 / delta vide) — curseur conservé.
@@ -21,6 +21,14 @@ class PullOutcome {
   /// Nombre de lignes appliquées (0 si [PullResult.notModified] / [PullResult.error]).
   final int upserted;
 
+  /// Nombre de lignes **retirées** localement sur ce pull.
+  ///
+  /// Sans ce compteur, un cycle qui ne fait qu'effacer se rapporterait comme
+  /// inactif : `upserted: 0` se lit « rien à faire », alors que la tablette
+  /// vient de perdre des lignes — exactement l'événement qu'on veut voir dans un
+  /// diagnostic, et le seul dont l'utilisateur puisse s'étonner.
+  final int removed;
+
   /// Message d'échec ([PullResult.error] uniquement).
   final String? error;
 
@@ -33,16 +41,21 @@ class PullOutcome {
   const PullOutcome._(
     this.result, {
     this.upserted = 0,
+    this.removed = 0,
     this.error,
     this.serverTimeMs,
   });
 
-  const PullOutcome.updated({int upserted = 0, int? serverTimeMs})
-    : this._(
-        PullResult.updated,
-        upserted: upserted,
-        serverTimeMs: serverTimeMs,
-      );
+  const PullOutcome.updated({
+    int upserted = 0,
+    int removed = 0,
+    int? serverTimeMs,
+  }) : this._(
+         PullResult.updated,
+         upserted: upserted,
+         removed: removed,
+         serverTimeMs: serverTimeMs,
+       );
 
   const PullOutcome.notModified() : this._(PullResult.notModified);
 

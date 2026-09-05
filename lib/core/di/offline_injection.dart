@@ -27,6 +27,10 @@ import 'package:school_app_flutter/features/sync/data/repositories/sync_plan_rep
 import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_dao.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_api.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_handler.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
@@ -249,6 +253,13 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
   _registerSyncPlan(getIt);
+  // AVANT les modules, et c'est l'ordre qui compte : le coordinateur tire dans
+  // l'ordre d'enregistrement, et retirer doit précéder ce qui recrée. Une ligne
+  // supprimée puis recréée côté serveur — le cas est réel, les identifiants de
+  // versement et d'inscription venant du poste — est ainsi effacée puis
+  // réinsérée par son propre flux, dans le même cycle. L'ordre inverse laisserait
+  // le retrait effacer la recréation.
+  _registerTombstones(getIt);
   registerBoutiqueOffline(getIt); // Boutique — caisse point-de-vente (ADR-020)
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
@@ -271,6 +282,31 @@ void registerOfflineModules(GetIt getIt) {
 ///
 /// Il ne gouverne toujours pas l'**ordre** : le coordinateur tire dans l'ordre
 /// d'enregistrement, et `PullSequencer` reste dormant.
+/// Le registre des disparitions (V121) : un flux, un curseur, une table de
+/// correspondance vers les tables locales.
+///
+/// **Un flux global, et non un tableau `deletions` dans chaque page keyset.**
+/// L'arbitrage vient d'ici : le squelette de pagination est une méthode privée
+/// recopiée dans chacun des treize dépôts de pull. Enrichir l'enveloppe aurait
+/// été treize chantiers, treize occasions d'oublier une garde, et treize
+/// endroits où la règle d'effacement pouvait diverger.
+void _registerTombstones(GetIt getIt) {
+  getIt.registerLazySingleton<TombstonePullApi>(
+    () => TombstonePullApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<TombstonePullRepository>(
+    () => TombstonePullRepository(
+      api: getIt<TombstonePullApi>(),
+      dao: TombstoneDao(getIt<Database>(), getIt<SyncMetaDao>()),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt<PullCoordinator>().registerHandler(
+    TombstonePullHandler(getIt<TombstonePullRepository>()),
+  );
+}
+
 void _registerSyncPlan(GetIt getIt) {
   getIt.registerLazySingleton<SyncPlanApi>(() => SyncPlanApi(getIt<Dio>()));
   getIt.registerLazySingleton<SyncPlanRepository>(

@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/refresh_ledger_before_collection_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/watch_ledger_revalidation_use_case.dart';
@@ -245,11 +246,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('vingt et un handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(21));
+    test('vingt-deux handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(22));
       expect(
         order().toSet(),
-        hasLength(21),
+        hasLength(22),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -257,13 +258,26 @@ void main() {
     // CORRECTIF A — le socle est une exception au filtre de permission, donc
     // une porte ouverte. Un second porteur du drapeau doit être une décision,
     // jamais un copier-coller : `isBaseline` sort son flux de TOUT filtre.
-    test('un seul flux socle dans tout le dépôt, et c\'est le référentiel', () {
+    test('deux flux socle, nommés — et le registre des retraits vient EN TÊTE', () {
       final socles = coordinator.registered
           .where((h) => h.isBaseline)
           .map((h) => h.resource)
           .toList();
 
-      expect(socles, [EnrollmentPullRepositoryImpl.referentialResource]);
+      // Le second porteur du drapeau est une décision, pas un copier-coller :
+      // tout profil détient localement quelque chose qui peut être supprimé, et
+      // garder les retraits derrière une permission laisserait aveugle
+      // exactement le profil qui ne l'a pas.
+      //
+      // L'ORDRE est porteur : le coordinateur tire dans l'ordre d'enregistrement,
+      // et retirer doit précéder ce qui recrée. Une ligne supprimée puis recréée
+      // côté serveur — les identifiants de versement et d'inscription viennent du
+      // poste — est ainsi effacée puis réinsérée par son propre flux, dans le
+      // même cycle. L'ordre inverse laisserait le retrait effacer la recréation.
+      expect(socles, [
+        kTombstonesResource,
+        EnrollmentPullRepositoryImpl.referentialResource,
+      ]);
     });
 
     // Les vingt autres restent gouvernés par leur permission : sans cette
@@ -305,8 +319,9 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les vingt et une ressources attendues sont toutes enregistrées', () {
+  test('les vingt-deux ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
+      kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
       EnrollmentPullRepositoryImpl.cohortResource,
       EnrollmentPullRepositoryImpl.preEnrollmentsResource,
