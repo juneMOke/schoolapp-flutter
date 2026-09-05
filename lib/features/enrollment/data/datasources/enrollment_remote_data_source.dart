@@ -72,11 +72,21 @@ abstract class EnrollmentRemoteDataSource {
     @Path('enrollmentId') String enrollmentId,
   );
 
+  /// Les statistiques d'inscription sur une fenêtre de temps.
+  ///
+  /// `date` n'accompagne QUE `period=day`, `from`/`to` QUE `period=custom` :
+  /// le serveur refuse les autres combinaisons en 400 plutôt que d'ignorer un
+  /// paramètre hors sujet. `EnrollmentStatsWindow` rend ces requêtes
+  /// inconstructibles, il n'y a donc rien à valider ici.
+  ///
+  /// Retrofit omet les `@Query` nuls : les trois restent absents de l'URL tant
+  /// que la fenêtre ne les porte pas.
   @GET(AppConstants.enrollmentStatsEndpoint)
   Future<EnrollmentStatsResponseModel> getEnrollmentStats(
     @Extras() Map<String, dynamic> extras,
     @Query('period') String period,
-    @Query('month') String? month,
-    @Query('week') String? week,
+    @Query('date') String? date,
+    @Query('from') String? from,
+    @Query('to') String? to,
   );
 }

@@ -14,6 +14,13 @@ class MockEnrollmentRemoteDataSource extends Mock
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 
 final tResponseModel = EnrollmentStatsResponseModel(
+  headcount: const GenderDistributionModel(
+    total: 120,
+    segments: <GenderSegmentModel>[
+      GenderSegmentModel(code: 'FEMALE', value: 62, percent: 52),
+      GenderSegmentModel(code: 'MALE', value: 58, percent: 48),
+    ],
+  ),
   context: StatsContextModel(
     schoolYear: '2025-2026',
     period: 'year',
@@ -32,16 +39,37 @@ final tResponseModel = EnrollmentStatsResponseModel(
     granularity: 'month',
     currentBucketIndex: 8,
     buckets: <EvolutionBucketModel>[
-      EvolutionBucketModel(key: '2025-09', value: 12, isCurrent: false),
-      EvolutionBucketModel(key: '2026-05', value: 18, isCurrent: true),
+      EvolutionBucketModel(
+        key: '2025-09',
+        shortLabel: '2025-09',
+        longLabel: '2025-09',
+        value: 12,
+        isCurrent: false,
+      ),
+      EvolutionBucketModel(
+        key: '2026-05',
+        shortLabel: '2026-05',
+        longLabel: '2026-05',
+        value: 18,
+        isCurrent: true,
+      ),
     ],
   ),
   distributionByCycle: const CycleDistributionModel(
     cycles: <CycleStatModel>[
       CycleStatModel(
         code: 'PRIMARY',
+        label: 'PRIMARY',
         total: 70,
-        levels: <LevelStatModel>[LevelStatModel(code: 'P1', value: 30)],
+        levels: <LevelStatModel>[
+          LevelStatModel(
+            id: 'p1-id',
+            code: 'P1',
+            label: 'P1',
+            cycle: 'PRIMARY',
+            value: 30,
+          ),
+        ],
       ),
     ],
   ),
@@ -73,6 +101,7 @@ void main() {
           'year',
           null,
           null,
+          null,
         ),
       ).thenAnswer((_) async => tResponseModel);
 
@@ -94,6 +123,7 @@ void main() {
           'year',
           null,
           null,
+          null,
         ),
       ).called(1);
     });
@@ -104,14 +134,14 @@ void main() {
         () => mockRemoteDataSource.getEnrollmentStats(
           tRequiredAuth,
           'month',
-          '2026-05',
+          null,
+          null,
           null,
         ),
       ).thenThrow(_dioException(error: failure));
 
       final result = await repository.getEnrollmentStats(
-        period: EnrollmentStatsPeriod.month,
-        month: '2026-05',
+        window: const EnrollmentStatsWindow.month(),
       );
 
       expect(result, const Left<Failure, EnrollmentStats>(failure));
@@ -123,15 +153,15 @@ void main() {
         when(
           () => mockRemoteDataSource.getEnrollmentStats(
             tRequiredAuth,
-            'week',
+            'day',
+            '2026-05-21',
             null,
-            '2026-W21',
+            null,
           ),
         ).thenThrow(_dioException(error: Exception('socket error')));
 
         final result = await repository.getEnrollmentStats(
-          period: EnrollmentStatsPeriod.week,
-          week: '2026-W21',
+          window: EnrollmentStatsWindow.day(DateTime(2026, 5, 21)),
         );
 
         expect(

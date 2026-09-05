@@ -9,14 +9,8 @@ class GetEnrollmentStatsUseCase {
   const GetEnrollmentStatsUseCase(this._repository);
 
   Future<Either<Failure, EnrollmentStats>> call({
-    EnrollmentStatsPeriod period = EnrollmentStatsPeriod.year,
-    String? month,
-    String? week,
+    EnrollmentStatsWindow window = const EnrollmentStatsWindow.year(),
   }) {
-    return _repository.getEnrollmentStats(
-      period: period,
-      month: month,
-      week: week,
-    );
+    return _repository.getEnrollmentStats(window: window);
   }
 }

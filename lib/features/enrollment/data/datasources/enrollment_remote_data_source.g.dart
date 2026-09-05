@@ -261,15 +261,17 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   Future<EnrollmentStatsResponseModel> getEnrollmentStats(
     Map<String, dynamic> extras,
     String period,
-    String? month,
-    String? week,
+    String? date,
+    String? from,
+    String? to,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'period': period,
-      r'month': month,
-      r'week': week,
+      r'date': date,
+      r'from': from,
+      r'to': to,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

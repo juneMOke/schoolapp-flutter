@@ -7,6 +7,11 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrol
 part 'enrollment_stats_event.dart';
 part 'enrollment_stats_state.dart';
 
+/// Le tableau de bord des inscriptions — **une fenêtre, un fait**.
+///
+/// Ce bloc fait seul autorité sur ce que la page rend sous son en-tête. Les
+/// quatre états qu'il émet (`loading`, `success`, `empty`, `error`) ne sont pas
+/// des nuances d'affichage : ils décident quels blocs **existent**.
 class EnrollmentStatsBloc
     extends Bloc<EnrollmentStatsEvent, EnrollmentStatsState> {
   final GetEnrollmentStatsUseCase _getEnrollmentStatsUseCase;
@@ -27,50 +32,52 @@ class EnrollmentStatsBloc
     emit(
       state.copyWith(
         status: EnrollmentStatsStatus.loading,
-        errorType: EnrollmentStatsErrorType.none,
-        errorMessage: null,
-        selectedPeriod: event.period,
-        selectedMonth: event.month,
-        selectedWeek: event.week,
+        failure: null,
+        window: event.window,
       ),
     );
 
-    final result = await _getEnrollmentStatsUseCase(
-      period: event.period,
-      month: event.month,
-      week: event.week,
-    );
+    final result = await _getEnrollmentStatsUseCase(window: event.window);
 
     result.fold(
+      // L'erreur emporte les données AVEC elle.
+      //
+      // Sans ce `stats: null`, la dernière lecture réussie survivait à l'échec
+      // suivant : le bandeau d'effectif aurait affiché un total d'il y a dix
+      // minutes, sous un écran en erreur, sans rien qui le signale. « Sans
+      // données, l'effectif affiché serait un mensonge » — et la façon de tenir
+      // cette règle est de ne plus AVOIR la donnée, pas de compter sur chaque
+      // widget pour s'abstenir de la lire.
       (failure) => emit(
         state.copyWith(
           status: EnrollmentStatsStatus.error,
-          errorType: _mapFailureToErrorType(failure),
-          errorMessage: _mapFailureToMessage(failure),
+          stats: null,
+          failure: failure,
         ),
       ),
       (stats) => emit(
-        state.copyWith(
-          status: EnrollmentStatsStatus.success,
-          stats: stats,
-          errorType: EnrollmentStatsErrorType.none,
-          errorMessage: null,
-        ),
+        state.copyWith(status: _statusFor(stats), stats: stats, failure: null),
       ),
     );
+  }
+
+  /// Vide ou plein — tranché ici, une fois pour tout l'écran.
+  ///
+  /// `pre > 0` n'est **pas** un vide : des demandes en ligne attendent d'être
+  /// traitées, l'écran a donc quelque chose à dire et une action à proposer.
+  static EnrollmentStatsStatus _statusFor(EnrollmentStats stats) {
+    final total = stats.kpis.totalEnrollments.value;
+    final pre = stats.kpis.preEnrollments.value;
+    return total == 0 && pre == 0
+        ? EnrollmentStatsStatus.empty
+        : EnrollmentStatsStatus.success;
   }
 
   Future<void> _onRefreshRequested(
     EnrollmentStatsRefreshRequested event,
     Emitter<EnrollmentStatsState> emit,
   ) async {
-    add(
-      EnrollmentStatsRequested(
-        period: state.selectedPeriod,
-        month: state.selectedMonth,
-        week: state.selectedWeek,
-      ),
-    );
+    add(EnrollmentStatsRequested(window: state.window));
   }
 
   void _onResetRequested(
@@ -79,30 +86,4 @@ class EnrollmentStatsBloc
   ) {
     emit(const EnrollmentStatsState());
   }
-
-  EnrollmentStatsErrorType _mapFailureToErrorType(Failure failure) =>
-      switch (failure) {
-        NetworkFailure() => EnrollmentStatsErrorType.network,
-        NotFoundFailure() => EnrollmentStatsErrorType.notFound,
-        ValidationFailure() => EnrollmentStatsErrorType.validation,
-        UnauthorizedFailure() => EnrollmentStatsErrorType.unauthorized,
-        InvalidCredentialsFailure() =>
-          EnrollmentStatsErrorType.invalidCredentials,
-        ServerFailure() => EnrollmentStatsErrorType.server,
-        StorageFailure() => EnrollmentStatsErrorType.storage,
-        AuthFailure() => EnrollmentStatsErrorType.auth,
-        _ => EnrollmentStatsErrorType.unknown,
-      };
-
-  String _mapFailureToMessage(Failure failure) => switch (failure) {
-    NetworkFailure() => 'Verifiez votre connexion internet',
-    NotFoundFailure() => 'Aucune statistique disponible',
-    ValidationFailure() => 'Parametres invalides',
-    UnauthorizedFailure() => 'Acces non autorise',
-    InvalidCredentialsFailure() => 'Session invalide, reconnectez-vous',
-    ServerFailure() => 'Erreur serveur, reessayez plus tard',
-    StorageFailure() => 'Erreur de stockage local',
-    AuthFailure() => 'Erreur d\'authentification',
-    _ => 'Une erreur est survenue',
-  };
 }

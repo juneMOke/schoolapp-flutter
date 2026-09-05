@@ -4,8 +4,6 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 
 abstract class EnrollmentStatsRepository {
   Future<Either<Failure, EnrollmentStats>> getEnrollmentStats({
-    EnrollmentStatsPeriod period = EnrollmentStatsPeriod.year,
-    String? month,
-    String? week,
+    EnrollmentStatsWindow window,
   });
 }

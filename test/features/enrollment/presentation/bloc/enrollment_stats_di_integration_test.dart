@@ -20,6 +20,13 @@ class MockEnrollmentRemoteDataSource extends Mock
     implements EnrollmentRemoteDataSource {}
 
 final _tStatsResponseModel = EnrollmentStatsResponseModel(
+  headcount: const GenderDistributionModel(
+    total: 120,
+    segments: <GenderSegmentModel>[
+      GenderSegmentModel(code: 'FEMALE', value: 62, percent: 52),
+      GenderSegmentModel(code: 'MALE', value: 58, percent: 48),
+    ],
+  ),
   context: StatsContextModel(
     schoolYear: '2025-2026',
     period: 'month',
@@ -38,19 +45,50 @@ final _tStatsResponseModel = EnrollmentStatsResponseModel(
     granularity: 'week',
     currentBucketIndex: 2,
     buckets: <EvolutionBucketModel>[
-      EvolutionBucketModel(key: '2026-W19', value: 12, isCurrent: false),
-      EvolutionBucketModel(key: '2026-W20', value: 20, isCurrent: false),
-      EvolutionBucketModel(key: '2026-W21', value: 18, isCurrent: true),
+      EvolutionBucketModel(
+        key: '2026-W19',
+        shortLabel: '2026-W19',
+        longLabel: '2026-W19',
+        value: 12,
+        isCurrent: false,
+      ),
+      EvolutionBucketModel(
+        key: '2026-W20',
+        shortLabel: '2026-W20',
+        longLabel: '2026-W20',
+        value: 20,
+        isCurrent: false,
+      ),
+      EvolutionBucketModel(
+        key: '2026-W21',
+        shortLabel: '2026-W21',
+        longLabel: '2026-W21',
+        value: 18,
+        isCurrent: true,
+      ),
     ],
   ),
   distributionByCycle: const CycleDistributionModel(
     cycles: <CycleStatModel>[
       CycleStatModel(
         code: 'PRIMARY',
+        label: 'PRIMARY',
         total: 70,
         levels: <LevelStatModel>[
-          LevelStatModel(code: 'P1', value: 30),
-          LevelStatModel(code: 'P2', value: 40),
+          LevelStatModel(
+            id: 'p1-id',
+            code: 'P1',
+            label: 'P1',
+            cycle: 'PRIMARY',
+            value: 30,
+          ),
+          LevelStatModel(
+            id: 'p2-id',
+            code: 'P2',
+            label: 'P2',
+            cycle: 'PRIMARY',
+            value: 40,
+          ),
         ],
       ),
     ],
@@ -122,17 +160,15 @@ void main() {
           () => mockRemoteDataSource.getEnrollmentStats(
             any(),
             'month',
-            '2026-05',
+            null,
+            null,
             null,
           ),
         ).thenAnswer((_) async => _tStatsResponseModel);
       },
       build: () => getIt<EnrollmentStatsBloc>(),
       act: (bloc) => bloc.add(
-        const EnrollmentStatsRequested(
-          period: EnrollmentStatsPeriod.month,
-          month: '2026-05',
-        ),
+        const EnrollmentStatsRequested(window: EnrollmentStatsWindow.month()),
       ),
       expect: () => [
         isA<EnrollmentStatsState>()
@@ -142,11 +178,10 @@ void main() {
               EnrollmentStatsStatus.loading,
             )
             .having(
-              (state) => state.selectedPeriod,
-              'selectedPeriod',
-              EnrollmentStatsPeriod.month,
-            )
-            .having((state) => state.selectedMonth, 'selectedMonth', '2026-05'),
+              (state) => state.window,
+              'window',
+              const EnrollmentStatsWindow.month(),
+            ),
         isA<EnrollmentStatsState>()
             .having(
               (state) => state.status,
@@ -163,18 +198,18 @@ void main() {
               'bucketCount',
               3,
             )
-            .having(
-              (state) => state.errorType,
-              'errorType',
-              EnrollmentStatsErrorType.none,
-            ),
+            .having((state) => state.failure, 'failure', isNull),
       ],
       verify: (_) {
+        // Le contrat : `date` n'accompagne QUE `day`, `from`/`to` QUE
+        // `custom`. Une fenêtre « mois » ne pose aucune borne — les trois
+        // paramètres restent absents de l'URL.
         final captured = verify(
           () => mockRemoteDataSource.getEnrollmentStats(
             captureAny(),
             'month',
-            '2026-05',
+            null,
+            null,
             null,
           ),
         ).captured;
@@ -193,9 +228,10 @@ void main() {
         when(
           () => mockRemoteDataSource.getEnrollmentStats(
             any(),
-            'week',
+            'custom',
             null,
-            '2026-W21',
+            '2026-05-18',
+            '2026-05-24',
           ),
         ).thenThrow(
           DioException(
@@ -207,9 +243,11 @@ void main() {
       },
       build: () => getIt<EnrollmentStatsBloc>(),
       act: (bloc) => bloc.add(
-        const EnrollmentStatsRequested(
-          period: EnrollmentStatsPeriod.week,
-          week: '2026-W21',
+        EnrollmentStatsRequested(
+          window: EnrollmentStatsWindow.custom(
+            from: DateTime(2026, 5, 18),
+            to: DateTime(2026, 5, 24),
+          ),
         ),
       ),
       expect: () => [
@@ -225,16 +263,16 @@ void main() {
               EnrollmentStatsStatus.error,
             )
             .having(
-              (state) => state.errorType,
-              'errorType',
-              EnrollmentStatsErrorType.unauthorized,
+              (state) => state.failure,
+              'failure',
+              isA<UnauthorizedFailure>(),
             )
+            .having((state) => state.stats, 'stats', isNull)
             .having(
-              (state) => state.errorMessage,
-              'errorMessage',
-              'Acces non autorise',
-            )
-            .having((state) => state.selectedWeek, 'selectedWeek', '2026-W21'),
+              (state) => state.window.kind,
+              'kind',
+              EnrollmentStatsWindowKind.custom,
+            ),
       ],
     );
   });

@@ -16,16 +16,15 @@ class EnrollmentStatsRepositoryImpl implements EnrollmentStatsRepository {
 
   @override
   Future<Either<Failure, EnrollmentStats>> getEnrollmentStats({
-    EnrollmentStatsPeriod period = EnrollmentStatsPeriod.year,
-    String? month,
-    String? week,
+    EnrollmentStatsWindow window = const EnrollmentStatsWindow.year(),
   }) async {
     try {
       final response = await remoteDataSource.getEnrollmentStats(
         requiredAuth,
-        period.apiValue,
-        month,
-        week,
+        window.apiPeriod,
+        window.apiDate,
+        window.apiFrom,
+        window.apiTo,
       );
       return Right(response.toEntity());
     } on DioException catch (e) {
