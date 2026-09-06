@@ -8731,4 +8731,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentDashboardInsightPreAction => 'Open pre-enrolments';
+
+  @override
+  String get enrollmentDashboardDayListTitle => 'Named list for the day';
+
+  @override
+  String enrollmentDashboardDayListSubtitle(String day) {
+    return 'Students enrolled $day';
+  }
+
+  @override
+  String get enrollmentDashboardDayListColumnHour => 'Time';
+
+  @override
+  String get enrollmentDashboardDayListColumnStudent => 'Student';
+
+  @override
+  String get enrollmentDashboardDayListColumnLevel => 'Level';
+
+  @override
+  String get enrollmentDashboardDayListColumnType => 'Type';
+
+  @override
+  String get enrollmentDashboardDayListColumnRecordedBy => 'Recorded by';
+
+  @override
+  String get enrollmentDashboardDayListUnit => 'enrolment';
+
+  @override
+  String enrollmentDashboardDayListCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count enrolments',
+      one: '1 enrolment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardDayListUnknownAgent => '—';
+
+  @override
+  String get enrollmentDashboardDayListNoHour => '—';
+
+  @override
+  String get enrollmentDashboardDayListLoading => 'Loading the day\'s list';
+
+  @override
+  String get enrollmentDashboardDayListEmpty =>
+      'No enrolment recorded on that day.';
+
+  @override
+  String get enrollmentDashboardDayListForbidden =>
+      'You are not allowed to view the named list. Analytics remain available.';
+
+  @override
+  String get enrollmentDashboardDayListError =>
+      'The day\'s list could not be loaded.';
+
+  @override
+  String enrollmentDashboardDayListRowA11y(
+    String name,
+    String gender,
+    String level,
+    String type,
+  ) {
+    return '$name, $gender, $level, $type';
+  }
 }

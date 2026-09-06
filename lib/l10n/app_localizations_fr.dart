@@ -8814,4 +8814,73 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardInsightPreAction =>
       'Ouvrir les pré-inscriptions';
+
+  @override
+  String get enrollmentDashboardDayListTitle => 'Liste nominative du jour';
+
+  @override
+  String enrollmentDashboardDayListSubtitle(String day) {
+    return 'Les élèves inscrits $day';
+  }
+
+  @override
+  String get enrollmentDashboardDayListColumnHour => 'Heure';
+
+  @override
+  String get enrollmentDashboardDayListColumnStudent => 'Élève';
+
+  @override
+  String get enrollmentDashboardDayListColumnLevel => 'Niveau';
+
+  @override
+  String get enrollmentDashboardDayListColumnType => 'Type';
+
+  @override
+  String get enrollmentDashboardDayListColumnRecordedBy => 'Enregistré par';
+
+  @override
+  String get enrollmentDashboardDayListUnit => 'inscription';
+
+  @override
+  String enrollmentDashboardDayListCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count inscriptions',
+      one: '1 inscription',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardDayListUnknownAgent => '—';
+
+  @override
+  String get enrollmentDashboardDayListNoHour => '—';
+
+  @override
+  String get enrollmentDashboardDayListLoading =>
+      'Chargement de la liste du jour';
+
+  @override
+  String get enrollmentDashboardDayListEmpty =>
+      'Aucune inscription enregistrée ce jour-là.';
+
+  @override
+  String get enrollmentDashboardDayListForbidden =>
+      'Vous n\'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.';
+
+  @override
+  String get enrollmentDashboardDayListError =>
+      'La liste du jour n\'a pas pu être chargée.';
+
+  @override
+  String enrollmentDashboardDayListRowA11y(
+    String name,
+    String gender,
+    String level,
+    String type,
+  ) {
+    return '$name, $gender, $level, $type';
+  }
 }

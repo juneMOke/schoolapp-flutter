@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_error_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_header.dart';
@@ -67,6 +71,28 @@ class _EnrollmentStatsDashboardPageState
   void _seeWholeYear() => context.read<EnrollmentStatsBloc>().add(
     const EnrollmentStatsRequested(window: EnrollmentStatsWindow.year()),
   );
+
+  /// Ouvre le dossier d'un élève depuis la liste du jour.
+  ///
+  /// Même chemin que depuis un listing : un intent porté par `extra`, plus les
+  /// mêmes paramètres en requête pour survivre à l'aller-retour GoRouter.
+  /// L'origine est celle d'une consultation de dossier serveur — ces lignes
+  /// sont des inscriptions terminées, pas des brouillons locaux.
+  void _openDossier(DayEnrollmentEntry entry) {
+    final intent = EnrollmentDetailIntent(
+      origin: EnrollmentDetailOrigin.firstRegistration,
+      enrollmentId: entry.enrollmentId,
+      studentId: entry.studentId,
+    );
+    context.push(
+      Uri(
+        path:
+            '${EnrollmentConstants.enrollmentDetailRoute}/${entry.enrollmentId}',
+        queryParameters: intent.toQueryParameters(),
+      ).toString(),
+      extra: intent,
+    );
+  }
 
   void _openPreRegistrations() {
     final l10n = AppLocalizations.of(context)!;
@@ -179,6 +205,7 @@ class _EnrollmentStatsDashboardPageState
         // acceptera une intention, c'est ici que ça se branche.
         onLevelTap: (_) => _openFirstRegistration(),
         onOpenPreRegistrations: _openPreRegistrations,
+        onDayEntryTap: _openDossier,
       ),
       EnrollmentStatsStatus.empty => EnrollmentDashboardEmptyState(
         windowLabel: _windowLabel(l10n, state.window.kind),

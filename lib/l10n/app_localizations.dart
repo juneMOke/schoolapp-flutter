@@ -14159,6 +14159,107 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open pre-enrolments'**
   String get enrollmentDashboardInsightPreAction;
+
+  /// No description provided for @enrollmentDashboardDayListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Named list for the day'**
+  String get enrollmentDashboardDayListTitle;
+
+  /// No description provided for @enrollmentDashboardDayListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled {day}'**
+  String enrollmentDashboardDayListSubtitle(String day);
+
+  /// No description provided for @enrollmentDashboardDayListColumnHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get enrollmentDashboardDayListColumnHour;
+
+  /// No description provided for @enrollmentDashboardDayListColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get enrollmentDashboardDayListColumnStudent;
+
+  /// No description provided for @enrollmentDashboardDayListColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get enrollmentDashboardDayListColumnLevel;
+
+  /// No description provided for @enrollmentDashboardDayListColumnType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get enrollmentDashboardDayListColumnType;
+
+  /// No description provided for @enrollmentDashboardDayListColumnRecordedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded by'**
+  String get enrollmentDashboardDayListColumnRecordedBy;
+
+  /// No description provided for @enrollmentDashboardDayListUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'enrolment'**
+  String get enrollmentDashboardDayListUnit;
+
+  /// No description provided for @enrollmentDashboardDayListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 enrolment} other{{count} enrolments}}'**
+  String enrollmentDashboardDayListCount(int count);
+
+  /// No description provided for @enrollmentDashboardDayListUnknownAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get enrollmentDashboardDayListUnknownAgent;
+
+  /// No description provided for @enrollmentDashboardDayListNoHour.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get enrollmentDashboardDayListNoHour;
+
+  /// No description provided for @enrollmentDashboardDayListLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the day\'s list'**
+  String get enrollmentDashboardDayListLoading;
+
+  /// No description provided for @enrollmentDashboardDayListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrolment recorded on that day.'**
+  String get enrollmentDashboardDayListEmpty;
+
+  /// No description provided for @enrollmentDashboardDayListForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to view the named list. Analytics remain available.'**
+  String get enrollmentDashboardDayListForbidden;
+
+  /// No description provided for @enrollmentDashboardDayListError.
+  ///
+  /// In en, this message translates to:
+  /// **'The day\'s list could not be loaded.'**
+  String get enrollmentDashboardDayListError;
+
+  /// No description provided for @enrollmentDashboardDayListRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {gender}, {level}, {type}'**
+  String enrollmentDashboardDayListRowA11y(
+    String name,
+    String gender,
+    String level,
+    String type,
+  );
 }
 
 class _AppLocalizationsDelegate

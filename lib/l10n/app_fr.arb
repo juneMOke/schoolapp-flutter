@@ -5021,5 +5021,51 @@
       }
     }
   },
-  "enrollmentDashboardInsightPreAction": "Ouvrir les pré-inscriptions"
+  "enrollmentDashboardInsightPreAction": "Ouvrir les pré-inscriptions",
+  "enrollmentDashboardDayListTitle": "Liste nominative du jour",
+  "enrollmentDashboardDayListSubtitle": "Les élèves inscrits {day}",
+  "@enrollmentDashboardDayListSubtitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardDayListColumnHour": "Heure",
+  "enrollmentDashboardDayListColumnStudent": "Élève",
+  "enrollmentDashboardDayListColumnLevel": "Niveau",
+  "enrollmentDashboardDayListColumnType": "Type",
+  "enrollmentDashboardDayListColumnRecordedBy": "Enregistré par",
+  "enrollmentDashboardDayListUnit": "inscription",
+  "enrollmentDashboardDayListCount": "{count, plural, =1{1 inscription} other{{count} inscriptions}}",
+  "@enrollmentDashboardDayListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardDayListUnknownAgent": "—",
+  "enrollmentDashboardDayListNoHour": "—",
+  "enrollmentDashboardDayListLoading": "Chargement de la liste du jour",
+  "enrollmentDashboardDayListEmpty": "Aucune inscription enregistrée ce jour-là.",
+  "enrollmentDashboardDayListForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
+  "enrollmentDashboardDayListError": "La liste du jour n'a pas pu être chargée.",
+  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
+  "@enrollmentDashboardDayListRowA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "gender": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/day_entries_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
@@ -172,6 +173,59 @@ void main() {
         );
       },
     );
+  });
+  group('getDayEntries — ce qui part sur le fil', () {
+    test('la date part au format du contrat, avec page et taille', () async {
+      // `date` est REQUIS côté serveur et n'a pas de défaut à aujourd'hui :
+      // la liste doit pouvoir servir n'importe quelle journée.
+      when(
+        () => mockRemoteDataSource.getDayEntries(
+          tRequiredAuth,
+          '2026-09-05',
+          0,
+          8,
+        ),
+      ).thenAnswer(
+        (_) async => DayEntriesPageModel.fromJson(const <String, dynamic>{
+          'content': <dynamic>[],
+          'page': 0,
+          'size': 8,
+          'totalElements': 0,
+          'totalPages': 0,
+        }),
+      );
+
+      final result = await repository.getDayEntries(
+        day: DateTime(2026, 9, 5),
+        page: 0,
+        size: 8,
+      );
+
+      expect(result.isRight(), isTrue);
+      verify(
+        () => mockRemoteDataSource.getDayEntries(
+          tRequiredAuth,
+          '2026-09-05',
+          0,
+          8,
+        ),
+      ).called(1);
+    });
+
+    test('un 403 remonte tel quel — c\'est un droit, pas une panne', () async {
+      const failure = UnauthorizedFailure('Access forbidden');
+      when(
+        () => mockRemoteDataSource.getDayEntries(any(), any(), any(), any()),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.getDayEntries(
+        day: DateTime(2026, 9, 5),
+        page: 0,
+        size: 8,
+      );
+
+      expect(result, const Left<Failure, dynamic>(failure));
+    });
   });
 }
 

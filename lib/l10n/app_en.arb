@@ -5065,5 +5065,51 @@
       }
     }
   },
-  "enrollmentDashboardInsightPreAction": "Open pre-enrolments"
+  "enrollmentDashboardInsightPreAction": "Open pre-enrolments",
+  "enrollmentDashboardDayListTitle": "Named list for the day",
+  "enrollmentDashboardDayListSubtitle": "Students enrolled {day}",
+  "@enrollmentDashboardDayListSubtitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardDayListColumnHour": "Time",
+  "enrollmentDashboardDayListColumnStudent": "Student",
+  "enrollmentDashboardDayListColumnLevel": "Level",
+  "enrollmentDashboardDayListColumnType": "Type",
+  "enrollmentDashboardDayListColumnRecordedBy": "Recorded by",
+  "enrollmentDashboardDayListUnit": "enrolment",
+  "enrollmentDashboardDayListCount": "{count, plural, =1{1 enrolment} other{{count} enrolments}}",
+  "@enrollmentDashboardDayListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardDayListUnknownAgent": "—",
+  "enrollmentDashboardDayListNoHour": "—",
+  "enrollmentDashboardDayListLoading": "Loading the day's list",
+  "enrollmentDashboardDayListEmpty": "No enrolment recorded on that day.",
+  "enrollmentDashboardDayListForbidden": "You are not allowed to view the named list. Analytics remain available.",
+  "enrollmentDashboardDayListError": "The day's list could not be loaded.",
+  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
+  "@enrollmentDashboardDayListRowA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "gender": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  }
 }

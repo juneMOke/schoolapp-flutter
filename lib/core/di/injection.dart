@@ -155,12 +155,14 @@ import 'package:school_app_flutter/features/enrollment/domain/repositories/enrol
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_day_entries_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_stats_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_day_entries_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
@@ -568,6 +570,9 @@ Future<void> configureDependencies({
     ),
   );
 
+  getIt.registerFactory<GetEnrollmentDayEntriesUseCase>(
+    () => GetEnrollmentDayEntriesUseCase(getIt<EnrollmentStatsRepository>()),
+  );
   getIt.registerFactory<GetEnrollmentStatsUseCase>(
     () => GetEnrollmentStatsUseCase(getIt<EnrollmentStatsRepository>()),
   );
@@ -594,6 +599,11 @@ Future<void> configureDependencies({
     ),
   );
 
+  getIt.registerFactory<EnrollmentDayEntriesBloc>(
+    () => EnrollmentDayEntriesBloc(
+      getDayEntriesUseCase: getIt<GetEnrollmentDayEntriesUseCase>(),
+    ),
+  );
   getIt.registerFactory<EnrollmentStatsBloc>(
     () => EnrollmentStatsBloc(
       getEnrollmentStatsUseCase: getIt<GetEnrollmentStatsUseCase>(),

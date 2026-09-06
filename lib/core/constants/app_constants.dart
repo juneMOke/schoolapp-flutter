@@ -57,6 +57,8 @@ class AppConstants {
       '/api/v1/enrollments/students/{studentId}/preview';
 
   static const String enrollmentStatsEndpoint = '/api/v1/enrollment-stats';
+  static const String enrollmentDayEntriesEndpoint =
+      '/api/v1/enrollment-stats/day-entries';
 
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =
