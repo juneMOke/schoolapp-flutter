@@ -14260,6 +14260,118 @@ abstract class AppLocalizations {
     String level,
     String type,
   );
+
+  /// No description provided for @enrollmentDashboardExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get enrollmentDashboardExportPdf;
+
+  /// No description provided for @enrollmentDashboardExportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV'**
+  String get enrollmentDashboardExportCsv;
+
+  /// No description provided for @enrollmentDashboardExportPdfTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the breakdown by level as PDF'**
+  String get enrollmentDashboardExportPdfTooltip;
+
+  /// No description provided for @enrollmentDashboardExportCsvTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the day\'s list as CSV'**
+  String get enrollmentDashboardExportCsvTooltip;
+
+  /// No description provided for @enrollmentDashboardPdfOvertitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO CONNECT · Enrolments'**
+  String get enrollmentDashboardPdfOvertitle;
+
+  /// No description provided for @enrollmentDashboardPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown by level'**
+  String get enrollmentDashboardPdfTitle;
+
+  /// No description provided for @enrollmentDashboardPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear} · as of {generatedOn}'**
+  String enrollmentDashboardPdfSubtitle(String schoolYear, String generatedOn);
+
+  /// No description provided for @enrollmentDashboardPdfFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{rowCount, plural, =1{1 level} other{{rowCount} levels}} · school year {schoolYear} · generated on {generatedOn}'**
+  String enrollmentDashboardPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  );
+
+  /// No description provided for @enrollmentDashboardPdfColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get enrollmentDashboardPdfColumnLevel;
+
+  /// No description provided for @enrollmentDashboardPdfColumnCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get enrollmentDashboardPdfColumnCycle;
+
+  /// No description provided for @enrollmentDashboardPdfColumnCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled'**
+  String get enrollmentDashboardPdfColumnCount;
+
+  /// No description provided for @enrollmentDashboardPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF export did not complete. Try again.'**
+  String get enrollmentDashboardPdfFailed;
+
+  /// No description provided for @enrollmentDashboardCsvColumnLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get enrollmentDashboardCsvColumnLastName;
+
+  /// No description provided for @enrollmentDashboardCsvColumnFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get enrollmentDashboardCsvColumnFirstName;
+
+  /// No description provided for @enrollmentDashboardCsvColumnGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Sex'**
+  String get enrollmentDashboardCsvColumnGender;
+
+  /// No description provided for @enrollmentDashboardCsvColumnStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get enrollmentDashboardCsvColumnStatus;
+
+  /// No description provided for @enrollmentDashboardCsvCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Day list copied as CSV ({fileName})'**
+  String enrollmentDashboardCsvCopied(String fileName);
+
+  /// No description provided for @enrollmentDashboardCsvFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying the list did not complete. Try again.'**
+  String get enrollmentDashboardCsvFailed;
 }
 
 class _AppLocalizationsDelegate

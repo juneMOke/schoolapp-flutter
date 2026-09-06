@@ -5067,5 +5067,53 @@
         "type": "String"
       }
     }
-  }
+  },
+  "enrollmentDashboardExportPdf": "PDF",
+  "enrollmentDashboardExportCsv": "CSV",
+  "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
+  "enrollmentDashboardExportCsvTooltip": "Copier la liste du jour au format CSV",
+  "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",
+  "enrollmentDashboardPdfTitle": "Répartition par niveau",
+  "enrollmentDashboardPdfSubtitle": "Année scolaire {schoolYear} · au {generatedOn}",
+  "@enrollmentDashboardPdfSubtitle": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardPdfFooter": "{rowCount, plural, =1{1 niveau} other{{rowCount} niveaux}} · année scolaire {schoolYear} · généré le {generatedOn}",
+  "@enrollmentDashboardPdfFooter": {
+    "placeholders": {
+      "rowCount": {
+        "type": "int"
+      },
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardPdfColumnLevel": "Niveau",
+  "enrollmentDashboardPdfColumnCycle": "Cycle",
+  "enrollmentDashboardPdfColumnCount": "Inscrits",
+  "enrollmentDashboardPdfFailed": "L'export PDF n'a pas abouti. Réessayez.",
+  "enrollmentDashboardCsvColumnLastName": "Nom",
+  "enrollmentDashboardCsvColumnFirstName": "Prénom",
+  "enrollmentDashboardCsvColumnGender": "Sexe",
+  "enrollmentDashboardCsvColumnStatus": "Statut",
+  "enrollmentDashboardCsvCopied": "Liste du jour copiée au format CSV ({fileName})",
+  "@enrollmentDashboardCsvCopied": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez."
 }

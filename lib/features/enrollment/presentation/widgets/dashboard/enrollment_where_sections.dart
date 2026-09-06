@@ -41,6 +41,18 @@ class EnrollmentLevelSection extends StatelessWidget {
     this.exportActions = const [],
   });
 
+  /// Les niveaux affichés, pour un appelant qui doit montrer **la même
+  /// chose** — l'export PDF.
+  ///
+  /// Exposé plutôt que recalculé de l'autre côté : un export qui re-trierait
+  /// ou re-filtrerait serait un second écran à tenir d'accord avec le premier,
+  /// et ils divergeraient au premier changement de règle.
+  static List<LevelStat> levelsOf(CycleDistribution distribution) =>
+      EnrollmentLevelSection(
+        distribution: distribution,
+        isSingleDay: false,
+      )._levels;
+
   /// Les niveaux qui ont reçu au moins une inscription, du plus gros au plus
   /// petit.
   ///

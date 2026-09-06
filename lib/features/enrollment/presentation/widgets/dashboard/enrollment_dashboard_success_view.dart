@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_kpi_band.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_day_entries_section.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_export_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_insights_section.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_pace_section.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_where_sections.dart';
@@ -94,6 +95,25 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
             distribution: stats.distributionByCycle,
             isSingleDay: isSingleDay,
             onLevelTap: onLevelTap,
+            // La carte retire elle-même ces boutons quand aucun niveau n'a
+            // reçu d'inscription : un PDF d'un tableau vide est une page
+            // blanche.
+            //
+            // Le `Builder` donne au bouton un contexte situé SOUS le
+            // `Scaffold` : le toast d'échec a besoin d'un `ScaffoldMessenger`,
+            // et le contexte de cette vue est au-dessus.
+            exportActions: [
+              Builder(
+                builder: (context) => EnrollmentExportActions.levelsPdf(
+                  context: context,
+                  levels: EnrollmentLevelSection.levelsOf(
+                    stats.distributionByCycle,
+                  ),
+                  schoolYear: stats.context.schoolYear,
+                  generatedAt: stats.context.generatedAt,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppDimensions.spacingL),

@@ -8799,4 +8799,78 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$name, $gender, $level, $type';
   }
+
+  @override
+  String get enrollmentDashboardExportPdf => 'PDF';
+
+  @override
+  String get enrollmentDashboardExportCsv => 'CSV';
+
+  @override
+  String get enrollmentDashboardExportPdfTooltip =>
+      'Export the breakdown by level as PDF';
+
+  @override
+  String get enrollmentDashboardExportCsvTooltip =>
+      'Copy the day\'s list as CSV';
+
+  @override
+  String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Enrolments';
+
+  @override
+  String get enrollmentDashboardPdfTitle => 'Breakdown by level';
+
+  @override
+  String enrollmentDashboardPdfSubtitle(String schoolYear, String generatedOn) {
+    return 'School year $schoolYear · as of $generatedOn';
+  }
+
+  @override
+  String enrollmentDashboardPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rowCount,
+      locale: localeName,
+      other: '$rowCount levels',
+      one: '1 level',
+    );
+    return '$_temp0 · school year $schoolYear · generated on $generatedOn';
+  }
+
+  @override
+  String get enrollmentDashboardPdfColumnLevel => 'Level';
+
+  @override
+  String get enrollmentDashboardPdfColumnCycle => 'Cycle';
+
+  @override
+  String get enrollmentDashboardPdfColumnCount => 'Enrolled';
+
+  @override
+  String get enrollmentDashboardPdfFailed =>
+      'The PDF export did not complete. Try again.';
+
+  @override
+  String get enrollmentDashboardCsvColumnLastName => 'Last name';
+
+  @override
+  String get enrollmentDashboardCsvColumnFirstName => 'First name';
+
+  @override
+  String get enrollmentDashboardCsvColumnGender => 'Sex';
+
+  @override
+  String get enrollmentDashboardCsvColumnStatus => 'Status';
+
+  @override
+  String enrollmentDashboardCsvCopied(String fileName) {
+    return 'Day list copied as CSV ($fileName)';
+  }
+
+  @override
+  String get enrollmentDashboardCsvFailed =>
+      'Copying the list did not complete. Try again.';
 }

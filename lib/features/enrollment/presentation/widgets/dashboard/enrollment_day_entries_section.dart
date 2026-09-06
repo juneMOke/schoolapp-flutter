@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_day_entries_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_day_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_export_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Qui, exactement, a été inscrit ce jour-là.
@@ -65,6 +66,18 @@ class EnrollmentDayEntriesSection extends StatelessWidget {
               : l10n.enrollmentDashboardDayListSubtitle(
                   MaterialLocalizations.of(context).formatFullDate(state.day!),
                 ),
+          // Pas d'export sur une carte en erreur : il n'y a rien à copier.
+          actions:
+              state.status == EnrollmentDayEntriesStatus.success &&
+                  state.day != null
+              ? [
+                  EnrollmentExportActions.dayEntriesCsv(
+                    context: context,
+                    entries: state.entries,
+                    day: state.day!,
+                  ),
+                ]
+              : const [],
           child: _body(context, l10n, state),
         );
       },

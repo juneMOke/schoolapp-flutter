@@ -8883,4 +8883,78 @@ class AppLocalizationsFr extends AppLocalizations {
   ) {
     return '$name, $gender, $level, $type';
   }
+
+  @override
+  String get enrollmentDashboardExportPdf => 'PDF';
+
+  @override
+  String get enrollmentDashboardExportCsv => 'CSV';
+
+  @override
+  String get enrollmentDashboardExportPdfTooltip =>
+      'Exporter la répartition par niveau en PDF';
+
+  @override
+  String get enrollmentDashboardExportCsvTooltip =>
+      'Copier la liste du jour au format CSV';
+
+  @override
+  String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Inscriptions';
+
+  @override
+  String get enrollmentDashboardPdfTitle => 'Répartition par niveau';
+
+  @override
+  String enrollmentDashboardPdfSubtitle(String schoolYear, String generatedOn) {
+    return 'Année scolaire $schoolYear · au $generatedOn';
+  }
+
+  @override
+  String enrollmentDashboardPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rowCount,
+      locale: localeName,
+      other: '$rowCount niveaux',
+      one: '1 niveau',
+    );
+    return '$_temp0 · année scolaire $schoolYear · généré le $generatedOn';
+  }
+
+  @override
+  String get enrollmentDashboardPdfColumnLevel => 'Niveau';
+
+  @override
+  String get enrollmentDashboardPdfColumnCycle => 'Cycle';
+
+  @override
+  String get enrollmentDashboardPdfColumnCount => 'Inscrits';
+
+  @override
+  String get enrollmentDashboardPdfFailed =>
+      'L\'export PDF n\'a pas abouti. Réessayez.';
+
+  @override
+  String get enrollmentDashboardCsvColumnLastName => 'Nom';
+
+  @override
+  String get enrollmentDashboardCsvColumnFirstName => 'Prénom';
+
+  @override
+  String get enrollmentDashboardCsvColumnGender => 'Sexe';
+
+  @override
+  String get enrollmentDashboardCsvColumnStatus => 'Statut';
+
+  @override
+  String enrollmentDashboardCsvCopied(String fileName) {
+    return 'Liste du jour copiée au format CSV ($fileName)';
+  }
+
+  @override
+  String get enrollmentDashboardCsvFailed =>
+      'La copie de la liste n\'a pas abouti. Réessayez.';
 }
