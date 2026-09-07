@@ -18,6 +18,7 @@ final tStats = EnrollmentStats(
     periodEnd: DateTime.utc(2026, 6, 30),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
   ),
+  headcount: const GenderDistribution(total: 0, segments: <GenderSegment>[]),
   kpis: const EnrollmentKpis(
     totalEnrollments: KpiValue(value: 120),
     firstEnrollments: KpiValue(value: 90, percentOfTotal: 75),
@@ -29,16 +30,37 @@ final tStats = EnrollmentStats(
     granularity: EvolutionGranularity.month,
     currentBucketIndex: 8,
     buckets: <EvolutionBucket>[
-      EvolutionBucket(key: '2025-09', value: 12, isCurrent: false),
-      EvolutionBucket(key: '2026-05', value: 18, isCurrent: true),
+      EvolutionBucket(
+        key: '2025-09',
+        shortLabel: '2025-09',
+        longLabel: '2025-09',
+        value: 12,
+        isCurrent: false,
+      ),
+      EvolutionBucket(
+        key: '2026-05',
+        shortLabel: '2026-05',
+        longLabel: '2026-05',
+        value: 18,
+        isCurrent: true,
+      ),
     ],
   ),
   distributionByCycle: const CycleDistribution(
     cycles: <CycleStat>[
       CycleStat(
         code: 'PRIMARY',
+        label: 'PRIMARY',
         total: 70,
-        levels: <LevelStat>[LevelStat(code: 'P1', value: 30)],
+        levels: <LevelStat>[
+          LevelStat(
+            id: 'p1-id',
+            code: 'P1',
+            label: 'P1',
+            cycle: 'PRIMARY',
+            value: 30,
+          ),
+        ],
       ),
     ],
   ),
@@ -67,9 +89,7 @@ void main() {
       setUp: () {
         when(
           () => mockGetEnrollmentStatsUseCase(
-            period: EnrollmentStatsPeriod.year,
-            month: null,
-            week: null,
+            window: const EnrollmentStatsWindow.year(),
           ),
         ).thenAnswer((_) async => Right(tStats));
       },
@@ -82,11 +102,7 @@ void main() {
               'status',
               EnrollmentStatsStatus.loading,
             )
-            .having(
-              (state) => state.errorType,
-              'errorType',
-              EnrollmentStatsErrorType.none,
-            ),
+            .having((state) => state.failure, 'failure', isNull),
         isA<EnrollmentStatsState>()
             .having(
               (state) => state.status,
@@ -94,18 +110,12 @@ void main() {
               EnrollmentStatsStatus.success,
             )
             .having((state) => state.stats, 'stats', tStats)
-            .having(
-              (state) => state.errorType,
-              'errorType',
-              EnrollmentStatsErrorType.none,
-            ),
+            .having((state) => state.failure, 'failure', isNull),
       ],
       verify: (_) {
         verify(
           () => mockGetEnrollmentStatsUseCase(
-            period: EnrollmentStatsPeriod.year,
-            month: null,
-            week: null,
+            window: const EnrollmentStatsWindow.year(),
           ),
         ).called(1);
       },
@@ -116,9 +126,7 @@ void main() {
       setUp: () {
         when(
           () => mockGetEnrollmentStatsUseCase(
-            period: EnrollmentStatsPeriod.month,
-            month: '2026-05',
-            week: null,
+            window: const EnrollmentStatsWindow.month(),
           ),
         ).thenAnswer(
           (_) async => const Left(NetworkFailure('Network error occurred')),
@@ -126,10 +134,7 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const EnrollmentStatsRequested(
-          period: EnrollmentStatsPeriod.month,
-          month: '2026-05',
-        ),
+        const EnrollmentStatsRequested(window: EnrollmentStatsWindow.month()),
       ),
       expect: () => [
         isA<EnrollmentStatsState>().having(
@@ -143,16 +148,10 @@ void main() {
               'status',
               EnrollmentStatsStatus.error,
             )
-            .having(
-              (state) => state.errorType,
-              'errorType',
-              EnrollmentStatsErrorType.network,
-            )
-            .having(
-              (state) => state.errorMessage,
-              'errorMessage',
-              'Verifiez votre connexion internet',
-            ),
+            .having((state) => state.failure, 'failure', isA<NetworkFailure>())
+            // L'échec emporte les données avec lui : rien de périmé ne survit
+            // sous un écran en erreur.
+            .having((state) => state.stats, 'stats', isNull),
       ],
     );
   });

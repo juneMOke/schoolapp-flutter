@@ -34,6 +34,21 @@ class SegmentedTabFilterStyle {
   final Color unselectedForegroundColor;
   final List<BoxShadow> selectedShadow;
 
+  /// Hauteur imposée à la barre. `null` la laisse s'ajuster à ses onglets —
+  /// obligatoire en mode enroulé, où deux rangs ne tiennent dans aucune
+  /// hauteur fixée d'avance.
+  final double? containerHeight;
+
+  /// Écart entre deux onglets. Zéro par défaut : les segmentés historiques se
+  /// touchent, et c'est ce qui les fait lire comme UN contrôle.
+  final double itemGap;
+
+  /// Rembourrage intérieur d'un onglet.
+  final EdgeInsetsGeometry itemPadding;
+
+  /// Écart entre l'icône et le libellé d'un onglet.
+  final double itemContentGap;
+
   const SegmentedTabFilterStyle({
     this.backgroundColor = AppColors.surfaceAlt,
     this.borderColor = AppColors.border,
@@ -48,10 +63,40 @@ class SegmentedTabFilterStyle {
     this.selectedShadow = const [
       BoxShadow(color: Color(0x2E1B4D6B), blurRadius: 4, offset: Offset(0, 2)),
     ],
+    this.containerHeight = AppDimensions.enrollmentStatsPeriodFilterHeight,
+    this.itemGap = 0,
+    this.itemPadding = const EdgeInsets.symmetric(
+      horizontal: AppDimensions.spacingM,
+      vertical: AppDimensions.spacingXS,
+    ),
+    this.itemContentGap = AppSpacing.xs,
   });
 
   static const kpi = SegmentedTabFilterStyle(
     selectedShadow: AppElevation.shadowKpi,
+  );
+
+  /// Fenêtre de temps d'un tableau de bord — **onglets pleins**.
+  ///
+  /// Plus hauts (44 dp, une vraie cible tactile), plus espacés et plus arrondis
+  /// que le segmenté de filtre : « le choix de la période est l'action la plus
+  /// fréquente de l'écran, il ne doit jamais être confondu avec un filtre
+  /// secondaire ». Sans hauteur imposée, pour s'enrouler sur deux rangs quand
+  /// cinq onglets ne tiennent plus sur une ligne.
+  static const window = SegmentedTabFilterStyle(
+    borderRadius: AppDimensions.enrollmentDashboardTabsRadius,
+    containerPadding: EdgeInsets.all(
+      AppDimensions.enrollmentDashboardTabsPadding,
+    ),
+    containerHeight: null,
+    itemHeight: AppDimensions.enrollmentDashboardTabMinHeight,
+    itemBorderRadius: AppDimensions.enrollmentDashboardTabRadius,
+    itemGap: AppDimensions.enrollmentDashboardTabGap,
+    itemPadding: EdgeInsets.symmetric(
+      horizontal: AppDimensions.enrollmentDashboardTabPaddingH,
+    ),
+    itemContentGap: AppSpacing.sm,
+    selectedBackgroundColor: AppColors.bleuArdoise,
   );
 }
 
@@ -82,6 +127,18 @@ class SegmentedTabFilter<T> extends StatelessWidget {
   /// le contrôle se grise et n'accepte plus de tap.
   final bool enabled;
 
+  /// Si `true`, les onglets s'enroulent sur plusieurs rangs quand la largeur
+  /// ne suffit plus, au lieu de se comprimer sur une ligne.
+  ///
+  /// À réserver aux barres de **navigation** — une fenêtre de temps, dont
+  /// chaque onglet doit garder sa cible tactile de 44 dp. Un filtre secondaire
+  /// à trois options n'en a pas besoin et reste sur une ligne, où il se lit
+  /// comme un seul contrôle.
+  ///
+  /// Incompatible avec [expand], qui répartit la largeur sur **une** ligne : le
+  /// mode enroulé donne à chaque onglet sa largeur intrinsèque.
+  final bool wrap;
+
   const SegmentedTabFilter({
     super.key,
     required this.options,
@@ -91,7 +148,13 @@ class SegmentedTabFilter<T> extends StatelessWidget {
     this.style = const SegmentedTabFilterStyle(),
     this.expand = false,
     this.enabled = true,
-  });
+    this.wrap = false,
+  }) : assert(
+         !(wrap && expand),
+         'SegmentedTabFilter : `wrap` et `expand` s\'excluent — le premier '
+         'donne aux onglets leur largeur intrinsèque sur plusieurs rangs, le '
+         'second les étire à parts égales sur une seule ligne.',
+       );
 
   /// Opacité du contrôle grisé.
   static const double _disabledOpacity = 0.5;
@@ -115,20 +178,41 @@ class SegmentedTabFilter<T> extends StatelessWidget {
 
   Widget _buildBar() {
     return Container(
-      height: AppDimensions.enrollmentStatsPeriodFilterHeight,
+      // Une hauteur imposée empêche tout enroulement : deux rangs ne tiennent
+      // dans aucune hauteur fixée d'avance. Le style l'annule (`null`) pour les
+      // barres enroulables.
+      height: wrap ? null : style.containerHeight,
       decoration: BoxDecoration(
         color: style.backgroundColor,
         borderRadius: BorderRadius.circular(style.borderRadius),
         border: Border.all(color: style.borderColor),
       ),
       padding: style.containerPadding,
-      child: Row(
-        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-        children: [
-          for (final opt in options)
-            if (expand) Expanded(child: _buildTab(opt)) else _buildTab(opt),
-        ],
-      ),
+      child: wrap ? _buildWrappedTabs() : _buildRowTabs(),
+    );
+  }
+
+  /// Les onglets sur une ligne — le rendu historique.
+  Widget _buildRowTabs() {
+    final tabs = <Widget>[];
+    for (final opt in options) {
+      if (tabs.isNotEmpty && style.itemGap > 0) {
+        tabs.add(SizedBox(width: style.itemGap));
+      }
+      tabs.add(expand ? Expanded(child: _buildTab(opt)) : _buildTab(opt));
+    }
+    return Row(
+      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      children: tabs,
+    );
+  }
+
+  /// Les onglets sur autant de rangs qu'il en faut, chacun à sa hauteur pleine.
+  Widget _buildWrappedTabs() {
+    return Wrap(
+      spacing: style.itemGap,
+      runSpacing: style.itemGap,
+      children: [for (final opt in options) _buildTab(opt)],
     );
   }
 
@@ -154,13 +238,7 @@ class SegmentedTabFilter<T> extends StatelessWidget {
               curve: AppMotion.outCurve,
               width: style.itemWidth,
               height: style.itemHeight,
-              alignment: Alignment.center,
-              padding: isIconOnly
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.symmetric(
-                      horizontal: AppDimensions.spacingM,
-                      vertical: AppDimensions.spacingXS,
-                    ),
+              padding: isIconOnly ? EdgeInsets.zero : style.itemPadding,
               decoration: isSelected
                   ? BoxDecoration(
                       color: style.selectedBackgroundColor,
@@ -170,7 +248,26 @@ class SegmentedTabFilter<T> extends StatelessWidget {
                       boxShadow: style.selectedShadow,
                     )
                   : const BoxDecoration(),
-              child: _buildTabContent(opt, isSelected),
+              // ⚠️ Le centrage est porté par un `Align`, PAS par l'`alignment`
+              // du conteneur.
+              //
+              // Un Container porteur d'un `alignment` se **dilate** pour
+              // remplir des contraintes bornées. En `Row`, les enfants non
+              // flexibles reçoivent une largeur non bornée, donc l'onglet se
+              // rétractait sur son contenu et le défaut ne se voyait pas. Un
+              // `Wrap`, lui, borne la largeur de ses enfants : chaque onglet
+              // prenait TOUTE la barre, un par rang, à n'importe quelle
+              // largeur — la barre de fenêtres se lisait comme une colonne.
+              //
+              // `widthFactor`/`heightFactor` à 1 rendent l'onglet intrinsèque
+              // quand rien ne le force plus large, tout en le laissant remplir
+              // — et centrer son contenu — sous une contrainte serrée
+              // (`expand`, ou `itemWidth` imposée).
+              child: Align(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: _buildTabContent(opt, isSelected),
+              ),
             ),
           ),
         ),
@@ -196,7 +293,7 @@ class SegmentedTabFilter<T> extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(opt.icon, size: 16, color: color),
-          const SizedBox(width: AppSpacing.xs),
+          SizedBox(width: style.itemContentGap),
           Flexible(
             child: Text(
               opt.label,

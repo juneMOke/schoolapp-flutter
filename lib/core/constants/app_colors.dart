@@ -208,6 +208,13 @@ class AppColors {
   static const enrollmentStatsReSoft = tokens.AppColors.enrollmentStatsReSoft;
   static const enrollmentStatsPre = tokens.AppColors.enrollmentStatsPre;
   static const enrollmentStatsPreSoft = tokens.AppColors.enrollmentStatsPreSoft;
+  static const enrollmentStatsPaceBar = tokens.AppColors.enrollmentStatsPaceBar;
+  static const enrollmentStatsCycleMaternelle =
+      tokens.AppColors.enrollmentStatsCycleMaternelle;
+  static const enrollmentStatsCyclePrimaire =
+      tokens.AppColors.enrollmentStatsCyclePrimaire;
+  static const enrollmentStatsCycleSecondaire =
+      tokens.AppColors.enrollmentStatsCycleSecondaire;
   static const enrollmentStatsInProgress =
       tokens.AppColors.enrollmentStatsInProgress;
   static const enrollmentStatsInProgressSoft =

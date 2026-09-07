@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
@@ -164,5 +165,82 @@ void main() {
     );
     final shortest = tester.renderObject<RenderBox>(find.text('P1'));
     expect(capped.size.height, shortest.size.height);
+  });
+
+  group('largeur des barres', () {
+    /// La largeur réellement demandée à fl_chart pour la première barre.
+    double barWidthOf(WidgetTester tester) {
+      final chart = tester.widget<BarChart>(find.byType(BarChart));
+      return chart.data.barGroups.first.barRods.first.width;
+    }
+
+    Future<void> pumpAt(WidgetTester tester, double width, int barCount) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: width,
+              child: CycleBarChart(
+                items: [
+                  for (var i = 0; i < barCount; i++)
+                    BarChartItem(
+                      label: 'B$i',
+                      value: 10.0 + i,
+                      color: AppColors.enrollmentStatsAccent,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('une barre occupe ~53 % du pas, pas une largeur en dur', (
+      tester,
+    ) async {
+      // Régression : la largeur était posée en dur (`length > 4 ? 20 : 32`),
+      // sans rapport avec l'espace disponible — à cinq barres dans une carte
+      // large, 20 dp ne faisaient que ~23 % du pas et le rythme se lisait
+      // comme une rangée de traits. La spec veut 46/86.
+      const width = 436.0;
+      const barCount = 5;
+      await pumpAt(tester, width, barCount);
+
+      final pitch =
+          (width - AppDimensions.enrollmentStatsChartLeftAxisWidth) / barCount;
+      expect(
+        barWidthOf(tester) / pitch,
+        closeTo(AppDimensions.enrollmentStatsChartBarWidthRatio, 0.01),
+      );
+    });
+
+    testWidgets('cinq barres ne sont pas plus fines que quatre', (
+      tester,
+    ) async {
+      // L'ancien seuil `> 4` faisait chuter la barre de 32 à 20 dp d'un coup :
+      // passer de « Ce mois » à « Aujourd'hui » amincissait le tracé.
+      // Largeurs choisies sous le plafond de 46 dp, sinon les deux cas y
+      // seraient écrêtés et le rapport ne prouverait rien.
+      await pumpAt(tester, 356, 4);
+      final atFour = barWidthOf(tester);
+      await pumpAt(tester, 356, 5);
+      final atFive = barWidthOf(tester);
+
+      expect(atFive, lessThan(atFour));
+      expect(
+        atFive / atFour,
+        closeTo(4 / 5, 0.02),
+        reason: 'la largeur doit suivre le pas, sans marche d\'escalier',
+      );
+    });
+
+    testWidgets('la barre reste bornée quand le pas est immense', (
+      tester,
+    ) async {
+      await pumpAt(tester, 1200, 2);
+      expect(barWidthOf(tester), AppDimensions.enrollmentStatsChartBarMaxWidth);
+    });
   });
 }

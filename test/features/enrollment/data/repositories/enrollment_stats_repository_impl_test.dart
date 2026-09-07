@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/day_entries_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
@@ -14,6 +15,13 @@ class MockEnrollmentRemoteDataSource extends Mock
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 
 final tResponseModel = EnrollmentStatsResponseModel(
+  headcount: const GenderDistributionModel(
+    total: 120,
+    segments: <GenderSegmentModel>[
+      GenderSegmentModel(code: 'FEMALE', value: 62, percent: 52),
+      GenderSegmentModel(code: 'MALE', value: 58, percent: 48),
+    ],
+  ),
   context: StatsContextModel(
     schoolYear: '2025-2026',
     period: 'year',
@@ -32,16 +40,37 @@ final tResponseModel = EnrollmentStatsResponseModel(
     granularity: 'month',
     currentBucketIndex: 8,
     buckets: <EvolutionBucketModel>[
-      EvolutionBucketModel(key: '2025-09', value: 12, isCurrent: false),
-      EvolutionBucketModel(key: '2026-05', value: 18, isCurrent: true),
+      EvolutionBucketModel(
+        key: '2025-09',
+        shortLabel: '2025-09',
+        longLabel: '2025-09',
+        value: 12,
+        isCurrent: false,
+      ),
+      EvolutionBucketModel(
+        key: '2026-05',
+        shortLabel: '2026-05',
+        longLabel: '2026-05',
+        value: 18,
+        isCurrent: true,
+      ),
     ],
   ),
   distributionByCycle: const CycleDistributionModel(
     cycles: <CycleStatModel>[
       CycleStatModel(
         code: 'PRIMARY',
+        label: 'PRIMARY',
         total: 70,
-        levels: <LevelStatModel>[LevelStatModel(code: 'P1', value: 30)],
+        levels: <LevelStatModel>[
+          LevelStatModel(
+            id: 'p1-id',
+            code: 'P1',
+            label: 'P1',
+            cycle: 'PRIMARY',
+            value: 30,
+          ),
+        ],
       ),
     ],
   ),
@@ -73,6 +102,7 @@ void main() {
           'year',
           null,
           null,
+          null,
         ),
       ).thenAnswer((_) async => tResponseModel);
 
@@ -94,6 +124,7 @@ void main() {
           'year',
           null,
           null,
+          null,
         ),
       ).called(1);
     });
@@ -104,14 +135,14 @@ void main() {
         () => mockRemoteDataSource.getEnrollmentStats(
           tRequiredAuth,
           'month',
-          '2026-05',
+          null,
+          null,
           null,
         ),
       ).thenThrow(_dioException(error: failure));
 
       final result = await repository.getEnrollmentStats(
-        period: EnrollmentStatsPeriod.month,
-        month: '2026-05',
+        window: const EnrollmentStatsWindow.month(),
       );
 
       expect(result, const Left<Failure, EnrollmentStats>(failure));
@@ -123,15 +154,15 @@ void main() {
         when(
           () => mockRemoteDataSource.getEnrollmentStats(
             tRequiredAuth,
-            'week',
+            'day',
+            '2026-05-21',
             null,
-            '2026-W21',
+            null,
           ),
         ).thenThrow(_dioException(error: Exception('socket error')));
 
         final result = await repository.getEnrollmentStats(
-          period: EnrollmentStatsPeriod.week,
-          week: '2026-W21',
+          window: EnrollmentStatsWindow.day(DateTime(2026, 5, 21)),
         );
 
         expect(
@@ -142,6 +173,59 @@ void main() {
         );
       },
     );
+  });
+  group('getDayEntries — ce qui part sur le fil', () {
+    test('la date part au format du contrat, avec page et taille', () async {
+      // `date` est REQUIS côté serveur et n'a pas de défaut à aujourd'hui :
+      // la liste doit pouvoir servir n'importe quelle journée.
+      when(
+        () => mockRemoteDataSource.getDayEntries(
+          tRequiredAuth,
+          '2026-09-05',
+          0,
+          8,
+        ),
+      ).thenAnswer(
+        (_) async => DayEntriesPageModel.fromJson(const <String, dynamic>{
+          'content': <dynamic>[],
+          'page': 0,
+          'size': 8,
+          'totalElements': 0,
+          'totalPages': 0,
+        }),
+      );
+
+      final result = await repository.getDayEntries(
+        day: DateTime(2026, 9, 5),
+        page: 0,
+        size: 8,
+      );
+
+      expect(result.isRight(), isTrue);
+      verify(
+        () => mockRemoteDataSource.getDayEntries(
+          tRequiredAuth,
+          '2026-09-05',
+          0,
+          8,
+        ),
+      ).called(1);
+    });
+
+    test('un 403 remonte tel quel — c\'est un droit, pas une panne', () async {
+      const failure = UnauthorizedFailure('Access forbidden');
+      when(
+        () => mockRemoteDataSource.getDayEntries(any(), any(), any(), any()),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.getDayEntries(
+        day: DateTime(2026, 9, 5),
+        page: 0,
+        size: 8,
+      );
+
+      expect(result, const Left<Failure, dynamic>(failure));
+    });
   });
 }
 

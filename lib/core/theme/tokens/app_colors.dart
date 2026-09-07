@@ -97,22 +97,45 @@ class AppColors {
   // Enrollment stats dashboard palette
   static const enrollmentStatsAccent = bleuArdoise;
   static const enrollmentStatsAccentSoft = Color(0xFFEBF2F7);
-  static const enrollmentStatsFirst = vertSavane;
+  // ⚠️ Type d'inscription : Première = bleu ardoise, Réinscription = vert
+  // savane. C'était l'inverse, ce qui contredisait la spec sur les DEUX
+  // lectures — les cartes KPI (« Premières » #1B4D6B, « Réinscriptions »
+  // #3D6B4A) et la barre « Par type d'inscription ». Les tokens portent le
+  // sens, donc les corriger ici corrige la bande KPI, la barre, la liste du
+  // jour et les pastilles de statut d'un seul geste.
+  static const enrollmentStatsFirst = bleuArdoise;
 
   // Onglet Presence — degrade teinte de la zone de synthese (bleu pale -> creme).
   static const presenceSummaryTintTop = Color(0xFFEDF3F8);
   static const presenceSummaryTintBottom = Color(0xFFF6F3EC);
-  static const enrollmentStatsFirstSoft = Color(0xFFEDF5EF);
-  static const enrollmentStatsRe = orDoux;
-  static const enrollmentStatsReSoft = Color(0xFFFBF3E3);
+  static const enrollmentStatsFirstSoft = Color(0xFFEBF2F7);
+  static const enrollmentStatsRe = vertSavane;
+  static const enrollmentStatsReSoft = Color(0xFFEDF5EF);
   static const enrollmentStatsPre = info;
   static const enrollmentStatsPreSoft = Color(0xFFE8F3F7);
   static const enrollmentStatsInProgress = textMuted;
   static const enrollmentStatsInProgressSoft = Color(0xFFF2F0EC);
-  static const enrollmentStatsMale = Color(0xFF3B82F6);
-  static const enrollmentStatsFemale = Color(0xFFEC4899);
+  static const enrollmentStatsMale = bleuArdoise;
+  static const enrollmentStatsFemale = Color(0xFF9D174D);
   static const enrollmentStatsCardSurface = surfaceRaised;
   static const enrollmentStatsChartGrid = border;
+
+  /// Barre normale du rythme des inscriptions.
+  ///
+  /// ⚠️ NE PAS reprendre `enrollmentStatsPreSoft` (#E8F3F7) ici : c'est un
+  /// token de **surface**, un fond quasi blanc. Employé comme remplissage, il
+  /// donnait des barres si pâles que le relief du bucket courant s'y noyait.
+  static const enrollmentStatsPaceBar = Color(0xFFA9C4D6);
+
+  // Teintes de cycle du tableau de bord des inscriptions.
+  //
+  // ⚠️ Le code de cycle n'est PAS un enum : il vient de
+  // `school_level_groups.code`, unique par année scolaire, donc **configuré
+  // par chaque école**. Ces trois teintes couvrent les cycles usuels ; tout
+  // code inconnu retombe sur la palette de repli (cf. enrollment_cycle_palette).
+  static const enrollmentStatsCycleMaternelle = info;
+  static const enrollmentStatsCyclePrimaire = bleuArdoise;
+  static const enrollmentStatsCycleSecondaire = terreCuite;
 
   // Disciplines — tableau de bord des presences (etats present/justifie/non
   // justifie + tints doux des cartes KPI, et l'or du donut des motifs).

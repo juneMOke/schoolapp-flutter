@@ -13667,6 +13667,757 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue anyway'**
   String get enrollmentDuplicateContinueAction;
+
+  /// No description provided for @enrollmentDashboardOvertitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolments'**
+  String get enrollmentDashboardOvertitle;
+
+  /// No description provided for @enrollmentDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get enrollmentDashboardTitle;
+
+  /// No description provided for @enrollmentDashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear} · as of {generatedOn} · enrolled headcount, breakdown by level and enrolment pace'**
+  String enrollmentDashboardSubtitle(String schoolYear, String generatedOn);
+
+  /// No description provided for @enrollmentDashboardSubtitleNoYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled headcount, breakdown by level and enrolment pace'**
+  String get enrollmentDashboardSubtitleNoYear;
+
+  /// No description provided for @enrollmentDashboardLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the enrolments dashboard'**
+  String get enrollmentDashboardLoadingA11yLabel;
+
+  /// No description provided for @enrollmentDashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrolment · {window}'**
+  String enrollmentDashboardEmptyTitle(String window);
+
+  /// No description provided for @enrollmentDashboardEmptyWidestMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the widest window: there is nothing left to widen. No student has been enrolled yet for this school year.'**
+  String get enrollmentDashboardEmptyWidestMessage;
+
+  /// No description provided for @enrollmentDashboardEmptyNarrowMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Widen the window to see more enrolments, or record a first enrolment.'**
+  String get enrollmentDashboardEmptyNarrowMessage;
+
+  /// No description provided for @enrollmentDashboardEmptyOpenFirstRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Open First enrolment'**
+  String get enrollmentDashboardEmptyOpenFirstRegistration;
+
+  /// No description provided for @enrollmentDashboardEmptySeeWholeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'See the whole year'**
+  String get enrollmentDashboardEmptySeeWholeYear;
+
+  /// No description provided for @enrollmentDashboardErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get enrollmentDashboardErrorNetworkTitle;
+
+  /// No description provided for @enrollmentDashboardErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get enrollmentDashboardErrorUnauthorizedTitle;
+
+  /// No description provided for @enrollmentDashboardErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get enrollmentDashboardErrorForbiddenTitle;
+
+  /// No description provided for @enrollmentDashboardErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get enrollmentDashboardErrorServerTitle;
+
+  /// No description provided for @enrollmentDashboardErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentDashboardErrorRetry;
+
+  /// No description provided for @enrollmentDashboardErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String enrollmentDashboardErrorIncidentCode(String code);
+
+  /// No description provided for @enrollmentDashboardNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection, then try again.'**
+  String get enrollmentDashboardNetworkError;
+
+  /// No description provided for @enrollmentDashboardNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'No statistics are available for this school year.'**
+  String get enrollmentDashboardNotFoundError;
+
+  /// No description provided for @enrollmentDashboardValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested window is invalid.'**
+  String get enrollmentDashboardValidationError;
+
+  /// No description provided for @enrollmentDashboardUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to view enrolment analytics. Contact your administrator.'**
+  String get enrollmentDashboardUnauthorizedError;
+
+  /// No description provided for @enrollmentDashboardInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to continue.'**
+  String get enrollmentDashboardInvalidCredentialsError;
+
+  /// No description provided for @enrollmentDashboardServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not respond. Try again in a moment.'**
+  String get enrollmentDashboardServerError;
+
+  /// No description provided for @enrollmentDashboardStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data could not be read.'**
+  String get enrollmentDashboardStorageError;
+
+  /// No description provided for @enrollmentDashboardAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed.'**
+  String get enrollmentDashboardAuthError;
+
+  /// No description provided for @enrollmentDashboardUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get enrollmentDashboardUnknownError;
+
+  /// No description provided for @enrollmentDashboardWindowDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get enrollmentDashboardWindowDay;
+
+  /// No description provided for @enrollmentDashboardWindowWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get enrollmentDashboardWindowWeek;
+
+  /// No description provided for @enrollmentDashboardWindowMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get enrollmentDashboardWindowMonth;
+
+  /// No description provided for @enrollmentDashboardWindowYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get enrollmentDashboardWindowYear;
+
+  /// No description provided for @enrollmentDashboardWindowCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get enrollmentDashboardWindowCustom;
+
+  /// No description provided for @enrollmentDashboardWindowTabsA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time window'**
+  String get enrollmentDashboardWindowTabsA11yLabel;
+
+  /// No description provided for @enrollmentDashboardRangeFromTo.
+  ///
+  /// In en, this message translates to:
+  /// **'From {from} to {to}'**
+  String enrollmentDashboardRangeFromTo(String from, String to);
+
+  /// No description provided for @enrollmentDashboardRangeSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear}'**
+  String enrollmentDashboardRangeSchoolYear(String schoolYear);
+
+  /// No description provided for @enrollmentDashboardRangeSinceOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Since enrolments opened'**
+  String get enrollmentDashboardRangeSinceOpening;
+
+  /// No description provided for @enrollmentDashboardRangeFieldFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get enrollmentDashboardRangeFieldFrom;
+
+  /// No description provided for @enrollmentDashboardRangeFieldTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get enrollmentDashboardRangeFieldTo;
+
+  /// No description provided for @enrollmentDashboardHeadcountOvertitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled students · still present'**
+  String get enrollmentDashboardHeadcountOvertitle;
+
+  /// No description provided for @enrollmentDashboardHeadcountCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{student · year {schoolYear}} other{students · year {schoolYear}}}'**
+  String enrollmentDashboardHeadcountCaption(int count, String schoolYear);
+
+  /// No description provided for @enrollmentDashboardHeadcountExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Running total since enrolments opened, excluding unvalidated online requests'**
+  String get enrollmentDashboardHeadcountExclusion;
+
+  /// No description provided for @enrollmentDashboardHeadcountA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No student enrolled} =1{1 student enrolled} other{{count} students enrolled}}'**
+  String enrollmentDashboardHeadcountA11yLabel(int count);
+
+  /// No description provided for @enrollmentDashboardKpiEnrollments.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolments · {window}'**
+  String enrollmentDashboardKpiEnrollments(String window);
+
+  /// No description provided for @enrollmentDashboardKpiEnrollmentsSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Students recorded within the chosen window'**
+  String get enrollmentDashboardKpiEnrollmentsSubline;
+
+  /// No description provided for @enrollmentDashboardKpiFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First enrolments'**
+  String get enrollmentDashboardKpiFirst;
+
+  /// No description provided for @enrollmentDashboardKpiFirstSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the period\'s enrolments · students from outside'**
+  String enrollmentDashboardKpiFirstSubline(int percent);
+
+  /// No description provided for @enrollmentDashboardKpiRe.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolments'**
+  String get enrollmentDashboardKpiRe;
+
+  /// No description provided for @enrollmentDashboardKpiReSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the period\'s enrolments · students already known'**
+  String enrollmentDashboardKpiReSubline(int percent);
+
+  /// No description provided for @enrollmentDashboardKpiPre.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending pre-enrolments'**
+  String get enrollmentDashboardKpiPre;
+
+  /// No description provided for @enrollmentDashboardKpiPreSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests received online, to check then validate'**
+  String get enrollmentDashboardKpiPreSubline;
+
+  /// No description provided for @enrollmentDashboardKpiNoneOnWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'None in this period'**
+  String get enrollmentDashboardKpiNoneOnWindow;
+
+  /// No description provided for @enrollmentDashboardKpiNoOnlineRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'No online request to handle'**
+  String get enrollmentDashboardKpiNoOnlineRequest;
+
+  /// No description provided for @enrollmentDashboardKpiNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A validated pre-enrolment becomes a first enrolment on its validation date.'**
+  String get enrollmentDashboardKpiNote;
+
+  /// No description provided for @enrollmentDashboardPaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment pace'**
+  String get enrollmentDashboardPaceTitle;
+
+  /// No description provided for @enrollmentDashboardPaceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrolment in this window.'**
+  String get enrollmentDashboardPaceEmpty;
+
+  /// No description provided for @enrollmentDashboardPaceA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment pace, {count} bars'**
+  String enrollmentDashboardPaceA11yLabel(int count);
+
+  /// No description provided for @enrollmentDashboardStudentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 students} =1{1 student} other{{count} students}}'**
+  String enrollmentDashboardStudentsCount(int count);
+
+  /// No description provided for @enrollmentDashboardGenderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls / Boys'**
+  String get enrollmentDashboardGenderTitle;
+
+  /// No description provided for @enrollmentDashboardSubtitleDay.
+  ///
+  /// In en, this message translates to:
+  /// **'for the day'**
+  String get enrollmentDashboardSubtitleDay;
+
+  /// No description provided for @enrollmentDashboardSubtitlePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'for the period'**
+  String get enrollmentDashboardSubtitlePeriod;
+
+  /// No description provided for @enrollmentDashboardGenderGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get enrollmentDashboardGenderGirls;
+
+  /// No description provided for @enrollmentDashboardGenderBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get enrollmentDashboardGenderBoys;
+
+  /// No description provided for @enrollmentDashboardGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get enrollmentDashboardGenderOther;
+
+  /// No description provided for @enrollmentDashboardNothingToSplitInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file is in progress} other{{count} files are in progress}}: no enrolment is finalised in this window yet, so there is nothing to split.'**
+  String enrollmentDashboardNothingToSplitInProgress(int count);
+
+  /// No description provided for @enrollmentDashboardNothingToSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'No finalised enrolment in this window: there is nothing to split.'**
+  String get enrollmentDashboardNothingToSplit;
+
+  /// No description provided for @enrollmentDashboardGenderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No enrolment {scope}} =1{Out of the single enrolment {scope}} other{Out of the {count} enrolments {scope}}}'**
+  String enrollmentDashboardGenderHint(int count, String scope);
+
+  /// No description provided for @enrollmentDashboardTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Newcomers versus the cohort already enrolled'**
+  String get enrollmentDashboardTypeHint;
+
+  /// No description provided for @enrollmentDashboardGenderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{windowShare}% girls in this window, {totalShare}% across the whole headcount. The second figure guards against over-reading a small sample.'**
+  String enrollmentDashboardGenderNote(int windowShare, int totalShare);
+
+  /// No description provided for @enrollmentDashboardTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By type'**
+  String get enrollmentDashboardTypeTitle;
+
+  /// No description provided for @enrollmentDashboardTypeFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First enrolment'**
+  String get enrollmentDashboardTypeFirst;
+
+  /// No description provided for @enrollmentDashboardTypeRe.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolment'**
+  String get enrollmentDashboardTypeRe;
+
+  /// No description provided for @enrollmentDashboardTypeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Only first enrolments grow the headcount; re-enrolments carry it over.'**
+  String get enrollmentDashboardTypeNote;
+
+  /// No description provided for @enrollmentDashboardLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown by level'**
+  String get enrollmentDashboardLevelTitle;
+
+  /// No description provided for @enrollmentDashboardLevelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the students enrolled {when} went'**
+  String enrollmentDashboardLevelSubtitle(String when);
+
+  /// No description provided for @enrollmentDashboardLevelCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 level involved} other{{count} levels involved}}'**
+  String enrollmentDashboardLevelCount(int count);
+
+  /// No description provided for @enrollmentDashboardLevelEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No level received an enrolment in this window.'**
+  String get enrollmentDashboardLevelEmpty;
+
+  /// No description provided for @enrollmentDashboardLevelToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get enrollmentDashboardLevelToday;
+
+  /// No description provided for @enrollmentDashboardCycleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle'**
+  String get enrollmentDashboardCycleTitle;
+
+  /// No description provided for @enrollmentDashboardInsightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings & alerts'**
+  String get enrollmentDashboardInsightsTitle;
+
+  /// No description provided for @enrollmentDashboardInsightPeakDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest day'**
+  String get enrollmentDashboardInsightPeakDay;
+
+  /// No description provided for @enrollmentDashboardInsightPeakWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest week'**
+  String get enrollmentDashboardInsightPeakWeek;
+
+  /// No description provided for @enrollmentDashboardInsightPeakMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest month'**
+  String get enrollmentDashboardInsightPeakMonth;
+
+  /// No description provided for @enrollmentDashboardInsightPeakBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} — {count}'**
+  String enrollmentDashboardInsightPeakBody(String label, String count);
+
+  /// No description provided for @enrollmentDashboardInsightParityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parity'**
+  String get enrollmentDashboardInsightParityTitle;
+
+  /// No description provided for @enrollmentDashboardInsightParityBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'{share}% girls: the split is balanced.'**
+  String enrollmentDashboardInsightParityBalanced(int share);
+
+  /// No description provided for @enrollmentDashboardInsightParitySkewed.
+  ///
+  /// In en, this message translates to:
+  /// **'{share}% girls: the split leans one way.'**
+  String enrollmentDashboardInsightParitySkewed(int share);
+
+  /// No description provided for @enrollmentDashboardInsightPreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Online requests to handle'**
+  String get enrollmentDashboardInsightPreTitle;
+
+  /// No description provided for @enrollmentDashboardInsightPreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request is awaiting a check.} other{{count} requests are awaiting a check.}}'**
+  String enrollmentDashboardInsightPreBody(int count);
+
+  /// No description provided for @enrollmentDashboardInsightPreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pre-enrolments'**
+  String get enrollmentDashboardInsightPreAction;
+
+  /// No description provided for @enrollmentDashboardDayListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Named list for the day'**
+  String get enrollmentDashboardDayListTitle;
+
+  /// No description provided for @enrollmentDashboardDayListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled {day}'**
+  String enrollmentDashboardDayListSubtitle(String day);
+
+  /// No description provided for @enrollmentDashboardDayListColumnHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get enrollmentDashboardDayListColumnHour;
+
+  /// No description provided for @enrollmentDashboardDayListColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get enrollmentDashboardDayListColumnStudent;
+
+  /// No description provided for @enrollmentDashboardDayListColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get enrollmentDashboardDayListColumnLevel;
+
+  /// No description provided for @enrollmentDashboardDayListColumnType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get enrollmentDashboardDayListColumnType;
+
+  /// No description provided for @enrollmentDashboardDayListColumnRecordedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded by'**
+  String get enrollmentDashboardDayListColumnRecordedBy;
+
+  /// No description provided for @enrollmentDashboardDayListUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'enrolment'**
+  String get enrollmentDashboardDayListUnit;
+
+  /// No description provided for @enrollmentDashboardDayListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 enrolment} other{{count} enrolments}}'**
+  String enrollmentDashboardDayListCount(int count);
+
+  /// No description provided for @enrollmentDashboardDayListUnknownAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get enrollmentDashboardDayListUnknownAgent;
+
+  /// No description provided for @enrollmentDashboardDayListNoHour.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get enrollmentDashboardDayListNoHour;
+
+  /// No description provided for @enrollmentDashboardDayListLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the day\'s list'**
+  String get enrollmentDashboardDayListLoading;
+
+  /// No description provided for @enrollmentDashboardDayListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrolment recorded on that day.'**
+  String get enrollmentDashboardDayListEmpty;
+
+  /// No description provided for @enrollmentDashboardDayListForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to view the named list. Analytics remain available.'**
+  String get enrollmentDashboardDayListForbidden;
+
+  /// No description provided for @enrollmentDashboardDayListError.
+  ///
+  /// In en, this message translates to:
+  /// **'The day\'s list could not be loaded.'**
+  String get enrollmentDashboardDayListError;
+
+  /// No description provided for @enrollmentDashboardDayListRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {gender}, {level}, {type}'**
+  String enrollmentDashboardDayListRowA11y(
+    String name,
+    String gender,
+    String level,
+    String type,
+  );
+
+  /// No description provided for @enrollmentDashboardExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get enrollmentDashboardExportPdf;
+
+  /// No description provided for @enrollmentDashboardExportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV'**
+  String get enrollmentDashboardExportCsv;
+
+  /// No description provided for @enrollmentDashboardExportPdfTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the breakdown by level as PDF'**
+  String get enrollmentDashboardExportPdfTooltip;
+
+  /// No description provided for @enrollmentDashboardExportCsvTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the day\'s list as CSV'**
+  String get enrollmentDashboardExportCsvTooltip;
+
+  /// No description provided for @enrollmentDashboardDayPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear} · {day}'**
+  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day);
+
+  /// No description provided for @enrollmentDashboardDayPdfFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}'**
+  String enrollmentDashboardDayPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  );
+
+  /// No description provided for @enrollmentDashboardPdfOvertitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO CONNECT · Enrolments'**
+  String get enrollmentDashboardPdfOvertitle;
+
+  /// No description provided for @enrollmentDashboardPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown by level'**
+  String get enrollmentDashboardPdfTitle;
+
+  /// No description provided for @enrollmentDashboardPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear} · as of {generatedOn}'**
+  String enrollmentDashboardPdfSubtitle(String schoolYear, String generatedOn);
+
+  /// No description provided for @enrollmentDashboardPdfFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{rowCount, plural, =1{1 level} other{{rowCount} levels}} · school year {schoolYear} · generated on {generatedOn}'**
+  String enrollmentDashboardPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  );
+
+  /// No description provided for @enrollmentDashboardPdfColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get enrollmentDashboardPdfColumnLevel;
+
+  /// No description provided for @enrollmentDashboardPdfColumnCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get enrollmentDashboardPdfColumnCycle;
+
+  /// No description provided for @enrollmentDashboardPdfColumnCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled'**
+  String get enrollmentDashboardPdfColumnCount;
+
+  /// No description provided for @enrollmentDashboardPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF export did not complete. Try again.'**
+  String get enrollmentDashboardPdfFailed;
+
+  /// No description provided for @enrollmentDashboardCsvColumnLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get enrollmentDashboardCsvColumnLastName;
+
+  /// No description provided for @enrollmentDashboardCsvColumnFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get enrollmentDashboardCsvColumnFirstName;
+
+  /// No description provided for @enrollmentDashboardCsvColumnGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Sex'**
+  String get enrollmentDashboardCsvColumnGender;
+
+  /// No description provided for @enrollmentDashboardCsvColumnStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get enrollmentDashboardCsvColumnStatus;
+
+  /// No description provided for @enrollmentDashboardCsvCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Day list copied as CSV ({fileName})'**
+  String enrollmentDashboardCsvCopied(String fileName);
+
+  /// No description provided for @enrollmentDashboardCsvFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying the list did not complete. Try again.'**
+  String get enrollmentDashboardCsvFailed;
 }
 
 class _AppLocalizationsDelegate

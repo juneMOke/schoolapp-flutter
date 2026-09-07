@@ -3,11 +3,13 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 
 class CycleStatModel {
   final String code;
+  final String label;
   final int total;
   final List<LevelStatModel> levels;
 
   const CycleStatModel({
     required this.code,
+    required this.label,
     required this.total,
     required this.levels,
   });
@@ -15,6 +17,7 @@ class CycleStatModel {
   factory CycleStatModel.fromJson(Map<String, dynamic> json) {
     return CycleStatModel(
       code: json['code'] as String,
+      label: json['label'] as String? ?? '',
       total: (json['total'] as num).toInt(),
       levels: (json['levels'] as List<dynamic>)
           .map((item) => LevelStatModel.fromJson(item as Map<String, dynamic>))
@@ -24,12 +27,14 @@ class CycleStatModel {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'code': code,
+    'label': label,
     'total': total,
     'levels': levels.map((level) => level.toJson()).toList(growable: false),
   };
 
   CycleStat toEntity() => CycleStat(
     code: code,
+    label: label,
     total: total,
     levels: levels.map((level) => level.toEntity()).toList(growable: false),
   );

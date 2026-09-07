@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 
 class EnrollmentStatsResponseModel {
   final StatsContextModel context;
+  final GenderDistributionModel headcount;
   final EnrollmentKpisModel kpis;
   final EnrollmentEvolutionModel evolution;
   final CycleDistributionModel distributionByCycle;
@@ -14,6 +15,7 @@ class EnrollmentStatsResponseModel {
 
   const EnrollmentStatsResponseModel({
     required this.context,
+    required this.headcount,
     required this.kpis,
     required this.evolution,
     required this.distributionByCycle,
@@ -25,6 +27,14 @@ class EnrollmentStatsResponseModel {
       context: StatsContextModel.fromJson(
         json['context'] as Map<String, dynamic>,
       ),
+      // Le serveur le sérialise TOUJOURS, à zéro s'il n'y a rien — c'est ce
+      // qui permet au bandeau de rester en repère de lecture à l'état vide.
+      // Le repli à zéro protège seulement d'une charge utile plus ancienne.
+      headcount: json['headcount'] == null
+          ? const GenderDistributionModel(total: 0, segments: [])
+          : GenderDistributionModel.fromJson(
+              json['headcount'] as Map<String, dynamic>,
+            ),
       kpis: EnrollmentKpisModel.fromJson(json['kpis'] as Map<String, dynamic>),
       evolution: EnrollmentEvolutionModel.fromJson(
         json['evolution'] as Map<String, dynamic>,
@@ -40,6 +50,7 @@ class EnrollmentStatsResponseModel {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'context': context.toJson(),
+    'headcount': headcount.toJson(),
     'kpis': kpis.toJson(),
     'evolution': evolution.toJson(),
     'distributionByCycle': distributionByCycle.toJson(),
@@ -48,6 +59,7 @@ class EnrollmentStatsResponseModel {
 
   EnrollmentStats toEntity() => EnrollmentStats(
     context: context.toEntity(),
+    headcount: headcount.toEntity(),
     kpis: kpis.toEntity(),
     evolution: evolution.toEntity(),
     distributionByCycle: distributionByCycle.toEntity(),
