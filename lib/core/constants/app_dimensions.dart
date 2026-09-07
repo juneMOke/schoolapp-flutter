@@ -178,6 +178,32 @@ class AppDimensions {
   static const enrollmentStatsChartSectionHeight = 220.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
+
+  // Géométrie des barres verticales (CycleBarChart).
+  //
+  // La largeur d'une barre est une **part du pas**, pas une valeur absolue :
+  // c'est le rapport largeur/pas qui fait qu'une série se lit comme un rythme
+  // plutôt que comme une rangée de traits. La spec le fixe à 46/86 sur un
+  // tracé de 480 (barres à x = 60/146/232/318/404).
+  static const enrollmentStatsChartBarWidthRatio = 0.53;
+  static const enrollmentStatsChartBarMinWidth = 6.0;
+  static const enrollmentStatsChartBarMaxWidth = 46.0;
+
+  /// Largeur réservée à l'axe des ordonnées, à défalquer du tracé pour
+  /// calculer le pas.
+  static const enrollmentStatsChartLeftAxisWidth = 36.0;
+
+  /// Intervalles de grille — une ligne de plus que d'intervalles.
+  static const enrollmentStatsChartGridDivisions = 4;
+
+  /// Le rythme des inscriptions suit la spec : radius 6, 3 lignes de grille.
+  static const enrollmentStatsChartPaceBorderRadius = 6.0;
+  static const enrollmentStatsChartPaceGridDivisions = 2;
+
+  /// Pastille d'icône en tête d'une carte de section (EteeloStatsCard),
+  /// calquée sur celle d'EteeloKpiCard.
+  static const statsCardIconBadgeRadius = 8.0;
+  static const statsCardIconSize = 16.0;
   static const enrollmentStatsChartBottomTitleHeight = 28.0;
   static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;

@@ -26,6 +26,20 @@ class EteeloStatsCard extends StatelessWidget {
   /// Indice discret poussé à droite du titre (ex. « 7 niveaux concernés »).
   final String? hint;
 
+  /// Glyphe de tête, posé dans une pastille teintée à gauche du titre.
+  ///
+  /// ⚠️ **Écart assumé à la spec** : `.k-ct` n'a pas de slot d'icône, et la
+  /// carte n'en exposait pas. Le porteur produit en demande une sur les cartes
+  /// du tableau de bord des inscriptions ; la modification doit remonter dans
+  /// le design system.
+  ///
+  /// Purement décoratif : le titre reste la seule source d'information, et
+  /// l'icône est masquée aux lecteurs d'écran.
+  final IconData? icon;
+
+  /// Teinte du glyphe. La pastille en reprend une version diluée.
+  final Color iconColor;
+
   /// Actions de l'en-tête — typiquement les exports. Vide par défaut : une
   /// carte sans export ne réserve aucune place pour des boutons absents.
   ///
@@ -40,9 +54,15 @@ class EteeloStatsCard extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.hint,
+    this.icon,
+    this.iconColor = AppColors.bleuArdoise,
     this.actions = const [],
     required this.child,
   });
+
+  /// Dilution de [iconColor] pour le fond de la pastille — même parti que la
+  /// carte KPI, dont les pastilles voisinent dans la même grille.
+  static const double iconBadgeTintAlpha = 0.12;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +90,8 @@ class EteeloStatsCard extends StatelessWidget {
             title: title,
             subtitle: subtitle,
             hint: hint,
+            icon: icon,
+            iconColor: iconColor,
             actions: actions,
           ),
           const SizedBox(height: AppDimensions.spacingM),
@@ -89,18 +111,22 @@ class _Header extends StatelessWidget {
   final String title;
   final String? subtitle;
   final String? hint;
+  final IconData? icon;
+  final Color iconColor;
   final List<Widget> actions;
 
   const _Header({
     required this.title,
     required this.subtitle,
     required this.hint,
+    required this.icon,
+    required this.iconColor,
     required this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
-    final heading = Column(
+    final texts = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -124,6 +150,37 @@ class _Header extends StatelessWidget {
         ],
       ],
     );
+
+    // La pastille est décorative : le titre dit déjà tout, et la relire
+    // n'ajouterait qu'un « icône » sans objet dans le flux du lecteur d'écran.
+    final heading = icon == null
+        ? texts
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  padding: const EdgeInsets.all(AppDimensions.spacingXS),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(
+                      alpha: EteeloStatsCard.iconBadgeTintAlpha,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.statsCardIconBadgeRadius,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: AppDimensions.statsCardIconSize,
+                    color: iconColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Flexible(child: texts),
+            ],
+          );
 
     final trailing = <Widget>[
       if (hint != null)

@@ -238,7 +238,6 @@ class SegmentedTabFilter<T> extends StatelessWidget {
               curve: AppMotion.outCurve,
               width: style.itemWidth,
               height: style.itemHeight,
-              alignment: Alignment.center,
               padding: isIconOnly ? EdgeInsets.zero : style.itemPadding,
               decoration: isSelected
                   ? BoxDecoration(
@@ -249,7 +248,26 @@ class SegmentedTabFilter<T> extends StatelessWidget {
                       boxShadow: style.selectedShadow,
                     )
                   : const BoxDecoration(),
-              child: _buildTabContent(opt, isSelected),
+              // ⚠️ Le centrage est porté par un `Align`, PAS par l'`alignment`
+              // du conteneur.
+              //
+              // Un Container porteur d'un `alignment` se **dilate** pour
+              // remplir des contraintes bornées. En `Row`, les enfants non
+              // flexibles reçoivent une largeur non bornée, donc l'onglet se
+              // rétractait sur son contenu et le défaut ne se voyait pas. Un
+              // `Wrap`, lui, borne la largeur de ses enfants : chaque onglet
+              // prenait TOUTE la barre, un par rang, à n'importe quelle
+              // largeur — la barre de fenêtres se lisait comme une colonne.
+              //
+              // `widthFactor`/`heightFactor` à 1 rendent l'onglet intrinsèque
+              // quand rien ne le force plus large, tout en le laissant remplir
+              // — et centrer son contenu — sous une contrainte serrée
+              // (`expand`, ou `itemWidth` imposée).
+              child: Align(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: _buildTabContent(opt, isSelected),
+              ),
             ),
           ),
         ),

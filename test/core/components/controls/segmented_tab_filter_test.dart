@@ -196,6 +196,69 @@ void main() {
       );
     });
 
+    testWidgets('en mode enroulé un onglet garde sa largeur intrinsèque', (
+      tester,
+    ) async {
+      // Régression : un Container porteur d'un `alignment` se DILATE pour
+      // remplir des contraintes bornées. Un Row donne à ses enfants une
+      // largeur non bornée, donc l'onglet s'y rétractait sur son contenu ;
+      // mais un Wrap borne la largeur de ses enfants, et chaque onglet
+      // prenait alors TOUTE la barre — un onglet par rang, à n'importe
+      // quelle largeur, ce qui se lisait comme une colonne.
+      // Une vraie surface large : la surface de test par défaut fait 800 dp,
+      // où cinq onglets pleins tiennent légitimement sur deux rangs.
+      tester.view.physicalSize = const Size(1400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 1400,
+              child: SegmentedTabFilter<int>(
+                options: const [
+                  SegmentedTabOption(label: 'Aujourd\'hui', value: 0),
+                  SegmentedTabOption(label: 'Cette semaine', value: 1),
+                  SegmentedTabOption(label: 'Ce mois', value: 2),
+                  SegmentedTabOption(label: 'Année', value: 3),
+                  SegmentedTabOption(label: 'Période précise', value: 4),
+                ],
+                selected: 0,
+                onSelected: (_) {},
+                wrap: true,
+                style: SegmentedTabFilterStyle.window,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Cinq onglets courts dans 900 dp tiennent sur UN rang : ils partagent
+      // donc tous la même ordonnée.
+      final tops = <double>{
+        for (final label in [
+          'Aujourd\'hui',
+          'Cette semaine',
+          'Ce mois',
+          'Année',
+          'Période précise',
+        ])
+          tester.getTopLeft(find.text(label)).dy,
+      };
+      expect(
+        tops,
+        hasLength(1),
+        reason: 'les cinq onglets doivent tenir sur une seule rangée',
+      );
+
+      // Et aucun ne s'étale sur toute la barre.
+      final tab = find
+          .ancestor(of: find.text('Ce mois'), matching: find.byType(InkWell))
+          .first;
+      expect(tester.getSize(tab).width, lessThan(300.0));
+    });
+
     test('« wrap » et « expand » s\'excluent', () {
       // Le premier donne aux onglets leur largeur intrinsèque sur plusieurs
       // rangs, le second les étire sur une seule ligne : les combiner ne veut
