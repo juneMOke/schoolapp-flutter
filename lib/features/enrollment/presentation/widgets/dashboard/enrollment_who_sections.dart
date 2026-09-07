@@ -27,11 +27,19 @@ class EnrollmentGenderSection extends StatelessWidget {
   /// Vrai quand la fenêtre couvre une seule journée.
   final bool isSingleDay;
 
+  /// Dossiers encore en cours sur la fenêtre.
+  ///
+  /// Ne sert **qu'à formuler le vide** : quand rien n'est finalisé, la carte
+  /// dit combien de dossiers sont en cours plutôt que « aucune donnée ». Zéro
+  /// par défaut — l'omettre dégrade la phrase, jamais le reste de la carte.
+  final int inProgress;
+
   const EnrollmentGenderSection({
     super.key,
     required this.windowDistribution,
     required this.headcount,
     required this.isSingleDay,
+    this.inProgress = 0,
   });
 
   @override
@@ -39,31 +47,66 @@ class EnrollmentGenderSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final segments = _segments(l10n, windowDistribution);
 
+    final scope = isSingleDay
+        ? l10n.enrollmentDashboardSubtitleDay
+        : l10n.enrollmentDashboardSubtitlePeriod;
+
+    // Rien de finalisé : la barre ne peut que dessiner sa piste, et une piste
+    // grise muette se lit comme une panne d'affichage. Elle en a l'air
+    // d'autant plus que la carte « Inscriptions » affiche, elle, un nombre —
+    // c'est le profil NORMAL d'une semaine de rentrée, où les dossiers restent
+    // en cours plusieurs jours. La carte dit donc ce qui est vrai : des
+    // dossiers existent, aucun n'est encore finalisé.
+    final splittable = segments.fold<int>(0, (sum, s) => sum + s.value.toInt());
+
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardGenderTitle,
-      subtitle: isSingleDay
-          ? l10n.enrollmentDashboardSubtitleDay
-          : l10n.enrollmentDashboardSubtitlePeriod,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          EteeloSplitBar(
-            segments: segments,
-            semanticsLabel: segments
-                .map((s) => '${s.label} : ${s.valueLabel}')
-                .join(', '),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          EnrollmentDashboardNote(
-            text: l10n.enrollmentDashboardGenderNote(
-              _girlsShare(windowDistribution),
-              _girlsShare(headcount),
+      icon: Icons.people_outline,
+      // UNE seule mention de la fenêtre, portée par l'indice.
+      //
+      // La redline « Sous-titre : "du jour" si insOneDay » ne décrit pas un
+      // second élément, elle décrit **la variation de cet indice**. Un
+      // sous-titre « du jour » sous un indice « Sur les 14 inscrits du jour »
+      // écrivait deux fois la même chose.
+      //
+      // L'indice dit sur combien de dossiers la barre répartit : « 50 % de
+      // filles » sur quatre inscriptions ne se lit pas comme sur quatre cents.
+      hint: l10n.enrollmentDashboardGenderHint(windowDistribution.total, scope),
+      child: splittable == 0
+          ? EnrollmentDashboardNote(text: nothingToSplitText(l10n, inProgress))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EteeloSplitBar(
+                  segments: segments,
+                  semanticsLabel: segments
+                      .map((s) => '${s.label} : ${s.valueLabel}')
+                      .join(', '),
+                ),
+                const SizedBox(height: AppDimensions.spacingM),
+                EnrollmentDashboardNote(
+                  text: l10n.enrollmentDashboardGenderNote(
+                    _girlsShare(windowDistribution),
+                    _girlsShare(headcount),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
+
+  /// Ce qu'on écrit quand il n'y a rien à répartir.
+  ///
+  /// **Jamais « aucune donnée »** : la donnée existe, elle n'est simplement
+  /// pas encore finalisée. Nommer les dossiers en cours est ce qui distingue
+  /// un écran qui attend d'un écran en panne.
+  ///
+  /// Partagée par les deux cartes « qui » — elles rencontrent le même vide,
+  /// pour la même raison, et doivent le dire de la même façon.
+  static String nothingToSplitText(AppLocalizations l10n, int inProgress) =>
+      inProgress > 0
+      ? l10n.enrollmentDashboardNothingToSplitInProgress(inProgress)
+      : l10n.enrollmentDashboardNothingToSplit;
 
   List<EteeloSplitBarSegment> _segments(
     AppLocalizations l10n,
@@ -157,22 +200,33 @@ class EnrollmentTypeSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardTypeTitle,
+      icon: Icons.category_outlined,
       subtitle: isSingleDay
           ? l10n.enrollmentDashboardSubtitleDay
           : l10n.enrollmentDashboardSubtitlePeriod,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          EteeloSplitBar(
-            segments: segments,
-            semanticsLabel: segments
-                .map((s) => '${s.label} : ${s.valueLabel}')
-                .join(', '),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          EnrollmentDashboardNote(text: l10n.enrollmentDashboardTypeNote),
-        ],
-      ),
+      // Ce que la barre oppose, en toutes lettres : « première » et
+      // « réinscription » ne disent pas d'eux-mêmes ce qui les sépare.
+      hint: l10n.enrollmentDashboardTypeHint,
+      child: kpis.firstEnrollments.value + kpis.reEnrollments.value == 0
+          ? EnrollmentDashboardNote(
+              text: EnrollmentGenderSection.nothingToSplitText(
+                l10n,
+                kpis.inProgress.value,
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EteeloSplitBar(
+                  segments: segments,
+                  semanticsLabel: segments
+                      .map((s) => '${s.label} : ${s.valueLabel}')
+                      .join(', '),
+                ),
+                const SizedBox(height: AppDimensions.spacingM),
+                EnrollmentDashboardNote(text: l10n.enrollmentDashboardTypeNote),
+              ],
+            ),
     );
   }
 }

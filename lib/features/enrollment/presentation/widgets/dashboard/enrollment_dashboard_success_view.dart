@@ -80,6 +80,9 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
               windowDistribution: stats.distributionByGender,
               headcount: stats.headcount,
               isSingleDay: isSingleDay,
+              // Sert à formuler le vide : « 14 dossiers en cours » plutôt que
+              // « aucune donnée » quand rien n'est encore finalisé.
+              inProgress: stats.kpis.inProgress.value,
             ),
             end: EnrollmentTypeSection(
               kpis: stats.kpis,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_kpi_band.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_headcount_banner.dart';
@@ -203,40 +205,100 @@ void main() {
       expect(find.textContaining('out-of-axis'), findsNothing);
     });
 
-    testWidgets('les barres à zéro sont conservées', (tester) async {
-      // La trame de temps reste lisible : un jour creux se voit, il ne
-      // disparaît pas de l'axe.
-      await tester.pumpWidget(
-        _host(
-          const EnrollmentPaceSection(
-            evolution: EnrollmentEvolution(
-              granularity: EvolutionGranularity.day,
-              currentBucketIndex: 1,
-              buckets: [
-                EvolutionBucket(
-                  key: '2026-09-05',
-                  shortLabel: '05/09',
-                  longLabel: 'samedi 5 septembre',
-                  value: 0,
-                  isCurrent: false,
-                ),
-                EvolutionBucket(
-                  key: '2026-09-06',
-                  shortLabel: '06/09',
-                  longLabel: 'dimanche 6 septembre',
-                  value: 0,
-                  isCurrent: true,
-                ),
-              ],
-            ),
+    // ─── Écart assumé à la spec (l.383) : le porteur produit ne veut plus
+    // voir les jours sans données. Deux garde-fous encadrent le filtre.
+    group('les buckets à zéro quittent l\'axe', () {
+      EvolutionBucket bucket(String label, int value, {bool current = false}) =>
+          EvolutionBucket(
+            key: label,
+            shortLabel: label,
+            longLabel: label,
+            value: value,
+            isCurrent: current,
+          );
+
+      Widget paceOf(List<EvolutionBucket> buckets) => _host(
+        EnrollmentPaceSection(
+          evolution: EnrollmentEvolution(
+            granularity: EvolutionGranularity.day,
+            currentBucketIndex: 0,
+            buckets: buckets,
           ),
         ),
       );
-      await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('05/09'), findsOneWidget);
-      expect(find.text('06/09'), findsOneWidget);
+      testWidgets('un jour creux disparaît quand il reste de quoi lire', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          paceOf([
+            bucket('lun', 4),
+            bucket('mar', 0),
+            bucket('mer', 7),
+            bucket('jeu', 0),
+            bucket('ven', 3),
+          ]),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('lun'), findsOneWidget);
+        expect(find.text('mer'), findsOneWidget);
+        expect(find.text('ven'), findsOneWidget);
+        expect(find.text('mar'), findsNothing);
+        expect(find.text('jeu'), findsNothing);
+      });
+
+      testWidgets('le bucket EN COURS reste, même à zéro', (tester) async {
+        // Sinon la fenêtre « Aujourd'hui » peut ne plus contenir aujourd'hui,
+        // et le relief n'a plus de support.
+        await tester.pumpWidget(
+          paceOf([
+            bucket('lun', 4),
+            bucket('mar', 6),
+            bucket('mer', 3),
+            bucket('jeu', 0, current: true),
+          ]),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('jeu'), findsOneWidget);
+      });
+
+      testWidgets('sous trois barres, la fenêtre dense est rendue entière', (
+        tester,
+      ) async {
+        // Spec l.350 : « jamais moins de trois barres ». Une barre seule ne se
+        // lit pas comme un rythme.
+        await tester.pumpWidget(
+          paceOf([
+            bucket('lun', 0),
+            bucket('mar', 0),
+            bucket('mer', 0),
+            bucket('jeu', 0),
+            bucket('ven', 9, current: true),
+          ]),
+        );
+        await tester.pumpAndSettle();
+
+        for (final label in ['lun', 'mar', 'mer', 'jeu', 'ven']) {
+          expect(find.text(label), findsOneWidget);
+        }
+      });
+
+      testWidgets('tout à zéro : une phrase, pas un axe vide', (tester) async {
+        await tester.pumpWidget(
+          paceOf([
+            bucket('lun', 0),
+            bucket('mar', 0, current: true),
+            bucket('mer', 0),
+          ]),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.byType(CycleBarChart), findsNothing);
+        expect(find.text('lun'), findsNothing);
+      });
     });
   });
 
@@ -263,7 +325,10 @@ void main() {
         find.textContaining('50 % sur l\'effectif complet'),
         findsOneWidget,
       );
-      expect(find.text('du jour'), findsOneWidget);
+      // La fenêtre n'est écrite QU'UNE fois, dans l'indice — plus de
+      // sous-titre « du jour » qui la répéterait juste en dessous.
+      expect(find.text('du jour'), findsNothing);
+      expect(find.text('Sur les 4 inscrits du jour'), findsOneWidget);
     });
 
     testWidgets('les pré-inscriptions sont exclues du bloc « par type »', (
@@ -282,6 +347,62 @@ void main() {
       expect(find.text('Première inscription'), findsOneWidget);
       expect(find.text('Réinscription'), findsOneWidget);
       expect(find.textContaining('Pré-inscription'), findsNothing);
+    });
+
+    testWidgets('l\'indice dit sur COMBIEN d\'inscrits la barre répartit', (
+      tester,
+    ) async {
+      // « 50 % de filles » sur quatre inscriptions ne se lit pas comme sur
+      // quatre cents : l'indice donne le dénominateur.
+      await tester.pumpWidget(
+        _host(
+          EnrollmentGenderSection(
+            windowDistribution: _gender(female: 7, male: 7),
+            headcount: _gender(female: 182, male: 181),
+            isSingleDay: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sur les 14 inscrits du jour'), findsOneWidget);
+    });
+
+    testWidgets('l\'indice suit la fenêtre, jour ou période', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          EnrollmentGenderSection(
+            windowDistribution: _gender(female: 3, male: 1),
+            headcount: _gender(female: 182, male: 181),
+            isSingleDay: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sur les 4 inscrits de la période'), findsOneWidget);
+    });
+
+    testWidgets('« par type » dit ce que la barre oppose', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          EnrollmentTypeSection(
+            kpis: _kpis(total: 10, first: 6, re: 4, pre: 7),
+            isSingleDay: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Extérieur contre cohorte déjà scolarisée'),
+        findsOneWidget,
+      );
+      // La note de la spec, mot pour mot.
+      expect(
+        find.textContaining('Seules les premières inscriptions font croître'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -385,6 +506,77 @@ void main() {
 
       await tester.tap(find.text('1re année'));
       expect(tapped?.id, 'lvl-0');
+    });
+
+    testWidgets('un cycle garde la MÊME teinte sur les deux cartes', (
+      tester,
+    ) async {
+      // ⚠️ Le contrat ne met pas la même chose dans les deux champs : un
+      // niveau porte le NOM de son cycle (`LevelStatDto` ← `group.name()`),
+      // la carte « Par cycle » porte son CODE (`group.code()`). Colorer les
+      // deux cartes sur ces deux chaînes donnait au même cycle deux teintes
+      // différentes dès que code ≠ nom — c'est-à-dire le cas normal.
+      //
+      // La fixture le reproduit exprès : code « PRIM » (qui ne matche aucun
+      // alias et part au repli), nom « Primaire » (qui matche).
+      const distribution = CycleDistribution(
+        cycles: [
+          CycleStat(
+            code: 'PRIM',
+            label: 'Primaire',
+            total: 30,
+            levels: [
+              LevelStat(
+                id: 'p1',
+                code: 'P1',
+                label: '1re année',
+                cycle: 'Primaire',
+                value: 30,
+              ),
+            ],
+          ),
+          CycleStat(
+            code: 'SEC',
+            label: 'Secondaire',
+            total: 12,
+            levels: [
+              LevelStat(
+                id: 's1',
+                code: 'S1',
+                label: '1re secondaire',
+                cycle: 'Secondaire',
+                value: 12,
+              ),
+            ],
+          ),
+        ],
+      );
+
+      Map<String, Color> colorsOf(WidgetTester tester) => {
+        for (final row
+            in tester.widget<EteeloBarRows>(find.byType(EteeloBarRows)).rows)
+          row.label: row.color,
+      };
+
+      await tester.pumpWidget(
+        _host(
+          const EnrollmentLevelSection(
+            distribution: distribution,
+            isSingleDay: false,
+          ),
+        ),
+      );
+      final byLevel = colorsOf(tester);
+
+      await tester.pumpWidget(
+        _host(const EnrollmentCycleSection(distribution: distribution)),
+      );
+      final byCycle = colorsOf(tester);
+
+      expect(byLevel['1re année'], byCycle['Primaire']);
+      expect(byLevel['1re secondaire'], byCycle['Secondaire']);
+      // Et deux cycles distincts ne se confondent pas pour autant.
+      expect(byCycle['Primaire'], isNot(byCycle['Secondaire']));
     });
   });
 

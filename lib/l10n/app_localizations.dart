@@ -13980,6 +13980,12 @@ abstract class AppLocalizations {
   /// **'Enrolment pace'**
   String get enrollmentDashboardPaceTitle;
 
+  /// No description provided for @enrollmentDashboardPaceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrolment in this window.'**
+  String get enrollmentDashboardPaceEmpty;
+
   /// No description provided for @enrollmentDashboardPaceA11yLabel.
   ///
   /// In en, this message translates to:
@@ -14027,6 +14033,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get enrollmentDashboardGenderOther;
+
+  /// No description provided for @enrollmentDashboardNothingToSplitInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file is in progress} other{{count} files are in progress}}: no enrolment is finalised in this window yet, so there is nothing to split.'**
+  String enrollmentDashboardNothingToSplitInProgress(int count);
+
+  /// No description provided for @enrollmentDashboardNothingToSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'No finalised enrolment in this window: there is nothing to split.'**
+  String get enrollmentDashboardNothingToSplit;
+
+  /// No description provided for @enrollmentDashboardGenderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No enrolment {scope}} =1{Out of the single enrolment {scope}} other{Out of the {count} enrolments {scope}}}'**
+  String enrollmentDashboardGenderHint(int count, String scope);
+
+  /// No description provided for @enrollmentDashboardTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Newcomers versus the cohort already enrolled'**
+  String get enrollmentDashboardTypeHint;
 
   /// No description provided for @enrollmentDashboardGenderNote.
   ///
@@ -14284,6 +14314,22 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy the day\'s list as CSV'**
   String get enrollmentDashboardExportCsvTooltip;
+
+  /// No description provided for @enrollmentDashboardDayPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {schoolYear} · {day}'**
+  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day);
+
+  /// No description provided for @enrollmentDashboardDayPdfFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}'**
+  String enrollmentDashboardDayPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  );
 
   /// No description provided for @enrollmentDashboardPdfOvertitle.
   ///

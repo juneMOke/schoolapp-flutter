@@ -4923,6 +4923,7 @@
   "enrollmentDashboardKpiNoOnlineRequest": "Aucune demande en ligne à traiter",
   "enrollmentDashboardKpiNote": "Une pré-inscription validée devient une première inscription à la date de validation.",
   "enrollmentDashboardPaceTitle": "Rythme d'inscription",
+  "enrollmentDashboardPaceEmpty": "Aucune inscription sur cette fenêtre.",
   "enrollmentDashboardPaceA11yLabel": "Rythme d'inscription, {count} barres",
   "@enrollmentDashboardPaceA11yLabel": {
     "placeholders": {
@@ -4945,6 +4946,27 @@
   "enrollmentDashboardGenderGirls": "Filles",
   "enrollmentDashboardGenderBoys": "Garçons",
   "enrollmentDashboardGenderOther": "Autre",
+  "enrollmentDashboardNothingToSplitInProgress": "{count, plural, =1{1 dossier est en cours} other{{count} dossiers sont en cours}} : aucune inscription n'est encore finalisée sur cette fenêtre, il n'y a donc rien à répartir pour l'instant.",
+  "@enrollmentDashboardNothingToSplitInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardNothingToSplit": "Aucune inscription finalisée sur cette fenêtre : il n'y a rien à répartir.",
+  "enrollmentDashboardGenderHint": "{count, plural, =0{Aucun inscrit {scope}} =1{Sur l'unique inscrit {scope}} other{Sur les {count} inscrits {scope}}}",
+  "@enrollmentDashboardGenderHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardTypeHint": "Extérieur contre cohorte déjà scolarisée",
   "enrollmentDashboardGenderNote": "{windowShare} % de filles sur la fenêtre, {totalShare} % sur l'effectif complet. Le second chiffre évite de surinterpréter un petit échantillon.",
   "@enrollmentDashboardGenderNote": {
     "placeholders": {
@@ -5072,6 +5094,31 @@
   "enrollmentDashboardExportCsv": "CSV",
   "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
   "enrollmentDashboardExportCsvTooltip": "Copier la liste du jour au format CSV",
+  "enrollmentDashboardDayPdfSubtitle": "Année scolaire {schoolYear} · {day}",
+  "@enrollmentDashboardDayPdfSubtitle": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 inscription} other{{rowCount} inscriptions}} · année scolaire {schoolYear} · généré le {generatedOn}",
+  "@enrollmentDashboardDayPdfFooter": {
+    "placeholders": {
+      "rowCount": {
+        "type": "int"
+      },
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",
   "enrollmentDashboardPdfTitle": "Répartition par niveau",
   "enrollmentDashboardPdfSubtitle": "Année scolaire {schoolYear} · au {generatedOn}",

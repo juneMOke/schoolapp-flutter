@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_cycle_palette.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_who_sections.dart';
@@ -47,29 +46,39 @@ class EnrollmentLevelSection extends StatelessWidget {
   /// Exposé plutôt que recalculé de l'autre côté : un export qui re-trierait
   /// ou re-filtrerait serait un second écran à tenir d'accord avec le premier,
   /// et ils divergeraient au premier changement de règle.
-  static List<LevelStat> levelsOf(CycleDistribution distribution) =>
-      EnrollmentLevelSection(
-        distribution: distribution,
-        isSingleDay: false,
-      )._levels;
+  static List<LevelStat> levelsOf(CycleDistribution distribution) => [
+    for (final ranked in EnrollmentLevelSection(
+      distribution: distribution,
+      isSingleDay: false,
+    )._rankedLevels)
+      ranked.level,
+  ];
 
   /// Les niveaux qui ont reçu au moins une inscription, du plus gros au plus
-  /// petit.
+  /// petit, **chacun avec le code de son cycle parent**.
+  ///
+  /// ⚠️ Le code du cycle est pris sur le cycle PARENT, jamais sur
+  /// `LevelStat.cycle`. Le contrat met dans ce champ le **nom** du cycle
+  /// (`LevelStatDto` ← `group.name()`), alors que la carte « Par cycle » est
+  /// clé sur son **code** (`group.code()`). Colorer les deux cartes sur ces
+  /// deux chaînes donnait au même cycle deux teintes différentes — le défaut
+  /// de la palette indexée, déplacé d'un cran. Le cycle parent est sous la
+  /// main au moment d'aplatir : on prend sa clé, pas son libellé.
   ///
   /// **Tri stable** : à effectif égal, l'ordre reçu du serveur — l'ordre
   /// pédagogique — départage. `List.sort` de Dart ne garantit PAS la
   /// stabilité, donc l'index d'origine est comparé explicitement ; sans lui,
   /// deux niveaux ex æquo pourraient permuter d'un rendu à l'autre, ce qui se
   /// lirait comme un mouvement d'effectif.
-  List<LevelStat> get _levels {
-    final levels = [
+  List<({LevelStat level, String cycleCode})> get _rankedLevels {
+    final flat = [
       for (final cycle in distribution.cycles)
         for (final level in cycle.levels)
-          if (level.value > 0) level,
+          if (level.value > 0) (level: level, cycleCode: cycle.code),
     ];
-    final indexed = [for (var i = 0; i < levels.length; i++) (i, levels[i])]
+    final indexed = [for (var i = 0; i < flat.length; i++) (i, flat[i])]
       ..sort((a, b) {
-        final byValue = b.$2.value.compareTo(a.$2.value);
+        final byValue = b.$2.level.value.compareTo(a.$2.level.value);
         return byValue != 0 ? byValue : a.$1.compareTo(b.$1);
       });
     return [for (final entry in indexed) entry.$2];
@@ -78,11 +87,11 @@ class EnrollmentLevelSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final levels = _levels;
-    final cycleColors = _cycleColors();
+    final levels = _rankedLevels;
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardLevelTitle,
+      icon: Icons.layers_outlined,
       subtitle: l10n.enrollmentDashboardLevelSubtitle(
         isSingleDay
             ? l10n.enrollmentDashboardLevelToday
@@ -97,30 +106,21 @@ class EnrollmentLevelSection extends StatelessWidget {
           ? EnrollmentDashboardNote(text: l10n.enrollmentDashboardLevelEmpty)
           : EteeloBarRows(
               rows: [
-                for (final level in levels)
+                for (final ranked in levels)
                   EteeloBarRow(
-                    label: level.displayLabel,
-                    value: level.value,
+                    label: ranked.level.displayLabel,
+                    value: ranked.level.value,
                     valueLabel: l10n.enrollmentDashboardStudentsCount(
-                      level.value,
+                      ranked.level.value,
                     ),
-                    color: cycleColors[level.cycle] ?? AppColors.bleuArdoise,
-                    onTap: onLevelTap == null ? null : () => onLevelTap!(level),
+                    color: cycleColorForCode(ranked.cycleCode),
+                    onTap: onLevelTap == null
+                        ? null
+                        : () => onLevelTap!(ranked.level),
                   ),
               ],
             ),
     );
-  }
-
-  /// Une teinte par cycle, stable d'une fenêtre à l'autre.
-  ///
-  /// La couleur est décorative : chaque ligne écrit déjà son niveau et son
-  /// effectif. Elle sert seulement à regrouper l'œil par cycle.
-  Map<String, Color> _cycleColors() {
-    final codes = distribution.cycles.map((c) => c.code).toList();
-    return {
-      for (var i = 0; i < codes.length; i++) codes[i]: cyclePaletteColor(i),
-    };
   }
 }
 
@@ -151,6 +151,7 @@ class EnrollmentCycleSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardCycleTitle,
+      icon: Icons.school_outlined,
       child: cycles.isEmpty
           ? EnrollmentDashboardNote(text: l10n.enrollmentDashboardLevelEmpty)
           : EteeloBarRows(
@@ -162,7 +163,7 @@ class EnrollmentCycleSection extends StatelessWidget {
                     valueLabel: l10n.enrollmentDashboardStudentsCount(
                       cycles[i].total,
                     ),
-                    color: cyclePaletteColor(i),
+                    color: cycleColorForCode(cycles[i].code),
                   ),
               ],
             ),

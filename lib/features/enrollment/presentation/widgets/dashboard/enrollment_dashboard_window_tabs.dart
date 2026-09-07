@@ -43,27 +43,27 @@ class EnrollmentDashboardWindowTabs extends StatelessWidget {
                 _option(
                   l10n.enrollmentDashboardWindowDay,
                   EnrollmentStatsWindowKind.day,
-                  Icons.today_rounded,
+                  Icons.schedule_outlined,
                 ),
                 _option(
                   l10n.enrollmentDashboardWindowWeek,
                   EnrollmentStatsWindowKind.week,
-                  Icons.view_week_rounded,
+                  Icons.calendar_today_outlined,
                 ),
                 _option(
                   l10n.enrollmentDashboardWindowMonth,
                   EnrollmentStatsWindowKind.month,
-                  Icons.calendar_month_rounded,
+                  Icons.event_note_outlined,
                 ),
                 _option(
                   l10n.enrollmentDashboardWindowYear,
                   EnrollmentStatsWindowKind.year,
-                  Icons.event_note_rounded,
+                  Icons.history_outlined,
                 ),
                 _option(
                   l10n.enrollmentDashboardWindowCustom,
                   EnrollmentStatsWindowKind.custom,
-                  Icons.date_range_rounded,
+                  Icons.filter_alt_outlined,
                 ),
               ],
             ),
@@ -81,6 +81,14 @@ class EnrollmentDashboardWindowTabs extends StatelessWidget {
     );
   }
 
+  /// Un onglet, son libellé et **son glyphe**.
+  ///
+  /// Les cinq glyphes sont ceux de la spec, et ils sont volontairement de
+  /// familles différentes : horloge, calendrier nu, calendrier réglé,
+  /// historique, entonnoir. La version précédente prenait cinq variantes de
+  /// calendrier (`today`, `view_week`, `calendar_month`, `event_note`,
+  /// `date_range`) — présentes, mais indistinguables à 16 dp, ce qui revenait
+  /// à n'en avoir aucune.
   SegmentedTabOption<EnrollmentStatsWindowKind> _option(
     String label,
     EnrollmentStatsWindowKind value,

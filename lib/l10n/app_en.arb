@@ -4967,6 +4967,7 @@
   "enrollmentDashboardKpiNoOnlineRequest": "No online request to handle",
   "enrollmentDashboardKpiNote": "A validated pre-enrolment becomes a first enrolment on its validation date.",
   "enrollmentDashboardPaceTitle": "Enrolment pace",
+  "enrollmentDashboardPaceEmpty": "No enrolment in this window.",
   "enrollmentDashboardPaceA11yLabel": "Enrolment pace, {count} bars",
   "@enrollmentDashboardPaceA11yLabel": {
     "placeholders": {
@@ -4989,6 +4990,27 @@
   "enrollmentDashboardGenderGirls": "Girls",
   "enrollmentDashboardGenderBoys": "Boys",
   "enrollmentDashboardGenderOther": "Other",
+  "enrollmentDashboardNothingToSplitInProgress": "{count, plural, =1{1 file is in progress} other{{count} files are in progress}}: no enrolment is finalised in this window yet, so there is nothing to split.",
+  "@enrollmentDashboardNothingToSplitInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardNothingToSplit": "No finalised enrolment in this window: there is nothing to split.",
+  "enrollmentDashboardGenderHint": "{count, plural, =0{No enrolment {scope}} =1{Out of the single enrolment {scope}} other{Out of the {count} enrolments {scope}}}",
+  "@enrollmentDashboardGenderHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardTypeHint": "Newcomers versus the cohort already enrolled",
   "enrollmentDashboardGenderNote": "{windowShare}% girls in this window, {totalShare}% across the whole headcount. The second figure guards against over-reading a small sample.",
   "@enrollmentDashboardGenderNote": {
     "placeholders": {
@@ -5116,6 +5138,31 @@
   "enrollmentDashboardExportCsv": "CSV",
   "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
   "enrollmentDashboardExportCsvTooltip": "Copy the day's list as CSV",
+  "enrollmentDashboardDayPdfSubtitle": "School year {schoolYear} · {day}",
+  "@enrollmentDashboardDayPdfSubtitle": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}",
+  "@enrollmentDashboardDayPdfFooter": {
+    "placeholders": {
+      "rowCount": {
+        "type": "int"
+      },
+      "schoolYear": {
+        "type": "String"
+      },
+      "generatedOn": {
+        "type": "String"
+      }
+    }
+  },
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Enrolments",
   "enrollmentDashboardPdfTitle": "Breakdown by level",
   "enrollmentDashboardPdfSubtitle": "School year {schoolYear} · as of {generatedOn}",

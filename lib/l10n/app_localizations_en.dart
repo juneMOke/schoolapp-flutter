@@ -8604,6 +8604,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentDashboardPaceTitle => 'Enrolment pace';
 
   @override
+  String get enrollmentDashboardPaceEmpty => 'No enrolment in this window.';
+
+  @override
   String enrollmentDashboardPaceA11yLabel(int count) {
     return 'Enrolment pace, $count bars';
   }
@@ -8637,6 +8640,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentDashboardGenderOther => 'Other';
+
+  @override
+  String enrollmentDashboardNothingToSplitInProgress(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files are in progress',
+      one: '1 file is in progress',
+    );
+    return '$_temp0: no enrolment is finalised in this window yet, so there is nothing to split.';
+  }
+
+  @override
+  String get enrollmentDashboardNothingToSplit =>
+      'No finalised enrolment in this window: there is nothing to split.';
+
+  @override
+  String enrollmentDashboardGenderHint(int count, String scope) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Out of the $count enrolments $scope',
+      one: 'Out of the single enrolment $scope',
+      zero: 'No enrolment $scope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardTypeHint =>
+      'Newcomers versus the cohort already enrolled';
 
   @override
   String enrollmentDashboardGenderNote(int windowShare, int totalShare) {
@@ -8813,6 +8847,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentDashboardExportCsvTooltip =>
       'Copy the day\'s list as CSV';
+
+  @override
+  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day) {
+    return 'School year $schoolYear · $day';
+  }
+
+  @override
+  String enrollmentDashboardDayPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rowCount,
+      locale: localeName,
+      other: '$rowCount enrolments',
+      one: '1 enrolment',
+    );
+    return '$_temp0 · school year $schoolYear · generated on $generatedOn';
+  }
 
   @override
   String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Enrolments';

@@ -8685,6 +8685,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentDashboardPaceTitle => 'Rythme d\'inscription';
 
   @override
+  String get enrollmentDashboardPaceEmpty =>
+      'Aucune inscription sur cette fenêtre.';
+
+  @override
   String enrollmentDashboardPaceA11yLabel(int count) {
     return 'Rythme d\'inscription, $count barres';
   }
@@ -8718,6 +8722,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentDashboardGenderOther => 'Autre';
+
+  @override
+  String enrollmentDashboardNothingToSplitInProgress(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dossiers sont en cours',
+      one: '1 dossier est en cours',
+    );
+    return '$_temp0 : aucune inscription n\'est encore finalisée sur cette fenêtre, il n\'y a donc rien à répartir pour l\'instant.';
+  }
+
+  @override
+  String get enrollmentDashboardNothingToSplit =>
+      'Aucune inscription finalisée sur cette fenêtre : il n\'y a rien à répartir.';
+
+  @override
+  String enrollmentDashboardGenderHint(int count, String scope) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sur les $count inscrits $scope',
+      one: 'Sur l\'unique inscrit $scope',
+      zero: 'Aucun inscrit $scope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardTypeHint =>
+      'Extérieur contre cohorte déjà scolarisée';
 
   @override
   String enrollmentDashboardGenderNote(int windowShare, int totalShare) {
@@ -8897,6 +8932,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardExportCsvTooltip =>
       'Copier la liste du jour au format CSV';
+
+  @override
+  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day) {
+    return 'Année scolaire $schoolYear · $day';
+  }
+
+  @override
+  String enrollmentDashboardDayPdfFooter(
+    int rowCount,
+    String schoolYear,
+    String generatedOn,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rowCount,
+      locale: localeName,
+      other: '$rowCount inscriptions',
+      one: '1 inscription',
+    );
+    return '$_temp0 · année scolaire $schoolYear · généré le $generatedOn';
+  }
 
   @override
   String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Inscriptions';
