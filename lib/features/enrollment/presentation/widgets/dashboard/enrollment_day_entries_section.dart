@@ -43,7 +43,21 @@ class EnrollmentDayEntriesSection extends StatelessWidget {
   /// Ouvre le dossier d'un élève.
   final void Function(DayEnrollmentEntry entry)? onEntryTap;
 
-  const EnrollmentDayEntriesSection({super.key, this.onEntryTap});
+  /// Année scolaire et instant de lecture — le pied des exports les porte,
+  /// pour qu'une feuille imprimée dise toujours de quoi elle parle.
+  ///
+  /// `null` retire le bouton PDF : sans année ni date, le document ne pourrait
+  /// pas se légender, et une feuille nominative sans périmètre est pire
+  /// qu'absente.
+  final String? schoolYear;
+  final DateTime? generatedAt;
+
+  const EnrollmentDayEntriesSection({
+    super.key,
+    this.onEntryTap,
+    this.schoolYear,
+    this.generatedAt,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +85,14 @@ class EnrollmentDayEntriesSection extends StatelessWidget {
               state.status == EnrollmentDayEntriesStatus.success &&
                   state.day != null
               ? [
+                  if (schoolYear != null && generatedAt != null)
+                    EnrollmentExportActions.dayEntriesPdf(
+                      context: context,
+                      entries: state.entries,
+                      day: state.day!,
+                      schoolYear: schoolYear!,
+                      generatedAt: generatedAt!,
+                    ),
                   EnrollmentExportActions.dayEntriesCsv(
                     context: context,
                     entries: state.entries,

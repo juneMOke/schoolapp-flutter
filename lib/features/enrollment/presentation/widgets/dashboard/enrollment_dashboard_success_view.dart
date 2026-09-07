@@ -135,7 +135,11 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingL),
           EteeloEntrance(
             index: 5,
-            child: EnrollmentDayEntriesSection(onEntryTap: onDayEntryTap),
+            child: EnrollmentDayEntriesSection(
+              onEntryTap: onDayEntryTap,
+              schoolYear: stats.context.schoolYear,
+              generatedAt: stats.context.generatedAt,
+            ),
           ),
         ],
         const SizedBox(height: AppDimensions.spacingL),

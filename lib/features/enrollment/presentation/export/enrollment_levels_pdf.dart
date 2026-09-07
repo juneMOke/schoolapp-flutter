@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/export/enrollment_pdf_kit.dart';
 
 /// Le classement par niveau, en A4.
 ///
@@ -28,15 +28,6 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 /// personne ne lit typographiquement. `times` est intégrée au format,
 /// couvre les accents français, et ne demande aucun chargement.
 abstract final class EnrollmentLevelsPdf {
-  /// Bleu ardoise du design system, en espace PDF.
-  static const PdfColor _accent = PdfColor.fromInt(0xFF1B4D6B);
-  static const PdfColor _muted = PdfColor.fromInt(0xFF5C5852);
-  static const PdfColor _zebra = PdfColor.fromInt(0xFFF4F1EA);
-
-  static const double _titleSize = 24;
-  static const double _overtitleSize = 8;
-  static const double _bodySize = 10;
-
   /// Compose le document.
   ///
   /// [levels] arrive **déjà trié et filtré** par l'écran : le PDF montre
@@ -53,62 +44,22 @@ abstract final class EnrollmentLevelsPdf {
 
     document.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4.copyWith(
-          marginTop: 16 * PdfPageFormat.mm,
-          marginBottom: 16 * PdfPageFormat.mm,
-          marginLeft: 14 * PdfPageFormat.mm,
-          marginRight: 14 * PdfPageFormat.mm,
-        ),
+        pageFormat: EnrollmentPdfKit.pageFormat,
         header: (context) => context.pageNumber == 1
-            ? _header(schoolYear, generatedOn, labels)
+            ? EnrollmentPdfKit.header(
+                overtitle: labels.overtitle,
+                title: labels.title,
+                subtitle: labels.subtitle(schoolYear, generatedOn),
+              )
             : pw.SizedBox(),
-        footer: (context) =>
-            _footer(levels.length, schoolYear, generatedOn, labels),
+        footer: (context) => EnrollmentPdfKit.footer(
+          labels.footer(levels.length, schoolYear, generatedOn),
+        ),
         build: (context) => [_table(levels, labels)],
       ),
     );
 
     return document.save();
-  }
-
-  static pw.Widget _header(
-    String schoolYear,
-    String generatedOn,
-    PdfLevelsLabels labels,
-  ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          labels.overtitle.toUpperCase(),
-          style: pw.TextStyle(
-            font: pw.Font.helvetica(),
-            fontSize: _overtitleSize,
-            letterSpacing: 1,
-            color: _accent,
-          ),
-        ),
-        pw.SizedBox(height: 4),
-        pw.Text(
-          labels.title,
-          style: pw.TextStyle(
-            font: pw.Font.timesBold(),
-            fontSize: _titleSize,
-            color: _accent,
-          ),
-        ),
-        pw.SizedBox(height: 2),
-        pw.Text(
-          labels.subtitle(schoolYear, generatedOn),
-          style: pw.TextStyle(
-            font: pw.Font.helvetica(),
-            fontSize: _bodySize,
-            color: _muted,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-      ],
-    );
   }
 
   static pw.Widget _table(List<LevelStat> levels, PdfLevelsLabels labels) {
@@ -123,78 +74,23 @@ abstract final class EnrollmentLevelsPdf {
         // et blanc d'une imprimante de bureau, un aplat se lit comme une ligne
         // de données grisée.
         pw.TableRow(
-          decoration: const pw.BoxDecoration(
-            border: pw.Border(
-              bottom: pw.BorderSide(color: _accent, width: 1.5),
-            ),
-          ),
+          decoration: EnrollmentPdfKit.headerRowDecoration,
           children: [
-            _headerCell(labels.columnLevel),
-            _headerCell(labels.columnCycle),
-            _headerCell(labels.columnCount, alignRight: true),
+            EnrollmentPdfKit.headerCell(labels.columnLevel),
+            EnrollmentPdfKit.headerCell(labels.columnCycle),
+            EnrollmentPdfKit.headerCell(labels.columnCount, alignRight: true),
           ],
         ),
         for (var i = 0; i < levels.length; i++)
           pw.TableRow(
-            decoration: i.isOdd ? const pw.BoxDecoration(color: _zebra) : null,
+            decoration: EnrollmentPdfKit.rowDecoration(i),
             children: [
-              _cell(levels[i].displayLabel),
-              _cell(levels[i].cycle),
-              _cell('${levels[i].value}', alignRight: true),
+              EnrollmentPdfKit.cell(levels[i].displayLabel),
+              EnrollmentPdfKit.cell(levels[i].cycle),
+              EnrollmentPdfKit.cell('${levels[i].value}', alignRight: true),
             ],
           ),
       ],
-    );
-  }
-
-  static pw.Widget _headerCell(String text, {bool alignRight = false}) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-      child: pw.Text(
-        text,
-        textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
-        style: pw.TextStyle(
-          font: pw.Font.helveticaBold(),
-          fontSize: _bodySize,
-          color: _accent,
-        ),
-      ),
-    );
-  }
-
-  static pw.Widget _cell(String text, {bool alignRight = false}) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-      child: pw.Text(
-        text,
-        textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
-        style: pw.TextStyle(font: pw.Font.helvetica(), fontSize: _bodySize),
-      ),
-    );
-  }
-
-  /// Nombre de lignes, année scolaire, date de génération.
-  ///
-  /// Le pied porte le **périmètre** du document : sans lui, une feuille
-  /// imprimée puis posée sur un bureau ne dit plus de quelle année ni de quel
-  /// jour elle parle, et deux exports d'années différentes deviennent
-  /// indiscernables.
-  static pw.Widget _footer(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-    PdfLevelsLabels labels,
-  ) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 8),
-      child: pw.Text(
-        labels.footer(rowCount, schoolYear, generatedOn),
-        style: pw.TextStyle(
-          font: pw.Font.helvetica(),
-          fontSize: 8,
-          color: _muted,
-        ),
-      ),
     );
   }
 }

@@ -40,6 +40,8 @@ Future<void> _pump(
   WidgetTester tester,
   EnrollmentDayEntriesState state, {
   double width = 1000,
+  String? schoolYear = '2026-2027',
+  DateTime? generatedAt,
 }) async {
   final bloc = _MockBloc();
   whenListen(
@@ -64,7 +66,10 @@ Future<void> _pump(
             width: width,
             child: BlocProvider<EnrollmentDayEntriesBloc>.value(
               value: bloc,
-              child: const EnrollmentDayEntriesSection(),
+              child: EnrollmentDayEntriesSection(
+                schoolYear: schoolYear,
+                generatedAt: generatedAt ?? DateTime(2026, 9, 5),
+              ),
             ),
           ),
         ),
@@ -84,6 +89,33 @@ EnrollmentDayEntriesState _loaded(List<DayEnrollmentEntry> entries) =>
     );
 
 void main() {
+  group('exports de la carte du jour', () {
+    testWidgets('la carte porte SES DEUX boutons, PDF et CSV', (tester) async {
+      await _pump(tester, _loaded([_entry()]));
+
+      expect(find.text('PDF'), findsOneWidget);
+      expect(find.text('CSV'), findsOneWidget);
+    });
+
+    testWidgets('les deux glyphes restent distincts', (tester) async {
+      // Le porteur produit veut le glyphe de téléchargement sur le PDF ; le
+      // CSV garde son tableur. Deux glyphes identiques auraient refait
+      // l'erreur des cinq calendriers des onglets de période.
+      await _pump(tester, _loaded([_entry()]));
+
+      expect(find.byIcon(Icons.download_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.table_view_outlined), findsOneWidget);
+    });
+
+    testWidgets('sans année scolaire, le PDF ne s\'offre pas', (tester) async {
+      // Le pied du document porte le périmètre : une feuille nominative sans
+      // année ni date ne dit plus de quoi elle parle.
+      await _pump(tester, _loaded([_entry()]), schoolYear: null);
+
+      expect(find.text('PDF'), findsNothing);
+      expect(find.text('CSV'), findsOneWidget);
+    });
+  });
   testWidgets('le sexe est ÉCRIT, jamais porté par la seule couleur', (
     tester,
   ) async {
