@@ -48,6 +48,61 @@ const _boys = EteeloSplitBarSegment(
 );
 
 void main() {
+  testWidgets('un segment occupe TOUTE la hauteur de la barre', (tester) async {
+    // Régression : les segments sont des `ColoredBox` SANS enfant, posés dans
+    // un Row dont le `crossAxisAlignment` valait `center` par défaut. Un Row
+    // donne alors à ses enfants des contraintes transversales LÂCHES, et une
+    // `ColoredBox` sans enfant s'y effondre à zéro de haut. La barre affichait
+    // donc sa piste grise avec des segments larges mais invisibles — pendant
+    // que la légende, elle, écrivait ses valeurs.
+    //
+    // Le test mesure la HAUTEUR : mesurer la seule largeur laissait passer le
+    // défaut, puisque l'`Expanded` donne bien sa largeur au segment.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 600,
+            child: EteeloSplitBar(
+              segments: [
+                EteeloSplitBarSegment(
+                  label: 'Filles',
+                  valueLabel: '7 élèves',
+                  value: 7,
+                  color: Color(0xFF9D174D),
+                ),
+                EteeloSplitBarSegment(
+                  label: 'Garçons',
+                  valueLabel: '7 élèves',
+                  value: 7,
+                  color: Color(0xFF1B4D6B),
+                ),
+              ],
+              semanticsLabel: 'répartition',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final track = tester.getSize(
+      find.byWidgetPredicate(
+        (w) => w is ColoredBox && w.color == AppColors.surfaceAlt,
+      ),
+    );
+    for (final color in [const Color(0xFF9D174D), const Color(0xFF1B4D6B)]) {
+      final size = tester.getSize(
+        find.byWidgetPredicate((w) => w is ColoredBox && w.color == color),
+      );
+      expect(
+        size.height,
+        track.height,
+        reason: 'un segment invisible est une barre vide',
+      );
+      expect(size.width, greaterThan(0));
+    }
+  });
   testWidgets('la légende écrit chaque libellé ET sa valeur', (tester) async {
     await _pump(tester, const [_girls, _boys]);
 

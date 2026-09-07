@@ -104,6 +104,15 @@ class EteeloSplitBar extends StatelessWidget {
             height: height,
             width: double.infinity,
             child: Row(
+              // ⚠️ `stretch`, et ce n'est pas cosmétique : les segments sont
+              // des `ColoredBox` SANS enfant. Sous l'alignement par défaut
+              // (`center`), un Row donne à ses enfants des contraintes
+              // transversales lâches, et une boîte sans enfant s'y effondre à
+              // zéro de haut. La barre affichait alors sa piste grise avec des
+              // segments à la bonne largeur mais invisibles — pendant que la
+              // légende, elle, écrivait ses valeurs. D'où « la barre est
+              // vide » avec des chiffres justes juste en dessous.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (var i = 0; i < segments.length; i++)
                   if (flexes[i] > 0)

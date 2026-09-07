@@ -70,7 +70,15 @@ EnrollmentKpis _kpis({
   inProgress: KpiValue(value: inProgress),
 );
 
-/// Largeur peinte du segment de couleur [color].
+/// Largeur peinte du segment de couleur [color], **après avoir vérifié qu'il
+/// est visible**.
+///
+/// ⚠️ La hauteur est contrôlée ici, et c'est la leçon d'un défaut réel : une
+/// première version de ces tests ne mesurait que la largeur. Les segments
+/// avaient bien leur largeur — l'`Expanded` la leur donnait — mais une hauteur
+/// NULLE, parce qu'une `ColoredBox` sans enfant s'effondre sous les
+/// contraintes lâches d'un Row centré. Les tests étaient verts et la barre
+/// était invisible à l'écran. Mesurer une largeur ne prouve pas qu'on peint.
 ///
 /// La pastille de légende porte la même teinte mais dans un `Container`
 /// décoré ; seul le segment de la barre est un `ColoredBox`. C'est donc bien
@@ -80,7 +88,13 @@ double _segmentWidth(WidgetTester tester, Color color) {
     (widget) => widget is ColoredBox && widget.color == color,
   );
   expect(finder, findsOneWidget, reason: 'segment $color absent de la barre');
-  return tester.getSize(finder).width;
+  final size = tester.getSize(finder);
+  expect(
+    size.height,
+    greaterThan(0),
+    reason: 'segment $color de hauteur nulle : large, mais invisible',
+  );
+  return size.width;
 }
 
 void main() {
