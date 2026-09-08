@@ -68,6 +68,28 @@ Future<void> _pump(
   );
 }
 
+/// Une entrée de cache éditique, telle que les deux décisions la reçoivent.
+///
+/// Hissée au niveau du fichier : `facturationReceiptGesture` et
+/// `facturationTicketRowOffered` lisent la MÊME entrée et en tirent des
+/// conclusions opposées sur l'annulation. Deux fabriques divergeraient.
+EditiqueCacheEntry entry({
+  String? documentId = 'doc-1',
+  String? contentSha256 = 'abc',
+  int? cancelledAt,
+}) => EditiqueCacheEntry(
+  id: 'c-1',
+  documentId: documentId,
+  documentNumber: 'ETL-RC-2526-000212',
+  docType: 'RC',
+  schoolId: 'school-1',
+  sizeBytes: 1024,
+  contentSha256: contentSha256,
+  cancelledAt: cancelledAt,
+  createdAt: 1000,
+  lastAccessedAt: 1000,
+);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -315,28 +337,68 @@ void main() {
     });
   });
 
+  /// ## La seule garde qui reste sur le bouton d'impression
+  ///
+  /// Elles étaient cinq. Quatre sont tombées avec la réimpression libre :
+  /// l'appareil d'encaissement, le papier déjà sorti, la lisibilité de la
+  /// pièce hors du poste, la trace locale. Celle-ci porte désormais seule.
+  ///
+  /// Elle n'était exercée par aucun test — ni avant ni après —, ce qui est la
+  /// forme exacte de l'omission qu'on vient de corriger ailleurs : une règle
+  /// que le code affirme et que rien ne tient.
+  group('facturationTicketRowOffered', () {
+    test('un reçu retiré ferme le ticket', () {
+      // Ce qu'on empêche : remettre à une famille un papier qui atteste un
+      // versement que l'établissement a annulé.
+      expect(
+        facturationTicketRowOffered(cached: entry(cancelledAt: 1786013000000)),
+        isFalse,
+      );
+    });
+
+    /// Le pendant du cas trouvé par la revue adversariale sur le geste de
+    /// téléchargement : l'annulation se lit sur la SEULE date, jamais déduite
+    /// de l'absence d'octets. Une pièce annulée dont l'éviction a emporté les
+    /// octets reste annulée.
+    test('un reçu retiré dont les octets sont partis reste fermé', () {
+      expect(
+        facturationTicketRowOffered(
+          cached: entry(contentSha256: null, cancelledAt: 1786013000000),
+        ),
+        isFalse,
+      );
+    });
+
+    test('un reçu en vigueur laisse le ticket ouvert', () {
+      expect(facturationTicketRowOffered(cached: entry()), isTrue);
+    });
+
+    /// ⚠️ Le défaut, et le sens compte. Aucune entrée en cache est le cas
+    /// ORDINAIRE hors ligne : rien n'a encore été appris du serveur. Fermer
+    /// là fermerait le ticket exactement là où il est la seule pièce que la
+    /// famille puisse emporter.
+    test('aucune entrée connue laisse le ticket ouvert', () {
+      expect(facturationTicketRowOffered(cached: null), isTrue);
+    });
+
+    /// Une pièce sans octets et sans identifiant n'est pas une pièce
+    /// annulée : c'est une ligne apprise par le delta. La lire « annulée »
+    /// barrerait le ticket de tout un catalogue.
+    test('une pièce seulement connue du delta n est pas une annulation', () {
+      expect(
+        facturationTicketRowOffered(
+          cached: entry(documentId: null, contentSha256: null),
+        ),
+        isTrue,
+      );
+    });
+  });
+
   // Le geste que porte « Télécharger le reçu ». Éprouvé ici parce qu'une revue
   // adversariale a montré ce que coûtait la mauvaise garde — et parce que la
   // décision vivait jusque-là dans l'arbre de widgets, hors de portée de tout
   // test.
   group('facturationReceiptGesture', () {
-    EditiqueCacheEntry entry({
-      String? documentId = 'doc-1',
-      String? contentSha256 = 'abc',
-      int? cancelledAt,
-    }) => EditiqueCacheEntry(
-      id: 'c-1',
-      documentId: documentId,
-      documentNumber: 'ETL-RC-2526-000212',
-      docType: 'RC',
-      schoolId: 'school-1',
-      sizeBytes: 1024,
-      contentSha256: contentSha256,
-      cancelledAt: cancelledAt,
-      createdAt: 1000,
-      lastAccessedAt: 1000,
-    );
-
     test('restitue une copie détenue', () {
       expect(
         facturationReceiptGesture(cached: entry(), isPendingSync: false),

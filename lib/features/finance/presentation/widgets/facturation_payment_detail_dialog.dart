@@ -78,6 +78,41 @@ FacturationReceiptGesture facturationReceiptGesture({
   return FacturationReceiptGesture.emit;
 }
 
+/// La ligne d'impression du ticket est-elle offerte pour ce versement ?
+///
+/// **C'est désormais la SEULE garde sur ce bouton**, et c'est ce qui justifie
+/// qu'elle devienne une fonction pure plutôt qu'une clause dans un arbre de
+/// widgets — le même arbitrage que [facturationReceiptGesture], pour la même
+/// raison. Elles étaient cinq : quatre sont tombées avec la réimpression libre
+/// (l'appareil d'encaissement, le papier déjà sorti, la lisibilité de la pièce
+/// hors du poste, la trace locale). Reste celle-ci — et une garde unique
+/// qu'aucun test n'exerce est exactement ce qu'on cherche à ne plus laisser
+/// passer.
+///
+/// ## Ce qu'elle protège
+///
+/// Un reçu **retiré** qui ressortirait en ticket remettrait à une famille un
+/// papier attestant un versement que l'établissement a annulé. Le geste est
+/// librement répétable depuis ce lot : rien d'autre ne l'arrête.
+///
+/// ## Pourquoi elle dit l'inverse de [facturationReceiptGesture]
+///
+/// Celle-là **restitue** volontiers une pièce annulée — la relire est légitime,
+/// et c'est même ce qui évite de la resceller par mégarde. Produire un papier
+/// neuf qui atteste le versement ne l'est pas. Lire et attester ne sont pas le
+/// même acte, d'où deux règles opposées sur la même annulation.
+///
+/// ## Le défaut, et pourquoi il va dans ce sens
+///
+/// Pas d'entrée en cache — cas ORDINAIRE hors ligne, quand rien n'a encore été
+/// appris du serveur — vaut « non annulée », donc **offert**. C'est toute la
+/// raison d'être du ticket : un parent qui verse des espèces repart avec un
+/// papier, coupure réseau ou non. Le défaut inverse fermerait le geste
+/// précisément là où il est le plus nécessaire.
+@visibleForTesting
+bool facturationTicketRowOffered({required EditiqueCacheEntry? cached}) =>
+    !(cached?.isCancelled ?? false);
+
 /// Ouvre le détail d'un paiement en popin (spec §15).
 Future<void> showFacturationPaymentDetailDialog(
   BuildContext context, {
@@ -161,14 +196,16 @@ Future<void> showFacturationPaymentDetailDialog(
           },
           // UNE seule condition désormais, et c'est celle que seule la modale
           // connaît : un reçu retiré ne ressort jamais sous forme de ticket.
+          // Elle vit dans une fonction pure pour être éprouvable — la même
+          // raison qui avait sorti `facturationReceiptGesture` de l'arbre.
           //
-          // ⚠️ `ticket.wasPrinted` n'entre PAS ici. La réimpression est libre
-          // — c'est tout l'objet du lot —, et le cubit ne sert plus qu'à
-          // choisir les mots de la ligne. Le remettre en condition
-          // ressusciterait la grille qu'on vient de retirer.
-          ticketPrint: (receipt.cached?.isCancelled ?? false)
-              ? null
-              : FacturationTicketPrintRow(paymentId: intent.paymentId),
+          // ⚠️ `wasPrinted` n'entre PAS ici. La réimpression est libre — c'est
+          // tout l'objet du lot —, et le cubit ne sert plus qu'à choisir les
+          // mots de la ligne. Le remettre en condition ressusciterait la
+          // grille qu'on vient de retirer.
+          ticketPrint: facturationTicketRowOffered(cached: receipt.cached)
+              ? FacturationTicketPrintRow(paymentId: intent.paymentId)
+              : null,
         ),
       ),
     ),
