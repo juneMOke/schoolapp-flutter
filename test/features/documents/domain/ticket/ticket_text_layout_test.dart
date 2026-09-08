@@ -312,7 +312,7 @@ void main() {
     /// de ligne absolus : le bloc bouge dès qu'une ligne d'en-tête change, et
     /// un test qui compterait depuis le haut du papier casserait pour la
     /// mauvaise raison.
-    test('le bloc solde : blanche, filet, titre, détail, filet, total', () {
+    test('le bloc solde : filet, titre, détail, filet, total', () {
       final lines = TicketTextLayout.render(_biDevise(), columns: 48);
       final title = lines.indexWhere(
         (l) => l.startsWith('Solde restant au moment de l\'impression'),
@@ -320,9 +320,14 @@ void main() {
       final total = lines.indexWhere((l) => l.startsWith('Total'));
 
       expect(title, greaterThan(1));
-      // Le filet SÉPARE de la répartition, la blanche donne l'air au-dessus.
+      // Le filet SÉPARE de la répartition, et il le fait seul : la ligne
+      // blanche qui l'accompagnait séparait une seconde fois la même chose.
       expect(lines[title - 1], '-' * 48, reason: 'un filet ouvre le bloc');
-      expect(lines[title - 2], '', reason: 'une ligne blanche le précède');
+      expect(
+        lines[title - 2],
+        isNot(''),
+        reason: 'plus de ligne blanche au-dessus du filet',
+      );
       expect(total, greaterThan(title));
       expect(lines[total - 1], '-' * 48, reason: 'un filet coiffe le total');
 
@@ -438,6 +443,17 @@ void main() {
         // ⚠️ LA forme dangereuse. Le titre est ce qui sépare le filet
         // d'ouverture du bloc de celui qui coiffe le total ; vidé, il les
         // laisserait se toucher. Le gabarit pose les deux ensemble ou aucun.
+        // Sans répartition, le filet du solde suit directement le montant reçu.
+        'solde sans répartition': _model(
+          allocations: const [],
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
         'titre de solde vide': _model(
           labels: _labelsWithoutBalanceTitle,
           remainingByCharge: const [

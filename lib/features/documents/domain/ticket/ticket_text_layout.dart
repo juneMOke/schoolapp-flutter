@@ -225,15 +225,18 @@ abstract final class TicketTextLayout {
 
     final balance = model.remainingBalance;
     if (balance != null && balance.isNotEmpty) {
-      // Le solde est bâti comme la répartition — ligne blanche, titre, détail,
-      // filet, total : deux blocs de même nature doivent se lire de la même
-      // façon.
+      // Le solde est bâti comme la répartition — titre, détail, filet, total :
+      // deux blocs de même nature doivent se lire de la même façon.
       //
       // Le qualificatif de temps est passé DANS le titre. Il se lit ainsi
       // AVANT les chiffres au lieu de les suivre, et la réserve qui traînait
       // sous le total a disparu avec lui — la garder en plus l'aurait dit deux
       // fois.
-      lines.add('');
+      //
+      // ⚠️ Pas de ligne blanche au-dessus du filet. Elle ouvrait ce bloc du
+      // temps où RIEN ne l'en séparait ; depuis qu'un filet le fait, les deux
+      // séparent la même chose, et la blanche ne fait plus que coûter du
+      // papier.
 
       // Titre REPLIÉ, pas posé brut. « Solde restant au moment de
       // l'impression » fait 39 caractères : il tient à 48, et se replie
