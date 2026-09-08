@@ -26,3 +26,18 @@ class FinanceTillRequested extends FinanceTillEvent {
 class FinanceTillRefreshRequested extends FinanceTillEvent {
   const FinanceTillRefreshRequested();
 }
+
+/// Détailler une autre caisse.
+///
+/// **Ne rejoue aucun chargement** : les deux caisses arrivent dans la même
+/// réponse, et tout ce qui change est la moitié qu'on regarde. Rappeler le
+/// serveur pour un choix déjà en mémoire ferait clignoter un écran entier sur
+/// un geste qui n'a rien demandé de neuf.
+class FinanceTillCurrencySelected extends FinanceTillEvent {
+  final String currency;
+
+  const FinanceTillCurrencySelected(this.currency);
+
+  @override
+  List<Object?> get props => [currency];
+}

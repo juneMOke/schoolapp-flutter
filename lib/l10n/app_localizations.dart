@@ -10589,6 +10589,46 @@ abstract class AppLocalizations {
   /// **'across all tills'**
   String get financeTillReceiptsIssuedSubline;
 
+  /// No description provided for @financeTillDetailHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Till detail'**
+  String get financeTillDetailHeading;
+
+  /// No description provided for @financeTillCurrencySegment.
+  ///
+  /// In en, this message translates to:
+  /// **'{symbol} {currency} ({count})'**
+  String financeTillCurrencySegment(String symbol, String currency, int count);
+
+  /// No description provided for @financeTillCurrencySegmentA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till, {count} {unit}'**
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  );
+
+  /// No description provided for @financeTillCurrencySelectorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till shown: {currency}'**
+  String financeTillCurrencySelectorA11yLabel(String currency);
+
+  /// No description provided for @financeTillBucketsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily collections · {currency} till'**
+  String financeTillBucketsHeading(String currency);
+
+  /// No description provided for @financeTillBucketsWindowNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The tiles count the requested window; the series draws the seven surrounding days, so a day\'s figure reads against the ones before it.'**
+  String get financeTillBucketsWindowNote;
+
   /// No description provided for @financeTillReceiptsIssuedMixedNote.
   ///
   /// In en, this message translates to:

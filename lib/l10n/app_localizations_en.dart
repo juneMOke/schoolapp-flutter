@@ -6471,6 +6471,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeTillReceiptsIssuedSubline => 'across all tills';
 
   @override
+  String get financeTillDetailHeading => 'Till detail';
+
+  @override
+  String financeTillCurrencySegment(String symbol, String currency, int count) {
+    return '$symbol $currency ($count)';
+  }
+
+  @override
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  ) {
+    return '$currency till, $count $unit';
+  }
+
+  @override
+  String financeTillCurrencySelectorA11yLabel(String currency) {
+    return 'Till shown: $currency';
+  }
+
+  @override
+  String financeTillBucketsHeading(String currency) {
+    return 'Daily collections · $currency till';
+  }
+
+  @override
+  String get financeTillBucketsWindowNote =>
+      'The tiles count the requested window; the series draws the seven surrounding days, so a day\'s figure reads against the ones before it.';
+
+  @override
   String get financeTillReceiptsIssuedMixedNote =>
       'A receipt settled in both currencies counts in each till, but is issued only once.';
 

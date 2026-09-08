@@ -6539,6 +6539,37 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeTillReceiptsIssuedSubline => 'toutes caisses confondues';
 
   @override
+  String get financeTillDetailHeading => 'Détail de la caisse';
+
+  @override
+  String financeTillCurrencySegment(String symbol, String currency, int count) {
+    return '$symbol $currency ($count)';
+  }
+
+  @override
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  ) {
+    return 'Caisse $currency, $count $unit';
+  }
+
+  @override
+  String financeTillCurrencySelectorA11yLabel(String currency) {
+    return 'Caisse détaillée : $currency';
+  }
+
+  @override
+  String financeTillBucketsHeading(String currency) {
+    return 'Encaissements jour par jour · caisse $currency';
+  }
+
+  @override
+  String get financeTillBucketsWindowNote =>
+      'Les tuiles comptent la fenêtre demandée ; la série dessine les sept jours autour, pour qu\'un chiffre du jour se lise contre les précédents.';
+
+  @override
   String get financeTillReceiptsIssuedMixedNote =>
       'Un reçu réglé dans les deux devises compte dans chaque caisse, mais n\'est émis qu\'une fois.';
 

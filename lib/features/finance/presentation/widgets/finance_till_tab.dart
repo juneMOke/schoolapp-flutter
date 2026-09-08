@@ -39,7 +39,8 @@ class FinanceTillTab extends StatelessWidget {
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||
           prev.till != curr.till ||
-          prev.failure != curr.failure,
+          prev.failure != curr.failure ||
+          prev.selectedCurrency != curr.selectedCurrency,
       builder: (context, state) {
         return AnimatedSwitcher(
           duration: AppMotion.standard,
@@ -54,6 +55,10 @@ class FinanceTillTab extends StatelessWidget {
               ),
               FinanceTillStatus.success => FinanceTillSuccessView(
                 till: state.till!,
+                selectedBlock: state.selectedBlock,
+                onCurrencySelected: (currency) => context
+                    .read<FinanceTillBloc>()
+                    .add(FinanceTillCurrencySelected(currency)),
               ),
               FinanceTillStatus.error => FinanceStatsResultsErrorState(
                 failure:

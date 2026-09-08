@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
@@ -10,6 +9,8 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_imputation_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_freshness_caption.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce qui est entré dans le tiroir sur la fenêtre — **puis ce que ça a
@@ -29,11 +30,25 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FinanceTillSuccessView extends StatelessWidget {
   final FinanceTill till;
 
-  const FinanceTillSuccessView({super.key, required this.till});
+  /// La caisse détaillée sous les tuiles. `null` quand la réponse ne porte aucun
+  /// bloc — l'état vide global parle alors à sa place.
+  final TillCurrencyBlock? selectedBlock;
+
+  /// Le geste de bascule. Remonté plutôt que traité ici : la sélection vit dans
+  /// le BLoC, avec la réponse qu'elle découpe.
+  final ValueChanged<String> onCurrencySelected;
+
+  const FinanceTillSuccessView({
+    super.key,
+    required this.till,
+    required this.selectedBlock,
+    required this.onCurrencySelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final selected = selectedBlock;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,14 +76,30 @@ class FinanceTillSuccessView extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.spacingS),
           const FinanceTillFreshnessCaption(),
+          const SizedBox(height: AppDimensions.spacingXL),
+          // Tout ce qui suit décrit **une seule** caisse — d'où la coupure de
+          // lecture marquée, et un sélecteur qui se lit comme un titre.
+          FinanceTillCurrencySelector(
+            blocks: till.encaisse,
+            selectedCurrency: selected?.currency ?? '',
+            onSelected: onCurrencySelected,
+          ),
           const SizedBox(height: AppDimensions.spacingL),
-          for (final block in till.encaisse) ...[
-            if (till.encaisse.length > 1)
-              _CurrencyHeading(currency: block.currency, l10n: l10n),
-            if (block.hasNoMovement)
+          if (selected != null) ...[
+            if (selected.hasNoMovement)
               _CurrencyNoMovement(l10n: l10n)
             else
-              FinanceTillBucketsSection(buckets: block.buckets),
+              FinanceTillBucketsSection(
+                title: l10n.financeTillBucketsHeading(
+                  tillCurrencyName(selected.currency, l10n),
+                ),
+                buckets: selected.buckets,
+                // La série déborde la fenêtre comptée sur la journée seulement.
+                // La note vit à côté du graphique, là où l'écart se voit.
+                windowNote: till.context.period == 'day'
+                    ? l10n.financeTillBucketsWindowNote
+                    : null,
+              ),
             const SizedBox(height: AppDimensions.spacingXL),
           ],
           // La ventilation par poste n'est plus une colonne du bloc de devise
@@ -257,36 +288,6 @@ class _CurrencyNoMovement extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Nomme la devise du bloc qui suit — seulement à partir de deux.
-class _CurrencyHeading extends StatelessWidget {
-  final String currency;
-  final AppLocalizations l10n;
-
-  const _CurrencyHeading({required this.currency, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimensions.spacingS),
-      child: Semantics(
-        header: true,
-        child: Row(
-          children: [
-            Text(
-              l10n.financeStatsCurrencyHeading(MoneyFormat.symbolOf(currency)),
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            const Expanded(child: Divider(height: 1, color: AppColors.border)),
-          ],
         ),
       ),
     );

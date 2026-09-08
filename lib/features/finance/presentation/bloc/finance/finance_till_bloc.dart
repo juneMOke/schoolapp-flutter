@@ -2,8 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_currency_block.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 
 part 'finance_till_event.dart';
 part 'finance_till_state.dart';
@@ -22,6 +24,7 @@ class FinanceTillBloc extends Bloc<FinanceTillEvent, FinanceTillState> {
       super(const FinanceTillState()) {
     on<FinanceTillRequested>(_onRequested);
     on<FinanceTillRefreshRequested>(_onRefreshRequested);
+    on<FinanceTillCurrencySelected>(_onCurrencySelected);
   }
 
   Future<void> _onRequested(
@@ -47,6 +50,13 @@ class FinanceTillBloc extends Bloc<FinanceTillEvent, FinanceTillState> {
           status: FinanceTillStatus.success,
           till: till,
           failure: null,
+          // La caisse examinée survit au changement de fenêtre — sauf si la
+          // nouvelle réponse ne la porte plus, auquel cas elle est réarbitrée
+          // plutôt que laissée à pointer dans le vide.
+          selectedCurrency: resolveSelectedTillCurrency(
+            state.selectedCurrency,
+            till.encaisse,
+          ),
         ),
       ),
     );
@@ -58,5 +68,19 @@ class FinanceTillBloc extends Bloc<FinanceTillEvent, FinanceTillState> {
     Emitter<FinanceTillState> emit,
   ) async {
     add(FinanceTillRequested(period: state.selectedPeriod));
+  }
+
+  /// Change de caisse **sans rappeler le serveur**.
+  ///
+  /// Une devise que la réponse ne porte pas est ignorée : mieux vaut garder la
+  /// caisse affichée que la vider sur une sélection qui ne désigne rien.
+  void _onCurrencySelected(
+    FinanceTillCurrencySelected event,
+    Emitter<FinanceTillState> emit,
+  ) {
+    final blocks = state.till?.encaisse ?? const <TillCurrencyBlock>[];
+    if (!blocks.any((block) => block.currency == event.currency)) return;
+
+    emit(state.copyWith(selectedCurrency: event.currency));
   }
 }

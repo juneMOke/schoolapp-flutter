@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// **Les deux seuls chiffres à retenir** — une caisse par devise, côte à côte,
@@ -45,7 +46,7 @@ class FinanceTillCashBoxes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final blocks = _displayOrder(till.encaisse);
+    final blocks = tillBlocksInDisplayOrder(till.encaisse);
 
     return Semantics(
       container: true,
@@ -82,29 +83,6 @@ class FinanceTillCashBoxes extends StatelessWidget {
       ),
     );
   }
-
-  /// **Les dollars toujours à gauche, quelle que soit l'activité.**
-  ///
-  /// Le serveur ordonne par code de devise — donc `CDF` avant `USD`. La spec
-  /// impose l'ordre inverse, et ce n'est pas une préférence esthétique : la
-  /// position d'une caisse doit être **stable d'un jour à l'autre**, sinon le
-  /// lecteur qui a mémorisé « le dollar est à gauche » lit un franc pour un
-  /// dollar le premier jour où les francs passent devant.
-  ///
-  /// Toute devise hors de cet ordre garde le rang du serveur, à la suite : le
-  /// modèle en admet une troisième, et la faire disparaître serait pire que la
-  /// placer.
-  static List<TillCurrencyBlock> _displayOrder(List<TillCurrencyBlock> blocks) {
-    const preferred = ['USD', 'CDF'];
-    final ordered = <TillCurrencyBlock>[];
-    for (final currency in preferred) {
-      ordered.addAll(blocks.where((block) => block.currency == currency));
-    }
-    ordered.addAll(
-      blocks.where((block) => !preferred.contains(block.currency)),
-    );
-    return ordered;
-  }
 }
 
 /// Une caisse : son montant, ce qui l'a produit, et son écart à la veille.
@@ -121,7 +99,7 @@ class _CashBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = _accentOf(block.currency);
+    final accent = tillCurrencyAccent(block.currency);
     final summary = block.summary;
 
     return Container(
@@ -155,7 +133,7 @@ class _CashBox extends StatelessWidget {
         children: [
           Text(
             l10n.financeTillCashBoxLabel(
-              _currencyName(block.currency, l10n),
+              tillCurrencyName(block.currency, l10n),
               windowLabel,
             ),
             style: AppTextStyles.caption.copyWith(
@@ -197,23 +175,6 @@ class _CashBox extends StatelessWidget {
       ),
     );
   }
-
-  /// La teinte de la devise. **Doublée du symbole partout** : elle repère, elle
-  /// n'informe pas.
-  static Color _accentOf(String currency) => switch (currency) {
-    'USD' => AppColors.bleuArdoise,
-    'CDF' => AppColors.vertSavane,
-    _ => AppColors.textSecondary,
-  };
-
-  /// « dollars », « francs » — et le code lui-même pour toute autre devise,
-  /// plutôt qu'un générique qui ne désignerait rien.
-  static String _currencyName(String currency, AppLocalizations l10n) =>
-      switch (currency) {
-        'USD' => l10n.financeTillCurrencyNameUsd,
-        'CDF' => l10n.financeTillCurrencyNameCdf,
-        _ => currency,
-      };
 }
 
 /// L'écart à la période précédente de même durée.

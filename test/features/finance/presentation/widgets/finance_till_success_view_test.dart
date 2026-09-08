@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
@@ -118,7 +119,23 @@ void main() {
     );
   });
 
-  Future<void> pump(WidgetTester tester, FinanceTill till) async {
+  /// La devise détaillée, résolue comme le BLoC la résout — dollar par défaut.
+  late List<String> selectedByTap;
+
+  Future<void> pump(
+    WidgetTester tester,
+    FinanceTill till, {
+    String? selectedCurrency,
+  }) async {
+    selectedByTap = <String>[];
+    final currency = resolveSelectedTillCurrency(
+      selectedCurrency,
+      till.encaisse,
+    );
+    final selected = till.encaisse
+        .where((block) => block.currency == currency)
+        .firstOrNull;
+
     await tester.binding.setSurfaceSize(const Size(1280, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -130,7 +147,11 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
-              child: FinanceTillSuccessView(till: till),
+              child: FinanceTillSuccessView(
+                till: till,
+                selectedBlock: selected,
+                onCurrencySelected: selectedByTap.add,
+              ),
             ),
           ),
         ),
@@ -375,7 +396,13 @@ void main() {
   ) async {
     await pump(
       tester,
-      _till([_block('CDF', fees: 0, boutique: 0), _block('USD')]),
+      _till([
+        _block('CDF', fees: 0, boutique: 0, receiptCount: 0),
+        _block('USD'),
+      ]),
+      // C'est la caisse SÉLECTIONNÉE qui est creuse : le détail ne décrit
+      // qu'elle, et c'est là que la phrase remplace un axe plat.
+      selectedCurrency: 'CDF',
     );
 
     expect(find.text('Aucun mouvement dans cette devise'), findsOneWidget);
@@ -383,12 +410,121 @@ void main() {
       find.text('Rien n\'est entré dans le tiroir sur cette période.'),
       findsOneWidget,
     );
-    // La devise garde sa tuile de caisse : ses zéros y sont justes.
+    // La devise garde sa tuile de caisse : ses zéros y sont justes, et l'autre
+    // caisse reste lisible à côté.
     expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
     expect(find.text('Caisse francs · Aujourd\'hui'), findsOneWidget);
-    // Un seul axe : celui de la devise qui a bougé.
-    expect(find.byType(FinanceTillBucketsSection), findsOneWidget);
+    expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
+    // Aucun axe : la caisse détaillée n'a rien à dessiner.
+    expect(find.byType(FinanceTillBucketsSection), findsNothing);
   });
+
+  testWidgets('le détail ne décrit qu’une caisse, celle qui est choisie', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([_block('CDF', fees: 9000000, boutique: 0), _block('USD')]),
+    );
+
+    // Deux tuiles, mais un seul axe : le dollar par défaut.
+    expect(find.byType(FinanceTillBucketsSection), findsOneWidget);
+    expect(
+      find.text('Encaissements jour par jour · caisse dollars'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('caisse francs'),
+      findsNothing,
+      reason:
+          'deux axes côte à côte inviteraient à comparer deux montants qui ne '
+          'se comptent pas dans la même unité',
+    );
+  });
+
+  testWidgets('le sélecteur porte le compteur de chaque caisse', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([
+        _block('CDF', receiptCount: 0, fees: 0, boutique: 0),
+        _block('USD', receiptCount: 17),
+      ]),
+    );
+
+    // On voit AVANT de cliquer que l'autre caisse n'a rien encaissé.
+    expect(find.text('Détail de la caisse'), findsOneWidget);
+    expect(find.text('\$ dollars (17)'), findsOneWidget);
+    expect(find.text('FC francs (0)'), findsOneWidget);
+  });
+
+  testWidgets('un segment à zéro reste cliquable, et remonte la bascule', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([
+        _block('CDF', receiptCount: 0, fees: 0, boutique: 0),
+        _block('USD', receiptCount: 17),
+      ]),
+    );
+
+    await tester.tap(find.text('FC francs (0)'));
+    await tester.pumpAndSettle();
+
+    expect(
+      selectedByTap,
+      ['CDF'],
+      reason:
+          'le griser ferait disparaître l’information « rien n’est entré en '
+          'francs aujourd’hui », qui est ce que le caissier vient vérifier',
+    );
+  });
+
+  testWidgets('une seule caisse : pas de sélecteur, il n’offrirait aucun choix', (
+    tester,
+  ) async {
+    await pump(tester, _till([_block('USD')]));
+
+    expect(find.text('Détail de la caisse'), findsNothing);
+    expect(find.textContaining('dollars ('), findsNothing);
+    // Le graphique, lui, reste nommé : on doit savoir quelle caisse il dessine.
+    expect(
+      find.text('Encaissements jour par jour · caisse dollars'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sur la journée, l’écart série/fenêtre est écrit à côté du '
+      'graphique', (tester) async {
+    await pump(tester, _till([_block('USD')]));
+
+    expect(
+      find.textContaining('la série dessine les sept jours autour'),
+      findsOneWidget,
+      reason:
+          'c’est la troisième fois que cet écart cherche à se faire passer '
+          'pour un bug : il est écrit là où on le voit',
+    );
+  });
+
+  testWidgets(
+    'hors journée, la note d’écart disparaît — il n’y a plus d’écart',
+    (tester) async {
+      await pump(
+        tester,
+        _till(
+          [_block('USD')],
+          period: 'month',
+          start: DateTime.utc(2026, 5),
+          end: DateTime.utc(2026, 5, 31),
+        ),
+      );
+
+      expect(find.textContaining('sept jours autour'), findsNothing);
+    },
+  );
 
   testWidgets('aucune devise : un état vide, pas un zéro', (tester) async {
     await pump(tester, _till(const []));
