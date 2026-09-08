@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
@@ -88,14 +90,32 @@ Future<void> printProvisionalTicketWithFallback(
     return;
   }
 
+  // La bande de logo, chargée UNE fois et partagée par les deux sorties : le
+  // papier doit être le même quel que soit le chemin emprunté.
+  //
+  // ⚠️ `null` sur tout — pas d'école, pas de ligne en cache, octets illisibles.
+  // Le renderer n'ajoute alors rien, et le flux redevient identique à l'octet
+  // près à celui d'avant ce lot. Le logo ne peut pas faire rater un papier.
+  final logoBand = await getIt<SchoolLogoBandLoader>().thermalBand(
+    getIt<CurrentUserContext>().schoolId,
+  );
+
   // Même raison qu'au-dessus, un cran plus tôt : sans surface, on ne peut plus
   // demander l'imprimante, mais on peut encore remettre un papier.
   if (!context.mounted) {
-    await printProvisionalTicket(model: model, cutNotice: cutNotice);
+    await printProvisionalTicket(
+      model: model,
+      cutNotice: cutNotice,
+      logoBand: logoBand,
+    );
     return;
   }
 
-  final outcome = await printThermalTicket(context, model: model);
+  final outcome = await printThermalTicket(
+    context,
+    model: model,
+    logoBand: logoBand,
+  );
 
   switch (outcome) {
     // Le seul signal qui prouve qu'un papier existe. On le retient ici, et
@@ -112,7 +132,11 @@ Future<void> printProvisionalTicketWithFallback(
     // Le repli, silencieux — il n'y a aucune cause à annoncer, et plus d'écran
     // pour la lire.
     case ThermalTicketNoSurface():
-      await printProvisionalTicket(model: model, cutNotice: cutNotice);
+      await printProvisionalTicket(
+        model: model,
+        cutNotice: cutNotice,
+        logoBand: logoBand,
+      );
 
     case ThermalTicketFailed(problem: final problem):
       messenger?.showSnackBar(
@@ -141,6 +165,7 @@ Future<void> printProvisionalTicketWithFallback(
       final printed = await printProvisionalTicket(
         model: model,
         cutNotice: cutNotice,
+        logoBand: logoBand,
       );
       // Le filet a lâché à son tour : le dire, plutôt que laisser le caissier
       // croire le papier parti. Un appui qui ne produit rien du tout est le

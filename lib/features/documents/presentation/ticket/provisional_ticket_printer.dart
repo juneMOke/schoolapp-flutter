@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_labels.dart';
@@ -59,6 +60,7 @@ Future<TicketReceiptModel?> buildProvisionalTicket(
 Future<bool> printProvisionalTicket({
   required TicketReceiptModel model,
   required String cutNotice,
+  TicketLogoBand? logoBand,
 }) async {
   {
     try {
@@ -69,6 +71,7 @@ Future<bool> printProvisionalTicket({
         model,
         format: _initialFormat,
         cutNotice: cutNotice,
+        logoBand: logoBand,
       );
 
       await Printing.layoutPdf(
@@ -78,6 +81,7 @@ Future<bool> printProvisionalTicket({
               model,
               format: format,
               cutNotice: cutNotice,
+              logoBand: logoBand,
             );
           } catch (_) {
             // Média annoncé trop exigu pour composer le bloc : mieux vaut le

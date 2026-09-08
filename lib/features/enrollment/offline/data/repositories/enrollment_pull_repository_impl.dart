@@ -105,6 +105,20 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     String schoolId,
   )
   replaceReductionCatalog;
+
+  /// Seam vers l'identité de l'école pour le **logo**, même raison que
+  /// [replaceTariffs] : le bundle porte les empreintes, mais `enrollment` n'a
+  /// rien à savoir d'un cache d'images ni d'une route d'octets. L'isolation du
+  /// module (invariant I-4) commencerait à se défaire par un import direct.
+  ///
+  /// ⚠️ **Ne doit jamais lever.** Le référentiel transporte l'identité de
+  /// l'établissement, l'année courante et les niveaux ; un logo qui ne descend
+  /// pas est décoratif à côté. Un tirage d'image ne peut pas faire échouer ce
+  /// cycle — l'implémentation avale ses propres échecs, et l'appel est de toute
+  /// façon gardé ici.
+  final Future<void> Function(String? thermalSha, String? displaySha)
+  syncSchoolLogo;
+
   final SyncMetaDao syncMetaDao;
   final Map<String, dynamic> requiredAuth;
   final CurrentUserContext currentUser;
@@ -136,6 +150,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceTariffs,
     required this.replaceBoutiqueArticles,
     required this.replaceReductionCatalog,
+    required this.syncSchoolLogo,
     required this.syncMetaDao,
     required this.requiredAuth,
     required this.currentUser,
@@ -426,6 +441,28 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       syncedAt: syncedAt,
       schoolId: currentUser.schoolId ?? '',
     );
+
+    // Le logo, APRÈS que les empreintes sont en base : le tirage se compare à
+    // ce que la tablette détient, et il lui faut la cible à jour.
+    //
+    // ⚠️ **Gardé, et le garde est le point du branchement.** Le référentiel
+    // porte l'identité de l'école, l'année courante et les niveaux ; une image
+    // qui ne descend pas est décorative à côté. Une route en panne, un réseau
+    // qui tombe, une écriture refusée ne doivent PAS empêcher ce cycle
+    // d'aboutir — sans quoi une école perdrait sa grille tarifaire hors ligne
+    // parce que son sceau n'a pas pu être tiré.
+    //
+    // Le seam avale déjà ses propres échecs ; ce `try` est la seconde ceinture,
+    // parce qu'une implémentation future pourrait cesser de le faire et que la
+    // panne serait alors invisible jusqu'au terrain.
+    try {
+      await syncSchoolLogo(
+        body.logoRefs?.thermalSha256,
+        body.logoRefs?.displaySha256,
+      );
+    } catch (_) {
+      // Volontairement muet : rien à annoncer au caissier, et le cycle continue.
+    }
     // Portion réservée (ADR-014 §4) : le serveur envoie `feeTariffs: null` —
     // et non `[]` — quand l'appelant n'a pas `finance.grid.read`. `null` dit
     // « je ne te la montre pas », jamais « cette école n'a pas de tarifs ».
