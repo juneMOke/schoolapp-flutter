@@ -21,7 +21,7 @@ class _MockFinanceOfflineRepository extends Mock
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -202,7 +202,7 @@ void main() {
     final model = result.getOrElse(() => throw StateError('échec'));
     expect(model.studentFullName, 'Mbala Kasa Amina');
     expect(model.matriculationNumber, 'MAT-0042');
-    expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
     expect(model.cashierFullName, 'Jean Kabeya');
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
     expect(model.allocations.single.label, 'Frais scolaires');
@@ -210,7 +210,95 @@ void main() {
 
   // Le scellement écrase `number` : c'est `provisional_number` qui garde la
   // trace du papier déjà remis au parent.
-  test('lit le numéro provisoire même après scellement', () async {
+  /// ⚠️ **Règle RENVERSÉE, et le test est inversé plutôt que supprimé.**
+  ///
+  /// Le ticket portait le numéro PROVISOIRE même après scellement, parce que
+  /// `provisional_number` survit à l'ACK là où `number` est écrasée. Depuis que
+  /// la pièce devient officielle dès qu'elle a un numéro définitif, c'est ce
+  /// dernier qu'elle doit porter : un papier qui s'annonce officiel sous une
+  /// référence provisoire serait irrapprochable avec le reçu scellé qu'il
+  /// annonce.
+  ///
+  /// Le provisoire reste lisible en base — la colonne n'a pas bougé — il n'est
+  /// simplement plus ce que le ticket montre.
+  group('le caractère provisoire, lu affirmativement', () {
+    /// ⚠️ **LE test qui garde la décision du porteur.**
+    ///
+    /// Un versement encaissé sur une AUTRE caisse est descendu par le pull et
+    /// n'a **aucune ligne `generated_documents` locale** — le contrat le dit
+    /// lui-même. Toute règle qui déduirait le caractère provisoire de l'absence
+    /// d'un numéro définitif local le déclarerait donc provisoire, et la mention
+    /// s'imprimerait **exactement sur les tickets qui doivent être officiels**.
+    ///
+    /// Sans ce test, la régression est **invisible sur un poste de
+    /// développement**, où la ligne locale existe toujours.
+    test('scellé ailleurs, sans ligne locale : aucune mention', () async {
+      await seedPayment();
+      // Le cas réel : la pièce est scellée côté serveur (receipt_id descendu),
+      // et ce poste n'a jamais produit de document pour elle.
+      await db.delete(
+        'generated_documents',
+        where: 'id = ?',
+        whereArgs: ['doc-1'],
+      );
+      await db.update(
+        'payments',
+        {'receipt_id': 'rc-42'},
+        where: 'id = ?',
+        whereArgs: ['p-1'],
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isFalse);
+      expect(
+        TicketTextLayout.render(model).join('\n'),
+        isNot(contains('provisoire')),
+      );
+    });
+
+    /// Le pendant : pas de `receipt_id`, donc pas encore scellé — la mention
+    /// doit être là, quelle que soit la présence d'une ligne locale.
+    test('non scellé : la mention est là', () async {
+      await seedPayment();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isTrue);
+      expect(
+        TicketTextLayout.render(model).join('\n'),
+        contains('Réf. provisoire'),
+      );
+    });
+
+    /// Une chaîne vide n'est pas un scellement. Sans le `trim`, un
+    /// `receipt_id` à `''` — que rien n'interdit en base — rendrait le ticket
+    /// officiel sans qu'aucune pièce n'existe.
+    test('un receipt_id vide ne scelle rien', () async {
+      await seedPayment();
+      await db.update(
+        'payments',
+        {'receipt_id': '   '},
+        where: 'id = ?',
+        whereArgs: ['p-1'],
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isTrue);
+    });
+  });
+
+  test('porte le numéro DÉFINITIF dès que la pièce est scellée', () async {
     await seedPayment();
     await db.update(
       'generated_documents',
@@ -225,8 +313,8 @@ void main() {
     );
 
     expect(
-      result.getOrElse(() => throw StateError('échec')).provisionalReference,
-      'PROV-A1B2C3-9F8E7D6C',
+      result.getOrElse(() => throw StateError('échec')).reference,
+      'ETL-RC-2526-000212',
     );
   });
 
@@ -306,7 +394,7 @@ void main() {
 
     final rendered = TicketTextLayout.render(model).join('\n');
     expect(rendered, contains('MBALA KASA AMINA'));
-    expect(rendered, contains('PROVISOIRE'));
+    expect(rendered, contains('Réf.'));
   });
 
   /// La CAUSE, ancrée côté données, du refus posé dans
@@ -334,7 +422,7 @@ void main() {
     // Le reste du ticket est intact — c'est bien un papier complet et anonyme
     // qui sortirait, pas un rendu cassé.
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
-    expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
   });
 
   test('refuse d imprimer un encaissement introuvable', () async {

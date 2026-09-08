@@ -12432,11 +12432,11 @@ abstract class AppLocalizations {
   /// **'Collection ticket'**
   String get ticketDocumentTitle;
 
-  /// No description provided for @ticketProvisionalBanner.
+  /// No description provided for @ticketProvisionalMention.
   ///
   /// In en, this message translates to:
-  /// **'Provisional'**
-  String get ticketProvisionalBanner;
+  /// **'provisional'**
+  String get ticketProvisionalMention;
 
   /// No description provided for @ticketReferenceLabel.
   ///

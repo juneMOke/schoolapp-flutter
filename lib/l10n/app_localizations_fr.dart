@@ -7685,7 +7685,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketDocumentTitle => 'Ticket de perception';
 
   @override
-  String get ticketProvisionalBanner => 'Provisoire';
+  String get ticketProvisionalMention => 'provisoire';
 
   @override
   String get ticketReferenceLabel => 'Réf.';

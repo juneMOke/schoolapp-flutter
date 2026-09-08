@@ -451,7 +451,8 @@ TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
     TicketReceiptModel(
       schoolName: 'Complexe scolaire La Colombe',
       studentFullName: studentFullName,
-      provisionalReference: 'PROV-TAB1-0001',
+      reference: 'PROV-TAB1-0001',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 12, 9, 30),
       tenders: TicketTenderLine.identityFrom(
         MoneyBag.of(const [Money(2500000, 'CDF')]),

@@ -4462,7 +4462,7 @@
     }
   },
   "ticketDocumentTitle": "Ticket de perception",
-  "ticketProvisionalBanner": "Provisoire",
+  "ticketProvisionalMention": "provisoire",
   "ticketReferenceLabel": "Réf.",
   "ticketDateLabel": "Date :",
   "ticketPayerLabel": "PAYEUR :",

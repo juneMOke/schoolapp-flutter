@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -51,7 +51,8 @@ TicketReceiptModel _model({
   studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
   classroomName: classroomName,
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
   tenders: TicketTenderLine.identityFrom(
@@ -157,34 +158,42 @@ void main() {
       );
     });
 
-    /// La pièce se nomme, et se nomme **avant** de se qualifier : le titre dit
-    /// ce que c'est, le bandeau dit dans quel état c'est. Quelqu'un qui trie une
-    /// liasse de fin de journée doit l'identifier sans lire le corps.
+    /// La pièce se nomme, sous l'en-tête et avant l'élève : le titre dit ce que
+    /// c'est, et quelqu'un qui trie une liasse de fin de journée doit
+    /// l'identifier sans lire le corps.
     ///
     /// ⚠️ « Ticket de perception », **jamais « note de perception »** — ce
     /// dernier nom désigne déjà une pièce annuelle scellée au niveau élève
     /// (`EditiqueDocumentType.notePerception`).
-    test('se nomme en tête, avant le bandeau', () {
+    ///
+    /// La seconde moitié de ce test — « avant le bandeau » — a disparu avec le
+    /// bandeau lui-même, pas avec sa règle : le titre garde sa place, il n'a
+    /// simplement plus rien à précéder.
+    test('se nomme sous l\'en-tête, avant l\'élève', () {
       final lines = TicketTextLayout.render(_model(), columns: 48);
       final titleIndex = lines.indexWhere(
         (l) => l.contains('TICKET DE PERCEPTION'),
       );
-      final bannerIndex = lines.indexWhere((l) => l.contains('PROVISOIRE'));
       final schoolIndex = lines.indexWhere((l) => l.contains('LA COLOMBE'));
+      final studentIndex = lines.indexWhere((l) => l.contains('MBALA'));
 
       expect(titleIndex, greaterThan(schoolIndex));
-      expect(titleIndex, lessThan(bannerIndex));
+      expect(titleIndex, lessThan(studentIndex));
     });
 
-    // Zone Z4 : aucun QR, jamais. Un code vérifiable sur une pièce non scellée
-    // serait un mensonge.
-    test('affiche le bandeau PROVISOIRE, pleine largeur', () {
+    /// Zone Z4 : aucun QR, jamais. Un code vérifiable sur une pièce non scellée
+    /// serait un mensonge.
+    ///
+    /// Le **bandeau pleine largeur** qui vivait ici est supprimé : le ticket
+    /// devient officiel dès qu'il porte un numéro définitif, et le cas non
+    /// scellé porte désormais une mention discrète sur la ligne de référence.
+    /// Ce qui reste à vérifier, c'est qu'aucun bandeau ne subsiste — assertion
+    /// NÉGATIVE, sans quoi un gabarit qui poserait les deux passerait.
+    test('n\'affiche plus aucun bandeau pleine largeur', () {
       final lines = TicketTextLayout.render(_model(), columns: 48);
-      final banner = lines.firstWhere((l) => l.contains('PROVISOIRE'));
-
-      expect(banner.length, 48);
-      expect(banner, startsWith('*'));
-      expect(banner, endsWith('*'));
+      for (final line in lines) {
+        expect(line, isNot(startsWith('*')), reason: line);
+      }
     });
 
     // RG-012-13 : le montant reçu et la répartition sont des FAITS (la
@@ -302,11 +311,18 @@ void main() {
 
         // `_wrapped('')` rend une liste VIDE : la zone Z2 ne laisse pas de
         // trace, pas même une ligne d'espaces. Les deux séparateurs qui
-        // l'encadraient se retrouvent collés, juste sous le bandeau.
-        final banner = lines.indexWhere((l) => l.contains('PROVISOIRE'));
+        // l'encadraient se retrouvent collés, juste sous le titre.
+        //
+        // ⚠️ Ancré sur le TITRE et non sur le bandeau disparu. Avec l'ancien
+        // repère, `indexWhere` rendrait -1, le test lirait `lines[0]`/`lines[1]`
+        // et passerait peut-être — en mesurant tout autre chose.
+        final title = lines.indexWhere(
+          (l) => l.contains('TICKET DE PERCEPTION'),
+        );
+        expect(title, greaterThanOrEqualTo(0));
         final rule = '-' * 48;
-        expect(lines[banner + 1], rule);
-        expect(lines[banner + 2], rule);
+        expect(lines[title + 1], rule);
+        expect(lines[title + 2], rule);
         expect(touchingRules(lines, 48), isTrue);
         // Rien, sur ce papier, ne signale qu'un nom manque.
         expect(_flat(lines), isNot(contains('MBALA')));
@@ -323,10 +339,10 @@ void main() {
           ),
         );
 
-        // Voilà le vrai danger : rien ne casse. Le gabarit ne lève pas, le
-        // bandeau, le montant et la phrase de conservation sont là — le papier
+        // Voilà le vrai danger : rien ne casse. Le gabarit ne lève pas, la
+        // référence, le montant et la phrase de conservation sont là — le papier
         // a toute l'apparence d'un justificatif, sauf qu'il n'atteste personne.
-        expect(out, contains('PROVISOIRE'));
+        expect(out, contains('Réf.'));
         expect(out, contains('Montant reçu'));
         expect(out, contains('Conservez ce ticket'));
       });
@@ -470,7 +486,8 @@ void main() {
       studentFullName: 'Lɔkɔ Ngɛlɛ Мбала',
       matriculationNumber: 'MAT—0042',
       classroomName: '5ᵉ primaire A',
-      provisionalReference: 'PROV-A1B2C3',
+      reference: 'PROV-A1B2C3',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 4, 14, 7),
       cashierFullName: 'Ĳsselmeer Ǎmba',
       tenders: TicketTenderLine.identityFrom(

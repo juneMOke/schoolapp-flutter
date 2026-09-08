@@ -7609,7 +7609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDocumentTitle => 'Collection ticket';
 
   @override
-  String get ticketProvisionalBanner => 'Provisional';
+  String get ticketProvisionalMention => 'provisional';
 
   @override
   String get ticketReferenceLabel => 'Ref.';

@@ -11,7 +11,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -38,7 +38,8 @@ TicketReceiptModel _model({String schoolName = 'Institut Sacré-Cœur'}) =>
       studentFullName: 'Mbala Kasa Amina',
       matriculationNumber: null,
       classroomName: '5e primaire A',
-      provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+      reference: 'PROV-A1B2C3-9F8E7D6C',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 11, 14, 7),
       cashierFullName: 'Jean Kabeya',
       tenders: TicketTenderLine.identityFrom(

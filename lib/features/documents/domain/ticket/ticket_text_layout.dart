@@ -49,15 +49,19 @@ abstract final class TicketTextLayout {
     lines.addAll(_centered(model.schoolPhone ?? '', width));
     lines.add(_rule(width));
 
-    // Nature de la pièce, avant tout le reste : quelqu'un qui trie une liasse
-    // de fin de journée doit pouvoir l'identifier sans lire le corps. Elle
-    // précède le bandeau, qui la qualifie — « ticket de perception », et il est
-    // provisoire.
+    // Nature de la pièce, sous l'en-tête : quelqu'un qui trie une liasse de fin
+    // de journée doit pouvoir l'identifier sans lire le corps.
+    //
+    // ⚠️ « Ticket de perception », jamais « note de perception » : ce dernier
+    // nom désigne déjà une pièce ANNUELLE SCELLÉE au niveau élève
+    // (`EditiqueDocumentType.notePerception`). Deux papiers homonymes au guichet
+    // se paieraient au premier rapprochement, et c'est le nom vers lequel on
+    // glisse naturellement en voulant faire « plus officiel ».
     lines.addAll(_centered(model.labels.documentTitle.toUpperCase(), width));
 
-    // ── Z4 — le bandeau. Placé HAUT et pleine largeur : la dissemblance doit
-    // se lire avant le contenu, y compris par quelqu'un qui lit peu le français.
-    lines.add(_banner(model.labels.provisionalBanner, width));
+    // Le filet reste, lui : sans lui le titre coulerait directement dans le nom
+    // de l'élève, et la coupure entre « ce qu'est ce document » et « de qui il
+    // parle » disparaîtrait. Il ne se récupère pas avec le bandeau.
     lines.add(_rule(width));
 
     // ── Z2 — l'élève.
@@ -79,12 +83,15 @@ abstract final class TicketTextLayout {
     // ── Z3 — la traçabilité. Sur une pièce non scellée, l'imputabilité humaine
     // remplace l'imputabilité cryptographique : le caissier est obligatoire dès
     // qu'il est connu (RG-012-11).
-    lines.addAll(
-      _wrapped(
-        '${model.labels.referenceLabel} ${model.provisionalReference}',
-        width,
-      ),
-    );
+    // La mention « provisoire » s'accole au LIBELLÉ, pas à la fin de la ligne :
+    // elle qualifie ainsi le numéro — l'argent est reçu, et le ticket
+    // l'affirme — et elle se replie proprement quand la référence retombe sur
+    // l'UUID du paiement, là où une parenthèse de fin de ligne se coupait en
+    // deux.
+    final referenceLabel = model.isProvisional
+        ? '${model.labels.referenceLabel} ${model.labels.provisionalMention}'
+        : model.labels.referenceLabel;
+    lines.addAll(_wrapped('$referenceLabel ${model.reference}', width));
     // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
     // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
     // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
@@ -298,9 +305,6 @@ abstract final class TicketTextLayout {
   ) => TicketTextPrimitives.addOptional(lines, label, value, width);
 
   static String _rule(int width) => TicketTextPrimitives.rule(width);
-
-  static String _banner(String rawText, int width) =>
-      TicketTextPrimitives.banner(rawText, width);
 
   static List<String> _centered(String text, int width) =>
       TicketTextPrimitives.centered(text, width);

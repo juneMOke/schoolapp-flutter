@@ -11,7 +11,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -36,7 +36,8 @@ TicketReceiptModel _model({int allocationCount = 2}) => TicketReceiptModel(
   studentFullName: 'Mbala Kasa Amina',
   matriculationNumber: 'MAT-0042',
   classroomName: '5e primaire A',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: 'Jean Kabeya',
   tenders: TicketTenderLine.identityFrom(
@@ -469,7 +470,8 @@ TicketReceiptModel _modelWithSingleLine(String studentName) =>
     TicketReceiptModel(
       schoolName: 'E',
       studentFullName: studentName,
-      provisionalReference: 'PROV-1',
+      reference: 'PROV-1',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 4, 14, 7),
       tenders: TicketTenderLine.identityFrom(
         MoneyBag.of(const [Money(2500000000, 'CDF')]),

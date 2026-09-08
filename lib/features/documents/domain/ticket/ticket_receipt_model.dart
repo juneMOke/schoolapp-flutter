@@ -102,7 +102,19 @@ class TicketLabels extends Equatable {
   /// trop-perçu ou non — l'imputation exacte appartient au reçu scellé.
   final String documentTitle;
 
-  final String provisionalBanner;
+  /// La mention discrète du cas NON scellé, posée en fin de libellé de
+  /// référence : « Réf. provisoire `<numéro>` ».
+  ///
+  /// Ce n'est plus un bandeau. Le bandeau pleine largeur a disparu avec la
+  /// décision de rendre le ticket officiel dès qu'il porte un numéro définitif ;
+  /// ce champ nomme donc désormais une MENTION, et son nom suit.
+  ///
+  /// Le mot est accolé au libellé et non ajouté en fin de ligne, pour deux
+  /// raisons. Il qualifie ainsi le NUMÉRO — l'argent, lui, est reçu, et le
+  /// ticket l'affirme — là où un mot flottant qualifierait le versement. Et il
+  /// se replie proprement : mis entre parenthèses en fin de ligne, il se coupait
+  /// en deux quand la référence retombe sur l'UUID du paiement.
+  final String provisionalMention;
   final String referenceLabel;
 
   /// « Date : » — coiffe la date de versement, l'heure restant calée à droite
@@ -154,7 +166,7 @@ class TicketLabels extends Equatable {
 
   const TicketLabels({
     required this.documentTitle,
-    required this.provisionalBanner,
+    required this.provisionalMention,
     required this.referenceLabel,
     required this.dateLabel,
     required this.cashierLabel,
@@ -176,7 +188,7 @@ class TicketLabels extends Equatable {
   @override
   List<Object?> get props => [
     documentTitle,
-    provisionalBanner,
+    provisionalMention,
     referenceLabel,
     dateLabel,
     cashierLabel,
@@ -247,7 +259,20 @@ class TicketReceiptModel extends Equatable {
   ///
   /// Ajouter un QR ici ne se fait donc qu'après avoir tranché **ce
   /// conflit-là**, pas en appliquant l'ADR-013 à la lettre.
-  final String provisionalReference;
+  final String reference;
+
+  /// Cette pièce est-elle encore NON scellée ?
+  ///
+  /// ⚠️ **Lu affirmativement sur l'absence de `payments.receipt_id`, jamais par
+  /// négation.** `!aUnNuméroDéfinitif` serait vrai aussi quand aucune ligne
+  /// `generated_documents` LOCALE n'existe — cas normal d'un versement encaissé
+  /// sur une AUTRE caisse et descendu par pull. La mention « provisoire »
+  /// s'imprimerait alors exactement sur les tickets qui doivent être officiels.
+  ///
+  /// Le dépôt a déjà payé ce défaut dans `PaymentReceiptState`, dont le
+  /// commentaire porte la même règle : affirmer, ne pas nier.
+  final bool isProvisional;
+
   final DateTime paidAt;
   final String? cashierFullName;
 
@@ -305,7 +330,8 @@ class TicketReceiptModel extends Equatable {
     required this.studentFullName,
     this.matriculationNumber,
     this.classroomName,
-    required this.provisionalReference,
+    required this.reference,
+    required this.isProvisional,
     required this.paidAt,
     this.cashierFullName,
     this.payerFullName,
@@ -441,7 +467,8 @@ class TicketReceiptModel extends Equatable {
     studentFullName,
     matriculationNumber,
     classroomName,
-    provisionalReference,
+    reference,
+    isProvisional,
     paidAt,
     cashierFullName,
     tenders,

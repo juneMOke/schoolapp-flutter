@@ -12,7 +12,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 /// effacée, pas comme une donnée manquante.
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -39,6 +39,8 @@ TicketReceiptModel _model({
   String? schoolPhone = '+243900000000',
   String? payerFullName,
   String? payerPhoneNumber,
+  bool isProvisional = true,
+  String reference = 'PROV-A1B2C3-9F8E7D6C',
 }) => TicketReceiptModel(
   schoolName: schoolName,
   schoolAddress: schoolAddress,
@@ -47,7 +49,8 @@ TicketReceiptModel _model({
   schoolPhone: schoolPhone,
   studentFullName: 'Mbala Kasa Amina',
   classroomName: '5e primaire A',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: reference,
+  isProvisional: isProvisional,
   paidAt: DateTime(2026, 9, 8, 1, 35),
   cashierFullName: 'Jean Kabeya',
   payerFullName: payerFullName,
@@ -248,6 +251,49 @@ void main() {
         lines[payer + 1],
       ].map((l) => l.trim()).join(' ');
       expect(joined, contains(long.toUpperCase()));
+    });
+  });
+
+  group('la mention provisoire', () {
+    /// Elle s'accole au LIBELLÉ, pas à la fin de la ligne : ainsi elle qualifie
+    /// le NUMÉRO. L'argent, lui, est reçu — et le ticket l'affirme.
+    test('non scellé : la mention coiffe la référence', () {
+      final lines = TicketTextLayout.render(_model(), columns: 48);
+      final ref = lines.firstWhere((l) => l.contains('Réf.'));
+      expect(ref, startsWith('Réf. provisoire PROV-A1B2C3-9F8E7D6C'));
+    });
+
+    /// Assertion NÉGATIVE explicite : sans elle, un gabarit qui poserait à la
+    /// fois la mention et un bandeau passerait le test précédent.
+    test('non scellé : aucun bandeau pleine largeur ne subsiste', () {
+      final lines = TicketTextLayout.render(_model(), columns: 48);
+      for (final line in lines) {
+        expect(line, isNot(startsWith('*')), reason: line);
+      }
+    });
+
+    test('scellé : la référence est nue', () {
+      final lines = TicketTextLayout.render(
+        _model(isProvisional: false, reference: 'ETL-RC-2526-000212'),
+        columns: 48,
+      );
+      final ref = lines.firstWhere((l) => l.contains('Réf.'));
+      expect(ref, 'Réf. ETL-RC-2526-000212');
+      expect(lines.join('\n'), isNot(contains('provisoire')));
+    });
+
+    /// Le repli sur l'UUID du paiement, qui est le cas où l'ancienne forme à
+    /// parenthèse se coupait en deux. Ici la coupure tombe entre le libellé et
+    /// le numéro : rien d'orphelin, rien de tronqué.
+    test('le repli sur l\'UUID se replie proprement', () {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      final lines = TicketTextLayout.render(
+        _model(reference: uuid),
+        columns: 48,
+      );
+      final first = lines.indexWhere((l) => l.contains('Réf.'));
+      expect(lines[first].trim(), 'Réf. provisoire');
+      expect(lines[first + 1].trim(), uuid);
     });
   });
 }

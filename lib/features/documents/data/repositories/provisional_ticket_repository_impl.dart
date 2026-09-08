@@ -94,7 +94,9 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       );
       final allocations = await _dao.findAllocations(paymentId);
       final tenders = await _dao.findTenders(paymentId);
-      final reference = await _dao.findProvisionalNumber(paymentId);
+      // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
+      final definitive = await _dao.findDefinitiveNumber(paymentId);
+      final provisional = await _dao.findProvisionalNumber(paymentId);
 
       return Right(
         TicketReceiptModel(
@@ -110,10 +112,18 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
           classroomName: classroomName,
-          // Sans ligne documentaire (cas anormal mais non bloquant), on retombe
-          // sur l'identifiant du paiement : un ticket sans aucune référence
-          // serait irrapprochable.
-          provisionalReference: reference ?? paymentId,
+          // Sans ligne documentaire (cas anormal mais non bloquant, et cas
+          // NORMAL d'un versement encaissé sur une autre caisse), on retombe sur
+          // l'identifiant du paiement : un ticket sans aucune référence serait
+          // irrapprochable.
+          reference: definitive ?? provisional ?? paymentId,
+          // ⚠️ Lu AFFIRMATIVEMENT sur l'absence de `receipt_id`, jamais par
+          // négation d'un numéro. `definitive == null` serait vrai aussi quand
+          // aucune ligne `generated_documents` locale n'existe — cas normal d'un
+          // versement encaissé ailleurs et descendu par pull. La mention
+          // « provisoire » s'imprimerait alors sur des tickets scellés, soit
+          // exactement l'inverse de ce qui est voulu. `receipt_id`, lui, descend.
+          isProvisional: (payment.receiptId?.trim().isEmpty ?? true),
           paidAt: _parsePaidAt(payment.paidAt),
           // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
           // de pull ne réécrit jamais les premiers, donc un versement encaissé

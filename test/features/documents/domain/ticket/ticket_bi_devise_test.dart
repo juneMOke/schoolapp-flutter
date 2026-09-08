@@ -14,7 +14,7 @@ const int _taux166667 = 1666670000;
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -40,7 +40,8 @@ TicketReceiptModel _model({
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'MAKELA Kevin',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 9, 1, 9, 30),
   cashierFullName: 'Sarah Ngalula',
   tenders: tenders,

@@ -4506,7 +4506,7 @@
     }
   },
   "ticketDocumentTitle": "Collection ticket",
-  "ticketProvisionalBanner": "Provisional",
+  "ticketProvisionalMention": "provisional",
   "ticketReferenceLabel": "Ref.",
   "ticketDateLabel": "Date:",
   "ticketPayerLabel": "PAYER:",

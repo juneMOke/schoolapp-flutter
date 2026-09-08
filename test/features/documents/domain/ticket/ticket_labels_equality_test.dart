@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _base = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   payerLabel: 'PAYEUR :',
@@ -39,7 +39,7 @@ void main() {
     // à la base et le test le nomme.
     final variants = <String, TicketLabels>{
       'documentTitle': _copyWith(documentTitle: 'Autre pièce'),
-      'provisionalBanner': _copyWith(provisionalBanner: 'Définitif'),
+      'provisionalMention': _copyWith(provisionalMention: 'definitif'),
       'referenceLabel': _copyWith(referenceLabel: 'Ref'),
       'dateLabel': _copyWith(dateLabel: 'Le :'),
       'payerLabel': _copyWith(payerLabel: 'VERSEUR :'),
@@ -75,7 +75,7 @@ void main() {
 
 TicketLabels _copyWith({
   String? documentTitle,
-  String? provisionalBanner,
+  String? provisionalMention,
   String? referenceLabel,
   String? dateLabel,
   String? payerLabel,
@@ -94,7 +94,7 @@ TicketLabels _copyWith({
   String? keepTicketNotice,
 }) => TicketLabels(
   documentTitle: documentTitle ?? _base.documentTitle,
-  provisionalBanner: provisionalBanner ?? _base.provisionalBanner,
+  provisionalMention: provisionalMention ?? _base.provisionalMention,
   referenceLabel: referenceLabel ?? _base.referenceLabel,
   dateLabel: dateLabel ?? _base.dateLabel,
   payerLabel: payerLabel ?? _base.payerLabel,
@@ -116,7 +116,8 @@ TicketLabels _copyWith({
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'Mbala Kasa Amina',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 12, 14, 7),
   tenders: TicketTenderLine.identityFrom(
     MoneyBag.of(const [Money(150000, 'CDF')]),

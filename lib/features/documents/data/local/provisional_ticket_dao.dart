@@ -214,6 +214,33 @@ class ProvisionalTicketDao {
     return rows.first['ticket_printed_at'] != null;
   }
 
+  /// Numéro **définitif** du reçu, `null` tant que la pièce n'est pas scellée.
+  ///
+  /// C'est l'ACK qui pose les deux ensemble (`number` = numéro serveur,
+  /// `status` = `DEFINITIVE`) : lire `number` sans vérifier le statut rendrait
+  /// le numéro PROVISOIRE sur une pièce non scellée, puisque c'est lui qui
+  /// occupe la colonne avant l'ACK.
+  ///
+  /// ⚠️ **`null` ne veut pas dire « pas scellé ».** Un versement encaissé sur
+  /// une AUTRE caisse n'a aucune ligne `generated_documents` locale, et rend donc
+  /// `null` alors qu'il est parfaitement scellé côté serveur. C'est exactement
+  /// pourquoi le caractère provisoire du ticket se lit sur `payments.receipt_id`
+  /// — qui descend, lui — et jamais sur l'absence de ce numéro.
+  Future<String?> findDefinitiveNumber(String paymentId) async {
+    final rows = await _db.query(
+      'generated_documents',
+      columns: const ['number', 'status'],
+      where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
+      whereArgs: [paymentId, 'PAYMENT', 'RC'],
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    if (rows.first['status'] != 'DEFINITIVE') return null;
+    final number = (rows.first['number'] as String?)?.trim();
+    return (number != null && number.isNotEmpty) ? number : null;
+  }
+
   /// Numéro provisoire du reçu. On lit `provisional_number` **puis** `number` :
   /// la première colonne survit au scellement, la seconde est écrasée par le
   /// numéro définitif.

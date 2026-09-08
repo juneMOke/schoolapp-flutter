@@ -208,7 +208,8 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'Mbala Kasa Amina',
-  provisionalReference: 'PROV-A1B2C3',
+  reference: 'PROV-A1B2C3',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   tenders: TicketTenderLine.identityFrom(
     MoneyBag.of(const [Money(150000, 'CDF')]),

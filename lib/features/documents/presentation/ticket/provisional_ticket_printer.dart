@@ -88,7 +88,7 @@ Future<bool> printProvisionalTicket({
             return fallback;
           }
         },
-        name: model.provisionalReference,
+        name: model.reference,
         format: _initialFormat,
       );
       return true;

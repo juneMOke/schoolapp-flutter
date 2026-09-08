@@ -20,7 +20,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 abstract final class TicketBenchFixtures {
   static const TicketLabels labels = TicketLabels(
     documentTitle: 'Ticket de perception',
-    provisionalBanner: 'Provisoire',
+    provisionalMention: 'provisoire',
     referenceLabel: 'Réf.',
     dateLabel: 'Date :',
     payerLabel: 'PAYEUR :',
@@ -57,7 +57,8 @@ abstract final class TicketBenchFixtures {
     studentFullName: 'Mbala-Kasa Ndombasi Amina Ɛlodie',
     matriculationNumber: 'MAT-2026-000481',
     classroomName: '5e primaire A',
-    provisionalReference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
+    reference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
+    isProvisional: true,
     paidAt: DateTime(2026, 8, 11, 14, 7),
     cashierFullName: 'Jean-Baptiste Kabeya wa Mukendi',
     tenders: TicketTenderLine.identityFrom(
@@ -103,7 +104,8 @@ abstract final class TicketBenchFixtures {
   static final TicketReceiptModel minimal = TicketReceiptModel(
     schoolName: 'EP Kimbanguiste',
     studentFullName: 'Amina Mbala',
-    provisionalReference: 'PROV-A1B2C3D4-0001',
+    reference: 'PROV-A1B2C3D4-0001',
+    isProvisional: true,
     paidAt: DateTime(2026, 8, 11, 8, 3),
     tenders: TicketTenderLine.identityFrom(
       MoneyBag.of(const [Money(500000, 'CDF')]),
