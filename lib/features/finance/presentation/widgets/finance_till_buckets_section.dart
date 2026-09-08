@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
@@ -27,6 +29,10 @@ class FinanceTillBucketsSection extends StatelessWidget {
   /// barre. Voir [shortBucketLabel] : la forme de la clé ne suffit pas.
   final String granularity;
 
+  /// La devise de la caisse dessinée — elle habille les montants posés sur les
+  /// barres. **Aucun nombre nu** : la doctrine vaut aussi sur un graphique.
+  final String currency;
+
   /// La phrase qui explique pourquoi le total des tuiles ne vaut pas la somme
   /// des barres — rendue **là où l'écart se voit**, et seulement sur la fenêtre
   /// où il existe.
@@ -41,12 +47,18 @@ class FinanceTillBucketsSection extends StatelessWidget {
   /// trente-et-un jours est le pire cas que l'écran ait à dessiner.
   static const int _rotateLabelsBeyond = 12;
 
+  /// Jusqu'à dix barres, **chacune porte son montant**. Au-delà, les étiquettes
+  /// se marchent dessus et seule la barre en relief garde la sienne — que le
+  /// composant du socle affiche via son infobulle.
+  static const int _labelAllBarsUpTo = 10;
+
   const FinanceTillBucketsSection({
     super.key,
     required this.buckets,
     this.title,
     this.windowNote,
     this.granularity = '',
+    this.currency = '',
   });
 
   @override
@@ -81,6 +93,12 @@ class FinanceTillBucketsSection extends StatelessWidget {
         if (buckets[i].isCurrent) i,
     };
 
+    // La règle de la spec, telle quelle : le montant est posé **sur** la barre
+    // — jamais sur un axe vertical, qu'il n'y a pas — et sur toutes les barres
+    // dès que la série en compte dix ou moins. Une fenêtre `jour` en a sept :
+    // elles sont donc toutes chiffrées.
+    final labelEveryBar = buckets.length <= _labelAllBarsUpTo;
+
     return FinanceStatsChartCard(
       title: heading,
       child: Column(
@@ -93,6 +111,12 @@ class FinanceTillBucketsSection extends StatelessWidget {
               items: items,
               highlightedIndexes: highlighted,
               verticalBottomLabels: buckets.length > _rotateLabelsBeyond,
+              showValueLabels: labelEveryBar,
+              // `finFmtShort` : la forme abrégée est **réservée** aux
+              // étiquettes de graphique, là où le montant entier ne tient pas.
+              // Elle porte quand même son symbole.
+              valueLabelFormatter: (value) =>
+                  MoneyFormat.compact(Money.parse(value.round(), currency)),
             ),
           ),
           if (windowNote != null) ...[
@@ -127,17 +151,20 @@ String shortBucketLabel(String key, {String granularity = ''}) {
   final parts = key.split('-');
 
   return switch (granularity) {
-    // « sem. 12 » : la barre couvre sept jours à partir de ce jour-là, et
-    // l'étiquette doit le dire.
-    'week' when parts.length == 3 => 'sem. ${parts[2]}',
-    'month' when parts.length >= 2 => parts[1],
-    'day' when parts.length == 3 => parts[2],
+    // « sem. 12/05 » : la barre couvre sept jours **à partir** de cette date,
+    // et l'étiquette doit dire les deux — qu'il s'agit d'une semaine, et de
+    // laquelle.
+    'week' when parts.length == 3 => 'sem. ${parts[2]}/${parts[1]}',
+    'month' when parts.length >= 2 => '${parts[1]}/${parts[0].substring(2)}',
+    'day' when parts.length == 3 => '${parts[2]}/${parts[1]}',
     // Sans grain annoncé, la forme de la clé décide — l'ancien comportement.
     _ => switch (parts.length) {
-      // `2026-05-15` → « 15 » : le jour suffit, le mois est dans la fenêtre.
-      3 => parts[2],
-      // `2026-05` → « 05 » : le rang du mois, comme sur l'axe du recouvrement.
-      2 => parts[1],
+      // `2026-05-15` → « 15/05 » : le jour SEUL laissait deviner le mois, et
+      // une fenêtre libre peut enjamber deux mois.
+      3 => '${parts[2]}/${parts[1]}',
+      // `2026-05` → « 05/26 » : le mois et son millésime, l'axe annuel pouvant
+      // enjamber deux années scolaires.
+      2 => '${parts[1]}/${parts[0].substring(2)}',
       _ => key,
     },
   };

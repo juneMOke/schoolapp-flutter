@@ -52,6 +52,21 @@ class FinanceTillReceiptsBloc
     FinanceTillReceiptsRequested event,
     Emitter<FinanceTillReceiptsState> emit,
   ) async {
+    // **Ne redemande pas ce qu'on sert déjà.** L'onglet déclenche depuis deux
+    // endroits — son montage et l'écouteur des agrégats — parce qu'un écouteur
+    // seul rate l'état qu'il trouve. Les deux peuvent coïncider ; le second ne
+    // doit pas relancer un appel identique, ni faire clignoter une table déjà
+    // remplie.
+    //
+    // Un échec, lui, se rejoue : c'est le geste de « Réessayer ».
+    if (event.currency == state.currency &&
+        event.window == state.window &&
+        (state.status == FinanceTillReceiptsStatus.loading ||
+            state.status == FinanceTillReceiptsStatus.success ||
+            state.status == FinanceTillReceiptsStatus.empty)) {
+      return;
+    }
+
     await _load(emit, currency: event.currency, window: event.window, page: 0);
   }
 

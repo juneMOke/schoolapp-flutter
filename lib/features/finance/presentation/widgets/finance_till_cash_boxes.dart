@@ -60,27 +60,85 @@ class FinanceTillCashBoxes extends StatelessWidget {
               ((constraints.maxWidth - spacing * (columns - 1)) / columns)
                   .floorToDouble();
 
-          return Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final block in blocks)
-                SizedBox(
-                  width: width,
-                  child: _CashBox(
-                    block: block,
-                    windowLabel: windowLabel,
-                    l10n: l10n,
+              Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (final block in blocks)
+                    SizedBox(
+                      width: width,
+                      child: _CashBox(
+                        block: block,
+                        windowLabel: windowLabel,
+                        l10n: l10n,
+                      ),
+                    ),
+                  SizedBox(
+                    width: width,
+                    child: _ReceiptsIssuedTile(till: till, l10n: l10n),
                   ),
-                ),
-              SizedBox(
-                width: width,
-                child: _ReceiptsIssuedTile(till: till, l10n: l10n),
+                ],
               ),
+              // ⚠️ **L'explication vit SOUS la rangée, pas dans la tuile.**
+              // Portée par la carte « Reçus émis », elle la faisait gonfler
+              // d'un tiers face aux deux tuiles de caisse : trois tuiles de
+              // même rang cessaient d'avoir le même poids visuel, et la plus
+              // haute attirait l'œil sur le chiffre le moins important. Sous la
+              // rangée, elle commente les trois — ce qu'elle fait réellement,
+              // puisqu'elle parle du rapport entre elles.
+              if (_hasMixedBaskets(till)) ...[
+                const SizedBox(height: AppDimensions.spacingS),
+                _MixedBasketsNote(l10n: l10n),
+              ],
             ],
           );
         },
       ),
+    );
+  }
+}
+
+/// La somme des compteurs de caisse dépasse le nombre de reçus émis — donc au
+/// moins un versement a été réglé dans les deux devises.
+///
+/// C'est **la condition d'affichage de la note** : sur une fenêtre sans panier
+/// mixte les trois chiffres s'accordent, et une phrase qui explique un écart
+/// absent en crée un.
+bool _hasMixedBaskets(FinanceTill till) =>
+    till.encaisse.fold<int>(
+      0,
+      (sum, block) => sum + block.summary.receiptCount,
+    ) >
+    till.receiptsIssued;
+
+/// Ce que « 5 » et « 3 » au-dessus de « 7 » veulent dire.
+///
+/// Un reçu compte **une fois par caisse qu'il a alimentée** dans les tuiles de
+/// gauche, et **une seule fois** dans le compteur : les trois ont raison, et
+/// c'est leur rapport qui a besoin d'être dit — d'où sa place sous la rangée
+/// entière plutôt que dans l'une des trois tuiles.
+class _MixedBasketsNote extends StatelessWidget {
+  final AppLocalizations l10n;
+
+  const _MixedBasketsNote({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Expanded(
+          child: Text(
+            l10n.financeTillReceiptsIssuedMixedNote,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -131,16 +189,32 @@ class _CashBox extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.financeTillCashBoxLabel(
-              tillCurrencyName(block.currency, l10n),
-              windowLabel,
-            ),
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textMuted,
-              letterSpacing: 0.06 * 11,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              // Le médaillon de la maquette : la teinte de la caisse, doublée
+              // partout du symbole dans le montant.
+              _Medallion(
+                icon: Icons.account_balance_wallet_outlined,
+                accent: accent,
+                surface: tillCurrencySoftAccent(block.currency),
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Expanded(
+                child: Text(
+                  l10n.financeTillCashBoxLabel(
+                    tillCurrencyName(block.currency, l10n),
+                    windowLabel,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                    letterSpacing: 0.06 * 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppDimensions.spacingXS),
           Text(
@@ -185,6 +259,33 @@ class _CashBox extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Le médaillon d'une tuile — 26 dp, comme la maquette le dessine.
+class _Medallion extends StatelessWidget {
+  final IconData icon;
+  final Color accent;
+  final Color surface;
+
+  const _Medallion({
+    required this.icon,
+    required this.accent,
+    required this.surface,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+      ),
+      child: Icon(icon, size: 15, color: accent),
     );
   }
 }
@@ -249,11 +350,6 @@ class _ReceiptsIssuedTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final perTill = till.encaisse.fold<int>(
-      0,
-      (sum, block) => sum + block.summary.receiptCount,
-    );
-
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
@@ -279,13 +375,30 @@ class _ReceiptsIssuedTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.financeTillReceiptsIssuedLabel,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textMuted,
-              letterSpacing: 0.06 * 11,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              // Médaillon **neutre** : lui donner une teinte de devise le
+              // rendrait comparable aux deux caisses, alors qu'il ne compte pas
+              // dans la même unité.
+              const _Medallion(
+                icon: Icons.receipt_long_outlined,
+                accent: AppColors.textSecondary,
+                surface: AppColors.surfaceAlt,
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Expanded(
+                child: Text(
+                  l10n.financeTillReceiptsIssuedLabel,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                    letterSpacing: 0.06 * 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppDimensions.spacingXS),
           Text(
@@ -303,16 +416,6 @@ class _ReceiptsIssuedTile extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          // La note n'apparaît que lorsqu'il y a un écart à expliquer : sur une
-          // journée sans panier mixte, les compteurs s'accordent et la phrase
-          // sèmerait un doute là où il n'y en a pas.
-          if (perTill > till.receiptsIssued) ...[
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              l10n.financeTillReceiptsIssuedMixedNote,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-            ),
-          ],
         ],
       ),
     );

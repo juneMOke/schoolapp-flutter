@@ -6691,6 +6691,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'In charge currency: these amounts do not add up with the drawer\'s.';
 
   @override
+  String get financeTillImputationCardHint =>
+      'In the claim currency, never converted — these amounts do not add up with the till\'s.';
+
+  @override
   String financeTillImputationCardTitle(String currency) {
     return 'Charges settled in $currency';
   }

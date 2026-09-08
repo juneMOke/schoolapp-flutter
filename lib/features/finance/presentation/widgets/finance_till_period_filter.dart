@@ -17,13 +17,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Le recouvrement, lui, n'a plus de sélecteur : à la semaine, les échéances
 /// tombant en fin de mois, l'attendu valait zéro.
 ///
-/// ## Quatre segments, et `year` n'en fait pas partie
+/// ## Cinq segments, dont un au-delà de la maquette
 ///
-/// La spec dessine **Aujourd'hui / Cette semaine / Ce mois / Période**. Le
-/// contrat sert aussi `year`, et [TillWindow] sait le construire — mais
-/// l'exposer ajouterait une fenêtre que la spec n'a jamais dessinée, sur un
-/// écran dont la doctrine est de ne montrer que ce qui a été décidé. La
-/// **période libre** couvre le besoin d'élargir, en le bornant à 366 jours.
+/// La spec en dessine **quatre** — Aujourd'hui / Cette semaine / Ce mois /
+/// Période. **« Cette année » est un cinquième, ajouté par le porteur** après
+/// avoir fait tourner l'écran : ce n'est pas une lecture erronée de la
+/// maquette, c'est un élargissement décidé. Le contrat le servait déjà, et
+/// [TillWindow] savait déjà le construire.
 class FinanceTillPeriodFilter extends StatefulWidget {
   const FinanceTillPeriodFilter({super.key});
 
@@ -41,12 +41,20 @@ class _FinanceTillPeriodFilterState extends State<FinanceTillPeriodFilter> {
   DateTime? _from;
   DateTime? _to;
 
-  /// Les quatre segments de la spec. `year` reste constructible côté modèle,
-  /// mais n'est pas offert ici — voir la doc de la classe.
+  /// Les segments offerts, **dans l'ordre des grains** — du plus fin au plus
+  /// large, la période libre en dernier parce qu'elle n'a pas de rang.
+  ///
+  /// ⚠️ **« Cette année » est un ajout au-delà de la maquette**, décidé par le
+  /// porteur après avoir fait tourner l'écran. La spec n'en dessine que quatre ;
+  /// ce cinquième n'est donc pas une lecture erronée de la maquette mais un
+  /// élargissement assumé. Le contrat le sert depuis toujours (`YEAR` est dans
+  /// `TILL_PERIODS` sur les trois routes) et son grain de série est `month`,
+  /// que le serveur annonce — les barres s'étiquettent seules.
   static const List<TillPeriod> _offered = [
     TillPeriod.day,
     TillPeriod.week,
     TillPeriod.month,
+    TillPeriod.year,
     TillPeriod.custom,
   ];
 
@@ -68,6 +76,12 @@ class _FinanceTillPeriodFilterState extends State<FinanceTillPeriodFilter> {
                 _labelOf(window.period, l10n),
               ),
               child: SegmentedTabFilter<TillPeriod>(
+                // Cinq segments ne tiennent pas sur une ligne à toutes les
+                // largeurs. Le composant du socle sait s'enrouler — chaque
+                // onglet garde sa largeur intrinsèque sur plusieurs rangs —
+                // plutôt que de tronquer un libellé ou d'imposer un défilement
+                // horizontal sur un contrôle de cinq éléments.
+                wrap: true,
                 options: [
                   for (final period in _offered)
                     SegmentedTabOption(
@@ -181,20 +195,27 @@ class _CustomRangeFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppDimensions.spacingM,
-      runSpacing: AppDimensions.spacingS,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    // **Une seule ligne, deux bornes.** Empilées, elles se lisent comme deux
+    // réglages indépendants ; côte à côte, elles se lisent comme ce qu'elles
+    // sont — les deux extrémités d'un même intervalle. `Flexible` plutôt qu'une
+    // largeur fixe : sur une tablette étroite, mieux vaut deux boutons serrés
+    // qu'un retour à la ligne qui casse la paire.
+    return Row(
       children: [
-        _DateButton(
-          label: l10n.financeTillPeriodFrom,
-          value: from,
-          onPick: (picked) => onChanged(picked, to),
+        Flexible(
+          child: _DateButton(
+            label: l10n.financeTillPeriodFrom,
+            value: from,
+            onPick: (picked) => onChanged(picked, to),
+          ),
         ),
-        _DateButton(
-          label: l10n.financeTillPeriodTo,
-          value: to,
-          onPick: (picked) => onChanged(from, picked),
+        const SizedBox(width: AppDimensions.spacingM),
+        Flexible(
+          child: _DateButton(
+            label: l10n.financeTillPeriodTo,
+            value: to,
+            onPick: (picked) => onChanged(from, picked),
+          ),
         ),
       ],
     );
@@ -241,7 +262,11 @@ class _DateButton extends StatelessWidget {
             if (picked != null) onPick(picked);
           },
           icon: const Icon(Icons.event_outlined, size: 16),
-          label: Text('$label · $shown'),
+          label: Text(
+            '$label · $shown',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
             side: const BorderSide(color: AppColors.border),

@@ -440,14 +440,21 @@ void main() {
     );
   });
 
-  testWidgets('la ventilation descend sous son propre titre', (tester) async {
+  testWidgets('la ventilation voisine « Par source », chacune nommant son '
+      'unité', (tester) async {
     await pump(tester, _till([_block('USD')]));
 
-    expect(find.text('Ce que ces versements ont éteint'), findsOneWidget);
+    // Deux lectures de la même somme, côte à côte : séparées, elles cessent de
+    // répondre à la même question.
     expect(find.text('Créances réglées en \$'), findsOneWidget);
+    expect(find.text('Par source'), findsOneWidget);
     expect(find.text('Minerval'), findsOneWidget);
-    // La part boutique n'a aucun poste : elle vit dans sa carte, entière.
-    expect(find.text('Boutique'), findsNothing);
+    // Et le voisinage n'invite pas à additionner : la carte de gauche dit son
+    // unité, qui n'est pas celle de droite.
+    expect(
+      find.textContaining('En devise de créance, jamais converti'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -462,14 +469,12 @@ void main() {
         ),
       );
 
-      // En haut, la devise reçue. En bas, celle des créances — et le titre le
-      // dit, sans quoi les montants du bas se lisent dans la mauvaise unité.
+      // À gauche la devise des créances, à droite celle du tiroir — et la
+      // carte de gauche le dit, sans quoi son voisinage la ferait lire dans la
+      // mauvaise unité.
       expect(find.text('Créances réglées en \$'), findsOneWidget);
       expect(
-        find.text(
-          'En devise de créance : ces montants ne s\'additionnent pas à ceux '
-          'du tiroir.',
-        ),
+        find.textContaining('En devise de créance, jamais converti'),
         findsOneWidget,
       );
       // Aucune ligne ne prétend faire la somme des deux.
@@ -483,11 +488,13 @@ void main() {
     (tester) async {
       await pump(tester, _till([_block('USD')], impute: const []));
 
-      expect(find.text('Ce que ces versements ont éteint'), findsOneWidget);
+      // La carte de gauche ne s'escamote pas : la lacune y passerait pour une
+      // journée sans frais.
       expect(
         find.text('Aucune donnée disponible pour cette période'),
         findsOneWidget,
       );
+      expect(find.text('Par source'), findsOneWidget);
     },
   );
 
@@ -640,12 +647,14 @@ void main() {
       // Le formatteur du recouvrement, écrit pour l'axe mensuel, rendait
       // « 5-15 » : il coupait les quatre derniers caractères d'une chaîne qui
       // en compte dix.
-      expect(shortBucketLabel('2026-05-15'), '15');
-      expect(shortBucketLabel('2026-05-01'), '01');
+      expect(shortBucketLabel('2026-05-15'), '15/05');
+      expect(shortBucketLabel('2026-05-01'), '01/05');
     });
 
-    test('une clé mensuelle rend le rang du mois', () {
-      expect(shortBucketLabel('2026-05'), '05');
+    test('une clé mensuelle rend le mois et son millésime', () {
+      // L'axe annuel enjambe deux années civiles : « 05 » seul ne dirait pas
+      // laquelle.
+      expect(shortBucketLabel('2026-05'), '05/26');
     });
 
     test('une clé inattendue se rend telle quelle', () {
@@ -657,8 +666,8 @@ void main() {
       // jour : `2026-05-12`, exactement la forme d'une journée. Sans le grain
       // annoncé, l'étiquette « 12 » ferait lire sept jours d'encaissements
       // comme la seule journée du 12.
-      expect(shortBucketLabel('2026-05-12', granularity: 'day'), '12');
-      expect(shortBucketLabel('2026-05-12', granularity: 'week'), 'sem. 12');
+      expect(shortBucketLabel('2026-05-12', granularity: 'day'), '12/05');
+      expect(shortBucketLabel('2026-05-12', granularity: 'week'), 'sem. 12/05');
       expect(
         shortBucketLabel('2026-05-12', granularity: 'week'),
         isNot(shortBucketLabel('2026-05-12', granularity: 'day')),
@@ -669,14 +678,14 @@ void main() {
     });
 
     test('le grain annoncé prime sur la forme de la clé', () {
-      expect(shortBucketLabel('2026-05', granularity: 'month'), '05');
+      expect(shortBucketLabel('2026-05', granularity: 'month'), '05/26');
     });
 
     test('sans grain annoncé, la forme de la clé décide — l’ancien repli', () {
       // Un serveur qui ne sert pas encore `granularity` ne doit pas casser
       // l'axe : on retombe sur ce que le formatteur faisait avant lui.
-      expect(shortBucketLabel('2026-05-15'), '15');
-      expect(shortBucketLabel('2026-05'), '05');
+      expect(shortBucketLabel('2026-05-15'), '15/05');
+      expect(shortBucketLabel('2026-05'), '05/26');
     });
   });
 

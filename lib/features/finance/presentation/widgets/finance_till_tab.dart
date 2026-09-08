@@ -12,8 +12,47 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/states/
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'onglet **Caisse** : ce qui est entré dans le tiroir sur la fenêtre.
-class FinanceTillTab extends StatelessWidget {
+class FinanceTillTab extends StatefulWidget {
   const FinanceTillTab({super.key});
+
+  @override
+  State<FinanceTillTab> createState() => _FinanceTillTabState();
+}
+
+class _FinanceTillTabState extends State<FinanceTillTab> {
+  @override
+  void initState() {
+    super.initState();
+    // ⚠️ **Un `BlocListener` ne réagit qu'aux TRANSITIONS, pas à l'état qu'il
+    // trouve en se montant.**
+    //
+    // Les agrégats peuvent avoir déjà répondu quand cet onglet apparaît — le
+    // cas normal d'un retour sur l'onglet, et un cas possible dès la première
+    // ouverture si la réponse arrive avant la frame. L'écouteur ne voyait alors
+    // aucune transition, et la table n'était **jamais demandée** : elle restait
+    // vide sous des cartes pleines, sans que rien ne signale l'appel manquant.
+    //
+    // On synchronise donc aussi au montage. Les deux chemins passent par la
+    // même méthode, et le BLoC de la table ignore une demande identique à ce
+    // qu'il sert déjà — un double déclenchement ne coûte donc pas un second
+    // appel.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncReceipts(context.read<FinanceTillBloc>().state);
+    });
+  }
+
+  /// Demande à la table ce que les agrégats viennent de décrire.
+  void _syncReceipts(FinanceTillState state) {
+    final currency = state.selectedCurrency;
+    if (state.status != FinanceTillStatus.success || currency == null) return;
+
+    context.read<FinanceTillReceiptsBloc>().add(
+      FinanceTillReceiptsRequested(
+        currency: currency,
+        window: state.selectedWindow,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +71,7 @@ class FinanceTillTab extends StatelessWidget {
               curr.selectedCurrency != null &&
               (prev.selectedCurrency != curr.selectedCurrency ||
                   prev.till != curr.till),
-          listener: (context, state) =>
-              context.read<FinanceTillReceiptsBloc>().add(
-                FinanceTillReceiptsRequested(
-                  currency: state.selectedCurrency!,
-                  window: state.selectedWindow,
-                ),
-              ),
+          listener: (context, state) => _syncReceipts(state),
         ),
       ],
       child: Column(

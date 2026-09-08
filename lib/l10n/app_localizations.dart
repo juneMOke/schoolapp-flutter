@@ -10893,6 +10893,12 @@ abstract class AppLocalizations {
   /// **'In charge currency: these amounts do not add up with the drawer\'s.'**
   String get financeTillImputationHint;
 
+  /// No description provided for @financeTillImputationCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In the claim currency, never converted — these amounts do not add up with the till\'s.'**
+  String get financeTillImputationCardHint;
+
   /// No description provided for @financeTillImputationCardTitle.
   ///
   /// In en, this message translates to:

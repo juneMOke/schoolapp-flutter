@@ -179,6 +179,67 @@ void main() {
     );
 
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
+      'redemander la MÊME caisse sur la MÊME fenêtre ne rappelle pas',
+      setUp: () => stub(_page()),
+      build: buildBloc,
+      seed: () => const FinanceTillReceiptsState(
+        status: FinanceTillReceiptsStatus.success,
+        currency: 'USD',
+        window: TillWindow.day(),
+      ),
+      act: (bloc) => bloc.add(
+        const FinanceTillReceiptsRequested(
+          currency: 'USD',
+          window: TillWindow.day(),
+        ),
+      ),
+      expect: () => const <FinanceTillReceiptsState>[],
+      verify: (_) {
+        // L'onglet déclenche depuis deux endroits — son montage et l'écouteur
+        // des agrégats — parce qu'un écouteur seul rate l'état qu'il trouve.
+        // Les deux peuvent coïncider ; le second ne doit ni rappeler ni faire
+        // clignoter une table déjà remplie.
+        verifyNever(
+          () => mockUseCase(
+            currency: any(named: 'currency'),
+            window: any(named: 'window'),
+            page: any(named: 'page'),
+            size: any(named: 'size'),
+          ),
+        );
+      },
+    );
+
+    blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
+      'après un échec, la même demande REJOUE — c’est « Réessayer »',
+      setUp: () => stub(_page()),
+      build: buildBloc,
+      seed: () => const FinanceTillReceiptsState(
+        status: FinanceTillReceiptsStatus.error,
+        currency: 'USD',
+        window: TillWindow.day(),
+        failure: NetworkFailure('offline'),
+      ),
+      act: (bloc) => bloc.add(
+        const FinanceTillReceiptsRequested(
+          currency: 'USD',
+          window: TillWindow.day(),
+        ),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.status, FinanceTillReceiptsStatus.success);
+        verify(
+          () => mockUseCase(
+            currency: 'USD',
+            window: const TillWindow.day(),
+            page: 0,
+            size: any(named: 'size'),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
       'tourner une page sans caisse choisie ne demande rien',
       build: buildBloc,
       act: (bloc) => bloc.add(const FinanceTillReceiptsPageChanged(1)),
@@ -242,9 +303,12 @@ void main() {
         ).thenAnswer((_) async => const Left(NetworkFailure('offline')));
       },
       build: buildBloc,
+      // La fenêtre change : la demande n'est donc pas un doublon de ce qui est
+      // déjà servi, et elle repart bien vers le serveur.
       seed: () => FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
         currency: 'USD',
+        window: const TillWindow.week(),
         receipts: [_receipt('p1', 'USD')],
       ),
       act: (bloc) => bloc.add(

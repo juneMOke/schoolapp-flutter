@@ -70,7 +70,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('quatre segments, le jour d’abord — et pas « Cette année »', (
+  testWidgets('cinq segments, du grain le plus fin au plus large', (
     tester,
   ) async {
     await pump(tester);
@@ -80,10 +80,24 @@ void main() {
     expect(find.text("Aujourd'hui"), findsOneWidget);
     expect(find.text('Cette semaine'), findsOneWidget);
     expect(find.text('Ce mois'), findsOneWidget);
+    // ⚠️ Cinquième segment, AJOUTÉ par le porteur au-delà de la maquette : la
+    // spec n'en dessine que quatre. Le contrat le servait déjà.
+    expect(find.text('Cette année'), findsOneWidget);
     expect(find.text('Période'), findsOneWidget);
-    // Le contrat sert `year` et le modèle sait le construire ; la spec ne l'a
-    // jamais dessiné, et le porteur a tranché pour la spec.
-    expect(find.text('Cette année'), findsNothing);
+  });
+
+  testWidgets('« Cette année » demande bien la fenêtre annuelle', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    await tester.tap(find.text('Cette année'));
+    await tester.pumpAndSettle();
+
+    expect(bloc.state.selectedWindow, const TillWindow.year());
+    verify(() => useCase(window: const TillWindow.year())).called(1);
+    // Aucune borne : `from`/`to` sur autre chose que `custom` part en 400.
+    expect(bloc.state.selectedWindow.apiFrom, isNull);
   });
 
   testWidgets('changer de grain redemande la caisse sur cette fenêtre', (

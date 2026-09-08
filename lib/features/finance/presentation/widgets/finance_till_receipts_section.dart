@@ -171,7 +171,9 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           variant: DataTableCellTextVariant.strong,
           secondaryText: _studentLine(receipt, l10n),
         ),
-        DataTableCellSpec(text: _sourceLabel(receipt.source, l10n)),
+        DataTableCellSpec(
+          child: _SourcePill(source: receipt.source, l10n: l10n),
+        ),
         DataTableCellSpec(
           text: MoneyFormat.format(
             Money.parse(receipt.amount, receipt.currency),
@@ -219,12 +221,62 @@ class FinanceTillReceiptsSection extends StatelessWidget {
         ? units.round().toString()
         : units.toString();
   }
+}
 
-  static String _sourceLabel(String source, AppLocalizations l10n) =>
-      switch (source) {
-        'BOUTIQUE' => l10n.financeTillSourceBoutique,
-        _ => l10n.financeTillSourceFees,
-      };
+/// D'où vient la ligne — **une pastille, pas un mot nu**.
+///
+/// La spec la dessine ainsi : `landmark` pour la facturation, `store` pour la
+/// boutique, chacune sur son fond. L'icône **double** le libellé, elle ne le
+/// remplace pas : une source portée par la seule teinte serait invisible à qui
+/// ne distingue pas les deux.
+class _SourcePill extends StatelessWidget {
+  final String source;
+  final AppLocalizations l10n;
+
+  const _SourcePill({required this.source, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final isBoutique = source == 'BOUTIQUE';
+    final label = isBoutique
+        ? l10n.financeTillSourceBoutique
+        : l10n.financeTillSourceFees;
+    final accent = isBoutique ? AppColors.terreCuite : AppColors.bleuArdoise;
+    final surface = isBoutique
+        ? AppColors.terreCuiteSoft
+        : AppColors.bleuArdoiseSoft;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingS,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            // `landmark` / `store` de la spec, dans leurs équivalents Material.
+            isBoutique ? Icons.storefront_outlined : Icons.account_balance,
+            size: 13,
+            color: accent,
+          ),
+          const SizedBox(width: AppDimensions.spacingXS),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(color: accent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// « 17 reçus · 4 120 $ · 2 sans pièce scellée » — **trois chiffres de fenêtre**.

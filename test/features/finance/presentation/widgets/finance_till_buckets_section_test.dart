@@ -98,14 +98,16 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('les libellés portent le jour, pas la clé entière', (
+  testWidgets('les libellés portent la date, pas la clé entière', (
     tester,
   ) async {
     await pump(tester, _month());
 
     final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
-    expect(chart.items.first.label, '01');
-    expect(chart.items.last.label, '31');
+    // « JJ/MM » et non le seul jour : une fenêtre libre peut enjamber deux
+    // mois, et « 01 » n'y dirait pas lequel.
+    expect(chart.items.first.label, '01/05');
+    expect(chart.items.last.label, '31/05');
   });
 
   testWidgets('l’intervalle en cours est le seul accentué', (tester) async {

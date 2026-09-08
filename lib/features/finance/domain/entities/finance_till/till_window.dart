@@ -43,10 +43,10 @@ class TillWindow extends Equatable {
 
   /// L'année scolaire.
   ///
-  /// ⚠️ **Constructible, mais non offerte par le sélecteur.** Le contrat la
-  /// sert ; la spec ne l'a jamais dessinée, et le porteur a tranché pour la
-  /// spec. Elle reste ici parce que le modèle doit pouvoir dire ce que le
-  /// serveur accepte — la retirer ferait mentir le modèle sur le contrat.
+  /// La spec ne la dessinait pas ; le porteur l'a **ajoutée** après avoir fait
+  /// tourner l'écran. Elle n'a rien coûté à rebrancher : le contrat la servait
+  /// déjà, et ce constructeur existait — le modèle avait été gardé complet
+  /// pendant que l'écran, lui, ne l'offrait pas.
   const TillWindow.year() : this._(period: TillPeriod.year);
 
   /// Une fenêtre libre, **bornes incluses**.

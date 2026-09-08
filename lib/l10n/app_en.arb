@@ -3913,6 +3913,7 @@
   "financeTillImputationHeading": "What these payments settled",
   "@financeTillImputationHeading": {"description": "Second half of the till screen, counted in charge currency."},
   "financeTillImputationHint": "In charge currency: these amounts do not add up with the drawer's.",
+  "financeTillImputationCardHint": "In the claim currency, never converted — these amounts do not add up with the till's.",
   "financeTillImputationCardTitle": "Charges settled in {currency}",
   "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
   "financeTillImputationTotal": "Settled total · {amount}",

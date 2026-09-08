@@ -3881,6 +3881,8 @@
   "@financeTillImputationHeading": {"description": "Titre de la seconde moitié de l'écran caisse. Elle compte dans la devise de la CRÉANCE, quand tout ce qui précède compte en devise reçue."},
   "financeTillImputationHint": "En devise de créance : ces montants ne s'additionnent pas à ceux du tiroir.",
   "@financeTillImputationHint": {"description": "Un versement de 115 000 FC qui solde 50 USD pèse en haut dans le bloc CDF et ici dans le bloc USD. Sans cette phrase, les deux moitiés se lisent comme un seul total, qui n'existe pas."},
+  "financeTillImputationCardHint": "En devise de créance, jamais converti — ces montants ne s'additionnent pas à ceux du tiroir.",
+  "@financeTillImputationCardHint": {"description": "La carte voisine « Par source », qui compte en devise REÇUE. Sans cette ligne, l'adjacence invite à lire un total commun qui n'existe pas."},
   "financeTillImputationCardTitle": "Créances réglées en {currency}",
   "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
   "financeTillImputationTotal": "Total imputé · {amount}",

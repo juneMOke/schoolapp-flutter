@@ -102,6 +102,7 @@ class FinanceTillSuccessView extends StatelessWidget {
                 // Le grain vient du serveur : une tranche hebdomadaire porte
                 // une clé de la même forme qu'une journée.
                 granularity: till.granularity,
+                currency: selected.currency,
                 // La série déborde la fenêtre comptée sur la journée seulement.
                 // La note vit à côté du graphique, là où l'écart se voit.
                 windowNote: till.context.period == 'day'
@@ -109,10 +110,11 @@ class FinanceTillSuccessView extends StatelessWidget {
                     : null,
               ),
               const SizedBox(height: AppDimensions.spacingL),
-              // Deux lectures de la même somme : d'où vient l'argent, puis quelle
-              // classe l'a versé. Toutes deux dans la devise de la caisse
-              // détaillée — aucune conversion nulle part.
-              FinanceTillSourceSection(block: selected),
+              // **Deux lectures de la même somme, côte à côte.** À gauche à quoi
+              // l'argent a été imputé, à droite d'où il vient. Séparées, elles
+              // cessent de répondre à la même question : c'est le rapprochement
+              // qui fait la lecture, pas chacune des deux cartes.
+              _ImputationAndSourceRow(till: till, selected: selected),
               const SizedBox(height: AppDimensions.spacingL),
               FinanceTillClassroomSection(block: selected),
               const SizedBox(height: AppDimensions.spacingL),
@@ -127,28 +129,6 @@ class FinanceTillSuccessView extends StatelessWidget {
             ],
             const SizedBox(height: AppDimensions.spacingXL),
           ],
-          // La ventilation par poste n'est plus une colonne du bloc de devise
-          // reçue : elle se compte dans la devise des créances. Elle descend
-          // donc sous son propre titre, qui nomme l'unité — la seule chose qui
-          // empêche de lire un total commun là où il n'en existe aucun.
-          if (till.impute.isNotEmpty || _hasFees(till)) ...[
-            _ImputationHeading(l10n: l10n),
-            const SizedBox(height: AppDimensions.spacingM),
-            if (till.impute.isEmpty)
-              // Des frais sont entrés sans qu'aucune imputation ne descende :
-              // on le montre sous le titre, plutôt que d'escamoter la section,
-              // où la lacune passerait pour une journée sans frais.
-              FinanceStatsEmptyState(
-                message: l10n.financeStatsNoData,
-                hint: l10n.financeStatsNoDataHint,
-                semanticLabel: l10n.financeStatsEmptyA11yLabel,
-              )
-            else
-              for (final imputation in till.impute) ...[
-                FinanceTillImputationSection(imputation: imputation),
-                const SizedBox(height: AppDimensions.spacingL),
-              ],
-          ],
         ],
       ],
     );
@@ -159,6 +139,95 @@ class FinanceTillSuccessView extends StatelessWidget {
 /// été imputé, et l'absence de bloc d'imputation est une lacune, pas un état.
 bool _hasFees(FinanceTill till) =>
     till.encaisse.any((block) => block.summary.fees > 0);
+
+/// **Deux lectures de la même somme**, côte à côte quand la largeur le permet.
+///
+/// À gauche « à quoi l'argent a été imputé », à droite « d'où il vient ». La
+/// spec l'écrit comme une **intention**, pas comme un détail de mise en page :
+/// séparées, les deux cartes cessent de répondre à la même question, et le
+/// lecteur perd le rapprochement qui fait toute la lecture.
+///
+/// ⚠️ **Les deux ne comptent pas dans la même unité**, et c'est justement
+/// pourquoi leur voisinage doit être explicite : la gauche est en devise de
+/// **créance**, la droite en devise **reçue**. Chaque carte nomme la sienne ;
+/// sans ça, l'adjacence inviterait à lire un total commun qui n'existe pas.
+///
+/// En dessous de la largeur des deux minima, elles s'empilent — la spec le
+/// prévoit (« empilées pleine largeur »), et un rapprochement illisible ne vaut
+/// pas mieux qu'une séparation.
+class _ImputationAndSourceRow extends StatelessWidget {
+  final FinanceTill till;
+  final TillCurrencyBlock selected;
+
+  const _ImputationAndSourceRow({required this.till, required this.selected});
+
+  /// Les deux minima de la spec, plus leur gouttière.
+  static const double _imputationMinWidth = 380;
+  static const double _sourceMinWidth = 300;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final imputation = _imputationColumn(l10n);
+    final source = FinanceTillSourceSection(block: selected);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gutter = AppDimensions.spacingL;
+        final fitsSideBySide =
+            constraints.maxWidth >=
+            _imputationMinWidth + _sourceMinWidth + gutter;
+
+        if (!fitsSideBySide) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              imputation,
+              const SizedBox(height: gutter),
+              source,
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: imputation),
+            const SizedBox(width: gutter),
+            Expanded(child: source),
+          ],
+        );
+      },
+    );
+  }
+
+  /// **Une carte par devise imputée** — le serveur en rend une par devise de
+  /// créance, et elles s'empilent dans la colonne de gauche.
+  Widget _imputationColumn(AppLocalizations l10n) {
+    if (till.impute.isEmpty) {
+      // Des frais sont entrés sans qu'aucune imputation ne descende : on le
+      // montre, plutôt que d'escamoter la carte — où la lacune passerait pour
+      // une journée sans frais.
+      if (!_hasFees(till)) return const SizedBox.shrink();
+      return FinanceStatsEmptyState(
+        message: l10n.financeStatsNoData,
+        hint: l10n.financeStatsNoDataHint,
+        semanticLabel: l10n.financeStatsEmptyA11yLabel,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final imputation in till.impute) ...[
+          FinanceTillImputationSection(imputation: imputation),
+          if (imputation != till.impute.last)
+            const SizedBox(height: AppDimensions.spacingM),
+        ],
+      ],
+    );
+  }
+}
 
 /// Le libellé de la fenêtre, **lu sur la réponse et non sur le sélecteur**.
 ///
@@ -178,39 +247,6 @@ String _windowLabel(FinanceTill till, AppLocalizations l10n) =>
       'year' => l10n.financeStatsPeriodYearCurrent,
       final other => other,
     };
-
-/// Sépare les deux unités de l'écran, et nomme celle qui commence.
-///
-/// Sans ce titre, les montants du bas se lisent dans la continuité de la bande
-/// KPI — c'est-à-dire dans la mauvaise devise, et sur un total qui n'existe pas.
-class _ImputationHeading extends StatelessWidget {
-  final AppLocalizations l10n;
-
-  const _ImputationHeading({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(
-            l10n.financeTillImputationHeading,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingXS),
-        Text(
-          l10n.financeTillImputationHint,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-        ),
-      ],
-    );
-  }
-}
 
 /// De quelle fenêtre parle le total, et dans quel fuseau elle se découpe.
 ///

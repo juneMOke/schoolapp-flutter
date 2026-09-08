@@ -246,6 +246,29 @@ void main() {
     verify(() => mockRecovery()).called(1);
   });
 
+  testWidgets('la table est TOUJOURS demandée avec une devise', (tester) async {
+    await pumpPage(tester);
+
+    await tester.tap(find.text('Caisse'));
+    await tester.pumpAndSettle();
+    // L'appel de la table est à un saut de plus que celui des agrégats
+    // (écouteur → bloc → cas d'usage) : il lui faut une frame supplémentaire.
+    await tester.pumpAndSettle();
+
+    // ⚠️ `currency` est **obligatoire** sur `/receipts` : sans elle, 400. La
+    // devise vient du bloc des agrégats via l'écouteur, donc elle est là par
+    // construction — mais c'est exactement le genre de paramètre qu'on perd
+    // sur une branche neuve sans que rien ne le dise avant l'exécution.
+    verify(
+      () => mockReceipts(
+        currency: 'USD',
+        window: any(named: 'window'),
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).called(1);
+  });
+
   testWidgets('un échec de caisse ne touche pas le recouvrement déjà lu', (
     tester,
   ) async {

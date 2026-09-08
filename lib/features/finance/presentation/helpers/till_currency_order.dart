@@ -75,6 +75,17 @@ Color tillCurrencyAccent(String currency) => switch (currency) {
   _ => AppColors.textSecondary,
 };
 
+/// Le fond du médaillon d'une caisse — la teinte douce qui accompagne
+/// [tillCurrencyAccent].
+///
+/// Même règle : elle repère, elle n'informe pas. Une devise inconnue prend le
+/// fond neutre plutôt qu'une couleur inventée.
+Color tillCurrencySoftAccent(String currency) => switch (currency) {
+  'USD' => AppColors.bleuArdoiseSoft,
+  'CDF' => AppColors.feeStatusPaidSoft,
+  _ => AppColors.surfaceAlt,
+};
+
 /// « dollars », « francs » — et le **code lui-même** pour toute autre devise.
 ///
 /// Un générique (« devise étrangère ») ne désignerait rien ; le code, lui, est

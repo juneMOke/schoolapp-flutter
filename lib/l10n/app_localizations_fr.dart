@@ -6760,6 +6760,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'En devise de créance : ces montants ne s\'additionnent pas à ceux du tiroir.';
 
   @override
+  String get financeTillImputationCardHint =>
+      'En devise de créance, jamais converti — ces montants ne s\'additionnent pas à ceux du tiroir.';
+
+  @override
   String financeTillImputationCardTitle(String currency) {
     return 'Créances réglées en $currency';
   }

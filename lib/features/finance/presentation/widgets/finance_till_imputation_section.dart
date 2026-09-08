@@ -50,6 +50,15 @@ class FinanceTillImputationSection extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
+          const SizedBox(height: AppDimensions.spacingXS),
+          // ⚠️ **La carte nomme son unité, et c'est indispensable depuis
+          // qu'elle voisine « Par source ».** Celle-ci compte en devise reçue,
+          // celle-là en devise de créance : côte à côte sans mention, leur
+          // adjacence invite à lire un total commun qui n'existe pas.
+          Text(
+            l10n.financeTillImputationCardHint,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
           const SizedBox(height: AppDimensions.spacingM),
           if (imputation.byFeeCode.isEmpty)
             FinanceStatsEmptyState(
