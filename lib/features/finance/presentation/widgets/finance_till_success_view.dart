@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_imputation_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_freshness_caption.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_kpi_band.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce qui est entré dans le tiroir sur la fenêtre — **puis ce que ça a
@@ -55,7 +55,10 @@ class FinanceTillSuccessView extends StatelessWidget {
             ),
           )
         else ...[
-          FinanceTillKpiBand(blocks: till.encaisse),
+          FinanceTillCashBoxes(
+            till: till,
+            windowLabel: _windowLabel(till, l10n),
+          ),
           const SizedBox(height: AppDimensions.spacingS),
           const FinanceTillFreshnessCaption(),
           const SizedBox(height: AppDimensions.spacingL),
@@ -100,6 +103,25 @@ class FinanceTillSuccessView extends StatelessWidget {
 /// été imputé, et l'absence de bloc d'imputation est une lacune, pas un état.
 bool _hasFees(FinanceTill till) =>
     till.encaisse.any((block) => block.summary.fees > 0);
+
+/// Le libellé de la fenêtre, **lu sur la réponse et non sur le sélecteur**.
+///
+/// Pendant un changement de grain, l'onglet a déjà bougé alors que les chiffres
+/// affichés sont encore ceux d'avant : suffixer les caisses avec le grain
+/// *demandé* daterait le montant d'une fenêtre qui ne l'a pas produit.
+/// `context.period` vient du serveur, avec les totaux qu'il décrit.
+///
+/// Une valeur inconnue retombe sur la chaîne du serveur plutôt que sur un
+/// générique : mieux vaut afficher `custom` que « période », qui ne désigne
+/// rien.
+String _windowLabel(FinanceTill till, AppLocalizations l10n) =>
+    switch (till.context.period) {
+      'day' => l10n.financeTillPeriodDayCurrent,
+      'week' => l10n.financeStatsPeriodWeekCurrent,
+      'month' => l10n.financeStatsPeriodMonthCurrent,
+      'year' => l10n.financeStatsPeriodYearCurrent,
+      final other => other,
+    };
 
 /// Sépare les deux unités de l'écran, et nomme celle qui commence.
 ///

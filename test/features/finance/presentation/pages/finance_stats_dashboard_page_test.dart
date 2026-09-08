@@ -199,13 +199,13 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockTill(period: any(named: 'period'))).called(1);
-    // Le total du tiroir et sa moitié boutique — le seul chiffre neuf de
-    // l'écran — sont là. Le libellé le NOMME « tiroir » et non « encaissé » :
-    // le recouvrement affiche déjà un « Total encaissé », qui compte l'année
-    // entière, et deux cartes homonymes à un onglet d'écart ne se distinguent
-    // par rien.
-    expect(find.text('Total du tiroir'), findsOneWidget);
-    expect(find.text('Ventes boutique'), findsOneWidget);
+    // La caisse de la fenêtre est là, nommée par sa devise et sa fenêtre. Le
+    // libellé dit « Caisse » et non « encaissé » : le recouvrement affiche déjà
+    // un « Total encaissé », qui compte l'année entière, et deux cartes
+    // homonymes à un onglet d'écart ne se distinguent par rien.
+    expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
+    // Le compteur de reçus — le seul agrégat inter-devises de l'écran.
+    expect(find.text('Reçus émis'), findsOneWidget);
   });
 
   testWidgets('les allers-retours entre onglets ne rappellent rien', (

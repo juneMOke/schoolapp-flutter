@@ -6429,6 +6429,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeTillKpiBandA11yLabel => 'Till indicators, by currency';
 
   @override
+  String get financeTillCashBoxesA11yLabel =>
+      'The window\'s tills, one per currency, and the number of receipts issued';
+
+  @override
+  String financeTillCashBoxLabel(String currency, String window) {
+    return '$currency till · $window';
+  }
+
+  @override
+  String get financeTillCurrencyNameUsd => 'dollar';
+
+  @override
+  String get financeTillCurrencyNameCdf => 'franc';
+
+  @override
+  String financeTillReceiptCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'receipts',
+      one: 'receipt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillCashBoxSubline(int count, String unit, String ticket) {
+    return '$count $unit · average ticket $ticket';
+  }
+
+  @override
+  String financeTillCashBoxTrend(int percent) {
+    return '$percent% vs previous period';
+  }
+
+  @override
+  String get financeTillReceiptsIssuedLabel => 'Receipts issued';
+
+  @override
+  String get financeTillReceiptsIssuedSubline => 'across all tills';
+
+  @override
+  String get financeTillReceiptsIssuedMixedNote =>
+      'A receipt settled in both currencies counts in each till, but is issued only once.';
+
+  @override
   String financeStatsFeeTypeOutstanding(String amount) {
     return 'Outstanding: $amount';
   }

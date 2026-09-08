@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -11,6 +10,7 @@ import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -63,6 +63,7 @@ FinanceTill _till(
   DateTime? start,
   DateTime? end,
   String timeZone = 'Africa/Kinshasa',
+  int? receiptsIssued,
 }) => FinanceTill(
   context: StatsContext(
     schoolYear: '2025-2026',
@@ -73,6 +74,12 @@ FinanceTill _till(
   ),
   timeZone: timeZone,
   encaisse: blocks,
+  // Par défaut, aucun panier mixte : chaque reçu n'a alimenté qu'une caisse, et
+  // le compteur global vaut la somme des compteurs. Les tests qui éprouvent
+  // l'écart passent leur propre valeur.
+  receiptsIssued:
+      receiptsIssued ??
+      blocks.fold<int>(0, (sum, block) => sum + block.summary.receiptCount),
   // Le cas courant : l'école n'encaisse que dans la devise de ses créances, et
   // chaque bloc reçu a son pendant imputé. Les tests qui éprouvent la bascule
   // de devise passent leur propre liste.
@@ -196,15 +203,120 @@ void main() {
     expect(find.text('Jamais synchronisé'), findsOneWidget);
   });
 
-  testWidgets('trois cartes, aucun taux : rien n’est dû ici', (tester) async {
+  testWidgets('une caisse par devise, plus le compteur — aucun taux ici', (
+    tester,
+  ) async {
     await pump(tester, _till([_block('USD')]));
 
-    expect(find.byType(EteeloKpiCard), findsNWidgets(3));
-    expect(find.text('Total du tiroir'), findsOneWidget);
-    expect(find.text('Frais scolaires'), findsOneWidget);
-    expect(find.text('Ventes boutique'), findsOneWidget);
+    expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
+    expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
+    expect(find.text('Reçus émis'), findsOneWidget);
+    // Rien n'est dû sur cet onglet : y lire un ratio ferait chercher un
+    // recouvrement là où le caissier compte des billets.
     expect(find.text('Taux de recouvrement'), findsNothing);
     expect(find.text('Reste à recouvrer'), findsNothing);
+  });
+
+  testWidgets('les dollars restent à gauche même quand les francs mènent', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      // L'ordre du serveur est alphabétique — CDF d'abord — et les francs
+      // pèsent ici bien plus lourd. La position ne doit pas bouger pour autant.
+      _till([
+        _block('CDF', fees: 9000000, boutique: 0),
+        _block('USD', fees: 100000, boutique: 23450),
+      ]),
+    );
+
+    final labels = tester
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byType(FinanceTillCashBoxes),
+            matching: find.byType(Text),
+          ),
+        )
+        .map((text) => text.data)
+        .whereType<String>();
+
+    expect(
+      labels.firstWhere((label) => label.startsWith('Caisse')),
+      'Caisse dollars · Aujourd\'hui',
+      reason:
+          'la position d’une caisse doit être stable d’un jour à l’autre : '
+          'sinon le lecteur qui a mémorisé « le dollar est à gauche » lit un '
+          'franc pour un dollar le premier jour où les francs passent devant',
+    );
+  });
+
+  testWidgets('un reçu croisé fait diverger les compteurs, et la note le dit', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till(
+        [_block('CDF', receiptCount: 3), _block('USD', receiptCount: 5)],
+        // 5 + 3 = 8 compteurs de caisse pour 7 reçus : un versement a été réglé
+        // moitié en francs, moitié en dollars.
+        receiptsIssued: 7,
+      ),
+    );
+
+    expect(find.text('7'), findsOneWidget);
+    expect(
+      find.text(
+        'Un reçu réglé dans les deux devises compte dans chaque caisse, '
+        'mais n\'est émis qu\'une fois.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sans panier mixte, la note d’écart ne s’affiche pas', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([_block('CDF', receiptCount: 3), _block('USD', receiptCount: 5)]),
+    );
+
+    expect(find.text('8'), findsOneWidget);
+    expect(
+      find.textContaining('compte dans chaque caisse'),
+      findsNothing,
+      reason:
+          'les compteurs s’accordent : la phrase sèmerait un doute là où il '
+          'n’y en a pas',
+    );
+  });
+
+  testWidgets('une tendance non mesurée ne s’affiche pas du tout', (
+    tester,
+  ) async {
+    await pump(tester, _till([_block('USD'), _block('CDF', trendPercent: -7)]));
+
+    expect(find.text('7 % vs période précédente'), findsOneWidget);
+    expect(
+      find.textContaining('vs période précédente'),
+      findsOneWidget,
+      reason:
+          'le bloc USD n’a pas de tendance : « 0 % » annoncerait une '
+          'stabilité que personne n’a observée',
+    );
+  });
+
+  testWidgets('une caisse sans reçu tait son ticket moyen', (tester) async {
+    await pump(
+      tester,
+      _till([_block('USD', fees: 0, boutique: 0, receiptCount: 0)]),
+    );
+
+    expect(
+      find.textContaining('ticket moyen'),
+      findsNothing,
+      reason: 'il n’y a rien à diviser — « ticket moyen 0 » serait une mesure',
+    );
   });
 
   testWidgets('la ventilation descend sous son propre titre', (tester) async {
@@ -271,8 +383,9 @@ void main() {
       find.text('Rien n\'est entré dans le tiroir sur cette période.'),
       findsOneWidget,
     );
-    // La devise garde sa place dans la bande KPI : ses zéros y sont justes.
-    expect(find.byType(EteeloKpiCard), findsNWidgets(3));
+    // La devise garde sa tuile de caisse : ses zéros y sont justes.
+    expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
+    expect(find.text('Caisse francs · Aujourd\'hui'), findsOneWidget);
     // Un seul axe : celui de la devise qui a bougé.
     expect(find.byType(FinanceTillBucketsSection), findsOneWidget);
   });
@@ -281,7 +394,7 @@ void main() {
     await pump(tester, _till(const []));
 
     expect(find.byType(EteeloEmptyResult), findsOneWidget);
-    expect(find.byType(EteeloKpiCard), findsNothing);
+    expect(find.byType(FinanceTillCashBoxes), findsNothing);
     // La fenêtre reste annoncée : elle dit de quoi l'écran ne trouve rien.
     expect(find.textContaining('Journée du'), findsOneWidget);
   });

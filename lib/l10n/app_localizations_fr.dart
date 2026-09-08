@@ -6497,6 +6497,52 @@ class AppLocalizationsFr extends AppLocalizations {
       'Indicateurs de la caisse, par devise';
 
   @override
+  String get financeTillCashBoxesA11yLabel =>
+      'Les caisses de la fenêtre, une par devise, et le nombre de reçus émis';
+
+  @override
+  String financeTillCashBoxLabel(String currency, String window) {
+    return 'Caisse $currency · $window';
+  }
+
+  @override
+  String get financeTillCurrencyNameUsd => 'dollars';
+
+  @override
+  String get financeTillCurrencyNameCdf => 'francs';
+
+  @override
+  String financeTillReceiptCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'reçus',
+      one: 'reçu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillCashBoxSubline(int count, String unit, String ticket) {
+    return '$count $unit · ticket moyen $ticket';
+  }
+
+  @override
+  String financeTillCashBoxTrend(int percent) {
+    return '$percent % vs période précédente';
+  }
+
+  @override
+  String get financeTillReceiptsIssuedLabel => 'Reçus émis';
+
+  @override
+  String get financeTillReceiptsIssuedSubline => 'toutes caisses confondues';
+
+  @override
+  String get financeTillReceiptsIssuedMixedNote =>
+      'Un reçu réglé dans les deux devises compte dans chaque caisse, mais n\'est émis qu\'une fois.';
+
+  @override
   String financeStatsFeeTypeOutstanding(String amount) {
     return 'Reste dû : $amount';
   }

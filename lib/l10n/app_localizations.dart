@@ -10535,6 +10535,66 @@ abstract class AppLocalizations {
   /// **'Till indicators, by currency'**
   String get financeTillKpiBandA11yLabel;
 
+  /// No description provided for @financeTillCashBoxesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'The window\'s tills, one per currency, and the number of receipts issued'**
+  String get financeTillCashBoxesA11yLabel;
+
+  /// No description provided for @financeTillCashBoxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till · {window}'**
+  String financeTillCashBoxLabel(String currency, String window);
+
+  /// No description provided for @financeTillCurrencyNameUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'dollar'**
+  String get financeTillCurrencyNameUsd;
+
+  /// No description provided for @financeTillCurrencyNameCdf.
+  ///
+  /// In en, this message translates to:
+  /// **'franc'**
+  String get financeTillCurrencyNameCdf;
+
+  /// No description provided for @financeTillReceiptCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{receipt} other{receipts}}'**
+  String financeTillReceiptCount(int count);
+
+  /// No description provided for @financeTillCashBoxSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {unit} · average ticket {ticket}'**
+  String financeTillCashBoxSubline(int count, String unit, String ticket);
+
+  /// No description provided for @financeTillCashBoxTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% vs previous period'**
+  String financeTillCashBoxTrend(int percent);
+
+  /// No description provided for @financeTillReceiptsIssuedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts issued'**
+  String get financeTillReceiptsIssuedLabel;
+
+  /// No description provided for @financeTillReceiptsIssuedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'across all tills'**
+  String get financeTillReceiptsIssuedSubline;
+
+  /// No description provided for @financeTillReceiptsIssuedMixedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A receipt settled in both currencies counts in each till, but is issued only once.'**
+  String get financeTillReceiptsIssuedMixedNote;
+
   /// Outstanding amount for a fee code.
   ///
   /// In en, this message translates to:
