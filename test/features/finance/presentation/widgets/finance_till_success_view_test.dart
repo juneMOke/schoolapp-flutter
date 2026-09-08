@@ -21,10 +21,19 @@ TillCurrencyBlock _block(
   String currency, {
   int fees = 100000,
   int boutique = 23450,
+  int receiptCount = 5,
+  int? trendPercent,
   List<TillBucket>? buckets,
 }) => TillCurrencyBlock(
   currency: currency,
-  summary: TillSummary(total: fees + boutique, fees: fees, boutique: boutique),
+  summary: TillSummary(
+    total: fees + boutique,
+    fees: fees,
+    boutique: boutique,
+    receiptCount: receiptCount,
+    averageTicket: receiptCount == 0 ? 0 : (fees + boutique) ~/ receiptCount,
+    trendPercent: trendPercent,
+  ),
   buckets:
       buckets ??
       [

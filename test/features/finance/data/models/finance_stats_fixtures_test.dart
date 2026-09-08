@@ -121,13 +121,11 @@ void main() {
       }
     });
 
-    test('`summary.total` vaut la somme des `buckets[].total`', () {
-      for (final raw in [
-        tillDayJson,
-        tillMonthJson,
-        tillEmptyDayJson,
-        tillYearJson,
-      ]) {
+    test('hors journée, `summary.total` vaut la somme des `buckets[].total`', () {
+      // `tillDayJson` est délibérément exclu : sur `day`, le serveur dessine
+      // sept barres pour une journée comptée, et le recoller ici rétablirait la
+      // règle périmée que le modèle vient d’abandonner.
+      for (final raw in [tillMonthJson, tillEmptyDayJson, tillYearJson]) {
         for (final block in decodeFixture(raw)['encaisse'] as List) {
           final map = block as Map<String, dynamic>;
           final summed = (map['buckets'] as List).fold<num>(
@@ -139,6 +137,31 @@ void main() {
         }
       }
     });
+
+    test(
+      'la fixture `day` porte bien sept barres pour une journée comptée',
+      () {
+        for (final block in decodeFixture(tillDayJson)['encaisse'] as List) {
+          final map = block as Map<String, dynamic>;
+          final buckets = map['buckets'] as List;
+          final summed = buckets.fold<num>(
+            0,
+            (sum, bucket) =>
+                sum + ((bucket as Map<String, dynamic>)['total'] as num),
+          );
+
+          expect(buckets, hasLength(7));
+          expect(
+            (map['summary'] as Map<String, dynamic>)['total'],
+            lessThan(summed),
+            reason:
+                'si cette fixture repassait à une barre unique, les tests qui '
+                'gardent l’écart deviendraient verts sans rien mesurer — c’est '
+                'exactement ce qui s’était produit',
+          );
+        }
+      },
+    );
 
     test('un bloc d’imputation somme exactement à son total', () {
       for (final raw in [tillDayJson, tillMonthJson, tillYearJson]) {

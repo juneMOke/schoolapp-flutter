@@ -44,8 +44,52 @@ void main() {
       expect(usd.summary.total, usd.summary.fees + usd.summary.boutique);
     });
 
-    test('le total du résumé vaut la somme des barres', () {
-      for (final raw in [tillDayJson, tillMonthJson, tillYearJson]) {
+    test('sur une journée, le total du résumé ne vaut PAS la somme des barres '
+        '— la série déborde la fenêtre comptée', () {
+      for (final block in _entity(tillDayJson).encaisse) {
+        final summed = block.buckets.fold<int>(
+          0,
+          (sum, bucket) => sum + bucket.total,
+        );
+
+        expect(
+          block.buckets,
+          hasLength(7),
+          reason:
+              'le serveur dessine sept jours autour de la journée demandée '
+              '(début − 6 j) : un chiffre du jour, seul, ne dit pas s’il est '
+              'bon',
+        );
+        expect(
+          block.summary.total,
+          lessThan(summed),
+          reason:
+              'le résumé porte sur la FENÊTRE, la série sur ce qu’il faut pour '
+              'la lire — recoller les deux ferait échouer la journée, qui est '
+              'la fenêtre par défaut de l’écran',
+        );
+      }
+    });
+
+    test(
+      'le total affiché est celui du résumé, jamais la somme des barres',
+      () {
+        final usd = _entity(tillDayJson).encaisse.last;
+        final today = usd.buckets.firstWhere((bucket) => bucket.isCurrent);
+
+        expect(
+          usd.summary.total,
+          today.total,
+          reason:
+              'sur une journée, le résumé vaut exactement la barre du jour '
+              'demandé — c’est ce qui rend l’écart avec les six autres lisible '
+              'plutôt que suspect',
+        );
+      },
+    );
+
+    test('sur une fenêtre large, la série couvre exactement la fenêtre', () {
+      for (final raw in [tillMonthJson, tillYearJson]) {
         for (final block in _entity(raw).encaisse) {
           final summed = block.buckets.fold<int>(
             0,
@@ -55,13 +99,154 @@ void main() {
             block.summary.total,
             summed,
             reason:
-                'les deux sont repliés depuis les mêmes lignes journalières — '
-                'le total et les barres s’affichent côte à côte sans '
-                'réconciliation',
+                'hors journée, la série ne déborde pas : les deux se replient '
+                'depuis les mêmes lignes, et l’écart de la fenêtre `day` est '
+                'bien une particularité de cette fenêtre-là',
           );
         }
       }
     });
+  });
+
+  group(
+    'les compteurs — celui qu’on additionne et ceux qu’on n’additionne pas',
+    () {
+      test('« reçus émis » ne vaut pas la somme des compteurs par caisse', () {
+        final till = _entity(tillDayJson);
+        final perTill = till.encaisse.fold<int>(
+          0,
+          (sum, block) => sum + block.summary.receiptCount,
+        );
+
+        expect(till.receiptsIssued, 7);
+        expect(
+          till.receiptsIssued,
+          lessThan(perTill),
+          reason:
+              'un reçu croisé alimente deux caisses et compte une fois par '
+              'caisse, mais n’est émis qu’une fois — « 40 \$ + 35 FC » au-dessus '
+              'de « 70 reçus émis » a raison deux fois et paraît faux',
+        );
+      });
+
+      test(
+        'le ticket moyen est LU, jamais recalculé sur le compteur global',
+        () {
+          final usd = _entity(tillDayJson).encaisse.last;
+
+          expect(usd.summary.averageTicket, 24690);
+          expect(
+            usd.summary.averageTicket,
+            usd.summary.total ~/ usd.summary.receiptCount,
+            reason:
+                'le dénominateur est le compteur DE LA CAISSE ; diviser par les '
+                'reçus émis donnerait 17 635 et sous-estimerait chaque panier',
+          );
+        },
+      );
+    },
+  );
+
+  group('ce qui se tait plutôt que de mentir', () {
+    test('`trendPercent` absent reste null — jamais replié sur zéro', () {
+      final blocks = _entity(tillDayJson).encaisse;
+      final cdf = blocks.firstWhere((block) => block.currency == 'CDF');
+      final usd = blocks.firstWhere((block) => block.currency == 'USD');
+
+      expect(cdf.summary.trendPercent, isNull);
+      expect(cdf.summary.hasTrend, isFalse);
+      expect(
+        usd.summary.trendPercent,
+        18,
+        reason: 'le cas mesuré doit rester distinct du cas tu',
+      );
+    });
+
+    test('`bestBucket` absent reste null sur une caisse creuse', () {
+      for (final block in _entity(tillEmptyDayJson).encaisse) {
+        expect(block.bestBucket, isNull);
+      }
+    });
+
+    test('la part du meilleur intervalle se rapporte aux barres dessinées', () {
+      final usd = _entity(tillDayJson).encaisse.last;
+      final drawn = usd.buckets.fold<int>(
+        0,
+        (sum, bucket) => sum + bucket.total,
+      );
+
+      expect(usd.bestBucket!.key, '2026-05-14');
+      expect(
+        usd.bestBucket!.sharePercent,
+        (usd.bestBucket!.amount * 100 / drawn).round(),
+        reason:
+            'rapportée à la journée comptée, la part vaudrait 100 % à chaque '
+            'fois et la carte cesserait de rien dire',
+      );
+    });
+  });
+
+  group('le classement par classe', () {
+    test('le palmarès et le montant sans classe se complètent au total', () {
+      final usd = _entity(tillDayJson).encaisse.last;
+      final ranked = usd.byClassroom.fold<int>(
+        0,
+        (sum, row) => sum + row.amount,
+      );
+
+      expect(usd.unassignedAmount, 23450);
+      expect(usd.hasUnassigned, isTrue);
+      expect(
+        ranked + usd.unassignedAmount,
+        usd.summary.total,
+        reason:
+            'sans la mention du montant écarté, la somme des lignes ne '
+            'retombe pas sur le total et le classement passe pour un bug — '
+            'une vente boutique ne désigne ni élève ni classe',
+      );
+    });
+
+    test('une caisse sans vente boutique n’écarte rien', () {
+      final cdf = _entity(tillDayJson).encaisse.first;
+
+      expect(cdf.unassignedAmount, 0);
+      expect(cdf.hasUnassigned, isFalse);
+    });
+  });
+
+  group('les paiements croisés', () {
+    test('les montants croisés gardent leur devise, jamais un total', () {
+      final crossed = _entity(tillDayJson).crossed;
+
+      expect(crossed.count, 2);
+      expect(crossed.isEmpty, isFalse);
+      expect(crossed.amounts.map((amount) => amount.currency), ['CDF', 'USD']);
+      expect(crossed.amounts.map((amount) => amount.amount), [1150000, 13500]);
+    });
+
+    test('les taux arrivent en micro-unités, et plusieurs se signalent', () {
+      final crossed = _entity(tillDayJson).crossed;
+
+      expect(crossed.rateMicros, [2850000000, 2900000000]);
+      expect(
+        crossed.hasMultipleRates,
+        isTrue,
+        reason:
+            'un taux changé en cours de fenêtre est justement ce qui explique '
+            'un écart de caisse — l’encart ne peut pas en citer un seul',
+      );
+    });
+
+    test(
+      'un bloc `crossed` absent vaut « aucun croisement », pas une erreur',
+      () {
+        final crossed = _entity(tillEmptyDayJson).crossed;
+
+        expect(crossed.isEmpty, isTrue);
+        expect(crossed.rateMicros, isEmpty);
+        expect(crossed.amounts, isEmpty);
+      },
+    );
   });
 
   group('l’imputation — l’autre unité', () {
@@ -130,11 +315,25 @@ void main() {
   });
 
   group('l’axe', () {
-    test('une journée rend une barre, pas zéro', () {
+    test('une journée rend sept barres, et une seule est courante', () {
       final buckets = _entity(tillDayJson).encaisse.first.buckets;
 
-      expect(buckets.single.key, '2026-05-15');
-      expect(buckets.single.isCurrent, isTrue);
+      // Ce test affirmait « une journée rend UNE barre ». Il était vert, et
+      // faux : le serveur trace les six jours qui précèdent la journée
+      // demandée, parce qu'un chiffre du jour, seul, ne dit pas s'il est bon.
+      expect(buckets.map((bucket) => bucket.key), [
+        '2026-05-09',
+        '2026-05-10',
+        '2026-05-11',
+        '2026-05-12',
+        '2026-05-13',
+        '2026-05-14',
+        '2026-05-15',
+      ]);
+      expect(
+        buckets.where((bucket) => bucket.isCurrent).single.key,
+        '2026-05-15',
+      );
     });
 
     test('un mois se lit jour par jour : 31 barres, une seule courante', () {

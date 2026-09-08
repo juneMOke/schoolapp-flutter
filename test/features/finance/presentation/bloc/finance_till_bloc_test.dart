@@ -22,7 +22,13 @@ FinanceTill _till(String period) => FinanceTill(
   encaisse: const [
     TillCurrencyBlock(
       currency: 'USD',
-      summary: TillSummary(total: 123450, fees: 100000, boutique: 23450),
+      summary: TillSummary(
+        total: 123450,
+        fees: 100000,
+        boutique: 23450,
+        receiptCount: 5,
+        averageTicket: 24690,
+      ),
       buckets: <TillBucket>[
         TillBucket(
           key: '2026-05-15',

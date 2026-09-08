@@ -220,10 +220,25 @@ const String recoveryOverCollectedJson = '''
 /// Le cas nominal de la caisse : une journée, deux devises reçues, des ventes
 /// boutique en dollars et rien que des frais en francs.
 ///
-/// Deux invariants s'y lisent : `summary.total == fees + boutique`, et
-/// `summary.total == somme des buckets[].total`. Le second est le seul des deux
-/// qui vaille comme contrôle de cohérence — voir `monthlyCollected` côté
-/// recouvrement, qui n'en est pas un.
+/// Un seul invariant s'y lit : `summary.total == fees + boutique`.
+///
+/// ⚠️ **`summary.total` ne vaut PAS la somme des `buckets[].total`, et cette
+/// fixture l'impose désormais.** Sur `day`, le serveur compte **la journée
+/// demandée** dans le résumé mais dessine **sept barres** (`début − 6 j`) : un
+/// chiffre du jour, seul, ne dit pas s'il est bon. Les 1 234,50 $ du résumé se
+/// lisent donc contre 5 984,50 $ de barres, et l'écart est la lecture, pas une
+/// erreur.
+///
+/// La fixture affirmait l'inverse — sept jours repliés sur une seule barre — et
+/// deux tests verts en vivaient. Ils ne mesuraient rien : **aucune fixture
+/// n'exerçait la fenêtre `day` telle que le serveur la sert**. Ne pas
+/// « réparer » cet écart ; le test qui le garde existe pour l'empêcher.
+///
+/// Elle porte aussi les compteurs qui **ne s'additionnent pas** :
+/// `receiptsIssued` vaut **7** quand les deux caisses comptent 5 et 3 reçus,
+/// parce qu'un reçu croisé a alimenté les deux et n'a été émis qu'une fois.
+/// Et le bloc CDF laisse `trendPercent` **absent** — période précédente hors
+/// année scolaire — pour que le cas « carte masquée » soit exercé quelque part.
 ///
 /// ⚠️ **`impute` ne se déduit pas de `encaisse`, et cette fixture l'impose** :
 /// le bloc USD de l'imputation (1 500,00 $) dépasse la moitié frais du bloc USD
@@ -241,11 +256,25 @@ const String tillDayJson = '''
     "generatedAt": "2026-05-15T18:04:11Z"
   },
   "timeZone": "Africa/Kinshasa",
+  "receiptsIssued": 7,
   "encaisse": [
     {
       "currency": "CDF",
-      "summary": { "total": 9000000, "fees": 9000000, "boutique": 0 },
+      "summary": {
+        "total": 9000000,
+        "fees": 9000000,
+        "boutique": 0,
+        "receiptCount": 3,
+        "averageTicket": 3000000,
+        "trendPercent": null
+      },
       "buckets": [
+        { "key": "2026-05-09", "total": 4000000, "fees": 4000000, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-10", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-11", "total": 2500000, "fees": 2500000, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-12", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-13", "total": 7000000, "fees": 7000000, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-14", "total": 3000000, "fees": 3000000, "boutique": 0, "isCurrent": false },
         {
           "key": "2026-05-15",
           "total": 9000000,
@@ -253,12 +282,31 @@ const String tillDayJson = '''
           "boutique": 0,
           "isCurrent": true
         }
-      ]
+      ],
+      "byClassroom": [
+        { "classroomId": "0f2a1e64-1111-4a3d-9c11-aaaaaaaaaaaa", "name": "1ère humanités", "amount": 5000000 },
+        { "classroomId": "0f2a1e64-2222-4a3d-9c11-bbbbbbbbbbbb", "name": "6ème primaire", "amount": 4000000 }
+      ],
+      "unassignedAmount": 0,
+      "bestBucket": { "key": "2026-05-15", "amount": 9000000, "sharePercent": 35 }
     },
     {
       "currency": "USD",
-      "summary": { "total": 123450, "fees": 100000, "boutique": 23450 },
+      "summary": {
+        "total": 123450,
+        "fees": 100000,
+        "boutique": 23450,
+        "receiptCount": 5,
+        "averageTicket": 24690,
+        "trendPercent": 18
+      },
       "buckets": [
+        { "key": "2026-05-09", "total": 80000, "fees": 70000, "boutique": 10000, "isCurrent": false },
+        { "key": "2026-05-10", "total": 0, "fees": 0, "boutique": 0, "isCurrent": false },
+        { "key": "2026-05-11", "total": 95000, "fees": 90000, "boutique": 5000, "isCurrent": false },
+        { "key": "2026-05-12", "total": 110000, "fees": 100000, "boutique": 10000, "isCurrent": false },
+        { "key": "2026-05-13", "total": 60000, "fees": 55000, "boutique": 5000, "isCurrent": false },
+        { "key": "2026-05-14", "total": 130000, "fees": 120000, "boutique": 10000, "isCurrent": false },
         {
           "key": "2026-05-15",
           "total": 123450,
@@ -266,9 +314,24 @@ const String tillDayJson = '''
           "boutique": 23450,
           "isCurrent": true
         }
-      ]
+      ],
+      "byClassroom": [
+        { "classroomId": "0f2a1e64-1111-4a3d-9c11-aaaaaaaaaaaa", "name": "1ère humanités", "amount": 46000 },
+        { "classroomId": "0f2a1e64-2222-4a3d-9c11-bbbbbbbbbbbb", "name": "6ème primaire", "amount": 34000 },
+        { "classroomId": "0f2a1e64-3333-4a3d-9c11-cccccccccccc", "name": "2ème maternelle", "amount": 20000 }
+      ],
+      "unassignedAmount": 23450,
+      "bestBucket": { "key": "2026-05-14", "amount": 130000, "sharePercent": 22 }
     }
   ],
+  "crossed": {
+    "count": 2,
+    "amounts": [
+      { "currency": "CDF", "amount": 1150000 },
+      { "currency": "USD", "amount": 13500 }
+    ],
+    "rates": [2850, 2900]
+  },
   "impute": [
     {
       "currency": "CDF",

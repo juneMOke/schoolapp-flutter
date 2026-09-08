@@ -30,12 +30,59 @@ class TillSummary extends Equatable {
   /// guichet, dans le même tiroir, le même jour.
   final int boutique;
 
+  /// Le nombre de reçus **ayant alimenté cette caisse**.
+  ///
+  /// ⚠️ **Ce n'est pas le compteur global**, et la nuance n'est pas une
+  /// subtilité comptable. Un reçu compte **une fois par caisse qu'il a
+  /// alimentée** : un versement payé moitié en francs, moitié en dollars entre
+  /// dans les deux. La somme des compteurs par caisse dépasse donc
+  /// [FinanceTill.receiptsIssued] dès qu'un panier est mixte — « 40 $ + 35 FC »
+  /// au-dessus de « 70 reçus émis » a raison deux fois et paraît faux, d'où le
+  /// sous-titre de la tuile neutre qui doit l'annoncer.
+  ///
+  /// C'est **ce compteur-ci** qui est le dénominateur du ticket moyen : diviser
+  /// par un compteur qui ignore les paniers mixtes fausserait le chiffre.
+  final int receiptCount;
+
+  /// Le ticket moyen, en centimes — `total / receiptCount`, **calculé serveur**,
+  /// `0` quand aucun reçu n'a alimenté la caisse.
+  ///
+  /// Lu et jamais recalculé : refaire la division ici rouvrirait la division par
+  /// zéro que le serveur a déjà fermée, et ferait diverger deux arrondis pour le
+  /// même chiffre.
+  final int averageTicket;
+
+  /// L'écart à la période précédente de même durée, en pourcentage entier.
+  ///
+  /// **`null` veut dire « carte masquée », jamais « 0 % »** — c'est le cas où la
+  /// période précédente était vide, et où le pourcentage vaudrait « +∞ ». La
+  /// tuile se tait au lieu de mentir ; afficher zéro annoncerait une stabilité
+  /// qui n'a pas été observée.
+  final int? trendPercent;
+
   const TillSummary({
     required this.total,
     required this.fees,
     required this.boutique,
+    required this.receiptCount,
+    required this.averageTicket,
+    this.trendPercent,
   });
 
+  /// La tendance a été mesurée : la période précédente n'était pas vide.
+  bool get hasTrend => trendPercent != null;
+
+  /// Aucun reçu n'a alimenté cette caisse — donc pas de ticket moyen à afficher.
+  /// La sous-ligne le tait plutôt que d'écrire « ticket moyen 0 ».
+  bool get hasNoReceipts => receiptCount == 0;
+
   @override
-  List<Object?> get props => [total, fees, boutique];
+  List<Object?> get props => [
+    total,
+    fees,
+    boutique,
+    receiptCount,
+    averageTicket,
+    trendPercent,
+  ];
 }
