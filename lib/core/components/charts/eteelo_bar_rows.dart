@@ -35,6 +35,24 @@ class EteeloBarRow {
   });
 }
 
+/// Ce dont la barre d'une ligne montre la part.
+///
+/// Les deux répondent à des questions différentes, et aucune n'est un défaut
+/// universel :
+///
+/// * [byTotal] — « quelle **proportion de l'ensemble** cette ligne
+///   représente-t-elle ». Deux cartes de la même page restent comparables, et
+///   la somme des barres remplit la largeur. C'est ce que veut une
+///   répartition.
+/// * [byMax] — « comment cette ligne se compare-t-elle **à la plus forte** ».
+///   La première barre est toujours pleine, et l'œil lit un classement plutôt
+///   qu'une part. C'est ce que veut un palmarès.
+///
+/// La contrepartie de [byTotal] est assumée dans la doc de la classe : sur une
+/// répartition très étalée, les petites barres deviennent des traits — d'où
+/// [EteeloBarRows.minimumFraction].
+enum EteeloBarRowsScale { byTotal, byMax }
+
 /// Un classement en lignes-barres : libellé, barre, valeur.
 ///
 /// Répond à « où » — quelle catégorie pèse combien — là où un anneau répondrait
@@ -61,16 +79,37 @@ class EteeloBarRows extends StatelessWidget {
   /// Largeur de la colonne des libellés.
   final double labelWidth;
 
+  /// Ce dont la barre montre la part — voir [EteeloBarRowsScale].
+  final EteeloBarRowsScale scale;
+
+  /// Largeur plancher d'une barre non nulle, en fraction.
+  ///
+  /// Une valeur réelle mais minuscule doit **rester visible** : sans plancher,
+  /// une ligne à 0,4 % rend un trait d'un pixel qu'on prend pour une absence.
+  /// Zéro reste zéro — le plancher ne s'applique qu'au-dessus.
+  final double minimumFraction;
+
   const EteeloBarRows({
     super.key,
     required this.rows,
     this.barHeight = AppDimensions.enrollmentDashboardRowBarHeight,
     this.labelWidth = AppDimensions.enrollmentDashboardRowLabelWidth,
+    this.scale = EteeloBarRowsScale.byTotal,
+    this.minimumFraction = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final total = rows.fold<num>(0, (sum, row) => sum + row.value);
+    final reference = switch (scale) {
+      EteeloBarRowsScale.byTotal => rows.fold<num>(
+        0,
+        (sum, row) => sum + row.value,
+      ),
+      EteeloBarRowsScale.byMax => rows.fold<num>(
+        0,
+        (best, row) => row.value > best ? row.value : best,
+      ),
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,13 +118,20 @@ class EteeloBarRows extends StatelessWidget {
           if (i > 0) const SizedBox(height: AppDimensions.spacingS),
           _Row(
             row: rows[i],
-            fraction: total <= 0 ? 0 : rows[i].value / total,
+            fraction: _fractionOf(rows[i].value, reference),
             barHeight: barHeight,
             labelWidth: labelWidth,
           ),
         ],
       ],
     );
+  }
+
+  /// La part d'une valeur, plancher compris — **et zéro reste zéro**.
+  double _fractionOf(num value, num reference) {
+    if (reference <= 0 || value <= 0) return 0;
+    final fraction = value / reference;
+    return fraction < minimumFraction ? minimumFraction : fraction;
   }
 }
 
