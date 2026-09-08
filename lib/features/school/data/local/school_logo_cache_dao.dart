@@ -114,6 +114,17 @@ class SchoolLogoCacheDao {
     'fetched_at': fetchedAt.millisecondsSinceEpoch,
   }, conflictAlgorithm: ConflictAlgorithm.replace);
 
+  /// Retire le logo d'une variante — l'école n'en a plus, ou le serveur ne le
+  /// sert plus.
+  ///
+  /// Effacer plutôt que garder : une école qui retire son sceau continuerait
+  /// sinon de l'imprimer sur ses tickets, indéfiniment et hors ligne.
+  Future<int> delete(String schoolId, SchoolLogoVariant variant) => _db.delete(
+    _table,
+    where: 'school_id = ? AND variant = ?',
+    whereArgs: [schoolId, variant.dbValue],
+  );
+
   /// Évacue les logos de toute école autre que [schoolId].
   ///
   /// La table est clavetée par école, donc rien ne se mélange jamais : une
