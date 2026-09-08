@@ -6503,6 +6503,77 @@ class AppLocalizationsEn extends AppLocalizations {
       'Collections could not be loaded. The totals above are up to date.';
 
   @override
+  String get financeTillInsightsHeading => 'Readings & alerts';
+
+  @override
+  String get financeTillInsightAmountSeparator => ' and ';
+
+  @override
+  String get financeTillInsightCrossedTitle => 'Cross-currency payments';
+
+  @override
+  String get financeTillInsightCrossedEmpty =>
+      'No cross-currency payment: every fee was settled in its own currency.';
+
+  @override
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments settle',
+      one: '1 payment settles',
+    );
+    return '$_temp0 a fee set in the other currency, for $amounts$rateClause. A rate discrepancy at till-count time comes from this.';
+  }
+
+  @override
+  String financeTillInsightCrossedSingleRate(String rate) {
+    return ', converted at a rate of $rate';
+  }
+
+  @override
+  String financeTillInsightCrossedRateRange(String from, String to) {
+    return ', converted at rates from $from to $to';
+  }
+
+  @override
+  String get financeTillInsightBestDayTitle => 'Strongest day';
+
+  @override
+  String financeTillInsightBestDayBody(String day, String amount, int share) {
+    return '$day brought in $amount, or $share% of what the chart draws — useful for planning cover.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueTitle => 'What the boutique changes';
+
+  @override
+  String financeTillInsightBoutiqueBody(String amount) {
+    return '$amount came from the boutique — optional, unbilled purchases: cash in, not a fee settled.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueEmpty =>
+      'No boutique sale in this window: everything that came in settles a billed fee.';
+
+  @override
+  String get financeTillInsightTrendTitle => 'Trend';
+
+  @override
+  String financeTillInsightTrendUp(String currency, int percent) {
+    return '$currency till up $percent% on the previous period. The pace is holding.';
+  }
+
+  @override
+  String financeTillInsightTrendDown(String currency, int percent) {
+    return '$currency till down $percent% on the previous period. Check whether a follow-up is needed.';
+  }
+
+  @override
   String get financeTillSourceHeading => 'By source';
 
   @override

@@ -6570,6 +6570,77 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les encaissements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
 
   @override
+  String get financeTillInsightsHeading => 'Lectures & alertes';
+
+  @override
+  String get financeTillInsightAmountSeparator => ' et ';
+
+  @override
+  String get financeTillInsightCrossedTitle => 'Paiements croisés';
+
+  @override
+  String get financeTillInsightCrossedEmpty =>
+      'Aucun paiement croisé : tous les frais ont été réglés dans leur devise d\'origine.';
+
+  @override
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements règlent',
+      one: '1 versement règle',
+    );
+    return '$_temp0 un frais fixé dans l\'autre devise, pour $amounts$rateClause. Un écart de taux au moment du contrôle de caisse vient de là.';
+  }
+
+  @override
+  String financeTillInsightCrossedSingleRate(String rate) {
+    return ', convertis au taux de $rate';
+  }
+
+  @override
+  String financeTillInsightCrossedRateRange(String from, String to) {
+    return ', convertis à des taux de $from à $to';
+  }
+
+  @override
+  String get financeTillInsightBestDayTitle => 'Jour le plus fort';
+
+  @override
+  String financeTillInsightBestDayBody(String day, String amount, int share) {
+    return 'Le $day a rapporté $amount, soit $share % de ce que le graphique dessine — utile pour caler les permanences.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueTitle => 'Ce que la boutique change';
+
+  @override
+  String financeTillInsightBoutiqueBody(String amount) {
+    return '$amount viennent de la boutique — des achats facultatifs, non facturés : c\'est de la trésorerie, pas le règlement d\'un frais.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueEmpty =>
+      'Aucune vente boutique sur cette fenêtre : tout ce qui est entré règle un frais facturé.';
+
+  @override
+  String get financeTillInsightTrendTitle => 'Tendance';
+
+  @override
+  String financeTillInsightTrendUp(String currency, int percent) {
+    return 'Caisse $currency en hausse de $percent % par rapport à la période précédente. Le rythme se maintient.';
+  }
+
+  @override
+  String financeTillInsightTrendDown(String currency, int percent) {
+    return 'Caisse $currency en baisse de $percent % par rapport à la période précédente. Vérifiez si une relance est nécessaire.';
+  }
+
+  @override
   String get financeTillSourceHeading => 'Par source';
 
   @override

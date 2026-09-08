@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_classroom_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_receipts_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_source_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
@@ -117,6 +118,11 @@ class FinanceTillSuccessView extends StatelessWidget {
               _ImputationAndSourceRow(till: till, selected: selected),
               const SizedBox(height: AppDimensions.spacingL),
               FinanceTillClassroomSection(block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+              // Ce que les chiffres veulent dire — et ce qu'il n'y a pas à en
+              // faire : aucune de ces cartes n'expose de bouton, la décision se
+              // prend en Facturation.
+              FinanceTillInsightsSection(till: till, block: selected),
               const SizedBox(height: AppDimensions.spacingL),
               // La preuve, en dernier. Son BLoC est distinct : un 403 ici —
               // droit de pilotage sans droit nominatif — laisse tout ce qui

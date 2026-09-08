@@ -10631,6 +10631,100 @@ abstract class AppLocalizations {
   /// **'Collections could not be loaded. The totals above are up to date.'**
   String get financeTillReceiptsError;
 
+  /// No description provided for @financeTillInsightsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings & alerts'**
+  String get financeTillInsightsHeading;
+
+  /// No description provided for @financeTillInsightAmountSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get financeTillInsightAmountSeparator;
+
+  /// No description provided for @financeTillInsightCrossedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-currency payments'**
+  String get financeTillInsightCrossedTitle;
+
+  /// No description provided for @financeTillInsightCrossedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cross-currency payment: every fee was settled in its own currency.'**
+  String get financeTillInsightCrossedEmpty;
+
+  /// No description provided for @financeTillInsightCrossedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 payment settles} other{{count} payments settle}} a fee set in the other currency, for {amounts}{rateClause}. A rate discrepancy at till-count time comes from this.'**
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  );
+
+  /// No description provided for @financeTillInsightCrossedSingleRate.
+  ///
+  /// In en, this message translates to:
+  /// **', converted at a rate of {rate}'**
+  String financeTillInsightCrossedSingleRate(String rate);
+
+  /// No description provided for @financeTillInsightCrossedRateRange.
+  ///
+  /// In en, this message translates to:
+  /// **', converted at rates from {from} to {to}'**
+  String financeTillInsightCrossedRateRange(String from, String to);
+
+  /// No description provided for @financeTillInsightBestDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strongest day'**
+  String get financeTillInsightBestDayTitle;
+
+  /// No description provided for @financeTillInsightBestDayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} brought in {amount}, or {share}% of what the chart draws — useful for planning cover.'**
+  String financeTillInsightBestDayBody(String day, String amount, int share);
+
+  /// No description provided for @financeTillInsightBoutiqueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the boutique changes'**
+  String get financeTillInsightBoutiqueTitle;
+
+  /// No description provided for @financeTillInsightBoutiqueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} came from the boutique — optional, unbilled purchases: cash in, not a fee settled.'**
+  String financeTillInsightBoutiqueBody(String amount);
+
+  /// No description provided for @financeTillInsightBoutiqueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No boutique sale in this window: everything that came in settles a billed fee.'**
+  String get financeTillInsightBoutiqueEmpty;
+
+  /// No description provided for @financeTillInsightTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trend'**
+  String get financeTillInsightTrendTitle;
+
+  /// No description provided for @financeTillInsightTrendUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till up {percent}% on the previous period. The pace is holding.'**
+  String financeTillInsightTrendUp(String currency, int percent);
+
+  /// No description provided for @financeTillInsightTrendDown.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till down {percent}% on the previous period. Check whether a follow-up is needed.'**
+  String financeTillInsightTrendDown(String currency, int percent);
+
   /// No description provided for @financeTillSourceHeading.
   ///
   /// In en, this message translates to:

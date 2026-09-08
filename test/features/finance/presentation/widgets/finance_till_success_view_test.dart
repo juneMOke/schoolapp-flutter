@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -37,6 +38,7 @@ TillCurrencyBlock _block(
   List<TillBucket>? buckets,
   List<TillClassroomAmount>? byClassroom,
   int unassignedAmount = 0,
+  TillBestBucket? bestBucket,
 }) => TillCurrencyBlock(
   currency: currency,
   summary: TillSummary(
@@ -61,6 +63,7 @@ TillCurrencyBlock _block(
       ],
   byClassroom: byClassroom ?? const [],
   unassignedAmount: unassignedAmount,
+  bestBucket: bestBucket,
 );
 
 /// Ce que les versements ont éteint, dans la devise d'une créance.
@@ -80,6 +83,11 @@ FinanceTill _till(
   DateTime? end,
   String timeZone = 'Africa/Kinshasa',
   int? receiptsIssued,
+  TillCrossed crossed = const TillCrossed(
+    count: 0,
+    amounts: [],
+    rateMicros: [],
+  ),
 }) => FinanceTill(
   context: StatsContext(
     schoolYear: '2025-2026',
@@ -89,6 +97,7 @@ FinanceTill _till(
     generatedAt: DateTime.utc(2026, 5, 15, 18, 4),
   ),
   timeZone: timeZone,
+  crossed: crossed,
   encaisse: blocks,
   // Par défaut, aucun panier mixte : chaque reçu n'a alimenté qu'une caisse, et
   // le compteur global vaut la somme des compteurs. Les tests qui éprouvent
@@ -935,6 +944,163 @@ void main() {
       );
 
       expect(find.textContaining('sans pièce scellée'), findsNothing);
+    });
+  });
+
+  group('lectures & alertes', () {
+    testWidgets('aucune carte n’expose de bouton — elles expliquent', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD')]));
+
+      expect(find.text('Lectures & alertes'), findsOneWidget);
+      // Un bouton ici promettrait une action que cet écran n'a pas : il est en
+      // lecture seule, et la décision se prend en Facturation.
+      expect(
+        find.descendant(
+          of: find.byType(FinanceTillInsightsSection),
+          matching: find.byType(ElevatedButton),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(FinanceTillInsightsSection),
+          matching: find.byType(TextButton),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('un seul taux se cite ; plusieurs donnent une FOURCHETTE', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till(
+          [_block('USD')],
+          crossed: const TillCrossed(
+            count: 3,
+            amounts: [TillCurrencyAmount(currency: 'USD', amount: 13500)],
+            rateMicros: [2850000000],
+          ),
+        ),
+      );
+      expect(find.textContaining('au taux de 2850'), findsOneWidget);
+
+      await pump(
+        tester,
+        _till(
+          [_block('USD')],
+          crossed: const TillCrossed(
+            count: 3,
+            amounts: [TillCurrencyAmount(currency: 'USD', amount: 13500)],
+            rateMicros: [2850000000, 2900000000],
+          ),
+        ),
+      );
+      // C'est le changement de taux en cours de fenêtre qui explique l'écart de
+      // caisse : en citer un seul en tairait un autre.
+      expect(find.textContaining('à des taux de 2850 à 2900'), findsOneWidget);
+    });
+
+    testWidgets('les montants croisés ne s’additionnent jamais', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till(
+          [_block('USD')],
+          crossed: const TillCrossed(
+            count: 5,
+            amounts: [
+              TillCurrencyAmount(currency: 'USD', amount: 13500),
+              TillCurrencyAmount(currency: 'CDF', amount: 1150000),
+            ],
+            rateMicros: [2850000000],
+          ),
+        ),
+      );
+
+      // Deux montants côte à côte, reliés par « et » — jamais par un « + », et
+      // jamais fondus en un total. (L'espace avant le symbole est insécable :
+      // on assert sur les chiffres.)
+      // Deux montants côte à côte, reliés par « et » — jamais par un « + », et
+      // jamais fondus en un total. Chacun garde son symbole et ses décimales
+      // propres : le franc n'en affiche pas, le dollar si.
+      final body = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byType(FinanceTillInsightsSection),
+              matching: find.byType(Text),
+            ),
+          )
+          .map((text) => text.data ?? '')
+          .firstWhere((text) => text.contains('versements règlent'))
+          // Les montants portent des espaces **insécables** — séparateur de
+          // milliers et avant le symbole. On normalise pour asserter sur ce que
+          // le caissier lit, pas sur des points de code.
+          .replaceAll('\u00A0', ' ');
+
+      expect(body, contains('135,00 \$'));
+      expect(body, contains('11 500 FC'));
+      expect(
+        body,
+        isNot(contains('635')),
+        reason: 'les deux caisses ne s’additionnent jamais, même ici',
+      );
+    });
+
+    testWidgets('sans croisement, la carte reste et le dit', (tester) async {
+      await pump(tester, _till([_block('USD')]));
+
+      expect(
+        find.textContaining('Aucun paiement croisé'),
+        findsOneWidget,
+        reason:
+            'une carte absente laisserait croire qu’on a oublié de regarder — '
+            '« aucun croisement » est une information',
+      );
+    });
+
+    testWidgets('la part du jour le plus fort est LUE, pas recalculée', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block(
+            'USD',
+            bestBucket: const TillBestBucket(
+              key: '2026-05-14',
+              amount: 130000,
+              sharePercent: 22,
+            ),
+          ),
+        ]),
+      );
+
+      // 22 % vient du serveur, rapporté à ce qui est DESSINÉ. Recalculé sur la
+      // fenêtre comptée, il vaudrait 100 % sur une journée.
+      expect(find.textContaining('22 %'), findsOneWidget);
+      expect(find.textContaining('14 mai 2026'), findsOneWidget);
+    });
+
+    testWidgets('une caisse creuse n’a pas de meilleur jour', (tester) async {
+      await pump(tester, _till([_block('USD')]));
+
+      expect(find.text('Jour le plus fort'), findsNothing);
+    });
+
+    testWidgets('la baisse porte une phrase d’action, la hausse non', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD', trendPercent: -7)]));
+      expect(find.textContaining('Vérifiez si une relance'), findsOneWidget);
+
+      await pump(tester, _till([_block('USD', trendPercent: 18)]));
+      expect(find.textContaining('Vérifiez si une relance'), findsNothing);
+      expect(find.textContaining('Le rythme se maintient'), findsOneWidget);
     });
   });
 }
