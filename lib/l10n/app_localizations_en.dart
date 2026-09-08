@@ -7654,7 +7654,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketBalanceLabel => 'Balance';
 
   @override
-  String get ticketBalanceReservation => 'subject to synchronisation';
+  String get ticketBalanceReservation => 'as of printing';
+
+  @override
+  String get ticketThanksNotice => 'Thank you for your trust.';
+
+  @override
+  String get ticketEditorNotice => 'Receipt issued by ETEELO CONNECT';
+
+  @override
+  String get ticketEditorSite => 'eteeloconnect.com';
 
   @override
   String get ticketKeepNotice =>

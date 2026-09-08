@@ -1,7 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
-import 'package:school_app_flutter/features/finance/domain/fee_tariff_code.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
 ///
@@ -129,20 +128,35 @@ class ProvisionalTicketDao {
   /// Répartition ligne à ligne, dans l'ordre d'écriture — c'est une **saisie**
   /// du guichet (A-2), pas un calcul : elle s'imprime telle quelle.
   ///
-  /// Le libellé est celui **gelé à l'encaissement** ; le code de la tranche est
-  /// joint depuis la grille (v39). Sans lui, deux versements sur deux tranches
-  /// d'un même minerval sortaient du même papier, mot pour mot.
+  /// ## Le libellé imprimé : le TITRE de la nature, puis le libellé gelé
   ///
-  /// ⚠️ **`LEFT JOIN`, jamais `JOIN`** : le tarif peut avoir quitté l'appareil,
-  /// et perdre une ligne de répartition sur un ticket, c'est remettre à une
-  /// famille un papier dont le détail ne fait plus la somme.
+  /// Le papier porte le nom du frais, pas sa tranche ni son code. Il se lit
+  /// donc dans `ref_fee_code_sections` — « le titre que l'école donne à chaque
+  /// nature de frais » —, qui est indexée par `(school_id, code)` et ne porte
+  /// donc **aucune fraction**.
   ///
-  /// ⚠️ La composition « libellé (code) » est écrite ici, et pas via la clé
-  /// `chargeDesignationWithTariffCode` des écrans : ce DAO n'a pas d'`l10n` — le
-  /// ticket est **pur** par construction (« l'appelant traduit, le gabarit
-  /// arrange »), et ses libellés lui arrivent déjà traduits. Ce qui compte est
-  /// partagé : la règle qui décide si un code distingue quelque chose vient de
-  /// [meaningfulTariffCode], la même que les six écrans.
+  /// ⚠️ **Avec repli sur le libellé gelé, et le repli n'est pas une
+  /// précaution.** Cette table n'est remplie que par le module Configuration :
+  /// son propre commentaire de schéma constate que « le cache est froid pour un
+  /// caissier ». Sur une tablette où personne n'y est passé, elle est **vide**.
+  /// Le papier garde alors `organisation materiels examens - 1/3`, ce qui reste
+  /// juste — là où un ticket qui ne nommerait plus le frais ne le serait pas.
+  ///
+  /// ⚠️ **Et surtout : on ne découpe RIEN sur le tiret.** « Frais mi-parcours -
+  /// session 2 » y perdrait sa moitié utile, et rien ne distingue ce tiret-là
+  /// d'un séparateur de tranche. Une troncature serait un défaut silencieux sur
+  /// un papier remis à une famille.
+  ///
+  /// Le **code de tranche** (`(OM1)`) ne s'imprime plus : il était composé ici
+  /// pour distinguer deux versements sur deux tranches d'un même minerval, et
+  /// le porteur a arbitré que le nom du frais suffit sur un reçu.
+  ///
+  /// ⚠️ **`LEFT JOIN`, jamais `JOIN`** : le tarif comme le titre peuvent avoir
+  /// quitté l'appareil, et perdre une ligne de répartition sur un ticket, c'est
+  /// remettre à une famille un papier dont le détail ne fait plus la somme.
+  ///
+  /// L'école est résolue par sous-requête sur `ref_school` — cache mono-ligne,
+  /// même lecture que partout ailleurs dans ce DAO.
   Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
     final rows = await _db.rawQuery(
       '''
@@ -150,9 +164,11 @@ class ProvisionalTicketDao {
              pa.fee_code,
              pa.amount_in_cents,
              pa.currency,
-             t.code AS t_fee_tariff_code
+             s.label AS section_label
       FROM payment_allocations pa
-      LEFT JOIN ref_fee_tariffs t ON t.id = pa.fee_tariff_id
+      LEFT JOIN ref_fee_code_sections s
+        ON UPPER(s.code) = UPPER(pa.fee_code)
+       AND s.school_id = (SELECT id FROM ref_school LIMIT 1)
       WHERE pa.payment_id = ?
       ''',
       [paymentId],
@@ -162,16 +178,16 @@ class ProvisionalTicketDao {
         .map((r) {
           final feeCode = (r['fee_code'] as String?) ?? '';
           final frozen = (r['student_charge_label'] as String?)?.trim() ?? '';
-          // Un frais sans libellé retombe sur sa nature BRUTE (jamais traduite ici),
-          // comportement d'origine : le ticket préfère un code lisible à un blanc.
-          final base = frozen.isNotEmpty ? frozen : feeCode;
-          final code = meaningfulTariffCode(
-            code: r['t_fee_tariff_code'] as String?,
-            feeCode: feeCode,
-          );
+          final section = (r['section_label'] as String?)?.trim() ?? '';
+          // Le titre de la nature d'abord, le libellé gelé ensuite, la nature
+          // brute en dernier ressort : le ticket préfère un code lisible à un
+          // blanc.
+          final label = section.isNotEmpty
+              ? section
+              : (frozen.isNotEmpty ? frozen : feeCode);
 
           return TicketAllocationRow(
-            label: code == null ? base : '$base ($code)',
+            label: label,
             amountInCents: (r['amount_in_cents'] as int?) ?? 0,
             currency: (r['currency'] as String?) ?? '',
           );

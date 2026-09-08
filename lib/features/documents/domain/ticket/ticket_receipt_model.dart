@@ -162,7 +162,23 @@ class TicketLabels extends Equatable {
   final String balanceReservation;
 
   /// « Conservez ce ticket jusqu'à la remise de votre reçu définitif. »
+  ///
+  /// ⚠️ **Imprimée seulement sur une pièce NON scellée.** Sur un ticket qui
+  /// porte déjà son numéro définitif, elle est factuellement fausse : il n'y a
+  /// pas de reçu à venir, celui-là l'est. Sa raison d'être (RG-012-12, le levier
+  /// de rappel de l'établissement) ne vaut que hors ligne.
   final String keepTicketNotice;
+
+  /// « Nous vous remercions pour votre confiance. »
+  final String thanksNotice;
+
+  /// « Reçu édité par ETEELO CONNECT » — l'éditeur du logiciel, en pied.
+  final String editorNotice;
+
+  /// « eteeloconnect.com » — **sans schéma**. C'est l'usage sur un reçu, ça
+  /// économise la largeur, et ça n'imprime pas un `http://` sur un papier que
+  /// des familles gardent.
+  final String editorSite;
 
   const TicketLabels({
     required this.documentTitle,
@@ -183,6 +199,9 @@ class TicketLabels extends Equatable {
     required this.balanceLabel,
     required this.balanceReservation,
     required this.keepTicketNotice,
+    required this.thanksNotice,
+    required this.editorNotice,
+    required this.editorSite,
   });
 
   @override
@@ -205,6 +224,9 @@ class TicketLabels extends Equatable {
     balanceLabel,
     balanceReservation,
     keepTicketNotice,
+    thanksNotice,
+    editorNotice,
+    editorSite,
   ];
 }
 

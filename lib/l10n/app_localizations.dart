@@ -12525,8 +12525,26 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceReservation.
   ///
   /// In en, this message translates to:
-  /// **'subject to synchronisation'**
+  /// **'as of printing'**
   String get ticketBalanceReservation;
+
+  /// No description provided for @ticketThanksNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your trust.'**
+  String get ticketThanksNotice;
+
+  /// No description provided for @ticketEditorNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt issued by ETEELO CONNECT'**
+  String get ticketEditorNotice;
+
+  /// No description provided for @ticketEditorSite.
+  ///
+  /// In en, this message translates to:
+  /// **'eteeloconnect.com'**
+  String get ticketEditorSite;
 
   /// No description provided for @ticketKeepNotice.
   ///

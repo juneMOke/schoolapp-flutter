@@ -22,6 +22,9 @@ const _base = TicketLabels(
   balanceLabel: 'Solde',
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 /// `TicketLabels` est comparé par valeur, et cette comparaison remonte jusqu'au
@@ -53,6 +56,9 @@ void main() {
       'advanceLabel': _copyWith(advanceLabel: 'Excédent'),
       'balanceLabel': _copyWith(balanceLabel: 'Reste'),
       'balanceReservation': _copyWith(balanceReservation: 'à confirmer'),
+      'thanksNotice': _copyWith(thanksNotice: 'Merci mille fois.'),
+      'editorNotice': _copyWith(editorNotice: 'Edite par AUTRE'),
+      'editorSite': _copyWith(editorSite: 'autre.example'),
       'keepTicketNotice': _copyWith(keepTicketNotice: 'Gardez ce papier.'),
     };
 
@@ -92,6 +98,9 @@ TicketLabels _copyWith({
   String? balanceLabel,
   String? balanceReservation,
   String? keepTicketNotice,
+  String? thanksNotice,
+  String? editorNotice,
+  String? editorSite,
 }) => TicketLabels(
   documentTitle: documentTitle ?? _base.documentTitle,
   provisionalMention: provisionalMention ?? _base.provisionalMention,
@@ -111,6 +120,9 @@ TicketLabels _copyWith({
   balanceLabel: balanceLabel ?? _base.balanceLabel,
   balanceReservation: balanceReservation ?? _base.balanceReservation,
   keepTicketNotice: keepTicketNotice ?? _base.keepTicketNotice,
+  thanksNotice: thanksNotice ?? _base.thanksNotice,
+  editorNotice: editorNotice ?? _base.editorNotice,
+  editorSite: editorSite ?? _base.editorSite,
 );
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(

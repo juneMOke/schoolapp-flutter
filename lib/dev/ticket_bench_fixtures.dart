@@ -38,6 +38,9 @@ abstract final class TicketBenchFixtures {
     balanceReservation: 'sous réserve de synchronisation',
     keepTicketNotice:
         'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
+    thanksNotice: 'Nous vous remercions pour votre confiance.',
+    editorNotice: 'Recu edite par ETEELO CONNECT',
+    editorSite: 'eteeloconnect.com',
   );
 
   /// Le cas de torture : tout ce qui peut décaler une colonne.

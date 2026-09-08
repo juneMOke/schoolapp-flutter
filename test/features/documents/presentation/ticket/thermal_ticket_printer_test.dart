@@ -111,6 +111,9 @@ final TicketReceiptModel _model = TicketReceiptModel(
     balanceLabel: 'Solde',
     balanceReservation: 'sous réserve',
     keepTicketNotice: 'Conservez ce ticket.',
+    thanksNotice: 'Merci.',
+    editorNotice: 'Recu edite par ETEELO CONNECT',
+    editorSite: 'eteeloconnect.com',
   ),
 );
 

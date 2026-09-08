@@ -25,6 +25,9 @@ const _labels = TicketLabels(
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
+  thanksNotice: 'Nous vous remercions pour votre confiance.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 TicketReceiptModel _model({
@@ -77,7 +80,10 @@ List<int> _amountsUnder(List<String> lines, String heading) {
   if (start < 0) return const [];
 
   final amounts = <int>[];
-  for (final line in lines.skip(start + 1)) {
+  // ⚠️ Le titre est suivi d'un FILET, et le bloc s'arrête au filet suivant : on
+  // saute donc le premier. Sans ce saut, la lecture s'arrêterait immédiatement
+  // et le test compterait zéro montant — vert sur une liste vide.
+  for (final line in lines.skip(start + 2)) {
     if (line.startsWith('-') || line.trim().isEmpty) break;
     // Les décimales sont facultatives : le franc n'en porte que s'il en a
     // réellement, depuis que la règle d'écriture se décide sur la devise.

@@ -185,6 +185,10 @@ abstract final class TicketTextLayout {
     if (model.allocations.isNotEmpty) {
       lines.add('');
       lines.add(TicketCharset.printable(model.labels.allocationsLabel));
+      // Un filet sous le titre : sans lui, la première ligne de répartition se
+      // lit comme un prolongement du mot « Répartition » plutôt que comme la
+      // première d'une liste.
+      lines.add(_rule(width));
       for (final allocation in model.allocations) {
         _addPair(
           lines,
@@ -226,10 +230,29 @@ abstract final class TicketTextLayout {
       lines.addAll(_wrapped(model.labels.balanceReservation, width));
     }
 
+    lines.add(_rule(width));
+
     // Phrase de conservation (RG-012-12) : sans elle, l'établissement n'a aucun
     // levier pour rappeler un parent dont le versement poserait problème.
-    lines.add(_rule(width));
-    lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
+    //
+    // ⚠️ **Seulement sur une pièce NON scellée**, et lue sur le même signal
+    // affirmatif que la mention de référence — `isProvisional`, dérivé de
+    // l'absence de `receipt_id`. Sur un ticket qui porte déjà son numéro
+    // définitif, elle est factuellement FAUSSE : il n'y a pas de reçu à venir,
+    // celui-là l'est. Sa raison d'être ne vaut que hors ligne.
+    if (model.isProvisional) {
+      lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
+    }
+
+    // Le pied, sur les deux sorties et dans tous les cas.
+    //
+    // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
+    // valent mieux qu'une longue qui se replierait au hasard, l'adresse isolée
+    // se recopie, et un `http://` imprimé sur un papier que des familles gardent
+    // annoncerait un transport non chiffré.
+    lines.addAll(_centeredWrapped(model.labels.thanksNotice, width));
+    lines.addAll(_centered(model.labels.editorNotice, width));
+    lines.addAll(_centered(model.labels.editorSite, width));
 
     return lines;
   }

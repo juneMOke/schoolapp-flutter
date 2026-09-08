@@ -7730,7 +7730,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketBalanceLabel => 'Solde';
 
   @override
-  String get ticketBalanceReservation => 'sous réserve de synchronisation';
+  String get ticketBalanceReservation => 'au moment de l\'impression';
+
+  @override
+  String get ticketThanksNotice => 'Nous vous remercions pour votre confiance.';
+
+  @override
+  String get ticketEditorNotice => 'Reçu édité par ETEELO CONNECT';
+
+  @override
+  String get ticketEditorSite => 'eteeloconnect.com';
 
   @override
   String get ticketKeepNotice =>

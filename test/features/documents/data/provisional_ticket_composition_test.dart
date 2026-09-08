@@ -38,6 +38,9 @@ const _labels = TicketLabels(
   balanceLabel: 'Solde',
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 LocalStudentCharge _charge({
@@ -567,13 +570,17 @@ void main() {
       whereArgs: ['a-1'],
     );
 
-    test('libellé gelé + code de la tranche', () async {
+    /// ⚠️ **Règle RENVERSÉE, test inversé plutôt que supprimé.** Le code de
+    /// tranche s'imprimait pour distinguer deux versements sur deux tranches
+    /// d'un même minerval. Le porteur a arbitré que le nom du frais suffit sur
+    /// un reçu remis à une famille : le code est du vocabulaire de gestion.
+    test('le code de tranche ne s\'imprime plus', () async {
       await seedPayment();
       await seedTariff('tar-t2', code: 'T2');
       await pointAllocationAt('tar-t2');
 
       final lines = await dao.findAllocations('p-1');
-      expect(lines.single.label, 'Frais scolaires (T2)');
+      expect(lines.single.label, 'Frais scolaires');
     });
 
     /// Une grille simple reçoit du serveur un code qui vaut la nature. Imprimer
@@ -612,8 +619,8 @@ void main() {
     });
 
     /// Le repli d'origine, préservé : sans libellé gelé, le ticket imprime la
-    /// nature BRUTE plutôt qu'un blanc — et le code s'y ajoute quand même.
-    test('sans libellé gelé → la nature brute, code compris', () async {
+    /// nature BRUTE plutôt qu'un blanc. Le code, lui, ne s'y ajoute plus.
+    test('sans libellé gelé → la nature brute, nue', () async {
       await seedPayment();
       await seedTariff('tar-t2', code: 'T2');
       await pointAllocationAt('tar-t2');
@@ -625,7 +632,7 @@ void main() {
       );
 
       final lines = await dao.findAllocations('p-1');
-      expect(lines.single.label, 'TUITION (T2)');
+      expect(lines.single.label, 'TUITION');
     });
   });
 }
