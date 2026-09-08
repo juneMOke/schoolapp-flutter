@@ -170,6 +170,18 @@ class _CashBox extends StatelessWidget {
           if (summary.hasTrend) ...[
             const SizedBox(height: AppDimensions.spacingXS),
             _Trend(percent: summary.trendPercent!, l10n: l10n),
+          ]
+          // Deux silences très différents. Ici la comparaison est IMPOSSIBLE —
+          // la période antérieure tomberait avant la rentrée — et la tuile le
+          // dit, sinon elle perd son delta tous les jours de septembre sans
+          // raison visible. Une période précédente simplement vide, elle, ne
+          // dit rien : l'absence se comprend d'elle-même.
+          else if (summary.explainsMissingTrend) ...[
+            const SizedBox(height: AppDimensions.spacingXS),
+            Text(
+              l10n.financeTillCashBoxNoComparablePeriod,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
           ],
         ],
       ),

@@ -10625,6 +10625,12 @@ abstract class AppLocalizations {
   /// **'{percent}% vs previous period'**
   String financeTillCashBoxTrend(int percent);
 
+  /// No description provided for @financeTillCashBoxNoComparablePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No comparable period before the school year began'**
+  String get financeTillCashBoxNoComparablePeriod;
+
   /// No description provided for @financeTillReceiptsIssuedLabel.
   ///
   /// In en, this message translates to:

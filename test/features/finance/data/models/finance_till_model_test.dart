@@ -162,6 +162,52 @@ void main() {
       );
     });
 
+    test('la cause du silence distingue « impossible » de « vide »', () {
+      final blocks = _entity(tillDayJson).encaisse;
+      final cdf = blocks.firstWhere((block) => block.currency == 'CDF');
+
+      expect(
+        cdf.summary.trendUnavailableReason,
+        TillTrendUnavailableReason.beforeSchoolYear,
+      );
+      expect(
+        cdf.summary.explainsMissingTrend,
+        isTrue,
+        reason:
+            'la comparaison est impossible — la période antérieure tomberait '
+            'avant la rentrée — et l’écran doit le dire',
+      );
+    });
+
+    test('une période précédente vide se tait, elle ne s’explique pas', () {
+      final block = _entity(tillEmptyDayJson).encaisse.first;
+
+      expect(
+        block.summary.trendUnavailableReason,
+        TillTrendUnavailableReason.previousPeriodEmpty,
+      );
+      expect(
+        block.summary.explainsMissingTrend,
+        isFalse,
+        reason:
+            'c’est un fait de la période regardée, pas une limite de la '
+            'mesure : l’absence se comprend d’elle-même',
+      );
+    });
+
+    test('une cause inconnue se tait plutôt que d’expliquer de travers', () {
+      final block = _entity(tillUnknownTrendReasonJson).encaisse.single;
+
+      expect(
+        block.summary.trendUnavailableReason,
+        isNull,
+        reason:
+            'retomber sur une cause connue afficherait une explication fausse '
+            'le jour où le serveur en ajoute une troisième',
+      );
+      expect(block.summary.explainsMissingTrend, isFalse);
+    });
+
     test('`bestBucket` absent reste null sur une caisse creuse', () {
       for (final block in _entity(tillEmptyDayJson).encaisse) {
         expect(block.bestBucket, isNull);

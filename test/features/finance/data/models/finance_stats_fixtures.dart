@@ -266,7 +266,8 @@ const String tillDayJson = '''
         "boutique": 0,
         "receiptCount": 3,
         "averageTicket": 3000000,
-        "trendPercent": null
+        "trendPercent": null,
+        "trendUnavailableReason": "BEFORE_SCHOOL_YEAR"
       },
       "buckets": [
         { "key": "2026-05-09", "total": 4000000, "fees": 4000000, "boutique": 0, "isCurrent": false },
@@ -441,7 +442,15 @@ const String tillEmptyDayJson = '''
   "encaisse": [
     {
       "currency": "USD",
-      "summary": { "total": 0, "fees": 0, "boutique": 0 },
+      "summary": {
+        "total": 0,
+        "fees": 0,
+        "boutique": 0,
+        "receiptCount": 0,
+        "averageTicket": 0,
+        "trendPercent": null,
+        "trendUnavailableReason": "PREVIOUS_PERIOD_EMPTY"
+      },
       "buckets": [
         {
           "key": "2026-05-17",
@@ -631,5 +640,49 @@ const String recoveryFloatingAmountsJson = '''
       }
     }
   ]
+}
+''';
+
+/// Une cause d'indisponibilité que **cet écran ne connaît pas**.
+///
+/// Le serveur peut en ajouter une troisième sans que le client soit redéployé.
+/// La lecture doit alors rendre `null` — donc « pas de raison formulable »,
+/// donc une tuile qui se tait — plutôt que de retomber sur une cause connue et
+/// d'afficher une explication fausse.
+const String tillUnknownTrendReasonJson = '''
+{
+  "context": {
+    "schoolYear": "2025-2026",
+    "period": "day",
+    "periodStart": "2026-05-18",
+    "periodEnd": "2026-05-18",
+    "generatedAt": "2026-05-18T19:00:00Z"
+  },
+  "timeZone": "Africa/Kinshasa",
+  "receiptsIssued": 2,
+  "encaisse": [
+    {
+      "currency": "USD",
+      "summary": {
+        "total": 45000,
+        "fees": 45000,
+        "boutique": 0,
+        "receiptCount": 2,
+        "averageTicket": 22500,
+        "trendPercent": null,
+        "trendUnavailableReason": "SOME_FUTURE_REASON"
+      },
+      "buckets": [
+        {
+          "key": "2026-05-18",
+          "total": 45000,
+          "fees": 45000,
+          "boutique": 0,
+          "isCurrent": true
+        }
+      ]
+    }
+  ],
+  "impute": []
 }
 ''';

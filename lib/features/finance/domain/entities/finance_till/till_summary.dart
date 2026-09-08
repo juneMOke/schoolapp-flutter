@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_trend_unavailable_reason.dart';
 
 /// Ce qui est entré en caisse sur la fenêtre, dans une devise **reçue**.
 ///
@@ -60,6 +61,16 @@ class TillSummary extends Equatable {
   /// qui n'a pas été observée.
   final int? trendPercent;
 
+  /// Pourquoi la tendance manque, quand elle manque.
+  ///
+  /// ⚠️ **Ne remplace pas [trendPercent], il le qualifie.** La règle « absent ⇒
+  /// pas de pourcentage affiché » est inchangée ; ce champ décide seulement si
+  /// la tuile **explique** son silence ou le garde.
+  ///
+  /// `null` quand la tendance existe — et aussi quand le serveur nomme une cause
+  /// que cet écran ne sait pas formuler : la tuile se tait alors, comme avant.
+  final TillTrendUnavailableReason? trendUnavailableReason;
+
   const TillSummary({
     required this.total,
     required this.fees,
@@ -67,10 +78,20 @@ class TillSummary extends Equatable {
     required this.receiptCount,
     required this.averageTicket,
     this.trendPercent,
+    this.trendUnavailableReason,
   });
 
   /// La tendance a été mesurée : la période précédente n'était pas vide.
   bool get hasTrend => trendPercent != null;
+
+  /// La comparaison est **impossible**, et l'écran doit le dire — il n'existe pas
+  /// de période antérieure à comparer, parce qu'elle tomberait avant la rentrée.
+  ///
+  /// Distinct d'une période précédente simplement vide, où la tuile se tait :
+  /// là, c'est la mesure qui manque, pas l'argent.
+  bool get explainsMissingTrend =>
+      !hasTrend &&
+      trendUnavailableReason == TillTrendUnavailableReason.beforeSchoolYear;
 
   /// Aucun reçu n'a alimenté cette caisse — donc pas de ticket moyen à afficher.
   /// La sous-ligne le tait plutôt que d'écrire « ticket moyen 0 ».
@@ -84,5 +105,6 @@ class TillSummary extends Equatable {
     receiptCount,
     averageTicket,
     trendPercent,
+    trendUnavailableReason,
   ];
 }

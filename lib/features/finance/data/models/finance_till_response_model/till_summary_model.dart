@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_summary.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_trend_unavailable_reason.dart';
 
 /// Miroir de `TillSummaryDto` — le chiffre de l'écran, en devise **reçue**.
 class TillSummaryModel {
@@ -8,6 +9,7 @@ class TillSummaryModel {
   final int receiptCount;
   final int averageTicket;
   final int? trendPercent;
+  final TillTrendUnavailableReason? trendUnavailableReason;
 
   const TillSummaryModel({
     required this.total,
@@ -16,6 +18,7 @@ class TillSummaryModel {
     required this.receiptCount,
     required this.averageTicket,
     this.trendPercent,
+    this.trendUnavailableReason,
   });
 
   /// **Aucune tolérance sur les trois montants.** Un résumé absent lève, et
@@ -38,6 +41,12 @@ class TillSummaryModel {
       receiptCount: (json['receiptCount'] as num?)?.toInt() ?? 0,
       averageTicket: (json['averageTicket'] as num?)?.toInt() ?? 0,
       trendPercent: (json['trendPercent'] as num?)?.toInt(),
+      // Une cause inconnue rend `null` : la tuile se tait, comme avant ce
+      // champ. Retomber sur une cause connue ferait afficher une explication
+      // fausse le jour où le serveur en ajoute une troisième.
+      trendUnavailableReason: TillTrendUnavailableReason.fromWire(
+        json['trendUnavailableReason'] as String?,
+      ),
     );
   }
 
@@ -48,6 +57,7 @@ class TillSummaryModel {
     'receiptCount': receiptCount,
     'averageTicket': averageTicket,
     'trendPercent': trendPercent,
+    'trendUnavailableReason': trendUnavailableReason?.wireValue,
   };
 
   TillSummary toEntity() => TillSummary(
@@ -57,5 +67,6 @@ class TillSummaryModel {
     receiptCount: receiptCount,
     averageTicket: averageTicket,
     trendPercent: trendPercent,
+    trendUnavailableReason: trendUnavailableReason,
   );
 }

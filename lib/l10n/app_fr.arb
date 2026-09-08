@@ -3809,6 +3809,8 @@
   "@financeTillCashBoxSubline": {"description": "Jamais rendue quand la caisse n'a aucun reçu : le ticket moyen vaudrait 0, ce qui se lirait comme une mesure.", "placeholders": {"count": {"type": "int"}, "unit": {"type": "String"}, "ticket": {"type": "String"}}},
   "financeTillCashBoxTrend": "{percent} % vs période précédente",
   "@financeTillCashBoxTrend": {"description": "Le signe est porté par l'icône et la couleur ; le nombre est donné en valeur absolue. Rendue seulement si le serveur a mesuré l'écart — une période précédente vide ou hors année scolaire fait disparaître la ligne.", "placeholders": {"percent": {"type": "int"}}},
+  "financeTillCashBoxNoComparablePeriod": "Pas de période comparable avant la rentrée",
+  "@financeTillCashBoxNoComparablePeriod": {"description": "Rendue quand `trendUnavailableReason` vaut BEFORE_SCHOOL_YEAR — la comparaison est impossible, pas seulement vide. Sans elle, la tuile perd son delta tous les jours de septembre sans raison visible."},
   "financeTillReceiptsIssuedLabel": "Reçus émis",
   "financeTillReceiptsIssuedSubline": "toutes caisses confondues",
   "@financeTillReceiptsIssuedSubline": {"description": "Un compteur, pas un montant — le seul agrégat inter-devises légitime de l'écran."},

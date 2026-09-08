@@ -6506,6 +6506,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get financeTillCashBoxNoComparablePeriod =>
+      'No comparable period before the school year began';
+
+  @override
   String get financeTillReceiptsIssuedLabel => 'Receipts issued';
 
   @override

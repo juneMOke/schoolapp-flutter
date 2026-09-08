@@ -24,6 +24,7 @@ TillCurrencyBlock _block(
   int boutique = 23450,
   int receiptCount = 5,
   int? trendPercent,
+  TillTrendUnavailableReason? trendUnavailableReason,
   List<TillBucket>? buckets,
   List<TillClassroomAmount>? byClassroom,
   int unassignedAmount = 0,
@@ -36,6 +37,7 @@ TillCurrencyBlock _block(
     receiptCount: receiptCount,
     averageTicket: receiptCount == 0 ? 0 : (fees + boutique) ~/ receiptCount,
     trendPercent: trendPercent,
+    trendUnavailableReason: trendUnavailableReason,
   ),
   buckets:
       buckets ??
@@ -329,6 +331,73 @@ void main() {
           'le bloc USD n’a pas de tendance : « 0 % » annoncerait une '
           'stabilité que personne n’a observée',
     );
+  });
+
+  testWidgets('avant la rentrée, la tuile DIT pourquoi elle ne compare pas', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([
+        _block(
+          'USD',
+          trendUnavailableReason: TillTrendUnavailableReason.beforeSchoolYear,
+        ),
+      ]),
+    );
+
+    expect(
+      find.text('Pas de période comparable avant la rentrée'),
+      findsOneWidget,
+      reason:
+          'sinon la tuile perd son delta tous les jours de septembre sans '
+          'raison visible, et quelqu’un finit par ouvrir un ticket',
+    );
+    expect(find.textContaining('vs période précédente'), findsNothing);
+  });
+
+  testWidgets('une période précédente vide se tait, elle ne s’explique pas', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([
+        _block(
+          'USD',
+          trendUnavailableReason:
+              TillTrendUnavailableReason.previousPeriodEmpty,
+        ),
+      ]),
+    );
+
+    expect(
+      find.textContaining('Pas de période comparable'),
+      findsNothing,
+      reason:
+          'la période existe et n’a rien encaissé : c’est un fait de la '
+          'période regardée, pas une limite de la mesure — l’absence se '
+          'comprend d’elle-même',
+    );
+    expect(find.textContaining('vs période précédente'), findsNothing);
+  });
+
+  testWidgets('une tendance mesurée ignore toute cause d’indisponibilité', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till([
+        _block(
+          'USD',
+          trendPercent: 18,
+          // Incohérent côté serveur, mais l'écran ne doit pas afficher les deux.
+          trendUnavailableReason: TillTrendUnavailableReason.beforeSchoolYear,
+        ),
+      ]),
+    );
+
+    expect(find.text('18 % vs période précédente'), findsOneWidget);
+    expect(find.textContaining('Pas de période comparable'), findsNothing);
   });
 
   testWidgets('une caisse sans reçu tait son ticket moyen', (tester) async {

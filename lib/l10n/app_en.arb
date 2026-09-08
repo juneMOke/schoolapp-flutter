@@ -3851,6 +3851,7 @@
   "@financeTillCashBoxSubline": {"placeholders": {"count": {"type": "int"}, "unit": {"type": "String"}, "ticket": {"type": "String"}}},
   "financeTillCashBoxTrend": "{percent}% vs previous period",
   "@financeTillCashBoxTrend": {"placeholders": {"percent": {"type": "int"}}},
+  "financeTillCashBoxNoComparablePeriod": "No comparable period before the school year began",
   "financeTillReceiptsIssuedLabel": "Receipts issued",
   "financeTillReceiptsIssuedSubline": "across all tills",
   "financeTillDetailHeading": "Till detail",

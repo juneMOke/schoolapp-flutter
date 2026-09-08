@@ -6573,6 +6573,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get financeTillCashBoxNoComparablePeriod =>
+      'Pas de période comparable avant la rentrée';
+
+  @override
   String get financeTillReceiptsIssuedLabel => 'Reçus émis';
 
   @override
