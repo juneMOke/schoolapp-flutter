@@ -251,6 +251,18 @@ const TableSchema refAcademicYearsTable = TableSchema(
 /// `ref_school` — identité de l'école (tenant), cache mono-ligne (D5/D6 :
 /// racine du bundle, pas dupliquée par année). Réécrite en entier à chaque
 /// pull référentiel (`upsertReferential` purge puis réinsère).
+///
+/// **`logo_thermal_sha256` / `logo_display_sha256` (v47)** — l'empreinte du logo
+/// de l'école, une par variante. Du TEXTE, et c'est délibéré : cette table est
+/// purgée puis réinsérée à chaque pull, donc y ranger des octets les ferait
+/// re-télécharger à chaque cycle. Les octets vivent dans `school_logo_cache`,
+/// que le pull ne touche pas.
+///
+/// ⚠️ Ces deux colonnes sont la **cible** (« voici le logo que l'école a »),
+/// jamais l'**état** (« voici celui que je détiens »). Elles ne doivent JAMAIS
+/// servir à construire un `If-None-Match` : après un tirage raté, le serveur
+/// répondrait `304` sur une empreinte qu'on ne détient pas, et les octets ne
+/// descendraient jamais. Cf. la note de `school_logo_cache`.
 const TableSchema refSchoolTable = TableSchema(
   name: 'ref_school',
   createTableSql: '''
@@ -264,7 +276,60 @@ const TableSchema refSchoolTable = TableSchema(
       address TEXT,
       phone TEXT,
       email TEXT,
+      logo_thermal_sha256 TEXT,
+      logo_display_sha256 TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+);
+
+/// `school_logo_cache` — les OCTETS du logo de l'école, une ligne par variante.
+///
+/// Table **tenant** (par école), pas appareil : marqueur posé ici pour le lot 1
+/// du plan multi-école, qui séparera `deviceOfflineTables` de
+/// `tenantOfflineTables` dans `buildOfflineSchema()`. Ce découpage n'existe pas
+/// encore ; ce commentaire est tout ce qu'on peut laisser en attendant.
+///
+/// ## Pourquoi des octets EN BASE, alors que le dépôt s'y était refusé
+///
+/// Le palier v21 a écarté `generated_documents.pdf_blob` en posant la règle :
+/// « les octets ne rejoignent PAS la base […] **avant d'introduire le moindre
+/// risque de volumétrie** ». Ce précédent est cité ici pour être **écarté**, et
+/// le motif qu'il nomme est justement celui qui ne s'applique pas :
+///
+/// * l'éditique range des CENTAINES de pièces de plusieurs Mo — d'où l'éviction
+///   LRU, le budget, et le magasin de fichiers chiffrés hors base ;
+/// * un logo, c'est **deux lignes par école** : ~1,5 ko en `thermal` (PNG 1 bit
+///   576×128) et ~12,5 ko en `display` (PNG 256×256 palette avec alpha), soit
+///   **~14 ko** — mesurés sur le vrai logo, pas estimés.
+///
+/// Aucune éviction, aucun budget, aucune croissance. Réutiliser
+/// `EditiqueBlobStore` aurait au contraire coûté le logo : son
+/// `reclaimOrphans()`, appelé au démarrage depuis `main.dart`, supprime tout
+/// fichier dont l'id n'est pas dans l'index `editique_cache_entries` — index
+/// dont le `doc_type` est contraint à `{AI, NP, RC, BU}`, où un logo n'entre
+/// pas. Le piège se contourne en ne l'approchant pas.
+///
+/// ## Trois règles d'écriture qui ne sont pas négociables
+///
+/// * **Jamais d'upsert `ConflictAlgorithm.replace` avec une map partielle.**
+///   C'est ce qui a vidé `pdf_blob` : une écriture qui omet `bytes` sous
+///   `replace` remet la colonne à NULL sans rien signaler.
+/// * **`sha256` et `bytes` dans la MÊME transaction.** Une empreinte écrite
+///   sans ses octets rejouerait le piège du `304`.
+/// * **Jamais de `SELECT *`.** L'invalidation lit `sha256` seul ; les pages de
+///   débordement qui portent le blob ne sont alors pas touchées.
+const TableSchema schoolLogoCacheTable = TableSchema(
+  name: 'school_logo_cache',
+  createTableSql: '''
+    CREATE TABLE school_logo_cache (
+      school_id TEXT NOT NULL,
+      variant TEXT NOT NULL,
+      sha256 TEXT NOT NULL,
+      bytes BLOB NOT NULL,
+      fetched_at INTEGER NOT NULL,
+      PRIMARY KEY (school_id, variant),
+      CHECK (variant IN ('thermal', 'display'))
     )
   ''',
 );
@@ -956,6 +1021,9 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   enrollmentsTable,
   // Inscription — tables de référence (pull, lecture seule)
   refSchoolTable,
+  // Voisine de `ref_school`, et pas ailleurs : la clé d'invalidation du logo
+  // vit dans `ref_school`, les octets ici. Les séparer cacherait le couplage.
+  schoolLogoCacheTable,
   refAcademicYearsTable,
   refSchoolLevelGroupsTable,
   refSchoolLevelsTable,

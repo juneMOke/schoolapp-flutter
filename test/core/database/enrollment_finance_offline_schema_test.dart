@@ -36,6 +36,7 @@ void main() {
         'enrollments',
         // Inscription — tables de référence (pull, lecture seule)
         'ref_school',
+        'school_logo_cache',
         'ref_academic_years',
         'ref_school_level_groups',
         'ref_school_levels',
@@ -51,7 +52,7 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 22 tables', () {
+  test('la liste exportée contient exactement 24 tables', () {
     // +1 en v33 : `ref_previous_year_student_balances`, les arriérés N-1 sortis
     // de la ligne de l'élève pour porter une entrée PAR DEVISE.
     // +3 en v36 : le catalogue des réductions (`ref_reduction_types`,
@@ -63,7 +64,10 @@ void main() {
     // append-only de `payment_allocations`.
     // +1 en v44 : `ref_fee_code_sections`, le titre que l'école donne à chaque
     // nature de frais — cache d'AFFICHAGE, qu'aucune écriture ne lit.
-    expect(enrollmentFinanceOfflineTables, hasLength(23));
+    // +1 en v47 : `school_logo_cache`, les octets du logo par variante. Voisine
+    // de `ref_school`, qui porte les empreintes : la table est réécrite à chaque
+    // pull, celle-ci non — sans quoi chaque cycle retélécharge le logo.
+    expect(enrollmentFinanceOfflineTables, hasLength(24));
   });
 
   test(

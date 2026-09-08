@@ -555,7 +555,16 @@ class AppConstants {
   // l'enfant d'un frère — et la contrainte ne laissait qu'une issue : en
   // inventer un. Une saisie fausse, donc un message envoyé à un inconnu le jour
   // où l'école notifie.
-  static const int offlineDbSchemaVersion = 46;
+  // v47 (2026-09-08) : le logo de l'école — `ref_school.logo_thermal_sha256` /
+  // `logo_display_sha256`, et la table `school_logo_cache` qui porte les octets.
+  // L'empreinte est du TEXTE sur une table réécrite à chaque pull ; les octets
+  // vivent à côté, dans une table que le pull ne touche pas, sans quoi chaque
+  // cycle les redemanderait. ~14 ko par école, deux variantes — assez peu pour
+  // que le refus d'octets en base du palier v21 (volumétrie de l'éditique) ne
+  // s'applique pas ici, et le commentaire de la table le dit.
+  // ⚠️ Numéro PRIS, pas réservé : le lot 2 du plan multi-école le visait aussi
+  // et renumérotera en v48. Cf. le v24 brûlé — un palier se prend en fusionnant.
+  static const int offlineDbSchemaVersion = 47;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
