@@ -10511,29 +10511,77 @@ abstract class AppLocalizations {
   /// **'What went into the drawer'**
   String get financeDashboardTabTillDescription;
 
-  /// No description provided for @financeTillKpiTotal.
+  /// No description provided for @financeTillSourceHeading.
   ///
   /// In en, this message translates to:
-  /// **'Till total'**
-  String get financeTillKpiTotal;
+  /// **'By source'**
+  String get financeTillSourceHeading;
 
-  /// No description provided for @financeTillKpiFees.
+  /// No description provided for @financeTillSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Billed fees versus boutique sales'**
+  String get financeTillSourceHint;
+
+  /// No description provided for @financeTillSourceFees.
   ///
   /// In en, this message translates to:
   /// **'School fees'**
-  String get financeTillKpiFees;
+  String get financeTillSourceFees;
 
-  /// No description provided for @financeTillKpiBoutique.
+  /// No description provided for @financeTillSourceBoutique.
   ///
   /// In en, this message translates to:
   /// **'Boutique sales'**
-  String get financeTillKpiBoutique;
+  String get financeTillSourceBoutique;
 
-  /// No description provided for @financeTillKpiBandA11yLabel.
+  /// No description provided for @financeTillSourceA11yLabel.
   ///
   /// In en, this message translates to:
-  /// **'Till indicators, by currency'**
-  String get financeTillKpiBandA11yLabel;
+  /// **'Split by source: {fees} in billed fees, {boutique} in boutique sales'**
+  String financeTillSourceA11yLabel(String fees, String boutique);
+
+  /// No description provided for @financeTillSourceBoutiqueNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, unbilled purchases: this share enters the till without settling any fee.'**
+  String get financeTillSourceBoutiqueNote;
+
+  /// No description provided for @financeTillClassroomHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'By classroom'**
+  String get financeTillClassroomHeading;
+
+  /// No description provided for @financeTillClassroomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No classroom fed this till} one{The top contributing classroom for this till} other{The {count} top contributing classrooms for this till}}'**
+  String financeTillClassroomHint(int count);
+
+  /// No description provided for @financeTillClassroomRowA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{classroom}: {amount}'**
+  String financeTillClassroomRowA11yLabel(String classroom, String amount);
+
+  /// No description provided for @financeTillClassroomUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} came in without naming a classroom — a boutique sale has neither student nor classroom. The rows above therefore do not add up to the till total.'**
+  String financeTillClassroomUnassigned(String amount);
+
+  /// No description provided for @financeTillClassroomEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No classroom to rank'**
+  String get financeTillClassroomEmpty;
+
+  /// No description provided for @financeTillClassroomEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing that entered this till names a student.'**
+  String get financeTillClassroomEmptyHint;
 
   /// No description provided for @financeTillCashBoxesA11yLabel.
   ///

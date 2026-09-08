@@ -9,7 +9,9 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_imputation_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_freshness_caption.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_classroom_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_source_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -88,7 +90,7 @@ class FinanceTillSuccessView extends StatelessWidget {
           if (selected != null) ...[
             if (selected.hasNoMovement)
               _CurrencyNoMovement(l10n: l10n)
-            else
+            else ...[
               FinanceTillBucketsSection(
                 title: l10n.financeTillBucketsHeading(
                   tillCurrencyName(selected.currency, l10n),
@@ -100,6 +102,14 @@ class FinanceTillSuccessView extends StatelessWidget {
                     ? l10n.financeTillBucketsWindowNote
                     : null,
               ),
+              const SizedBox(height: AppDimensions.spacingL),
+              // Deux lectures de la même somme : d'où vient l'argent, puis quelle
+              // classe l'a versé. Toutes deux dans la devise de la caisse
+              // détaillée — aucune conversion nulle part.
+              FinanceTillSourceSection(block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+              FinanceTillClassroomSection(block: selected),
+            ],
             const SizedBox(height: AppDimensions.spacingXL),
           ],
           // La ventilation par poste n'est plus une colonne du bloc de devise

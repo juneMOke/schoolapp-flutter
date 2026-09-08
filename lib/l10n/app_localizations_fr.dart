@@ -6484,17 +6484,57 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce qui est entré dans le tiroir';
 
   @override
-  String get financeTillKpiTotal => 'Total du tiroir';
+  String get financeTillSourceHeading => 'Par source';
 
   @override
-  String get financeTillKpiFees => 'Frais scolaires';
+  String get financeTillSourceHint => 'Frais facturés contre ventes boutique';
 
   @override
-  String get financeTillKpiBoutique => 'Ventes boutique';
+  String get financeTillSourceFees => 'Frais scolaires';
 
   @override
-  String get financeTillKpiBandA11yLabel =>
-      'Indicateurs de la caisse, par devise';
+  String get financeTillSourceBoutique => 'Ventes boutique';
+
+  @override
+  String financeTillSourceA11yLabel(String fees, String boutique) {
+    return 'Répartition par source : $fees de frais facturés, $boutique de ventes boutique';
+  }
+
+  @override
+  String get financeTillSourceBoutiqueNote =>
+      'Des achats facultatifs, non facturés : cette part entre en caisse sans solder aucun frais.';
+
+  @override
+  String get financeTillClassroomHeading => 'Par classe';
+
+  @override
+  String financeTillClassroomHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les $count classes les plus contributrices à cette caisse',
+      one: 'La classe la plus contributrice à cette caisse',
+      zero: 'Aucune classe n\'a alimenté cette caisse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillClassroomRowA11yLabel(String classroom, String amount) {
+    return '$classroom : $amount';
+  }
+
+  @override
+  String financeTillClassroomUnassigned(String amount) {
+    return '$amount sont entrés sans désigner de classe — une vente boutique n\'a ni élève ni classe. La somme des lignes ci-dessus ne fait donc pas le total de la caisse.';
+  }
+
+  @override
+  String get financeTillClassroomEmpty => 'Aucune classe à classer';
+
+  @override
+  String get financeTillClassroomEmptyHint =>
+      'Rien de ce qui est entré dans cette caisse ne désigne un élève.';
 
   @override
   String get financeTillCashBoxesA11yLabel =>

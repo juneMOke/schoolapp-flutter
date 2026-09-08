@@ -25,6 +25,8 @@ TillCurrencyBlock _block(
   int receiptCount = 5,
   int? trendPercent,
   List<TillBucket>? buckets,
+  List<TillClassroomAmount>? byClassroom,
+  int unassignedAmount = 0,
 }) => TillCurrencyBlock(
   currency: currency,
   summary: TillSummary(
@@ -46,6 +48,8 @@ TillCurrencyBlock _block(
           isCurrent: true,
         ),
       ],
+  byClassroom: byClassroom ?? const [],
+  unassignedAmount: unassignedAmount,
 );
 
 /// Ce que les versements ont éteint, dans la devise d'une créance.
@@ -550,6 +554,147 @@ void main() {
 
     test('une clé inattendue se rend telle quelle', () {
       expect(shortBucketLabel('2026'), '2026');
+    });
+  });
+
+  group('par source', () {
+    testWidgets('les deux sources se lisent, dans un ordre fixe', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD', fees: 325500, boutique: 86500)]));
+
+      expect(find.text('Par source'), findsOneWidget);
+      expect(find.text('Frais scolaires'), findsOneWidget);
+      expect(find.text('Ventes boutique'), findsOneWidget);
+    });
+
+    testWidgets('une source à zéro garde sa ligne — l’absence est une '
+        'information', (tester) async {
+      await pump(tester, _till([_block('USD', fees: 412000, boutique: 0)]));
+
+      expect(
+        find.text('Ventes boutique'),
+        findsOneWidget,
+        reason:
+            'une boutique qui n’a rien vendu ce jour-là doit se voir : la '
+            'faire disparaître laisserait croire qu’elle n’existe pas',
+      );
+    });
+
+    testWidgets('la note du statut non facturé n’apparaît qu’avec une vente', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD', fees: 412000, boutique: 0)]));
+
+      expect(
+        find.textContaining('sans solder aucun frais'),
+        findsNothing,
+        reason:
+            'expliquer le statut d’un montant nul commente une ligne que '
+            'personne ne voit',
+      );
+
+      await pump(tester, _till([_block('USD', fees: 325500, boutique: 86500)]));
+
+      expect(find.textContaining('sans solder aucun frais'), findsOneWidget);
+    });
+  });
+
+  group('par classe', () {
+    testWidgets('le palmarès annonce le nombre réellement affiché', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block(
+            'USD',
+            byClassroom: const [
+              TillClassroomAmount(
+                classroomId: 'c1',
+                name: '1ère humanités',
+                amount: 46000,
+              ),
+              TillClassroomAmount(
+                classroomId: 'c2',
+                name: '6ème primaire',
+                amount: 34000,
+              ),
+            ],
+          ),
+        ]),
+      );
+
+      expect(find.text('Par classe'), findsOneWidget);
+      // Deux classes, pas « top 8 » : une école de deux classes en montre deux.
+      expect(
+        find.text('Les 2 classes les plus contributrices à cette caisse'),
+        findsOneWidget,
+      );
+      expect(find.text('1ère humanités'), findsOneWidget);
+      expect(find.text('6ème primaire'), findsOneWidget);
+    });
+
+    testWidgets('le montant sans classe est annoncé, sinon le classement '
+        'passe pour un bug', (tester) async {
+      await pump(
+        tester,
+        _till([
+          _block(
+            'USD',
+            fees: 100000,
+            boutique: 23450,
+            byClassroom: const [
+              TillClassroomAmount(
+                classroomId: 'c1',
+                name: '1ère humanités',
+                amount: 100000,
+              ),
+            ],
+            unassignedAmount: 23450,
+          ),
+        ]),
+      );
+
+      expect(
+        find.textContaining('sans désigner de classe'),
+        findsOneWidget,
+        reason:
+            'la somme des lignes ne retombe pas sur le total de la caisse, et '
+            'le lecteur cherche une erreur qui n’existe pas — une vente '
+            'boutique n’a ni élève ni classe',
+      );
+    });
+
+    testWidgets('rien d’inattribuable : aucune mention à faire', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block(
+            'USD',
+            boutique: 0,
+            byClassroom: const [
+              TillClassroomAmount(
+                classroomId: 'c1',
+                name: '1ère humanités',
+                amount: 100000,
+              ),
+            ],
+          ),
+        ]),
+      );
+
+      expect(find.textContaining('sans désigner de classe'), findsNothing);
+    });
+
+    testWidgets('aucune classe : la carte le dit au lieu de rester vide', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD')]));
+
+      expect(find.text('Aucune classe à classer'), findsOneWidget);
     });
   });
 }

@@ -6417,16 +6417,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeDashboardTabTillDescription => 'What went into the drawer';
 
   @override
-  String get financeTillKpiTotal => 'Till total';
+  String get financeTillSourceHeading => 'By source';
 
   @override
-  String get financeTillKpiFees => 'School fees';
+  String get financeTillSourceHint => 'Billed fees versus boutique sales';
 
   @override
-  String get financeTillKpiBoutique => 'Boutique sales';
+  String get financeTillSourceFees => 'School fees';
 
   @override
-  String get financeTillKpiBandA11yLabel => 'Till indicators, by currency';
+  String get financeTillSourceBoutique => 'Boutique sales';
+
+  @override
+  String financeTillSourceA11yLabel(String fees, String boutique) {
+    return 'Split by source: $fees in billed fees, $boutique in boutique sales';
+  }
+
+  @override
+  String get financeTillSourceBoutiqueNote =>
+      'Optional, unbilled purchases: this share enters the till without settling any fee.';
+
+  @override
+  String get financeTillClassroomHeading => 'By classroom';
+
+  @override
+  String financeTillClassroomHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $count top contributing classrooms for this till',
+      one: 'The top contributing classroom for this till',
+      zero: 'No classroom fed this till',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillClassroomRowA11yLabel(String classroom, String amount) {
+    return '$classroom: $amount';
+  }
+
+  @override
+  String financeTillClassroomUnassigned(String amount) {
+    return '$amount came in without naming a classroom — a boutique sale has neither student nor classroom. The rows above therefore do not add up to the till total.';
+  }
+
+  @override
+  String get financeTillClassroomEmpty => 'No classroom to rank';
+
+  @override
+  String get financeTillClassroomEmptyHint =>
+      'Nothing that entered this till names a student.';
 
   @override
   String get financeTillCashBoxesA11yLabel =>
