@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/till_rate_micros.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_crossed.dart';
 
 /// Miroir de `TillCurrencyAmountDto` — un montant qui porte sa devise.
@@ -62,7 +63,7 @@ class TillCrossedModel {
     if (raw is! List) return const [];
     final micros = <int>[];
     for (final entry in raw) {
-      final value = _toMicros(entry);
+      final value = tillRateToMicros(entry);
       if (value != null) micros.add(value);
     }
     return micros;
@@ -72,20 +73,6 @@ class TillCrossedModel {
     : count = 0,
       amounts = const [],
       rateMicros = const [];
-
-  /// Un taux passe en **micro-unités**, comme partout ailleurs dans le socle
-  /// monétaire : un flottant qui traverse la couche métier finit par arrondir de
-  /// l'argent. Même conversion que le pull des taux de change
-  /// (`exchange_rate_pull_models.dart`), pour que les deux chemins ne divergent
-  /// pas d'un centième.
-  ///
-  /// Un taux nul, négatif ou illisible est **écarté** plutôt que replié sur zéro :
-  /// « au taux de 0 » se lirait comme une conversion observée.
-  static int? _toMicros(Object? raw) {
-    if (raw is! num) return null;
-    final micros = (raw * ExchangeRate.scale).round();
-    return micros > 0 ? micros : null;
-  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'count': count,
