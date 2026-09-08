@@ -6514,14 +6514,26 @@ abstract class AppLocalizations {
   /// No description provided for @facturationPaymentTicketNotPrinted.
   ///
   /// In en, this message translates to:
-  /// **'Ticket not printed'**
+  /// **'Never printed from this tablet.'**
   String get facturationPaymentTicketNotPrinted;
+
+  /// No description provided for @facturationPaymentTicketPrintedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on {date}'**
+  String facturationPaymentTicketPrintedAt(String date);
 
   /// No description provided for @facturationPaymentPrintTicketAction.
   ///
   /// In en, this message translates to:
   /// **'Print now'**
   String get facturationPaymentPrintTicketAction;
+
+  /// No description provided for @facturationPaymentReprintTicketAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint the ticket'**
+  String get facturationPaymentReprintTicketAction;
 
   /// No description provided for @facturationPaymentReceiptLabel.
   ///

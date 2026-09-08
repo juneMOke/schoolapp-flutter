@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
@@ -18,15 +17,17 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   final ProvisionalTicketDao _dao;
   final FinanceOfflineRepository _finance;
-  final DeviceIdentityService _deviceIdentity;
 
+  // ⚠️ Plus de `DeviceIdentityService` ici. Il ne servait qu'à refuser le
+  // rattrapage hors du poste d'encaissement ; la réimpression étant libre et la
+  // pièce se composant entière depuis un versement descendu par pull, la
+  // dépendance n'avait plus d'objet — la garder aurait laissé croire que
+  // l'appareil décide encore de quelque chose.
   const ProvisionalTicketRepositoryImpl({
     required ProvisionalTicketDao dao,
     required FinanceOfflineRepository finance,
-    required DeviceIdentityService deviceIdentity,
   }) : _dao = dao,
-       _finance = finance,
-       _deviceIdentity = deviceIdentity;
+       _finance = finance;
 
   @override
   Future<void> markTicketPrinted(String paymentId) async {
@@ -41,35 +42,14 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   }
 
   @override
-  Future<bool> hasPrintedTicket(String paymentId) async {
+  Future<DateTime?> ticketPrintedAt(String paymentId) async {
     try {
-      return await _dao.hasPrintedTicket(paymentId);
+      return await _dao.findTicketPrintedAt(paymentId);
     } catch (_) {
-      // Lecture illisible : on répond « pas imprimé ». Offrir un rattrapage
-      // inutile vaut mieux que masquer le seul chemin vers un papier manquant.
-      return false;
-    }
-  }
-
-  @override
-  Future<bool> awaitsTicketPrint(String paymentId) async {
-    try {
-      final payment = await _dao.findPayment(paymentId);
-      if (payment == null) return false;
-
-      // Encaissé ailleurs : le ticket sortirait sans référence provisoire et
-      // avec les codes de frais en guise de libellés. Un papier illisible
-      // remis à une famille vaut moins que pas de papier du tout.
-      final deviceId = payment.deviceId?.trim();
-      if (deviceId == null || deviceId.isEmpty) return false;
-      if (deviceId != await _deviceIdentity.getOrCreateDeviceId()) return false;
-
-      return !await _dao.hasPrintedTicket(paymentId);
-    } catch (_) {
-      // Rien de lisible : on n'offre pas un geste dont on ne sait pas s'il est
-      // légitime. Le silence vaut mieux qu'un bouton qui ressortirait un ticket
-      // déjà remis.
-      return false;
+      // Lecture illisible : on répond « aucun papier connu ». Le bouton reste
+      // offert de toute façon — seule la phrase qui l'accompagne s'appauvrit,
+      // et une phrase muette vaut mieux qu'une date inventée.
+      return null;
     }
   }
 

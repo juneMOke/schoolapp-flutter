@@ -490,13 +490,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // Le solde vient du domaine Facturation, seul détenteur de la sémantique
       // money-grade du reste à payer — jamais recomposé ici.
       finance: getIt<FinanceOfflineRepository>(),
-      // Sert à ne proposer le rattrapage d'impression que sur les versements
-      // encaissés par CETTE tablette.
-      deviceIdentity: getIt<DeviceIdentityService>(),
     ),
   );
-  getIt.registerFactory<AwaitsTicketPrintUseCase>(
-    () => AwaitsTicketPrintUseCase(getIt<ProvisionalTicketRepository>()),
+  getIt.registerFactory<TicketPrintedAtUseCase>(
+    () => TicketPrintedAtUseCase(getIt<ProvisionalTicketRepository>()),
   );
   getIt.registerFactory<MarkTicketPrintedUseCase>(
     () => MarkTicketPrintedUseCase(getIt<ProvisionalTicketRepository>()),
@@ -706,7 +703,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   // Factory : la ligne de rattrapage vit et meurt avec la modale de détail.
   getIt.registerFactory<TicketPrintStatusCubit>(
-    () => TicketPrintStatusCubit(getIt<AwaitsTicketPrintUseCase>()),
+    () => TicketPrintStatusCubit(getIt<TicketPrintedAtUseCase>()),
   );
   getIt.registerFactory<PaymentReceiptCubit>(
     () => PaymentReceiptCubit(

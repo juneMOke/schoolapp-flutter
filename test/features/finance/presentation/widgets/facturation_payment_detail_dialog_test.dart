@@ -123,11 +123,13 @@ void main() {
     expect(find.text('—'), findsOneWidget);
   });
 
-  /// Le rattrapage n'est offert que sur un versement dont AUCUN papier n'est
-  /// sorti. La modale ne juge que la dernière des trois conditions — le reçu
-  /// annulé —, les deux autres étant métier et tenues par le repository. Un
-  /// reçu retiré ne doit jamais ressortir sous forme de ticket.
-  group('rattrapage d\'impression', () {
+  /// La vue ne juge RIEN sur l'impression : elle reçoit une ligne, ou `null`.
+  ///
+  /// Depuis que la réimpression est libre, l'appelant ne passe `null` que dans
+  /// un seul cas — un **reçu annulé**, qu'il est seul à connaître. Le nombre de
+  /// papiers déjà sortis ne ferme plus rien : il choisit les mots de la ligne,
+  /// ce que `facturation_ticket_print_row_test.dart` vérifie.
+  group('ligne d\'impression', () {
     testWidgets('la ligne prend place sous la répartition', (tester) async {
       await _pump(
         tester,
@@ -139,9 +141,7 @@ void main() {
       expect(find.text('TICKET_SLOT'), findsOneWidget);
     });
 
-    testWidgets('rien du tout quand le versement a déjà son papier', (
-      tester,
-    ) async {
+    testWidgets('un emplacement vide ne laisse aucune trace', (tester) async {
       await _pump(tester, onDownload: () {});
       await tester.pumpAndSettle();
 

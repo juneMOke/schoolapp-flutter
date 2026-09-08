@@ -240,11 +240,16 @@ class ProvisionalTicketDao {
     );
   }
 
-  /// Vrai si un ticket est déjà sorti de CE poste pour ce versement.
+  /// Quand un ticket est sorti de CE poste pour ce versement, `null` si aucun.
   ///
-  /// Rend `false` quand la ligne est introuvable : mieux vaut offrir un
-  /// rattrapage inutile que refuser le seul chemin vers un papier qui manque.
-  Future<bool> hasPrintedTicket(String paymentId) async {
+  /// C'est la DERNIÈRE impression, pas la première : `markTicketPrinted`
+  /// réécrit l'horodatage à chaque tirage réussi. Depuis que la réimpression
+  /// est libre, la ligne d'écran ne demande plus « peut-on imprimer ? » mais
+  /// « qu'est-ce que je dis au caissier ? » — et la date est la réponse.
+  ///
+  /// Rend `null` quand la ligne est introuvable : le geste reste offert, et
+  /// l'écran dira simplement qu'aucun papier n'est connu.
+  Future<DateTime?> findTicketPrintedAt(String paymentId) async {
     final rows = await _db.query(
       'payments',
       columns: const ['ticket_printed_at'],
@@ -252,8 +257,9 @@ class ProvisionalTicketDao {
       whereArgs: [paymentId],
       limit: 1,
     );
-    if (rows.isEmpty) return false;
-    return rows.first['ticket_printed_at'] != null;
+    if (rows.isEmpty) return null;
+    final at = rows.first['ticket_printed_at'] as int?;
+    return at == null ? null : DateTime.fromMillisecondsSinceEpoch(at);
   }
 
   /// Les titres de nature de frais de l'école, `code` en MAJUSCULES → libellé.

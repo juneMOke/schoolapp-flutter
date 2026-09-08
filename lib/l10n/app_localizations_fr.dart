@@ -3991,10 +3991,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Encaissé par';
 
   @override
-  String get facturationPaymentTicketNotPrinted => 'Ticket non imprimé';
+  String get facturationPaymentTicketNotPrinted =>
+      'Jamais imprimé depuis cette tablette.';
+
+  @override
+  String facturationPaymentTicketPrintedAt(String date) {
+    return 'Imprimé le $date';
+  }
 
   @override
   String get facturationPaymentPrintTicketAction => 'Imprimer maintenant';
+
+  @override
+  String get facturationPaymentReprintTicketAction => 'Réimprimer le ticket';
 
   @override
   String get facturationPaymentReceiptLabel => 'Reçu n°';

@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
@@ -79,11 +78,7 @@ void main() {
     when(
       () => finance.getCharges(any()),
     ).thenAnswer((_) async => const Right(<LocalStudentCharge>[]));
-    repository = ProvisionalTicketRepositoryImpl(
-      dao: dao,
-      finance: finance,
-      deviceIdentity: _FakeDeviceIdentity(),
-    );
+    repository = ProvisionalTicketRepositoryImpl(dao: dao, finance: finance);
   });
 
   tearDown(() async => db.close());
@@ -93,6 +88,14 @@ void main() {
     String? cashierLastName = 'Kabeya',
     String? deviceId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
     String currency = 'CDF',
+
+    /// L'attribution SERVEUR, seule connue d'un versement encaissé ailleurs.
+    String? collectedByName,
+    String? receiptId,
+
+    /// La ligne `generated_documents` est POSÉE PAR LE POSTE qui encaisse : un
+    /// versement descendu par pull n'en a aucune en local.
+    bool withLocalDocument = true,
   }) async {
     await db.insert('students', {
       'id': 's-1',
@@ -118,6 +121,8 @@ void main() {
       'payer_last_name': 'Mbala',
       'cashier_first_name': cashierFirstName,
       'cashier_last_name': cashierLastName,
+      'collected_by_name': collectedByName,
+      'receipt_id': receiptId,
       'device_id': deviceId,
       'sync_status': 'PENDING_SYNC',
       'updated_at': 0,
@@ -144,6 +149,7 @@ void main() {
       'rate_micros': 1000000,
       'pivot_currency': currency,
     });
+    if (!withLocalDocument) return;
     await db.insert('generated_documents', {
       'id': 'doc-1',
       'doc_domain': 'PAYMENT',
@@ -157,43 +163,149 @@ void main() {
     });
   }
 
-  /// Le rattrapage d'impression n'est PAS une réimpression : il ne s'offre que
-  /// sur un versement dont aucun papier n'est sorti, encaissé sur CETTE
-  /// tablette. Ces deux conditions vivent dans le repository parce qu'elles
-  /// sont métier — l'écran, lui, n'ajoute que l'annulation du reçu.
-  group('rattrapage d\'impression', () {
-    test('un versement de ce poste jamais imprimé l attend', () async {
+  /// La trace d'impression n'autorise plus rien : elle DIT. La réimpression
+  /// est libre, et cette date sert à choisir les mots de la ligne d'écran.
+  ///
+  /// Elle reste purement locale — « ce poste a servi le papier » est un fait
+  /// d'appareil, jamais poussé ni descendu.
+  group('trace d\'impression', () {
+    test('un versement jamais imprimé ici ne porte aucune date', () async {
       await seedPayment(deviceId: 'device-1');
 
-      expect(await repository.awaitsTicketPrint('p-1'), isTrue);
+      expect(await repository.ticketPrintedAt('p-1'), isNull);
     });
 
-    test('une fois le papier sorti, plus jamais', () async {
+    test('le tirage pose la date, et le geste reste offert', () async {
       await seedPayment(deviceId: 'device-1');
+      final before = DateTime.now();
       await repository.markTicketPrinted('p-1');
 
-      // C'est ce qui empêche le rattrapage de devenir une réimpression, que
-      // l'ADR-013 interdit.
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
-      expect(await repository.hasPrintedTicket('p-1'), isTrue);
+      final at = await repository.ticketPrintedAt('p-1');
+      expect(at, isNotNull);
+      // À la seconde près : la trace porte l'instant du tirage, ce que la
+      // ligne d'écran affiche telle quelle.
+      expect(
+        at!.isBefore(before.subtract(const Duration(seconds: 5))),
+        isFalse,
+      );
     });
 
-    test('un versement encaissé ailleurs n est pas proposé', () async {
-      await seedPayment(deviceId: 'autre-tablette');
+    /// L'horodatage est celui de la DERNIÈRE impression, pas de la première.
+    /// Un caissier qui lit « Imprimé le … » doit pouvoir s'y fier pour savoir
+    /// quand le dernier papier est sorti — sans quoi la mention vieillirait
+    /// pendant que les tirages s'enchaînent.
+    test('un second tirage réécrit la date', () async {
+      await seedPayment(deviceId: 'device-1');
+      await repository.markTicketPrinted('p-1');
+      final first = await repository.ticketPrintedAt('p-1');
 
-      // Le ticket sortirait sans référence provisoire locale et avec les codes
-      // de frais en guise de libellés : un papier illisible pour la famille.
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await repository.markTicketPrinted('p-1');
+      final second = await repository.ticketPrintedAt('p-1');
+
+      expect(second!.isBefore(first!), isFalse);
+      expect(second, isNot(first));
     });
 
-    test('un versement sans appareil connu n est pas proposé', () async {
-      await seedPayment(deviceId: null);
+    test('un versement introuvable ne porte pas de date', () async {
+      expect(await repository.ticketPrintedAt('inconnu'), isNull);
+    });
+  });
 
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+  /// ## Ce qui a permis de retirer la garde `device_id`
+  ///
+  /// Le rattrapage refusait tout versement encaissé sur une AUTRE tablette,
+  /// pour une raison précise et alors exacte : le ticket serait sorti dégradé
+  /// — « Réf. » sur un UUID, libellés de répartition sur les codes de frais
+  /// bruts, aucun caissier à qui l'imputer.
+  ///
+  /// Ce lot a branché les trois sources qui manquaient. Ce test le CONSTATE sur
+  /// la pièce composée, plutôt que de le déduire du code : c'est lui qui
+  /// autorise la réimpression libre à s'offrir hors du poste d'encaissement.
+  group('un versement encaissé ailleurs compose une pièce entière', () {
+    /// La forme réelle d'un versement descendu par pull : aucune ligne
+    /// `generated_documents` locale, aucun `cashier_*` de ce poste, mais
+    /// l'attribution serveur et le `receipt_id` qui, eux, descendent.
+    Future<void> seedForeign() => seedPayment(
+      deviceId: 'autre-tablette',
+      cashierFirstName: null,
+      cashierLastName: null,
+      collectedByName: 'Alice Nsimba',
+      receiptId: 'rcpt-77',
+      withLocalDocument: false,
+    );
+
+    test(
+      'la référence retombe sur l identifiant, jamais sur du vide',
+      () async {
+        await seedForeign();
+
+        final model = (await repository.buildForPayment(
+          paymentId: 'p-1',
+          labels: _labels,
+        )).getOrElse(() => throw StateError('échec'));
+
+        expect(model.reference, 'p-1');
+        expect(model.reference, isNotEmpty);
+      },
+    );
+
+    /// La correction la plus importante des trois : `isProvisional` se lit
+    /// AFFIRMATIVEMENT sur `receipt_id`. Lu par négation du numéro, il aurait
+    /// rendu `true` ici — l'absence de ligne locale n'est pas l'absence de
+    /// sceau — et le papier d'un reçu scellé se serait dit « provisoire ».
+    test('la pièce scellée ailleurs ne se dit PAS provisoire', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isFalse);
     });
 
-    test('un versement introuvable n est pas proposé', () async {
-      expect(await repository.awaitsTicketPrint('inconnu'), isFalse);
+    test('l attribution serveur tient la ligne du caissier', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      // RG-012-11 : une pièce non scellée vaut par l'humain qu'elle nomme.
+      expect(model.cashierFullName, 'Alice Nsimba');
+    });
+
+    test('les libellés restent des mots, pas des codes de frais', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.allocations.single.label, 'Frais scolaires');
+      expect(model.allocations.single.label, isNot('TUITION'));
+    });
+
+    /// Les imputations ET les lignes d'encaissement descendent par le pull
+    /// (`finance_ledger_sync_dao.dart`, même patron patch-puis-insert). Sans
+    /// elles le papier n'aurait ni montant ni ventilation, et la garde aurait
+    /// eu raison de refuser.
+    test('le montant reçu et la ventilation sont là', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+      final out = TicketTextLayout.render(model).join('\n');
+
+      expect(model.amountReceived.isEmpty, isFalse);
+      expect(out, contains('1 500 FC'));
+      expect(out, contains('Frais scolaires'));
+      expect(out, contains('Alice Nsimba'));
     });
   });
 
@@ -937,14 +1049,4 @@ void main() {
       expect(lines.single.label, 'TUITION');
     });
   });
-}
-
-/// L'identité d'appareil ne sert qu'au rattrapage d'impression : la composition
-/// du ticket ne la consulte jamais.
-class _FakeDeviceIdentity implements DeviceIdentityService {
-  @override
-  Future<String> getOrCreateDeviceId() async => 'device-1';
-
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
