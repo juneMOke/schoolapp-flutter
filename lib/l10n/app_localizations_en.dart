@@ -7615,6 +7615,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketReferenceLabel => 'Ref.';
 
   @override
+  String get ticketDateLabel => 'Date:';
+
+  @override
+  String get ticketPayerLabel => 'PAYER:';
+
+  @override
+  String get ticketPhoneLabel => 'Tel.';
+
+  @override
   String get ticketCashierLabel => 'Cashier:';
 
   @override

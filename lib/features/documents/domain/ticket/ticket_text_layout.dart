@@ -29,13 +29,24 @@ abstract final class TicketTextLayout {
     final width = columns < 24 ? 24 : columns;
     final lines = <String>[];
 
-    // ── Z1 — l'établissement. Deux lignes, pas de logo, pas de mention
-    // d'agrément : ce n'est pas une pièce officielle.
+    // ── Z1 — l'établissement, en-tête complet : nom, adresse, localité, email,
+    // téléphone. Le logo, lui, n'est PAS ici : c'est une bande posée par chaque
+    // renderer en amont de ces lignes. Une image ne passe pas par le pivot
+    // `List<String>`, et c'est ce pivot qui rend vérifiable le critère
+    // d'acceptation de l'ADR — même contenu textuel entre les deux sorties. Le
+    // précédent est celui de `cutNotice` : ce qui appartient au SUPPORT est posé
+    // par le renderer, jamais par le gabarit.
+    //
+    // Aucune garde à écrire sur les lignes optionnelles : `_centered('')` rend
+    // une liste VIDE, donc un champ absent ne laisse pas même une ligne
+    // d'espaces. Une école mal renseignée sort un en-tête plus COURT, jamais un
+    // en-tête troué — et sur une pièce, une ligne blanche se lirait comme une
+    // mention effacée.
     lines.addAll(_centered(model.schoolName.toUpperCase(), width));
-    final municipality = model.schoolLocality?.trim();
-    if (municipality != null && municipality.isNotEmpty) {
-      lines.addAll(_centered(municipality, width));
-    }
+    lines.addAll(_centered(model.schoolAddress ?? '', width));
+    lines.addAll(_centered(model.schoolLocality ?? '', width));
+    lines.addAll(_centered(model.schoolEmail ?? '', width));
+    lines.addAll(_centered(model.schoolPhone ?? '', width));
     lines.add(_rule(width));
 
     // Nature de la pièce, avant tout le reste : quelqu'un qui trie une liasse
@@ -74,9 +85,13 @@ abstract final class TicketTextLayout {
         width,
       ),
     );
+    // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
+    // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
+    // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
+    // colonnes de battement à 48 et 11 à 32. Aucune ligne de papier ajoutée.
     _addPair(
       lines,
-      _formatDate(model.paidAt),
+      '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
       _formatTime(model.paidAt),
       width,
     );
@@ -87,6 +102,36 @@ abstract final class TicketTextLayout {
       width,
     );
     lines.add(_rule(width));
+
+    // ── Le payeur, quand il y en a un.
+    //
+    // **Le bloc ENTIER disparaît sinon** — ni cadre vide, ni tiret. Sur une
+    // pièce, une mention laissée vide se lit comme une mention EFFACÉE et invite
+    // à chercher ce qu'on aurait retiré ; mieux vaut n'avoir rien à lire que
+    // quelque chose à interpréter.
+    //
+    // Un téléphone SEUL garde le bloc : il a été tapé, donc il désigne
+    // quelqu'un. Même règle que le ticket de vente boutique, et il le faut —
+    // deux pièces du même acte qui divergent se paient au rapprochement de
+    // caisse.
+    if (model.hasPayer) {
+      final payerName = model.payerFullName?.trim() ?? '';
+      if (payerName.isNotEmpty) {
+        lines.addAll(
+          _wrapped(
+            '${model.labels.payerLabel} ${payerName.toUpperCase()}',
+            width,
+          ),
+        );
+      }
+      _addOptional(
+        lines,
+        model.labels.phoneLabel,
+        model.payerPhoneNumber,
+        width,
+      );
+      lines.add(_rule(width));
+    }
 
     // ── Z5 — l'argent. Montant reçu et répartition sont des FAITS : ils
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas

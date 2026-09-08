@@ -12444,6 +12444,24 @@ abstract class AppLocalizations {
   /// **'Ref.'**
   String get ticketReferenceLabel;
 
+  /// No description provided for @ticketDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date:'**
+  String get ticketDateLabel;
+
+  /// No description provided for @ticketPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PAYER:'**
+  String get ticketPayerLabel;
+
+  /// No description provided for @ticketPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tel.'**
+  String get ticketPhoneLabel;
+
   /// No description provided for @ticketCashierLabel.
   ///
   /// In en, this message translates to:

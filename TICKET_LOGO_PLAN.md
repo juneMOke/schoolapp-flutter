@@ -54,6 +54,22 @@ l'abstraction cesse d'être juste.
 
 Un seul appelant à reprendre (`provisional_ticket_repository_impl.dart:104`).
 
+#### ⚠️ La priorité est INVERSÉE, et ce n'est pas un accident de refactorisation
+
+L'ancien getter prenait **la commune d'abord**, la ville à défaut. Le nouveau
+prend **la ville d'abord**, la commune en repli. Deux raisons :
+
+- l'en-tête demande « la ville », pas « la commune » ;
+- `School.locality`, qui titre la bannière d'accueil, prend **déjà** la ville en
+  premier. Les deux divergeaient : la même tablette pouvait imprimer
+  « Ngaliema » et afficher « Kinshasa ».
+
+**Une école dont la commune et la ville diffèrent verra donc son ticket
+changer.** C'est voulu — le porteur a demandé la ville — mais c'est un
+changement de ce qui s'imprime, pas un simple déplacement de code. Le repli sur
+la commune reste : le référentiel autorise l'un sans l'autre, et une école qui ne
+renseigne que sa commune perdrait sa localité.
+
 **⚠️ Homonyme à ne pas toucher** : `School.locality`
 (`features/school/domain/entities/school.dart:31-38`) est une **autre classe**,
 lue par la bannière d'accueil (`accueil_brand_banner.dart:66-69`). Un
@@ -310,10 +326,32 @@ et vérifiable à l'œil par n'importe qui ; **le renderer inverse à l'empaquet
 connaît sa polarité.
 
 **Le test qui garde cette décision ne compare pas des octets** — il compare la
-**proportion de points imprimés** attendue (~8 %) à celle que produit
-l'empaquetage. C'est la leçon de `58360f63`, où six tests mesuraient `.width` sur
-une barre de hauteur nulle : « une mesure qui ne peut pas distinguer ce qu'elle
-cherche d'autre chose n'est pas une preuve ».
+**proportion de points imprimés** à celle que produit l'empaquetage. C'est la
+leçon de `58360f63`, où six tests mesuraient `.width` sur une barre de hauteur
+nulle : « une mesure qui ne peut pas distinguer ce qu'elle cherche d'autre chose
+n'est pas une preuve ».
+
+#### ⚠️ Mais cette proportion se borne LARGE, et surtout pas sur la mesure
+
+Les 92,3 % de blanc relevés l'ont été sur un fichier **d'essai**, dérivé en
+Python. Ce que la route servira sort d'un **dérivateur Java**, qui donne ~91,6 %
+sur une figure équivalente : même géométrie, même polarité, mais un
+rééchantillonneur et un anti-crénelage différents, donc des pixels de bord
+ailleurs.
+
+Un test borné à ±quelques dixièmes autour de 92,3 % serait **vert aujourd'hui et
+rouge au premier tirage réel**, pour une raison qui n'aurait rien à voir avec un
+défaut. C'est la même famille que le reste : une assertion qui épingle un
+**artefact de sa fixture** au lieu de la propriété qu'elle prétend garder.
+
+**Fourchette retenue : 80 à 98 % de blanc.** Elle attrape ce qu'elle doit
+attraper — le rectangle noir d'une polarité inversée (~0 %) et la bande vide
+(100 %) — et ne casse sur aucune différence de rendu.
+
+**Ce qui, en revanche, s'asserte au pixel :** la géométrie. Colonnes encrées
+**224 → 351**, marges **224 de chaque côté**, parce que c'est `(576 − 128) / 2` et
+que les deux dérivateurs font ce calcul. La bande est toujours 576×128, le logo
+toujours carré de 128 centré, quelle que soit la source.
 
 ---
 

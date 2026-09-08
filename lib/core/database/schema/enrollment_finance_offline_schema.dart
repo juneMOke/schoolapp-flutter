@@ -299,9 +299,15 @@ const TableSchema refSchoolTable = TableSchema(
 ///
 /// * l'éditique range des CENTAINES de pièces de plusieurs Mo — d'où l'éviction
 ///   LRU, le budget, et le magasin de fichiers chiffrés hors base ;
-/// * un logo, c'est **deux lignes par école** : ~1,5 ko en `thermal` (PNG 1 bit
-///   576×128) et ~12,5 ko en `display` (PNG 256×256 palette avec alpha), soit
-///   **~14 ko** — mesurés sur le vrai logo, pas estimés.
+/// * un logo, c'est **deux lignes par école** : quelques kilo-octets pour la
+///   bande `thermal` (PNG 1 bit 576×128) et une dizaine pour la variante
+///   `display` (PNG 256×256 en palette avec alpha) — **une dizaine de ko en
+///   tout**.
+///
+/// L'ordre de grandeur est délibéré : c'est lui qui porte l'argument, et il ne
+/// périme pas. Une valeur au kilo-octet près serait aujourd'hui prise sur des
+/// fichiers de travail, pas sur ce que la route sert — précise, donc crédible,
+/// et fausse.
 ///
 /// Aucune éviction, aucun budget, aucune croissance. Réutiliser
 /// `EditiqueBlobStore` aurait au contraire coûté le logo : son

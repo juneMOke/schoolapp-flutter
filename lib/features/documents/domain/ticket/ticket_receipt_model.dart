@@ -104,7 +104,20 @@ class TicketLabels extends Equatable {
 
   final String provisionalBanner;
   final String referenceLabel;
+
+  /// « Date : » — coiffe la date de versement, l'heure restant calée à droite
+  /// sur la même ligne. Aucune ligne de papier ajoutée : à 48 colonnes il reste
+  /// 27 caractères de battement, et 11 à 32 colonnes.
+  final String dateLabel;
+
   final String cashierLabel;
+
+  /// « PAYEUR : » — en tête du bloc payeur, quand il y en a un.
+  final String payerLabel;
+
+  /// « Tél. » — le numéro du payeur. Seul, il suffit à garder le bloc.
+  final String phoneLabel;
+
   final String studentLabel;
   final String matriculationLabel;
   final String classroomLabel;
@@ -143,7 +156,10 @@ class TicketLabels extends Equatable {
     required this.documentTitle,
     required this.provisionalBanner,
     required this.referenceLabel,
+    required this.dateLabel,
     required this.cashierLabel,
+    required this.payerLabel,
+    required this.phoneLabel,
     required this.studentLabel,
     required this.matriculationLabel,
     required this.classroomLabel,
@@ -162,7 +178,10 @@ class TicketLabels extends Equatable {
     documentTitle,
     provisionalBanner,
     referenceLabel,
+    dateLabel,
     cashierLabel,
+    payerLabel,
+    phoneLabel,
     studentLabel,
     matriculationLabel,
     classroomLabel,
