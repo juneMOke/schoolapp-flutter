@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/mono_png_decoder.dart';
 import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
 
@@ -26,13 +27,18 @@ import 'package:school_app_flutter/features/school/data/local/school_logo_cache_
 /// n'a pas, le prochain `If-None-Match` obtiendrait `304`, et le logo resterait
 /// absent **pour toujours**, sans erreur nulle part.
 ///
-/// La vérification est **structurelle** plutôt que cryptographique : la bande
-/// thermique n'est rangée que si elle se décode en bande exploitable, ce qui
-/// écarte une réponse tronquée ou corrompue en transit. `package:crypto`
-/// permettrait de comparer l'empreinte elle-même — pour les DEUX variantes — mais
-/// il n'est aujourd'hui qu'une dépendance transitive du projet, et l'importer
-/// sans le déclarer casserait au premier changement de résolution. Le déclarer
-/// est un arbitrage qui touche `pubspec`, et il n'est pas pris ici.
+/// La vérification est **double**, et les deux moitiés n'attrapent pas la même
+/// chose :
+///
+/// * **le condensat** doit correspondre à l'`ETag` reçu. Le serveur sert en
+///   `ETag` le `sha256` des octets exacts de la réponse : la réponse porte donc
+///   sa propre référence d'intégrité, et la comparer écarte des octets
+///   **corrompus qui décoderaient quand même**. C'est la seule garde qui couvre
+///   aussi la variante d'écran, qui n'est pas décodée ici ;
+/// * **le décodage** de la bande thermique doit aboutir à une bande
+///   exploitable. Une image dont le condensat est juste peut rester inutilisable
+///   — mauvaises dimensions, largeur non multiple de huit — et la ranger
+///   ferait croire à un logo qui ne s'imprimera jamais.
 class SchoolLogoFetcher {
   final Dio _dio;
   final SchoolLogoCacheDao _cache;
@@ -117,9 +123,26 @@ class SchoolLogoFetcher {
     if (data == null || data.isEmpty) return;
     final bytes = Uint8List.fromList(data);
 
-    // La bande thermique est rangée **seulement si elle se décode**. Une
-    // réponse tronquée franchirait autrement la porte, et son empreinte
-    // annoncerait une image que la tablette n'a pas.
+    // ── Première garde : le condensat.
+    //
+    // Le serveur sert en `ETag` le `sha256` des octets exacts de la réponse, si
+    // bien qu'elle porte sa propre référence d'intégrité. Recalculer et comparer
+    // écarte des octets **corrompus qui décoderaient quand même** — ce qu'aucun
+    // décodage réussi ne peut voir — et c'est la seule garde qui couvre aussi la
+    // variante d'écran.
+    //
+    // L'`ETag` fait foi, avec l'empreinte du lot en repli : c'est ce que le
+    // serveur vient de servir qui décrit ce qu'on détient, pas ce qu'un pull
+    // antérieur annonçait.
+    final expected = _etagOf(response) ?? targetSha;
+    final computed = await sha256Hex(bytes);
+    if (computed != expected) return;
+
+    // ── Seconde garde : la bande doit être EXPLOITABLE.
+    //
+    // Un condensat juste ne dit rien des dimensions. Une image intacte mais
+    // large de 100 points, ou haute de zéro, ferait croire à un logo qui ne
+    // s'imprimera jamais.
     if (variant == SchoolLogoVariant.thermal) {
       final band = MonoPngDecoder.decode(bytes);
       if (band == null || !band.isUsable) return;
@@ -129,15 +152,13 @@ class SchoolLogoFetcher {
       return;
     }
 
-    // L'empreinte rangée est celle que le serveur vient de servir, pas celle
-    // que le lot annonçait : les deux coïncident normalement, et en cas d'écart
-    // c'est ce qu'on DÉTIENT qui doit être décrit.
-    final served = _etagOf(response) ?? targetSha;
-
     await _cache.put(
       schoolId: schoolId,
       variant: variant,
-      sha256: served,
+      // `computed`, pas `expected` : les deux sont égaux à ce point, et ranger
+      // celui qu'on a CALCULÉ sur les octets détenus dit exactement ce que la
+      // ligne décrit.
+      sha256: computed,
       bytes: bytes,
       fetchedAt: _now(),
     );

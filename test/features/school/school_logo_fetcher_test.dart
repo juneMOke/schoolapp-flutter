@@ -28,8 +28,13 @@ class _MockDio extends Mock implements Dio {}
 
 const _held =
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+/// Le condensat RÉEL de la bande servie — le contrat du serveur veut que
+/// l'`ETag` en soit le `sha256`, et le tirage recalcule pour vérifier. Une
+/// valeur inventée ferait donc échouer le rangement, ce qui est le
+/// comportement voulu et ce que le groupe « ce qui n'entre pas » éprouve.
 const _target =
-    'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+    '5cf7cdab8c53fe306cb97c5f745e9f7f357b50d71813fe5417dee9de0e91e240';
 
 Uint8List _realBand() => File(
   'test/fixtures/logo/thermal_la_fontaine_576x128.png',
@@ -258,6 +263,42 @@ void main() {
       stub(response(200, data: const [1, 2, 3, 4], etag: '"$_target"'));
 
       await run(variant: SchoolLogoVariant.display);
+
+      expect(await cache.find('ecole-1', SchoolLogoVariant.display), isNull);
+    });
+
+    /// ⚠️ **La garde que le décodage ne peut pas rendre.** Ces octets sont un
+    /// PNG valide, ils décodent, ils sont exploitables — et pourtant le serveur
+    /// annonce un autre condensat. Un octet retourné en transit produit
+    /// exactement ça, et seule la comparaison d'empreinte le voit.
+    ///
+    /// Le ranger figerait l'état : le prochain `If-None-Match` porterait une
+    /// empreinte décrivant une image que la tablette n'a pas, le serveur
+    /// répondrait `304`, et le logo resterait faux **sans erreur nulle part**.
+    test('un condensat qui ne colle pas à l\'ETag n\'entre pas', () async {
+      stub(
+        response(
+          200,
+          data: _realBand(),
+          etag:
+              '"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+              'aaaaaaaaaaaaaaaaaaaaaaaa"',
+        ),
+      );
+
+      await run(target: _target);
+
+      expect(await cache.find('ecole-1', SchoolLogoVariant.thermal), isNull);
+    });
+
+    /// Le même garde couvre la variante d'ÉCRAN, que le tirage ne décode pas :
+    /// c'est le seul contrôle d'intégrité dont elle dispose.
+    test('la variante écran est protégée par le condensat aussi', () async {
+      // Un PNG bien formé — signature valide — mais dont le condensat ne
+      // correspondra pas à l'ETag annoncé.
+      stub(response(200, data: _realBand(), etag: '"$_held"'));
+
+      await run(variant: SchoolLogoVariant.display, target: _held);
 
       expect(await cache.find('ecole-1', SchoolLogoVariant.display), isNull);
     });
