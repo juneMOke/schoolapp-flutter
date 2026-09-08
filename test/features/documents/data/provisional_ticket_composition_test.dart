@@ -35,8 +35,8 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
@@ -435,9 +435,12 @@ void main() {
       expect(model.remainingByCharge.single.label, 'Frais scolaires');
     });
 
-    /// Le papier lui-même : les lignes détaillées précèdent le total, et la
-    /// réserve n'apparaît qu'UNE fois, sous lui.
-    test('le papier porte le détail puis le total', () async {
+    /// Le papier lui-même : titre, détail, filet, total — dans cet ordre.
+    ///
+    /// Le qualificatif de temps est DANS le titre depuis qu'il a remplacé la
+    /// réserve posée sous le total. L'assertion de comptage reste, avec la
+    /// nouvelle chaîne : c'est elle qui empêche de le redire ligne par ligne.
+    test('le papier porte le titre, le détail puis le total', () async {
       await seedPayment();
       when(() => finance.getCharges('s-1')).thenAnswer(
         (_) async => Right([
@@ -459,14 +462,23 @@ void main() {
       final lines = TicketTextLayout.render(model);
       final flat = lines.join('\n');
 
+      final title = lines.indexWhere((l) => l.startsWith('Solde'));
       final detail = lines.indexWhere((l) => l.contains('Organisation'));
-      final total = lines.indexWhere((l) => l.startsWith('Solde'));
-      expect(detail, greaterThan(0));
+      final total = lines.indexWhere((l) => l.startsWith('Total'));
+      expect(title, greaterThan(0));
+      expect(detail, greaterThan(title));
       expect(total, greaterThan(detail));
+
+      // Le filet est ENTRE le détail et le total, pas ailleurs : c'est ce qui
+      // fait du total une somme posée plutôt qu'une ligne de détail de plus.
+      expect(lines[total - 1], '-' * 48);
+
+      // Le qualificatif de temps se dit UNE fois, dans le titre. Répété par
+      // ligne, il se lirait comme une incertitude sur chaque frais.
       expect(
-        'sous réserve de synchronisation'.allMatches(flat).length,
+        'au moment de l\'impression'.allMatches(flat).length,
         1,
-        reason: 'la réserve ne se répète pas par ligne',
+        reason: 'le qualificatif ne se répète pas',
       );
     });
   });

@@ -34,8 +34,8 @@ abstract final class TicketBenchFixtures {
     derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
-    balanceLabel: 'Solde',
-    balanceReservation: 'sous réserve de synchronisation',
+    balanceLabel: 'Solde au moment de l\'impression',
+    balanceTotalLabel: 'Total',
     keepTicketNotice:
         'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
     thanksNotice: 'Nous vous remercions pour votre confiance.',

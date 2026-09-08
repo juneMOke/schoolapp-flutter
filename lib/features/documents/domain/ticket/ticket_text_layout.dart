@@ -225,7 +225,21 @@ abstract final class TicketTextLayout {
 
     final balance = model.remainingBalance;
     if (balance != null && balance.isNotEmpty) {
-      lines.add(_rule(width));
+      // Le solde est bâti comme la répartition — ligne blanche, titre, détail,
+      // filet, total : deux blocs de même nature doivent se lire de la même
+      // façon.
+      //
+      // Le qualificatif de temps est passé DANS le titre. Il se lit ainsi
+      // AVANT les chiffres au lieu de les suivre, et la réserve qui traînait
+      // sous le total a disparu avec lui — la garder en plus l'aurait dit deux
+      // fois.
+      lines.add('');
+
+      // Titre REPLIÉ, pas posé brut : « Solde au moment de l'impression » fait
+      // 31 caractères pour 32 colonnes en 58 mm. Il tient, à un caractère près.
+      // Une traduction plus longue déborderait la largeur du papier au lieu de
+      // se replier — c'est le défaut que « Répartition », court, masque encore.
+      lines.addAll(_wrapped(model.labels.balanceLabel, width));
 
       // Le reste PAR NATURE avant le total. « Il vous reste 10 000 FC et
       // 314 $ » juxtapose deux devises sans les expliquer ; le détail dit d'où
@@ -243,13 +257,15 @@ abstract final class TicketTextLayout {
         );
       }
 
+      // Un filet SOUS le détail : le trait d'une addition posée. Il sépare des
+      // lignes de nature différente — des créances au-dessus, ce qu'elles font
+      // ensemble en dessous — là où le filet de la répartition, lui, ouvre une
+      // liste sous son titre.
+      lines.add(_rule(width));
+
       // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait le
       // parent à additionner, le total sans détail est ce qu'on lui reproche.
-      _addMoneyBag(lines, model.labels.balanceLabel, balance, width);
-
-      // La réserve UNE fois, sous le total — la répéter par ligne la ferait
-      // lire comme une incertitude sur chaque frais plutôt que sur la date.
-      lines.addAll(_wrapped(model.labels.balanceReservation, width));
+      _addTotal(lines, model.labels.balanceTotalLabel, balance, width);
     }
 
     lines.add(_rule(width));
@@ -301,6 +317,53 @@ abstract final class TicketTextLayout {
       );
       first = false;
     }
+  }
+
+  /// Le total du solde : **une seule ligne**, les devises reliées par un `+`.
+  ///
+  /// Le `+` ne gagne pas que de la place. Deux montants séparés d'un simple
+  /// espace se lisent comme un seul nombre bizarrement mis en forme ; le signe
+  /// dit qu'ils sont DEUX, et qu'on ne les a précisément pas additionnés — ce
+  /// qu'on ne saurait faire sans inventer un taux. C'est aussi ce qui justifie
+  /// que cette ligne ait une forme que `Montant reçu` n'a pas : elle totalise,
+  /// lui énumère.
+  ///
+  /// Les montants sortent de [formatAmount], le **même** formateur que les
+  /// lignes au-dessus. Un total écrit autrement que les chiffres qu'il totalise
+  /// se lit comme une autre nature de nombre, et un parent qui recompte
+  /// s'arrête dessus.
+  ///
+  /// ## Le repli
+  ///
+  /// La ligne unique tient à 48 colonnes, et à 32 jusqu'à
+  /// « 9 999 999 FC + 99 999,00 $ » — 26 caractères, la mesure exacte. Au-delà,
+  /// le bloc revient à **une ligne par devise**, la seconde forme que le
+  /// porteur accepte.
+  ///
+  /// Ce repli-là est explicite parce que celui d'[_addPair] serait mauvais
+  /// ici : il renverrait les deux montants **collés sur une ligne à eux**, ce
+  /// qui garde le défaut qu'on voulait éviter, et déborderait franchement la
+  /// largeur du papier si la valeur seule atteignait la largeur.
+  static void _addTotal(
+    List<String> lines,
+    String label,
+    MoneyBag bag,
+    int width,
+  ) {
+    if (bag.isEmpty) return;
+    final joined = TicketCharset.printable(
+      bag.entries
+          .map((amount) => formatAmount(amount.amountInCents, amount.currency))
+          .join(' + '),
+    );
+    // Mesure sur la forme TRANSLITTÉRÉE, des deux côtés : c'est elle qui
+    // s'imprime, et `œ` → `oe` change une longueur.
+    final printableLabel = TicketCharset.printable(label);
+    if (printableLabel.length + 1 + joined.length <= width) {
+      _addPair(lines, label, joined, width);
+      return;
+    }
+    _addMoneyBag(lines, label, bag, width);
   }
 
   /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».

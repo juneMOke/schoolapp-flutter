@@ -156,10 +156,16 @@ class TicketLabels extends Equatable {
   /// que pour empêcher un écart muet entre le reçu et la ventilation.
   final String advanceLabel;
 
+  /// « Solde au moment de l'impression » — le TITRE du bloc, qui coiffe le
+  /// détail comme « Répartition » coiffe le sien.
+  ///
+  /// Le qualificatif de temps est DANS le titre, et n'a plus de ligne à lui :
+  /// il se lit avant les chiffres au lieu de les suivre, et une réserve posée
+  /// sous le total se lisait comme une incertitude sur le total seul.
   final String balanceLabel;
 
-  /// « sous réserve de synchronisation » — n'accompagne QUE le solde.
-  final String balanceReservation;
+  /// « Total » — la dernière ligne du bloc, sous le filet.
+  final String balanceTotalLabel;
 
   /// « Conservez ce ticket jusqu'à la remise de votre reçu définitif. »
   ///
@@ -197,7 +203,7 @@ class TicketLabels extends Equatable {
     required this.allocationsLabel,
     required this.advanceLabel,
     required this.balanceLabel,
-    required this.balanceReservation,
+    required this.balanceTotalLabel,
     required this.keepTicketNotice,
     required this.thanksNotice,
     required this.editorNotice,
@@ -222,7 +228,7 @@ class TicketLabels extends Equatable {
     allocationsLabel,
     advanceLabel,
     balanceLabel,
-    balanceReservation,
+    balanceTotalLabel,
     keepTicketNotice,
     thanksNotice,
     editorNotice,

@@ -21,8 +21,8 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
   thanksNotice: 'Nous vous remercions pour votre confiance.',
@@ -36,6 +36,12 @@ TicketReceiptModel _model({
   String? classroomName = '5e primaire A',
   String? cashierFullName = 'Jean Kabeya',
   int? remainingBalanceInCents = 250000,
+
+  /// Passe outre [remainingBalanceInCents] quand il est fourni — le seul moyen
+  /// de composer un solde à DEUX devises, que la forme en centimes ne sait pas
+  /// dire.
+  MoneyBag? remainingBalance,
+  List<TicketAllocationLine> remainingByCharge = const [],
   List<TicketAllocationLine> allocations = const [
     TicketAllocationLine(
       label: 'Frais scolaires',
@@ -62,13 +68,50 @@ TicketReceiptModel _model({
     MoneyBag.of(const [Money(150000, 'CDF')]),
   ),
   allocations: allocations,
-  remainingBalance: remainingBalanceInCents == null
-      ? null
-      : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')]),
+  remainingBalance:
+      remainingBalance ??
+      (remainingBalanceInCents == null
+          ? null
+          : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')])),
+  remainingByCharge: remainingByCharge,
   labels: _labels,
 );
 
+/// Un solde à deux devises, détaillé — la forme que le porteur veut voir sur le
+/// papier : « 5 000 FC + 309,00 $ ».
+TicketReceiptModel _biDevise() => _model(
+  remainingBalance: MoneyBag.of(const [
+    Money(500000, 'CDF'),
+    Money(30900, 'USD'),
+  ]),
+  remainingByCharge: const [
+    TicketAllocationLine(
+      label: 'Frais scolaires',
+      amountInCents: 500000,
+      currency: 'CDF',
+    ),
+    TicketAllocationLine(
+      label: 'Organisation',
+      amountInCents: 30900,
+      currency: 'USD',
+    ),
+  ],
+);
+
 String _flat(List<String> lines) => lines.join('\n');
+
+/// Vrai si deux lignes de séparation pleine largeur se suivent.
+///
+/// Hissé au niveau du fichier depuis le groupe « nom d'élève vide » : le bloc
+/// solde pose désormais un filet de plus, et le défaut qu'il garde — deux
+/// filets collés — n'appartient plus à un seul cas de figure.
+bool _touchingRules(List<String> lines, int width) {
+  final rule = '-' * width;
+  for (var i = 0; i + 1 < lines.length; i++) {
+    if (lines[i] == rule && lines[i + 1] == rule) return true;
+  }
+  return false;
+}
 
 /// Les montants imprimés dans le bloc ouvert par [heading], en centimes.
 ///
@@ -204,17 +247,166 @@ void main() {
 
     // RG-012-13 : le montant reçu et la répartition sont des FAITS (la
     // répartition est une saisie, pas un calcul) — seul le solde est incertain.
-    test('ne met la réserve que sur le solde', () {
+    // Le doute est donc porté par le TITRE du bloc solde, et par lui seul.
+    test('ne qualifie de « au moment de l\'impression » que le solde', () {
       final lines = TicketTextLayout.render(_model());
-      final reservationIndex = lines.indexWhere(
-        (l) => l.contains('sous réserve'),
+      final titleIndex = lines.indexWhere(
+        (l) => l.contains('au moment de l\'impression'),
       );
-      final balanceIndex = lines.indexWhere((l) => l.contains('Solde'));
       final amountIndex = lines.indexWhere((l) => l.contains('Montant reçu'));
 
-      expect(reservationIndex, greaterThan(balanceIndex));
-      expect(balanceIndex, greaterThan(amountIndex));
-      expect(lines[amountIndex], isNot(contains('sous réserve')));
+      expect(titleIndex, greaterThan(amountIndex));
+
+      // Assertion NÉGATIVE : aucune autre ligne ne porte le qualificatif. Sans
+      // elle, un gabarit qui le remettrait sous le total passerait — c'est
+      // exactement ce qu'on vient de retirer.
+      expect(
+        lines.where((l) => l.contains('au moment de l\'impression')).length,
+        1,
+      );
+      expect(lines[amountIndex], isNot(contains('au moment de')));
+    });
+
+    /// La forme exacte du bloc, exigée par le porteur : ligne blanche, titre,
+    /// détail indenté, filet, `Total`.
+    ///
+    /// Ancré sur les INDEX les uns par rapport aux autres, pas sur des numéros
+    /// de ligne absolus : le bloc bouge dès qu'une ligne d'en-tête change, et
+    /// un test qui compterait depuis le haut du papier casserait pour la
+    /// mauvaise raison.
+    test('le bloc solde : ligne blanche, titre, détail, filet, total', () {
+      final lines = TicketTextLayout.render(_biDevise(), columns: 48);
+      final title = lines.indexWhere(
+        (l) => l.startsWith('Solde au moment de l\'impression'),
+      );
+      final total = lines.indexWhere((l) => l.startsWith('Total'));
+
+      expect(title, greaterThan(0));
+      expect(lines[title - 1], '', reason: 'une ligne blanche ouvre le bloc');
+      expect(total, greaterThan(title));
+      expect(lines[total - 1], '-' * 48, reason: 'un filet coiffe le total');
+
+      // Entre le titre et le filet : le détail, indenté de deux espaces comme
+      // les lignes de la répartition.
+      for (var i = title + 1; i < total - 1; i++) {
+        expect(lines[i], startsWith('  '), reason: lines[i]);
+      }
+      expect(
+        total - 1 - (title + 1),
+        greaterThan(0),
+        reason: 'détail non vide',
+      );
+    });
+
+    /// Le total sur UNE ligne, les deux devises reliées par un `+`.
+    ///
+    /// Le `+` porte du sens : il dit que ce sont deux montants DISTINCTS, non
+    /// additionnés. Un simple espace les ferait lire comme un seul nombre.
+    test('le total relie les devises par un +, avec le même formateur', () {
+      final lines = TicketTextLayout.render(_biDevise(), columns: 48);
+      final total = lines.firstWhere((l) => l.startsWith('Total'));
+
+      expect(total, contains(' + '));
+      expect(total.length, 48);
+      // MÊME formateur que les lignes au-dessus : espace de groupement
+      // ordinaire, « FC » et non « CDF », deux décimales sur le dollar et
+      // aucune sur le franc.
+      expect(total, endsWith('5 000 FC + 309,00 \$'));
+    });
+
+    /// Le `+` tient aussi sur le gabarit étroit : c'est la mesure qui a décidé
+    /// de la forme, pas l'intention. « Total » + « 5 000 FC + 309,00 $ » fait
+    /// 24 caractères pour 32 colonnes.
+    test('à 32 colonnes, le total garde le + et rien ne déborde', () {
+      final lines = TicketTextLayout.render(_biDevise(), columns: 32);
+      final total = lines.firstWhere((l) => l.startsWith('Total'));
+
+      expect(total, contains(' + '));
+      expect(total.trimRight(), endsWith('5 000 FC + 309,00 \$'));
+      for (final line in lines) {
+        expect(line.length, lessThanOrEqualTo(32), reason: line);
+      }
+    });
+
+    /// Le repli, sur un solde que le papier étroit ne peut pas tenir sur une
+    /// ligne : le total revient à UNE LIGNE PAR DEVISE — la seconde forme que
+    /// le porteur accepte — au lieu de déborder la largeur.
+    ///
+    /// Le seuil est mesuré : à 32 colonnes, `Total` laisse 26 caractères à la
+    /// valeur. « 10 000 000 FC + 10 000,00 $ » en fait 27.
+    test(
+      'un solde trop large pour 32 colonnes repasse à une ligne par devise',
+      () {
+        final lines = TicketTextLayout.render(
+          _model(
+            remainingBalance: MoneyBag.of(const [
+              Money(1000000000, 'CDF'),
+              Money(1000000, 'USD'),
+            ]),
+            remainingByCharge: const [
+              TicketAllocationLine(
+                label: 'Frais scolaires',
+                amountInCents: 1000000000,
+                currency: 'CDF',
+              ),
+            ],
+          ),
+          columns: 32,
+        );
+
+        final total = lines.indexWhere((l) => l.startsWith('Total'));
+        expect(total, greaterThan(0));
+        expect(lines[total], isNot(contains(' + ')));
+        expect(lines[total].trimRight(), endsWith('10 000 000 FC'));
+        // La seconde devise sur la ligne suivante, sans répéter le libellé.
+        expect(lines[total + 1].trimRight(), endsWith('10 000,00 \$'));
+        expect(lines[total + 1].trimLeft(), isNot(startsWith('Total')));
+
+        // Ce que le repli d'`addPair` n'aurait pas donné : aucune ligne ne
+        // dépasse la largeur du papier.
+        for (final line in lines) {
+          expect(line.length, lessThanOrEqualTo(32), reason: line);
+        }
+      },
+    );
+
+    /// Le filet neuf du bloc solde ne colle jamais à un autre.
+    ///
+    /// Le cas à surveiller n'est pas celui qu'on imprime d'ordinaire : c'est le
+    /// solde SANS détail. Le bloc se réduit alors à « titre / filet / total »,
+    /// et il suffirait que le total cesse d'émettre une ligne — un `bag` vide
+    /// mal gardé, un repli qui rendrait tôt — pour que le filet du bloc et
+    /// celui qui ferme la zone se retrouvent collés.
+    test('le filet du solde ne touche aucun autre filet', () {
+      final shapes = <String, TicketReceiptModel>{
+        'solde à deux devises, détaillé': _biDevise(),
+        'solde simple, détaillé': _model(
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+        'solde SANS détail': _model(),
+        'aucun solde': _model(remainingBalanceInCents: null),
+        'aucun solde, aucune répartition': _model(
+          remainingBalanceInCents: null,
+          allocations: const [],
+        ),
+      };
+
+      shapes.forEach((name, model) {
+        for (final columns in const [32, 48]) {
+          final lines = TicketTextLayout.render(model, columns: columns);
+          expect(
+            _touchingRules(lines, columns),
+            isFalse,
+            reason: '$name, à $columns colonnes',
+          );
+        }
+      });
     });
 
     test('imprime la répartition ligne à ligne', () {
@@ -296,15 +488,6 @@ void main() {
     /// exactement ce que ce papier dirait, et ne « corrige » pas le gabarit en
     /// croyant bien faire.
     group('nom d\'élève vide — ce que la garde amont évite', () {
-      /// Vrai si deux lignes de séparation pleine largeur se suivent.
-      bool touchingRules(List<String> lines, int width) {
-        final rule = '-' * width;
-        for (var i = 0; i + 1 < lines.length; i++) {
-          if (lines[i] == rule && lines[i + 1] == rule) return true;
-        }
-        return false;
-      }
-
       test('ne produit pas une ligne blanche : il ne produit AUCUNE ligne', () {
         final lines = TicketTextLayout.render(
           _model(
@@ -329,7 +512,7 @@ void main() {
         final rule = '-' * 48;
         expect(lines[title + 1], rule);
         expect(lines[title + 2], rule);
-        expect(touchingRules(lines, 48), isTrue);
+        expect(_touchingRules(lines, 48), isTrue);
         // Rien, sur ce papier, ne signale qu'un nom manque.
         expect(_flat(lines), isNot(contains('MBALA')));
       });
@@ -364,7 +547,7 @@ void main() {
         // « ---- / Classe : … / ---- » : la zone Z2 n'est pas vide, le ticket
         // a même l'air normal. Il reste anonyme. Une garde qui aurait testé le
         // bloc entier laisserait donc passer ce cas-là.
-        expect(touchingRules(lines, 48), isFalse);
+        expect(_touchingRules(lines, 48), isFalse);
         expect(_flat(lines), contains('Classe : 5e primaire A'));
         expect(_flat(lines), isNot(contains('MBALA')));
       });

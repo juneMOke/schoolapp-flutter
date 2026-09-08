@@ -7727,10 +7727,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAdvanceLabel => 'Avance (non imputée)';
 
   @override
-  String get ticketBalanceLabel => 'Solde';
+  String get ticketBalanceLabel => 'Solde au moment de l\'impression';
 
   @override
-  String get ticketBalanceReservation => 'au moment de l\'impression';
+  String get ticketBalanceTotalLabel => 'Total';
 
   @override
   String get ticketThanksNotice => 'Nous vous remercions pour votre confiance.';

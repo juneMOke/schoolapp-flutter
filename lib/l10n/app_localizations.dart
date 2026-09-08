@@ -12519,14 +12519,14 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Balance'**
+  /// **'Balance as of printing'**
   String get ticketBalanceLabel;
 
-  /// No description provided for @ticketBalanceReservation.
+  /// No description provided for @ticketBalanceTotalLabel.
   ///
   /// In en, this message translates to:
-  /// **'as of printing'**
-  String get ticketBalanceReservation;
+  /// **'Total'**
+  String get ticketBalanceTotalLabel;
 
   /// No description provided for @ticketThanksNotice.
   ///

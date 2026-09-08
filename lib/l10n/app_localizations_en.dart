@@ -7651,10 +7651,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAdvanceLabel => 'Advance (unallocated)';
 
   @override
-  String get ticketBalanceLabel => 'Balance';
+  String get ticketBalanceLabel => 'Balance as of printing';
 
   @override
-  String get ticketBalanceReservation => 'as of printing';
+  String get ticketBalanceTotalLabel => 'Total';
 
   @override
   String get ticketThanksNotice => 'Thank you for your trust.';

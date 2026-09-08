@@ -24,7 +24,7 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   allocationsLabel: l10n.ticketAllocationsLabel,
   advanceLabel: l10n.ticketAdvanceLabel,
   balanceLabel: l10n.ticketBalanceLabel,
-  balanceReservation: l10n.ticketBalanceReservation,
+  balanceTotalLabel: l10n.ticketBalanceTotalLabel,
   keepTicketNotice: l10n.ticketKeepNotice,
   thanksNotice: l10n.ticketThanksNotice,
   editorNotice: l10n.ticketEditorNotice,
