@@ -31,6 +31,22 @@ class ReferentialBundleDto {
   /// ÉCOLE, donc sur une tablette partagée un pull sans ce droit effacerait le
   /// barème dont dépend le guichet d'un autre poste.
   final List<RefReductionDto>? reductions;
+
+  /// Empreintes du logo de l'école — **frère de [school], jamais dedans**.
+  ///
+  /// La place n'est pas un détail de rangement. `SchoolDto` est aussi le corps
+  /// du `PUT` côté serveur, et tous ses champs y sont obligatoires : y loger des
+  /// valeurs **dérivées** et nullables ouvrirait un chemin pour déposer une
+  /// empreinte forgée, que le mapping recopierait par nom. Un champ frère est en
+  /// lecture pure par construction.
+  ///
+  /// **`null` = cette école n'a pas de logo**, et la clé est alors PRÉSENTE et
+  /// nulle, jamais absente. Le projet serveur n'a aucune politique globale
+  /// d'inclusion, donc « absente » et « nulle » ne se déduisent d'aucune règle
+  /// générale : c'est constaté sur la charge utile, et c'est pour ça que la
+  /// désérialisation teste la valeur et non la présence de la clé.
+  final RefLogoRefsDto? logoRefs;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -38,27 +54,66 @@ class ReferentialBundleDto {
     required this.current,
     this.previous,
     this.reductions,
+    this.logoRefs,
     required this.serverTime,
   });
 
-  factory ReferentialBundleDto.fromJson(Map<String, dynamic> j) =>
-      ReferentialBundleDto(
-        school: RefSchoolDto.fromJson(j['school'] as Map<String, dynamic>),
-        current: ReferentialYearBundleDto.fromJson(
-          j['current'] as Map<String, dynamic>,
-        ),
-        previous: j['previous'] == null
-            ? null
-            : ReferentialYearBundleDto.fromJson(
-                j['previous'] as Map<String, dynamic>,
-              ),
-        // Volontairement hors de `pullList`, qui replie `null` sur la liste
-        // vide : c'est exactement la distinction à préserver ici.
-        reductions: j['reductions'] == null
-            ? null
-            : pullList(j['reductions'], RefReductionDto.fromJson),
-        serverTime: j['serverTime'] as String,
-      );
+  factory ReferentialBundleDto.fromJson(
+    Map<String, dynamic> j,
+  ) => ReferentialBundleDto(
+    school: RefSchoolDto.fromJson(j['school'] as Map<String, dynamic>),
+    current: ReferentialYearBundleDto.fromJson(
+      j['current'] as Map<String, dynamic>,
+    ),
+    previous: j['previous'] == null
+        ? null
+        : ReferentialYearBundleDto.fromJson(
+            j['previous'] as Map<String, dynamic>,
+          ),
+    // Volontairement hors de `pullList`, qui replie `null` sur la liste
+    // vide : c'est exactement la distinction à préserver ici.
+    reductions: j['reductions'] == null
+        ? null
+        : pullList(j['reductions'], RefReductionDto.fromJson),
+    // Testé sur la VALEUR, pas sur la présence de la clé : le serveur envoie
+    // `"logoRefs": null` pour une école sans logo, il ne retire pas le champ.
+    logoRefs: j['logoRefs'] == null
+        ? null
+        : RefLogoRefsDto.fromJson(j['logoRefs'] as Map<String, dynamic>),
+    serverTime: j['serverTime'] as String,
+  );
+}
+
+/// Les deux empreintes du logo de l'école, telles que le lot les porte.
+///
+/// **Deux états seulement, jamais trois.** Ou bien l'objet est absent — l'école
+/// n'a pas de logo — ou bien il porte ses **deux** clés, garanties non nulles :
+/// les colonnes d'empreinte sont `NOT NULL` côté serveur et les variantes sont
+/// dérivées ensemble, en une seule transaction. Il n'y a donc aucun chemin à
+/// coder pour un objet à moitié rempli, et en voir un serait un défaut serveur,
+/// pas un cas à absorber ici.
+///
+/// Les valeurs sont des SHA-256 en **hexadécimal minuscule, 64 caractères**,
+/// sans préfixe ni guillemets. Ce sont les mêmes chaînes que les routes d'octets
+/// acceptent en `If-None-Match`.
+///
+/// ⚠️ Ces empreintes disent ce que l'école **A**, jamais ce que la tablette
+/// **DÉTIENT**. Elles ne doivent jamais construire un `If-None-Match` : après un
+/// tirage raté, le serveur répondrait `304` sur une empreinte qu'on n'a pas, et
+/// les octets ne descendraient jamais. Cf. `school_logo_cache`.
+class RefLogoRefsDto {
+  final String displaySha256;
+  final String thermalSha256;
+
+  const RefLogoRefsDto({
+    required this.displaySha256,
+    required this.thermalSha256,
+  });
+
+  factory RefLogoRefsDto.fromJson(Map<String, dynamic> j) => RefLogoRefsDto(
+    displaySha256: j['displaySha256'] as String,
+    thermalSha256: j['thermalSha256'] as String,
+  );
 }
 
 /// Une nature de réduction du barème de l'école, **et son barème avec elle**

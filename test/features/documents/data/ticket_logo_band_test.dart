@@ -306,13 +306,19 @@ void main() {
     /// La bande est peinte **exactement une fois**, même sur un ticket qui
     /// pagine : elle est un en-tête de document, pas de page.
     ///
-    /// ⚠️ **Ce test ne prouve PAS que `header:` serait fautif.** Je l'ai
-    /// éprouvé en déplaçant la bande dans `header:` : le paquet `pdf` la peint
-    /// alors **une fois aussi**, et aucune assertion ne sépare les deux formes.
-    /// Le choix de `build:` reste le bon — un en-tête de page se répéterait par
-    /// contrat, et rien ne garantit que cette version se comporte ainsi pour
-    /// toujours — mais il est tenu par le commentaire du renderer, pas par ce
-    /// test. Le dire plutôt que de laisser croire à une garantie.
+    /// ⚠️ **Ce test ne prouve PAS que `header:` serait fautif.** Éprouvé en
+    /// déplaçant la bande dans `header:` : **sur `pdf` 3.12.0**, le paquet la
+    /// peint **une fois aussi**, et aucune assertion ne sépare les deux formes.
+    ///
+    /// Le constat est **daté de cette version**, et ce n'est pas une propriété
+    /// du format : un en-tête de page se répète **par contrat**, et rien ne dit
+    /// qu'une version ultérieure gardera ce comportement. À revérifier à la
+    /// prochaine montée du paquet — ce sera soit le jour où ce test peut enfin
+    /// discriminer, soit celui où le défaut passerait sans bruit.
+    ///
+    /// Le choix de `build:` reste le bon, mais il est tenu par le commentaire du
+    /// renderer, pas par ce test. Le dire plutôt que de laisser croire à une
+    /// garantie.
     ///
     /// Ce que ce test attrape réellement : une bande dupliquée par un futur
     /// remaniement, et une bande peinte alors qu'aucune n'est fournie.

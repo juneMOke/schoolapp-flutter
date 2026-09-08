@@ -85,6 +85,15 @@ class EnrollmentReferentialDao {
         'address': bundle.school.address,
         'phone': bundle.school.phone,
         'email': bundle.school.email,
+        // Les empreintes seules — les octets vivent dans `school_logo_cache`,
+        // que cette purge ne touche pas. C'est ce qui évite de retélécharger le
+        // logo à chaque cycle de pull.
+        //
+        // Elles viennent d'un champ FRÈRE de `school` dans le lot, pas de
+        // l'objet école : côté serveur, `SchoolDto` est aussi le corps du `PUT`,
+        // et une empreinte dérivée n'y a rien à faire.
+        'logo_thermal_sha256': bundle.logoRefs?.thermalSha256,
+        'logo_display_sha256': bundle.logoRefs?.displaySha256,
         'synced_at': syncedAt,
       });
 
