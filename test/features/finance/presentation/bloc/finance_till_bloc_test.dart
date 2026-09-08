@@ -66,7 +66,7 @@ void main() {
       'la journée est le défaut — la question de la fermeture',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_till('day')));
       },
       build: buildBloc,
@@ -80,33 +80,33 @@ void main() {
         ),
       ],
       verify: (_) =>
-          verify(() => mockUseCase(period: TillPeriod.day)).called(1),
+          verify(() => mockUseCase(window: const TillWindow.day())).called(1),
     );
 
     blocTest<FinanceTillBloc, FinanceTillState>(
       'le grain demandé est retenu dès le chargement, pas à l’arrivée',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.month),
+          () => mockUseCase(window: const TillWindow.month()),
         ).thenAnswer((_) async => Right(_till('month')));
       },
       build: buildBloc,
       act: (bloc) =>
-          bloc.add(const FinanceTillRequested(period: TillPeriod.month)),
+          bloc.add(const FinanceTillRequested(window: TillWindow.month())),
       expect: () => [
         const FinanceTillState(
           status: FinanceTillStatus.loading,
-          selectedPeriod: TillPeriod.month,
+          selectedWindow: TillWindow.month(),
         ),
         FinanceTillState(
           status: FinanceTillStatus.success,
           till: _till('month'),
-          selectedPeriod: TillPeriod.month,
+          selectedWindow: const TillWindow.month(),
           selectedCurrency: 'USD',
         ),
       ],
       verify: (_) =>
-          verify(() => mockUseCase(period: TillPeriod.month)).called(1),
+          verify(() => mockUseCase(window: const TillWindow.month())).called(1),
     );
 
     /// Le serveur refuse en **400** une ancre qui ne correspond pas à la
@@ -115,22 +115,22 @@ void main() {
     blocTest<FinanceTillBloc, FinanceTillState>(
       'émet [chargement, erreur] en portant l’échec lui-même',
       setUp: () {
-        when(() => mockUseCase(period: TillPeriod.week)).thenAnswer(
+        when(() => mockUseCase(window: const TillWindow.week())).thenAnswer(
           (_) async => const Left(ValidationFailure('Invalid request data')),
         );
       },
       build: buildBloc,
       act: (bloc) =>
-          bloc.add(const FinanceTillRequested(period: TillPeriod.week)),
+          bloc.add(const FinanceTillRequested(window: TillWindow.week())),
       expect: () => [
         const FinanceTillState(
           status: FinanceTillStatus.loading,
-          selectedPeriod: TillPeriod.week,
+          selectedWindow: TillWindow.week(),
         ),
         const FinanceTillState(
           status: FinanceTillStatus.error,
           failure: ValidationFailure('Invalid request data'),
-          selectedPeriod: TillPeriod.week,
+          selectedWindow: TillWindow.week(),
         ),
       ],
     );
@@ -141,31 +141,31 @@ void main() {
       'rejoue la fenêtre retenue, jamais le défaut',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.year),
+          () => mockUseCase(window: const TillWindow.year()),
         ).thenAnswer((_) async => Right(_till('year')));
       },
       build: buildBloc,
       seed: () => const FinanceTillState(
         status: FinanceTillStatus.error,
         failure: NetworkFailure('offline'),
-        selectedPeriod: TillPeriod.year,
+        selectedWindow: TillWindow.year(),
       ),
       act: (bloc) => bloc.add(const FinanceTillRefreshRequested()),
       expect: () => [
         const FinanceTillState(
           status: FinanceTillStatus.loading,
-          selectedPeriod: TillPeriod.year,
+          selectedWindow: TillWindow.year(),
         ),
         FinanceTillState(
           status: FinanceTillStatus.success,
           till: _till('year'),
-          selectedPeriod: TillPeriod.year,
+          selectedWindow: const TillWindow.year(),
           selectedCurrency: 'USD',
         ),
       ],
       verify: (_) {
-        verify(() => mockUseCase(period: TillPeriod.year)).called(1);
-        verifyNever(() => mockUseCase(period: TillPeriod.day));
+        verify(() => mockUseCase(window: const TillWindow.year())).called(1);
+        verifyNever(() => mockUseCase(window: const TillWindow.day()));
       },
     );
   });
@@ -175,7 +175,7 @@ void main() {
       'le dollar par défaut, jamais « la plus active »',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_twoTills()));
       },
       build: buildBloc,
@@ -194,7 +194,7 @@ void main() {
       'la bascule ne rappelle pas le serveur',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_twoTills()));
       },
       build: buildBloc,
@@ -209,7 +209,7 @@ void main() {
         // Les deux caisses arrivent dans la même réponse : rappeler le serveur
         // ferait clignoter un écran entier sur un geste qui n'a rien demandé
         // de neuf.
-        verify(() => mockUseCase(period: TillPeriod.day)).called(1);
+        verify(() => mockUseCase(window: const TillWindow.day())).called(1);
       },
     );
 
@@ -217,10 +217,10 @@ void main() {
       'la caisse examinée survit au changement de fenêtre',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_twoTills()));
         when(
-          () => mockUseCase(period: TillPeriod.month),
+          () => mockUseCase(window: const TillWindow.month()),
         ).thenAnswer((_) async => Right(_twoTills(period: 'month')));
       },
       build: buildBloc,
@@ -228,7 +228,7 @@ void main() {
         bloc.add(const FinanceTillRequested());
         await Future<void>.delayed(Duration.zero);
         bloc.add(const FinanceTillCurrencySelected('CDF'));
-        bloc.add(const FinanceTillRequested(period: TillPeriod.month));
+        bloc.add(const FinanceTillRequested(window: TillWindow.month()));
       },
       verify: (bloc) {
         expect(
@@ -245,12 +245,12 @@ void main() {
       'une devise que la réponse ne porte plus est réarbitrée',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_twoTills()));
         // La fenêtre annuelle ne porte que le dollar : la sélection en francs
         // ne désigne plus rien et doit retomber quelque part.
         when(
-          () => mockUseCase(period: TillPeriod.year),
+          () => mockUseCase(window: const TillWindow.year()),
         ).thenAnswer((_) async => Right(_till('year')));
       },
       build: buildBloc,
@@ -258,7 +258,7 @@ void main() {
         bloc.add(const FinanceTillRequested());
         await Future<void>.delayed(Duration.zero);
         bloc.add(const FinanceTillCurrencySelected('CDF'));
-        bloc.add(const FinanceTillRequested(period: TillPeriod.year));
+        bloc.add(const FinanceTillRequested(window: TillWindow.year()));
       },
       verify: (bloc) => expect(bloc.state.selectedCurrency, 'USD'),
     );
@@ -267,7 +267,7 @@ void main() {
       'une devise inconnue est ignorée, la caisse affichée ne se vide pas',
       setUp: () {
         when(
-          () => mockUseCase(period: TillPeriod.day),
+          () => mockUseCase(window: const TillWindow.day()),
         ).thenAnswer((_) async => Right(_twoTills()));
       },
       build: buildBloc,

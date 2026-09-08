@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 
 /// Ce qui est entré dans le tiroir sur la fenêtre — frais scolaires **et**
@@ -16,6 +16,6 @@ class GetFinanceTillUseCase {
   const GetFinanceTillUseCase(this._repository);
 
   Future<Either<Failure, FinanceTill>> call({
-    TillPeriod period = TillPeriod.day,
-  }) => _repository.getFinanceTill(period: period);
+    TillWindow window = const TillWindow.day(),
+  }) => _repository.getFinanceTill(window: window);
 }

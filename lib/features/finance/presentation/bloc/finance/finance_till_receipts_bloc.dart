@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipt.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 
@@ -52,7 +52,7 @@ class FinanceTillReceiptsBloc
     FinanceTillReceiptsRequested event,
     Emitter<FinanceTillReceiptsState> emit,
   ) async {
-    await _load(emit, currency: event.currency, period: event.period, page: 0);
+    await _load(emit, currency: event.currency, window: event.window, page: 0);
   }
 
   Future<void> _onPageChanged(
@@ -64,7 +64,7 @@ class FinanceTillReceiptsBloc
     await _load(
       emit,
       currency: currency,
-      period: state.period,
+      window: state.window,
       page: event.page,
     );
   }
@@ -72,14 +72,14 @@ class FinanceTillReceiptsBloc
   Future<void> _load(
     Emitter<FinanceTillReceiptsState> emit, {
     required String currency,
-    required TillPeriod period,
+    required TillWindow window,
     required int page,
   }) async {
     emit(
       state.copyWith(
         status: FinanceTillReceiptsStatus.loading,
         currency: currency,
-        period: period,
+        window: window,
         page: page,
         failure: null,
       ),
@@ -87,7 +87,7 @@ class FinanceTillReceiptsBloc
 
     final result = await _getTillReceiptsUseCase(
       currency: currency,
-      period: period,
+      window: window,
       page: page,
     );
 

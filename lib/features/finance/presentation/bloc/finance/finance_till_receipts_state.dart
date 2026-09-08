@@ -11,7 +11,7 @@ class FinanceTillReceiptsState extends Equatable {
   final String? currency;
 
   /// La fenêtre servie — retenue pour que tourner une page rejoue **la même**.
-  final TillPeriod period;
+  final TillWindow window;
 
   final List<TillReceipt> receipts;
 
@@ -37,7 +37,7 @@ class FinanceTillReceiptsState extends Equatable {
   const FinanceTillReceiptsState({
     this.status = FinanceTillReceiptsStatus.initial,
     this.currency,
-    this.period = TillPeriod.day,
+    this.window = const TillWindow.day(),
     this.receipts = const [],
     this.page = 0,
     this.totalElements = 0,
@@ -56,7 +56,7 @@ class FinanceTillReceiptsState extends Equatable {
   FinanceTillReceiptsState copyWith({
     FinanceTillReceiptsStatus? status,
     Object? currency = _undefined,
-    TillPeriod? period,
+    TillWindow? window,
     List<TillReceipt>? receipts,
     int? page,
     int? totalElements,
@@ -68,7 +68,7 @@ class FinanceTillReceiptsState extends Equatable {
     currency: identical(currency, _undefined)
         ? this.currency
         : currency as String?,
-    period: period ?? this.period,
+    window: window ?? this.window,
     receipts: receipts ?? this.receipts,
     page: page ?? this.page,
     totalElements: totalElements ?? this.totalElements,
@@ -83,7 +83,7 @@ class FinanceTillReceiptsState extends Equatable {
   List<Object?> get props => [
     status,
     currency,
-    period,
+    window,
     receipts,
     page,
     totalElements,

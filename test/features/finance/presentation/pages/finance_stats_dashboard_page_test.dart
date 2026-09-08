@@ -128,7 +128,7 @@ final tTill = FinanceTill(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() => registerFallbackValue(TillPeriod.day));
+  setUpAll(() => registerFallbackValue(const TillWindow.day()));
 
   late MockGetFinanceRecoveryUseCase mockRecovery;
   late MockGetFinanceTillUseCase mockTill;
@@ -149,7 +149,7 @@ void main() {
     );
     when(() => mockRecovery()).thenAnswer((_) async => Right(tRecovery));
     when(
-      () => mockTill(period: any(named: 'period')),
+      () => mockTill(window: any(named: 'window')),
     ).thenAnswer((_) async => Right(tTill));
     // La table nominative est un SECOND appel, sous une seconde permission. Le
     // stub la sert vide : ce que ces tests vérifient est le pilotage, pas les
@@ -157,7 +157,7 @@ void main() {
     when(
       () => mockReceipts(
         currency: any(named: 'currency'),
-        period: any(named: 'period'),
+        window: any(named: 'window'),
         page: any(named: 'page'),
         size: any(named: 'size'),
       ),
@@ -200,7 +200,7 @@ void main() {
     expect(find.text('Recouvrement'), findsOneWidget);
     expect(find.text('Caisse'), findsOneWidget);
     verify(() => mockRecovery()).called(1);
-    verifyNever(() => mockTill(period: any(named: 'period')));
+    verifyNever(() => mockTill(window: any(named: 'window')));
   });
 
   testWidgets('les descriptifs disent laquelle des deux questions on regarde', (
@@ -220,7 +220,7 @@ void main() {
     await tester.tap(find.text('Caisse'));
     await tester.pumpAndSettle();
 
-    verify(() => mockTill(period: any(named: 'period'))).called(1);
+    verify(() => mockTill(window: any(named: 'window'))).called(1);
     // La caisse de la fenêtre est là, nommée par sa devise et sa fenêtre. Le
     // libellé dit « Caisse » et non « encaissé » : le recouvrement affiche déjà
     // un « Total encaissé », qui compte l'année entière, et deux cartes
@@ -242,7 +242,7 @@ void main() {
     await tester.tap(find.text('Caisse'));
     await tester.pumpAndSettle();
 
-    verify(() => mockTill(period: any(named: 'period'))).called(1);
+    verify(() => mockTill(window: any(named: 'window'))).called(1);
     verify(() => mockRecovery()).called(1);
   });
 
@@ -250,7 +250,7 @@ void main() {
     tester,
   ) async {
     when(
-      () => mockTill(period: any(named: 'period')),
+      () => mockTill(window: any(named: 'window')),
     ).thenAnswer((_) async => const Left(NetworkFailure('offline')));
 
     await pumpPage(tester);

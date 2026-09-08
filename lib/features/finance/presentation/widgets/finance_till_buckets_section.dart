@@ -23,6 +23,10 @@ class FinanceTillBucketsSection extends StatelessWidget {
   /// tard on ne sait plus quelle caisse on regarde.
   final String? title;
 
+  /// Le grain annoncé par le serveur — il décide de l'étiquette sous chaque
+  /// barre. Voir [shortBucketLabel] : la forme de la clé ne suffit pas.
+  final String granularity;
+
   /// La phrase qui explique pourquoi le total des tuiles ne vaut pas la somme
   /// des barres — rendue **là où l'écart se voit**, et seulement sur la fenêtre
   /// où il existe.
@@ -42,6 +46,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
     required this.buckets,
     this.title,
     this.windowNote,
+    this.granularity = '',
   });
 
   @override
@@ -63,7 +68,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
     final items = [
       for (final bucket in buckets)
         BarChartItem(
-          label: shortBucketLabel(bucket.key),
+          label: shortBucketLabel(bucket.key, granularity: granularity),
           value: bucket.total.toDouble(),
           color: bucket.isCurrent
               ? AppColors.terreCuite
@@ -103,20 +108,37 @@ class FinanceTillBucketsSection extends StatelessWidget {
   }
 }
 
-/// Le libellé sous une barre, **par grain d'axe**.
+/// Le libellé sous une barre, **selon le grain que le serveur annonce**.
 ///
-/// Deux formes de clé descendent du serveur, et une seule règle ne peut pas les
-/// couvrir : `YYYY-MM-DD` sur les axes de journées (jour, semaine, mois),
-/// `YYYY-MM` sur l'axe annuel. Le formatteur du recouvrement, écrit pour l'axe
-/// mensuel seul, rendait `5-15` sur une clé journalière — il coupait les quatre
-/// derniers caractères d'une chaîne qui en compte dix.
-String shortBucketLabel(String key) {
+/// ⚠️ **La forme de la clé ne suffit pas à décider.** Une tranche hebdomadaire
+/// porte `2026-05-12` — la date de son premier jour —, exactement la forme
+/// d'une journée. Étiqueter « 12 » ferait lire **sept jours d'encaissements
+/// comme la journée du 12**, sur l'écran dont toute la doctrine est de ne
+/// jamais laisser un chiffre se faire passer pour un autre.
+///
+/// [granularity] vient donc de la réponse (`day` / `week` / `month`), et n'est
+/// **jamais redérivé** de la largeur de la fenêtre : le seuil qui décide du
+/// grain appartient au serveur, et le dupliquer ici en ferait un nombre magique
+/// qui divergerait en silence le jour où il bouge.
+///
+/// Vide — un serveur qui ne sert pas encore le champ — retombe sur la forme de
+/// la clé, ce que faisait le formatteur avant lui.
+String shortBucketLabel(String key, {String granularity = ''}) {
   final parts = key.split('-');
-  return switch (parts.length) {
-    // `2026-05-15` → « 15 » : le jour suffit, le mois est dans la fenêtre.
-    3 => parts[2],
-    // `2026-05` → « 05 » : le rang du mois, comme sur l'axe du recouvrement.
-    2 => parts[1],
-    _ => key,
+
+  return switch (granularity) {
+    // « sem. 12 » : la barre couvre sept jours à partir de ce jour-là, et
+    // l'étiquette doit le dire.
+    'week' when parts.length == 3 => 'sem. ${parts[2]}',
+    'month' when parts.length >= 2 => parts[1],
+    'day' when parts.length == 3 => parts[2],
+    // Sans grain annoncé, la forme de la clé décide — l'ancien comportement.
+    _ => switch (parts.length) {
+      // `2026-05-15` → « 15 » : le jour suffit, le mois est dans la fenêtre.
+      3 => parts[2],
+      // `2026-05` → « 05 » : le rang du mois, comme sur l'axe du recouvrement.
+      2 => parts[1],
+      _ => key,
+    },
   };
 }

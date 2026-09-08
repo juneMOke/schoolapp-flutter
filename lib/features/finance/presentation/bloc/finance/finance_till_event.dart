@@ -14,12 +14,12 @@ sealed class FinanceTillEvent extends Equatable {
 /// envoyé explicitement — un défaut qui vit des deux côtés finit par diverger
 /// d'un seul.
 class FinanceTillRequested extends FinanceTillEvent {
-  final TillPeriod period;
+  final TillWindow window;
 
-  const FinanceTillRequested({this.period = TillPeriod.day});
+  const FinanceTillRequested({this.window = const TillWindow.day()});
 
   @override
-  List<Object?> get props => [period];
+  List<Object?> get props => [window];
 }
 
 /// Recharger la fenêtre en cours — le geste du bouton « Réessayer ».

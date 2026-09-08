@@ -19,7 +19,7 @@ class FinanceTillState extends Equatable {
   /// grain** — le serveur refuse en 400 une ancre qui ne correspond pas à la
   /// période, et un état qui garderait l'ancienne produirait un écran d'erreur
   /// sur un simple clic d'onglet.
-  final TillPeriod selectedPeriod;
+  final TillWindow selectedWindow;
 
   /// La caisse détaillée sous les tuiles — le code de sa devise.
   ///
@@ -36,7 +36,7 @@ class FinanceTillState extends Equatable {
     this.status = FinanceTillStatus.initial,
     this.till,
     this.failure,
-    this.selectedPeriod = TillPeriod.day,
+    this.selectedWindow = const TillWindow.day(),
     this.selectedCurrency,
   });
 
@@ -58,7 +58,7 @@ class FinanceTillState extends Equatable {
     FinanceTillStatus? status,
     Object? till = _undefined,
     Object? failure = _undefined,
-    TillPeriod? selectedPeriod,
+    TillWindow? selectedWindow,
     Object? selectedCurrency = _undefined,
   }) => FinanceTillState(
     status: status ?? this.status,
@@ -66,7 +66,7 @@ class FinanceTillState extends Equatable {
     failure: identical(failure, _undefined)
         ? this.failure
         : failure as Failure?,
-    selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+    selectedWindow: selectedWindow ?? this.selectedWindow,
     selectedCurrency: identical(selectedCurrency, _undefined)
         ? this.selectedCurrency
         : selectedCurrency as String?,
@@ -77,7 +77,7 @@ class FinanceTillState extends Equatable {
     status,
     till,
     failure,
-    selectedPeriod,
+    selectedWindow,
     selectedCurrency,
   ];
 }

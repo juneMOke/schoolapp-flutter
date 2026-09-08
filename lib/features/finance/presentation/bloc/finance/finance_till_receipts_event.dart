@@ -14,15 +14,15 @@ sealed class FinanceTillReceiptsEvent extends Equatable {
 /// pagination à zéro.
 class FinanceTillReceiptsRequested extends FinanceTillReceiptsEvent {
   final String currency;
-  final TillPeriod period;
+  final TillWindow window;
 
   const FinanceTillReceiptsRequested({
     required this.currency,
-    required this.period,
+    required this.window,
   });
 
   @override
-  List<Object?> get props => [currency, period];
+  List<Object?> get props => [currency, window];
 }
 
 /// Tourner une page — **sans changer ni la caisse ni la fenêtre**.

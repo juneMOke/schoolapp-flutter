@@ -11,8 +11,7 @@ import 'package:school_app_flutter/features/finance/data/repositories/finance_re
 import 'package:school_app_flutter/features/finance/data/models/finance_recovery_response_model/finance_recovery_response_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/finance_till_response_model.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 
 class MockFinanceRemoteDataSource extends Mock
     implements FinanceRemoteDataSource {}
@@ -121,10 +120,17 @@ void main() {
 
     test('rend Right(FinanceTill) et transmet la période demandée', () async {
       when(
-        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'month'),
+        () => mockRemoteDataSource.getFinanceTill(
+          tRequiredAuth,
+          'month',
+          null,
+          null,
+        ),
       ).thenAnswer((_) async => tTillModel);
 
-      final result = await repository.getFinanceTill(period: TillPeriod.month);
+      final result = await repository.getFinanceTill(
+        window: const TillWindow.month(),
+      );
 
       result.fold((_) => fail('Expected Right but got Left'), (till) {
         expect(till.timeZone, 'Africa/Kinshasa');
@@ -135,19 +141,34 @@ void main() {
       });
 
       verify(
-        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'month'),
+        () => mockRemoteDataSource.getFinanceTill(
+          tRequiredAuth,
+          'month',
+          null,
+          null,
+        ),
       ).called(1);
     });
 
     test('le défaut est la journée — la question de la fermeture', () async {
       when(
-        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+        () => mockRemoteDataSource.getFinanceTill(
+          tRequiredAuth,
+          'day',
+          null,
+          null,
+        ),
       ).thenAnswer((_) async => tTillModel);
 
       await repository.getFinanceTill();
 
       verify(
-        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+        () => mockRemoteDataSource.getFinanceTill(
+          tRequiredAuth,
+          'day',
+          null,
+          null,
+        ),
       ).called(1);
     });
 
@@ -157,10 +178,17 @@ void main() {
       // arrivera.
       const failure = ValidationFailure('Invalid request data');
       when(
-        () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'week'),
+        () => mockRemoteDataSource.getFinanceTill(
+          tRequiredAuth,
+          'week',
+          null,
+          null,
+        ),
       ).thenThrow(_dioException(error: failure));
 
-      final result = await repository.getFinanceTill(period: TillPeriod.week);
+      final result = await repository.getFinanceTill(
+        window: const TillWindow.week(),
+      );
 
       expect(result, const Left<Failure, FinanceTill>(failure));
     });
@@ -169,7 +197,12 @@ void main() {
       'une charge utile illisible devient une erreur, jamais un tiroir vide',
       () async {
         when(
-          () => mockRemoteDataSource.getFinanceTill(tRequiredAuth, 'day'),
+          () => mockRemoteDataSource.getFinanceTill(
+            tRequiredAuth,
+            'day',
+            null,
+            null,
+          ),
         ).thenThrow(TypeError());
 
         final result = await repository.getFinanceTill();

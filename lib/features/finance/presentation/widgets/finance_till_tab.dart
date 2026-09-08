@@ -36,7 +36,7 @@ class FinanceTillTab extends StatelessWidget {
               context.read<FinanceTillReceiptsBloc>().add(
                 FinanceTillReceiptsRequested(
                   currency: state.selectedCurrency!,
-                  period: state.selectedPeriod,
+                  window: state.selectedWindow,
                 ),
               ),
         ),

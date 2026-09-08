@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 
@@ -20,12 +20,12 @@ class GetTillReceiptsUseCase {
 
   Future<Either<Failure, TillReceiptsPage>> call({
     required String currency,
-    TillPeriod period = TillPeriod.day,
+    TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,
   }) => _repository.getTillReceipts(
     currency: currency,
-    period: period,
+    window: window,
     page: page,
     size: size,
   );

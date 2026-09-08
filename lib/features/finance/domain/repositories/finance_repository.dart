@@ -4,7 +4,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.d
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 
 abstract class FinanceRepository {
   Future<Either<Failure, List<FeeTariff>>> getFeeTariffsByLevel({
@@ -16,7 +16,7 @@ abstract class FinanceRepository {
 
   /// Ce qui est entré dans le tiroir sur la fenêtre — frais et boutique.
   Future<Either<Failure, FinanceTill>> getFinanceTill({
-    TillPeriod period = TillPeriod.day,
+    TillWindow window = const TillWindow.day(),
   });
 
   /// Les reçus **d'une caisse** sur la fenêtre, page par page.
@@ -30,7 +30,7 @@ abstract class FinanceRepository {
   /// échec **sans** effacer les agrégats déjà affichés.
   Future<Either<Failure, TillReceiptsPage>> getTillReceipts({
     required String currency,
-    TillPeriod period = TillPeriod.day,
+    TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,
   });

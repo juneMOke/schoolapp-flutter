@@ -10511,6 +10511,24 @@ abstract class AppLocalizations {
   /// **'What went into the drawer'**
   String get financeDashboardTabTillDescription;
 
+  /// No description provided for @financeTillPeriodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get financeTillPeriodCustom;
+
+  /// No description provided for @financeTillPeriodFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get financeTillPeriodFrom;
+
+  /// No description provided for @financeTillPeriodTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get financeTillPeriodTo;
+
   /// No description provided for @financeTillReceiptsHeading.
   ///
   /// In en, this message translates to:

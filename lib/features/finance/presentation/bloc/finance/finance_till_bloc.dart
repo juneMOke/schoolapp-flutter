@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_currency_block.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 
@@ -34,12 +34,12 @@ class FinanceTillBloc extends Bloc<FinanceTillEvent, FinanceTillState> {
     emit(
       state.copyWith(
         status: FinanceTillStatus.loading,
-        selectedPeriod: event.period,
+        selectedWindow: event.window,
         failure: null,
       ),
     );
 
-    final result = await _getFinanceTillUseCase(period: event.period);
+    final result = await _getFinanceTillUseCase(window: event.window);
 
     result.fold(
       (failure) => emit(
@@ -67,7 +67,7 @@ class FinanceTillBloc extends Bloc<FinanceTillEvent, FinanceTillState> {
     FinanceTillRefreshRequested event,
     Emitter<FinanceTillState> emit,
   ) async {
-    add(FinanceTillRequested(period: state.selectedPeriod));
+    add(FinanceTillRequested(window: state.selectedWindow));
   }
 
   /// Change de caisse **sans rappeler le serveur**.

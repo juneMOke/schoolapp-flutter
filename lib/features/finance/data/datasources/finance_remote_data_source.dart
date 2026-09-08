@@ -44,6 +44,8 @@ abstract class FinanceRemoteDataSource {
   Future<FinanceTillResponseModel> getFinanceTill(
     @Extras() Map<String, dynamic> extras,
     @Query('period') String period,
+    @Query('from') String? from,
+    @Query('to') String? to,
   );
 
   /// Les reçus de **une** caisse, page par page.
@@ -63,5 +65,7 @@ abstract class FinanceRemoteDataSource {
     @Query('currency') String currency,
     @Query('page') int page,
     @Query('size') int size,
+    @Query('from') String? from,
+    @Query('to') String? to,
   );
 }

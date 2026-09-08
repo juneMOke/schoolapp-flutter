@@ -651,6 +651,33 @@ void main() {
     test('une clé inattendue se rend telle quelle', () {
       expect(shortBucketLabel('2026'), '2026');
     });
+
+    test('⚠️ une tranche HEBDOMADAIRE ne se lit pas comme une journée', () {
+      // Le serveur donne à une tranche de sept jours la date de son premier
+      // jour : `2026-05-12`, exactement la forme d'une journée. Sans le grain
+      // annoncé, l'étiquette « 12 » ferait lire sept jours d'encaissements
+      // comme la seule journée du 12.
+      expect(shortBucketLabel('2026-05-12', granularity: 'day'), '12');
+      expect(shortBucketLabel('2026-05-12', granularity: 'week'), 'sem. 12');
+      expect(
+        shortBucketLabel('2026-05-12', granularity: 'week'),
+        isNot(shortBucketLabel('2026-05-12', granularity: 'day')),
+        reason:
+            'deux grains, même clé : c’est le grain qui décide, pas la forme '
+            'de la clé',
+      );
+    });
+
+    test('le grain annoncé prime sur la forme de la clé', () {
+      expect(shortBucketLabel('2026-05', granularity: 'month'), '05');
+    });
+
+    test('sans grain annoncé, la forme de la clé décide — l’ancien repli', () {
+      // Un serveur qui ne sert pas encore `granularity` ne doit pas casser
+      // l'axe : on retombe sur ce que le formatteur faisait avant lui.
+      expect(shortBucketLabel('2026-05-15'), '15');
+      expect(shortBucketLabel('2026-05'), '05');
+    });
   });
 
   group('par source', () {

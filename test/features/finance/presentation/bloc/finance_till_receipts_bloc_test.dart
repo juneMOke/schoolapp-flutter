@@ -40,7 +40,7 @@ TillReceiptsPage _page({
 /// garde jamais une page qui ne décrit plus ce qu'on regarde.
 void main() {
   setUpAll(() {
-    registerFallbackValue(TillPeriod.day);
+    registerFallbackValue(const TillWindow.day());
   });
 
   late MockGetTillReceiptsUseCase mockUseCase;
@@ -56,7 +56,7 @@ void main() {
     when(
       () => mockUseCase(
         currency: any(named: 'currency'),
-        period: any(named: 'period'),
+        window: any(named: 'window'),
         page: any(named: 'page'),
         size: any(named: 'size'),
       ),
@@ -71,16 +71,16 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'CDF',
-          period: TillPeriod.month,
+          window: TillWindow.month(),
         ),
       ),
       verify: (bloc) {
         expect(bloc.state.currency, 'CDF');
-        expect(bloc.state.period, TillPeriod.month);
+        expect(bloc.state.window, const TillWindow.month());
         verify(
           () => mockUseCase(
             currency: 'CDF',
-            period: TillPeriod.month,
+            window: const TillWindow.month(),
             page: 0,
             size: any(named: 'size'),
           ),
@@ -95,7 +95,7 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'USD',
-          period: TillPeriod.day,
+          window: TillWindow.day(),
         ),
       ),
       verify: (bloc) {
@@ -118,7 +118,7 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'USD',
-          period: TillPeriod.day,
+          window: TillWindow.day(),
         ),
       ),
       verify: (bloc) =>
@@ -139,7 +139,7 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'CDF',
-          period: TillPeriod.day,
+          window: TillWindow.day(),
         ),
       ),
       verify: (_) {
@@ -149,7 +149,7 @@ void main() {
         verify(
           () => mockUseCase(
             currency: 'CDF',
-            period: any(named: 'period'),
+            window: any(named: 'window'),
             page: 0,
             size: any(named: 'size'),
           ),
@@ -164,14 +164,14 @@ void main() {
       seed: () => const FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
         currency: 'CDF',
-        period: TillPeriod.week,
+        window: TillWindow.week(),
         page: 0,
       ),
       act: (bloc) => bloc.add(const FinanceTillReceiptsPageChanged(1)),
       verify: (_) => verify(
         () => mockUseCase(
           currency: 'CDF',
-          period: TillPeriod.week,
+          window: const TillWindow.week(),
           page: 1,
           size: any(named: 'size'),
         ),
@@ -186,7 +186,7 @@ void main() {
       verify: (_) => verifyNever(
         () => mockUseCase(
           currency: any(named: 'currency'),
-          period: any(named: 'period'),
+          window: any(named: 'window'),
           page: any(named: 'page'),
           size: any(named: 'size'),
         ),
@@ -201,7 +201,7 @@ void main() {
         when(
           () => mockUseCase(
             currency: any(named: 'currency'),
-            period: any(named: 'period'),
+            window: any(named: 'window'),
             page: any(named: 'page'),
             size: any(named: 'size'),
           ),
@@ -213,7 +213,7 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'USD',
-          period: TillPeriod.day,
+          window: TillWindow.day(),
         ),
       ),
       verify: (bloc) {
@@ -235,7 +235,7 @@ void main() {
         when(
           () => mockUseCase(
             currency: any(named: 'currency'),
-            period: any(named: 'period'),
+            window: any(named: 'window'),
             page: any(named: 'page'),
             size: any(named: 'size'),
           ),
@@ -250,7 +250,7 @@ void main() {
       act: (bloc) => bloc.add(
         const FinanceTillReceiptsRequested(
           currency: 'USD',
-          period: TillPeriod.day,
+          window: TillWindow.day(),
         ),
       ),
       verify: (bloc) => expect(bloc.state.receipts, isEmpty),

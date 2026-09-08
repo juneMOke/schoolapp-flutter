@@ -25,6 +25,9 @@ class FinanceTillResponseModel {
   /// Ce que ces versements ont éteint, par devise de **créance**.
   final List<TillImputationModel> impute;
 
+  /// Le grain des barres, annoncé par le serveur — jamais déduit de la période.
+  final String granularity;
+
   /// Le nombre de reçus de la fenêtre, toutes caisses — un **compteur**, donc le
   /// seul agrégat que l'écran a le droit de lire à travers les devises.
   final int receiptsIssued;
@@ -38,6 +41,7 @@ class FinanceTillResponseModel {
     required this.timeZone,
     required this.encaisse,
     required this.impute,
+    this.granularity = '',
     this.receiptsIssued = 0,
     this.crossed = const TillCrossedModel.empty(),
   });
@@ -73,6 +77,7 @@ class FinanceTillResponseModel {
         for (final raw in (json['impute'] as List<dynamic>? ?? const []))
           if (raw is Map<String, dynamic>) TillImputationModel.fromJson(raw),
       ],
+      granularity: ((json['granularity'] as String?) ?? '').trim(),
       receiptsIssued: (json['receiptsIssued'] as num?)?.toInt() ?? 0,
       crossed: TillCrossedModel.fromJsonOrEmpty(json['crossed']),
     );
@@ -81,6 +86,7 @@ class FinanceTillResponseModel {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'context': context.toJson(),
     'timeZone': timeZone,
+    'granularity': granularity,
     'receiptsIssued': receiptsIssued,
     'encaisse': [for (final block in encaisse) block.toJson()],
     'impute': [for (final block in impute) block.toJson()],
@@ -92,6 +98,7 @@ class FinanceTillResponseModel {
     timeZone: timeZone,
     encaisse: [for (final block in encaisse) block.toEntity()],
     impute: [for (final block in impute) block.toEntity()],
+    granularity: granularity,
     receiptsIssued: receiptsIssued,
     crossed: crossed.toEntity(),
   );

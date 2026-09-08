@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.d
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 
 class FinanceRepositoryImpl implements FinanceRepository {
@@ -57,12 +57,14 @@ class FinanceRepositoryImpl implements FinanceRepository {
 
   @override
   Future<Either<Failure, FinanceTill>> getFinanceTill({
-    TillPeriod period = TillPeriod.day,
+    TillWindow window = const TillWindow.day(),
   }) async {
     try {
       final response = await remoteDataSource.getFinanceTill(
         requiredAuth,
-        period.apiValue,
+        window.apiPeriod,
+        window.apiFrom,
+        window.apiTo,
       );
       return Right(response.toEntity());
     } on DioException catch (e) {
@@ -80,17 +82,19 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<Either<Failure, TillReceiptsPage>> getTillReceipts({
     required String currency,
-    TillPeriod period = TillPeriod.day,
+    TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,
   }) async {
     try {
       final response = await remoteDataSource.getTillReceipts(
         requiredAuth,
-        period.apiValue,
+        window.apiPeriod,
         currency,
         page,
         size,
+        window.apiFrom,
+        window.apiTo,
       );
       return Right(response.toEntity());
     } on DioException catch (e) {

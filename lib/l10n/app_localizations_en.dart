@@ -6417,6 +6417,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeDashboardTabTillDescription => 'What went into the drawer';
 
   @override
+  String get financeTillPeriodCustom => 'Range';
+
+  @override
+  String get financeTillPeriodFrom => 'From';
+
+  @override
+  String get financeTillPeriodTo => 'To';
+
+  @override
   String financeTillReceiptsHeading(String currency) {
     return '$currency till receipts';
   }

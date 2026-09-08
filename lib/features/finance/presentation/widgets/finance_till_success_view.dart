@@ -99,6 +99,9 @@ class FinanceTillSuccessView extends StatelessWidget {
                   tillCurrencyName(selected.currency, l10n),
                 ),
                 buckets: selected.buckets,
+                // Le grain vient du serveur : une tranche hebdomadaire porte
+                // une clé de la même forme qu'une journée.
+                granularity: till.granularity,
                 // La série déborde la fenêtre comptée sur la journée seulement.
                 // La note vit à côté du graphique, là où l'écart se voit.
                 windowNote: till.context.period == 'day'

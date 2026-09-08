@@ -88,10 +88,17 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
   Future<FinanceTillResponseModel> getFinanceTill(
     Map<String, dynamic> extras,
     String period,
+    String? from,
+    String? to,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{r'period': period};
+    final queryParameters = <String, dynamic>{
+      r'period': period,
+      r'from': from,
+      r'to': to,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<FinanceTillResponseModel>(
@@ -122,6 +129,8 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
     String currency,
     int page,
     int size,
+    String? from,
+    String? to,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
@@ -130,7 +139,10 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
       r'currency': currency,
       r'page': page,
       r'size': size,
+      r'from': from,
+      r'to': to,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<TillReceiptPageModel>(

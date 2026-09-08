@@ -49,6 +49,23 @@ class FinanceTill extends Equatable {
   /// même versement pèse dans le bloc CDF de l'un et le bloc USD de l'autre.
   final List<TillImputation> impute;
 
+  /// Le grain des barres, **annoncé par le serveur** : `day`, `week` ou
+  /// `month`.
+  ///
+  /// ⚠️ **Il ne se déduit pas de la période.** Sur une fenêtre libre le serveur
+  /// choisit le grain sur la **largeur** de la fenêtre, avec un seuil qui lui
+  /// appartient — et une tranche hebdomadaire porte une clé `YYYY-MM-DD`,
+  /// textuellement indistinguable d'une journée. Sans ce champ, sept jours
+  /// d'encaissements s'étiquetteraient comme la journée du premier.
+  ///
+  /// ⚠️ **C'est le grain de la SÉRIE**, pas celui de la fenêtre comptée. Les
+  /// deux ne diffèrent que sur `day`, où la série recule de six jours — mais
+  /// c'est exactement l'écart qui ferait mentir l'étiquette.
+  ///
+  /// Vide si le serveur ne l'envoie pas : le formatteur retombe alors sur la
+  /// forme de la clé, ce qu'il faisait avant ce champ.
+  final String granularity;
+
   /// Le nombre de reçus de la fenêtre, **toutes caisses confondues**.
   ///
   /// **Le seul agrégat légitimement inter-devises de l'écran** — parce que c'est
@@ -78,6 +95,7 @@ class FinanceTill extends Equatable {
     required this.timeZone,
     required this.encaisse,
     required this.impute,
+    this.granularity = '',
     this.receiptsIssued = 0,
     this.crossed = const TillCrossed(count: 0, amounts: [], rateMicros: []),
   });
@@ -96,6 +114,7 @@ class FinanceTill extends Equatable {
     timeZone,
     encaisse,
     impute,
+    granularity,
     receiptsIssued,
     crossed,
   ];

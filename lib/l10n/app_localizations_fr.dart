@@ -6484,6 +6484,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce qui est entré dans le tiroir';
 
   @override
+  String get financeTillPeriodCustom => 'Période';
+
+  @override
+  String get financeTillPeriodFrom => 'Du';
+
+  @override
+  String get financeTillPeriodTo => 'Au';
+
+  @override
   String financeTillReceiptsHeading(String currency) {
     return 'Reçus de la caisse $currency';
   }

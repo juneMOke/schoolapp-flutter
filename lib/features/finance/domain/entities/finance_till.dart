@@ -11,3 +11,4 @@ export 'package:school_app_flutter/features/finance/domain/entities/finance_till
 export 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_summary.dart';
 export 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_trend_unavailable_reason.dart';
+export 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
