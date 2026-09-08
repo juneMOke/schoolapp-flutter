@@ -226,7 +226,29 @@ abstract final class TicketTextLayout {
     final balance = model.remainingBalance;
     if (balance != null && balance.isNotEmpty) {
       lines.add(_rule(width));
+
+      // Le reste PAR NATURE avant le total. « Il vous reste 10 000 FC et
+      // 314 $ » juxtapose deux devises sans les expliquer ; le détail dit d'où
+      // elles viennent. C'est la règle que le montant reçu applique déjà — ne
+      // jamais additionner deux unités — étendue au solde, qui y avait échappé.
+      //
+      // Les lignes sont indentées comme celles de la ventilation : elles se
+      // lisent de la même façon, et le total les coiffe.
+      for (final line in model.remainingByCharge) {
+        _addPair(
+          lines,
+          '  ${line.label}',
+          formatAmount(line.amountInCents, line.currency),
+          width,
+        );
+      }
+
+      // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait le
+      // parent à additionner, le total sans détail est ce qu'on lui reproche.
       _addMoneyBag(lines, model.labels.balanceLabel, balance, width);
+
+      // La réserve UNE fois, sous le total — la répéter par ligne la ferait
+      // lire comme une incertitude sur chaque frais plutôt que sur la date.
       lines.addAll(_wrapped(model.labels.balanceReservation, width));
     }
 

@@ -47,15 +47,18 @@ LocalStudentCharge _charge({
   required int expected,
   required int paid,
   String currency = 'CDF',
+  String id = 'c-1',
+  String feeCode = 'TUITION',
+  String label = 'Frais scolaires',
   // Nullable : `academic_year_id` l'est en base par construction, et c'est
   // précisément le cas que le solde imprimé oubliait.
   String? academicYearId = 'y-1',
 }) => LocalStudentCharge(
-  id: 'c-1',
+  id: id,
   studentId: 's-1',
   academicYearId: academicYearId,
-  feeCode: 'TUITION',
-  label: 'Frais scolaires',
+  feeCode: feeCode,
+  label: label,
   expectedAmountInCents: expected,
   amountPaidInCents: paid,
   amountPaidPendingInCents: 0,
@@ -321,6 +324,153 @@ void main() {
     );
   });
 
+  group('le solde détaillé par nature', () {
+    /// Le détail EXPLIQUE les devises au lieu de les juxtaposer : « il vous
+    /// reste 10 000 FC et 314 dollars » posait plus de questions qu'elle n'en
+    /// résolvait.
+    test('une ligne par nature, et le total les somme', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation materiels examens',
+            expected: 60000,
+            paid: 10000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(2));
+      expect(model.remainingByCharge.first.label, 'Frais scolaires');
+      expect(model.remainingByCharge.first.amountInCents, 250000);
+      expect(model.remainingByCharge.last.amountInCents, 50000);
+
+      // ⚠️ Le total DÉRIVE des lignes : un parent additionne ce qu'il lit.
+      expect(model.remainingBalance, MoneyBag.of(const [Money(300000, 'CDF')]));
+    });
+
+    /// Deux tranches d'un même frais font UNE ligne, comme la ventilation.
+    test('deux créances d\'un même code font une ligne', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 200000, paid: 50000),
+          _charge(id: 'c-2', expected: 200000, paid: 100000),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(1));
+      expect(model.remainingByCharge.single.amountInCents, 250000);
+    });
+
+    /// ⚠️ Jamais sur le seul code : additionner deux devises imprimerait un
+    /// chiffre qui n'est l'argent de personne.
+    test('un même code en deux devises fait deux lignes', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 200000, paid: 50000),
+          _charge(id: 'c-2', expected: 300, paid: 100, currency: 'USD'),
+        ]),
+      );
+      // Le versement doit toucher les deux devises pour que le solde les porte.
+      await db.insert('payment_allocations', {
+        'id': 'a-usd',
+        'client_uuid': 'a-usd',
+        'payment_id': 'p-1',
+        'fee_code': 'TUITION',
+        'student_charge_label': 'Frais scolaires',
+        'amount_in_cents': 100,
+        'currency': 'USD',
+      });
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(2));
+      expect(
+        {for (final l in model.remainingByCharge) l.currency},
+        {'CDF', 'USD'},
+      );
+    });
+
+    /// Un frais soldé n'a rien à faire sur le papier — même règle que le bloc
+    /// payeur : une mention à zéro se lit comme une mention effacée.
+    test('un frais soldé n\'apparaît pas', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation',
+            expected: 60000,
+            paid: 60000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(1));
+      expect(model.remainingByCharge.single.label, 'Frais scolaires');
+    });
+
+    /// Le papier lui-même : les lignes détaillées précèdent le total, et la
+    /// réserve n'apparaît qu'UNE fois, sous lui.
+    test('le papier porte le détail puis le total', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation',
+            expected: 60000,
+            paid: 10000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+      final lines = TicketTextLayout.render(model);
+      final flat = lines.join('\n');
+
+      final detail = lines.indexWhere((l) => l.contains('Organisation'));
+      final total = lines.indexWhere((l) => l.startsWith('Solde'));
+      expect(detail, greaterThan(0));
+      expect(total, greaterThan(detail));
+      expect(
+        'sous réserve de synchronisation'.allMatches(flat).length,
+        1,
+        reason: 'la réserve ne se répète pas par ligne',
+      );
+    });
+  });
+
   test(
     'reprend le solde du domaine Facturation, pas un calcul maison',
     () async {
@@ -549,6 +699,146 @@ void main() {
   /// Avant, deux versements sur deux tranches d'un même minerval sortaient du
   /// même ticket, mot pour mot : la répartition n'imprimait que le libellé gelé,
   /// identique d'une tranche à l'autre quand l'école les nomme pareil.
+  group('la répartition regroupe par nature', () {
+    Future<void> addAllocation({
+      required String id,
+      required String feeCode,
+      required String label,
+      required int amount,
+      String currency = 'CDF',
+    }) => db.insert('payment_allocations', {
+      'id': id,
+      'client_uuid': id,
+      'payment_id': 'p-1',
+      'fee_code': feeCode,
+      'student_charge_label': label,
+      'amount_in_cents': amount,
+      'currency': currency,
+    });
+
+    /// ⚠️ **La régression que le libellé par nature a introduite.** Le code de
+    /// tranche `(OM1)` était ce qui distinguait deux imputations d'un même
+    /// frais ; en le retirant sans regrouper, trois tranches sortaient sur
+    /// TROIS lignes identiques — pire qu'avant, parce qu'un lecteur ne peut
+    /// plus les départager du tout.
+    ///
+    /// Rien n'interdit ce cas en base : `payment_allocations` n'a aucune
+    /// contrainte d'unicité sur `(payment_id, fee_code)`, et payer deux
+    /// tranches d'un coup est le geste nominal du guichet.
+    test('deux tranches d\'un même frais font UNE ligne', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+
+      final lines = await dao.findAllocations('p-1');
+
+      expect(lines, hasLength(1), reason: 'deux lignes indistinguables');
+      expect(lines.single.amountInCents, 30000);
+    });
+
+    /// ⚠️ **Jamais sur le seul code.** Grouper francs et dollars ensemble
+    /// produirait « le chiffre qui n'est l'argent de personne » que ce gabarit
+    /// refuse partout ailleurs.
+    test('deux devises d\'un même frais font DEUX lignes', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 2000,
+        currency: 'USD',
+      );
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines, hasLength(2));
+      expect({for (final l in lines) l.currency}, {'CDF', 'USD'});
+    });
+
+    /// Le cas du repli : sans titre de section, deux tranches portent deux
+    /// libellés figés DIFFÉRENTS. Le porteur a tranché — une seule ligne, le
+    /// **premier** libellé du groupe.
+    ///
+    /// ⚠️ Et « premier » doit être défini, sinon ce n'est pas une règle : le
+    /// ticket est librement réimprimable, donc un libellé pris sans ordre
+    /// établi ferait porter deux intitulés différents à deux tirages du même
+    /// versement, sur des papiers qu'une famille garde côte à côte.
+    test('deux libellés figés différents : une ligne, le premier', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 2/3',
+        amount: 15000,
+      );
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines, hasLength(1));
+      expect(lines.single.label, 'Organisation materiels examens - 1/3');
+      expect(lines.single.amountInCents, 30000);
+    });
+
+    /// Un ticket réimprimé doit être identique à l'original — vrai par principe
+    /// depuis que la réimpression est libre.
+    ///
+    /// ⚠️ **Ce test ne prouve PAS le déterminisme, et il ne faut pas le croire.**
+    /// Éprouvé en faisant gagner le DERNIER libellé du groupe : il est resté
+    /// **vert**. Deux appels dans le même processus, sur la même base, obtiennent
+    /// de SQLite le même ordre physique — la comparaison ne peut donc pas voir
+    /// un ordre instable.
+    ///
+    /// Ce qui garde réellement la règle est le test précédent, qui asserte le
+    /// libellé **attendu** et non l'égalité de deux exécutions ; celui-ci n'est
+    /// qu'un filet de non-régression sur la forme du résultat.
+    test('deux compositions du même versement rendent la même forme', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      for (var i = 0; i < 6; i++) {
+        await addAllocation(
+          id: 'a-$i',
+          feeCode: i.isEven ? 'OM' : 'TUITION',
+          label: 'Nature ${i.isEven ? "OM" : "TUITION"} - tranche $i',
+          amount: 1000 * (i + 1),
+          currency: i % 3 == 0 ? 'USD' : 'CDF',
+        );
+      }
+
+      final first = await dao.findAllocations('p-1');
+      final second = await dao.findAllocations('p-1');
+
+      expect(first.length, second.length);
+      for (var i = 0; i < first.length; i++) {
+        expect(first[i].label, second[i].label);
+        expect(first[i].amountInCents, second[i].amountInCents);
+        expect(first[i].currency, second[i].currency);
+      }
+    });
+  });
+
   group('la répartition imprimée nomme la tranche', () {
     Future<void> seedTariff(String id, {String? code}) =>
         db.insert('ref_fee_tariffs', {

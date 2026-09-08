@@ -155,44 +155,70 @@ class ProvisionalTicketDao {
   /// quitté l'appareil, et perdre une ligne de répartition sur un ticket, c'est
   /// remettre à une famille un papier dont le détail ne fait plus la somme.
   ///
+  /// ## Une ligne par (nature, devise), et pourquoi ce regroupement existe
+  ///
+  /// Retirer le code de tranche sans regrouper faisait sortir **trois lignes
+  /// identiques** quand un versement solde trois tranches d'un même frais —
+  /// pire qu'avant, puisque `(OM1)` était précisément ce qui les distinguait.
+  /// Rien ne l'interdit en base : `payment_allocations` n'a aucune contrainte
+  /// d'unicité sur `(payment_id, fee_code)`, et payer plusieurs tranches d'un
+  /// coup est le geste nominal du guichet.
+  ///
+  /// ⚠️ **La devise entre dans la clé.** Grouper sur le seul code additionnerait
+  /// des francs et des dollars — « le chiffre qui n'est l'argent de personne »
+  /// que ce gabarit refuse partout ailleurs.
+  ///
+  /// ⚠️ **Le libellé retenu est le PREMIER du groupe, et « premier » est
+  /// défini.** Deux tranches sans titre de section peuvent porter deux libellés
+  /// figés différents (« … - 1/3 », « … - 2/3 »). Un `GROUP BY` SQL rendrait
+  /// alors la valeur d'une ligne quelconque : le ticket étant **librement
+  /// réimprimable**, deux tirages du même versement porteraient deux intitulés
+  /// différents, sur des papiers qu'une famille garde côte à côte. D'où un tri
+  /// **total** — `rowid` pour l'ordre d'écriture, `id` pour le rendre strict —
+  /// et un regroupement écrit en Dart, où le choix se lit.
+  ///
   /// L'école est résolue par sous-requête sur `ref_school` — cache mono-ligne,
   /// même lecture que partout ailleurs dans ce DAO.
   Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
     final rows = await _db.rawQuery(
       '''
-      SELECT pa.student_charge_label,
-             pa.fee_code,
-             pa.amount_in_cents,
+      SELECT pa.fee_code,
              pa.currency,
-             s.label AS section_label
+             pa.amount_in_cents,
+             COALESCE(
+               NULLIF(TRIM(s.label), ''),
+               NULLIF(TRIM(pa.student_charge_label), ''),
+               pa.fee_code
+             ) AS label
       FROM payment_allocations pa
       LEFT JOIN ref_fee_code_sections s
         ON UPPER(s.code) = UPPER(pa.fee_code)
        AND s.school_id = (SELECT id FROM ref_school LIMIT 1)
       WHERE pa.payment_id = ?
+      ORDER BY pa.rowid, pa.id
       ''',
       [paymentId],
     );
 
-    return rows
-        .map((r) {
-          final feeCode = (r['fee_code'] as String?) ?? '';
-          final frozen = (r['student_charge_label'] as String?)?.trim() ?? '';
-          final section = (r['section_label'] as String?)?.trim() ?? '';
-          // Le titre de la nature d'abord, le libellé gelé ensuite, la nature
-          // brute en dernier ressort : le ticket préfère un code lisible à un
-          // blanc.
-          final label = section.isNotEmpty
-              ? section
-              : (frozen.isNotEmpty ? frozen : feeCode);
-
-          return TicketAllocationRow(
-            label: label,
-            amountInCents: (r['amount_in_cents'] as int?) ?? 0,
-            currency: (r['currency'] as String?) ?? '',
-          );
-        })
-        .toList(growable: false);
+    // Regroupement en Dart plutôt qu'en SQL, pour que le choix du libellé soit
+    // EXPLICITE : un `GROUP BY` rendrait, pour une colonne non agrégée, la
+    // valeur d'une ligne quelconque du groupe — c'est-à-dire un libellé
+    // non déterministe.
+    final grouped = <String, TicketAllocationRow>{};
+    for (final r in rows) {
+      final currency = (r['currency'] as String?) ?? '';
+      final key = '${(r['fee_code'] as String?) ?? ''}|$currency';
+      final amount = (r['amount_in_cents'] as int?) ?? 0;
+      final existing = grouped[key];
+      grouped[key] = TicketAllocationRow(
+        // Le PREMIER libellé du groupe, dans l'ordre où la requête les rend —
+        // lequel est total (`rowid, id`), donc reproductible.
+        label: existing?.label ?? ((r['label'] as String?) ?? ''),
+        amountInCents: (existing?.amountInCents ?? 0) + amount,
+        currency: currency,
+      );
+    }
+    return grouped.values.toList(growable: false);
   }
 
   /// Retient qu'un papier est SORTI pour ce versement.
@@ -228,6 +254,30 @@ class ProvisionalTicketDao {
     );
     if (rows.isEmpty) return false;
     return rows.first['ticket_printed_at'] != null;
+  }
+
+  /// Les titres de nature de frais de l'école, `code` en MAJUSCULES → libellé.
+  ///
+  /// Même source que la répartition (`ref_fee_code_sections`), et pour la même
+  /// raison : le solde détaillé doit nommer les frais **exactement comme** la
+  /// ventilation juste au-dessus. Deux noms pour un même code sur le même
+  /// papier feraient chercher au parent la différence entre eux.
+  ///
+  /// Table vide ⇒ carte vide, et l'appelant retombe sur le libellé de la
+  /// créance. Elle n'est peuplée que par Configuration : cf. la note de
+  /// [findAllocations].
+  Future<Map<String, String>> feeSectionTitles() async {
+    final rows = await _db.rawQuery(
+      'SELECT code, label FROM ref_fee_code_sections '
+      'WHERE school_id = (SELECT id FROM ref_school LIMIT 1)',
+    );
+    return {
+      for (final r in rows)
+        if (((r['code'] as String?) ?? '').trim().isNotEmpty &&
+            ((r['label'] as String?) ?? '').trim().isNotEmpty)
+          (r['code'] as String).trim().toUpperCase(): (r['label'] as String)
+              .trim(),
+    };
   }
 
   /// Numéro **définitif** du reçu, `null` tant que la pièce n'est pas scellée.

@@ -97,6 +97,17 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
       final definitive = await _dao.findDefinitiveNumber(paymentId);
       final provisional = await _dao.findProvisionalNumber(paymentId);
+      // Le solde des SEULES devises que ce versement a touchées, détaillé par
+      // nature : imprimer une dette en francs sur un ticket réglé en dollars
+      // ferait lire au payeur un chiffre qui ne le concerne pas.
+      //
+      // Les devises retenues sont celles des CRÉANCES touchées, pas des billets
+      // posés : un solde se dit dans la devise où la dette existe.
+      final remaining = await _remainingByCharge(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+        currencies: payment.amounts.currencies,
+      );
 
       return Right(
         TicketReceiptModel(
@@ -156,19 +167,17 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
                 ),
               )
               .toList(growable: false),
-          // Le solde des SEULES devises que ce versement a touchées : imprimer
-          // une dette en francs sur un ticket réglé en dollars ferait lire au
-          // payeur un chiffre qui ne le concerne pas.
-          remainingBalance: await _remainingBalances(
-            studentId: payment.studentId,
-            academicYearId: payment.academicYearId,
-            // Les devises des CRÉANCES que ce versement a touchées : un solde
-            // se dit dans la devise où la dette existe, pas dans celle des
-            // billets posés. Un ticket réglé en francs sur une créance en
-            // dollars affiche donc un reste en dollars — c'est bien ce que le
-            // parent doit encore.
-            currencies: payment.amounts.currencies,
-          ),
+          remainingByCharge: remaining,
+          // ⚠️ Le total **dérive des lignes imprimées**, il n'est pas recalculé
+          // à côté. Un parent additionne ce qu'il lit : deux chemins de calcul
+          // finiraient par diverger, et l'écart apparaîtrait sur le papier —
+          // exactement ce que la ligne d'avance ferme déjà dans la ventilation.
+          remainingBalance: remaining.isEmpty
+              ? null
+              : MoneyBag.sumBy(
+                  remaining,
+                  (l) => Money.parse(l.amountInCents, l.currency),
+                ),
           labels: labels,
         ),
       );
@@ -194,20 +203,32 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   ///
   /// `null` dès que la lecture échoue, que l'année est inconnue, ou qu'aucune
   /// créance ne correspond : le ticket omet alors la ligne, ce qu'il sait faire.
-  Future<MoneyBag?> _remainingBalances({
+  /// Le reste dû, **une ligne par (nature de frais, devise)**, dans l'ordre où
+  /// les créances remontent.
+  ///
+  /// Le nom vient de `ref_fee_code_sections` s'il existe, du libellé de la
+  /// créance sinon — **la même règle que la ventilation juste au-dessus**, et
+  /// c'est ce qui compte : deux noms pour un même frais sur le même papier
+  /// feraient chercher au parent la différence entre eux.
+  ///
+  /// Les frais **soldés sont absents**, jamais imprimés à zéro : même règle que
+  /// le bloc payeur, une mention à zéro se lit comme une mention effacée.
+  Future<List<TicketAllocationLine>> _remainingByCharge({
     required String studentId,
     required String? academicYearId,
     required Iterable<String> currencies,
   }) async {
-    if (academicYearId == null || academicYearId.isEmpty) return null;
-    if (currencies.isEmpty) return null;
+    const empty = <TicketAllocationLine>[];
+    if (academicYearId == null || academicYearId.isEmpty) return empty;
+    if (currencies.isEmpty) return empty;
 
     final charges = await _finance.getCharges(studentId);
+    final titles = await _dao.feeSectionTitles();
     final wanted = {
       for (final currency in currencies) CurrencyCode.normalize(currency),
     };
 
-    return charges.fold<MoneyBag?>((_) => null, (list) {
+    return charges.fold<List<TicketAllocationLine>>((_) => empty, (list) {
       // `belongsToYear` et pas une égalité stricte : une créance sans année
       // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
       // vivait ici imprimait une dette plus petite que celle de l'écran.
@@ -218,12 +239,24 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
                 c.belongsToYear(academicYearId),
           )
           .toList(growable: false);
-      if (matching.isEmpty) return null;
-
-      return MoneyBag.sumBy(
-        matching,
-        (c) => Money.parse(c.optimisticRemainingInCents, c.currency),
-      );
+      final grouped = <String, TicketAllocationLine>{};
+      for (final c in matching) {
+        // Un frais soldé n'a rien à faire sur le papier.
+        if (c.optimisticRemainingInCents <= 0) continue;
+        final key = '${c.feeCode.toUpperCase()}|${c.currency}';
+        final existing = grouped[key];
+        grouped[key] = TicketAllocationLine(
+          // Premier nom du groupe, comme la ventilation : titre de section s'il
+          // existe, libellé de la créance sinon.
+          label:
+              existing?.label ??
+              (titles[c.feeCode.trim().toUpperCase()] ?? c.label),
+          amountInCents:
+              (existing?.amountInCents ?? 0) + c.optimisticRemainingInCents,
+          currency: c.currency,
+        );
+      }
+      return grouped.values.toList(growable: false);
     });
   }
 

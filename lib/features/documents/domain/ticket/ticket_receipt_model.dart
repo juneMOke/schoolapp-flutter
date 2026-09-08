@@ -341,6 +341,20 @@ class TicketReceiptModel extends Equatable {
   /// le ticket omet alors la ligne, ce qu'il sait faire.
   final MoneyBag? remainingBalance;
 
+  /// Le même solde, **détaillé par (nature de frais, devise)**.
+  ///
+  /// « Il vous reste 10 000 FC et 314 dollars » pose plus de questions qu'elle n'en
+  /// résout : le détail EXPLIQUE les deux devises au lieu de les juxtaposer.
+  /// C'est la règle que le ticket applique déjà au montant reçu — additionner
+  /// des unités différentes imprimerait un chiffre qui n'est l'argent de
+  /// personne — et à laquelle le solde avait échappé.
+  ///
+  /// **Seuls les frais restant dus** y figurent : un frais soldé n'a rien à
+  /// faire sur le papier, même règle que le bloc payeur absent. Le total reste,
+  /// en dernière ligne du bloc — le détail sans total obligerait le parent à
+  /// additionner, le total sans détail est ce qu'on lui reproche.
+  final List<TicketAllocationLine> remainingByCharge;
+
   final TicketLabels labels;
 
   const TicketReceiptModel({
@@ -361,6 +375,7 @@ class TicketReceiptModel extends Equatable {
     required this.tenders,
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
+    this.remainingByCharge = const <TicketAllocationLine>[],
     required this.labels,
   });
 
@@ -496,6 +511,7 @@ class TicketReceiptModel extends Equatable {
     tenders,
     allocations,
     remainingBalance,
+    remainingByCharge,
     labels,
   ];
 }
