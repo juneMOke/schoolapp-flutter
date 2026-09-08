@@ -235,11 +235,24 @@ abstract final class TicketTextLayout {
       // fois.
       lines.add('');
 
-      // Titre REPLIÉ, pas posé brut : « Solde au moment de l'impression » fait
-      // 31 caractères pour 32 colonnes en 58 mm. Il tient, à un caractère près.
-      // Une traduction plus longue déborderait la largeur du papier au lieu de
-      // se replier — c'est le défaut que « Répartition », court, masque encore.
-      lines.addAll(_wrapped(model.labels.balanceLabel, width));
+      // Titre REPLIÉ, pas posé brut. « Solde restant au moment de
+      // l'impression » fait 39 caractères : il tient à 48, et se replie
+      // proprement sur deux lignes à 32. Posé brut, il aurait débordé la
+      // largeur du papier — c'est le défaut que « Répartition », court, masque
+      // encore.
+      final title = _wrapped(model.labels.balanceLabel, width);
+
+      // Le filet qui SÉPARE de la répartition, avant le titre.
+      //
+      // ⚠️ Conditionné au titre, et pas seulement pour la forme : `_wrapped('')`
+      // rend une liste VIDE. Un libellé vide — ce qu'une traduction incomplète
+      // produit sans bruit — laisserait ce filet et celui du total se toucher,
+      // en un « ---- / ---- » que rien d'autre ne rattraperait. Poser les deux
+      // ensemble ou aucun ferme le cas à la source plutôt qu'en aval.
+      if (title.isNotEmpty) {
+        lines.add(_rule(width));
+        lines.addAll(title);
+      }
 
       // Le reste PAR NATURE avant le total. « Il vous reste 10 000 FC et
       // 314 $ » juxtapose deux devises sans les expliquer ; le détail dit d'où

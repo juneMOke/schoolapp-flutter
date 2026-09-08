@@ -21,13 +21,41 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde au moment de l\'impression',
+  balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
   thanksNotice: 'Nous vous remercions pour votre confiance.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
   editorSite: 'eteeloconnect.com',
+);
+
+/// Les mêmes libellés, le TITRE du bloc solde en moins.
+///
+/// Une traduction incomplète produit exactement cela, sans bruit : une chaîne
+/// vide là où le gabarit attend une phrase.
+final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
+  documentTitle: _labels.documentTitle,
+  provisionalMention: _labels.provisionalMention,
+  referenceLabel: _labels.referenceLabel,
+  dateLabel: _labels.dateLabel,
+  payerLabel: _labels.payerLabel,
+  phoneLabel: _labels.phoneLabel,
+  cashierLabel: _labels.cashierLabel,
+  studentLabel: _labels.studentLabel,
+  matriculationLabel: _labels.matriculationLabel,
+  classroomLabel: _labels.classroomLabel,
+  amountReceivedLabel: _labels.amountReceivedLabel,
+  rateLabel: _labels.rateLabel,
+  derivedAmountPrefix: _labels.derivedAmountPrefix,
+  allocationsLabel: _labels.allocationsLabel,
+  advanceLabel: _labels.advanceLabel,
+  balanceLabel: '',
+  balanceTotalLabel: _labels.balanceTotalLabel,
+  keepTicketNotice: _labels.keepTicketNotice,
+  thanksNotice: _labels.thanksNotice,
+  editorNotice: _labels.editorNotice,
+  editorSite: _labels.editorSite,
 );
 
 TicketReceiptModel _model({
@@ -42,6 +70,11 @@ TicketReceiptModel _model({
   /// dire.
   MoneyBag? remainingBalance,
   List<TicketAllocationLine> remainingByCharge = const [],
+
+  /// Permet de composer un ticket dont le TITRE de solde est vide — ce qu'une
+  /// traduction incomplète produit sans bruit, et le seul cas où les deux
+  /// filets du bloc pourraient se toucher.
+  TicketLabels labels = _labels,
   List<TicketAllocationLine> allocations = const [
     TicketAllocationLine(
       label: 'Frais scolaires',
@@ -74,7 +107,7 @@ TicketReceiptModel _model({
           ? null
           : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')])),
   remainingByCharge: remainingByCharge,
-  labels: _labels,
+  labels: labels,
 );
 
 /// Un solde à deux devises, détaillé — la forme que le porteur veut voir sur le
@@ -248,24 +281,29 @@ void main() {
     // RG-012-13 : le montant reçu et la répartition sont des FAITS (la
     // répartition est une saisie, pas un calcul) — seul le solde est incertain.
     // Le doute est donc porté par le TITRE du bloc solde, et par lui seul.
-    test('ne qualifie de « au moment de l\'impression » que le solde', () {
-      final lines = TicketTextLayout.render(_model());
-      final titleIndex = lines.indexWhere(
-        (l) => l.contains('au moment de l\'impression'),
-      );
-      final amountIndex = lines.indexWhere((l) => l.contains('Montant reçu'));
+    test(
+      'ne qualifie de « restant au moment de l\'impression » que le solde',
+      () {
+        final lines = TicketTextLayout.render(_model());
+        final titleIndex = lines.indexWhere(
+          (l) => l.contains('restant au moment de l\'impression'),
+        );
+        final amountIndex = lines.indexWhere((l) => l.contains('Montant reçu'));
 
-      expect(titleIndex, greaterThan(amountIndex));
+        expect(titleIndex, greaterThan(amountIndex));
 
-      // Assertion NÉGATIVE : aucune autre ligne ne porte le qualificatif. Sans
-      // elle, un gabarit qui le remettrait sous le total passerait — c'est
-      // exactement ce qu'on vient de retirer.
-      expect(
-        lines.where((l) => l.contains('au moment de l\'impression')).length,
-        1,
-      );
-      expect(lines[amountIndex], isNot(contains('au moment de')));
-    });
+        // Assertion NÉGATIVE : aucune autre ligne ne porte le qualificatif. Sans
+        // elle, un gabarit qui le remettrait sous le total passerait — c'est
+        // exactement ce qu'on vient de retirer.
+        expect(
+          lines
+              .where((l) => l.contains('restant au moment de l\'impression'))
+              .length,
+          1,
+        );
+        expect(lines[amountIndex], isNot(contains('au moment de')));
+      },
+    );
 
     /// La forme exacte du bloc, exigée par le porteur : ligne blanche, titre,
     /// détail indenté, filet, `Total`.
@@ -274,15 +312,17 @@ void main() {
     /// de ligne absolus : le bloc bouge dès qu'une ligne d'en-tête change, et
     /// un test qui compterait depuis le haut du papier casserait pour la
     /// mauvaise raison.
-    test('le bloc solde : ligne blanche, titre, détail, filet, total', () {
+    test('le bloc solde : blanche, filet, titre, détail, filet, total', () {
       final lines = TicketTextLayout.render(_biDevise(), columns: 48);
       final title = lines.indexWhere(
-        (l) => l.startsWith('Solde au moment de l\'impression'),
+        (l) => l.startsWith('Solde restant au moment de l\'impression'),
       );
       final total = lines.indexWhere((l) => l.startsWith('Total'));
 
-      expect(title, greaterThan(0));
-      expect(lines[title - 1], '', reason: 'une ligne blanche ouvre le bloc');
+      expect(title, greaterThan(1));
+      // Le filet SÉPARE de la répartition, la blanche donne l'air au-dessus.
+      expect(lines[title - 1], '-' * 48, reason: 'un filet ouvre le bloc');
+      expect(lines[title - 2], '', reason: 'une ligne blanche le précède');
       expect(total, greaterThan(title));
       expect(lines[total - 1], '-' * 48, reason: 'un filet coiffe le total');
 
@@ -394,6 +434,22 @@ void main() {
         'aucun solde, aucune répartition': _model(
           remainingBalanceInCents: null,
           allocations: const [],
+        ),
+        // ⚠️ LA forme dangereuse. Le titre est ce qui sépare le filet
+        // d'ouverture du bloc de celui qui coiffe le total ; vidé, il les
+        // laisserait se toucher. Le gabarit pose les deux ensemble ou aucun.
+        'titre de solde vide': _model(
+          labels: _labelsWithoutBalanceTitle,
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+        'titre de solde vide, sans détail': _model(
+          labels: _labelsWithoutBalanceTitle,
         ),
       };
 

@@ -4523,7 +4523,7 @@
   "ticketRateLabel": "Rate",
   "ticketDerivedAmountPrefix": "i.e.",
   "ticketAdvanceLabel": "Advance (unallocated)",
-  "ticketBalanceLabel": "Balance as of printing",
+  "ticketBalanceLabel": "Remaining balance as of printing",
   "ticketBalanceTotalLabel": "Total",
   "ticketThanksNotice": "Thank you for your trust.",
   "ticketEditorNotice": "Receipt issued by ETEELO CONNECT",

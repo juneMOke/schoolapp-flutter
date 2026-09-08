@@ -12531,7 +12531,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Balance as of printing'**
+  /// **'Remaining balance as of printing'**
   String get ticketBalanceLabel;
 
   /// No description provided for @ticketBalanceTotalLabel.

@@ -19,7 +19,7 @@ const _base = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance (non imputée)',
-  balanceLabel: 'Solde au moment de l\'impression',
+  balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',

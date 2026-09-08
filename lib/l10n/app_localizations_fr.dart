@@ -7736,7 +7736,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAdvanceLabel => 'Avance (non imputée)';
 
   @override
-  String get ticketBalanceLabel => 'Solde au moment de l\'impression';
+  String get ticketBalanceLabel => 'Solde restant au moment de l\'impression';
 
   @override
   String get ticketBalanceTotalLabel => 'Total';
