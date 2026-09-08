@@ -222,6 +222,84 @@ void main() {
       expect(id, isNull);
     });
 
+    /// ⚠️ **LE cas réel, et il vient du serveur.** `INACTIVE` ne veut pas dire
+    /// « rattachement bizarre » : côté serveur il signifie « cet élève a QUITTÉ
+    /// cette classe », gardé comme historique et descendu **exprès** — la
+    /// synchro propage les deux valeurs, elle ne filtre pas.
+    ///
+    /// Un déplacement A→B laisse donc DEUX lignes pour la même année, écrites
+    /// dans la même transaction serveur : **même `updated_at`**. Le tri
+    /// `ORDER BY updated_at DESC` ne départage alors rien, et sans filtre de
+    /// statut la lecture rendait la classe QUITTÉE une fois sur deux — au
+    /// moment de faire l'appel.
+    ///
+    /// L'INACTIVE est insérée en PREMIER à dessein : à `updated_at` égal, c'est
+    /// elle que l'ordre physique de SQLite favorise.
+    test('une ligne INACTIVE ne masque pas la classe ACTIVE', () async {
+      await upsertDelta(
+        members: [
+          const ClassroomMemberDto(
+            id: 'm-quittee',
+            studentId: 'stu-mobile',
+            classroomId: 'cls-quittee',
+            academicYearId: yearId,
+            studentFirstName: 'A',
+            studentLastName: 'A',
+            studentGender: 'MALE',
+            status: 'INACTIVE',
+            updatedAt: 7000,
+          ),
+          const ClassroomMemberDto(
+            id: 'm-actuelle',
+            studentId: 'stu-mobile',
+            classroomId: 'cls-actuelle',
+            academicYearId: yearId,
+            studentFirstName: 'A',
+            studentLastName: 'A',
+            studentGender: 'MALE',
+            status: 'ACTIVE',
+            updatedAt: 7000,
+          ),
+        ],
+        syncedAt: 1000,
+      );
+
+      final id = await dao.getCurrentClassroomId(
+        studentId: 'stu-mobile',
+        academicYearId: yearId,
+      );
+
+      expect(id, 'cls-actuelle');
+    });
+
+    /// Le pendant : un élève dont TOUS les rattachements sont sortis n'a plus
+    /// de classe. Rendre la dernière quittée serait pire que rien — l'appel se
+    /// ferait sur une classe qu'il n'a plus.
+    test('que des INACTIVE : aucune classe', () async {
+      await upsertDelta(
+        members: [
+          const ClassroomMemberDto(
+            id: 'm-sortie',
+            studentId: 'stu-sorti',
+            classroomId: 'cls-quittee',
+            academicYearId: yearId,
+            studentFirstName: 'B',
+            studentLastName: 'B',
+            studentGender: 'MALE',
+            status: 'INACTIVE',
+          ),
+        ],
+        syncedAt: 1000,
+      );
+
+      final id = await dao.getCurrentClassroomId(
+        studentId: 'stu-sorti',
+        academicYearId: yearId,
+      );
+
+      expect(id, isNull);
+    });
+
     test('renvoie la classe du miroir en l\'absence de transfert', () async {
       await upsertDelta(
         members: [member(id: 'm1', first: 'A', last: 'A')],
