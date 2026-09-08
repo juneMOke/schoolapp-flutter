@@ -31,24 +31,27 @@ abstract class ProvisionalTicketRepository {
   /// du parent.
   Future<void> markTicketPrinted(String paymentId);
 
-  /// Vrai si un papier est déjà sorti de CE poste pour ce versement.
-  Future<bool> hasPrintedTicket(String paymentId);
-
-  /// Vrai si ce versement **attend encore son premier papier**, sur cette
-  /// tablette.
+  /// Quand un papier est sorti de CE poste pour ce versement, `null` si aucun.
   ///
-  /// Ce n'est PAS une réimpression, et la nuance décide de tout : ADR-013
-  /// interdit de ressortir un ticket déjà remis, pas de rattraper un tirage qui
-  /// n'a jamais abouti. D'où deux conditions, tenues ici plutôt qu'à l'écran
-  /// parce qu'elles sont métier :
+  /// **Ce n'est plus une grille d'autorisation.** La réimpression est libre —
+  /// le bouton est toujours offert, sur le patron de la boutique — et cette
+  /// date ne décide plus de rien : elle dit ce que la ligne d'écran AFFICHE,
+  /// « Imprimer maintenant » ou « Réimprimer le ticket ».
   ///
-  /// * **aucun papier n'est sorti** — la trace se pose sur le seul succès
-  ///   thermique, donc un repli PDF laisse le rattrapage ouvert ;
-  /// * **le versement a été encaissé sur CETTE tablette** — ailleurs, le ticket
-  ///   sortirait dégradé de façon visible pour le parent : sans référence
-  ///   provisoire locale, la « Réf. » retombe sur un UUID de 36 caractères, et
-  ///   les libellés de répartition sur les codes de frais bruts.
+  /// C'est la DERNIÈRE impression et non la première : la trace est réécrite à
+  /// chaque tirage thermique réussi. Un caissier qui lit « Imprimé le … » doit
+  /// pouvoir s'y fier pour savoir quand le dernier papier est sorti.
   ///
-  /// L'annulation du reçu, elle, se juge à l'écran : c'est lui qui la connaît.
-  Future<bool> awaitsTicketPrint(String paymentId);
+  /// ## Ce qui a disparu avec elle
+  ///
+  /// `awaitsTicketPrint` posait deux conditions : aucun papier sorti, et
+  /// versement encaissé sur CETTE tablette. La première est devenue un
+  /// affichage, la seconde n'a plus d'objet — un versement descendu par pull
+  /// compose désormais une pièce entière (référence de repli, attribution
+  /// serveur, libellés du référentiel), ce que
+  /// `provisional_ticket_composition_test.dart` constate sur la pièce elle-même.
+  ///
+  /// L'annulation du reçu, elle, se juge toujours à l'écran : c'est lui qui la
+  /// connaît, et un reçu retiré ne ressort jamais en ticket.
+  Future<DateTime?> ticketPrintedAt(String paymentId);
 }

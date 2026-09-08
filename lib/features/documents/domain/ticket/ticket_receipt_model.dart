@@ -102,9 +102,34 @@ class TicketLabels extends Equatable {
   /// trop-perçu ou non — l'imputation exacte appartient au reçu scellé.
   final String documentTitle;
 
-  final String provisionalBanner;
+  /// La mention discrète du cas NON scellé, posée en fin de libellé de
+  /// référence : « Réf. provisoire `<numéro>` ».
+  ///
+  /// Ce n'est plus un bandeau. Le bandeau pleine largeur a disparu avec la
+  /// décision de rendre le ticket officiel dès qu'il porte un numéro définitif ;
+  /// ce champ nomme donc désormais une MENTION, et son nom suit.
+  ///
+  /// Le mot est accolé au libellé et non ajouté en fin de ligne, pour deux
+  /// raisons. Il qualifie ainsi le NUMÉRO — l'argent, lui, est reçu, et le
+  /// ticket l'affirme — là où un mot flottant qualifierait le versement. Et il
+  /// se replie proprement : mis entre parenthèses en fin de ligne, il se coupait
+  /// en deux quand la référence retombe sur l'UUID du paiement.
+  final String provisionalMention;
   final String referenceLabel;
+
+  /// « Date : » — coiffe la date de versement, l'heure restant calée à droite
+  /// sur la même ligne. Aucune ligne de papier ajoutée : à 48 colonnes il reste
+  /// 27 caractères de battement, et 11 à 32 colonnes.
+  final String dateLabel;
+
   final String cashierLabel;
+
+  /// « PAYEUR : » — en tête du bloc payeur, quand il y en a un.
+  final String payerLabel;
+
+  /// « Tél. » — le numéro du payeur. Seul, il suffit à garder le bloc.
+  final String phoneLabel;
+
   final String studentLabel;
   final String matriculationLabel;
   final String classroomLabel;
@@ -131,19 +156,44 @@ class TicketLabels extends Equatable {
   /// que pour empêcher un écart muet entre le reçu et la ventilation.
   final String advanceLabel;
 
+  /// « Solde au moment de l'impression » — le TITRE du bloc, qui coiffe le
+  /// détail comme « Répartition » coiffe le sien.
+  ///
+  /// Le qualificatif de temps est DANS le titre, et n'a plus de ligne à lui :
+  /// il se lit avant les chiffres au lieu de les suivre, et une réserve posée
+  /// sous le total se lisait comme une incertitude sur le total seul.
   final String balanceLabel;
 
-  /// « sous réserve de synchronisation » — n'accompagne QUE le solde.
-  final String balanceReservation;
+  /// « Total » — la dernière ligne du bloc, sous le filet.
+  final String balanceTotalLabel;
 
   /// « Conservez ce ticket jusqu'à la remise de votre reçu définitif. »
+  ///
+  /// ⚠️ **Imprimée seulement sur une pièce NON scellée.** Sur un ticket qui
+  /// porte déjà son numéro définitif, elle est factuellement fausse : il n'y a
+  /// pas de reçu à venir, celui-là l'est. Sa raison d'être (RG-012-12, le levier
+  /// de rappel de l'établissement) ne vaut que hors ligne.
   final String keepTicketNotice;
+
+  /// « Nous vous remercions pour votre confiance. »
+  final String thanksNotice;
+
+  /// « Reçu édité par ETEELO CONNECT » — l'éditeur du logiciel, en pied.
+  final String editorNotice;
+
+  /// « eteeloconnect.com » — **sans schéma**. C'est l'usage sur un reçu, ça
+  /// économise la largeur, et ça n'imprime pas un `http://` sur un papier que
+  /// des familles gardent.
+  final String editorSite;
 
   const TicketLabels({
     required this.documentTitle,
-    required this.provisionalBanner,
+    required this.provisionalMention,
     required this.referenceLabel,
+    required this.dateLabel,
     required this.cashierLabel,
+    required this.payerLabel,
+    required this.phoneLabel,
     required this.studentLabel,
     required this.matriculationLabel,
     required this.classroomLabel,
@@ -153,16 +203,22 @@ class TicketLabels extends Equatable {
     required this.allocationsLabel,
     required this.advanceLabel,
     required this.balanceLabel,
-    required this.balanceReservation,
+    required this.balanceTotalLabel,
     required this.keepTicketNotice,
+    required this.thanksNotice,
+    required this.editorNotice,
+    required this.editorSite,
   });
 
   @override
   List<Object?> get props => [
     documentTitle,
-    provisionalBanner,
+    provisionalMention,
     referenceLabel,
+    dateLabel,
     cashierLabel,
+    payerLabel,
+    phoneLabel,
     studentLabel,
     matriculationLabel,
     classroomLabel,
@@ -172,8 +228,11 @@ class TicketLabels extends Equatable {
     allocationsLabel,
     advanceLabel,
     balanceLabel,
-    balanceReservation,
+    balanceTotalLabel,
     keepTicketNotice,
+    thanksNotice,
+    editorNotice,
+    editorSite,
   ];
 }
 
@@ -192,8 +251,21 @@ class TicketLabels extends Equatable {
 /// qu'il ne connaît pas — il n'invente jamais.
 class TicketReceiptModel extends Equatable {
   // ── Z1 : l'établissement ────────────────────────────────────────────────────
+  //
+  // L'en-tête complet, une ligne par champ. Chacun est nullable et chacun
+  // s'escamote seul : `wrapped('')` rend une liste vide, donc un champ absent ne
+  // laisse pas même une ligne d'espaces. Aucune garde à écrire, et une école
+  // mal renseignée sort un en-tête plus court, jamais un en-tête troué.
   final String schoolName;
-  final String? schoolMunicipality;
+
+  /// La ligne « localité » — la ville si le référentiel la porte, la commune à
+  /// défaut. Nommée d'après ce qu'elle EST plutôt que d'après la colonne qui la
+  /// remplit, justement parce que deux colonnes peuvent la remplir.
+  final String? schoolLocality;
+
+  final String? schoolAddress;
+  final String? schoolEmail;
+  final String? schoolPhone;
 
   // ── Z2 : l'élève ────────────────────────────────────────────────────────────
   final String studentFullName;
@@ -215,9 +287,41 @@ class TicketReceiptModel extends Equatable {
   ///
   /// Ajouter un QR ici ne se fait donc qu'après avoir tranché **ce
   /// conflit-là**, pas en appliquant l'ADR-013 à la lettre.
-  final String provisionalReference;
+  final String reference;
+
+  /// Cette pièce est-elle encore NON scellée ?
+  ///
+  /// ⚠️ **Lu affirmativement sur l'absence de `payments.receipt_id`, jamais par
+  /// négation.** `!aUnNuméroDéfinitif` serait vrai aussi quand aucune ligne
+  /// `generated_documents` LOCALE n'existe — cas normal d'un versement encaissé
+  /// sur une AUTRE caisse et descendu par pull. La mention « provisoire »
+  /// s'imprimerait alors exactement sur les tickets qui doivent être officiels.
+  ///
+  /// Le dépôt a déjà payé ce défaut dans `PaymentReceiptState`, dont le
+  /// commentaire porte la même règle : affirmer, ne pas nier.
+  final bool isProvisional;
+
   final DateTime paidAt;
   final String? cashierFullName;
+
+  /// Le payeur, **quand il y en a un**.
+  ///
+  /// `null` — jamais `''` — quand personne n'a été nommé : c'est ce que le
+  /// gabarit lit pour escamoter le bloc payeur ENTIER plutôt que d'imprimer un
+  /// cadre vide. Sur une pièce, une mention laissée vide se lit comme une
+  /// mention EFFACÉE et invite à chercher ce qu'on aurait retiré ; mieux vaut
+  /// n'avoir rien à lire que quelque chose à interpréter.
+  final String? payerFullName;
+
+  /// Le numéro du payeur. **Seul, il garde le bloc** : il a été tapé, donc il
+  /// désigne quelqu'un.
+  final String? payerPhoneNumber;
+
+  /// Y a-t-il quelqu'un à nommer comme payeur ? Décidé ici plutôt qu'à l'œil du
+  /// gabarit, pour que la règle du bloc soit à un seul endroit.
+  bool get hasPayer =>
+      (payerFullName?.trim().isNotEmpty ?? false) ||
+      (payerPhoneNumber?.trim().isNotEmpty ?? false);
 
   // ── Z5 : l'argent ───────────────────────────────────────────────────────────
   /// Ce qui est entré dans le tiroir, ligne par ligne.
@@ -243,20 +347,41 @@ class TicketReceiptModel extends Equatable {
   /// le ticket omet alors la ligne, ce qu'il sait faire.
   final MoneyBag? remainingBalance;
 
+  /// Le même solde, **détaillé par (nature de frais, devise)**.
+  ///
+  /// « Il vous reste 10 000 FC et 314 dollars » pose plus de questions qu'elle n'en
+  /// résout : le détail EXPLIQUE les deux devises au lieu de les juxtaposer.
+  /// C'est la règle que le ticket applique déjà au montant reçu — additionner
+  /// des unités différentes imprimerait un chiffre qui n'est l'argent de
+  /// personne — et à laquelle le solde avait échappé.
+  ///
+  /// **Seuls les frais restant dus** y figurent : un frais soldé n'a rien à
+  /// faire sur le papier, même règle que le bloc payeur absent. Le total reste,
+  /// en dernière ligne du bloc — le détail sans total obligerait le parent à
+  /// additionner, le total sans détail est ce qu'on lui reproche.
+  final List<TicketAllocationLine> remainingByCharge;
+
   final TicketLabels labels;
 
   const TicketReceiptModel({
     required this.schoolName,
-    this.schoolMunicipality,
+    this.schoolLocality,
+    this.schoolAddress,
+    this.schoolEmail,
+    this.schoolPhone,
     required this.studentFullName,
     this.matriculationNumber,
     this.classroomName,
-    required this.provisionalReference,
+    required this.reference,
+    required this.isProvisional,
     required this.paidAt,
     this.cashierFullName,
+    this.payerFullName,
+    this.payerPhoneNumber,
     required this.tenders,
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
+    this.remainingByCharge = const <TicketAllocationLine>[],
     required this.labels,
   });
 
@@ -376,16 +501,23 @@ class TicketReceiptModel extends Equatable {
   @override
   List<Object?> get props => [
     schoolName,
-    schoolMunicipality,
+    schoolLocality,
+    schoolAddress,
+    schoolEmail,
+    schoolPhone,
+    payerFullName,
+    payerPhoneNumber,
     studentFullName,
     matriculationNumber,
     classroomName,
-    provisionalReference,
+    reference,
+    isProvisional,
     paidAt,
     cashierFullName,
     tenders,
     allocations,
     remainingBalance,
+    remainingByCharge,
     labels,
   ];
 }

@@ -86,15 +86,19 @@ class _FakePermission implements ThermalPrinterPermission {
 final TicketReceiptModel _model = TicketReceiptModel(
   schoolName: 'Complexe scolaire Sacré-Cœur',
   studentFullName: 'Amina Ndombasi',
-  provisionalReference: 'PROV-TAB1-0001',
+  reference: 'PROV-TAB1-0001',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 12, 9, 30),
   tenders: TicketTenderLine.identityFrom(
     MoneyBag.of(const [Money(2500000, 'CDF')]),
   ),
   labels: const TicketLabels(
     documentTitle: 'Ticket de perception',
-    provisionalBanner: 'Provisoire',
+    provisionalMention: 'provisoire',
     referenceLabel: 'Réf.',
+    dateLabel: 'Date :',
+    payerLabel: 'PAYEUR :',
+    phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',
     studentLabel: 'Élève :',
     matriculationLabel: 'Matricule :',
@@ -104,9 +108,12 @@ final TicketReceiptModel _model = TicketReceiptModel(
     derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
-    balanceLabel: 'Solde',
-    balanceReservation: 'sous réserve',
+    balanceLabel: 'Solde restant au moment de l\'impression',
+    balanceTotalLabel: 'Total',
     keepTicketNotice: 'Conservez ce ticket.',
+    thanksNotice: 'Merci.',
+    editorNotice: 'Recu edite par ETEELO CONNECT',
+    editorSite: 'eteeloconnect.com',
   ),
 );
 

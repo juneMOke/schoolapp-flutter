@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
@@ -21,8 +20,11 @@ class _MockFinanceOfflineRepository extends Mock
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
+  dateLabel: 'Date :',
+  payerLabel: 'PAYEUR :',
+  phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
@@ -32,24 +34,30 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 LocalStudentCharge _charge({
   required int expected,
   required int paid,
   String currency = 'CDF',
+  String id = 'c-1',
+  String feeCode = 'TUITION',
+  String label = 'Frais scolaires',
   // Nullable : `academic_year_id` l'est en base par construction, et c'est
   // précisément le cas que le solde imprimé oubliait.
   String? academicYearId = 'y-1',
 }) => LocalStudentCharge(
-  id: 'c-1',
+  id: id,
   studentId: 's-1',
   academicYearId: academicYearId,
-  feeCode: 'TUITION',
-  label: 'Frais scolaires',
+  feeCode: feeCode,
+  label: label,
   expectedAmountInCents: expected,
   amountPaidInCents: paid,
   amountPaidPendingInCents: 0,
@@ -70,11 +78,7 @@ void main() {
     when(
       () => finance.getCharges(any()),
     ).thenAnswer((_) async => const Right(<LocalStudentCharge>[]));
-    repository = ProvisionalTicketRepositoryImpl(
-      dao: dao,
-      finance: finance,
-      deviceIdentity: _FakeDeviceIdentity(),
-    );
+    repository = ProvisionalTicketRepositoryImpl(dao: dao, finance: finance);
   });
 
   tearDown(() async => db.close());
@@ -84,6 +88,14 @@ void main() {
     String? cashierLastName = 'Kabeya',
     String? deviceId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
     String currency = 'CDF',
+
+    /// L'attribution SERVEUR, seule connue d'un versement encaissé ailleurs.
+    String? collectedByName,
+    String? receiptId,
+
+    /// La ligne `generated_documents` est POSÉE PAR LE POSTE qui encaisse : un
+    /// versement descendu par pull n'en a aucune en local.
+    bool withLocalDocument = true,
   }) async {
     await db.insert('students', {
       'id': 's-1',
@@ -109,6 +121,8 @@ void main() {
       'payer_last_name': 'Mbala',
       'cashier_first_name': cashierFirstName,
       'cashier_last_name': cashierLastName,
+      'collected_by_name': collectedByName,
+      'receipt_id': receiptId,
       'device_id': deviceId,
       'sync_status': 'PENDING_SYNC',
       'updated_at': 0,
@@ -135,6 +149,7 @@ void main() {
       'rate_micros': 1000000,
       'pivot_currency': currency,
     });
+    if (!withLocalDocument) return;
     await db.insert('generated_documents', {
       'id': 'doc-1',
       'doc_domain': 'PAYMENT',
@@ -148,43 +163,149 @@ void main() {
     });
   }
 
-  /// Le rattrapage d'impression n'est PAS une réimpression : il ne s'offre que
-  /// sur un versement dont aucun papier n'est sorti, encaissé sur CETTE
-  /// tablette. Ces deux conditions vivent dans le repository parce qu'elles
-  /// sont métier — l'écran, lui, n'ajoute que l'annulation du reçu.
-  group('rattrapage d\'impression', () {
-    test('un versement de ce poste jamais imprimé l attend', () async {
+  /// La trace d'impression n'autorise plus rien : elle DIT. La réimpression
+  /// est libre, et cette date sert à choisir les mots de la ligne d'écran.
+  ///
+  /// Elle reste purement locale — « ce poste a servi le papier » est un fait
+  /// d'appareil, jamais poussé ni descendu.
+  group('trace d\'impression', () {
+    test('un versement jamais imprimé ici ne porte aucune date', () async {
       await seedPayment(deviceId: 'device-1');
 
-      expect(await repository.awaitsTicketPrint('p-1'), isTrue);
+      expect(await repository.ticketPrintedAt('p-1'), isNull);
     });
 
-    test('une fois le papier sorti, plus jamais', () async {
+    test('le tirage pose la date, et le geste reste offert', () async {
       await seedPayment(deviceId: 'device-1');
+      final before = DateTime.now();
       await repository.markTicketPrinted('p-1');
 
-      // C'est ce qui empêche le rattrapage de devenir une réimpression, que
-      // l'ADR-013 interdit.
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
-      expect(await repository.hasPrintedTicket('p-1'), isTrue);
+      final at = await repository.ticketPrintedAt('p-1');
+      expect(at, isNotNull);
+      // À la seconde près : la trace porte l'instant du tirage, ce que la
+      // ligne d'écran affiche telle quelle.
+      expect(
+        at!.isBefore(before.subtract(const Duration(seconds: 5))),
+        isFalse,
+      );
     });
 
-    test('un versement encaissé ailleurs n est pas proposé', () async {
-      await seedPayment(deviceId: 'autre-tablette');
+    /// L'horodatage est celui de la DERNIÈRE impression, pas de la première.
+    /// Un caissier qui lit « Imprimé le … » doit pouvoir s'y fier pour savoir
+    /// quand le dernier papier est sorti — sans quoi la mention vieillirait
+    /// pendant que les tirages s'enchaînent.
+    test('un second tirage réécrit la date', () async {
+      await seedPayment(deviceId: 'device-1');
+      await repository.markTicketPrinted('p-1');
+      final first = await repository.ticketPrintedAt('p-1');
 
-      // Le ticket sortirait sans référence provisoire locale et avec les codes
-      // de frais en guise de libellés : un papier illisible pour la famille.
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await repository.markTicketPrinted('p-1');
+      final second = await repository.ticketPrintedAt('p-1');
+
+      expect(second!.isBefore(first!), isFalse);
+      expect(second, isNot(first));
     });
 
-    test('un versement sans appareil connu n est pas proposé', () async {
-      await seedPayment(deviceId: null);
+    test('un versement introuvable ne porte pas de date', () async {
+      expect(await repository.ticketPrintedAt('inconnu'), isNull);
+    });
+  });
 
-      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+  /// ## Ce qui a permis de retirer la garde `device_id`
+  ///
+  /// Le rattrapage refusait tout versement encaissé sur une AUTRE tablette,
+  /// pour une raison précise et alors exacte : le ticket serait sorti dégradé
+  /// — « Réf. » sur un UUID, libellés de répartition sur les codes de frais
+  /// bruts, aucun caissier à qui l'imputer.
+  ///
+  /// Ce lot a branché les trois sources qui manquaient. Ce test le CONSTATE sur
+  /// la pièce composée, plutôt que de le déduire du code : c'est lui qui
+  /// autorise la réimpression libre à s'offrir hors du poste d'encaissement.
+  group('un versement encaissé ailleurs compose une pièce entière', () {
+    /// La forme réelle d'un versement descendu par pull : aucune ligne
+    /// `generated_documents` locale, aucun `cashier_*` de ce poste, mais
+    /// l'attribution serveur et le `receipt_id` qui, eux, descendent.
+    Future<void> seedForeign() => seedPayment(
+      deviceId: 'autre-tablette',
+      cashierFirstName: null,
+      cashierLastName: null,
+      collectedByName: 'Alice Nsimba',
+      receiptId: 'rcpt-77',
+      withLocalDocument: false,
+    );
+
+    test(
+      'la référence retombe sur l identifiant, jamais sur du vide',
+      () async {
+        await seedForeign();
+
+        final model = (await repository.buildForPayment(
+          paymentId: 'p-1',
+          labels: _labels,
+        )).getOrElse(() => throw StateError('échec'));
+
+        expect(model.reference, 'p-1');
+        expect(model.reference, isNotEmpty);
+      },
+    );
+
+    /// La correction la plus importante des trois : `isProvisional` se lit
+    /// AFFIRMATIVEMENT sur `receipt_id`. Lu par négation du numéro, il aurait
+    /// rendu `true` ici — l'absence de ligne locale n'est pas l'absence de
+    /// sceau — et le papier d'un reçu scellé se serait dit « provisoire ».
+    test('la pièce scellée ailleurs ne se dit PAS provisoire', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isFalse);
     });
 
-    test('un versement introuvable n est pas proposé', () async {
-      expect(await repository.awaitsTicketPrint('inconnu'), isFalse);
+    test('l attribution serveur tient la ligne du caissier', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      // RG-012-11 : une pièce non scellée vaut par l'humain qu'elle nomme.
+      expect(model.cashierFullName, 'Alice Nsimba');
+    });
+
+    test('les libellés restent des mots, pas des codes de frais', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.allocations.single.label, 'Frais scolaires');
+      expect(model.allocations.single.label, isNot('TUITION'));
+    });
+
+    /// Les imputations ET les lignes d'encaissement descendent par le pull
+    /// (`finance_ledger_sync_dao.dart`, même patron patch-puis-insert). Sans
+    /// elles le papier n'aurait ni montant ni ventilation, et la garde aurait
+    /// eu raison de refuser.
+    test('le montant reçu et la ventilation sont là', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+      final out = TicketTextLayout.render(model).join('\n');
+
+      expect(model.amountReceived.isEmpty, isFalse);
+      expect(out, contains('1 500 FC'));
+      expect(out, contains('Frais scolaires'));
+      expect(out, contains('Alice Nsimba'));
     });
   });
 
@@ -199,7 +320,7 @@ void main() {
     final model = result.getOrElse(() => throw StateError('échec'));
     expect(model.studentFullName, 'Mbala Kasa Amina');
     expect(model.matriculationNumber, 'MAT-0042');
-    expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
     expect(model.cashierFullName, 'Jean Kabeya');
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
     expect(model.allocations.single.label, 'Frais scolaires');
@@ -207,7 +328,95 @@ void main() {
 
   // Le scellement écrase `number` : c'est `provisional_number` qui garde la
   // trace du papier déjà remis au parent.
-  test('lit le numéro provisoire même après scellement', () async {
+  /// ⚠️ **Règle RENVERSÉE, et le test est inversé plutôt que supprimé.**
+  ///
+  /// Le ticket portait le numéro PROVISOIRE même après scellement, parce que
+  /// `provisional_number` survit à l'ACK là où `number` est écrasée. Depuis que
+  /// la pièce devient officielle dès qu'elle a un numéro définitif, c'est ce
+  /// dernier qu'elle doit porter : un papier qui s'annonce officiel sous une
+  /// référence provisoire serait irrapprochable avec le reçu scellé qu'il
+  /// annonce.
+  ///
+  /// Le provisoire reste lisible en base — la colonne n'a pas bougé — il n'est
+  /// simplement plus ce que le ticket montre.
+  group('le caractère provisoire, lu affirmativement', () {
+    /// ⚠️ **LE test qui garde la décision du porteur.**
+    ///
+    /// Un versement encaissé sur une AUTRE caisse est descendu par le pull et
+    /// n'a **aucune ligne `generated_documents` locale** — le contrat le dit
+    /// lui-même. Toute règle qui déduirait le caractère provisoire de l'absence
+    /// d'un numéro définitif local le déclarerait donc provisoire, et la mention
+    /// s'imprimerait **exactement sur les tickets qui doivent être officiels**.
+    ///
+    /// Sans ce test, la régression est **invisible sur un poste de
+    /// développement**, où la ligne locale existe toujours.
+    test('scellé ailleurs, sans ligne locale : aucune mention', () async {
+      await seedPayment();
+      // Le cas réel : la pièce est scellée côté serveur (receipt_id descendu),
+      // et ce poste n'a jamais produit de document pour elle.
+      await db.delete(
+        'generated_documents',
+        where: 'id = ?',
+        whereArgs: ['doc-1'],
+      );
+      await db.update(
+        'payments',
+        {'receipt_id': 'rc-42'},
+        where: 'id = ?',
+        whereArgs: ['p-1'],
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isFalse);
+      expect(
+        TicketTextLayout.render(model).join('\n'),
+        isNot(contains('provisoire')),
+      );
+    });
+
+    /// Le pendant : pas de `receipt_id`, donc pas encore scellé — la mention
+    /// doit être là, quelle que soit la présence d'une ligne locale.
+    test('non scellé : la mention est là', () async {
+      await seedPayment();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isTrue);
+      expect(
+        TicketTextLayout.render(model).join('\n'),
+        contains('Réf. provisoire'),
+      );
+    });
+
+    /// Une chaîne vide n'est pas un scellement. Sans le `trim`, un
+    /// `receipt_id` à `''` — que rien n'interdit en base — rendrait le ticket
+    /// officiel sans qu'aucune pièce n'existe.
+    test('un receipt_id vide ne scelle rien', () async {
+      await seedPayment();
+      await db.update(
+        'payments',
+        {'receipt_id': '   '},
+        where: 'id = ?',
+        whereArgs: ['p-1'],
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.isProvisional, isTrue);
+    });
+  });
+
+  test('porte le numéro DÉFINITIF dès que la pièce est scellée', () async {
     await seedPayment();
     await db.update(
       'generated_documents',
@@ -222,9 +431,168 @@ void main() {
     );
 
     expect(
-      result.getOrElse(() => throw StateError('échec')).provisionalReference,
-      'PROV-A1B2C3-9F8E7D6C',
+      result.getOrElse(() => throw StateError('échec')).reference,
+      'ETL-RC-2526-000212',
     );
+  });
+
+  group('le solde détaillé par nature', () {
+    /// Le détail EXPLIQUE les devises au lieu de les juxtaposer : « il vous
+    /// reste 10 000 FC et 314 dollars » posait plus de questions qu'elle n'en
+    /// résolvait.
+    test('une ligne par nature, et le total les somme', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation materiels examens',
+            expected: 60000,
+            paid: 10000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(2));
+      expect(model.remainingByCharge.first.label, 'Frais scolaires');
+      expect(model.remainingByCharge.first.amountInCents, 250000);
+      expect(model.remainingByCharge.last.amountInCents, 50000);
+
+      // ⚠️ Le total DÉRIVE des lignes : un parent additionne ce qu'il lit.
+      expect(model.remainingBalance, MoneyBag.of(const [Money(300000, 'CDF')]));
+    });
+
+    /// Deux tranches d'un même frais font UNE ligne, comme la ventilation.
+    test('deux créances d\'un même code font une ligne', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 200000, paid: 50000),
+          _charge(id: 'c-2', expected: 200000, paid: 100000),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(1));
+      expect(model.remainingByCharge.single.amountInCents, 250000);
+    });
+
+    /// ⚠️ Jamais sur le seul code : additionner deux devises imprimerait un
+    /// chiffre qui n'est l'argent de personne.
+    test('un même code en deux devises fait deux lignes', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 200000, paid: 50000),
+          _charge(id: 'c-2', expected: 300, paid: 100, currency: 'USD'),
+        ]),
+      );
+      // Le versement doit toucher les deux devises pour que le solde les porte.
+      await db.insert('payment_allocations', {
+        'id': 'a-usd',
+        'client_uuid': 'a-usd',
+        'payment_id': 'p-1',
+        'fee_code': 'TUITION',
+        'student_charge_label': 'Frais scolaires',
+        'amount_in_cents': 100,
+        'currency': 'USD',
+      });
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(2));
+      expect(
+        {for (final l in model.remainingByCharge) l.currency},
+        {'CDF', 'USD'},
+      );
+    });
+
+    /// Un frais soldé n'a rien à faire sur le papier — même règle que le bloc
+    /// payeur : une mention à zéro se lit comme une mention effacée.
+    test('un frais soldé n\'apparaît pas', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation',
+            expected: 60000,
+            paid: 60000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(1));
+      expect(model.remainingByCharge.single.label, 'Frais scolaires');
+    });
+
+    /// Le papier lui-même : titre, détail, filet, total — dans cet ordre.
+    ///
+    /// Le qualificatif de temps est DANS le titre depuis qu'il a remplacé la
+    /// réserve posée sous le total. L'assertion de comptage reste, avec la
+    /// nouvelle chaîne : c'est elle qui empêche de le redire ligne par ligne.
+    test('le papier porte le titre, le détail puis le total', () async {
+      await seedPayment();
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'OM',
+            label: 'Organisation',
+            expected: 60000,
+            paid: 10000,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+      final lines = TicketTextLayout.render(model);
+      final flat = lines.join('\n');
+
+      final title = lines.indexWhere((l) => l.startsWith('Solde'));
+      final detail = lines.indexWhere((l) => l.contains('Organisation'));
+      final total = lines.indexWhere((l) => l.startsWith('Total'));
+      expect(title, greaterThan(0));
+      expect(detail, greaterThan(title));
+      expect(total, greaterThan(detail));
+
+      // Le filet est ENTRE le détail et le total, pas ailleurs : c'est ce qui
+      // fait du total une somme posée plutôt qu'une ligne de détail de plus.
+      expect(lines[total - 1], '-' * 48);
+
+      // Le qualificatif de temps se dit UNE fois, dans le titre. Répété par
+      // ligne, il se lirait comme une incertitude sur chaque frais.
+      expect(
+        'au moment de l\'impression'.allMatches(flat).length,
+        1,
+        reason: 'le qualificatif ne se répète pas',
+      );
+    });
   });
 
   test(
@@ -303,7 +671,7 @@ void main() {
 
     final rendered = TicketTextLayout.render(model).join('\n');
     expect(rendered, contains('MBALA KASA AMINA'));
-    expect(rendered, contains('PROVISOIRE'));
+    expect(rendered, contains('Réf.'));
   });
 
   /// La CAUSE, ancrée côté données, du refus posé dans
@@ -331,7 +699,7 @@ void main() {
     // Le reste du ticket est intact — c'est bien un papier complet et anonyme
     // qui sortirait, pas un rendu cassé.
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
-    expect(model.provisionalReference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
   });
 
   test('refuse d imprimer un encaissement introuvable', () async {
@@ -371,7 +739,7 @@ void main() {
     final model = result.getOrElse(() => throw StateError('échec'));
 
     expect(model.schoolName, 'Complexe scolaire La Colombe');
-    expect(model.schoolMunicipality, 'Ngaliema');
+    expect(model.schoolLocality, 'Ngaliema');
     expect(model.classroomName, '5e primaire A');
   });
 
@@ -455,6 +823,146 @@ void main() {
   /// Avant, deux versements sur deux tranches d'un même minerval sortaient du
   /// même ticket, mot pour mot : la répartition n'imprimait que le libellé gelé,
   /// identique d'une tranche à l'autre quand l'école les nomme pareil.
+  group('la répartition regroupe par nature', () {
+    Future<void> addAllocation({
+      required String id,
+      required String feeCode,
+      required String label,
+      required int amount,
+      String currency = 'CDF',
+    }) => db.insert('payment_allocations', {
+      'id': id,
+      'client_uuid': id,
+      'payment_id': 'p-1',
+      'fee_code': feeCode,
+      'student_charge_label': label,
+      'amount_in_cents': amount,
+      'currency': currency,
+    });
+
+    /// ⚠️ **La régression que le libellé par nature a introduite.** Le code de
+    /// tranche `(OM1)` était ce qui distinguait deux imputations d'un même
+    /// frais ; en le retirant sans regrouper, trois tranches sortaient sur
+    /// TROIS lignes identiques — pire qu'avant, parce qu'un lecteur ne peut
+    /// plus les départager du tout.
+    ///
+    /// Rien n'interdit ce cas en base : `payment_allocations` n'a aucune
+    /// contrainte d'unicité sur `(payment_id, fee_code)`, et payer deux
+    /// tranches d'un coup est le geste nominal du guichet.
+    test('deux tranches d\'un même frais font UNE ligne', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+
+      final lines = await dao.findAllocations('p-1');
+
+      expect(lines, hasLength(1), reason: 'deux lignes indistinguables');
+      expect(lines.single.amountInCents, 30000);
+    });
+
+    /// ⚠️ **Jamais sur le seul code.** Grouper francs et dollars ensemble
+    /// produirait « le chiffre qui n'est l'argent de personne » que ce gabarit
+    /// refuse partout ailleurs.
+    test('deux devises d\'un même frais font DEUX lignes', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 2000,
+        currency: 'USD',
+      );
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines, hasLength(2));
+      expect({for (final l in lines) l.currency}, {'CDF', 'USD'});
+    });
+
+    /// Le cas du repli : sans titre de section, deux tranches portent deux
+    /// libellés figés DIFFÉRENTS. Le porteur a tranché — une seule ligne, le
+    /// **premier** libellé du groupe.
+    ///
+    /// ⚠️ Et « premier » doit être défini, sinon ce n'est pas une règle : le
+    /// ticket est librement réimprimable, donc un libellé pris sans ordre
+    /// établi ferait porter deux intitulés différents à deux tirages du même
+    /// versement, sur des papiers qu'une famille garde côte à côte.
+    test('deux libellés figés différents : une ligne, le premier', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 1/3',
+        amount: 15000,
+      );
+      await addAllocation(
+        id: 'a-2',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens - 2/3',
+        amount: 15000,
+      );
+
+      final lines = await dao.findAllocations('p-1');
+      expect(lines, hasLength(1));
+      expect(lines.single.label, 'Organisation materiels examens - 1/3');
+      expect(lines.single.amountInCents, 30000);
+    });
+
+    /// Un ticket réimprimé doit être identique à l'original — vrai par principe
+    /// depuis que la réimpression est libre.
+    ///
+    /// ⚠️ **Ce test ne prouve PAS le déterminisme, et il ne faut pas le croire.**
+    /// Éprouvé en faisant gagner le DERNIER libellé du groupe : il est resté
+    /// **vert**. Deux appels dans le même processus, sur la même base, obtiennent
+    /// de SQLite le même ordre physique — la comparaison ne peut donc pas voir
+    /// un ordre instable.
+    ///
+    /// Ce qui garde réellement la règle est le test précédent, qui asserte le
+    /// libellé **attendu** et non l'égalité de deux exécutions ; celui-ci n'est
+    /// qu'un filet de non-régression sur la forme du résultat.
+    test('deux compositions du même versement rendent la même forme', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      for (var i = 0; i < 6; i++) {
+        await addAllocation(
+          id: 'a-$i',
+          feeCode: i.isEven ? 'OM' : 'TUITION',
+          label: 'Nature ${i.isEven ? "OM" : "TUITION"} - tranche $i',
+          amount: 1000 * (i + 1),
+          currency: i % 3 == 0 ? 'USD' : 'CDF',
+        );
+      }
+
+      final first = await dao.findAllocations('p-1');
+      final second = await dao.findAllocations('p-1');
+
+      expect(first.length, second.length);
+      for (var i = 0; i < first.length; i++) {
+        expect(first[i].label, second[i].label);
+        expect(first[i].amountInCents, second[i].amountInCents);
+        expect(first[i].currency, second[i].currency);
+      }
+    });
+  });
+
   group('la répartition imprimée nomme la tranche', () {
     Future<void> seedTariff(String id, {String? code}) =>
         db.insert('ref_fee_tariffs', {
@@ -476,13 +984,17 @@ void main() {
       whereArgs: ['a-1'],
     );
 
-    test('libellé gelé + code de la tranche', () async {
+    /// ⚠️ **Règle RENVERSÉE, test inversé plutôt que supprimé.** Le code de
+    /// tranche s'imprimait pour distinguer deux versements sur deux tranches
+    /// d'un même minerval. Le porteur a arbitré que le nom du frais suffit sur
+    /// un reçu remis à une famille : le code est du vocabulaire de gestion.
+    test('le code de tranche ne s\'imprime plus', () async {
       await seedPayment();
       await seedTariff('tar-t2', code: 'T2');
       await pointAllocationAt('tar-t2');
 
       final lines = await dao.findAllocations('p-1');
-      expect(lines.single.label, 'Frais scolaires (T2)');
+      expect(lines.single.label, 'Frais scolaires');
     });
 
     /// Une grille simple reçoit du serveur un code qui vaut la nature. Imprimer
@@ -521,8 +1033,8 @@ void main() {
     });
 
     /// Le repli d'origine, préservé : sans libellé gelé, le ticket imprime la
-    /// nature BRUTE plutôt qu'un blanc — et le code s'y ajoute quand même.
-    test('sans libellé gelé → la nature brute, code compris', () async {
+    /// nature BRUTE plutôt qu'un blanc. Le code, lui, ne s'y ajoute plus.
+    test('sans libellé gelé → la nature brute, nue', () async {
       await seedPayment();
       await seedTariff('tar-t2', code: 'T2');
       await pointAllocationAt('tar-t2');
@@ -534,17 +1046,7 @@ void main() {
       );
 
       final lines = await dao.findAllocations('p-1');
-      expect(lines.single.label, 'TUITION (T2)');
+      expect(lines.single.label, 'TUITION');
     });
   });
-}
-
-/// L'identité d'appareil ne sert qu'au rattrapage d'impression : la composition
-/// du ticket ne la consulte jamais.
-class _FakeDeviceIdentity implements DeviceIdentityService {
-  @override
-  Future<String> getOrCreateDeviceId() async => 'device-1';
-
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

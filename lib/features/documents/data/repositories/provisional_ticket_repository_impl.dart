@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
@@ -18,15 +17,17 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   final ProvisionalTicketDao _dao;
   final FinanceOfflineRepository _finance;
-  final DeviceIdentityService _deviceIdentity;
 
+  // ⚠️ Plus de `DeviceIdentityService` ici. Il ne servait qu'à refuser le
+  // rattrapage hors du poste d'encaissement ; la réimpression étant libre et la
+  // pièce se composant entière depuis un versement descendu par pull, la
+  // dépendance n'avait plus d'objet — la garder aurait laissé croire que
+  // l'appareil décide encore de quelque chose.
   const ProvisionalTicketRepositoryImpl({
     required ProvisionalTicketDao dao,
     required FinanceOfflineRepository finance,
-    required DeviceIdentityService deviceIdentity,
   }) : _dao = dao,
-       _finance = finance,
-       _deviceIdentity = deviceIdentity;
+       _finance = finance;
 
   @override
   Future<void> markTicketPrinted(String paymentId) async {
@@ -41,35 +42,14 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   }
 
   @override
-  Future<bool> hasPrintedTicket(String paymentId) async {
+  Future<DateTime?> ticketPrintedAt(String paymentId) async {
     try {
-      return await _dao.hasPrintedTicket(paymentId);
+      return await _dao.findTicketPrintedAt(paymentId);
     } catch (_) {
-      // Lecture illisible : on répond « pas imprimé ». Offrir un rattrapage
-      // inutile vaut mieux que masquer le seul chemin vers un papier manquant.
-      return false;
-    }
-  }
-
-  @override
-  Future<bool> awaitsTicketPrint(String paymentId) async {
-    try {
-      final payment = await _dao.findPayment(paymentId);
-      if (payment == null) return false;
-
-      // Encaissé ailleurs : le ticket sortirait sans référence provisoire et
-      // avec les codes de frais en guise de libellés. Un papier illisible
-      // remis à une famille vaut moins que pas de papier du tout.
-      final deviceId = payment.deviceId?.trim();
-      if (deviceId == null || deviceId.isEmpty) return false;
-      if (deviceId != await _deviceIdentity.getOrCreateDeviceId()) return false;
-
-      return !await _dao.hasPrintedTicket(paymentId);
-    } catch (_) {
-      // Rien de lisible : on n'offre pas un geste dont on ne sait pas s'il est
-      // légitime. Le silence vaut mieux qu'un bouton qui ressortirait un ticket
-      // déjà remis.
-      return false;
+      // Lecture illisible : on répond « aucun papier connu ». Le bouton reste
+      // offert de toute façon — seule la phrase qui l'accompagne s'appauvrit,
+      // et une phrase muette vaut mieux qu'une date inventée.
+      return null;
     }
   }
 
@@ -94,23 +74,57 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       );
       final allocations = await _dao.findAllocations(paymentId);
       final tenders = await _dao.findTenders(paymentId);
-      final reference = await _dao.findProvisionalNumber(paymentId);
+      // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
+      final definitive = await _dao.findDefinitiveNumber(paymentId);
+      final provisional = await _dao.findProvisionalNumber(paymentId);
+      // Le solde des SEULES devises que ce versement a touchées, détaillé par
+      // nature : imprimer une dette en francs sur un ticket réglé en dollars
+      // ferait lire au payeur un chiffre qui ne le concerne pas.
+      //
+      // Les devises retenues sont celles des CRÉANCES touchées, pas des billets
+      // posés : un solde se dit dans la devise où la dette existe.
+      final remaining = await _remainingByCharge(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+        currencies: payment.amounts.currencies,
+      );
 
       return Right(
         TicketReceiptModel(
           // Une école inconnue n'empêche pas d'imprimer : le ticket vaut par son
-          // montant et son caissier, pas par son en-tête.
+          // montant et son caissier, pas par son en-tête. Chaque ligne absente
+          // s'escamote d'elle-même, donc un référentiel non pullé produit un
+          // en-tête COURT, jamais un en-tête troué.
           schoolName: school?.name ?? '',
-          schoolMunicipality: school?.locality,
+          schoolLocality: school?.locality,
+          schoolAddress: school?.address,
+          schoolEmail: school?.email,
+          schoolPhone: school?.phone,
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
           classroomName: classroomName,
-          // Sans ligne documentaire (cas anormal mais non bloquant), on retombe
-          // sur l'identifiant du paiement : un ticket sans aucune référence
-          // serait irrapprochable.
-          provisionalReference: reference ?? paymentId,
+          // Sans ligne documentaire (cas anormal mais non bloquant, et cas
+          // NORMAL d'un versement encaissé sur une autre caisse), on retombe sur
+          // l'identifiant du paiement : un ticket sans aucune référence serait
+          // irrapprochable.
+          reference: definitive ?? provisional ?? paymentId,
+          // ⚠️ Lu AFFIRMATIVEMENT sur l'absence de `receipt_id`, jamais par
+          // négation d'un numéro. `definitive == null` serait vrai aussi quand
+          // aucune ligne `generated_documents` locale n'existe — cas normal d'un
+          // versement encaissé ailleurs et descendu par pull. La mention
+          // « provisoire » s'imprimerait alors sur des tickets scellés, soit
+          // exactement l'inverse de ce qui est voulu. `receipt_id`, lui, descend.
+          isProvisional: (payment.receiptId?.trim().isEmpty ?? true),
           paidAt: _parsePaidAt(payment.paidAt),
+          // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
+          // de pull ne réécrit jamais les premiers, donc un versement encaissé
+          // sur une AUTRE caisse n'a que la seconde. Sans ce repli, son ticket
+          // sortirait sans personne à qui l'imputer (RG-012-11).
           cashierFullName: payment.cashierFullName,
+          // `null`, jamais `''` — c'est ce que le gabarit lit pour escamoter le
+          // bloc payeur entier plutôt que d'imprimer un cadre vide.
+          payerFullName: payment.payerFullName,
+          payerPhoneNumber: payment.payerPhoneNumber,
           // Ce que le TIROIR a vu, et non ce que les imputations totalisent :
           // c'est toute la correction de ce lot. Le montant reçu du ticket en
           // dérive (`TicketReceiptModel.amountReceived`), il n'est plus posable
@@ -133,19 +147,17 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
                 ),
               )
               .toList(growable: false),
-          // Le solde des SEULES devises que ce versement a touchées : imprimer
-          // une dette en francs sur un ticket réglé en dollars ferait lire au
-          // payeur un chiffre qui ne le concerne pas.
-          remainingBalance: await _remainingBalances(
-            studentId: payment.studentId,
-            academicYearId: payment.academicYearId,
-            // Les devises des CRÉANCES que ce versement a touchées : un solde
-            // se dit dans la devise où la dette existe, pas dans celle des
-            // billets posés. Un ticket réglé en francs sur une créance en
-            // dollars affiche donc un reste en dollars — c'est bien ce que le
-            // parent doit encore.
-            currencies: payment.amounts.currencies,
-          ),
+          remainingByCharge: remaining,
+          // ⚠️ Le total **dérive des lignes imprimées**, il n'est pas recalculé
+          // à côté. Un parent additionne ce qu'il lit : deux chemins de calcul
+          // finiraient par diverger, et l'écart apparaîtrait sur le papier —
+          // exactement ce que la ligne d'avance ferme déjà dans la ventilation.
+          remainingBalance: remaining.isEmpty
+              ? null
+              : MoneyBag.sumBy(
+                  remaining,
+                  (l) => Money.parse(l.amountInCents, l.currency),
+                ),
           labels: labels,
         ),
       );
@@ -171,20 +183,32 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   ///
   /// `null` dès que la lecture échoue, que l'année est inconnue, ou qu'aucune
   /// créance ne correspond : le ticket omet alors la ligne, ce qu'il sait faire.
-  Future<MoneyBag?> _remainingBalances({
+  /// Le reste dû, **une ligne par (nature de frais, devise)**, dans l'ordre où
+  /// les créances remontent.
+  ///
+  /// Le nom vient de `ref_fee_code_sections` s'il existe, du libellé de la
+  /// créance sinon — **la même règle que la ventilation juste au-dessus**, et
+  /// c'est ce qui compte : deux noms pour un même frais sur le même papier
+  /// feraient chercher au parent la différence entre eux.
+  ///
+  /// Les frais **soldés sont absents**, jamais imprimés à zéro : même règle que
+  /// le bloc payeur, une mention à zéro se lit comme une mention effacée.
+  Future<List<TicketAllocationLine>> _remainingByCharge({
     required String studentId,
     required String? academicYearId,
     required Iterable<String> currencies,
   }) async {
-    if (academicYearId == null || academicYearId.isEmpty) return null;
-    if (currencies.isEmpty) return null;
+    const empty = <TicketAllocationLine>[];
+    if (academicYearId == null || academicYearId.isEmpty) return empty;
+    if (currencies.isEmpty) return empty;
 
     final charges = await _finance.getCharges(studentId);
+    final titles = await _dao.feeSectionTitles();
     final wanted = {
       for (final currency in currencies) CurrencyCode.normalize(currency),
     };
 
-    return charges.fold<MoneyBag?>((_) => null, (list) {
+    return charges.fold<List<TicketAllocationLine>>((_) => empty, (list) {
       // `belongsToYear` et pas une égalité stricte : une créance sans année
       // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
       // vivait ici imprimait une dette plus petite que celle de l'écran.
@@ -195,12 +219,24 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
                 c.belongsToYear(academicYearId),
           )
           .toList(growable: false);
-      if (matching.isEmpty) return null;
-
-      return MoneyBag.sumBy(
-        matching,
-        (c) => Money.parse(c.optimisticRemainingInCents, c.currency),
-      );
+      final grouped = <String, TicketAllocationLine>{};
+      for (final c in matching) {
+        // Un frais soldé n'a rien à faire sur le papier.
+        if (c.optimisticRemainingInCents <= 0) continue;
+        final key = '${c.feeCode.toUpperCase()}|${c.currency}';
+        final existing = grouped[key];
+        grouped[key] = TicketAllocationLine(
+          // Premier nom du groupe, comme la ventilation : titre de section s'il
+          // existe, libellé de la créance sinon.
+          label:
+              existing?.label ??
+              (titles[c.feeCode.trim().toUpperCase()] ?? c.label),
+          amountInCents:
+              (existing?.amountInCents ?? 0) + c.optimisticRemainingInCents,
+          currency: c.currency,
+        );
+      }
+      return grouped.values.toList(growable: false);
     });
   }
 

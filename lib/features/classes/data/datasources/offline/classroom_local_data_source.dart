@@ -311,11 +311,30 @@ class ClassroomLocalDataSource {
   /// miroir. `null` si l'élève n'a pas (encore) de ligne membre locale pour
   /// cette année (ex. roster pas encore pullé).
   ///
-  /// Le modèle suppose une seule ligne `ref_classroom_members` par
-  /// `(student_id, academic_year_id)` (aucune contrainte SQL ne l'impose) —
-  /// `ORDER BY updated_at DESC` sert de filet déterministe (ligne la plus
-  /// récemment mutée) plutôt que l'ordre physique arbitraire de SQLite, si
-  /// cette hypothèse était un jour violée.
+  /// ⚠️ **Seuls les rattachements `ACTIVE` répondent.** `INACTIVE` n'est pas une
+  /// anomalie : côté serveur il signifie « cet élève a QUITTÉ cette classe »,
+  /// conservé comme historique (sortie, transfert) et descendu **exprès** par la
+  /// synchro, qui propage les deux valeurs. Sans ce filtre, un élève transféré
+  /// se résolvait vers la classe qu'il venait de quitter — et c'est l'appel des
+  /// présences qui s'y faisait.
+  ///
+  /// ⚠️ **Une seule ligne par `(student_id, academic_year_id)` n'est PAS une
+  /// hypothèse sûre, et ce commentaire disait le contraire.** Il annonçait un
+  /// filet « si cette hypothèse était un jour violée » : elle l'est **par
+  /// conception serveur**. La clé primaire est `id`, l'upsert remplace sur `id`,
+  /// et un déplacement A→B laisse donc DEUX lignes pour la même année — une
+  /// `INACTIVE` en A, une `ACTIVE` en B.
+  ///
+  /// C'est ce commentaire qui a fait croire le cas impossible, et le tri qu'il
+  /// décrivait ne départageait rien : les deux lignes sont écrites dans la même
+  /// transaction serveur, donc **`updated_at` est le plus souvent égal** — et il
+  /// est nullable, si bien que deux valeurs nulles font retomber le départage
+  /// sur l'ordre physique. Le tri répond d'ailleurs à « quelle ligne a changé en
+  /// dernier », jamais à « laquelle est active ».
+  ///
+  /// Le filtre rend donc le cas nominal univoque. **Le tri reste** : rien en SQL
+  /// n'impose l'unicité, et un filet dont on a mesuré la faiblesse vaut mieux
+  /// que pas de filet.
   Future<String?> getCurrentClassroomId({
     required String studentId,
     required String academicYearId,
@@ -324,6 +343,7 @@ class ClassroomLocalDataSource {
       'SELECT $_composedClassroomExpr AS classroom_id '
       'FROM $membersTable m '
       'WHERE m.student_id = ? AND m.academic_year_id = ? '
+      "AND m.status = 'ACTIVE' "
       'ORDER BY m.updated_at DESC LIMIT 1',
       [studentId, academicYearId],
     );

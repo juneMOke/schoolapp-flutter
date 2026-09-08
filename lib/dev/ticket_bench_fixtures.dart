@@ -20,8 +20,11 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 abstract final class TicketBenchFixtures {
   static const TicketLabels labels = TicketLabels(
     documentTitle: 'Ticket de perception',
-    provisionalBanner: 'Provisoire',
+    provisionalMention: 'provisoire',
     referenceLabel: 'Réf.',
+    dateLabel: 'Date :',
+    payerLabel: 'PAYEUR :',
+    phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',
     studentLabel: 'Élève :',
     matriculationLabel: 'Matricule :',
@@ -31,10 +34,13 @@ abstract final class TicketBenchFixtures {
     derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
-    balanceLabel: 'Solde',
-    balanceReservation: 'sous réserve de synchronisation',
+    balanceLabel: 'Solde restant au moment de l\'impression',
+    balanceTotalLabel: 'Total',
     keepTicketNotice:
         'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
+    thanksNotice: 'Nous vous remercions pour votre confiance.',
+    editorNotice: 'Recu edite par ETEELO CONNECT',
+    editorSite: 'eteeloconnect.com',
   );
 
   /// Le cas de torture : tout ce qui peut décaler une colonne.
@@ -50,11 +56,12 @@ abstract final class TicketBenchFixtures {
   /// * un solde présent, seul porteur de la mention de réserve.
   static final TicketReceiptModel torture = TicketReceiptModel(
     schoolName: 'Complexe scolaire Sacré-Cœur de l’Étoile',
-    schoolMunicipality: 'Kinshasa · Ngaliema',
+    schoolLocality: 'Kinshasa · Ngaliema',
     studentFullName: 'Mbala-Kasa Ndombasi Amina Ɛlodie',
     matriculationNumber: 'MAT-2026-000481',
     classroomName: '5e primaire A',
-    provisionalReference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
+    reference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
+    isProvisional: true,
     paidAt: DateTime(2026, 8, 11, 14, 7),
     cashierFullName: 'Jean-Baptiste Kabeya wa Mukendi',
     tenders: TicketTenderLine.identityFrom(
@@ -100,7 +107,8 @@ abstract final class TicketBenchFixtures {
   static final TicketReceiptModel minimal = TicketReceiptModel(
     schoolName: 'EP Kimbanguiste',
     studentFullName: 'Amina Mbala',
-    provisionalReference: 'PROV-A1B2C3D4-0001',
+    reference: 'PROV-A1B2C3D4-0001',
+    isProvisional: true,
     paidAt: DateTime(2026, 8, 11, 8, 3),
     tenders: TicketTenderLine.identityFrom(
       MoneyBag.of(const [Money(500000, 'CDF')]),

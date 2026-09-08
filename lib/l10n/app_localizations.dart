@@ -6514,14 +6514,26 @@ abstract class AppLocalizations {
   /// No description provided for @facturationPaymentTicketNotPrinted.
   ///
   /// In en, this message translates to:
-  /// **'Ticket not printed'**
+  /// **'Never printed from this tablet.'**
   String get facturationPaymentTicketNotPrinted;
+
+  /// No description provided for @facturationPaymentTicketPrintedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on {date}'**
+  String facturationPaymentTicketPrintedAt(String date);
 
   /// No description provided for @facturationPaymentPrintTicketAction.
   ///
   /// In en, this message translates to:
   /// **'Print now'**
   String get facturationPaymentPrintTicketAction;
+
+  /// No description provided for @facturationPaymentReprintTicketAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint the ticket'**
+  String get facturationPaymentReprintTicketAction;
 
   /// No description provided for @facturationPaymentReceiptLabel.
   ///
@@ -12432,17 +12444,35 @@ abstract class AppLocalizations {
   /// **'Collection ticket'**
   String get ticketDocumentTitle;
 
-  /// No description provided for @ticketProvisionalBanner.
+  /// No description provided for @ticketProvisionalMention.
   ///
   /// In en, this message translates to:
-  /// **'Provisional'**
-  String get ticketProvisionalBanner;
+  /// **'provisional'**
+  String get ticketProvisionalMention;
 
   /// No description provided for @ticketReferenceLabel.
   ///
   /// In en, this message translates to:
   /// **'Ref.'**
   String get ticketReferenceLabel;
+
+  /// No description provided for @ticketDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date:'**
+  String get ticketDateLabel;
+
+  /// No description provided for @ticketPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PAYER:'**
+  String get ticketPayerLabel;
+
+  /// No description provided for @ticketPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tel.'**
+  String get ticketPhoneLabel;
 
   /// No description provided for @ticketCashierLabel.
   ///
@@ -12501,14 +12531,32 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Balance'**
+  /// **'Remaining balance as of printing'**
   String get ticketBalanceLabel;
 
-  /// No description provided for @ticketBalanceReservation.
+  /// No description provided for @ticketBalanceTotalLabel.
   ///
   /// In en, this message translates to:
-  /// **'subject to synchronisation'**
-  String get ticketBalanceReservation;
+  /// **'Total'**
+  String get ticketBalanceTotalLabel;
+
+  /// No description provided for @ticketThanksNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your trust.'**
+  String get ticketThanksNotice;
+
+  /// No description provided for @ticketEditorNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt issued by ETEELO CONNECT'**
+  String get ticketEditorNotice;
+
+  /// No description provided for @ticketEditorSite.
+  ///
+  /// In en, this message translates to:
+  /// **'eteeloconnect.com'**
+  String get ticketEditorSite;
 
   /// No description provided for @ticketKeepNotice.
   ///

@@ -28,6 +28,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/reducti
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
+import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
+import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
+import 'package:school_app_flutter/features/school/data/school_logo_fetcher.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
@@ -141,6 +144,25 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // DAO de pull Inscription : découpés par discipline d'écriture — référentiel
   // (bundle full), viviers seed RE/PRE (cohorte + préinscriptions + lectures),
   // réconciliation (delta UPDATE-only + snapshots hydratants).
+  // ── Logo de l'école (v47) : le cache d'octets, son tirage conditionnel et
+  // le chargeur qui en sort une bande pour le ticket.
+  //
+  // Le tirage est enregistré ICI plutôt que dans un module `school` parce que
+  // c'est le pull référentiel qui le déclenche, et que les empreintes vivent
+  // sur `ref_school`. Le seam qui les relie est déclaré plus bas.
+  getIt.registerLazySingleton<SchoolLogoCacheDao>(
+    () => SchoolLogoCacheDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<SchoolLogoFetcher>(
+    () => SchoolLogoFetcher(
+      dio: getIt<Dio>(),
+      cache: getIt<SchoolLogoCacheDao>(),
+    ),
+  );
+  getIt.registerLazySingleton<SchoolLogoBandLoader>(
+    () => SchoolLogoBandLoader(getIt<SchoolLogoCacheDao>()),
+  );
+
   getIt.registerLazySingleton<EnrollmentReferentialDao>(
     () => EnrollmentReferentialDao(getIt<Database>()),
   );
@@ -352,6 +374,32 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // `enrollment` n'a rien à savoir de la boutique. Le `schoolId` est résolu
       // à l'appel et non à l'enregistrement — la DI offline est montée AVANT
       // l'authentification, l'école n'est pas encore connue ici.
+      // Le logo : deux variantes, chacune alignée sur l'empreinte que le lot
+      // annonce. `null` veut dire « cette école n'a pas de logo » et retire la
+      // ligne du cache — une école qui retire son sceau cesserait sinon de
+      // l'imprimer seulement à la réinstallation.
+      //
+      // Le `schoolId` est résolu À L'APPEL, comme pour la boutique juste en
+      // dessous : la DI offline est montée AVANT l'authentification.
+      //
+      // ⚠️ Les échecs sont avalés ici ET gardés côté appelant. Un logo qui ne
+      // descend pas ne doit pas faire échouer un cycle qui transporte la grille
+      // tarifaire et l'année courante.
+      syncSchoolLogo: (thermalSha, displaySha) async {
+        final schoolId = getIt<CurrentUserContext>().schoolId ?? '';
+        if (schoolId.isEmpty) return;
+        final fetcher = getIt<SchoolLogoFetcher>();
+        await fetcher.ensureFresh(
+          schoolId: schoolId,
+          variant: SchoolLogoVariant.thermal,
+          targetSha: thermalSha,
+        );
+        await fetcher.ensureFresh(
+          schoolId: schoolId,
+          variant: SchoolLogoVariant.display,
+          targetSha: displaySha,
+        );
+      },
       replaceBoutiqueArticles: (articles, academicYearIds) =>
           getIt<BoutiqueCatalogDao>().replaceArticlesForYears(
             articles,
@@ -442,13 +490,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // Le solde vient du domaine Facturation, seul détenteur de la sémantique
       // money-grade du reste à payer — jamais recomposé ici.
       finance: getIt<FinanceOfflineRepository>(),
-      // Sert à ne proposer le rattrapage d'impression que sur les versements
-      // encaissés par CETTE tablette.
-      deviceIdentity: getIt<DeviceIdentityService>(),
     ),
   );
-  getIt.registerFactory<AwaitsTicketPrintUseCase>(
-    () => AwaitsTicketPrintUseCase(getIt<ProvisionalTicketRepository>()),
+  getIt.registerFactory<TicketPrintedAtUseCase>(
+    () => TicketPrintedAtUseCase(getIt<ProvisionalTicketRepository>()),
   );
   getIt.registerFactory<MarkTicketPrintedUseCase>(
     () => MarkTicketPrintedUseCase(getIt<ProvisionalTicketRepository>()),
@@ -658,7 +703,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   // Factory : la ligne de rattrapage vit et meurt avec la modale de détail.
   getIt.registerFactory<TicketPrintStatusCubit>(
-    () => TicketPrintStatusCubit(getIt<AwaitsTicketPrintUseCase>()),
+    () => TicketPrintStatusCubit(getIt<TicketPrintedAtUseCase>()),
   );
   getIt.registerFactory<PaymentReceiptCubit>(
     () => PaymentReceiptCubit(

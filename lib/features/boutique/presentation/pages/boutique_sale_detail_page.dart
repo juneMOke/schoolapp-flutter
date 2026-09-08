@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -290,14 +291,6 @@ class _Body extends StatelessWidget {
     if (parsed == null) return soldAt;
     return formatLocalDateTime(parsed);
   }
-}
-
-/// `JJ/MM/AAAA à HH:MM`, en heure locale. Partagé avec la mention d'impression.
-String formatLocalDateTime(DateTime instant) {
-  final local = instant.toLocal();
-  String two(int value) => value.toString().padLeft(2, '0');
-  return '${two(local.day)}/${two(local.month)}/${local.year} '
-      '${two(local.hour)}:${two(local.minute)}';
 }
 
 /// Le montant, en Bleu Profond texturé — le même bandeau que le total du panier

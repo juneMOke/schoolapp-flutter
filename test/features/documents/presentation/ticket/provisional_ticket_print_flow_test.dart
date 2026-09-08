@@ -13,6 +13,9 @@ import 'package:printing/printing.dart';
 // ignore: implementation_imports
 import 'package:printing/src/interface.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
+import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
@@ -44,8 +47,12 @@ void main() {
   late _FakePort port;
   late _FakePermission permission;
   late _FakeTicketRepository repository;
+  late CurrentUserContext userContext;
+  late _FakeBandLoader bandLoader;
 
   setUp(() {
+    userContext = CurrentUserContext()..set('u-1', schoolId: 'ecole-1');
+    bandLoader = _FakeBandLoader();
     printing = _FakePrinting();
     PrintingPlatform.instance = printing;
     port = _FakePort();
@@ -61,7 +68,12 @@ void main() {
       // au-dessus : la présentation ne parle jamais à la couche de données.
       ..registerFactory<MarkTicketPrintedUseCase>(
         () => MarkTicketPrintedUseCase(repository),
-      );
+      )
+      // Le logo : le flux résout ces deux-là avant d'imprimer. Les enregistrer
+      // ici n'est pas une commodité de test — c'est ce qui rend observable le
+      // fait que la bande atteint bien le renderer.
+      ..registerSingleton<CurrentUserContext>(userContext)
+      ..registerSingleton<SchoolLogoBandLoader>(bandLoader);
   });
 
   tearDown(getIt.reset);
@@ -183,6 +195,46 @@ void main() {
       await run(tester);
 
       expect(repository.printed, contains('pay-1'));
+    });
+
+    /// ⚠️ **La preuve que le FIL existe.** Tout le lot logo peut être vert et
+    /// n'être jamais appelé : c'est le mode de défaillance nommé de ce dépôt,
+    /// les gardes jamais branchées. Ce test regarde les octets **réellement
+    /// envoyés à l'imprimante**, pas un composant en isolation.
+    testWidgets('la bande atteint les octets envoyés', (tester) async {
+      final bits = Uint8List(72 * 8);
+      for (var i = 0; i < bits.length; i++) {
+        bits[i] = 0xFF;
+      }
+      bandLoader.band = TicketLogoBand(
+        widthDots: 576,
+        heightDots: 8,
+        bits: bits,
+      );
+
+      await run(tester);
+
+      // Le chargeur a été interrogé avec l'école de la session.
+      expect(bandLoader.askedFor, contains('ecole-1'));
+
+      // Et la commande raster est dans le flux parti sur le fil.
+      expect(port.sentBytes, isNotEmpty);
+      expect(
+        _containsRaster(port.sentBytes.single),
+        isTrue,
+        reason: 'aucun GS v 0 : la bande n\'a pas traversé',
+      );
+    });
+
+    /// Le repli, vérifié plutôt que supposé : sans bande, les octets sont ceux
+    /// d'avant ce lot — aucune commande raster, et un flux qui ne gagne rien.
+    testWidgets('sans bande, aucun raster dans les octets', (tester) async {
+      bandLoader.band = null;
+
+      await run(tester);
+
+      expect(port.sentBytes, isNotEmpty);
+      expect(_containsRaster(port.sentBytes.single), isFalse);
     });
 
     testWidgets('un repli PDF ne marque rien', (tester) async {
@@ -343,7 +395,7 @@ void main() {
       await run(tester);
 
       expect(repository.marked, isZero);
-      expect(await repository.awaitsTicketPrint('pay-1'), isTrue);
+      expect(await repository.ticketPrintedAt('pay-1'), isNull);
     });
 
     /// Non-régression : la garde ne doit fermer que la zone élève vide.
@@ -362,6 +414,11 @@ class _FakePort implements ThermalPrinterPort {
   ThermalPrinterProblem? sendProblem;
   List<ThermalPrinter> printers = const [_netum];
   final List<String> sentTo = [];
+
+  /// Les octets RÉELLEMENT envoyés. C'est le seul endroit où l'on peut voir si
+  /// la bande de logo a traversé tout le chemin — chargeur, flux, renderer —
+  /// plutôt que d'exister quelque part sans être appelée.
+  final List<Uint8List> sentBytes = [];
 
   /// Retient l'envoi jusqu'à ce que le test l'ouvre. Sans ce verrou, impossible
   /// de reproduire le vrai cas : sur la tablette, `printBytes` peut rester en
@@ -394,6 +451,7 @@ class _FakePort implements ThermalPrinterPort {
     final problem = sendProblem;
     if (problem != null) return Left(ThermalPrinterFailure(problem));
     sentTo.add(macAddress);
+    sentBytes.add(bytes);
     return const Right(unit);
   }
 }
@@ -439,19 +497,21 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
     printed.add(paymentId);
   }
 
+  /// La trace, telle que la production la rend : une date dès qu'un papier est
+  /// sorti d'ici. Le fake ne retient pas l'instant réel — aucun test ne le lit
+  /// — mais il doit rendre `null` tant que rien n'est sorti, sans quoi la
+  /// bascule de libellé ne serait pas discriminée.
   @override
-  Future<bool> hasPrintedTicket(String paymentId) async =>
-      printed.contains(paymentId);
-  @override
-  Future<bool> awaitsTicketPrint(String paymentId) async =>
-      !printed.contains(paymentId);
+  Future<DateTime?> ticketPrintedAt(String paymentId) async =>
+      printed.contains(paymentId) ? DateTime(2026, 9, 8, 10) : null;
 }
 
 TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
     TicketReceiptModel(
       schoolName: 'Complexe scolaire La Colombe',
       studentFullName: studentFullName,
-      provisionalReference: 'PROV-TAB1-0001',
+      reference: 'PROV-TAB1-0001',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 12, 9, 30),
       tenders: TicketTenderLine.identityFrom(
         MoneyBag.of(const [Money(2500000, 'CDF')]),
@@ -506,4 +566,37 @@ class _FakePrinting extends PrintingPlatform {
   @override
   Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) =>
       throw UnimplementedError();
+}
+
+/// Chargeur de bande piloté par le test.
+///
+/// `implements` plutôt qu'une vraie base : la lecture sqflite FFI ne se résout
+/// pas sous le pompage d'un test de widget, et ce n'est pas elle qu'on éprouve
+/// ici — le cache a ses propres tests. Ce qui se joue à ce niveau, c'est que la
+/// bande **traverse** le flux jusqu'aux octets envoyés à l'imprimante.
+/// La commande `GS v 0` est-elle présente dans le flux ?
+bool _containsRaster(Uint8List bytes) {
+  const marker = [0x1D, 0x76, 0x30, 0x00];
+  for (var i = 0; i + marker.length <= bytes.length; i++) {
+    var ok = true;
+    for (var k = 0; k < marker.length; k++) {
+      if (bytes[i + k] != marker[k]) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return true;
+  }
+  return false;
+}
+
+class _FakeBandLoader implements SchoolLogoBandLoader {
+  TicketLogoBand? band;
+  final List<String?> askedFor = [];
+
+  @override
+  Future<TicketLogoBand?> thermalBand(String? schoolId) async {
+    askedFor.add(schoolId);
+    return band;
+  }
 }

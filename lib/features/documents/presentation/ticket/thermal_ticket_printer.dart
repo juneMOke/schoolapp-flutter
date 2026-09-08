@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/documents/data/printing/thermal_prin
 import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_printer_picker.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
@@ -33,7 +34,11 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 Future<ThermalTicketOutcome> printThermalTicket(
   BuildContext context, {
   required TicketReceiptModel model,
-}) => printThermalBytes(context, bytes: EscPosTicketRenderer.render(model));
+  TicketLogoBand? logoBand,
+}) => printThermalBytes(
+  context,
+  bytes: EscPosTicketRenderer.render(model, logoBand: logoBand),
+);
 
 /// Le même parcours, à partir d'octets **déjà rendus**.
 ///

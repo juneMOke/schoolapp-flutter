@@ -5,8 +5,11 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _base = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
+  dateLabel: 'Date :',
+  payerLabel: 'PAYEUR :',
+  phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
@@ -16,9 +19,12 @@ const _base = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance (non imputée)',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 /// `TicketLabels` est comparé par valeur, et cette comparaison remonte jusqu'au
@@ -36,8 +42,11 @@ void main() {
     // à la base et le test le nomme.
     final variants = <String, TicketLabels>{
       'documentTitle': _copyWith(documentTitle: 'Autre pièce'),
-      'provisionalBanner': _copyWith(provisionalBanner: 'Définitif'),
+      'provisionalMention': _copyWith(provisionalMention: 'definitif'),
       'referenceLabel': _copyWith(referenceLabel: 'Ref'),
+      'dateLabel': _copyWith(dateLabel: 'Le :'),
+      'payerLabel': _copyWith(payerLabel: 'VERSEUR :'),
+      'phoneLabel': _copyWith(phoneLabel: 'Tel'),
       'cashierLabel': _copyWith(cashierLabel: 'Agent :'),
       'studentLabel': _copyWith(studentLabel: 'Enfant :'),
       'matriculationLabel': _copyWith(matriculationLabel: 'Mat :'),
@@ -46,7 +55,10 @@ void main() {
       'allocationsLabel': _copyWith(allocationsLabel: 'Détail'),
       'advanceLabel': _copyWith(advanceLabel: 'Excédent'),
       'balanceLabel': _copyWith(balanceLabel: 'Reste'),
-      'balanceReservation': _copyWith(balanceReservation: 'à confirmer'),
+      'balanceTotalLabel': _copyWith(balanceTotalLabel: 'Somme'),
+      'thanksNotice': _copyWith(thanksNotice: 'Merci mille fois.'),
+      'editorNotice': _copyWith(editorNotice: 'Edite par AUTRE'),
+      'editorSite': _copyWith(editorSite: 'autre.example'),
       'keepTicketNotice': _copyWith(keepTicketNotice: 'Gardez ce papier.'),
     };
 
@@ -69,8 +81,11 @@ void main() {
 
 TicketLabels _copyWith({
   String? documentTitle,
-  String? provisionalBanner,
+  String? provisionalMention,
   String? referenceLabel,
+  String? dateLabel,
+  String? payerLabel,
+  String? phoneLabel,
   String? cashierLabel,
   String? studentLabel,
   String? matriculationLabel,
@@ -81,12 +96,18 @@ TicketLabels _copyWith({
   String? allocationsLabel,
   String? advanceLabel,
   String? balanceLabel,
-  String? balanceReservation,
+  String? balanceTotalLabel,
   String? keepTicketNotice,
+  String? thanksNotice,
+  String? editorNotice,
+  String? editorSite,
 }) => TicketLabels(
   documentTitle: documentTitle ?? _base.documentTitle,
-  provisionalBanner: provisionalBanner ?? _base.provisionalBanner,
+  provisionalMention: provisionalMention ?? _base.provisionalMention,
   referenceLabel: referenceLabel ?? _base.referenceLabel,
+  dateLabel: dateLabel ?? _base.dateLabel,
+  payerLabel: payerLabel ?? _base.payerLabel,
+  phoneLabel: phoneLabel ?? _base.phoneLabel,
   cashierLabel: cashierLabel ?? _base.cashierLabel,
   studentLabel: studentLabel ?? _base.studentLabel,
   matriculationLabel: matriculationLabel ?? _base.matriculationLabel,
@@ -97,14 +118,18 @@ TicketLabels _copyWith({
   allocationsLabel: allocationsLabel ?? _base.allocationsLabel,
   advanceLabel: advanceLabel ?? _base.advanceLabel,
   balanceLabel: balanceLabel ?? _base.balanceLabel,
-  balanceReservation: balanceReservation ?? _base.balanceReservation,
+  balanceTotalLabel: balanceTotalLabel ?? _base.balanceTotalLabel,
   keepTicketNotice: keepTicketNotice ?? _base.keepTicketNotice,
+  thanksNotice: thanksNotice ?? _base.thanksNotice,
+  editorNotice: editorNotice ?? _base.editorNotice,
+  editorSite: editorSite ?? _base.editorSite,
 );
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'Mbala Kasa Amina',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 12, 14, 7),
   tenders: TicketTenderLine.identityFrom(
     MoneyBag.of(const [Money(150000, 'CDF')]),

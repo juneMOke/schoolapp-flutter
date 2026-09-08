@@ -11,8 +11,11 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
+  dateLabel: 'Date :',
+  payerLabel: 'PAYEUR :',
+  phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
@@ -22,20 +25,24 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
+  thanksNotice: 'Nous vous remercions pour votre confiance.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 TicketReceiptModel _model({String schoolName = 'Institut Sacré-Cœur'}) =>
     TicketReceiptModel(
       schoolName: schoolName,
-      schoolMunicipality: 'Kinshasa · Ngaliema',
+      schoolLocality: 'Kinshasa · Ngaliema',
       studentFullName: 'Mbala Kasa Amina',
       matriculationNumber: null,
       classroomName: '5e primaire A',
-      provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+      reference: 'PROV-A1B2C3-9F8E7D6C',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 11, 14, 7),
       cashierFullName: 'Jean Kabeya',
       tenders: TicketTenderLine.identityFrom(

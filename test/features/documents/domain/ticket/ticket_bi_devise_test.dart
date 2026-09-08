@@ -14,8 +14,11 @@ const int _taux166667 = 1666670000;
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
+  dateLabel: 'Date :',
+  payerLabel: 'PAYEUR :',
+  phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
@@ -25,9 +28,12 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance (non imputée)',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 TicketReceiptModel _model({
@@ -37,7 +43,8 @@ TicketReceiptModel _model({
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'MAKELA Kevin',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 9, 1, 9, 30),
   cashierFullName: 'Sarah Ngalula',
   tenders: tenders,

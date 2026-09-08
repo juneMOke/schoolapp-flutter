@@ -11,8 +11,11 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
-  provisionalBanner: 'Provisoire',
+  provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
+  dateLabel: 'Date :',
+  payerLabel: 'PAYEUR :',
+  phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
@@ -22,18 +25,22 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde',
-  balanceReservation: 'sous réserve de synchronisation',
+  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceTotalLabel: 'Total',
   keepTicketNotice: 'Conservez ce ticket.',
+  thanksNotice: 'Merci.',
+  editorNotice: 'Recu edite par ETEELO CONNECT',
+  editorSite: 'eteeloconnect.com',
 );
 
 TicketReceiptModel _model({int allocationCount = 2}) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
-  schoolMunicipality: 'Ngaliema',
+  schoolLocality: 'Ngaliema',
   studentFullName: 'Mbala Kasa Amina',
   matriculationNumber: 'MAT-0042',
   classroomName: '5e primaire A',
-  provisionalReference: 'PROV-A1B2C3-9F8E7D6C',
+  reference: 'PROV-A1B2C3-9F8E7D6C',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: 'Jean Kabeya',
   tenders: TicketTenderLine.identityFrom(
@@ -466,7 +473,8 @@ TicketReceiptModel _modelWithSingleLine(String studentName) =>
     TicketReceiptModel(
       schoolName: 'E',
       studentFullName: studentName,
-      provisionalReference: 'PROV-1',
+      reference: 'PROV-1',
+      isProvisional: true,
       paidAt: DateTime(2026, 8, 4, 14, 7),
       tenders: TicketTenderLine.identityFrom(
         MoneyBag.of(const [Money(2500000000, 'CDF')]),

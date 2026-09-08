@@ -31,6 +31,10 @@ void main() {
   late List<ReductionTypeLocalModel> capturedReductionTypes;
   late List<ReductionLineLocalModel> capturedReductionLines;
   late List<String> capturedReductionSchoolIds;
+
+  /// Les empreintes de logo passées au seam, cycle par cycle. Sert à prouver
+  /// que le tirage est **appelé** — un lot entier peut être vert et inerte.
+  late List<({String? thermal, String? display})> syncedLogoRefs;
   late EnrollmentPullRepositoryImpl repo;
 
   const auth = <String, dynamic>{'requiresAuth': true};
@@ -48,6 +52,7 @@ void main() {
     capturedReductionTypes = [];
     capturedReductionLines = [];
     capturedReductionSchoolIds = [];
+    syncedLogoRefs = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
       api: api,
@@ -61,6 +66,11 @@ void main() {
       replaceBoutiqueArticles: (articles, academicYearIds) async {
         capturedBoutiqueArticles.addAll(articles);
         capturedBoutiqueYears = academicYearIds;
+      },
+      // Capturé pour prouver que le fil EXISTE : sans cette assertion, tout le
+      // lot logo pourrait être vert et n'être jamais appelé.
+      syncSchoolLogo: (thermalSha, displaySha) async {
+        syncedLogoRefs.add((thermal: thermalSha, display: displaySha));
       },
       replaceReductionCatalog: (types, lines, schoolId) async {
         capturedReductionTypes.addAll(types);
@@ -120,8 +130,10 @@ void main() {
     List<RefBoutiqueArticleDto>? boutiqueArticles,
     bool withheldBoutique = true,
     List<RefReductionDto>? reductions,
+    RefLogoRefsDto? logoRefs,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+    logoRefs: logoRefs,
     current: ReferentialYearBundleDto(
       academicYear: const RefAcademicYearDto(
         id: 'ay-1',
@@ -344,6 +356,74 @@ void main() {
       // le serveur lui pose une ligne, elle arrive avec lui.
       expect(capturedReductionTypes, hasLength(1));
       expect(capturedReductionLines, isEmpty);
+    });
+  });
+
+  group('le logo de l\'école', () {
+    /// ⚠️ **La preuve que le fil EXISTE.** Le cache, le tirage, le décodeur et
+    /// le renderer peuvent tous être verts sans que rien ne les appelle — c'est
+    /// le mode de défaillance nommé de ce dépôt, les gardes jamais branchées.
+    /// Ce test regarde le seam, donc l'appel lui-même.
+    test('un pull référentiel déclenche le tirage', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            logoRefs: const RefLogoRefsDto(
+              displaySha256: 'display-sha',
+              thermalSha256: 'thermal-sha',
+            ),
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      expect(syncedLogoRefs, hasLength(1));
+      expect(syncedLogoRefs.single.thermal, 'thermal-sha');
+      expect(syncedLogoRefs.single.display, 'display-sha');
+    });
+
+    /// Une école sans logo passe quand même par le seam, avec deux `null` : le
+    /// tirage y lit un ordre de RETIRER la ligne. Ne pas appeler du tout
+    /// laisserait une école imprimer indéfiniment un sceau qu'elle a retiré.
+    test('sans logo, le seam est appelé avec deux nulls', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      await repo.syncReferential();
+
+      expect(syncedLogoRefs, hasLength(1));
+      expect(syncedLogoRefs.single.thermal, isNull);
+      expect(syncedLogoRefs.single.display, isNull);
+    });
+
+    /// ⚠️ **Le logo ne doit JAMAIS faire échouer un pull.** Ce cycle transporte
+    /// l'identité de l'établissement, l'année courante et les niveaux ; une
+    /// image qui ne descend pas est décorative à côté. Une école perdrait sinon
+    /// sa grille tarifaire hors ligne parce que son sceau n'a pas pu être tiré.
+    test('un tirage qui lève ne fait pas échouer le cycle', () async {
+      final failing = EnrollmentPullRepositoryImpl(
+        api: api,
+        referentialDao: EnrollmentReferentialDao(db),
+        seedDao: EnrollmentSeedDao(db),
+        reconciliationDao: EnrollmentReconciliationDao(db),
+        replaceTariffs: (_, _) async {},
+        replaceBoutiqueArticles: (_, _) async {},
+        replaceReductionCatalog: (_, _, _) async {},
+        syncSchoolLogo: (_, _) async => throw StateError('route en panne'),
+        syncMetaDao: syncMeta,
+        requiredAuth: const {},
+        currentUser: CurrentUserContext()..set('u-1', schoolId: 'sch-1'),
+        now: () => clock,
+      );
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      final result = await failing.syncReferential();
+
+      expect(result.isRight(), isTrue, reason: 'le cycle a échoué sur un logo');
     });
   });
 
@@ -741,6 +821,7 @@ void main() {
             throw StateError('ref_fee_tariffs indisponible'),
         replaceBoutiqueArticles: (_, _) async {},
         replaceReductionCatalog: (_, _, _) async {},
+        syncSchoolLogo: (_, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
         currentUser: CurrentUserContext()..set('u1', schoolId: 'school-1'),
@@ -1170,6 +1251,7 @@ void main() {
           replaceTariffs: (_, _) async {},
           replaceBoutiqueArticles: (_, _) async {},
           replaceReductionCatalog: (_, _, _) async {},
+          syncSchoolLogo: (_, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,
           currentUser: CurrentUserContext()..set('u2', schoolId: schoolId),

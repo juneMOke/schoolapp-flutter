@@ -3969,10 +3969,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Collected by';
 
   @override
-  String get facturationPaymentTicketNotPrinted => 'Ticket not printed';
+  String get facturationPaymentTicketNotPrinted =>
+      'Never printed from this tablet.';
+
+  @override
+  String facturationPaymentTicketPrintedAt(String date) {
+    return 'Printed on $date';
+  }
 
   @override
   String get facturationPaymentPrintTicketAction => 'Print now';
+
+  @override
+  String get facturationPaymentReprintTicketAction => 'Reprint the ticket';
 
   @override
   String get facturationPaymentReceiptLabel => 'Receipt no.';
@@ -7609,10 +7618,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDocumentTitle => 'Collection ticket';
 
   @override
-  String get ticketProvisionalBanner => 'Provisional';
+  String get ticketProvisionalMention => 'provisional';
 
   @override
   String get ticketReferenceLabel => 'Ref.';
+
+  @override
+  String get ticketDateLabel => 'Date:';
+
+  @override
+  String get ticketPayerLabel => 'PAYER:';
+
+  @override
+  String get ticketPhoneLabel => 'Tel.';
 
   @override
   String get ticketCashierLabel => 'Cashier:';
@@ -7642,10 +7660,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAdvanceLabel => 'Advance (unallocated)';
 
   @override
-  String get ticketBalanceLabel => 'Balance';
+  String get ticketBalanceLabel => 'Remaining balance as of printing';
 
   @override
-  String get ticketBalanceReservation => 'subject to synchronisation';
+  String get ticketBalanceTotalLabel => 'Total';
+
+  @override
+  String get ticketThanksNotice => 'Thank you for your trust.';
+
+  @override
+  String get ticketEditorNotice => 'Receipt issued by ETEELO CONNECT';
+
+  @override
+  String get ticketEditorSite => 'eteeloconnect.com';
 
   @override
   String get ticketKeepNotice =>

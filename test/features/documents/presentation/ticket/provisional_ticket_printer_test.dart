@@ -197,18 +197,20 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
     printed.add(paymentId);
   }
 
+  /// La trace, telle que la production la rend : une date dès qu'un papier est
+  /// sorti d'ici. Le fake ne retient pas l'instant réel — aucun test ne le lit
+  /// — mais il doit rendre `null` tant que rien n'est sorti, sans quoi la
+  /// bascule de libellé ne serait pas discriminée.
   @override
-  Future<bool> hasPrintedTicket(String paymentId) async =>
-      printed.contains(paymentId);
-  @override
-  Future<bool> awaitsTicketPrint(String paymentId) async =>
-      !printed.contains(paymentId);
+  Future<DateTime?> ticketPrintedAt(String paymentId) async =>
+      printed.contains(paymentId) ? DateTime(2026, 9, 8, 10) : null;
 }
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   studentFullName: 'Mbala Kasa Amina',
-  provisionalReference: 'PROV-A1B2C3',
+  reference: 'PROV-A1B2C3',
+  isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   tenders: TicketTenderLine.identityFrom(
     MoneyBag.of(const [Money(150000, 'CDF')]),

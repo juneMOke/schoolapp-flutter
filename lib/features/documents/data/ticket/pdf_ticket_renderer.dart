@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_geometry.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
@@ -84,21 +85,62 @@ abstract final class PdfTicketRenderer {
   /// découpe : il appartient au **support**, jamais au ticket — l'ajouter au
   /// gabarit casserait le critère « même contenu textuel entre les deux
   /// sorties ».
+  /// [logoBand] est posée en tête, avant la première ligne. Elle n'entre pas
+  /// dans le gabarit — cf. `TicketLogoBand` — et le corps de texte est identique
+  /// avec ou sans elle.
   static Future<Uint8List> render(
     TicketReceiptModel model, {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
+    TicketLogoBand? logoBand,
   }) async {
     final lines = TicketTextLayout.render(model, columns: columns);
     final document = pw.Document();
+    final band = (logoBand != null && logoBand.isUsable) ? logoBand : null;
 
     if (format.height.isInfinite) {
-      _addRollPage(document, lines, format);
+      _addRollPage(document, lines, format, band);
     } else {
-      _addSheetPages(document, lines, format, cutNotice);
+      _addSheetPages(document, lines, format, cutNotice, band);
     }
 
     return document.save();
+  }
+
+  /// La bande, étendue en pixels pour le PDF.
+  ///
+  /// Elle dérive des **mêmes points** que le flux ESC/POS, et c'est voulu :
+  /// porter en plus les octets PNG d'origine aurait ouvert la possibilité que
+  /// les deux sorties montrent deux images différentes.
+  ///
+  /// La convention est celle du fichier — `1` = blanc — et elle est appliquée
+  /// telle quelle ici : contrairement à `GS v 0`, aucun renversement n'est dû.
+  /// Le PDF est donc la sortie où l'on VOIT si la polarité est juste.
+  static pw.Widget _bandWidget(TicketLogoBand band, double targetWidth) {
+    final pixels = Uint8List(band.widthDots * band.heightDots * 4);
+    var out = 0;
+    for (var y = 0; y < band.heightDots; y++) {
+      for (var x = 0; x < band.widthDots; x++) {
+        final byte = band.bits[y * band.bytesPerRow + (x >> 3)];
+        final isWhite = (byte >> (7 - (x & 7))) & 1 == 1;
+        final level = isWhite ? 0xFF : 0x00;
+        pixels[out++] = level;
+        pixels[out++] = level;
+        pixels[out++] = level;
+        pixels[out++] = 0xFF;
+      }
+    }
+    return pw.Image(
+      pw.RawImage(
+        bytes: pixels,
+        width: band.widthDots,
+        height: band.heightDots,
+      ),
+      width: targetWidth,
+      // La bande garde ses proportions : elle est mesurée en POINTS
+      // d'imprimante, et les déformer ferait diverger le papier du PDF.
+      height: targetWidth * band.heightDots / band.widthDots,
+    );
   }
 
   // ── Rouleau ────────────────────────────────────────────────────────────────
@@ -107,6 +149,7 @@ abstract final class PdfTicketRenderer {
     pw.Document document,
     List<String> lines,
     PdfPageFormat format,
+    TicketLogoBand? band,
   ) {
     final style = _textStyle(
       TicketBlockGeometry.fontSizeFor(TicketBlockGeometry.textWidthFor(format)),
@@ -118,7 +161,11 @@ abstract final class PdfTicketRenderer {
         build: (context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           mainAxisSize: pw.MainAxisSize.min,
-          children: [for (final line in lines) _line(line, style)],
+          children: [
+            if (band != null)
+              _bandWidget(band, TicketBlockGeometry.textWidthFor(format)),
+            for (final line in lines) _line(line, style),
+          ],
         ),
       ),
     );
@@ -131,6 +178,7 @@ abstract final class PdfTicketRenderer {
     List<String> lines,
     PdfPageFormat format,
     String? cutNotice,
+    TicketLogoBand? band,
   ) {
     final block = TicketBlockGeometry.blockWidthFor(format);
     final textWidth = TicketBlockGeometry.textWidthFor(format);
@@ -149,6 +197,16 @@ abstract final class PdfTicketRenderer {
         build: (context) => [
           if (framed) _horizontalCutGuide(block),
           if (framed) guided(pw.SizedBox(width: block, height: _cutGap)),
+          // ⚠️ Premier ENFANT de `build:`, jamais un `header:` — ce dernier se
+          // répète sur chaque page, et une répartition longue ferait sortir un
+          // logo par feuille.
+          if (band != null)
+            guided(
+              pw.Padding(
+                padding: pw.EdgeInsets.symmetric(horizontal: padding),
+                child: _bandWidget(band, textWidth),
+              ),
+            ),
           for (final line in lines)
             guided(
               // La marge intérieure est posée des DEUX côtés : la boîte du

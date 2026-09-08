@@ -1341,6 +1341,37 @@ Future<void> migrateOfflineDatabase(
       await db.execute('ALTER TABLE payments ADD COLUMN cancelled_at INTEGER');
     }
   }
+  if (upTo(47)) {
+    // v47 — le logo de l'école : deux empreintes sur `ref_school`, et la table
+    // qui porte les octets.
+    //
+    // ⚠️ Ce numéro a été ATTRIBUÉ, pas réservé. Le lot 2 du plan multi-école le
+    // visait aussi ; l'arbitrage a mis le logo devant, et ce lot prend donc le
+    // 47 en fusionnant. Le multi-école renumérotera en v48. C'est exactement la
+    // discipline que le v24 brûlé impose : un palier ne s'annonce jamais à
+    // l'avance, il se prend au moment de fusionner.
+    //
+    // Les deux colonnes d'empreinte sont nullables et sans backfill : `NULL`
+    // vaut « cette école n'a pas de logo », ce qui est vrai de tout le parc
+    // jusqu'au premier pull qui en descend une.
+    if (await _hasTable(db, 'ref_school')) {
+      for (final column in const [
+        'logo_thermal_sha256',
+        'logo_display_sha256',
+      ]) {
+        if (!await _hasColumn(db, 'ref_school', column)) {
+          await db.execute('ALTER TABLE ref_school ADD COLUMN $column TEXT');
+        }
+      }
+    }
+    // Table neuve, aucune reprise : les octets d'un logo se retirent au serveur
+    // sur présentation de l'empreinte, ils ne se reconstruisent pas.
+    final table = schema.firstWhere((t) => t.name == 'school_logo_cache');
+    await db.execute(_asIfNotExists(table.createTableSql));
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
 }
 
 /// Étape v45 : `parents.phone_number` perd son `NOT NULL`.

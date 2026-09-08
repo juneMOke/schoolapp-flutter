@@ -39,6 +39,7 @@ library;
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 import 'package:flutter/foundation.dart';
 
 /// Sens du calcul demandé.
@@ -167,7 +168,7 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
         ..setAll(kEditiqueBlobHeaderLength, body);
       return EditiqueCipherResult(
         bytes: sealed,
-        sha256Hex: await _sha256Hex(request.payload),
+        sha256Hex: await sha256Hex(request.payload),
         clearSizeBytes: request.payload.length,
       );
 
@@ -204,7 +205,7 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
       }
       return EditiqueCipherResult(
         bytes: clear,
-        sha256Hex: await _sha256Hex(clear),
+        sha256Hex: await sha256Hex(clear),
         clearSizeBytes: clear.length,
       );
   }
@@ -224,13 +225,4 @@ Uint8List _bodyOf(Uint8List file, int minimumBodyLength) {
     throw const EditiqueCipherException('version de format inconnue');
   }
   return Uint8List.sublistView(file, kEditiqueBlobHeaderLength);
-}
-
-Future<String> _sha256Hex(List<int> bytes) async {
-  final digest = await Sha256().hash(bytes);
-  final buffer = StringBuffer();
-  for (final byte in digest.bytes) {
-    buffer.write(byte.toRadixString(16).padLeft(2, '0'));
-  }
-  return buffer.toString();
 }

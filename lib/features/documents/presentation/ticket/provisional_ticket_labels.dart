@@ -9,8 +9,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// l'interdiction des chaînes en dur.
 TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   documentTitle: l10n.ticketDocumentTitle,
-  provisionalBanner: l10n.ticketProvisionalBanner,
+  provisionalMention: l10n.ticketProvisionalMention,
   referenceLabel: l10n.ticketReferenceLabel,
+  dateLabel: l10n.ticketDateLabel,
+  payerLabel: l10n.ticketPayerLabel,
+  phoneLabel: l10n.ticketPhoneLabel,
   cashierLabel: l10n.ticketCashierLabel,
   studentLabel: l10n.ticketStudentLabel,
   matriculationLabel: l10n.ticketMatriculationLabel,
@@ -21,6 +24,9 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   allocationsLabel: l10n.ticketAllocationsLabel,
   advanceLabel: l10n.ticketAdvanceLabel,
   balanceLabel: l10n.ticketBalanceLabel,
-  balanceReservation: l10n.ticketBalanceReservation,
+  balanceTotalLabel: l10n.ticketBalanceTotalLabel,
   keepTicketNotice: l10n.ticketKeepNotice,
+  thanksNotice: l10n.ticketThanksNotice,
+  editorNotice: l10n.ticketEditorNotice,
+  editorSite: l10n.ticketEditorSite,
 );

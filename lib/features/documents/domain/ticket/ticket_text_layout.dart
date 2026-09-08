@@ -29,24 +29,39 @@ abstract final class TicketTextLayout {
     final width = columns < 24 ? 24 : columns;
     final lines = <String>[];
 
-    // ── Z1 — l'établissement. Deux lignes, pas de logo, pas de mention
-    // d'agrément : ce n'est pas une pièce officielle.
+    // ── Z1 — l'établissement, en-tête complet : nom, adresse, localité, email,
+    // téléphone. Le logo, lui, n'est PAS ici : c'est une bande posée par chaque
+    // renderer en amont de ces lignes. Une image ne passe pas par le pivot
+    // `List<String>`, et c'est ce pivot qui rend vérifiable le critère
+    // d'acceptation de l'ADR — même contenu textuel entre les deux sorties. Le
+    // précédent est celui de `cutNotice` : ce qui appartient au SUPPORT est posé
+    // par le renderer, jamais par le gabarit.
+    //
+    // Aucune garde à écrire sur les lignes optionnelles : `_centered('')` rend
+    // une liste VIDE, donc un champ absent ne laisse pas même une ligne
+    // d'espaces. Une école mal renseignée sort un en-tête plus COURT, jamais un
+    // en-tête troué — et sur une pièce, une ligne blanche se lirait comme une
+    // mention effacée.
     lines.addAll(_centered(model.schoolName.toUpperCase(), width));
-    final municipality = model.schoolMunicipality?.trim();
-    if (municipality != null && municipality.isNotEmpty) {
-      lines.addAll(_centered(municipality, width));
-    }
+    lines.addAll(_centered(model.schoolAddress ?? '', width));
+    lines.addAll(_centered(model.schoolLocality ?? '', width));
+    lines.addAll(_centered(model.schoolEmail ?? '', width));
+    lines.addAll(_centered(model.schoolPhone ?? '', width));
     lines.add(_rule(width));
 
-    // Nature de la pièce, avant tout le reste : quelqu'un qui trie une liasse
-    // de fin de journée doit pouvoir l'identifier sans lire le corps. Elle
-    // précède le bandeau, qui la qualifie — « ticket de perception », et il est
-    // provisoire.
+    // Nature de la pièce, sous l'en-tête : quelqu'un qui trie une liasse de fin
+    // de journée doit pouvoir l'identifier sans lire le corps.
+    //
+    // ⚠️ « Ticket de perception », jamais « note de perception » : ce dernier
+    // nom désigne déjà une pièce ANNUELLE SCELLÉE au niveau élève
+    // (`EditiqueDocumentType.notePerception`). Deux papiers homonymes au guichet
+    // se paieraient au premier rapprochement, et c'est le nom vers lequel on
+    // glisse naturellement en voulant faire « plus officiel ».
     lines.addAll(_centered(model.labels.documentTitle.toUpperCase(), width));
 
-    // ── Z4 — le bandeau. Placé HAUT et pleine largeur : la dissemblance doit
-    // se lire avant le contenu, y compris par quelqu'un qui lit peu le français.
-    lines.add(_banner(model.labels.provisionalBanner, width));
+    // Le filet reste, lui : sans lui le titre coulerait directement dans le nom
+    // de l'élève, et la coupure entre « ce qu'est ce document » et « de qui il
+    // parle » disparaîtrait. Il ne se récupère pas avec le bandeau.
     lines.add(_rule(width));
 
     // ── Z2 — l'élève.
@@ -68,15 +83,22 @@ abstract final class TicketTextLayout {
     // ── Z3 — la traçabilité. Sur une pièce non scellée, l'imputabilité humaine
     // remplace l'imputabilité cryptographique : le caissier est obligatoire dès
     // qu'il est connu (RG-012-11).
-    lines.addAll(
-      _wrapped(
-        '${model.labels.referenceLabel} ${model.provisionalReference}',
-        width,
-      ),
-    );
+    // La mention « provisoire » s'accole au LIBELLÉ, pas à la fin de la ligne :
+    // elle qualifie ainsi le numéro — l'argent est reçu, et le ticket
+    // l'affirme — et elle se replie proprement quand la référence retombe sur
+    // l'UUID du paiement, là où une parenthèse de fin de ligne se coupait en
+    // deux.
+    final referenceLabel = model.isProvisional
+        ? '${model.labels.referenceLabel} ${model.labels.provisionalMention}'
+        : model.labels.referenceLabel;
+    lines.addAll(_wrapped('$referenceLabel ${model.reference}', width));
+    // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
+    // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
+    // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
+    // colonnes de battement à 48 et 11 à 32. Aucune ligne de papier ajoutée.
     _addPair(
       lines,
-      _formatDate(model.paidAt),
+      '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
       _formatTime(model.paidAt),
       width,
     );
@@ -87,6 +109,36 @@ abstract final class TicketTextLayout {
       width,
     );
     lines.add(_rule(width));
+
+    // ── Le payeur, quand il y en a un.
+    //
+    // **Le bloc ENTIER disparaît sinon** — ni cadre vide, ni tiret. Sur une
+    // pièce, une mention laissée vide se lit comme une mention EFFACÉE et invite
+    // à chercher ce qu'on aurait retiré ; mieux vaut n'avoir rien à lire que
+    // quelque chose à interpréter.
+    //
+    // Un téléphone SEUL garde le bloc : il a été tapé, donc il désigne
+    // quelqu'un. Même règle que le ticket de vente boutique, et il le faut —
+    // deux pièces du même acte qui divergent se paient au rapprochement de
+    // caisse.
+    if (model.hasPayer) {
+      final payerName = model.payerFullName?.trim() ?? '';
+      if (payerName.isNotEmpty) {
+        lines.addAll(
+          _wrapped(
+            '${model.labels.payerLabel} ${payerName.toUpperCase()}',
+            width,
+          ),
+        );
+      }
+      _addOptional(
+        lines,
+        model.labels.phoneLabel,
+        model.payerPhoneNumber,
+        width,
+      );
+      lines.add(_rule(width));
+    }
 
     // ── Z5 — l'argent. Montant reçu et répartition sont des FAITS : ils
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas
@@ -133,6 +185,10 @@ abstract final class TicketTextLayout {
     if (model.allocations.isNotEmpty) {
       lines.add('');
       lines.add(TicketCharset.printable(model.labels.allocationsLabel));
+      // Un filet sous le titre : sans lui, la première ligne de répartition se
+      // lit comme un prolongement du mot « Répartition » plutôt que comme la
+      // première d'une liste.
+      lines.add(_rule(width));
       for (final allocation in model.allocations) {
         _addPair(
           lines,
@@ -169,15 +225,88 @@ abstract final class TicketTextLayout {
 
     final balance = model.remainingBalance;
     if (balance != null && balance.isNotEmpty) {
+      // Le solde est bâti comme la répartition — titre, détail, filet, total :
+      // deux blocs de même nature doivent se lire de la même façon.
+      //
+      // Le qualificatif de temps est passé DANS le titre. Il se lit ainsi
+      // AVANT les chiffres au lieu de les suivre, et la réserve qui traînait
+      // sous le total a disparu avec lui — la garder en plus l'aurait dit deux
+      // fois.
+      //
+      // ⚠️ Pas de ligne blanche au-dessus du filet. Elle ouvrait ce bloc du
+      // temps où RIEN ne l'en séparait ; depuis qu'un filet le fait, les deux
+      // séparent la même chose, et la blanche ne fait plus que coûter du
+      // papier.
+
+      // Titre REPLIÉ, pas posé brut. « Solde restant au moment de
+      // l'impression » fait 39 caractères : il tient à 48, et se replie
+      // proprement sur deux lignes à 32. Posé brut, il aurait débordé la
+      // largeur du papier — c'est le défaut que « Répartition », court, masque
+      // encore.
+      final title = _wrapped(model.labels.balanceLabel, width);
+
+      // Le filet qui SÉPARE de la répartition, avant le titre.
+      //
+      // ⚠️ Conditionné au titre, et pas seulement pour la forme : `_wrapped('')`
+      // rend une liste VIDE. Un libellé vide — ce qu'une traduction incomplète
+      // produit sans bruit — laisserait ce filet et celui du total se toucher,
+      // en un « ---- / ---- » que rien d'autre ne rattraperait. Poser les deux
+      // ensemble ou aucun ferme le cas à la source plutôt qu'en aval.
+      if (title.isNotEmpty) {
+        lines.add(_rule(width));
+        lines.addAll(title);
+      }
+
+      // Le reste PAR NATURE avant le total. « Il vous reste 10 000 FC et
+      // 314 $ » juxtapose deux devises sans les expliquer ; le détail dit d'où
+      // elles viennent. C'est la règle que le montant reçu applique déjà — ne
+      // jamais additionner deux unités — étendue au solde, qui y avait échappé.
+      //
+      // Les lignes sont indentées comme celles de la ventilation : elles se
+      // lisent de la même façon, et le total les coiffe.
+      for (final line in model.remainingByCharge) {
+        _addPair(
+          lines,
+          '  ${line.label}',
+          formatAmount(line.amountInCents, line.currency),
+          width,
+        );
+      }
+
+      // Un filet SOUS le détail : le trait d'une addition posée. Il sépare des
+      // lignes de nature différente — des créances au-dessus, ce qu'elles font
+      // ensemble en dessous — là où le filet de la répartition, lui, ouvre une
+      // liste sous son titre.
       lines.add(_rule(width));
-      _addMoneyBag(lines, model.labels.balanceLabel, balance, width);
-      lines.addAll(_wrapped(model.labels.balanceReservation, width));
+
+      // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait le
+      // parent à additionner, le total sans détail est ce qu'on lui reproche.
+      _addTotal(lines, model.labels.balanceTotalLabel, balance, width);
     }
+
+    lines.add(_rule(width));
 
     // Phrase de conservation (RG-012-12) : sans elle, l'établissement n'a aucun
     // levier pour rappeler un parent dont le versement poserait problème.
-    lines.add(_rule(width));
-    lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
+    //
+    // ⚠️ **Seulement sur une pièce NON scellée**, et lue sur le même signal
+    // affirmatif que la mention de référence — `isProvisional`, dérivé de
+    // l'absence de `receipt_id`. Sur un ticket qui porte déjà son numéro
+    // définitif, elle est factuellement FAUSSE : il n'y a pas de reçu à venir,
+    // celui-là l'est. Sa raison d'être ne vaut que hors ligne.
+    if (model.isProvisional) {
+      lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
+    }
+
+    // Le pied, sur les deux sorties et dans tous les cas.
+    //
+    // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
+    // valent mieux qu'une longue qui se replierait au hasard, l'adresse isolée
+    // se recopie, et un `http://` imprimé sur un papier que des familles gardent
+    // annoncerait un transport non chiffré.
+    lines.addAll(_centeredWrapped(model.labels.thanksNotice, width));
+    lines.addAll(_centered(model.labels.editorNotice, width));
+    lines.addAll(_centered(model.labels.editorSite, width));
 
     return lines;
   }
@@ -204,6 +333,53 @@ abstract final class TicketTextLayout {
       );
       first = false;
     }
+  }
+
+  /// Le total du solde : **une seule ligne**, les devises reliées par un `+`.
+  ///
+  /// Le `+` ne gagne pas que de la place. Deux montants séparés d'un simple
+  /// espace se lisent comme un seul nombre bizarrement mis en forme ; le signe
+  /// dit qu'ils sont DEUX, et qu'on ne les a précisément pas additionnés — ce
+  /// qu'on ne saurait faire sans inventer un taux. C'est aussi ce qui justifie
+  /// que cette ligne ait une forme que `Montant reçu` n'a pas : elle totalise,
+  /// lui énumère.
+  ///
+  /// Les montants sortent de [formatAmount], le **même** formateur que les
+  /// lignes au-dessus. Un total écrit autrement que les chiffres qu'il totalise
+  /// se lit comme une autre nature de nombre, et un parent qui recompte
+  /// s'arrête dessus.
+  ///
+  /// ## Le repli
+  ///
+  /// La ligne unique tient à 48 colonnes, et à 32 jusqu'à
+  /// « 9 999 999 FC + 99 999,00 $ » — 26 caractères, la mesure exacte. Au-delà,
+  /// le bloc revient à **une ligne par devise**, la seconde forme que le
+  /// porteur accepte.
+  ///
+  /// Ce repli-là est explicite parce que celui d'[_addPair] serait mauvais
+  /// ici : il renverrait les deux montants **collés sur une ligne à eux**, ce
+  /// qui garde le défaut qu'on voulait éviter, et déborderait franchement la
+  /// largeur du papier si la valeur seule atteignait la largeur.
+  static void _addTotal(
+    List<String> lines,
+    String label,
+    MoneyBag bag,
+    int width,
+  ) {
+    if (bag.isEmpty) return;
+    final joined = TicketCharset.printable(
+      bag.entries
+          .map((amount) => formatAmount(amount.amountInCents, amount.currency))
+          .join(' + '),
+    );
+    // Mesure sur la forme TRANSLITTÉRÉE, des deux côtés : c'est elle qui
+    // s'imprime, et `œ` → `oe` change une longueur.
+    final printableLabel = TicketCharset.printable(label);
+    if (printableLabel.length + 1 + joined.length <= width) {
+      _addPair(lines, label, joined, width);
+      return;
+    }
+    _addMoneyBag(lines, label, bag, width);
   }
 
   /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».
@@ -253,9 +429,6 @@ abstract final class TicketTextLayout {
   ) => TicketTextPrimitives.addOptional(lines, label, value, width);
 
   static String _rule(int width) => TicketTextPrimitives.rule(width);
-
-  static String _banner(String rawText, int width) =>
-      TicketTextPrimitives.banner(rawText, width);
 
   static List<String> _centered(String text, int width) =>
       TicketTextPrimitives.centered(text, width);
