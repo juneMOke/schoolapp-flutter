@@ -84,6 +84,19 @@ class ProvisionalTicketDao {
         'paid_at',
         'cashier_first_name',
         'cashier_last_name',
+        // L'encaisseur attribué par le SERVEUR (v29). Il descend là où les
+        // `cashier_*` ne descendent pas — c'est le seul nom disponible sur un
+        // versement encaissé depuis une autre caisse.
+        'collected_by_name',
+        // Le payeur (v43) : descend et hydrate une ligne inconnue, donc
+        // disponible partout, pas seulement sur le poste d'encaissement.
+        'payer_first_name',
+        'payer_last_name',
+        'payer_middle_name',
+        'payer_phone_number',
+        // L'UUID de la pièce scellée (v19). C'est LUI qui dit si le ticket est
+        // provisoire — affirmativement, cf. `TicketReceiptModel.isProvisional`.
+        'receipt_id',
         'device_id',
         'sync_status',
       ],
@@ -102,6 +115,12 @@ class ProvisionalTicketDao {
       paidAt: (r['paid_at'] as String?) ?? '',
       cashierFirstName: r['cashier_first_name'] as String?,
       cashierLastName: r['cashier_last_name'] as String?,
+      collectedByName: r['collected_by_name'] as String?,
+      payerFirstName: r['payer_first_name'] as String?,
+      payerLastName: r['payer_last_name'] as String?,
+      payerMiddleName: r['payer_middle_name'] as String?,
+      payerPhoneNumber: r['payer_phone_number'] as String?,
+      receiptId: r['receipt_id'] as String?,
       deviceId: r['device_id'] as String?,
       syncStatus: (r['sync_status'] as String?) ?? 'PENDING_SYNC',
     );
@@ -240,12 +259,23 @@ class ProvisionalTicketDao {
     );
   }
 
-  /// Dénomination et commune de l'établissement (zone Z1). `null` tant que le
+  /// En-tête complet de l'établissement (zone Z1). `null` tant que le
   /// référentiel n'a pas été pullé.
+  ///
+  /// Les six colonnes sont lues d'un coup parce que l'en-tête les imprime toutes
+  /// : la requête ne coûte pas plus, et un champ oublié ici ne se verrait qu'au
+  /// papier, sur une ligne manquante que rien ne signale.
   Future<TicketSchoolRow?> findSchool() async {
     final rows = await _db.query(
       'ref_school',
-      columns: const ['name', 'municipality', 'city'],
+      columns: const [
+        'name',
+        'address',
+        'municipality',
+        'city',
+        'email',
+        'phone',
+      ],
       limit: 1,
     );
     if (rows.isEmpty) return null;
@@ -253,8 +283,11 @@ class ProvisionalTicketDao {
     final r = rows.first;
     return TicketSchoolRow(
       name: (r['name'] as String?) ?? '',
+      address: r['address'] as String?,
       municipality: r['municipality'] as String?,
       city: r['city'] as String?,
+      email: r['email'] as String?,
+      phone: r['phone'] as String?,
     );
   }
 
@@ -313,6 +346,19 @@ class TicketPaymentRow {
   final String paidAt;
   final String? cashierFirstName;
   final String? cashierLastName;
+
+  /// L'encaisseur tel que le SERVEUR l'attribue (v29), distinct des `cashier_*`
+  /// que ce poste a stampés au guichet.
+  final String? collectedByName;
+
+  final String? payerFirstName;
+  final String? payerLastName;
+  final String? payerMiddleName;
+  final String? payerPhoneNumber;
+
+  /// UUID de la pièce scellée (v19). `null` = pas encore scellée.
+  final String? receiptId;
+
   final String? deviceId;
   final String syncStatus;
 
@@ -324,19 +370,60 @@ class TicketPaymentRow {
     required this.paidAt,
     this.cashierFirstName,
     this.cashierLastName,
+    this.collectedByName,
+    this.payerFirstName,
+    this.payerLastName,
+    this.payerMiddleName,
+    this.payerPhoneNumber,
+    this.receiptId,
     this.deviceId,
     required this.syncStatus,
   });
 
-  /// Nom affichable du caissier, `null` si aucune identité n'a été stampée
-  /// (encaissement antérieur à la v19, ou annuaire muet au moment du geste).
+  /// Nom affichable du caissier — les `cashier_*` stampés ICI d'abord, **puis
+  /// l'attribution serveur**.
+  ///
+  /// Le repli n'est pas cosmétique : le patch de pull ne touche jamais aux
+  /// `cashier_*` (« ce que ce poste a imprimé sur le ticket ne se réécrit pas
+  /// depuis le réseau »), si bien qu'un versement encaissé sur une AUTRE caisse
+  /// n'en a aucun. Sans ce repli, son ticket sortirait sans caissier — or sur
+  /// une pièce non scellée, l'imputabilité humaine remplace l'imputabilité
+  /// cryptographique (RG-012-11), et un papier que personne ne signe ne
+  /// s'arbitre pas en fin de journée.
+  ///
+  /// L'ordre compte : ce que ce poste a écrit fait autorité sur ce que le
+  /// serveur a déduit, jamais l'inverse.
   String? get cashierFullName {
     final parts = [
       cashierFirstName?.trim(),
       cashierLastName?.trim(),
     ].where((p) => p != null && p.isNotEmpty).cast<String>();
+    if (parts.isNotEmpty) return parts.join(' ');
+    final attributed = collectedByName?.trim();
+    return (attributed != null && attributed.isNotEmpty) ? attributed : null;
+  }
+
+  /// Nom composé du payeur — **`null`, jamais `''`**.
+  ///
+  /// C'est cette distinction que le gabarit lit pour escamoter le bloc payeur
+  /// ENTIER : sur une pièce, une mention laissée vide se lit comme une mention
+  /// effacée et invite à chercher ce qu'on aurait retiré.
+  String? get payerFullName {
+    final parts = [
+      payerLastName?.trim(),
+      payerMiddleName?.trim(),
+      payerFirstName?.trim(),
+    ].where((p) => p != null && p.isNotEmpty).cast<String>();
     return parts.isEmpty ? null : parts.join(' ');
   }
+
+  /// Ce versement a-t-il quelqu'un à nommer comme payeur ?
+  ///
+  /// **Un téléphone seul suffit** : il a été tapé, donc il désigne quelqu'un.
+  /// Même règle que le ticket de vente boutique, et il le faut — deux pièces du
+  /// même acte qui divergent se paient au rapprochement de caisse.
+  bool get hasPayer =>
+      payerFullName != null || (payerPhoneNumber?.trim().isNotEmpty ?? false);
 }
 
 /// Une ligne de `payment_tenders`, telle que le ticket la lit.
@@ -391,16 +478,37 @@ class TicketStudentRow {
 
 class TicketSchoolRow {
   final String name;
+  final String? address;
   final String? municipality;
   final String? city;
+  final String? email;
+  final String? phone;
 
-  const TicketSchoolRow({required this.name, this.municipality, this.city});
+  const TicketSchoolRow({
+    required this.name,
+    this.address,
+    this.municipality,
+    this.city,
+    this.email,
+    this.phone,
+  });
 
-  /// Ligne 2 de la zone Z1 : commune si connue, ville à défaut.
+  /// La ligne « ville » de l'en-tête — **la ville d'abord, la commune à défaut**.
+  ///
+  /// Remplace l'ancien `locality`, qui repliait les deux dans une ligne unique
+  /// coiffant l'adresse. L'en-tête les sépare désormais : l'adresse a sa ligne,
+  /// celle-ci porte la localité.
+  ///
+  /// ⚠️ **La priorité est inversée par rapport à l'ancien getter**, et c'est
+  /// délibéré. L'en-tête demande « la ville » ; et `School.locality`, qui titre
+  /// la bannière d'accueil, prend déjà la ville en premier. Les deux divergeaient
+  /// : la même tablette pouvait imprimer « Ngaliema » et afficher « Kinshasa ».
+  /// Le repli sur la commune reste, sans quoi une école qui ne renseigne que
+  /// celle-ci perdrait sa localité — le référentiel autorise les deux.
   String? get locality {
-    final commune = municipality?.trim();
-    if (commune != null && commune.isNotEmpty) return commune;
     final town = city?.trim();
-    return (town != null && town.isNotEmpty) ? town : null;
+    if (town != null && town.isNotEmpty) return town;
+    final commune = municipality?.trim();
+    return (commune != null && commune.isNotEmpty) ? commune : null;
   }
 }

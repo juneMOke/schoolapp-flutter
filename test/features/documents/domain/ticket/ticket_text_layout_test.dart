@@ -44,7 +44,7 @@ TicketReceiptModel _model({
   ],
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
-  schoolMunicipality: 'Kinshasa · Ngaliema',
+  schoolLocality: 'Kinshasa · Ngaliema',
   studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
   classroomName: classroomName,
@@ -463,7 +463,7 @@ void main() {
   group('jeu de caractères', () {
     TicketReceiptModel exotic() => TicketReceiptModel(
       schoolName: 'Institut Sacré-Cœur d’Élite',
-      schoolMunicipality: 'Kinshasa — Ngaliema',
+      schoolLocality: 'Kinshasa — Ngaliema',
       studentFullName: 'Lɔkɔ Ngɛlɛ Мбала',
       matriculationNumber: 'MAT—0042',
       classroomName: '5ᵉ primaire A',

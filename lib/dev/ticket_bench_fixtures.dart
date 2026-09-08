@@ -50,7 +50,7 @@ abstract final class TicketBenchFixtures {
   /// * un solde présent, seul porteur de la mention de réserve.
   static final TicketReceiptModel torture = TicketReceiptModel(
     schoolName: 'Complexe scolaire Sacré-Cœur de l’Étoile',
-    schoolMunicipality: 'Kinshasa · Ngaliema',
+    schoolLocality: 'Kinshasa · Ngaliema',
     studentFullName: 'Mbala-Kasa Ndombasi Amina Ɛlodie',
     matriculationNumber: 'MAT-2026-000481',
     classroomName: '5e primaire A',

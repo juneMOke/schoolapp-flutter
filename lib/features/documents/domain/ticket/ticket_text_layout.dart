@@ -32,7 +32,7 @@ abstract final class TicketTextLayout {
     // ── Z1 — l'établissement. Deux lignes, pas de logo, pas de mention
     // d'agrément : ce n'est pas une pièce officielle.
     lines.addAll(_centered(model.schoolName.toUpperCase(), width));
-    final municipality = model.schoolMunicipality?.trim();
+    final municipality = model.schoolLocality?.trim();
     if (municipality != null && municipality.isNotEmpty) {
       lines.addAll(_centered(municipality, width));
     }

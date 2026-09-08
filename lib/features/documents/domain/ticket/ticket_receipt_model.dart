@@ -192,8 +192,21 @@ class TicketLabels extends Equatable {
 /// qu'il ne connaît pas — il n'invente jamais.
 class TicketReceiptModel extends Equatable {
   // ── Z1 : l'établissement ────────────────────────────────────────────────────
+  //
+  // L'en-tête complet, une ligne par champ. Chacun est nullable et chacun
+  // s'escamote seul : `wrapped('')` rend une liste vide, donc un champ absent ne
+  // laisse pas même une ligne d'espaces. Aucune garde à écrire, et une école
+  // mal renseignée sort un en-tête plus court, jamais un en-tête troué.
   final String schoolName;
-  final String? schoolMunicipality;
+
+  /// La ligne « localité » — la ville si le référentiel la porte, la commune à
+  /// défaut. Nommée d'après ce qu'elle EST plutôt que d'après la colonne qui la
+  /// remplit, justement parce que deux colonnes peuvent la remplir.
+  final String? schoolLocality;
+
+  final String? schoolAddress;
+  final String? schoolEmail;
+  final String? schoolPhone;
 
   // ── Z2 : l'élève ────────────────────────────────────────────────────────────
   final String studentFullName;
@@ -218,6 +231,25 @@ class TicketReceiptModel extends Equatable {
   final String provisionalReference;
   final DateTime paidAt;
   final String? cashierFullName;
+
+  /// Le payeur, **quand il y en a un**.
+  ///
+  /// `null` — jamais `''` — quand personne n'a été nommé : c'est ce que le
+  /// gabarit lit pour escamoter le bloc payeur ENTIER plutôt que d'imprimer un
+  /// cadre vide. Sur une pièce, une mention laissée vide se lit comme une
+  /// mention EFFACÉE et invite à chercher ce qu'on aurait retiré ; mieux vaut
+  /// n'avoir rien à lire que quelque chose à interpréter.
+  final String? payerFullName;
+
+  /// Le numéro du payeur. **Seul, il garde le bloc** : il a été tapé, donc il
+  /// désigne quelqu'un.
+  final String? payerPhoneNumber;
+
+  /// Y a-t-il quelqu'un à nommer comme payeur ? Décidé ici plutôt qu'à l'œil du
+  /// gabarit, pour que la règle du bloc soit à un seul endroit.
+  bool get hasPayer =>
+      (payerFullName?.trim().isNotEmpty ?? false) ||
+      (payerPhoneNumber?.trim().isNotEmpty ?? false);
 
   // ── Z5 : l'argent ───────────────────────────────────────────────────────────
   /// Ce qui est entré dans le tiroir, ligne par ligne.
@@ -247,13 +279,18 @@ class TicketReceiptModel extends Equatable {
 
   const TicketReceiptModel({
     required this.schoolName,
-    this.schoolMunicipality,
+    this.schoolLocality,
+    this.schoolAddress,
+    this.schoolEmail,
+    this.schoolPhone,
     required this.studentFullName,
     this.matriculationNumber,
     this.classroomName,
     required this.provisionalReference,
     required this.paidAt,
     this.cashierFullName,
+    this.payerFullName,
+    this.payerPhoneNumber,
     required this.tenders,
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
@@ -376,7 +413,12 @@ class TicketReceiptModel extends Equatable {
   @override
   List<Object?> get props => [
     schoolName,
-    schoolMunicipality,
+    schoolLocality,
+    schoolAddress,
+    schoolEmail,
+    schoolPhone,
+    payerFullName,
+    payerPhoneNumber,
     studentFullName,
     matriculationNumber,
     classroomName,

@@ -99,9 +99,14 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       return Right(
         TicketReceiptModel(
           // Une école inconnue n'empêche pas d'imprimer : le ticket vaut par son
-          // montant et son caissier, pas par son en-tête.
+          // montant et son caissier, pas par son en-tête. Chaque ligne absente
+          // s'escamote d'elle-même, donc un référentiel non pullé produit un
+          // en-tête COURT, jamais un en-tête troué.
           schoolName: school?.name ?? '',
-          schoolMunicipality: school?.locality,
+          schoolLocality: school?.locality,
+          schoolAddress: school?.address,
+          schoolEmail: school?.email,
+          schoolPhone: school?.phone,
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
           classroomName: classroomName,
@@ -110,7 +115,15 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           // serait irrapprochable.
           provisionalReference: reference ?? paymentId,
           paidAt: _parsePaidAt(payment.paidAt),
+          // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
+          // de pull ne réécrit jamais les premiers, donc un versement encaissé
+          // sur une AUTRE caisse n'a que la seconde. Sans ce repli, son ticket
+          // sortirait sans personne à qui l'imputer (RG-012-11).
           cashierFullName: payment.cashierFullName,
+          // `null`, jamais `''` — c'est ce que le gabarit lit pour escamoter le
+          // bloc payeur entier plutôt que d'imprimer un cadre vide.
+          payerFullName: payment.payerFullName,
+          payerPhoneNumber: payment.payerPhoneNumber,
           // Ce que le TIROIR a vu, et non ce que les imputations totalisent :
           // c'est toute la correction de ce lot. Le montant reçu du ticket en
           // dérive (`TicketReceiptModel.amountReceived`), il n'est plus posable

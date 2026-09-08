@@ -29,7 +29,7 @@ const _labels = TicketLabels(
 
 TicketReceiptModel _model({int allocationCount = 2}) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
-  schoolMunicipality: 'Ngaliema',
+  schoolLocality: 'Ngaliema',
   studentFullName: 'Mbala Kasa Amina',
   matriculationNumber: 'MAT-0042',
   classroomName: '5e primaire A',

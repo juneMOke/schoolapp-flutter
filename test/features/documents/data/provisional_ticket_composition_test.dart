@@ -371,7 +371,7 @@ void main() {
     final model = result.getOrElse(() => throw StateError('échec'));
 
     expect(model.schoolName, 'Complexe scolaire La Colombe');
-    expect(model.schoolMunicipality, 'Ngaliema');
+    expect(model.schoolLocality, 'Ngaliema');
     expect(model.classroomName, '5e primaire A');
   });
 

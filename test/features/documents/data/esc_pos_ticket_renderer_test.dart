@@ -31,7 +31,7 @@ const _labels = TicketLabels(
 TicketReceiptModel _model({String schoolName = 'Institut Sacré-Cœur'}) =>
     TicketReceiptModel(
       schoolName: schoolName,
-      schoolMunicipality: 'Kinshasa · Ngaliema',
+      schoolLocality: 'Kinshasa · Ngaliema',
       studentFullName: 'Mbala Kasa Amina',
       matriculationNumber: null,
       classroomName: '5e primaire A',
