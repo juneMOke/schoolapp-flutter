@@ -14,7 +14,9 @@ import 'package:school_app_flutter/features/finance/domain/entities/finance_till
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_recovery_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -22,6 +24,9 @@ class MockGetFinanceRecoveryUseCase extends Mock
     implements GetFinanceRecoveryUseCase {}
 
 class MockGetFinanceTillUseCase extends Mock implements GetFinanceTillUseCase {}
+
+class MockGetTillReceiptsUseCase extends Mock
+    implements GetTillReceiptsUseCase {}
 
 /// La ligne de fraîcheur de la caisse lit le cubit de synchro, fourni au niveau
 /// de `main.dart`. Tout test qui monte l'onglet doit donc en poser un —
@@ -127,11 +132,13 @@ void main() {
 
   late MockGetFinanceRecoveryUseCase mockRecovery;
   late MockGetFinanceTillUseCase mockTill;
+  late MockGetTillReceiptsUseCase mockReceipts;
   late MockSyncStatusCubit syncCubit;
 
   setUp(() {
     mockRecovery = MockGetFinanceRecoveryUseCase();
     mockTill = MockGetFinanceTillUseCase();
+    mockReceipts = MockGetTillReceiptsUseCase();
     syncCubit = MockSyncStatusCubit();
     const syncState = SyncStatusState(status: SyncStatus.synced);
     when(() => syncCubit.state).thenReturn(syncState);
@@ -144,6 +151,17 @@ void main() {
     when(
       () => mockTill(period: any(named: 'period')),
     ).thenAnswer((_) async => Right(tTill));
+    // La table nominative est un SECOND appel, sous une seconde permission. Le
+    // stub la sert vide : ce que ces tests vérifient est le pilotage, pas les
+    // lignes.
+    when(
+      () => mockReceipts(
+        currency: any(named: 'currency'),
+        period: any(named: 'period'),
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).thenAnswer((_) async => const Right(TillReceiptsPage.empty));
   });
 
   Future<void> pumpPage(WidgetTester tester) async {
@@ -156,6 +174,10 @@ void main() {
           ),
           BlocProvider<FinanceTillBloc>(
             create: (_) => FinanceTillBloc(getFinanceTillUseCase: mockTill),
+          ),
+          BlocProvider<FinanceTillReceiptsBloc>(
+            create: (_) =>
+                FinanceTillReceiptsBloc(getTillReceiptsUseCase: mockReceipts),
           ),
           BlocProvider<SyncStatusCubit>.value(value: syncCubit),
         ],

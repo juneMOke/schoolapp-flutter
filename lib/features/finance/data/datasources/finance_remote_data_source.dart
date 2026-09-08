@@ -45,4 +45,23 @@ abstract class FinanceRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Query('period') String period,
   );
+
+  /// Les reçus de **une** caisse, page par page.
+  ///
+  /// `currency` n'est pas facultatif : la table décrit une caisse, et un appel
+  /// sans devise part en 400. C'est le garde-fou qui empêche une page
+  /// vraisemblable scopée sur rien — huit lignes toutes devises confondues sous
+  /// un titre qui en annonce une seule.
+  ///
+  /// ⚠️ **Seconde permission** (`finance.payment.read`) : un porteur du seul
+  /// pilotage reçoit 200 sur l'agrégat et **403 ici**. L'appel vit donc dans
+  /// son propre BLoC, et son échec ne doit pas emporter les cartes.
+  @GET(AppConstants.financeTillReceiptsEndpoint)
+  Future<TillReceiptPageModel> getTillReceipts(
+    @Extras() Map<String, dynamic> extras,
+    @Query('period') String period,
+    @Query('currency') String currency,
+    @Query('page') int page,
+    @Query('size') int size,
+  );
 }

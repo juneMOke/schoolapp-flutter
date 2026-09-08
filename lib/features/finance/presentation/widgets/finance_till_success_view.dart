@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
@@ -11,6 +13,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_classroom_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_receipts_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_source_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -109,6 +112,15 @@ class FinanceTillSuccessView extends StatelessWidget {
               FinanceTillSourceSection(block: selected),
               const SizedBox(height: AppDimensions.spacingL),
               FinanceTillClassroomSection(block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+              // La preuve, en dernier. Son BLoC est distinct : un 403 ici —
+              // droit de pilotage sans droit nominatif — laisse tout ce qui
+              // précède à l'écran.
+              FinanceTillReceiptsSection(
+                tillTotal: MoneyFormat.format(
+                  Money.parse(selected.summary.total, selected.currency),
+                ),
+              ),
             ],
             const SizedBox(height: AppDimensions.spacingXL),
           ],

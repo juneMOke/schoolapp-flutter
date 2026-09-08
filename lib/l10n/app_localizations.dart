@@ -10511,6 +10511,108 @@ abstract class AppLocalizations {
   /// **'What went into the drawer'**
   String get financeDashboardTabTillDescription;
 
+  /// No description provided for @financeTillReceiptsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till receipts'**
+  String financeTillReceiptsHeading(String currency);
+
+  /// No description provided for @financeTillReceiptsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No collections} one{1 collection} other{{count} collections}}'**
+  String financeTillReceiptsCount(int count);
+
+  /// No description provided for @financeTillReceiptsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'collection'**
+  String get financeTillReceiptsUnit;
+
+  /// No description provided for @financeTillReceiptsUnsealed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 without a sealed receipt (back-entry)} other{{count} without a sealed receipt (back-entries)}}'**
+  String financeTillReceiptsUnsealed(int count);
+
+  /// No description provided for @financeTillReceiptsColumnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get financeTillReceiptsColumnDate;
+
+  /// No description provided for @financeTillReceiptsColumnReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get financeTillReceiptsColumnReceipt;
+
+  /// No description provided for @financeTillReceiptsColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get financeTillReceiptsColumnStudent;
+
+  /// No description provided for @financeTillReceiptsColumnSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get financeTillReceiptsColumnSource;
+
+  /// No description provided for @financeTillReceiptsColumnAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get financeTillReceiptsColumnAmount;
+
+  /// No description provided for @financeTillReceiptsNoNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get financeTillReceiptsNoNumber;
+
+  /// No description provided for @financeTillReceiptsNoStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get financeTillReceiptsNoStudent;
+
+  /// No description provided for @financeTillReceiptsCollectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'collected by {agent}'**
+  String financeTillReceiptsCollectedBy(String agent);
+
+  /// No description provided for @financeTillReceiptsCrossed.
+  ///
+  /// In en, this message translates to:
+  /// **'settles {amount} · rate {rate}'**
+  String financeTillReceiptsCrossed(String amount, String rate);
+
+  /// No description provided for @financeTillReceiptsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading collections…'**
+  String get financeTillReceiptsLoading;
+
+  /// No description provided for @financeTillReceiptsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections in this till for the period'**
+  String get financeTillReceiptsEmpty;
+
+  /// No description provided for @financeTillReceiptsForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The itemised list of collections requires the payment-read permission. The totals above remain readable without it.'**
+  String get financeTillReceiptsForbidden;
+
+  /// No description provided for @financeTillReceiptsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections could not be loaded. The totals above are up to date.'**
+  String get financeTillReceiptsError;
+
   /// No description provided for @financeTillSourceHeading.
   ///
   /// In en, this message translates to:

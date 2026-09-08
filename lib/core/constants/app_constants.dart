@@ -151,6 +151,26 @@ class AppConstants {
   /// en 400 si elle ne correspond pas à la période demandée.
   static const String financeTillStatsEndpoint = '/api/v1/finance-stats/till';
 
+  /// La table **nominative** des reçus d'une caisse.
+  ///
+  /// ⚠️ **Deux permissions**, pas une : `finance.stats.read` **et**
+  /// `finance.payment.read`. Ces lignes portent des noms d'élèves et de
+  /// caissiers ; les servir sous le seul droit de pilotage donnerait le
+  /// nominatif à qui ne détient que les agrégats. Un porteur du pilotage seul
+  /// reçoit donc 200 sur `/till` et **403 ici** — c'est voulu, et c'est
+  /// pourquoi cet appel vit dans son propre BLoC : les cartes restent à
+  /// l'écran, seule la table dit ce qui lui manque.
+  ///
+  /// `currency` est **obligatoire** : la table décrit une caisse. Sans elle le
+  /// serveur répond 400, plutôt qu'une page vraisemblable scopée sur rien dont
+  /// le `totalElements` compterait à travers les caisses.
+  ///
+  /// La taille de page est bornée à 100, et un dépassement part en **400** —
+  /// pas en écrêtage silencieux, qui ferait conclure d'une réponse courte que
+  /// la fenêtre est creuse.
+  static const String financeTillReceiptsEndpoint =
+      '/api/v1/finance-stats/till/receipts';
+
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body
   // de requête, et posent un `Content-Disposition: attachment; filename="<n°>.pdf"`

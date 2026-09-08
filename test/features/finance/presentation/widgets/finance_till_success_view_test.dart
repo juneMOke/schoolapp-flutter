@@ -7,8 +7,10 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
@@ -17,6 +19,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+/// La table des reçus vit dans son propre BLoC — c'est ce qui permet à un 403
+/// nominatif de ne pas emporter les agrégats. Les tests de la vue la montent
+/// donc à un état donné plutôt que d'appeler le réseau.
+class _StubReceiptsBloc
+    extends MockBloc<FinanceTillReceiptsEvent, FinanceTillReceiptsState>
+    implements FinanceTillReceiptsBloc {}
 
 TillCurrencyBlock _block(
   String currency, {
@@ -132,6 +141,7 @@ void main() {
     WidgetTester tester,
     FinanceTill till, {
     String? selectedCurrency,
+    FinanceTillReceiptsState? receiptsState,
   }) async {
     selectedByTap = <String>[];
     final currency = resolveSelectedTillCurrency(
@@ -142,11 +152,28 @@ void main() {
         .where((block) => block.currency == currency)
         .firstOrNull;
 
+    final receipts =
+        receiptsState ??
+        FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.empty,
+          currency: currency,
+        );
+    final receiptsBloc = _StubReceiptsBloc();
+    when(() => receiptsBloc.state).thenReturn(receipts);
+    whenListen(
+      receiptsBloc,
+      const Stream<FinanceTillReceiptsState>.empty(),
+      initialState: receipts,
+    );
+
     await tester.binding.setSurfaceSize(const Size(1280, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      BlocProvider<SyncStatusCubit>.value(
-        value: syncCubit,
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<SyncStatusCubit>.value(value: syncCubit),
+          BlocProvider<FinanceTillReceiptsBloc>.value(value: receiptsBloc),
+        ],
         child: MaterialApp(
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -764,6 +791,114 @@ void main() {
       await pump(tester, _till([_block('USD')]));
 
       expect(find.text('Aucune classe à classer'), findsOneWidget);
+    });
+  });
+
+  group('la table des reçus', () {
+    testWidgets('un 403 nominatif laisse TOUT le reste à l’écran', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        // Le cas réel : un porteur de `finance.stats.read` sans
+        // `finance.payment.read`. Les agrégats ont répondu 200 ; seule la table
+        // est refusée.
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.error,
+          currency: 'USD',
+          failure: UnauthorizedFailure('Access forbidden'),
+        ),
+      );
+
+      expect(
+        find.textContaining('demande le droit de lecture des paiements'),
+        findsOneWidget,
+      );
+      // Et surtout : rien d'autre n'a disparu.
+      expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
+      expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
+      expect(find.byType(FinanceTillBucketsSection), findsOneWidget);
+      expect(find.text('Par source'), findsOneWidget);
+      expect(find.text('Par classe'), findsOneWidget);
+      expect(
+        find.textContaining('Journée du'),
+        findsOneWidget,
+        reason:
+            'l’en-tête, les caisses, le graphique et les ventilations viennent '
+            'd’un appel qui a réussi : un droit manquant sur la table ne les '
+            'emporte pas',
+      );
+    });
+
+    testWidgets('une panne réseau sur la table ne se lit pas comme un refus', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.error,
+          currency: 'USD',
+          failure: NetworkFailure('offline'),
+        ),
+      );
+
+      expect(find.textContaining('n\'ont pas pu être chargés'), findsOneWidget);
+      expect(
+        find.textContaining('droit de lecture des paiements'),
+        findsNothing,
+        reason:
+            'un droit manquant et une panne appellent deux gestes différents : '
+            'les confondre enverrait le caissier réessayer un refus',
+      );
+    });
+
+    testWidgets('le sous-titre aligne trois chiffres de FENÊTRE', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD', fees: 400000, boutique: 12000)]),
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          currency: 'USD',
+          totalElements: 17,
+          totalPages: 3,
+          // Compté par le serveur sur la fenêtre : la page n'en montre que 8.
+          withoutReceiptNumber: 2,
+        ),
+      );
+
+      expect(
+        find.textContaining('17 encaissements'),
+        findsOneWidget,
+        reason: 'le compte porte sur la fenêtre, pas sur la page affichée',
+      );
+      expect(
+        find.textContaining('2 sans pièce scellée'),
+        findsOneWidget,
+        reason:
+            'compté sur la page, ce chiffre changerait à chaque tour de '
+            'pagination sous un total immobile',
+      );
+    });
+
+    testWidgets('sans rattrapage, le sous-titre n’en parle pas', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          currency: 'USD',
+          totalElements: 5,
+          totalPages: 1,
+        ),
+      );
+
+      expect(find.textContaining('sans pièce scellée'), findsNothing);
     });
   });
 }

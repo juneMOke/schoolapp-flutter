@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/finance/data/datasources/finance_rem
 import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_period.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 
@@ -72,6 +73,34 @@ class FinanceRepositoryImpl implements FinanceRepository {
     } catch (_) {
       // `fromJson` lève sur un `summary` absent : mieux vaut dire « erreur »
       // que rendre un tiroir vide à qui l'a ouvert devant lui.
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TillReceiptsPage>> getTillReceipts({
+    required String currency,
+    TillPeriod period = TillPeriod.day,
+    int page = 0,
+    int size = TillReceiptsQuery.defaultPageSize,
+  }) async {
+    try {
+      final response = await remoteDataSource.getTillReceipts(
+        requiredAuth,
+        period.apiValue,
+        currency,
+        page,
+        size,
+      );
+      return Right(response.toEntity());
+    } on DioException catch (e) {
+      // Le 403 remonte **tel quel** : c'est un droit manquant, pas une panne,
+      // et l'écran doit pouvoir les distinguer pour garder ses cartes.
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }

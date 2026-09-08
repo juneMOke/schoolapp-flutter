@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
@@ -18,16 +19,39 @@ class FinanceTillTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Align(
-          alignment: Alignment.centerLeft,
-          child: FinanceTillPeriodFilter(),
+    return MultiBlocListener(
+      listeners: [
+        // **Le bloc des agrégats fait autorité.** C'est lui qui sait quelle
+        // fenêtre a répondu et quelle caisse est examinée ; la table ne décide
+        // ni l'une ni l'autre, elle les reçoit. Un second appel déclenché par
+        // la table elle-même finirait par demander une caisse que les agrégats
+        // ne portent plus.
+        BlocListener<FinanceTillBloc, FinanceTillState>(
+          listenWhen: (prev, curr) =>
+              curr.status == FinanceTillStatus.success &&
+              curr.selectedCurrency != null &&
+              (prev.selectedCurrency != curr.selectedCurrency ||
+                  prev.till != curr.till),
+          listener: (context, state) =>
+              context.read<FinanceTillReceiptsBloc>().add(
+                FinanceTillReceiptsRequested(
+                  currency: state.selectedCurrency!,
+                  period: state.selectedPeriod,
+                ),
+              ),
         ),
-        const SizedBox(height: AppDimensions.spacingL),
-        _body(context, l10n),
       ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: FinanceTillPeriodFilter(),
+          ),
+          const SizedBox(height: AppDimensions.spacingL),
+          _body(context, l10n),
+        ],
+      ),
     );
   }
 

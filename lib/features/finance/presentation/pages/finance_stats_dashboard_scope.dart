@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 
 /// Scope BLoC du tableau de bord Finances — **un bloc par onglet**.
 ///
@@ -27,17 +28,24 @@ class _FinanceStatsDashboardScopeState
   late final FinanceRecoveryBloc _recoveryBloc;
   late final FinanceTillBloc _tillBloc;
 
+  /// Le second appel de la caisse — nominatif, paginé, et **sous une seconde
+  /// permission**. Il vit ici plutôt que dans l'onglet pour survivre aux
+  /// bascules d'onglet, comme les deux autres.
+  late final FinanceTillReceiptsBloc _receiptsBloc;
+
   @override
   void initState() {
     super.initState();
     _recoveryBloc = GetIt.instance<FinanceRecoveryBloc>();
     _tillBloc = GetIt.instance<FinanceTillBloc>();
+    _receiptsBloc = GetIt.instance<FinanceTillReceiptsBloc>();
   }
 
   @override
   void dispose() {
     _recoveryBloc.close();
     _tillBloc.close();
+    _receiptsBloc.close();
     super.dispose();
   }
 
@@ -47,6 +55,7 @@ class _FinanceStatsDashboardScopeState
       providers: [
         BlocProvider<FinanceRecoveryBloc>.value(value: _recoveryBloc),
         BlocProvider<FinanceTillBloc>.value(value: _tillBloc),
+        BlocProvider<FinanceTillReceiptsBloc>.value(value: _receiptsBloc),
       ],
       child: widget.child,
     );

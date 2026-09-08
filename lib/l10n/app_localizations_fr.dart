@@ -6484,6 +6484,83 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce qui est entré dans le tiroir';
 
   @override
+  String financeTillReceiptsHeading(String currency) {
+    return 'Reçus de la caisse $currency';
+  }
+
+  @override
+  String financeTillReceiptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count encaissements',
+      one: '1 encaissement',
+      zero: 'Aucun encaissement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsUnit => 'encaissement';
+
+  @override
+  String financeTillReceiptsUnsealed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sans pièce scellée (saisies de rattrapage)',
+      one: '1 sans pièce scellée (saisie de rattrapage)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsColumnDate => 'Date';
+
+  @override
+  String get financeTillReceiptsColumnReceipt => 'Reçu';
+
+  @override
+  String get financeTillReceiptsColumnStudent => 'Élève';
+
+  @override
+  String get financeTillReceiptsColumnSource => 'Source';
+
+  @override
+  String get financeTillReceiptsColumnAmount => 'Encaissé';
+
+  @override
+  String get financeTillReceiptsNoNumber => '—';
+
+  @override
+  String get financeTillReceiptsNoStudent => '—';
+
+  @override
+  String financeTillReceiptsCollectedBy(String agent) {
+    return 'encaissé par $agent';
+  }
+
+  @override
+  String financeTillReceiptsCrossed(String amount, String rate) {
+    return 'solde $amount · taux $rate';
+  }
+
+  @override
+  String get financeTillReceiptsLoading => 'Chargement des encaissements…';
+
+  @override
+  String get financeTillReceiptsEmpty =>
+      'Aucun encaissement dans cette caisse sur la période';
+
+  @override
+  String get financeTillReceiptsForbidden =>
+      'Le détail nominatif des encaissements demande le droit de lecture des paiements. Les totaux ci-dessus restent lisibles sans lui.';
+
+  @override
+  String get financeTillReceiptsError =>
+      'Les encaissements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
+
+  @override
   String get financeTillSourceHeading => 'Par source';
 
   @override

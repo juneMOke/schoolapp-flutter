@@ -6417,6 +6417,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeDashboardTabTillDescription => 'What went into the drawer';
 
   @override
+  String financeTillReceiptsHeading(String currency) {
+    return '$currency till receipts';
+  }
+
+  @override
+  String financeTillReceiptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections',
+      one: '1 collection',
+      zero: 'No collections',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsUnit => 'collection';
+
+  @override
+  String financeTillReceiptsUnsealed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count without a sealed receipt (back-entries)',
+      one: '1 without a sealed receipt (back-entry)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsColumnDate => 'Date';
+
+  @override
+  String get financeTillReceiptsColumnReceipt => 'Receipt';
+
+  @override
+  String get financeTillReceiptsColumnStudent => 'Student';
+
+  @override
+  String get financeTillReceiptsColumnSource => 'Source';
+
+  @override
+  String get financeTillReceiptsColumnAmount => 'Collected';
+
+  @override
+  String get financeTillReceiptsNoNumber => '—';
+
+  @override
+  String get financeTillReceiptsNoStudent => '—';
+
+  @override
+  String financeTillReceiptsCollectedBy(String agent) {
+    return 'collected by $agent';
+  }
+
+  @override
+  String financeTillReceiptsCrossed(String amount, String rate) {
+    return 'settles $amount · rate $rate';
+  }
+
+  @override
+  String get financeTillReceiptsLoading => 'Loading collections…';
+
+  @override
+  String get financeTillReceiptsEmpty =>
+      'No collections in this till for the period';
+
+  @override
+  String get financeTillReceiptsForbidden =>
+      'The itemised list of collections requires the payment-read permission. The totals above remain readable without it.';
+
+  @override
+  String get financeTillReceiptsError =>
+      'Collections could not be loaded. The totals above are up to date.';
+
+  @override
   String get financeTillSourceHeading => 'By source';
 
   @override
