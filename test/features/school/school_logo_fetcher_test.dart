@@ -133,6 +133,38 @@ void main() {
       expect(headers['If-None-Match'], isNot(_target));
     });
 
+    /// ⚠️ **Le défaut trouvé en production, et le test qui manquait.**
+    ///
+    /// L'intercepteur d'authentification n'attache le jeton que si
+    /// `extra['requiresAuth']` est vrai — et son **défaut est `false`**. Une
+    /// requête qui l'omet part donc anonyme, en silence ; le serveur, qui lit
+    /// l'école dans l'en-tête d'autorisation, répond un `403` parfaitement
+    /// correct, et le logo n'arrive jamais.
+    ///
+    /// Aucun des autres tests de ce fichier ne pouvait le voir : ils simulent
+    /// `Dio`, donc **la chaîne d'intercepteurs ne tourne pas**. Une requête
+    /// bien adressée mais mal formée les satisfait tous. C'est la limite de
+    /// cette famille de tests, et cette assertion est ce qui la compense au
+    /// point exact où elle fait mal.
+    ///
+    /// La clé est écrite en toutes lettres plutôt que dérivée de
+    /// `RequestOptionsExtra.auth()` : c'est cette chaîne-là que l'intercepteur
+    /// lit, et un test qui passerait par le même helper que le code testé
+    /// suivrait un renommage sans rien dire.
+    test('la requête porte le drapeau d\'authentification', () async {
+      stub(response(200, data: _realBand(), etag: '"$_target"'));
+
+      await run();
+
+      final captured = verify(
+        () => dio.get<List<int>>(any(), options: captureAny(named: 'options')),
+      ).captured;
+      final extra = (captured.last as Options).extra;
+
+      expect(extra, isNotNull, reason: 'aucun extra : la requête part anonyme');
+      expect(extra!['requiresAuth'], isTrue);
+    });
+
     /// Rien à demander quand ce qu'on détient est déjà ce que le lot annonce :
     /// pas d'appel du tout, donc pas d'octets sur un réseau de terrain.
     test('déjà à jour : aucun appel', () async {

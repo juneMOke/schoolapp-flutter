@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/mono_png_decoder.dart';
 import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
@@ -78,6 +79,16 @@ class SchoolLogoFetcher {
       final response = await _dio.get<List<int>>(
         '/api/v1/schools/$schoolId/logo/${variant.dbValue}',
         options: Options(
+          // ⚠️ **Sans ceci, aucun jeton ne part.** L'intercepteur
+          // d'authentification n'attache l'en-tête que si `requiresAuth` est
+          // vrai dans `extra`, et son défaut est `false` — une requête qui
+          // l'omet sort donc anonyme, en silence.
+          //
+          // Le serveur lit l'école dans l'en-tête d'autorisation : sans lui,
+          // aucune école, et un `403` parfaitement correct. Le symptôme est
+          // même prédit par le commentaire de l'intercepteur (« certaines
+          // configs Spring répondent 403 »), à quelques lignes de là.
+          extra: RequestOptionsExtra.auth(),
           responseType: ResponseType.bytes,
           // Sur ce que la tablette DÉTIENT, et seulement si elle détient
           // quelque chose. Le serveur accepte l'empreinte nue comme entre

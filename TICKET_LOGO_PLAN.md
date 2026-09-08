@@ -8,13 +8,21 @@
 >
 > | | état |
 > |---|---|
-> | Format du ticket, réimpression, bandeau conditionnel | **décidé**, non écrit |
 > | Schéma v47 (`school_logo_cache` + empreintes) | **écrit** |
-> | Raster `GS v 0` et bande hors pivot | **décidé**, non écrit |
-> | Tirage conditionnel des octets | **bloqué** — attend le contrat réel du back |
+> | Format du ticket : en-tête, `Date :`, payeur, caissier | **écrit** |
+> | Bandeau conditionnel et mention `Réf. provisoire` | **écrit** |
+> | Bande hors pivot et raster `GS v 0` | **écrit** |
+> | DTO `logoRefs`, cache d'octets, décodeur PNG 1 bit | **écrit** |
+> | Tirage conditionnel + vérification d'intégrité | **écrit** |
+> | Câblage (pull → tirage, impression → bande) | **écrit** |
 >
-> Aucun push. Les arbitrages produit viennent du porteur ; ce document porte le
-> raisonnement technique, pas la décision.
+> **Le lot est complet et non poussé.** Les arbitrages produit viennent du
+> porteur ; ce document porte le raisonnement technique, pas la décision.
+>
+> ⚠️ Un défaut est passé en production et a été corrigé après coup — le tirage
+> partait **sans jeton d'authentification**. Voir « un test qui simule le
+> transport ne peut pas voir un défaut du transport », §9 : c'est le constat le
+> plus transférable de ce lot.
 
 ---
 
@@ -463,6 +471,44 @@ colonnes sans débordement.
 
 **Caissier (13-15)** : `cashier_*` sur le poste ; **repli `collected_by_name`**
 hors poste ; les deux absents ⇒ la ligne disparaît.
+
+### ⚠️ Un test qui simule le transport ne peut pas voir un défaut du transport
+
+**Constaté en production, pas en revue.** Le tirage du logo revenait `403`. Le
+défaut tenait en une ligne : les `Options` du `get` ne portaient pas
+`extra: RequestOptionsExtra.auth()`, et l'intercepteur d'authentification
+n'attache le jeton que si `extra['requiresAuth']` est vrai — **son défaut est
+`false`**. La requête partait donc anonyme, en silence. Le serveur lisant l'école
+dans l'en-tête d'autorisation, son `403` était parfaitement correct.
+
+Les treize tests du tireur étaient verts, et **aucun ne pouvait le voir** : ils
+simulent `Dio`, donc la chaîne d'intercepteurs ne tourne jamais. Une requête
+**bien adressée mais mal formée** les satisfait tous.
+
+C'est la même famille que tout le reste de ce document, sous une forme nouvelle :
+
+| ce qu'on croyait mesurer | ce qu'on mesurait |
+|---|---|
+| la barre est peinte | sa largeur est juste (58360f63) |
+| la commande est correcte | les octets sont ceux qu'on a passés |
+| la bande n'est pas répétée | le fichier ne grossit pas |
+| **la requête est bien formée** | **elle part vers la bonne URL** |
+
+Et la consigne de câblage était elle-même insuffisante : elle demandait la preuve
+que **l'appel a lieu**, pas que **l'appel est bien formé**. Le premier se
+satisfait d'une requête sans jeton.
+
+**Ce qui le garde désormais** : une assertion sur les `RequestOptions` réellement
+passées — `extra['requiresAuth']` vaut `true`. La clé est écrite en toutes
+lettres plutôt que dérivée du helper, parce que c'est cette chaîne-là que
+l'intercepteur lit et qu'un test passant par le même helper que le code testé
+suivrait un renommage sans rien dire. **Vérifiée en retirant le correctif : elle
+rougit.**
+
+**La leçon générale, pour tout appel réseau ajouté ici :** un test qui simule le
+transport prouve la logique, jamais la forme de la requête. Le seul test qui
+verrait ce défaut sans assertion dédiée serait un test qui traverse la vraie
+chaîne d'intercepteurs — plus fort, et à payer si le lot le justifie.
 
 ### ⚠️ Ce qu'il ne faut PAS toucher (16-17)
 
