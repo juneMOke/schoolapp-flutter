@@ -10725,12 +10725,6 @@ abstract class AppLocalizations {
   /// **'No rate configured'**
   String get financeTillRateNone;
 
-  /// No description provided for @financeTillRateEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Change the rate'**
-  String get financeTillRateEdit;
-
   /// No description provided for @financeTillRateA11yLabel.
   ///
   /// In en, this message translates to:
@@ -11000,7 +10994,7 @@ abstract class AppLocalizations {
   /// No description provided for @financeTillBucketsHeading.
   ///
   /// In en, this message translates to:
-  /// **'Daily collections · {currency} till'**
+  /// **'Collections trend · {currency} till'**
   String financeTillBucketsHeading(String currency);
 
   /// No description provided for @financeTillBucketsWindowNote.

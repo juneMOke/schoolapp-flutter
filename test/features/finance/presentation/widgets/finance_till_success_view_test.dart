@@ -17,6 +17,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -454,21 +455,86 @@ void main() {
     );
   });
 
-  testWidgets('la ventilation voisine « Par source », chacune nommant son '
-      'unité', (tester) async {
+  testWidgets('la ventilation suit « Par source », chacune nommant son unité', (
+    tester,
+  ) async {
     await pump(tester, _till([_block('USD')]));
 
-    // Deux lectures de la même somme, côte à côte : séparées, elles cessent de
-    // répondre à la même question.
+    // Deux lectures de la même somme, l'une sous l'autre : « d'où ça vient »
+    // puis « ce que ça a éteint ».
     expect(find.text('Créances réglées en \$'), findsOneWidget);
     expect(find.text('Par source'), findsOneWidget);
     expect(find.text('Minerval'), findsOneWidget);
-    // Et le voisinage n'invite pas à additionner : la carte de gauche dit son
-    // unité, qui n'est pas celle de droite.
+    // Et leur succession n'invite pas à additionner : la seconde dit son unité,
+    // qui n'est pas celle de la première.
     expect(
       find.textContaining('En devise de créance, jamais converti'),
       findsOneWidget,
     );
+  });
+
+  /// La carte qui porte ce titre, prise par son cadre.
+  Finder cardOf(String title) => find.ancestor(
+    of: find.text(title),
+    matching: find.byType(FinanceStatsChartCard),
+  );
+
+  testWidgets('« Par source » tient toute la ligne, sans rien partager', (
+    tester,
+  ) async {
+    await pump(tester, _till([_block('USD')]));
+
+    final source = tester.getRect(cardOf('Par source'));
+    // Pleine largeur : celle d'une carte dont on sait qu'elle l'occupe déjà.
+    expect(source.width, tester.getRect(cardOf('Par classe')).width);
+    // Et rien à sa droite : les créances, qui partageaient sa ligne, sont
+    // passées dessous — elles ne comptent pas dans la même unité qu'elle.
+    expect(
+      tester.getRect(cardOf('Créances réglées en \$')).top,
+      greaterThanOrEqualTo(source.bottom),
+    );
+  });
+
+  testWidgets('les deux devises de créance se lisent côte à côte', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _till(
+        [_block('USD')],
+        impute: [_imputation('USD', 5000), _imputation('CDF', 11500000)],
+      ),
+    );
+
+    final usd = tester.getRect(cardOf('Créances réglées en \$'));
+    final cdf = tester.getRect(cardOf('Créances réglées en FC'));
+
+    // Empilées, comparer « ce que la journée a éteint ici et là » demandait de
+    // faire défiler.
+    expect(usd.top, cdf.top);
+    expect(usd.right, lessThanOrEqualTo(cdf.left));
+  });
+
+  testWidgets('à l’étroit, elles retombent l’une sous l’autre', (tester) async {
+    // ⚠️ La taille se pose APRÈS le pump, que le harnais fixe à 1280.
+    await pump(
+      tester,
+      _till(
+        [_block('USD')],
+        impute: [_imputation('USD', 5000), _imputation('CDF', 11500000)],
+      ),
+    );
+    await tester.binding.setSurfaceSize(const Size(600, 4000));
+    await tester.pumpAndSettle();
+
+    final usd = tester.getRect(cardOf('Créances réglées en \$'));
+    final cdf = tester.getRect(cardOf('Créances réglées en FC'));
+
+    // Une comparaison illisible ne vaut pas mieux qu'un empilement.
+    expect(cdf.top, greaterThanOrEqualTo(usd.bottom));
+    expect(usd.width, cdf.width);
+    expect(tester.takeException(), isNull);
+    await tester.binding.setSurfaceSize(null);
   });
 
   testWidgets(
@@ -783,7 +849,7 @@ void main() {
     // Deux tuiles, mais un seul axe : le dollar par défaut.
     expect(find.byType(FinanceTillBucketsSection), findsOneWidget);
     expect(
-      find.text('Encaissements jour par jour · caisse dollars'),
+      find.text('Progression des encaissements · caisse dollars'),
       findsOneWidget,
     );
     expect(
@@ -844,7 +910,7 @@ void main() {
     expect(find.textContaining('dollars ('), findsNothing);
     // Le graphique, lui, reste nommé : on doit savoir quelle caisse il dessine.
     expect(
-      find.text('Encaissements jour par jour · caisse dollars'),
+      find.text('Progression des encaissements · caisse dollars'),
       findsOneWidget,
     );
   });
@@ -1400,30 +1466,69 @@ void main() {
   });
 
   group('les icônes', () {
-    testWidgets(
-      'aucun titre de section n’en porte — la spec n’en dessine pas',
-      (tester) async {
-        await pump(tester, _till([_block('USD')]));
+    testWidgets('chaque carte porte le repère de son sujet', (tester) async {
+      await pump(tester, _till([_block('USD')]));
 
-        // Vérifié titre par titre sur la maquette : « Encaissements jour par
-        // jour », « Par source », « Ventilation par poste imputé », « Par
-        // classe », « Reçus de la caisse » et « Détail de la caisse » y sont
-        // rendus en **texte nu**. Les icônes de la maquette sont ailleurs —
-        // médaillons de tuiles, médaillons de lectures, pastilles de source.
-        for (final title in const [
-          'Par source',
-          'Par classe',
-          'Lectures & alertes',
-        ]) {
-          final heading = find.text(title);
-          expect(heading, findsOneWidget);
-          expect(
-            find.ancestor(of: heading, matching: find.byType(Icon)),
-            findsNothing,
-          );
-        }
-      },
-    );
+      // ⚠️ **Le repère double le titre, il ne le remplace pas** : chaque titre
+      // reste écrit en toutes lettres. L'icône sert à retrouver une carte d'un
+      // coup d'œil dans une page qui en empile six.
+      //
+      // Aucune n'est choisie librement : chacune est **déjà** celle de son
+      // sujet ailleurs dans l'application — la flèche de la carte « Tendance »,
+      // la pastille « facturation » de la table des reçus, les créances et les
+      // versements de Facturation. Une icône inventée ici ferait de la même
+      // chose deux sujets.
+      const expected = <String, IconData>{
+        'Progression des encaissements · caisse dollars':
+            Icons.trending_up_rounded,
+        'Par source': Icons.account_balance,
+        'Créances réglées en \$': Icons.receipt_long_outlined,
+        'Par classe': Icons.groups_outlined,
+        'Reçus de la caisse dollars': Icons.payments_outlined,
+      };
+
+      for (final entry in expected.entries) {
+        final heading = find.text(entry.key);
+        expect(heading, findsOneWidget, reason: entry.key);
+
+        // Scopé à la carte du titre : la même icône vit ailleurs à l'écran (la
+        // flèche est aussi sur la tuile de caisse, la colonne « source »
+        // reprend `account_balance`), et un `find.byIcon` global passerait sans
+        // rien prouver.
+        final card = find.ancestor(
+          of: heading,
+          matching: find.byType(FinanceStatsChartCard),
+        );
+        expect(card, findsOneWidget, reason: entry.key);
+        expect(
+          find.descendant(of: card, matching: find.byIcon(entry.value)),
+          findsWidgets,
+          reason: entry.key,
+        );
+      }
+    });
+
+    testWidgets('un titre hors carte n’en porte pas', (tester) async {
+      // Deux caisses : sans elles, « Détail de la caisse » n'existe pas — un
+      // sélecteur à un segment n'offrirait aucun choix.
+      await pump(tester, _till([_block('USD'), _block('CDF')]));
+
+      // « Lectures & alertes » et « Détail de la caisse » chapeautent des
+      // ensembles, ils ne nomment pas une carte : leur donner un repère les
+      // ferait passer pour une carte de plus.
+      for (final title in const ['Lectures & alertes', 'Détail de la caisse']) {
+        final heading = find.text(title);
+        expect(heading, findsOneWidget, reason: title);
+        expect(
+          find.ancestor(
+            of: heading,
+            matching: find.byType(FinanceStatsChartCard),
+          ),
+          findsNothing,
+          reason: title,
+        );
+      }
+    });
 
     testWidgets('celles qui existent sont RENDUES et visibles', (tester) async {
       await pump(tester, _till([_block('USD')]));

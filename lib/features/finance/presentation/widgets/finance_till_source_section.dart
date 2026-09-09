@@ -37,6 +37,11 @@ class FinanceTillSourceSection extends StatelessWidget {
 
     return FinanceStatsChartCard(
       title: l10n.financeTillSourceHeading,
+      // **La pastille de la table, promue en repère de carte.** C'est déjà
+      // l'icône de la source « facturation » dans « Reçus de la caisse » ; en
+      // reprendre une autre ici ferait de la ventilation et de ses lignes deux
+      // sujets sans rapport.
+      icon: Icons.account_balance,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

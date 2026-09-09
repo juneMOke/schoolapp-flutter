@@ -63,6 +63,12 @@ class FinanceTillBucketsSection extends StatelessWidget {
   /// composant du socle affiche via son infobulle.
   static const int _labelAllBarsUpTo = 10;
 
+  /// **La même flèche que la carte de lecture « Tendance »**, et ce n'est pas
+  /// une coïncidence : les deux disent la progression de la caisse, l'une en
+  /// dessin, l'autre en phrase. Deux icônes différentes les feraient lire comme
+  /// deux sujets.
+  static const IconData _headingIcon = Icons.trending_up_rounded;
+
   const FinanceTillBucketsSection({
     super.key,
     required this.buckets,
@@ -94,6 +100,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
     if (drawn.isEmpty) {
       return FinanceStatsChartCard(
         title: heading,
+        icon: _headingIcon,
         child: FinanceStatsEmptyState(
           message: l10n.financeStatsNoData,
           hint: l10n.financeStatsNoDataHint,
@@ -131,6 +138,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
 
     return FinanceStatsChartCard(
       title: heading,
+      icon: _headingIcon,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

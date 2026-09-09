@@ -42,6 +42,7 @@ class FinanceTillClassroomSection extends StatelessWidget {
 
     return FinanceStatsChartCard(
       title: l10n.financeTillClassroomHeading,
+      icon: Icons.groups_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

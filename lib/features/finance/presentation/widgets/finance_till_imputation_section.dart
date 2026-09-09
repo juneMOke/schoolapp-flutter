@@ -18,8 +18,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// caisses et ne s'y recoupent pas ligne à ligne : le même versement pèse dans
 /// le bloc CDF de l'encaisse et dans le bloc USD d'ici. **Une carte par devise
 /// de créance**, chacune nommant la sienne — c'est ce qui empêche de lire un
-/// total commun là où il n'en existe aucun, et ça compte double depuis que la
-/// carte voisine « Par source », qui compte en devise **reçue**.
+/// total commun là où il n'en existe aucun. Deux gardes le rendent nécessaire :
+/// « Par source » la précède immédiatement et compte, elle, en devise **reçue**
+/// ; et sa jumelle est désormais **à côté d'elle** sur la même ligne, où deux
+/// titres qui ne nommeraient pas leur devise se liraient comme deux moitiés
+/// d'un même total.
 ///
 /// **Un montant, et rien d'autre** : ni attendu, ni reste dû, ni taux. Ce qu'il
 /// reste à recouvrer sur un poste est la question de l'onglet d'à côté.
@@ -62,6 +65,9 @@ class FinanceTillImputationSection extends StatelessWidget {
 
     return FinanceStatsChartCard(
       title: l10n.financeTillImputationCardTitle(symbol),
+      // L'icône que Facturation donne déjà à ses créances : c'est le même objet
+      // qu'on regarde ici, éteint plutôt qu'ouvert.
+      icon: Icons.receipt_long_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -73,10 +79,11 @@ class FinanceTillImputationSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppDimensions.spacingXS),
-          // ⚠️ **La carte nomme son unité, et c'est indispensable depuis
-          // qu'elle voisine « Par source ».** Celle-ci compte en devise reçue,
-          // celle-là en devise de créance : côte à côte sans mention, leur
-          // adjacence invite à lire un total commun qui n'existe pas.
+          // ⚠️ **La carte nomme son unité**, et rien dans sa mise en page ne
+          // le dit à sa place : « Par source » la précède en devise reçue, sa
+          // jumelle la jouxte en une autre devise de créance. Sans cette
+          // mention, ce voisinage invite à additionner ce qui ne s'additionne
+          // pas.
           Text(
             l10n.financeTillImputationCardHint,
             style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),

@@ -155,12 +155,25 @@ class FinanceTillSuccessView extends StatelessWidget {
                     : null,
               ),
               const SizedBox(height: AppDimensions.spacingL),
-              // **Deux lectures de la même somme, côte à côte.** À gauche à quoi
-              // l'argent a été imputé, à droite d'où il vient. Séparées, elles
-              // cessent de répondre à la même question : c'est le rapprochement
-              // qui fait la lecture, pas chacune des deux cartes.
-              _ImputationAndSourceRow(till: till, selected: selected),
+              // **D'où vient l'argent, sur toute la largeur.**
+              //
+              // Elle occupait auparavant la moitié d'une ligne, l'imputation
+              // tenant l'autre. Les deux ne comptent pas dans la même unité —
+              // celle-ci en devise **reçue**, l'imputation en devise de
+              // **créance** — et leur voisinage invitait à lire un total commun
+              // qui n'existe pas. Empilées, chacune garde sa ligne et son
+              // unité ; elle suit ici le graphique et les tuiles, qui comptent
+              // comme elle.
+              //
+              // Ce qu'on y perd, et qu'il faut savoir : le rapprochement d'un
+              // coup d'œil entre « d'où ça vient » et « ce que ça a éteint »
+              // demande maintenant de descendre d'une carte.
+              FinanceTillSourceSection(block: selected),
               const SizedBox(height: AppDimensions.spacingL),
+              if (_showsImputation(till)) ...[
+                _ImputationRow(till: till),
+                const SizedBox(height: AppDimensions.spacingL),
+              ],
               FinanceTillClassroomSection(block: selected),
               const SizedBox(height: AppDimensions.spacingL),
               // Ce que les chiffres veulent dire — et ce qu'il n'y a pas à en
@@ -190,75 +203,48 @@ class FinanceTillSuccessView extends StatelessWidget {
 bool _hasFees(FinanceTill till) =>
     till.encaisse.any((block) => block.summary.fees > 0);
 
-/// **Deux lectures de la même somme**, côte à côte quand la largeur le permet.
+/// La rangée des créances a-t-elle quelque chose à dire ?
 ///
-/// À gauche « à quoi l'argent a été imputé », à droite « d'où il vient ». La
-/// spec l'écrit comme une **intention**, pas comme un détail de mise en page :
-/// séparées, les deux cartes cessent de répondre à la même question, et le
-/// lecteur perd le rapprochement qui fait toute la lecture.
+/// Elle existe soit parce que le serveur a rendu des imputations, soit parce
+/// qu'il n'en a rendu aucune **alors que des frais sont entrés** — auquel cas
+/// c'est la lacune qui s'affiche. Une journée sans frais, elle, n'a rien à
+/// montrer : la rangée disparaît, plutôt que d'annoncer un vide qui n'en est
+/// pas un.
+bool _showsImputation(FinanceTill till) =>
+    till.impute.isNotEmpty || _hasFees(till);
+
+/// **Les créances éteintes, une carte par devise**, côte à côte.
 ///
-/// ⚠️ **Les deux ne comptent pas dans la même unité**, et c'est justement
-/// pourquoi leur voisinage doit être explicite : la gauche est en devise de
-/// **créance**, la droite en devise **reçue**. Chaque carte nomme la sienne ;
-/// sans ça, l'adjacence inviterait à lire un total commun qui n'existe pas.
+/// Le serveur rend une carte par devise de **créance** : une école qui facture
+/// en dollars et en francs en a deux, et elles se lisent l'une contre l'autre —
+/// « ce que la journée a éteint, ici et là ». Empilées, la comparaison
+/// demandait de faire défiler ; côte à côte, elle se fait d'un coup d'œil.
 ///
-/// En dessous de la largeur des deux minima, elles s'empilent — la spec le
-/// prévoit (« empilées pleine largeur »), et un rapprochement illisible ne vaut
-/// pas mieux qu'une séparation.
-class _ImputationAndSourceRow extends StatelessWidget {
+/// ⚠️ **Aucune des deux ne s'additionne à l'autre**, et rien n'affiche leur
+/// somme : ce sont deux monnaies de créance, pas deux moitiés d'un total. C'est
+/// le titre de chaque carte qui porte cette garde — il nomme sa devise — et
+/// c'est pourquoi il n'est jamais escamoté.
+///
+/// En dessous de deux minima, les cartes retombent l'une sous l'autre : une
+/// comparaison illisible ne vaut pas mieux qu'un empilement.
+class _ImputationRow extends StatelessWidget {
   final FinanceTill till;
-  final TillCurrencyBlock selected;
 
-  const _ImputationAndSourceRow({required this.till, required this.selected});
+  const _ImputationRow({required this.till});
 
-  /// Les deux minima de la spec, plus leur gouttière.
-  static const double _imputationMinWidth = 380;
-  static const double _sourceMinWidth = 300;
+  /// Le minimum de la spec pour une carte d'imputation. En dessous, les libellés
+  /// de poste et leur montant se marchent dessus.
+  static const double _minCardWidth = 380;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final imputation = _imputationColumn(l10n);
-    final source = FinanceTillSourceSection(block: selected);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const gutter = AppDimensions.spacingL;
-        final fitsSideBySide =
-            constraints.maxWidth >=
-            _imputationMinWidth + _sourceMinWidth + gutter;
-
-        if (!fitsSideBySide) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              imputation,
-              const SizedBox(height: gutter),
-              source,
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: imputation),
-            const SizedBox(width: gutter),
-            Expanded(child: source),
-          ],
-        );
-      },
-    );
-  }
-
-  /// **Une carte par devise imputée** — le serveur en rend une par devise de
-  /// créance, et elles s'empilent dans la colonne de gauche.
-  Widget _imputationColumn(AppLocalizations l10n) {
+    // Des frais sont entrés sans qu'aucune imputation ne descende : on le
+    // montre, plutôt que d'escamoter la carte — où la lacune passerait pour une
+    // journée sans frais. Le cas « ni frais ni imputation » ne parvient pas
+    // jusqu'ici : [_showsImputation] a déjà retiré la rangée.
     if (till.impute.isEmpty) {
-      // Des frais sont entrés sans qu'aucune imputation ne descende : on le
-      // montre, plutôt que d'escamoter la carte — où la lacune passerait pour
-      // une journée sans frais.
-      if (!_hasFees(till)) return const SizedBox.shrink();
       return FinanceStatsEmptyState(
         message: l10n.financeStatsNoData,
         hint: l10n.financeStatsNoDataHint,
@@ -266,15 +252,31 @@ class _ImputationAndSourceRow extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final imputation in till.impute) ...[
-          FinanceTillImputationSection(imputation: imputation),
-          if (imputation != till.impute.last)
-            const SizedBox(height: AppDimensions.spacingM),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gutter = AppDimensions.spacingL;
+        final sideBySide =
+            till.impute.length > 1 &&
+            constraints.maxWidth >= _minCardWidth * 2 + gutter;
+        final width = sideBySide
+            ? (constraints.maxWidth - gutter) / 2
+            : constraints.maxWidth;
+
+        // Un [Wrap] plutôt qu'une [Row] : une troisième devise de créance —
+        // improbable, mais le contrat ne l'interdit pas — passe à la ligne au
+        // lieu de comprimer les deux premières.
+        return Wrap(
+          spacing: gutter,
+          runSpacing: gutter,
+          children: [
+            for (final imputation in till.impute)
+              SizedBox(
+                width: width,
+                child: FinanceTillImputationSection(imputation: imputation),
+              ),
+          ],
+        );
+      },
     );
   }
 }

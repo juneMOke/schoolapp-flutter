@@ -2,21 +2,14 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockRatesCubit extends MockCubit<ExchangeRatesState>
     implements ExchangeRatesCubit {}
-
-class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
-    implements AuthBloc {}
 
 ExchangeRate _rate(String base, String quote, int micros, {DateTime? from}) =>
     ExchangeRate(
@@ -32,12 +25,9 @@ void main() {
 
   setUp(() => rates = _MockRatesCubit());
 
-  /// Le harnais nomme une route `home` : c'est là que pointe « Modifier le
-  /// taux », par le paramètre `subMenuId` de la coquille.
-  Future<Uri?> pump(
+  Future<void> pump(
     WidgetTester tester,
     ExchangeRatesState state, {
-    List<String>? permissions = const ['school.provisioning.write'],
     Size size = const Size(1280, 800),
   }) async {
     await tester.binding.setSurfaceSize(size);
@@ -50,69 +40,37 @@ void main() {
       initialState: state,
     );
 
-    final auth = _MockAuthBloc();
-    final authState = AuthState(
-      status: AuthStatus.authenticated,
-      permissions: permissions,
-    );
-    when(() => auth.state).thenReturn(authState);
-    whenListen(
-      auth,
-      Stream<AuthState>.value(authState),
-      initialState: authState,
-    );
-
-    Uri? landed;
-    final router = GoRouter(
-      initialLocation: '/finances',
-      routes: [
-        GoRoute(
-          path: '/finances',
-          builder: (context, state) => Scaffold(
-            body: MultiBlocProvider(
-              providers: [
-                BlocProvider<ExchangeRatesCubit>.value(value: rates),
-                BlocProvider<AuthBloc>.value(value: auth),
-              ],
-              child: const FinanceTillRateBar(),
-            ),
-          ),
-        ),
-        GoRoute(
-          path: '/home',
-          name: 'home',
-          builder: (context, state) {
-            landed = state.uri;
-            return const Scaffold(body: Text('coquille'));
-          },
-        ),
-      ],
-    );
-
     await tester.pumpWidget(
-      MaterialApp.router(
+      MaterialApp(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
+        home: Scaffold(
+          body: BlocProvider<ExchangeRatesCubit>.value(
+            value: rates,
+            child: const FinanceTillRateBar(),
+          ),
+        ),
       ),
     );
     await tester.pumpAndSettle();
-    return landed;
   }
 
-  String? rateText(WidgetTester tester) {
-    final texts = find
-        .byType(Text)
-        .evaluate()
-        .map((e) => (e.widget as Text).data)
-        .whereType<String>()
-        // Les espaces insécables du formatage monétaire ne se tapent pas dans
-        // une assertion.
-        .map((t) => t.replaceAll(' ', ' '))
-        .toList();
-    return texts.where((t) => t.startsWith('1 ')).firstOrNull;
-  }
+  /// Les textes rendus, **espaces normalisés**.
+  ///
+  /// Le formatage monétaire pose des espaces insécables (`U+00A0`, `U+202F`)
+  /// qu'on ne peut ni taper ni relire dans une assertion — et qui disparaissent
+  /// silencieusement au premier copier-coller du fichier. `\s` les couvre tous.
+  List<String> texts(WidgetTester tester) => find
+      .byType(Text)
+      .evaluate()
+      .map((e) => (e.widget as Text).data)
+      .whereType<String>()
+      .map((t) => t.replaceAll(RegExp(r'\s+'), ' '))
+      .toList();
+
+  String? rateText(WidgetTester tester) =>
+      texts(tester).where((t) => t.startsWith('1 ')).firstOrNull;
 
   testWidgets('le taux en vigueur se lit « 1 \$ = 2 850,00 FC »', (
     tester,
@@ -128,18 +86,33 @@ void main() {
     expect(rateText(tester), '1 \$ = 2 850,00 FC');
     // Deux décimales, contre les « 2 850 » de la maquette : une seule façon
     // d'écrire un taux dans l'application, partagée avec le ticket.
-    expect(find.text('Modifier le taux'), findsOneWidget);
   });
 
-  testWidgets('sans taux paramétré, le bandeau reste — avec sa sortie', (
+  testWidgets('aucune sortie n’est offerte depuis le bandeau', (tester) async {
+    await pump(
+      tester,
+      ExchangeRatesState(
+        loaded: true,
+        rates: [_rate('USD', 'CDF', 2850000000)],
+      ),
+    );
+
+    // Arbitrage du porteur : le taux se change en Configuration ▸ Réglages, et
+    // le bandeau redevient une lecture — comme toutes les cartes de cet écran,
+    // dont aucune n'expose de bouton.
+    expect(find.text('Modifier le taux'), findsNothing);
+    expect(find.byType(InkWell), findsNothing);
+  });
+
+  testWidgets('sans taux paramétré, le bandeau reste — et le dit', (
     tester,
   ) async {
     await pump(tester, const ExchangeRatesState(loaded: true));
 
     expect(find.text('Aucun taux paramétré'), findsOneWidget);
-    // C'est par ce lien qu'on répare l'absence : le masquer laisserait un
-    // constat sans issue.
-    expect(find.text('Modifier le taux'), findsOneWidget);
+    // Un constat désormais sans issue offerte : c'est le prix, connu, du lien
+    // retiré.
+    expect(find.text('Modifier le taux'), findsNothing);
   });
 
   testWidgets('tant que la série n’a pas répondu, rien n’est affirmé', (
@@ -148,7 +121,7 @@ void main() {
     await pump(tester, const ExchangeRatesState());
 
     expect(find.text('Aucun taux paramétré'), findsNothing);
-    expect(find.text('Modifier le taux'), findsNothing);
+    expect(rateText(tester), isNull);
   });
 
   testWidgets('l’identité n’est pas un taux à afficher', (tester) async {
@@ -205,9 +178,7 @@ void main() {
     expect(rateText(tester), '1 \$ = 2 850,00 FC');
   });
 
-  testWidgets('deux paires en vigueur se lisent toutes les deux', (
-    tester,
-  ) async {
+  testWidgets('une autre paire en vigueur n’est pas écrite', (tester) async {
     await pump(
       tester,
       ExchangeRatesState(
@@ -219,57 +190,45 @@ void main() {
       ),
     );
 
-    // En taire une serait le genre de silence que cet écran refuse partout
-    // ailleurs.
-    expect(
-      find.textContaining('2 850,00'.replaceAll(' ', ' ')),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('3 100,00'.replaceAll(' ', ' ')),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('« Modifier le taux » ouvre Réglages dans la coquille', (
-    tester,
-  ) async {
-    await pump(
-      tester,
-      ExchangeRatesState(
-        loaded: true,
-        rates: [_rate('USD', 'CDF', 2850000000)],
-      ),
-    );
-
-    await tester.tap(find.text('Modifier le taux'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('coquille'), findsOneWidget);
-  });
-
-  testWidgets('sans le droit de configurer, le lien n’est pas offert', (
-    tester,
-  ) async {
-    await pump(
-      tester,
-      ExchangeRatesState(
-        loaded: true,
-        rates: [_rate('USD', 'CDF', 2850000000)],
-      ),
-      permissions: const ['finance.stats.read'],
-    );
-
-    // Masqué et non grisé : un lien absent dit « pas vous », un lien estompé
-    // dirait « pas maintenant ».
-    expect(find.text('Modifier le taux'), findsNothing);
-    // Le taux, lui, reste lisible — il n'est pas une action.
+    // Le bandeau ne porte plus que le dollar contre le franc : c'est la paire
+    // qui croise sur cet écran, et une paire exotique n'y expliquerait aucune
+    // ligne de la table.
     expect(rateText(tester), '1 \$ = 2 850,00 FC');
+    expect(
+      texts(tester).where((t) => t.contains('3 100')),
+      isEmpty,
+      reason: 'l’euro n’explique aucune ligne de cet écran',
+    );
   });
 
-  testWidgets('à l’étroit, le lien passe sous le taux et le médaillon reste', (
+  testWidgets('une école qui n’a que l’euro ne voit aucun taux', (
     tester,
   ) async {
+    await pump(
+      tester,
+      ExchangeRatesState(
+        loaded: true,
+        rates: [_rate('EUR', 'CDF', 3100000000)],
+      ),
+    );
+
+    expect(find.text('Aucun taux paramétré'), findsOneWidget);
+  });
+
+  testWidgets('le sens inverse n’est pas retourné pour faire nombre', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      ExchangeRatesState(loaded: true, rates: [_rate('CDF', 'USD', 350)]),
+    );
+
+    // L'inverse d'un taux arrondi n'est pas le taux inverse — et ce nombre
+    // s'imprime sur les tickets.
+    expect(find.text('Aucun taux paramétré'), findsOneWidget);
+  });
+
+  testWidgets('à l’étroit, le médaillon garde sa taille', (tester) async {
     await pump(
       tester,
       ExchangeRatesState(

@@ -6641,9 +6641,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeTillRateNone => 'Aucun taux paramétré';
 
   @override
-  String get financeTillRateEdit => 'Modifier le taux';
-
-  @override
   String financeTillRateA11yLabel(String rate) {
     return 'Taux du jour : $rate';
   }
@@ -6846,7 +6843,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String financeTillBucketsHeading(String currency) {
-    return 'Encaissements jour par jour · caisse $currency';
+    return 'Progression des encaissements · caisse $currency';
   }
 
   @override

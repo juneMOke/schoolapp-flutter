@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Le **taux du jour**, posé au-dessus de la fenêtre de temps.
 ///
@@ -26,8 +22,23 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 ///
 /// Le bandeau reste néanmoins juste : il dit ce que l'école a paramétré
 /// aujourd'hui, ce qui est exactement ce dont on a besoin pour comprendre
-/// qu'un reçu d'hier ne s'aligne pas dessus — et il porte la porte vers
-/// Réglages, seul endroit où ce nombre se change.
+/// qu'un reçu d'hier ne s'aligne pas dessus.
+///
+/// ## Une seule paire, et aucune sortie — arbitrage du porteur
+///
+/// ⚠️ **Le bandeau ne montre plus que le dollar contre le franc**, et plus
+/// « toutes les paires en vigueur ». Cet écran-ci est un écran de caisse
+/// congolais : la paire qui s'y lit est celle qui croise, et une paire exotique
+/// qu'une école aurait configurée par ailleurs n'y expliquerait aucune ligne de
+/// la table. Conséquence assumée : si une telle paire existe, ce bandeau la
+/// tait — le silence est ici volontaire, contrairement à tous les autres de cet
+/// écran.
+///
+/// ⚠️ **Et le lien « Modifier le taux » est retiré.** Le taux se change en
+/// Configuration ▸ Réglages, qui reste atteignable par le menu ; le bandeau
+/// redevient une lecture, comme le reste de l'écran, où aucune carte n'expose
+/// de bouton. Le prix à connaître : « aucun taux paramétré » est désormais un
+/// constat sans issue offerte.
 ///
 /// ## La ligne fine est absente FAUTE DE DONNÉE, pas par oubli
 ///
@@ -52,8 +63,7 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 class FinanceTillRateBar extends StatelessWidget {
   const FinanceTillRateBar({super.key});
 
-  /// Médaillon de 30 dp, rayon 9 — la maquette les conserve même quand le lien
-  /// passe à la ligne, donc ils ne sont pas dans le [Wrap].
+  /// Médaillon de 30 dp, rayon 9, tel que la maquette le dessine.
   static const double _medallionSize = 30;
 
   @override
@@ -70,7 +80,7 @@ class FinanceTillRateBar extends StatelessWidget {
         // de « il n'y a rien ».
         if (!state.loaded) return const SizedBox.shrink();
 
-        final rates = _inForce(state.rates);
+        final rate = _dollarInFrancs(state.rates);
 
         return Container(
           margin: const EdgeInsets.only(bottom: 18),
@@ -86,13 +96,8 @@ class FinanceTillRateBar extends StatelessWidget {
               const _RateMedallion(size: _medallionSize),
               const SizedBox(width: 16),
               Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: AppDimensions.spacingM,
-                  runSpacing: AppDimensions.spacingXS,
-                  children: [
-                    if (rates.isEmpty)
-                      Semantics(
+                child: rate == null
+                    ? Semantics(
                         label: l10n.financeTillRateNoneA11yLabel,
                         child: ExcludeSemantics(
                           child: Text(
@@ -103,11 +108,7 @@ class FinanceTillRateBar extends StatelessWidget {
                           ),
                         ),
                       )
-                    else
-                      for (final rate in rates) _RateValue(rate: rate),
-                    const _EditRateLink(),
-                  ],
-                ),
+                    : _RateValue(rate: rate),
               ),
             ],
           ),
@@ -116,7 +117,7 @@ class FinanceTillRateBar extends StatelessWidget {
     );
   }
 
-  /// Les taux **en vigueur aujourd'hui**, un par paire, l'identité exclue.
+  /// Le taux **du dollar en francs en vigueur aujourd'hui**, ou `null`.
   ///
   /// ⚠️ **Pas de repli sur le plus ancien.** [ExchangeRates.at] l'offre pour le
   /// guichet, dont la tablette peut retarder sur le serveur et qui, sans taux,
@@ -124,38 +125,18 @@ class FinanceTillRateBar extends StatelessWidget {
   /// tranche le cas : « l'écran de direction doit dire la vérité stricte —
   /// "aucun taux en vigueur" est une information juste ».
   ///
-  /// L'identité (`1 USD = 1 USD`) est écartée : la table en contient par
-  /// construction — « il n'y a pas de "pas de taux" dans la table, il y a un
-  /// taux de 1 » — et l'afficher remplirait le bandeau d'évidences.
-  ///
-  /// Toutes les paires en vigueur sont rendues, et non une choisie au hasard :
-  /// l'école n'en configure qu'une en pratique, mais si elle en pose deux, en
-  /// taire une serait le genre de silence que cet écran refuse partout
-  /// ailleurs. Le [Wrap] les prend.
-  static List<ExchangeRate> _inForce(List<ExchangeRate> rates) {
-    final now = DateTime.now();
-    final pairs = <String>{
-      for (final rate in rates) '${rate.base}>${rate.quote}',
-    };
-
-    final inForce = <ExchangeRate>[];
-    for (final pair in pairs.toList()..sort()) {
-      final parts = pair.split('>');
-      final rate = ExchangeRates.at(
+  /// ⚠️ **Le sens ne s'inverse pas.** La paire est lue telle qu'elle est
+  /// stockée — `USD` de créance contre `CDF` reçus — et une école qui n'aurait
+  /// que le sens contraire rend `null` plutôt qu'un taux retourné : l'inverse
+  /// d'un taux arrondi n'est pas le taux inverse, et ce nombre s'imprime sur
+  /// les tickets.
+  static ExchangeRate? _dollarInFrancs(List<ExchangeRate> rates) =>
+      ExchangeRates.at(
         rates,
-        base: parts.first,
-        quote: parts.last,
-        moment: now,
+        base: CurrencyCode.usd,
+        quote: CurrencyCode.cdf,
+        moment: DateTime.now(),
       );
-      // ⚠️ **Le seul filtre d'identité, et il est ici.** Le doubler à la
-      // collecte des paires ne retirait rien : une paire dont les deux devises
-      // diffèrent n'est jamais l'identité, et une paire USD>USD y serait
-      // écartée deux fois. Un sabotage l'a montré — la suite restait verte
-      // sans lui, ce qui en faisait un garde-fou que rien ne défendait.
-      if (rate != null && !rate.isIdentity) inForce.add(rate);
-    }
-    return inForce;
-  }
 }
 
 /// « 1 $ = 2 850,00 FC ».
@@ -208,71 +189,6 @@ class _RateMedallion extends StatelessWidget {
         size: 16,
         color: AppColors.terreCuite,
       ),
-    );
-  }
-}
-
-/// **La seule sortie de cet écran en lecture seule** — et elle est gardée.
-///
-/// ⚠️ Configuration ▸ Réglages exige `school.provisioning.write`, que la caisse
-/// (`finance.stats.read`) ne porte pas. Sans garde, un caissier légitime
-/// verrait un lien vers une page qui lui est fermée : exactement la promesse
-/// d'un geste qui n'existe pas que le reste de l'écran refuse — les lignes de
-/// poste n'ont pas d'`onTap`, les cartes de lecture n'ont pas de bouton.
-///
-/// [PermissionGate] **masque** plutôt qu'il ne grise : un lien absent dit « pas
-/// vous », un lien estompé dirait « pas maintenant ». C'est le second qui
-/// serait faux ici.
-class _EditRateLink extends StatelessWidget {
-  const _EditRateLink();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return PermissionGate(
-      requires: const [Perm.schoolProvisioningWrite],
-      child: InkWell(
-        onTap: () => _openSettings(context),
-        borderRadius: BorderRadius.circular(AppDimensions.spacingXS),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingXS,
-            vertical: 2,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.financeTillRateEdit,
-                style: AppTextStyles.action.copyWith(
-                  color: AppColors.bleuArdoise,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.spacingXS),
-              const Icon(
-                Icons.arrow_forward,
-                size: 14,
-                color: AppColors.bleuArdoise,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Rejoint Réglages **dans la coquille**, comme la maquette
-  /// (`onNavigate('configuration','cfg-reglages')`).
-  ///
-  /// Le paramètre `subMenuId` de `/home` est le chemin que l'application se
-  /// donne déjà pour ce geste (cf. `EnrollmentNavigationHelper`) : il vaut
-  /// depuis la page hors coquille comme depuis la coquille, là où un
-  /// `go('/configuration/settings')` sortirait le lecteur de sa barre latérale.
-  static void _openSettings(BuildContext context) {
-    context.goNamed(
-      AppRoutesNames.home,
-      queryParameters: {'subMenuId': MenuConstants.configurationSchoolId},
     );
   }
 }

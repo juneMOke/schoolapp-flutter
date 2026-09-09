@@ -46,6 +46,9 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           title: l10n.financeTillReceiptsHeading(
             tillCurrencyName(currency, l10n),
           ),
+          // Les versements de Facturation portent la même : la table d'ici en
+          // est la lecture par caisse.
+          icon: Icons.payments_outlined,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

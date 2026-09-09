@@ -7,11 +7,26 @@ import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dar
 class FinanceStatsChartCard extends StatelessWidget {
   /// `null` en chargement : le titre y est un bloc, pas un mot.
   final String? title;
+
+  /// Le repère de la carte, posé **avant** le titre.
+  ///
+  /// ⚠️ **Elle double le titre, elle ne le remplace jamais.** Le titre reste
+  /// écrit en toutes lettres et porte seul le sens ; l'icône sert à retrouver
+  /// la carte d'un coup d'œil dans une page qui en empile six. Elle n'entre
+  /// donc pas dans l'arbre d'accessibilité — un lecteur d'écran annoncerait
+  /// deux fois la même chose.
+  final IconData? icon;
   final Widget child;
+
+  /// Assez petite pour rester sous la hauteur de la ligne de titre : au-delà,
+  /// l'icône pousserait la ligne de séparation vers le bas et la carte ne
+  /// s'alignerait plus sur sa voisine.
+  static const double _iconSize = 18;
 
   const FinanceStatsChartCard({
     super.key,
     required String this.title,
+    this.icon,
     required this.child,
   });
 
@@ -22,7 +37,8 @@ class FinanceStatsChartCard extends StatelessWidget {
   /// que le squelette existe précisément pour éviter. Ici le cadre est le même
   /// objet ; seule sa première ligne change.
   const FinanceStatsChartCard.skeleton({super.key, required this.child})
-    : title = null;
+    : title = null,
+      icon = null;
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +61,30 @@ class FinanceStatsChartCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title case final title?)
-            Text(
-              title,
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              children: [
+                if (icon case final icon?) ...[
+                  ExcludeSemantics(
+                    child: Icon(
+                      icon,
+                      size: _iconSize,
+                      color: AppColors.bleuArdoise,
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.spacingS),
+                ],
+                // Un titre long se coupe plutôt que de déborder : les cartes se
+                // rangent maintenant deux par ligne, et « Créances réglées en
+                // FC » y dispose de la moitié de la largeur.
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
             )
           else
             // La hauteur du titre réel, pour que la ligne de séparation et tout

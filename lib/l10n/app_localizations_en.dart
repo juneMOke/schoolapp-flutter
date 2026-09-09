@@ -6574,9 +6574,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeTillRateNone => 'No rate configured';
 
   @override
-  String get financeTillRateEdit => 'Change the rate';
-
-  @override
   String financeTillRateA11yLabel(String rate) {
     return 'Today\'s rate: $rate';
   }
@@ -6779,7 +6776,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String financeTillBucketsHeading(String currency) {
-    return 'Daily collections · $currency till';
+    return 'Collections trend · $currency till';
   }
 
   @override
