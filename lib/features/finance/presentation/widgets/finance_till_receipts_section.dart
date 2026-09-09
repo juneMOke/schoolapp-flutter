@@ -216,17 +216,15 @@ class FinanceTillReceiptsSection extends StatelessWidget {
       MoneyFormat.format(
         Money.parse(receipt.settledAmount!, receipt.settledCurrency!),
       ),
-      _formatRate(receipt.rateMicros!),
+      // ⚠️ **Deux décimales, contre la maquette qui écrit « taux 2 850 ».**
+      // Un taux a une seule écriture dans cette application, parce qu'il
+      // s'imprime aussi sur le ticket. Et ici la raison est plus forte encore :
+      // ce taux-ci est celui **du reçu**, quand le bandeau porte celui **du
+      // jour** — deux nombres différents par nature. Si leurs formats
+      // différaient aussi, on ne pourrait plus savoir si un écart est dans la
+      // valeur ou dans l'écriture.
+      ExchangeRate.formatMicros(receipt.rateMicros!),
     );
-  }
-
-  /// Le taux, rendu depuis les micro-unités sans décimale superflue : `2 850`
-  /// et non `2 850,000000`.
-  static String _formatRate(int rateMicros) {
-    final units = rateMicros / ExchangeRate.scale;
-    return units == units.roundToDouble()
-        ? units.round().toString()
-        : units.toString();
   }
 }
 

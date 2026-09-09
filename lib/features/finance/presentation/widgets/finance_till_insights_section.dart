@@ -132,20 +132,22 @@ class FinanceTillInsightsSection extends StatelessWidget {
   /// l'écart que cette carte éclaire. La fourchette le montre, et sa longueur
   /// ne dépend pas du nombre de taux.
   ///
-  /// Le taux s'écrit **nu**, sans unité : c'est la convention de la spec
-  /// partout où un taux apparaît (« taux 2 850 » dans la table des reçus). La
-  /// doctrine « tout montant porte son symbole » vise les **montants** ; un
-  /// taux n'en est pas un.
+  /// Le taux s'écrit **nu**, sans unité : la doctrine « tout montant porte son
+  /// symbole » vise les **montants**, et un taux n'en est pas un.
+  ///
+  /// Il s'écrit en revanche avec ses **deux décimales**, comme partout ailleurs
+  /// — le bandeau du jour comme la table des reçus. La maquette écrit
+  /// « taux 2 850 » ; un taux n'a qu'une écriture dans cette application.
   String _rateClause(TillCrossed crossed, AppLocalizations l10n) {
     if (crossed.rateMicros.isEmpty) return '';
     if (!crossed.hasMultipleRates) {
       return l10n.financeTillInsightCrossedSingleRate(
-        _formatRate(crossed.rateMicros.first),
+        ExchangeRate.formatMicros(crossed.rateMicros.first),
       );
     }
     return l10n.financeTillInsightCrossedRateRange(
-      _formatRate(crossed.rateMicros.first),
-      _formatRate(crossed.rateMicros.last),
+      ExchangeRate.formatMicros(crossed.rateMicros.first),
+      ExchangeRate.formatMicros(crossed.rateMicros.last),
     );
   }
 
@@ -228,14 +230,6 @@ class FinanceTillInsightsSection extends StatelessWidget {
     return key.length == 7
         ? MaterialLocalizations.of(context).formatMonthYear(parsed)
         : MaterialLocalizations.of(context).formatFullDate(parsed);
-  }
-
-  /// Le taux depuis les micro-unités, sans décimale superflue.
-  static String _formatRate(int rateMicros) {
-    final units = rateMicros / ExchangeRate.scale;
-    return units == units.roundToDouble()
-        ? units.round().toString()
-        : units.toString();
   }
 }
 

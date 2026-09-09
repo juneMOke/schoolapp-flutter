@@ -1068,6 +1068,44 @@ void main() {
       );
     });
 
+    testWidgets('la ligne croisée écrit son taux comme partout ailleurs', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          currency: 'USD',
+          totalElements: 1,
+          totalPages: 1,
+          receipts: [
+            TillReceipt(
+              paymentId: 'p-1',
+              paidAt: DateTime.utc(2026, 5, 15, 10),
+              source: 'BILLING',
+              amount: 4000,
+              currency: 'USD',
+              receiptNumber: 'ETL-RC-2526-000183',
+              studentName: 'Ilunga Kasongo Esther',
+              settledAmount: 11500000,
+              settledCurrency: 'CDF',
+              rateMicros: 2850000000,
+            ),
+          ],
+        ),
+      );
+
+      // ⚠️ « taux 2 850,00 » et non « taux 2850 » comme l'écrit la maquette.
+      // Ce taux-ci est celui DU REÇU ; le bandeau porte celui DU JOUR. Deux
+      // nombres différents par nature : si leurs formats différaient aussi, on
+      // ne pourrait plus savoir si un écart est dans la valeur ou dans
+      // l'écriture.
+      expect(find.textContaining('taux 2\u00A0850,00'), findsOneWidget);
+      // Le montant soldé est LU sur les imputations, jamais dérivé du taux.
+      expect(find.textContaining('115\u00A0000\u00A0FC'), findsOneWidget);
+    });
+
     testWidgets('une panne réseau sur la table ne se lit pas comme un refus', (
       tester,
     ) async {
@@ -1178,7 +1216,12 @@ void main() {
           ),
         ),
       );
-      expect(find.textContaining('au taux de 2850'), findsOneWidget);
+      // ⚠️ « 2 850,00 » et non « 2850 » : un taux n'a qu'une écriture dans
+      // cette application. Ce taux-ci est celui du reçu, le bandeau porte celui
+      // du jour — deux nombres différents PAR NATURE, et deux formats
+      // empêcheraient de savoir si un écart est dans la valeur ou dans
+      // l'écriture.
+      expect(find.textContaining('au taux de 2\u00A0850,00'), findsOneWidget);
 
       await pump(
         tester,
@@ -1193,7 +1236,10 @@ void main() {
       );
       // C'est le changement de taux en cours de fenêtre qui explique l'écart de
       // caisse : en citer un seul en tairait un autre.
-      expect(find.textContaining('à des taux de 2850 à 2900'), findsOneWidget);
+      expect(
+        find.textContaining('à des taux de 2\u00A0850,00 à 2\u00A0900,00'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('les montants croisés ne s’additionnent jamais', (
