@@ -50,6 +50,27 @@ class CycleBarChart extends StatelessWidget {
   /// Nombre d'intervalles de grille — une ligne de plus que d'intervalles.
   final int gridDivisions;
 
+  /// Dessine l'axe vertical et ses libellés de valeurs.
+  ///
+  /// ⚠️ **Un écran qui pose les montants SUR les barres n'en veut pas** : le
+  /// même chiffre s'écrirait alors deux fois, une fois au sommet de la barre et
+  /// une fois sur l'axe. Le laisser vaut quand les barres ne portent pas leur
+  /// valeur, l'axe étant alors le seul repère chiffré.
+  ///
+  /// Défaut `true` — le rendu historique, que les appelants existants gardent.
+  final bool showLeftAxis;
+
+  /// Hauteur minimale, **en dp**, d'une barre dont la valeur n'est pas nulle.
+  ///
+  /// ⚠️ Sans plancher, une valeur réelle mais très petite sous un maximum très
+  /// grand rend une barre d'une fraction de pixel — **indiscernable d'un
+  /// zéro**. Le plancher la rend visible.
+  ///
+  /// **Zéro reste zéro** : le plancher ne relève jamais une valeur nulle, ce
+  /// qui ferait voir une donnée là où il n'y en a pas. C'est la même règle que
+  /// sur les lignes-barres du socle.
+  final double minimumBarHeight;
+
   const CycleBarChart({
     super.key,
     required this.items,
@@ -61,6 +82,8 @@ class CycleBarChart extends StatelessWidget {
     this.minTop = 10.0,
     this.barRadius = AppDimensions.enrollmentStatsChartBorderRadius,
     this.gridDivisions = AppDimensions.enrollmentStatsChartGridDivisions,
+    this.showLeftAxis = true,
+    this.minimumBarHeight = 0,
   });
 
   /// Style du libellé sous l'axe pour la barre [index].
@@ -82,6 +105,9 @@ class CycleBarChart extends StatelessWidget {
 
     // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur
     // ce que l'axe lui prend, pour que les barres gardent leur amplitude.
+    final axisWidth = showLeftAxis
+        ? AppDimensions.enrollmentStatsChartLeftAxisWidth
+        : 0.0;
     final bottomReservedSize = verticalBottomLabels
         ? cycleBarBottomLabelExtent(
             context: context,
@@ -103,7 +129,17 @@ class CycleBarChart extends StatelessWidget {
           final barWidth = cycleBarWidth(
             barCount: items.length,
             availableWidth: constraints.maxWidth,
+            axisWidth: axisWidth,
           );
+
+          // Le plancher est donné en dp ; les barres, elles, se mesurent dans
+          // l'unité des données. On convertit donc avec la hauteur réellement
+          // offerte au tracé — sans quoi le même plancher vaudrait deux choses
+          // différentes sur deux graphiques de hauteurs différentes.
+          final plotHeight = chartHeight - bottomReservedSize;
+          final minToY = (minimumBarHeight <= 0 || plotHeight <= 0)
+              ? 0.0
+              : topY * (minimumBarHeight / plotHeight);
           return ChartEntrance(
             builder: (context, motion) => BarChart(
               BarChartData(
@@ -173,9 +209,8 @@ class CycleBarChart extends StatelessWidget {
                   ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize:
-                          AppDimensions.enrollmentStatsChartLeftAxisWidth,
+                      showTitles: showLeftAxis,
+                      reservedSize: axisWidth,
                       getTitlesWidget: (value, meta) => Text(
                         NumberFormatterHelper.formatYAxisLabel(value),
                         style: AppTextStyles.caption.copyWith(
@@ -224,7 +259,15 @@ class CycleBarChart extends StatelessWidget {
                           : const [],
                       barRods: [
                         BarChartRodData(
-                          toY: motion.lerpValue(items[i].value),
+                          // Zéro reste zéro : le plancher ne s'applique qu'à
+                          // une valeur réellement encaissée.
+                          toY: motion.lerpValue(
+                            items[i].value <= 0
+                                ? items[i].value
+                                : (items[i].value < minToY
+                                      ? minToY
+                                      : items[i].value),
+                          ),
                           color: items[i].color,
                           width: barWidth,
                           borderRadius: BorderRadius.circular(barRadius),

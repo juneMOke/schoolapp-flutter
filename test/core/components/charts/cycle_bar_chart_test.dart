@@ -21,6 +21,8 @@ void main() {
     WidgetTester tester, {
     required bool vertical,
     List<BarChartItem> barItems = items,
+    bool showLeftAxis = true,
+    double minimumBarHeight = 0,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -30,6 +32,8 @@ void main() {
             child: CycleBarChart(
               items: barItems,
               verticalBottomLabels: vertical,
+              showLeftAxis: showLeftAxis,
+              minimumBarHeight: minimumBarHeight,
             ),
           ),
         ),
@@ -242,5 +246,81 @@ void main() {
       await pumpAt(tester, 1200, 2);
       expect(barWidthOf(tester), AppDimensions.enrollmentStatsChartBarMaxWidth);
     });
+  });
+
+  testWidgets('l’axe vertical se retire, et rend sa largeur au tracé', (
+    tester,
+  ) async {
+    // Assez de barres pour que la largeur ne bute pas sur son plafond : à
+    // trois barres dans 600 dp, elles sont déjà au maximum et l'axe ne change
+    // rien.
+    final many = [
+      for (var i = 0; i < 20; i++)
+        const BarChartItem(label: 'J', value: 40, color: AppColors.bleuArdoise),
+    ];
+
+    await pumpChart(tester, vertical: false, barItems: many);
+    final withAxis = tester.widget<BarChart>(find.byType(BarChart));
+    expect(withAxis.data.titlesData.leftTitles.sideTitles.showTitles, isTrue);
+    final wideBars = withAxis.data.barGroups.first.barRods.first.width;
+
+    await pumpChart(
+      tester,
+      vertical: false,
+      barItems: many,
+      showLeftAxis: false,
+    );
+    final without = tester.widget<BarChart>(find.byType(BarChart));
+
+    expect(without.data.titlesData.leftTitles.sideTitles.showTitles, isFalse);
+    expect(
+      without.data.titlesData.leftTitles.sideTitles.reservedSize,
+      0,
+      reason:
+          'un axe masqué qui garderait sa réserve laisserait une marge vide',
+    );
+    expect(
+      without.data.barGroups.first.barRods.first.width,
+      greaterThan(wideBars),
+      reason: 'les 36 dp de l’axe reviennent aux barres',
+    );
+  });
+
+  testWidgets('une valeur minuscule garde une hauteur visible', (tester) async {
+    // ⚠️ Le cas qui l'impose : une journée à 300 sous un maximum à 9 000 000
+    // rend une barre d'une fraction de pixel — indiscernable d'un zéro. Et
+    // depuis que les écrans peuvent masquer les barres nulles, une barre non
+    // nulle invisible se lit comme un jour supprimé.
+    const lopsided = [
+      BarChartItem(label: 'A', value: 9000000, color: AppColors.bleuArdoise),
+      BarChartItem(label: 'B', value: 300, color: AppColors.bleuArdoise),
+      BarChartItem(label: 'C', value: 0, color: AppColors.bleuArdoise),
+    ];
+
+    await pumpChart(tester, vertical: false, barItems: lopsided);
+    final flat = tester.widget<BarChart>(find.byType(BarChart));
+    final unfloored = flat.data.barGroups[1].barRods.first.toY;
+
+    await pumpChart(
+      tester,
+      vertical: false,
+      barItems: lopsided,
+      minimumBarHeight: 2,
+    );
+    final floored = tester.widget<BarChart>(find.byType(BarChart));
+
+    expect(floored.data.barGroups[1].barRods.first.toY, greaterThan(unfloored));
+    expect(
+      floored.data.barGroups[2].barRods.first.toY,
+      0,
+      reason:
+          'zéro reste zéro — un plancher qui le relèverait ferait voir un '
+          'encaissement là où il n’y en a pas',
+    );
+    expect(
+      floored.data.barGroups.first.barRods.first.toY,
+      9000000,
+      reason: 'une valeur qui dépasse le plancher n’est jamais modifiée',
+    );
   });
 }
