@@ -173,12 +173,23 @@ class CycleBarChart extends StatelessWidget {
                     fitInsideHorizontally: true,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final item = items[group.x.toInt()];
+                      // ⚠️ **L'étiquette lit la valeur de l'ITEM, jamais
+                      // `rod.toY`.** Les deux ne sont pas le même nombre depuis
+                      // qu'un plancher existe : une barre de 300 sous un maximum
+                      // à 7 000 000 est dessinée à 91 145 pour rester visible, et
+                      // une étiquette prise sur la géométrie annonçait « 91 K »
+                      // là où l'école avait encaissé 300. Sur un écran d'argent,
+                      // un chiffre faux est pire qu'une barre invisible.
+                      //
+                      // Le plancher est une décision de DESSIN ; l'étiquette est
+                      // une donnée. Elles n'ont pas à passer par la même valeur.
+                      final value = item.value;
                       if (showValueLabels) {
                         // Étiquette permanente : valeur seule ; couleur dédiée si
                         // fournie (sinon couleur de la barre).
                         return BarTooltipItem(
                           (valueLabelFormatter ??
-                              NumberFormatterHelper.formatYAxisLabel)(rod.toY),
+                              NumberFormatterHelper.formatYAxisLabel)(value),
                           AppTextStyles.caption.copyWith(
                             color:
                                 valueLabelColorBuilder?.call(group.x.toInt()) ??
@@ -189,7 +200,7 @@ class CycleBarChart extends StatelessWidget {
                         );
                       }
                       return BarTooltipItem(
-                        '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
+                        '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
                         AppTextStyles.caption.copyWith(
                           color: AppColors.textOnDark,
                           fontWeight: FontWeight.w600,

@@ -349,4 +349,55 @@ void main() {
       );
     }
   });
+
+  testWidgets('une barre au plancher annonce sa VRAIE valeur, pas sa hauteur', (
+    tester,
+  ) async {
+    const tiny = [
+      BarChartItem(
+        label: '01/05',
+        value: 1000000,
+        color: AppColors.bleuArdoise,
+      ),
+      BarChartItem(label: '02/05', value: 300, color: AppColors.bleuArdoise),
+      BarChartItem(
+        label: '03/05',
+        value: 7000000,
+        color: AppColors.bleuArdoise,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 600,
+            child: CycleBarChart(
+              items: tiny,
+              showValueLabels: true,
+              minimumBarHeight: 2,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final data = tester.widget<BarChart>(find.byType(BarChart)).data;
+    final group = data.barGroups[1];
+    final rod = group.barRods.first;
+
+    // La barre est bien REMONTÉE pour rester visible…
+    expect(rod.toY, greaterThan(300));
+    // …mais son étiquette dit 300, pas la hauteur à laquelle on l'a dessinée.
+    // Le plancher est une décision de DESSIN ; l'étiquette est une donnée. Sur
+    // un écran d'argent, un chiffre faux est pire qu'une barre invisible.
+    final label = data.barTouchData.touchTooltipData.getTooltipItem(
+      group,
+      1,
+      rod,
+      0,
+    );
+    expect(label?.text, '300');
+  });
 }
