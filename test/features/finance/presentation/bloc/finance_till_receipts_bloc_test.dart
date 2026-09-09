@@ -36,8 +36,8 @@ TillReceiptsPage _page({
 /// La table des reçus — **le second appel**.
 ///
 /// Ce qui se vérifie ici n'est pas le rendu des lignes, mais **ce que le BLoC
-/// refuse de décider** : il ne choisit ni la fenêtre, ni la caisse, et il ne
-/// garde jamais une page qui ne décrit plus ce qu'on regarde.
+/// refuse de décider** : il ne choisit pas la fenêtre, il ne cadre sur aucune
+/// caisse, et il ne garde jamais une page qui ne décrit plus ce qu'on regarde.
 void main() {
   setUpAll(() {
     registerFallbackValue(const TillWindow.day());
@@ -55,7 +55,6 @@ void main() {
   void stub(TillReceiptsPage page) {
     when(
       () => mockUseCase(
-        currency: any(named: 'currency'),
         window: any(named: 'window'),
         page: any(named: 'page'),
         size: any(named: 'size'),
@@ -65,21 +64,20 @@ void main() {
 
   group('le chargement', () {
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
-      'la devise et la fenêtre sont REÇUES, jamais choisies ici',
+      'la fenêtre est REÇUE, jamais choisie ici — et rien ne la cadre sur une '
+      'caisse',
       setUp: () => stub(_page()),
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'CDF',
-          window: TillWindow.month(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.month()),
       ),
       verify: (bloc) {
-        expect(bloc.state.currency, 'CDF');
         expect(bloc.state.window, const TillWindow.month());
+        // Aucune devise n'est transmise : la table porte tous les paiements de
+        // la fenêtre, et le serveur la pagine ainsi. Un défaut posé ici la
+        // cadrerait sur une caisse sans que rien à l'écran ne le dise.
         verify(
           () => mockUseCase(
-            currency: 'CDF',
             window: const TillWindow.month(),
             page: 0,
             size: any(named: 'size'),
@@ -93,10 +91,7 @@ void main() {
       setUp: () => stub(_page(withoutReceiptNumber: 2)),
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       verify: (bloc) {
         expect(bloc.state.withoutReceiptNumber, 2);
@@ -116,10 +111,7 @@ void main() {
       setUp: () => stub(_page(content: const [], totalPages: 0)),
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       verify: (bloc) =>
           expect(bloc.state.status, FinanceTillReceiptsStatus.empty),
@@ -128,28 +120,27 @@ void main() {
 
   group('la pagination', () {
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
-      'changer de caisse REMET la pagination à zéro',
-      setUp: () => stub(_page(page: 2)),
+      'changer de FENÊTRE remet la pagination à zéro',
+      setUp: () => stub(_page(page: 0)),
       build: buildBloc,
       seed: () => const FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
-        currency: 'USD',
+        window: TillWindow.day(),
         page: 2,
       ),
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'CDF',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.month()),
       ),
       verify: (_) {
-        // Rester page 3 en changeant de caisse afficherait une page vide d'une
-        // liste qui, elle, a des lignes — et le lecteur conclurait que l'autre
-        // caisse n'a rien encaissé.
+        // Rester page 3 en changeant de fenêtre afficherait une page vide d'une
+        // liste qui, elle, a des lignes — et le lecteur conclurait que la
+        // période n'a rien reçu.
+        //
+        // ⚠️ La bascule de caisse ne remet plus rien à zéro : elle ne parvient
+        // plus jusqu'ici. La table porte toutes les devises.
         verify(
           () => mockUseCase(
-            currency: 'CDF',
-            window: any(named: 'window'),
+            window: const TillWindow.month(),
             page: 0,
             size: any(named: 'size'),
           ),
@@ -158,19 +149,17 @@ void main() {
     );
 
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
-      'tourner une page rejoue la MÊME caisse et la MÊME fenêtre',
+      'tourner une page rejoue la MÊME fenêtre',
       setUp: () => stub(_page(page: 1)),
       build: buildBloc,
       seed: () => const FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
-        currency: 'CDF',
         window: TillWindow.week(),
         page: 0,
       ),
       act: (bloc) => bloc.add(const FinanceTillReceiptsPageChanged(1)),
       verify: (_) => verify(
         () => mockUseCase(
-          currency: 'CDF',
           window: const TillWindow.week(),
           page: 1,
           size: any(named: 'size'),
@@ -179,19 +168,15 @@ void main() {
     );
 
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
-      'redemander la MÊME caisse sur la MÊME fenêtre ne rappelle pas',
+      'redemander la MÊME fenêtre ne rappelle pas',
       setUp: () => stub(_page()),
       build: buildBloc,
       seed: () => const FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
-        currency: 'USD',
         window: TillWindow.day(),
       ),
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       expect: () => const <FinanceTillReceiptsState>[],
       verify: (_) {
@@ -201,7 +186,6 @@ void main() {
         // clignoter une table déjà remplie.
         verifyNever(
           () => mockUseCase(
-            currency: any(named: 'currency'),
             window: any(named: 'window'),
             page: any(named: 'page'),
             size: any(named: 'size'),
@@ -216,21 +200,16 @@ void main() {
       build: buildBloc,
       seed: () => const FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.error,
-        currency: 'USD',
         window: TillWindow.day(),
         failure: NetworkFailure('offline'),
       ),
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       verify: (bloc) {
         expect(bloc.state.status, FinanceTillReceiptsStatus.success);
         verify(
           () => mockUseCase(
-            currency: 'USD',
             window: const TillWindow.day(),
             page: 0,
             size: any(named: 'size'),
@@ -240,13 +219,12 @@ void main() {
     );
 
     blocTest<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
-      'tourner une page sans caisse choisie ne demande rien',
+      'tourner une page avant tout chargement ne demande rien',
       build: buildBloc,
       act: (bloc) => bloc.add(const FinanceTillReceiptsPageChanged(1)),
       expect: () => const <FinanceTillReceiptsState>[],
       verify: (_) => verifyNever(
         () => mockUseCase(
-          currency: any(named: 'currency'),
           window: any(named: 'window'),
           page: any(named: 'page'),
           size: any(named: 'size'),
@@ -261,7 +239,6 @@ void main() {
       setUp: () {
         when(
           () => mockUseCase(
-            currency: any(named: 'currency'),
             window: any(named: 'window'),
             page: any(named: 'page'),
             size: any(named: 'size'),
@@ -272,10 +249,7 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       verify: (bloc) {
         expect(bloc.state.status, FinanceTillReceiptsStatus.error);
@@ -295,7 +269,6 @@ void main() {
       setUp: () {
         when(
           () => mockUseCase(
-            currency: any(named: 'currency'),
             window: any(named: 'window'),
             page: any(named: 'page'),
             size: any(named: 'size'),
@@ -307,15 +280,11 @@ void main() {
       // déjà servi, et elle repart bien vers le serveur.
       seed: () => FinanceTillReceiptsState(
         status: FinanceTillReceiptsStatus.success,
-        currency: 'USD',
         window: const TillWindow.week(),
         receipts: [_receipt('p1', 'USD')],
       ),
       act: (bloc) => bloc.add(
-        const FinanceTillReceiptsRequested(
-          currency: 'USD',
-          window: TillWindow.day(),
-        ),
+        const FinanceTillReceiptsRequested(window: TillWindow.day()),
       ),
       verify: (bloc) => expect(bloc.state.receipts, isEmpty),
     );

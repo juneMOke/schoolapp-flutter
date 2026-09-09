@@ -126,7 +126,6 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
   Future<TillReceiptPageModel> getTillReceipts(
     Map<String, dynamic> extras,
     String period,
-    String currency,
     int page,
     int size,
     String? from,
@@ -136,7 +135,6 @@ class _FinanceRemoteDataSource implements FinanceRemoteDataSource {
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'period': period,
-      r'currency': currency,
       r'page': page,
       r'size': size,
       r'from': from,

@@ -166,12 +166,10 @@ void main() {
         .where((block) => block.currency == currency)
         .firstOrNull;
 
+    // La table porte TOUTES les caisses : rien ne la cadre sur `currency`.
     final receipts =
         receiptsState ??
-        FinanceTillReceiptsState(
-          status: FinanceTillReceiptsStatus.empty,
-          currency: currency,
-        );
+        const FinanceTillReceiptsState(status: FinanceTillReceiptsStatus.empty);
     final receiptsBloc = _StubReceiptsBloc();
     when(() => receiptsBloc.state).thenReturn(receipts);
     whenListen(
@@ -1154,7 +1152,6 @@ void main() {
         // est refusée.
         receiptsState: const FinanceTillReceiptsState(
           status: FinanceTillReceiptsStatus.error,
-          currency: 'USD',
           failure: UnauthorizedFailure('Access forbidden'),
         ),
       );
@@ -1179,6 +1176,32 @@ void main() {
       );
     });
 
+    testWidgets('une caisse vide ne cache pas les paiements de l’autre', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        // Le dollar est sélectionné par défaut et n'a rien reçu ; le franc,
+        // lui, a encaissé.
+        _till([
+          _block('USD', fees: 0, boutique: 0, receiptCount: 0),
+          _block('CDF', fees: 11500000, boutique: 0, receiptCount: 12),
+        ]),
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          totalElements: 12,
+          totalPages: 2,
+        ),
+      );
+
+      // La caisse choisie dit qu'elle est vide — c'est juste, elle l'est.
+      expect(find.textContaining('Caisse dollars'), findsWidgets);
+      // ⚠️ Mais la table porte TOUTES les caisses : la cacher ici ferait
+      // disparaître douze paiements réels sous un « rien dans cette caisse ».
+      expect(find.text('Paiements'), findsOneWidget);
+      expect(find.textContaining('12 paiements'), findsOneWidget);
+    });
+
     testWidgets('la ligne croisée écrit son taux comme partout ailleurs', (
       tester,
     ) async {
@@ -1187,7 +1210,6 @@ void main() {
         _till([_block('USD')]),
         receiptsState: FinanceTillReceiptsState(
           status: FinanceTillReceiptsStatus.success,
-          currency: 'USD',
           totalElements: 1,
           totalPages: 1,
           receipts: [
@@ -1237,7 +1259,6 @@ void main() {
         _till([_block('USD')]),
         receiptsState: const FinanceTillReceiptsState(
           status: FinanceTillReceiptsStatus.error,
-          currency: 'USD',
           failure: NetworkFailure('offline'),
         ),
       );
@@ -1252,15 +1273,15 @@ void main() {
       );
     });
 
-    testWidgets('le sous-titre aligne trois chiffres de FENÊTRE', (
-      tester,
-    ) async {
+    testWidgets('le sous-titre aligne des chiffres de FENÊTRE', (tester) async {
       await pump(
         tester,
-        _till([_block('USD', fees: 400000, boutique: 12000)]),
+        _till([
+          _block('USD', fees: 400000, boutique: 12000),
+          _block('CDF', fees: 11500000, boutique: 0),
+        ]),
         receiptsState: const FinanceTillReceiptsState(
           status: FinanceTillReceiptsStatus.success,
-          currency: 'USD',
           totalElements: 17,
           totalPages: 3,
           // Compté par le serveur sur la fenêtre : la page n'en montre que 8.
@@ -1269,10 +1290,33 @@ void main() {
       );
 
       expect(
-        find.textContaining('17 encaissements'),
+        find.textContaining('17 paiements'),
         findsOneWidget,
         reason: 'le compte porte sur la fenêtre, pas sur la page affichée',
       );
+      // ⚠️ **`fees`, jamais `total`.** La boutique n'entre pas dans cette table
+      // (elle a sa propre lecture nominative) : poser un total de caisse qui
+      // l'inclut à côté d'un compte de lignes qui l'exclut ferait diverger deux
+      // chiffres voisins. 4 000 $ et non 4 120 $.
+      //
+      // Espaces normalisés : le formatage monétaire pose des insécables qu'on
+      // ne peut ni taper ni relire dans une assertion.
+      final subtitle = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => (t.data ?? '').replaceAll(RegExp(r'\s+'), ' '))
+          .firstWhere((t) => t.startsWith('17 paiements'));
+
+      expect(
+        subtitle,
+        contains('4 000,00 \$'),
+        reason: 'le total de la caisse dollars ajouterait 120 \$ de boutique',
+      );
+      // Les deux caisses, jointes par « et » — jamais par un « + ».
+      // Le franc s'écrit sans décimales : les décimales se décident sur la
+      // DEVISE, jamais sur la valeur.
+      expect(subtitle, contains('115 000 FC'));
+      expect(subtitle, contains(' et '));
+      expect(subtitle, isNot(contains('+')));
       expect(
         find.textContaining('2 sans pièce scellée'),
         findsOneWidget,
@@ -1280,6 +1324,81 @@ void main() {
             'compté sur la page, ce chiffre changerait à chaque tour de '
             'pagination sous un total immobile',
       );
+    });
+
+    testWidgets(
+      'deux lignes sous le même numéro s’expliquent — ce n’est pas un doublon',
+      (tester) async {
+        await pump(
+          tester,
+          _till([_block('USD'), _block('CDF')]),
+          receiptsState: FinanceTillReceiptsState(
+            status: FinanceTillReceiptsStatus.success,
+            totalElements: 2,
+            totalPages: 1,
+            // Le panier mixte : cent quinze mille francs ET dix dollars tendus
+            // au même guichet. Deux lignes de tender, un seul versement.
+            receipts: [
+              TillReceipt(
+                paymentId: 'p-1',
+                paidAt: DateTime.utc(2026, 5, 15, 10),
+                source: 'FACTURATION',
+                amount: 1000,
+                currency: 'USD',
+                receiptNumber: 'ETL-RC-2526-000183',
+              ),
+              TillReceipt(
+                paymentId: 'p-1',
+                paidAt: DateTime.utc(2026, 5, 15, 10),
+                source: 'FACTURATION',
+                amount: 11500000,
+                currency: 'CDF',
+                receiptNumber: 'ETL-RC-2526-000183',
+              ),
+            ],
+          ),
+        );
+
+        // ⚠️ C'est la SEULE chose que la table ait gagnée en passant à toutes
+        // les caisses : les deux moitiés, jusqu'ici rangées dans deux tables
+        // différentes, sont maintenant voisines sous un numéro identique. Sans
+        // la mention, le caissier y voit un doublon.
+        expect(
+          find.textContaining('occupe deux lignes'),
+          findsOneWidget,
+          reason: 'un doublon apparent non expliqué décrédibilise la table',
+        );
+        // Et les deux devises se lisent chacune avec son symbole : aucune
+        // colonne n'invite à sommer deux unités.
+        expect(find.textContaining('115\u00A0000\u00A0FC'), findsOneWidget);
+        expect(find.textContaining('10,00\u00A0\$'), findsOneWidget);
+      },
+    );
+
+    testWidgets('une page sans panier mixte n’explique rien', (tester) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          totalElements: 1,
+          totalPages: 1,
+          receipts: [
+            TillReceipt(
+              paymentId: 'p-1',
+              paidAt: DateTime.utc(2026, 5, 15, 10),
+              source: 'FACTURATION',
+              amount: 4000,
+              currency: 'USD',
+              receiptNumber: 'ETL-RC-2526-000183',
+            ),
+          ],
+        ),
+      );
+
+      // Expliquer un doublon apparent qui n'est pas à l'écran apprendrait au
+      // lecteur à s'en méfier partout — même règle que la note boutique.
+      expect(find.textContaining('occupe deux lignes'), findsNothing);
     });
 
     testWidgets('sans rattrapage, le sous-titre n’en parle pas', (
@@ -1290,7 +1409,6 @@ void main() {
         _till([_block('USD')]),
         receiptsState: const FinanceTillReceiptsState(
           status: FinanceTillReceiptsStatus.success,
-          currency: 'USD',
           totalElements: 5,
           totalPages: 1,
         ),
@@ -1484,7 +1602,7 @@ void main() {
         'Par source': Icons.account_balance,
         'Créances réglées en \$': Icons.receipt_long_outlined,
         'Par classe': Icons.groups_outlined,
-        'Reçus de la caisse dollars': Icons.payments_outlined,
+        'Paiements': Icons.payments_outlined,
       };
 
       for (final entry in expected.entries) {

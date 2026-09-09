@@ -20,14 +20,15 @@ part 'finance_till_receipts_state.dart';
 ///    peuvent pas vivre dans un état commun — et surtout, l'échec de l'une ne
 ///    doit pas effacer l'autre.
 /// 2. **Une pagination**, qui n'a aucun sens pour les agrégats.
-/// 3. **Une portée plus étroite** : la table décrit **une caisse**, là où les
-///    agrégats les portent toutes.
+/// 3. **Une portée différente** : depuis que la table porte « Paiements », elle
+///    couvre **toutes les caisses** de la fenêtre, là où les cartes qui
+///    l'entourent en détaillent une seule. C'est le seul bloc de l'écran que la
+///    bascule de devise ne rejoue pas.
 ///
 /// ## Ce que ce BLoC ne décide PAS
 ///
-/// Ni **quand** charger, ni **quelle fenêtre**, ni **quelle caisse**. C'est le
-/// bloc des agrégats qui fait autorité ; celui-ci reçoit la fenêtre et la
-/// devise, et se contente de les servir. La page ne construit ce sous-arbre que
+/// Ni **quand** charger, ni **quelle fenêtre**. C'est le bloc des agrégats qui
+/// fait autorité ; celui-ci reçoit la fenêtre et se contente de la servir. La page ne construit ce sous-arbre que
 /// dans sa branche `success` : si les agrégats échouent, ce BLoC n'est pas dans
 /// l'arbre du tout, et la règle « l'erreur remplace tout le contenu » est tenue
 /// par la structure plutôt que par une condition qu'un widget pourrait oublier.
@@ -43,11 +44,11 @@ class FinanceTillReceiptsBloc
     on<FinanceTillReceiptsPageChanged>(_onPageChanged);
   }
 
-  /// Changer de caisse ou de fenêtre **remet la pagination à zéro**.
+  /// Changer de fenêtre **remet la pagination à zéro**.
   ///
-  /// Rester page 3 en changeant de caisse afficherait une page vide d'une liste
-  /// qui, elle, a des lignes — et le lecteur conclurait que l'autre caisse n'a
-  /// rien encaissé.
+  /// Rester page 3 en changeant de fenêtre afficherait une page vide d'une
+  /// liste qui, elle, a des lignes — et le lecteur conclurait que la période
+  /// n'a rien reçu.
   Future<void> _onRequested(
     FinanceTillReceiptsRequested event,
     Emitter<FinanceTillReceiptsState> emit,
@@ -59,52 +60,41 @@ class FinanceTillReceiptsBloc
     // remplie.
     //
     // Un échec, lui, se rejoue : c'est le geste de « Réessayer ».
-    if (event.currency == state.currency &&
-        event.window == state.window &&
+    if (event.window == state.window &&
         (state.status == FinanceTillReceiptsStatus.loading ||
             state.status == FinanceTillReceiptsStatus.success ||
             state.status == FinanceTillReceiptsStatus.empty)) {
       return;
     }
 
-    await _load(emit, currency: event.currency, window: event.window, page: 0);
+    await _load(emit, window: event.window, page: 0);
   }
 
   Future<void> _onPageChanged(
     FinanceTillReceiptsPageChanged event,
     Emitter<FinanceTillReceiptsState> emit,
   ) async {
-    final currency = state.currency;
-    if (currency == null) return;
-    await _load(
-      emit,
-      currency: currency,
-      window: state.window,
-      page: event.page,
-    );
+    // Rien à tourner tant que rien n'a été servi : la barre de pagination ne
+    // se monte qu'avec des lignes, mais l'événement, lui, resterait recevable.
+    if (state.status == FinanceTillReceiptsStatus.initial) return;
+    await _load(emit, window: state.window, page: event.page);
   }
 
   Future<void> _load(
     Emitter<FinanceTillReceiptsState> emit, {
-    required String currency,
     required TillWindow window,
     required int page,
   }) async {
     emit(
       state.copyWith(
         status: FinanceTillReceiptsStatus.loading,
-        currency: currency,
         window: window,
         page: page,
         failure: null,
       ),
     );
 
-    final result = await _getTillReceiptsUseCase(
-      currency: currency,
-      window: window,
-      page: page,
-    );
+    final result = await _getTillReceiptsUseCase(window: window, page: page);
 
     result.fold(
       // L'échec emporte les lignes — mais **pas les cartes**, qui vivent dans

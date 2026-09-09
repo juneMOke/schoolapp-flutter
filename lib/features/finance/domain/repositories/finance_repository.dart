@@ -19,17 +19,17 @@ abstract class FinanceRepository {
     TillWindow window = const TillWindow.day(),
   });
 
-  /// Les reçus **d'une caisse** sur la fenêtre, page par page.
+  /// Les paiements de la fenêtre, **toutes caisses**, page par page.
   ///
-  /// [currency] n'a pas de défaut, et c'est délibéré : la table décrit une
-  /// caisse. Un appel sans devise part en 400 côté serveur, et un défaut ici
-  /// n'aurait fait que déplacer l'ambiguïté d'un étage.
+  /// Aucune devise n'est demandée : l'écran veut tous les paiements de la
+  /// période, et le serveur cadre alors sur la fenêtre seule. Chaque ligne
+  /// porte sa devise, et son montant s'écrit avec — rien n'invite à sommer une
+  /// colonne qui mêle deux unités.
   ///
   /// ⚠️ Peut échouer en **403** là où [getFinanceTill] réussit — la lecture
   /// nominative demande une seconde permission. L'appelant doit traiter cet
   /// échec **sans** effacer les agrégats déjà affichés.
   Future<Either<Failure, TillReceiptsPage>> getTillReceipts({
-    required String currency,
     TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,

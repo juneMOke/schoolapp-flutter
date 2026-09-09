@@ -6503,24 +6503,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeTillPeriodTo => 'Au';
 
   @override
-  String financeTillReceiptsHeading(String currency) {
-    return 'Reçus de la caisse $currency';
-  }
+  String get financeTillReceiptsHeading => 'Paiements';
 
   @override
   String financeTillReceiptsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count encaissements',
-      one: '1 encaissement',
-      zero: 'Aucun encaissement',
+      other: '$count paiements',
+      one: '1 paiement',
+      zero: 'Aucun paiement',
     );
     return '$_temp0';
   }
 
   @override
-  String get financeTillReceiptsUnit => 'encaissement';
+  String get financeTillReceiptsUnit => 'paiement';
 
   @override
   String financeTillReceiptsUnsealed(int count) {
@@ -6565,19 +6563,22 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get financeTillReceiptsLoading => 'Chargement des encaissements…';
+  String get financeTillReceiptsLoading => 'Chargement des paiements…';
 
   @override
-  String get financeTillReceiptsEmpty =>
-      'Aucun encaissement dans cette caisse sur la période';
+  String get financeTillReceiptsEmpty => 'Aucun paiement sur la période';
 
   @override
   String get financeTillReceiptsForbidden =>
-      'Le détail nominatif des encaissements demande le droit de lecture des paiements. Les totaux ci-dessus restent lisibles sans lui.';
+      'Le détail nominatif des paiements demande le droit de lecture des paiements. Les totaux ci-dessus restent lisibles sans lui.';
 
   @override
   String get financeTillReceiptsError =>
-      'Les encaissements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
+      'Les paiements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
+
+  @override
+  String get financeTillReceiptsSplitTenderNote =>
+      'Un versement réglé dans les deux devises occupe deux lignes, sous le même numéro de pièce : ce n\'est pas un doublon, c\'est ce que le tiroir contient.';
 
   @override
   String financeTillEmptyGlobalTitle(String window) {

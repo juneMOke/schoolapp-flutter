@@ -17,21 +17,37 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// **La preuve** — une ligne d'encaissement par ligne de table.
 ///
-/// ⚠️ **Pas un reçu par ligne.** Un versement qui a pris des francs *et* des
-/// dollars apparaît **deux fois sous le même numéro**, et ce n'est pas un
-/// doublon : c'est la conséquence directe de « l'unité est la ligne de tender »,
-/// et c'est ce que le caissier retrouve dans son tiroir.
+/// ## Toutes les caisses, contrairement à tout ce qui l'entoure
+///
+/// Les cartes au-dessus détaillent **une** caisse, celle du sélecteur ; cette
+/// table-ci porte **tous les paiements de la fenêtre**, francs et dollars mêlés.
+/// C'est ce qu'on vient y chercher : la liste de ce qui a été encaissé, pas la
+/// liste d'un tiroir. Elle ne se rejoue donc pas quand on bascule de devise.
+///
+/// Le mélange se lit parce que **chaque montant porte son symbole** : il n'y a
+/// pas de colonne où sommer deux unités, et le serveur pagine, compte et trie
+/// la table entière — le filtre de devise vit dans la même requête que le
+/// `LIMIT`, jamais après.
+///
+/// ⚠️ **Pas un reçu par ligne, et ça se voit maintenant.** Un versement qui a
+/// pris des francs *et* des dollars apparaît **deux fois sous le même numéro** :
+/// c'est la conséquence directe de « l'unité est la ligne de tender », et c'est
+/// ce que le caissier retrouve dans son tiroir. Scopée sur une caisse, la table
+/// n'en montrait qu'une des deux moitiés ; ici les deux se retrouvent voisines,
+/// d'où la mention qui l'explique — sans elle, un lecteur y verrait un doublon.
 ///
 /// C'est la ligne qui explique les écarts au contrôle de caisse — d'où la
 /// seconde ligne ambre quand un frais fixé dans une devise a été réglé dans
 /// l'autre.
 class FinanceTillReceiptsSection extends StatelessWidget {
-  /// Le total de la caisse décrite, déjà formaté — il complète le sous-titre.
+  /// Ce que la fenêtre a encaissé, **un montant par caisse**, déjà formaté.
+  ///
   /// Lu sur les agrégats, jamais recomposé depuis les lignes de la page : la
-  /// page n'en montre que huit.
-  final String tillTotal;
+  /// page n'en montre que huit. Ils complètent le sous-titre, et ne sont
+  /// **jamais additionnés** — ce sont deux unités.
+  final List<String> tillTotals;
 
-  const FinanceTillReceiptsSection({super.key, required this.tillTotal});
+  const FinanceTillReceiptsSection({super.key, required this.tillTotals});
 
   @override
   Widget build(BuildContext context) {
@@ -39,22 +55,23 @@ class FinanceTillReceiptsSection extends StatelessWidget {
 
     return BlocBuilder<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
       builder: (context, state) {
-        final currency = state.currency;
-        if (currency == null) return const SizedBox.shrink();
-
         return FinanceStatsChartCard(
-          title: l10n.financeTillReceiptsHeading(
-            tillCurrencyName(currency, l10n),
-          ),
-          // Les versements de Facturation portent la même : la table d'ici en
-          // est la lecture par caisse.
+          title: l10n.financeTillReceiptsHeading,
+          // Les versements de Facturation portent la même.
           icon: Icons.payments_outlined,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Subtitle(state: state, tillTotal: tillTotal, l10n: l10n),
+              _Subtitle(state: state, tillTotals: tillTotals, l10n: l10n),
               const SizedBox(height: AppDimensions.spacingM),
-              _body(context, l10n, state, currency),
+              _body(context, l10n, state),
+              // ⚠️ Rendue **seulement quand la page en porte une**, comme la
+              // note boutique : expliquer un doublon apparent qui n'est pas à
+              // l'écran apprendrait au lecteur à s'en méfier partout.
+              if (_hasSplitTender(state.receipts)) ...[
+                const SizedBox(height: AppDimensions.spacingM),
+                _SplitTenderNote(l10n: l10n),
+              ],
             ],
           ),
         );
@@ -62,11 +79,24 @@ class FinanceTillReceiptsSection extends StatelessWidget {
     );
   }
 
+  /// Deux lignes de la page portent-elles le **même versement** ?
+  ///
+  /// Le cas du panier mixte : cent mille francs et dix dollars tendus au même
+  /// guichet font deux lignes de tender sous un seul `paymentId`. Le tri du
+  /// serveur est `(paidAt, id, tenderId)`, donc elles sont voisines — mais
+  /// c'est la présence qui compte ici, pas l'adjacence.
+  static bool _hasSplitTender(List<TillReceipt> receipts) {
+    final seen = <String>{};
+    for (final receipt in receipts) {
+      if (!seen.add(receipt.paymentId)) return true;
+    }
+    return false;
+  }
+
   Widget _body(
     BuildContext context,
     AppLocalizations l10n,
     FinanceTillReceiptsState state,
-    String currency,
   ) {
     // ⚠️ **L'erreur de CETTE table n'est pas l'erreur de l'écran.**
     //
@@ -92,9 +122,7 @@ class FinanceTillReceiptsSection extends StatelessWidget {
         isLoading: state.status == FinanceTillReceiptsStatus.loading,
         loadingLabel: l10n.financeTillReceiptsLoading,
         emptyLabel: l10n.financeTillReceiptsEmpty,
-        semanticsLabel: l10n.financeTillReceiptsHeading(
-          tillCurrencyName(currency, l10n),
-        ),
+        semanticsLabel: l10n.financeTillReceiptsHeading,
         density: DataTableDensity.compact,
         // Les proportions de la spec — `1fr · 1,1fr · 2fr · 1fr · 1,2fr` —
         // portées en dixièmes.
@@ -330,20 +358,31 @@ class _SourcePill extends StatelessWidget {
   }
 }
 
-/// « 17 reçus · 4 120 $ · 2 sans pièce scellée » — **trois chiffres de fenêtre**.
+/// « 22 paiements · 4 120 $ et 1 350 000 FC · 2 sans pièce scellée » — **des
+/// chiffres de fenêtre**.
 ///
-/// Les trois portent sur la même chose, et c'est ce qui les rend comparables.
-/// Le compte des rattrapages vient du serveur (`withoutReceiptNumber`) et non
-/// des lignes affichées : compté sur la page, il changerait à chaque tour de
-/// pagination sous un total immobile.
+/// Ils portent tous sur la même population, et c'est ce qui les rend
+/// comparables. Le compte des rattrapages vient du serveur
+/// (`withoutReceiptNumber`) et non des lignes affichées : compté sur la page, il
+/// changerait à chaque tour de pagination sous un total immobile.
+///
+/// ⚠️ **Les montants sont ceux de la FACTURATION, pas les totaux de caisse.**
+/// Un total de caisse inclut la boutique, que cette table ne montre pas — le
+/// contrat le dit en toutes lettres : « le jour où la boutique tournera, le
+/// total de caisse inclura des ventes que cette table ne montrera pas ». Poser
+/// ce total-là à côté d'un compte de lignes qui l'exclut ferait diverger deux
+/// chiffres voisins sans que rien ne le dise.
+///
+/// ⚠️ **Et ils ne s'additionnent jamais** : ce sont deux unités, jointes par
+/// « et » et non par un « + ».
 class _Subtitle extends StatelessWidget {
   final FinanceTillReceiptsState state;
-  final String tillTotal;
+  final List<String> tillTotals;
   final AppLocalizations l10n;
 
   const _Subtitle({
     required this.state,
-    required this.tillTotal,
+    required this.tillTotals,
     required this.l10n,
   });
 
@@ -351,7 +390,8 @@ class _Subtitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final parts = <String>[
       l10n.financeTillReceiptsCount(state.totalElements),
-      tillTotal,
+      if (tillTotals.isNotEmpty)
+        tillTotals.join(l10n.financeTillInsightAmountSeparator),
       // N'apparaît qu'avec des rattrapages à annoncer : sur une fenêtre où
       // toutes les pièces existent, la mention n'aurait rien à expliquer.
       if (state.hasUnsealedReceipts)
@@ -406,6 +446,52 @@ class _InlineMessage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Pourquoi deux lignes portent le même numéro de pièce.
+///
+/// **Sans elle, le lecteur voit un doublon.** Le panier mixte est la seule
+/// chose que cette table ait gagnée en passant à toutes les caisses : les deux
+/// moitiés d'un versement, jusqu'ici rangées dans deux tables différentes, y
+/// sont maintenant voisines sous un numéro identique.
+///
+/// Même forme que la note boutique de « Par source » : un encart discret, une
+/// icône qui double le texte, et rien à cliquer.
+class _SplitTenderNote extends StatelessWidget {
+  final AppLocalizations l10n;
+
+  const _SplitTenderNote({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.call_split_rounded,
+            size: 16,
+            color: AppColors.bleuArdoise,
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          Expanded(
+            child: Text(
+              l10n.financeTillReceiptsSplitTenderNote,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

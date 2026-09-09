@@ -10544,19 +10544,19 @@ abstract class AppLocalizations {
   /// No description provided for @financeTillReceiptsHeading.
   ///
   /// In en, this message translates to:
-  /// **'{currency} till receipts'**
-  String financeTillReceiptsHeading(String currency);
+  /// **'Payments'**
+  String get financeTillReceiptsHeading;
 
   /// No description provided for @financeTillReceiptsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No collections} one{1 collection} other{{count} collections}}'**
+  /// **'{count, plural, =0{No payments} one{1 payment} other{{count} payments}}'**
   String financeTillReceiptsCount(int count);
 
   /// No description provided for @financeTillReceiptsUnit.
   ///
   /// In en, this message translates to:
-  /// **'collection'**
+  /// **'payment'**
   String get financeTillReceiptsUnit;
 
   /// No description provided for @financeTillReceiptsUnsealed.
@@ -10622,26 +10622,32 @@ abstract class AppLocalizations {
   /// No description provided for @financeTillReceiptsLoading.
   ///
   /// In en, this message translates to:
-  /// **'Loading collections…'**
+  /// **'Loading payments…'**
   String get financeTillReceiptsLoading;
 
   /// No description provided for @financeTillReceiptsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No collections in this till for the period'**
+  /// **'No payments in this period'**
   String get financeTillReceiptsEmpty;
 
   /// No description provided for @financeTillReceiptsForbidden.
   ///
   /// In en, this message translates to:
-  /// **'The itemised list of collections requires the payment-read permission. The totals above remain readable without it.'**
+  /// **'The itemised list of payments requires the payment-read permission. The totals above remain readable without it.'**
   String get financeTillReceiptsForbidden;
 
   /// No description provided for @financeTillReceiptsError.
   ///
   /// In en, this message translates to:
-  /// **'Collections could not be loaded. The totals above are up to date.'**
+  /// **'Payments could not be loaded. The totals above are up to date.'**
   String get financeTillReceiptsError;
+
+  /// No description provided for @financeTillReceiptsSplitTenderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.'**
+  String get financeTillReceiptsSplitTenderNote;
 
   /// No description provided for @financeTillEmptyGlobalTitle.
   ///

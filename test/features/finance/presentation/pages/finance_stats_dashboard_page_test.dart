@@ -131,6 +131,35 @@ final tTill = FinanceTill(
   ],
 );
 
+/// La même caisse, plus une seconde devise — de quoi rendre le sélecteur.
+final tTillTwoCurrencies = FinanceTill(
+  context: tTill.context,
+  timeZone: tTill.timeZone,
+  encaisse: [
+    ...tTill.encaisse,
+    const TillCurrencyBlock(
+      currency: 'CDF',
+      summary: TillSummary(
+        total: 11500000,
+        fees: 11500000,
+        boutique: 0,
+        receiptCount: 3,
+        averageTicket: 3833333,
+      ),
+      buckets: <TillBucket>[
+        TillBucket(
+          key: '2026-05-15',
+          total: 11500000,
+          fees: 11500000,
+          boutique: 0,
+          isCurrent: true,
+        ),
+      ],
+    ),
+  ],
+  impute: tTill.impute,
+);
+
 /// La coquille à deux onglets.
 ///
 /// Ce qui se vérifie ici n'est pas le rendu des deux moitiés — chacune a ses
@@ -180,7 +209,6 @@ void main() {
     // lignes.
     when(
       () => mockReceipts(
-        currency: any(named: 'currency'),
         window: any(named: 'window'),
         page: any(named: 'page'),
         size: any(named: 'size'),
@@ -356,7 +384,9 @@ void main() {
     verify(() => mockRecovery()).called(1);
   });
 
-  testWidgets('la table est TOUJOURS demandée avec une devise', (tester) async {
+  testWidgets('la table est demandée SANS devise — toutes les caisses', (
+    tester,
+  ) async {
     await pumpPage(tester);
 
     await tester.tap(find.text('Caisse'));
@@ -365,13 +395,40 @@ void main() {
     // (écouteur → bloc → cas d'usage) : il lui faut une frame supplémentaire.
     await tester.pumpAndSettle();
 
-    // ⚠️ `currency` est **obligatoire** sur `/receipts` : sans elle, 400. La
-    // devise vient du bloc des agrégats via l'écouteur, donc elle est là par
-    // construction — mais c'est exactement le genre de paramètre qu'on perd
-    // sur une branche neuve sans que rien ne le dise avant l'exécution.
+    // ⚠️ `currency` **n'existe plus** dans cette chaîne : la table porte tous
+    // les paiements de la fenêtre, et c'est son absence qui le demande au
+    // serveur. Le cas d'usage ne l'accepte plus, donc une devise réintroduite
+    // ici ne compilerait pas — c'est le compilateur qui tient la règle.
     verify(
       () => mockReceipts(
-        currency: 'USD',
+        window: any(named: 'window'),
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('basculer de caisse ne redemande pas la table', (tester) async {
+    // Deux caisses, donc un sélecteur — le seul geste qui rejouait la table
+    // avant qu'elle ne porte toutes les devises.
+    when(
+      () => mockTill(window: any(named: 'window')),
+    ).thenAnswer((_) async => Right(tTillTwoCurrencies));
+
+    await pumpPage(tester);
+    await tester.tap(find.text('Caisse'));
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('FC francs (3)'));
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    // Un second appel rendrait exactement la même page : la table ne dépend
+    // que de la fenêtre. Il ferait clignoter des lignes déjà justes et paierait
+    // un aller-retour de guichet pour rien.
+    verify(
+      () => mockReceipts(
         window: any(named: 'window'),
         page: any(named: 'page'),
         size: any(named: 'size'),

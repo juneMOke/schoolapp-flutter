@@ -6436,24 +6436,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeTillPeriodTo => 'To';
 
   @override
-  String financeTillReceiptsHeading(String currency) {
-    return '$currency till receipts';
-  }
+  String get financeTillReceiptsHeading => 'Payments';
 
   @override
   String financeTillReceiptsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count collections',
-      one: '1 collection',
-      zero: 'No collections',
+      other: '$count payments',
+      one: '1 payment',
+      zero: 'No payments',
     );
     return '$_temp0';
   }
 
   @override
-  String get financeTillReceiptsUnit => 'collection';
+  String get financeTillReceiptsUnit => 'payment';
 
   @override
   String financeTillReceiptsUnsealed(int count) {
@@ -6498,19 +6496,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get financeTillReceiptsLoading => 'Loading collections…';
+  String get financeTillReceiptsLoading => 'Loading payments…';
 
   @override
-  String get financeTillReceiptsEmpty =>
-      'No collections in this till for the period';
+  String get financeTillReceiptsEmpty => 'No payments in this period';
 
   @override
   String get financeTillReceiptsForbidden =>
-      'The itemised list of collections requires the payment-read permission. The totals above remain readable without it.';
+      'The itemised list of payments requires the payment-read permission. The totals above remain readable without it.';
 
   @override
   String get financeTillReceiptsError =>
-      'Collections could not be loaded. The totals above are up to date.';
+      'Payments could not be loaded. The totals above are up to date.';
+
+  @override
+  String get financeTillReceiptsSplitTenderNote =>
+      'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.';
 
   @override
   String financeTillEmptyGlobalTitle(String window) {

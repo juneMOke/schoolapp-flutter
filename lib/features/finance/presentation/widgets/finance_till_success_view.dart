@@ -181,15 +181,22 @@ class FinanceTillSuccessView extends StatelessWidget {
               // prend en Facturation.
               FinanceTillInsightsSection(till: till, block: selected),
               const SizedBox(height: AppDimensions.spacingL),
-              // La preuve, en dernier. Son BLoC est distinct : un 403 ici —
-              // droit de pilotage sans droit nominatif — laisse tout ce qui
-              // précède à l'écran.
-              FinanceTillReceiptsSection(
-                tillTotal: MoneyFormat.format(
-                  Money.parse(selected.summary.total, selected.currency),
-                ),
-              ),
             ],
+            const SizedBox(height: AppDimensions.spacingL),
+            // La preuve, en dernier. Son BLoC est distinct : un 403 ici —
+            // droit de pilotage sans droit nominatif — laisse tout ce qui
+            // précède à l'écran.
+            //
+            // ⚠️ **Le seul bloc qui ignore le sélecteur, et il est HORS de la
+            // branche « caisse vide ».** Il porte tous les paiements de la
+            // fenêtre : la laisser sous le `else` la ferait disparaître quand
+            // le dollar n'a rien reçu et que le franc a encaissé douze fois —
+            // l'écran annoncerait « rien dans cette caisse » en cachant les
+            // douze paiements que la table, elle, aurait montrés.
+            //
+            // Elle reçoit donc les totaux de TOUTES les caisses, jamais ceux de
+            // `selected`.
+            FinanceTillReceiptsSection(tillTotals: _paidTotals(till)),
             const SizedBox(height: AppDimensions.spacingXL),
           ],
         ],
@@ -212,6 +219,26 @@ bool _hasFees(FinanceTill till) =>
 /// pas un.
 bool _showsImputation(FinanceTill till) =>
     till.impute.isNotEmpty || _hasFees(till);
+
+/// Ce que la fenêtre a encaissé en **facturation**, un montant par caisse.
+///
+/// ⚠️ **`fees`, et surtout pas `total`.** La table des paiements ne montre que
+/// la facturation — la boutique a sa propre lecture nominative — alors qu'un
+/// total de caisse ajoute les ventes. Poser `total` sous un compte de lignes
+/// qui les exclut ferait diverger deux chiffres voisins le jour où la boutique
+/// tournera, sans que rien ne le dise. `fees` est lu sur les mêmes lignes
+/// d'encaissement que la table, par `paid_at` et en devise reçue : c'est
+/// exactement la population comptée.
+///
+/// Les caisses à zéro sont écartées : « 0 $ et 1 350 000 FC » allonge le
+/// sous-titre sans rien apprendre, et ce sont les tuiles — qui, elles, gardent
+/// toutes les devises de l'école — qui portent le repère « cette caisse
+/// existe ».
+List<String> _paidTotals(FinanceTill till) => [
+  for (final block in tillBlocksInDisplayOrder(till.encaisse))
+    if (block.summary.fees > 0)
+      MoneyFormat.format(Money.parse(block.summary.fees, block.currency)),
+];
 
 /// **Les créances éteintes, une carte par devise**, côte à côte.
 ///

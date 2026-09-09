@@ -42,16 +42,18 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
     });
   }
 
-  /// Demande à la table ce que les agrégats viennent de décrire.
+  /// Demande à la table la fenêtre que les agrégats viennent de décrire.
+  ///
+  /// ⚠️ **La caisse ne fait plus partie de la demande.** La table porte tous
+  /// les paiements de la fenêtre : la rejouer sur une bascule de devise
+  /// redemanderait la même page. Le BLoC la refuserait déjà — sa garde compare
+  /// la fenêtre servie — mais l'événement ne la porte plus du tout, ce qui rend
+  /// la règle lisible ici plutôt que déduite là-bas.
   void _syncReceipts(FinanceTillState state) {
-    final currency = state.selectedCurrency;
-    if (state.status != FinanceTillStatus.success || currency == null) return;
+    if (state.status != FinanceTillStatus.success) return;
 
     context.read<FinanceTillReceiptsBloc>().add(
-      FinanceTillReceiptsRequested(
-        currency: currency,
-        window: state.selectedWindow,
-      ),
+      FinanceTillReceiptsRequested(window: state.selectedWindow),
     );
   }
 

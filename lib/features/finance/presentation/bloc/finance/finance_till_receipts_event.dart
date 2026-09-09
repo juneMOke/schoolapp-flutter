@@ -7,22 +7,22 @@ sealed class FinanceTillReceiptsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Charger la table pour une caisse et une fenêtre.
+/// Charger la table pour une fenêtre.
 ///
-/// Émis à la première ouverture, **et à chaque bascule de caisse ou de
-/// fenêtre** : les deux changent ce que la table décrit, et remettent donc la
-/// pagination à zéro.
+/// Émis à la première ouverture **et à chaque changement de fenêtre**, qui
+/// remet la pagination à zéro.
+///
+/// ⚠️ **Une bascule de caisse ne l'émet plus.** La table porte désormais tous
+/// les paiements de la période, quelle que soit la caisse examinée au-dessus :
+/// la rejouer sur un changement de devise redemanderait exactement la même page
+/// et ferait clignoter une table déjà juste.
 class FinanceTillReceiptsRequested extends FinanceTillReceiptsEvent {
-  final String currency;
   final TillWindow window;
 
-  const FinanceTillReceiptsRequested({
-    required this.currency,
-    required this.window,
-  });
+  const FinanceTillReceiptsRequested({required this.window});
 
   @override
-  List<Object?> get props => [currency, window];
+  List<Object?> get props => [window];
 }
 
 /// Tourner une page — **sans changer ni la caisse ni la fenêtre**.

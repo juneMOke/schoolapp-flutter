@@ -7,9 +7,6 @@ enum FinanceTillReceiptsStatus { initial, loading, success, empty, error }
 class FinanceTillReceiptsState extends Equatable {
   final FinanceTillReceiptsStatus status;
 
-  /// La caisse décrite. Nulle tant qu'aucune n'a été demandée.
-  final String? currency;
-
   /// La fenêtre servie — retenue pour que tourner une page rejoue **la même**.
   final TillWindow window;
 
@@ -36,7 +33,6 @@ class FinanceTillReceiptsState extends Equatable {
 
   const FinanceTillReceiptsState({
     this.status = FinanceTillReceiptsStatus.initial,
-    this.currency,
     this.window = const TillWindow.day(),
     this.receipts = const [],
     this.page = 0,
@@ -55,7 +51,6 @@ class FinanceTillReceiptsState extends Equatable {
 
   FinanceTillReceiptsState copyWith({
     FinanceTillReceiptsStatus? status,
-    Object? currency = _undefined,
     TillWindow? window,
     List<TillReceipt>? receipts,
     int? page,
@@ -65,9 +60,6 @@ class FinanceTillReceiptsState extends Equatable {
     Object? failure = _undefined,
   }) => FinanceTillReceiptsState(
     status: status ?? this.status,
-    currency: identical(currency, _undefined)
-        ? this.currency
-        : currency as String?,
     window: window ?? this.window,
     receipts: receipts ?? this.receipts,
     page: page ?? this.page,
@@ -82,7 +74,6 @@ class FinanceTillReceiptsState extends Equatable {
   @override
   List<Object?> get props => [
     status,
-    currency,
     window,
     receipts,
     page,

@@ -81,7 +81,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
 
   @override
   Future<Either<Failure, TillReceiptsPage>> getTillReceipts({
-    required String currency,
     TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,
@@ -90,7 +89,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final response = await remoteDataSource.getTillReceipts(
         requiredAuth,
         window.apiPeriod,
-        currency,
         page,
         size,
         window.apiFrom,

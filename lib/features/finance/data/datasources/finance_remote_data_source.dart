@@ -48,12 +48,18 @@ abstract class FinanceRemoteDataSource {
     @Query('to') String? to,
   );
 
-  /// Les reçus de **une** caisse, page par page.
+  /// Les paiements de la fenêtre, **toutes caisses**, page par page.
   ///
-  /// `currency` n'est pas facultatif : la table décrit une caisse, et un appel
-  /// sans devise part en 400. C'est le garde-fou qui empêche une page
-  /// vraisemblable scopée sur rien — huit lignes toutes devises confondues sous
-  /// un titre qui en annonce une seule.
+  /// ⚠️ **`currency` n'est délibérément pas envoyée.** Le contrat la porte
+  /// toujours — elle cadre la table sur une seule caisse — mais cet écran veut
+  /// l'inverse : « tous les paiements de la période ». Absente, le serveur rend
+  /// toutes les caisses, chaque ligne portant sa devise.
+  ///
+  /// Ce mode est sûr **parce que le filtre vit dans la requête**, avec le
+  /// `LIMIT` : la page reste pleine, `totalElements` et `withoutReceiptNumber`
+  /// restent justes, la pagination ne saute pas. C'est précisément ce qu'un
+  /// filtrage côté client après réception ne peut pas tenir — il rendrait une
+  /// page de huit réduite à trois.
   ///
   /// ⚠️ **Seconde permission** (`finance.payment.read`) : un porteur du seul
   /// pilotage reçoit 200 sur l'agrégat et **403 ici**. L'appel vit donc dans
@@ -62,7 +68,6 @@ abstract class FinanceRemoteDataSource {
   Future<TillReceiptPageModel> getTillReceipts(
     @Extras() Map<String, dynamic> extras,
     @Query('period') String period,
-    @Query('currency') String currency,
     @Query('page') int page,
     @Query('size') int size,
     @Query('from') String? from,
