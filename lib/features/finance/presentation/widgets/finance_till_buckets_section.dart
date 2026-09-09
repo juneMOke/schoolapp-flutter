@@ -45,6 +45,17 @@ class FinanceTillBucketsSection extends StatelessWidget {
 
   /// Au-delà de douze compartiments, les libellés se chevauchent : un mois de
   /// trente-et-un jours est le pire cas que l'écran ait à dessiner.
+  /// Au-delà de douze barres, les libellés pivotent.
+  ///
+  /// ⚠️ **Écart assumé avec la spec**, qui demande l'inverse : garder les
+  /// libellés à plat et n'en montrer qu'« un sur ceil(n/12) au-delà de 20
+  /// jours ». Les deux règlent le même encombrement, mais pas au même prix —
+  /// l'amincissement **cache des dates**, la rotation les montre toutes.
+  ///
+  /// Sur un axe où chaque barre est un jour d'argent, ne pas cacher de date
+  /// vaut mieux qu'un axe plus élégant : le lecteur qui cherche le 17 doit le
+  /// trouver. La spec optimise la lisibilité de l'axe ; on préserve
+  /// l'information. Tranché par le porteur.
   static const int _rotateLabelsBeyond = 12;
 
   /// Jusqu'à dix barres, **chacune porte son montant**. Au-delà, les étiquettes
