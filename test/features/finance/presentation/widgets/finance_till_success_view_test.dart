@@ -12,6 +12,10 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_report_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
@@ -27,6 +31,26 @@ class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
 /// La table des reçus vit dans son propre BLoC — c'est ce qui permet à un 403
 /// nominatif de ne pas emporter les agrégats. Les tests de la vue la montent
 /// donc à un état donné plutôt que d'appeler le réseau.
+/// Un [AuthBloc] figé sur un jeu de permissions, pour éprouver la garde du
+/// bouton de téléchargement.
+class _StubAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+AuthBloc _authBloc(List<String> permissions) {
+  final bloc = _StubAuthBloc();
+  final state = AuthState(
+    status: AuthStatus.authenticated,
+    permissions: permissions,
+  );
+  when(() => bloc.state).thenReturn(state);
+  whenListen(bloc, Stream<AuthState>.value(state), initialState: state);
+  return bloc;
+}
+
+/// Le cubit du rapport PDF — la carte des paiements porte son bouton.
+class _StubReportCubit extends MockCubit<FinanceTillReportState>
+    implements FinanceTillReportCubit {}
+
 class _StubReceiptsBloc
     extends MockBloc<FinanceTillReceiptsEvent, FinanceTillReceiptsState>
     implements FinanceTillReceiptsBloc {}
@@ -128,6 +152,9 @@ FinanceTill _till(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  // Le stub du cubit de rapport prend une fenêtre en `any`.
+  setUpAll(() => registerFallbackValue(const TillWindow.day()));
+
   late _MockSyncStatusCubit syncCubit;
 
   setUp(() {
@@ -149,12 +176,21 @@ void main() {
   /// La devise détaillée, résolue comme le BLoC la résout — dollar par défaut.
   late List<String> selectedByTap;
   late List<TillWindow> windowsByTap;
+  late _StubReportCubit reportCubit;
 
   Future<void> pump(
     WidgetTester tester,
     FinanceTill till, {
     String? selectedCurrency,
     FinanceTillReceiptsState? receiptsState,
+    FinanceTillReportState? reportState,
+    // Un état ÉMIS après l'initial. Le listener du bouton ne réagit qu'aux
+    // changements : une remise posée en état initial ne le réveillerait pas.
+    FinanceTillReportState? reportEmits,
+    List<String>? permissions,
+    // Le bouton en préparation porte un indicateur circulaire, qui tourne sans
+    // fin : `pumpAndSettle` ne rendrait jamais la main.
+    bool settle = true,
   }) async {
     selectedByTap = <String>[];
     windowsByTap = <TillWindow>[];
@@ -170,6 +206,21 @@ void main() {
     final receipts =
         receiptsState ??
         const FinanceTillReceiptsState(status: FinanceTillReceiptsStatus.empty);
+    reportCubit = _StubReportCubit();
+    when(
+      () => reportCubit.download(window: any(named: 'window')),
+    ).thenAnswer((_) async {});
+    final report = reportState ?? const FinanceTillReportState();
+    when(() => reportCubit.state).thenReturn(reportEmits ?? report);
+    when(() => reportCubit.isClosed).thenReturn(false);
+    whenListen(
+      reportCubit,
+      reportEmits == null
+          ? const Stream<FinanceTillReportState>.empty()
+          : Stream<FinanceTillReportState>.value(reportEmits),
+      initialState: report,
+    );
+
     final receiptsBloc = _StubReceiptsBloc();
     when(() => receiptsBloc.state).thenReturn(receipts);
     whenListen(
@@ -185,6 +236,11 @@ void main() {
         providers: [
           BlocProvider<SyncStatusCubit>.value(value: syncCubit),
           BlocProvider<FinanceTillReceiptsBloc>.value(value: receiptsBloc),
+          BlocProvider<FinanceTillReportCubit>.value(value: reportCubit),
+          // Sans AuthBloc, `PermissionGate` laisse passer — c'est sa convention.
+          // Les tests qui éprouvent la garde en montent un.
+          if (permissions != null)
+            BlocProvider<AuthBloc>.value(value: _authBloc(permissions)),
         ],
         child: MaterialApp(
           locale: const Locale('fr'),
@@ -203,7 +259,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
   testWidgets('la fenêtre et le fuseau se disent, ils ne se devinent pas', (
@@ -1580,6 +1640,214 @@ void main() {
       await pump(tester, _till([_block('USD', trendPercent: 18)]));
       expect(find.textContaining('Vérifiez si une relance'), findsNothing);
       expect(find.textContaining('Le rythme se maintient'), findsOneWidget);
+    });
+  });
+
+  group('le rapport téléchargeable', () {
+    testWidgets('le bouton est offert dans la carte des paiements', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD')]));
+
+      expect(find.text('Télécharger'), findsOneWidget);
+      final card = find.ancestor(
+        of: find.text('Télécharger'),
+        matching: find.byType(FinanceStatsChartCard),
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('Paiements')),
+        findsOneWidget,
+        reason: 'la sortie appartient à la table qu’elle exporte',
+      );
+    });
+
+    testWidgets('un appui télécharge, sans rien demander de plus', (
+      tester,
+    ) async {
+      await pump(tester, _till([_block('USD')]));
+
+      await tester.tap(find.text('Télécharger'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => reportCubit.download(window: const TillWindow.day()),
+      ).called(1);
+    });
+
+    testWidgets(
+      'deux caisses ne posent plus de question : le document les porte toutes',
+      (tester) async {
+        await pump(tester, _till([_block('USD'), _block('CDF')]));
+
+        await tester.tap(find.text('Télécharger'));
+        await tester.pumpAndSettle();
+
+        // ⚠️ Le serveur exigeait une devise ; le bouton ouvrait alors un menu,
+        // parce qu'en choisir une en silence aurait rendu un document crédible
+        // sur une caisse que personne n'avait demandée. Depuis que le rapport
+        // rend les deux unités — un total par devise au pied, jamais leur
+        // somme — la question n'a plus d'objet.
+        expect(find.text('Caisse dollars'), findsNothing);
+        expect(find.text('Caisse francs'), findsNothing);
+        verify(
+          () => reportCubit.download(window: const TillWindow.day()),
+        ).called(1);
+      },
+    );
+
+    testWidgets('la fenêtre envoyée est celle qui a produit la table', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')], period: 'month'),
+        receiptsState: const FinanceTillReceiptsState(
+          status: FinanceTillReceiptsStatus.success,
+          window: TillWindow.month(),
+          totalElements: 3,
+          totalPages: 1,
+        ),
+      );
+
+      await tester.tap(find.text('Télécharger'));
+      await tester.pumpAndSettle();
+
+      // Lue sur l'état des reçus et non sur le sélecteur : pendant un
+      // changement de filtre, celui-ci a déjà bougé alors que les lignes
+      // affichées sont encore celles d'avant.
+      verify(
+        () => reportCubit.download(window: const TillWindow.month()),
+      ).called(1);
+    });
+
+    testWidgets('pendant la préparation, le bouton est désarmé et le dit', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        reportState: const FinanceTillReportState(
+          status: FinanceTillReportStatus.preparing,
+        ),
+        settle: false,
+      );
+
+      expect(find.text('Préparation…'), findsOneWidget);
+      final button = tester.widget<TextButton>(find.byType(TextButton));
+      expect(
+        button.onPressed,
+        isNull,
+        reason:
+            'deux appuis lanceraient deux rendus, et le serveur n’en compose '
+            'qu’un à la fois',
+      );
+    });
+
+    testWidgets('pendant l’attente d’un 429, le bouton reste désarmé', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        reportState: const FinanceTillReportState(
+          status: FinanceTillReportStatus.cooldown,
+          retryAfter: Duration(seconds: 60),
+        ),
+      );
+
+      // Réarmer tout de suite inviterait à reproduire exactement ce que le
+      // serveur vient de refuser.
+      expect(find.text('Patientez…'), findsOneWidget);
+      expect(
+        tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('le refus de plafond se dit avec NOS mots et SES chiffres', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        reportEmits: const FinanceTillReportState(
+          failure: ApiValidationFailure(
+            code: ApiErrorCode.businessRule,
+            detailCode: 'REPORT_LINE_CAP',
+            details: {'lines': 7213, 'cap': 5000},
+            // La phrase du serveur, complète — mais c'est la nôtre qu'on veut
+            // voir, parce qu'elle suit la langue de l'écran.
+            serverMessage: 'Cette fenêtre contient 7213 lignes…',
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Espaces normalisés : le formatage décimal pose des insécables qu'on ne
+      // peut ni taper ni relire dans une assertion.
+      final shown = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => (t.data ?? '').replaceAll(RegExp(r'\s+'), ' '))
+          .where((t) => t.contains('plafonné'))
+          .toList();
+
+      expect(shown, hasLength(1), reason: 'un message, et un seul');
+      expect(
+        shown.single,
+        contains('7 213'),
+        reason: 'le compte vient de `details`, pas de la phrase du serveur',
+      );
+      expect(shown.single, contains('5 000'));
+      expect(shown.single, contains('Resserrez la période'));
+    });
+
+    testWidgets(
+      'sans chiffres exploitables, la phrase du serveur reprend la main',
+      (tester) async {
+        await pump(
+          tester,
+          _till([_block('USD')]),
+          reportEmits: const FinanceTillReportState(
+            failure: ApiValidationFailure(
+              code: ApiErrorCode.businessRule,
+              detailCode: 'REPORT_LINE_CAP',
+              // Le contrat ne promet pas la forme : une clé manquante ne doit
+              // pas produire une phrase à trous.
+              details: {'cap': 5000},
+              message: 'Fenêtre trop volumineuse.',
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // Mieux vaut la phrase du serveur, complète mais dans sa langue, qu'une
+        // des nôtres amputée de son seul chiffre actionnable.
+        expect(find.text('Fenêtre trop volumineuse.'), findsOneWidget);
+      },
+    );
+
+    testWidgets('sans le droit nominatif, le bouton n’est pas offert', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        permissions: const ['finance.stats.read'],
+      );
+
+      // Le porteur du seul pilotage voit les cartes et reçoit 403 sur le
+      // rapport : lui offrir le bouton promettrait un geste qui échoue.
+      expect(find.text('Télécharger'), findsNothing);
+    });
+
+    testWidgets('avec les deux droits, il l’est', (tester) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        permissions: const ['finance.stats.read', 'finance.payment.read'],
+      );
+
+      expect(find.text('Télécharger'), findsOneWidget);
     });
   });
 

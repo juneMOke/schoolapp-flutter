@@ -10649,6 +10649,60 @@ abstract class AppLocalizations {
   /// **'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.'**
   String get financeTillReceiptsSplitTenderNote;
 
+  /// No description provided for @financeTillReportDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get financeTillReportDownload;
+
+  /// No description provided for @financeTillReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the period\'s payments report'**
+  String get financeTillReportTooltip;
+
+  /// No description provided for @financeTillReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get financeTillReportPreparing;
+
+  /// No description provided for @financeTillReportWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get financeTillReportWaiting;
+
+  /// No description provided for @financeTillReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, one{A report is already being prepared. Try again in 1 second.} other{A report is already being prepared. Try again in {seconds} seconds.}}'**
+  String financeTillReportBusy(int seconds);
+
+  /// No description provided for @financeTillReportForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The payments report requires the payment-read permission.'**
+  String get financeTillReportForbidden;
+
+  /// No description provided for @financeTillReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The report could not be produced.'**
+  String get financeTillReportFailed;
+
+  /// No description provided for @financeTillReportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This window holds {lines} lines; the report is capped at {cap}. Narrow the period.'**
+  String financeTillReportTooLarge(int lines, int cap);
+
+  /// No description provided for @financeTillReportHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The report is ready, but printing could not be opened.'**
+  String get financeTillReportHandoffFailed;
+
   /// No description provided for @financeTillEmptyGlobalTitle.
   ///
   /// In en, this message translates to:

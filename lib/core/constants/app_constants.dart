@@ -171,6 +171,44 @@ class AppConstants {
   static const String financeTillReceiptsEndpoint =
       '/api/v1/finance-stats/till/receipts';
 
+  /// Le **rapport d'encaissements** de la fenêtre, en PDF paginé et scellé.
+  ///
+  /// Même fenêtre et mêmes paramètres de période que la table, à une exception
+  /// près qui gouverne toute l'interface : ⚠️ **`currency` y est OBLIGATOIRE**,
+  /// là où la table l'a rendue facultative. Le document se nomme d'après une
+  /// caisse et son total de pied ne vaut que sur une seule unité — on ne
+  /// totalise pas des dollars avec des francs. Un écran qui montre « toutes les
+  /// caisses » doit donc **désigner une caisse** au moment de télécharger.
+  ///
+  /// ⚠️ **Pièce numérotée mais NON archivée** : le serveur n'en garde pas les
+  /// octets, et redemander le même rapport en produit un nouveau, sous un
+  /// nouveau numéro. Il n'y a donc rien à mettre en cache, et pas de
+  /// « re-téléchargement » à offrir.
+  ///
+  /// ⚠️ **Plafonné à 5 000 lignes**, refusé en 400 au-delà plutôt que tronqué —
+  /// le refus porte le compte réel. La sortie de secours est l'export CSV
+  /// voisin, sans plafond.
+  ///
+  /// ⚠️ **Un rendu à la fois côté serveur** : un second appel concurrent part
+  /// en 429 avec `Retry-After`. Le bouton se désarme pendant la préparation.
+  static const String financeTillReceiptsReportEndpoint =
+      '/api/v1/finance-stats/till/receipts.pdf';
+
+  /// L'attente retenue quand un 429 du rapport n'annonce pas la sienne.
+  ///
+  /// C'est la valeur que le serveur pose lui-même en `Retry-After` ; elle n'est
+  /// reprise ici que pour le cas où l'en-tête manque, où l'écran doit bien
+  /// choisir quelque chose.
+  ///
+  /// ⚠️ **Ce n'est pas un jeton de motion, et elle vit ici pour ça.** Le
+  /// contrôle `check_motion_tokens.sh` interdit les `Duration()` sous
+  /// `features/*/presentation`, à juste titre : une durée d'interface doit
+  /// pouvoir se retoucher d'un seul endroit. Celle-ci n'en est pas une — elle
+  /// est dictée par le protocole, et la ranger avec les animations
+  /// (`actionCooldown` vaut 600 ms) l'exposerait à être réglée pour des raisons
+  /// de fluidité, ce qui la ferait diverger du serveur en silence.
+  static const Duration financeTillReportRetryFallback = Duration(seconds: 60);
+
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body
   // de requête, et posent un `Content-Disposition: attachment; filename="<n°>.pdf"`

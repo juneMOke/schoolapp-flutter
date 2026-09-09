@@ -6514,6 +6514,55 @@ class AppLocalizationsEn extends AppLocalizations {
       'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.';
 
   @override
+  String get financeTillReportDownload => 'Download';
+
+  @override
+  String get financeTillReportTooltip =>
+      'Download the period\'s payments report';
+
+  @override
+  String get financeTillReportPreparing => 'Preparing…';
+
+  @override
+  String get financeTillReportWaiting => 'Please wait…';
+
+  @override
+  String financeTillReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'A report is already being prepared. Try again in $seconds seconds.',
+      one: 'A report is already being prepared. Try again in 1 second.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReportForbidden =>
+      'The payments report requires the payment-read permission.';
+
+  @override
+  String get financeTillReportFailed => 'The report could not be produced.';
+
+  @override
+  String financeTillReportTooLarge(int lines, int cap) {
+    final intl.NumberFormat linesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String linesString = linesNumberFormat.format(lines);
+    final intl.NumberFormat capNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String capString = capNumberFormat.format(cap);
+
+    return 'This window holds $linesString lines; the report is capped at $capString. Narrow the period.';
+  }
+
+  @override
+  String get financeTillReportHandoffFailed =>
+      'The report is ready, but printing could not be opened.';
+
+  @override
   String financeTillEmptyGlobalTitle(String window) {
     return 'No collections · $window';
   }

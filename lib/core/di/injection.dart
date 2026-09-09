@@ -177,6 +177,7 @@ import 'package:school_app_flutter/features/finance/domain/usecases/create_payme
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_recovery_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_report_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
@@ -196,6 +197,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_report_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
@@ -812,6 +814,9 @@ Future<void> configureDependencies({
     () => GetFinanceTillUseCase(getIt<FinanceRepository>()),
   );
 
+  getIt.registerFactory<GetTillReceiptsReportUseCase>(
+    () => GetTillReceiptsReportUseCase(getIt<FinanceRepository>()),
+  );
   getIt.registerFactory<GetTillReceiptsUseCase>(
     () => GetTillReceiptsUseCase(getIt<FinanceRepository>()),
   );
@@ -870,6 +875,11 @@ Future<void> configureDependencies({
         FinanceTillBloc(getFinanceTillUseCase: getIt<GetFinanceTillUseCase>()),
   );
 
+  getIt.registerFactory<FinanceTillReportCubit>(
+    () => FinanceTillReportCubit(
+      getTillReceiptsReportUseCase: getIt<GetTillReceiptsReportUseCase>(),
+    ),
+  );
   getIt.registerFactory<FinanceTillReceiptsBloc>(
     () => FinanceTillReceiptsBloc(
       getTillReceiptsUseCase: getIt<GetTillReceiptsUseCase>(),

@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/finance/domain/repositories/finance_
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_report_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// **La preuve** — une ligne d'encaissement par ligne de table.
@@ -59,6 +60,10 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           title: l10n.financeTillReceiptsHeading,
           // Les versements de Facturation portent la même.
           icon: Icons.payments_outlined,
+          // La fenêtre vient de l'état des reçus : c'est celle qui a produit
+          // les lignes affichées, pas celle qu'un changement de filtre est en
+          // train de demander.
+          trailing: FinanceTillReportButton(window: state.window),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

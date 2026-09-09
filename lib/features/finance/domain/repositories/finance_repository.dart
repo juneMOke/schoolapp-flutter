@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.d
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_report.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_window.dart';
 
 abstract class FinanceRepository {
@@ -33,6 +34,24 @@ abstract class FinanceRepository {
     TillWindow window = const TillWindow.day(),
     int page = 0,
     int size = TillReceiptsQuery.defaultPageSize,
+  });
+
+  /// Le **rapport PDF** des paiements de la fenêtre, **toutes caisses**.
+  ///
+  /// Aucune devise ne le cadre, comme [getTillReceipts] : le document porte les
+  /// deux unités, chaque ligne avec la sienne, et son pied rend un total par
+  /// devise. C'est la sortie exacte de la table affichée.
+  ///
+  /// ⚠️ **Rien n'est mis en cache.** Le serveur n'archive pas cette pièce :
+  /// deux appels rendent deux documents, sous deux numéros. Un cache ferait
+  /// donc croire à une pièce stable qui n'existe pas.
+  ///
+  /// Échecs à traiter nommément par l'appelant : **400** quand la fenêtre
+  /// dépasse le plafond de lignes (le message du serveur porte le compte réel),
+  /// **403** sur droit nominatif manquant, **429** quand un rapport est déjà en
+  /// cours de production — celui-là s'attend, il ne se rejoue pas.
+  Future<Either<Failure, TillReport>> getTillReceiptsReport({
+    TillWindow window,
   });
 }
 

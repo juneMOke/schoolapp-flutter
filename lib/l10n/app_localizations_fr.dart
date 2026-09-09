@@ -6581,6 +6581,55 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un versement réglé dans les deux devises occupe deux lignes, sous le même numéro de pièce : ce n\'est pas un doublon, c\'est ce que le tiroir contient.';
 
   @override
+  String get financeTillReportDownload => 'Télécharger';
+
+  @override
+  String get financeTillReportTooltip =>
+      'Télécharger le rapport des paiements de la période';
+
+  @override
+  String get financeTillReportPreparing => 'Préparation…';
+
+  @override
+  String get financeTillReportWaiting => 'Patientez…';
+
+  @override
+  String financeTillReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'Un rapport est déjà en préparation. Réessayez dans $seconds secondes.',
+      one: 'Un rapport est déjà en préparation. Réessayez dans 1 seconde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReportForbidden =>
+      'Le rapport des paiements demande le droit de lecture des paiements.';
+
+  @override
+  String get financeTillReportFailed => 'Le rapport n\'a pas pu être produit.';
+
+  @override
+  String financeTillReportTooLarge(int lines, int cap) {
+    final intl.NumberFormat linesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String linesString = linesNumberFormat.format(lines);
+    final intl.NumberFormat capNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String capString = capNumberFormat.format(cap);
+
+    return 'Cette fenêtre contient $linesString lignes ; le rapport est plafonné à $capString. Resserrez la période.';
+  }
+
+  @override
+  String get financeTillReportHandoffFailed =>
+      'Le rapport est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
+
+  @override
   String financeTillEmptyGlobalTitle(String window) {
     return 'Aucun encaissement · $window';
   }

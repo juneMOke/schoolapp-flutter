@@ -1,5 +1,9 @@
-import 'package:dio/dio.dart';
+// `Headers` est déclaré par dio ET par retrofit : ici c'est l'annotation
+// retrofit qu'on veut, celle de dio est masquée.
+import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
+import 'dart:typed_data';
+
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/finance/data/models/fee_tariff_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_recovery_response_model.dart';
@@ -72,5 +76,48 @@ abstract class FinanceRemoteDataSource {
     @Query('size') int size,
     @Query('from') String? from,
     @Query('to') String? to,
+  );
+
+  /// Le rapport PDF de la fenêtre, **toutes caisses**.
+  ///
+  /// ⚠️ **`currency` n'est plus envoyée.** Le contrat la porte toujours — elle
+  /// cadre le document sur une seule caisse — mais l'écran veut ce que la table
+  /// montre : tous les paiements de la période. Absente, le serveur rend les
+  /// deux unités, chaque ligne avec la sienne, et le pied porte **un total par
+  /// devise** — jamais leur somme, qui serait un nombre que personne ne peut
+  /// recompter.
+  ///
+  /// `HttpResponse` et non `Uint8List` nu : le nom du fichier ne vit que dans
+  /// le `Content-Disposition`, et il porte les bornes réellement retenues —
+  /// deux rapports de deux journées ne doivent pas s'écraser l'un l'autre dans
+  /// le dossier de téléchargement.
+  ///
+  /// `@DioResponseType(ResponseType.bytes)` est indispensable : sans lui, Dio
+  /// tenterait de désérialiser le PDF comme du JSON et lèverait sur le premier
+  /// octet. Et l'`Accept` doit couvrir le PDF **et** le JSON du corps d'erreur,
+  /// sans quoi le 400 du plafond ressortirait en 500 au corps vide — cf.
+  /// [AppConstants.pdfAcceptHeader].
+  ///
+  /// Aucune ancre (`date`, `week`, `month`) n'est envoyée : l'écran ne cadre
+  /// que des périodes **courantes** et des intervalles libres, et le serveur
+  /// refuse en 400 une ancre qui ne relève pas de sa période.
+  ///
+  /// ⚠️ **[options] existe pour une seule raison : le délai.** Le
+  /// `receiveTimeout` du client vaut 12 s, calibré sur des réponses JSON de
+  /// guichet ; composer ce document prend **plusieurs secondes** sur une
+  /// grosse fenêtre. Sans allongement, un rapport mensuel expirerait côté
+  /// client pendant que le serveur continue de le produire — et l'appel
+  /// suivant se heurterait au 429 du rendu toujours en cours, ce qui rendrait
+  /// le geste inexplicable. L'appelant y pose 60 s, le délai que le contrat
+  /// recommande.
+  @GET(AppConstants.financeTillReceiptsReportEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getTillReceiptsReport(
+    @Extras() Map<String, dynamic> extras,
+    @Query('period') String period,
+    @Query('from') String? from,
+    @Query('to') String? to,
+    @DioOptions() Options options,
   );
 }

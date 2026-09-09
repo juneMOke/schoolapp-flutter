@@ -20,7 +20,9 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ex
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_report_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_report_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_loading_view.dart';
@@ -34,6 +36,9 @@ class MockGetFinanceTillUseCase extends Mock implements GetFinanceTillUseCase {}
 
 class MockGetTillReceiptsUseCase extends Mock
     implements GetTillReceiptsUseCase {}
+
+class MockGetTillReceiptsReportUseCase extends Mock
+    implements GetTillReceiptsReportUseCase {}
 
 /// La ligne de fraîcheur de la caisse lit le cubit de synchro, fourni au niveau
 /// de `main.dart`. Tout test qui monte l'onglet doit donc en poser un —
@@ -175,6 +180,7 @@ void main() {
   late MockGetFinanceRecoveryUseCase mockRecovery;
   late MockGetFinanceTillUseCase mockTill;
   late MockGetTillReceiptsUseCase mockReceipts;
+  late MockGetTillReceiptsReportUseCase mockReport;
   late MockSyncStatusCubit syncCubit;
   late MockExchangeRatesCubit ratesCubit;
 
@@ -182,6 +188,7 @@ void main() {
     mockRecovery = MockGetFinanceRecoveryUseCase();
     mockTill = MockGetFinanceTillUseCase();
     mockReceipts = MockGetTillReceiptsUseCase();
+    mockReport = MockGetTillReceiptsReportUseCase();
     syncCubit = MockSyncStatusCubit();
     ratesCubit = MockExchangeRatesCubit();
     // Série vide : ces tests portent sur le pilotage des deux onglets, pas sur
@@ -230,6 +237,13 @@ void main() {
           BlocProvider<FinanceTillReceiptsBloc>(
             create: (_) =>
                 FinanceTillReceiptsBloc(getTillReceiptsUseCase: mockReceipts),
+          ),
+          // Le bouton de téléchargement du rapport vit dans la carte des
+          // paiements ; sans son cubit, la carte ne se monte pas.
+          BlocProvider<FinanceTillReportCubit>(
+            create: (_) => FinanceTillReportCubit(
+              getTillReceiptsReportUseCase: mockReport,
+            ),
           ),
           BlocProvider<SyncStatusCubit>.value(value: syncCubit),
           BlocProvider<ExchangeRatesCubit>.value(value: ratesCubit),

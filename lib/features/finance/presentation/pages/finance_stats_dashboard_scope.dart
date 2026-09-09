@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ex
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_report_cubit.dart';
 
 /// Scope BLoC du tableau de bord Finances — **un bloc par onglet**.
 ///
@@ -34,12 +35,18 @@ class _FinanceStatsDashboardScopeState
   /// bascules d'onglet, comme les deux autres.
   late final FinanceTillReceiptsBloc _receiptsBloc;
 
+  /// Le téléchargement du rapport. Ici plutôt que dans le bouton : une attente
+  /// imposée par un 429 doit survivre au démontage de la carte — sinon un
+  /// aller-retour d'onglet réarme un bouton que le serveur vient de refuser.
+  late final FinanceTillReportCubit _reportCubit;
+
   @override
   void initState() {
     super.initState();
     _recoveryBloc = GetIt.instance<FinanceRecoveryBloc>();
     _tillBloc = GetIt.instance<FinanceTillBloc>();
     _receiptsBloc = GetIt.instance<FinanceTillReceiptsBloc>();
+    _reportCubit = GetIt.instance<FinanceTillReportCubit>();
   }
 
   @override
@@ -47,6 +54,7 @@ class _FinanceStatsDashboardScopeState
     _recoveryBloc.close();
     _tillBloc.close();
     _receiptsBloc.close();
+    _reportCubit.close();
     super.dispose();
   }
 
@@ -57,6 +65,7 @@ class _FinanceStatsDashboardScopeState
         BlocProvider<FinanceRecoveryBloc>.value(value: _recoveryBloc),
         BlocProvider<FinanceTillBloc>.value(value: _tillBloc),
         BlocProvider<FinanceTillReceiptsBloc>.value(value: _receiptsBloc),
+        BlocProvider<FinanceTillReportCubit>.value(value: _reportCubit),
         // Le taux du jour, pour le bandeau de l'onglet Caisse.
         //
         // Ici et non dans l'onglet, bien que seul l'onglet Caisse l'affiche :

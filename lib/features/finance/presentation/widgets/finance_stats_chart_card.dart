@@ -16,6 +16,12 @@ class FinanceStatsChartCard extends StatelessWidget {
   /// donc pas dans l'arbre d'accessibilité — un lecteur d'écran annoncerait
   /// deux fois la même chose.
   final IconData? icon;
+
+  /// Une action posée **au bout de la ligne de titre** — un export, jamais une
+  /// navigation. `null` sur la plupart des cartes : celles de cet écran sont
+  /// des lectures, et n'offrent rien à faire.
+  final Widget? trailing;
+
   final Widget child;
 
   /// Assez petite pour rester sous la hauteur de la ligne de titre : au-delà,
@@ -27,6 +33,7 @@ class FinanceStatsChartCard extends StatelessWidget {
     super.key,
     required String this.title,
     this.icon,
+    this.trailing,
     required this.child,
   });
 
@@ -38,7 +45,8 @@ class FinanceStatsChartCard extends StatelessWidget {
   /// objet ; seule sa première ligne change.
   const FinanceStatsChartCard.skeleton({super.key, required this.child})
     : title = null,
-      icon = null;
+      icon = null,
+      trailing = null;
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +92,10 @@ class FinanceStatsChartCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (trailing case final trailing?) ...[
+                  const SizedBox(width: AppDimensions.spacingS),
+                  trailing,
+                ],
               ],
             )
           else
