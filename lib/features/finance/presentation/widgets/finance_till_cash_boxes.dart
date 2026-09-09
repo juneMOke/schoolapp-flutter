@@ -43,6 +43,18 @@ class FinanceTillCashBoxes extends StatelessWidget {
     required this.windowLabel,
   });
 
+  /// Les largeurs de base de la spec : une caisse contre le compteur.
+  static const double _cashBoxBasis = 260;
+  static const double _counterBasis = 190;
+
+  /// Quand la rangée ne tient pas, les tuiles s'enroulent **à largeur égale** :
+  /// un rapport de largeurs n'a plus de sens sur plusieurs rangs, où les tuiles
+  /// ne se comparent plus du regard.
+  static double _wrappedWidth(double maxWidth, int count, double spacing) {
+    final columns = EteeloKpiBand.columnsFor(maxWidth, count);
+    return ((maxWidth - spacing * (columns - 1)) / columns).floorToDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -55,10 +67,24 @@ class FinanceTillCashBoxes extends StatelessWidget {
         builder: (context, constraints) {
           const spacing = AppDimensions.spacingM;
           final count = blocks.length + 1;
-          final columns = EteeloKpiBand.columnsFor(constraints.maxWidth, count);
-          final width =
-              ((constraints.maxWidth - spacing * (columns - 1)) / columns)
-                  .floorToDouble();
+
+          // **La tuile du compteur est plus étroite que les caisses** — la spec
+          // leur donne `flex 1 1 260` et `1 1 190`. Ce n'est pas cosmétique :
+          // trois tuiles de largeur égale se lisent comme trois chiffres de
+          // même rang, alors que le compteur n'est pas un montant.
+          final gutters = spacing * (count - 1);
+          final fitsOneRow =
+              constraints.maxWidth >=
+              _cashBoxBasis * blocks.length + _counterBasis + gutters;
+
+          final available = constraints.maxWidth - gutters;
+          final basisTotal = _cashBoxBasis * blocks.length + _counterBasis;
+          final cashWidth = fitsOneRow
+              ? (available * _cashBoxBasis / basisTotal).floorToDouble()
+              : _wrappedWidth(constraints.maxWidth, count, spacing);
+          final counterWidth = fitsOneRow
+              ? (available * _counterBasis / basisTotal).floorToDouble()
+              : cashWidth;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +95,7 @@ class FinanceTillCashBoxes extends StatelessWidget {
                 children: [
                   for (final block in blocks)
                     SizedBox(
-                      width: width,
+                      width: cashWidth,
                       child: _CashBox(
                         block: block,
                         windowLabel: windowLabel,
@@ -77,7 +103,7 @@ class FinanceTillCashBoxes extends StatelessWidget {
                       ),
                     ),
                   SizedBox(
-                    width: width,
+                    width: counterWidth,
                     child: _ReceiptsIssuedTile(till: till, l10n: l10n),
                   ),
                 ],

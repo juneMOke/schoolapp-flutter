@@ -6417,6 +6417,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeDashboardTabTillDescription => 'What went into the drawer';
 
   @override
+  String financeTillRangeCaptionCustom(String from, String to) {
+    return 'From $from to $to';
+  }
+
+  @override
+  String financeTillRangeCaptionWindow(String today) {
+    return 'As at $today';
+  }
+
+  @override
   String get financeTillPeriodCustom => 'Range';
 
   @override
@@ -6760,6 +6770,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeTillImputationHint =>
       'In charge currency: these amounts do not add up with the drawer\'s.';
+
+  @override
+  String financeTillImputationShare(String label, int share) {
+    return '$label · $share% of the total';
+  }
 
   @override
   String get financeTillImputationCardHint =>

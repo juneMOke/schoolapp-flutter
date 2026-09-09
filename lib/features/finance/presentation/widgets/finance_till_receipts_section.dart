@@ -93,6 +93,13 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           tillCurrencyName(currency, l10n),
         ),
         density: DataTableDensity.compact,
+        // Les proportions de la spec — `1fr · 1,1fr · 2fr · 1fr · 1,2fr` —
+        // portées en dixièmes.
+        //
+        // ⚠️ La spec leur donne aussi un **minimum** (`minmax(90, …)`,
+        // `minmax(150, …)`…) que `DataTableColumnDef` ne sait pas exprimer : il
+        // ne porte qu'un `flex`. Les rapports sont donc tenus, les planchers
+        // non — à l'étroit, la colonne Élève rétrécira sous ses 150 dp.
         columns: [
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnDate,
@@ -100,19 +107,19 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           ),
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnReceipt,
-            flex: 16,
+            flex: 11,
           ),
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnStudent,
-            flex: 24,
+            flex: 20,
           ),
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnSource,
-            flex: 12,
+            flex: 10,
           ),
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnAmount,
-            flex: 16,
+            flex: 12,
           ),
         ],
         footer: DataTableFooterConfig(

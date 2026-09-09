@@ -93,6 +93,13 @@ class _FinanceTillPeriodFilterState extends State<FinanceTillPeriodFilter> {
                 onSelected: (period) => _onPeriodSelected(context, period),
               ),
             ),
+            const SizedBox(height: AppDimensions.spacingS),
+            // **Le libellé de la plage vit ici, à côté des segments** — pas
+            // dans le contenu. Posé plus bas, il disparaissait pendant le
+            // chargement et en erreur, alors que la spec veut les contrôles
+            // lisibles en permanence : on doit pouvoir lire quelle fenêtre on a
+            // demandée pendant qu'elle charge.
+            _RangeCaption(window: window, l10n: l10n),
             if (window.isCustom) ...[
               const SizedBox(height: AppDimensions.spacingM),
               _CustomRangeFields(
@@ -173,6 +180,55 @@ class _FinanceTillPeriodFilterState extends State<FinanceTillPeriodFilter> {
         TillPeriod.year => l10n.financeStatsPeriodYearCurrent,
         TillPeriod.custom => l10n.financeTillPeriodCustom,
       };
+}
+
+/// La plage effectivement demandée, en toutes lettres.
+///
+/// Elle **double le segment** plutôt que de le répéter : « Ce mois » ne dit pas
+/// quel mois, et sur une fenêtre libre le segment ne dit rien du tout. C'est
+/// aussi le seul endroit où la fenêtre reste lisible pendant un chargement.
+///
+/// ⚠️ Les bornes affichées ici sont celles **demandées**, pas celles que le
+/// serveur a retenues — il fait autorité, et le contenu porte les siennes une
+/// fois la réponse arrivée. Sur les grains déductibles, ce libellé ne prétend
+/// donc qu'au nom du grain.
+class _RangeCaption extends StatelessWidget {
+  final TillWindow window;
+  final AppLocalizations l10n;
+
+  const _RangeCaption({required this.window, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final materialL10n = MaterialLocalizations.of(context);
+    final text = window.isCustom
+        ? l10n.financeTillRangeCaptionCustom(
+            materialL10n.formatMediumDate(window.from!),
+            materialL10n.formatMediumDate(window.to!),
+          )
+        : l10n.financeTillRangeCaptionWindow(
+            materialL10n.formatFullDate(DateTime.now()),
+          );
+
+    return Row(
+      children: [
+        const Icon(
+          Icons.calendar_today_outlined,
+          size: 15,
+          color: AppColors.textMuted,
+        ),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Les deux bornes d'une fenêtre libre.

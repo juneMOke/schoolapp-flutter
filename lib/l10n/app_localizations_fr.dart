@@ -6484,6 +6484,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce qui est entré dans le tiroir';
 
   @override
+  String financeTillRangeCaptionCustom(String from, String to) {
+    return 'Du $from au $to';
+  }
+
+  @override
+  String financeTillRangeCaptionWindow(String today) {
+    return 'Au $today';
+  }
+
+  @override
   String get financeTillPeriodCustom => 'Période';
 
   @override
@@ -6829,6 +6839,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeTillImputationHint =>
       'En devise de créance : ces montants ne s\'additionnent pas à ceux du tiroir.';
+
+  @override
+  String financeTillImputationShare(String label, int share) {
+    return '$label · $share % du total';
+  }
 
   @override
   String get financeTillImputationCardHint =>

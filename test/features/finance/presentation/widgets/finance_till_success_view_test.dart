@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -1101,6 +1102,63 @@ void main() {
       await pump(tester, _till([_block('USD', trendPercent: 18)]));
       expect(find.textContaining('Vérifiez si une relance'), findsNothing);
       expect(find.textContaining('Le rythme se maintient'), findsOneWidget);
+    });
+  });
+
+  group('les icônes', () {
+    testWidgets(
+      'aucun titre de section n’en porte — la spec n’en dessine pas',
+      (tester) async {
+        await pump(tester, _till([_block('USD')]));
+
+        // Vérifié titre par titre sur la maquette : « Encaissements jour par
+        // jour », « Par source », « Ventilation par poste imputé », « Par
+        // classe », « Reçus de la caisse » et « Détail de la caisse » y sont
+        // rendus en **texte nu**. Les icônes de la maquette sont ailleurs —
+        // médaillons de tuiles, médaillons de lectures, pastilles de source.
+        for (final title in const [
+          'Par source',
+          'Par classe',
+          'Lectures & alertes',
+        ]) {
+          final heading = find.text(title);
+          expect(heading, findsOneWidget);
+          expect(
+            find.ancestor(of: heading, matching: find.byType(Icon)),
+            findsNothing,
+          );
+        }
+      },
+    );
+
+    testWidgets('celles qui existent sont RENDUES et visibles', (tester) async {
+      await pump(tester, _till([_block('USD')]));
+
+      final icons = tester.widgetList<Icon>(find.byType(Icon)).toList();
+
+      expect(
+        icons,
+        isNotEmpty,
+        reason: 'médaillons de tuiles, de lectures, et pastilles de source',
+      );
+      // ⚠️ Le vrai risque n'est pas l'absence d'icône dans l'arbre, c'est une
+      // icône **posée mais invisible** — teinte transparente, ou teinte du
+      // fond. Une lecture du code ne l'attrape pas ; cette assertion si.
+      for (final icon in icons) {
+        expect(icon.icon, isNotNull);
+        final color = icon.color;
+        if (color == null) continue; // héritée du thème, qui n'en écrase aucune
+        expect(
+          color.a,
+          greaterThan(0),
+          reason: 'une icône transparente est une icône absente',
+        );
+        expect(
+          color,
+          isNot(AppColors.surfaceRaised),
+          reason: 'une icône de la teinte du fond est une icône absente',
+        );
+      }
     });
   });
 }

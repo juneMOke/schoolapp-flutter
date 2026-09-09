@@ -66,7 +66,21 @@ class FinanceTillBucketsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final heading = title ?? l10n.financeTillSectionBuckets;
 
-    if (buckets.isEmpty) {
+    // ⚠️ **Arbitrage du porteur, CONTRE la spec.** La spec écrit « un point par
+    // jour civil, **y compris les jours à 0 — les trous sont l'information** »,
+    // et le service back documente la même règle. Le porteur a tranché
+    // l'inverse après avoir vu l'écran ; sa décision prime, et ce n'est pas une
+    // lecture de la spec.
+    //
+    // Conséquence à connaître : l'axe cesse d'être régulier dans le temps. Deux
+    // barres voisines peuvent être séparées d'un jour ou de six sans que rien
+    // ne le dise, et une semaine creuse ressemble à une semaine pleine.
+    final drawn = buckets.where((bucket) => bucket.total > 0).toList();
+
+    // Une fenêtre entièrement creuse ne dessine plus **aucune** barre depuis cet
+    // arbitrage : sans ce cas, le graphique rendrait un axe sans contenu là où
+    // il rendait auparavant une rangée de zéros. C'est l'état vide qui parle.
+    if (drawn.isEmpty) {
       return FinanceStatsChartCard(
         title: heading,
         child: FinanceStatsEmptyState(
@@ -78,7 +92,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
     }
 
     final items = [
-      for (final bucket in buckets)
+      for (final bucket in drawn)
         BarChartItem(
           label: shortBucketLabel(bucket.key, granularity: granularity),
           value: bucket.total.toDouble(),
@@ -89,15 +103,20 @@ class FinanceTillBucketsSection extends StatelessWidget {
     ];
 
     final highlighted = <int>{
-      for (var i = 0; i < buckets.length; i++)
-        if (buckets[i].isCurrent) i,
+      for (var i = 0; i < drawn.length; i++)
+        if (drawn[i].isCurrent) i,
     };
 
     // La règle de la spec, telle quelle : le montant est posé **sur** la barre
     // — jamais sur un axe vertical, qu'il n'y a pas — et sur toutes les barres
     // dès que la série en compte dix ou moins. Une fenêtre `jour` en a sept :
     // elles sont donc toutes chiffrées.
-    final labelEveryBar = buckets.length <= _labelAllBarsUpTo;
+    // Le seuil porte sur la série **effectivement dessinée**, donc sur les
+    // barres non nulles — la spec a toujours compté la série et non la fenêtre.
+    // Un mois creux passera donc sous le seuil et portera ses montants, un mois
+    // chargé non : ce n'est pas une irrégularité, c'est la même règle appliquée
+    // à ce qu'on voit.
+    final labelEveryBar = drawn.length <= _labelAllBarsUpTo;
 
     return FinanceStatsChartCard(
       title: heading,
@@ -110,7 +129,7 @@ class FinanceTillBucketsSection extends StatelessWidget {
             child: CycleBarChart(
               items: items,
               highlightedIndexes: highlighted,
-              verticalBottomLabels: buckets.length > _rotateLabelsBeyond,
+              verticalBottomLabels: drawn.length > _rotateLabelsBeyond,
               showValueLabels: labelEveryBar,
               // `finFmtShort` : la forme abrégée est **réservée** aux
               // étiquettes de graphique, là où le montant entier ne tient pas.

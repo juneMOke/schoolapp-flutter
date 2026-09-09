@@ -10511,6 +10511,18 @@ abstract class AppLocalizations {
   /// **'What went into the drawer'**
   String get financeDashboardTabTillDescription;
 
+  /// No description provided for @financeTillRangeCaptionCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {from} to {to}'**
+  String financeTillRangeCaptionCustom(String from, String to);
+
+  /// No description provided for @financeTillRangeCaptionWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'As at {today}'**
+  String financeTillRangeCaptionWindow(String today);
+
   /// No description provided for @financeTillPeriodCustom.
   ///
   /// In en, this message translates to:
@@ -10986,6 +10998,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In charge currency: these amounts do not add up with the drawer\'s.'**
   String get financeTillImputationHint;
+
+  /// No description provided for @financeTillImputationShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {share}% of the total'**
+  String financeTillImputationShare(String label, int share);
 
   /// No description provided for @financeTillImputationCardHint.
   ///

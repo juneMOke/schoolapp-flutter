@@ -78,7 +78,48 @@ void main() {
           'à l’horizontale, trente-et-un libellés se chevauchent ou se '
           'replient sur deux lignes',
     );
-    expect(chart.items.length, 31);
+    // ⚠️ 27 et non 31 : quatre jours du mois sont à zéro, et le porteur a
+    // tranché — **contre la spec** — que les barres nulles ne s'affichent pas.
+    expect(chart.items.length, 27);
+  });
+
+  testWidgets('les jours à zéro ne dessinent plus de barre', (tester) async {
+    await pump(tester, _month());
+
+    final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
+
+    expect(
+      chart.items.every((item) => item.value > 0),
+      isTrue,
+      reason:
+          'arbitrage du porteur CONTRE la spec, qui veut « un point par jour '
+          'civil, y compris les jours à 0 »',
+    );
+    // Conséquence assumée : l'axe cesse d'être régulier dans le temps — le 6 et
+    // le 8 deviennent voisins, le 7 ayant disparu.
+    expect(chart.items.map((item) => item.label), isNot(contains('07/05')));
+    expect(chart.items.map((item) => item.label), contains('06/05'));
+    expect(chart.items.map((item) => item.label), contains('08/05'));
+  });
+
+  testWidgets('une fenêtre entièrement creuse rend son état vide', (
+    tester,
+  ) async {
+    // Sans ce cas, l'arbitrage laisserait un axe sans aucune barre là où il
+    // rendait auparavant une rangée de zéros.
+    await pump(tester, [
+      for (var day = 1; day <= 5; day++)
+        TillBucket(
+          key: '2026-05-0$day',
+          total: 0,
+          fees: 0,
+          boutique: 0,
+          isCurrent: day == 3,
+        ),
+    ]);
+
+    expect(find.byType(CycleBarChart), findsNothing);
+    expect(find.text('Entrées de caisse'), findsOneWidget);
   });
 
   testWidgets('douze barres ou moins gardent leurs libellés à plat', (
@@ -114,7 +155,12 @@ void main() {
     await pump(tester, _month());
 
     final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
-    expect(chart.highlightedIndexes, {14});
+
+    // Le 15 est le jour courant. Son **rang** a bougé : deux jours nuls (le 7
+    // et le 14) ont disparu avant lui, donc l'index 14 devient 12. L'accent
+    // suit la barre, pas la position d'origine.
+    expect(chart.highlightedIndexes, {12});
+    expect(chart.items[12].label, '15/05');
   });
 
   testWidgets('un axe vide rend son état vide, pas un graphique nu', (
