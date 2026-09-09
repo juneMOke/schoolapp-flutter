@@ -52,6 +52,23 @@ const ModuleAccess kDisciplineInstructAccess = ModuleAccess([
   Perm.disciplineWrite,
 ]);
 
+/// Lire la Facturation — la fiche financière d'un élève, ses créances et ses
+/// paiements.
+///
+/// **Disjonction** : la fiche montre les créances ET les paiements, mais le
+/// secrétariat n'a que les premières. Lui fermer l'écran entier lui retirerait
+/// une lecture qu'il détient.
+///
+/// Nommée plutôt que recopiée parce qu'elle sort désormais du menu : les états
+/// vides de la caisse offrent « Ouvrir la facturation », et cette porte doit se
+/// fermer exactement quand celle du menu se ferme. Deux copies de la même
+/// exigence divergent au premier ajustement, et la divergence se verrait ici
+/// comme un lien qui mène à un refus.
+const ModuleAccess kBillingReadAccess = ModuleAccess([
+  Perm.financeChargeRead,
+  Perm.financePaymentRead,
+]);
+
 /// Encaisser un paiement (`POST /sync/payments`).
 ///
 /// **Conjonction** : ce point d'entrée scelle le reçu en encaissant.
@@ -137,13 +154,10 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   },
   MenuConstants.financesMenuId: {
     MenuConstants.financesDashboardId: ModuleAccess([Perm.financeStatsRead]),
-    // Disjonction : la fiche montre les créances ET les paiements, mais le
-    // secrétariat n'a que les premières. Lui fermer l'écran entier lui retirerait
-    // une lecture qu'il détient.
-    MenuConstants.facturationsId: ModuleAccess([
-      Perm.financeChargeRead,
-      Perm.financePaymentRead,
-    ]),
+    // Même exigence que le lien « Ouvrir la facturation » des états vides de la
+    // caisse : une seule définition, pour que les deux portes s'ouvrent et se
+    // ferment ensemble.
+    MenuConstants.facturationsId: kBillingReadAccess,
   },
   // Le contrôle ne lit que des créances et leur solde : `finance.charge.read`
   // suffit, et c'est exactement ce que détient le secrétariat. Qui le détient
