@@ -71,6 +71,19 @@ class CycleBarChart extends StatelessWidget {
   /// sur les lignes-barres du socle.
   final double minimumBarHeight;
 
+  /// Étiquette **en permanence** les barres mises en relief, même quand
+  /// [showValueLabels] est faux.
+  ///
+  /// ⚠️ **Pour un écran qui n'a pas d'axe vertical.** Sans axe et sans
+  /// étiquettes — le cas d'une fenêtre large, où l'on renonce à chiffrer chaque
+  /// barre — le relief ne repose plus que sur la **couleur**. Un lecteur qui ne
+  /// distingue pas les deux teintes perd alors l'intervalle en cours, et il n'a
+  /// aucun chiffre nulle part pour le retrouver.
+  ///
+  /// Défaut faux : les appelants qui gardent leur axe n'en ont pas besoin, et
+  /// leur rendu ne bouge pas.
+  final bool labelHighlightedBars;
+
   const CycleBarChart({
     super.key,
     required this.items,
@@ -84,7 +97,13 @@ class CycleBarChart extends StatelessWidget {
     this.gridDivisions = AppDimensions.enrollmentStatsChartGridDivisions,
     this.showLeftAxis = true,
     this.minimumBarHeight = 0,
+    this.labelHighlightedBars = false,
   });
+
+  /// Cette barre porte-t-elle son montant en permanence ?
+  bool _labelsAlways(int index) =>
+      showValueLabels ||
+      (labelHighlightedBars && highlightedIndexes.contains(index));
 
   /// Style du libellé sous l'axe pour la barre [index].
   /// Sert aussi bien au rendu qu'à la mesure de la hauteur à réserver.
@@ -159,7 +178,9 @@ class CycleBarChart extends StatelessWidget {
                   enabled: !showValueLabels,
                   handleBuiltInTouches: !showValueLabels,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => showValueLabels
+                    // Transparent sous une étiquette permanente : c'est un
+                    // montant posé sur la barre, pas une bulle.
+                    getTooltipColor: (group) => _labelsAlways(group.x.toInt())
                         ? Colors.transparent
                         : AppColors.surfaceDark,
                     tooltipRoundedRadius: 8,
@@ -184,7 +205,7 @@ class CycleBarChart extends StatelessWidget {
                       // Le plancher est une décision de DESSIN ; l'étiquette est
                       // une donnée. Elles n'ont pas à passer par la même valeur.
                       final value = item.value;
-                      if (showValueLabels) {
+                      if (_labelsAlways(group.x.toInt())) {
                         // Étiquette permanente : valeur seule ; couleur dédiée si
                         // fournie (sinon couleur de la barre).
                         return BarTooltipItem(
@@ -276,7 +297,7 @@ class CycleBarChart extends StatelessWidget {
                   for (int i = 0; i < items.length; i++)
                     BarChartGroupData(
                       x: i,
-                      showingTooltipIndicators: showValueLabels
+                      showingTooltipIndicators: _labelsAlways(i)
                           ? const [0]
                           : const [],
                       barRods: [

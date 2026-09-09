@@ -400,4 +400,63 @@ void main() {
     );
     expect(label?.text, '300');
   });
+
+  testWidgets('sans axe ni étiquettes, le relief garde son montant', (
+    tester,
+  ) async {
+    final many = [
+      for (var d = 1; d <= 20; d++)
+        BarChartItem(
+          label: '${d.toString().padLeft(2, '0')}/05',
+          value: 100000.0 * d,
+          color: AppColors.bleuArdoise,
+        ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 900,
+            child: CycleBarChart(
+              items: many,
+              // Le cas d'une fenêtre large : trop de barres pour les chiffrer
+              // toutes, et pas d'axe vertical.
+              showValueLabels: false,
+              showLeftAxis: false,
+              highlightedIndexes: const {7},
+              labelHighlightedBars: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final data = tester.widget<BarChart>(find.byType(BarChart)).data;
+
+    // Seule la barre en relief porte son montant en permanence…
+    for (var i = 0; i < data.barGroups.length; i++) {
+      expect(
+        data.barGroups[i].showingTooltipIndicators.isNotEmpty,
+        i == 7,
+        reason: 'barre $i',
+      );
+    }
+    // …et sans bulle sombre : c'est un montant posé sur la barre.
+    expect(
+      data.barTouchData.touchTooltipData.getTooltipColor(data.barGroups[7]),
+      Colors.transparent,
+    );
+    // Sans quoi le relief ne reposerait que sur la couleur, qui ne porte jamais
+    // seule une information.
+    final label = data.barTouchData.touchTooltipData.getTooltipItem(
+      data.barGroups[7],
+      7,
+      data.barGroups[7].barRods.first,
+      0,
+    );
+    expect(label?.text, isNot(contains('\n')));
+    expect(label?.text, '800K');
+  });
 }

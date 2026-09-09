@@ -131,6 +131,13 @@ class FinanceTillBucketsSection extends StatelessWidget {
               highlightedIndexes: highlighted,
               verticalBottomLabels: drawn.length > _rotateLabelsBeyond,
               showValueLabels: labelEveryBar,
+              // ⚠️ **Au-delà du seuil, l'intervalle en cours garde son
+              // montant.** Sans axe vertical et sans étiquettes, son relief ne
+              // reposerait plus que sur la couleur — et la doctrine de cet
+              // écran est qu'une couleur ne porte jamais seule une information.
+              // La spec le dit d'ailleurs mot pour mot : « le jour en relief
+              // est doublé d'une couleur ET d'une étiquette de montant ».
+              labelHighlightedBars: true,
               // ⚠️ **Pas d'axe vertical, à aucun grain** — la spec n'en dessine
               // aucun, et le porteur l'a tranché en connaissant le prix : sur
               // une fenêtre large, où les barres ne portent pas leur montant,

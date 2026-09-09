@@ -182,6 +182,10 @@ void main() {
       // demi-pixel, indiscernable d'un zéro — or les barres nulles ne se
       // dessinent plus, donc elle se lirait comme un jour supprimé.
       expect(chart.minimumBarHeight, 2);
+      // Sans axe ni étiquettes sur une fenêtre large, le relief ne reposerait
+      // plus que sur la couleur. La spec l'écrit : « le jour en relief est doublé
+      // d'une couleur ET d'une étiquette de montant ».
+      expect(chart.labelHighlightedBars, isTrue);
     },
   );
 
