@@ -68,6 +68,15 @@ class FinanceTillCurrencySelector extends StatelessWidget {
             tillCurrencyName(selectedCurrency, l10n),
           ),
           child: SegmentedTabFilter<String>(
+            // ⚠️ **Une vraie cible tactile.** Le style par défaut rend un
+            // segment de **25 dp** de haut — mesuré au rendu, pas lu dans le
+            // code, où le conteneur annonce 38 et où le segment se rétracte
+            // ensuite sur son contenu. C'est sous le minimum d'accessibilité,
+            // et cet écran se lit sur la tablette d'un caissier.
+            //
+            // Un compteur à zéro reste cliquable : la cible vaut donc pour
+            // les deux segments, pas seulement pour celui qui a travaillé.
+            style: const SegmentedTabFilterStyle(minimumTapTarget: 44),
             options: [
               for (final block in ordered)
                 SegmentedTabOption(
