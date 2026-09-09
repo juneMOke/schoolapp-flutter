@@ -10643,6 +10643,36 @@ abstract class AppLocalizations {
   /// **'Collections could not be loaded. The totals above are up to date.'**
   String get financeTillReceiptsError;
 
+  /// No description provided for @financeTillRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'1 {base} = {value} {quote}'**
+  String financeTillRateValue(String base, String value, String quote);
+
+  /// No description provided for @financeTillRateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate configured'**
+  String get financeTillRateNone;
+
+  /// No description provided for @financeTillRateEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the rate'**
+  String get financeTillRateEdit;
+
+  /// No description provided for @financeTillRateA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rate: {rate}'**
+  String financeTillRateA11yLabel(String rate);
+
+  /// No description provided for @financeTillRateNoneA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rate: no rate configured'**
+  String get financeTillRateNoneA11yLabel;
+
   /// No description provided for @financeTillInsightsHeading.
   ///
   /// In en, this message translates to:

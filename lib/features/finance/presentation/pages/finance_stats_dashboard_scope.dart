@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
@@ -56,6 +57,20 @@ class _FinanceStatsDashboardScopeState
         BlocProvider<FinanceRecoveryBloc>.value(value: _recoveryBloc),
         BlocProvider<FinanceTillBloc>.value(value: _tillBloc),
         BlocProvider<FinanceTillReceiptsBloc>.value(value: _receiptsBloc),
+        // Le taux du jour, pour le bandeau de l'onglet Caisse.
+        //
+        // Ici et non dans l'onglet, bien que seul l'onglet Caisse l'affiche :
+        // monté dans l'onglet, il serait détruit et relu à chaque bascule, et
+        // son `loaded` repassant à faux ferait **clignoter le bandeau** à
+        // chaque retour. Le prix est une lecture locale pour qui n'ouvre jamais
+        // la caisse — pas un appel réseau, contrairement aux agrégats, dont la
+        // paresse se justifie par le délai de guichet.
+        //
+        // `create` et non `.value` : celui-ci se ferme tout seul, n'ayant pas à
+        // survivre à la page comme les trois autres.
+        BlocProvider<ExchangeRatesCubit>(
+          create: (_) => GetIt.instance<ExchangeRatesCubit>()..load(),
+        ),
       ],
       child: widget.child,
     );

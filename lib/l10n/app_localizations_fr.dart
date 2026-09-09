@@ -6580,6 +6580,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les encaissements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
 
   @override
+  String financeTillRateValue(String base, String value, String quote) {
+    return '1 $base = $value $quote';
+  }
+
+  @override
+  String get financeTillRateNone => 'Aucun taux paramétré';
+
+  @override
+  String get financeTillRateEdit => 'Modifier le taux';
+
+  @override
+  String financeTillRateA11yLabel(String rate) {
+    return 'Taux du jour : $rate';
+  }
+
+  @override
+  String get financeTillRateNoneA11yLabel =>
+      'Taux du jour : aucun taux paramétré';
+
+  @override
   String get financeTillInsightsHeading => 'Lectures & alertes';
 
   @override

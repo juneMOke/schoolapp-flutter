@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/states/finance_stats_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -77,6 +78,19 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Le taux d'abord, la fenêtre ensuite : l'ordre de la maquette
+          // raconte « à quel taux → sur quelle fenêtre → combien dans chaque
+          // caisse ».
+          //
+          // ⚠️ **Écart assumé : il reste rendu EN ERREUR.** La spec le fait
+          // disparaître « avec le reste du contenu ». Mais elle emporte au même
+          // endroit la fenêtre de temps, que cet onglet garde délibérément :
+          // un 400 sur une plage libre est laissé remonter tel quel, et sans
+          // le sélecteur la seule issue serait « Réessayer », qui rejouerait
+          // la requête qui vient d'échouer. Faire disparaître le bandeau seul,
+          // en gardant le sélecteur, ne serait plus une règle mais un
+          // arbitraire. Les deux restent, ou aucun ne reste.
+          const FinanceTillRateBar(),
           const Align(
             alignment: Alignment.centerLeft,
             child: FinanceTillPeriodFilter(),

@@ -8,16 +8,20 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_recovery_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class MockGetFinanceRecoveryUseCase extends Mock
@@ -34,6 +38,12 @@ class MockGetTillReceiptsUseCase extends Mock
 /// l'a causé.
 class MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+/// Le bandeau du taux lit cette série, fournie par le scope de la page. Comme
+/// pour la synchro ci-dessus : sans elle, `BlocProvider.of` lève, et l'échec ne
+/// ressemble en rien à ce qui l'a causé.
+class MockExchangeRatesCubit extends MockCubit<ExchangeRatesState>
+    implements ExchangeRatesCubit {}
 
 final tRecovery = FinanceRecovery(
   context: StatsContext(
@@ -134,12 +144,23 @@ void main() {
   late MockGetFinanceTillUseCase mockTill;
   late MockGetTillReceiptsUseCase mockReceipts;
   late MockSyncStatusCubit syncCubit;
+  late MockExchangeRatesCubit ratesCubit;
 
   setUp(() {
     mockRecovery = MockGetFinanceRecoveryUseCase();
     mockTill = MockGetFinanceTillUseCase();
     mockReceipts = MockGetTillReceiptsUseCase();
     syncCubit = MockSyncStatusCubit();
+    ratesCubit = MockExchangeRatesCubit();
+    // Série vide : ces tests portent sur le pilotage des deux onglets, pas sur
+    // le bandeau. Le bandeau se lit dans son propre fichier.
+    const ratesState = ExchangeRatesState(loaded: true);
+    when(() => ratesCubit.state).thenReturn(ratesState);
+    whenListen(
+      ratesCubit,
+      const Stream<ExchangeRatesState>.empty(),
+      initialState: ratesState,
+    );
     const syncState = SyncStatusState(status: SyncStatus.synced);
     when(() => syncCubit.state).thenReturn(syncState);
     whenListen(
@@ -180,6 +201,7 @@ void main() {
                 FinanceTillReceiptsBloc(getTillReceiptsUseCase: mockReceipts),
           ),
           BlocProvider<SyncStatusCubit>.value(value: syncCubit),
+          BlocProvider<ExchangeRatesCubit>.value(value: ratesCubit),
         ],
         child: const MaterialApp(
           locale: Locale('fr'),
@@ -210,6 +232,46 @@ void main() {
 
     expect(find.text("Ce qu'il reste à encaisser cette année"), findsOneWidget);
     expect(find.text('Ce qui est entré dans le tiroir'), findsOneWidget);
+  });
+
+  testWidgets('le taux du jour surmonte la fenêtre, et seulement en Caisse', (
+    tester,
+  ) async {
+    // Le bandeau lit une série RÉELLE ici : les autres tests la servent vide,
+    // et un bandeau vide ne prouverait pas qu'il est au bon endroit.
+    final state = ExchangeRatesState(
+      loaded: true,
+      rates: [
+        ExchangeRate(
+          base: 'USD',
+          quote: 'CDF',
+          rateMicros: 2850000000,
+          effectiveFrom: DateTime.utc(2020),
+        ),
+      ],
+    );
+    when(() => ratesCubit.state).thenReturn(state);
+    whenListen(
+      ratesCubit,
+      const Stream<ExchangeRatesState>.empty(),
+      initialState: state,
+    );
+
+    await pumpPage(tester);
+
+    // Le recouvrement ne convertit rien et ne porte pas de bandeau.
+    expect(find.byType(FinanceTillRateBar), findsNothing);
+
+    await tester.tap(find.text('Caisse'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FinanceTillRateBar), findsOneWidget);
+    // « à quel taux → sur quelle fenêtre » : l'ordre de la maquette, vérifié
+    // sur les positions rendues et non sur l'ordre du code.
+    expect(
+      tester.getTopLeft(find.byType(FinanceTillRateBar)).dy,
+      lessThan(tester.getTopLeft(find.byType(FinanceTillPeriodFilter)).dy),
+    );
   });
 
   testWidgets('la caisse ne se charge qu’à sa première ouverture', (

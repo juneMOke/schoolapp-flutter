@@ -6513,6 +6513,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Collections could not be loaded. The totals above are up to date.';
 
   @override
+  String financeTillRateValue(String base, String value, String quote) {
+    return '1 $base = $value $quote';
+  }
+
+  @override
+  String get financeTillRateNone => 'No rate configured';
+
+  @override
+  String get financeTillRateEdit => 'Change the rate';
+
+  @override
+  String financeTillRateA11yLabel(String rate) {
+    return 'Today\'s rate: $rate';
+  }
+
+  @override
+  String get financeTillRateNoneA11yLabel =>
+      'Today\'s rate: no rate configured';
+
+  @override
   String get financeTillInsightsHeading => 'Readings & alerts';
 
   @override
