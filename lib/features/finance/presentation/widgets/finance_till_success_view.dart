@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
@@ -13,6 +12,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_classroom_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_empty_states.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_receipts_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_source_section.dart';
@@ -44,11 +44,21 @@ class FinanceTillSuccessView extends StatelessWidget {
   /// le BLoC, avec la réponse qu'elle découpe.
   final ValueChanged<String> onCurrencySelected;
 
+  /// L'élargissement de fenêtre offert par le vide global — remonté pour la
+  /// même raison que la bascule.
+  ///
+  /// Il passe par le **même événement** que le sélecteur de période, si bien
+  /// que le segment suit : celui-ci se lit sur `state.selectedWindow`, et une
+  /// requête posée d'ici bougerait la donnée sans bouger le contrôle si elle
+  /// empruntait un autre chemin.
+  final ValueChanged<TillWindow> onWindowRequested;
+
   const FinanceTillSuccessView({
     super.key,
     required this.till,
     required this.selectedBlock,
     required this.onCurrencySelected,
+    required this.onWindowRequested,
   });
 
   @override
@@ -56,30 +66,50 @@ class FinanceTillSuccessView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final selected = selectedBlock;
 
+    final windowLabel = _windowLabel(till, l10n);
+    // **Le vide global se lit sur les blocs, pas sur le compteur.** Le contrat
+    // porte bien un `receiptsIssued` toutes caisses, mais s'y fier ferait
+    // dépendre l'affichage d'un agrégat : un compteur à zéro en désaccord avec
+    // des blocs pleins **cacherait des caisses qui ont travaillé**. Dérivé de
+    // ce qui est affiché, ce test-ci ne peut pas mentir dans ce sens-là.
+    //
+    // `every` sur une liste vide vaut vrai : le cas « le serveur ne renvoie
+    // aucun bloc » tombe dans la même branche, sans condition supplémentaire.
+    final globallyEmpty = till.encaisse.every(
+      (block) => block.summary.hasNoReceipts,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _WindowCaption(till: till, l10n: l10n),
         const SizedBox(height: AppDimensions.spacingM),
-        if (till.encaisse.isEmpty)
-          // Ni catalogue, ni grille, ni mouvement : le serveur ne renvoie aucun
-          // bloc. C'est un état vide, pas une erreur — et surtout pas un zéro
-          // dans une unité que personne n'a choisie.
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppDimensions.spacingXL,
-            ),
-            child: EteeloEmptyResult(
-              label: l10n.financeStatsNoMovementLabel,
-              description: l10n.financeStatsNoMovementDescription,
-              medallionIcon: Icons.point_of_sale_outlined,
-            ),
-          )
-        else ...[
-          FinanceTillCashBoxes(
-            till: till,
-            windowLabel: _windowLabel(till, l10n),
+        if (globallyEmpty) ...[
+          // ⚠️ **Les tuiles restent, à zéro** — « le repère de lecture ne
+          // disparaît pas ». Un écran qui les retirerait ferait perdre au
+          // lecteur les deux devises de son école au moment précis où il se
+          // demande s'il regarde le bon endroit.
+          //
+          // Elles n'existent que si le serveur a rendu des blocs : sans bloc,
+          // on ne connaît même pas les devises, et une tuile inventée serait
+          // pire que pas de tuile.
+          if (till.encaisse.isNotEmpty) ...[
+            FinanceTillCashBoxes(till: till, windowLabel: windowLabel),
+            const SizedBox(height: AppDimensions.spacingS),
+            const FinanceTillFreshnessCaption(),
+            const SizedBox(height: AppDimensions.spacingXL),
+          ],
+          // Le sélecteur et tout le détail ne sont pas rendus : il n'y a pas de
+          // caisse à détailler, et un sélecteur à deux segments vides
+          // proposerait de choisir entre deux riens.
+          FinanceTillGlobalEmpty(
+            windowLabel: windowLabel,
+            period: till.context.period,
+            onWindowRequested: onWindowRequested,
           ),
+          const SizedBox(height: AppDimensions.spacingXL),
+        ] else ...[
+          FinanceTillCashBoxes(till: till, windowLabel: windowLabel),
           const SizedBox(height: AppDimensions.spacingS),
           const FinanceTillFreshnessCaption(),
           const SizedBox(height: AppDimensions.spacingXL),
@@ -92,8 +122,22 @@ class FinanceTillSuccessView extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.spacingL),
           if (selected != null) ...[
-            if (selected.hasNoMovement)
-              _CurrencyNoMovement(l10n: l10n)
+            // ⚠️ **Le compte de reçus, et non le total.** Une caisse qui a
+            // encaissé puis remboursé le même montant a bien travaillé ; lui
+            // écrire « aucun paiement n'a été tendu » serait faux, et c'est ce
+            // que disait le total à zéro.
+            if (selected.summary.hasNoReceipts)
+              FinanceTillCurrencyEmpty(
+                selected: selected,
+                others: [
+                  for (final block in tillBlocksInDisplayOrder(till.encaisse))
+                    if (block.currency != selected.currency &&
+                        !block.summary.hasNoReceipts)
+                      block,
+                ],
+                windowLabel: windowLabel,
+                onCurrencySelected: onCurrencySelected,
+              )
             else ...[
               FinanceTillBucketsSection(
                 title: l10n.financeTillBucketsHeading(
@@ -294,69 +338,6 @@ class _WindowCaption extends StatelessWidget {
             style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
       ],
-    );
-  }
-}
-
-/// Une devise dans laquelle l'école facture ou vend, sans qu'un franc y ait
-/// circulé sur la fenêtre.
-///
-/// **Le cas le plus fréquent de l'onglet** : le serveur garde ces blocs à zéro
-/// plutôt que de les omettre, et une journée creuse en rendrait autant que
-/// l'école a de devises.
-class _CurrencyNoMovement extends StatelessWidget {
-  final AppLocalizations l10n;
-
-  const _CurrencyNoMovement({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label:
-          '${l10n.financeStatsCurrencyNoMovement}. '
-          '${l10n.financeStatsCurrencyNoMovementTill}',
-      child: ExcludeSemantics(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceAlt,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.point_of_sale_outlined,
-                size: 18,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.financeStatsCurrencyNoMovement,
-                      style: AppTextStyles.bodyStrong.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    Text(
-                      l10n.financeStatsCurrencyNoMovementTill,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

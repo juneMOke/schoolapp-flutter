@@ -6513,6 +6513,54 @@ class AppLocalizationsEn extends AppLocalizations {
       'Collections could not be loaded. The totals above are up to date.';
 
   @override
+  String financeTillEmptyGlobalTitle(String window) {
+    return 'No collections · $window';
+  }
+
+  @override
+  String financeTillEmptyGlobalMessage(String window) {
+    return 'No receipt was issued $window, in any till. Widen the window, or open billing to record a payment.';
+  }
+
+  @override
+  String get financeTillEmptySeeMonth => 'See this month';
+
+  @override
+  String get financeTillEmptySeeYear => 'See this year';
+
+  @override
+  String get financeTillEmptyOpenBilling => 'Open billing';
+
+  @override
+  String financeTillEmptyCurrencyTitle(String currency) {
+    return '$currency till empty over this period';
+  }
+
+  @override
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  ) {
+    return 'No payment was tendered in $currency $window. $others';
+  }
+
+  @override
+  String financeTillEmptyOtherTill(String amount) {
+    return 'The other till recorded $amount.';
+  }
+
+  @override
+  String financeTillEmptyOtherTills(String amounts) {
+    return 'The other tills recorded $amounts.';
+  }
+
+  @override
+  String financeTillEmptySeeTill(String currency) {
+    return 'See the $currency till';
+  }
+
+  @override
   String financeTillRateValue(String base, String value, String quote) {
     return '1 $base = $value $quote';
   }

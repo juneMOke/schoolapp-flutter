@@ -10643,6 +10643,70 @@ abstract class AppLocalizations {
   /// **'Collections could not be loaded. The totals above are up to date.'**
   String get financeTillReceiptsError;
 
+  /// No description provided for @financeTillEmptyGlobalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections · {window}'**
+  String financeTillEmptyGlobalTitle(String window);
+
+  /// No description provided for @financeTillEmptyGlobalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt was issued {window}, in any till. Widen the window, or open billing to record a payment.'**
+  String financeTillEmptyGlobalMessage(String window);
+
+  /// No description provided for @financeTillEmptySeeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'See this month'**
+  String get financeTillEmptySeeMonth;
+
+  /// No description provided for @financeTillEmptySeeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'See this year'**
+  String get financeTillEmptySeeYear;
+
+  /// No description provided for @financeTillEmptyOpenBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Open billing'**
+  String get financeTillEmptyOpenBilling;
+
+  /// No description provided for @financeTillEmptyCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till empty over this period'**
+  String financeTillEmptyCurrencyTitle(String currency);
+
+  /// No description provided for @financeTillEmptyCurrencyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment was tendered in {currency} {window}. {others}'**
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  );
+
+  /// No description provided for @financeTillEmptyOtherTill.
+  ///
+  /// In en, this message translates to:
+  /// **'The other till recorded {amount}.'**
+  String financeTillEmptyOtherTill(String amount);
+
+  /// No description provided for @financeTillEmptyOtherTills.
+  ///
+  /// In en, this message translates to:
+  /// **'The other tills recorded {amounts}.'**
+  String financeTillEmptyOtherTills(String amounts);
+
+  /// No description provided for @financeTillEmptySeeTill.
+  ///
+  /// In en, this message translates to:
+  /// **'See the {currency} till'**
+  String financeTillEmptySeeTill(String currency);
+
   /// No description provided for @financeTillRateValue.
   ///
   /// In en, this message translates to:

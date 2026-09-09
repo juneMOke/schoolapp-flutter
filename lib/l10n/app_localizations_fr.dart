@@ -6580,6 +6580,54 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les encaissements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
 
   @override
+  String financeTillEmptyGlobalTitle(String window) {
+    return 'Aucun encaissement · $window';
+  }
+
+  @override
+  String financeTillEmptyGlobalMessage(String window) {
+    return 'Aucun reçu n\'a été émis $window, dans aucune caisse. Élargissez la fenêtre, ou ouvrez la facturation pour enregistrer un paiement.';
+  }
+
+  @override
+  String get financeTillEmptySeeMonth => 'Voir ce mois';
+
+  @override
+  String get financeTillEmptySeeYear => 'Voir cette année';
+
+  @override
+  String get financeTillEmptyOpenBilling => 'Ouvrir la facturation';
+
+  @override
+  String financeTillEmptyCurrencyTitle(String currency) {
+    return 'Caisse $currency vide sur cette période';
+  }
+
+  @override
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  ) {
+    return 'Aucun paiement n\'a été tendu en $currency $window. $others';
+  }
+
+  @override
+  String financeTillEmptyOtherTill(String amount) {
+    return 'L\'autre caisse a enregistré $amount.';
+  }
+
+  @override
+  String financeTillEmptyOtherTills(String amounts) {
+    return 'Les autres caisses ont enregistré $amounts.';
+  }
+
+  @override
+  String financeTillEmptySeeTill(String currency) {
+    return 'Voir la caisse $currency';
+  }
+
+  @override
   String financeTillRateValue(String base, String value, String quote) {
     return '1 $base = $value $quote';
   }

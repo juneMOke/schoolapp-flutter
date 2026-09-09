@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -146,6 +147,7 @@ void main() {
 
   /// La devise détaillée, résolue comme le BLoC la résout — dollar par défaut.
   late List<String> selectedByTap;
+  late List<TillWindow> windowsByTap;
 
   Future<void> pump(
     WidgetTester tester,
@@ -154,6 +156,7 @@ void main() {
     FinanceTillReceiptsState? receiptsState,
   }) async {
     selectedByTap = <String>[];
+    windowsByTap = <TillWindow>[];
     final currency = resolveSelectedTillCurrency(
       selectedCurrency,
       till.encaisse,
@@ -194,6 +197,7 @@ void main() {
                 till: till,
                 selectedBlock: selected,
                 onCurrencySelected: selectedByTap.add,
+                onWindowRequested: windowsByTap.add,
               ),
             ),
           ),
@@ -508,6 +512,189 @@ void main() {
     },
   );
 
+  group('vide global — aucune caisse n’a rien reçu', () {
+    testWidgets('les tuiles restent à 0, le détail disparaît', (tester) async {
+      await pump(
+        tester,
+        _till([
+          _block('USD', fees: 0, boutique: 0, receiptCount: 0),
+          _block('CDF', fees: 0, boutique: 0, receiptCount: 0),
+        ]),
+      );
+
+      expect(find.text('Aucun encaissement · aujourd\'hui'), findsOneWidget);
+      // « Le repère de lecture ne disparaît pas » : les deux tuiles restent,
+      // à zéro, pour que le lecteur retrouve les devises de son école au
+      // moment même où il se demande s'il regarde au bon endroit.
+      expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
+      expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
+      expect(find.text('Caisse francs · Aujourd\'hui'), findsOneWidget);
+      // Blocs 4 → 9 masqués : il n'y a pas de caisse à détailler, et un
+      // sélecteur proposerait de choisir entre deux riens.
+      expect(find.byType(FinanceTillCurrencySelector), findsNothing);
+      expect(find.byType(FinanceTillBucketsSection), findsNothing);
+    });
+
+    testWidgets('sans le moindre bloc, aucune tuile n’est inventée', (
+      tester,
+    ) async {
+      await pump(tester, _till(const []));
+
+      expect(find.text('Aucun encaissement · aujourd\'hui'), findsOneWidget);
+      // On ne connaît même pas les devises de l'école : une tuile inventée
+      // serait pire que pas de tuile.
+      expect(find.byType(FinanceTillCashBoxes), findsNothing);
+    });
+
+    testWidgets('l’issue élargit la fenêtre, et le mois va vers l’année', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block('USD', fees: 0, boutique: 0, receiptCount: 0),
+        ], period: 'day'),
+      );
+      expect(find.text('Voir ce mois'), findsOneWidget);
+
+      await tester.tap(find.text('Voir ce mois'));
+      await tester.pumpAndSettle();
+      expect(windowsByTap.single.period, TillPeriod.month);
+    });
+
+    testWidgets('depuis le mois, l’élargissement offert est l’année', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block('USD', fees: 0, boutique: 0, receiptCount: 0),
+        ], period: 'month'),
+      );
+
+      expect(find.text('Voir cette année'), findsOneWidget);
+      await tester.tap(find.text('Voir cette année'));
+      await tester.pumpAndSettle();
+      expect(windowsByTap.single.period, TillPeriod.year);
+    });
+
+    testWidgets(
+      'une plage libre n’est pas élargie — ses bornes sont un choix',
+      (tester) async {
+        await pump(
+          tester,
+          _till([
+            _block('USD', fees: 0, boutique: 0, receiptCount: 0),
+          ], period: 'custom'),
+        );
+
+        // Substituer « ce mois » jetterait les bornes que le lecteur vient de
+        // choisir — et rien ne dit que sa plage est plus étroite qu'un mois.
+        expect(find.text('Voir ce mois'), findsNothing);
+        expect(find.text('Voir cette année'), findsNothing);
+        // La règle « jamais sans issue » tient par la facturation.
+        expect(find.text('Ouvrir la facturation'), findsOneWidget);
+      },
+    );
+
+    testWidgets('un compteur global à 0 ne cache pas une caisse qui a reçu', (
+      tester,
+    ) async {
+      // ⚠️ Le contrat porte un `receiptsIssued` toutes caisses. S'y fier ferait
+      // dépendre l'affichage d'un agrégat : ici il vaut 0 alors que la caisse
+      // dollars porte cinq reçus. Le vide se lit sur les BLOCS, qui sont ce
+      // qu'on affiche — ce test-là ne peut donc pas cacher de données.
+      await pump(tester, _till([_block('USD')], receiptsIssued: 0));
+
+      expect(find.text('Aucun encaissement · aujourd\'hui'), findsNothing);
+      expect(find.byType(FinanceTillCurrencySelector), findsOneWidget);
+    });
+  });
+
+  group('vide de caisse — l’autre a travaillé', () {
+    testWidgets('les tuiles ET le sélecteur restent, seul le détail change', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block('CDF', fees: 0, boutique: 0, receiptCount: 0),
+          _block('USD'),
+        ]),
+        selectedCurrency: 'CDF',
+      );
+
+      expect(find.byType(FinanceTillCashBoxes), findsOneWidget);
+      expect(find.byType(FinanceTillCurrencySelector), findsOneWidget);
+      expect(find.byType(FinanceTillBucketsSection), findsNothing);
+    });
+
+    testWidgets('une caisse au total nul mais qui a des reçus a travaillé', (
+      tester,
+    ) async {
+      // Encaisser puis rembourser le même montant laisse un total à zéro et
+      // des reçus bien réels. « Aucun paiement n'a été tendu » serait faux —
+      // c'est ce que disait le total, et c'est pourquoi on compte les reçus.
+      await pump(
+        tester,
+        _till([
+          _block('CDF', fees: 0, boutique: 0, receiptCount: 3),
+          _block('USD'),
+        ]),
+        selectedCurrency: 'CDF',
+      );
+
+      expect(find.text('Caisse francs vide sur cette période'), findsNothing);
+    });
+
+    testWidgets('la bascule est directe et nomme la caisse qui a travaillé', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([
+          _block('CDF', fees: 0, boutique: 0, receiptCount: 0),
+          _block('USD'),
+        ]),
+        selectedCurrency: 'CDF',
+      );
+
+      await tester.tap(find.text('Voir la caisse dollars'));
+      await tester.pumpAndSettle();
+
+      expect(selectedByTap, ['USD']);
+    });
+
+    testWidgets(
+      'plusieurs autres caisses se juxtaposent, jamais ne s’ajoutent',
+      (tester) async {
+        await pump(
+          tester,
+          _till([
+            _block('CDF', fees: 0, boutique: 0, receiptCount: 0),
+            _block('USD', fees: 100000, boutique: 0),
+            _block('EUR', fees: 200000, boutique: 0),
+          ]),
+          selectedCurrency: 'CDF',
+        );
+
+        final text = find
+            .byType(Text)
+            .evaluate()
+            .map((e) => (e.widget as Text).data)
+            .whereType<String>()
+            .map((t) => t.replaceAll('\u00A0', ' '))
+            .firstWhere((t) => t.contains('Les autres caisses'));
+
+        // Les deux montants, côte à côte. Jamais 3 000 : les caisses ne
+        // s'additionnent pas, et la phrase ne relâche pas la règle.
+        expect(text, contains('1 000,00 \$'));
+        expect(text, contains('2 000,00 €'));
+        expect(text, isNot(contains('3 000')));
+      },
+    );
+  });
+
   testWidgets('une devise sans mouvement se dit, au lieu d’un axe plat', (
     tester,
   ) async {
@@ -522,11 +709,15 @@ void main() {
       selectedCurrency: 'CDF',
     );
 
-    expect(find.text('Aucun mouvement dans cette devise'), findsOneWidget);
-    expect(
-      find.text('Rien n\'est entré dans le tiroir sur cette période.'),
-      findsOneWidget,
-    );
+    // ⚠️ **La phrase CHIFFRE l'autre caisse.** L'ancienne — « Aucun mouvement
+    // dans cette devise » — constatait sans situer : elle se lisait comme un
+    // écran en panne. Ce montant-ci dit « il ne s'est rien passé ICI », ce qui
+    // n'est pas la même information.
+    expect(find.text('Caisse francs vide sur cette période'), findsOneWidget);
+    expect(find.textContaining("L'autre caisse a enregistré"), findsOneWidget);
+    // Jamais d'écran vide sans issue : la bascule est offerte, et elle nomme
+    // la caisse qui, elle, a travaillé.
+    expect(find.text('Voir la caisse dollars'), findsOneWidget);
     // La devise garde sa tuile de caisse : ses zéros y sont justes, et l'autre
     // caisse reste lisible à côté.
     expect(find.byType(FinanceTillCashBoxes), findsOneWidget);

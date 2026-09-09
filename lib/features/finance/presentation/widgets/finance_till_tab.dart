@@ -130,6 +130,12 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
                 onCurrencySelected: (currency) => context
                     .read<FinanceTillBloc>()
                     .add(FinanceTillCurrencySelected(currency)),
+                // Le même événement que le sélecteur de période : c'est ce qui
+                // fait suivre le segment quand le vide global élargit la
+                // fenêtre.
+                onWindowRequested: (window) => context
+                    .read<FinanceTillBloc>()
+                    .add(FinanceTillRequested(window: window)),
               ),
               FinanceTillStatus.error => FinanceStatsResultsErrorState(
                 failure:
