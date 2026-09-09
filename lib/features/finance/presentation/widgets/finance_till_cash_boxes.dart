@@ -44,8 +44,15 @@ class FinanceTillCashBoxes extends StatelessWidget {
   });
 
   /// Les largeurs de base de la spec : une caisse contre le compteur.
-  static const double _cashBoxBasis = 260;
-  static const double _counterBasis = 190;
+  /// Gabarit d'une tuile de caisse — `flex 1 1 260` dans la spec.
+  ///
+  /// Public parce que le squelette s'en sert : il doit occuper **les mêmes
+  /// places**, et deux copies du gabarit se décaleraient au premier ajustement.
+  static const double cashBoxBasis = 260;
+
+  /// Gabarit de la tuile « Reçus émis » — `flex 1 1 190`, plus étroite parce
+  /// qu'elle ne porte pas un montant.
+  static const double counterBasis = 190;
 
   /// Quand la rangée ne tient pas, les tuiles s'enroulent **à largeur égale** :
   /// un rapport de largeurs n'a plus de sens sur plusieurs rangs, où les tuiles
@@ -75,15 +82,15 @@ class FinanceTillCashBoxes extends StatelessWidget {
           final gutters = spacing * (count - 1);
           final fitsOneRow =
               constraints.maxWidth >=
-              _cashBoxBasis * blocks.length + _counterBasis + gutters;
+              cashBoxBasis * blocks.length + counterBasis + gutters;
 
           final available = constraints.maxWidth - gutters;
-          final basisTotal = _cashBoxBasis * blocks.length + _counterBasis;
+          final basisTotal = cashBoxBasis * blocks.length + counterBasis;
           final cashWidth = fitsOneRow
-              ? (available * _cashBoxBasis / basisTotal).floorToDouble()
+              ? (available * cashBoxBasis / basisTotal).floorToDouble()
               : _wrappedWidth(constraints.maxWidth, count, spacing);
           final counterWidth = fitsOneRow
-              ? (available * _counterBasis / basisTotal).floorToDouble()
+              ? (available * counterBasis / basisTotal).floorToDouble()
               : cashWidth;
 
           return Column(

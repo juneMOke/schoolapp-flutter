@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_loading_view.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
@@ -120,10 +120,10 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
           child: KeyedSubtree(
             key: ValueKey<FinanceTillStatus>(state.status),
             child: switch (state.status) {
-              // Trois cartes, pas quatre : la caisse ne compte aucun taux.
-              FinanceTillStatus.loading => const FinanceStatsLoadingView(
-                kpiCount: 3,
-              ),
+              // Le squelette de la caisse, et non celui du recouvrement :
+              // trois tuiles puis un graphique puis des rangées, dans l'ordre
+              // et aux hauteurs de ce qui arrive.
+              FinanceTillStatus.loading => const FinanceTillLoadingView(),
               FinanceTillStatus.success => FinanceTillSuccessView(
                 till: state.till!,
                 selectedBlock: state.selectedBlock,

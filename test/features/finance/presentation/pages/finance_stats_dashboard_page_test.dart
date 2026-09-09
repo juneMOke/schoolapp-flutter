@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -232,6 +235,51 @@ void main() {
 
     expect(find.text("Ce qu'il reste à encaisser cette année"), findsOneWidget);
     expect(find.text('Ce qui est entré dans le tiroir'), findsOneWidget);
+  });
+
+  testWidgets('pendant le chargement, taux et fenêtre restent utilisables', (
+    tester,
+  ) async {
+    // On retient la réponse en vol : c'est le seul moyen d'observer l'état de
+    // chargement, que le stub traverse d'ordinaire en une frame.
+    final held = Completer<Either<Failure, FinanceTill>>();
+    when(
+      () => mockTill(window: any(named: 'window')),
+    ).thenAnswer((_) => held.future);
+
+    final state = ExchangeRatesState(
+      loaded: true,
+      rates: [
+        ExchangeRate(
+          base: 'USD',
+          quote: 'CDF',
+          rateMicros: 2850000000,
+          effectiveFrom: DateTime.utc(2020),
+        ),
+      ],
+    );
+    when(() => ratesCubit.state).thenReturn(state);
+    whenListen(
+      ratesCubit,
+      const Stream<ExchangeRatesState>.empty(),
+      initialState: state,
+    );
+
+    await pumpPage(tester);
+    await tester.tap(find.text('Caisse'));
+    await tester.pump();
+
+    // Le squelette de la CAISSE — trois tuiles puis un graphique puis des
+    // rangées — et non celui du recouvrement, qui pose deux cartes côte à côte.
+    expect(find.byType(FinanceTillLoadingView), findsOneWidget);
+    // « Les contrôles restent utilisables pendant le fetch » : on doit pouvoir
+    // lire à quel taux et sur quelle fenêtre on attend.
+    expect(find.byType(FinanceTillRateBar), findsOneWidget);
+    expect(find.byType(FinanceTillPeriodFilter), findsOneWidget);
+
+    held.complete(Right(tTill));
+    await tester.pumpAndSettle();
+    expect(find.byType(FinanceTillLoadingView), findsNothing);
   });
 
   testWidgets('le taux du jour surmonte la fenêtre, et seulement en Caisse', (
