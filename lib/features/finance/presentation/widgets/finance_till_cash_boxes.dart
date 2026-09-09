@@ -270,8 +270,14 @@ class _CashBox extends StatelessWidget {
                   Money.parse(summary.averageTicket, block.currency),
                 ),
               ),
+              // Deux tuiles côte à côte, deux sous-lignes de même forme : sans
+              // chiffres tabulaires, « 5 reçus · ticket moyen 246,90 $ » et
+              // « 17 reçus · ticket moyen 1 118,00 FC » ne se comparent pas
+              // d'un coup d'œil — c'est pourtant le geste que la bande invite
+              // à faire.
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.textSecondary,
+                fontFeatures: AppTextStyles.tabularFigures,
               ),
             ),
           if (summary.hasTrend) ...[

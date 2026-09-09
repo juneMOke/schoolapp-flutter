@@ -69,6 +69,7 @@ class FinanceTillImputationSection extends StatelessWidget {
             l10n.financeTillImputationTotal(total),
             style: AppTextStyles.bodyStrong.copyWith(
               color: AppColors.textSecondary,
+              fontFeatures: AppTextStyles.tabularFigures,
             ),
           ),
           const SizedBox(height: AppDimensions.spacingXS),
@@ -171,8 +172,11 @@ class _ShareLegend extends StatelessWidget {
                   line.label,
                   (line.amount * 100 / total).round(),
                 ),
+                // Une colonne de parts, une par poste : les « 100 % » et les
+                // « 7 % » s'alignent, ou la légende se relit ligne à ligne.
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textMuted,
+                  fontFeatures: AppTextStyles.tabularFigures,
                 ),
               ),
             ],

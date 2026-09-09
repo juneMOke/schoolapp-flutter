@@ -512,6 +512,31 @@ void main() {
     },
   );
 
+  testWidgets('les chiffres qu’on compare portent des largeurs fixes', (
+    tester,
+  ) async {
+    await pump(tester, _till([_block('USD'), _block('CDF')]));
+
+    bool tabular(String startsWith) {
+      final widget = tester
+          .widgetList<Text>(find.byType(Text))
+          .firstWhere((t) => (t.data ?? '').startsWith(startsWith));
+      return (widget.style?.fontFeatures ?? const <FontFeature>[]).any(
+        (f) => f.feature == 'tnum',
+      );
+    }
+
+    // Deux tuiles côte à côte, deux sous-lignes de même forme : sans largeurs
+    // fixes, « 5 reçus · ticket moyen 246,90 $ » et son voisin en francs ne se
+    // comparent pas d'un coup d'œil — c'est pourtant le geste que la bande
+    // invite à faire.
+    expect(tabular('5 reçus'), isTrue);
+    // Le total d'une carte d'imputation, et la colonne de parts sous les
+    // barres.
+    expect(tabular('Total imputé'), isTrue);
+    expect(tabular('Minerval ·'), isTrue);
+  });
+
   group('vide global — aucune caisse n’a rien reçu', () {
     testWidgets('les tuiles restent à 0, le détail disparaît', (tester) async {
       await pump(

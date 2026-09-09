@@ -314,7 +314,12 @@ class _Subtitle extends StatelessWidget {
 
     return Text(
       parts.join(' · '),
-      style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+      // Trois chiffres de la même fenêtre, faits pour être comparés entre eux
+      // et avec les tuiles : ils s'alignent comme le reste.
+      style: AppTextStyles.caption.copyWith(
+        color: AppColors.textMuted,
+        fontFeatures: AppTextStyles.tabularFigures,
+      ),
     );
   }
 }
