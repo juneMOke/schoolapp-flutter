@@ -124,6 +124,67 @@ void main() {
     });
   });
 
+  group('ApiErrorParser — les chiffres de la cause', () {
+    test('« details » descend tel quel, sans schéma', () {
+      final response = _response(
+        data: {
+          'code': 'BUSINESS_RULE',
+          'detailCode': 'REPORT_LINE_CAP',
+          'details': {'lines': 7213, 'cap': 5000},
+        },
+      );
+
+      // C'est ce qui permet à l'écran d'écrire SA phrase, dans SA langue, sans
+      // perdre le nombre qui la rend actionnable.
+      expect(ApiErrorParser.detailsOf(response), {'lines': 7213, 'cap': 5000});
+    });
+
+    test('la Failure de validation les porte', () {
+      final failure = ApiErrorParser.validationFailure(
+        _response(
+          data: {
+            'code': 'BUSINESS_RULE',
+            'detailCode': 'REPORT_LINE_CAP',
+            'details': {'lines': 7213, 'cap': 5000},
+          },
+        ),
+      );
+
+      expect(failure.detailCode, 'REPORT_LINE_CAP');
+      expect(failure.details?['lines'], 7213);
+      expect(failure.details?['cap'], 5000);
+    });
+
+    test('un corps sans « details » rend null, il ne lève pas', () {
+      expect(
+        ApiErrorParser.detailsOf(_response(data: {'code': 'BUSINESS_RULE'})),
+        isNull,
+      );
+    });
+
+    test('un « details » qui n’est pas un objet est ignoré', () {
+      // Une erreur mal formée reste une erreur à afficher : elle retombera sur
+      // le message du serveur plutôt que d'emporter l'écran.
+      expect(
+        ApiErrorParser.detailsOf(
+          _response(data: {'details': 'REPORT_LINE_CAP'}),
+        ),
+        isNull,
+      );
+      expect(
+        ApiErrorParser.detailsOf(_response(data: {'details': 42})),
+        isNull,
+      );
+    });
+
+    test('un corps illisible ne fabrique pas de chiffres', () {
+      expect(
+        ApiErrorParser.detailsOf(_response(data: '<html>502</html>')),
+        isNull,
+      );
+    });
+  });
+
   group('les deux 400 ne se confondent plus', () {
     // C'est la raison d'être de tout ce fichier. Avant, ces deux réponses
     // arrivaient à l'écran sous le même `ValidationFailure('Invalid request

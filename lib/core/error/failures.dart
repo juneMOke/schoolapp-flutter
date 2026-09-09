@@ -229,6 +229,20 @@ mixin ApiErrorDetails on Failure {
   /// Se brancher dessus, **jamais sur [serverMessage]** : la phrase est
   /// française et se reformule, le code est une valeur de fil.
   String? get detailCode;
+
+  /// Les **chiffres** de la cause, quand le serveur en pose — `{"lines": 7213,
+  /// "cap": 5000}` sur un `REPORT_LINE_CAP`.
+  ///
+  /// C'est ce qui permet à l'écran d'écrire **sa propre phrase**, dans **sa**
+  /// langue, sans perdre le nombre qui la rend actionnable. Avant eux, il n'y
+  /// avait que deux mauvaises options : afficher la phrase du serveur — donc sa
+  /// langue — ou en écrire une générique, qui perd le chiffre.
+  ///
+  /// ⚠️ **Rendus tels quels, sans schéma.** Le catalogue est ouvert et grandit
+  /// par module ; l'appelant lit les clés qu'il connaît et **ignore le reste**.
+  /// Une clé absente ou d'un type inattendu doit le faire retomber sur
+  /// [serverMessage], jamais lever.
+  Map<String, dynamic>? get details;
 }
 
 /// 400 ou 422 portant le code typé du serveur.
@@ -249,15 +263,25 @@ class ApiValidationFailure extends ValidationFailure with ApiErrorDetails {
   @override
   final String? detailCode;
 
+  @override
+  final Map<String, dynamic>? details;
+
   const ApiValidationFailure({
     required this.code,
     this.serverMessage,
     this.detailCode,
+    this.details,
     String message = 'Invalid request data',
   }) : super(message);
 
   @override
-  List<Object?> get props => [message, code, serverMessage, detailCode];
+  List<Object?> get props => [
+    message,
+    code,
+    serverMessage,
+    detailCode,
+    details,
+  ];
 }
 
 /// 5xx portant le code typé et, quand le serveur en pose une, la référence
@@ -275,6 +299,11 @@ class ApiServerFailure extends ServerFailure with ApiErrorDetails {
   /// Toujours `null` : le serveur ne nomme une cause précise que sur un 422.
   @override
   String? get detailCode => null;
+
+  /// Aucun chiffre non plus : ils accompagnent un [detailCode], qui n'existe
+  /// pas ici.
+  @override
+  Map<String, dynamic>? get details => null;
 
   const ApiServerFailure({
     this.code = ApiErrorCode.internalError,
@@ -304,6 +333,11 @@ class TooManyRequestsFailure extends Failure with ApiErrorDetails {
 
   @override
   String? get detailCode => null;
+
+  /// Aucun chiffre non plus : ils accompagnent un [detailCode], qui n'existe
+  /// pas ici.
+  @override
+  Map<String, dynamic>? get details => null;
 
   /// Délai annoncé par l'en-tête `Retry-After`, quand le serveur en pose un.
   final Duration? retryAfter;
