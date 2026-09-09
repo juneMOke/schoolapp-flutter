@@ -150,38 +150,52 @@ class _ShareLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     if (total <= 0) return const SizedBox.shrink();
 
-    return Wrap(
-      spacing: AppDimensions.spacingM,
-      runSpacing: AppDimensions.spacingXS,
-      children: [
-        for (final line in lines)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: tillFeeCodeAccent(line.code),
-                  borderRadius: BorderRadius.circular(3),
-                ),
+    // ⚠️ **Chaque entrée est bornée à la largeur disponible.** Sans ça, un
+    // libellé de poste un peu long débordait la carte sur un téléphone étroit
+    // — mesuré à 320 dp — parce qu'une `Row` de taille minimale dans un `Wrap`
+    // n'est bornée par rien.
+    return LayoutBuilder(
+      builder: (context, constraints) => Wrap(
+        spacing: AppDimensions.spacingM,
+        runSpacing: AppDimensions.spacingXS,
+        children: [
+          for (final line in lines)
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: tillFeeCodeAccent(line.code),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.spacingXS),
+                  Flexible(
+                    child: Text(
+                      l10n.financeTillImputationShare(
+                        line.label,
+                        (line.amount * 100 / total).round(),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // Une colonne de parts, une par poste : les « 100 % » et
+                      // les « 7 % » s'alignent, ou la légende se relit ligne à
+                      // ligne.
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                        fontFeatures: AppTextStyles.tabularFigures,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppDimensions.spacingXS),
-              Text(
-                l10n.financeTillImputationShare(
-                  line.label,
-                  (line.amount * 100 / total).round(),
-                ),
-                // Une colonne de parts, une par poste : les « 100 % » et les
-                // « 7 % » s'alignent, ou la légende se relit ligne à ligne.
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
-                  fontFeatures: AppTextStyles.tabularFigures,
-                ),
-              ),
-            ],
-          ),
-      ],
+            ),
+        ],
+      ),
     );
   }
 }

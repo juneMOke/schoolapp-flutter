@@ -77,6 +77,13 @@ class FinanceTillCurrencySelector extends StatelessWidget {
             // Un compteur à zéro reste cliquable : la cible vaut donc pour
             // les deux segments, pas seulement pour celui qui a travaillé.
             style: const SegmentedTabFilterStyle(minimumTapTarget: 44),
+            // ⚠️ **S'enroule, sinon il déborde à 360 dp.** « $ dollars (5) »
+            // et « FC francs (5) » ne tiennent pas sur une ligne sur un
+            // téléphone — mesuré : 31 pixels de trop. Deux rangs valent
+            // mieux qu'un libellé tronqué, d'autant que le compteur est
+            // en fin de libellé : c'est LUI que la troncature emporterait,
+            // et il est la raison d'être de ce sélecteur.
+            wrap: true,
             options: [
               for (final block in ordered)
                 SegmentedTabOption(

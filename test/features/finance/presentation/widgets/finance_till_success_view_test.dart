@@ -537,6 +537,26 @@ void main() {
     expect(tabular('Minerval ·'), isTrue);
   });
 
+  testWidgets('l’écran tient de la tablette au petit téléphone', (
+    tester,
+  ) async {
+    // ⚠️ **La taille se pose APRÈS le pump.** Le harnais impose lui-même
+    // 1280 : une taille posée avant est écrasée sans que rien ne le signale, et
+    // la boucle rendait sept fois la même largeur en annonçant sept résultats.
+    for (final width in [1280.0, 1024.0, 768.0, 600.0, 420.0, 360.0, 320.0]) {
+      await pump(tester, _till([_block('USD'), _block('CDF')]));
+      await tester.binding.setSurfaceSize(Size(width, 4000));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'débordement à ${width.toStringAsFixed(0)} dp',
+      );
+    }
+    await tester.binding.setSurfaceSize(null);
+  });
+
   group('vide global — aucune caisse n’a rien reçu', () {
     testWidgets('les tuiles restent à 0, le détail disparaît', (tester) async {
       await pump(
