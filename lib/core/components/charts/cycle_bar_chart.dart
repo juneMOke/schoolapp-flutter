@@ -88,11 +88,22 @@ class CycleBarChart extends StatelessWidget {
 
   /// Style du libellé sous l'axe pour la barre [index].
   /// Sert aussi bien au rendu qu'à la mesure de la hauteur à réserver.
+  /// Le style d'un libellé d'axe — **et la mesure de la place qu'il prend**.
+  ///
+  /// Chiffres tabulaires : l'axe est une **rangée de nombres** — des jours, des
+  /// mois, des semaines — et sans largeur fixe le « 11 » et le « 08 » ne
+  /// tombent pas au même endroit sous leurs barres. Le décalage est d'un
+  /// pixel ou deux par libellé, mais il se cumule sur trente et un jours et
+  /// fait onduler l'axe.
+  ///
+  /// La même fonction sert à mesurer la hauteur réservée aux libellés pivotés :
+  /// le calcul suit donc le changement de largeur sans qu'on ait à y penser.
   TextStyle _bottomLabelStyle(int index) {
     final highlighted = highlightedIndexes.contains(index);
     return AppTextStyles.caption.copyWith(
       color: highlighted ? AppColors.textPrimary : AppColors.textSecondary,
       fontWeight: highlighted ? FontWeight.w700 : FontWeight.w500,
+      fontFeatures: AppTextStyles.tabularFigures,
     );
   }
 

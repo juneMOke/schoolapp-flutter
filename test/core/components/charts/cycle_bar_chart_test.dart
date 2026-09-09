@@ -323,4 +323,30 @@ void main() {
       reason: 'une valeur qui dépasse le plancher n’est jamais modifiée',
     );
   });
+
+  testWidgets('les libellés d’axe portent des chiffres de largeur fixe', (
+    tester,
+  ) async {
+    await pumpChart(tester, vertical: false);
+
+    final labels = tester
+        .widgetList<Text>(find.byType(Text))
+        .where((t) => items.any((item) => item.label == t.data))
+        .toList();
+
+    expect(labels, isNotEmpty);
+    // L'axe est une RANGÉE de nombres. Sans largeur fixe, « 11 » et « 08 » ne
+    // tombent pas au même endroit sous leurs barres : le décalage est d'un
+    // pixel par libellé, mais il se cumule sur trente et un jours et fait
+    // onduler l'axe.
+    for (final label in labels) {
+      expect(
+        (label.style?.fontFeatures ?? const <FontFeature>[]).any(
+          (f) => f.feature == 'tnum',
+        ),
+        isTrue,
+        reason: 'le libellé « ${label.data} » n’est pas tabulaire',
+      );
+    }
+  });
 }
