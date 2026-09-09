@@ -255,6 +255,16 @@ class _InsightCard extends StatelessWidget {
     required this.body,
   });
 
+  /// ⚠️ **Écart de style connu, et ajourné.**
+  ///
+  /// La spec écrit le titre en `title-small` et le corps en `body-small`. Le
+  /// socle ne porte ni l'un ni l'autre : `bodyStrong` et `caption` en sont les
+  /// plus proches, et sont ce qui est utilisé ici.
+  ///
+  /// Les rapprocher exactement demanderait d'**ajouter deux styles au socle**,
+  /// pour un écart que personne n'a signalé sur un appareil réel. C'est de la
+  /// surface partagée en plus sans preuve de besoin ; à rouvrir si l'écart se
+  /// voit, pas avant.
   @override
   Widget build(BuildContext context) {
     return Semantics(
