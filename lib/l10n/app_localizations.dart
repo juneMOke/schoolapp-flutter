@@ -10707,6 +10707,12 @@ abstract class AppLocalizations {
   /// **'See the {currency} till'**
   String financeTillEmptySeeTill(String currency);
 
+  /// No description provided for @financeTillReceiptsCrossedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee set in {fee}, settled in {tendered}'**
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered);
+
   /// No description provided for @financeTillRateValue.
   ///
   /// In en, this message translates to:

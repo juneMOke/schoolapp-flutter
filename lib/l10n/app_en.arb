@@ -3870,6 +3870,8 @@
   "@financeTillEmptyOtherTills": {"placeholders": {"amounts": {"type": "String"}}},
   "financeTillEmptySeeTill": "See the {currency} till",
   "@financeTillEmptySeeTill": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillReceiptsCrossedTooltip": "Fee set in {fee}, settled in {tendered}",
+  "@financeTillReceiptsCrossedTooltip": {"placeholders": {"fee": {"type": "String"}, "tendered": {"type": "String"}}},
   "financeTillRateValue": "1 {base} = {value} {quote}",
   "@financeTillRateValue": {"placeholders": {"base": {"type": "String"}, "value": {"type": "String"}, "quote": {"type": "String"}}},
   "financeTillRateNone": "No rate configured",

@@ -1129,6 +1129,18 @@ void main() {
       expect(find.textContaining('taux 2\u00A0850,00'), findsOneWidget);
       // Le montant soldé est LU sur les imputations, jamais dérivé du taux.
       expect(find.textContaining('115\u00A0000\u00A0FC'), findsOneWidget);
+
+      // ⚠️ La mention dit ce qui s'est passé, pas POURQUOI il y a deux devises
+      // sur une ligne. L'explication est une infobulle — donc aussi une
+      // étiquette d'accessibilité : une mention qui ne s'obtiendrait qu'à la
+      // souris n'existerait pas sur la tablette du caissier.
+      final tooltip = tester
+          .widgetList<Tooltip>(find.byType(Tooltip))
+          .map((t) => t.message)
+          .whereType<String>()
+          .where((m) => m.startsWith('Frais fixé'))
+          .toList();
+      expect(tooltip, ['Frais fixé en francs, réglé en dollars']);
     });
 
     testWidgets('une panne réseau sur la table ne se lit pas comme un refus', (

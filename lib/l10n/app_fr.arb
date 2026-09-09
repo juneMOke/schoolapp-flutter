@@ -3831,6 +3831,8 @@
   "@financeTillEmptyOtherTills": {"description": "Jamais une somme : les montants sont juxtaposés, comme partout ailleurs sur cet écran.", "placeholders": {"amounts": {"type": "String"}}},
   "financeTillEmptySeeTill": "Voir la caisse {currency}",
   "@financeTillEmptySeeTill": {"placeholders": {"currency": {"type": "String"}}},
+  "financeTillReceiptsCrossedTooltip": "Frais fixé en {fee}, réglé en {tendered}",
+  "@financeTillReceiptsCrossedTooltip": {"description": "La mention du croisement est du TEXTE, jamais une simple teinte ambre. Cette explication la complète, et elle est LUE par le lecteur d'écran — une mention qui ne s'obtient qu'à la souris n'existe pas sur une tablette.", "placeholders": {"fee": {"type": "String"}, "tendered": {"type": "String"}}},
   "financeTillRateValue": "1 {base} = {value} {quote}",
   "@financeTillRateValue": {"description": "Le taux du jour, tel que l'école l'a saisi. CONTEXTE et non base de calcul : les montants croisés de l'écran sont convertis au taux DU REÇU, jamais à celui-ci.", "placeholders": {"base": {"type": "String"}, "value": {"type": "String"}, "quote": {"type": "String"}}},
   "financeTillRateNone": "Aucun taux paramétré",

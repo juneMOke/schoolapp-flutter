@@ -190,6 +190,16 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           // teinte ambre : la doctrine interdit qu'une conversion se signale
           // par la seule couleur.
           secondaryText: _crossingLine(receipt, l10n),
+          // ⚠️ **Et elle s'explique.** « solde 115 000 FC · taux 2 850,00 » dit
+          // ce qui s'est passé sans dire pourquoi il y a deux devises sur une
+          // ligne. L'explication est portée par une infobulle, qui est aussi
+          // l'étiquette d'accessibilité — une mention qui ne s'obtiendrait qu'à
+          // la souris n'existerait pas sur la tablette du caissier.
+          //
+          // Elle rattrape en outre la troncature : la ligne secondaire tient
+          // sur une ligne, et dans une colonne étroite le taux disparaît le
+          // premier.
+          secondaryTooltip: _crossingExplanation(receipt, l10n),
         ),
       ],
     );
@@ -224,6 +234,22 @@ class FinanceTillReceiptsSection extends StatelessWidget {
       // différaient aussi, on ne pourrait plus savoir si un écart est dans la
       // valeur ou dans l'écriture.
       ExchangeRate.formatMicros(receipt.rateMicros!),
+    );
+  }
+
+  /// « Frais fixé en dollars, réglé en francs » — le **pourquoi** des deux
+  /// devises sur une même ligne.
+  ///
+  /// Les devises sont nommées et non symbolisées : l'infobulle est une phrase,
+  /// et « Frais fixé en $ » se lit mal à voix haute.
+  static String? _crossingExplanation(
+    TillReceipt receipt,
+    AppLocalizations l10n,
+  ) {
+    if (!receipt.isCrossed) return null;
+    return l10n.financeTillReceiptsCrossedTooltip(
+      tillCurrencyName(receipt.settledCurrency!, l10n),
+      tillCurrencyName(receipt.currency, l10n),
     );
   }
 }

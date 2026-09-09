@@ -6628,6 +6628,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered) {
+    return 'Frais fixé en $fee, réglé en $tendered';
+  }
+
+  @override
   String financeTillRateValue(String base, String value, String quote) {
     return '1 $base = $value $quote';
   }

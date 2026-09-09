@@ -6561,6 +6561,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered) {
+    return 'Fee set in $fee, settled in $tendered';
+  }
+
+  @override
   String financeTillRateValue(String base, String value, String quote) {
     return '1 $base = $value $quote';
   }
