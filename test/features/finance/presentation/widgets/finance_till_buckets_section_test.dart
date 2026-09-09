@@ -163,6 +163,28 @@ void main() {
     expect(chart.items[12].label, '15/05');
   });
 
+  testWidgets(
+    'le graphique de caisse suit la maquette, pas les valeurs par défaut',
+    (tester) async {
+      await pump(tester, _month());
+
+      final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
+
+      // Aucun axe vertical, à AUCUN grain : la spec n'en dessine pas, et le
+      // porteur a écarté l'option « axe seulement sur les fenêtres larges »
+      // parce qu'elle aurait rendu le graphique différent selon le grain.
+      expect(chart.showLeftAxis, isFalse);
+      // Trois lignes de grille — le composant compte les INTERVALLES, et il y a
+      // une ligne de plus qu'eux. Deux intervalles font donc trois lignes.
+      expect(chart.gridDivisions, 2);
+      expect(chart.barRadius, 4);
+      // Sans plancher, une barre très basse sous un maximum élevé rend un
+      // demi-pixel, indiscernable d'un zéro — or les barres nulles ne se
+      // dessinent plus, donc elle se lirait comme un jour supprimé.
+      expect(chart.minimumBarHeight, 2);
+    },
+  );
+
   testWidgets('un axe vide rend son état vide, pas un graphique nu', (
     tester,
   ) async {

@@ -131,6 +131,27 @@ class FinanceTillBucketsSection extends StatelessWidget {
               highlightedIndexes: highlighted,
               verticalBottomLabels: drawn.length > _rotateLabelsBeyond,
               showValueLabels: labelEveryBar,
+              // ⚠️ **Pas d'axe vertical, à aucun grain** — la spec n'en dessine
+              // aucun, et le porteur l'a tranché en connaissant le prix : sur
+              // une fenêtre large, où les barres ne portent pas leur montant,
+              // le graphique devient une **forme**. Les trois lignes de grille
+              // tiennent lieu d'échelle, et les chiffres se lisent dans les
+              // tuiles et la table.
+              //
+              // L'option écartée — masquer l'axe seulement quand les montants
+              // sont sur les barres — aurait rendu le graphique différent selon
+              // le grain, ce qu'on venait justement de corriger.
+              showLeftAxis: false,
+              // Trois lignes de grille (0 / 50 / 100 %). Le composant compte
+              // les **intervalles**, et il y a une ligne de plus qu'eux : deux
+              // intervalles font donc les trois lignes de la spec.
+              gridDivisions: 2,
+              barRadius: 4,
+              // Sans plancher, une journée à 300 FC sous un maximum à 9 000 000
+              // rend une barre d'un demi-pixel — indiscernable d'un zéro. Et
+              // comme les barres nulles ne se dessinent plus, une barre non
+              // nulle invisible se lirait comme un **jour supprimé**.
+              minimumBarHeight: 2,
               // `finFmtShort` : la forme abrégée est **réservée** aux
               // étiquettes de graphique, là où le montant entier ne tient pas.
               // Elle porte quand même son symbole.
