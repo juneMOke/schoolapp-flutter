@@ -47,21 +47,37 @@ class EteeloDataTableTheme {
   static const double rowLeadingBorderWidth = 3;
 
   // Cells
+  // ## Chiffres tabulaires dans les trois variantes
+  //
+  // C'est la raison d'être d'une table : une colonne de montants, de dates ou
+  // de numéros de pièce se **parcourt du regard**, et des chiffres de largeurs
+  // différentes décalent chaque ligne d'un cran imprévisible. Le « 1 » d'une
+  // fonte proportionnelle est deux fois plus étroit que le « 8 » : 1 111 et
+  // 8 888 n'ont pas la même longueur, et l'œil qui compare deux lignes doit
+  // relire au lieu de balayer.
+  //
+  // Sur les trois variantes et non sur la seule colonne de montants : une date
+  // et un numéro de reçu forment aussi des colonnes, et une table dont deux
+  // colonnes s'alignent et trois autres non se lit plus mal que si aucune ne
+  // s'alignait. Le texte sans chiffre n'est pas affecté.
   static final TextStyle cellRegularStyle = AppTextStyles.caption.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
+    fontFeatures: AppTextStyles.tabularFigures,
   );
   static final TextStyle cellStrongStyle = AppTextStyles.caption.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
+    fontFeatures: AppTextStyles.tabularFigures,
   );
   static final TextStyle cellMonoStyle = AppTextStyles.codeMuted.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
     letterSpacing: 0.3,
+    fontFeatures: AppTextStyles.tabularFigures,
   );
 
   // Footer
