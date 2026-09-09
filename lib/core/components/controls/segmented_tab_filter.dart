@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -49,6 +51,27 @@ class SegmentedTabFilterStyle {
   /// Écart entre l'icône et le libellé d'un onglet.
   final double itemContentGap;
 
+  /// Hauteur minimale de la **zone tactile** d'un onglet, en dp.
+  ///
+  /// ⚠️ **Ce n'est pas la hauteur dessinée.** Un onglet du style par défaut se
+  /// rétracte sur son contenu : la barre fait 38 dp, mais la cible mesurée au
+  /// rendu n'en fait que **25** — sous le minimum d'accessibilité, et sous les
+  /// 48 dp que Material impose à ses propres contrôles. Lire le style ne le
+  /// montre pas ; il faut mesurer.
+  ///
+  /// La barre s'agrandit d'autant quand c'est nécessaire : une cible de 44 dp
+  /// dans un conteneur de 38 n'existerait pas.
+  ///
+  /// Zéro par défaut — les barres existantes ne bougent pas.
+  final double minimumTapTarget;
+
+  /// Épaisseur du trait de la barre.
+  ///
+  /// Nommée parce qu'elle **se déduit de la hauteur utile** : un trait de 1 dp
+  /// en haut et en bas retire 2 dp à ce qui reste pour les onglets, et une
+  /// cible calculée sans lui tombait deux pixels trop court.
+  static const double borderWidth = 1;
+
   const SegmentedTabFilterStyle({
     this.backgroundColor = AppColors.surfaceAlt,
     this.borderColor = AppColors.border,
@@ -70,6 +93,7 @@ class SegmentedTabFilterStyle {
       vertical: AppDimensions.spacingXS,
     ),
     this.itemContentGap = AppSpacing.xs,
+    this.minimumTapTarget = 0,
   });
 
   static const kpi = SegmentedTabFilterStyle(
@@ -176,16 +200,32 @@ class SegmentedTabFilter<T> extends StatelessWidget {
     );
   }
 
+  /// La hauteur de la barre, élargie s'il le faut pour contenir la cible.
+  ///
+  /// Sans ça, une cible de 44 dp posée dans un conteneur figé à 38 serait
+  /// simplement écrasée — et le paramètre n'aurait servi à rien.
+  double? get _barHeight {
+    final fixed = style.containerHeight;
+    if (fixed == null || style.minimumTapTarget <= 0) return fixed;
+    final padding = style.containerPadding.resolve(TextDirection.ltr).vertical;
+    // Le trait compte : il est DANS la hauteur, pas autour.
+    final chrome = padding + SegmentedTabFilterStyle.borderWidth * 2;
+    return math.max(fixed, style.minimumTapTarget + chrome);
+  }
+
   Widget _buildBar() {
     return Container(
       // Une hauteur imposée empêche tout enroulement : deux rangs ne tiennent
       // dans aucune hauteur fixée d'avance. Le style l'annule (`null`) pour les
       // barres enroulables.
-      height: wrap ? null : style.containerHeight,
+      height: wrap ? null : _barHeight,
       decoration: BoxDecoration(
         color: style.backgroundColor,
         borderRadius: BorderRadius.circular(style.borderRadius),
-        border: Border.all(color: style.borderColor),
+        border: Border.all(
+          color: style.borderColor,
+          width: SegmentedTabFilterStyle.borderWidth,
+        ),
       ),
       padding: style.containerPadding,
       child: wrap ? _buildWrappedTabs() : _buildRowTabs(),
@@ -230,43 +270,46 @@ class SegmentedTabFilter<T> extends StatelessWidget {
       child: ExcludeSemantics(
         child: Material(
           color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(style.itemBorderRadius),
-            onTap: () => onSelected(opt.value),
-            child: AnimatedContainer(
-              duration: AppMotion.fast,
-              curve: AppMotion.outCurve,
-              width: style.itemWidth,
-              height: style.itemHeight,
-              padding: isIconOnly ? EdgeInsets.zero : style.itemPadding,
-              decoration: isSelected
-                  ? BoxDecoration(
-                      color: style.selectedBackgroundColor,
-                      borderRadius: BorderRadius.circular(
-                        style.itemBorderRadius,
-                      ),
-                      boxShadow: style.selectedShadow,
-                    )
-                  : const BoxDecoration(),
-              // ⚠️ Le centrage est porté par un `Align`, PAS par l'`alignment`
-              // du conteneur.
-              //
-              // Un Container porteur d'un `alignment` se **dilate** pour
-              // remplir des contraintes bornées. En `Row`, les enfants non
-              // flexibles reçoivent une largeur non bornée, donc l'onglet se
-              // rétractait sur son contenu et le défaut ne se voyait pas. Un
-              // `Wrap`, lui, borne la largeur de ses enfants : chaque onglet
-              // prenait TOUTE la barre, un par rang, à n'importe quelle
-              // largeur — la barre de fenêtres se lisait comme une colonne.
-              //
-              // `widthFactor`/`heightFactor` à 1 rendent l'onglet intrinsèque
-              // quand rien ne le force plus large, tout en le laissant remplir
-              // — et centrer son contenu — sous une contrainte serrée
-              // (`expand`, ou `itemWidth` imposée).
-              child: Align(
-                widthFactor: 1,
-                heightFactor: 1,
-                child: _buildTabContent(opt, isSelected),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: style.minimumTapTarget),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(style.itemBorderRadius),
+              onTap: () => onSelected(opt.value),
+              child: AnimatedContainer(
+                duration: AppMotion.fast,
+                curve: AppMotion.outCurve,
+                width: style.itemWidth,
+                height: style.itemHeight,
+                padding: isIconOnly ? EdgeInsets.zero : style.itemPadding,
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: style.selectedBackgroundColor,
+                        borderRadius: BorderRadius.circular(
+                          style.itemBorderRadius,
+                        ),
+                        boxShadow: style.selectedShadow,
+                      )
+                    : const BoxDecoration(),
+                // ⚠️ Le centrage est porté par un `Align`, PAS par l'`alignment`
+                // du conteneur.
+                //
+                // Un Container porteur d'un `alignment` se **dilate** pour
+                // remplir des contraintes bornées. En `Row`, les enfants non
+                // flexibles reçoivent une largeur non bornée, donc l'onglet se
+                // rétractait sur son contenu et le défaut ne se voyait pas. Un
+                // `Wrap`, lui, borne la largeur de ses enfants : chaque onglet
+                // prenait TOUTE la barre, un par rang, à n'importe quelle
+                // largeur — la barre de fenêtres se lisait comme une colonne.
+                //
+                // `widthFactor`/`heightFactor` à 1 rendent l'onglet intrinsèque
+                // quand rien ne le force plus large, tout en le laissant remplir
+                // — et centrer son contenu — sous une contrainte serrée
+                // (`expand`, ou `itemWidth` imposée).
+                child: Align(
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: _buildTabContent(opt, isSelected),
+                ),
               ),
             ),
           ),
