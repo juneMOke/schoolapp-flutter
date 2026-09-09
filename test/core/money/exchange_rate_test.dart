@@ -297,4 +297,28 @@ void main() {
       expect(MoneyFormat.displayUnitInCents('XAF'), 1);
     });
   });
+
+  group('formatMicros — une seule écriture du taux', () {
+    test('écrit depuis des micro-unités nues comme depuis un taux entier', () {
+      const micros = 2850000000;
+      final rate = ExchangeRate(
+        base: 'USD',
+        quote: 'CDF',
+        rateMicros: micros,
+        effectiveFrom: DateTime.utc(2026),
+      );
+
+      // Une ligne de reçu n'a que l'entier : elle doit pourtant écrire le même
+      // nombre que le bandeau, qui a l'objet complet.
+      expect(ExchangeRate.formatMicros(micros), rate.formatted());
+    });
+
+    test('garde les deux décimales, même sur un taux rond', () {
+      // C'est tout l'enjeu : le taux du jour et le taux d'un reçu sont
+      // différents PAR NATURE. Si leurs formats diffèrent aussi, on ne peut
+      // plus savoir si un écart est dans la valeur ou dans l'écriture.
+      expect(ExchangeRate.formatMicros(2850000000, space: ' '), '2 850,00');
+      expect(ExchangeRate.formatMicros(1666670000, space: ' '), '1 666,67');
+    });
+  });
 }
