@@ -43,6 +43,16 @@ class DataTableCellSpec {
   /// Teinte de la ligne secondaire. `null` → couleur du variant.
   final Color? secondaryColor;
 
+  /// Explication de la ligne secondaire, au survol et pour l'accessibilité.
+  ///
+  /// La ligne secondaire est **tronquée à une ligne** : elle porte souvent une
+  /// mention dense — une conversion, un reste, un motif — que la colonne ne
+  /// peut pas montrer en entier. Une infobulle la rend lisible sans élargir la
+  /// table, et l'énonce à qui ne la voit pas.
+  ///
+  /// `null` → aucune infobulle, comportement historique.
+  final String? secondaryTooltip;
+
   const DataTableCellSpec({
     this.text = '',
     this.child,
@@ -52,6 +62,7 @@ class DataTableCellSpec {
     this.secondaryVariant = DataTableCellTextVariant.regular,
     this.color,
     this.secondaryColor,
+    this.secondaryTooltip,
   });
 }
 
