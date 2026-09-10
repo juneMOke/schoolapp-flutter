@@ -1652,11 +1652,11 @@ abstract class AppLocalizations {
   /// **'Billing'**
   String get subMenuBilling;
 
-  /// Fee control menu title
+  /// Collections module menu title (renamed from Fee control, 2026-09-10)
   ///
   /// In en, this message translates to:
-  /// **'Fee control'**
-  String get menuFeeControl;
+  /// **'Collections'**
+  String get menuRecouvrement;
 
   /// Fee control sub-menu title
   ///

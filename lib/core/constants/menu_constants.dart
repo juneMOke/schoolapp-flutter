@@ -19,13 +19,16 @@ class MenuConstants {
   // sous-menu de Finances qui en mentirait sur la portée.
   static const String documentsMenuId = 'documents';
 
-  /// Le contrôle des frais — un menu PROPRE, et non un sous-menu de Finances.
+  /// Le recouvrement — un menu PROPRE, et non un sous-menu de Finances.
   /// Finances est le module de l'ARGENT QUI ENTRE : facturer, encaisser, en
-  /// rendre compte. Le contrôle, lui, ne touche à aucun de ces gestes : il
-  /// interroge un frais et répond qui l'a réglé. C'est une surveillance, pas
-  /// une opération de caisse — et le ranger sous Finances laissait croire
-  /// qu'on pouvait y encaisser.
-  static const String feeControlMenuId = 'controle-frais';
+  /// rendre compte. Le recouvrement, lui, ne touche à aucun de ces gestes : il
+  /// regarde la DETTE — combien il manque, qui décroche, ce que coûterait un
+  /// renvoi. C'est une surveillance, pas une opération de caisse, et le ranger
+  /// sous Finances laissait croire qu'on pouvait y encaisser.
+  ///
+  /// Renommé depuis `controle-frais` le 2026-09-10 (RECOUVREMENT_PLAN.md, D2) :
+  /// le contrôle par frais n'est plus qu'un des deux écrans du module.
+  static const String recouvrementMenuId = 'recouvrement';
 
   /// La caisse boutique (ADR-020) — un menu PROPRE, et non un sous-menu de
   /// Finances : c'est une caisse **étanche** à la scolarité (I-4), qui n'alimente
@@ -47,15 +50,16 @@ class MenuConstants {
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
 
-  /// Synthèse du module Contrôle des frais : pour un frais, quelle part des
-  /// élèves est en ordre, et quels groupes décrochent.
-  static const String feeControlDashboardId = 'controle-frais-dashboard';
+  /// Tableau de bord du Recouvrement : où en est la dette sur une sélection de
+  /// frais, quels groupes décrochent, et ce que coûterait un renvoi.
+  static const String recouvrementDashboardId = 'recouvrement-dashboard';
 
-  /// Page nominative du module Contrôle des frais. Identifiant distinct de
-  /// celui du menu qui le porte : la route de coquille vaut
-  /// `/{menu}/{sousMenu}`, et deux segments identiques n'auraient nommé qu'une
-  /// redondance.
-  static const String feeControlId = 'controle-frais-eleves';
+  /// Page nominative du module — le contrôle par frais, qui garde son nom :
+  /// c'est lui qui donne les noms là où le tableau de bord pose la question.
+  /// Identifiant distinct de celui du menu qui le porte : la route de coquille
+  /// vaut `/{menu}/{sousMenu}`, et deux segments identiques n'auraient nommé
+  /// qu'une redondance.
+  static const String recouvrementControlId = 'recouvrement-controle';
 
   /// Le guichet : catalogue, panier, encaissement.
   static const String boutiqueAchatsId = 'boutique-achats';

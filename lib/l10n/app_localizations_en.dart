@@ -1024,7 +1024,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get menuFeeControl => 'Fee control';
+  String get menuRecouvrement => 'Collections';
 
   @override
   String get subMenuFeeControl => 'Control by fee';

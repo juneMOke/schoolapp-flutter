@@ -31,10 +31,10 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_feature_scope.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/contracts/fee_control_dashboard_contracts.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_dashboard_page.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_dashboard_contracts.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_dashboard_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -402,11 +402,11 @@ class AppRouter {
       builder: (context, state, child) => FeeControlFeatureScope(child: child),
       routes: [
         GoRoute(
-          path: AppRoutesNames.feeControlDashboard,
+          path: AppRoutesNames.recouvrementDashboard,
           builder: (context, state) => const FeeControlDashboardPage(),
         ),
         GoRoute(
-          path: AppRoutesNames.feeControl,
+          path: AppRoutesNames.recouvrementControl,
           // `extra` porte les critères quand l'écran est ouvert depuis le
           // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
           builder: (context, state) => FeeControlPage(

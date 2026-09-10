@@ -1078,9 +1078,9 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "menuFeeControl": "Fee control",
-  "@menuFeeControl": {
-    "description": "Fee control menu title"
+  "menuRecouvrement": "Collections",
+  "@menuRecouvrement": {
+    "description": "Collections module menu title (renamed from Fee control, 2026-09-10)"
   },
   "subMenuFeeControl": "Control by fee",
   "@subMenuFeeControl": {

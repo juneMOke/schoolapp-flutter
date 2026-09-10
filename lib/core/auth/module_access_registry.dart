@@ -164,13 +164,15 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // franchit aussi la disjonction de la Facturation, donc la fiche financière
   // ouverte depuis cet écran reste atteignable — alors même que le contrôle a
   // quitté le module Finances pour le sien.
-  MenuConstants.feeControlMenuId: {
+  MenuConstants.recouvrementMenuId: {
     // La synthèse ne lit rien de plus que la page nominative — les mêmes
     // créances, comptées au lieu d'être listées. Lui demander un droit de
     // statistiques (`finance.stats.read`) la fermerait au secrétariat, qui est
     // précisément celui qui contrôle.
-    MenuConstants.feeControlDashboardId: ModuleAccess([Perm.financeChargeRead]),
-    MenuConstants.feeControlId: ModuleAccess([Perm.financeChargeRead]),
+    MenuConstants.recouvrementDashboardId: ModuleAccess([
+      Perm.financeChargeRead,
+    ]),
+    MenuConstants.recouvrementControlId: ModuleAccess([Perm.financeChargeRead]),
   },
   MenuConstants.boutiqueMenuId: {
     // La caisse s'OUVRE sur la seule lecture des ventes — encaisser est gardé à

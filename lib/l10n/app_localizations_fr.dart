@@ -1032,7 +1032,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuBilling => 'Facturations';
 
   @override
-  String get menuFeeControl => 'Contrôle des frais';
+  String get menuRecouvrement => 'Recouvrement';
 
   @override
   String get subMenuFeeControl => 'Contrôle par frais';

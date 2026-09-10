@@ -48,12 +48,12 @@ class AppRoutesNames {
       '/finances/${MenuConstants.facturationsId}'
       '/detail/$studentId/$academicYearId/encaissement';
 
-  /// Contrôle des frais — module propre depuis 2026-09-02 : le chemin ne
-  /// passe plus par `/finances`.
-  static const String feeControlDashboard =
-      '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlDashboardId}';
-  static const String feeControl =
-      '/${MenuConstants.feeControlMenuId}/${MenuConstants.feeControlId}';
+  /// Recouvrement — module propre depuis 2026-09-02, renommé le 2026-09-10 :
+  /// le chemin ne passe plus par `/finances`, ni par `/controle-frais`.
+  static const String recouvrementDashboard =
+      '/${MenuConstants.recouvrementMenuId}/${MenuConstants.recouvrementDashboardId}';
+  static const String recouvrementControl =
+      '/${MenuConstants.recouvrementMenuId}/${MenuConstants.recouvrementControlId}';
 
   static const String boutiqueAchats =
       '/boutique/${MenuConstants.boutiqueAchatsId}';

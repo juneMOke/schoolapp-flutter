@@ -163,19 +163,19 @@ class MenuFactory {
   /// écran.
   static MenuItem _createFeeControlMenu(AppLocalizations l10n) {
     return MenuItem(
-      id: MenuConstants.feeControlMenuId,
-      title: l10n.menuFeeControl,
+      id: MenuConstants.recouvrementMenuId,
+      title: l10n.menuRecouvrement,
       icon: Icons.fact_check_outlined,
       subMenus: [
         SubMenuItem(
-          id: MenuConstants.feeControlDashboardId,
+          id: MenuConstants.recouvrementDashboardId,
           title: l10n.subMenuDashboard,
-          route: AppRoutesNames.feeControlDashboard,
+          route: AppRoutesNames.recouvrementDashboard,
         ),
         SubMenuItem(
-          id: MenuConstants.feeControlId,
+          id: MenuConstants.recouvrementControlId,
           title: l10n.subMenuFeeControl,
-          route: AppRoutesNames.feeControl,
+          route: AppRoutesNames.recouvrementControl,
         ),
       ],
     );
