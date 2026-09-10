@@ -188,10 +188,12 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/s
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_positions_by_level_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
@@ -933,6 +935,12 @@ Future<void> configureDependencies({
       getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
       getRosters: getIt<GetComposedRostersUseCase>(),
       searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
+    ),
+  );
+  getIt.registerFactory<RecouvrementDashboardBloc>(
+    () => RecouvrementDashboardBloc(
+      getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
+      getPositions: getIt<GetRecoveryPositionsUseCase>(),
     ),
   );
 

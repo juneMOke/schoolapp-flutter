@@ -5323,5 +5323,101 @@
       }
     }
   },
-  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez."
+  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez.",
+
+  "recouvrementFeePickerLabel": "Frais retenus",
+  "@recouvrementFeePickerLabel": {
+      "description": "Titre du sélecteur de frais du tableau de bord Recouvrement"
+  },
+  "recouvrementFeePickerA11yLabel": "Frais retenus — sélection multiple, au moins un",
+  "@recouvrementFeePickerA11yLabel": {
+      "description": "Libellé a11y du groupe de pastilles de frais"
+  },
+  "recouvrementFeeChipLockedA11y": "{fee} — seul frais retenu, ne peut pas être décoché",
+  "@recouvrementFeeChipLockedA11y": {
+      "description": "A11y d'une pastille verrouillée car dernière cochée",
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementScopeLabel": "Périmètre",
+  "@recouvrementScopeLabel": {
+      "description": "Libellé du sélecteur de cycle du tableau de bord Recouvrement"
+  },
+  "recouvrementScopeAll": "Tout l'établissement",
+  "@recouvrementScopeAll": {
+      "description": "Entrée « tous les cycles » du périmètre"
+  },
+  "recouvrementExpectedLabel": "Attendu sur ces frais",
+  "@recouvrementExpectedLabel": {
+      "description": "Carte KPI : montant attendu sur la sélection"
+  },
+  "recouvrementExpectedMixedSubline": "Deux devises — jamais additionnées",
+  "@recouvrementExpectedMixedSubline": {
+      "description": "Sous-ligne de la carte Attendu en sélection mixte"
+  },
+  "recouvrementCollectedLabel": "Perçu à ce jour",
+  "@recouvrementCollectedLabel": {
+      "description": "Carte KPI : montant perçu"
+  },
+  "recouvrementSettledSubline": "{count} élèves ont tout soldé, soit {percent} % de l'effectif",
+  "@recouvrementSettledSubline": {
+      "description": "Sous-ligne de la carte Perçu",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementNothingPaidLabel": "N'ont rien payé",
+  "@recouvrementNothingPaidLabel": {
+      "description": "Carte KPI : effectif sans aucun versement"
+  },
+  "recouvrementNothingPaidSubline": "Cible de relance prioritaire",
+  "@recouvrementNothingPaidSubline": {
+      "description": "Sous-ligne de la carte N'ont rien payé"
+  },
+  "recouvrementPartialLabel": "Paiement partiel",
+  "@recouvrementPartialLabel": {
+      "description": "Carte KPI : effectif ayant commencé à payer"
+  },
+  "recouvrementPartialSubline": "Un geste a déjà été fait",
+  "@recouvrementPartialSubline": {
+      "description": "Sous-ligne de la carte Paiement partiel"
+  },
+  "recouvrementNoAmountDash": "—",
+  "@recouvrementNoAmountDash": {
+      "description": "Tiret d'un sac vide : rien n'est dû, et dans aucune devise nommée"
+  },
+  "recouvrementContextLine": "{count} élèves concernés · tous les indicateurs de cette page portent sur les frais cochés",
+  "@recouvrementContextLine": {
+      "description": "Ligne de contexte sous le périmètre",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRateLine": "taux du jour 1 $ = {rate} FC",
+  "@recouvrementRateLine": {
+      "description": "Rappel du taux de guichet dans la ligne de contexte",
+      "placeholders": {
+          "rate": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateMissing": "aucun taux du jour n'est posé",
+  "@recouvrementRateMissing": {
+      "description": "Ligne de contexte quand aucun taux n'a été paramétré"
+  },
+  "recouvrementFiguresA11yLabel": "Chiffres clés du recouvrement",
+  "@recouvrementFiguresA11yLabel": {
+      "description": "Libellé a11y de la bande de KPI"
+  }
 }

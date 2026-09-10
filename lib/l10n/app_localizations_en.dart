@@ -9372,4 +9372,68 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentDashboardCsvFailed =>
       'Copying the list did not complete. Try again.';
+
+  @override
+  String get recouvrementFeePickerLabel => 'Selected fees';
+
+  @override
+  String get recouvrementFeePickerA11yLabel =>
+      'Selected fees — multiple choice, at least one';
+
+  @override
+  String recouvrementFeeChipLockedA11y(String fee) {
+    return '$fee — only selected fee, cannot be unchecked';
+  }
+
+  @override
+  String get recouvrementScopeLabel => 'Scope';
+
+  @override
+  String get recouvrementScopeAll => 'Whole school';
+
+  @override
+  String get recouvrementExpectedLabel => 'Expected on these fees';
+
+  @override
+  String get recouvrementExpectedMixedSubline =>
+      'Two currencies — never added together';
+
+  @override
+  String get recouvrementCollectedLabel => 'Collected to date';
+
+  @override
+  String recouvrementSettledSubline(int count, int percent) {
+    return '$count students have settled in full, $percent% of the cohort';
+  }
+
+  @override
+  String get recouvrementNothingPaidLabel => 'Nothing paid';
+
+  @override
+  String get recouvrementNothingPaidSubline => 'Priority follow-up target';
+
+  @override
+  String get recouvrementPartialLabel => 'Partial payment';
+
+  @override
+  String get recouvrementPartialSubline => 'A first step has been taken';
+
+  @override
+  String get recouvrementNoAmountDash => '—';
+
+  @override
+  String recouvrementContextLine(int count) {
+    return '$count students concerned · every figure on this page covers the checked fees';
+  }
+
+  @override
+  String recouvrementRateLine(String rate) {
+    return 'today\'s rate 1 \$ = $rate FC';
+  }
+
+  @override
+  String get recouvrementRateMissing => 'no rate has been set for today';
+
+  @override
+  String get recouvrementFiguresA11yLabel => 'Recovery key figures';
 }

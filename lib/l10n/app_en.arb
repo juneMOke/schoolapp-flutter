@@ -5342,5 +5342,55 @@
       }
     }
   },
-  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again."
+  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again.",
+
+  "recouvrementFeePickerLabel": "Selected fees",
+  "recouvrementFeePickerA11yLabel": "Selected fees — multiple choice, at least one",
+  "recouvrementFeeChipLockedA11y": "{fee} — only selected fee, cannot be unchecked",
+  "@recouvrementFeeChipLockedA11y": {
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementScopeLabel": "Scope",
+  "recouvrementScopeAll": "Whole school",
+  "recouvrementExpectedLabel": "Expected on these fees",
+  "recouvrementExpectedMixedSubline": "Two currencies — never added together",
+  "recouvrementCollectedLabel": "Collected to date",
+  "recouvrementSettledSubline": "{count} students have settled in full, {percent}% of the cohort",
+  "@recouvrementSettledSubline": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementNothingPaidLabel": "Nothing paid",
+  "recouvrementNothingPaidSubline": "Priority follow-up target",
+  "recouvrementPartialLabel": "Partial payment",
+  "recouvrementPartialSubline": "A first step has been taken",
+  "recouvrementNoAmountDash": "—",
+  "recouvrementContextLine": "{count} students concerned · every figure on this page covers the checked fees",
+  "@recouvrementContextLine": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRateLine": "today's rate 1 $ = {rate} FC",
+  "@recouvrementRateLine": {
+      "placeholders": {
+          "rate": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateMissing": "no rate has been set for today",
+  "recouvrementFiguresA11yLabel": "Recovery key figures"
 }

@@ -15012,6 +15012,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copying the list did not complete. Try again.'**
   String get enrollmentDashboardCsvFailed;
+
+  /// No description provided for @recouvrementFeePickerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected fees'**
+  String get recouvrementFeePickerLabel;
+
+  /// No description provided for @recouvrementFeePickerA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected fees — multiple choice, at least one'**
+  String get recouvrementFeePickerA11yLabel;
+
+  /// No description provided for @recouvrementFeeChipLockedA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee} — only selected fee, cannot be unchecked'**
+  String recouvrementFeeChipLockedA11y(String fee);
+
+  /// No description provided for @recouvrementScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get recouvrementScopeLabel;
+
+  /// No description provided for @recouvrementScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole school'**
+  String get recouvrementScopeAll;
+
+  /// No description provided for @recouvrementExpectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected on these fees'**
+  String get recouvrementExpectedLabel;
+
+  /// No description provided for @recouvrementExpectedMixedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Two currencies — never added together'**
+  String get recouvrementExpectedMixedSubline;
+
+  /// No description provided for @recouvrementCollectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected to date'**
+  String get recouvrementCollectedLabel;
+
+  /// No description provided for @recouvrementSettledSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students have settled in full, {percent}% of the cohort'**
+  String recouvrementSettledSubline(int count, int percent);
+
+  /// No description provided for @recouvrementNothingPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing paid'**
+  String get recouvrementNothingPaidLabel;
+
+  /// No description provided for @recouvrementNothingPaidSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority follow-up target'**
+  String get recouvrementNothingPaidSubline;
+
+  /// No description provided for @recouvrementPartialLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial payment'**
+  String get recouvrementPartialLabel;
+
+  /// No description provided for @recouvrementPartialSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'A first step has been taken'**
+  String get recouvrementPartialSubline;
+
+  /// No description provided for @recouvrementNoAmountDash.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get recouvrementNoAmountDash;
+
+  /// No description provided for @recouvrementContextLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students concerned · every figure on this page covers the checked fees'**
+  String recouvrementContextLine(int count);
+
+  /// No description provided for @recouvrementRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'today\'s rate 1 \$ = {rate} FC'**
+  String recouvrementRateLine(String rate);
+
+  /// No description provided for @recouvrementRateMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'no rate has been set for today'**
+  String get recouvrementRateMissing;
+
+  /// No description provided for @recouvrementFiguresA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key figures'**
+  String get recouvrementFiguresA11yLabel;
 }
 
 class _AppLocalizationsDelegate

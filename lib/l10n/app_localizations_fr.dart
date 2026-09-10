@@ -9456,4 +9456,68 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardCsvFailed =>
       'La copie de la liste n\'a pas abouti. Réessayez.';
+
+  @override
+  String get recouvrementFeePickerLabel => 'Frais retenus';
+
+  @override
+  String get recouvrementFeePickerA11yLabel =>
+      'Frais retenus — sélection multiple, au moins un';
+
+  @override
+  String recouvrementFeeChipLockedA11y(String fee) {
+    return '$fee — seul frais retenu, ne peut pas être décoché';
+  }
+
+  @override
+  String get recouvrementScopeLabel => 'Périmètre';
+
+  @override
+  String get recouvrementScopeAll => 'Tout l\'établissement';
+
+  @override
+  String get recouvrementExpectedLabel => 'Attendu sur ces frais';
+
+  @override
+  String get recouvrementExpectedMixedSubline =>
+      'Deux devises — jamais additionnées';
+
+  @override
+  String get recouvrementCollectedLabel => 'Perçu à ce jour';
+
+  @override
+  String recouvrementSettledSubline(int count, int percent) {
+    return '$count élèves ont tout soldé, soit $percent % de l\'effectif';
+  }
+
+  @override
+  String get recouvrementNothingPaidLabel => 'N\'ont rien payé';
+
+  @override
+  String get recouvrementNothingPaidSubline => 'Cible de relance prioritaire';
+
+  @override
+  String get recouvrementPartialLabel => 'Paiement partiel';
+
+  @override
+  String get recouvrementPartialSubline => 'Un geste a déjà été fait';
+
+  @override
+  String get recouvrementNoAmountDash => '—';
+
+  @override
+  String recouvrementContextLine(int count) {
+    return '$count élèves concernés · tous les indicateurs de cette page portent sur les frais cochés';
+  }
+
+  @override
+  String recouvrementRateLine(String rate) {
+    return 'taux du jour 1 \$ = $rate FC';
+  }
+
+  @override
+  String get recouvrementRateMissing => 'aucun taux du jour n\'est posé';
+
+  @override
+  String get recouvrementFiguresA11yLabel => 'Chiffres clés du recouvrement';
 }

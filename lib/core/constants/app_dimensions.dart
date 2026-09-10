@@ -216,6 +216,15 @@ class AppDimensions {
   // Enrollment results bar tokens
   static const enrollmentResultsBarGap = 10.0;
   static const enrollmentResultsFilterChipHPadding = 10.0;
+
+  // Recouvrement — pastilles du sélecteur de frais (spec §2). La pastille fait
+  // 38 dp ; la rangée qui la porte atteint les 44 dp de cible tactile avec son
+  // interligne.
+  static const recouvrementFeeChipHeight = 38.0;
+  static const recouvrementFeeChipRadius = 999.0;
+  static const recouvrementFeeChipIconSize = 15.0;
+  static const recouvrementScopeFieldWidth = 230.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;
