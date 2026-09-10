@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/relance_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
@@ -128,13 +128,8 @@ List<LocalRecoveryLine>? targetedLinesOf(
   );
 }
 
-/// Le taux dollar → franc en vigueur, ou `null` si l'école n'en a posé aucun.
-///
-/// Le sens contraire rend `null` plutôt qu'un taux retourné : l'inverse d'un
-/// taux arrondi n'est pas le taux inverse, et ce nombre sert des arbitrages.
-ExchangeRate? dollarInFrancs(List<ExchangeRate> rates) => ExchangeRates.at(
-  rates,
-  base: CurrencyCode.usd,
-  quote: CurrencyCode.cdf,
-  moment: DateTime.now(),
-);
+/// Le taux dollar → franc en vigueur. Dit une seule fois, dans
+/// [RecouvrementPivot] : l'écran nominatif le lit aussi, pour ordonner ses
+/// lignes.
+ExchangeRate? dollarInFrancs(List<ExchangeRate> rates) =>
+    RecouvrementPivot.dollarInFrancs(rates);

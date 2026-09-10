@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
 
 /// Qui l'on vise, si l'on renvoyait.
 enum RecouvrementCriterion {
@@ -225,32 +226,14 @@ class RecouvrementSimulationProjector {
     ExchangeRate? rate,
   ) {
     if (threshold == null) return false;
-
-    var paid = 0;
-    for (final entry in line.paidTotal.entries) {
-      if (entry.currency == threshold.currency) {
-        paid += entry.amountInCents;
-        continue;
-      }
-      final converted = _convert(entry, threshold.currency, rate);
-      if (converted == null) return false;
-      paid += converted;
-    }
+    // `null` = une devise du sac ne se convertit pas : on renonce à viser cet
+    // élève plutôt que de comparer des unités étrangères.
+    final paid = RecouvrementPivot.inCurrency(
+      line.paidTotal,
+      threshold.currency,
+      rate,
+    );
+    if (paid == null) return false;
     return paid < threshold.amountInCents;
-  }
-
-  /// Convertit **pour trier**, jamais pour afficher. `null` quand aucun cours ne
-  /// relie les deux devises : l'appelant renonce alors à viser, plutôt que de
-  /// comparer des unités étrangères.
-  static int? _convert(Money amount, String target, ExchangeRate? rate) {
-    if (rate == null) return null;
-    if (rate.base == amount.currency && rate.quote == target) {
-      return (amount.amountInCents * rate.rateMicros) ~/ ExchangeRate.scale;
-    }
-    if (rate.quote == amount.currency && rate.base == target) {
-      if (rate.rateMicros == 0) return null;
-      return (amount.amountInCents * ExchangeRate.scale) ~/ rate.rateMicros;
-    }
-    return null;
   }
 }
