@@ -1032,7 +1032,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuBilling => 'Facturations';
 
   @override
-  String get menuFeeControl => 'Contrôle des frais';
+  String get menuRecouvrement => 'Recouvrement';
 
   @override
   String get subMenuFeeControl => 'Contrôle par frais';
@@ -6484,17 +6484,425 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce qui est entré dans le tiroir';
 
   @override
-  String get financeTillKpiTotal => 'Total du tiroir';
+  String financeTillRangeCaptionCustom(String from, String to) {
+    return 'Du $from au $to';
+  }
 
   @override
-  String get financeTillKpiFees => 'Frais scolaires';
+  String financeTillRangeCaptionWindow(String today) {
+    return 'Au $today';
+  }
 
   @override
-  String get financeTillKpiBoutique => 'Ventes boutique';
+  String get financeTillPeriodCustom => 'Période';
 
   @override
-  String get financeTillKpiBandA11yLabel =>
-      'Indicateurs de la caisse, par devise';
+  String get financeTillPeriodFrom => 'Du';
+
+  @override
+  String get financeTillPeriodTo => 'Au';
+
+  @override
+  String get financeTillReceiptsHeading => 'Paiements';
+
+  @override
+  String financeTillReceiptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paiements',
+      one: '1 paiement',
+      zero: 'Aucun paiement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsUnit => 'paiement';
+
+  @override
+  String financeTillReceiptsUnsealed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sans pièce scellée (saisies de rattrapage)',
+      one: '1 sans pièce scellée (saisie de rattrapage)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsColumnDate => 'Date';
+
+  @override
+  String get financeTillReceiptsColumnReceipt => 'Reçu';
+
+  @override
+  String get financeTillReceiptsColumnStudent => 'Élève';
+
+  @override
+  String get financeTillReceiptsColumnSource => 'Source';
+
+  @override
+  String get financeTillReceiptsColumnAmount => 'Encaissé';
+
+  @override
+  String get financeTillReceiptsNoNumber => '—';
+
+  @override
+  String get financeTillReceiptsNoStudent => '—';
+
+  @override
+  String financeTillReceiptsCollectedBy(String agent) {
+    return 'encaissé par $agent';
+  }
+
+  @override
+  String financeTillReceiptsCrossed(String amount, String rate) {
+    return 'solde $amount · taux $rate';
+  }
+
+  @override
+  String get financeTillReceiptsLoading => 'Chargement des paiements…';
+
+  @override
+  String get financeTillReceiptsEmpty => 'Aucun paiement sur la période';
+
+  @override
+  String get financeTillReceiptsForbidden =>
+      'Le détail nominatif des paiements demande le droit de lecture des paiements. Les totaux ci-dessus restent lisibles sans lui.';
+
+  @override
+  String get financeTillReceiptsError =>
+      'Les paiements n\'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.';
+
+  @override
+  String get financeTillReceiptsSplitTenderNote =>
+      'Un versement réglé dans les deux devises occupe deux lignes, sous le même numéro de pièce : ce n\'est pas un doublon, c\'est ce que le tiroir contient.';
+
+  @override
+  String get financeTillReportDownload => 'Télécharger';
+
+  @override
+  String get financeTillReportTooltip =>
+      'Télécharger le rapport des paiements de la période';
+
+  @override
+  String get financeTillReportPreparing => 'Préparation…';
+
+  @override
+  String get financeTillReportWaiting => 'Patientez…';
+
+  @override
+  String financeTillReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'Un rapport est déjà en préparation. Réessayez dans $seconds secondes.',
+      one: 'Un rapport est déjà en préparation. Réessayez dans 1 seconde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReportForbidden =>
+      'Le rapport des paiements demande le droit de lecture des paiements.';
+
+  @override
+  String get financeTillReportFailed => 'Le rapport n\'a pas pu être produit.';
+
+  @override
+  String financeTillReportTooLarge(int lines, int cap) {
+    final intl.NumberFormat linesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String linesString = linesNumberFormat.format(lines);
+    final intl.NumberFormat capNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String capString = capNumberFormat.format(cap);
+
+    return 'Cette fenêtre contient $linesString lignes ; le rapport est plafonné à $capString. Resserrez la période.';
+  }
+
+  @override
+  String get financeTillReportHandoffFailed =>
+      'Le rapport est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
+
+  @override
+  String financeTillEmptyGlobalTitle(String window) {
+    return 'Aucun encaissement · $window';
+  }
+
+  @override
+  String financeTillEmptyGlobalMessage(String window) {
+    return 'Aucun reçu n\'a été émis $window, dans aucune caisse. Élargissez la fenêtre, ou ouvrez la facturation pour enregistrer un paiement.';
+  }
+
+  @override
+  String get financeTillEmptySeeMonth => 'Voir ce mois';
+
+  @override
+  String get financeTillEmptySeeYear => 'Voir cette année';
+
+  @override
+  String get financeTillEmptyOpenBilling => 'Ouvrir la facturation';
+
+  @override
+  String financeTillEmptyCurrencyTitle(String currency) {
+    return 'Caisse $currency vide sur cette période';
+  }
+
+  @override
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  ) {
+    return 'Aucun paiement n\'a été tendu en $currency $window. $others';
+  }
+
+  @override
+  String financeTillEmptyOtherTill(String amount) {
+    return 'L\'autre caisse a enregistré $amount.';
+  }
+
+  @override
+  String financeTillEmptyOtherTills(String amounts) {
+    return 'Les autres caisses ont enregistré $amounts.';
+  }
+
+  @override
+  String financeTillEmptySeeTill(String currency) {
+    return 'Voir la caisse $currency';
+  }
+
+  @override
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered) {
+    return 'Frais fixé en $fee, réglé en $tendered';
+  }
+
+  @override
+  String financeTillRateValue(String base, String value, String quote) {
+    return '1 $base = $value $quote';
+  }
+
+  @override
+  String get financeTillRateNone => 'Aucun taux paramétré';
+
+  @override
+  String financeTillRateA11yLabel(String rate) {
+    return 'Taux du jour : $rate';
+  }
+
+  @override
+  String get financeTillRateNoneA11yLabel =>
+      'Taux du jour : aucun taux paramétré';
+
+  @override
+  String get financeTillInsightsHeading => 'Lectures & alertes';
+
+  @override
+  String get financeTillInsightAmountSeparator => ' et ';
+
+  @override
+  String get financeTillInsightCrossedTitle => 'Paiements croisés';
+
+  @override
+  String get financeTillInsightCrossedEmpty =>
+      'Aucun paiement croisé : tous les frais ont été réglés dans leur devise d\'origine.';
+
+  @override
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements règlent',
+      one: '1 versement règle',
+    );
+    return '$_temp0 un frais fixé dans l\'autre devise, pour $amounts$rateClause. Un écart de taux au moment du contrôle de caisse vient de là.';
+  }
+
+  @override
+  String financeTillInsightCrossedSingleRate(String rate) {
+    return ', convertis au taux de $rate';
+  }
+
+  @override
+  String financeTillInsightCrossedRateRange(String from, String to) {
+    return ', convertis à des taux de $from à $to';
+  }
+
+  @override
+  String get financeTillInsightBestDayTitle => 'Jour le plus fort';
+
+  @override
+  String financeTillInsightBestDayBody(String day, String amount, int share) {
+    return 'Le $day a rapporté $amount, soit $share % de ce que le graphique dessine — utile pour caler les permanences.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueTitle => 'Ce que la boutique change';
+
+  @override
+  String financeTillInsightBoutiqueBody(String amount) {
+    return '$amount viennent de la boutique — des achats facultatifs, non facturés : c\'est de la trésorerie, pas le règlement d\'un frais.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueEmpty =>
+      'Aucune vente boutique sur cette fenêtre : tout ce qui est entré règle un frais facturé.';
+
+  @override
+  String get financeTillInsightTrendTitle => 'Tendance';
+
+  @override
+  String financeTillInsightTrendUp(String currency, int percent) {
+    return 'Caisse $currency en hausse de $percent % par rapport à la période précédente. Le rythme se maintient.';
+  }
+
+  @override
+  String financeTillInsightTrendDown(String currency, int percent) {
+    return 'Caisse $currency en baisse de $percent % par rapport à la période précédente. Vérifiez si une relance est nécessaire.';
+  }
+
+  @override
+  String get financeTillSourceHeading => 'Par source';
+
+  @override
+  String get financeTillSourceHint => 'Frais facturés contre ventes boutique';
+
+  @override
+  String get financeTillSourceFees => 'Frais scolaires';
+
+  @override
+  String get financeTillSourceBoutique => 'Ventes boutique';
+
+  @override
+  String financeTillSourceA11yLabel(String fees, String boutique) {
+    return 'Répartition par source : $fees de frais facturés, $boutique de ventes boutique';
+  }
+
+  @override
+  String get financeTillSourceBoutiqueNote =>
+      'Des achats facultatifs, non facturés : cette part entre en caisse sans solder aucun frais.';
+
+  @override
+  String get financeTillClassroomHeading => 'Par classe';
+
+  @override
+  String financeTillClassroomHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les $count classes les plus contributrices à cette caisse',
+      one: 'La classe la plus contributrice à cette caisse',
+      zero: 'Aucune classe n\'a alimenté cette caisse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillClassroomRowA11yLabel(String classroom, String amount) {
+    return '$classroom : $amount';
+  }
+
+  @override
+  String financeTillClassroomUnassigned(String amount) {
+    return '$amount sont entrés sans désigner de classe — une vente boutique n\'a ni élève ni classe. La somme des lignes ci-dessus ne fait donc pas le total de la caisse.';
+  }
+
+  @override
+  String get financeTillClassroomEmpty => 'Aucune classe à classer';
+
+  @override
+  String get financeTillClassroomEmptyHint =>
+      'Rien de ce qui est entré dans cette caisse ne désigne un élève.';
+
+  @override
+  String get financeTillCashBoxesA11yLabel =>
+      'Les caisses de la fenêtre, une par devise, et le nombre de reçus émis';
+
+  @override
+  String financeTillCashBoxLabel(String currency, String window) {
+    return 'Caisse $currency · $window';
+  }
+
+  @override
+  String get financeTillCurrencyNameUsd => 'dollars';
+
+  @override
+  String get financeTillCurrencyNameCdf => 'francs';
+
+  @override
+  String financeTillReceiptCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'reçus',
+      one: 'reçu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillCashBoxSubline(int count, String unit, String ticket) {
+    return '$count $unit · ticket moyen $ticket';
+  }
+
+  @override
+  String financeTillCashBoxTrend(int percent) {
+    return '$percent % vs période précédente';
+  }
+
+  @override
+  String get financeTillCashBoxNoComparablePeriod =>
+      'Pas de période comparable avant la rentrée';
+
+  @override
+  String get financeTillReceiptsIssuedLabel => 'Reçus émis';
+
+  @override
+  String get financeTillReceiptsIssuedSubline => 'toutes caisses confondues';
+
+  @override
+  String get financeTillDetailHeading => 'Détail de la caisse';
+
+  @override
+  String financeTillCurrencySegment(String symbol, String currency, int count) {
+    return '$symbol $currency ($count)';
+  }
+
+  @override
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  ) {
+    return 'Caisse $currency, $count $unit';
+  }
+
+  @override
+  String financeTillCurrencySelectorA11yLabel(String currency) {
+    return 'Caisse détaillée : $currency';
+  }
+
+  @override
+  String financeTillBucketsHeading(String currency) {
+    return 'Progression des encaissements · caisse $currency';
+  }
+
+  @override
+  String get financeTillBucketsWindowNote =>
+      'Les tuiles comptent la fenêtre demandée ; la série dessine les sept jours autour, pour qu\'un chiffre du jour se lise contre les précédents.';
+
+  @override
+  String get financeTillReceiptsIssuedMixedNote =>
+      'Un reçu réglé dans les deux devises compte dans chaque caisse, mais n\'est émis qu\'une fois.';
 
   @override
   String financeStatsFeeTypeOutstanding(String amount) {
@@ -6551,6 +6959,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeTillImputationHint =>
       'En devise de créance : ces montants ne s\'additionnent pas à ceux du tiroir.';
+
+  @override
+  String financeTillImputationShare(String label, int share) {
+    return '$label · $share % du total';
+  }
+
+  @override
+  String get financeTillImputationCardHint =>
+      'En devise de créance, jamais converti — ces montants ne s\'additionnent pas à ceux du tiroir.';
 
   @override
   String financeTillImputationCardTitle(String currency) {
@@ -9039,4 +9456,541 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardCsvFailed =>
       'La copie de la liste n\'a pas abouti. Réessayez.';
+
+  @override
+  String get recouvrementFeePickerLabel => 'Frais retenus';
+
+  @override
+  String get recouvrementFeePickerA11yLabel =>
+      'Frais retenus — sélection multiple, au moins un';
+
+  @override
+  String recouvrementFeeChipLockedA11y(String fee) {
+    return '$fee — seul frais retenu, ne peut pas être décoché';
+  }
+
+  @override
+  String get recouvrementScopeLabel => 'Périmètre';
+
+  @override
+  String get recouvrementScopeAll => 'Tout l\'établissement';
+
+  @override
+  String get recouvrementExpectedLabel => 'Attendu sur ces frais';
+
+  @override
+  String get recouvrementExpectedMixedSubline =>
+      'Deux devises — jamais additionnées';
+
+  @override
+  String get recouvrementCollectedLabel => 'Perçu à ce jour';
+
+  @override
+  String recouvrementSettledSubline(int count, int percent) {
+    return '$count élèves ont tout soldé, soit $percent % de l\'effectif';
+  }
+
+  @override
+  String get recouvrementNothingPaidLabel => 'N\'ont rien payé';
+
+  @override
+  String get recouvrementNothingPaidSubline => 'Cible de relance prioritaire';
+
+  @override
+  String get recouvrementPartialLabel => 'Paiement partiel';
+
+  @override
+  String get recouvrementPartialSubline => 'Un geste a déjà été fait';
+
+  @override
+  String get recouvrementNoAmountDash => '—';
+
+  @override
+  String recouvrementContextLine(int count) {
+    return '$count élèves concernés · tous les indicateurs de cette page portent sur les frais cochés';
+  }
+
+  @override
+  String recouvrementRateLine(String rate) {
+    return 'taux du jour 1 \$ = $rate FC';
+  }
+
+  @override
+  String get recouvrementRateMissing => 'aucun taux du jour n\'est posé';
+
+  @override
+  String get recouvrementFiguresA11yLabel => 'Chiffres clés du recouvrement';
+
+  @override
+  String get recouvrementRatesTitle => 'Taux de recouvrement par frais';
+
+  @override
+  String get recouvrementRatesSubtitleOne =>
+      'Un seul frais retenu · le taux se lit dans sa devise';
+
+  @override
+  String recouvrementRatesSubtitleMany(int count) {
+    return '$count frais retenus · chaque devise se lit séparément — longueur de la barre = poids du frais, remplissage = ce qui est perçu';
+  }
+
+  @override
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate) {
+    return '$paid sur $expected · $rate % recouvrés';
+  }
+
+  @override
+  String recouvrementRatesGroupHeaderNoExpectation(String paid) {
+    return '$paid perçus · rien n\'était dû dans cette devise';
+  }
+
+  @override
+  String recouvrementRateRemaining(String amount) {
+    return 'reste $amount';
+  }
+
+  @override
+  String recouvrementRateExpected(String amount) {
+    return '$amount attendus';
+  }
+
+  @override
+  String get recouvrementRateNoExpectation => 'aucun frais dû';
+
+  @override
+  String get recouvrementRatesA11yLabel =>
+      'Taux de recouvrement par frais et par devise';
+
+  @override
+  String recouvrementRateBarA11y(String fee, int rate, String amount) {
+    return '$fee : $rate % recouvrés, il reste $amount';
+  }
+
+  @override
+  String recouvrementCurrencyGroupTitle(String currency) {
+    return 'Frais en $currency';
+  }
+
+  @override
+  String recouvrementUnbilledNote(int count) {
+    return '$count inscrits ne portent aucun de ces frais';
+  }
+
+  @override
+  String get recouvrementSimulationTitle => 'Simulation de renvoi';
+
+  @override
+  String get recouvrementSimulationSubtitle =>
+      'Rien n\'est appliqué — appliquer un renvoi passe par les Inscriptions, dossier par dossier';
+
+  @override
+  String get recouvrementSimulationWho => 'On renvoie les élèves qui…';
+
+  @override
+  String get recouvrementCriterionNoPayment => 'N\'ont rien payé';
+
+  @override
+  String get recouvrementCriterionNotSettled => 'N\'ont pas tout soldé';
+
+  @override
+  String get recouvrementCriterionBelowThreshold => 'Ont payé moins que…';
+
+  @override
+  String get recouvrementThresholdLabel => 'Montant plancher';
+
+  @override
+  String recouvrementThresholdMixedWarning(String currency) {
+    return 'Le plancher est comparé en équivalent $currency : la sélection mêle deux devises. C\'est un arbitrage, pas une mesure.';
+  }
+
+  @override
+  String get recouvrementThresholdNoRate =>
+      'Aucun taux du jour n\'est posé : la comparaison est impossible en sélection mixte.';
+
+  @override
+  String recouvrementCriticalLabel(int percent) {
+    return 'Seuil de groupe ingérable : $percent % de l\'effectif';
+  }
+
+  @override
+  String recouvrementCriticalA11y(int percent) {
+    return '$percent % de l\'effectif';
+  }
+
+  @override
+  String get recouvrementSimHeadcount => 'Effectif aujourd\'hui';
+
+  @override
+  String get recouvrementSimHeadcountSubline =>
+      'élèves concernés par ces frais';
+
+  @override
+  String get recouvrementSimTargeted => 'Élèves visés';
+
+  @override
+  String get recouvrementSimRemaining => 'Effectif restant';
+
+  @override
+  String recouvrementSimRemainingSubline(int percent) {
+    return '$percent % de l\'effectif conservé';
+  }
+
+  @override
+  String get recouvrementSimCritical => 'Groupes ingérables';
+
+  @override
+  String get recouvrementSimTableGroup => 'Groupe';
+
+  @override
+  String get recouvrementSimTableHeadcount => 'Effectif';
+
+  @override
+  String get recouvrementSimTableLeaving => 'À renvoyer';
+
+  @override
+  String get recouvrementSimTableRemaining => 'Restants';
+
+  @override
+  String get recouvrementSimTableKept => 'Effectif conservé';
+
+  @override
+  String get recouvrementSimTableVerdict => 'Verdict';
+
+  @override
+  String get recouvrementVerdictManageable => 'Tenable';
+
+  @override
+  String get recouvrementVerdictFragile => 'Fragile';
+
+  @override
+  String get recouvrementVerdictCritical => 'Ingérable';
+
+  @override
+  String recouvrementSimFootNothingLost(String missing) {
+    return 'Ces élèves n\'ont rien versé : le renvoi ne ferait perdre aucune recette, mais il abandonne définitivement $missing.';
+  }
+
+  @override
+  String recouvrementSimFootWithLoss(String lost, String missing) {
+    return 'Le renvoi rendrait sans objet $lost déjà encaissés, et abandonnerait $missing jamais versés.';
+  }
+
+  @override
+  String get recouvrementSimA11yLabel =>
+      'Simulation de renvoi — aucune écriture';
+
+  @override
+  String recouvrementSimRowA11y(String group, int kept, String verdict) {
+    return '$group : $kept % de l\'effectif conservé, $verdict';
+  }
+
+  @override
+  String get recouvrementRelanceListPreparing => 'Préparation de la liste…';
+
+  @override
+  String recouvrementRelanceListBusy(int seconds) {
+    return 'Un document est déjà en préparation sur ce serveur — réessayez dans $seconds s';
+  }
+
+  @override
+  String recouvrementRelanceListTooLarge(int lines, int cap) {
+    return '$lines lignes pour un plafond de $cap : resserrez le périmètre ou le critère.';
+  }
+
+  @override
+  String recouvrementRelanceListUnknownStudents(int count) {
+    return '$count élèves de cette liste ne sont pas rattachés à cette école pour cette année.';
+  }
+
+  @override
+  String get recouvrementRelanceListInconsistent =>
+      'La liste n\'a pas pu être établie : certaines lignes se contredisent. Rafraîchissez l\'écran.';
+
+  @override
+  String get recouvrementRelanceListForbidden =>
+      'Vous n\'avez pas le droit d\'éditer une liste nominative.';
+
+  @override
+  String get recouvrementRelanceListFailed =>
+      'La liste n\'a pas pu être établie.';
+
+  @override
+  String get recouvrementRelanceListHandoffFailed =>
+      'La liste est arrivée, mais l\'aperçu n\'a pas pu s\'ouvrir.';
+
+  @override
+  String recouvrementRelanceListA11y(String group) {
+    return 'Éditer la liste nominative de $group';
+  }
+
+  @override
+  String get recouvrementInsightWorstFeeTitle => 'Le frais le plus en retard';
+
+  @override
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount) {
+    return '$fee plafonne à $rate % de recouvrement : $amount manquent encore. C\'est le frais à contrôler groupe par groupe.';
+  }
+
+  @override
+  String get recouvrementInsightControlAction => 'Contrôler les élèves';
+
+  @override
+  String get recouvrementInsightSpreadTitle => 'Écart entre groupes';
+
+  @override
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  ) {
+    return 'L\'écart va de $bestRate % ($bestGroup) à $worstRate % ($worstGroup). Un écart de cette ampleur relève plus de la pratique de relance que de la capacité des familles.';
+  }
+
+  @override
+  String get recouvrementInsightSimulationTitle => 'Ce que dit la simulation';
+
+  @override
+  String recouvrementInsightSimulationSafe(int remaining, int percent) {
+    return 'La mesure resterait tenable partout : $remaining élèves resteraient, soit $percent % de l\'effectif conservé.';
+  }
+
+  @override
+  String recouvrementInsightSimulationCritical(int count, int percent) {
+    return 'Le renvoi ferait passer $count groupes sous $percent % de l\'effectif. Une relance échelonnée y coûte moins cher qu\'une classe vidée.';
+  }
+
+  @override
+  String get recouvrementEmptyResultDescription =>
+      'Personne ne porte ces frais dans ce périmètre : ils n\'ont pas encore été générés, ou ils ne s\'appliquent pas ici. Changez la sélection ou le cycle.';
+
+  @override
+  String get recouvrementRelanceListNotDeployed =>
+      'Cette version du serveur ne sait pas encore établir de liste de relance. Le reste du tableau de bord fonctionne : il se lit sur l\'appareil.';
+
+  @override
+  String recouvrementCallListTitle(String group) {
+    return 'Élèves visés — $group';
+  }
+
+  @override
+  String recouvrementCallListSubtitle(int count, String criterion) {
+    return '$count élèves · $criterion';
+  }
+
+  @override
+  String get recouvrementCallListStudent => 'Élève';
+
+  @override
+  String get recouvrementCallListDue => 'Dû';
+
+  @override
+  String get recouvrementCallListPaid => 'Payé';
+
+  @override
+  String get recouvrementCallListRemaining => 'Reste';
+
+  @override
+  String recouvrementCallListUnnamed(String id) {
+    return 'Élève $id';
+  }
+
+  @override
+  String get recouvrementCallListUnnamedNote =>
+      'Certains élèves ne figurent plus aux inscriptions : ils gardent leur dette, et le document les nommera depuis le référentiel.';
+
+  @override
+  String get recouvrementCallListEmit => 'Éditer la liste à signer';
+
+  @override
+  String get recouvrementCallListClose => 'Fermer';
+
+  @override
+  String get recouvrementCallListEmpty => 'Aucun élève visé dans ce groupe.';
+
+  @override
+  String get feeControlFeeLoading => 'Lecture de la grille…';
+
+  @override
+  String get feeControlFeesLabel => 'Frais contrôlés';
+
+  @override
+  String get feeControlFeesA11yLabel =>
+      'Frais contrôlés — sélection multiple, au moins un';
+
+  @override
+  String get feeControlSituationLabel => 'Situation recherchée';
+
+  @override
+  String get feeControlSituationThreshold => 'A payé au moins…';
+
+  @override
+  String get feeControlThresholdMixedWarning =>
+      'Les frais retenus ne partagent pas la même devise : un montant plancher unique n\'aurait pas de sens. Ne gardez qu\'une devise.';
+
+  @override
+  String get feeControlColumnStudent => 'Élève';
+
+  @override
+  String feeControlResultTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'aucun élève',
+    );
+    return 'Résultat · $_temp0';
+  }
+
+  @override
+  String get feeControlResultOrder => 'trié du moins avancé au plus avancé';
+
+  @override
+  String feeControlCriteriaThreshold(String amount) {
+    return 'Plancher : $amount';
+  }
+
+  @override
+  String get feeControlSelectPage => 'Sélectionner la page';
+
+  @override
+  String get feeControlDeselectPage => 'Désélectionner la page';
+
+  @override
+  String get feeControlMarkedBadge => 'à renvoyer';
+
+  @override
+  String get feeControlSummaryCollected => 'Encaissé sur ces frais';
+
+  @override
+  String feeControlSummaryCollectedOn(String expected) {
+    return 'sur $expected dus';
+  }
+
+  @override
+  String feeControlSelectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves sélectionnés',
+      one: '1 élève sélectionné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlCallListAction => 'Liste d\'appel';
+
+  @override
+  String get feeControlMarkAction => 'Marquer à renvoyer';
+
+  @override
+  String get feeControlDeselectAction => 'Désélectionner';
+
+  @override
+  String feeControlMarkedTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves marqués « à renvoyer »',
+      one: '1 élève marqué « à renvoyer »',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlMarkedNote =>
+      'Cette liste est un brouillon de travail : rien n\'est notifié aux familles. Mesurez l\'effet sur l\'effectif dans le tableau de bord avant de décider.';
+
+  @override
+  String get feeControlMarkedClear => 'Vider la liste des renvois';
+
+  @override
+  String get feeControlMarkedCleared => 'Liste des renvois vidée.';
+
+  @override
+  String feeControlMarkedDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count élèves marqués « à renvoyer » — la liste reste modifiable.',
+      one: '1 élève marqué « à renvoyer » — la liste reste modifiable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlSheetDossier(String code) {
+    return 'Dossier $code';
+  }
+
+  @override
+  String feeControlSheetPaidOf(String paid, String expected, int percent) {
+    return '$paid sur $expected · $percent %';
+  }
+
+  @override
+  String feeControlSheetRemaining(String amount) {
+    return 'reste $amount';
+  }
+
+  @override
+  String get feeControlSheetNoExpectation =>
+      'Aucun montant attendu sur ce frais';
+
+  @override
+  String get feeControlSheetMixedNote =>
+      'Chaque frais se solde dans sa propre devise : les lignes ne s\'additionnent pas.';
+
+  @override
+  String get feeControlSheetOpenRecord => 'Ouvrir la fiche complète';
+
+  @override
+  String get feeControlSheetUnmark => 'Retirer des renvois';
+
+  @override
+  String feeControlSheetMarked(String name) {
+    return '$name marqué « à renvoyer ».';
+  }
+
+  @override
+  String feeControlSheetUnmarked(String name) {
+    return '$name retiré des renvois.';
+  }
+
+  @override
+  String get feeControlCallSheetTitle => 'Contrôle des frais scolaires';
+
+  @override
+  String feeControlCallSheetIssuedOn(String date) {
+    return 'Établi le $date';
+  }
+
+  @override
+  String feeControlCallSheetRate(String rate) {
+    return 'Taux appliqué : $rate';
+  }
+
+  @override
+  String get feeControlCallSheetNumber => 'N°';
+
+  @override
+  String get feeControlCallSheetSignature => 'Signature du parent';
+
+  @override
+  String get feeControlCallSheetVisaCollector => 'Visa du percepteur';
+
+  @override
+  String get feeControlCallSheetVisaDirection => 'Visa de la direction';
+
+  @override
+  String get feeControlCallSheetFailed =>
+      'La feuille d\'appel n\'a pas pu être préparée.';
+
+  @override
+  String get feeControlEmptyWiden => 'Voir tous les élèves';
+
+  @override
+  String get feeControlEmptyBilling => 'Ouvrir la facturation';
 }

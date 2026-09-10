@@ -1652,11 +1652,11 @@ abstract class AppLocalizations {
   /// **'Billing'**
   String get subMenuBilling;
 
-  /// Fee control menu title
+  /// Collections module menu title (renamed from Fee control, 2026-09-10)
   ///
   /// In en, this message translates to:
-  /// **'Fee control'**
-  String get menuFeeControl;
+  /// **'Collections'**
+  String get menuRecouvrement;
 
   /// Fee control sub-menu title
   ///
@@ -10511,29 +10511,563 @@ abstract class AppLocalizations {
   /// **'What went into the drawer'**
   String get financeDashboardTabTillDescription;
 
-  /// No description provided for @financeTillKpiTotal.
+  /// No description provided for @financeTillRangeCaptionCustom.
   ///
   /// In en, this message translates to:
-  /// **'Till total'**
-  String get financeTillKpiTotal;
+  /// **'From {from} to {to}'**
+  String financeTillRangeCaptionCustom(String from, String to);
 
-  /// No description provided for @financeTillKpiFees.
+  /// No description provided for @financeTillRangeCaptionWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'As at {today}'**
+  String financeTillRangeCaptionWindow(String today);
+
+  /// No description provided for @financeTillPeriodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get financeTillPeriodCustom;
+
+  /// No description provided for @financeTillPeriodFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get financeTillPeriodFrom;
+
+  /// No description provided for @financeTillPeriodTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get financeTillPeriodTo;
+
+  /// No description provided for @financeTillReceiptsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get financeTillReceiptsHeading;
+
+  /// No description provided for @financeTillReceiptsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payments} one{1 payment} other{{count} payments}}'**
+  String financeTillReceiptsCount(int count);
+
+  /// No description provided for @financeTillReceiptsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'payment'**
+  String get financeTillReceiptsUnit;
+
+  /// No description provided for @financeTillReceiptsUnsealed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 without a sealed receipt (back-entry)} other{{count} without a sealed receipt (back-entries)}}'**
+  String financeTillReceiptsUnsealed(int count);
+
+  /// No description provided for @financeTillReceiptsColumnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get financeTillReceiptsColumnDate;
+
+  /// No description provided for @financeTillReceiptsColumnReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get financeTillReceiptsColumnReceipt;
+
+  /// No description provided for @financeTillReceiptsColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get financeTillReceiptsColumnStudent;
+
+  /// No description provided for @financeTillReceiptsColumnSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get financeTillReceiptsColumnSource;
+
+  /// No description provided for @financeTillReceiptsColumnAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get financeTillReceiptsColumnAmount;
+
+  /// No description provided for @financeTillReceiptsNoNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get financeTillReceiptsNoNumber;
+
+  /// No description provided for @financeTillReceiptsNoStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get financeTillReceiptsNoStudent;
+
+  /// No description provided for @financeTillReceiptsCollectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'collected by {agent}'**
+  String financeTillReceiptsCollectedBy(String agent);
+
+  /// No description provided for @financeTillReceiptsCrossed.
+  ///
+  /// In en, this message translates to:
+  /// **'settles {amount} · rate {rate}'**
+  String financeTillReceiptsCrossed(String amount, String rate);
+
+  /// No description provided for @financeTillReceiptsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading payments…'**
+  String get financeTillReceiptsLoading;
+
+  /// No description provided for @financeTillReceiptsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments in this period'**
+  String get financeTillReceiptsEmpty;
+
+  /// No description provided for @financeTillReceiptsForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The itemised list of payments requires the payment-read permission. The totals above remain readable without it.'**
+  String get financeTillReceiptsForbidden;
+
+  /// No description provided for @financeTillReceiptsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments could not be loaded. The totals above are up to date.'**
+  String get financeTillReceiptsError;
+
+  /// No description provided for @financeTillReceiptsSplitTenderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.'**
+  String get financeTillReceiptsSplitTenderNote;
+
+  /// No description provided for @financeTillReportDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get financeTillReportDownload;
+
+  /// No description provided for @financeTillReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the period\'s payments report'**
+  String get financeTillReportTooltip;
+
+  /// No description provided for @financeTillReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get financeTillReportPreparing;
+
+  /// No description provided for @financeTillReportWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get financeTillReportWaiting;
+
+  /// No description provided for @financeTillReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, one{A report is already being prepared. Try again in 1 second.} other{A report is already being prepared. Try again in {seconds} seconds.}}'**
+  String financeTillReportBusy(int seconds);
+
+  /// No description provided for @financeTillReportForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The payments report requires the payment-read permission.'**
+  String get financeTillReportForbidden;
+
+  /// No description provided for @financeTillReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The report could not be produced.'**
+  String get financeTillReportFailed;
+
+  /// No description provided for @financeTillReportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This window holds {lines} lines; the report is capped at {cap}. Narrow the period.'**
+  String financeTillReportTooLarge(int lines, int cap);
+
+  /// No description provided for @financeTillReportHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The report is ready, but printing could not be opened.'**
+  String get financeTillReportHandoffFailed;
+
+  /// No description provided for @financeTillEmptyGlobalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections · {window}'**
+  String financeTillEmptyGlobalTitle(String window);
+
+  /// No description provided for @financeTillEmptyGlobalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt was issued {window}, in any till. Widen the window, or open billing to record a payment.'**
+  String financeTillEmptyGlobalMessage(String window);
+
+  /// No description provided for @financeTillEmptySeeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'See this month'**
+  String get financeTillEmptySeeMonth;
+
+  /// No description provided for @financeTillEmptySeeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'See this year'**
+  String get financeTillEmptySeeYear;
+
+  /// No description provided for @financeTillEmptyOpenBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Open billing'**
+  String get financeTillEmptyOpenBilling;
+
+  /// No description provided for @financeTillEmptyCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till empty over this period'**
+  String financeTillEmptyCurrencyTitle(String currency);
+
+  /// No description provided for @financeTillEmptyCurrencyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment was tendered in {currency} {window}. {others}'**
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  );
+
+  /// No description provided for @financeTillEmptyOtherTill.
+  ///
+  /// In en, this message translates to:
+  /// **'The other till recorded {amount}.'**
+  String financeTillEmptyOtherTill(String amount);
+
+  /// No description provided for @financeTillEmptyOtherTills.
+  ///
+  /// In en, this message translates to:
+  /// **'The other tills recorded {amounts}.'**
+  String financeTillEmptyOtherTills(String amounts);
+
+  /// No description provided for @financeTillEmptySeeTill.
+  ///
+  /// In en, this message translates to:
+  /// **'See the {currency} till'**
+  String financeTillEmptySeeTill(String currency);
+
+  /// No description provided for @financeTillReceiptsCrossedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee set in {fee}, settled in {tendered}'**
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered);
+
+  /// No description provided for @financeTillRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'1 {base} = {value} {quote}'**
+  String financeTillRateValue(String base, String value, String quote);
+
+  /// No description provided for @financeTillRateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate configured'**
+  String get financeTillRateNone;
+
+  /// No description provided for @financeTillRateA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rate: {rate}'**
+  String financeTillRateA11yLabel(String rate);
+
+  /// No description provided for @financeTillRateNoneA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rate: no rate configured'**
+  String get financeTillRateNoneA11yLabel;
+
+  /// No description provided for @financeTillInsightsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings & alerts'**
+  String get financeTillInsightsHeading;
+
+  /// No description provided for @financeTillInsightAmountSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get financeTillInsightAmountSeparator;
+
+  /// No description provided for @financeTillInsightCrossedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-currency payments'**
+  String get financeTillInsightCrossedTitle;
+
+  /// No description provided for @financeTillInsightCrossedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cross-currency payment: every fee was settled in its own currency.'**
+  String get financeTillInsightCrossedEmpty;
+
+  /// No description provided for @financeTillInsightCrossedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 payment settles} other{{count} payments settle}} a fee set in the other currency, for {amounts}{rateClause}. A rate discrepancy at till-count time comes from this.'**
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  );
+
+  /// No description provided for @financeTillInsightCrossedSingleRate.
+  ///
+  /// In en, this message translates to:
+  /// **', converted at a rate of {rate}'**
+  String financeTillInsightCrossedSingleRate(String rate);
+
+  /// No description provided for @financeTillInsightCrossedRateRange.
+  ///
+  /// In en, this message translates to:
+  /// **', converted at rates from {from} to {to}'**
+  String financeTillInsightCrossedRateRange(String from, String to);
+
+  /// No description provided for @financeTillInsightBestDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strongest day'**
+  String get financeTillInsightBestDayTitle;
+
+  /// No description provided for @financeTillInsightBestDayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} brought in {amount}, or {share}% of what the chart draws — useful for planning cover.'**
+  String financeTillInsightBestDayBody(String day, String amount, int share);
+
+  /// No description provided for @financeTillInsightBoutiqueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the boutique changes'**
+  String get financeTillInsightBoutiqueTitle;
+
+  /// No description provided for @financeTillInsightBoutiqueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} came from the boutique — optional, unbilled purchases: cash in, not a fee settled.'**
+  String financeTillInsightBoutiqueBody(String amount);
+
+  /// No description provided for @financeTillInsightBoutiqueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No boutique sale in this window: everything that came in settles a billed fee.'**
+  String get financeTillInsightBoutiqueEmpty;
+
+  /// No description provided for @financeTillInsightTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trend'**
+  String get financeTillInsightTrendTitle;
+
+  /// No description provided for @financeTillInsightTrendUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till up {percent}% on the previous period. The pace is holding.'**
+  String financeTillInsightTrendUp(String currency, int percent);
+
+  /// No description provided for @financeTillInsightTrendDown.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till down {percent}% on the previous period. Check whether a follow-up is needed.'**
+  String financeTillInsightTrendDown(String currency, int percent);
+
+  /// No description provided for @financeTillSourceHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'By source'**
+  String get financeTillSourceHeading;
+
+  /// No description provided for @financeTillSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Billed fees versus boutique sales'**
+  String get financeTillSourceHint;
+
+  /// No description provided for @financeTillSourceFees.
   ///
   /// In en, this message translates to:
   /// **'School fees'**
-  String get financeTillKpiFees;
+  String get financeTillSourceFees;
 
-  /// No description provided for @financeTillKpiBoutique.
+  /// No description provided for @financeTillSourceBoutique.
   ///
   /// In en, this message translates to:
   /// **'Boutique sales'**
-  String get financeTillKpiBoutique;
+  String get financeTillSourceBoutique;
 
-  /// No description provided for @financeTillKpiBandA11yLabel.
+  /// No description provided for @financeTillSourceA11yLabel.
   ///
   /// In en, this message translates to:
-  /// **'Till indicators, by currency'**
-  String get financeTillKpiBandA11yLabel;
+  /// **'Split by source: {fees} in billed fees, {boutique} in boutique sales'**
+  String financeTillSourceA11yLabel(String fees, String boutique);
+
+  /// No description provided for @financeTillSourceBoutiqueNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, unbilled purchases: this share enters the till without settling any fee.'**
+  String get financeTillSourceBoutiqueNote;
+
+  /// No description provided for @financeTillClassroomHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'By classroom'**
+  String get financeTillClassroomHeading;
+
+  /// No description provided for @financeTillClassroomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No classroom fed this till} one{The top contributing classroom for this till} other{The {count} top contributing classrooms for this till}}'**
+  String financeTillClassroomHint(int count);
+
+  /// No description provided for @financeTillClassroomRowA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{classroom}: {amount}'**
+  String financeTillClassroomRowA11yLabel(String classroom, String amount);
+
+  /// No description provided for @financeTillClassroomUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} came in without naming a classroom — a boutique sale has neither student nor classroom. The rows above therefore do not add up to the till total.'**
+  String financeTillClassroomUnassigned(String amount);
+
+  /// No description provided for @financeTillClassroomEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No classroom to rank'**
+  String get financeTillClassroomEmpty;
+
+  /// No description provided for @financeTillClassroomEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing that entered this till names a student.'**
+  String get financeTillClassroomEmptyHint;
+
+  /// No description provided for @financeTillCashBoxesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'The window\'s tills, one per currency, and the number of receipts issued'**
+  String get financeTillCashBoxesA11yLabel;
+
+  /// No description provided for @financeTillCashBoxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till · {window}'**
+  String financeTillCashBoxLabel(String currency, String window);
+
+  /// No description provided for @financeTillCurrencyNameUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'dollar'**
+  String get financeTillCurrencyNameUsd;
+
+  /// No description provided for @financeTillCurrencyNameCdf.
+  ///
+  /// In en, this message translates to:
+  /// **'franc'**
+  String get financeTillCurrencyNameCdf;
+
+  /// No description provided for @financeTillReceiptCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{receipt} other{receipts}}'**
+  String financeTillReceiptCount(int count);
+
+  /// No description provided for @financeTillCashBoxSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {unit} · average ticket {ticket}'**
+  String financeTillCashBoxSubline(int count, String unit, String ticket);
+
+  /// No description provided for @financeTillCashBoxTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% vs previous period'**
+  String financeTillCashBoxTrend(int percent);
+
+  /// No description provided for @financeTillCashBoxNoComparablePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No comparable period before the school year began'**
+  String get financeTillCashBoxNoComparablePeriod;
+
+  /// No description provided for @financeTillReceiptsIssuedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts issued'**
+  String get financeTillReceiptsIssuedLabel;
+
+  /// No description provided for @financeTillReceiptsIssuedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'across all tills'**
+  String get financeTillReceiptsIssuedSubline;
+
+  /// No description provided for @financeTillDetailHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Till detail'**
+  String get financeTillDetailHeading;
+
+  /// No description provided for @financeTillCurrencySegment.
+  ///
+  /// In en, this message translates to:
+  /// **'{symbol} {currency} ({count})'**
+  String financeTillCurrencySegment(String symbol, String currency, int count);
+
+  /// No description provided for @financeTillCurrencySegmentA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} till, {count} {unit}'**
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  );
+
+  /// No description provided for @financeTillCurrencySelectorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till shown: {currency}'**
+  String financeTillCurrencySelectorA11yLabel(String currency);
+
+  /// No description provided for @financeTillBucketsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections trend · {currency} till'**
+  String financeTillBucketsHeading(String currency);
+
+  /// No description provided for @financeTillBucketsWindowNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The tiles count the requested window; the series draws the seven surrounding days, so a day\'s figure reads against the ones before it.'**
+  String get financeTillBucketsWindowNote;
+
+  /// No description provided for @financeTillReceiptsIssuedMixedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A receipt settled in both currencies counts in each till, but is issued only once.'**
+  String get financeTillReceiptsIssuedMixedNote;
 
   /// Outstanding amount for a fee code.
   ///
@@ -10618,6 +11152,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In charge currency: these amounts do not add up with the drawer\'s.'**
   String get financeTillImputationHint;
+
+  /// No description provided for @financeTillImputationShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {share}% of the total'**
+  String financeTillImputationShare(String label, int share);
+
+  /// No description provided for @financeTillImputationCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In the claim currency, never converted — these amounts do not add up with the till\'s.'**
+  String get financeTillImputationCardHint;
 
   /// No description provided for @financeTillImputationCardTitle.
   ///
@@ -14466,6 +15012,809 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copying the list did not complete. Try again.'**
   String get enrollmentDashboardCsvFailed;
+
+  /// No description provided for @recouvrementFeePickerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected fees'**
+  String get recouvrementFeePickerLabel;
+
+  /// No description provided for @recouvrementFeePickerA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected fees — multiple choice, at least one'**
+  String get recouvrementFeePickerA11yLabel;
+
+  /// No description provided for @recouvrementFeeChipLockedA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee} — only selected fee, cannot be unchecked'**
+  String recouvrementFeeChipLockedA11y(String fee);
+
+  /// No description provided for @recouvrementScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get recouvrementScopeLabel;
+
+  /// No description provided for @recouvrementScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole school'**
+  String get recouvrementScopeAll;
+
+  /// No description provided for @recouvrementExpectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected on these fees'**
+  String get recouvrementExpectedLabel;
+
+  /// No description provided for @recouvrementExpectedMixedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Two currencies — never added together'**
+  String get recouvrementExpectedMixedSubline;
+
+  /// No description provided for @recouvrementCollectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected to date'**
+  String get recouvrementCollectedLabel;
+
+  /// No description provided for @recouvrementSettledSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students have settled in full, {percent}% of the cohort'**
+  String recouvrementSettledSubline(int count, int percent);
+
+  /// No description provided for @recouvrementNothingPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing paid'**
+  String get recouvrementNothingPaidLabel;
+
+  /// No description provided for @recouvrementNothingPaidSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority follow-up target'**
+  String get recouvrementNothingPaidSubline;
+
+  /// No description provided for @recouvrementPartialLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial payment'**
+  String get recouvrementPartialLabel;
+
+  /// No description provided for @recouvrementPartialSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'A first step has been taken'**
+  String get recouvrementPartialSubline;
+
+  /// No description provided for @recouvrementNoAmountDash.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get recouvrementNoAmountDash;
+
+  /// No description provided for @recouvrementContextLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students concerned · every figure on this page covers the checked fees'**
+  String recouvrementContextLine(int count);
+
+  /// No description provided for @recouvrementRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'today\'s rate 1 \$ = {rate} FC'**
+  String recouvrementRateLine(String rate);
+
+  /// No description provided for @recouvrementRateMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'no rate has been set for today'**
+  String get recouvrementRateMissing;
+
+  /// No description provided for @recouvrementFiguresA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key figures'**
+  String get recouvrementFiguresA11yLabel;
+
+  /// No description provided for @recouvrementRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate by fee'**
+  String get recouvrementRatesTitle;
+
+  /// No description provided for @recouvrementRatesSubtitleOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One fee selected · the rate reads in its own currency'**
+  String get recouvrementRatesSubtitleOne;
+
+  /// No description provided for @recouvrementRatesSubtitleMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected'**
+  String recouvrementRatesSubtitleMany(int count);
+
+  /// No description provided for @recouvrementRatesGroupHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {expected} · {rate}% recovered'**
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate);
+
+  /// No description provided for @recouvrementRatesGroupHeaderNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} collected · nothing was owed in this currency'**
+  String recouvrementRatesGroupHeaderNoExpectation(String paid);
+
+  /// No description provided for @recouvrementRateRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String recouvrementRateRemaining(String amount);
+
+  /// No description provided for @recouvrementRateExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} expected'**
+  String recouvrementRateExpected(String amount);
+
+  /// No description provided for @recouvrementRateNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'no fee owed'**
+  String get recouvrementRateNoExpectation;
+
+  /// No description provided for @recouvrementRatesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate by fee and currency'**
+  String get recouvrementRatesA11yLabel;
+
+  /// No description provided for @recouvrementRateBarA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee}: {rate}% recovered, {amount} left'**
+  String recouvrementRateBarA11y(String fee, int rate, String amount);
+
+  /// No description provided for @recouvrementCurrencyGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in {currency}'**
+  String recouvrementCurrencyGroupTitle(String currency);
+
+  /// No description provided for @recouvrementUnbilledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} enrolled students carry none of these fees'**
+  String recouvrementUnbilledNote(int count);
+
+  /// No description provided for @recouvrementSimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal simulation'**
+  String get recouvrementSimulationTitle;
+
+  /// No description provided for @recouvrementSimulationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is applied — a dismissal goes through Enrolments, file by file'**
+  String get recouvrementSimulationSubtitle;
+
+  /// No description provided for @recouvrementSimulationWho.
+  ///
+  /// In en, this message translates to:
+  /// **'We dismiss students who…'**
+  String get recouvrementSimulationWho;
+
+  /// No description provided for @recouvrementCriterionNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid nothing'**
+  String get recouvrementCriterionNoPayment;
+
+  /// No description provided for @recouvrementCriterionNotSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Have not settled in full'**
+  String get recouvrementCriterionNotSettled;
+
+  /// No description provided for @recouvrementCriterionBelowThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid less than…'**
+  String get recouvrementCriterionBelowThreshold;
+
+  /// No description provided for @recouvrementThresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum amount'**
+  String get recouvrementThresholdLabel;
+
+  /// No description provided for @recouvrementThresholdMixedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The floor is compared in {currency} equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.'**
+  String recouvrementThresholdMixedWarning(String currency);
+
+  /// No description provided for @recouvrementThresholdNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate has been set for today: the comparison is impossible on a mixed selection.'**
+  String get recouvrementThresholdNoRate;
+
+  /// No description provided for @recouvrementCriticalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable group threshold: {percent}% of the cohort'**
+  String recouvrementCriticalLabel(int percent);
+
+  /// No description provided for @recouvrementCriticalA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the cohort'**
+  String recouvrementCriticalA11y(int percent);
+
+  /// No description provided for @recouvrementSimHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort today'**
+  String get recouvrementSimHeadcount;
+
+  /// No description provided for @recouvrementSimHeadcountSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'students carrying these fees'**
+  String get recouvrementSimHeadcountSubline;
+
+  /// No description provided for @recouvrementSimTargeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Students targeted'**
+  String get recouvrementSimTargeted;
+
+  /// No description provided for @recouvrementSimRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort left'**
+  String get recouvrementSimRemaining;
+
+  /// No description provided for @recouvrementSimRemainingSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the cohort kept'**
+  String recouvrementSimRemainingSubline(int percent);
+
+  /// No description provided for @recouvrementSimCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable groups'**
+  String get recouvrementSimCritical;
+
+  /// No description provided for @recouvrementSimTableGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get recouvrementSimTableGroup;
+
+  /// No description provided for @recouvrementSimTableHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort'**
+  String get recouvrementSimTableHeadcount;
+
+  /// No description provided for @recouvrementSimTableLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'To dismiss'**
+  String get recouvrementSimTableLeaving;
+
+  /// No description provided for @recouvrementSimTableRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get recouvrementSimTableRemaining;
+
+  /// No description provided for @recouvrementSimTableKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort kept'**
+  String get recouvrementSimTableKept;
+
+  /// No description provided for @recouvrementSimTableVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdict'**
+  String get recouvrementSimTableVerdict;
+
+  /// No description provided for @recouvrementVerdictManageable.
+  ///
+  /// In en, this message translates to:
+  /// **'Manageable'**
+  String get recouvrementVerdictManageable;
+
+  /// No description provided for @recouvrementVerdictFragile.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragile'**
+  String get recouvrementVerdictFragile;
+
+  /// No description provided for @recouvrementVerdictCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable'**
+  String get recouvrementVerdictCritical;
+
+  /// No description provided for @recouvrementSimFootNothingLost.
+  ///
+  /// In en, this message translates to:
+  /// **'These students have paid nothing: dismissal would lose no income, but it definitively writes off {missing}.'**
+  String recouvrementSimFootNothingLost(String missing);
+
+  /// No description provided for @recouvrementSimFootWithLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal would void {lost} already collected, and write off {missing} never paid.'**
+  String recouvrementSimFootWithLoss(String lost, String missing);
+
+  /// No description provided for @recouvrementSimA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal simulation — no writes'**
+  String get recouvrementSimA11yLabel;
+
+  /// No description provided for @recouvrementSimRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{group}: {kept}% of the cohort kept, {verdict}'**
+  String recouvrementSimRowA11y(String group, int kept, String verdict);
+
+  /// No description provided for @recouvrementRelanceListPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the list…'**
+  String get recouvrementRelanceListPreparing;
+
+  /// No description provided for @recouvrementRelanceListBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'A document is already being produced on this server — try again in {seconds}s'**
+  String recouvrementRelanceListBusy(int seconds);
+
+  /// No description provided for @recouvrementRelanceListTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines} lines for a cap of {cap}: narrow the scope or the criterion.'**
+  String recouvrementRelanceListTooLarge(int lines, int cap);
+
+  /// No description provided for @recouvrementRelanceListUnknownStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students on this list are not attached to this school for this year.'**
+  String recouvrementRelanceListUnknownStudents(int count);
+
+  /// No description provided for @recouvrementRelanceListInconsistent.
+  ///
+  /// In en, this message translates to:
+  /// **'The list could not be produced: some rows contradict themselves. Refresh the screen.'**
+  String get recouvrementRelanceListInconsistent;
+
+  /// No description provided for @recouvrementRelanceListForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to produce a named list.'**
+  String get recouvrementRelanceListForbidden;
+
+  /// No description provided for @recouvrementRelanceListFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list could not be produced.'**
+  String get recouvrementRelanceListFailed;
+
+  /// No description provided for @recouvrementRelanceListHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list arrived, but the preview could not open.'**
+  String get recouvrementRelanceListHandoffFailed;
+
+  /// No description provided for @recouvrementRelanceListA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce the named list for {group}'**
+  String recouvrementRelanceListA11y(String group);
+
+  /// No description provided for @recouvrementInsightWorstFeeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee furthest behind'**
+  String get recouvrementInsightWorstFeeTitle;
+
+  /// No description provided for @recouvrementInsightWorstFeeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee} tops out at {rate}% recovered: {amount} are still missing. This is the fee to check group by group.'**
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount);
+
+  /// No description provided for @recouvrementInsightControlAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the students'**
+  String get recouvrementInsightControlAction;
+
+  /// No description provided for @recouvrementInsightSpreadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread between groups'**
+  String get recouvrementInsightSpreadTitle;
+
+  /// No description provided for @recouvrementInsightSpreadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The spread runs from {bestRate}% ({bestGroup}) to {worstRate}% ({worstGroup}). A gap this wide says more about follow-up practice than about what families can pay.'**
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  );
+
+  /// No description provided for @recouvrementInsightSimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the simulation says'**
+  String get recouvrementInsightSimulationTitle;
+
+  /// No description provided for @recouvrementInsightSimulationSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'The measure would hold everywhere: {remaining} students would remain, {percent}% of the cohort kept.'**
+  String recouvrementInsightSimulationSafe(int remaining, int percent);
+
+  /// No description provided for @recouvrementInsightSimulationCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal would push {count} groups below {percent}% of their cohort. Staggered follow-up costs less than an emptied class.'**
+  String recouvrementInsightSimulationCritical(int count, int percent);
+
+  /// No description provided for @recouvrementEmptyResultDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.'**
+  String get recouvrementEmptyResultDescription;
+
+  /// No description provided for @recouvrementRelanceListNotDeployed.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.'**
+  String get recouvrementRelanceListNotDeployed;
+
+  /// No description provided for @recouvrementCallListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students targeted — {group}'**
+  String recouvrementCallListTitle(String group);
+
+  /// No description provided for @recouvrementCallListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students · {criterion}'**
+  String recouvrementCallListSubtitle(int count, String criterion);
+
+  /// No description provided for @recouvrementCallListStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get recouvrementCallListStudent;
+
+  /// No description provided for @recouvrementCallListDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get recouvrementCallListDue;
+
+  /// No description provided for @recouvrementCallListPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get recouvrementCallListPaid;
+
+  /// No description provided for @recouvrementCallListRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get recouvrementCallListRemaining;
+
+  /// No description provided for @recouvrementCallListUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {id}'**
+  String recouvrementCallListUnnamed(String id);
+
+  /// No description provided for @recouvrementCallListUnnamedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.'**
+  String get recouvrementCallListUnnamedNote;
+
+  /// No description provided for @recouvrementCallListEmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce the list to sign'**
+  String get recouvrementCallListEmit;
+
+  /// No description provided for @recouvrementCallListClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get recouvrementCallListClose;
+
+  /// No description provided for @recouvrementCallListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student targeted in this group.'**
+  String get recouvrementCallListEmpty;
+
+  /// No description provided for @feeControlFeeLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the fee schedule…'**
+  String get feeControlFeeLoading;
+
+  /// No description provided for @feeControlFeesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees checked'**
+  String get feeControlFeesLabel;
+
+  /// No description provided for @feeControlFeesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees checked — multiple selection, at least one'**
+  String get feeControlFeesA11yLabel;
+
+  /// No description provided for @feeControlSituationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Situation looked for'**
+  String get feeControlSituationLabel;
+
+  /// No description provided for @feeControlSituationThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at least…'**
+  String get feeControlSituationThreshold;
+
+  /// No description provided for @feeControlThresholdMixedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected fees do not share one currency: a single floor amount would mean nothing. Keep only one currency.'**
+  String get feeControlThresholdMixedWarning;
+
+  /// No description provided for @feeControlColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get feeControlColumnStudent;
+
+  /// No description provided for @feeControlResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Result · {count, plural, =0{no student} =1{1 student} other{{count} students}}'**
+  String feeControlResultTitle(num count);
+
+  /// No description provided for @feeControlResultOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'sorted from least to most advanced'**
+  String get feeControlResultOrder;
+
+  /// No description provided for @feeControlCriteriaThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor: {amount}'**
+  String feeControlCriteriaThreshold(String amount);
+
+  /// No description provided for @feeControlSelectPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the page'**
+  String get feeControlSelectPage;
+
+  /// No description provided for @feeControlDeselectPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect the page'**
+  String get feeControlDeselectPage;
+
+  /// No description provided for @feeControlMarkedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'to send home'**
+  String get feeControlMarkedBadge;
+
+  /// No description provided for @feeControlSummaryCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on these fees'**
+  String get feeControlSummaryCollected;
+
+  /// No description provided for @feeControlSummaryCollectedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'of {expected} due'**
+  String feeControlSummaryCollectedOn(String expected);
+
+  /// No description provided for @feeControlSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student selected} other{{count} students selected}}'**
+  String feeControlSelectionCount(num count);
+
+  /// No description provided for @feeControlCallListAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Call sheet'**
+  String get feeControlCallListAction;
+
+  /// No description provided for @feeControlMarkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark to send home'**
+  String get feeControlMarkAction;
+
+  /// No description provided for @feeControlDeselectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get feeControlDeselectAction;
+
+  /// No description provided for @feeControlMarkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked to send home} other{{count} students marked to send home}}'**
+  String feeControlMarkedTitle(num count);
+
+  /// No description provided for @feeControlMarkedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This list is a working draft: nothing is sent to the families. Measure the effect on headcount in the dashboard before deciding.'**
+  String get feeControlMarkedNote;
+
+  /// No description provided for @feeControlMarkedClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the send-home list'**
+  String get feeControlMarkedClear;
+
+  /// No description provided for @feeControlMarkedCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Send-home list cleared.'**
+  String get feeControlMarkedCleared;
+
+  /// No description provided for @feeControlMarkedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked to send home — the list stays editable.} other{{count} students marked to send home — the list stays editable.}}'**
+  String feeControlMarkedDone(num count);
+
+  /// No description provided for @feeControlSheetDossier.
+  ///
+  /// In en, this message translates to:
+  /// **'File {code}'**
+  String feeControlSheetDossier(String code);
+
+  /// No description provided for @feeControlSheetPaidOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {expected} · {percent}%'**
+  String feeControlSheetPaidOf(String paid, String expected, int percent);
+
+  /// No description provided for @feeControlSheetRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String feeControlSheetRemaining(String amount);
+
+  /// No description provided for @feeControlSheetNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount expected on this fee'**
+  String get feeControlSheetNoExpectation;
+
+  /// No description provided for @feeControlSheetMixedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each fee is settled in its own currency: the lines do not add up.'**
+  String get feeControlSheetMixedNote;
+
+  /// No description provided for @feeControlSheetOpenRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the full record'**
+  String get feeControlSheetOpenRecord;
+
+  /// No description provided for @feeControlSheetUnmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from send-home list'**
+  String get feeControlSheetUnmark;
+
+  /// No description provided for @feeControlSheetMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked to send home.'**
+  String feeControlSheetMarked(String name);
+
+  /// No description provided for @feeControlSheetUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed from the send-home list.'**
+  String feeControlSheetUnmarked(String name);
+
+  /// No description provided for @feeControlCallSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School fee control'**
+  String get feeControlCallSheetTitle;
+
+  /// No description provided for @feeControlCallSheetIssuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on {date}'**
+  String feeControlCallSheetIssuedOn(String date);
+
+  /// No description provided for @feeControlCallSheetRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate applied: {rate}'**
+  String feeControlCallSheetRate(String rate);
+
+  /// No description provided for @feeControlCallSheetNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'No.'**
+  String get feeControlCallSheetNumber;
+
+  /// No description provided for @feeControlCallSheetSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent signature'**
+  String get feeControlCallSheetSignature;
+
+  /// No description provided for @feeControlCallSheetVisaCollector.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector\'s signature'**
+  String get feeControlCallSheetVisaCollector;
+
+  /// No description provided for @feeControlCallSheetVisaDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Management\'s signature'**
+  String get feeControlCallSheetVisaDirection;
+
+  /// No description provided for @feeControlCallSheetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The call sheet could not be prepared.'**
+  String get feeControlCallSheetFailed;
+
+  /// No description provided for @feeControlEmptyWiden.
+  ///
+  /// In en, this message translates to:
+  /// **'See all students'**
+  String get feeControlEmptyWiden;
+
+  /// No description provided for @feeControlEmptyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Open billing'**
+  String get feeControlEmptyBilling;
 }
 
 class _AppLocalizationsDelegate

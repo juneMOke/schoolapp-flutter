@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
 import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
@@ -16,19 +20,87 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FinanceTillBucketsSection extends StatelessWidget {
   final List<TillBucket> buckets;
 
+  /// Le titre de la carte — il **nomme la caisse dessinée**. La série est
+  /// mono-devise et n'est jamais convertie ; sans le nom, deux bascules plus
+  /// tard on ne sait plus quelle caisse on regarde.
+  final String? title;
+
+  /// Le grain annoncé par le serveur — il décide de l'étiquette sous chaque
+  /// barre. Voir [shortBucketLabel] : la forme de la clé ne suffit pas.
+  final String granularity;
+
+  /// La devise de la caisse dessinée — elle habille les montants posés sur les
+  /// barres. **Aucun nombre nu** : la doctrine vaut aussi sur un graphique.
+  final String currency;
+
+  /// La phrase qui explique pourquoi le total des tuiles ne vaut pas la somme
+  /// des barres — rendue **là où l'écart se voit**, et seulement sur la fenêtre
+  /// où il existe.
+  ///
+  /// C'est une **propriété** de l'écran, pas une excuse : les tuiles comptent la
+  /// fenêtre demandée, la série dessine ce qu'il faut pour la lire. Dite
+  /// ailleurs — ou pas dite du tout — l'écart se fait passer pour un bug, et
+  /// quelqu'un finit par « corriger » l'un des deux chiffres.
+  final String? windowNote;
+
   /// Au-delà de douze compartiments, les libellés se chevauchent : un mois de
   /// trente-et-un jours est le pire cas que l'écran ait à dessiner.
+  /// Au-delà de douze barres, les libellés pivotent.
+  ///
+  /// ⚠️ **Écart assumé avec la spec**, qui demande l'inverse : garder les
+  /// libellés à plat et n'en montrer qu'« un sur ceil(n/12) au-delà de 20
+  /// jours ». Les deux règlent le même encombrement, mais pas au même prix —
+  /// l'amincissement **cache des dates**, la rotation les montre toutes.
+  ///
+  /// Sur un axe où chaque barre est un jour d'argent, ne pas cacher de date
+  /// vaut mieux qu'un axe plus élégant : le lecteur qui cherche le 17 doit le
+  /// trouver. La spec optimise la lisibilité de l'axe ; on préserve
+  /// l'information. Tranché par le porteur.
   static const int _rotateLabelsBeyond = 12;
 
-  const FinanceTillBucketsSection({super.key, required this.buckets});
+  /// Jusqu'à dix barres, **chacune porte son montant**. Au-delà, les étiquettes
+  /// se marchent dessus et seule la barre en relief garde la sienne — que le
+  /// composant du socle affiche via son infobulle.
+  static const int _labelAllBarsUpTo = 10;
+
+  /// **La même flèche que la carte de lecture « Tendance »**, et ce n'est pas
+  /// une coïncidence : les deux disent la progression de la caisse, l'une en
+  /// dessin, l'autre en phrase. Deux icônes différentes les feraient lire comme
+  /// deux sujets.
+  static const IconData _headingIcon = Icons.trending_up_rounded;
+
+  const FinanceTillBucketsSection({
+    super.key,
+    required this.buckets,
+    this.title,
+    this.windowNote,
+    this.granularity = '',
+    this.currency = '',
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final heading = title ?? l10n.financeTillSectionBuckets;
 
-    if (buckets.isEmpty) {
+    // ⚠️ **Arbitrage du porteur, CONTRE la spec.** La spec écrit « un point par
+    // jour civil, **y compris les jours à 0 — les trous sont l'information** »,
+    // et le service back documente la même règle. Le porteur a tranché
+    // l'inverse après avoir vu l'écran ; sa décision prime, et ce n'est pas une
+    // lecture de la spec.
+    //
+    // Conséquence à connaître : l'axe cesse d'être régulier dans le temps. Deux
+    // barres voisines peuvent être séparées d'un jour ou de six sans que rien
+    // ne le dise, et une semaine creuse ressemble à une semaine pleine.
+    final drawn = buckets.where((bucket) => bucket.total > 0).toList();
+
+    // Une fenêtre entièrement creuse ne dessine plus **aucune** barre depuis cet
+    // arbitrage : sans ce cas, le graphique rendrait un axe sans contenu là où
+    // il rendait auparavant une rangée de zéros. C'est l'état vide qui parle.
+    if (drawn.isEmpty) {
       return FinanceStatsChartCard(
-        title: l10n.financeTillSectionBuckets,
+        title: heading,
+        icon: _headingIcon,
         child: FinanceStatsEmptyState(
           message: l10n.financeStatsNoData,
           hint: l10n.financeStatsNoDataHint,
@@ -38,9 +110,9 @@ class FinanceTillBucketsSection extends StatelessWidget {
     }
 
     final items = [
-      for (final bucket in buckets)
+      for (final bucket in drawn)
         BarChartItem(
-          label: shortBucketLabel(bucket.key),
+          label: shortBucketLabel(bucket.key, granularity: granularity),
           value: bucket.total.toDouble(),
           color: bucket.isCurrent
               ? AppColors.terreCuite
@@ -49,39 +121,117 @@ class FinanceTillBucketsSection extends StatelessWidget {
     ];
 
     final highlighted = <int>{
-      for (var i = 0; i < buckets.length; i++)
-        if (buckets[i].isCurrent) i,
+      for (var i = 0; i < drawn.length; i++)
+        if (drawn[i].isCurrent) i,
     };
 
+    // La règle de la spec, telle quelle : le montant est posé **sur** la barre
+    // — jamais sur un axe vertical, qu'il n'y a pas — et sur toutes les barres
+    // dès que la série en compte dix ou moins. Une fenêtre `jour` en a sept :
+    // elles sont donc toutes chiffrées.
+    // Le seuil porte sur la série **effectivement dessinée**, donc sur les
+    // barres non nulles — la spec a toujours compté la série et non la fenêtre.
+    // Un mois creux passera donc sous le seuil et portera ses montants, un mois
+    // chargé non : ce n'est pas une irrégularité, c'est la même règle appliquée
+    // à ce qu'on voit.
+    final labelEveryBar = drawn.length <= _labelAllBarsUpTo;
+
     return FinanceStatsChartCard(
-      title: l10n.financeTillSectionBuckets,
-      child: Semantics(
-        container: true,
-        label: l10n.financeTillBucketsChartA11yLabel,
-        child: CycleBarChart(
-          items: items,
-          highlightedIndexes: highlighted,
-          verticalBottomLabels: buckets.length > _rotateLabelsBeyond,
-        ),
+      title: heading,
+      icon: _headingIcon,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            container: true,
+            label: l10n.financeTillBucketsChartA11yLabel,
+            child: CycleBarChart(
+              items: items,
+              highlightedIndexes: highlighted,
+              verticalBottomLabels: drawn.length > _rotateLabelsBeyond,
+              showValueLabels: labelEveryBar,
+              // ⚠️ **Au-delà du seuil, l'intervalle en cours garde son
+              // montant.** Sans axe vertical et sans étiquettes, son relief ne
+              // reposerait plus que sur la couleur — et la doctrine de cet
+              // écran est qu'une couleur ne porte jamais seule une information.
+              // La spec le dit d'ailleurs mot pour mot : « le jour en relief
+              // est doublé d'une couleur ET d'une étiquette de montant ».
+              labelHighlightedBars: true,
+              // ⚠️ **Pas d'axe vertical, à aucun grain** — la spec n'en dessine
+              // aucun, et le porteur l'a tranché en connaissant le prix : sur
+              // une fenêtre large, où les barres ne portent pas leur montant,
+              // le graphique devient une **forme**. Les trois lignes de grille
+              // tiennent lieu d'échelle, et les chiffres se lisent dans les
+              // tuiles et la table.
+              //
+              // L'option écartée — masquer l'axe seulement quand les montants
+              // sont sur les barres — aurait rendu le graphique différent selon
+              // le grain, ce qu'on venait justement de corriger.
+              showLeftAxis: false,
+              // Trois lignes de grille (0 / 50 / 100 %). Le composant compte
+              // les **intervalles**, et il y a une ligne de plus qu'eux : deux
+              // intervalles font donc les trois lignes de la spec.
+              gridDivisions: 2,
+              barRadius: 4,
+              // Sans plancher, une journée à 300 FC sous un maximum à 9 000 000
+              // rend une barre d'un demi-pixel — indiscernable d'un zéro. Et
+              // comme les barres nulles ne se dessinent plus, une barre non
+              // nulle invisible se lirait comme un **jour supprimé**.
+              minimumBarHeight: 2,
+              // `finFmtShort` : la forme abrégée est **réservée** aux
+              // étiquettes de graphique, là où le montant entier ne tient pas.
+              // Elle porte quand même son symbole.
+              valueLabelFormatter: (value) =>
+                  MoneyFormat.compact(Money.parse(value.round(), currency)),
+            ),
+          ),
+          if (windowNote != null) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            Text(
+              windowNote!,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-/// Le libellé sous une barre, **par grain d'axe**.
+/// Le libellé sous une barre, **selon le grain que le serveur annonce**.
 ///
-/// Deux formes de clé descendent du serveur, et une seule règle ne peut pas les
-/// couvrir : `YYYY-MM-DD` sur les axes de journées (jour, semaine, mois),
-/// `YYYY-MM` sur l'axe annuel. Le formatteur du recouvrement, écrit pour l'axe
-/// mensuel seul, rendait `5-15` sur une clé journalière — il coupait les quatre
-/// derniers caractères d'une chaîne qui en compte dix.
-String shortBucketLabel(String key) {
+/// ⚠️ **La forme de la clé ne suffit pas à décider.** Une tranche hebdomadaire
+/// porte `2026-05-12` — la date de son premier jour —, exactement la forme
+/// d'une journée. Étiqueter « 12 » ferait lire **sept jours d'encaissements
+/// comme la journée du 12**, sur l'écran dont toute la doctrine est de ne
+/// jamais laisser un chiffre se faire passer pour un autre.
+///
+/// [granularity] vient donc de la réponse (`day` / `week` / `month`), et n'est
+/// **jamais redérivé** de la largeur de la fenêtre : le seuil qui décide du
+/// grain appartient au serveur, et le dupliquer ici en ferait un nombre magique
+/// qui divergerait en silence le jour où il bouge.
+///
+/// Vide — un serveur qui ne sert pas encore le champ — retombe sur la forme de
+/// la clé, ce que faisait le formatteur avant lui.
+String shortBucketLabel(String key, {String granularity = ''}) {
   final parts = key.split('-');
-  return switch (parts.length) {
-    // `2026-05-15` → « 15 » : le jour suffit, le mois est dans la fenêtre.
-    3 => parts[2],
-    // `2026-05` → « 05 » : le rang du mois, comme sur l'axe du recouvrement.
-    2 => parts[1],
-    _ => key,
+
+  return switch (granularity) {
+    // « sem. 12/05 » : la barre couvre sept jours **à partir** de cette date,
+    // et l'étiquette doit dire les deux — qu'il s'agit d'une semaine, et de
+    // laquelle.
+    'week' when parts.length == 3 => 'sem. ${parts[2]}/${parts[1]}',
+    'month' when parts.length >= 2 => '${parts[1]}/${parts[0].substring(2)}',
+    'day' when parts.length == 3 => '${parts[2]}/${parts[1]}',
+    // Sans grain annoncé, la forme de la clé décide — l'ancien comportement.
+    _ => switch (parts.length) {
+      // `2026-05-15` → « 15/05 » : le jour SEUL laissait deviner le mois, et
+      // une fenêtre libre peut enjamber deux mois.
+      3 => '${parts[2]}/${parts[1]}',
+      // `2026-05` → « 05/26 » : le mois et son millésime, l'axe annuel pouvant
+      // enjamber deux années scolaires.
+      2 => '${parts[1]}/${parts[0].substring(2)}',
+      _ => key,
+    },
   };
 }

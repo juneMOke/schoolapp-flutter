@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -507,6 +508,116 @@ class FinanceLedgerReadDao {
             ),
           ),
     ];
+  }
+
+  /// Position de **toute la population** sur une SÉLECTION de frais, ventilée
+  /// par niveau — la lecture du tableau de bord du Recouvrement.
+  ///
+  /// Se distingue de [getFeeChargePositionsByLevel] par la maille du
+  /// regroupement : celui-ci écrase les natures ensemble, celui-ci les garde
+  /// séparées. Le taux **par frais** en a besoin, et le statut d'un élève sur
+  /// la sélection se déduit ensuite des positions, jamais l'inverse.
+  ///
+  /// ⚠️ [feeCodes] vide rend une liste vide **sans requête** : un `IN ()` n'est
+  /// pas du SQL valide, et l'écran interdit de toute façon une sélection vide.
+  Future<List<LocalRecoveryLine>> getRecoveryPositions({
+    required String academicYearId,
+    required List<String> feeCodes,
+    String? schoolLevelGroupId,
+  }) async {
+    if (feeCodes.isEmpty) return const <LocalRecoveryLine>[];
+
+    // Aucun argument nullable n'est lié : le validateur de sqflite refuse
+    // `null` en `whereArgs`, et le cycle absent retire sa clause plutôt que de
+    // lier un `null` qui lèverait.
+    final args = <Object>[
+      SyncState.synced.dbValue,
+      ...feeCodes,
+      academicYearId,
+      ?schoolLevelGroupId,
+    ];
+    final placeholders = List.filled(feeCodes.length, '?').join(', ');
+    final cycleClause = schoolLevelGroupId == null
+        ? ''
+        : 'AND sc.school_level_group_id = ?';
+
+    final rows = await _db.rawQuery('''
+      SELECT sc.student_id                    AS student_id,
+             sc.school_level_id               AS school_level_id,
+             sc.fee_code                      AS fee_code,
+             sc.currency                      AS currency,
+             SUM(sc.expected_amount_in_cents) AS expected,
+             SUM(sc.amount_paid_in_cents)     AS paid_mirror,
+             SUM(COALESCE((
+               SELECT SUM(pa.amount_in_cents)
+               FROM payment_allocations pa
+               JOIN payments p ON p.id = pa.payment_id
+               WHERE pa.student_charge_id = sc.id
+                 AND p.cancelled_at IS NULL
+                 AND p.sync_status <> ?
+             ), 0))                           AS paid_pending
+      FROM student_charges sc
+      WHERE sc.fee_code IN ($placeholders)
+        AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
+        $cycleClause
+      GROUP BY sc.student_id, sc.school_level_id, sc.fee_code, sc.currency
+      ORDER BY sc.student_id, sc.school_level_id, sc.fee_code, sc.currency
+      ''', args);
+
+    // Une LIGNE par (élève, niveau, frais, devise) → une entrée par
+    // (élève, niveau), portant une position par (frais, devise). Deux Map
+    // imbriquées plutôt qu'une clé concaténée : un identifiant n'a pas à
+    // promettre qu'il ne contient pas le séparateur qu'on aurait choisi.
+    final byStudent = <String, Map<String?, List<RecoveryChargePosition>>>{};
+    for (final r in rows) {
+      final studentId = r['student_id'] as String;
+      final levelId = r['school_level_id'] as String?;
+      final charges = (byStudent[studentId] ??= {})[levelId] ??=
+          <RecoveryChargePosition>[];
+      charges.add(
+        RecoveryChargePosition(
+          feeCode: (r['fee_code'] as String?) ?? '',
+          position: FeeChargePosition(
+            currency: CurrencyCode.normalize((r['currency'] as String?) ?? ''),
+            expectedInCents: (r['expected'] as int?) ?? 0,
+            paidMirrorInCents: (r['paid_mirror'] as int?) ?? 0,
+            paidPendingInCents: (r['paid_pending'] as int?) ?? 0,
+          ),
+        ),
+      );
+    }
+
+    return [
+      for (final student in byStudent.entries)
+        for (final level in student.value.entries)
+          LocalRecoveryLine(
+            schoolLevelId: level.key,
+            studentId: student.key,
+            charges: level.value,
+          ),
+    ];
+  }
+
+  /// Nombre d'**encaissements** non encore acquittés par le serveur.
+  ///
+  /// Exactement ce que la liste de relance imprime sous son titre : ni les
+  /// inscriptions, ni les transferts de classe, ni la présence. Le compteur
+  /// général de la file d'écritures ne convient pas — il agrège tous les
+  /// modules, et le papier annoncerait un nombre plus grand que la vérité.
+  ///
+  /// Les paiements **annulés** ne comptent pas : ils ne déplaceront aucun
+  /// solde en remontant.
+  Future<int> countPendingPayments() async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT COUNT(*) AS c
+      FROM payments
+      WHERE sync_status <> ?
+        AND cancelled_at IS NULL
+      ''',
+      [SyncState.synced.dbValue],
+    );
+    return (rows.first['c'] as int?) ?? 0;
   }
 
   /// Taille des lots d'identifiants. SQLite plafonne les variables liées d'une

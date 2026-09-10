@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_buckets_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_imputation_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_freshness_caption.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_kpi_band.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_cash_boxes.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_classroom_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_currency_selector.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_empty_states.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_insights_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_receipts_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_source_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce qui est entré dans le tiroir sur la fenêtre — **puis ce que ça a
@@ -29,66 +36,168 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FinanceTillSuccessView extends StatelessWidget {
   final FinanceTill till;
 
-  const FinanceTillSuccessView({super.key, required this.till});
+  /// La caisse détaillée sous les tuiles. `null` quand la réponse ne porte aucun
+  /// bloc — l'état vide global parle alors à sa place.
+  final TillCurrencyBlock? selectedBlock;
+
+  /// Le geste de bascule. Remonté plutôt que traité ici : la sélection vit dans
+  /// le BLoC, avec la réponse qu'elle découpe.
+  final ValueChanged<String> onCurrencySelected;
+
+  /// L'élargissement de fenêtre offert par le vide global — remonté pour la
+  /// même raison que la bascule.
+  ///
+  /// Il passe par le **même événement** que le sélecteur de période, si bien
+  /// que le segment suit : celui-ci se lit sur `state.selectedWindow`, et une
+  /// requête posée d'ici bougerait la donnée sans bouger le contrôle si elle
+  /// empruntait un autre chemin.
+  final ValueChanged<TillWindow> onWindowRequested;
+
+  const FinanceTillSuccessView({
+    super.key,
+    required this.till,
+    required this.selectedBlock,
+    required this.onCurrencySelected,
+    required this.onWindowRequested,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final selected = selectedBlock;
+
+    final windowLabel = _windowLabel(till, l10n);
+    // **Le vide global se lit sur les blocs, pas sur le compteur.** Le contrat
+    // porte bien un `receiptsIssued` toutes caisses, mais s'y fier ferait
+    // dépendre l'affichage d'un agrégat : un compteur à zéro en désaccord avec
+    // des blocs pleins **cacherait des caisses qui ont travaillé**. Dérivé de
+    // ce qui est affiché, ce test-ci ne peut pas mentir dans ce sens-là.
+    //
+    // `every` sur une liste vide vaut vrai : le cas « le serveur ne renvoie
+    // aucun bloc » tombe dans la même branche, sans condition supplémentaire.
+    final globallyEmpty = till.encaisse.every(
+      (block) => block.summary.hasNoReceipts,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _WindowCaption(till: till, l10n: l10n),
         const SizedBox(height: AppDimensions.spacingM),
-        if (till.encaisse.isEmpty)
-          // Ni catalogue, ni grille, ni mouvement : le serveur ne renvoie aucun
-          // bloc. C'est un état vide, pas une erreur — et surtout pas un zéro
-          // dans une unité que personne n'a choisie.
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppDimensions.spacingXL,
-            ),
-            child: EteeloEmptyResult(
-              label: l10n.financeStatsNoMovementLabel,
-              description: l10n.financeStatsNoMovementDescription,
-              medallionIcon: Icons.point_of_sale_outlined,
-            ),
-          )
-        else ...[
-          FinanceTillKpiBand(blocks: till.encaisse),
-          const SizedBox(height: AppDimensions.spacingS),
-          const FinanceTillFreshnessCaption(),
-          const SizedBox(height: AppDimensions.spacingL),
-          for (final block in till.encaisse) ...[
-            if (till.encaisse.length > 1)
-              _CurrencyHeading(currency: block.currency, l10n: l10n),
-            if (block.hasNoMovement)
-              _CurrencyNoMovement(l10n: l10n)
-            else
-              FinanceTillBucketsSection(buckets: block.buckets),
+        if (globallyEmpty) ...[
+          // ⚠️ **Les tuiles restent, à zéro** — « le repère de lecture ne
+          // disparaît pas ». Un écran qui les retirerait ferait perdre au
+          // lecteur les deux devises de son école au moment précis où il se
+          // demande s'il regarde le bon endroit.
+          //
+          // Elles n'existent que si le serveur a rendu des blocs : sans bloc,
+          // on ne connaît même pas les devises, et une tuile inventée serait
+          // pire que pas de tuile.
+          if (till.encaisse.isNotEmpty) ...[
+            FinanceTillCashBoxes(till: till, windowLabel: windowLabel),
+            const SizedBox(height: AppDimensions.spacingS),
+            const FinanceTillFreshnessCaption(),
             const SizedBox(height: AppDimensions.spacingXL),
           ],
-          // La ventilation par poste n'est plus une colonne du bloc de devise
-          // reçue : elle se compte dans la devise des créances. Elle descend
-          // donc sous son propre titre, qui nomme l'unité — la seule chose qui
-          // empêche de lire un total commun là où il n'en existe aucun.
-          if (till.impute.isNotEmpty || _hasFees(till)) ...[
-            _ImputationHeading(l10n: l10n),
-            const SizedBox(height: AppDimensions.spacingM),
-            if (till.impute.isEmpty)
-              // Des frais sont entrés sans qu'aucune imputation ne descende :
-              // on le montre sous le titre, plutôt que d'escamoter la section,
-              // où la lacune passerait pour une journée sans frais.
-              FinanceStatsEmptyState(
-                message: l10n.financeStatsNoData,
-                hint: l10n.financeStatsNoDataHint,
-                semanticLabel: l10n.financeStatsEmptyA11yLabel,
+          // Le sélecteur et tout le détail ne sont pas rendus : il n'y a pas de
+          // caisse à détailler, et un sélecteur à deux segments vides
+          // proposerait de choisir entre deux riens.
+          FinanceTillGlobalEmpty(
+            windowLabel: windowLabel,
+            period: till.context.period,
+            onWindowRequested: onWindowRequested,
+          ),
+          const SizedBox(height: AppDimensions.spacingXL),
+        ] else ...[
+          FinanceTillCashBoxes(till: till, windowLabel: windowLabel),
+          const SizedBox(height: AppDimensions.spacingS),
+          const FinanceTillFreshnessCaption(),
+          const SizedBox(height: AppDimensions.spacingXL),
+          // Tout ce qui suit décrit **une seule** caisse — d'où la coupure de
+          // lecture marquée, et un sélecteur qui se lit comme un titre.
+          FinanceTillCurrencySelector(
+            blocks: till.encaisse,
+            selectedCurrency: selected?.currency ?? '',
+            onSelected: onCurrencySelected,
+          ),
+          const SizedBox(height: AppDimensions.spacingL),
+          if (selected != null) ...[
+            // ⚠️ **Le compte de reçus, et non le total.** Une caisse qui a
+            // encaissé puis remboursé le même montant a bien travaillé ; lui
+            // écrire « aucun paiement n'a été tendu » serait faux, et c'est ce
+            // que disait le total à zéro.
+            if (selected.summary.hasNoReceipts)
+              FinanceTillCurrencyEmpty(
+                selected: selected,
+                others: [
+                  for (final block in tillBlocksInDisplayOrder(till.encaisse))
+                    if (block.currency != selected.currency &&
+                        !block.summary.hasNoReceipts)
+                      block,
+                ],
+                windowLabel: windowLabel,
+                onCurrencySelected: onCurrencySelected,
               )
-            else
-              for (final imputation in till.impute) ...[
-                FinanceTillImputationSection(imputation: imputation),
+            else ...[
+              FinanceTillBucketsSection(
+                title: l10n.financeTillBucketsHeading(
+                  tillCurrencyName(selected.currency, l10n),
+                ),
+                buckets: selected.buckets,
+                // Le grain vient du serveur : une tranche hebdomadaire porte
+                // une clé de la même forme qu'une journée.
+                granularity: till.granularity,
+                currency: selected.currency,
+                // La série déborde la fenêtre comptée sur la journée seulement.
+                // La note vit à côté du graphique, là où l'écart se voit.
+                windowNote: till.context.period == 'day'
+                    ? l10n.financeTillBucketsWindowNote
+                    : null,
+              ),
+              const SizedBox(height: AppDimensions.spacingL),
+              // **D'où vient l'argent, sur toute la largeur.**
+              //
+              // Elle occupait auparavant la moitié d'une ligne, l'imputation
+              // tenant l'autre. Les deux ne comptent pas dans la même unité —
+              // celle-ci en devise **reçue**, l'imputation en devise de
+              // **créance** — et leur voisinage invitait à lire un total commun
+              // qui n'existe pas. Empilées, chacune garde sa ligne et son
+              // unité ; elle suit ici le graphique et les tuiles, qui comptent
+              // comme elle.
+              //
+              // Ce qu'on y perd, et qu'il faut savoir : le rapprochement d'un
+              // coup d'œil entre « d'où ça vient » et « ce que ça a éteint »
+              // demande maintenant de descendre d'une carte.
+              FinanceTillSourceSection(block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+              if (_showsImputation(till)) ...[
+                _ImputationRow(till: till),
                 const SizedBox(height: AppDimensions.spacingL),
               ],
+              FinanceTillClassroomSection(block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+              // Ce que les chiffres veulent dire — et ce qu'il n'y a pas à en
+              // faire : aucune de ces cartes n'expose de bouton, la décision se
+              // prend en Facturation.
+              FinanceTillInsightsSection(till: till, block: selected),
+              const SizedBox(height: AppDimensions.spacingL),
+            ],
+            const SizedBox(height: AppDimensions.spacingL),
+            // La preuve, en dernier. Son BLoC est distinct : un 403 ici —
+            // droit de pilotage sans droit nominatif — laisse tout ce qui
+            // précède à l'écran.
+            //
+            // ⚠️ **Le seul bloc qui ignore le sélecteur, et il est HORS de la
+            // branche « caisse vide ».** Il porte tous les paiements de la
+            // fenêtre : la laisser sous le `else` la ferait disparaître quand
+            // le dollar n'a rien reçu et que le franc a encaissé douze fois —
+            // l'écran annoncerait « rien dans cette caisse » en cachant les
+            // douze paiements que la table, elle, aurait montrés.
+            //
+            // Elle reçoit donc les totaux de TOUTES les caisses, jamais ceux de
+            // `selected`.
+            FinanceTillReceiptsSection(tillTotals: _paidTotals(till)),
+            const SizedBox(height: AppDimensions.spacingXL),
           ],
         ],
       ],
@@ -101,38 +210,122 @@ class FinanceTillSuccessView extends StatelessWidget {
 bool _hasFees(FinanceTill till) =>
     till.encaisse.any((block) => block.summary.fees > 0);
 
-/// Sépare les deux unités de l'écran, et nomme celle qui commence.
+/// La rangée des créances a-t-elle quelque chose à dire ?
 ///
-/// Sans ce titre, les montants du bas se lisent dans la continuité de la bande
-/// KPI — c'est-à-dire dans la mauvaise devise, et sur un total qui n'existe pas.
-class _ImputationHeading extends StatelessWidget {
-  final AppLocalizations l10n;
+/// Elle existe soit parce que le serveur a rendu des imputations, soit parce
+/// qu'il n'en a rendu aucune **alors que des frais sont entrés** — auquel cas
+/// c'est la lacune qui s'affiche. Une journée sans frais, elle, n'a rien à
+/// montrer : la rangée disparaît, plutôt que d'annoncer un vide qui n'en est
+/// pas un.
+bool _showsImputation(FinanceTill till) =>
+    till.impute.isNotEmpty || _hasFees(till);
 
-  const _ImputationHeading({required this.l10n});
+/// Ce que la fenêtre a encaissé en **facturation**, un montant par caisse.
+///
+/// ⚠️ **`fees`, et surtout pas `total`.** La table des paiements ne montre que
+/// la facturation — la boutique a sa propre lecture nominative — alors qu'un
+/// total de caisse ajoute les ventes. Poser `total` sous un compte de lignes
+/// qui les exclut ferait diverger deux chiffres voisins le jour où la boutique
+/// tournera, sans que rien ne le dise. `fees` est lu sur les mêmes lignes
+/// d'encaissement que la table, par `paid_at` et en devise reçue : c'est
+/// exactement la population comptée.
+///
+/// Les caisses à zéro sont écartées : « 0 $ et 1 350 000 FC » allonge le
+/// sous-titre sans rien apprendre, et ce sont les tuiles — qui, elles, gardent
+/// toutes les devises de l'école — qui portent le repère « cette caisse
+/// existe ».
+List<String> _paidTotals(FinanceTill till) => [
+  for (final block in tillBlocksInDisplayOrder(till.encaisse))
+    if (block.summary.fees > 0)
+      MoneyFormat.format(Money.parse(block.summary.fees, block.currency)),
+];
+
+/// **Les créances éteintes, une carte par devise**, côte à côte.
+///
+/// Le serveur rend une carte par devise de **créance** : une école qui facture
+/// en dollars et en francs en a deux, et elles se lisent l'une contre l'autre —
+/// « ce que la journée a éteint, ici et là ». Empilées, la comparaison
+/// demandait de faire défiler ; côte à côte, elle se fait d'un coup d'œil.
+///
+/// ⚠️ **Aucune des deux ne s'additionne à l'autre**, et rien n'affiche leur
+/// somme : ce sont deux monnaies de créance, pas deux moitiés d'un total. C'est
+/// le titre de chaque carte qui porte cette garde — il nomme sa devise — et
+/// c'est pourquoi il n'est jamais escamoté.
+///
+/// En dessous de deux minima, les cartes retombent l'une sous l'autre : une
+/// comparaison illisible ne vaut pas mieux qu'un empilement.
+class _ImputationRow extends StatelessWidget {
+  final FinanceTill till;
+
+  const _ImputationRow({required this.till});
+
+  /// Le minimum de la spec pour une carte d'imputation. En dessous, les libellés
+  /// de poste et leur montant se marchent dessus.
+  static const double _minCardWidth = 380;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(
-            l10n.financeTillImputationHeading,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingXS),
-        Text(
-          l10n.financeTillImputationHint,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-        ),
-      ],
+    final l10n = AppLocalizations.of(context)!;
+
+    // Des frais sont entrés sans qu'aucune imputation ne descende : on le
+    // montre, plutôt que d'escamoter la carte — où la lacune passerait pour une
+    // journée sans frais. Le cas « ni frais ni imputation » ne parvient pas
+    // jusqu'ici : [_showsImputation] a déjà retiré la rangée.
+    if (till.impute.isEmpty) {
+      return FinanceStatsEmptyState(
+        message: l10n.financeStatsNoData,
+        hint: l10n.financeStatsNoDataHint,
+        semanticLabel: l10n.financeStatsEmptyA11yLabel,
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gutter = AppDimensions.spacingL;
+        final sideBySide =
+            till.impute.length > 1 &&
+            constraints.maxWidth >= _minCardWidth * 2 + gutter;
+        final width = sideBySide
+            ? (constraints.maxWidth - gutter) / 2
+            : constraints.maxWidth;
+
+        // Un [Wrap] plutôt qu'une [Row] : une troisième devise de créance —
+        // improbable, mais le contrat ne l'interdit pas — passe à la ligne au
+        // lieu de comprimer les deux premières.
+        return Wrap(
+          spacing: gutter,
+          runSpacing: gutter,
+          children: [
+            for (final imputation in till.impute)
+              SizedBox(
+                width: width,
+                child: FinanceTillImputationSection(imputation: imputation),
+              ),
+          ],
+        );
+      },
     );
   }
 }
+
+/// Le libellé de la fenêtre, **lu sur la réponse et non sur le sélecteur**.
+///
+/// Pendant un changement de grain, l'onglet a déjà bougé alors que les chiffres
+/// affichés sont encore ceux d'avant : suffixer les caisses avec le grain
+/// *demandé* daterait le montant d'une fenêtre qui ne l'a pas produit.
+/// `context.period` vient du serveur, avec les totaux qu'il décrit.
+///
+/// Une valeur inconnue retombe sur la chaîne du serveur plutôt que sur un
+/// générique : mieux vaut afficher `custom` que « période », qui ne désigne
+/// rien.
+String _windowLabel(FinanceTill till, AppLocalizations l10n) =>
+    switch (till.context.period) {
+      'day' => l10n.financeTillPeriodDayCurrent,
+      'week' => l10n.financeStatsPeriodWeekCurrent,
+      'month' => l10n.financeStatsPeriodMonthCurrent,
+      'year' => l10n.financeStatsPeriodYearCurrent,
+      final other => other,
+    };
 
 /// De quelle fenêtre parle le total, et dans quel fuseau elle se découpe.
 ///
@@ -174,99 +367,6 @@ class _WindowCaption extends StatelessWidget {
             style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
       ],
-    );
-  }
-}
-
-/// Une devise dans laquelle l'école facture ou vend, sans qu'un franc y ait
-/// circulé sur la fenêtre.
-///
-/// **Le cas le plus fréquent de l'onglet** : le serveur garde ces blocs à zéro
-/// plutôt que de les omettre, et une journée creuse en rendrait autant que
-/// l'école a de devises.
-class _CurrencyNoMovement extends StatelessWidget {
-  final AppLocalizations l10n;
-
-  const _CurrencyNoMovement({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label:
-          '${l10n.financeStatsCurrencyNoMovement}. '
-          '${l10n.financeStatsCurrencyNoMovementTill}',
-      child: ExcludeSemantics(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceAlt,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.point_of_sale_outlined,
-                size: 18,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.financeStatsCurrencyNoMovement,
-                      style: AppTextStyles.bodyStrong.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    Text(
-                      l10n.financeStatsCurrencyNoMovementTill,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Nomme la devise du bloc qui suit — seulement à partir de deux.
-class _CurrencyHeading extends StatelessWidget {
-  final String currency;
-  final AppLocalizations l10n;
-
-  const _CurrencyHeading({required this.currency, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimensions.spacingS),
-      child: Semantics(
-        header: true,
-        child: Row(
-          children: [
-            Text(
-              l10n.financeStatsCurrencyHeading(MoneyFormat.symbolOf(currency)),
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            const Expanded(child: Divider(height: 1, color: AppColors.border)),
-          ],
-        ),
-      ),
     );
   }
 }

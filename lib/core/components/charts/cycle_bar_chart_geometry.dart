@@ -18,12 +18,17 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 ///
 /// [availableWidth] non bornée (tracé posé dans un contexte de largeur
 /// infinie) : on retombe sur la largeur maximale, faute de pas mesurable.
-double cycleBarWidth({required int barCount, required double availableWidth}) {
+double cycleBarWidth({
+  required int barCount,
+  required double availableWidth,
+  double axisWidth = AppDimensions.enrollmentStatsChartLeftAxisWidth,
+}) {
   if (barCount <= 0 || !availableWidth.isFinite) {
     return AppDimensions.enrollmentStatsChartBarMaxWidth;
   }
-  final plotWidth =
-      availableWidth - AppDimensions.enrollmentStatsChartLeftAxisWidth;
+  // Sans axe vertical, les 36 dp qu'il réservait reviennent au tracé : les
+  // barres s'élargissent au lieu de laisser une marge vide à gauche.
+  final plotWidth = availableWidth - axisWidth;
   if (plotWidth <= 0) return AppDimensions.enrollmentStatsChartBarMinWidth;
 
   final pitch = plotWidth / barCount;

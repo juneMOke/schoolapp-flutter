@@ -78,7 +78,48 @@ void main() {
           'à l’horizontale, trente-et-un libellés se chevauchent ou se '
           'replient sur deux lignes',
     );
-    expect(chart.items.length, 31);
+    // ⚠️ 27 et non 31 : quatre jours du mois sont à zéro, et le porteur a
+    // tranché — **contre la spec** — que les barres nulles ne s'affichent pas.
+    expect(chart.items.length, 27);
+  });
+
+  testWidgets('les jours à zéro ne dessinent plus de barre', (tester) async {
+    await pump(tester, _month());
+
+    final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
+
+    expect(
+      chart.items.every((item) => item.value > 0),
+      isTrue,
+      reason:
+          'arbitrage du porteur CONTRE la spec, qui veut « un point par jour '
+          'civil, y compris les jours à 0 »',
+    );
+    // Conséquence assumée : l'axe cesse d'être régulier dans le temps — le 6 et
+    // le 8 deviennent voisins, le 7 ayant disparu.
+    expect(chart.items.map((item) => item.label), isNot(contains('07/05')));
+    expect(chart.items.map((item) => item.label), contains('06/05'));
+    expect(chart.items.map((item) => item.label), contains('08/05'));
+  });
+
+  testWidgets('une fenêtre entièrement creuse rend son état vide', (
+    tester,
+  ) async {
+    // Sans ce cas, l'arbitrage laisserait un axe sans aucune barre là où il
+    // rendait auparavant une rangée de zéros.
+    await pump(tester, [
+      for (var day = 1; day <= 5; day++)
+        TillBucket(
+          key: '2026-05-0$day',
+          total: 0,
+          fees: 0,
+          boutique: 0,
+          isCurrent: day == 3,
+        ),
+    ]);
+
+    expect(find.byType(CycleBarChart), findsNothing);
+    expect(find.text('Entrées de caisse'), findsOneWidget);
   });
 
   testWidgets('douze barres ou moins gardent leurs libellés à plat', (
@@ -98,22 +139,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('les libellés portent le jour, pas la clé entière', (
+  testWidgets('les libellés portent la date, pas la clé entière', (
     tester,
   ) async {
     await pump(tester, _month());
 
     final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
-    expect(chart.items.first.label, '01');
-    expect(chart.items.last.label, '31');
+    // « JJ/MM » et non le seul jour : une fenêtre libre peut enjamber deux
+    // mois, et « 01 » n'y dirait pas lequel.
+    expect(chart.items.first.label, '01/05');
+    expect(chart.items.last.label, '31/05');
   });
 
   testWidgets('l’intervalle en cours est le seul accentué', (tester) async {
     await pump(tester, _month());
 
     final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
-    expect(chart.highlightedIndexes, {14});
+
+    // Le 15 est le jour courant. Son **rang** a bougé : deux jours nuls (le 7
+    // et le 14) ont disparu avant lui, donc l'index 14 devient 12. L'accent
+    // suit la barre, pas la position d'origine.
+    expect(chart.highlightedIndexes, {12});
+    expect(chart.items[12].label, '15/05');
   });
+
+  testWidgets(
+    'le graphique de caisse suit la maquette, pas les valeurs par défaut',
+    (tester) async {
+      await pump(tester, _month());
+
+      final chart = tester.widget<CycleBarChart>(find.byType(CycleBarChart));
+
+      // Aucun axe vertical, à AUCUN grain : la spec n'en dessine pas, et le
+      // porteur a écarté l'option « axe seulement sur les fenêtres larges »
+      // parce qu'elle aurait rendu le graphique différent selon le grain.
+      expect(chart.showLeftAxis, isFalse);
+      // Trois lignes de grille — le composant compte les INTERVALLES, et il y a
+      // une ligne de plus qu'eux. Deux intervalles font donc trois lignes.
+      expect(chart.gridDivisions, 2);
+      expect(chart.barRadius, 4);
+      // Sans plancher, une barre très basse sous un maximum élevé rend un
+      // demi-pixel, indiscernable d'un zéro — or les barres nulles ne se
+      // dessinent plus, donc elle se lirait comme un jour supprimé.
+      expect(chart.minimumBarHeight, 2);
+      // Sans axe ni étiquettes sur une fenêtre large, le relief ne reposerait
+      // plus que sur la couleur. La spec l'écrit : « le jour en relief est doublé
+      // d'une couleur ET d'une étiquette de montant ».
+      expect(chart.labelHighlightedBars, isTrue);
+    },
+  );
 
   testWidgets('un axe vide rend son état vide, pas un graphique nu', (
     tester,

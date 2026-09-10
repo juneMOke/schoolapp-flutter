@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/grantable_reduction.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
@@ -222,6 +223,18 @@ class FinanceLocalDao {
   }) => _read.getFeeChargePositionsByLevel(
     academicYearId: academicYearId,
     feeCode: feeCode,
+    schoolLevelGroupId: schoolLevelGroupId,
+  );
+
+  Future<int> countPendingPayments() => _read.countPendingPayments();
+
+  Future<List<LocalRecoveryLine>> getRecoveryPositions({
+    required String academicYearId,
+    required List<String> feeCodes,
+    String? schoolLevelGroupId,
+  }) => _read.getRecoveryPositions(
+    academicYearId: academicYearId,
+    feeCodes: feeCodes,
     schoolLevelGroupId: schoolLevelGroupId,
   );
 

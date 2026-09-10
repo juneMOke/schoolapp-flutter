@@ -89,6 +89,8 @@ class AppColors {
       tokens.AppColors.financeDetailChargeInfoSurfaceAlt;
 
   // Finance — Méta badge Cycle (ambre)
+  static const financeCrossedAccent = tokens.AppColors.financeCrossedAccent;
+  static const financeCrossedSurface = tokens.AppColors.financeCrossedSurface;
   static const financeDetailAmber = tokens.AppColors.financeDetailAmber;
   static const financeDetailAmberSoft = tokens.AppColors.financeDetailAmberSoft;
 

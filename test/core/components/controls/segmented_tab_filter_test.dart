@@ -275,4 +275,53 @@ void main() {
       );
     });
   });
+
+  group('cible tactile minimale', () {
+    Future<double> tabHeight(
+      WidgetTester tester, {
+      required SegmentedTabFilterStyle style,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SegmentedTabFilter<String>(
+              style: style,
+              options: const [
+                SegmentedTabOption(label: 'Un', value: 'a'),
+                SegmentedTabOption(label: 'Deux', value: 'b'),
+              ],
+              selected: 'a',
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester.getSize(find.byType(InkWell).first).height;
+    }
+
+    testWidgets('sans paramètre, la barre garde exactement sa taille', (
+      tester,
+    ) async {
+      // Vingt et un écrans passent par ce composant : le défaut ne bouge pas.
+      final height = await tabHeight(
+        tester,
+        style: const SegmentedTabFilterStyle(),
+      );
+      expect(height, lessThan(44));
+    });
+
+    testWidgets('avec 44, la cible RENDUE fait 44 — trait de barre compris', (
+      tester,
+    ) async {
+      // ⚠️ Mesuré, pas déduit. Le conteneur annonce 38, le segment se rétracte
+      // sur son contenu, et le trait de 1 dp se prend DANS la hauteur : un
+      // calcul qui l'oubliait tombait deux pixels trop court.
+      final height = await tabHeight(
+        tester,
+        style: const SegmentedTabFilterStyle(minimumTapTarget: 44),
+      );
+      expect(height, 44);
+    });
+  });
 }

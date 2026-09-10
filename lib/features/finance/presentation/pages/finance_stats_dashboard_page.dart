@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_dashboard_tabs.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_recovery_tab.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_dashboard_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le tableau de bord Finances — **deux onglets, deux questions**.
+/// Le tableau de bord Finances : **la caisse**, et elle seule.
 ///
-/// « Où en est-on de l'argent qu'on doit encaisser cette année ? » et « combien
-/// est entré dans le tiroir ? » ne se posent jamais en même temps. Elles ont
-/// pourtant partagé un écran et un sélecteur de période, jusqu'à ce que le
-/// serveur les sépare en deux routes.
+/// « Combien est entré dans le tiroir ? » est une question de **flux**, datée,
+/// servie par le serveur. L'autre — « où en est la dette ? » — est un **état**,
+/// et elle a quitté cet écran le 2026-09-10 pour le module Recouvrement, qui la
+/// lit sur l'appareil.
 ///
-/// La page reste **la même** — même chemin, même entrée de menu, même
-/// permission. Un sous-menu séparé aurait buté sur un droit : la caisse se lit
-/// sous `finance.stats.read`, qu'un caissier boutique ne détient pas ; il
-/// n'aurait pas vu le total de ses propres ventes dans un menu qui lui est
-/// ouvert.
+/// Ce n'est pas un déplacement de confort. Le registre local voit les
+/// encaissements non encore remontés, le serveur non : deux écrans de
+/// recouvrement auraient donné deux chiffres sur les mêmes données, et celui
+/// qui compose la file d'écritures est le seul à ne pas se tromper.
+///
+/// La page garde son chemin, son entrée de menu et sa permission : le profil
+/// « pilotage sans accès aux créances » (`finance.stats.read` sans
+/// `finance.charge.read`) y trouve toujours de quoi lire.
 class FinanceStatsDashboardPage extends StatefulWidget {
   const FinanceStatsDashboardPage({super.key});
 
@@ -32,33 +31,13 @@ class FinanceStatsDashboardPage extends StatefulWidget {
 }
 
 class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
-  FinanceDashboardTab _tab = FinanceDashboardTab.recovery;
-
-  /// L'onglet Caisse n'a encore jamais été ouvert.
-  ///
-  /// **Chargement paresseux, et ce n'est pas une micro-optimisation :** deux
-  /// appels au montage, sur une liaison de guichet, c'est deux fois le délai
-  /// avant le premier chiffre — pour un écran dont on ne lit qu'une moitié.
-  bool _tillRequested = false;
-
   @override
   void initState() {
     super.initState();
-    context.read<FinanceRecoveryBloc>().add(const FinanceRecoveryRequested());
-  }
-
-  void _onTabSelected(FinanceDashboardTab tab) {
-    if (tab == _tab) return;
-
-    // La caisse se demande **une fois**, à la première ouverture. Les allers et
-    // retours suivants entre les onglets ne rappellent rien : ce que l'écran
-    // affiche est ce qui a été lu, et la ligne de fraîcheur dira son âge.
-    if (tab == FinanceDashboardTab.till && !_tillRequested) {
-      _tillRequested = true;
-      context.read<FinanceTillBloc>().add(const FinanceTillRequested());
-    }
-
-    setState(() => _tab = tab);
+    // Un seul onglet, donc une seule lecture, et elle part au montage. Le
+    // chargement paresseux qui existait ici n'avait de sens qu'avec deux
+    // moitiés dont on ne lisait qu'une.
+    context.read<FinanceTillBloc>().add(const FinanceTillRequested());
   }
 
   @override
@@ -70,28 +49,15 @@ class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BlocBuilder<FinanceRecoveryBloc, FinanceRecoveryState>(
-            buildWhen: (prev, curr) => prev.recovery != curr.recovery,
+          BlocBuilder<FinanceTillBloc, FinanceTillState>(
+            buildWhen: (prev, curr) => prev.till != curr.till,
             builder: (context, state) => FinanceStatsDashboardHeader(
-              schoolYear: state.recovery?.context.schoolYear,
+              schoolYear: state.till?.context.schoolYear,
               l10n: l10n,
             ),
           ),
           const SizedBox(height: AppDimensions.spacingL),
-          FinanceDashboardTabs(selected: _tab, onSelected: _onTabSelected),
-          const SizedBox(height: AppDimensions.spacingL),
-          AnimatedSwitcher(
-            duration: AppMotion.standard,
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            child: KeyedSubtree(
-              key: ValueKey<FinanceDashboardTab>(_tab),
-              child: switch (_tab) {
-                FinanceDashboardTab.recovery => const FinanceRecoveryTab(),
-                FinanceDashboardTab.till => const FinanceTillTab(),
-              },
-            ),
-          ),
+          const FinanceTillTab(),
         ],
       ),
     );

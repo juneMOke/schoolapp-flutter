@@ -105,7 +105,7 @@ void main() {
         'Finances': 'Tableau de bord',
         // Module propre depuis 2026-09-02. Depuis qu'il a un tableau de bord,
         // l'en-tête y mène — la synthèse d'abord, les noms ensuite.
-        'Contrôle des frais': 'Tableau de bord',
+        'Recouvrement': 'Tableau de bord',
         'Classes': 'Tableau de bord',
         'Cours': 'Emploi du temps',
         'Résultats': 'Résultats par classe',
@@ -177,14 +177,17 @@ void main() {
     await pumpAccueil(tester);
 
     // Le témoin était « Pré-inscriptions », masquée depuis (`kHiddenSubMenus`).
-    // « Contrôle par frais » est la LIGNE : la carte qui la porte s'intitule
-    // « Contrôle des frais », et viser ce dernier texte trouverait les deux.
+    // « Contrôle par frais » est la LIGNE ; la carte qui la porte s'intitule
+    // « Recouvrement » depuis le renommage du module (RECOUVREMENT_PLAN.md D2).
     await tester.tap(find.text('Contrôle par frais'));
     await tester.pumpAndSettle();
 
     // La ligne absorbe le tap : on atterrit sur le sous-écran, pas sur le
     // tableau de bord de la carte parente.
-    expect(navigationBloc.state.selectedSubMenuId, MenuConstants.feeControlId);
+    expect(
+      navigationBloc.state.selectedSubMenuId,
+      MenuConstants.recouvrementControlId,
+    );
   });
 
   testWidgets('chaque page de chaque module a sa ligne dans un pied de carte', (
@@ -193,7 +196,7 @@ void main() {
     await pumpAccueil(tester);
 
     // 2 + 2 + 2 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03 ; Finances redescendue
-    // à 2, le Contrôle des frais ayant emporté sa page dans son propre module,
+    // à 2, le Recouvrement ayant emporté sa page dans son propre module,
     // où il en a depuis deux ; plus la carte Configuration). Inscriptions est
     // descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées par
     // décision produit (`kHiddenSubMenus`).

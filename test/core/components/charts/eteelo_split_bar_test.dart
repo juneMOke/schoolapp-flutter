@@ -8,6 +8,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<EteeloSplitBarSegment> segments, {
   bool reduceMotion = true,
+  double width = 400,
 }) async {
   await tester.pumpWidget(
     MediaQuery(
@@ -18,7 +19,7 @@ Future<void> _pump(
           home: Scaffold(
             body: Center(
               child: SizedBox(
-                width: 400,
+                width: width,
                 child: EteeloSplitBar(
                   segments: segments,
                   semanticsLabel: '182 filles, 181 garçons',
@@ -204,5 +205,38 @@ void main() {
     await _pump(tester, const [_girls, _boys], reduceMotion: false);
     expect(tester.takeException(), isNull);
     expect(find.text('Filles'), findsOneWidget);
+  });
+
+  testWidgets('une légende trop longue s\'abrège au lieu de déborder', (
+    tester,
+  ) async {
+    // ⚠️ Le cas qui a rendu les rayures noir et jaune en production : la même
+    // légende qui tenait sur une carte pleine largeur, posée sur une
+    // demi-largeur. Un `Wrap` donne à ses enfants une largeur **non bornée** —
+    // une entrée trop longue ne se replie donc pas, elle déborde.
+    await _pump(tester, const [
+      EteeloSplitBarSegment(
+        label: 'Facturation (frais scolaires réglés au guichet)',
+        valueLabel: '3 255 000,00 FC',
+        value: 3255000,
+        color: AppColors.bleuArdoise,
+      ),
+      EteeloSplitBarSegment(
+        label: 'Boutique (achats facultatifs, hors attendu)',
+        valueLabel: '865 000,00 FC',
+        value: 865000,
+        color: AppColors.terreCuite,
+      ),
+    ], width: 300);
+
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'un débordement lève ici, et rend des rayures à l’écran',
+    );
+    // Le MONTANT n'est jamais tronqué : un chiffre coupé serait pire
+    // qu'illisible. C'est le libellé qui cède.
+    expect(find.text('3 255 000,00 FC'), findsOneWidget);
+    expect(find.text('865 000,00 FC'), findsOneWidget);
   });
 }

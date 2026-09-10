@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/entities/stats_context.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_crossed.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_currency_block.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_imputation.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_summary.dart';
 
 /// La caisse de la fenêtre — **deux blocs qui ne se comptent pas dans la même
 /// unité**.
@@ -47,17 +49,73 @@ class FinanceTill extends Equatable {
   /// même versement pèse dans le bloc CDF de l'un et le bloc USD de l'autre.
   final List<TillImputation> impute;
 
+  /// Le grain des barres, **annoncé par le serveur** : `day`, `week` ou
+  /// `month`.
+  ///
+  /// ⚠️ **Il ne se déduit pas de la période.** Sur une fenêtre libre le serveur
+  /// choisit le grain sur la **largeur** de la fenêtre, avec un seuil qui lui
+  /// appartient — et une tranche hebdomadaire porte une clé `YYYY-MM-DD`,
+  /// textuellement indistinguable d'une journée. Sans ce champ, sept jours
+  /// d'encaissements s'étiquetteraient comme la journée du premier.
+  ///
+  /// ⚠️ **C'est le grain de la SÉRIE**, pas celui de la fenêtre comptée. Les
+  /// deux ne diffèrent que sur `day`, où la série recule de six jours — mais
+  /// c'est exactement l'écart qui ferait mentir l'étiquette.
+  ///
+  /// Vide si le serveur ne l'envoie pas : le formatteur retombe alors sur la
+  /// forme de la clé, ce qu'il faisait avant ce champ.
+  final String granularity;
+
+  /// Le nombre de reçus de la fenêtre, **toutes caisses confondues**.
+  ///
+  /// **Le seul agrégat légitimement inter-devises de l'écran** — parce que c'est
+  /// un compteur et non un montant. Chaque reçu y compte **une seule fois**,
+  /// quel que soit le nombre de caisses qu'il a alimentées.
+  ///
+  /// Il ne vaut donc pas la somme des [TillSummary.receiptCount] : un versement
+  /// payé moitié-moitié entre dans les deux compteurs de caisse et une seule fois
+  /// ici. La tuile qui le porte doit l'annoncer, faute de quoi « 40 $ + 35 FC »
+  /// au-dessus de « 70 reçus émis » a raison deux fois et paraît faux.
+  ///
+  /// Un « reçu » est **un encaissement**, qu'une pièce ait été scellée ou non :
+  /// compter les seuls versements portant un numéro diviserait un mois de reprise
+  /// du cahier par 2 au lieu de 91.
+  final int receiptsIssued;
+
+  /// Les paiements croisés de la fenêtre — ceux qui ont réglé un frais fixé dans
+  /// une autre devise que celle tendue.
+  ///
+  /// Toujours présent, éventuellement à zéro : l'encart de lecture garde sa
+  /// formulation de repli plutôt que de disparaître, parce qu'une carte absente
+  /// laisse croire qu'on a oublié de regarder.
+  final TillCrossed crossed;
+
   const FinanceTill({
     required this.context,
     required this.timeZone,
     required this.encaisse,
     required this.impute,
+    this.granularity = '',
+    this.receiptsIssued = 0,
+    this.crossed = const TillCrossed(count: 0, amounts: [], rateMicros: []),
   });
 
   /// Le fuseau est connu : la mention « journée à l'heure de l'école » a un
   /// contenu.
   bool get hasTimeZone => timeZone.isNotEmpty;
 
+  /// Aucun reçu sur la fenêtre, dans aucune devise — l'état vide **global**,
+  /// distinct de la caisse vide dont l'autre a travaillé.
+  bool get hasNoReceipts => receiptsIssued == 0;
+
   @override
-  List<Object?> get props => [context, timeZone, encaisse, impute];
+  List<Object?> get props => [
+    context,
+    timeZone,
+    encaisse,
+    impute,
+    granularity,
+    receiptsIssued,
+    crossed,
+  ];
 }

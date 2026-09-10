@@ -141,14 +141,17 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                       style: _resolveCellStyle(cell.variant, cell.color),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      cell.secondaryText!,
-                      textAlign: cell.textAlign,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _resolveCellStyle(
-                        cell.secondaryVariant,
-                        cell.secondaryColor,
+                    _maybeExplained(
+                      cell.secondaryTooltip,
+                      Text(
+                        cell.secondaryText!,
+                        textAlign: cell.textAlign,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _resolveCellStyle(
+                          cell.secondaryVariant,
+                          cell.secondaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -181,4 +184,14 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
     };
     return color == null ? style : style.copyWith(color: color);
   }
+
+  /// Enrobe la ligne secondaire d'une explication, quand il y en a une.
+  ///
+  /// [Tooltip] porte aussi l'étiquette d'accessibilité : l'explication est
+  /// **lue**, pas seulement survolée — une mention qui ne s'obtient qu'à la
+  /// souris n'existe pas sur une tablette.
+  static Widget _maybeExplained(String? tooltip, Widget child) =>
+      tooltip == null || tooltip.isEmpty
+      ? child
+      : Tooltip(message: tooltip, child: child);
 }

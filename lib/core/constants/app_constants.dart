@@ -151,6 +151,133 @@ class AppConstants {
   /// en 400 si elle ne correspond pas à la période demandée.
   static const String financeTillStatsEndpoint = '/api/v1/finance-stats/till';
 
+  /// La table **nominative** des reçus d'une caisse.
+  ///
+  /// ⚠️ **Deux permissions**, pas une : `finance.stats.read` **et**
+  /// `finance.payment.read`. Ces lignes portent des noms d'élèves et de
+  /// caissiers ; les servir sous le seul droit de pilotage donnerait le
+  /// nominatif à qui ne détient que les agrégats. Un porteur du pilotage seul
+  /// reçoit donc 200 sur `/till` et **403 ici** — c'est voulu, et c'est
+  /// pourquoi cet appel vit dans son propre BLoC : les cartes restent à
+  /// l'écran, seule la table dit ce qui lui manque.
+  ///
+  /// `currency` est **obligatoire** : la table décrit une caisse. Sans elle le
+  /// serveur répond 400, plutôt qu'une page vraisemblable scopée sur rien dont
+  /// le `totalElements` compterait à travers les caisses.
+  ///
+  /// La taille de page est bornée à 100, et un dépassement part en **400** —
+  /// pas en écrêtage silencieux, qui ferait conclure d'une réponse courte que
+  /// la fenêtre est creuse.
+  static const String financeTillReceiptsEndpoint =
+      '/api/v1/finance-stats/till/receipts';
+
+  /// Le **rapport d'encaissements** de la fenêtre, en PDF paginé et scellé.
+  ///
+  /// Même fenêtre et mêmes paramètres de période que la table, à une exception
+  /// près qui gouverne toute l'interface : ⚠️ **`currency` y est OBLIGATOIRE**,
+  /// là où la table l'a rendue facultative. Le document se nomme d'après une
+  /// caisse et son total de pied ne vaut que sur une seule unité — on ne
+  /// totalise pas des dollars avec des francs. Un écran qui montre « toutes les
+  /// caisses » doit donc **désigner une caisse** au moment de télécharger.
+  ///
+  /// ⚠️ **Pièce numérotée mais NON archivée** : le serveur n'en garde pas les
+  /// octets, et redemander le même rapport en produit un nouveau, sous un
+  /// nouveau numéro. Il n'y a donc rien à mettre en cache, et pas de
+  /// « re-téléchargement » à offrir.
+  ///
+  /// ⚠️ **Plafonné à 5 000 lignes**, refusé en 400 au-delà plutôt que tronqué —
+  /// le refus porte le compte réel. La sortie de secours est l'export CSV
+  /// voisin, sans plafond.
+  ///
+  /// ⚠️ **Un rendu à la fois côté serveur** : un second appel concurrent part
+  /// en 429 avec `Retry-After`. Le bouton se désarme pendant la préparation.
+  static const String financeTillReceiptsReportEndpoint =
+      '/api/v1/finance-stats/till/receipts.pdf';
+
+  /// L'attente retenue quand un 429 du rapport n'annonce pas la sienne.
+  ///
+  /// C'est la valeur que le serveur pose lui-même en `Retry-After` ; elle n'est
+  /// reprise ici que pour le cas où l'en-tête manque, où l'écran doit bien
+  /// choisir quelque chose.
+  ///
+  /// ⚠️ **Ce n'est pas un jeton de motion, et elle vit ici pour ça.** Le
+  /// contrôle `check_motion_tokens.sh` interdit les `Duration()` sous
+  /// `features/*/presentation`, à juste titre : une durée d'interface doit
+  /// pouvoir se retoucher d'un seul endroit. Celle-ci n'en est pas une — elle
+  /// est dictée par le protocole, et la ranger avec les animations
+  /// (`actionCooldown` vaut 600 ms) l'exposerait à être réglée pour des raisons
+  /// de fluidité, ce qui la ferait diverger du serveur en silence.
+  static const Duration financeTillReportRetryFallback = Duration(seconds: 60);
+
+  // ── Recouvrement — la liste de relance ────────────────────────────────────
+
+  /// `POST` de la **liste de relance** : la tablette envoie les lignes, le
+  /// serveur imprime. Sous `finance.charge.read` **seule** — c'est la
+  /// permission des créances qu'elle sert, et celle du secrétariat qui relance.
+  ///
+  /// ⚠️ **Pièce numérotée et scellée, mais NON archivée** — comme le rapport de
+  /// caisse et le registre d'inscriptions. Rien à mettre en cache, aucun
+  /// « re-téléchargement » à offrir : redemander la même liste en produit une
+  /// nouvelle sous un nouveau numéro.
+  ///
+  /// ⚠️ **Plafonnée à 5 000 lignes**, refusée en `400` `REPORT_LINE_CAP`
+  /// au-delà plutôt que tronquée. Le compte est connu AVANT l'envoi : la garde
+  /// est locale, et ce refus-ci est un dernier recours.
+  ///
+  /// ⚠️ **C'est la RÉPONSE qui coûte, pas la requête.** Au plafond le PDF pèse
+  /// 2 050 Ko contre 257 Ko pour le corps compressé — huit fois plus — et il
+  /// n'y a pas de remède symétrique : un PDF est déjà compressé, aucune
+  /// négociation de contenu ne l'entamera. Un tirage de 5 000 lignes met
+  /// 5 min 28 à descendre sur une liaison à 50 kbit/s, et aucun réglage ne
+  /// rendra cela praticable. L'écran n'en propose pas : le clic porte sur une
+  /// ligne de **groupe**, donc un niveau — 228 Ko et 3 s de rendu à 500 élèves,
+  /// qui est l'usage réel.
+  ///
+  /// ⚠️ **Un rendu à la fois côté serveur**, et le permis est **partagé** avec
+  /// le rapport de caisse et le registre d'inscriptions : un `429` peut donc
+  /// venir d'un document lancé par quelqu'un d'autre. Le message doit le dire.
+  static const String recouvrementRelanceListEndpoint =
+      '/api/v1/finance/relance-list';
+
+  /// Plafond de lignes, tel que le serveur le pose. Vérifié **localement** avant
+  /// l'envoi : on connaît le compte sans faire le voyage, et téléverser un
+  /// mégaoctet pour se faire refuser serait absurde.
+  static const int recouvrementRelanceListLineCap = 5000;
+
+  /// Délai de réception de la liste de relance — **mesuré, pas recopié**.
+  ///
+  /// Le back a chronométré la chaîne réelle le 2026-09-10 : le serveur rend
+  /// **entièrement en mémoire avant d'émettre**, donc il y a un silence de
+  /// 1,1 s (100 lignes) à 7,1 s (plafond) avant le premier octet. Trente
+  /// secondes, c'est deux fois le pire mesuré plus la marge d'un serveur
+  /// chargé — ces 7,1 s viennent d'une machine de développement, pas du
+  /// matériel de staging.
+  ///
+  /// ⚠️ **`receiveTimeout` joue DEUX rôles dans Dio, et un seul est contraint
+  /// ici.** Sur `request.close()`, c'est un **budget total** : l'attente avant
+  /// les en-têtes, donc ce silence de rendu. Sur le flux du corps, c'est un
+  /// **intervalle entre chunks**, réarmé à chaque paquet
+  /// (`handleResponseStream`). Le PDF du plafond pèse 2 050 Ko et met 5 min 28
+  /// à descendre sur une liaison à 50 kbit/s — il ne coupe pas pour autant,
+  /// tant que les paquets arrivent. C'est le rendu qu'on borne, pas le
+  /// transfert.
+  static const Duration recouvrementRelanceListTimeout = Duration(seconds: 30);
+
+  /// Délai d'**envoi** de la liste de relance.
+  ///
+  /// ⚠️ **Celui-ci est bien un budget TOTAL** : l'adaptateur l'applique à
+  /// `request.addStream`, qui ne se complète qu'une fois tout le corps écrit.
+  /// Il se dérive donc du lien, pas du serveur.
+  ///
+  /// Le corps gzippé pèse 26 Ko pour un niveau de 500 élèves — 8 s sur une
+  /// liaison à 50 kbit/s — et 257 Ko au plafond, soit 41 s sur la même liaison.
+  /// Soixante secondes couvrent les deux avec de la marge, et détectent un fil
+  /// mort en une minute. Descendre à trente couperait un envoi **sain** au
+  /// plafond depuis un guichet étroit.
+  static const Duration recouvrementRelanceListSendTimeout = Duration(
+    seconds: 60,
+  );
+
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body
   // de requête, et posent un `Content-Disposition: attachment; filename="<n°>.pdf"`

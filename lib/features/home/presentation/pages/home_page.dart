@@ -23,9 +23,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/re_reg
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_feature_scope.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_dashboard_page.dart';
-import 'package:school_app_flutter/features/fee_control/presentation/pages/fee_control_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -191,8 +191,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
-        state.selectedSubMenuId == MenuConstants.feeControlDashboardId ||
-        state.selectedSubMenuId == MenuConstants.feeControlId ||
+        state.selectedSubMenuId == MenuConstants.recouvrementDashboardId ||
+        state.selectedSubMenuId == MenuConstants.recouvrementControlId ||
         state.selectedSubMenuId == MenuConstants.boutiqueAchatsId ||
         state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
@@ -365,14 +365,14 @@ class _HomePageView extends StatelessWidget {
       // emplacement du switch, et sans clé Flutter recyclerait l'Element en
       // basculant de l'un à l'autre — son State ne serait jamais remonté, donc
       // les pulls d'hydratation ne rejoueraient pas.
-      case MenuConstants.feeControlDashboardId:
+      case MenuConstants.recouvrementDashboardId:
         return const FeeControlFeatureScope(
-          key: ValueKey(MenuConstants.feeControlDashboardId),
-          child: FeeControlDashboardPage(),
+          key: ValueKey(MenuConstants.recouvrementDashboardId),
+          child: RecouvrementDashboardPage(),
         );
-      case MenuConstants.feeControlId:
+      case MenuConstants.recouvrementControlId:
         return const FeeControlFeatureScope(
-          key: ValueKey(MenuConstants.feeControlId),
+          key: ValueKey(MenuConstants.recouvrementControlId),
           child: FeeControlPage(),
         );
       case MenuConstants.documentsStudentId:

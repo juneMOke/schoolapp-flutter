@@ -110,856 +110,856 @@
   },
   "configurationTitle": "Setup",
   "@configurationTitle": {
-      "description": "Provisioning wizard app bar title"
+    "description": "Provisioning wizard app bar title"
   },
   "configurationSubtitle": "Bringing the school into service",
   "@configurationSubtitle": {
-      "description": "Provisioning wizard app bar subtitle"
+    "description": "Provisioning wizard app bar subtitle"
   },
   "configurationStepCounter": "Step {current} / {total}",
   "@configurationStepCounter": {
-      "description": "Wizard step counter, right-aligned in the bar",
-      "placeholders": {
-          "current": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "description": "Wizard step counter, right-aligned in the bar",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
+    }
   },
   "configurationExitTooltip": "Leave setup",
   "@configurationExitTooltip": {
-      "description": "Exit button tooltip — no confirmation, everything is saved"
+    "description": "Exit button tooltip — no confirmation, everything is saved"
   },
   "configurationStepSchool": "School",
   "@configurationStepSchool": {
-      "description": "Short label of step 1 in the stepper"
+    "description": "Short label of step 1 in the stepper"
   },
   "configurationStepAcademicYear": "Year",
   "@configurationStepAcademicYear": {
-      "description": "Short label of step 2 in the stepper"
+    "description": "Short label of step 2 in the stepper"
   },
   "configurationStepStructure": "Structure",
   "@configurationStepStructure": {
-      "description": "Short label of step 3 in the stepper"
+    "description": "Short label of step 3 in the stepper"
   },
   "configurationStepFees": "Fees",
   "@configurationStepFees": {
-      "description": "Short label of step 4 in the stepper"
+    "description": "Short label of step 4 in the stepper"
   },
   "configurationStepActivation": "Activation",
   "@configurationStepActivation": {
-      "description": "Short label of step 5 in the stepper"
+    "description": "Short label of step 5 in the stepper"
   },
   "configurationStepSemantics": "Step {current} of {total}, {title}",
   "@configurationStepSemantics": {
-      "description": "Accessibility label of a stepper dot",
-      "placeholders": {
-          "current": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          },
-          "title": {
-              "type": "String"
-          }
+    "description": "Accessibility label of a stepper dot",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
       }
+    }
   },
   "configurationBack": "Back",
   "@configurationBack": {
-      "description": "Back button of the save bar"
+    "description": "Back button of the save bar"
   },
   "configurationSave": "Save",
   "@configurationSave": {
-      "description": "Save button of the footer bar"
+    "description": "Save button of the footer bar"
   },
   "configurationContinue": "Continue",
   "@configurationContinue": {
-      "description": "Advance button of the footer bar"
+    "description": "Advance button of the footer bar"
   },
   "configurationSaving": "Saving…",
   "@configurationSaving": {
-      "description": "Transient footer message while writing"
+    "description": "Transient footer message while writing"
   },
   "configurationSaved": "Saved",
   "@configurationSaved": {
-      "description": "Footer check on step 1, the only step that really writes"
+    "description": "Footer check on step 1, the only step that really writes"
   },
   "configurationDraftSaved": "Draft saved",
   "@configurationDraftSaved": {
-      "description": "Footer check on steps 2 to 4, which only build a local draft"
+    "description": "Footer check on steps 2 to 4, which only build a local draft"
   },
   "configurationSaveBarDefaultHint": "Fill in the required fields to continue",
   "@configurationSaveBarDefaultHint": {
-      "description": "Default footer message when the step provides no hint"
+    "description": "Default footer message when the step provides no hint"
   },
   "configurationSchoolSectionTitle": "School identity",
   "@configurationSchoolSectionTitle": {
-      "description": "Step 1 card title"
+    "description": "Step 1 card title"
   },
   "configurationSchoolSectionSubtitle": "This information appears on certificates, receipts and report cards.",
   "@configurationSchoolSectionSubtitle": {
-      "description": "Step 1 card subtitle — says why these fields matter"
+    "description": "Step 1 card subtitle — says why these fields matter"
   },
   "configurationSchoolName": "School name",
   "@configurationSchoolName": {
-      "description": "School name field"
+    "description": "School name field"
   },
   "configurationSchoolCountry": "Country",
   "@configurationSchoolCountry": {
-      "description": "Country field, read-only"
+    "description": "Country field, read-only"
   },
   "configurationSchoolCity": "City",
   "@configurationSchoolCity": {
-      "description": "City field, read-only"
+    "description": "City field, read-only"
   },
   "configurationSchoolDistrict": "District",
   "@configurationSchoolDistrict": {
-      "description": "Kinshasa district field"
+    "description": "Kinshasa district field"
   },
   "configurationSchoolMunicipality": "Municipality",
   "@configurationSchoolMunicipality": {
-      "description": "Municipality field, cascading from the district"
+    "description": "Municipality field, cascading from the district"
   },
   "configurationSchoolMunicipalityPlaceholder": "Pick a district first",
   "@configurationSchoolMunicipalityPlaceholder": {
-      "description": "Municipality placeholder while no district is chosen"
+    "description": "Municipality placeholder while no district is chosen"
   },
   "configurationSchoolAddress": "Address",
   "@configurationSchoolAddress": {
-      "description": "School address field"
+    "description": "School address field"
   },
   "configurationSchoolPhone": "School phone",
   "@configurationSchoolPhone": {
-      "description": "School phone field"
+    "description": "School phone field"
   },
   "configurationSchoolEmail": "School email",
   "@configurationSchoolEmail": {
-      "description": "School email field"
+    "description": "School email field"
   },
   "configurationSchoolMissingHint": "Still needed: {fields}",
   "@configurationSchoolMissingHint": {
-      "description": "Footer message naming the required fields still empty",
-      "placeholders": {
-          "fields": {
-              "type": "String"
-          }
+    "description": "Footer message naming the required fields still empty",
+    "placeholders": {
+      "fields": {
+        "type": "String"
       }
+    }
   },
   "configurationSchoolReadOnlyNote": "Country and city are fixed: the application is deployed in Kinshasa.",
   "@configurationSchoolReadOnlyNote": {
-      "description": "Note explaining why two fields cannot be edited"
+    "description": "Note explaining why two fields cannot be edited"
   },
   "configurationYearSectionTitle": "Academic year",
   "@configurationYearSectionTitle": {
-      "description": "Step 2 card title"
+    "description": "Step 2 card title"
   },
   "configurationYearSectionSubtitle": "A first year is proposed from today's date — adjust the dates if needed.",
   "@configurationYearSectionSubtitle": {
-      "description": "Step 2 card subtitle"
+    "description": "Step 2 card subtitle"
   },
   "configurationYearProposed": "Proposed automatically",
   "@configurationYearProposed": {
-      "description": "Origin badge while the proposal is untouched"
+    "description": "Origin badge while the proposal is untouched"
   },
   "configurationYearEdited": "Edited",
   "@configurationYearEdited": {
-      "description": "Origin badge once a date or the label has changed"
+    "description": "Origin badge once a date or the label has changed"
   },
   "configurationYearRestore": "Restore the proposal",
   "@configurationYearRestore": {
-      "description": "Link rebuilding the proposal from today's date"
+    "description": "Link rebuilding the proposal from today's date"
   },
   "configurationYearStart": "First day of class",
   "@configurationYearStart": {
-      "description": "Start date field"
+    "description": "Start date field"
   },
   "configurationYearEnd": "End of year",
   "@configurationYearEnd": {
-      "description": "End date field"
+    "description": "End date field"
   },
   "configurationYearDuration": "Length",
   "@configurationYearDuration": {
-      "description": "Label of the indicative span between both dates"
+    "description": "Label of the indicative span between both dates"
   },
   "configurationYearDurationValue": "≈ {months} months",
   "@configurationYearDurationValue": {
-      "description": "Indicative span, rounded to months",
-      "placeholders": {
-          "months": {
-              "type": "int"
-          }
+    "description": "Indicative span, rounded to months",
+    "placeholders": {
+      "months": {
+        "type": "int"
       }
+    }
   },
   "configurationYearRangeError": "The end must follow the start",
   "@configurationYearRangeError": {
-      "description": "Shown when the end date does not follow the start date"
+    "description": "Shown when the end date does not follow the start date"
   },
   "configurationYearPeriodsNote": "Terms and semesters are set later, in Results.",
   "@configurationYearPeriodsNote": {
-      "description": "Explicit pointer to another module — do not add terms here"
+    "description": "Explicit pointer to another module — do not add terms here"
   },
   "configurationStructureTitle": "Cycles, levels and classes",
   "@configurationStructureTitle": {
-      "description": "Step 3 title"
+    "description": "Step 3 title"
   },
   "configurationTotalCycles": "{count, plural, one{cycle} other{cycles}}",
   "@configurationTotalCycles": {
-      "description": "Cycle total chip label",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Cycle total chip label",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalLevels": "{count, plural, one{level} other{levels}}",
   "@configurationTotalLevels": {
-      "description": "Level total chip label",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Level total chip label",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalClassrooms": "{count, plural, one{class} other{classes}}",
   "@configurationTotalClassrooms": {
-      "description": "Classroom total chip label",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Classroom total chip label",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalCourses": "{count, plural, one{course} other{courses}}",
   "@configurationTotalCourses": {
-      "description": "Course total chip label — the teaching volume activation will generate",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Course total chip label — the teaching volume activation will generate",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationCycleClassroomsPerLevel": "Classes per level",
   "@configurationCycleClassroomsPerLevel": {
-      "description": "Cycle-wide setting, with no effect on levels carrying official grids"
+    "description": "Cycle-wide setting, with no effect on levels carrying official grids"
   },
   "configurationCycleNotOffered": "Not offered",
   "@configurationCycleNotOffered": {
-      "description": "Header counter of a fully deselected cycle"
+    "description": "Header counter of a fully deselected cycle"
   },
   "configurationCycleSummary": "{open} / {total} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
   "@configurationCycleSummary": {
-      "description": "Cycle header counter: open levels out of total, then classes",
-      "placeholders": {
-          "open": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          },
-          "classrooms": {
-              "type": "int"
-          }
+    "description": "Cycle header counter: open levels out of total, then classes",
+    "placeholders": {
+      "open": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "classrooms": {
+        "type": "int"
       }
+    }
   },
   "configurationLevelNotOffered": "Level not offered this year",
   "@configurationLevelNotOffered": {
-      "description": "Row of a level whose counter is zero"
+    "description": "Row of a level whose counter is zero"
   },
   "configurationLevelNoGrid": "No official grid — these classes will have no courses.",
   "@configurationLevelNoGrid": {
-      "description": "Amber warning under a level with no MINEDUC grid. Blocks nothing"
+    "description": "Amber warning under a level with no MINEDUC grid. Blocks nothing"
   },
   "configurationSectionsServed": "Grids served on {level}",
   "@configurationSectionsServed": {
-      "description": "Header of a level's stream row",
-      "placeholders": {
-          "level": {
-              "type": "String"
-          }
+    "description": "Header of a level's stream row",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
+    }
   },
   "configurationSectionCourses": "{count, plural, one{{count} course} other{{count} courses}}",
   "@configurationSectionCourses": {
-      "description": "Course cost of a class following this grid",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Course cost of a class following this grid",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationStructureHint": "{count, plural, one{{count} class will be created for the year} other{{count} classes will be created for the year}}",
   "@configurationStructureHint": {
-      "description": "Step 3 footer message — the only place the commitment is quantified before activation",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Step 3 footer message — the only place the commitment is quantified before activation",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationStructureEmptyHint": "Tick at least one level",
   "@configurationStructureEmptyHint": {
-      "description": "Footer message when no class is open"
+    "description": "Footer message when no class is open"
   },
   "configurationStructureEmptyTitle": "No level selected",
   "@configurationStructureEmptyTitle": {
-      "description": "Step 3 empty state title"
+    "description": "Step 3 empty state title"
   },
   "configurationStructureEmptyMessage": "A school needs at least one class to open enrolments. Restore the default proposal, or tick the levels you are opening.",
   "@configurationStructureEmptyMessage": {
-      "description": "Step 3 empty state message"
+    "description": "Step 3 empty state message"
   },
   "configurationStructureRestore": "Restore the proposal",
   "@configurationStructureRestore": {
-      "description": "Empty state action: rebuilds the proposal from the catalogue"
+    "description": "Empty state action: rebuilds the proposal from the catalogue"
   },
   "configurationFeesTitle": "School fees",
   "@configurationFeesTitle": {
-      "description": "Step 4 title"
+    "description": "Step 4 title"
   },
   "configurationFeeNew": "New fee",
   "@configurationFeeNew": {
-      "description": "Button opening the fee form"
+    "description": "Button opening the fee form"
   },
   "configurationFeeFormTitle": "New fee",
   "@configurationFeeFormTitle": {
-      "description": "Fee creation form title"
+    "description": "Fee creation form title"
   },
   "configurationFeeFormEditTitle": "Edit fee",
   "@configurationFeeFormEditTitle": {
-      "description": "Fee form title when editing"
+    "description": "Fee form title when editing"
   },
   "configurationFeeType": "Fee type",
   "@configurationFeeType": {
-      "description": "Fee type field, served by the catalogue"
+    "description": "Fee type field, served by the catalogue"
   },
   "configurationFeeTypeOthers": "Other types ({count})",
   "@configurationFeeTypeOthers": {
-      "description": "Disclosure for fee types outside the common ones",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Disclosure for fee types outside the common ones",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeLabel": "Label shown to parents",
   "@configurationFeeLabel": {
-      "description": "Label field — the one printed on the collection note"
+    "description": "Label field — the one printed on the collection note"
   },
   "configurationFeeAmount": "Amount",
   "@configurationFeeAmount": {
-      "description": "Amount field, entered in units"
+    "description": "Amount field, entered in units"
   },
   "configurationFeeCurrency": "Currency",
   "@configurationFeeCurrency": {
-      "description": "Currency selector next to the amount"
+    "description": "Currency selector next to the amount"
   },
   "configurationFeeDueAt": "Due date",
   "@configurationFeeDueAt": {
-      "description": "Fee due date field"
+    "description": "Fee due date field"
   },
   "configurationFeeScope": "Applies to",
   "@configurationFeeScope": {
-      "description": "Scope field — the levels the fee is charged on"
+    "description": "Scope field — the levels the fee is charged on"
   },
   "configurationFeeScopeAll": "All opened levels",
   "@configurationFeeScopeAll": {
-      "description": "Scope mode: every level receiving at least one class"
+    "description": "Scope mode: every level receiving at least one class"
   },
   "configurationFeeScopeSome": "Selected levels",
   "@configurationFeeScopeSome": {
-      "description": "Scope mode: a chosen set of levels"
+    "description": "Scope mode: a chosen set of levels"
   },
   "configurationFeeScopeAllHint": "Will apply to {count, plural, one{{count} open level} other{{count} open levels}}",
   "@configurationFeeScopeAllHint": {
-      "description": "Dynamic subtitle of the all-levels mode",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Dynamic subtitle of the all-levels mode",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeScopeCount": "{selected} / {total} selected",
   "@configurationFeeScopeCount": {
-      "description": "Counter of levels held in the scope",
-      "placeholders": {
-          "selected": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "description": "Counter of levels held in the scope",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeScopeWholeCycle": "Whole cycle",
   "@configurationFeeScopeWholeCycle": {
-      "description": "Shortcut ticking every open level of a cycle"
+    "description": "Shortcut ticking every open level of a cycle"
   },
   "configurationFeeAdd": "Add the fee",
   "@configurationFeeAdd": {
-      "description": "Fee form submit button"
+    "description": "Fee form submit button"
   },
   "configurationFeeUpdate": "Update",
   "@configurationFeeUpdate": {
-      "description": "Fee form submit button when editing"
+    "description": "Fee form submit button when editing"
   },
   "configurationFeeCancel": "Cancel",
   "@configurationFeeCancel": {
-      "description": "Fee form dismiss button"
+    "description": "Fee form dismiss button"
   },
   "configurationFeeCount": "{count, plural, =0{No fee defined} one{{count} fee defined} other{{count} fees defined}}",
   "@configurationFeeCount": {
-      "description": "Summary of how many fees were entered",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Summary of how many fees were entered",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeCatalogTotal": "Catalogue total: {total}",
   "@configurationFeeCatalogTotal": {
-      "description": "Total of entered fees, per currency — never summed across currencies",
-      "placeholders": {
-          "total": {
-              "type": "String"
-          }
+    "description": "Total of entered fees, per currency — never summed across currencies",
+    "placeholders": {
+      "total": {
+        "type": "String"
       }
+    }
   },
   "configurationFeePerStudent": "per student",
   "@configurationFeePerStudent": {
-      "description": "Caption under a fee row amount"
+    "description": "Caption under a fee row amount"
   },
   "configurationFeeLevelsLabel": "{count, plural, one{{count} level} other{{count} levels}}",
   "@configurationFeeLevelsLabel": {
-      "description": "Scope summary of a fee row",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Scope summary of a fee row",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeDueLabel": "due {date}",
   "@configurationFeeDueLabel": {
-      "description": "Due date summary of a fee row",
-      "placeholders": {
-          "date": {
-              "type": "String"
-          }
+    "description": "Due date summary of a fee row",
+    "placeholders": {
+      "date": {
+        "type": "String"
       }
+    }
   },
   "configurationFeeDeleted": "Fee \"{label}\" deleted",
   "@configurationFeeDeleted": {
-      "description": "Toast after deleting a fee",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Toast after deleting a fee",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationFeeSaved": "Fee \"{label}\" saved",
   "@configurationFeeSaved": {
-      "description": "Toast after adding or updating a fee",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Toast after adding or updating a fee",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationFeesEmptyTitle": "No fees yet",
   "@configurationFeesEmptyTitle": {
-      "description": "Step 4 empty state title"
+    "description": "Step 4 empty state title"
   },
   "configurationFeesEmptyMessage": "Add at least one fee — registration, tuition, canteen — so billing can generate collection notes.",
   "@configurationFeesEmptyMessage": {
-      "description": "Step 4 empty state message"
+    "description": "Step 4 empty state message"
   },
   "configurationFeesEmptyAction": "Create the first fee",
   "@configurationFeesEmptyAction": {
-      "description": "Step 4 empty state action"
+    "description": "Step 4 empty state action"
   },
   "configurationFeesEmptyHint": "Add at least one fee to continue",
   "@configurationFeesEmptyHint": {
-      "description": "Footer message when no fee has been entered"
+    "description": "Footer message when no fee has been entered"
   },
   "configurationFeesDraftHint": "Finish the fee you are editing",
   "@configurationFeesDraftHint": {
-      "description": "Footer message while a sub-form is open"
+    "description": "Footer message while a sub-form is open"
   },
   "configurationFeesValidHint": "{count, plural, one{{count} fee will be attached to the open levels} other{{count} fees will be attached to the open levels}}",
   "@configurationFeesValidHint": {
-      "description": "Footer message when step 4 is valid",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Footer message when step 4 is valid",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryTitle": "Summary",
   "@configurationSummaryTitle": {
-      "description": "Step 5 title"
+    "description": "Step 5 title"
   },
   "configurationSummaryEdit": "Edit",
   "@configurationSummaryEdit": {
-      "description": "Summary card shortcut back to its step"
+    "description": "Summary card shortcut back to its step"
   },
   "configurationSummarySchool": "School",
   "@configurationSummarySchool": {
-      "description": "Identity summary card"
+    "description": "Identity summary card"
   },
   "configurationSummaryYear": "Academic year",
   "@configurationSummaryYear": {
-      "description": "Year summary card"
+    "description": "Year summary card"
   },
   "configurationSummaryStructure": "Structure · {count, plural, one{{count} class} other{{count} classes}}",
   "@configurationSummaryStructure": {
-      "description": "Structure summary card",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Structure summary card",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryFees": "School fees",
   "@configurationSummaryFees": {
-      "description": "Fees summary card"
+    "description": "Fees summary card"
   },
   "configurationSummaryMissing": "to be filled in",
   "@configurationSummaryMissing": {
-      "description": "Shown instead of a missing field — never a silent blank"
+    "description": "Shown instead of a missing field — never a silent blank"
   },
   "configurationSummaryCycleLine": "{levels, plural, one{{levels} level} other{{levels} levels}} · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}}",
   "@configurationSummaryCycleLine": {
-      "description": "Cycle line in the structure summary",
-      "placeholders": {
-          "levels": {
-              "type": "int"
-          },
-          "classrooms": {
-              "type": "int"
-          }
+    "description": "Cycle line in the structure summary",
+    "placeholders": {
+      "levels": {
+        "type": "int"
+      },
+      "classrooms": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryNoGrid": "no official grid",
   "@configurationSummaryNoGrid": {
-      "description": "Added to a cycle whose levels carry no official grid"
+    "description": "Added to a cycle whose levels carry no official grid"
   },
   "configurationCheckSchool": "School identity complete",
   "@configurationCheckSchool": {
-      "description": "Activation check: the eight fields"
+    "description": "Activation check: the eight fields"
   },
   "configurationCheckYear": "Academic year dated",
   "@configurationCheckYear": {
-      "description": "Activation check: the date range"
+    "description": "Activation check: the date range"
   },
   "configurationCheckClassrooms": "{count, plural, =0{No class to open} one{{count} class ready to open} other{{count} classes ready to open}}",
   "@configurationCheckClassrooms": {
-      "description": "Activation check: classes from the plan",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Activation check: classes from the plan",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationCheckFees": "{count, plural, =0{No fee attached to levels} one{{count} fee attached to levels} other{{count} fees attached to levels}}",
   "@configurationCheckFees": {
-      "description": "Activation check: fees entered",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Activation check: fees entered",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationActivate": "Bring the school into service",
   "@configurationActivate": {
-      "description": "Activation button — the journey's only structural write"
+    "description": "Activation button — the journey's only structural write"
   },
   "configurationActivating": "Activating…",
   "@configurationActivating": {
-      "description": "Button label while activating"
+    "description": "Button label while activating"
   },
   "configurationActivateBlocked": "Complete the amber items to activate.",
   "@configurationActivateBlocked": {
-      "description": "Shown while the four checks do not pass"
+    "description": "Shown while the four checks do not pass"
   },
   "configurationActivateFailed": "Activation failed — try again.",
   "@configurationActivateFailed": {
-      "description": "Activation failure toast. No data is lost"
+    "description": "Activation failure toast. No data is lost"
   },
   "configurationActivatedTitle": "{school} is in service",
   "@configurationActivatedTitle": {
-      "description": "Success screen title",
-      "placeholders": {
-          "school": {
-              "type": "String"
-          }
+    "description": "Success screen title",
+    "placeholders": {
+      "school": {
+        "type": "String"
       }
+    }
   },
   "configurationActivatedMessage": "The {year} year is open with {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} and {fees, plural, one{{fees} fee} other{{fees} fees}}. You can enrol your first students.",
   "@configurationActivatedMessage": {
-      "description": "Success screen message",
-      "placeholders": {
-          "year": {
-              "type": "String"
-          },
-          "classrooms": {
-              "type": "int"
-          },
-          "fees": {
-              "type": "int"
-          }
+    "description": "Success screen message",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "classrooms": {
+        "type": "int"
+      },
+      "fees": {
+        "type": "int"
       }
+    }
   },
   "configurationGoHome": "Go to the dashboard",
   "@configurationGoHome": {
-      "description": "Primary exit of the success screen"
+    "description": "Primary exit of the success screen"
   },
   "configurationReviewSetup": "Review the setup",
   "@configurationReviewSetup": {
-      "description": "Secondary exit of the success screen"
+    "description": "Secondary exit of the success screen"
   },
   "configurationWarningsTitle": "Worth knowing before activating",
   "@configurationWarningsTitle": {
-      "description": "Header of the plan warnings block"
+    "description": "Header of the plan warnings block"
   },
   "menuConfiguration": "Setup",
   "@menuConfiguration": {
-      "description": "Sidebar menu — school settings, once the school is in service"
+    "description": "Sidebar menu — school settings, once the school is in service"
   },
   "subMenuConfigurationSchool": "School settings",
   "@subMenuConfigurationSchool": {
-      "description": "Sub-menu of the Setup module"
+    "description": "Sub-menu of the Setup module"
   },
   "configurationSettingsTitle": "School setup",
   "@configurationSettingsTitle": {
-      "description": "Settings screen title, after the school is in service"
+    "description": "Settings screen title, after the school is in service"
   },
   "configurationSettingsInService": "{school} · in service",
   "@configurationSettingsInService": {
-      "description": "State banner: the school is set up",
-      "placeholders": {
-          "school": {
-              "type": "String"
-          }
+    "description": "State banner: the school is set up",
+    "placeholders": {
+      "school": {
+        "type": "String"
       }
+    }
   },
   "configurationSettingsSummary": "{year} year · {classrooms, plural, one{{classrooms} class} other{{classrooms} classes}} · {levels, plural, one{{levels} level} other{{levels} levels}}",
   "@configurationSettingsSummary": {
-      "description": "State banner summary",
-      "placeholders": {
-          "year": {
-              "type": "String"
-          },
-          "classrooms": {
-              "type": "int"
-          },
-          "levels": {
-              "type": "int"
-          }
+    "description": "State banner summary",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "classrooms": {
+        "type": "int"
+      },
+      "levels": {
+        "type": "int"
       }
+    }
   },
   "configurationSettingsNextYear": "Prepare next year",
   "@configurationSettingsNextYear": {
-      "description": "Disabled in V1 — the wizard cannot be replayed"
+    "description": "Disabled in V1 — the wizard cannot be replayed"
   },
   "configurationSettingsNextYearTooltip": "Not available yet: the wizard cannot be replayed, as the server would refuse an already open year. A dedicated action is still to be delivered.",
   "@configurationSettingsNextYearTooltip": {
-      "description": "Tooltip of the prepare-next-year button"
+    "description": "Tooltip of the prepare-next-year button"
   },
   "configurationSettingsTabIdentity": "School identity",
   "@configurationSettingsTabIdentity": {
-      "description": "Editable settings tab"
+    "description": "Editable settings tab"
   },
   "configurationSettingsTabStructure": "Cycles, levels and classes",
   "@configurationSettingsTabStructure": {
-      "description": "Read-only settings tab"
+    "description": "Read-only settings tab"
   },
   "configurationSettingsTabFees": "School fees",
   "@configurationSettingsTabFees": {
-      "description": "Tariff tab, editable row by row"
+    "description": "Tariff tab, editable row by row"
   },
   "configurationSettingsReadOnly": "read-only",
   "@configurationSettingsReadOnly": {
-      "description": "Marker of a non-editable tab"
+    "description": "Marker of a non-editable tab"
   },
   "configurationSettingsStructureReadOnlyNote": "The structure can no longer be changed once the school is in service. The server cannot yet cleanly refuse deleting a populated level: wiring it here would risk breaking ongoing enrolments.",
   "@configurationSettingsStructureReadOnlyNote": {
-      "description": "Why the structure tab is read-only"
+    "description": "Why the structure tab is read-only"
   },
   "configurationSettingsSaved": "Changes saved",
   "@configurationSettingsSaved": {
-      "description": "Toast after saving in the settings"
+    "description": "Toast after saving in the settings"
   },
   "configurationSettingsSave": "Save",
   "@configurationSettingsSave": {
-      "description": "Settings save button"
+    "description": "Settings save button"
   },
   "configurationSettingsNoYear": "No open year",
   "@configurationSettingsNoYear": {
-      "description": "Settings empty state when the academic context returns no year"
+    "description": "Settings empty state when the academic context returns no year"
   },
   "configurationSettingsTariffsForLevel": "Tariffs for {level}",
   "@configurationSettingsTariffsForLevel": {
-      "description": "Header of a level's tariff list",
-      "placeholders": {
-          "level": {
-              "type": "String"
-          }
+    "description": "Header of a level's tariff list",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
+    }
   },
   "configurationSettingsTariffOne": "Here a tariff carries a single level: each row is edited on its own.",
   "@configurationSettingsTariffOne": {
-      "description": "Note explaining the wizard's scope no longer exists in settings"
+    "description": "Note explaining the wizard's scope no longer exists in settings"
   },
   "configurationSectionsTitle": "Fee sections",
   "@configurationSectionsTitle": {
-      "description": "Titre de la carte de nommage des natures de frais"
+    "description": "Titre de la carte de nommage des natures de frais"
   },
   "configurationSectionsSubtitle": "The name your school gives each fee nature. Every tariff of the same nature is shown under that title.",
   "@configurationSectionsSubtitle": {
-      "description": "Sous-titre de la carte de nommage des sections"
+    "description": "Sous-titre de la carte de nommage des sections"
   },
   "configurationSectionsSave": "Save sections",
   "@configurationSectionsSave": {
-      "description": "Bouton d'enregistrement du nommage des sections"
+    "description": "Bouton d'enregistrement du nommage des sections"
   },
   "configurationSectionsSaved": "Sections saved",
   "@configurationSectionsSaved": {
-      "description": "Confirmation d'enregistrement du nommage des sections"
+    "description": "Confirmation d'enregistrement du nommage des sections"
   },
   "configurationSectionsHiddenHint": "Hidden: no longer offered for input, but still counted in the statistics.",
   "@configurationSectionsHiddenHint": {
-      "description": "Explication de ce que masquer une section veut dire"
+    "description": "Explication de ce que masquer une section veut dire"
   },
   "configurationSectionsLabelRequired": "Every section must have a name.",
   "@configurationSectionsLabelRequired": {
-      "description": "Refus d'enregistrer quand un titre de section est vide"
+    "description": "Refus d'enregistrer quand un titre de section est vide"
   },
   "configurationSectionsReorderHint": "Drag a section to move it up; this order is the tariff picker's.",
   "@configurationSectionsReorderHint": {
-      "description": "Explication du reclassement des sections"
+    "description": "Explication du reclassement des sections"
   },
   "configurationTariffAdd": "Add a tariff",
   "@configurationTariffAdd": {
-      "description": "Button adding a tariff on a level"
+    "description": "Button adding a tariff on a level"
   },
   "configurationTariffEdit": "Edit tariff",
   "@configurationTariffEdit": {
-      "description": "Tariff edit dialog title"
+    "description": "Tariff edit dialog title"
   },
   "configurationTariffNew": "New tariff",
   "@configurationTariffNew": {
-      "description": "Tariff creation dialog title"
+    "description": "Tariff creation dialog title"
   },
   "configurationTariffDelete": "Delete tariff",
   "@configurationTariffDelete": {
-      "description": "Tariff deletion action"
+    "description": "Tariff deletion action"
   },
   "configurationTariffDeleteConfirm": "Delete \"{label}\"? Charges already generated are not affected.",
   "@configurationTariffDeleteConfirm": {
-      "description": "Tariff deletion confirmation — a server write, unlike the wizard's draft",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Tariff deletion confirmation — a server write, unlike the wizard's draft",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationTariffSaved": "Tariff saved",
   "@configurationTariffSaved": {
-      "description": "Toast after writing a tariff"
+    "description": "Toast after writing a tariff"
   },
   "configurationTariffDeleted": "Tariff deleted",
   "@configurationTariffDeleted": {
-      "description": "Toast after deleting a tariff"
+    "description": "Toast after deleting a tariff"
   },
   "configurationTariffNone": "No tariff on this level",
   "@configurationTariffNone": {
-      "description": "Shown when a level carries no tariff"
+    "description": "Shown when a level carries no tariff"
   },
   "configurationFeeTypesUnavailableTitle": "Fee types unavailable",
   "@configurationFeeTypesUnavailableTitle": {
-      "description": "Empty state of step 4 when the fee type reference could not be served"
+    "description": "Empty state of step 4 when the fee type reference could not be served"
   },
   "configurationFeeTypesUnavailableMessage": "The fee type reference was not loaded. Reload it to enter the school fees.",
   "@configurationFeeTypesUnavailableMessage": {
-      "description": "Message of the step 4 empty state when no fee type is served"
+    "description": "Message of the step 4 empty state when no fee type is served"
   },
   "configurationLoadingA11yLabel": "Loading the step data",
   "@configurationLoadingA11yLabel": {
-      "description": "Label announced to screen readers while the provisioning wizard skeletons are on screen"
+    "description": "Label announced to screen readers while the provisioning wizard skeletons are on screen"
   },
   "configurationErrorNetworkTitle": "Connection lost",
   "@configurationErrorNetworkTitle": {
-      "description": "Network error title in the wizard"
+    "description": "Network error title in the wizard"
   },
   "configurationErrorNetworkMessage": "The setup was not sent. Check your connection, then try again.",
   "@configurationErrorNetworkMessage": {
-      "description": "Network error message"
+    "description": "Network error message"
   },
   "configurationErrorSessionTitle": "Your session has expired",
   "@configurationErrorSessionTitle": {
-      "description": "401 title"
+    "description": "401 title"
   },
   "configurationErrorSessionMessage": "Sign in again to pick up where you left off. Your entries are kept.",
   "@configurationErrorSessionMessage": {
-      "description": "401 message — the local draft survives an expired session"
+    "description": "401 message — the local draft survives an expired session"
   },
   "configurationErrorForbiddenTitle": "Access denied",
   "@configurationErrorForbiddenTitle": {
-      "description": "403 title"
+    "description": "403 title"
   },
   "configurationErrorForbiddenMessage": "Only the school owner can set up the school. Contact your school administrator.",
   "@configurationErrorForbiddenMessage": {
-      "description": "403 message — retrying cannot help"
+    "description": "403 message — retrying cannot help"
   },
   "configurationErrorServerTitle": "The server could not save",
   "@configurationErrorServerTitle": {
-      "description": "500 title"
+    "description": "500 title"
   },
   "configurationErrorServerMessage": "Something broke. Try again, and quote the code below to support if it persists.",
   "@configurationErrorServerMessage": {
-      "description": "500 message"
+    "description": "500 message"
   },
   "configurationErrorRateTitle": "Too many requests",
   "@configurationErrorRateTitle": {
-      "description": "429 title"
+    "description": "429 title"
   },
   "configurationErrorRateMessage": "The server is asking for a pause. Wait a few moments before carrying on.",
   "@configurationErrorRateMessage": {
-      "description": "429 message — definitely no Retry"
+    "description": "429 message — definitely no Retry"
   },
   "configurationErrorYearExistsTitle": "This academic year already exists",
   "@configurationErrorYearExistsTitle": {
-      "description": "400 BUSINESS_RULE title"
+    "description": "400 BUSINESS_RULE title"
   },
   "configurationErrorYearExistsMessage": "Setup is a bootstrapping gesture: it does not add a year to a school that already has one. Go back to the year step to declare a different one.",
   "@configurationErrorYearExistsMessage": {
-      "description": "Message for the already-existing-year refusal"
+    "description": "Message for the already-existing-year refusal"
   },
   "configurationErrorYearExistsAction": "Back to the year",
   "@configurationErrorYearExistsAction": {
-      "description": "Action for the already-existing-year refusal — returns to step 2 with a purged draft"
+    "description": "Action for the already-existing-year refusal — returns to step 2 with a purged draft"
   },
   "configurationErrorRetry": "Try again",
   "@configurationErrorRetry": {
-      "description": "Generic recovery action"
+    "description": "Generic recovery action"
   },
   "configurationErrorSignIn": "Sign in again",
   "@configurationErrorSignIn": {
-      "description": "401 action"
+    "description": "401 action"
   },
   "configurationErrorContact": "Contact the administrator",
   "@configurationErrorContact": {
-      "description": "403 action"
+    "description": "403 action"
   },
   "configurationErrorIncident": "Incident code",
   "@configurationErrorIncident": {
-      "description": "Label of the incident code to quote to support"
+    "description": "Label of the incident code to quote to support"
   },
   "configurationErrorReloadCatalog": "Reload the referential",
   "@configurationErrorReloadCatalog": {
-      "description": "Action for a 422 unknown-code — the cached catalogue is stale"
+    "description": "Action for a 422 unknown-code — the cached catalogue is stale"
   },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
@@ -1078,9 +1078,9 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "menuFeeControl": "Fee control",
-  "@menuFeeControl": {
-    "description": "Fee control menu title"
+  "menuRecouvrement": "Collections",
+  "@menuRecouvrement": {
+    "description": "Collections module menu title (renamed from Fee control, 2026-09-10)"
   },
   "subMenuFeeControl": "Control by fee",
   "@subMenuFeeControl": {
@@ -2480,9 +2480,33 @@
   "feeControlDashboardRankingTitle": "Where each level stands",
   "feeControlDashboardRankingHint": "The levels furthest behind come first.",
   "feeControlDashboardGroupTally": "{settled} of {total}",
-  "@feeControlDashboardGroupTally": {"placeholders": {"settled": {"type": "int"}, "total": {"type": "int"}}},
+  "@feeControlDashboardGroupTally": {
+    "placeholders": {
+      "settled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardGroupA11y": "{level}: {percent}% settled, {settled} of {total} students concerned",
-  "@feeControlDashboardGroupA11y": {"placeholders": {"level": {"type": "String"}, "percent": {"type": "int"}, "settled": {"type": "int"}, "total": {"type": "int"}}},
+  "@feeControlDashboardGroupA11y": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "settled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardLevelUnknown": "Level not recorded",
   "feeControlDashboardLevelMissing": "Level missing from the reference data",
   "feeControlDashboardNoFeesTitle": "No fee billed",
@@ -2497,9 +2521,21 @@
   "feeControlDashboardClassroomsWithheld": "Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.",
   "feeControlDashboardClassesFailed": "The classes of this level could not be read on this device.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} enrolled student does not carry this fee} other{{count} enrolled students do not carry this fee}}",
-  "@feeControlDashboardUnbilled": {"placeholders": {"count": {"type": "int"}}},
+  "@feeControlDashboardUnbilled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardRemaining": "Left to collect: {amounts}",
-  "@feeControlDashboardRemaining": {"placeholders": {"amounts": {"type": "String"}}},
+  "@feeControlDashboardRemaining": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
   "feeControlDashboardOpenControl": "View students",
   "feeControlCriteriaFee": "Fee: {label}",
   "@feeControlCriteriaFee": {
@@ -2643,7 +2679,13 @@
   "facturationPaymentCollectedByLabel": "Collected by",
   "facturationPaymentTicketNotPrinted": "Never printed from this tablet.",
   "facturationPaymentTicketPrintedAt": "Printed on {date}",
-  "@facturationPaymentTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@facturationPaymentTicketPrintedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "facturationPaymentPrintTicketAction": "Print now",
   "facturationPaymentReprintTicketAction": "Reprint the ticket",
   "facturationPaymentReceiptLabel": "Receipt no.",
@@ -2899,16 +2941,40 @@
     }
   },
   "boutiqueTenderCurrency": "Customer pays {due} in",
-  "@boutiqueTenderCurrency": {"placeholders": {"due": {"type": "String"}}},
+  "@boutiqueTenderCurrency": {
+    "placeholders": {
+      "due": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueTenderReceivedLabel": "Received at the counter",
   "boutiqueTenderShortfall": "Still due · {amount}",
-  "@boutiqueTenderShortfall": {"placeholders": {"amount": {"type": "String"}}},
+  "@boutiqueTenderShortfall": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueTenderChangeDue": "Change due · {amount}",
-  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "@boutiqueTenderChangeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentTenderCurrency": "Parent pays in",
   "facturationCreatePaymentTenderAmountLabel": "Received at the counter",
   "facturationCreatePaymentChangeDue": "Change due · {amount}",
-  "@facturationCreatePaymentChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "@facturationCreatePaymentChangeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentAmountToSettleLabel": "Amount to settle",
   "facturationCreatePaymentGroupRemainingTranches": "{count, plural, =1{1 instalment left} other{{count} instalments left}}",
   "@facturationCreatePaymentGroupRemainingTranches": {
@@ -2974,38 +3040,75 @@
   "exchangeRateSettingsNone": "No rate set: at the counter, each fee is paid in its own currency.",
   "exchangeRateSettingsCurrent": "In force: 1 {base} = {value} {quote}",
   "@exchangeRateSettingsCurrent": {
-    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "quote": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementPerCharge": "Each fee",
   "facturationSettlementRateLabel": "Today's rate",
   "facturationSettlementCountedLabel": "Amount counted",
   "facturationSettlementCountedHint": "Conversion: {expected}",
   "@facturationSettlementCountedHint": {
-    "placeholders": { "expected": { "type": "String" } }
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementCountedMismatch": "Too far from the conversion ({expected}). Adjust the amount or the rate.",
   "@facturationSettlementCountedMismatch": {
-    "placeholders": { "expected": { "type": "String" } }
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementRateEdit": "Change",
   "facturationSettlementRateFieldLabel": "Applied rate",
   "facturationSettlementRateHint": "{quote} for 1 {base}",
   "@facturationSettlementRateHint": {
-    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+    "placeholders": {
+      "quote": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementRateDiverges": "This rate differs from the school's ({reference}). The payment can still be taken; it will be flagged.",
   "@facturationSettlementRateDiverges": {
-    "placeholders": { "reference": { "type": "String" } }
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementNoRate": "No rate set: each fee is paid in its own currency.",
   "facturationSettlementDerived": "i.e. {amount}",
   "@facturationSettlementDerived": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationCreatePaymentToPerceive": "To collect",
   "facturationCreatePaymentImputes": "settles {amount}",
   "@facturationCreatePaymentImputes": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -3709,7 +3812,11 @@
   "financeStatsCurrencyHeading": "In {currency}",
   "@financeStatsCurrencyHeading": {
     "description": "Sub-heading naming the currency of the KPI block that follows. Only shown from two currencies on: on a single-currency school it would repeat what every amount already carries.",
-    "placeholders": { "currency": { "type": "String" } }
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
   },
   "financeStatsNoMovementLabel": "No movement in this period",
   "@financeStatsNoMovementLabel": {
@@ -3727,8 +3834,12 @@
   "@financeStatsKpiRateForCurrency": {
     "description": "Collection rate of one currency, when the dashboard carries several.",
     "placeholders": {
-      "rate": { "type": "int" },
-      "currency": { "type": "String" }
+      "rate": {
+        "type": "int"
+      },
+      "currency": {
+        "type": "String"
+      }
     }
   },
   "financeStatsSectionEvolution": "Collection evolution",
@@ -3818,49 +3929,567 @@
   "financeStatsErrorServerTitle": "Could not load",
   "financeStatsErrorReconnect": "Sign in again",
   "financeStatsErrorIncidentCode": "Incident code: {code}",
-  "@financeStatsErrorIncidentCode": {"description": "To quote to support.", "placeholders": {"code": {"type": "String"}}},
+  "@financeStatsErrorIncidentCode": {
+    "description": "To quote to support.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "financeDashboardTabsA11yLabel": "Finance dashboard tabs",
   "financeDashboardTabRecoveryLabel": "Recovery",
   "financeDashboardTabRecoveryDescription": "What is still to be collected this year",
   "financeDashboardTabTillLabel": "Till",
   "financeDashboardTabTillDescription": "What went into the drawer",
-  "financeTillKpiTotal": "Till total",
-  "financeTillKpiFees": "School fees",
-  "financeTillKpiBoutique": "Boutique sales",
-  "financeTillKpiBandA11yLabel": "Till indicators, by currency",
+  "financeTillRangeCaptionCustom": "From {from} to {to}",
+  "@financeTillRangeCaptionCustom": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRangeCaptionWindow": "As at {today}",
+  "@financeTillRangeCaptionWindow": {
+    "placeholders": {
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillPeriodCustom": "Range",
+  "financeTillPeriodFrom": "From",
+  "financeTillPeriodTo": "To",
+  "financeTillReceiptsHeading": "Payments",
+  "financeTillReceiptsCount": "{count, plural, =0{No payments} one{1 payment} other{{count} payments}}",
+  "@financeTillReceiptsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReceiptsUnit": "payment",
+  "financeTillReceiptsUnsealed": "{count, plural, one{1 without a sealed receipt (back-entry)} other{{count} without a sealed receipt (back-entries)}}",
+  "@financeTillReceiptsUnsealed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReceiptsColumnDate": "Date",
+  "financeTillReceiptsColumnReceipt": "Receipt",
+  "financeTillReceiptsColumnStudent": "Student",
+  "financeTillReceiptsColumnSource": "Source",
+  "financeTillReceiptsColumnAmount": "Collected",
+  "financeTillReceiptsNoNumber": "—",
+  "financeTillReceiptsNoStudent": "—",
+  "financeTillReceiptsCollectedBy": "collected by {agent}",
+  "@financeTillReceiptsCollectedBy": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsCrossed": "settles {amount} · rate {rate}",
+  "@financeTillReceiptsCrossed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsLoading": "Loading payments…",
+  "financeTillReceiptsEmpty": "No payments in this period",
+  "financeTillReceiptsForbidden": "The itemised list of payments requires the payment-read permission. The totals above remain readable without it.",
+  "financeTillReceiptsError": "Payments could not be loaded. The totals above are up to date.",
+  "financeTillReceiptsSplitTenderNote": "A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.",
+  "financeTillReportDownload": "Download",
+  "financeTillReportTooltip": "Download the period's payments report",
+  "financeTillReportPreparing": "Preparing…",
+  "financeTillReportWaiting": "Please wait…",
+  "financeTillReportBusy": "{seconds, plural, one{A report is already being prepared. Try again in 1 second.} other{A report is already being prepared. Try again in {seconds} seconds.}}",
+  "@financeTillReportBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReportForbidden": "The payments report requires the payment-read permission.",
+  "financeTillReportFailed": "The report could not be produced.",
+  "financeTillReportTooLarge": "This window holds {lines} lines; the report is capped at {cap}. Narrow the period.",
+  "@financeTillReportTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "cap": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "financeTillReportHandoffFailed": "The report is ready, but printing could not be opened.",
+  "financeTillEmptyGlobalTitle": "No collections · {window}",
+  "@financeTillEmptyGlobalTitle": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyGlobalMessage": "No receipt was issued {window}, in any till. Widen the window, or open billing to record a payment.",
+  "@financeTillEmptyGlobalMessage": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptySeeMonth": "See this month",
+  "financeTillEmptySeeYear": "See this year",
+  "financeTillEmptyOpenBilling": "Open billing",
+  "financeTillEmptyCurrencyTitle": "{currency} till empty over this period",
+  "@financeTillEmptyCurrencyTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyCurrencyMessage": "No payment was tendered in {currency} {window}. {others}",
+  "@financeTillEmptyCurrencyMessage": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      },
+      "others": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyOtherTill": "The other till recorded {amount}.",
+  "@financeTillEmptyOtherTill": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyOtherTills": "The other tills recorded {amounts}.",
+  "@financeTillEmptyOtherTills": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptySeeTill": "See the {currency} till",
+  "@financeTillEmptySeeTill": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsCrossedTooltip": "Fee set in {fee}, settled in {tendered}",
+  "@financeTillReceiptsCrossedTooltip": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "tendered": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateValue": "1 {base} = {value} {quote}",
+  "@financeTillRateValue": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "quote": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateNone": "No rate configured",
+  "financeTillRateA11yLabel": "Today's rate: {rate}",
+  "@financeTillRateA11yLabel": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateNoneA11yLabel": "Today's rate: no rate configured",
+  "financeTillInsightsHeading": "Readings & alerts",
+  "financeTillInsightAmountSeparator": " and ",
+  "financeTillInsightCrossedTitle": "Cross-currency payments",
+  "financeTillInsightCrossedEmpty": "No cross-currency payment: every fee was settled in its own currency.",
+  "financeTillInsightCrossedBody": "{count, plural, one{1 payment settles} other{{count} payments settle}} a fee set in the other currency, for {amounts}{rateClause}. A rate discrepancy at till-count time comes from this.",
+  "@financeTillInsightCrossedBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amounts": {
+        "type": "String"
+      },
+      "rateClause": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightCrossedSingleRate": ", converted at a rate of {rate}",
+  "@financeTillInsightCrossedSingleRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightCrossedRateRange": ", converted at rates from {from} to {to}",
+  "@financeTillInsightCrossedRateRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightBestDayTitle": "Strongest day",
+  "financeTillInsightBestDayBody": "{day} brought in {amount}, or {share}% of what the chart draws — useful for planning cover.",
+  "@financeTillInsightBestDayBody": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillInsightBoutiqueTitle": "What the boutique changes",
+  "financeTillInsightBoutiqueBody": "{amount} came from the boutique — optional, unbilled purchases: cash in, not a fee settled.",
+  "@financeTillInsightBoutiqueBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightBoutiqueEmpty": "No boutique sale in this window: everything that came in settles a billed fee.",
+  "financeTillInsightTrendTitle": "Trend",
+  "financeTillInsightTrendUp": "{currency} till up {percent}% on the previous period. The pace is holding.",
+  "@financeTillInsightTrendUp": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillInsightTrendDown": "{currency} till down {percent}% on the previous period. Check whether a follow-up is needed.",
+  "@financeTillInsightTrendDown": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillSourceHeading": "By source",
+  "financeTillSourceHint": "Billed fees versus boutique sales",
+  "financeTillSourceFees": "School fees",
+  "financeTillSourceBoutique": "Boutique sales",
+  "financeTillSourceA11yLabel": "Split by source: {fees} in billed fees, {boutique} in boutique sales",
+  "@financeTillSourceA11yLabel": {
+    "placeholders": {
+      "fees": {
+        "type": "String"
+      },
+      "boutique": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillSourceBoutiqueNote": "Optional, unbilled purchases: this share enters the till without settling any fee.",
+  "financeTillClassroomHeading": "By classroom",
+  "financeTillClassroomHint": "{count, plural, =0{No classroom fed this till} one{The top contributing classroom for this till} other{The {count} top contributing classrooms for this till}}",
+  "@financeTillClassroomHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillClassroomRowA11yLabel": "{classroom}: {amount}",
+  "@financeTillClassroomRowA11yLabel": {
+    "placeholders": {
+      "classroom": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillClassroomUnassigned": "{amount} came in without naming a classroom — a boutique sale has neither student nor classroom. The rows above therefore do not add up to the till total.",
+  "@financeTillClassroomUnassigned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillClassroomEmpty": "No classroom to rank",
+  "financeTillClassroomEmptyHint": "Nothing that entered this till names a student.",
+  "financeTillCashBoxesA11yLabel": "The window's tills, one per currency, and the number of receipts issued",
+  "financeTillCashBoxLabel": "{currency} till · {window}",
+  "@financeTillCashBoxLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCurrencyNameUsd": "dollar",
+  "financeTillCurrencyNameCdf": "franc",
+  "financeTillReceiptCount": "{count, plural, one{receipt} other{receipts}}",
+  "@financeTillReceiptCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCashBoxSubline": "{count} {unit} · average ticket {ticket}",
+  "@financeTillCashBoxSubline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "ticket": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCashBoxTrend": "{percent}% vs previous period",
+  "@financeTillCashBoxTrend": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCashBoxNoComparablePeriod": "No comparable period before the school year began",
+  "financeTillReceiptsIssuedLabel": "Receipts issued",
+  "financeTillReceiptsIssuedSubline": "across all tills",
+  "financeTillDetailHeading": "Till detail",
+  "financeTillCurrencySegment": "{symbol} {currency} ({count})",
+  "@financeTillCurrencySegment": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCurrencySegmentA11yLabel": "{currency} till, {count} {unit}",
+  "@financeTillCurrencySegmentA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCurrencySelectorA11yLabel": "Till shown: {currency}",
+  "@financeTillCurrencySelectorA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillBucketsHeading": "Collections trend · {currency} till",
+  "@financeTillBucketsHeading": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillBucketsWindowNote": "The tiles count the requested window; the series draws the seven surrounding days, so a day's figure reads against the ones before it.",
+  "financeTillReceiptsIssuedMixedNote": "A receipt settled in both currencies counts in each till, but is issued only once.",
   "financeStatsFeeTypeOutstanding": "Outstanding: {amount}",
-  "@financeStatsFeeTypeOutstanding": {"description": "Outstanding amount for a fee code.", "placeholders": {"amount": {"type": "String"}}},
+  "@financeStatsFeeTypeOutstanding": {
+    "description": "Outstanding amount for a fee code.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeStatsRateNotApplicable": "Not applicable",
-  "@financeStatsRateNotApplicable": {"description": "Collection rate when nothing was expected."},
+  "@financeStatsRateNotApplicable": {
+    "description": "Collection rate when nothing was expected."
+  },
   "financeStatsRateNotApplicableForCurrency": "Not applicable · {currency}",
-  "@financeStatsRateNotApplicableForCurrency": {"description": "Same, on a multi-currency dashboard.", "placeholders": {"currency": {"type": "String"}}},
+  "@financeStatsRateNotApplicableForCurrency": {
+    "description": "Same, on a multi-currency dashboard.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeStatsFeeTypeRateNotApplicable": "Rate: not applicable",
-  "@financeStatsFeeTypeRateNotApplicable": {"description": "Rate of a fee code with nothing expected."},
+  "@financeStatsFeeTypeRateNotApplicable": {
+    "description": "Rate of a fee code with nothing expected."
+  },
   "financeStatsCurrencyNoMovement": "No movement in this currency",
-  "@financeStatsCurrencyNoMovement": {"description": "Block of a currency the school bills in, with nothing circulating."},
+  "@financeStatsCurrencyNoMovement": {
+    "description": "Block of a currency the school bills in, with nothing circulating."
+  },
   "financeStatsCurrencyNoMovementRecovery": "Nothing was billed or collected this school year.",
   "financeTillPeriodDayCurrent": "Today",
   "financeTillWindow": "From {start} to {end}",
-  "@financeTillWindow": {"description": "Till window bounds, as returned by the server.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@financeTillWindow": {
+    "description": "Till window bounds, as returned by the server.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillWindowDay": "Day of {date}",
-  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "@financeTillWindowDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillTimeZoneHint": "Day in the school's time zone · {zone}",
-  "@financeTillTimeZoneHint": {"description": "The time zone comes from the response.", "placeholders": {"zone": {"type": "String"}}},
+  "@financeTillTimeZoneHint": {
+    "description": "The time zone comes from the response.",
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillSectionBuckets": "Cash-in over time",
   "financeTillBucketsChartA11yLabel": "Cash-in chart, by interval",
   "financeTillImputationHeading": "What these payments settled",
-  "@financeTillImputationHeading": {"description": "Second half of the till screen, counted in charge currency."},
+  "@financeTillImputationHeading": {
+    "description": "Second half of the till screen, counted in charge currency."
+  },
   "financeTillImputationHint": "In charge currency: these amounts do not add up with the drawer's.",
+  "financeTillImputationShare": "{label} · {share}% of the total",
+  "@financeTillImputationShare": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillImputationCardHint": "In the claim currency, never converted — these amounts do not add up with the till's.",
   "financeTillImputationCardTitle": "Charges settled in {currency}",
-  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "@financeTillImputationCardTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillImputationTotal": "Settled total · {amount}",
-  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "@financeTillImputationTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillImputationSectionA11yLabel": "Settlement by fee type, in {currency}",
-  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
+  "@financeTillImputationSectionA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFeeCodeAmountA11yLabel": "{label}: {amount}",
-  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "@financeTillFeeCodeAmountA11yLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFreshnessNotice": "As of the last sync · {relative}",
-  "@financeTillFreshnessNotice": {"description": "The server only totals what reached it.", "placeholders": {"relative": {"type": "String"}}},
+  "@financeTillFreshnessNotice": {
+    "description": "The server only totals what reached it.",
+    "placeholders": {
+      "relative": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFreshnessNever": "Never synced",
   "financeStatsCurrencyNoMovementTill": "Nothing went into the drawer over this window.",
   "enrollmentResults": "Results",
@@ -4563,21 +5192,29 @@
   "boutiqueArticleCount": "{count, plural, one{1 item} other{{count} items}}",
   "@boutiqueArticleCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueInCartBadge": "{count} in cart",
   "@boutiqueInCartBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueLevelBadge": "by level",
   "boutiquePriceRange": "{min} – {max}",
   "@boutiquePriceRange": {
     "placeholders": {
-      "min": { "type": "String" },
-      "max": { "type": "String" }
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
     }
   },
   "boutiqueGridReminder": "Prices always come from the catalogue grid. At the till you pick a student or a level — never an amount.",
@@ -4593,8 +5230,12 @@
   "boutiqueLineMeta": "{unitPrice} × {quantity}",
   "@boutiqueLineMeta": {
     "placeholders": {
-      "unitPrice": { "type": "String" },
-      "quantity": { "type": "int" }
+      "unitPrice": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
     }
   },
   "boutiquePayerSection": "Payer",
@@ -4611,7 +5252,9 @@
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 line without a level} other{{count} lines without a level}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueBlockerMixedCurrency": "Mixed currencies",
@@ -4623,21 +5266,29 @@
   "boutiqueNoMatchMessage": "Nothing for “{query}” in “{family}”. Broaden the search.",
   "@boutiqueNoMatchMessage": {
     "placeholders": {
-      "query": { "type": "String" },
-      "family": { "type": "String" }
+      "query": {
+        "type": "String"
+      },
+      "family": {
+        "type": "String"
+      }
     }
   },
   "boutiqueNoMatchMessageAll": "Nothing for “{query}”. Broaden the search.",
   "@boutiqueNoMatchMessageAll": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
   "boutiqueResetFilters": "Reset filters",
   "boutiqueUnsellableNotice": "{count, plural, one{1 item in this catalogue cannot be sold from this version of the app.} other{{count} items in this catalogue cannot be sold from this version of the app.}}",
   "@boutiqueUnsellableNotice": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueErrorNetworkTitle": "No connection",
@@ -4653,7 +5304,9 @@
   "boutiqueErrorIncidentCode": "Incident code: {code}",
   "@boutiqueErrorIncidentCode": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "boutiqueBeneficiaryEyebrow": "Line recipient",
@@ -4665,7 +5318,9 @@
   "boutiqueBeneficiaryNoResult": "No student matches “{query}”. Check the spelling or search by level.",
   "@boutiqueBeneficiaryNoResult": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
   "boutiqueBeneficiaryPickLevel": "Pick a level to list its students.",
@@ -4676,7 +5331,9 @@
   "boutiquePayerDirectoryCount": "Already in the directory · {count, plural, one{1 sale} other{{count} sales}}",
   "@boutiquePayerDirectoryCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiquePayerUse": "Use",
@@ -4695,13 +5352,17 @@
   "boutiqueConfirmAction": "Collect {total}",
   "@boutiqueConfirmAction": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueSaleRecorded": "Sale collected · {total}",
   "@boutiqueSaleRecorded": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueSaleFailed": "The sale could not be recorded. Nothing was collected — try again.",
@@ -4724,19 +5385,25 @@
   "boutiqueReceiptBannerTitle": "Sale collected · {total}",
   "@boutiqueReceiptBannerTitle": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptBannerProvisional": "{reference} · provisional, will be sealed on sync",
   "@boutiqueReceiptBannerProvisional": {
     "placeholders": {
-      "reference": { "type": "String" }
+      "reference": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptBannerSealed": "{reference} · sealed",
   "@boutiqueReceiptBannerSealed": {
     "placeholders": {
-      "reference": { "type": "String" }
+      "reference": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptPrint": "Print",
@@ -4754,13 +5421,25 @@
   "boutiqueSuccessMessage": "The customer paid {total} in cash. Hand them their ticket.",
   "boutiqueSuccessDone": "Done",
   "@boutiqueAddOneMore": {
-    "placeholders": { "article": { "type": "String" } }
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
   },
   "@boutiqueRemoveOne": {
-    "placeholders": { "article": { "type": "String" } }
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
   },
   "@boutiqueSuccessMessage": {
-    "placeholders": { "total": { "type": "String" } }
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
   },
   "boutiqueHistoryEyebrow": "Shop ▸ History",
   "boutiqueHistoryTitle": "Sales history",
@@ -4778,10 +5457,37 @@
   "boutiqueHistoryTotalLabel": "Total collected",
   "boutiqueHistorySaleTime": "{time} · {reference}",
   "boutiqueHistoryProvisional": "provisional ticket",
-  "@boutiqueHistorySaleCount": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistoryArticleCount": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistoryPendingNotice": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistorySaleTime": {"placeholders": {"time": {"type": "String"}, "reference": {"type": "String"}}},
+  "@boutiqueHistorySaleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistoryArticleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistoryPendingNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistorySaleTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueHistoryErrorServerTitle": "History unreadable",
   "boutiqueHistoryErrorServer": "The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.",
   "boutiqueHistoryErrorNetwork": "History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
@@ -4792,8 +5498,20 @@
   "boutiqueClearPayerSummary": "Payer entered: {payer}",
   "boutiqueClearCancel": "Keep the cart",
   "boutiqueClearConfirm": "Empty",
-  "@boutiqueClearLinesSummary": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueClearPayerSummary": {"placeholders": {"payer": {"type": "String"}}},
+  "@boutiqueClearLinesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueClearPayerSummary": {
+    "placeholders": {
+      "payer": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueSuccessEyebrow": "Shop ▸ Collection",
   "boutiqueSaleDetailEyebrow": "Shop ▸ Sale",
   "boutiqueSaleDetailTitle": "Sale details",
@@ -4817,12 +5535,32 @@
   "boutiqueSaleDetailNotFoundTitle": "Sale not found",
   "boutiqueSaleDetailNotFound": "This sale is no longer in this school's local database. Nothing is lost server-side if it had already been sent.",
   "boutiqueSaleDetailPendingNotice": "This sale has not reached the server yet. It will be sent at the next synchronisation, with no action needed.",
-  "@boutiqueSaleDetailBeneficiary": {"placeholders": {"name": {"type": "String"}}},
-  "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
-  "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@boutiqueSaleDetailBeneficiary": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@boutiqueSaleDetailSizePrefix": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@boutiqueSaleDetailTicketPrintedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "@boutiqueOpenCartWithCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "enrollmentDuplicateDialogEyebrow": "Check",
@@ -4836,13 +5574,19 @@
   "enrollmentDuplicateContinueAction": "Continue anyway",
   "@enrollmentDuplicateIdentityLine": {
     "placeholders": {
-      "name": { "type": "String" },
-      "dateOfBirth": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "dateOfBirth": {
+        "type": "String"
+      }
     }
   },
   "@enrollmentDuplicateOthers": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "enrollmentDashboardOvertitle": "Enrolments",
@@ -5215,5 +5959,496 @@
       }
     }
   },
-  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again."
+  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again.",
+  "recouvrementFeePickerLabel": "Selected fees",
+  "recouvrementFeePickerA11yLabel": "Selected fees — multiple choice, at least one",
+  "recouvrementFeeChipLockedA11y": "{fee} — only selected fee, cannot be unchecked",
+  "@recouvrementFeeChipLockedA11y": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementScopeLabel": "Scope",
+  "recouvrementScopeAll": "Whole school",
+  "recouvrementExpectedLabel": "Expected on these fees",
+  "recouvrementExpectedMixedSubline": "Two currencies — never added together",
+  "recouvrementCollectedLabel": "Collected to date",
+  "recouvrementSettledSubline": "{count} students have settled in full, {percent}% of the cohort",
+  "@recouvrementSettledSubline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementNothingPaidLabel": "Nothing paid",
+  "recouvrementNothingPaidSubline": "Priority follow-up target",
+  "recouvrementPartialLabel": "Partial payment",
+  "recouvrementPartialSubline": "A first step has been taken",
+  "recouvrementNoAmountDash": "—",
+  "recouvrementContextLine": "{count} students concerned · every figure on this page covers the checked fees",
+  "@recouvrementContextLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRateLine": "today's rate 1 $ = {rate} FC",
+  "@recouvrementRateLine": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateMissing": "no rate has been set for today",
+  "recouvrementFiguresA11yLabel": "Recovery key figures",
+  "recouvrementRatesTitle": "Recovery rate by fee",
+  "recouvrementRatesSubtitleOne": "One fee selected · the rate reads in its own currency",
+  "recouvrementRatesSubtitleMany": "{count} fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected",
+  "@recouvrementRatesSubtitleMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRatesGroupHeader": "{paid} of {expected} · {rate}% recovered",
+  "@recouvrementRatesGroupHeader": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRatesGroupHeaderNoExpectation": "{paid} collected · nothing was owed in this currency",
+  "@recouvrementRatesGroupHeaderNoExpectation": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateRemaining": "{amount} left",
+  "@recouvrementRateRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateExpected": "{amount} expected",
+  "@recouvrementRateExpected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateNoExpectation": "no fee owed",
+  "recouvrementRatesA11yLabel": "Recovery rate by fee and currency",
+  "recouvrementRateBarA11y": "{fee}: {rate}% recovered, {amount} left",
+  "@recouvrementRateBarA11y": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCurrencyGroupTitle": "Fees in {currency}",
+  "@recouvrementCurrencyGroupTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementUnbilledNote": "{count} enrolled students carry none of these fees",
+  "@recouvrementUnbilledNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimulationTitle": "Dismissal simulation",
+  "recouvrementSimulationSubtitle": "Nothing is applied — a dismissal goes through Enrolments, file by file",
+  "recouvrementSimulationWho": "We dismiss students who…",
+  "recouvrementCriterionNoPayment": "Have paid nothing",
+  "recouvrementCriterionNotSettled": "Have not settled in full",
+  "recouvrementCriterionBelowThreshold": "Have paid less than…",
+  "recouvrementThresholdLabel": "Minimum amount",
+  "recouvrementThresholdMixedWarning": "The floor is compared in {currency} equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.",
+  "@recouvrementThresholdMixedWarning": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementThresholdNoRate": "No rate has been set for today: the comparison is impossible on a mixed selection.",
+  "recouvrementCriticalLabel": "Unmanageable group threshold: {percent}% of the cohort",
+  "@recouvrementCriticalLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCriticalA11y": "{percent}% of the cohort",
+  "@recouvrementCriticalA11y": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimHeadcount": "Cohort today",
+  "recouvrementSimHeadcountSubline": "students carrying these fees",
+  "recouvrementSimTargeted": "Students targeted",
+  "recouvrementSimRemaining": "Cohort left",
+  "recouvrementSimRemainingSubline": "{percent}% of the cohort kept",
+  "@recouvrementSimRemainingSubline": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimCritical": "Unmanageable groups",
+  "recouvrementSimTableGroup": "Group",
+  "recouvrementSimTableHeadcount": "Cohort",
+  "recouvrementSimTableLeaving": "To dismiss",
+  "recouvrementSimTableRemaining": "Left",
+  "recouvrementSimTableKept": "Cohort kept",
+  "recouvrementSimTableVerdict": "Verdict",
+  "recouvrementVerdictManageable": "Manageable",
+  "recouvrementVerdictFragile": "Fragile",
+  "recouvrementVerdictCritical": "Unmanageable",
+  "recouvrementSimFootNothingLost": "These students have paid nothing: dismissal would lose no income, but it definitively writes off {missing}.",
+  "@recouvrementSimFootNothingLost": {
+    "placeholders": {
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementSimFootWithLoss": "Dismissal would void {lost} already collected, and write off {missing} never paid.",
+  "@recouvrementSimFootWithLoss": {
+    "placeholders": {
+      "lost": {
+        "type": "String"
+      },
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementSimA11yLabel": "Dismissal simulation — no writes",
+  "recouvrementSimRowA11y": "{group}: {kept}% of the cohort kept, {verdict}",
+  "@recouvrementSimRowA11y": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "kept": {
+        "type": "int"
+      },
+      "verdict": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRelanceListPreparing": "Preparing the list…",
+  "recouvrementRelanceListBusy": "A document is already being produced on this server — try again in {seconds}s",
+  "@recouvrementRelanceListBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListTooLarge": "{lines} lines for a cap of {cap}: narrow the scope or the criterion.",
+  "@recouvrementRelanceListTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListUnknownStudents": "{count} students on this list are not attached to this school for this year.",
+  "@recouvrementRelanceListUnknownStudents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListInconsistent": "The list could not be produced: some rows contradict themselves. Refresh the screen.",
+  "recouvrementRelanceListForbidden": "You are not allowed to produce a named list.",
+  "recouvrementRelanceListFailed": "The list could not be produced.",
+  "recouvrementRelanceListHandoffFailed": "The list arrived, but the preview could not open.",
+  "recouvrementRelanceListA11y": "Produce the named list for {group}",
+  "@recouvrementRelanceListA11y": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightWorstFeeTitle": "The fee furthest behind",
+  "recouvrementInsightWorstFeeBody": "{fee} tops out at {rate}% recovered: {amount} are still missing. This is the fee to check group by group.",
+  "@recouvrementInsightWorstFeeBody": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightControlAction": "Check the students",
+  "recouvrementInsightSpreadTitle": "Spread between groups",
+  "recouvrementInsightSpreadBody": "The spread runs from {bestRate}% ({bestGroup}) to {worstRate}% ({worstGroup}). A gap this wide says more about follow-up practice than about what families can pay.",
+  "@recouvrementInsightSpreadBody": {
+    "placeholders": {
+      "bestRate": {
+        "type": "int"
+      },
+      "bestGroup": {
+        "type": "String"
+      },
+      "worstRate": {
+        "type": "int"
+      },
+      "worstGroup": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightSimulationTitle": "What the simulation says",
+  "recouvrementInsightSimulationSafe": "The measure would hold everywhere: {remaining} students would remain, {percent}% of the cohort kept.",
+  "@recouvrementInsightSimulationSafe": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementInsightSimulationCritical": "Dismissal would push {count} groups below {percent}% of their cohort. Staggered follow-up costs less than an emptied class.",
+  "@recouvrementInsightSimulationCritical": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementEmptyResultDescription": "Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.",
+  "recouvrementRelanceListNotDeployed": "This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.",
+  "recouvrementCallListTitle": "Students targeted — {group}",
+  "@recouvrementCallListTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListSubtitle": "{count} students · {criterion}",
+  "@recouvrementCallListSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "criterion": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListStudent": "Student",
+  "recouvrementCallListDue": "Due",
+  "recouvrementCallListPaid": "Paid",
+  "recouvrementCallListRemaining": "Left",
+  "recouvrementCallListUnnamed": "Student {id}",
+  "@recouvrementCallListUnnamed": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListUnnamedNote": "Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.",
+  "recouvrementCallListEmit": "Produce the list to sign",
+  "recouvrementCallListClose": "Close",
+  "recouvrementCallListEmpty": "No student targeted in this group.",
+  "feeControlFeeLoading": "Reading the fee schedule…",
+  "feeControlFeesLabel": "Fees checked",
+  "feeControlFeesA11yLabel": "Fees checked — multiple selection, at least one",
+  "feeControlSituationLabel": "Situation looked for",
+  "feeControlSituationThreshold": "Paid at least…",
+  "feeControlThresholdMixedWarning": "The selected fees do not share one currency: a single floor amount would mean nothing. Keep only one currency.",
+  "feeControlColumnStudent": "Student",
+  "feeControlResultTitle": "Result · {count, plural, =0{no student} =1{1 student} other{{count} students}}",
+  "feeControlResultOrder": "sorted from least to most advanced",
+  "feeControlCriteriaThreshold": "Floor: {amount}",
+  "feeControlSelectPage": "Select the page",
+  "feeControlDeselectPage": "Deselect the page",
+  "feeControlMarkedBadge": "to send home",
+  "@feeControlResultTitle": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@feeControlCriteriaThreshold": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlSummaryCollected": "Collected on these fees",
+  "feeControlSummaryCollectedOn": "of {expected} due",
+  "@feeControlSummaryCollectedOn": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlSelectionCount": "{count, plural, =1{1 student selected} other{{count} students selected}}",
+  "feeControlCallListAction": "Call sheet",
+  "feeControlMarkAction": "Mark to send home",
+  "feeControlDeselectAction": "Deselect",
+  "feeControlMarkedTitle": "{count, plural, =1{1 student marked to send home} other{{count} students marked to send home}}",
+  "feeControlMarkedNote": "This list is a working draft: nothing is sent to the families. Measure the effect on headcount in the dashboard before deciding.",
+  "feeControlMarkedClear": "Clear the send-home list",
+  "feeControlMarkedCleared": "Send-home list cleared.",
+  "feeControlMarkedDone": "{count, plural, =1{1 student marked to send home — the list stays editable.} other{{count} students marked to send home — the list stays editable.}}",
+  "@feeControlSelectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@feeControlMarkedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@feeControlMarkedDone": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "feeControlSheetDossier": "File {code}",
+  "feeControlSheetPaidOf": "{paid} of {expected} · {percent}%",
+  "feeControlSheetRemaining": "{amount} left",
+  "feeControlSheetNoExpectation": "No amount expected on this fee",
+  "feeControlSheetMixedNote": "Each fee is settled in its own currency: the lines do not add up.",
+  "feeControlSheetOpenRecord": "Open the full record",
+  "feeControlSheetUnmark": "Remove from send-home list",
+  "feeControlSheetMarked": "{name} marked to send home.",
+  "feeControlSheetUnmarked": "{name} removed from the send-home list.",
+  "@feeControlSheetDossier": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@feeControlSheetPaidOf": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@feeControlSheetRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@feeControlSheetMarked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@feeControlSheetUnmarked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCallSheetTitle": "School fee control",
+  "feeControlCallSheetIssuedOn": "Issued on {date}",
+  "feeControlCallSheetRate": "Rate applied: {rate}",
+  "feeControlCallSheetNumber": "No.",
+  "feeControlCallSheetSignature": "Parent signature",
+  "feeControlCallSheetVisaCollector": "Collector's signature",
+  "feeControlCallSheetVisaDirection": "Management's signature",
+  "feeControlCallSheetFailed": "The call sheet could not be prepared.",
+  "@feeControlCallSheetIssuedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@feeControlCallSheetRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlEmptyWiden": "See all students",
+  "feeControlEmptyBilling": "Open billing"
 }

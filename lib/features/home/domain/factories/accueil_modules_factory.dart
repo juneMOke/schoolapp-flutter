@@ -154,10 +154,10 @@ class AccueilModulesFactory {
   /// les noms. Finances porte les gestes de caisse ; ce module n'en accomplit
   /// aucun — il regarde qui a réglé.
   static AccueilModule _feeControl(AppLocalizations l10n) {
-    const menuId = MenuConstants.feeControlMenuId;
+    const menuId = MenuConstants.recouvrementMenuId;
     return AccueilModule(
       id: menuId,
-      title: l10n.menuFeeControl,
+      title: l10n.menuRecouvrement,
       description: l10n.accueilModuleFeeControlDescription,
       icon: Icons.fact_check_outlined,
       accent: AppColors.accueilFeeControlAccent,
@@ -166,11 +166,11 @@ class AccueilModulesFactory {
         _dashboard(
           l10n,
           menuId: menuId,
-          subMenuId: MenuConstants.feeControlDashboardId,
+          subMenuId: MenuConstants.recouvrementDashboardId,
         ),
         _page(
           menuId: menuId,
-          subMenuId: MenuConstants.feeControlId,
+          subMenuId: MenuConstants.recouvrementControlId,
           title: l10n.subMenuFeeControl,
         ),
       ],

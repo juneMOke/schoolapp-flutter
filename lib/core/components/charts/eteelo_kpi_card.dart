@@ -11,6 +11,11 @@ class EteeloKpiCard extends StatelessWidget {
 
   const EteeloKpiCard({super.key, required this.data});
 
+  /// Le tour d'une carte enfoncée. Transparent au repos : le rendu des cartes
+  /// de lecture ne bouge pas d'un pixel.
+  static BorderSide _edge(EteeloKpiCardData data) =>
+      data.selected ? BorderSide(color: data.accent) : BorderSide.none;
+
   @override
   Widget build(BuildContext context) {
     final values = data.displayValues;
@@ -29,7 +34,14 @@ class EteeloKpiCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           AppDimensions.enrollmentStatsChartRadius,
         ),
-        border: Border(left: BorderSide(color: data.accent, width: 3)),
+        border: Border(
+          left: BorderSide(color: data.accent, width: 3),
+          // Enfoncée : le tour de la carte reprend l'accent. Jamais la couleur
+          // seule — l'état est aussi annoncé, et la valeur reste écrite.
+          top: _edge(data),
+          right: _edge(data),
+          bottom: _edge(data),
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: 0.04),
@@ -128,10 +140,12 @@ class EteeloKpiCard extends StatelessWidget {
       ),
     );
 
+    final tapped = _wrapTap(card);
+
     // reduced-motion : pas d'animation d'entree (etat final visible).
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (reduceMotion) return card;
+    if (reduceMotion) return tapped;
 
     return TweenAnimationBuilder<double>(
       key: ValueKey('${data.label}-${data.displayValue}-${data.percent}'),
@@ -142,7 +156,26 @@ class EteeloKpiCard extends StatelessWidget {
         opacity: scale,
         child: Transform.scale(scale: scale, child: child),
       ),
-      child: card,
+      child: tapped,
+    );
+  }
+
+  /// N'enveloppe que les cartes qui **font** quelque chose : l'arbre d'une
+  /// carte de lecture reste exactement celui d'avant.
+  Widget _wrapTap(Widget card) {
+    final onTap = data.onTap;
+    if (onTap == null) return card;
+
+    return Semantics(
+      button: true,
+      selected: data.selected,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(
+          AppDimensions.enrollmentStatsChartRadius,
+        ),
+        child: card,
+      ),
     );
   }
 }

@@ -98,12 +98,32 @@ class ApiErrorParser {
     return trimmed.isEmpty ? null : trimmed;
   }
 
+  /// Les **chiffres** de la cause, quand le serveur en pose.
+  ///
+  /// `{"lines": 7213, "cap": 5000}` sur un `REPORT_LINE_CAP` : de quoi laisser
+  /// l'écran écrire sa propre phrase, dans sa langue, sans perdre le nombre qui
+  /// la rend actionnable.
+  ///
+  /// Rendus **tels quels**, sans schéma ni énumération : le catalogue grandit
+  /// par module, et c'est l'appelant qui lit les clés qu'il connaît. Un corps
+  /// sans `details`, ou dont la valeur n'est pas un objet, rend `null` plutôt
+  /// que de lever — une erreur mal formée reste une erreur à afficher.
+  static Map<String, dynamic>? detailsOf(Response<dynamic>? response) {
+    final details = _bodyOf(response)?['details'];
+    if (details is! Map) return null;
+    return <String, dynamic>{
+      for (final entry in details.entries)
+        if (entry.key is String) entry.key as String: entry.value,
+    };
+  }
+
   /// [ApiValidationFailure] pour un 400 ou un 422.
   static ApiValidationFailure validationFailure(Response<dynamic>? response) =>
       ApiValidationFailure(
         code: codeOf(response),
         serverMessage: serverMessageOf(response),
         detailCode: detailCodeOf(response),
+        details: detailsOf(response),
       );
 
   /// [ApiServerFailure] pour un 5xx, avec sa référence d'incident si elle existe.

@@ -35,6 +35,17 @@ class EteeloKpiCardData {
   /// pas conservent le rendu et la hauteur historiques.
   final String? subline;
 
+  /// Ce que la carte fait quand on la touche. `null` — le défaut — en fait une
+  /// carte de lecture : aucune bordure de survol, aucun rôle de bouton annoncé.
+  ///
+  /// Une carte cliquable est un **filtre** : elle applique ce qu'elle compte.
+  final VoidCallback? onTap;
+
+  /// Vrai quand ce filtre est celui qui s'applique. La carte s'enfonce, et
+  /// l'assistance vocale l'annonce comme sélectionnée — la couleur seule ne
+  /// dirait rien à qui ne la voit pas.
+  final bool selected;
+
   const EteeloKpiCardData({
     required this.label,
     this.value,
@@ -45,6 +56,8 @@ class EteeloKpiCardData {
     required this.icon,
     this.percent,
     this.subline,
+    this.onTap,
+    this.selected = false,
   }) : assert(
          value != null || valueText != null || valueLines != null,
          'KpiCardData : fournir value (entier), valueText (formaté) ou '

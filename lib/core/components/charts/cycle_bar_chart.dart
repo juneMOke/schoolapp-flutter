@@ -50,6 +50,40 @@ class CycleBarChart extends StatelessWidget {
   /// Nombre d'intervalles de grille — une ligne de plus que d'intervalles.
   final int gridDivisions;
 
+  /// Dessine l'axe vertical et ses libellés de valeurs.
+  ///
+  /// ⚠️ **Un écran qui pose les montants SUR les barres n'en veut pas** : le
+  /// même chiffre s'écrirait alors deux fois, une fois au sommet de la barre et
+  /// une fois sur l'axe. Le laisser vaut quand les barres ne portent pas leur
+  /// valeur, l'axe étant alors le seul repère chiffré.
+  ///
+  /// Défaut `true` — le rendu historique, que les appelants existants gardent.
+  final bool showLeftAxis;
+
+  /// Hauteur minimale, **en dp**, d'une barre dont la valeur n'est pas nulle.
+  ///
+  /// ⚠️ Sans plancher, une valeur réelle mais très petite sous un maximum très
+  /// grand rend une barre d'une fraction de pixel — **indiscernable d'un
+  /// zéro**. Le plancher la rend visible.
+  ///
+  /// **Zéro reste zéro** : le plancher ne relève jamais une valeur nulle, ce
+  /// qui ferait voir une donnée là où il n'y en a pas. C'est la même règle que
+  /// sur les lignes-barres du socle.
+  final double minimumBarHeight;
+
+  /// Étiquette **en permanence** les barres mises en relief, même quand
+  /// [showValueLabels] est faux.
+  ///
+  /// ⚠️ **Pour un écran qui n'a pas d'axe vertical.** Sans axe et sans
+  /// étiquettes — le cas d'une fenêtre large, où l'on renonce à chiffrer chaque
+  /// barre — le relief ne repose plus que sur la **couleur**. Un lecteur qui ne
+  /// distingue pas les deux teintes perd alors l'intervalle en cours, et il n'a
+  /// aucun chiffre nulle part pour le retrouver.
+  ///
+  /// Défaut faux : les appelants qui gardent leur axe n'en ont pas besoin, et
+  /// leur rendu ne bouge pas.
+  final bool labelHighlightedBars;
+
   const CycleBarChart({
     super.key,
     required this.items,
@@ -61,15 +95,34 @@ class CycleBarChart extends StatelessWidget {
     this.minTop = 10.0,
     this.barRadius = AppDimensions.enrollmentStatsChartBorderRadius,
     this.gridDivisions = AppDimensions.enrollmentStatsChartGridDivisions,
+    this.showLeftAxis = true,
+    this.minimumBarHeight = 0,
+    this.labelHighlightedBars = false,
   });
+
+  /// Cette barre porte-t-elle son montant en permanence ?
+  bool _labelsAlways(int index) =>
+      showValueLabels ||
+      (labelHighlightedBars && highlightedIndexes.contains(index));
 
   /// Style du libellé sous l'axe pour la barre [index].
   /// Sert aussi bien au rendu qu'à la mesure de la hauteur à réserver.
+  /// Le style d'un libellé d'axe — **et la mesure de la place qu'il prend**.
+  ///
+  /// Chiffres tabulaires : l'axe est une **rangée de nombres** — des jours, des
+  /// mois, des semaines — et sans largeur fixe le « 11 » et le « 08 » ne
+  /// tombent pas au même endroit sous leurs barres. Le décalage est d'un
+  /// pixel ou deux par libellé, mais il se cumule sur trente et un jours et
+  /// fait onduler l'axe.
+  ///
+  /// La même fonction sert à mesurer la hauteur réservée aux libellés pivotés :
+  /// le calcul suit donc le changement de largeur sans qu'on ait à y penser.
   TextStyle _bottomLabelStyle(int index) {
     final highlighted = highlightedIndexes.contains(index);
     return AppTextStyles.caption.copyWith(
       color: highlighted ? AppColors.textPrimary : AppColors.textSecondary,
       fontWeight: highlighted ? FontWeight.w700 : FontWeight.w500,
+      fontFeatures: AppTextStyles.tabularFigures,
     );
   }
 
@@ -82,6 +135,9 @@ class CycleBarChart extends StatelessWidget {
 
     // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur
     // ce que l'axe lui prend, pour que les barres gardent leur amplitude.
+    final axisWidth = showLeftAxis
+        ? AppDimensions.enrollmentStatsChartLeftAxisWidth
+        : 0.0;
     final bottomReservedSize = verticalBottomLabels
         ? cycleBarBottomLabelExtent(
             context: context,
@@ -103,7 +159,17 @@ class CycleBarChart extends StatelessWidget {
           final barWidth = cycleBarWidth(
             barCount: items.length,
             availableWidth: constraints.maxWidth,
+            axisWidth: axisWidth,
           );
+
+          // Le plancher est donné en dp ; les barres, elles, se mesurent dans
+          // l'unité des données. On convertit donc avec la hauteur réellement
+          // offerte au tracé — sans quoi le même plancher vaudrait deux choses
+          // différentes sur deux graphiques de hauteurs différentes.
+          final plotHeight = chartHeight - bottomReservedSize;
+          final minToY = (minimumBarHeight <= 0 || plotHeight <= 0)
+              ? 0.0
+              : topY * (minimumBarHeight / plotHeight);
           return ChartEntrance(
             builder: (context, motion) => BarChart(
               BarChartData(
@@ -112,7 +178,9 @@ class CycleBarChart extends StatelessWidget {
                   enabled: !showValueLabels,
                   handleBuiltInTouches: !showValueLabels,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => showValueLabels
+                    // Transparent sous une étiquette permanente : c'est un
+                    // montant posé sur la barre, pas une bulle.
+                    getTooltipColor: (group) => _labelsAlways(group.x.toInt())
                         ? Colors.transparent
                         : AppColors.surfaceDark,
                     tooltipRoundedRadius: 8,
@@ -126,12 +194,23 @@ class CycleBarChart extends StatelessWidget {
                     fitInsideHorizontally: true,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final item = items[group.x.toInt()];
-                      if (showValueLabels) {
+                      // ⚠️ **L'étiquette lit la valeur de l'ITEM, jamais
+                      // `rod.toY`.** Les deux ne sont pas le même nombre depuis
+                      // qu'un plancher existe : une barre de 300 sous un maximum
+                      // à 7 000 000 est dessinée à 91 145 pour rester visible, et
+                      // une étiquette prise sur la géométrie annonçait « 91 K »
+                      // là où l'école avait encaissé 300. Sur un écran d'argent,
+                      // un chiffre faux est pire qu'une barre invisible.
+                      //
+                      // Le plancher est une décision de DESSIN ; l'étiquette est
+                      // une donnée. Elles n'ont pas à passer par la même valeur.
+                      final value = item.value;
+                      if (_labelsAlways(group.x.toInt())) {
                         // Étiquette permanente : valeur seule ; couleur dédiée si
                         // fournie (sinon couleur de la barre).
                         return BarTooltipItem(
                           (valueLabelFormatter ??
-                              NumberFormatterHelper.formatYAxisLabel)(rod.toY),
+                              NumberFormatterHelper.formatYAxisLabel)(value),
                           AppTextStyles.caption.copyWith(
                             color:
                                 valueLabelColorBuilder?.call(group.x.toInt()) ??
@@ -142,7 +221,7 @@ class CycleBarChart extends StatelessWidget {
                         );
                       }
                       return BarTooltipItem(
-                        '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
+                        '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
                         AppTextStyles.caption.copyWith(
                           color: AppColors.textOnDark,
                           fontWeight: FontWeight.w600,
@@ -173,9 +252,8 @@ class CycleBarChart extends StatelessWidget {
                   ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize:
-                          AppDimensions.enrollmentStatsChartLeftAxisWidth,
+                      showTitles: showLeftAxis,
+                      reservedSize: axisWidth,
                       getTitlesWidget: (value, meta) => Text(
                         NumberFormatterHelper.formatYAxisLabel(value),
                         style: AppTextStyles.caption.copyWith(
@@ -219,12 +297,20 @@ class CycleBarChart extends StatelessWidget {
                   for (int i = 0; i < items.length; i++)
                     BarChartGroupData(
                       x: i,
-                      showingTooltipIndicators: showValueLabels
+                      showingTooltipIndicators: _labelsAlways(i)
                           ? const [0]
                           : const [],
                       barRods: [
                         BarChartRodData(
-                          toY: motion.lerpValue(items[i].value),
+                          // Zéro reste zéro : le plancher ne s'applique qu'à
+                          // une valeur réellement encaissée.
+                          toY: motion.lerpValue(
+                            items[i].value <= 0
+                                ? items[i].value
+                                : (items[i].value < minToY
+                                      ? minToY
+                                      : items[i].value),
+                          ),
                           color: items[i].color,
                           width: barWidth,
                           borderRadius: BorderRadius.circular(barRadius),

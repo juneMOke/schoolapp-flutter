@@ -156,44 +156,65 @@ class EteeloSplitBar extends StatelessWidget {
   ///
   /// Exclue du lecteur d'écran : la barre porte déjà la phrase complète, et
   /// relire chaque segment ferait entendre deux fois la même répartition.
+  /// ⚠️ **Chaque entrée est bornée à la largeur du bloc.**
+  ///
+  /// Un `Wrap` donne à ses enfants une largeur **non bornée** : une entrée dont
+  /// le libellé et le montant dépassent la carte ne se replie pas, elle
+  /// **déborde** — et rend les rayures noir et jaune en production. Le cas est
+  /// apparu en posant deux cartes côte à côte : la même légende qui tenait sur
+  /// une carte pleine largeur ne tient plus sur une demi-largeur.
+  ///
+  /// D'où le `LayoutBuilder` : il rend la contrainte que le `Wrap` a perdue, et
+  /// le libellé s'abrège alors au lieu de déborder. Le montant, lui, n'est
+  /// jamais tronqué — c'est le chiffre, et un montant coupé serait pire
+  /// qu'illisible.
   Widget _buildLegend() {
     return ExcludeSemantics(
-      child: Wrap(
-        spacing: AppDimensions.spacingL,
-        runSpacing: AppDimensions.spacingS,
-        children: [
-          for (final segment in segments)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: AppDimensions.spacingS + 3,
-                  height: AppDimensions.spacingS + 3,
-                  decoration: BoxDecoration(
-                    color: segment.color,
-                    borderRadius: BorderRadius.circular(
-                      AppDimensions.spacingXS,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Wrap(
+          spacing: AppDimensions.spacingL,
+          runSpacing: AppDimensions.spacingS,
+          children: [
+            for (final segment in segments)
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: AppDimensions.spacingS + 3,
+                      height: AppDimensions.spacingS + 3,
+                      decoration: BoxDecoration(
+                        color: segment.color,
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.spacingXS,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: AppDimensions.spacingS),
+                    Flexible(
+                      child: Text(
+                        segment.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppDimensions.spacingXS),
+                    Text(
+                      segment.valueLabel,
+                      style: AppTextStyles.bodyStrong.copyWith(
+                        color: segment.color,
+                        fontFeatures: AppTextStyles.tabularFigures,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppDimensions.spacingS),
-                Text(
-                  segment.label,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingXS),
-                Text(
-                  segment.valueLabel,
-                  style: AppTextStyles.bodyStrong.copyWith(
-                    color: segment.color,
-                    fontFeatures: AppTextStyles.tabularFigures,
-                  ),
-                ),
-              ],
-            ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }

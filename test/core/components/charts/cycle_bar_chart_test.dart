@@ -21,6 +21,8 @@ void main() {
     WidgetTester tester, {
     required bool vertical,
     List<BarChartItem> barItems = items,
+    bool showLeftAxis = true,
+    double minimumBarHeight = 0,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -30,6 +32,8 @@ void main() {
             child: CycleBarChart(
               items: barItems,
               verticalBottomLabels: vertical,
+              showLeftAxis: showLeftAxis,
+              minimumBarHeight: minimumBarHeight,
             ),
           ),
         ),
@@ -242,5 +246,217 @@ void main() {
       await pumpAt(tester, 1200, 2);
       expect(barWidthOf(tester), AppDimensions.enrollmentStatsChartBarMaxWidth);
     });
+  });
+
+  testWidgets('l’axe vertical se retire, et rend sa largeur au tracé', (
+    tester,
+  ) async {
+    // Assez de barres pour que la largeur ne bute pas sur son plafond : à
+    // trois barres dans 600 dp, elles sont déjà au maximum et l'axe ne change
+    // rien.
+    final many = [
+      for (var i = 0; i < 20; i++)
+        const BarChartItem(label: 'J', value: 40, color: AppColors.bleuArdoise),
+    ];
+
+    await pumpChart(tester, vertical: false, barItems: many);
+    final withAxis = tester.widget<BarChart>(find.byType(BarChart));
+    expect(withAxis.data.titlesData.leftTitles.sideTitles.showTitles, isTrue);
+    final wideBars = withAxis.data.barGroups.first.barRods.first.width;
+
+    await pumpChart(
+      tester,
+      vertical: false,
+      barItems: many,
+      showLeftAxis: false,
+    );
+    final without = tester.widget<BarChart>(find.byType(BarChart));
+
+    expect(without.data.titlesData.leftTitles.sideTitles.showTitles, isFalse);
+    expect(
+      without.data.titlesData.leftTitles.sideTitles.reservedSize,
+      0,
+      reason:
+          'un axe masqué qui garderait sa réserve laisserait une marge vide',
+    );
+    expect(
+      without.data.barGroups.first.barRods.first.width,
+      greaterThan(wideBars),
+      reason: 'les 36 dp de l’axe reviennent aux barres',
+    );
+  });
+
+  testWidgets('une valeur minuscule garde une hauteur visible', (tester) async {
+    // ⚠️ Le cas qui l'impose : une journée à 300 sous un maximum à 9 000 000
+    // rend une barre d'une fraction de pixel — indiscernable d'un zéro. Et
+    // depuis que les écrans peuvent masquer les barres nulles, une barre non
+    // nulle invisible se lit comme un jour supprimé.
+    const lopsided = [
+      BarChartItem(label: 'A', value: 9000000, color: AppColors.bleuArdoise),
+      BarChartItem(label: 'B', value: 300, color: AppColors.bleuArdoise),
+      BarChartItem(label: 'C', value: 0, color: AppColors.bleuArdoise),
+    ];
+
+    await pumpChart(tester, vertical: false, barItems: lopsided);
+    final flat = tester.widget<BarChart>(find.byType(BarChart));
+    final unfloored = flat.data.barGroups[1].barRods.first.toY;
+
+    await pumpChart(
+      tester,
+      vertical: false,
+      barItems: lopsided,
+      minimumBarHeight: 2,
+    );
+    final floored = tester.widget<BarChart>(find.byType(BarChart));
+
+    expect(floored.data.barGroups[1].barRods.first.toY, greaterThan(unfloored));
+    expect(
+      floored.data.barGroups[2].barRods.first.toY,
+      0,
+      reason:
+          'zéro reste zéro — un plancher qui le relèverait ferait voir un '
+          'encaissement là où il n’y en a pas',
+    );
+    expect(
+      floored.data.barGroups.first.barRods.first.toY,
+      9000000,
+      reason: 'une valeur qui dépasse le plancher n’est jamais modifiée',
+    );
+  });
+
+  testWidgets('les libellés d’axe portent des chiffres de largeur fixe', (
+    tester,
+  ) async {
+    await pumpChart(tester, vertical: false);
+
+    final labels = tester
+        .widgetList<Text>(find.byType(Text))
+        .where((t) => items.any((item) => item.label == t.data))
+        .toList();
+
+    expect(labels, isNotEmpty);
+    // L'axe est une RANGÉE de nombres. Sans largeur fixe, « 11 » et « 08 » ne
+    // tombent pas au même endroit sous leurs barres : le décalage est d'un
+    // pixel par libellé, mais il se cumule sur trente et un jours et fait
+    // onduler l'axe.
+    for (final label in labels) {
+      expect(
+        (label.style?.fontFeatures ?? const <FontFeature>[]).any(
+          (f) => f.feature == 'tnum',
+        ),
+        isTrue,
+        reason: 'le libellé « ${label.data} » n’est pas tabulaire',
+      );
+    }
+  });
+
+  testWidgets('une barre au plancher annonce sa VRAIE valeur, pas sa hauteur', (
+    tester,
+  ) async {
+    const tiny = [
+      BarChartItem(
+        label: '01/05',
+        value: 1000000,
+        color: AppColors.bleuArdoise,
+      ),
+      BarChartItem(label: '02/05', value: 300, color: AppColors.bleuArdoise),
+      BarChartItem(
+        label: '03/05',
+        value: 7000000,
+        color: AppColors.bleuArdoise,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 600,
+            child: CycleBarChart(
+              items: tiny,
+              showValueLabels: true,
+              minimumBarHeight: 2,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final data = tester.widget<BarChart>(find.byType(BarChart)).data;
+    final group = data.barGroups[1];
+    final rod = group.barRods.first;
+
+    // La barre est bien REMONTÉE pour rester visible…
+    expect(rod.toY, greaterThan(300));
+    // …mais son étiquette dit 300, pas la hauteur à laquelle on l'a dessinée.
+    // Le plancher est une décision de DESSIN ; l'étiquette est une donnée. Sur
+    // un écran d'argent, un chiffre faux est pire qu'une barre invisible.
+    final label = data.barTouchData.touchTooltipData.getTooltipItem(
+      group,
+      1,
+      rod,
+      0,
+    );
+    expect(label?.text, '300');
+  });
+
+  testWidgets('sans axe ni étiquettes, le relief garde son montant', (
+    tester,
+  ) async {
+    final many = [
+      for (var d = 1; d <= 20; d++)
+        BarChartItem(
+          label: '${d.toString().padLeft(2, '0')}/05',
+          value: 100000.0 * d,
+          color: AppColors.bleuArdoise,
+        ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 900,
+            child: CycleBarChart(
+              items: many,
+              // Le cas d'une fenêtre large : trop de barres pour les chiffrer
+              // toutes, et pas d'axe vertical.
+              showValueLabels: false,
+              showLeftAxis: false,
+              highlightedIndexes: const {7},
+              labelHighlightedBars: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final data = tester.widget<BarChart>(find.byType(BarChart)).data;
+
+    // Seule la barre en relief porte son montant en permanence…
+    for (var i = 0; i < data.barGroups.length; i++) {
+      expect(
+        data.barGroups[i].showingTooltipIndicators.isNotEmpty,
+        i == 7,
+        reason: 'barre $i',
+      );
+    }
+    // …et sans bulle sombre : c'est un montant posé sur la barre.
+    expect(
+      data.barTouchData.touchTooltipData.getTooltipColor(data.barGroups[7]),
+      Colors.transparent,
+    );
+    // Sans quoi le relief ne reposerait que sur la couleur, qui ne porte jamais
+    // seule une information.
+    final label = data.barTouchData.touchTooltipData.getTooltipItem(
+      data.barGroups[7],
+      7,
+      data.barGroups[7].barRods.first,
+      0,
+    );
+    expect(label?.text, isNot(contains('\n')));
+    expect(label?.text, '800K');
   });
 }

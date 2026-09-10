@@ -1024,7 +1024,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get menuFeeControl => 'Fee control';
+  String get menuRecouvrement => 'Collections';
 
   @override
   String get subMenuFeeControl => 'Control by fee';
@@ -6417,16 +6417,425 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeDashboardTabTillDescription => 'What went into the drawer';
 
   @override
-  String get financeTillKpiTotal => 'Till total';
+  String financeTillRangeCaptionCustom(String from, String to) {
+    return 'From $from to $to';
+  }
 
   @override
-  String get financeTillKpiFees => 'School fees';
+  String financeTillRangeCaptionWindow(String today) {
+    return 'As at $today';
+  }
 
   @override
-  String get financeTillKpiBoutique => 'Boutique sales';
+  String get financeTillPeriodCustom => 'Range';
 
   @override
-  String get financeTillKpiBandA11yLabel => 'Till indicators, by currency';
+  String get financeTillPeriodFrom => 'From';
+
+  @override
+  String get financeTillPeriodTo => 'To';
+
+  @override
+  String get financeTillReceiptsHeading => 'Payments';
+
+  @override
+  String financeTillReceiptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+      zero: 'No payments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsUnit => 'payment';
+
+  @override
+  String financeTillReceiptsUnsealed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count without a sealed receipt (back-entries)',
+      one: '1 without a sealed receipt (back-entry)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReceiptsColumnDate => 'Date';
+
+  @override
+  String get financeTillReceiptsColumnReceipt => 'Receipt';
+
+  @override
+  String get financeTillReceiptsColumnStudent => 'Student';
+
+  @override
+  String get financeTillReceiptsColumnSource => 'Source';
+
+  @override
+  String get financeTillReceiptsColumnAmount => 'Collected';
+
+  @override
+  String get financeTillReceiptsNoNumber => '—';
+
+  @override
+  String get financeTillReceiptsNoStudent => '—';
+
+  @override
+  String financeTillReceiptsCollectedBy(String agent) {
+    return 'collected by $agent';
+  }
+
+  @override
+  String financeTillReceiptsCrossed(String amount, String rate) {
+    return 'settles $amount · rate $rate';
+  }
+
+  @override
+  String get financeTillReceiptsLoading => 'Loading payments…';
+
+  @override
+  String get financeTillReceiptsEmpty => 'No payments in this period';
+
+  @override
+  String get financeTillReceiptsForbidden =>
+      'The itemised list of payments requires the payment-read permission. The totals above remain readable without it.';
+
+  @override
+  String get financeTillReceiptsError =>
+      'Payments could not be loaded. The totals above are up to date.';
+
+  @override
+  String get financeTillReceiptsSplitTenderNote =>
+      'A payment settled in both currencies takes two rows, under the same receipt number: that is not a duplicate, it is what the till holds.';
+
+  @override
+  String get financeTillReportDownload => 'Download';
+
+  @override
+  String get financeTillReportTooltip =>
+      'Download the period\'s payments report';
+
+  @override
+  String get financeTillReportPreparing => 'Preparing…';
+
+  @override
+  String get financeTillReportWaiting => 'Please wait…';
+
+  @override
+  String financeTillReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'A report is already being prepared. Try again in $seconds seconds.',
+      one: 'A report is already being prepared. Try again in 1 second.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeTillReportForbidden =>
+      'The payments report requires the payment-read permission.';
+
+  @override
+  String get financeTillReportFailed => 'The report could not be produced.';
+
+  @override
+  String financeTillReportTooLarge(int lines, int cap) {
+    final intl.NumberFormat linesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String linesString = linesNumberFormat.format(lines);
+    final intl.NumberFormat capNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String capString = capNumberFormat.format(cap);
+
+    return 'This window holds $linesString lines; the report is capped at $capString. Narrow the period.';
+  }
+
+  @override
+  String get financeTillReportHandoffFailed =>
+      'The report is ready, but printing could not be opened.';
+
+  @override
+  String financeTillEmptyGlobalTitle(String window) {
+    return 'No collections · $window';
+  }
+
+  @override
+  String financeTillEmptyGlobalMessage(String window) {
+    return 'No receipt was issued $window, in any till. Widen the window, or open billing to record a payment.';
+  }
+
+  @override
+  String get financeTillEmptySeeMonth => 'See this month';
+
+  @override
+  String get financeTillEmptySeeYear => 'See this year';
+
+  @override
+  String get financeTillEmptyOpenBilling => 'Open billing';
+
+  @override
+  String financeTillEmptyCurrencyTitle(String currency) {
+    return '$currency till empty over this period';
+  }
+
+  @override
+  String financeTillEmptyCurrencyMessage(
+    String currency,
+    String window,
+    String others,
+  ) {
+    return 'No payment was tendered in $currency $window. $others';
+  }
+
+  @override
+  String financeTillEmptyOtherTill(String amount) {
+    return 'The other till recorded $amount.';
+  }
+
+  @override
+  String financeTillEmptyOtherTills(String amounts) {
+    return 'The other tills recorded $amounts.';
+  }
+
+  @override
+  String financeTillEmptySeeTill(String currency) {
+    return 'See the $currency till';
+  }
+
+  @override
+  String financeTillReceiptsCrossedTooltip(String fee, String tendered) {
+    return 'Fee set in $fee, settled in $tendered';
+  }
+
+  @override
+  String financeTillRateValue(String base, String value, String quote) {
+    return '1 $base = $value $quote';
+  }
+
+  @override
+  String get financeTillRateNone => 'No rate configured';
+
+  @override
+  String financeTillRateA11yLabel(String rate) {
+    return 'Today\'s rate: $rate';
+  }
+
+  @override
+  String get financeTillRateNoneA11yLabel =>
+      'Today\'s rate: no rate configured';
+
+  @override
+  String get financeTillInsightsHeading => 'Readings & alerts';
+
+  @override
+  String get financeTillInsightAmountSeparator => ' and ';
+
+  @override
+  String get financeTillInsightCrossedTitle => 'Cross-currency payments';
+
+  @override
+  String get financeTillInsightCrossedEmpty =>
+      'No cross-currency payment: every fee was settled in its own currency.';
+
+  @override
+  String financeTillInsightCrossedBody(
+    int count,
+    String amounts,
+    String rateClause,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments settle',
+      one: '1 payment settles',
+    );
+    return '$_temp0 a fee set in the other currency, for $amounts$rateClause. A rate discrepancy at till-count time comes from this.';
+  }
+
+  @override
+  String financeTillInsightCrossedSingleRate(String rate) {
+    return ', converted at a rate of $rate';
+  }
+
+  @override
+  String financeTillInsightCrossedRateRange(String from, String to) {
+    return ', converted at rates from $from to $to';
+  }
+
+  @override
+  String get financeTillInsightBestDayTitle => 'Strongest day';
+
+  @override
+  String financeTillInsightBestDayBody(String day, String amount, int share) {
+    return '$day brought in $amount, or $share% of what the chart draws — useful for planning cover.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueTitle => 'What the boutique changes';
+
+  @override
+  String financeTillInsightBoutiqueBody(String amount) {
+    return '$amount came from the boutique — optional, unbilled purchases: cash in, not a fee settled.';
+  }
+
+  @override
+  String get financeTillInsightBoutiqueEmpty =>
+      'No boutique sale in this window: everything that came in settles a billed fee.';
+
+  @override
+  String get financeTillInsightTrendTitle => 'Trend';
+
+  @override
+  String financeTillInsightTrendUp(String currency, int percent) {
+    return '$currency till up $percent% on the previous period. The pace is holding.';
+  }
+
+  @override
+  String financeTillInsightTrendDown(String currency, int percent) {
+    return '$currency till down $percent% on the previous period. Check whether a follow-up is needed.';
+  }
+
+  @override
+  String get financeTillSourceHeading => 'By source';
+
+  @override
+  String get financeTillSourceHint => 'Billed fees versus boutique sales';
+
+  @override
+  String get financeTillSourceFees => 'School fees';
+
+  @override
+  String get financeTillSourceBoutique => 'Boutique sales';
+
+  @override
+  String financeTillSourceA11yLabel(String fees, String boutique) {
+    return 'Split by source: $fees in billed fees, $boutique in boutique sales';
+  }
+
+  @override
+  String get financeTillSourceBoutiqueNote =>
+      'Optional, unbilled purchases: this share enters the till without settling any fee.';
+
+  @override
+  String get financeTillClassroomHeading => 'By classroom';
+
+  @override
+  String financeTillClassroomHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $count top contributing classrooms for this till',
+      one: 'The top contributing classroom for this till',
+      zero: 'No classroom fed this till',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillClassroomRowA11yLabel(String classroom, String amount) {
+    return '$classroom: $amount';
+  }
+
+  @override
+  String financeTillClassroomUnassigned(String amount) {
+    return '$amount came in without naming a classroom — a boutique sale has neither student nor classroom. The rows above therefore do not add up to the till total.';
+  }
+
+  @override
+  String get financeTillClassroomEmpty => 'No classroom to rank';
+
+  @override
+  String get financeTillClassroomEmptyHint =>
+      'Nothing that entered this till names a student.';
+
+  @override
+  String get financeTillCashBoxesA11yLabel =>
+      'The window\'s tills, one per currency, and the number of receipts issued';
+
+  @override
+  String financeTillCashBoxLabel(String currency, String window) {
+    return '$currency till · $window';
+  }
+
+  @override
+  String get financeTillCurrencyNameUsd => 'dollar';
+
+  @override
+  String get financeTillCurrencyNameCdf => 'franc';
+
+  @override
+  String financeTillReceiptCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'receipts',
+      one: 'receipt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeTillCashBoxSubline(int count, String unit, String ticket) {
+    return '$count $unit · average ticket $ticket';
+  }
+
+  @override
+  String financeTillCashBoxTrend(int percent) {
+    return '$percent% vs previous period';
+  }
+
+  @override
+  String get financeTillCashBoxNoComparablePeriod =>
+      'No comparable period before the school year began';
+
+  @override
+  String get financeTillReceiptsIssuedLabel => 'Receipts issued';
+
+  @override
+  String get financeTillReceiptsIssuedSubline => 'across all tills';
+
+  @override
+  String get financeTillDetailHeading => 'Till detail';
+
+  @override
+  String financeTillCurrencySegment(String symbol, String currency, int count) {
+    return '$symbol $currency ($count)';
+  }
+
+  @override
+  String financeTillCurrencySegmentA11yLabel(
+    String currency,
+    int count,
+    String unit,
+  ) {
+    return '$currency till, $count $unit';
+  }
+
+  @override
+  String financeTillCurrencySelectorA11yLabel(String currency) {
+    return 'Till shown: $currency';
+  }
+
+  @override
+  String financeTillBucketsHeading(String currency) {
+    return 'Collections trend · $currency till';
+  }
+
+  @override
+  String get financeTillBucketsWindowNote =>
+      'The tiles count the requested window; the series draws the seven surrounding days, so a day\'s figure reads against the ones before it.';
+
+  @override
+  String get financeTillReceiptsIssuedMixedNote =>
+      'A receipt settled in both currencies counts in each till, but is issued only once.';
 
   @override
   String financeStatsFeeTypeOutstanding(String amount) {
@@ -6481,6 +6890,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeTillImputationHint =>
       'In charge currency: these amounts do not add up with the drawer\'s.';
+
+  @override
+  String financeTillImputationShare(String label, int share) {
+    return '$label · $share% of the total';
+  }
+
+  @override
+  String get financeTillImputationCardHint =>
+      'In the claim currency, never converted — these amounts do not add up with the till\'s.';
 
   @override
   String financeTillImputationCardTitle(String currency) {
@@ -8954,4 +9372,535 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentDashboardCsvFailed =>
       'Copying the list did not complete. Try again.';
+
+  @override
+  String get recouvrementFeePickerLabel => 'Selected fees';
+
+  @override
+  String get recouvrementFeePickerA11yLabel =>
+      'Selected fees — multiple choice, at least one';
+
+  @override
+  String recouvrementFeeChipLockedA11y(String fee) {
+    return '$fee — only selected fee, cannot be unchecked';
+  }
+
+  @override
+  String get recouvrementScopeLabel => 'Scope';
+
+  @override
+  String get recouvrementScopeAll => 'Whole school';
+
+  @override
+  String get recouvrementExpectedLabel => 'Expected on these fees';
+
+  @override
+  String get recouvrementExpectedMixedSubline =>
+      'Two currencies — never added together';
+
+  @override
+  String get recouvrementCollectedLabel => 'Collected to date';
+
+  @override
+  String recouvrementSettledSubline(int count, int percent) {
+    return '$count students have settled in full, $percent% of the cohort';
+  }
+
+  @override
+  String get recouvrementNothingPaidLabel => 'Nothing paid';
+
+  @override
+  String get recouvrementNothingPaidSubline => 'Priority follow-up target';
+
+  @override
+  String get recouvrementPartialLabel => 'Partial payment';
+
+  @override
+  String get recouvrementPartialSubline => 'A first step has been taken';
+
+  @override
+  String get recouvrementNoAmountDash => '—';
+
+  @override
+  String recouvrementContextLine(int count) {
+    return '$count students concerned · every figure on this page covers the checked fees';
+  }
+
+  @override
+  String recouvrementRateLine(String rate) {
+    return 'today\'s rate 1 \$ = $rate FC';
+  }
+
+  @override
+  String get recouvrementRateMissing => 'no rate has been set for today';
+
+  @override
+  String get recouvrementFiguresA11yLabel => 'Recovery key figures';
+
+  @override
+  String get recouvrementRatesTitle => 'Recovery rate by fee';
+
+  @override
+  String get recouvrementRatesSubtitleOne =>
+      'One fee selected · the rate reads in its own currency';
+
+  @override
+  String recouvrementRatesSubtitleMany(int count) {
+    return '$count fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected';
+  }
+
+  @override
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate) {
+    return '$paid of $expected · $rate% recovered';
+  }
+
+  @override
+  String recouvrementRatesGroupHeaderNoExpectation(String paid) {
+    return '$paid collected · nothing was owed in this currency';
+  }
+
+  @override
+  String recouvrementRateRemaining(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String recouvrementRateExpected(String amount) {
+    return '$amount expected';
+  }
+
+  @override
+  String get recouvrementRateNoExpectation => 'no fee owed';
+
+  @override
+  String get recouvrementRatesA11yLabel => 'Recovery rate by fee and currency';
+
+  @override
+  String recouvrementRateBarA11y(String fee, int rate, String amount) {
+    return '$fee: $rate% recovered, $amount left';
+  }
+
+  @override
+  String recouvrementCurrencyGroupTitle(String currency) {
+    return 'Fees in $currency';
+  }
+
+  @override
+  String recouvrementUnbilledNote(int count) {
+    return '$count enrolled students carry none of these fees';
+  }
+
+  @override
+  String get recouvrementSimulationTitle => 'Dismissal simulation';
+
+  @override
+  String get recouvrementSimulationSubtitle =>
+      'Nothing is applied — a dismissal goes through Enrolments, file by file';
+
+  @override
+  String get recouvrementSimulationWho => 'We dismiss students who…';
+
+  @override
+  String get recouvrementCriterionNoPayment => 'Have paid nothing';
+
+  @override
+  String get recouvrementCriterionNotSettled => 'Have not settled in full';
+
+  @override
+  String get recouvrementCriterionBelowThreshold => 'Have paid less than…';
+
+  @override
+  String get recouvrementThresholdLabel => 'Minimum amount';
+
+  @override
+  String recouvrementThresholdMixedWarning(String currency) {
+    return 'The floor is compared in $currency equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.';
+  }
+
+  @override
+  String get recouvrementThresholdNoRate =>
+      'No rate has been set for today: the comparison is impossible on a mixed selection.';
+
+  @override
+  String recouvrementCriticalLabel(int percent) {
+    return 'Unmanageable group threshold: $percent% of the cohort';
+  }
+
+  @override
+  String recouvrementCriticalA11y(int percent) {
+    return '$percent% of the cohort';
+  }
+
+  @override
+  String get recouvrementSimHeadcount => 'Cohort today';
+
+  @override
+  String get recouvrementSimHeadcountSubline => 'students carrying these fees';
+
+  @override
+  String get recouvrementSimTargeted => 'Students targeted';
+
+  @override
+  String get recouvrementSimRemaining => 'Cohort left';
+
+  @override
+  String recouvrementSimRemainingSubline(int percent) {
+    return '$percent% of the cohort kept';
+  }
+
+  @override
+  String get recouvrementSimCritical => 'Unmanageable groups';
+
+  @override
+  String get recouvrementSimTableGroup => 'Group';
+
+  @override
+  String get recouvrementSimTableHeadcount => 'Cohort';
+
+  @override
+  String get recouvrementSimTableLeaving => 'To dismiss';
+
+  @override
+  String get recouvrementSimTableRemaining => 'Left';
+
+  @override
+  String get recouvrementSimTableKept => 'Cohort kept';
+
+  @override
+  String get recouvrementSimTableVerdict => 'Verdict';
+
+  @override
+  String get recouvrementVerdictManageable => 'Manageable';
+
+  @override
+  String get recouvrementVerdictFragile => 'Fragile';
+
+  @override
+  String get recouvrementVerdictCritical => 'Unmanageable';
+
+  @override
+  String recouvrementSimFootNothingLost(String missing) {
+    return 'These students have paid nothing: dismissal would lose no income, but it definitively writes off $missing.';
+  }
+
+  @override
+  String recouvrementSimFootWithLoss(String lost, String missing) {
+    return 'Dismissal would void $lost already collected, and write off $missing never paid.';
+  }
+
+  @override
+  String get recouvrementSimA11yLabel => 'Dismissal simulation — no writes';
+
+  @override
+  String recouvrementSimRowA11y(String group, int kept, String verdict) {
+    return '$group: $kept% of the cohort kept, $verdict';
+  }
+
+  @override
+  String get recouvrementRelanceListPreparing => 'Preparing the list…';
+
+  @override
+  String recouvrementRelanceListBusy(int seconds) {
+    return 'A document is already being produced on this server — try again in ${seconds}s';
+  }
+
+  @override
+  String recouvrementRelanceListTooLarge(int lines, int cap) {
+    return '$lines lines for a cap of $cap: narrow the scope or the criterion.';
+  }
+
+  @override
+  String recouvrementRelanceListUnknownStudents(int count) {
+    return '$count students on this list are not attached to this school for this year.';
+  }
+
+  @override
+  String get recouvrementRelanceListInconsistent =>
+      'The list could not be produced: some rows contradict themselves. Refresh the screen.';
+
+  @override
+  String get recouvrementRelanceListForbidden =>
+      'You are not allowed to produce a named list.';
+
+  @override
+  String get recouvrementRelanceListFailed => 'The list could not be produced.';
+
+  @override
+  String get recouvrementRelanceListHandoffFailed =>
+      'The list arrived, but the preview could not open.';
+
+  @override
+  String recouvrementRelanceListA11y(String group) {
+    return 'Produce the named list for $group';
+  }
+
+  @override
+  String get recouvrementInsightWorstFeeTitle => 'The fee furthest behind';
+
+  @override
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount) {
+    return '$fee tops out at $rate% recovered: $amount are still missing. This is the fee to check group by group.';
+  }
+
+  @override
+  String get recouvrementInsightControlAction => 'Check the students';
+
+  @override
+  String get recouvrementInsightSpreadTitle => 'Spread between groups';
+
+  @override
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  ) {
+    return 'The spread runs from $bestRate% ($bestGroup) to $worstRate% ($worstGroup). A gap this wide says more about follow-up practice than about what families can pay.';
+  }
+
+  @override
+  String get recouvrementInsightSimulationTitle => 'What the simulation says';
+
+  @override
+  String recouvrementInsightSimulationSafe(int remaining, int percent) {
+    return 'The measure would hold everywhere: $remaining students would remain, $percent% of the cohort kept.';
+  }
+
+  @override
+  String recouvrementInsightSimulationCritical(int count, int percent) {
+    return 'Dismissal would push $count groups below $percent% of their cohort. Staggered follow-up costs less than an emptied class.';
+  }
+
+  @override
+  String get recouvrementEmptyResultDescription =>
+      'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.';
+
+  @override
+  String get recouvrementRelanceListNotDeployed =>
+      'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.';
+
+  @override
+  String recouvrementCallListTitle(String group) {
+    return 'Students targeted — $group';
+  }
+
+  @override
+  String recouvrementCallListSubtitle(int count, String criterion) {
+    return '$count students · $criterion';
+  }
+
+  @override
+  String get recouvrementCallListStudent => 'Student';
+
+  @override
+  String get recouvrementCallListDue => 'Due';
+
+  @override
+  String get recouvrementCallListPaid => 'Paid';
+
+  @override
+  String get recouvrementCallListRemaining => 'Left';
+
+  @override
+  String recouvrementCallListUnnamed(String id) {
+    return 'Student $id';
+  }
+
+  @override
+  String get recouvrementCallListUnnamedNote =>
+      'Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.';
+
+  @override
+  String get recouvrementCallListEmit => 'Produce the list to sign';
+
+  @override
+  String get recouvrementCallListClose => 'Close';
+
+  @override
+  String get recouvrementCallListEmpty => 'No student targeted in this group.';
+
+  @override
+  String get feeControlFeeLoading => 'Reading the fee schedule…';
+
+  @override
+  String get feeControlFeesLabel => 'Fees checked';
+
+  @override
+  String get feeControlFeesA11yLabel =>
+      'Fees checked — multiple selection, at least one';
+
+  @override
+  String get feeControlSituationLabel => 'Situation looked for';
+
+  @override
+  String get feeControlSituationThreshold => 'Paid at least…';
+
+  @override
+  String get feeControlThresholdMixedWarning =>
+      'The selected fees do not share one currency: a single floor amount would mean nothing. Keep only one currency.';
+
+  @override
+  String get feeControlColumnStudent => 'Student';
+
+  @override
+  String feeControlResultTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+      zero: 'no student',
+    );
+    return 'Result · $_temp0';
+  }
+
+  @override
+  String get feeControlResultOrder => 'sorted from least to most advanced';
+
+  @override
+  String feeControlCriteriaThreshold(String amount) {
+    return 'Floor: $amount';
+  }
+
+  @override
+  String get feeControlSelectPage => 'Select the page';
+
+  @override
+  String get feeControlDeselectPage => 'Deselect the page';
+
+  @override
+  String get feeControlMarkedBadge => 'to send home';
+
+  @override
+  String get feeControlSummaryCollected => 'Collected on these fees';
+
+  @override
+  String feeControlSummaryCollectedOn(String expected) {
+    return 'of $expected due';
+  }
+
+  @override
+  String feeControlSelectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students selected',
+      one: '1 student selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlCallListAction => 'Call sheet';
+
+  @override
+  String get feeControlMarkAction => 'Mark to send home';
+
+  @override
+  String get feeControlDeselectAction => 'Deselect';
+
+  @override
+  String feeControlMarkedTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students marked to send home',
+      one: '1 student marked to send home',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlMarkedNote =>
+      'This list is a working draft: nothing is sent to the families. Measure the effect on headcount in the dashboard before deciding.';
+
+  @override
+  String get feeControlMarkedClear => 'Clear the send-home list';
+
+  @override
+  String get feeControlMarkedCleared => 'Send-home list cleared.';
+
+  @override
+  String feeControlMarkedDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students marked to send home — the list stays editable.',
+      one: '1 student marked to send home — the list stays editable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlSheetDossier(String code) {
+    return 'File $code';
+  }
+
+  @override
+  String feeControlSheetPaidOf(String paid, String expected, int percent) {
+    return '$paid of $expected · $percent%';
+  }
+
+  @override
+  String feeControlSheetRemaining(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get feeControlSheetNoExpectation => 'No amount expected on this fee';
+
+  @override
+  String get feeControlSheetMixedNote =>
+      'Each fee is settled in its own currency: the lines do not add up.';
+
+  @override
+  String get feeControlSheetOpenRecord => 'Open the full record';
+
+  @override
+  String get feeControlSheetUnmark => 'Remove from send-home list';
+
+  @override
+  String feeControlSheetMarked(String name) {
+    return '$name marked to send home.';
+  }
+
+  @override
+  String feeControlSheetUnmarked(String name) {
+    return '$name removed from the send-home list.';
+  }
+
+  @override
+  String get feeControlCallSheetTitle => 'School fee control';
+
+  @override
+  String feeControlCallSheetIssuedOn(String date) {
+    return 'Issued on $date';
+  }
+
+  @override
+  String feeControlCallSheetRate(String rate) {
+    return 'Rate applied: $rate';
+  }
+
+  @override
+  String get feeControlCallSheetNumber => 'No.';
+
+  @override
+  String get feeControlCallSheetSignature => 'Parent signature';
+
+  @override
+  String get feeControlCallSheetVisaCollector => 'Collector\'s signature';
+
+  @override
+  String get feeControlCallSheetVisaDirection => 'Management\'s signature';
+
+  @override
+  String get feeControlCallSheetFailed =>
+      'The call sheet could not be prepared.';
+
+  @override
+  String get feeControlEmptyWiden => 'See all students';
+
+  @override
+  String get feeControlEmptyBilling => 'Open billing';
 }

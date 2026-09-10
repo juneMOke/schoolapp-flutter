@@ -3,7 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 
-Future<void> _pump(WidgetTester tester, List<EteeloBarRow> rows) async {
+Future<void> _pump(
+  WidgetTester tester,
+  List<EteeloBarRow> rows, {
+  EteeloBarRowsScale scale = EteeloBarRowsScale.byTotal,
+  double minimumFraction = 0,
+}) async {
   await tester.pumpWidget(
     const MediaQuery(
       data: MediaQueryData(disableAnimations: true),
@@ -18,7 +23,14 @@ Future<void> _pump(WidgetTester tester, List<EteeloBarRow> rows) async {
         child: MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(width: 500, child: EteeloBarRows(rows: rows)),
+              child: SizedBox(
+                width: 500,
+                child: EteeloBarRows(
+                  rows: rows,
+                  scale: scale,
+                  minimumFraction: minimumFraction,
+                ),
+              ),
             ),
           ),
         ),
@@ -115,5 +127,53 @@ void main() {
     );
     expect(label.overflow, TextOverflow.ellipsis);
     expect(label.maxLines, 1);
+  });
+
+  testWidgets('en part du MAXIMUM, la plus forte remplit la barre', (
+    tester,
+  ) async {
+    // Les mêmes données qu'au-dessus : 50 et 150. En part du total elles
+    // valent 25 % et 75 % ; en part du maximum, 33 % et 100 %. Les deux
+    // lectures sont justes et répondent à deux questions différentes — une
+    // répartition d'un côté, un classement de l'autre.
+    await _pump(tester, [
+      _row('A', 50),
+      _row('B', 150),
+    ], scale: EteeloBarRowsScale.byMax);
+
+    final factors = tester
+        .widgetList<FractionallySizedBox>(find.byType(FractionallySizedBox))
+        .map((box) => box.widthFactor)
+        .toList();
+
+    expect(factors[0], closeTo(1 / 3, 0.001));
+    expect(factors[1], closeTo(1.0, 0.001));
+  });
+
+  testWidgets('une part minuscule garde un plancher — mais zéro reste zéro', (
+    tester,
+  ) async {
+    // Sans plancher, 0,4 % rend un trait d'un pixel qu'on prend pour une
+    // absence. Le plancher le rend visible SANS le rendre égal à un vrai zéro,
+    // qui, lui, ne dessine rien.
+    await _pump(tester, [
+      _row('Grosse', 1000),
+      _row('Miette', 4),
+      _row('Rien', 0),
+    ], minimumFraction: 0.06);
+
+    final factors = tester
+        .widgetList<FractionallySizedBox>(find.byType(FractionallySizedBox))
+        .map((box) => box.widthFactor)
+        .toList();
+
+    expect(factors[1], closeTo(0.06, 0.001));
+    expect(
+      factors[2],
+      0.0,
+      reason:
+          'un plancher qui relèverait zéro ferait voir un encaissement '
+          'là où il n’y en a pas',
+    );
   });
 }

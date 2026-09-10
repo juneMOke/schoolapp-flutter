@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
@@ -486,6 +487,23 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
       schoolLevelGroupId: schoolLevelGroupId,
     ),
   );
+
+  @override
+  Future<Either<Failure, List<LocalRecoveryLine>>> getRecoveryPositions({
+    required String academicYearId,
+    required List<String> feeCodes,
+    String? schoolLevelGroupId,
+  }) => _guard(
+    () => _dao.getRecoveryPositions(
+      academicYearId: academicYearId,
+      feeCodes: feeCodes,
+      schoolLevelGroupId: schoolLevelGroupId,
+    ),
+  );
+
+  @override
+  Future<Either<Failure, int>> countPendingPayments() =>
+      _guard(_dao.countPendingPayments);
 
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {

@@ -75,6 +75,15 @@ class AppColors {
   static const financeDetailChargeInfoSurface = Color(0xFFFFFAF5);
   static const financeDetailChargeInfoSurfaceAlt = surfaceRaised;
 
+  /// L'ambre de la **caisse** — la teinte du paiement croisé.
+  ///
+  /// Distincte de [financeDetailAmber] (#D97706), qui sert le détail d'un
+  /// paiement : la spec Encaissements donne ce couple-ci, et deux ambres
+  /// voisines valent mieux qu'une approximation sur un écran qui signale une
+  /// conversion.
+  static const financeCrossedAccent = Color(0xFFA66A00);
+  static const financeCrossedSurface = Color(0xFFFBF3E3);
+
   // Finance - Meta
   static const financeDetailAmber = Color(0xFFD97706);
   static const financeDetailAmberSoft = Color(0xFFFEF3C7);

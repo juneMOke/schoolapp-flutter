@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/till_crossed_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/till_currency_block_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/till_imputation_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/stats_context_model.dart';
@@ -24,11 +25,25 @@ class FinanceTillResponseModel {
   /// Ce que ces versements ont éteint, par devise de **créance**.
   final List<TillImputationModel> impute;
 
+  /// Le grain des barres, annoncé par le serveur — jamais déduit de la période.
+  final String granularity;
+
+  /// Le nombre de reçus de la fenêtre, toutes caisses — un **compteur**, donc le
+  /// seul agrégat que l'écran a le droit de lire à travers les devises.
+  final int receiptsIssued;
+
+  /// Les paiements croisés de la fenêtre. Toujours construit, éventuellement
+  /// vide.
+  final TillCrossedModel crossed;
+
   const FinanceTillResponseModel({
     required this.context,
     required this.timeZone,
     required this.encaisse,
     required this.impute,
+    this.granularity = '',
+    this.receiptsIssued = 0,
+    this.crossed = const TillCrossedModel.empty(),
   });
 
   /// **`encaisse` absent lève, et c'est le point de conception du lot.** Le
@@ -62,14 +77,20 @@ class FinanceTillResponseModel {
         for (final raw in (json['impute'] as List<dynamic>? ?? const []))
           if (raw is Map<String, dynamic>) TillImputationModel.fromJson(raw),
       ],
+      granularity: ((json['granularity'] as String?) ?? '').trim(),
+      receiptsIssued: (json['receiptsIssued'] as num?)?.toInt() ?? 0,
+      crossed: TillCrossedModel.fromJsonOrEmpty(json['crossed']),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'context': context.toJson(),
     'timeZone': timeZone,
+    'granularity': granularity,
+    'receiptsIssued': receiptsIssued,
     'encaisse': [for (final block in encaisse) block.toJson()],
     'impute': [for (final block in impute) block.toJson()],
+    'crossed': crossed.toJson(),
   };
 
   FinanceTill toEntity() => FinanceTill(
@@ -77,5 +98,8 @@ class FinanceTillResponseModel {
     timeZone: timeZone,
     encaisse: [for (final block in encaisse) block.toEntity()],
     impute: [for (final block in impute) block.toEntity()],
+    granularity: granularity,
+    receiptsIssued: receiptsIssued,
+    crossed: crossed.toEntity(),
   );
 }

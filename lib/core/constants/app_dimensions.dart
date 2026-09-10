@@ -216,6 +216,39 @@ class AppDimensions {
   // Enrollment results bar tokens
   static const enrollmentResultsBarGap = 10.0;
   static const enrollmentResultsFilterChipHPadding = 10.0;
+
+  // Recouvrement — pastilles du sélecteur de frais (spec §2). La pastille fait
+  // 38 dp ; la rangée qui la porte atteint les 44 dp de cible tactile avec son
+  // interligne.
+  static const recouvrementFeeChipHeight = 38.0;
+  static const recouvrementFeeChipRadius = 999.0;
+  static const recouvrementFeeChipIconSize = 15.0;
+  static const recouvrementScopeFieldWidth = 230.0;
+  // Barres du taux par frais (spec §4) : hauteur 20, radius 5.
+  static const recouvrementRateBarHeight = 20.0;
+  static const recouvrementRateBarRadius = 5.0;
+
+  // Simulation de renvoi (spec §6).
+  static const recouvrementCriterionFieldWidth = 260.0;
+  static const recouvrementThresholdFieldWidth = 190.0;
+  static const recouvrementWarningMaxWidth = 300.0;
+  static const recouvrementKeptBarHeight = 8.0;
+
+  // Lectures & alertes (spec §8) : médaillon 34, cartes 260 → 380.
+  static const recouvrementInsightMedallion = 34.0;
+  static const recouvrementInsightMinWidth = 260.0;
+  static const recouvrementInsightMaxWidth = 380.0;
+
+  // Aperçu nominatif d'un groupe visé (spec §7).
+  static const recouvrementCallListMaxWidth = 720.0;
+  static const recouvrementCallListMaxHeight = 620.0;
+  static const recouvrementCallListSpinner = 16.0;
+
+  // Aperçu nominatif d'un élève — la fiche qui désagrège ses frais.
+  static const recouvrementStudentSheetMaxWidth = 560.0;
+  static const recouvrementStudentSheetMinPinned = 300.0;
+  static const recouvrementFeeLineBarHeight = 7.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;

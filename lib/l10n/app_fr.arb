@@ -110,856 +110,856 @@
   },
   "configurationTitle": "Configuration",
   "@configurationTitle": {
-      "description": "Titre de la barre de l'assistant de mise en service"
+    "description": "Titre de la barre de l'assistant de mise en service"
   },
   "configurationSubtitle": "Mise en service de l'école",
   "@configurationSubtitle": {
-      "description": "Sous-titre de la barre de l'assistant"
+    "description": "Sous-titre de la barre de l'assistant"
   },
   "configurationStepCounter": "Étape {current} / {total}",
   "@configurationStepCounter": {
-      "description": "Compteur d'étapes de l'assistant, aligné à droite de la barre",
-      "placeholders": {
-          "current": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "description": "Compteur d'étapes de l'assistant, aligné à droite de la barre",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
+    }
   },
   "configurationExitTooltip": "Quitter la configuration",
   "@configurationExitTooltip": {
-      "description": "Infobulle du bouton de sortie — aucune confirmation, tout est enregistré"
+    "description": "Infobulle du bouton de sortie — aucune confirmation, tout est enregistré"
   },
   "configurationStepSchool": "École",
   "@configurationStepSchool": {
-      "description": "Libellé court de l'étape 1 dans le stepper"
+    "description": "Libellé court de l'étape 1 dans le stepper"
   },
   "configurationStepAcademicYear": "Année",
   "@configurationStepAcademicYear": {
-      "description": "Libellé court de l'étape 2 dans le stepper"
+    "description": "Libellé court de l'étape 2 dans le stepper"
   },
   "configurationStepStructure": "Structure",
   "@configurationStepStructure": {
-      "description": "Libellé court de l'étape 3 dans le stepper"
+    "description": "Libellé court de l'étape 3 dans le stepper"
   },
   "configurationStepFees": "Frais",
   "@configurationStepFees": {
-      "description": "Libellé court de l'étape 4 dans le stepper"
+    "description": "Libellé court de l'étape 4 dans le stepper"
   },
   "configurationStepActivation": "Activation",
   "@configurationStepActivation": {
-      "description": "Libellé court de l'étape 5 dans le stepper"
+    "description": "Libellé court de l'étape 5 dans le stepper"
   },
   "configurationStepSemantics": "Étape {current} sur {total}, {title}",
   "@configurationStepSemantics": {
-      "description": "Libellé d'accessibilité d'une pastille du stepper",
-      "placeholders": {
-          "current": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          },
-          "title": {
-              "type": "String"
-          }
+    "description": "Libellé d'accessibilité d'une pastille du stepper",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
       }
+    }
   },
   "configurationBack": "Retour",
   "@configurationBack": {
-      "description": "Bouton de retour de la barre d'enregistrement"
+    "description": "Bouton de retour de la barre d'enregistrement"
   },
   "configurationSave": "Enregistrer",
   "@configurationSave": {
-      "description": "Bouton d'enregistrement de la barre de pied"
+    "description": "Bouton d'enregistrement de la barre de pied"
   },
   "configurationContinue": "Continuer",
   "@configurationContinue": {
-      "description": "Bouton d'avancement de la barre de pied"
+    "description": "Bouton d'avancement de la barre de pied"
   },
   "configurationSaving": "Enregistrement…",
   "@configurationSaving": {
-      "description": "Message transitoire de la barre de pied pendant l'écriture"
+    "description": "Message transitoire de la barre de pied pendant l'écriture"
   },
   "configurationSaved": "Enregistré",
   "@configurationSaved": {
-      "description": "Coche de la barre de pied à l'étape 1, la seule qui écrit vraiment"
+    "description": "Coche de la barre de pied à l'étape 1, la seule qui écrit vraiment"
   },
   "configurationDraftSaved": "Brouillon enregistré",
   "@configurationDraftSaved": {
-      "description": "Coche de la barre de pied aux étapes 2 à 4, qui ne construisent qu'un brouillon local"
+    "description": "Coche de la barre de pied aux étapes 2 à 4, qui ne construisent qu'un brouillon local"
   },
   "configurationSaveBarDefaultHint": "Complétez les champs obligatoires pour continuer",
   "@configurationSaveBarDefaultHint": {
-      "description": "Message par défaut de la barre de pied quand l'étape n'en fournit pas"
+    "description": "Message par défaut de la barre de pied quand l'étape n'en fournit pas"
   },
   "configurationSchoolSectionTitle": "Identité de l'école",
   "@configurationSchoolSectionTitle": {
-      "description": "Titre de la carte de l'étape 1"
+    "description": "Titre de la carte de l'étape 1"
   },
   "configurationSchoolSectionSubtitle": "Ces informations apparaissent sur les attestations, reçus et bulletins.",
   "@configurationSchoolSectionSubtitle": {
-      "description": "Sous-titre de la carte de l'étape 1 — dit pourquoi ces champs comptent"
+    "description": "Sous-titre de la carte de l'étape 1 — dit pourquoi ces champs comptent"
   },
   "configurationSchoolName": "Dénomination de l'école",
   "@configurationSchoolName": {
-      "description": "Champ nom de l'établissement"
+    "description": "Champ nom de l'établissement"
   },
   "configurationSchoolCountry": "Pays",
   "@configurationSchoolCountry": {
-      "description": "Champ pays, en lecture seule"
+    "description": "Champ pays, en lecture seule"
   },
   "configurationSchoolCity": "Ville",
   "@configurationSchoolCity": {
-      "description": "Champ ville, en lecture seule"
+    "description": "Champ ville, en lecture seule"
   },
   "configurationSchoolDistrict": "District",
   "@configurationSchoolDistrict": {
-      "description": "Champ district de Kinshasa"
+    "description": "Champ district de Kinshasa"
   },
   "configurationSchoolMunicipality": "Commune",
   "@configurationSchoolMunicipality": {
-      "description": "Champ commune, en cascade sur le district"
+    "description": "Champ commune, en cascade sur le district"
   },
   "configurationSchoolMunicipalityPlaceholder": "District d'abord",
   "@configurationSchoolMunicipalityPlaceholder": {
-      "description": "Marque-place de la commune tant qu'aucun district n'est choisi"
+    "description": "Marque-place de la commune tant qu'aucun district n'est choisi"
   },
   "configurationSchoolAddress": "Adresse",
   "@configurationSchoolAddress": {
-      "description": "Champ adresse de l'établissement"
+    "description": "Champ adresse de l'établissement"
   },
   "configurationSchoolPhone": "Téléphone de l'école",
   "@configurationSchoolPhone": {
-      "description": "Champ téléphone de l'établissement"
+    "description": "Champ téléphone de l'établissement"
   },
   "configurationSchoolEmail": "E-mail de l'école",
   "@configurationSchoolEmail": {
-      "description": "Champ e-mail de l'établissement"
+    "description": "Champ e-mail de l'établissement"
   },
   "configurationSchoolMissingHint": "À compléter : {fields}",
   "@configurationSchoolMissingHint": {
-      "description": "Message de la barre de pied nommant les champs requis encore vides",
-      "placeholders": {
-          "fields": {
-              "type": "String"
-          }
+    "description": "Message de la barre de pied nommant les champs requis encore vides",
+    "placeholders": {
+      "fields": {
+        "type": "String"
       }
+    }
   },
   "configurationSchoolReadOnlyNote": "Pays et ville sont fixés : l'application est déployée à Kinshasa.",
   "@configurationSchoolReadOnlyNote": {
-      "description": "Note expliquant pourquoi deux champs ne se saisissent pas"
+    "description": "Note expliquant pourquoi deux champs ne se saisissent pas"
   },
   "configurationYearSectionTitle": "Année académique",
   "@configurationYearSectionTitle": {
-      "description": "Titre de la carte de l'étape 2"
+    "description": "Titre de la carte de l'étape 2"
   },
   "configurationYearSectionSubtitle": "Une première année est proposée d'après la date du jour — ajustez les dates si besoin.",
   "@configurationYearSectionSubtitle": {
-      "description": "Sous-titre de la carte de l'étape 2"
+    "description": "Sous-titre de la carte de l'étape 2"
   },
   "configurationYearProposed": "Proposée automatiquement",
   "@configurationYearProposed": {
-      "description": "Pastille d'origine tant que la proposition n'a pas été touchée"
+    "description": "Pastille d'origine tant que la proposition n'a pas été touchée"
   },
   "configurationYearEdited": "Modifiée",
   "@configurationYearEdited": {
-      "description": "Pastille d'origine dès qu'une date ou le libellé a changé"
+    "description": "Pastille d'origine dès qu'une date ou le libellé a changé"
   },
   "configurationYearRestore": "Rétablir la proposition",
   "@configurationYearRestore": {
-      "description": "Lien qui reconstruit la proposition d'après la date du jour"
+    "description": "Lien qui reconstruit la proposition d'après la date du jour"
   },
   "configurationYearStart": "Début des cours",
   "@configurationYearStart": {
-      "description": "Champ date de rentrée"
+    "description": "Champ date de rentrée"
   },
   "configurationYearEnd": "Fin de l'année",
   "@configurationYearEnd": {
-      "description": "Champ date de fin d'exercice"
+    "description": "Champ date de fin d'exercice"
   },
   "configurationYearDuration": "Durée",
   "@configurationYearDuration": {
-      "description": "Libellé de la durée indicative entre les deux dates"
+    "description": "Libellé de la durée indicative entre les deux dates"
   },
   "configurationYearDurationValue": "≈ {months} mois",
   "@configurationYearDurationValue": {
-      "description": "Durée indicative, arrondie au mois",
-      "placeholders": {
-          "months": {
-              "type": "int"
-          }
+    "description": "Durée indicative, arrondie au mois",
+    "placeholders": {
+      "months": {
+        "type": "int"
       }
+    }
   },
   "configurationYearRangeError": "La fin doit suivre le début",
   "@configurationYearRangeError": {
-      "description": "Message affiché quand la date de fin ne suit pas celle de début"
+    "description": "Message affiché quand la date de fin ne suit pas celle de début"
   },
   "configurationYearPeriodsNote": "Le découpage en périodes (trimestres, semestres) se règle plus tard, dans Résultats.",
   "@configurationYearPeriodsNote": {
-      "description": "Renvoi explicite vers un autre module — ne pas ajouter de trimestres ici"
+    "description": "Renvoi explicite vers un autre module — ne pas ajouter de trimestres ici"
   },
   "configurationStructureTitle": "Cycles, niveaux et classes",
   "@configurationStructureTitle": {
-      "description": "Titre de l'étape 3"
+    "description": "Titre de l'étape 3"
   },
   "configurationTotalCycles": "{count, plural, one{cycle} other{cycles}}",
   "@configurationTotalCycles": {
-      "description": "Libellé de la pastille de total des cycles",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Libellé de la pastille de total des cycles",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalLevels": "{count, plural, one{niveau} other{niveaux}}",
   "@configurationTotalLevels": {
-      "description": "Libellé de la pastille de total des niveaux",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Libellé de la pastille de total des niveaux",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalClassrooms": "{count, plural, one{classe} other{classes}}",
   "@configurationTotalClassrooms": {
-      "description": "Libellé de la pastille de total des classes",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Libellé de la pastille de total des classes",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationTotalCourses": "{count, plural, one{cours} other{cours}}",
   "@configurationTotalCourses": {
-      "description": "Libellé de la pastille de total des cours — le volume pédagogique que l'activation générera",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Libellé de la pastille de total des cours — le volume pédagogique que l'activation générera",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationCycleClassroomsPerLevel": "Classes par niveau",
   "@configurationCycleClassroomsPerLevel": {
-      "description": "Réglage global d'un cycle, sans effet sur les niveaux à barèmes"
+    "description": "Réglage global d'un cycle, sans effet sur les niveaux à barèmes"
   },
   "configurationCycleNotOffered": "Non proposé",
   "@configurationCycleNotOffered": {
-      "description": "Compteur d'en-tête d'un cycle entièrement décoché"
+    "description": "Compteur d'en-tête d'un cycle entièrement décoché"
   },
   "configurationCycleSummary": "{open} / {total} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}}",
   "@configurationCycleSummary": {
-      "description": "Compteur d'en-tête d'un cycle : niveaux ouverts sur total, puis classes",
-      "placeholders": {
-          "open": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          },
-          "classrooms": {
-              "type": "int"
-          }
+    "description": "Compteur d'en-tête d'un cycle : niveaux ouverts sur total, puis classes",
+    "placeholders": {
+      "open": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "classrooms": {
+        "type": "int"
       }
+    }
   },
   "configurationLevelNotOffered": "Niveau non proposé cette année",
   "@configurationLevelNotOffered": {
-      "description": "Ligne d'un niveau dont le compteur est à zéro"
+    "description": "Ligne d'un niveau dont le compteur est à zéro"
   },
   "configurationLevelNoGrid": "Aucun barème officiel — ces classes n'auront aucun cours.",
   "@configurationLevelNoGrid": {
-      "description": "Avertissement ambre sous un niveau sans barème MINEDUC. Ne bloque rien"
+    "description": "Avertissement ambre sous un niveau sans barème MINEDUC. Ne bloque rien"
   },
   "configurationSectionsServed": "Barèmes servis sur {level}",
   "@configurationSectionsServed": {
-      "description": "En-tête de la rangée de filières d'un niveau",
-      "placeholders": {
-          "level": {
-              "type": "String"
-          }
+    "description": "En-tête de la rangée de filières d'un niveau",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
+    }
   },
   "configurationSectionCourses": "{count, plural, one{{count} cours} other{{count} cours}}",
   "@configurationSectionCourses": {
-      "description": "Coût en cours d'une classe suivant ce barème",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Coût en cours d'une classe suivant ce barème",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationStructureHint": "{count, plural, one{{count} classe sera créée pour l'année} other{{count} classes seront créées pour l'année}}",
   "@configurationStructureHint": {
-      "description": "Message de la barre de pied à l'étape 3 — le seul endroit où l'engagement est chiffré avant l'activation",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Message de la barre de pied à l'étape 3 — le seul endroit où l'engagement est chiffré avant l'activation",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationStructureEmptyHint": "Cochez au moins un niveau",
   "@configurationStructureEmptyHint": {
-      "description": "Message de la barre de pied quand aucune classe n'est ouverte"
+    "description": "Message de la barre de pied quand aucune classe n'est ouverte"
   },
   "configurationStructureEmptyTitle": "Aucun niveau retenu",
   "@configurationStructureEmptyTitle": {
-      "description": "Titre de l'état vide de l'étape 3"
+    "description": "Titre de l'état vide de l'étape 3"
   },
   "configurationStructureEmptyMessage": "Une école a besoin d'au moins une classe pour ouvrir les inscriptions. Rétablissez la proposition par défaut ou cochez les niveaux que vous ouvrez.",
   "@configurationStructureEmptyMessage": {
-      "description": "Message de l'état vide de l'étape 3"
+    "description": "Message de l'état vide de l'étape 3"
   },
   "configurationStructureRestore": "Rétablir la proposition",
   "@configurationStructureRestore": {
-      "description": "Action de l'état vide : reconstruit la proposition depuis le catalogue"
+    "description": "Action de l'état vide : reconstruit la proposition depuis le catalogue"
   },
   "configurationFeesTitle": "Frais scolaires",
   "@configurationFeesTitle": {
-      "description": "Titre de l'étape 4"
+    "description": "Titre de l'étape 4"
   },
   "configurationFeeNew": "Nouveau frais",
   "@configurationFeeNew": {
-      "description": "Bouton d'ouverture du formulaire de frais"
+    "description": "Bouton d'ouverture du formulaire de frais"
   },
   "configurationFeeFormTitle": "Nouveau frais",
   "@configurationFeeFormTitle": {
-      "description": "Titre du formulaire de création d'un frais"
+    "description": "Titre du formulaire de création d'un frais"
   },
   "configurationFeeFormEditTitle": "Modifier le frais",
   "@configurationFeeFormEditTitle": {
-      "description": "Titre du formulaire en édition"
+    "description": "Titre du formulaire en édition"
   },
   "configurationFeeType": "Type de frais",
   "@configurationFeeType": {
-      "description": "Champ du type, servi par le catalogue"
+    "description": "Champ du type, servi par le catalogue"
   },
   "configurationFeeTypeOthers": "Autres types ({count})",
   "@configurationFeeTypeOthers": {
-      "description": "Dépliant des types de frais hors des usuels",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Dépliant des types de frais hors des usuels",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeLabel": "Libellé affiché aux parents",
   "@configurationFeeLabel": {
-      "description": "Champ du libellé — celui qui figure sur la note de perception"
+    "description": "Champ du libellé — celui qui figure sur la note de perception"
   },
   "configurationFeeAmount": "Montant",
   "@configurationFeeAmount": {
-      "description": "Champ du montant, saisi en unité"
+    "description": "Champ du montant, saisi en unité"
   },
   "configurationFeeCurrency": "Devise",
   "@configurationFeeCurrency": {
-      "description": "Sélecteur de devise accolé au montant"
+    "description": "Sélecteur de devise accolé au montant"
   },
   "configurationFeeDueAt": "Échéance",
   "@configurationFeeDueAt": {
-      "description": "Champ de l'échéance du frais"
+    "description": "Champ de l'échéance du frais"
   },
   "configurationFeeScope": "Assiette",
   "@configurationFeeScope": {
-      "description": "Champ de l'assiette — la liste des niveaux sur lesquels le frais porte"
+    "description": "Champ de l'assiette — la liste des niveaux sur lesquels le frais porte"
   },
   "configurationFeeScopeAll": "Tous les niveaux ouverts",
   "@configurationFeeScopeAll": {
-      "description": "Mode d'assiette : tous les niveaux qui reçoivent au moins une classe"
+    "description": "Mode d'assiette : tous les niveaux qui reçoivent au moins une classe"
   },
   "configurationFeeScopeSome": "Certains niveaux",
   "@configurationFeeScopeSome": {
-      "description": "Mode d'assiette : une sélection de niveaux"
+    "description": "Mode d'assiette : une sélection de niveaux"
   },
   "configurationFeeScopeAllHint": "S'appliquera aux {count, plural, one{{count} niveau ouvert} other{{count} niveaux ouverts}}",
   "@configurationFeeScopeAllHint": {
-      "description": "Sous-titre dynamique du mode « tous les niveaux »",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Sous-titre dynamique du mode « tous les niveaux »",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeScopeCount": "{selected} / {total} sélectionnés",
   "@configurationFeeScopeCount": {
-      "description": "Compteur de niveaux retenus dans l'assiette",
-      "placeholders": {
-          "selected": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "description": "Compteur de niveaux retenus dans l'assiette",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeScopeWholeCycle": "Tout le cycle",
   "@configurationFeeScopeWholeCycle": {
-      "description": "Raccourci qui coche tous les niveaux ouverts d'un cycle"
+    "description": "Raccourci qui coche tous les niveaux ouverts d'un cycle"
   },
   "configurationFeeAdd": "Ajouter le frais",
   "@configurationFeeAdd": {
-      "description": "Bouton de validation du formulaire de frais"
+    "description": "Bouton de validation du formulaire de frais"
   },
   "configurationFeeUpdate": "Mettre à jour",
   "@configurationFeeUpdate": {
-      "description": "Bouton de validation du formulaire en édition"
+    "description": "Bouton de validation du formulaire en édition"
   },
   "configurationFeeCancel": "Annuler",
   "@configurationFeeCancel": {
-      "description": "Bouton d'abandon du formulaire de frais"
+    "description": "Bouton d'abandon du formulaire de frais"
   },
   "configurationFeeCount": "{count, plural, =0{Aucun frais défini} one{{count} frais défini} other{{count} frais définis}}",
   "@configurationFeeCount": {
-      "description": "Synthèse du nombre de frais saisis",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Synthèse du nombre de frais saisis",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeCatalogTotal": "Total catalogue : {total}",
   "@configurationFeeCatalogTotal": {
-      "description": "Total des frais saisis, par devise — jamais additionné entre devises",
-      "placeholders": {
-          "total": {
-              "type": "String"
-          }
+    "description": "Total des frais saisis, par devise — jamais additionné entre devises",
+    "placeholders": {
+      "total": {
+        "type": "String"
       }
+    }
   },
   "configurationFeePerStudent": "par élève",
   "@configurationFeePerStudent": {
-      "description": "Mention sous le montant d'une ligne de frais"
+    "description": "Mention sous le montant d'une ligne de frais"
   },
   "configurationFeeLevelsLabel": "{count, plural, one{{count} niveau} other{{count} niveaux}}",
   "@configurationFeeLevelsLabel": {
-      "description": "Résumé de l'assiette d'une ligne de frais",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Résumé de l'assiette d'une ligne de frais",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationFeeDueLabel": "échéance {date}",
   "@configurationFeeDueLabel": {
-      "description": "Résumé de l'échéance d'une ligne de frais",
-      "placeholders": {
-          "date": {
-              "type": "String"
-          }
+    "description": "Résumé de l'échéance d'une ligne de frais",
+    "placeholders": {
+      "date": {
+        "type": "String"
       }
+    }
   },
   "configurationFeeDeleted": "Frais « {label} » supprimé",
   "@configurationFeeDeleted": {
-      "description": "Toast de suppression d'un frais",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Toast de suppression d'un frais",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationFeeSaved": "Frais « {label} » enregistré",
   "@configurationFeeSaved": {
-      "description": "Toast d'ajout ou de mise à jour d'un frais",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Toast d'ajout ou de mise à jour d'un frais",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationFeesEmptyTitle": "Aucun frais pour l'instant",
   "@configurationFeesEmptyTitle": {
-      "description": "Titre de l'état vide de l'étape 4"
+    "description": "Titre de l'état vide de l'étape 4"
   },
   "configurationFeesEmptyMessage": "Ajoutez au moins un frais — inscription, minerval, cantine — pour que la facturation puisse générer les notes de perception.",
   "@configurationFeesEmptyMessage": {
-      "description": "Message de l'état vide de l'étape 4"
+    "description": "Message de l'état vide de l'étape 4"
   },
   "configurationFeesEmptyAction": "Créer le premier frais",
   "@configurationFeesEmptyAction": {
-      "description": "Action de l'état vide de l'étape 4"
+    "description": "Action de l'état vide de l'étape 4"
   },
   "configurationFeesEmptyHint": "Ajoutez au moins un frais pour continuer",
   "@configurationFeesEmptyHint": {
-      "description": "Message de la barre de pied quand aucun frais n'est saisi"
+    "description": "Message de la barre de pied quand aucun frais n'est saisi"
   },
   "configurationFeesDraftHint": "Terminez le frais en cours d'édition",
   "@configurationFeesDraftHint": {
-      "description": "Message de la barre de pied quand un sous-formulaire est ouvert"
+    "description": "Message de la barre de pied quand un sous-formulaire est ouvert"
   },
   "configurationFeesValidHint": "{count, plural, one{{count} frais sera rattaché aux niveaux ouverts} other{{count} frais seront rattachés aux niveaux ouverts}}",
   "@configurationFeesValidHint": {
-      "description": "Message de la barre de pied quand l'étape 4 est valide",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Message de la barre de pied quand l'étape 4 est valide",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryTitle": "Récapitulatif",
   "@configurationSummaryTitle": {
-      "description": "Titre de l'étape 5"
+    "description": "Titre de l'étape 5"
   },
   "configurationSummaryEdit": "Modifier",
   "@configurationSummaryEdit": {
-      "description": "Raccourci d'une carte de récapitulatif vers son étape"
+    "description": "Raccourci d'une carte de récapitulatif vers son étape"
   },
   "configurationSummarySchool": "École",
   "@configurationSummarySchool": {
-      "description": "Carte de récapitulatif de l'identité"
+    "description": "Carte de récapitulatif de l'identité"
   },
   "configurationSummaryYear": "Année académique",
   "@configurationSummaryYear": {
-      "description": "Carte de récapitulatif de l'année"
+    "description": "Carte de récapitulatif de l'année"
   },
   "configurationSummaryStructure": "Structure · {count, plural, one{{count} classe} other{{count} classes}}",
   "@configurationSummaryStructure": {
-      "description": "Carte de récapitulatif de la structure",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Carte de récapitulatif de la structure",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryFees": "Frais scolaires",
   "@configurationSummaryFees": {
-      "description": "Carte de récapitulatif des frais"
+    "description": "Carte de récapitulatif des frais"
   },
   "configurationSummaryMissing": "à renseigner",
   "@configurationSummaryMissing": {
-      "description": "Valeur affichée à la place d'un champ manquant — jamais un vide silencieux"
+    "description": "Valeur affichée à la place d'un champ manquant — jamais un vide silencieux"
   },
   "configurationSummaryCycleLine": "{levels, plural, one{{levels} niveau} other{{levels} niveaux}} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}}",
   "@configurationSummaryCycleLine": {
-      "description": "Ligne d'un cycle dans le récapitulatif de structure",
-      "placeholders": {
-          "levels": {
-              "type": "int"
-          },
-          "classrooms": {
-              "type": "int"
-          }
+    "description": "Ligne d'un cycle dans le récapitulatif de structure",
+    "placeholders": {
+      "levels": {
+        "type": "int"
+      },
+      "classrooms": {
+        "type": "int"
       }
+    }
   },
   "configurationSummaryNoGrid": "aucun barème",
   "@configurationSummaryNoGrid": {
-      "description": "Mention ajoutée à un cycle dont les niveaux n'ont pas de barème officiel"
+    "description": "Mention ajoutée à un cycle dont les niveaux n'ont pas de barème officiel"
   },
   "configurationCheckSchool": "Identité de l'école complète",
   "@configurationCheckSchool": {
-      "description": "Contrôle d'activation : les huit champs"
+    "description": "Contrôle d'activation : les huit champs"
   },
   "configurationCheckYear": "Année académique datée",
   "@configurationCheckYear": {
-      "description": "Contrôle d'activation : l'intervalle de dates"
+    "description": "Contrôle d'activation : l'intervalle de dates"
   },
   "configurationCheckClassrooms": "{count, plural, =0{Aucune classe à ouvrir} one{{count} classe prête à ouvrir} other{{count} classes prêtes à ouvrir}}",
   "@configurationCheckClassrooms": {
-      "description": "Contrôle d'activation : les classes du plan",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Contrôle d'activation : les classes du plan",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationCheckFees": "{count, plural, =0{Aucun frais rattaché aux niveaux} one{{count} frais rattaché aux niveaux} other{{count} frais rattachés aux niveaux}}",
   "@configurationCheckFees": {
-      "description": "Contrôle d'activation : les frais saisis",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Contrôle d'activation : les frais saisis",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "configurationActivate": "Activer l'école",
   "@configurationActivate": {
-      "description": "Bouton d'activation — la seule écriture de structure du parcours"
+    "description": "Bouton d'activation — la seule écriture de structure du parcours"
   },
   "configurationActivating": "Activation…",
   "@configurationActivating": {
-      "description": "Libellé du bouton pendant l'activation"
+    "description": "Libellé du bouton pendant l'activation"
   },
   "configurationActivateBlocked": "Complétez les points en ambre pour activer.",
   "@configurationActivateBlocked": {
-      "description": "Message affiché tant que les quatre contrôles ne passent pas"
+    "description": "Message affiché tant que les quatre contrôles ne passent pas"
   },
   "configurationActivateFailed": "L'activation a échoué — réessayez.",
   "@configurationActivateFailed": {
-      "description": "Toast d'échec d'activation. Aucune donnée n'est perdue"
+    "description": "Toast d'échec d'activation. Aucune donnée n'est perdue"
   },
   "configurationActivatedTitle": "{school} est en service",
   "@configurationActivatedTitle": {
-      "description": "Titre de l'écran de succès",
-      "placeholders": {
-          "school": {
-              "type": "String"
-          }
+    "description": "Titre de l'écran de succès",
+    "placeholders": {
+      "school": {
+        "type": "String"
       }
+    }
   },
   "configurationActivatedMessage": "L'année {year} est ouverte avec {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}} et {fees, plural, one{{fees} frais} other{{fees} frais}}. Vous pouvez inscrire vos premiers élèves.",
   "@configurationActivatedMessage": {
-      "description": "Message de l'écran de succès",
-      "placeholders": {
-          "year": {
-              "type": "String"
-          },
-          "classrooms": {
-              "type": "int"
-          },
-          "fees": {
-              "type": "int"
-          }
+    "description": "Message de l'écran de succès",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "classrooms": {
+        "type": "int"
+      },
+      "fees": {
+        "type": "int"
       }
+    }
   },
   "configurationGoHome": "Aller à l'accueil",
   "@configurationGoHome": {
-      "description": "Issue principale de l'écran de succès"
+    "description": "Issue principale de l'écran de succès"
   },
   "configurationReviewSetup": "Revoir la configuration",
   "@configurationReviewSetup": {
-      "description": "Seconde issue de l'écran de succès"
+    "description": "Seconde issue de l'écran de succès"
   },
   "configurationWarningsTitle": "À savoir avant d'activer",
   "@configurationWarningsTitle": {
-      "description": "En-tête du bloc des avertissements du plan"
+    "description": "En-tête du bloc des avertissements du plan"
   },
   "menuConfiguration": "Configuration",
   "@menuConfiguration": {
-      "description": "Menu latéral — réglages de l'école, après mise en service"
+    "description": "Menu latéral — réglages de l'école, après mise en service"
   },
   "subMenuConfigurationSchool": "Paramètres de l'école",
   "@subMenuConfigurationSchool": {
-      "description": "Sous-menu du module Configuration"
+    "description": "Sous-menu du module Configuration"
   },
   "configurationSettingsTitle": "Configuration de l'école",
   "@configurationSettingsTitle": {
-      "description": "Titre de l'écran de réglages, après mise en service"
+    "description": "Titre de l'écran de réglages, après mise en service"
   },
   "configurationSettingsInService": "{school} · en service",
   "@configurationSettingsInService": {
-      "description": "Bandeau d'état : l'école est paramétrée",
-      "placeholders": {
-          "school": {
-              "type": "String"
-          }
+    "description": "Bandeau d'état : l'école est paramétrée",
+    "placeholders": {
+      "school": {
+        "type": "String"
       }
+    }
   },
   "configurationSettingsSummary": "Année {year} · {classrooms, plural, one{{classrooms} classe} other{{classrooms} classes}} · {levels, plural, one{{levels} niveau} other{{levels} niveaux}}",
   "@configurationSettingsSummary": {
-      "description": "Résumé du bandeau d'état",
-      "placeholders": {
-          "year": {
-              "type": "String"
-          },
-          "classrooms": {
-              "type": "int"
-          },
-          "levels": {
-              "type": "int"
-          }
+    "description": "Résumé du bandeau d'état",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "classrooms": {
+        "type": "int"
+      },
+      "levels": {
+        "type": "int"
       }
+    }
   },
   "configurationSettingsNextYear": "Préparer l'année suivante",
   "@configurationSettingsNextYear": {
-      "description": "Bouton désactivé en V1 — l'assistant ne se rejoue pas"
+    "description": "Bouton désactivé en V1 — l'assistant ne se rejoue pas"
   },
   "configurationSettingsNextYearTooltip": "Indisponible pour l'instant : l'assistant ne peut pas être rejoué, le serveur refuserait une année déjà ouverte. Un geste dédié reste à livrer.",
   "@configurationSettingsNextYearTooltip": {
-      "description": "Infobulle du bouton « Préparer l'année suivante »"
+    "description": "Infobulle du bouton « Préparer l'année suivante »"
   },
   "configurationSettingsTabIdentity": "Identité de l'école",
   "@configurationSettingsTabIdentity": {
-      "description": "Onglet modifiable des réglages"
+    "description": "Onglet modifiable des réglages"
   },
   "configurationSettingsTabStructure": "Cycles, niveaux et classes",
   "@configurationSettingsTabStructure": {
-      "description": "Onglet en lecture des réglages"
+    "description": "Onglet en lecture des réglages"
   },
   "configurationSettingsTabFees": "Frais scolaires",
   "@configurationSettingsTabFees": {
-      "description": "Onglet des tarifs, modifiable ligne par ligne"
+    "description": "Onglet des tarifs, modifiable ligne par ligne"
   },
   "configurationSettingsReadOnly": "lecture",
   "@configurationSettingsReadOnly": {
-      "description": "Marqueur d'un onglet non modifiable"
+    "description": "Marqueur d'un onglet non modifiable"
   },
   "configurationSettingsStructureReadOnlyNote": "La structure ne se modifie plus après la mise en service. Le serveur ne sait pas encore refuser proprement la suppression d'un niveau peuplé : la câbler ici risquerait de casser des inscriptions en cours.",
   "@configurationSettingsStructureReadOnlyNote": {
-      "description": "Explication de la lecture seule de l'onglet Structure"
+    "description": "Explication de la lecture seule de l'onglet Structure"
   },
   "configurationSettingsSaved": "Modifications enregistrées",
   "@configurationSettingsSaved": {
-      "description": "Toast après enregistrement dans les réglages"
+    "description": "Toast après enregistrement dans les réglages"
   },
   "configurationSettingsSave": "Enregistrer",
   "@configurationSettingsSave": {
-      "description": "Bouton d'enregistrement des réglages"
+    "description": "Bouton d'enregistrement des réglages"
   },
   "configurationSettingsNoYear": "Aucune année ouverte",
   "@configurationSettingsNoYear": {
-      "description": "État vide des réglages quand le contexte académique ne rend pas d'année"
+    "description": "État vide des réglages quand le contexte académique ne rend pas d'année"
   },
   "configurationSettingsTariffsForLevel": "Tarifs de {level}",
   "@configurationSettingsTariffsForLevel": {
-      "description": "En-tête de la liste des tarifs d'un niveau",
-      "placeholders": {
-          "level": {
-              "type": "String"
-          }
+    "description": "En-tête de la liste des tarifs d'un niveau",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
+    }
   },
   "configurationSettingsTariffOne": "Ici, un tarif porte un seul niveau : chaque ligne se modifie séparément.",
   "@configurationSettingsTariffOne": {
-      "description": "Note expliquant que l'assiette de l'assistant n'existe plus dans les réglages"
+    "description": "Note expliquant que l'assiette de l'assistant n'existe plus dans les réglages"
   },
   "configurationSectionsTitle": "Sections de frais",
   "@configurationSectionsTitle": {
-      "description": "Titre de la carte de nommage des natures de frais"
+    "description": "Titre de la carte de nommage des natures de frais"
   },
   "configurationSectionsSubtitle": "Le nom que votre école donne à chaque nature. Tous les tarifs d'une même nature s'affichent sous ce titre.",
   "@configurationSectionsSubtitle": {
-      "description": "Sous-titre de la carte de nommage des sections"
+    "description": "Sous-titre de la carte de nommage des sections"
   },
   "configurationSectionsSave": "Enregistrer les sections",
   "@configurationSectionsSave": {
-      "description": "Bouton d'enregistrement du nommage des sections"
+    "description": "Bouton d'enregistrement du nommage des sections"
   },
   "configurationSectionsSaved": "Sections enregistrées",
   "@configurationSectionsSaved": {
-      "description": "Confirmation d'enregistrement du nommage des sections"
+    "description": "Confirmation d'enregistrement du nommage des sections"
   },
   "configurationSectionsHiddenHint": "Masquée : plus proposée à la saisie, mais toujours comptée dans les statistiques.",
   "@configurationSectionsHiddenHint": {
-      "description": "Explication de ce que masquer une section veut dire"
+    "description": "Explication de ce que masquer une section veut dire"
   },
   "configurationSectionsLabelRequired": "Chaque section doit porter un nom.",
   "@configurationSectionsLabelRequired": {
-      "description": "Refus d'enregistrer quand un titre de section est vide"
+    "description": "Refus d'enregistrer quand un titre de section est vide"
   },
   "configurationSectionsReorderHint": "Glissez une section pour la remonter ; l'ordre est celui du sélecteur de tarifs.",
   "@configurationSectionsReorderHint": {
-      "description": "Explication du reclassement des sections"
+    "description": "Explication du reclassement des sections"
   },
   "configurationTariffAdd": "Ajouter un tarif",
   "@configurationTariffAdd": {
-      "description": "Bouton d'ajout d'un tarif sur un niveau"
+    "description": "Bouton d'ajout d'un tarif sur un niveau"
   },
   "configurationTariffEdit": "Modifier le tarif",
   "@configurationTariffEdit": {
-      "description": "Titre de la modale d'édition d'un tarif"
+    "description": "Titre de la modale d'édition d'un tarif"
   },
   "configurationTariffNew": "Nouveau tarif",
   "@configurationTariffNew": {
-      "description": "Titre de la modale de création d'un tarif"
+    "description": "Titre de la modale de création d'un tarif"
   },
   "configurationTariffDelete": "Supprimer le tarif",
   "@configurationTariffDelete": {
-      "description": "Action de suppression d'un tarif"
+    "description": "Action de suppression d'un tarif"
   },
   "configurationTariffDeleteConfirm": "Supprimer « {label} » ? Les créances déjà générées ne sont pas touchées.",
   "@configurationTariffDeleteConfirm": {
-      "description": "Confirmation de suppression d'un tarif — une écriture serveur, contrairement au brouillon de l'assistant",
-      "placeholders": {
-          "label": {
-              "type": "String"
-          }
+    "description": "Confirmation de suppression d'un tarif — une écriture serveur, contrairement au brouillon de l'assistant",
+    "placeholders": {
+      "label": {
+        "type": "String"
       }
+    }
   },
   "configurationTariffSaved": "Tarif enregistré",
   "@configurationTariffSaved": {
-      "description": "Toast après écriture d'un tarif"
+    "description": "Toast après écriture d'un tarif"
   },
   "configurationTariffDeleted": "Tarif supprimé",
   "@configurationTariffDeleted": {
-      "description": "Toast après suppression d'un tarif"
+    "description": "Toast après suppression d'un tarif"
   },
   "configurationTariffNone": "Aucun tarif sur ce niveau",
   "@configurationTariffNone": {
-      "description": "Message quand un niveau ne porte aucun tarif"
+    "description": "Message quand un niveau ne porte aucun tarif"
   },
   "configurationFeeTypesUnavailableTitle": "Types de frais indisponibles",
   "@configurationFeeTypesUnavailableTitle": {
-      "description": "État vide de l'étape 4 quand le référentiel des types de frais n'a pas pu être servi"
+    "description": "État vide de l'étape 4 quand le référentiel des types de frais n'a pas pu être servi"
   },
   "configurationFeeTypesUnavailableMessage": "Le référentiel des types de frais n'a pas été chargé. Rechargez-le pour saisir les frais de l'école.",
   "@configurationFeeTypesUnavailableMessage": {
-      "description": "Message de l'état vide de l'étape 4 sans types de frais servis"
+    "description": "Message de l'état vide de l'étape 4 sans types de frais servis"
   },
   "configurationLoadingA11yLabel": "Chargement des données de l'étape",
   "@configurationLoadingA11yLabel": {
-      "description": "Libellé annoncé aux lecteurs d'écran pendant que les squelettes de l'assistant de mise en service sont affichés"
+    "description": "Libellé annoncé aux lecteurs d'écran pendant que les squelettes de l'assistant de mise en service sont affichés"
   },
   "configurationErrorNetworkTitle": "Connexion perdue",
   "@configurationErrorNetworkTitle": {
-      "description": "Titre de l'erreur réseau dans l'assistant"
+    "description": "Titre de l'erreur réseau dans l'assistant"
   },
   "configurationErrorNetworkMessage": "La configuration n'a pas été envoyée. Vérifiez votre connexion, puis réessayez.",
   "@configurationErrorNetworkMessage": {
-      "description": "Message de l'erreur réseau"
+    "description": "Message de l'erreur réseau"
   },
   "configurationErrorSessionTitle": "Votre session a expiré",
   "@configurationErrorSessionTitle": {
-      "description": "Titre du 401"
+    "description": "Titre du 401"
   },
   "configurationErrorSessionMessage": "Reconnectez-vous pour reprendre là où vous en étiez. Votre saisie est conservée.",
   "@configurationErrorSessionMessage": {
-      "description": "Message du 401 — le brouillon local survit à une session expirée"
+    "description": "Message du 401 — le brouillon local survit à une session expirée"
   },
   "configurationErrorForbiddenTitle": "Accès refusé",
   "@configurationErrorForbiddenTitle": {
-      "description": "Titre du 403"
+    "description": "Titre du 403"
   },
   "configurationErrorForbiddenMessage": "Seul le promoteur peut configurer l'école. Contactez l'administrateur de votre établissement.",
   "@configurationErrorForbiddenMessage": {
-      "description": "Message du 403 — aucun réessai possible"
+    "description": "Message du 403 — aucun réessai possible"
   },
   "configurationErrorServerTitle": "Le serveur n'a pas pu enregistrer",
   "@configurationErrorServerTitle": {
-      "description": "Titre du 500"
+    "description": "Titre du 500"
   },
   "configurationErrorServerMessage": "Une panne est survenue. Réessayez, et citez le code ci-dessous au support si elle persiste.",
   "@configurationErrorServerMessage": {
-      "description": "Message du 500"
+    "description": "Message du 500"
   },
   "configurationErrorRateTitle": "Trop de demandes",
   "@configurationErrorRateTitle": {
-      "description": "Titre du 429"
+    "description": "Titre du 429"
   },
   "configurationErrorRateMessage": "Le serveur demande une pause. Patientez quelques instants avant de reprendre.",
   "@configurationErrorRateMessage": {
-      "description": "Message du 429 — surtout pas de « Réessayer »"
+    "description": "Message du 429 — surtout pas de « Réessayer »"
   },
   "configurationErrorYearExistsTitle": "Cette année scolaire existe déjà",
   "@configurationErrorYearExistsTitle": {
-      "description": "Titre du refus 400 BUSINESS_RULE"
+    "description": "Titre du refus 400 BUSINESS_RULE"
   },
   "configurationErrorYearExistsMessage": "Le paramétrage est un geste d'amorçage : il n'ajoute pas une année à une école qui en a déjà une. Reprenez à l'étape de l'année pour en déclarer une autre.",
   "@configurationErrorYearExistsMessage": {
-      "description": "Message du refus « année déjà existante »"
+    "description": "Message du refus « année déjà existante »"
   },
   "configurationErrorYearExistsAction": "Revenir à l'année",
   "@configurationErrorYearExistsAction": {
-      "description": "Action du refus « année déjà existante » — repart à l'étape 2 avec un brouillon purgé"
+    "description": "Action du refus « année déjà existante » — repart à l'étape 2 avec un brouillon purgé"
   },
   "configurationErrorRetry": "Réessayer",
   "@configurationErrorRetry": {
-      "description": "Action de récupération générique"
+    "description": "Action de récupération générique"
   },
   "configurationErrorSignIn": "Se reconnecter",
   "@configurationErrorSignIn": {
-      "description": "Action du 401"
+    "description": "Action du 401"
   },
   "configurationErrorContact": "Contacter l'administrateur",
   "@configurationErrorContact": {
-      "description": "Action du 403"
+    "description": "Action du 403"
   },
   "configurationErrorIncident": "Code incident",
   "@configurationErrorIncident": {
-      "description": "Libellé du code d'incident à citer au support"
+    "description": "Libellé du code d'incident à citer au support"
   },
   "configurationErrorReloadCatalog": "Recharger le référentiel",
   "@configurationErrorReloadCatalog": {
-      "description": "Action d'un 422 « code inconnu » — le catalogue en mémoire est périmé"
+    "description": "Action d'un 422 « code inconnu » — le catalogue en mémoire est périmé"
   },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
@@ -1048,7 +1048,7 @@
   "subMenuReRegistrations": "Réinscriptions",
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
-  "menuFeeControl": "Contrôle des frais",
+  "menuRecouvrement": "Recouvrement",
   "subMenuFeeControl": "Contrôle par frais",
   "menuBoutique": "Boutique",
   "subMenuBoutiquePurchases": "Achats",
@@ -2425,9 +2425,33 @@
   "feeControlDashboardRankingTitle": "Où en est chaque niveau",
   "feeControlDashboardRankingHint": "Les niveaux les plus en retard d'abord.",
   "feeControlDashboardGroupTally": "{settled} sur {total}",
-  "@feeControlDashboardGroupTally": {"placeholders": {"settled": {"type": "int"}, "total": {"type": "int"}}},
+  "@feeControlDashboardGroupTally": {
+    "placeholders": {
+      "settled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardGroupA11y": "{level} : {percent} % en ordre, {settled} sur {total} élèves concernés",
-  "@feeControlDashboardGroupA11y": {"placeholders": {"level": {"type": "String"}, "percent": {"type": "int"}, "settled": {"type": "int"}, "total": {"type": "int"}}},
+  "@feeControlDashboardGroupA11y": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "settled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardLevelUnknown": "Niveau non renseigné",
   "feeControlDashboardLevelMissing": "Niveau absent du référentiel",
   "feeControlDashboardNoFeesTitle": "Aucun frais facturé",
@@ -2442,9 +2466,21 @@
   "feeControlDashboardClassroomsWithheld": "La composition des classes relève d'un module auquel ce profil n'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.",
   "feeControlDashboardClassesFailed": "Les classes de ce niveau n'ont pas pu être lues sur cet appareil.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} élève inscrit ne porte pas ce frais} other{{count} élèves inscrits ne portent pas ce frais}}",
-  "@feeControlDashboardUnbilled": {"placeholders": {"count": {"type": "int"}}},
+  "@feeControlDashboardUnbilled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "feeControlDashboardRemaining": "Reste à recouvrer : {amounts}",
-  "@feeControlDashboardRemaining": {"placeholders": {"amounts": {"type": "String"}}},
+  "@feeControlDashboardRemaining": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
   "feeControlDashboardOpenControl": "Voir les élèves",
   "feeControlCriteriaFee": "Frais : {label}",
   "@feeControlCriteriaFee": {
@@ -2588,7 +2624,13 @@
   "facturationPaymentCollectedByLabel": "Encaissé par",
   "facturationPaymentTicketNotPrinted": "Jamais imprimé depuis cette tablette.",
   "facturationPaymentTicketPrintedAt": "Imprimé le {date}",
-  "@facturationPaymentTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@facturationPaymentTicketPrintedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "facturationPaymentPrintTicketAction": "Imprimer maintenant",
   "facturationPaymentReprintTicketAction": "Réimprimer le ticket",
   "facturationPaymentReceiptLabel": "Reçu n°",
@@ -2844,19 +2886,52 @@
     }
   },
   "boutiqueTenderCurrency": "Le client règle {due} en",
-  "@boutiqueTenderCurrency": {"description": "La question se pose par devise du panier : c'est le sous-total dû dans cette unité qui sert de point de départ.", "placeholders": {"due": {"type": "String"}}},
+  "@boutiqueTenderCurrency": {
+    "description": "La question se pose par devise du panier : c'est le sous-total dû dans cette unité qui sert de point de départ.",
+    "placeholders": {
+      "due": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueTenderReceivedLabel": "Reçu au comptoir",
-  "@boutiqueTenderReceivedLabel": {"description": "Pré-rempli par la conversion et modifiable : le client tend un billet rond, l'écart repart en monnaie rendue."},
+  "@boutiqueTenderReceivedLabel": {
+    "description": "Pré-rempli par la conversion et modifiable : le client tend un billet rond, l'écart repart en monnaie rendue."
+  },
   "boutiqueTenderShortfall": "Il manque · {amount}",
-  "@boutiqueTenderShortfall": {"description": "Le client a posé moins que le dû. Une vente est comptant intégral : on le dit au comptoir plutôt que d'écrire une vente à moitié payée.", "placeholders": {"amount": {"type": "String"}}},
+  "@boutiqueTenderShortfall": {
+    "description": "Le client a posé moins que le dû. Une vente est comptant intégral : on le dit au comptoir plutôt que d'écrire une vente à moitié payée.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueTenderChangeDue": "Monnaie à rendre · {amount}",
-  "@boutiqueTenderChangeDue": {"placeholders": {"amount": {"type": "String"}}},
+  "@boutiqueTenderChangeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentTenderCurrency": "Le parent règle en",
-  "@facturationCreatePaymentTenderCurrency": {"description": "La question se pose sur le frais coché, parce que c'est la devise de CE frais qui sert de point de départ."},
+  "@facturationCreatePaymentTenderCurrency": {
+    "description": "La question se pose sur le frais coché, parce que c'est la devise de CE frais qui sert de point de départ."
+  },
   "facturationCreatePaymentTenderAmountLabel": "Reçu en caisse",
-  "@facturationCreatePaymentTenderAmountLabel": {"description": "Le montant posé sur le comptoir. Remplir ce champ calcule l'imputation, et inversement."},
+  "@facturationCreatePaymentTenderAmountLabel": {
+    "description": "Le montant posé sur le comptoir. Remplir ce champ calcule l'imputation, et inversement."
+  },
   "facturationCreatePaymentChangeDue": "Monnaie à rendre · {amount}",
-  "@facturationCreatePaymentChangeDue": {"description": "La conversion ne tombe pas juste : ce reliquat repart avec le parent, il n'entre pas dans le tiroir.", "placeholders": {"amount": {"type": "String"}}},
+  "@facturationCreatePaymentChangeDue": {
+    "description": "La conversion ne tombe pas juste : ce reliquat repart avec le parent, il n'entre pas dans le tiroir.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentAmountToSettleLabel": "Montant à régler",
   "facturationCreatePaymentGroupRemainingTranches": "{count, plural, =1{1 tranche restante} other{{count} tranches restantes}}",
   "@facturationCreatePaymentGroupRemainingTranches": {
@@ -2922,38 +2997,75 @@
   "exchangeRateSettingsNone": "Aucun taux paramétré : au guichet, chaque frais se règle dans sa propre devise.",
   "exchangeRateSettingsCurrent": "En vigueur : 1 {base} = {value} {quote}",
   "@exchangeRateSettingsCurrent": {
-    "placeholders": { "base": { "type": "String" }, "value": { "type": "String" }, "quote": { "type": "String" } }
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "quote": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementPerCharge": "Chaque frais",
   "facturationSettlementRateLabel": "Taux du jour",
   "facturationSettlementCountedLabel": "Montant compté",
   "facturationSettlementCountedHint": "Conversion : {expected}",
   "@facturationSettlementCountedHint": {
-    "placeholders": { "expected": { "type": "String" } }
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementCountedMismatch": "Écart trop grand avec la conversion ({expected}). Ajustez le montant ou le taux.",
   "@facturationSettlementCountedMismatch": {
-    "placeholders": { "expected": { "type": "String" } }
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementRateEdit": "Modifier",
   "facturationSettlementRateFieldLabel": "Taux appliqué",
   "facturationSettlementRateHint": "{quote} pour 1 {base}",
   "@facturationSettlementRateHint": {
-    "placeholders": { "quote": { "type": "String" }, "base": { "type": "String" } }
+    "placeholders": {
+      "quote": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementRateDiverges": "Ce taux s'écarte de celui de l'école ({reference}). L'encaissement reste possible ; il sera signalé.",
   "@facturationSettlementRateDiverges": {
-    "placeholders": { "reference": { "type": "String" } }
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
   },
   "facturationSettlementNoRate": "Aucun taux paramétré : le règlement se fait dans la devise de chaque frais.",
   "facturationSettlementDerived": "soit {amount}",
   "@facturationSettlementDerived": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationCreatePaymentToPerceive": "À percevoir",
   "facturationCreatePaymentImputes": "impute {amount}",
   "@facturationCreatePaymentImputes": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
   "@facturationCreatePaymentCollectAmountAction": {
@@ -3664,7 +3776,11 @@
   "financeStatsCurrencyHeading": "En {currency}",
   "@financeStatsCurrencyHeading": {
     "description": "Intertitre nommant la devise du bloc d'indicateurs qui suit. N'apparaît qu'à partir de deux devises : sur une école mono-devise il répéterait ce que chaque montant porte déjà.",
-    "placeholders": { "currency": { "type": "String" } }
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
   },
   "financeStatsNoMovementLabel": "Aucun mouvement sur la période",
   "@financeStatsNoMovementLabel": {
@@ -3678,12 +3794,16 @@
   "financeStatsKpiExpected": "Total attendu",
   "financeStatsKpiOutstanding": "Reste à recouvrer",
   "financeStatsKpiCollectionRate": "Taux de recouvrement",
-  "financeStatsKpiRateForCurrency": "{rate}\u00A0% · {currency}",
+  "financeStatsKpiRateForCurrency": "{rate} % · {currency}",
   "@financeStatsKpiRateForCurrency": {
     "description": "Taux de recouvrement d'une devise, quand le tableau de bord en porte plusieurs.",
     "placeholders": {
-      "rate": { "type": "int" },
-      "currency": { "type": "String" }
+      "rate": {
+        "type": "int"
+      },
+      "currency": {
+        "type": "String"
+      }
     }
   },
   "financeStatsSectionEvolution": "Évolution des encaissements",
@@ -3773,50 +3893,674 @@
   "financeStatsErrorServerTitle": "Chargement impossible",
   "financeStatsErrorReconnect": "Se reconnecter",
   "financeStatsErrorIncidentCode": "Code d'incident : {code}",
-  "@financeStatsErrorIncidentCode": {"description": "À citer au support. Porté par les seules erreurs serveur : c'est ce qui distingue une panne qu'on peut faire remonter d'une coupure de réseau.", "placeholders": {"code": {"type": "String"}}},
+  "@financeStatsErrorIncidentCode": {
+    "description": "À citer au support. Porté par les seules erreurs serveur : c'est ce qui distingue une panne qu'on peut faire remonter d'une coupure de réseau.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "financeDashboardTabsA11yLabel": "Onglets du tableau de bord Finances",
   "financeDashboardTabRecoveryLabel": "Recouvrement",
   "financeDashboardTabRecoveryDescription": "Ce qu'il reste à encaisser cette année",
   "financeDashboardTabTillLabel": "Caisse",
   "financeDashboardTabTillDescription": "Ce qui est entré dans le tiroir",
-  "financeTillKpiTotal": "Total du tiroir",
-  "financeTillKpiFees": "Frais scolaires",
-  "financeTillKpiBoutique": "Ventes boutique",
-  "financeTillKpiBandA11yLabel": "Indicateurs de la caisse, par devise",
+  "financeTillRangeCaptionCustom": "Du {from} au {to}",
+  "@financeTillRangeCaptionCustom": {
+    "description": "Les bornes DEMANDÉES. Celles que le serveur a retenues sont portées par le contenu, une fois la réponse arrivée.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRangeCaptionWindow": "Au {today}",
+  "@financeTillRangeCaptionWindow": {
+    "description": "Sur un grain déductible, l'écran ne connaît pas les bornes avant la réponse : il date donc la lecture plutôt que d'annoncer un intervalle qu'il aurait recalculé.",
+    "placeholders": {
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillPeriodCustom": "Période",
+  "@financeTillPeriodCustom": {
+    "description": "La fenêtre libre. Le serveur la borne à 366 jours et refuse en 400 au-delà : ce refus remonte plutôt que d'être devancé par une borne dupliquée côté client."
+  },
+  "financeTillPeriodFrom": "Du",
+  "financeTillPeriodTo": "Au",
+  "financeTillReceiptsHeading": "Paiements",
+  "@financeTillReceiptsHeading": {
+    "description": "TOUTES les caisses, contrairement aux cartes qui l'entourent : la fenêtre seule borne cette table. Plus de devise dans le titre — il n'y en a plus une seule à nommer."
+  },
+  "financeTillReceiptsCount": "{count, plural, =0{Aucun paiement} one{1 paiement} other{{count} paiements}}",
+  "@financeTillReceiptsCount": {
+    "description": "Compte des LIGNES d'encaissement de la fenêtre, pas des reçus : un versement réglé dans deux devises en fait deux.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReceiptsUnit": "paiement",
+  "financeTillReceiptsUnsealed": "{count, plural, one{1 sans pièce scellée (saisie de rattrapage)} other{{count} sans pièce scellée (saisies de rattrapage)}}",
+  "@financeTillReceiptsUnsealed": {
+    "description": "Compte de FENÊTRE, servi par le serveur. Nécessaire et non cosmétique : sur une fenêtre de reprise de cahier la colonne est vide presque partout, et sans ce compte elle se lit comme une table cassée.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReceiptsColumnDate": "Date",
+  "financeTillReceiptsColumnReceipt": "Reçu",
+  "financeTillReceiptsColumnStudent": "Élève",
+  "financeTillReceiptsColumnSource": "Source",
+  "financeTillReceiptsColumnAmount": "Encaissé",
+  "financeTillReceiptsNoNumber": "—",
+  "@financeTillReceiptsNoNumber": {
+    "description": "Un versement antérieur à l'imprimerie n'a pas de numéro scellé. On n'affiche JAMAIS l'identifiant technique à sa place."
+  },
+  "financeTillReceiptsNoStudent": "—",
+  "@financeTillReceiptsNoStudent": {
+    "description": "Une vente boutique ne désigne ni élève ni classe."
+  },
+  "financeTillReceiptsCollectedBy": "encaissé par {agent}",
+  "@financeTillReceiptsCollectedBy": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsCrossed": "solde {amount} · taux {rate}",
+  "@financeTillReceiptsCrossed": {
+    "description": "Le montant soldé est LU sur les imputations, jamais dérivé du taux. Rendue en TEXTE et pas seulement en teinte ambre : une conversion ne se signale jamais par la seule couleur.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsLoading": "Chargement des paiements…",
+  "financeTillReceiptsEmpty": "Aucun paiement sur la période",
+  "financeTillReceiptsForbidden": "Le détail nominatif des paiements demande le droit de lecture des paiements. Les totaux ci-dessus restent lisibles sans lui.",
+  "@financeTillReceiptsForbidden": {
+    "description": "403 sur la table alors que les agrégats ont répondu : droit manquant, pas panne. La phrase dit ce qui manque ET ce qui reste."
+  },
+  "financeTillReceiptsError": "Les paiements n'ont pas pu être chargés. Les totaux ci-dessus, eux, sont à jour.",
+  "financeTillReceiptsSplitTenderNote": "Un versement réglé dans les deux devises occupe deux lignes, sous le même numéro de pièce : ce n'est pas un doublon, c'est ce que le tiroir contient.",
+  "financeTillReportDownload": "Télécharger",
+  "@financeTillReportDownload": {
+    "description": "Le rapport PDF des paiements de la fenêtre affichée, TOUTES caisses : la sortie exacte de la table. Le pied du document rend un total par devise, jamais leur somme."
+  },
+  "financeTillReportTooltip": "Télécharger le rapport des paiements de la période",
+  "financeTillReportPreparing": "Préparation…",
+  "@financeTillReportPreparing": {
+    "description": "Un rendu prend plusieurs secondes sur une grosse fenêtre, et le serveur n'en compose qu'un à la fois : le bouton se désarme et le dit."
+  },
+  "financeTillReportWaiting": "Patientez…",
+  "financeTillReportBusy": "{seconds, plural, one{Un rapport est déjà en préparation. Réessayez dans 1 seconde.} other{Un rapport est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "@financeTillReportBusy": {
+    "description": "429 : ce n'est ni une panne ni un refus, c'est un tour de file. Le bouton reste désarmé le temps annoncé plutôt que d'inviter à reproduire ce que le serveur vient de refuser.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillReportForbidden": "Le rapport des paiements demande le droit de lecture des paiements.",
+  "financeTillReportFailed": "Le rapport n'a pas pu être produit.",
+  "financeTillReportTooLarge": "Cette fenêtre contient {lines} lignes ; le rapport est plafonné à {cap}. Resserrez la période.",
+  "@financeTillReportTooLarge": {
+    "description": "Le refus de plafond, écrit AVEC NOS MOTS et SES CHIFFRES : reconnu au `detailCode` REPORT_LINE_CAP, les deux nombres lus dans `details`. Les extraire de la phrase du serveur casserait à sa première reformulation — et sa phrase, elle, n'est pas traduite en anglais.",
+    "placeholders": {
+      "lines": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "cap": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@financeTillReportFailed": {
+    "description": "Repli SEULEMENT : le message du serveur prime quand il en porte un — c'est lui qui dit le nombre de lignes sur le refus de plafond, et « resserrez la période » sans ce chiffre ne guide rien."
+  },
+  "financeTillReportHandoffFailed": "Le rapport est prêt, mais l'impression n'a pas pu s'ouvrir.",
+  "@financeTillReportHandoffFailed": {
+    "description": "Le canal natif du spouleur peut manquer. Le document est arrivé : c'est le geste qui a échoué, et le taire ne laisserait rien à l'écran."
+  },
+  "@financeTillReceiptsSplitTenderNote": {
+    "description": "Rendue SEULEMENT quand la page en porte une. Scopée sur une caisse, la table ne montrait qu'une des deux moitiés ; toutes caisses, elles sont voisines et se lisent comme un doublon."
+  },
+  "financeTillEmptyGlobalTitle": "Aucun encaissement · {window}",
+  "@financeTillEmptyGlobalTitle": {
+    "description": "La fenêtre en minuscules, comme la maquette. Les tuiles de caisse restent visibles à 0 au-dessus : le repère de lecture ne disparaît pas.",
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyGlobalMessage": "Aucun reçu n'a été émis {window}, dans aucune caisse. Élargissez la fenêtre, ou ouvrez la facturation pour enregistrer un paiement.",
+  "@financeTillEmptyGlobalMessage": {
+    "description": "« dans aucune caisse » et non « ni en dollars ni en francs » : la maquette suppose exactement deux devises, le modèle en admet davantage.",
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptySeeMonth": "Voir ce mois",
+  "financeTillEmptySeeYear": "Voir cette année",
+  "@financeTillEmptySeeYear": {
+    "description": "Élargissement depuis le mois. La maquette ne connaît que « Voir ce mois » ; l'année est le segment ajouté par le porteur."
+  },
+  "financeTillEmptyOpenBilling": "Ouvrir la facturation",
+  "@financeTillEmptyOpenBilling": {
+    "description": "Masqué sans finance.charge.read ni finance.payment.read : une porte fermée ne s'annonce pas."
+  },
+  "financeTillEmptyCurrencyTitle": "Caisse {currency} vide sur cette période",
+  "@financeTillEmptyCurrencyTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyCurrencyMessage": "Aucun paiement n'a été tendu en {currency} {window}. {others}",
+  "@financeTillEmptyCurrencyMessage": {
+    "description": "La phrase CHIFFRE l'autre caisse : sans ce montant, l'état vide se lirait comme un écran cassé plutôt que comme une caisse qui n'a pas travaillé.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      },
+      "others": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyOtherTill": "L'autre caisse a enregistré {amount}.",
+  "@financeTillEmptyOtherTill": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptyOtherTills": "Les autres caisses ont enregistré {amounts}.",
+  "@financeTillEmptyOtherTills": {
+    "description": "Jamais une somme : les montants sont juxtaposés, comme partout ailleurs sur cet écran.",
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillEmptySeeTill": "Voir la caisse {currency}",
+  "@financeTillEmptySeeTill": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillReceiptsCrossedTooltip": "Frais fixé en {fee}, réglé en {tendered}",
+  "@financeTillReceiptsCrossedTooltip": {
+    "description": "La mention du croisement est du TEXTE, jamais une simple teinte ambre. Cette explication la complète, et elle est LUE par le lecteur d'écran — une mention qui ne s'obtient qu'à la souris n'existe pas sur une tablette.",
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "tendered": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateValue": "1 {base} = {value} {quote}",
+  "@financeTillRateValue": {
+    "description": "Le taux du jour, tel que l'école l'a saisi. CONTEXTE et non base de calcul : les montants croisés de l'écran sont convertis au taux DU REÇU, jamais à celui-ci.",
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "quote": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateNone": "Aucun taux paramétré",
+  "@financeTillRateNone": {
+    "description": "Le bandeau reste rendu, sans issue : le taux se change en Configuration, et le porteur a retiré le lien. Un taux n'est jamais deviné."
+  },
+  "financeTillRateA11yLabel": "Taux du jour : {rate}",
+  "@financeTillRateA11yLabel": {
+    "description": "Les mots « Taux du jour » ne sont PAS écrits à l'écran — la ligne fine de la maquette est absente faute de donnée. Ils restent ici pour que le lecteur d'écran nomme ce nombre.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillRateNoneA11yLabel": "Taux du jour : aucun taux paramétré",
+  "financeTillInsightsHeading": "Lectures & alertes",
+  "@financeTillInsightsHeading": {
+    "description": "Ces cartes EXPLIQUENT ; elles n'exposent aucun bouton — la décision se prend en Facturation."
+  },
+  "financeTillInsightAmountSeparator": " et ",
+  "@financeTillInsightAmountSeparator": {
+    "description": "Sépare deux montants de devises différentes. Jamais un « + » : les deux caisses ne s'additionnent pas."
+  },
+  "financeTillInsightCrossedTitle": "Paiements croisés",
+  "financeTillInsightCrossedEmpty": "Aucun paiement croisé : tous les frais ont été réglés dans leur devise d'origine.",
+  "@financeTillInsightCrossedEmpty": {
+    "description": "La carte reste rendue même à zéro — une carte absente laisse croire qu'on a oublié de regarder."
+  },
+  "financeTillInsightCrossedBody": "{count, plural, one{1 versement règle} other{{count} versements règlent}} un frais fixé dans l'autre devise, pour {amounts}{rateClause}. Un écart de taux au moment du contrôle de caisse vient de là.",
+  "@financeTillInsightCrossedBody": {
+    "description": "Portée ÉCRAN : le compte et les montants couvrent toutes les caisses, comme le serveur les construit.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amounts": {
+        "type": "String"
+      },
+      "rateClause": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightCrossedSingleRate": ", convertis au taux de {rate}",
+  "@financeTillInsightCrossedSingleRate": {
+    "description": "Le taux s'écrit NU, sans unité : c'est la convention de la spec partout où un taux apparaît. La doctrine « tout montant porte son symbole » vise les montants ; un taux n'en est pas un.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightCrossedRateRange": ", convertis à des taux de {from} à {to}",
+  "@financeTillInsightCrossedRateRange": {
+    "description": "La fourchette MONTRE l'écart, qui est justement ce qui explique la différence de caisse — et sa longueur ne dépend pas du nombre de taux. Citer un seul taux en tairait d'autres.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightBestDayTitle": "Jour le plus fort",
+  "financeTillInsightBestDayBody": "Le {day} a rapporté {amount}, soit {share} % de ce que le graphique dessine — utile pour caler les permanences.",
+  "@financeTillInsightBestDayBody": {
+    "description": "La part est LUE du serveur, rapportée à ce qui est DESSINÉ et non à la fenêtre comptée : sur la journée, la rapporter au jour donnerait 100 % à chaque fois.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillInsightBoutiqueTitle": "Ce que la boutique change",
+  "financeTillInsightBoutiqueBody": "{amount} viennent de la boutique — des achats facultatifs, non facturés : c'est de la trésorerie, pas le règlement d'un frais.",
+  "@financeTillInsightBoutiqueBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillInsightBoutiqueEmpty": "Aucune vente boutique sur cette fenêtre : tout ce qui est entré règle un frais facturé.",
+  "financeTillInsightTrendTitle": "Tendance",
+  "financeTillInsightTrendUp": "Caisse {currency} en hausse de {percent} % par rapport à la période précédente. Le rythme se maintient.",
+  "@financeTillInsightTrendUp": {
+    "description": "Plus courte que la maquette : elle veut la DURÉE de la période précédente et son TOTAL, que le contrat n'expose pas. La phrase s'arrête à ce qui est su.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillInsightTrendDown": "Caisse {currency} en baisse de {percent} % par rapport à la période précédente. Vérifiez si une relance est nécessaire.",
+  "@financeTillInsightTrendDown": {
+    "description": "La seule des quatre cartes à porter une phrase d'action — et elle renvoie ailleurs, cet écran étant en lecture seule.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillSourceHeading": "Par source",
+  "@financeTillSourceHeading": {
+    "description": "D'où vient l'argent de la caisse détaillée — la moitié de l'ancienne bande KPI, remise à sa vraie place."
+  },
+  "financeTillSourceHint": "Frais facturés contre ventes boutique",
+  "financeTillSourceFees": "Frais scolaires",
+  "financeTillSourceBoutique": "Ventes boutique",
+  "financeTillSourceA11yLabel": "Répartition par source : {fees} de frais facturés, {boutique} de ventes boutique",
+  "@financeTillSourceA11yLabel": {
+    "description": "La barre n'est jamais lue par sa seule couleur : ce libellé porte les deux montants.",
+    "placeholders": {
+      "fees": {
+        "type": "String"
+      },
+      "boutique": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillSourceBoutiqueNote": "Des achats facultatifs, non facturés : cette part entre en caisse sans solder aucun frais.",
+  "@financeTillSourceBoutiqueNote": {
+    "description": "Rendue seulement si la boutique a vendu. Sans elle, une vente comptant se lit comme un règlement de frais."
+  },
+  "financeTillClassroomHeading": "Par classe",
+  "financeTillClassroomHint": "{count, plural, =0{Aucune classe n'a alimenté cette caisse} one{La classe la plus contributrice à cette caisse} other{Les {count} classes les plus contributrices à cette caisse}}",
+  "@financeTillClassroomHint": {
+    "description": "Annonce le nombre RÉELLEMENT affiché : le serveur coupe à huit, mais une école de cinq classes en montre cinq.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillClassroomRowA11yLabel": "{classroom} : {amount}",
+  "@financeTillClassroomRowA11yLabel": {
+    "placeholders": {
+      "classroom": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillClassroomUnassigned": "{amount} sont entrés sans désigner de classe — une vente boutique n'a ni élève ni classe. La somme des lignes ci-dessus ne fait donc pas le total de la caisse.",
+  "@financeTillClassroomUnassigned": {
+    "description": "Sans cette mention, le classement passe pour un bug : le lecteur cherche une erreur qui n'existe pas.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillClassroomEmpty": "Aucune classe à classer",
+  "financeTillClassroomEmptyHint": "Rien de ce qui est entré dans cette caisse ne désigne un élève.",
+  "financeTillCashBoxesA11yLabel": "Les caisses de la fenêtre, une par devise, et le nombre de reçus émis",
+  "@financeTillCashBoxesA11yLabel": {
+    "description": "Les deux caisses ne s'additionnent pas : le libellé annonce des montants séparés, jamais un total."
+  },
+  "financeTillCashBoxLabel": "Caisse {currency} · {window}",
+  "@financeTillCashBoxLabel": {
+    "description": "Titre d'une tuile de caisse. La fenêtre y est répétée parce qu'un montant de caisse sans sa fenêtre est illisible.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCurrencyNameUsd": "dollars",
+  "financeTillCurrencyNameCdf": "francs",
+  "financeTillReceiptCount": "{count, plural, one{reçu} other{reçus}}",
+  "@financeTillReceiptCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCashBoxSubline": "{count} {unit} · ticket moyen {ticket}",
+  "@financeTillCashBoxSubline": {
+    "description": "Jamais rendue quand la caisse n'a aucun reçu : le ticket moyen vaudrait 0, ce qui se lirait comme une mesure.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "ticket": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCashBoxTrend": "{percent} % vs période précédente",
+  "@financeTillCashBoxTrend": {
+    "description": "Le signe est porté par l'icône et la couleur ; le nombre est donné en valeur absolue. Rendue seulement si le serveur a mesuré l'écart — une période précédente vide ou hors année scolaire fait disparaître la ligne.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCashBoxNoComparablePeriod": "Pas de période comparable avant la rentrée",
+  "@financeTillCashBoxNoComparablePeriod": {
+    "description": "Rendue quand `trendUnavailableReason` vaut BEFORE_SCHOOL_YEAR — la comparaison est impossible, pas seulement vide. Sans elle, la tuile perd son delta tous les jours de septembre sans raison visible."
+  },
+  "financeTillReceiptsIssuedLabel": "Reçus émis",
+  "financeTillReceiptsIssuedSubline": "toutes caisses confondues",
+  "@financeTillReceiptsIssuedSubline": {
+    "description": "Un compteur, pas un montant — le seul agrégat inter-devises légitime de l'écran."
+  },
+  "financeTillDetailHeading": "Détail de la caisse",
+  "@financeTillDetailHeading": {
+    "description": "Titre de section : tout ce qui suit décrit UNE seule caisse. Le sélecteur agit comme un titre, pas comme un filtre discret."
+  },
+  "financeTillCurrencySegment": "{symbol} {currency} ({count})",
+  "@financeTillCurrencySegment": {
+    "description": "Le compteur est dans le segment pour qu'on voie AVANT de cliquer si l'autre caisse a travaillé, plutôt que de basculer sur un écran vide et revenir.",
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillCurrencySegmentA11yLabel": "Caisse {currency}, {count} {unit}",
+  "@financeTillCurrencySegmentA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillCurrencySelectorA11yLabel": "Caisse détaillée : {currency}",
+  "@financeTillCurrencySelectorA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillBucketsHeading": "Progression des encaissements · caisse {currency}",
+  "@financeTillBucketsHeading": {
+    "description": "La série est mono-devise et jamais convertie : le titre nomme la caisse qu'elle dessine.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "financeTillBucketsWindowNote": "Les tuiles comptent la fenêtre demandée ; la série dessine les sept jours autour, pour qu'un chiffre du jour se lise contre les précédents.",
+  "@financeTillBucketsWindowNote": {
+    "description": "Rendue sur la fenêtre `jour` seulement, où la série déborde. C'est une PROPRIÉTÉ de l'écran, pas une excuse : le total d'une caisse n'égale pas la somme de ses barres, et l'écart est la lecture."
+  },
+  "financeTillReceiptsIssuedMixedNote": "Un reçu réglé dans les deux devises compte dans chaque caisse, mais n'est émis qu'une fois.",
+  "@financeTillReceiptsIssuedMixedNote": {
+    "description": "Rendue seulement quand la somme des compteurs de caisse dépasse ce total. Sans elle, « 5 » et « 3 » au-dessus de « 7 » passent pour une erreur d'addition."
+  },
   "financeStatsFeeTypeOutstanding": "Reste dû : {amount}",
-  "@financeStatsFeeTypeOutstanding": {"description": "Reste dû d'un poste de frais. Sans lui, la carte affiche un encaissé supérieur à l'attendu à côté d'une barre incomplète, et rien n'explique l'écart.", "placeholders": {"amount": {"type": "String"}}},
+  "@financeStatsFeeTypeOutstanding": {
+    "description": "Reste dû d'un poste de frais. Sans lui, la carte affiche un encaissé supérieur à l'attendu à côté d'une barre incomplète, et rien n'explique l'écart.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeStatsRateNotApplicable": "Sans objet",
-  "@financeStatsRateNotApplicable": {"description": "Taux de recouvrement quand rien n'était attendu. Le serveur renvoie alors 100, qui se lit « rien ne manque » et non « tout a été recouvré »."},
+  "@financeStatsRateNotApplicable": {
+    "description": "Taux de recouvrement quand rien n'était attendu. Le serveur renvoie alors 100, qui se lit « rien ne manque » et non « tout a été recouvré »."
+  },
   "financeStatsRateNotApplicableForCurrency": "Sans objet · {currency}",
-  "@financeStatsRateNotApplicableForCurrency": {"description": "Idem, quand le tableau de bord porte plusieurs devises.", "placeholders": {"currency": {"type": "String"}}},
+  "@financeStatsRateNotApplicableForCurrency": {
+    "description": "Idem, quand le tableau de bord porte plusieurs devises.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeStatsFeeTypeRateNotApplicable": "Taux : sans objet",
-  "@financeStatsFeeTypeRateNotApplicable": {"description": "Taux d'un poste de frais sur lequel rien n'était attendu."},
+  "@financeStatsFeeTypeRateNotApplicable": {
+    "description": "Taux d'un poste de frais sur lequel rien n'était attendu."
+  },
   "financeStatsCurrencyNoMovement": "Aucun mouvement dans cette devise",
-  "@financeStatsCurrencyNoMovement": {"description": "Bloc d'une devise que l'école facture mais où rien n'a circulé. Le serveur la renvoie à zéro plutôt que de l'omettre : son absence se lirait comme une école qui aurait cessé de facturer dedans."},
+  "@financeStatsCurrencyNoMovement": {
+    "description": "Bloc d'une devise que l'école facture mais où rien n'a circulé. Le serveur la renvoie à zéro plutôt que de l'omettre : son absence se lirait comme une école qui aurait cessé de facturer dedans."
+  },
   "financeStatsCurrencyNoMovementRecovery": "Rien n'a été facturé ni encaissé sur l'année scolaire.",
   "financeTillPeriodDayCurrent": "Aujourd'hui",
   "financeTillWindow": "Du {start} au {end}",
-  "@financeTillWindow": {"description": "Bornes de la fenêtre de caisse, telles que le serveur les renvoie. Jamais recalculées côté tablette : la journée commence et finit dans le fuseau de l'école.", "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@financeTillWindow": {
+    "description": "Bornes de la fenêtre de caisse, telles que le serveur les renvoie. Jamais recalculées côté tablette : la journée commence et finit dans le fuseau de l'école.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillWindowDay": "Journée du {date}",
-  "@financeTillWindowDay": {"placeholders": {"date": {"type": "String"}}},
+  "@financeTillWindowDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillTimeZoneHint": "Journée à l'heure de l'école · {zone}",
-  "@financeTillTimeZoneHint": {"description": "Le fuseau vient de la réponse. Un encaissement sonné à 00 h 20 au guichet porte un instant serveur de 23 h 20 Z la veille.", "placeholders": {"zone": {"type": "String"}}},
+  "@financeTillTimeZoneHint": {
+    "description": "Le fuseau vient de la réponse. Un encaissement sonné à 00 h 20 au guichet porte un instant serveur de 23 h 20 Z la veille.",
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillSectionBuckets": "Entrées de caisse",
   "financeTillBucketsChartA11yLabel": "Graphique des entrées de caisse par intervalle",
   "financeTillImputationHeading": "Ce que ces versements ont éteint",
-  "@financeTillImputationHeading": {"description": "Titre de la seconde moitié de l'écran caisse. Elle compte dans la devise de la CRÉANCE, quand tout ce qui précède compte en devise reçue."},
+  "@financeTillImputationHeading": {
+    "description": "Titre de la seconde moitié de l'écran caisse. Elle compte dans la devise de la CRÉANCE, quand tout ce qui précède compte en devise reçue."
+  },
   "financeTillImputationHint": "En devise de créance : ces montants ne s'additionnent pas à ceux du tiroir.",
-  "@financeTillImputationHint": {"description": "Un versement de 115 000 FC qui solde 50 USD pèse en haut dans le bloc CDF et ici dans le bloc USD. Sans cette phrase, les deux moitiés se lisent comme un seul total, qui n'existe pas."},
+  "@financeTillImputationHint": {
+    "description": "Un versement de 115 000 FC qui solde 50 USD pèse en haut dans le bloc CDF et ici dans le bloc USD. Sans cette phrase, les deux moitiés se lisent comme un seul total, qui n'existe pas."
+  },
+  "financeTillImputationShare": "{label} · {share} % du total",
+  "@financeTillImputationShare": {
+    "description": "Part dans CETTE caisse, pas dans l'encaissement global. Les parts peuvent faire 99 ou 101 — arrondis entiers ; ne jamais dériver un montant d'un pourcentage affiché.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "financeTillImputationCardHint": "En devise de créance, jamais converti — ces montants ne s'additionnent pas à ceux du tiroir.",
+  "@financeTillImputationCardHint": {
+    "description": "La carte voisine « Par source », qui compte en devise REÇUE. Sans cette ligne, l'adjacence invite à lire un total commun qui n'existe pas."
+  },
   "financeTillImputationCardTitle": "Créances réglées en {currency}",
-  "@financeTillImputationCardTitle": {"placeholders": {"currency": {"type": "String"}}},
+  "@financeTillImputationCardTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillImputationTotal": "Total imputé · {amount}",
-  "@financeTillImputationTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "@financeTillImputationTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillImputationSectionA11yLabel": "Imputation par poste de frais, en {currency}",
-  "@financeTillImputationSectionA11yLabel": {"placeholders": {"currency": {"type": "String"}}},
+  "@financeTillImputationSectionA11yLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFeeCodeAmountA11yLabel": "{label} : {amount}",
-  "@financeTillFeeCodeAmountA11yLabel": {"placeholders": {"label": {"type": "String"}, "amount": {"type": "String"}}},
+  "@financeTillFeeCodeAmountA11yLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFreshnessNotice": "Arrêté à la dernière synchro · {relative}",
-  "@financeTillFreshnessNotice": {"description": "Le serveur ne totalise que ce qui lui est parvenu : encaissements et ventes boutique passent par la file d'écritures. Hors ligne ou file non vidée, le total sous-compte, et cette ligne dit de quand il date.", "placeholders": {"relative": {"type": "String"}}},
+  "@financeTillFreshnessNotice": {
+    "description": "Le serveur ne totalise que ce qui lui est parvenu : encaissements et ventes boutique passent par la file d'écritures. Hors ligne ou file non vidée, le total sous-compte, et cette ligne dit de quand il date.",
+    "placeholders": {
+      "relative": {
+        "type": "String"
+      }
+    }
+  },
   "financeTillFreshnessNever": "Jamais synchronisé",
   "financeStatsCurrencyNoMovementTill": "Rien n'est entré dans le tiroir sur cette période.",
   "enrollmentResults": "Résultats",
@@ -4519,21 +5263,29 @@
   "boutiqueArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
   "@boutiqueArticleCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueInCartBadge": "{count} au panier",
   "@boutiqueInCartBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueLevelBadge": "par niveau",
   "boutiquePriceRange": "{min} – {max}",
   "@boutiquePriceRange": {
     "placeholders": {
-      "min": { "type": "String" },
-      "max": { "type": "String" }
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
     }
   },
   "boutiqueGridReminder": "Les prix viennent toujours de la grille du catalogue. À la caisse, on désigne un élève ou un niveau — jamais un montant.",
@@ -4549,8 +5301,12 @@
   "boutiqueLineMeta": "{unitPrice} × {quantity}",
   "@boutiqueLineMeta": {
     "placeholders": {
-      "unitPrice": { "type": "String" },
-      "quantity": { "type": "int" }
+      "unitPrice": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
     }
   },
   "boutiquePayerSection": "Payeur",
@@ -4567,7 +5323,9 @@
   "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueBlockerMixedCurrency": "Devises mélangées",
@@ -4579,21 +5337,29 @@
   "boutiqueNoMatchMessage": "Rien pour « {query} » dans « {family} ». Élargissez la recherche.",
   "@boutiqueNoMatchMessage": {
     "placeholders": {
-      "query": { "type": "String" },
-      "family": { "type": "String" }
+      "query": {
+        "type": "String"
+      },
+      "family": {
+        "type": "String"
+      }
     }
   },
   "boutiqueNoMatchMessageAll": "Rien pour « {query} ». Élargissez la recherche.",
   "@boutiqueNoMatchMessageAll": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
   "boutiqueResetFilters": "Réinitialiser les filtres",
   "boutiqueUnsellableNotice": "{count, plural, one{1 article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
   "@boutiqueUnsellableNotice": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiqueErrorNetworkTitle": "Pas de connexion",
@@ -4609,7 +5375,9 @@
   "boutiqueErrorIncidentCode": "Code incident : {code}",
   "@boutiqueErrorIncidentCode": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "boutiqueBeneficiaryEyebrow": "Bénéficiaire de la ligne",
@@ -4621,7 +5389,9 @@
   "boutiqueBeneficiaryNoResult": "Aucun élève ne correspond à « {query} ». Vérifiez l'orthographe ou cherchez par niveau.",
   "@boutiqueBeneficiaryNoResult": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
   "boutiqueBeneficiaryPickLevel": "Choisissez un niveau pour voir ses élèves.",
@@ -4632,7 +5402,9 @@
   "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{1 vente} other{{count} ventes}}",
   "@boutiquePayerDirectoryCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "boutiquePayerUse": "Utiliser",
@@ -4651,13 +5423,17 @@
   "boutiqueConfirmAction": "Encaisser {total}",
   "@boutiqueConfirmAction": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueSaleRecorded": "Vente encaissée · {total}",
   "@boutiqueSaleRecorded": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueSaleFailed": "La vente n'a pas pu être enregistrée. Rien n'a été encaissé — réessayez.",
@@ -4680,19 +5456,25 @@
   "boutiqueReceiptBannerTitle": "Vente encaissée · {total}",
   "@boutiqueReceiptBannerTitle": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptBannerProvisional": "{reference} · provisoire, sera scellé à la synchro",
   "@boutiqueReceiptBannerProvisional": {
     "placeholders": {
-      "reference": { "type": "String" }
+      "reference": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptBannerSealed": "{reference} · scellé",
   "@boutiqueReceiptBannerSealed": {
     "placeholders": {
-      "reference": { "type": "String" }
+      "reference": {
+        "type": "String"
+      }
     }
   },
   "boutiqueReceiptPrint": "Imprimer",
@@ -4710,13 +5492,25 @@
   "boutiqueSuccessMessage": "Le client a payé {total} en espèces. Remettez-lui son ticket.",
   "boutiqueSuccessDone": "Terminer",
   "@boutiqueAddOneMore": {
-    "placeholders": { "article": { "type": "String" } }
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
   },
   "@boutiqueRemoveOne": {
-    "placeholders": { "article": { "type": "String" } }
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
   },
   "@boutiqueSuccessMessage": {
-    "placeholders": { "total": { "type": "String" } }
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
   },
   "boutiqueHistoryEyebrow": "Boutique ▸ Historiques",
   "boutiqueHistoryTitle": "Historique des ventes",
@@ -4734,10 +5528,37 @@
   "boutiqueHistoryTotalLabel": "Total encaissé",
   "boutiqueHistorySaleTime": "{time} · {reference}",
   "boutiqueHistoryProvisional": "ticket provisoire",
-  "@boutiqueHistorySaleCount": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistoryArticleCount": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistoryPendingNotice": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueHistorySaleTime": {"placeholders": {"time": {"type": "String"}, "reference": {"type": "String"}}},
+  "@boutiqueHistorySaleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistoryArticleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistoryPendingNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueHistorySaleTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueHistoryErrorServerTitle": "Historique illisible",
   "boutiqueHistoryErrorServer": "La caisse locale n'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c'est leur relecture qui a échoué.",
   "boutiqueHistoryErrorNetwork": "L'historique se lit en local et n'a pas besoin du réseau. Réessayez ; s'il ne revient pas, c'est la base locale qui est en cause.",
@@ -4748,8 +5569,20 @@
   "boutiqueClearPayerSummary": "Payeur saisi : {payer}",
   "boutiqueClearCancel": "Garder le panier",
   "boutiqueClearConfirm": "Vider",
-  "@boutiqueClearLinesSummary": {"placeholders": {"count": {"type": "int"}}},
-  "@boutiqueClearPayerSummary": {"placeholders": {"payer": {"type": "String"}}},
+  "@boutiqueClearLinesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boutiqueClearPayerSummary": {
+    "placeholders": {
+      "payer": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueSuccessEyebrow": "Boutique ▸ Encaissement",
   "boutiqueSaleDetailEyebrow": "Boutique ▸ Vente",
   "boutiqueSaleDetailTitle": "Détail de la vente",
@@ -4773,12 +5606,32 @@
   "boutiqueSaleDetailNotFoundTitle": "Vente introuvable",
   "boutiqueSaleDetailNotFound": "Cette vente n'est plus dans la base locale de cet établissement. Rien n'est perdu côté serveur si elle y était déjà partie.",
   "boutiqueSaleDetailPendingNotice": "Cette vente n'est pas encore partie au serveur. Elle partira à la prochaine synchronisation, sans intervention.",
-  "@boutiqueSaleDetailBeneficiary": {"placeholders": {"name": {"type": "String"}}},
-  "@boutiqueSaleDetailSizePrefix": {"placeholders": {"size": {"type": "String"}}},
-  "@boutiqueSaleDetailTicketPrintedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@boutiqueSaleDetailBeneficiary": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@boutiqueSaleDetailSizePrefix": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@boutiqueSaleDetailTicketPrintedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "@boutiqueOpenCartWithCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "enrollmentDuplicateDialogEyebrow": "Vérification",
@@ -4792,13 +5645,19 @@
   "enrollmentDuplicateContinueAction": "Continuer quand même",
   "@enrollmentDuplicateIdentityLine": {
     "placeholders": {
-      "name": { "type": "String" },
-      "dateOfBirth": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "dateOfBirth": {
+        "type": "String"
+      }
     }
   },
   "@enrollmentDuplicateOthers": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "enrollmentDashboardOvertitle": "Inscriptions",
@@ -5171,5 +6030,609 @@
       }
     }
   },
-  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez."
+  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez.",
+  "recouvrementFeePickerLabel": "Frais retenus",
+  "@recouvrementFeePickerLabel": {
+    "description": "Titre du sélecteur de frais du tableau de bord Recouvrement"
+  },
+  "recouvrementFeePickerA11yLabel": "Frais retenus — sélection multiple, au moins un",
+  "@recouvrementFeePickerA11yLabel": {
+    "description": "Libellé a11y du groupe de pastilles de frais"
+  },
+  "recouvrementFeeChipLockedA11y": "{fee} — seul frais retenu, ne peut pas être décoché",
+  "@recouvrementFeeChipLockedA11y": {
+    "description": "A11y d'une pastille verrouillée car dernière cochée",
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementScopeLabel": "Périmètre",
+  "@recouvrementScopeLabel": {
+    "description": "Libellé du sélecteur de cycle du tableau de bord Recouvrement"
+  },
+  "recouvrementScopeAll": "Tout l'établissement",
+  "@recouvrementScopeAll": {
+    "description": "Entrée « tous les cycles » du périmètre"
+  },
+  "recouvrementExpectedLabel": "Attendu sur ces frais",
+  "@recouvrementExpectedLabel": {
+    "description": "Carte KPI : montant attendu sur la sélection"
+  },
+  "recouvrementExpectedMixedSubline": "Deux devises — jamais additionnées",
+  "@recouvrementExpectedMixedSubline": {
+    "description": "Sous-ligne de la carte Attendu en sélection mixte"
+  },
+  "recouvrementCollectedLabel": "Perçu à ce jour",
+  "@recouvrementCollectedLabel": {
+    "description": "Carte KPI : montant perçu"
+  },
+  "recouvrementSettledSubline": "{count} élèves ont tout soldé, soit {percent} % de l'effectif",
+  "@recouvrementSettledSubline": {
+    "description": "Sous-ligne de la carte Perçu",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementNothingPaidLabel": "N'ont rien payé",
+  "@recouvrementNothingPaidLabel": {
+    "description": "Carte KPI : effectif sans aucun versement"
+  },
+  "recouvrementNothingPaidSubline": "Cible de relance prioritaire",
+  "@recouvrementNothingPaidSubline": {
+    "description": "Sous-ligne de la carte N'ont rien payé"
+  },
+  "recouvrementPartialLabel": "Paiement partiel",
+  "@recouvrementPartialLabel": {
+    "description": "Carte KPI : effectif ayant commencé à payer"
+  },
+  "recouvrementPartialSubline": "Un geste a déjà été fait",
+  "@recouvrementPartialSubline": {
+    "description": "Sous-ligne de la carte Paiement partiel"
+  },
+  "recouvrementNoAmountDash": "—",
+  "@recouvrementNoAmountDash": {
+    "description": "Tiret d'un sac vide : rien n'est dû, et dans aucune devise nommée"
+  },
+  "recouvrementContextLine": "{count} élèves concernés · tous les indicateurs de cette page portent sur les frais cochés",
+  "@recouvrementContextLine": {
+    "description": "Ligne de contexte sous le périmètre",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRateLine": "taux du jour 1 $ = {rate} FC",
+  "@recouvrementRateLine": {
+    "description": "Rappel du taux de guichet dans la ligne de contexte",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateMissing": "aucun taux du jour n'est posé",
+  "@recouvrementRateMissing": {
+    "description": "Ligne de contexte quand aucun taux n'a été paramétré"
+  },
+  "recouvrementFiguresA11yLabel": "Chiffres clés du recouvrement",
+  "@recouvrementFiguresA11yLabel": {
+    "description": "Libellé a11y de la bande de KPI"
+  },
+  "recouvrementRatesTitle": "Taux de recouvrement par frais",
+  "@recouvrementRatesTitle": {
+    "description": "Titre de la section des taux"
+  },
+  "recouvrementRatesSubtitleOne": "Un seul frais retenu · le taux se lit dans sa devise",
+  "@recouvrementRatesSubtitleOne": {
+    "description": "Sous-titre quand un seul frais est coché"
+  },
+  "recouvrementRatesSubtitleMany": "{count} frais retenus · chaque devise se lit séparément — longueur de la barre = poids du frais, remplissage = ce qui est perçu",
+  "@recouvrementRatesSubtitleMany": {
+    "description": "Sous-titre de la section des taux",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRatesGroupHeader": "{paid} sur {expected} · {rate} % recouvrés",
+  "@recouvrementRatesGroupHeader": {
+    "description": "En-tête chiffré d'un groupe de devise",
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRatesGroupHeaderNoExpectation": "{paid} perçus · rien n'était dû dans cette devise",
+  "@recouvrementRatesGroupHeaderNoExpectation": {
+    "description": "En-tête d'un groupe sans attendu",
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateRemaining": "reste {amount}",
+  "@recouvrementRateRemaining": {
+    "description": "Reste dû d'un poste",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateExpected": "{amount} attendus",
+  "@recouvrementRateExpected": {
+    "description": "Attendu d'un poste",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRateNoExpectation": "aucun frais dû",
+  "@recouvrementRateNoExpectation": {
+    "description": "Mention d'un poste sans attendu"
+  },
+  "recouvrementRatesA11yLabel": "Taux de recouvrement par frais et par devise",
+  "@recouvrementRatesA11yLabel": {
+    "description": "Libellé a11y de la section des taux"
+  },
+  "recouvrementRateBarA11y": "{fee} : {rate} % recouvrés, il reste {amount}",
+  "@recouvrementRateBarA11y": {
+    "description": "Description a11y d'une barre de taux",
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCurrencyGroupTitle": "Frais en {currency}",
+  "@recouvrementCurrencyGroupTitle": {
+    "description": "Titre d'un groupe de devise",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementUnbilledNote": "{count} inscrits ne portent aucun de ces frais",
+  "@recouvrementUnbilledNote": {
+    "description": "Note des inscrits non facturés dans la ligne de contexte",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimulationTitle": "Simulation de renvoi",
+  "@recouvrementSimulationTitle": {
+    "description": "Titre de la section de simulation"
+  },
+  "recouvrementSimulationSubtitle": "Rien n'est appliqué — appliquer un renvoi passe par les Inscriptions, dossier par dossier",
+  "@recouvrementSimulationSubtitle": {
+    "description": "Sous-titre de la section de simulation"
+  },
+  "recouvrementSimulationWho": "On renvoie les élèves qui…",
+  "@recouvrementSimulationWho": {
+    "description": "Libellé du sélecteur de critère"
+  },
+  "recouvrementCriterionNoPayment": "N'ont rien payé",
+  "@recouvrementCriterionNoPayment": {
+    "description": "Critère : aucun versement"
+  },
+  "recouvrementCriterionNotSettled": "N'ont pas tout soldé",
+  "@recouvrementCriterionNotSettled": {
+    "description": "Critère : rien ou partiel"
+  },
+  "recouvrementCriterionBelowThreshold": "Ont payé moins que…",
+  "@recouvrementCriterionBelowThreshold": {
+    "description": "Critère : sous un plancher"
+  },
+  "recouvrementThresholdLabel": "Montant plancher",
+  "@recouvrementThresholdLabel": {
+    "description": "Libellé du champ plancher"
+  },
+  "recouvrementThresholdMixedWarning": "Le plancher est comparé en équivalent {currency} : la sélection mêle deux devises. C'est un arbitrage, pas une mesure.",
+  "@recouvrementThresholdMixedWarning": {
+    "description": "Avertissement de sélection mixte",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementThresholdNoRate": "Aucun taux du jour n'est posé : la comparaison est impossible en sélection mixte.",
+  "@recouvrementThresholdNoRate": {
+    "description": "Plancher indisponible sans taux"
+  },
+  "recouvrementCriticalLabel": "Seuil de groupe ingérable : {percent} % de l'effectif",
+  "@recouvrementCriticalLabel": {
+    "description": "Libellé du curseur de seuil",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCriticalA11y": "{percent} % de l'effectif",
+  "@recouvrementCriticalA11y": {
+    "description": "Valeur parlée du curseur",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimHeadcount": "Effectif aujourd'hui",
+  "@recouvrementSimHeadcount": {
+    "description": "Tuile : effectif avant renvoi"
+  },
+  "recouvrementSimHeadcountSubline": "élèves concernés par ces frais",
+  "@recouvrementSimHeadcountSubline": {
+    "description": "Sous-ligne de l'effectif"
+  },
+  "recouvrementSimTargeted": "Élèves visés",
+  "@recouvrementSimTargeted": {
+    "description": "Tuile : élèves que le critère vise"
+  },
+  "recouvrementSimRemaining": "Effectif restant",
+  "@recouvrementSimRemaining": {
+    "description": "Tuile : effectif après renvoi"
+  },
+  "recouvrementSimRemainingSubline": "{percent} % de l'effectif conservé",
+  "@recouvrementSimRemainingSubline": {
+    "description": "Sous-ligne de l'effectif restant",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSimCritical": "Groupes ingérables",
+  "@recouvrementSimCritical": {
+    "description": "Tuile : groupes sous le seuil"
+  },
+  "recouvrementSimTableGroup": "Groupe",
+  "@recouvrementSimTableGroup": {
+    "description": "Colonne : niveau"
+  },
+  "recouvrementSimTableHeadcount": "Effectif",
+  "@recouvrementSimTableHeadcount": {
+    "description": "Colonne : effectif"
+  },
+  "recouvrementSimTableLeaving": "À renvoyer",
+  "@recouvrementSimTableLeaving": {
+    "description": "Colonne : partants"
+  },
+  "recouvrementSimTableRemaining": "Restants",
+  "@recouvrementSimTableRemaining": {
+    "description": "Colonne : restants"
+  },
+  "recouvrementSimTableKept": "Effectif conservé",
+  "@recouvrementSimTableKept": {
+    "description": "Colonne : part conservée"
+  },
+  "recouvrementSimTableVerdict": "Verdict",
+  "@recouvrementSimTableVerdict": {
+    "description": "Colonne : verdict"
+  },
+  "recouvrementVerdictManageable": "Tenable",
+  "@recouvrementVerdictManageable": {
+    "description": "Verdict : au-dessus du seuil"
+  },
+  "recouvrementVerdictFragile": "Fragile",
+  "@recouvrementVerdictFragile": {
+    "description": "Verdict : proche du seuil"
+  },
+  "recouvrementVerdictCritical": "Ingérable",
+  "@recouvrementVerdictCritical": {
+    "description": "Verdict : sous le seuil"
+  },
+  "recouvrementSimFootNothingLost": "Ces élèves n'ont rien versé : le renvoi ne ferait perdre aucune recette, mais il abandonne définitivement {missing}.",
+  "@recouvrementSimFootNothingLost": {
+    "description": "Note de pied quand rien n'a été encaissé des visés",
+    "placeholders": {
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementSimFootWithLoss": "Le renvoi rendrait sans objet {lost} déjà encaissés, et abandonnerait {missing} jamais versés.",
+  "@recouvrementSimFootWithLoss": {
+    "description": "Note de pied quand les visés avaient versé",
+    "placeholders": {
+      "lost": {
+        "type": "String"
+      },
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementSimA11yLabel": "Simulation de renvoi — aucune écriture",
+  "@recouvrementSimA11yLabel": {
+    "description": "Libellé a11y de la section"
+  },
+  "recouvrementSimRowA11y": "{group} : {kept} % de l'effectif conservé, {verdict}",
+  "@recouvrementSimRowA11y": {
+    "description": "Description a11y d'une ligne de simulation",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "kept": {
+        "type": "int"
+      },
+      "verdict": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementRelanceListPreparing": "Préparation de la liste…",
+  "@recouvrementRelanceListPreparing": {
+    "description": "Le document est en cours de composition"
+  },
+  "recouvrementRelanceListBusy": "Un document est déjà en préparation sur ce serveur — réessayez dans {seconds} s",
+  "@recouvrementRelanceListBusy": {
+    "description": "429 : le permis de rendu est partagé",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListTooLarge": "{lines} lignes pour un plafond de {cap} : resserrez le périmètre ou le critère.",
+  "@recouvrementRelanceListTooLarge": {
+    "description": "Refus de plafond",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListUnknownStudents": "{count} élèves de cette liste ne sont pas rattachés à cette école pour cette année.",
+  "@recouvrementRelanceListUnknownStudents": {
+    "description": "Refus UNKNOWN_STUDENTS",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementRelanceListInconsistent": "La liste n'a pas pu être établie : certaines lignes se contredisent. Rafraîchissez l'écran.",
+  "@recouvrementRelanceListInconsistent": {
+    "description": "Refus INCONSISTENT_LINE — notre bug"
+  },
+  "recouvrementRelanceListForbidden": "Vous n'avez pas le droit d'éditer une liste nominative.",
+  "@recouvrementRelanceListForbidden": {
+    "description": "403"
+  },
+  "recouvrementRelanceListFailed": "La liste n'a pas pu être établie.",
+  "@recouvrementRelanceListFailed": {
+    "description": "Échec générique"
+  },
+  "recouvrementRelanceListHandoffFailed": "La liste est arrivée, mais l'aperçu n'a pas pu s'ouvrir.",
+  "@recouvrementRelanceListHandoffFailed": {
+    "description": "Le canal d'impression a échoué"
+  },
+  "recouvrementRelanceListA11y": "Éditer la liste nominative de {group}",
+  "@recouvrementRelanceListA11y": {
+    "description": "A11y de l'action d'édition",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightWorstFeeTitle": "Le frais le plus en retard",
+  "@recouvrementInsightWorstFeeTitle": {
+    "description": "Titre de la lecture du poste le plus bas"
+  },
+  "recouvrementInsightWorstFeeBody": "{fee} plafonne à {rate} % de recouvrement : {amount} manquent encore. C'est le frais à contrôler groupe par groupe.",
+  "@recouvrementInsightWorstFeeBody": {
+    "description": "Corps de la lecture du poste le plus bas",
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightControlAction": "Contrôler les élèves",
+  "@recouvrementInsightControlAction": {
+    "description": "Action vers l'écran nominatif"
+  },
+  "recouvrementInsightSpreadTitle": "Écart entre groupes",
+  "@recouvrementInsightSpreadTitle": {
+    "description": "Titre de la lecture de l'écart"
+  },
+  "recouvrementInsightSpreadBody": "L'écart va de {bestRate} % ({bestGroup}) à {worstRate} % ({worstGroup}). Un écart de cette ampleur relève plus de la pratique de relance que de la capacité des familles.",
+  "@recouvrementInsightSpreadBody": {
+    "description": "Corps de la lecture de l'écart",
+    "placeholders": {
+      "bestRate": {
+        "type": "int"
+      },
+      "bestGroup": {
+        "type": "String"
+      },
+      "worstRate": {
+        "type": "int"
+      },
+      "worstGroup": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementInsightSimulationTitle": "Ce que dit la simulation",
+  "@recouvrementInsightSimulationTitle": {
+    "description": "Titre de la lecture de simulation"
+  },
+  "recouvrementInsightSimulationSafe": "La mesure resterait tenable partout : {remaining} élèves resteraient, soit {percent} % de l'effectif conservé.",
+  "@recouvrementInsightSimulationSafe": {
+    "description": "Lecture rassurante",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementInsightSimulationCritical": "Le renvoi ferait passer {count} groupes sous {percent} % de l'effectif. Une relance échelonnée y coûte moins cher qu'une classe vidée.",
+  "@recouvrementInsightSimulationCritical": {
+    "description": "Lecture d'alerte",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementEmptyResultDescription": "Personne ne porte ces frais dans ce périmètre : ils n'ont pas encore été générés, ou ils ne s'appliquent pas ici. Changez la sélection ou le cycle.",
+  "@recouvrementEmptyResultDescription": {
+    "description": "État vide des résultats du tableau de bord Recouvrement"
+  },
+  "recouvrementRelanceListNotDeployed": "Cette version du serveur ne sait pas encore établir de liste de relance. Le reste du tableau de bord fonctionne : il se lit sur l'appareil.",
+  "@recouvrementRelanceListNotDeployed": {
+    "description": "404 — la route n'est pas déployée"
+  },
+  "recouvrementCallListTitle": "Élèves visés — {group}",
+  "@recouvrementCallListTitle": {
+    "description": "Titre de l'aperçu nominatif",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListSubtitle": "{count} élèves · {criterion}",
+  "@recouvrementCallListSubtitle": {
+    "description": "Sous-titre : effectif et critère",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "criterion": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListStudent": "Élève",
+  "@recouvrementCallListStudent": {
+    "description": "Colonne : nom"
+  },
+  "recouvrementCallListDue": "Dû",
+  "@recouvrementCallListDue": {
+    "description": "Colonne : attendu"
+  },
+  "recouvrementCallListPaid": "Payé",
+  "@recouvrementCallListPaid": {
+    "description": "Colonne : versé"
+  },
+  "recouvrementCallListRemaining": "Reste",
+  "@recouvrementCallListRemaining": {
+    "description": "Colonne : reste dû"
+  },
+  "recouvrementCallListUnnamed": "Élève {id}",
+  "@recouvrementCallListUnnamed": {
+    "description": "Élève que les inscriptions ne connaissent pas",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementCallListUnnamedNote": "Certains élèves ne figurent plus aux inscriptions : ils gardent leur dette, et le document les nommera depuis le référentiel.",
+  "@recouvrementCallListUnnamedNote": {
+    "description": "Note quand un élève n'a pas de nom local"
+  },
+  "recouvrementCallListEmit": "Éditer la liste à signer",
+  "@recouvrementCallListEmit": {
+    "description": "Action d'émission du PDF"
+  },
+  "recouvrementCallListClose": "Fermer",
+  "@recouvrementCallListClose": {
+    "description": "Action de fermeture"
+  },
+  "recouvrementCallListEmpty": "Aucun élève visé dans ce groupe.",
+  "@recouvrementCallListEmpty": {
+    "description": "Aperçu vide"
+  },
+  "feeControlFeeLoading": "Lecture de la grille…",
+  "feeControlFeesLabel": "Frais contrôlés",
+  "feeControlFeesA11yLabel": "Frais contrôlés — sélection multiple, au moins un",
+  "feeControlSituationLabel": "Situation recherchée",
+  "feeControlSituationThreshold": "A payé au moins…",
+  "feeControlThresholdMixedWarning": "Les frais retenus ne partagent pas la même devise : un montant plancher unique n'aurait pas de sens. Ne gardez qu'une devise.",
+  "feeControlColumnStudent": "Élève",
+  "feeControlResultTitle": "Résultat · {count, plural, =0{aucun élève} =1{1 élève} other{{count} élèves}}",
+  "feeControlResultOrder": "trié du moins avancé au plus avancé",
+  "feeControlCriteriaThreshold": "Plancher : {amount}",
+  "feeControlSelectPage": "Sélectionner la page",
+  "feeControlDeselectPage": "Désélectionner la page",
+  "feeControlMarkedBadge": "à renvoyer",
+  "feeControlSummaryCollected": "Encaissé sur ces frais",
+  "feeControlSummaryCollectedOn": "sur {expected} dus",
+  "feeControlSelectionCount": "{count, plural, =1{1 élève sélectionné} other{{count} élèves sélectionnés}}",
+  "feeControlCallListAction": "Liste d'appel",
+  "feeControlMarkAction": "Marquer à renvoyer",
+  "feeControlDeselectAction": "Désélectionner",
+  "feeControlMarkedTitle": "{count, plural, =1{1 élève marqué « à renvoyer »} other{{count} élèves marqués « à renvoyer »}}",
+  "feeControlMarkedNote": "Cette liste est un brouillon de travail : rien n'est notifié aux familles. Mesurez l'effet sur l'effectif dans le tableau de bord avant de décider.",
+  "feeControlMarkedClear": "Vider la liste des renvois",
+  "feeControlMarkedCleared": "Liste des renvois vidée.",
+  "feeControlMarkedDone": "{count, plural, =1{1 élève marqué « à renvoyer » — la liste reste modifiable.} other{{count} élèves marqués « à renvoyer » — la liste reste modifiable.}}",
+  "feeControlSheetDossier": "Dossier {code}",
+  "feeControlSheetPaidOf": "{paid} sur {expected} · {percent} %",
+  "feeControlSheetRemaining": "reste {amount}",
+  "feeControlSheetNoExpectation": "Aucun montant attendu sur ce frais",
+  "feeControlSheetMixedNote": "Chaque frais se solde dans sa propre devise : les lignes ne s'additionnent pas.",
+  "feeControlSheetOpenRecord": "Ouvrir la fiche complète",
+  "feeControlSheetUnmark": "Retirer des renvois",
+  "feeControlSheetMarked": "{name} marqué « à renvoyer ».",
+  "feeControlSheetUnmarked": "{name} retiré des renvois.",
+  "feeControlCallSheetTitle": "Contrôle des frais scolaires",
+  "feeControlCallSheetIssuedOn": "Établi le {date}",
+  "feeControlCallSheetRate": "Taux appliqué : {rate}",
+  "feeControlCallSheetNumber": "N°",
+  "feeControlCallSheetSignature": "Signature du parent",
+  "feeControlCallSheetVisaCollector": "Visa du percepteur",
+  "feeControlCallSheetVisaDirection": "Visa de la direction",
+  "feeControlCallSheetFailed": "La feuille d'appel n'a pas pu être préparée.",
+  "feeControlEmptyWiden": "Voir tous les élèves",
+  "feeControlEmptyBilling": "Ouvrir la facturation"
 }

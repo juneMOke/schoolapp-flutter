@@ -120,7 +120,26 @@ final class ExchangeRate extends Equatable {
   /// centime SOUS ce qui a servi au calcul, et le parent qui recompte ne
   /// retombe pas sur son total. C'est précisément l'invariant que le ticket
   /// promet.
-  String formatted({String space = MoneyFormat.nbsp}) => MoneyFormat.amountOnly(
+  String formatted({String space = MoneyFormat.nbsp}) =>
+      formatMicros(rateMicros, space: space);
+
+  /// Le même nombre, écrit depuis des **micro-unités nues**.
+  ///
+  /// Toutes les surfaces n'ont pas un [ExchangeRate] sous la main : une ligne
+  /// de reçu porte le taux qui lui a été appliqué sous la forme d'un entier,
+  /// sans les devises ni la date qui en feraient un point de la série. Elle
+  /// doit pourtant l'écrire **comme tout le monde**.
+  ///
+  /// C'est le sens de « une seule implémentation » ci-dessus, poussé un cran
+  /// plus loin : les écrans qui montrent le taux du jour et ceux qui montrent
+  /// le taux d'un reçu montrent des nombres **différents par nature** — l'un
+  /// est d'aujourd'hui, l'autre peut avoir trois jours. Si en plus leurs
+  /// formats diffèrent, on ne peut plus savoir si un écart est dans la valeur
+  /// ou dans l'écriture.
+  static String formatMicros(
+    int rateMicros, {
+    String space = MoneyFormat.nbsp,
+  }) => MoneyFormat.amountOnly(
     Money(((rateMicros / (scale ~/ 100)).round()), ''),
     space: space,
   );
