@@ -126,7 +126,10 @@ class _Body extends StatelessWidget {
 
     if (state.status == EnrollmentLoadStatus.loading ||
         state.status == EnrollmentLoadStatus.initial) {
-      return const Padding(
+      // Le squelette défile comme la liste qu'il annonce : ses six lignes
+      // dépassent la hauteur offerte en paysage, et une colonne figée y
+      // déborderait de plus de cent pixels.
+      return const SingleChildScrollView(
         padding: EdgeInsets.all(AppDimensions.spacingM),
         child: EteeloListSkeleton(rowCount: 6, showAvatar: false),
       );
@@ -279,6 +282,16 @@ class _Footer extends StatelessWidget {
             ),
             const SizedBox(width: AppDimensions.spacingS),
             FilledButton.icon(
+              // ⚠️ Sans ce `minimumSize`, la modale entière n'a plus de taille.
+              // Le thème donne aux `FilledButton` une largeur minimale infinie
+              // (pensée pour les CTA pleine largeur) ; posé en enfant non-flex
+              // d'un `Row`, qui offre déjà une largeur non bornée, le bouton
+              // lève « BoxConstraints forces an infinite width » — l'erreur est
+              // avalée au layout, et c'est le premier clic suivant qui éclate
+              // sur « Cannot hit test a render box with no size ».
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
               // Le bouton se désarme pendant le rendu ET pendant l'attente
               // qu'un 429 a imposée : un second appui lancerait un second rendu
               // que le serveur refuserait.
