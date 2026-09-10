@@ -5419,5 +5419,97 @@
   "recouvrementFiguresA11yLabel": "Chiffres clés du recouvrement",
   "@recouvrementFiguresA11yLabel": {
       "description": "Libellé a11y de la bande de KPI"
+  },
+
+  "recouvrementRatesTitle": "Taux de recouvrement par frais",
+  "@recouvrementRatesTitle": {
+      "description": "Titre de la section des taux"
+  },
+  "recouvrementRatesSubtitleOne": "Un seul frais retenu · le taux se lit dans sa devise",
+  "@recouvrementRatesSubtitleOne": {
+      "description": "Sous-titre quand un seul frais est coché"
+  },
+  "recouvrementRatesSubtitleMany": "{count} frais retenus · chaque devise se lit séparément — longueur de la barre = poids du frais, remplissage = ce qui est perçu",
+  "@recouvrementRatesSubtitleMany": {
+      "description": "Sous-titre de la section des taux",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRatesGroupHeader": "{paid} sur {expected} · {rate} % recouvrés",
+  "@recouvrementRatesGroupHeader": {
+      "description": "En-tête chiffré d'un groupe de devise",
+      "placeholders": {
+          "paid": {
+              "type": "String"
+          },
+          "expected": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRatesGroupHeaderNoExpectation": "{paid} perçus · rien n'était dû dans cette devise",
+  "@recouvrementRatesGroupHeaderNoExpectation": {
+      "description": "En-tête d'un groupe sans attendu",
+      "placeholders": {
+          "paid": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateRemaining": "reste {amount}",
+  "@recouvrementRateRemaining": {
+      "description": "Reste dû d'un poste",
+      "placeholders": {
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateExpected": "{amount} attendus",
+  "@recouvrementRateExpected": {
+      "description": "Attendu d'un poste",
+      "placeholders": {
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateNoExpectation": "aucun frais dû",
+  "@recouvrementRateNoExpectation": {
+      "description": "Mention d'un poste sans attendu"
+  },
+  "recouvrementRatesA11yLabel": "Taux de recouvrement par frais et par devise",
+  "@recouvrementRatesA11yLabel": {
+      "description": "Libellé a11y de la section des taux"
+  },
+  "recouvrementRateBarA11y": "{fee} : {rate} % recouvrés, il reste {amount}",
+  "@recouvrementRateBarA11y": {
+      "description": "Description a11y d'une barre de taux",
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          },
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCurrencyGroupTitle": "Frais en {currency}",
+  "@recouvrementCurrencyGroupTitle": {
+      "description": "Titre d'un groupe de devise",
+      "placeholders": {
+          "currency": {
+              "type": "String"
+          }
+      }
   }
 }

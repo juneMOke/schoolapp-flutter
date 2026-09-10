@@ -224,6 +224,9 @@ class AppDimensions {
   static const recouvrementFeeChipRadius = 999.0;
   static const recouvrementFeeChipIconSize = 15.0;
   static const recouvrementScopeFieldWidth = 230.0;
+  // Barres du taux par frais (spec §4) : hauteur 20, radius 5.
+  static const recouvrementRateBarHeight = 20.0;
+  static const recouvrementRateBarRadius = 5.0;
 
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;

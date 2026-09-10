@@ -15120,6 +15120,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recovery key figures'**
   String get recouvrementFiguresA11yLabel;
+
+  /// No description provided for @recouvrementRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate by fee'**
+  String get recouvrementRatesTitle;
+
+  /// No description provided for @recouvrementRatesSubtitleOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One fee selected · the rate reads in its own currency'**
+  String get recouvrementRatesSubtitleOne;
+
+  /// No description provided for @recouvrementRatesSubtitleMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected'**
+  String recouvrementRatesSubtitleMany(int count);
+
+  /// No description provided for @recouvrementRatesGroupHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {expected} · {rate}% recovered'**
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate);
+
+  /// No description provided for @recouvrementRatesGroupHeaderNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} collected · nothing was owed in this currency'**
+  String recouvrementRatesGroupHeaderNoExpectation(String paid);
+
+  /// No description provided for @recouvrementRateRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String recouvrementRateRemaining(String amount);
+
+  /// No description provided for @recouvrementRateExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} expected'**
+  String recouvrementRateExpected(String amount);
+
+  /// No description provided for @recouvrementRateNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'no fee owed'**
+  String get recouvrementRateNoExpectation;
+
+  /// No description provided for @recouvrementRatesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate by fee and currency'**
+  String get recouvrementRatesA11yLabel;
+
+  /// No description provided for @recouvrementRateBarA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee}: {rate}% recovered, {amount} left'**
+  String recouvrementRateBarA11y(String fee, int rate, String amount);
+
+  /// No description provided for @recouvrementCurrencyGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in {currency}'**
+  String recouvrementCurrencyGroupTitle(String currency);
 }
 
 class _AppLocalizationsDelegate

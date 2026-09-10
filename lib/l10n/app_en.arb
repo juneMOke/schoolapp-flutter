@@ -5392,5 +5392,78 @@
       }
   },
   "recouvrementRateMissing": "no rate has been set for today",
-  "recouvrementFiguresA11yLabel": "Recovery key figures"
+  "recouvrementFiguresA11yLabel": "Recovery key figures",
+
+  "recouvrementRatesTitle": "Recovery rate by fee",
+  "recouvrementRatesSubtitleOne": "One fee selected · the rate reads in its own currency",
+  "recouvrementRatesSubtitleMany": "{count} fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected",
+  "@recouvrementRatesSubtitleMany": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRatesGroupHeader": "{paid} of {expected} · {rate}% recovered",
+  "@recouvrementRatesGroupHeader": {
+      "placeholders": {
+          "paid": {
+              "type": "String"
+          },
+          "expected": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRatesGroupHeaderNoExpectation": "{paid} collected · nothing was owed in this currency",
+  "@recouvrementRatesGroupHeaderNoExpectation": {
+      "placeholders": {
+          "paid": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateRemaining": "{amount} left",
+  "@recouvrementRateRemaining": {
+      "placeholders": {
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateExpected": "{amount} expected",
+  "@recouvrementRateExpected": {
+      "placeholders": {
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementRateNoExpectation": "no fee owed",
+  "recouvrementRatesA11yLabel": "Recovery rate by fee and currency",
+  "recouvrementRateBarA11y": "{fee}: {rate}% recovered, {amount} left",
+  "@recouvrementRateBarA11y": {
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          },
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCurrencyGroupTitle": "Fees in {currency}",
+  "@recouvrementCurrencyGroupTitle": {
+      "placeholders": {
+          "currency": {
+              "type": "String"
+          }
+      }
+  }
 }

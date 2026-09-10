@@ -9520,4 +9520,53 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recouvrementFiguresA11yLabel => 'Chiffres clés du recouvrement';
+
+  @override
+  String get recouvrementRatesTitle => 'Taux de recouvrement par frais';
+
+  @override
+  String get recouvrementRatesSubtitleOne =>
+      'Un seul frais retenu · le taux se lit dans sa devise';
+
+  @override
+  String recouvrementRatesSubtitleMany(int count) {
+    return '$count frais retenus · chaque devise se lit séparément — longueur de la barre = poids du frais, remplissage = ce qui est perçu';
+  }
+
+  @override
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate) {
+    return '$paid sur $expected · $rate % recouvrés';
+  }
+
+  @override
+  String recouvrementRatesGroupHeaderNoExpectation(String paid) {
+    return '$paid perçus · rien n\'était dû dans cette devise';
+  }
+
+  @override
+  String recouvrementRateRemaining(String amount) {
+    return 'reste $amount';
+  }
+
+  @override
+  String recouvrementRateExpected(String amount) {
+    return '$amount attendus';
+  }
+
+  @override
+  String get recouvrementRateNoExpectation => 'aucun frais dû';
+
+  @override
+  String get recouvrementRatesA11yLabel =>
+      'Taux de recouvrement par frais et par devise';
+
+  @override
+  String recouvrementRateBarA11y(String fee, int rate, String amount) {
+    return '$fee : $rate % recouvrés, il reste $amount';
+  }
+
+  @override
+  String recouvrementCurrencyGroupTitle(String currency) {
+    return 'Frais en $currency';
+  }
 }

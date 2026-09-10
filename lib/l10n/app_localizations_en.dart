@@ -9436,4 +9436,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recouvrementFiguresA11yLabel => 'Recovery key figures';
+
+  @override
+  String get recouvrementRatesTitle => 'Recovery rate by fee';
+
+  @override
+  String get recouvrementRatesSubtitleOne =>
+      'One fee selected · the rate reads in its own currency';
+
+  @override
+  String recouvrementRatesSubtitleMany(int count) {
+    return '$count fees selected · each currency reads separately — bar length = weight of the fee, fill = what has been collected';
+  }
+
+  @override
+  String recouvrementRatesGroupHeader(String paid, String expected, int rate) {
+    return '$paid of $expected · $rate% recovered';
+  }
+
+  @override
+  String recouvrementRatesGroupHeaderNoExpectation(String paid) {
+    return '$paid collected · nothing was owed in this currency';
+  }
+
+  @override
+  String recouvrementRateRemaining(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String recouvrementRateExpected(String amount) {
+    return '$amount expected';
+  }
+
+  @override
+  String get recouvrementRateNoExpectation => 'no fee owed';
+
+  @override
+  String get recouvrementRatesA11yLabel => 'Recovery rate by fee and currency';
+
+  @override
+  String recouvrementRateBarA11y(String fee, int rate, String amount) {
+    return '$fee: $rate% recovered, $amount left';
+  }
+
+  @override
+  String recouvrementCurrencyGroupTitle(String currency) {
+    return 'Fees in $currency';
+  }
 }
