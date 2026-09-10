@@ -171,12 +171,25 @@ class _RecouvrementDashboardViewState
               _load(academicYearId);
             },
             onFeeCodesLoaded: (codes) {
-              if (!_awaitingAutoSelection || codes.isEmpty) return;
+              if (codes.isEmpty) return;
+
+              // ⚠️ La sélection peut avoir SURVÉCU à une liste qui a changé —
+              // changement d'année académique, grille refaite. Les codes
+              // disparus sont retirés ; si plus rien ne reste, on retombe sur
+              // la première nature comme au premier matin. Sans cela, l'écran
+              // interrogerait un frais que l'année ne facture plus et rendrait
+              // un vide que rien n'explique.
+              final available = codes.toSet();
+              final kept = _feeCodes.intersection(available);
+              if (!_awaitingAutoSelection && kept.length == _feeCodes.length) {
+                return;
+              }
+
               // La première nature est **la plus portée** (le DAO les trie par
               // effectif) : ouvrir dessus, c'est ouvrir sur la question du
               // matin plutôt que sur un frais marginal.
               _awaitingAutoSelection = false;
-              setState(() => _feeCodes = {codes.first});
+              setState(() => _feeCodes = kept.isEmpty ? {codes.first} : kept);
               _load(academicYearId);
             },
           );
@@ -211,6 +224,22 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // ⚠️ Le cubit des taux charge EN PARALLÈLE de la lecture du registre : si
+    // la série arrive après les lignes, la simulation resterait sans cours et
+    // le critère du plancher ne viserait personne, en silence. On repose donc
+    // le taux dès qu'il bouge, pas seulement quand les lignes bougent.
+    return BlocListener<ExchangeRatesCubit, ExchangeRatesState>(
+      listenWhen: (prev, curr) => prev.rates != curr.rates,
+      listener: (context, ratesState) =>
+          context.read<RecouvrementSimulationCubit>().setLines(
+            context.read<RecouvrementDashboardBloc>().lines,
+            rate: _dollarInFrancs(ratesState.rates),
+          ),
+      child: _buildBody(context, l10n),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AppLocalizations l10n) {
     return BlocConsumer<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       listenWhen: (prev, curr) =>
           prev.feeCodesStatus != curr.feeCodesStatus ||
@@ -286,6 +315,16 @@ class _Body extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
+            // ⚠️ Personne de concerné : **toutes** les sections se cachent, et
+            // l'écran se viderait sans un mot sous un périmètre qu'on vient de
+            // choisir. On le dit ici. Ce n'est PAS le vide structurel plus
+            // haut — celui-ci laisse le périmètre en place, parce que la sortie
+            // est de le changer.
+            if (state.hasEmptyResult)
+              RecouvrementDashboardEmptyState(
+                title: l10n.feeControlDashboardEmptyTitle,
+                description: l10n.recouvrementEmptyResultDescription,
+              ),
             const RecouvrementKeyFiguresBand(),
             RecouvrementFeeRatesSection(groups: state.rates),
             RecouvrementRankingSection(
@@ -338,6 +377,16 @@ class _Body extends StatelessWidget {
     String? schoolLevelId,
     RecouvrementDashboardState dashboard,
   ) {
+    // ⚠️ **Un groupe sans niveau n'est pas éditable.** `scope.kind` du contrat
+    // n'a que `CLASSROOM`, `SCHOOL_LEVEL`, `SCHOOL_LEVEL_GROUP` et
+    // `UNASSIGNED` — et `UNASSIGNED` y désigne les élèves sans CLASSE, pas les
+    // créances sans NIVEAU. Les confondre ferait titrer le papier « Non
+    // affectés » sur une population qui n'est pas celle-là. Le dépliage refuse
+    // déjà ce groupe pour une raison voisine ; l'édition le refuse aussi,
+    // plutôt que d'imprimer un titre faux. À rouvrir avec le back si le besoin
+    // se présente.
+    if (schoolLevelId == null) return;
+
     final simulation = context.read<RecouvrementSimulationCubit>().state;
     final lines = context.read<RecouvrementDashboardBloc>().lines;
     final query = dashboard.lastQuery;
@@ -357,9 +406,7 @@ class _Body extends StatelessWidget {
     if (targeted.isEmpty) return;
 
     context.read<RelanceListCubit>().emit_(
-      scope: schoolLevelId == null
-          ? RelanceScope.unassigned
-          : RelanceScope.schoolLevel(schoolLevelId),
+      scope: RelanceScope.schoolLevel(schoolLevelId),
       feeCodes: query.feeCodes,
       criterion: simulation.criterion,
       lines: targeted,

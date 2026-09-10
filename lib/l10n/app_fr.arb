@@ -5820,5 +5820,10 @@
               "type": "int"
           }
       }
+  },
+
+  "recouvrementEmptyResultDescription": "Personne ne porte ces frais dans ce périmètre : ils n'ont pas encore été générés, ou ils ne s'appliquent pas ici. Changez la sélection ou le cycle.",
+  "@recouvrementEmptyResultDescription": {
+      "description": "État vide des résultats du tableau de bord Recouvrement"
   }
 }

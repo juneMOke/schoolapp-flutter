@@ -5662,5 +5662,7 @@
               "type": "int"
           }
       }
-  }
+  },
+
+  "recouvrementEmptyResultDescription": "Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle."
 }

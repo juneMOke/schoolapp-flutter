@@ -15479,6 +15479,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismissal would push {count} groups below {percent}% of their cohort. Staggered follow-up costs less than an emptied class.'**
   String recouvrementInsightSimulationCritical(int count, int percent);
+
+  /// No description provided for @recouvrementEmptyResultDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.'**
+  String get recouvrementEmptyResultDescription;
 }
 
 class _AppLocalizationsDelegate

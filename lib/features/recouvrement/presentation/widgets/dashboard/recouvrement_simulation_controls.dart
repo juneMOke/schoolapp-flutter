@@ -64,10 +64,18 @@ class _RecouvrementSimulationControlsState
         final currency = _thresholdCurrency(dashboard);
         final mixed = dashboard.rates.length > 1;
 
-        return BlocBuilder<
+        return BlocConsumer<
           RecouvrementSimulationCubit,
           RecouvrementSimulationState
         >(
+          // ⚠️ Le cubit OUBLIE le plancher en quittant son critère ; le champ,
+          // lui, garde son texte. Sans cette remise à zéro, revenir sur « a
+          // payé moins que… » réafficherait un montant que le calcul ne
+          // connaît plus — et l'écran montrerait un chiffre qui ne vise
+          // personne.
+          listenWhen: (prev, curr) =>
+              prev.threshold != null && curr.threshold == null,
+          listener: (context, _) => _thresholdController.clear(),
           buildWhen: (prev, curr) =>
               prev.criterion != curr.criterion ||
               prev.criticalPercent != curr.criticalPercent,

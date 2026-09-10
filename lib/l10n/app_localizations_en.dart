@@ -9670,4 +9670,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String recouvrementInsightSimulationCritical(int count, int percent) {
     return 'Dismissal would push $count groups below $percent% of their cohort. Staggered follow-up costs less than an emptied class.';
   }
+
+  @override
+  String get recouvrementEmptyResultDescription =>
+      'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.';
 }

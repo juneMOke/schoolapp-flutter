@@ -9758,4 +9758,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String recouvrementInsightSimulationCritical(int count, int percent) {
     return 'Le renvoi ferait passer $count groupes sous $percent % de l\'effectif. Une relance échelonnée y coûte moins cher qu\'une classe vidée.';
   }
+
+  @override
+  String get recouvrementEmptyResultDescription =>
+      'Personne ne porte ces frais dans ce périmètre : ils n\'ont pas encore été générés, ou ils ne s\'appliquent pas ici. Changez la sélection ou le cycle.';
 }
