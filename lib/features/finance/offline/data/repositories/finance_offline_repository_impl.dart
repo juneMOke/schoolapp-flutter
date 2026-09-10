@@ -501,6 +501,10 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     ),
   );
 
+  @override
+  Future<Either<Failure, int>> countPendingPayments() =>
+      _guard(_dao.countPendingPayments);
+
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {
       return Right(await run());

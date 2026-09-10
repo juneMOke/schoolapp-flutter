@@ -5686,5 +5686,65 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementRelanceListPreparing": "Préparation de la liste…",
+  "@recouvrementRelanceListPreparing": {
+      "description": "Le document est en cours de composition"
+  },
+  "recouvrementRelanceListBusy": "Un document est déjà en préparation sur ce serveur — réessayez dans {seconds} s",
+  "@recouvrementRelanceListBusy": {
+      "description": "429 : le permis de rendu est partagé",
+      "placeholders": {
+          "seconds": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListTooLarge": "{lines} lignes pour un plafond de {cap} : resserrez le périmètre ou le critère.",
+  "@recouvrementRelanceListTooLarge": {
+      "description": "Refus de plafond",
+      "placeholders": {
+          "lines": {
+              "type": "int"
+          },
+          "cap": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListUnknownStudents": "{count} élèves de cette liste ne sont pas rattachés à cette école pour cette année.",
+  "@recouvrementRelanceListUnknownStudents": {
+      "description": "Refus UNKNOWN_STUDENTS",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListInconsistent": "La liste n'a pas pu être établie : certaines lignes se contredisent. Rafraîchissez l'écran.",
+  "@recouvrementRelanceListInconsistent": {
+      "description": "Refus INCONSISTENT_LINE — notre bug"
+  },
+  "recouvrementRelanceListForbidden": "Vous n'avez pas le droit d'éditer une liste nominative.",
+  "@recouvrementRelanceListForbidden": {
+      "description": "403"
+  },
+  "recouvrementRelanceListFailed": "La liste n'a pas pu être établie.",
+  "@recouvrementRelanceListFailed": {
+      "description": "Échec générique"
+  },
+  "recouvrementRelanceListHandoffFailed": "La liste est arrivée, mais l'aperçu n'a pas pu s'ouvrir.",
+  "@recouvrementRelanceListHandoffFailed": {
+      "description": "Le canal d'impression a échoué"
+  },
+  "recouvrementRelanceListA11y": "Éditer la liste nominative de {group}",
+  "@recouvrementRelanceListA11y": {
+      "description": "A11y de l'action d'édition",
+      "placeholders": {
+          "group": {
+              "type": "String"
+          }
+      }
   }
 }

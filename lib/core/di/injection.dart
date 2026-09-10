@@ -197,6 +197,8 @@ import 'package:school_app_flutter/features/recouvrement/data/repositories/relan
 import 'package:school_app_flutter/features/recouvrement/domain/repositories/relance_list_repository.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/usecases/emit_relance_list_usecase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
@@ -949,6 +951,12 @@ Future<void> configureDependencies({
     () => EmitRelanceListUseCase(getIt<RelanceListRepository>()),
   );
 
+  getIt.registerFactory<RelanceListCubit>(
+    () => RelanceListCubit(
+      emitRelanceList: getIt<EmitRelanceListUseCase>(),
+      countPendingPayments: getIt<CountPendingPaymentsUseCase>(),
+    ),
+  );
   getIt.registerFactory<RecouvrementSimulationCubit>(
     RecouvrementSimulationCubit.new,
   );

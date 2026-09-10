@@ -5563,5 +5563,46 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementRelanceListPreparing": "Preparing the list…",
+  "recouvrementRelanceListBusy": "A document is already being produced on this server — try again in {seconds}s",
+  "@recouvrementRelanceListBusy": {
+      "placeholders": {
+          "seconds": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListTooLarge": "{lines} lines for a cap of {cap}: narrow the scope or the criterion.",
+  "@recouvrementRelanceListTooLarge": {
+      "placeholders": {
+          "lines": {
+              "type": "int"
+          },
+          "cap": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListUnknownStudents": "{count} students on this list are not attached to this school for this year.",
+  "@recouvrementRelanceListUnknownStudents": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementRelanceListInconsistent": "The list could not be produced: some rows contradict themselves. Refresh the screen.",
+  "recouvrementRelanceListForbidden": "You are not allowed to produce a named list.",
+  "recouvrementRelanceListFailed": "The list could not be produced.",
+  "recouvrementRelanceListHandoffFailed": "The list arrived, but the preview could not open.",
+  "recouvrementRelanceListA11y": "Produce the named list for {group}",
+  "@recouvrementRelanceListA11y": {
+      "placeholders": {
+          "group": {
+              "type": "String"
+          }
+      }
   }
 }

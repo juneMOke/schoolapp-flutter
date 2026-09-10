@@ -15372,6 +15372,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{group}: {kept}% of the cohort kept, {verdict}'**
   String recouvrementSimRowA11y(String group, int kept, String verdict);
+
+  /// No description provided for @recouvrementRelanceListPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the list…'**
+  String get recouvrementRelanceListPreparing;
+
+  /// No description provided for @recouvrementRelanceListBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'A document is already being produced on this server — try again in {seconds}s'**
+  String recouvrementRelanceListBusy(int seconds);
+
+  /// No description provided for @recouvrementRelanceListTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines} lines for a cap of {cap}: narrow the scope or the criterion.'**
+  String recouvrementRelanceListTooLarge(int lines, int cap);
+
+  /// No description provided for @recouvrementRelanceListUnknownStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students on this list are not attached to this school for this year.'**
+  String recouvrementRelanceListUnknownStudents(int count);
+
+  /// No description provided for @recouvrementRelanceListInconsistent.
+  ///
+  /// In en, this message translates to:
+  /// **'The list could not be produced: some rows contradict themselves. Refresh the screen.'**
+  String get recouvrementRelanceListInconsistent;
+
+  /// No description provided for @recouvrementRelanceListForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to produce a named list.'**
+  String get recouvrementRelanceListForbidden;
+
+  /// No description provided for @recouvrementRelanceListFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list could not be produced.'**
+  String get recouvrementRelanceListFailed;
+
+  /// No description provided for @recouvrementRelanceListHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list arrived, but the preview could not open.'**
+  String get recouvrementRelanceListHandoffFailed;
+
+  /// No description provided for @recouvrementRelanceListA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce the named list for {group}'**
+  String recouvrementRelanceListA11y(String group);
 }
 
 class _AppLocalizationsDelegate

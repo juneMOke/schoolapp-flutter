@@ -598,6 +598,28 @@ class FinanceLedgerReadDao {
     ];
   }
 
+  /// Nombre d'**encaissements** non encore acquittés par le serveur.
+  ///
+  /// Exactement ce que la liste de relance imprime sous son titre : ni les
+  /// inscriptions, ni les transferts de classe, ni la présence. Le compteur
+  /// général de la file d'écritures ne convient pas — il agrège tous les
+  /// modules, et le papier annoncerait un nombre plus grand que la vérité.
+  ///
+  /// Les paiements **annulés** ne comptent pas : ils ne déplaceront aucun
+  /// solde en remontant.
+  Future<int> countPendingPayments() async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT COUNT(*) AS c
+      FROM payments
+      WHERE sync_status <> ?
+        AND cancelled_at IS NULL
+      ''',
+      [SyncState.synced.dbValue],
+    );
+    return (rows.first['c'] as int?) ?? 0;
+  }
+
   /// Taille des lots d'identifiants. SQLite plafonne les variables liées d'une
   /// requête (999 par défaut) : on garde de la marge pour les 3 autres.
   static const int _idBatchSize = 500;

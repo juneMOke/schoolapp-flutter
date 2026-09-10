@@ -210,6 +210,10 @@ abstract class FinanceOfflineRepository {
     String academicYearId,
   );
 
+  /// Nombre d'encaissements non encore acquittés par le serveur — ce que la
+  /// liste de relance imprime sous son titre.
+  Future<Either<Failure, int>> countPendingPayments();
+
   /// Position de TOUTE la population sur une SÉLECTION de frais, ventilée par
   /// niveau et gardant le détail **par frais** — la lecture du tableau de bord
   /// du Recouvrement, qui en a besoin pour le taux poste par poste.

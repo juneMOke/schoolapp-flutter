@@ -9595,4 +9595,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String recouvrementSimRowA11y(String group, int kept, String verdict) {
     return '$group: $kept% of the cohort kept, $verdict';
   }
+
+  @override
+  String get recouvrementRelanceListPreparing => 'Preparing the list…';
+
+  @override
+  String recouvrementRelanceListBusy(int seconds) {
+    return 'A document is already being produced on this server — try again in ${seconds}s';
+  }
+
+  @override
+  String recouvrementRelanceListTooLarge(int lines, int cap) {
+    return '$lines lines for a cap of $cap: narrow the scope or the criterion.';
+  }
+
+  @override
+  String recouvrementRelanceListUnknownStudents(int count) {
+    return '$count students on this list are not attached to this school for this year.';
+  }
+
+  @override
+  String get recouvrementRelanceListInconsistent =>
+      'The list could not be produced: some rows contradict themselves. Refresh the screen.';
+
+  @override
+  String get recouvrementRelanceListForbidden =>
+      'You are not allowed to produce a named list.';
+
+  @override
+  String get recouvrementRelanceListFailed => 'The list could not be produced.';
+
+  @override
+  String get recouvrementRelanceListHandoffFailed =>
+      'The list arrived, but the preview could not open.';
+
+  @override
+  String recouvrementRelanceListA11y(String group) {
+    return 'Produce the named list for $group';
+  }
 }

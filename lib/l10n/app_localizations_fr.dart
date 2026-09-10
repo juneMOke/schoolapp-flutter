@@ -9682,4 +9682,43 @@ class AppLocalizationsFr extends AppLocalizations {
   String recouvrementSimRowA11y(String group, int kept, String verdict) {
     return '$group : $kept % de l\'effectif conservé, $verdict';
   }
+
+  @override
+  String get recouvrementRelanceListPreparing => 'Préparation de la liste…';
+
+  @override
+  String recouvrementRelanceListBusy(int seconds) {
+    return 'Un document est déjà en préparation sur ce serveur — réessayez dans $seconds s';
+  }
+
+  @override
+  String recouvrementRelanceListTooLarge(int lines, int cap) {
+    return '$lines lignes pour un plafond de $cap : resserrez le périmètre ou le critère.';
+  }
+
+  @override
+  String recouvrementRelanceListUnknownStudents(int count) {
+    return '$count élèves de cette liste ne sont pas rattachés à cette école pour cette année.';
+  }
+
+  @override
+  String get recouvrementRelanceListInconsistent =>
+      'La liste n\'a pas pu être établie : certaines lignes se contredisent. Rafraîchissez l\'écran.';
+
+  @override
+  String get recouvrementRelanceListForbidden =>
+      'Vous n\'avez pas le droit d\'éditer une liste nominative.';
+
+  @override
+  String get recouvrementRelanceListFailed =>
+      'La liste n\'a pas pu être établie.';
+
+  @override
+  String get recouvrementRelanceListHandoffFailed =>
+      'La liste est arrivée, mais l\'aperçu n\'a pas pu s\'ouvrir.';
+
+  @override
+  String recouvrementRelanceListA11y(String group) {
+    return 'Éditer la liste nominative de $group';
+  }
 }

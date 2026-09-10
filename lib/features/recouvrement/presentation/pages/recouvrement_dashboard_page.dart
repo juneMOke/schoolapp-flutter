@@ -13,12 +13,15 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/stat
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/relance_list_delivery.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_rates_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/entities/relance_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -47,8 +50,11 @@ class RecouvrementDashboardPage extends StatelessWidget {
         BlocProvider<RecouvrementSimulationCubit>(
           create: (_) => getIt<RecouvrementSimulationCubit>(),
         ),
+        BlocProvider<RelanceListCubit>(
+          create: (_) => getIt<RelanceListCubit>(),
+        ),
       ],
-      child: const _RecouvrementDashboardView(),
+      child: const RelanceListDelivery(child: _RecouvrementDashboardView()),
     );
   }
 }
@@ -289,10 +295,53 @@ class _Body extends StatelessWidget {
             RecouvrementSimulationSection(
               labels: labels,
               showCycleInLabels: cycleId == null,
+              onGroupTapped: (schoolLevelId) =>
+                  _emitRelanceList(context, schoolLevelId, state),
             ),
           ],
         );
       },
+    );
+  }
+
+  /// Édite la liste nominative d'un groupe — **la seule sortie matérielle de
+  /// l'écran**, et son seul appel réseau.
+  ///
+  /// Les lignes envoyées sont celles que la simulation vise **dans ce groupe**,
+  /// et elles viennent du registre local : lui seul voit les encaissements non
+  /// encore remontés. Le serveur les imprime, il ne les redérive pas.
+  static void _emitRelanceList(
+    BuildContext context,
+    String? schoolLevelId,
+    RecouvrementDashboardState dashboard,
+  ) {
+    final simulation = context.read<RecouvrementSimulationCubit>().state;
+    final lines = context.read<RecouvrementDashboardBloc>().lines;
+    final query = dashboard.lastQuery;
+    if (query == null) return;
+
+    // Le même filtre que la simulation, borné au groupe : ce sont les élèves
+    // que l'écran vient d'afficher comme visés, pas une seconde population.
+    final targeted = RecouvrementSimulationProjector.targetsOf(
+      [
+        for (final line in lines)
+          if (line.schoolLevelId == schoolLevelId) line,
+      ],
+      criterion: simulation.criterion,
+      threshold: simulation.threshold,
+      rate: _dollarInFrancs(context.read<ExchangeRatesCubit>().state.rates),
+    );
+    if (targeted.isEmpty) return;
+
+    context.read<RelanceListCubit>().emit_(
+      scope: schoolLevelId == null
+          ? RelanceScope.unassigned
+          : RelanceScope.schoolLevel(schoolLevelId),
+      feeCodes: query.feeCodes,
+      criterion: simulation.criterion,
+      lines: targeted,
+      thresholdInCents: simulation.threshold?.amountInCents,
+      thresholdCurrency: simulation.threshold?.currency,
     );
   }
 

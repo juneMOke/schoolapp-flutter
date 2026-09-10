@@ -13,7 +13,10 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/usecases/emit_relance_list_usecase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
@@ -28,6 +31,12 @@ class _MockExchangeRatesCubit extends Cubit<ExchangeRatesState>
   @override
   Future<void> load() async {}
 }
+
+/// L'édition n'est jamais déclenchée par ces tests : ils vérifient la coque,
+/// pas la sortie papier.
+class _NeverEmit extends Mock implements EmitRelanceListUseCase {}
+
+class _NeverCount extends Mock implements CountPendingPaymentsUseCase {}
 
 class _MockDashboardBloc
     extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
@@ -96,6 +105,12 @@ void main() {
     );
     GetIt.instance.registerFactory<RecouvrementSimulationCubit>(
       RecouvrementSimulationCubit.new,
+    );
+    GetIt.instance.registerFactory<RelanceListCubit>(
+      () => RelanceListCubit(
+        emitRelanceList: _NeverEmit(),
+        countPendingPayments: _NeverCount(),
+      ),
     );
     // Les lignes vivent HORS de l'état : un mock qui ne les stubbe pas rend
     // `null`, et la page — qui les repasse à la simulation — tombe.

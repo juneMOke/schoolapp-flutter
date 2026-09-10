@@ -226,6 +226,8 @@ class FinanceLocalDao {
     schoolLevelGroupId: schoolLevelGroupId,
   );
 
+  Future<int> countPendingPayments() => _read.countPendingPayments();
+
   Future<List<LocalRecoveryLine>> getRecoveryPositions({
     required String academicYearId,
     required List<String> feeCodes,

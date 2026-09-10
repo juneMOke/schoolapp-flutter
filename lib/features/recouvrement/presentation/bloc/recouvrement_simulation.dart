@@ -182,6 +182,22 @@ class RecouvrementSimulationProjector {
     );
   }
 
+  /// Les lignes que le critère **vise** — la population exacte que l'écran
+  /// vient d'afficher comme visée.
+  ///
+  /// Exposée pour la liste de relance : elle doit porter ces élèves-là, pas une
+  /// seconde population recalculée autrement. C'est la même règle, appelée une
+  /// seule fois de plus.
+  static List<LocalRecoveryLine> targetsOf(
+    List<LocalRecoveryLine> lines, {
+    required RecouvrementCriterion criterion,
+    Money? threshold,
+    ExchangeRate? rate,
+  }) => [
+    for (final line in lines)
+      if (_targets(line, criterion, threshold, rate)) line,
+  ];
+
   static bool _targets(
     LocalRecoveryLine line,
     RecouvrementCriterion criterion,
