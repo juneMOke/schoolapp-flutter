@@ -59,8 +59,8 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 | `enrollment` | Inscriptions des élèves | utilise `FeatureScope` (cf. AGENTS.md §11) |
 | `attendances` | Présences | pattern standard |
 | `academic_year` | Contexte académique (année courante/précédente + cycles/niveaux) | remplace l'ex-module `bootstrap` — lecture 100% locale du référentiel Inscription (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`), scopée par école (`CurrentUserContext`) ; `AcademicYearContextBloc` sert aussi de gate de navigation |
-| `finance` | Paiements et frais scolaires | voir aussi `FINANCE_MOTION_MAP.md` |
-| `fee_control` | Contrôle des frais — pour un frais donné, qui l'a soldé / partiellement payé / pas payé | **présentation seule**, menu et route propres (`/controle-frais/…`) depuis le 2026-09-02 ; lit la couche `finance/offline` (agrégats, grille tarifaire) et `classes`/`enrollment` sans rien écrire ; l'œil rouvre `FacturationDetailPage` telle quelle |
+| `finance` | Paiements et frais scolaires ; le tableau de bord Finances est **la caisse**, et elle seule | voir aussi `FINANCE_MOTION_MAP.md` |
+| `recouvrement` | Où en est la dette : tableau de bord (sélection de frais, taux, classement, simulation de renvoi) + contrôle nominatif par frais | ex `fee_control`, renommé le 2026-09-10 (`RECOUVREMENT_PLAN.md`) ; menu et route propres (`/recouvrement/…`) ; **lecture 100 % locale** — un seul appel réseau, `POST /finance/relance-list`, et il ÉCRIT un PDF ; sous `finance.charge.read` **seule** ; a absorbé l'onglet Finances ▸ Recouvrement, supprimé |
 | `documents` | Éditique — émission des pièces PDF scellées (attestation, note de perception, reçu, relevé, quitus) | **socle only, aucune UI** · 100% online (pas d'outbox) · seul module à réponses binaires · RL/QT NON idempotents : jamais de rejeu automatique (cf. `UncertainOutcomeFailure`) · bulletin hors périmètre |
 
 ## Fichiers où atterrir en premier
