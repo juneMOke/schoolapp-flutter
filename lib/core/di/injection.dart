@@ -175,7 +175,6 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/create_payment_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_recovery_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_report_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
@@ -201,7 +200,6 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/coun
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_report_cubit.dart';
@@ -813,10 +811,6 @@ Future<void> configureDependencies({
     () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
   );
 
-  getIt.registerFactory<GetFinanceRecoveryUseCase>(
-    () => GetFinanceRecoveryUseCase(getIt<FinanceRepository>()),
-  );
-
   getIt.registerFactory<GetFinanceTillUseCase>(
     () => GetFinanceTillUseCase(getIt<FinanceRepository>()),
   );
@@ -871,11 +865,6 @@ Future<void> configureDependencies({
   // Caisse ne se charge qu'à sa première ouverture, et un bloc commun aurait
   // appelé les deux routes au montage pour un écran dont on ne lit qu'une
   // moitié.
-  getIt.registerFactory<FinanceRecoveryBloc>(
-    () => FinanceRecoveryBloc(
-      getFinanceRecoveryUseCase: getIt<GetFinanceRecoveryUseCase>(),
-    ),
-  );
 
   getIt.registerFactory<FinanceTillBloc>(
     () =>

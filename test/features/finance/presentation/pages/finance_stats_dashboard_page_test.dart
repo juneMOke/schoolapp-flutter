@@ -12,12 +12,9 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/core/entities/stats_context.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_recovery_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_till_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_till_receipts_report_usecase.dart';
@@ -28,9 +25,6 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-class MockGetFinanceRecoveryUseCase extends Mock
-    implements GetFinanceRecoveryUseCase {}
 
 class MockGetFinanceTillUseCase extends Mock implements GetFinanceTillUseCase {}
 
@@ -52,48 +46,6 @@ class MockSyncStatusCubit extends MockCubit<SyncStatusState>
 /// ressemble en rien à ce qui l'a causé.
 class MockExchangeRatesCubit extends MockCubit<ExchangeRatesState>
     implements ExchangeRatesCubit {}
-
-final tRecovery = FinanceRecovery(
-  context: StatsContext(
-    schoolYear: '2025-2026',
-    period: 'year',
-    periodStart: DateTime.utc(2025, 9),
-    periodEnd: DateTime.utc(2026, 8, 31),
-    generatedAt: DateTime.utc(2026, 5, 23, 8),
-  ),
-  byCurrency: const [
-    RecoveryCurrencyBlock(
-      currency: 'USD',
-      kpis: FinanceKpis(
-        collected: 300000,
-        expected: 400000,
-        outstanding: 100000,
-        collectionRate: 75,
-      ),
-      byFeeCode: <FeeTypeItem>[
-        FeeTypeItem(
-          code: 'TUITION',
-          label: 'Minerval',
-          collected: 300000,
-          expected: 400000,
-          outstanding: 100000,
-          collectionRate: 75,
-        ),
-      ],
-      monthlyCollected: FinanceEvolution(
-        granularity: FinanceEvolutionGranularity.month,
-        currentBucketIndex: 0,
-        buckets: <FinanceEvolutionBucket>[
-          FinanceEvolutionBucket(
-            key: '2026-05',
-            value: 300000,
-            isCurrent: true,
-          ),
-        ],
-      ),
-    ),
-  ],
-);
 
 final tTill = FinanceTill(
   context: StatsContext(
@@ -177,7 +129,6 @@ void main() {
 
   setUpAll(() => registerFallbackValue(const TillWindow.day()));
 
-  late MockGetFinanceRecoveryUseCase mockRecovery;
   late MockGetFinanceTillUseCase mockTill;
   late MockGetTillReceiptsUseCase mockReceipts;
   late MockGetTillReceiptsReportUseCase mockReport;
@@ -185,7 +136,6 @@ void main() {
   late MockExchangeRatesCubit ratesCubit;
 
   setUp(() {
-    mockRecovery = MockGetFinanceRecoveryUseCase();
     mockTill = MockGetFinanceTillUseCase();
     mockReceipts = MockGetTillReceiptsUseCase();
     mockReport = MockGetTillReceiptsReportUseCase();
@@ -207,7 +157,6 @@ void main() {
       const Stream<SyncStatusState>.empty(),
       initialState: syncState,
     );
-    when(() => mockRecovery()).thenAnswer((_) async => Right(tRecovery));
     when(
       () => mockTill(window: any(named: 'window')),
     ).thenAnswer((_) async => Right(tTill));
@@ -223,14 +172,13 @@ void main() {
     ).thenAnswer((_) async => const Right(TillReceiptsPage.empty));
   });
 
-  Future<void> pumpPage(WidgetTester tester) async {
+  /// [settle] à `false` quand la lecture de la caisse est volontairement
+  /// retenue : la page l'appelle désormais AU MONTAGE — il n'y a plus d'onglet
+  /// derrière lequel attendre — et `pumpAndSettle` n'aurait rien à stabiliser.
+  Future<void> pumpPage(WidgetTester tester, {bool settle = true}) async {
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
-          BlocProvider<FinanceRecoveryBloc>(
-            create: (_) =>
-                FinanceRecoveryBloc(getFinanceRecoveryUseCase: mockRecovery),
-          ),
           BlocProvider<FinanceTillBloc>(
             create: (_) => FinanceTillBloc(getFinanceTillUseCase: mockTill),
           ),
@@ -256,28 +204,24 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
-  testWidgets('ouvre sur le Recouvrement et n’appelle pas la caisse', (
-    tester,
-  ) async {
-    await pumpPage(tester);
+  testWidgets(
+    'la page est la CAISSE : elle se charge au montage, sans onglet à choisir',
+    (tester) async {
+      await pumpPage(tester);
 
-    expect(find.text('Recouvrement'), findsOneWidget);
-    expect(find.text('Caisse'), findsOneWidget);
-    verify(() => mockRecovery()).called(1);
-    verifyNever(() => mockTill(window: any(named: 'window')));
-  });
-
-  testWidgets('les descriptifs disent laquelle des deux questions on regarde', (
-    tester,
-  ) async {
-    await pumpPage(tester);
-
-    expect(find.text("Ce qu'il reste à encaisser cette année"), findsOneWidget);
-    expect(find.text('Ce qui est entré dans le tiroir'), findsOneWidget);
-  });
+      // Le recouvrement a quitté cet écran le 2026-09-10 : il se lit sur
+      // l'appareil, dans son propre module.
+      expect(find.text('Recouvrement'), findsNothing);
+      verify(() => mockTill(window: any(named: 'window'))).called(1);
+    },
+  );
 
   testWidgets('pendant le chargement, taux et fenêtre restent utilisables', (
     tester,
@@ -307,9 +251,7 @@ void main() {
       initialState: state,
     );
 
-    await pumpPage(tester);
-    await tester.tap(find.text('Caisse'));
-    await tester.pump();
+    await pumpPage(tester, settle: false);
 
     // Le squelette de la CAISSE — trois tuiles puis un graphique puis des
     // rangées — et non celui du recouvrement, qui pose deux cartes côte à côte.
@@ -324,78 +266,17 @@ void main() {
     expect(find.byType(FinanceTillLoadingView), findsNothing);
   });
 
-  testWidgets('le taux du jour surmonte la fenêtre, et seulement en Caisse', (
-    tester,
-  ) async {
-    // Le bandeau lit une série RÉELLE ici : les autres tests la servent vide,
-    // et un bandeau vide ne prouverait pas qu'il est au bon endroit.
-    final state = ExchangeRatesState(
-      loaded: true,
-      rates: [
-        ExchangeRate(
-          base: 'USD',
-          quote: 'CDF',
-          rateMicros: 2850000000,
-          effectiveFrom: DateTime.utc(2020),
-        ),
-      ],
-    );
-    when(() => ratesCubit.state).thenReturn(state);
-    whenListen(
-      ratesCubit,
-      const Stream<ExchangeRatesState>.empty(),
-      initialState: state,
-    );
-
+  testWidgets('la caisse se charge une fois, au montage', (tester) async {
     await pumpPage(tester);
-
-    // Le recouvrement ne convertit rien et ne porte pas de bandeau.
-    expect(find.byType(FinanceTillRateBar), findsNothing);
-
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(FinanceTillRateBar), findsOneWidget);
-    // « à quel taux → sur quelle fenêtre » : l'ordre de la maquette, vérifié
-    // sur les positions rendues et non sur l'ordre du code.
-    expect(
-      tester.getTopLeft(find.byType(FinanceTillRateBar)).dy,
-      lessThan(tester.getTopLeft(find.byType(FinanceTillPeriodFilter)).dy),
-    );
-  });
-
-  testWidgets('la caisse ne se charge qu’à sa première ouverture', (
-    tester,
-  ) async {
-    await pumpPage(tester);
-
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
 
     verify(() => mockTill(window: any(named: 'window'))).called(1);
     // La caisse de la fenêtre est là, nommée par sa devise et sa fenêtre. Le
-    // libellé dit « Caisse » et non « encaissé » : le recouvrement affiche déjà
-    // un « Total encaissé », qui compte l'année entière, et deux cartes
-    // homonymes à un onglet d'écart ne se distinguent par rien.
+    // libellé dit « Caisse » et non « encaissé » : le recouvrement compte
+    // l'année entière, et deux cartes homonymes se distinguent mal — même
+    // depuis qu'elles vivent dans deux modules.
     expect(find.text('Caisse dollars · Aujourd\'hui'), findsOneWidget);
     // Le compteur de reçus — le seul agrégat inter-devises de l'écran.
     expect(find.text('Reçus émis'), findsOneWidget);
-  });
-
-  testWidgets('les allers-retours entre onglets ne rappellent rien', (
-    tester,
-  ) async {
-    await pumpPage(tester);
-
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Recouvrement'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
-
-    verify(() => mockTill(window: any(named: 'window'))).called(1);
-    verify(() => mockRecovery()).called(1);
   });
 
   testWidgets('la table est demandée SANS devise — toutes les caisses', (
@@ -403,8 +284,6 @@ void main() {
   ) async {
     await pumpPage(tester);
 
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
     // L'appel de la table est à un saut de plus que celui des agrégats
     // (écouteur → bloc → cas d'usage) : il lui faut une frame supplémentaire.
     await tester.pumpAndSettle();
@@ -430,8 +309,6 @@ void main() {
     ).thenAnswer((_) async => Right(tTillTwoCurrencies));
 
     await pumpPage(tester);
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('FC francs (3)'));
@@ -448,27 +325,5 @@ void main() {
         size: any(named: 'size'),
       ),
     ).called(1);
-  });
-
-  testWidgets('un échec de caisse ne touche pas le recouvrement déjà lu', (
-    tester,
-  ) async {
-    when(
-      () => mockTill(window: any(named: 'window')),
-    ).thenAnswer((_) async => const Left(NetworkFailure('offline')));
-
-    await pumpPage(tester);
-    await tester.tap(find.text('Caisse'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Total du tiroir'), findsNothing);
-
-    await tester.tap(find.text('Recouvrement'));
-    await tester.pumpAndSettle();
-
-    // La moitié qui a réussi est toujours là : les deux onglets ne partagent
-    // ni bloc ni état.
-    expect(find.text('Total du tiroir'), findsNothing);
-    expect(find.text('Taux de recouvrement'), findsOneWidget);
   });
 }

@@ -5,7 +5,6 @@ import 'package:school_app_flutter/features/documents/data/utils/editique_failur
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/mappers/till_report_mapper.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/fee_tariff.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipts_page.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_report.dart';
@@ -41,23 +40,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
       }
       return const Left(NetworkFailure('Network error occurred'));
     } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, FinanceRecovery>> getFinanceRecovery() async {
-    try {
-      final response = await remoteDataSource.getFinanceRecovery(requiredAuth);
-      return Right(response.toEntity());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      // Une charge utile illisible passe par ici : `fromJson` lève sur un
-      // `kpis` absent, et l'écran doit dire « erreur », jamais « 0 encaissé ».
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }

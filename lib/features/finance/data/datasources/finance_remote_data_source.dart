@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/finance/data/models/fee_tariff_model.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_recovery_response_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model.dart';
 
 part 'finance_remote_data_source.g.dart';
@@ -20,16 +19,6 @@ abstract class FinanceRemoteDataSource {
   Future<List<FeeTariffModel>> listTariffsByLevel(
     @Extras() Map<String, dynamic> extras,
     @Query('levelId') String levelId,
-  );
-
-  /// Le recouvrement de l'année scolaire courante.
-  ///
-  /// **Aucun paramètre de requête**, et c'est le contrat : l'école vient du
-  /// jeton, l'année est la courante. Un `period` envoyé par habitude serait
-  /// ignoré — la réponse dira toujours `"year"`.
-  @GET(AppConstants.financeRecoveryStatsEndpoint)
-  Future<FinanceRecoveryResponseModel> getFinanceRecovery(
-    @Extras() Map<String, dynamic> extras,
   );
 
   /// La caisse de la fenêtre — frais scolaires et ventes boutique.

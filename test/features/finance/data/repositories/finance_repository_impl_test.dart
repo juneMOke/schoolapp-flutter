@@ -10,9 +10,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/models/fee_tariff_model.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/data/models/finance_recovery_response_model/finance_recovery_response_model.dart';
 import 'package:school_app_flutter/features/finance/data/models/finance_till_response_model/finance_till_response_model.dart';
-import 'package:school_app_flutter/features/finance/domain/entities/finance_recovery/finance_recovery.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 
 class MockFinanceRemoteDataSource extends Mock
@@ -53,66 +51,6 @@ void main() {
         (tariffs) => expect(tariffs.first.id, 'tariff-1'),
       );
     });
-  });
-
-  group('getFinanceRecovery', () {
-    /// Le modèle de réponse est **désérialisé depuis du JSON**, jamais
-    /// construit : c'est `fromJson` que la couche data doit exercer, et un
-    /// objet bâti en Dart ne le traverse pas.
-    final tRecoveryModel = FinanceRecoveryResponseModel.fromJson(
-      jsonDecode(_recoveryJson) as Map<String, dynamic>,
-    );
-
-    test('rend Right(FinanceRecovery) et n’envoie aucun paramètre', () async {
-      when(
-        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
-      ).thenAnswer((_) async => tRecoveryModel);
-
-      final result = await repository.getFinanceRecovery();
-
-      result.fold((_) => fail('Expected Right but got Left'), (recovery) {
-        expect(recovery.context.period, 'year');
-        final block = recovery.byCurrency.single;
-        expect(block.currency, 'USD');
-        expect(block.kpis.outstanding, 50000);
-        expect(block.byFeeCode.single.label, 'Minerval');
-        expect(block.monthlyCollected.buckets.single.key, '2026-05');
-      });
-
-      verify(
-        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
-      ).called(1);
-    });
-
-    test('rend Left(Failure) quand la DioException en porte une', () async {
-      const failure = UnauthorizedFailure('Forbidden');
-      when(
-        () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
-      ).thenThrow(_dioException(error: failure));
-
-      final result = await repository.getFinanceRecovery();
-
-      expect(result, const Left<Failure, FinanceRecovery>(failure));
-    });
-
-    test(
-      'une charge utile illisible devient une erreur, jamais un zéro',
-      () async {
-        when(
-          () => mockRemoteDataSource.getFinanceRecovery(tRequiredAuth),
-        ).thenThrow(TypeError());
-
-        final result = await repository.getFinanceRecovery();
-
-        result.fold(
-          (failure) => expect(failure, isA<ServerFailure>()),
-          (_) => fail(
-            'un tableau de bord d’argent préfère dire « erreur » que rendre un '
-            'encaissé fabriqué',
-          ),
-        );
-      },
-    );
   });
 
   group('getTillReceiptsReport', () {
@@ -356,46 +294,6 @@ DioException _dioException({Object? error}) {
     type: DioExceptionType.unknown,
   );
 }
-
-const String _recoveryJson = '''
-{
-  "context": {
-    "schoolYear": "2025-2026",
-    "period": "year",
-    "periodStart": "2025-09-01",
-    "periodEnd": "2026-08-31",
-    "generatedAt": "2026-05-23T08:00:00Z"
-  },
-  "byCurrency": [
-    {
-      "currency": "USD",
-      "kpis": {
-        "collected": 150000,
-        "expected": 200000,
-        "outstanding": 50000,
-        "collectionRate": 75
-      },
-      "byFeeCode": [
-        {
-          "code": "TUITION",
-          "label": "Minerval",
-          "collected": 120000,
-          "expected": 150000,
-          "outstanding": 30000,
-          "collectionRate": 80
-        }
-      ],
-      "monthlyCollected": {
-        "granularity": "month",
-        "currentBucketIndex": 8,
-        "buckets": [
-          { "key": "2026-05", "value": 100000, "isCurrent": true }
-        ]
-      }
-    }
-  ]
-}
-''';
 
 const String _tillJson = '''
 {
