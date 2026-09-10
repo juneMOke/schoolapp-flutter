@@ -9674,4 +9674,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recouvrementEmptyResultDescription =>
       'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.';
+
+  @override
+  String get recouvrementRelanceListNotDeployed =>
+      'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.';
 }

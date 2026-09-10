@@ -15485,6 +15485,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.'**
   String get recouvrementEmptyResultDescription;
+
+  /// No description provided for @recouvrementRelanceListNotDeployed.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.'**
+  String get recouvrementRelanceListNotDeployed;
 }
 
 class _AppLocalizationsDelegate

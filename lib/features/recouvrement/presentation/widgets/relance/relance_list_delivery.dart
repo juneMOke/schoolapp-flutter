@@ -98,6 +98,18 @@ class RelanceListDelivery extends StatelessWidget {
       return l10n.recouvrementRelanceListTooLarge(cap.lines, cap.cap);
     }
 
+    // ⚠️ **L'intercepteur global rend des `Failure` NUES sur 403 et 404** —
+    // `UnauthorizedFailure` et `NotFoundFailure`, sans le mixin `ApiErrorDetails`.
+    // Les chercher par `code` ne les trouvait jamais, et les deux tombaient sur
+    // le message générique : un serveur qui n'a pas encore la route faisait
+    // chercher un bug dans l'app.
+    if (failure is NotFoundFailure) {
+      return l10n.recouvrementRelanceListNotDeployed;
+    }
+    if (failure is UnauthorizedFailure) {
+      return l10n.recouvrementRelanceListForbidden;
+    }
+
     if (failure is ApiErrorDetails) {
       final details = failure;
       switch (details.detailCode) {
@@ -110,9 +122,6 @@ class RelanceListDelivery extends StatelessWidget {
           // Notre bug, pas celui de l'utilisateur : on ne lui montre pas
           // l'index de la ligne fautive, qui ne lui apprendrait rien.
           return l10n.recouvrementRelanceListInconsistent;
-      }
-      if (details.code == ApiErrorCode.forbidden) {
-        return l10n.recouvrementRelanceListForbidden;
       }
       final server = details.serverMessage;
       if (server != null && server.isNotEmpty) return server;

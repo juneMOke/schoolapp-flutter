@@ -9762,4 +9762,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get recouvrementEmptyResultDescription =>
       'Personne ne porte ces frais dans ce périmètre : ils n\'ont pas encore été générés, ou ils ne s\'appliquent pas ici. Changez la sélection ou le cycle.';
+
+  @override
+  String get recouvrementRelanceListNotDeployed =>
+      'Cette version du serveur ne sait pas encore établir de liste de relance. Le reste du tableau de bord fonctionne : il se lit sur l\'appareil.';
 }

@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
+import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
@@ -343,6 +344,51 @@ void main() {
 
     expect(find.text('84 %'), findsOneWidget);
     expect(find.text('26 sur 31'), findsOneWidget);
+  });
+
+  group('la coque de section', () {
+    testWidgets('le classement est dans une CARTE, comme les autres sections', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        RecouvrementDashboardState(
+          status: EnrollmentLoadStatus.success,
+          ranking: summaryOf([levelRow('lvl-1', settled: 8, total: 10)]),
+        ),
+      );
+
+      // Le titre vit dans l'en-tête de la carte, pas en texte libre au-dessus
+      // d'une colonne : c'est ce qui fait lire la page comme une page.
+      expect(find.byType(BiToneSectionCard), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BiToneSectionCard),
+          matching: find.text('Où en est chaque niveau'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+      'les états partagés restent NUS — un vide n\'a pas de titre de section',
+      (tester) async {
+        await _pump(
+          tester,
+          const RecouvrementDashboardState(
+            status: EnrollmentLoadStatus.success,
+          ),
+        );
+
+        expect(
+          find.byType(BiToneSectionCard),
+          findsNothing,
+          reason:
+              'titrer un vide reviendrait à annoncer une section pour dire '
+              'qu\'elle n\'a rien à montrer',
+        );
+      },
+    );
   });
 
   group('dépliage', () {

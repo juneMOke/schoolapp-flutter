@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fe
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_class_rows.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_group_row.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
+import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -89,7 +90,6 @@ class RecouvrementRankingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return BlocBuilder<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       buildWhen: (prev, curr) =>
@@ -122,68 +122,80 @@ class RecouvrementRankingSection extends StatelessWidget {
           );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.feeControlDashboardRankingTitle,
-              style: theme.textTheme.titleMedium,
-            ),
-            Text(
-              l10n.feeControlDashboardRankingHint,
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppDimensions.spacingS),
-            for (final group in state.ranking.groups) ...[
-              RecouvrementGroupRowTile(
-                key: ValueKey(group.schoolLevelId ?? '__sans-niveau__'),
-                label: labels.labelFor(
-                  group.schoolLevelId,
-                  l10n,
-                  withGroup: showCycleInLabels,
-                ),
-                breakdown: group.breakdown,
-                expanded: state.expandedLevelId == group.schoolLevelId,
-                // Rien à transmettre à l'écran nominatif dans deux cas : la
-                // ligne n'a pas de niveau, ou le référentiel ne sait pas à quel
-                // cycle il appartient — que l'écran voisin exige. Offrir le
-                // passage quand même donnerait un bouton qui ne fait rien.
-                onOpenControl: _canOpenControl(group.schoolLevelId)
-                    ? () => _openControl(
-                        context,
-                        state,
-                        schoolLevelId: group.schoolLevelId!,
-                      )
-                    : null,
-                // Sans niveau, aucune classe où chercher : la ligne reste
-                // inerte plutôt que d'offrir un chevron qui n'ouvre rien.
-                onToggle: group.schoolLevelId == null
-                    ? null
-                    : () => context.read<RecouvrementDashboardBloc>().add(
-                        RecouvrementGroupToggled(
-                          academicYearId: academicYearId,
-                          schoolLevelId: group.schoolLevelId,
-                        ),
-                      ),
-              ),
-              if (state.expandedLevelId == group.schoolLevelId)
-                RecouvrementClassRows(
-                  status: state.classesStatus,
-                  classes: state.classes,
-                  classroomsMissing: state.classroomsMissing,
+        return _card(
+          l10n,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final group in state.ranking.groups) ...[
+                RecouvrementGroupRowTile(
+                  key: ValueKey(group.schoolLevelId ?? '__sans-niveau__'),
+                  label: labels.labelFor(
+                    group.schoolLevelId,
+                    l10n,
+                    withGroup: showCycleInLabels,
+                  ),
+                  breakdown: group.breakdown,
+                  expanded: state.expandedLevelId == group.schoolLevelId,
+                  // Rien à transmettre à l'écran nominatif dans deux cas : la
+                  // ligne n'a pas de niveau, ou le référentiel ne sait pas à quel
+                  // cycle il appartient — que l'écran voisin exige. Offrir le
+                  // passage quand même donnerait un bouton qui ne fait rien.
                   onOpenControl: _canOpenControl(group.schoolLevelId)
-                      ? (row) => _openControl(
+                      ? () => _openControl(
                           context,
                           state,
                           schoolLevelId: group.schoolLevelId!,
-                          classroomId: row.classroomId,
                         )
                       : null,
+                  // Sans niveau, aucune classe où chercher : la ligne reste
+                  // inerte plutôt que d'offrir un chevron qui n'ouvre rien.
+                  onToggle: group.schoolLevelId == null
+                      ? null
+                      : () => context.read<RecouvrementDashboardBloc>().add(
+                          RecouvrementGroupToggled(
+                            academicYearId: academicYearId,
+                            schoolLevelId: group.schoolLevelId,
+                          ),
+                        ),
                 ),
+                if (state.expandedLevelId == group.schoolLevelId)
+                  RecouvrementClassRows(
+                    status: state.classesStatus,
+                    classes: state.classes,
+                    classroomsMissing: state.classroomsMissing,
+                    onOpenControl: _canOpenControl(group.schoolLevelId)
+                        ? (row) => _openControl(
+                            context,
+                            state,
+                            schoolLevelId: group.schoolLevelId!,
+                            classroomId: row.classroomId,
+                          )
+                        : null,
+                  ),
+              ],
             ],
-          ],
+          ),
         );
       },
     );
   }
+
+  /// Toutes les sections de l'écran vivent dans la même carte — c'est ce qui
+  /// fait lire la page comme une page, et non comme une pile de blocs qui
+  /// n'auraient pas le même rang. Le classement était le dernier à ne pas
+  /// l'avoir : il vient, seul, du tableau de bord du Contrôle des frais, où il
+  /// était la seule section et n'avait donc rien à côtoyer.
+  ///
+  /// Les états qui la précèdent — squelette, erreur, vide — restent NUS : ce
+  /// sont des anatomies partagées, et les envelopper leur donnerait un titre de
+  /// section pour dire qu'il n'y a rien à titrer.
+  Widget _card(AppLocalizations l10n, Widget child) => Padding(
+    padding: const EdgeInsets.only(bottom: AppDimensions.spacingM),
+    child: BiToneSectionCard(
+      title: l10n.feeControlDashboardRankingTitle,
+      subtitle: l10n.feeControlDashboardRankingHint,
+      child: child,
+    ),
+  );
 }
