@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -31,12 +32,43 @@ class RecouvrementFeePicker extends StatelessWidget {
   /// changer en vol produirait deux requêtes pour un seul geste.
   final bool enabled;
 
+  /// Devise de chaque nature, **quand elle n'en a qu'une**.
+  ///
+  /// ⚠️ Chez nous la devise appartient à la **créance**, pas au frais : rien
+  /// n'interdit à une même nature d'exister en francs et en dollars sur le même
+  /// périmètre. Une nature absente de cette table n'affiche donc aucun symbole —
+  /// et sa présence dans la sélection rend celle-ci mixte. Écrire un symbole au
+  /// jugé ferait croire à une devise que la grille ne garantit pas.
+  ///
+  /// Vide par défaut : le tableau de bord n'affiche pas de symbole.
+  final Map<String, String> currencies;
+
+  /// Nom de chaque nature, quand l'écran sait la nommer **par la grille**.
+  ///
+  /// Le tableau de bord n'en passe pas : il est école-wide, et deux niveaux
+  /// nomment la même nature différemment — seule la nature localisée y est
+  /// juste. L'écran de contrôle, lui, est borné à un niveau, donc à une grille :
+  /// il écrit le nom que l'école a écrit. Une nature absente de cette table
+  /// retombe sur son libellé localisé.
+  final Map<String, String> labels;
+
+  /// Libellé de la rangée. Les deux écrans du module ne nomment pas la même
+  /// chose : le tableau de bord retient des frais pour mesurer, le contrôle en
+  /// contrôle.
+  final String? label;
+
+  final String? semanticsLabel;
+
   const RecouvrementFeePicker({
     super.key,
     required this.feeCodes,
     required this.selected,
     required this.onChanged,
     this.enabled = true,
+    this.currencies = const <String, String>{},
+    this.labels = const <String, String>{},
+    this.label,
+    this.semanticsLabel,
   });
 
   void _toggle(String code) {
@@ -57,12 +89,12 @@ class RecouvrementFeePicker extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: l10n.recouvrementFeePickerA11yLabel,
+      label: semanticsLabel ?? l10n.recouvrementFeePickerA11yLabel,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.recouvrementFeePickerLabel,
+            label ?? l10n.recouvrementFeePickerLabel,
             style: AppTextStyles.tableHeader,
           ),
           const SizedBox(height: AppDimensions.spacingS),
@@ -73,7 +105,8 @@ class RecouvrementFeePicker extends StatelessWidget {
               for (final code in feeCodes)
                 _FeeChip(
                   code: code,
-                  label: code.localizedFeeLabel(l10n),
+                  label: labels[code] ?? code.localizedFeeLabel(l10n),
+                  currency: currencies[code],
                   checked: selected.contains(code),
                   // Une pastille seule cochée n'est pas décochable : on le dit
                   // à l'assistance vocale plutôt que de la laisser annoncer un
@@ -93,6 +126,10 @@ class RecouvrementFeePicker extends StatelessWidget {
 class _FeeChip extends StatelessWidget {
   final String code;
   final String label;
+
+  /// Devise de la nature, `null` quand la grille en porte plusieurs.
+  final String? currency;
+
   final bool checked;
   final bool locked;
   final bool enabled;
@@ -101,6 +138,7 @@ class _FeeChip extends StatelessWidget {
   const _FeeChip({
     required this.code,
     required this.label,
+    required this.currency,
     required this.checked,
     required this.locked,
     required this.enabled,
@@ -111,6 +149,10 @@ class _FeeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final active = checked && enabled;
+    final currencyCode = currency;
+    final symbol = currencyCode == null
+        ? ''
+        : MoneyFormat.symbolOf(currencyCode);
 
     return Semantics(
       checked: checked,
@@ -160,6 +202,18 @@ class _FeeChip extends StatelessWidget {
                         color: AppColors.textSecondary,
                       ),
               ),
+              // Le symbole rend la conséquence du clic lisible AVANT le clic :
+              // cocher un frais en francs à côté d'un frais en dollars ferme le
+              // montant plancher.
+              if (symbol.isNotEmpty) ...[
+                const SizedBox(width: AppDimensions.spacingXS),
+                Text(
+                  symbol,
+                  style: AppTextStyles.caption.copyWith(
+                    color: active ? AppColors.bleuArdoise : AppColors.textMuted,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

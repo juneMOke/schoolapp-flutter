@@ -15557,6 +15557,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student targeted in this group.'**
   String get recouvrementCallListEmpty;
+
+  /// No description provided for @feeControlFeeLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the fee schedule…'**
+  String get feeControlFeeLoading;
+
+  /// No description provided for @feeControlFeesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees checked'**
+  String get feeControlFeesLabel;
+
+  /// No description provided for @feeControlFeesA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees checked — multiple selection, at least one'**
+  String get feeControlFeesA11yLabel;
+
+  /// No description provided for @feeControlSituationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Situation looked for'**
+  String get feeControlSituationLabel;
+
+  /// No description provided for @feeControlSituationThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at least…'**
+  String get feeControlSituationThreshold;
+
+  /// No description provided for @feeControlThresholdMixedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected fees do not share one currency: a single floor amount would mean nothing. Keep only one currency.'**
+  String get feeControlThresholdMixedWarning;
+
+  /// No description provided for @feeControlColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get feeControlColumnStudent;
+
+  /// No description provided for @feeControlResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Result · {count, plural, =0{no student} =1{1 student} other{{count} students}}'**
+  String feeControlResultTitle(num count);
+
+  /// No description provided for @feeControlResultOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'sorted from least to most advanced'**
+  String get feeControlResultOrder;
+
+  /// No description provided for @feeControlCriteriaThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor: {amount}'**
+  String feeControlCriteriaThreshold(String amount);
+
+  /// No description provided for @feeControlSelectPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the page'**
+  String get feeControlSelectPage;
+
+  /// No description provided for @feeControlDeselectPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect the page'**
+  String get feeControlDeselectPage;
+
+  /// No description provided for @feeControlMarkedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'to send home'**
+  String get feeControlMarkedBadge;
+
+  /// No description provided for @feeControlSummaryCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on these fees'**
+  String get feeControlSummaryCollected;
+
+  /// No description provided for @feeControlSummaryCollectedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'of {expected} due'**
+  String feeControlSummaryCollectedOn(String expected);
+
+  /// No description provided for @feeControlSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student selected} other{{count} students selected}}'**
+  String feeControlSelectionCount(num count);
+
+  /// No description provided for @feeControlCallListAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Call sheet'**
+  String get feeControlCallListAction;
+
+  /// No description provided for @feeControlMarkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark to send home'**
+  String get feeControlMarkAction;
+
+  /// No description provided for @feeControlDeselectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get feeControlDeselectAction;
+
+  /// No description provided for @feeControlMarkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked to send home} other{{count} students marked to send home}}'**
+  String feeControlMarkedTitle(num count);
+
+  /// No description provided for @feeControlMarkedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This list is a working draft: nothing is sent to the families. Measure the effect on headcount in the dashboard before deciding.'**
+  String get feeControlMarkedNote;
+
+  /// No description provided for @feeControlMarkedClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the send-home list'**
+  String get feeControlMarkedClear;
+
+  /// No description provided for @feeControlMarkedCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Send-home list cleared.'**
+  String get feeControlMarkedCleared;
+
+  /// No description provided for @feeControlMarkedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked to send home — the list stays editable.} other{{count} students marked to send home — the list stays editable.}}'**
+  String feeControlMarkedDone(num count);
+
+  /// No description provided for @feeControlSheetDossier.
+  ///
+  /// In en, this message translates to:
+  /// **'File {code}'**
+  String feeControlSheetDossier(String code);
+
+  /// No description provided for @feeControlSheetPaidOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {expected} · {percent}%'**
+  String feeControlSheetPaidOf(String paid, String expected, int percent);
+
+  /// No description provided for @feeControlSheetRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String feeControlSheetRemaining(String amount);
+
+  /// No description provided for @feeControlSheetNoExpectation.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount expected on this fee'**
+  String get feeControlSheetNoExpectation;
+
+  /// No description provided for @feeControlSheetMixedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each fee is settled in its own currency: the lines do not add up.'**
+  String get feeControlSheetMixedNote;
+
+  /// No description provided for @feeControlSheetOpenRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the full record'**
+  String get feeControlSheetOpenRecord;
+
+  /// No description provided for @feeControlSheetUnmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from send-home list'**
+  String get feeControlSheetUnmark;
+
+  /// No description provided for @feeControlSheetMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked to send home.'**
+  String feeControlSheetMarked(String name);
+
+  /// No description provided for @feeControlSheetUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed from the send-home list.'**
+  String feeControlSheetUnmarked(String name);
+
+  /// No description provided for @feeControlCallSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School fee control'**
+  String get feeControlCallSheetTitle;
+
+  /// No description provided for @feeControlCallSheetIssuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on {date}'**
+  String feeControlCallSheetIssuedOn(String date);
+
+  /// No description provided for @feeControlCallSheetRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate applied: {rate}'**
+  String feeControlCallSheetRate(String rate);
+
+  /// No description provided for @feeControlCallSheetNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'No.'**
+  String get feeControlCallSheetNumber;
+
+  /// No description provided for @feeControlCallSheetSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent signature'**
+  String get feeControlCallSheetSignature;
+
+  /// No description provided for @feeControlCallSheetVisaCollector.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector\'s signature'**
+  String get feeControlCallSheetVisaCollector;
+
+  /// No description provided for @feeControlCallSheetVisaDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Management\'s signature'**
+  String get feeControlCallSheetVisaDirection;
+
+  /// No description provided for @feeControlCallSheetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The call sheet could not be prepared.'**
+  String get feeControlCallSheetFailed;
+
+  /// No description provided for @feeControlEmptyWiden.
+  ///
+  /// In en, this message translates to:
+  /// **'See all students'**
+  String get feeControlEmptyWiden;
+
+  /// No description provided for @feeControlEmptyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Open billing'**
+  String get feeControlEmptyBilling;
 }
 
 class _AppLocalizationsDelegate

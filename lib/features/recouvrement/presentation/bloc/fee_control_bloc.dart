@@ -11,7 +11,9 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_load_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
@@ -30,8 +32,8 @@ export 'package:school_app_flutter/features/recouvrement/presentation/contracts/
 part 'fee_control_event.dart';
 part 'fee_control_state.dart';
 
-/// BLoC du **Contrôle des frais** : pour un frais donné d'une classe donnée,
-/// qui est soldé, qui est partiel, qui n'a rien versé.
+/// BLoC du **Contrôle des frais** : pour une **sélection de frais** et une
+/// classe donnée, qui est soldé, qui est partiel, qui n'a rien versé.
 ///
 /// Bloc **dédié**, et non un mode de plus sur `EnrollmentLocalListBloc` : ce
 /// dernier est partagé par la Facturation et les Documents, et y ajouter des
@@ -42,18 +44,26 @@ part 'fee_control_state.dart';
 ///     (`SearchLocalEnrollmentsUseCase.currentYearEnrolled` — mêmes règles de
 ///     « facturable » que la Facturation), raffinés nom/post-nom/prénom par
 ///     [EnrollmentLocalListProjector] ;
-///  2. leur position sur le frais, agrégée par le grand-livre local.
+///  2. leur position sur les frais retenus, lue dans le **même registre** que
+///     le tableau de bord (`GetRecoveryPositionsUseCase`) — c'est ce qui rend
+///     impossible que les deux écrans se contredisent sur le même élève.
 ///
-/// Le périmètre se resserre en trois crans : le niveau (obligatoire), puis
+/// Le périmètre se resserre en deux crans : le niveau (obligatoire), puis
 /// éventuellement **une classe** — le roster local composé donne alors les
-/// élèves retenus — puis le raffinement par nom.
+/// élèves retenus.
 ///
-/// Un élève **sans créance** de ce frais est écarté : « aucun paiement » n'est
+/// ⚠️ La lecture du registre n'est **pas** bornée au cycle, alors qu'elle
+/// pourrait l'être : un élève qui a changé de niveau en cours d'année porte des
+/// créances sur les deux, et il les doit toutes. Les borner au cycle de sa
+/// classe actuelle ferait disparaître une dette de la feuille que son parent
+/// signe.
+///
+/// Un élève **sans créance** de ces frais est écarté : « aucun paiement » n'est
 /// pas « aucune créance ». L'écart entre [FeeControlState.studentsInScope] et
 /// `breakdown.total` permet à l'état vide de le dire.
 class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   final SearchLocalEnrollmentsUseCase _search;
-  final GetFeeChargeAggregatesUseCase _getAggregates;
+  final GetRecoveryPositionsUseCase _getPositions;
   final FeeControlTariffsResolver _tariffs;
   final GetOfflineClassroomsUseCase _getClassrooms;
   final GetOfflineRosterUseCase _getRoster;
@@ -61,6 +71,19 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   /// Liste complète filtrée de la recherche courante, conservée pour paginer
   /// sans relire la base.
   List<FeeControlRow> _cache = const <FeeControlRow>[];
+
+  /// Toute la population **concernée**, avant la coupe par situation. C'est
+  /// elle que les tuiles de compteur recoupent, sans relire.
+  List<FeeControlRow> _charged = const <FeeControlRow>[];
+
+  /// Le résultat **entier**, dans l'ordre où l'écran le sert — pas seulement la
+  /// page affichée.
+  ///
+  /// Exposé parce que la sélection porte sur tout le résultat : la feuille
+  /// d'appel doit pouvoir nommer un élève coché à la page 1 alors qu'on en est
+  /// à la page 3. L'ordre est celui du tri, donc celui de la numérotation
+  /// imprimée.
+  List<FeeControlRow> get results => List.unmodifiable(_cache);
 
   // Générations de chargement : le transformer par défaut du bloc étant
   // `concurrent`, plusieurs chargements peuvent voler en parallèle. Chaque
@@ -73,13 +96,13 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
 
   FeeControlBloc({
     required SearchLocalEnrollmentsUseCase search,
-    required GetFeeChargeAggregatesUseCase getAggregates,
+    required GetRecoveryPositionsUseCase getPositions,
     required GetFeeTariffsForLevelUseCase getTariffs,
     required HasFeeGridUseCase hasFeeGrid,
     required GetOfflineClassroomsUseCase getClassrooms,
     required GetOfflineRosterUseCase getRoster,
   }) : _search = search,
-       _getAggregates = getAggregates,
+       _getPositions = getPositions,
        _tariffs = FeeControlTariffsResolver(
          getTariffs: getTariffs,
          hasFeeGrid: hasFeeGrid,
@@ -90,6 +113,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     on<FeeControlTariffsRequested>(_onTariffsRequested);
     on<FeeControlClassroomsRequested>(_onClassroomsRequested);
     on<FeeControlSearchRequested>(_onSearchRequested);
+    on<FeeControlSituationRequested>(_onSituationRequested);
     on<FeeControlPageRequested>(_onPageRequested);
     on<FeeControlRefreshRequested>(_onRefreshRequested);
     on<FeeControlResetRequested>(_onResetRequested);
@@ -176,13 +200,10 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         schoolLevelGroupId: request.schoolLevelGroupId,
         schoolLevelId: request.schoolLevelId,
         classroomId: request.classroomId,
-        feeCode: request.feeCode,
-        feeLabel: request.feeLabel,
-        feeTariffCode: request.feeTariffCode,
+        feeCodes: request.feeCodes,
         statusFilter: request.statusFilter,
-        firstName: request.firstName,
-        lastName: request.lastName,
-        surname: request.surname,
+        threshold: request.threshold,
+        rate: event.rate,
         page: event.page,
         size: event.size,
       ),
@@ -196,6 +217,33 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     final last = state.lastQuery;
     if (last == null) return;
     await _load(emit, last);
+  }
+
+  /// Recoupe la population déjà lue. Ne touche ni aux compteurs ni à
+  /// l'encaissé : ils portent sur la classe entière, et une tuile qui
+  /// changerait le total qu'elle affiche n'afficherait que son propre reflet.
+  void _onSituationRequested(
+    FeeControlSituationRequested event,
+    Emitter<FeeControlState> emit,
+  ) {
+    final last = state.lastQuery;
+    if (last == null) return;
+    if (state.status != EnrollmentLoadStatus.success) return;
+    if (last.statusFilter == event.filter) return;
+
+    final query = last.copyWithSituation(event.filter);
+    _cache = FeeControlProjector.refilter(
+      _charged,
+      filter: query.statusFilter,
+      threshold: query.threshold,
+      rate: query.rate,
+    );
+    emit(
+      state.withPage(
+        query: query,
+        page: ClientSidePaginator.paginate(_cache, page: 0, size: query.size),
+      ),
+    );
   }
 
   void _onPageRequested(
@@ -229,6 +277,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   ) {
     _loadGeneration++; // invalide tout chargement en vol
     _cache = const <FeeControlRow>[];
+    _charged = const <FeeControlRow>[];
     emit(const FeeControlState.initial());
   }
 
@@ -284,14 +333,10 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
           : items
                 .where((i) => classroomStudentIds!.contains(i.studentId))
                 .toList(growable: false);
-      final summaries = EnrollmentLocalListProjector.project(
-        scoped,
-        firstName: query.firstName,
-        lastName: query.lastName,
-        surname: query.surname,
-      );
+      final summaries = EnrollmentLocalListProjector.project(scoped);
       if (summaries.isEmpty) {
         _cache = const <FeeControlRow>[];
+        _charged = const <FeeControlRow>[];
         emit(
           state.withPage(
             query: query,
@@ -302,26 +347,30 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
             ),
             studentsInScope: 0,
             breakdown: const FeeControlBreakdown(),
+            expected: MoneyBag.empty,
+            collected: MoneyBag.empty,
             classroomRosterSize: classroomStudentIds?.length,
           ),
         );
         return;
       }
 
-      final aggregates = await _getAggregates(
+      final positions = await _getPositions(
         academicYearId: query.academicYearId,
-        feeCode: query.feeCode,
-        studentIds: summaries.map((s) => s.student.id).toList(growable: false),
+        feeCodes: query.feeCodes,
       );
       if (generation != _loadGeneration) return;
 
-      aggregates.fold((failure) => _emitFailure(emit, failure), (list) {
+      positions.fold((failure) => _emitFailure(emit, failure), (lines) {
         final join = FeeControlProjector.join(
           summaries: summaries,
-          aggregates: list,
+          lines: lines,
           filter: query.statusFilter,
+          threshold: query.threshold,
+          rate: query.rate,
         );
         _cache = join.filtered;
+        _charged = join.charged;
         emit(
           state.withPage(
             query: query,
@@ -332,6 +381,8 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
             ),
             studentsInScope: summaries.length,
             breakdown: join.breakdown,
+            expected: join.expected,
+            collected: join.collected,
             classroomRosterSize: classroomStudentIds?.length,
           ),
         );
@@ -344,6 +395,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   /// l'identité de la requête échouée.
   void _emitFailure(Emitter<FeeControlState> emit, Failure failure) {
     _cache = const <FeeControlRow>[];
+    _charged = const <FeeControlRow>[];
     emit(
       state.withFailure(
         errorType: _mapFailureToErrorType(failure),

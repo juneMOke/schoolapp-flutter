@@ -184,7 +184,6 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_payments
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
@@ -913,7 +912,7 @@ Future<void> configureDependencies({
   getIt.registerFactory<FeeControlBloc>(
     () => FeeControlBloc(
       search: getIt<SearchLocalEnrollmentsUseCase>(),
-      getAggregates: getIt<GetFeeChargeAggregatesUseCase>(),
+      getPositions: getIt<GetRecoveryPositionsUseCase>(),
       getTariffs: getIt<GetFeeTariffsForLevelUseCase>(),
       hasFeeGrid: getIt<HasFeeGridUseCase>(),
       getClassrooms: getIt<GetOfflineClassroomsUseCase>(),

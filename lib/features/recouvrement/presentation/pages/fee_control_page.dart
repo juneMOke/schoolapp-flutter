@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page_actions.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_action_bar.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_marked_card.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_page_helpers.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_view.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_search_form.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_summary_band.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Contrôle des frais : pour un frais d'une classe, qui est soldé, qui est
 /// partiel, qui n'a rien versé.
@@ -36,8 +35,22 @@ class FeeControlPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<FeeControlBloc>(
-      create: (_) => getIt<FeeControlBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FeeControlBloc>(create: (_) => getIt<FeeControlBloc>()),
+        // Le cours du jour n'est lu QUE pour arbitrer : ordonner les lignes et
+        // comparer un plancher à un sac mixte. Aucun montant affiché n'est
+        // converti (doctrine bi-devise, règle 6).
+        BlocProvider<ExchangeRatesCubit>(
+          create: (_) => getIt<ExchangeRatesCubit>()..load(),
+        ),
+        // Brouillon de séance : les cochés et les marqués « à renvoyer ». Rien
+        // n'en sort tant qu'on ne le demande pas, rien n'y survit à la sortie
+        // du module.
+        BlocProvider<FeeControlSelectionCubit>(
+          create: (_) => FeeControlSelectionCubit(),
+        ),
+      ],
       child: _FeeControlView(intent: intent),
     );
   }
@@ -102,29 +115,36 @@ class _FeeControlViewState extends State<_FeeControlView> {
     final intent = widget.intent;
     if (!_pendingIntentSearch || intent == null) return;
     if (state.tariffsStatus != EnrollmentLoadStatus.success) return;
-    final option = feeControlFeeOptionFor(state.tariffs, intent.feeCode);
     // La nature n'est pas dans la grille de ce niveau : il n'y a rien à
-    // chercher, et forcer une requête afficherait un vide inexplicable. Le
-    // formulaire reste pré-rempli, l'utilisateur voit ce qui manque.
+    // chercher, et forcer une requête afficherait un vide inexplicable. La
+    // carte reste pré-remplie, l'utilisateur voit ce qui manque.
     _pendingIntentSearch = false;
-    if (option == null) return;
+    if (!state.tariffs.any((t) => t.feeCode == intent.feeCode)) return;
 
+    _search(
+      academicYearId,
+      FeeControlSearchRequest(
+        schoolLevelGroupId: intent.schoolLevelGroupId,
+        schoolLevelId: intent.schoolLevelId,
+        classroomId: intent.classroomId,
+        feeCodes: [intent.feeCode],
+        statusFilter: FeeControlPaymentFilter.all,
+      ),
+    );
+  }
+
+  /// Le seul canal de recherche : il attache le cours du jour à la requête.
+  ///
+  /// Attaché ICI et non lu par le BLoC : la requête est une **photo**, et le
+  /// réessai comme la pagination doivent rejouer le même classement. Un cours
+  /// qui bouge entre deux pages réordonnerait la liste sous les doigts.
+  void _search(String academicYearId, FeeControlSearchRequest request) {
     context.read<FeeControlBloc>().add(
       FeeControlSearchRequested(
         academicYearId: academicYearId,
-        request: FeeControlSearchRequest(
-          schoolLevelGroupId: intent.schoolLevelGroupId,
-          schoolLevelId: intent.schoolLevelId,
-          classroomId: intent.classroomId,
-          feeCode: intent.feeCode,
-          // Mêmes champs que le formulaire construit lui-même : la puce de
-          // critère nomme le frais comme le sélecteur l'aurait nommé.
-          feeLabel: option.tariffLabel,
-          feeTariffCode: option.tariffCode,
-          statusFilter: FeeControlPaymentFilter.all,
-          firstName: '',
-          lastName: '',
-          surname: '',
+        request: request,
+        rate: RecouvrementPivot.dollarInFrancs(
+          context.read<ExchangeRatesCubit>().state.rates,
         ),
       ),
     );
@@ -172,132 +192,94 @@ class _FeeControlViewState extends State<_FeeControlView> {
             });
           }
 
-          return AnimatedSwitcher(
-            duration: FinanceMotion.standard,
-            child: Column(
-              key: const ValueKey('fee-control-content'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocConsumer<FeeControlBloc, FeeControlState>(
-                  listenWhen: (prev, curr) =>
-                      prev.tariffsStatus != curr.tariffsStatus,
-                  listener: (context, state) =>
-                      _searchFromIntent(academicYearId, state),
-                  buildWhen: (prev, curr) =>
-                      prev.status != curr.status ||
-                      prev.tariffsStatus != curr.tariffsStatus ||
-                      prev.tariffs != curr.tariffs ||
-                      prev.classroomsStatus != curr.classroomsStatus ||
-                      prev.classrooms != curr.classrooms ||
-                      prev.feeGridMissing != curr.feeGridMissing,
-                  builder: (context, state) {
-                    final bloc = context.read<FeeControlBloc>();
-                    return FeeControlSearchForm(
-                      initial: widget.intent,
-                      options: options,
-                      tariffs: state.tariffs,
-                      classrooms: state.classrooms,
-                      isTariffsLoading:
-                          state.tariffsStatus == EnrollmentLoadStatus.loading,
-                      isClassroomsLoading:
-                          state.classroomsStatus ==
-                          EnrollmentLoadStatus.loading,
-                      feeGridMissing: state.feeGridMissing,
-                      // `tariffsStatus: failure` était stocké et lu par
-                      // personne : le sélecteur de frais retombait alors sur
-                      // « aucun frais défini pour ce niveau », qui affirme sur
-                      // l'école ce qui n'est vrai que de cet appareil.
-                      tariffsFailed:
-                          state.tariffsStatus == EnrollmentLoadStatus.failure,
-                      isLoading: state.status == EnrollmentLoadStatus.loading,
-                      // Un niveau choisi ouvre deux lectures locales : sa grille
-                      // tarifaire et ses classes.
-                      onLevelSelected: (groupId, levelId) {
-                        bloc.add(
-                          FeeControlTariffsRequested(
-                            academicYearId: academicYearId,
-                            schoolLevelGroupId: groupId,
-                            schoolLevelId: levelId,
-                          ),
-                        );
-                        bloc.add(
-                          FeeControlClassroomsRequested(
-                            academicYearId: academicYearId,
-                            schoolLevelId: levelId,
-                          ),
-                        );
-                      },
-                      onSearch: (request) => bloc.add(
-                        FeeControlSearchRequested(
-                          academicYearId: academicYearId,
-                          request: request,
-                        ),
-                      ),
-                      onClear: () => bloc.add(const FeeControlResetRequested()),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                const FeeControlSummaryBand(),
-                FeeControlResultsView(
-                  onViewRequested: (row) =>
-                      _openFinancialRecord(context, row, academicYearId),
-                ),
-              ],
+          return BlocListener<FeeControlBloc, FeeControlState>(
+            // Une sélection n'a de sens que dans son périmètre : changer de
+            // frais, de classe, de situation ou de plancher la vide. Les
+            // marques « à renvoyer », elles, traversent — on les constitue
+            // justement en parcourant les classes.
+            listenWhen: (prev, curr) => prev.lastQuery != curr.lastQuery,
+            listener: (context, _) =>
+                context.read<FeeControlSelectionCubit>().clearSelection(),
+            child: AnimatedSwitcher(
+              duration: FinanceMotion.standard,
+              child: Column(
+                key: const ValueKey('fee-control-content'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BlocConsumer<FeeControlBloc, FeeControlState>(
+                    listenWhen: (prev, curr) =>
+                        prev.tariffsStatus != curr.tariffsStatus,
+                    listener: (context, state) =>
+                        _searchFromIntent(academicYearId, state),
+                    buildWhen: (prev, curr) =>
+                        prev.status != curr.status ||
+                        prev.tariffsStatus != curr.tariffsStatus ||
+                        prev.tariffs != curr.tariffs ||
+                        prev.classroomsStatus != curr.classroomsStatus ||
+                        prev.classrooms != curr.classrooms ||
+                        prev.feeGridMissing != curr.feeGridMissing,
+                    builder: (context, state) {
+                      final bloc = context.read<FeeControlBloc>();
+                      return FeeControlPerimeterCard(
+                        initial: widget.intent,
+                        options: options,
+                        tariffs: state.tariffs,
+                        classrooms: state.classrooms,
+                        isTariffsLoading:
+                            state.tariffsStatus == EnrollmentLoadStatus.loading,
+                        isClassroomsLoading:
+                            state.classroomsStatus ==
+                            EnrollmentLoadStatus.loading,
+                        feeGridMissing: state.feeGridMissing,
+                        // `tariffsStatus: failure` était stocké et lu par
+                        // personne : le sélecteur de frais retombait alors sur
+                        // « aucun frais défini pour ce niveau », qui affirme sur
+                        // l'école ce qui n'est vrai que de cet appareil.
+                        tariffsFailed:
+                            state.tariffsStatus == EnrollmentLoadStatus.failure,
+                        isLoading: state.status == EnrollmentLoadStatus.loading,
+                        // Un niveau choisi ouvre deux lectures locales : sa grille
+                        // tarifaire et ses classes.
+                        onLevelSelected: (groupId, levelId) {
+                          bloc.add(
+                            FeeControlTariffsRequested(
+                              academicYearId: academicYearId,
+                              schoolLevelGroupId: groupId,
+                              schoolLevelId: levelId,
+                            ),
+                          );
+                          bloc.add(
+                            FeeControlClassroomsRequested(
+                              academicYearId: academicYearId,
+                              schoolLevelId: levelId,
+                            ),
+                          );
+                        },
+                        onSearch: (request) => _search(academicYearId, request),
+                        onClear: () =>
+                            bloc.add(const FeeControlResetRequested()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  const FeeControlSummaryBand(),
+                  FeeControlActionBar(
+                    onCallList: () => printCallSheet(context),
+                    onMark: () => markSelection(context),
+                  ),
+                  FeeControlResultsView(
+                    onViewRequested: (row) =>
+                        openFinancialRecord(context, row, academicYearId),
+                    onRowTapped: (row) =>
+                        openStudentSheet(context, row, academicYearId),
+                    onBilling: () => openBilling(context),
+                  ),
+                  const FeeControlMarkedCard(),
+                ],
+              ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  /// Ouvre la fiche financière de l'élève — la page de détail de la
-  /// Facturation, réutilisée telle quelle. Le retour revient ici : la page est
-  /// **poussée**, et `StudentDetailAppBar` dépile avant de retomber sur sa
-  /// route de repli.
-  void _openFinancialRecord(
-    BuildContext context,
-    FeeControlRow row,
-    String academicYearId,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    if (academicYearId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.bootstrapContextUnavailableMessage)),
-      );
-      return;
-    }
-
-    final levelId =
-        context.read<FeeControlBloc>().state.lastQuery?.schoolLevelId ?? '';
-    final academicYearContext = context
-        .read<AcademicYearContextBloc>()
-        .state
-        .context;
-
-    // Troisième porte sur la MÊME fiche que Facturation et son sur-titre : le
-    // frais contrôlé impose déjà une classe, mais la ligne reste la source la
-    // plus sûre quand le référentiel n'est pas encore descendu.
-    final labels = resolveEnrollmentLevelLabels(
-      row.summary,
-      bundles: academicYearContext?.schoolLevelGroups ?? const [],
-      searchedLevelId: levelId,
-    );
-
-    final student = row.summary.student;
-    context.push(
-      AppRoutesNames.facturationDetailPath(
-        studentId: student.id,
-        academicYearId: academicYearId,
-      ),
-      extra: FacturationDetailIntent(
-        studentId: student.id,
-        academicYearId: academicYearId,
-        firstName: student.firstName,
-        lastName: student.lastName,
-        surname: student.surname,
-        levelName: labels.levelName,
-        levelGroupName: labels.levelGroupName,
       ),
     );
   }

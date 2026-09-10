@@ -41,9 +41,11 @@ class FeeControlPageHelpers {
   static String paymentFilterLabel(
     FeeControlPaymentFilter filter,
     AppLocalizations l10n,
-  ) {
-    final status = filter.targetStatus;
-    if (status == null) return l10n.feeControlPaymentStatusAll;
-    return status.localizedLabel(l10n);
-  }
+  ) => switch (filter) {
+    FeeControlPaymentFilter.all => l10n.feeControlPaymentStatusAll,
+    // Un seuil n'est pas un statut : il ne peut pas emprunter un libellé de
+    // créance, et les points de suspension disent qu'il attend une saisie.
+    FeeControlPaymentFilter.threshold => l10n.feeControlSituationThreshold,
+    _ => filter.targetStatus!.localizedLabel(l10n),
+  };
 }

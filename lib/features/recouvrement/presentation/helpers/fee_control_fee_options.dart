@@ -142,3 +142,26 @@ String feeControlFeeOptionLabel(
       MoneyFormat.format(Money.parse(amountInCents, currency)),
   ].join(' · ');
 }
+
+/// Le nom **court** d'une nature — celui des pastilles et de la phrase qui
+/// rejoue la requête.
+///
+/// La grille du niveau nomme quand elle ne porte qu'une ligne pour cette
+/// nature : c'est alors le nom que l'école a écrit. Plusieurs tranches, ou une
+/// grille qu'on n'a pas sous la main, retombent sur la nature localisée —
+/// aucun des libellés de tranche ne vaudrait pour l'ensemble.
+///
+/// Distinct de [feeControlFeeOptionLabel], qui compose en plus le code et le
+/// montant : dans une pastille de 38 dp, ces deux-là ne tiennent pas.
+String feeControlFeeCodeLabel(
+  FeeControlFeeOption? option,
+  String feeCode,
+  AppLocalizations l10n,
+) {
+  if (option != null &&
+      option.isSingleTariff &&
+      option.tariffLabel.trim().isNotEmpty) {
+    return option.tariffLabel;
+  }
+  return feeCode.localizedFeeLabel(l10n);
+}

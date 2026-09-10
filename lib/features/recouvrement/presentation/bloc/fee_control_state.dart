@@ -37,6 +37,12 @@ class FeeControlState extends Equatable {
   /// pas ce frais » de « personne ne correspond au statut demandé ».
   final FeeControlBreakdown breakdown;
 
+  /// Attendu et **encaissé** de toute la classe sur les frais retenus, par
+  /// devise — la cinquième carte de la rangée de compteurs. Deux sacs, jamais
+  /// deux nombres : en sélection mixte, chacun s'écrit sur deux lignes.
+  final MoneyBag expected;
+  final MoneyBag collected;
+
   /// Taille du roster local de la classe demandée, ou `null` si la recherche
   /// portait sur tout le niveau. `0` distingue « le roster n'est pas descendu
   /// sur cet appareil » de « la classe existe mais aucun de ses élèves n'a de
@@ -62,6 +68,8 @@ class FeeControlState extends Equatable {
     this.totalPages = 0,
     this.studentsInScope = 0,
     this.breakdown = const FeeControlBreakdown(),
+    this.expected = MoneyBag.empty,
+    this.collected = MoneyBag.empty,
     this.classroomRosterSize,
     this.errorType,
     this.errorMessage,
@@ -87,6 +95,8 @@ class FeeControlState extends Equatable {
     int? totalPages,
     int? studentsInScope,
     FeeControlBreakdown? breakdown,
+    MoneyBag? expected,
+    MoneyBag? collected,
     Object? classroomRosterSize = _undefined,
     Object? errorType = _undefined,
     Object? errorMessage = _undefined,
@@ -106,6 +116,8 @@ class FeeControlState extends Equatable {
       totalPages: totalPages ?? this.totalPages,
       studentsInScope: studentsInScope ?? this.studentsInScope,
       breakdown: breakdown ?? this.breakdown,
+      expected: expected ?? this.expected,
+      collected: collected ?? this.collected,
       classroomRosterSize: identical(classroomRosterSize, _undefined)
           ? this.classroomRosterSize
           : classroomRosterSize as int?,
@@ -128,6 +140,8 @@ class FeeControlState extends Equatable {
     required ClientPage<FeeControlRow> page,
     int? studentsInScope,
     FeeControlBreakdown? breakdown,
+    MoneyBag? expected,
+    MoneyBag? collected,
     Object? classroomRosterSize = _undefined,
   }) => copyWith(
     status: EnrollmentLoadStatus.success,
@@ -138,6 +152,8 @@ class FeeControlState extends Equatable {
     totalPages: page.totalPages,
     studentsInScope: studentsInScope,
     breakdown: breakdown,
+    expected: expected,
+    collected: collected,
     classroomRosterSize: classroomRosterSize,
     lastQuery: query.copyWithPage(page.page),
     errorType: null,
@@ -156,6 +172,8 @@ class FeeControlState extends Equatable {
     totalPages: 0,
     studentsInScope: 0,
     breakdown: const FeeControlBreakdown(),
+    expected: MoneyBag.empty,
+    collected: MoneyBag.empty,
     classroomRosterSize: null,
     errorType: errorType,
     errorMessage: errorMessage,
@@ -176,6 +194,8 @@ class FeeControlState extends Equatable {
     totalPages,
     studentsInScope,
     breakdown,
+    expected,
+    collected,
     classroomRosterSize,
     errorType,
     errorMessage,

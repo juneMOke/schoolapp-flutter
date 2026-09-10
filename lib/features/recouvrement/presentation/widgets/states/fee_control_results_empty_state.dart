@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -11,16 +12,31 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ne porte ce frais » et « personne ne correspond au statut demandé » sont deux
 /// constats différents, et confondre les deux enverrait chercher une erreur de
 /// saisie là où il n'y a qu'une grille incomplète.
+///
+/// ## Deux issues, jamais un rechargement
+///
+/// [onWiden] **élargit** la recherche (situation = « Tous ») au lieu de la
+/// rejouer : quand un filtre est trop étroit, relancer la même requête ne peut
+/// que redonner le même vide. Il ne s'affiche que s'il ferait quelque chose —
+/// un bouton inerte apprend à ne plus lire les boutons.
+///
+/// [onBilling] mène à la Facturation : si personne n'a payé, l'issue utile
+/// n'est pas de re-chercher, c'est d'encaisser.
 class FeeControlResultsEmptyState extends StatelessWidget {
   final List<String> criteria;
   final String description;
-  final VoidCallback? onReset;
+
+  /// Élargit à « Tous ». `null` quand la situation est déjà « Tous ».
+  final VoidCallback? onWiden;
+
+  final VoidCallback? onBilling;
 
   const FeeControlResultsEmptyState({
     super.key,
     required this.description,
     this.criteria = const <String>[],
-    this.onReset,
+    this.onWiden,
+    this.onBilling,
   });
 
   @override
@@ -48,12 +64,27 @@ class FeeControlResultsEmptyState extends StatelessWidget {
       criteriaChips: criteriaChips,
       medallionIcon: Icons.search_off_rounded,
       cornerBadgeIcon: hasCriteria ? Icons.filter_list_rounded : null,
-      secondaryAction: onReset == null
+      primaryAction: onWiden == null
+          ? null
+          : FilledButton.icon(
+              // ⚠️ `minimumSize` : le thème veut ces boutons pleine largeur, et
+              // l'hôte les pose dans un `Wrap`.
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
+              onPressed: onWiden,
+              icon: const Icon(Icons.groups_outlined, size: 16),
+              label: Text(l10n.feeControlEmptyWiden),
+            ),
+      secondaryAction: onBilling == null
           ? null
           : OutlinedButton.icon(
-              onPressed: onReset,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: Text(l10n.clear),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
+              onPressed: onBilling,
+              icon: const Icon(Icons.point_of_sale_outlined, size: 16),
+              label: Text(l10n.feeControlEmptyBilling),
             ),
       fullWidthCard: true,
     );

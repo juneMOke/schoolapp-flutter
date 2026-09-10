@@ -244,6 +244,11 @@ class AppDimensions {
   static const recouvrementCallListMaxHeight = 620.0;
   static const recouvrementCallListSpinner = 16.0;
 
+  // Aperçu nominatif d'un élève — la fiche qui désagrège ses frais.
+  static const recouvrementStudentSheetMaxWidth = 560.0;
+  static const recouvrementStudentSheetMinPinned = 300.0;
+  static const recouvrementFeeLineBarHeight = 7.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;

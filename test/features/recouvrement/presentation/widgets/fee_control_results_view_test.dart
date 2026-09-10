@@ -15,6 +15,10 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_data_table.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_view.dart';
@@ -52,11 +56,8 @@ const tQuery = FeeControlQuery(
   academicYearId: 'ay-1',
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'l1',
-  feeCode: 'TUITION',
+  feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
-  firstName: '',
-  lastName: '',
-  surname: '',
   page: 0,
   size: 10,
 );
@@ -67,11 +68,8 @@ const tClassroomQuery = FeeControlQuery(
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'l1',
   classroomId: 'cls-1',
-  feeCode: 'TUITION',
+  feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
-  firstName: '',
-  lastName: '',
-  surname: '',
   page: 0,
   size: 10,
 );
@@ -82,13 +80,8 @@ const tNamedQuery = FeeControlQuery(
   academicYearId: 'ay-1',
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'l1',
-  feeCode: 'TUITION',
-  feeLabel: 'Frais scolaires annuels',
-  feeTariffCode: 'SCO',
+  feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
-  firstName: '',
-  lastName: '',
-  surname: '',
   page: 0,
   size: 10,
 );
@@ -101,19 +94,14 @@ const tRelanceQuery = FeeControlQuery(
   academicYearId: 'ay-1',
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'l1',
-  feeCode: 'TUITION',
+  feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.none,
-  firstName: '',
-  lastName: '',
-  surname: '',
   page: 0,
   size: 10,
 );
 
-// Non `const` : l'agrégat porte une LISTE de positions (une par devise), et
-// une fabrique ne peut pas l'être.
-final tRow = FeeControlRow(
-  summary: const EnrollmentSummary(
+const tRow = FeeControlRow(
+  summary: EnrollmentSummary(
     enrollmentId: 'enr-1',
     enrollmentCode: 'code-1',
     status: 'COMPLETED',
@@ -127,12 +115,20 @@ final tRow = FeeControlRow(
       gender: Gender.female,
     ),
   ),
-  aggregate: LocalFeeChargeAggregate.single(
+  line: LocalRecoveryLine(
+    schoolLevelId: 'l1',
     studentId: 's1',
-    expectedInCents: 150000,
-    paidMirrorInCents: 150000,
-    paidPendingInCents: 0,
-    currency: 'USD',
+    charges: [
+      RecoveryChargePosition(
+        feeCode: 'TUITION',
+        position: FeeChargePosition(
+          currency: 'USD',
+          expectedInCents: 150000,
+          paidMirrorInCents: 150000,
+          paidPendingInCents: 0,
+        ),
+      ),
+    ],
   ),
 );
 
@@ -147,10 +143,18 @@ Future<void> _pumpView(
   when(() => bloc.state).thenReturn(state);
   whenListen(bloc, const Stream<FeeControlState>.empty(), initialState: state);
 
-  Widget child = BlocProvider<FeeControlBloc>.value(
-    value: bloc,
+  Widget child = MultiBlocProvider(
+    providers: [
+      BlocProvider<FeeControlBloc>.value(value: bloc),
+      BlocProvider<FeeControlSelectionCubit>(
+        create: (_) => FeeControlSelectionCubit(),
+      ),
+    ],
     child: AppPageBackground(
-      child: FeeControlResultsView(onViewRequested: (_) {}),
+      child: FeeControlResultsView(
+        onViewRequested: (_) {},
+        onRowTapped: (_) {},
+      ),
     ),
   );
 
@@ -171,6 +175,7 @@ Future<void> _pumpView(
 
   await tester.pumpWidget(
     MaterialApp(
+      theme: AppTheme.light,
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -200,19 +205,24 @@ void main() {
 
     await _pumpView(
       tester,
-      FeeControlState(
+      const FeeControlState(
         status: EnrollmentLoadStatus.success,
         rows: [tRow],
         totalElements: 1,
         totalPages: 1,
         studentsInScope: 1,
-        breakdown: const FeeControlBreakdown(settled: 1),
+        breakdown: FeeControlBreakdown(settled: 1),
         lastQuery: tQuery,
       ),
     );
 
     expect(find.byType(FeeControlDataTable), findsOneWidget);
-    expect(find.text('MOKE'), findsOneWidget);
+    // Une seule colonne d'identité désormais : nom et prénom y tiennent
+    // ensemble, et le code du dossier passe en seconde ligne.
+    expect(find.text('MOKE Debbie'), findsOneWidget);
+    // L'en-tête rejoue la requête, et dit l'ordre — sans quoi un tableau trié
+    // par progression passerait pour désordonné.
+    expect(find.textContaining('trié du moins avancé'), findsOneWidget);
   });
 
   testWidgets('classe peuplée mais sans créance de ce frais → message dédié', (
@@ -701,10 +711,18 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: BlocProvider<AuthBloc>.value(
             value: authBloc,
-            child: BlocProvider<FeeControlBloc>.value(
-              value: bloc,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider<FeeControlBloc>.value(value: bloc),
+                BlocProvider<FeeControlSelectionCubit>(
+                  create: (_) => FeeControlSelectionCubit(),
+                ),
+              ],
               child: AppPageBackground(
-                child: FeeControlResultsView(onViewRequested: (_) {}),
+                child: FeeControlResultsView(
+                  onViewRequested: (_) {},
+                  onRowTapped: (_) {},
+                ),
               ),
             ),
           ),
@@ -758,6 +776,19 @@ void main() {
           status: EnrollmentLoadStatus.success,
           studentsInScope: 12,
           breakdown: FeeControlBreakdown(settled: 12),
+          // Le nom vient désormais de la GRILLE portée par l'état, pas d'un
+          // libellé recopié dans la requête : l'écran est borné à un niveau,
+          // donc à une grille, et c'est elle qui nomme.
+          tariffs: [
+            LocalFeeTariff(
+              id: 't-1',
+              feeCode: 'TUITION',
+              label: 'Frais scolaires annuels',
+              code: 'SCO',
+              amountInCents: 150000,
+              currency: 'USD',
+            ),
+          ],
           lastQuery: tNamedQuery,
         ),
         session: _complet,
@@ -792,6 +823,97 @@ void main() {
       );
 
       expect(find.text('Frais : Frais de scolarité'), findsOneWidget);
+    });
+  });
+
+  /// Deux issues, jamais un rechargement : élargir, ou aller encaisser.
+  group('le vide propose deux issues', () {
+    testWidgets('un filtre trop étroit s\'élargit — il ne se recharge pas', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final bloc = MockFeeControlBloc();
+      const state = FeeControlState(
+        status: EnrollmentLoadStatus.success,
+        studentsInScope: 12,
+        breakdown: FeeControlBreakdown(settled: 12),
+        lastQuery: tQuery,
+      );
+      when(() => bloc.state).thenReturn(state);
+      whenListen(
+        bloc,
+        const Stream<FeeControlState>.empty(),
+        initialState: state,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<FeeControlBloc>.value(value: bloc),
+              BlocProvider<FeeControlSelectionCubit>(
+                create: (_) => FeeControlSelectionCubit(),
+              ),
+            ],
+            child: AppPageBackground(
+              child: FeeControlResultsView(
+                onViewRequested: (_) {},
+                onRowTapped: (_) {},
+                onBilling: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Voir tous les élèves'));
+      await tester.pumpAndSettle();
+
+      // Élargir, pas rejouer : relancer la même requête ne pourrait que
+      // redonner le même vide.
+      verify(
+        () => bloc.add(
+          const FeeControlSituationRequested(FeeControlPaymentFilter.all),
+        ),
+      ).called(1);
+      expect(find.text('Ouvrir la facturation'), findsOneWidget);
+    });
+
+    testWidgets('déjà sur « Tous », le bouton d\'élargissement disparaît', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: FeeControlQuery(
+            academicYearId: 'ay-1',
+            schoolLevelGroupId: 'g1',
+            schoolLevelId: 'l1',
+            feeCodes: ['TUITION'],
+            statusFilter: FeeControlPaymentFilter.all,
+            page: 0,
+            size: 10,
+          ),
+        ),
+      );
+
+      // Un bouton qui ne ferait rien apprend à ne plus lire les boutons.
+      expect(find.text('Voir tous les élèves'), findsNothing);
     });
   });
 }

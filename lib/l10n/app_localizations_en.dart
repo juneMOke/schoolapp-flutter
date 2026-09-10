@@ -9718,4 +9718,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recouvrementCallListEmpty => 'No student targeted in this group.';
+
+  @override
+  String get feeControlFeeLoading => 'Reading the fee schedule…';
+
+  @override
+  String get feeControlFeesLabel => 'Fees checked';
+
+  @override
+  String get feeControlFeesA11yLabel =>
+      'Fees checked — multiple selection, at least one';
+
+  @override
+  String get feeControlSituationLabel => 'Situation looked for';
+
+  @override
+  String get feeControlSituationThreshold => 'Paid at least…';
+
+  @override
+  String get feeControlThresholdMixedWarning =>
+      'The selected fees do not share one currency: a single floor amount would mean nothing. Keep only one currency.';
+
+  @override
+  String get feeControlColumnStudent => 'Student';
+
+  @override
+  String feeControlResultTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+      zero: 'no student',
+    );
+    return 'Result · $_temp0';
+  }
+
+  @override
+  String get feeControlResultOrder => 'sorted from least to most advanced';
+
+  @override
+  String feeControlCriteriaThreshold(String amount) {
+    return 'Floor: $amount';
+  }
+
+  @override
+  String get feeControlSelectPage => 'Select the page';
+
+  @override
+  String get feeControlDeselectPage => 'Deselect the page';
+
+  @override
+  String get feeControlMarkedBadge => 'to send home';
+
+  @override
+  String get feeControlSummaryCollected => 'Collected on these fees';
+
+  @override
+  String feeControlSummaryCollectedOn(String expected) {
+    return 'of $expected due';
+  }
+
+  @override
+  String feeControlSelectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students selected',
+      one: '1 student selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlCallListAction => 'Call sheet';
+
+  @override
+  String get feeControlMarkAction => 'Mark to send home';
+
+  @override
+  String get feeControlDeselectAction => 'Deselect';
+
+  @override
+  String feeControlMarkedTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students marked to send home',
+      one: '1 student marked to send home',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlMarkedNote =>
+      'This list is a working draft: nothing is sent to the families. Measure the effect on headcount in the dashboard before deciding.';
+
+  @override
+  String get feeControlMarkedClear => 'Clear the send-home list';
+
+  @override
+  String get feeControlMarkedCleared => 'Send-home list cleared.';
+
+  @override
+  String feeControlMarkedDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students marked to send home — the list stays editable.',
+      one: '1 student marked to send home — the list stays editable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlSheetDossier(String code) {
+    return 'File $code';
+  }
+
+  @override
+  String feeControlSheetPaidOf(String paid, String expected, int percent) {
+    return '$paid of $expected · $percent%';
+  }
+
+  @override
+  String feeControlSheetRemaining(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get feeControlSheetNoExpectation => 'No amount expected on this fee';
+
+  @override
+  String get feeControlSheetMixedNote =>
+      'Each fee is settled in its own currency: the lines do not add up.';
+
+  @override
+  String get feeControlSheetOpenRecord => 'Open the full record';
+
+  @override
+  String get feeControlSheetUnmark => 'Remove from send-home list';
+
+  @override
+  String feeControlSheetMarked(String name) {
+    return '$name marked to send home.';
+  }
+
+  @override
+  String feeControlSheetUnmarked(String name) {
+    return '$name removed from the send-home list.';
+  }
+
+  @override
+  String get feeControlCallSheetTitle => 'School fee control';
+
+  @override
+  String feeControlCallSheetIssuedOn(String date) {
+    return 'Issued on $date';
+  }
+
+  @override
+  String feeControlCallSheetRate(String rate) {
+    return 'Rate applied: $rate';
+  }
+
+  @override
+  String get feeControlCallSheetNumber => 'No.';
+
+  @override
+  String get feeControlCallSheetSignature => 'Parent signature';
+
+  @override
+  String get feeControlCallSheetVisaCollector => 'Collector\'s signature';
+
+  @override
+  String get feeControlCallSheetVisaDirection => 'Management\'s signature';
+
+  @override
+  String get feeControlCallSheetFailed =>
+      'The call sheet could not be prepared.';
+
+  @override
+  String get feeControlEmptyWiden => 'See all students';
+
+  @override
+  String get feeControlEmptyBilling => 'Open billing';
 }

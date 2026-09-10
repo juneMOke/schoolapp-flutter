@@ -7,9 +7,13 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Bandeau de synthèse du Contrôle des frais : où en est la classe sur le frais
-/// contrôlé — combien d'élèves concernés, combien soldés, partiels, sans
-/// paiement.
+/// Bandeau de synthèse du Contrôle des frais : où en est la classe sur les
+/// frais contrôlés — combien d'élèves concernés, combien soldés, partiels, sans
+/// paiement, et ce qui est rentré.
+///
+/// **Les quatre premières tuiles filtrent.** Cliquée, chacune applique la
+/// situation qu'elle compte ; la cinquième, l'encaissé, ne fait que dire — un
+/// montant n'est pas une situation.
 ///
 /// Les compteurs portent sur **toute la population concernée**, pas sur la page
 /// affichée ni sur le sous-ensemble filtré : filtrer sur « Soldé » ne doit pas
@@ -28,7 +32,11 @@ class FeeControlSummaryBand extends StatelessWidget {
 
     return BlocBuilder<FeeControlBloc, FeeControlState>(
       buildWhen: (prev, curr) =>
-          prev.status != curr.status || prev.breakdown != curr.breakdown,
+          prev.status != curr.status ||
+          prev.breakdown != curr.breakdown ||
+          prev.collected != curr.collected ||
+          prev.expected != curr.expected ||
+          prev.lastQuery?.statusFilter != curr.lastQuery?.statusFilter,
       builder: (context, state) {
         // Rien à annoncer tant qu'aucun contrôle n'a abouti, et rien non plus
         // quand la classe ne porte pas ce frais — l'état vide des résultats le
@@ -51,7 +59,21 @@ class FeeControlSummaryBand extends StatelessWidget {
                     container: true,
                     label: l10n.feeControlSummaryA11yLabel,
                     child: EteeloKpiBand(
-                      cards: feeControlSummaryCards(state.breakdown, l10n),
+                      cards: [
+                        ...feeControlSummaryCards(
+                          state.breakdown,
+                          l10n,
+                          active: state.lastQuery?.statusFilter,
+                          onSituation: (filter) => context
+                              .read<FeeControlBloc>()
+                              .add(FeeControlSituationRequested(filter)),
+                        ),
+                        feeControlCollectedCard(
+                          collected: state.collected,
+                          expected: state.expected,
+                          l10n: l10n,
+                        ),
+                      ],
                     ),
                   ),
                 )

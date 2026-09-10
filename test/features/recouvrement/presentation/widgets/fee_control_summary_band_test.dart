@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
@@ -17,16 +20,16 @@ const tQuery = FeeControlQuery(
   academicYearId: 'ay-1',
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'l1',
-  feeCode: 'TUITION',
+  feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
-  firstName: '',
-  lastName: '',
-  surname: '',
   page: 0,
   size: 10,
 );
 
-Future<void> _pumpBand(WidgetTester tester, FeeControlState state) async {
+Future<MockFeeControlBloc> _pumpBand(
+  WidgetTester tester,
+  FeeControlState state,
+) async {
   final bloc = MockFeeControlBloc();
   when(() => bloc.state).thenReturn(state);
   whenListen(bloc, const Stream<FeeControlState>.empty(), initialState: state);
@@ -43,6 +46,7 @@ Future<void> _pumpBand(WidgetTester tester, FeeControlState state) async {
     ),
   );
   await tester.pumpAndSettle();
+  return bloc;
 }
 
 void main() {
@@ -193,5 +197,103 @@ void main() {
     );
 
     expect(find.byType(EteeloKpiBand), findsNothing);
+  });
+
+  group('les tuiles filtrent', () {
+    testWidgets('cliquer une tuile applique la situation qu\'elle compte', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final bloc = await _pumpBand(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 25,
+          breakdown: FeeControlBreakdown(settled: 12, partial: 8, none: 5),
+          lastQuery: tQuery,
+        ),
+      );
+
+      await tester.tap(find.text('À régler'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => bloc.add(
+          const FeeControlSituationRequested(FeeControlPaymentFilter.none),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('la tuile active est annoncée sélectionnée', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpBand(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 25,
+          breakdown: FeeControlBreakdown(settled: 12, partial: 8, none: 5),
+          // `tQuery` filtre sur « soldé » : c'est cette tuile-là qui est
+          // enfoncée, et la couleur seule ne le dirait pas.
+          lastQuery: tQuery,
+        ),
+      );
+
+      // Une seule tuile enfoncée, et c'est celle du filtre courant.
+      final selected = find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.selected == true,
+      );
+      expect(selected, findsOneWidget);
+      // Elle porte bien le libellé « Payé » — l'état n'est pas dit par la
+      // seule couleur.
+      expect(
+        find.descendant(of: selected, matching: find.text('Payé')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('l\'encaissé s\'écrit par devise, jamais en total', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpBand(
+        tester,
+        FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 25,
+          breakdown: const FeeControlBreakdown(settled: 12, partial: 8),
+          collected: MoneyBag.of(const [
+            Money(412000, 'USD'),
+            Money(90000000, 'CDF'),
+          ]),
+          expected: MoneyBag.of(const [
+            Money(748000, 'USD'),
+            Money(120000000, 'CDF'),
+          ]),
+          lastQuery: tQuery,
+        ),
+      );
+
+      expect(find.text('Encaissé sur ces frais'), findsOneWidget);
+      // Deux lignes, pas une somme : leur total n'existe pas. Les montants
+      // sont cherchés tels que le formateur les écrit — espace insécable
+      // compris, que le chercher « à la main » raterait.
+      expect(
+        find.text(MoneyFormat.format(const Money(412000, 'USD'))),
+        findsOneWidget,
+      );
+      expect(
+        find.text(MoneyFormat.format(const Money(90000000, 'CDF'))),
+        findsOneWidget,
+      );
+    });
   });
 }

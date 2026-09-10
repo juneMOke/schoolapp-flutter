@@ -3,6 +3,9 @@ import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -11,18 +14,18 @@ import 'package:school_app_flutter/features/finance/presentation/extensions/stud
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Colonnes triables du Contrôle des frais. `remaining` et `status` viennent des
-/// montants agrégés, pas de l'élève — d'où un enum propre à cette table.
-///
-/// Les valeurs servent d'index de tri **stables** : elles ne changent pas avec
-/// la disposition, si bien qu'un tri choisi en large survit au passage en
-/// étroit.
-enum FeeControlSortColumn { lastName, surname, firstName, remaining, status }
-
 /// Colonnes et lignes du tableau, dans ses deux dispositions.
 ///
-/// Sept colonnes ne tiennent pas sous ~1024 dp : en étroit, on garde identité,
-/// reste et statut, et Attendu/Payé passent en ligne secondaire plutôt que
+/// ## L'ordre n'est pas réordonnable
+///
+/// Les colonnes ne portent plus de tri : la liste sort **du moins avancé au
+/// plus avancé**, et cet ordre EST la priorité de relance. Laisser trier par
+/// nom rendrait la feuille d'appel dépendante d'un clic, et deux impressions du
+/// même périmètre pourraient différer.
+///
+/// ## Six colonnes en large, trois en étroit
+///
+/// Sous ~1024 dp, Dû et Payé passent en ligne secondaire sous Reste plutôt que
 /// d'être tronqués par l'ellipse — un montant tronqué est un chiffre faux.
 class FeeControlTableLayout {
   const FeeControlTableLayout._();
@@ -33,46 +36,24 @@ class FeeControlTableLayout {
   }) {
     if (!wide) {
       return [
-        DataTableColumnDef(
-          label: l10n.lastName,
-          flex: 4,
-          sortable: true,
-          sortIndex: FeeControlSortColumn.lastName.index,
-        ),
+        // Sans libellé : l'action « Sélectionner la page » vit dans l'en-tête
+        // de section, pas dans la colonne.
+        const DataTableColumnDef(label: '', flex: 1),
+        DataTableColumnDef(label: l10n.feeControlColumnStudent, flex: 4),
         DataTableColumnDef(
           label: l10n.facturationDetailChargeRemainingAmountColumn,
           flex: 3,
-          sortable: true,
-          sortIndex: FeeControlSortColumn.remaining.index,
         ),
         DataTableColumnDef(
           label: l10n.facturationDetailChargeStatusColumn,
           flex: 3,
-          sortable: true,
-          sortIndex: FeeControlSortColumn.status.index,
         ),
       ];
     }
 
     return [
-      DataTableColumnDef(
-        label: l10n.lastName,
-        flex: 3,
-        sortable: true,
-        sortIndex: FeeControlSortColumn.lastName.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.surname,
-        flex: 2,
-        sortable: true,
-        sortIndex: FeeControlSortColumn.surname.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.firstName,
-        flex: 2,
-        sortable: true,
-        sortIndex: FeeControlSortColumn.firstName.index,
-      ),
+      const DataTableColumnDef(label: '', flex: 1),
+      DataTableColumnDef(label: l10n.feeControlColumnStudent, flex: 4),
       // Les colonnes de montant pèsent autant que les noms.
       DataTableColumnDef(
         label: l10n.facturationDetailChargeExpectedAmountColumn,
@@ -85,14 +66,10 @@ class FeeControlTableLayout {
       DataTableColumnDef(
         label: l10n.facturationDetailChargeRemainingAmountColumn,
         flex: 3,
-        sortable: true,
-        sortIndex: FeeControlSortColumn.remaining.index,
       ),
       DataTableColumnDef(
         label: l10n.facturationDetailChargeStatusColumn,
         flex: 3,
-        sortable: true,
-        sortIndex: FeeControlSortColumn.status.index,
       ),
     ];
   }
@@ -101,37 +78,41 @@ class FeeControlTableLayout {
     List<FeeControlRow> rows,
     AppLocalizations l10n, {
     required bool wide,
+    required ExchangeRate? rate,
+    required Set<String> selected,
+    required Set<String> marked,
     required ValueChanged<FeeControlRow> onViewRequested,
+    required ValueChanged<FeeControlRow> onRowTapped,
+    required ValueChanged<FeeControlRow> onSelectionToggled,
   }) {
     return rows
         .map((row) {
           final student = row.summary.student;
-          final aggregate = row.aggregate;
-          // Une ligne par devise, jointes par « · » : la cellule d'un tableau
-          // ne s'empile pas. En pratique cet écran est borné à un frais et un
-          // niveau, donc à une devise — la jointure ne se voit jamais, et elle
-          // évite qu'une devise disparaisse en silence si elle se voyait.
-          final expected = money(aggregate.expected);
-          final paid = money(aggregate.paidTotal);
-          final remaining = money(aggregate.remaining);
-          final statusCell = DataTableCellSpec(
-            child: FeeStatusBadge(
-              label: row.status.localizedLabel(l10n),
-              visuals: row.status.visuals,
-            ),
-          );
+          final expected = money(row.expected);
+          final paid = money(row.paid);
+          final remaining = money(row.remaining);
 
           // Teintes sur un PRÉDICAT, pas sur un montant : « quelque chose a
           // été payé », « il reste quelque chose » — dans n'importe quelle
           // devise.
-          final paidColor = _paidColor(!aggregate.paidTotal.isAllZero);
-          final remainingColor = _remainingColor(
-            !aggregate.remaining.isAllZero,
+          final paidColor = _paidColor(!row.paid.isAllZero);
+          final remainingColor = _remainingColor(!row.remaining.isAllZero);
+
+          final name = DataTableCellSpec(
+            text: '${student.lastName} ${student.firstName}',
+            variant: DataTableCellTextVariant.strong,
+            // ⚠️ La spec écrit ici « matricule · payeur ». Le payeur n'a pas de
+            // source locale pour un élève déjà inscrit (`guardian_phone` ne vit
+            // que sur les tables de candidats), et l'inventer serait pire que
+            // l'omettre. Reste le code du dossier, que l'école lit déjà.
+            secondaryText: row.summary.enrollmentCode.isEmpty
+                ? null
+                : row.summary.enrollmentCode,
           );
 
           return DataTableRowSpec(
-            // L'identité de ligne est l'ÉLÈVE : un candidat sans dossier porte un
-            // `enrollmentId` vide, qui ferait collisionner plusieurs lignes.
+            // L'identité de ligne est l'ÉLÈVE : un candidat sans dossier porte
+            // un `enrollmentId` vide, qui ferait collisionner plusieurs lignes.
             id: student.id,
             displayName: '${student.lastName} ${student.firstName}',
             leading: core_avatar.StudentAvatar(
@@ -140,26 +121,20 @@ class FeeControlTableLayout {
               studentId: student.id,
               size: core_avatar.AvatarSize.sm,
             ),
+            onTap: () => onRowTapped(row),
             cells: wide
                 ? [
-                    DataTableCellSpec(
-                      text: student.lastName,
-                      variant: DataTableCellTextVariant.strong,
-                    ),
-                    DataTableCellSpec(text: student.surname),
-                    DataTableCellSpec(text: student.firstName),
+                    _selectCell(row, selected, marked, onSelectionToggled),
+                    name,
                     // L'attendu reste neutre : c'est la référence, pas un verdict.
                     _amount(expected),
                     _amount(paid, color: paidColor),
                     _amount(remaining, color: remainingColor),
-                    statusCell,
+                    _situation(row, l10n, rate),
                   ]
                 : [
-                    DataTableCellSpec(
-                      text: '${student.lastName} ${student.firstName}',
-                      variant: DataTableCellTextVariant.strong,
-                      secondaryText: student.surname,
-                    ),
+                    _selectCell(row, selected, marked, onSelectionToggled),
+                    name,
                     DataTableCellSpec(
                       text: remaining,
                       variant: DataTableCellTextVariant.mono,
@@ -168,7 +143,7 @@ class FeeControlTableLayout {
                       secondaryVariant: DataTableCellTextVariant.mono,
                       secondaryColor: paidColor,
                     ),
-                    statusCell,
+                    _situation(row, l10n, rate),
                   ],
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
@@ -178,6 +153,54 @@ class FeeControlTableLayout {
           );
         })
         .toList(growable: false);
+  }
+
+  /// La case à cocher, et le rappel qu'un élève est déjà sur la liste des
+  /// renvois.
+  ///
+  /// Une **cellule** et non le `leading` de la ligne : celui-ci est borné à
+  /// 36 dp par le tableau partagé, où une case et un avatar ne tiennent pas.
+  static DataTableCellSpec _selectCell(
+    FeeControlRow row,
+    Set<String> selected,
+    Set<String> marked,
+    ValueChanged<FeeControlRow> onSelectionToggled,
+  ) => DataTableCellSpec(
+    child: _SelectCell(
+      checked: selected.contains(row.studentId),
+      marked: marked.contains(row.studentId),
+      onToggled: () => onSelectionToggled(row),
+    ),
+  );
+
+  /// La pastille classe, le taux nuance.
+  static DataTableCellSpec _situation(
+    FeeControlRow row,
+    AppLocalizations l10n,
+    ExchangeRate? rate,
+  ) {
+    final percent = row.hasNoExpectation ? null : row.ratePercent(rate);
+    return DataTableCellSpec(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: FeeStatusBadge(
+              label: row.status.localizedLabel(l10n),
+              visuals: row.status.visuals,
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingXS),
+          Text(
+            // Un tiret plutôt qu'un « 0 % » : rien n'était attendu, ou aucun
+            // cours ne rapproche les deux devises de la ligne. Les deux se
+            // disent « on ne sait pas », pas « rien n'a été payé ».
+            percent == null ? '—' : '$percent %',
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
   }
 
   static DataTableCellSpec _amount(String text, {Color? color}) =>
@@ -204,4 +227,57 @@ class FeeControlTableLayout {
   /// créance » n'est pas « zéro dollar ».
   static String money(MoneyBag bag) =>
       bag.isEmpty ? '—' : bag.entries.map(MoneyFormat.format).join(' · ');
+}
+
+/// La case, et le rappel qu'un élève est déjà sur la liste des renvois.
+class _SelectCell extends StatelessWidget {
+  final bool checked;
+  final bool marked;
+  final VoidCallback onToggled;
+
+  const _SelectCell({
+    required this.checked,
+    required this.marked,
+    required this.onToggled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ⚠️ Le tap de la case ne doit PAS ouvrir la fiche : cocher n'est pas
+        // consulter. `Checkbox` absorbe le geste, la ligne ne le voit pas.
+        Checkbox(
+          value: checked,
+          onChanged: (_) => onToggled(),
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        if (marked) ...[
+          const SizedBox(width: AppDimensions.spacingXS),
+          const _MarkedDot(),
+        ],
+      ],
+    );
+  }
+}
+
+/// Le rappel « à renvoyer », visible sans ouvrir la fiche.
+class _MarkedDot extends StatelessWidget {
+  const _MarkedDot();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Tooltip(
+      message: l10n.feeControlMarkedBadge,
+      child: const Icon(
+        Icons.person_off_outlined,
+        size: AppDimensions.recouvrementFeeChipIconSize,
+        color: AppColors.error,
+      ),
+    );
+  }
 }

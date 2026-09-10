@@ -9806,4 +9806,191 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recouvrementCallListEmpty => 'Aucun élève visé dans ce groupe.';
+
+  @override
+  String get feeControlFeeLoading => 'Lecture de la grille…';
+
+  @override
+  String get feeControlFeesLabel => 'Frais contrôlés';
+
+  @override
+  String get feeControlFeesA11yLabel =>
+      'Frais contrôlés — sélection multiple, au moins un';
+
+  @override
+  String get feeControlSituationLabel => 'Situation recherchée';
+
+  @override
+  String get feeControlSituationThreshold => 'A payé au moins…';
+
+  @override
+  String get feeControlThresholdMixedWarning =>
+      'Les frais retenus ne partagent pas la même devise : un montant plancher unique n\'aurait pas de sens. Ne gardez qu\'une devise.';
+
+  @override
+  String get feeControlColumnStudent => 'Élève';
+
+  @override
+  String feeControlResultTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'aucun élève',
+    );
+    return 'Résultat · $_temp0';
+  }
+
+  @override
+  String get feeControlResultOrder => 'trié du moins avancé au plus avancé';
+
+  @override
+  String feeControlCriteriaThreshold(String amount) {
+    return 'Plancher : $amount';
+  }
+
+  @override
+  String get feeControlSelectPage => 'Sélectionner la page';
+
+  @override
+  String get feeControlDeselectPage => 'Désélectionner la page';
+
+  @override
+  String get feeControlMarkedBadge => 'à renvoyer';
+
+  @override
+  String get feeControlSummaryCollected => 'Encaissé sur ces frais';
+
+  @override
+  String feeControlSummaryCollectedOn(String expected) {
+    return 'sur $expected dus';
+  }
+
+  @override
+  String feeControlSelectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves sélectionnés',
+      one: '1 élève sélectionné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlCallListAction => 'Liste d\'appel';
+
+  @override
+  String get feeControlMarkAction => 'Marquer à renvoyer';
+
+  @override
+  String get feeControlDeselectAction => 'Désélectionner';
+
+  @override
+  String feeControlMarkedTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves marqués « à renvoyer »',
+      one: '1 élève marqué « à renvoyer »',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlMarkedNote =>
+      'Cette liste est un brouillon de travail : rien n\'est notifié aux familles. Mesurez l\'effet sur l\'effectif dans le tableau de bord avant de décider.';
+
+  @override
+  String get feeControlMarkedClear => 'Vider la liste des renvois';
+
+  @override
+  String get feeControlMarkedCleared => 'Liste des renvois vidée.';
+
+  @override
+  String feeControlMarkedDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count élèves marqués « à renvoyer » — la liste reste modifiable.',
+      one: '1 élève marqué « à renvoyer » — la liste reste modifiable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlSheetDossier(String code) {
+    return 'Dossier $code';
+  }
+
+  @override
+  String feeControlSheetPaidOf(String paid, String expected, int percent) {
+    return '$paid sur $expected · $percent %';
+  }
+
+  @override
+  String feeControlSheetRemaining(String amount) {
+    return 'reste $amount';
+  }
+
+  @override
+  String get feeControlSheetNoExpectation =>
+      'Aucun montant attendu sur ce frais';
+
+  @override
+  String get feeControlSheetMixedNote =>
+      'Chaque frais se solde dans sa propre devise : les lignes ne s\'additionnent pas.';
+
+  @override
+  String get feeControlSheetOpenRecord => 'Ouvrir la fiche complète';
+
+  @override
+  String get feeControlSheetUnmark => 'Retirer des renvois';
+
+  @override
+  String feeControlSheetMarked(String name) {
+    return '$name marqué « à renvoyer ».';
+  }
+
+  @override
+  String feeControlSheetUnmarked(String name) {
+    return '$name retiré des renvois.';
+  }
+
+  @override
+  String get feeControlCallSheetTitle => 'Contrôle des frais scolaires';
+
+  @override
+  String feeControlCallSheetIssuedOn(String date) {
+    return 'Établi le $date';
+  }
+
+  @override
+  String feeControlCallSheetRate(String rate) {
+    return 'Taux appliqué : $rate';
+  }
+
+  @override
+  String get feeControlCallSheetNumber => 'N°';
+
+  @override
+  String get feeControlCallSheetSignature => 'Signature du parent';
+
+  @override
+  String get feeControlCallSheetVisaCollector => 'Visa du percepteur';
+
+  @override
+  String get feeControlCallSheetVisaDirection => 'Visa de la direction';
+
+  @override
+  String get feeControlCallSheetFailed =>
+      'La feuille d\'appel n\'a pas pu être préparée.';
+
+  @override
+  String get feeControlEmptyWiden => 'Voir tous les élèves';
+
+  @override
+  String get feeControlEmptyBilling => 'Ouvrir la facturation';
 }

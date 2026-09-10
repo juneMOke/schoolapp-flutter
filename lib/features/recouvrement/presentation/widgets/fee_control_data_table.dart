@@ -2,19 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_table_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Tableau du Contrôle des frais : identité de l'élève **et** sa position sur
-/// le frais contrôlé (attendu / payé / reste / statut).
+/// Tableau du Contrôle des frais : l'élève **et** sa position sur les frais
+/// retenus (attendu / payé / reste / situation).
 ///
-/// Ne porte que l'état de tri et le câblage de pagination ; colonnes et lignes,
-/// dans leurs deux dispositions, vivent dans [FeeControlTableLayout].
-class FeeControlDataTable extends StatefulWidget {
+/// Ne porte plus aucun état : l'ordre vient du projecteur — du moins avancé au
+/// plus avancé — et n'est pas réordonnable. Colonnes et lignes, dans leurs deux
+/// dispositions, vivent dans [FeeControlTableLayout].
+class FeeControlDataTable extends StatelessWidget {
   final List<FeeControlRow> rows;
   final int? totalCount;
+
+  /// Cours du jour, pour le taux affiché en regard de la pastille. Le même que
+  /// celui qui a ordonné la liste.
+  final ExchangeRate? rate;
+
+  final Set<String> selected;
+  final Set<String> marked;
+
   final ValueChanged<FeeControlRow> onViewRequested;
+  final ValueChanged<FeeControlRow> onRowTapped;
+  final ValueChanged<FeeControlRow> onSelectionToggled;
+
   final bool isLoading;
   final bool isError;
   final String? loadingLabel;
@@ -31,7 +44,12 @@ class FeeControlDataTable extends StatefulWidget {
   const FeeControlDataTable({
     super.key,
     required this.rows,
+    required this.rate,
+    required this.selected,
+    required this.marked,
     required this.onViewRequested,
+    required this.onRowTapped,
+    required this.onSelectionToggled,
     this.totalCount,
     this.isLoading = false,
     this.isError = false,
@@ -48,17 +66,8 @@ class FeeControlDataTable extends StatefulWidget {
   });
 
   @override
-  State<FeeControlDataTable> createState() => _FeeControlDataTableState();
-}
-
-class _FeeControlDataTableState extends State<FeeControlDataTable> {
-  FeeControlSortColumn _sortColumn = FeeControlSortColumn.lastName;
-  bool _sortAscending = true;
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final sorted = _sortRows(widget.rows);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -66,27 +75,28 @@ class _FeeControlDataTableState extends State<FeeControlDataTable> {
             constraints.maxWidth >= AppBreakpoints.feeControlTableWideMin;
         return DataTableView(
           rows: FeeControlTableLayout.rows(
-            sorted,
+            rows,
             l10n,
             wide: wide,
-            onViewRequested: widget.onViewRequested,
+            rate: rate,
+            selected: selected,
+            marked: marked,
+            onViewRequested: onViewRequested,
+            onRowTapped: onRowTapped,
+            onSelectionToggled: onSelectionToggled,
           ),
           config: DataTableViewConfig(
             columns: FeeControlTableLayout.columns(l10n, wide: wide),
-            isLoading: widget.isLoading,
-            isError: widget.isError,
-            loadingLabel: widget.loadingLabel ?? l10n.loadingStudents,
-            errorLabel: widget.errorLabel ?? l10n.noResultsFound,
-            sortColumnIndex: _sortColumn.index,
-            sortAscending: _sortAscending,
-            onSortChanged: _onSortChanged,
-            emptyLabel:
-                widget.emptyLabel ?? l10n.feeControlNoResultsDescription,
+            isLoading: isLoading,
+            isError: isError,
+            loadingLabel: loadingLabel ?? l10n.loadingStudents,
+            errorLabel: errorLabel ?? l10n.noResultsFound,
+            emptyLabel: emptyLabel ?? l10n.feeControlNoResultsDescription,
             footer: DataTableFooterConfig(
-              label: l10n.paginationResultsCount(sorted.length),
-              total: widget.totalCount,
+              label: l10n.paginationResultsCount(rows.length),
+              total: totalCount,
               unit: l10n.unitStudents,
-              pagination: _buildPaginationConfig(),
+              pagination: _pagination(),
             ),
           ),
         );
@@ -94,57 +104,18 @@ class _FeeControlDataTableState extends State<FeeControlDataTable> {
     );
   }
 
-  DataTablePaginationConfig? _buildPaginationConfig() {
-    if (!widget.showPagination || widget.totalPages <= 1) {
-      return null;
-    }
-    if (widget.onPreviousPage == null || widget.onNextPage == null) {
-      return null;
-    }
+  DataTablePaginationConfig? _pagination() {
+    if (!showPagination || totalPages <= 1) return null;
+    if (onPreviousPage == null || onNextPage == null) return null;
 
     return DataTablePaginationConfig(
-      currentPage: widget.currentPage,
-      totalPages: widget.totalPages,
-      pageSize: widget.pageSize,
-      onPrevious: widget.onPreviousPage!,
-      onNext: widget.onNextPage!,
-      isLoading: widget.isLoading,
-      pageLabel: widget.pageLabelBuilder,
+      currentPage: currentPage,
+      totalPages: totalPages,
+      pageSize: pageSize,
+      onPrevious: onPreviousPage!,
+      onNext: onNextPage!,
+      isLoading: isLoading,
+      pageLabel: pageLabelBuilder,
     );
-  }
-
-  void _onSortChanged(int column, bool ascending) {
-    if (column < 0 || column >= FeeControlSortColumn.values.length) return;
-
-    setState(() {
-      _sortColumn = FeeControlSortColumn.values[column];
-      _sortAscending = ascending;
-    });
-  }
-
-  /// Tri de la **page courante**, comme le tableau de la Facturation : la
-  /// liste complète vit dans le BLoC, la table n'en voit qu'une tranche.
-  List<FeeControlRow> _sortRows(List<FeeControlRow> rows) {
-    final list = [...rows];
-    list.sort((a, b) {
-      final cmp = switch (_sortColumn) {
-        FeeControlSortColumn.lastName => a.summary.student.lastName.compareTo(
-          b.summary.student.lastName,
-        ),
-        FeeControlSortColumn.surname => a.summary.student.surname.compareTo(
-          b.summary.student.surname,
-        ),
-        FeeControlSortColumn.firstName => a.summary.student.firstName.compareTo(
-          b.summary.student.firstName,
-        ),
-        FeeControlSortColumn.remaining =>
-          a.aggregate.sortableRemainingInCents.compareTo(
-            b.aggregate.sortableRemainingInCents,
-          ),
-        FeeControlSortColumn.status => a.status.index.compareTo(b.status.index),
-      };
-      return _sortAscending ? cmp : -cmp;
-    });
-    return list;
   }
 }

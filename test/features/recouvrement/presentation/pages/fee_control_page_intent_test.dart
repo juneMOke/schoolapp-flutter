@@ -4,9 +4,9 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -17,7 +17,6 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/school_le
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -31,6 +30,18 @@ class _MockAcademicYearBloc
 
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
+
+/// Aucun cours en base : l'écran doit rester lisible sans lui.
+class _StubExchangeRatesCubit extends Cubit<ExchangeRatesState>
+    implements ExchangeRatesCubit {
+  _StubExchangeRatesCubit() : super(const ExchangeRatesState());
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 const tIntent = FeeControlIntent(
   schoolLevelGroupId: 'g1',
@@ -112,6 +123,11 @@ void main() {
     );
 
     GetIt.instance.registerFactory<FeeControlBloc>(() => bloc);
+    // La page lit le cours du jour pour ordonner ses lignes. Un cubit réel
+    // sur un dépôt bouchonné suffit : aucun taux n'est attendu ici.
+    GetIt.instance.registerFactory<ExchangeRatesCubit>(
+      () => _StubExchangeRatesCubit(),
+    );
   });
 
   tearDown(() async => GetIt.instance.reset());
@@ -195,11 +211,9 @@ void main() {
     expect(request.schoolLevelGroupId, 'g1');
     expect(request.schoolLevelId, 'lvl-1');
     expect(request.classroomId, 'c-a');
-    expect(request.feeCode, 'TUITION');
-    // La désignation vient de la grille : lancée plus tôt, la requête aurait
-    // porté un libellé vide et la puce de critère aurait menti.
-    expect(request.feeLabel, 'Minerval annuel');
-    expect(request.feeTariffCode, 'T1');
+    // La sélection d'ouverture porte le frais désigné, et lui seul : lancée
+    // plus tôt, la requête serait partie sur une grille pas encore lue.
+    expect(request.feeCodes, ['TUITION']);
   });
 
   testWidgets('la recherche ne part QU\'UNE fois, même si la grille est '
@@ -316,14 +330,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // La VALEUR du champ, pas un texte présent ailleurs à l'écran : le libellé
-    // du tarif apparaît aussi dans la liste déroulante, et le chercher là
-    // rendrait le test vert quoi qu'il arrive à la sélection.
-    final fee = tester
-        .widgetList<EteeloSelectInput<String>>(
-          find.byType(EteeloSelectInput<String>),
-        )
-        .firstWhere((field) => field.label == 'Frais');
-    expect(fee.value, 'TUITION');
+    // La pastille du frais est là ET cochée. Chercher le seul libellé ne
+    // suffirait pas : il apparaîtrait aussi sur une pastille décochée, et le
+    // test resterait vert alors que la sélection aurait été effacée.
+    expect(find.text('Minerval annuel'), findsOneWidget);
+    expect(find.byIcon(Icons.check_box), findsOneWidget);
   });
 }

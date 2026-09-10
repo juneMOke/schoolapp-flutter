@@ -8,22 +8,32 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_page_helpers.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_data_table.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_empty_reason.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_search_invitation_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/states/fee_control_results_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Adapte l'état de [FeeControlBloc] vers le bon widget de résultats.
 ///
-/// Responsabilité unique : router vers invitation / erreur / vide / tableau —
-/// le rendu est délégué. Même anatomie que `FacturationStudentTable`, y compris
-/// les composants d'états partagés.
+/// Responsabilité unique : router vers invitation / erreur / vide / section de
+/// résultat — le rendu est délégué. Même anatomie que `FacturationStudentTable`,
+/// y compris les composants d'états partagés.
 class FeeControlResultsView extends StatelessWidget {
   final ValueChanged<FeeControlRow> onViewRequested;
+  final ValueChanged<FeeControlRow> onRowTapped;
 
-  const FeeControlResultsView({super.key, required this.onViewRequested});
+  /// Mène à la Facturation. Si personne n'a payé, l'issue utile est
+  /// d'encaisser, pas de re-chercher.
+  final VoidCallback? onBilling;
+
+  const FeeControlResultsView({
+    super.key,
+    required this.onViewRequested,
+    required this.onRowTapped,
+    this.onBilling,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +61,10 @@ class FeeControlResultsView extends StatelessWidget {
           return const FeeControlSearchInvitationCard();
         }
 
-        final isLoading = state.status == EnrollmentLoadStatus.loading;
-        final isError = state.status == EnrollmentLoadStatus.failure;
         final isEmpty =
             state.status == EnrollmentLoadStatus.success && state.rows.isEmpty;
 
-        if (isError) {
+        if (state.status == EnrollmentLoadStatus.failure) {
           return AnimatedSwitcher(
             duration: AppMotion.layout,
             switchInCurve: AppMotion.outCurve,
@@ -80,18 +88,27 @@ class FeeControlResultsView extends StatelessWidget {
             switchInCurve: AppMotion.outCurve,
             switchOutCurve: AppMotion.inCurve,
             // Pas de bouton « Effacer » ici : il ne remettrait à zéro que les
-            // résultats, pas les champs du formulaire (widget voisin), et
+            // résultats, pas la carte de périmètre (widget voisin), et
             // laisserait l'écran dans un état contradictoire. La remise à zéro
-            // se fait depuis le formulaire, qui la porte déjà.
+            // se fait depuis la carte, qui la porte déjà.
             child: FeeControlResultsEmptyState(
               key: const ValueKey('fee-control-results-empty'),
-              description: _emptyDescription(
+              onWiden:
+                  state.lastQuery?.statusFilter == FeeControlPaymentFilter.all
+                  ? null
+                  : () => context.read<FeeControlBloc>().add(
+                      const FeeControlSituationRequested(
+                        FeeControlPaymentFilter.all,
+                      ),
+                    ),
+              onBilling: onBilling,
+              description: feeControlEmptyReason(
                 state,
                 l10n,
                 enrollment: enrollment,
                 classroom: classroom,
               ),
-              criteria: _buildCriteria(state, l10n),
+              criteria: FeeControlQueryPhrase.chips(state, l10n),
             ),
           );
         }
@@ -100,151 +117,24 @@ class FeeControlResultsView extends StatelessWidget {
           duration: AppMotion.layout,
           switchInCurve: AppMotion.outCurve,
           switchOutCurve: AppMotion.inCurve,
-          child: FeeControlDataTable(
+          child: FeeControlResultsSection(
             key: ValueKey(state.status),
-            rows: state.rows,
-            totalCount: state.totalElements,
-            isLoading: isLoading,
-            isError: isError,
-            loadingLabel: l10n.loadingStudents,
-            errorLabel: state.errorMessage,
+            state: state,
             // Même cause, même phrase : sans ce relais le tableau continuerait
             // d'annoncer « aucun élève ne correspond » là où la carte de vide
             // dit désormais la vérité.
-            emptyLabel: _emptyDescription(
+            emptyLabel: feeControlEmptyReason(
               state,
               l10n,
               enrollment: enrollment,
               classroom: classroom,
             ),
-            showPagination: true,
-            currentPage: state.page + 1,
-            totalPages: state.totalPages,
-            pageSize: state.size,
-            onPreviousPage: () => context.read<FeeControlBloc>().add(
-              FeeControlPageRequested(state.page - 1),
-            ),
-            onNextPage: () => context.read<FeeControlBloc>().add(
-              FeeControlPageRequested(state.page + 1),
-            ),
-            pageLabelBuilder: (current, total) =>
-                l10n.paginationPageIndicator(current, total),
             onViewRequested: onViewRequested,
+            onRowTapped: onRowTapped,
           ),
         );
       },
     );
-  }
-
-  /// Une liste vide a plusieurs causes qui appellent des gestes différents. Les
-  /// confondre envoie chercher une erreur de saisie là où il manque une
-  /// synchronisation — ou l'inverse.
-  ///
-  /// **Le droit manquant passe en tête** (ADR-015 F1). Les deux messages de
-  /// synchronisation ci-dessous promettent une mise à jour qui n'arrivera
-  /// jamais : le flux qui remplirait ces tables est sauté à chaque cycle faute
-  /// de permission. Placés avant, ils enverraient le caissier attendre
-  /// indéfiniment un pull qui a déjà eu lieu et qui l'a délibérément sauté.
-  static String _emptyDescription(
-    FeeControlState state,
-    AppLocalizations l10n, {
-    required PermissionHolding enrollment,
-    required PermissionHolding classroom,
-  }) {
-    if (enrollment == PermissionHolding.missing) {
-      return l10n.feeControlEmptyEnrollmentWithheld;
-    }
-    // ⚠️ La maille décide du VOCABULAIRE autant que des causes. Les messages de
-    // classe (« de cette classe ») étaient les seuls écrits, si bien qu'une
-    // recherche « toutes les classes du niveau » ne pouvait qu'échouer vers
-    // « modifiez le formulaire » — on envoyait l'opérateur corriger des
-    // critères qui n'y peuvent rien.
-    final scopedToClassroom = state.lastQuery?.classroomId != null;
-    if (scopedToClassroom && classroom == PermissionHolding.missing) {
-      return l10n.feeControlEmptyClassroomWithheld;
-    }
-
-    if (state.studentsInScope == 0) {
-      // Maille NIVEAU : deux causes se ressemblent et l'appareil ne peut pas
-      // les départager — le niveau n'a réellement aucun élève, ou le flux
-      // Inscription n'a pas atterri. Le message dit donc ce qui est vrai des
-      // deux côtés (« sur cet appareil ») et n'offre le geste qu'en condition.
-      if (!scopedToClassroom) return l10n.feeControlEmptyNoEnrollmentForLevel;
-      // Maille CLASSE : le roster tranche, lui. Absent, rien à croiser.
-      if (state.classroomRosterSize == 0) {
-        return l10n.feeControlEmptyRosterMissing;
-      }
-      // Roster connu, mais aucun de ses élèves n'a de dossier d'inscription
-      // local sur l'année — décalage d'identifiants ou pull Inscription partiel.
-      return l10n.feeControlEmptyNoLocalEnrollment;
-    }
-
-    // Des élèves, mais aucun ne porte ce frais : la grille ne l'a pas généré.
-    // Mesuré AVANT le filtre de statut (cf. `FeeControlProjector.join`), donc
-    // « personne n'est concerné », jamais « le filtre a tout écarté ».
-    if (state.breakdown.isEmpty) {
-      return scopedToClassroom
-          ? l10n.feeControlNoChargeDescription
-          : l10n.feeControlNoChargeForLevelDescription;
-    }
-    // Il reste des élèves concernés : c'est bien la saisie qui n'a rien laissé
-    // passer, et « modifiez le formulaire » est enfin le bon conseil.
-    return l10n.feeControlNoResultsDescription;
-  }
-
-  /// Puces rappelant ce qui a été demandé — le frais et le statut d'abord :
-  /// ce sont eux qui expliquent une liste vide.
-  static List<String> _buildCriteria(
-    FeeControlState state,
-    AppLocalizations l10n,
-  ) {
-    final query = state.lastQuery;
-    if (query == null) return const <String>[];
-
-    final chips = <String>[];
-    if (query.feeCode.trim().isNotEmpty) {
-      // La MÊME désignation que le sélecteur : le libellé de la grille et son
-      // code quand ils désignent une ligne unique, la nature localisée sinon.
-      // Une puce qui rappelle « Minerval » là où l'opérateur a cliqué « Frais
-      // scolaires annuels (SCO) » lui fait douter de ce qu'il a demandé.
-      chips.add(
-        l10n.feeControlCriteriaFee(
-          feeDesignation(
-            label: query.feeLabel,
-            feeCode: query.feeCode,
-            feeTariffCode: query.feeTariffCode,
-            l10n: l10n,
-          ),
-        ),
-      );
-    }
-    // Nom de la classe plutôt que son id — l'id ne dit rien à personne. Le
-    // repli sur « toutes les classes » n'est pas affiché : c'est le défaut.
-    final classroomId = query.classroomId;
-    if (classroomId != null) {
-      final name = state.classrooms
-          .where((c) => c.id == classroomId)
-          .map((c) => c.name)
-          .firstOrNull;
-      if (name != null) chips.add(l10n.feeControlCriteriaClassroom(name));
-    }
-    if (query.statusFilter != FeeControlPaymentFilter.all) {
-      chips.add(
-        l10n.feeControlCriteriaStatus(
-          FeeControlPageHelpers.paymentFilterLabel(query.statusFilter, l10n),
-        ),
-      );
-    }
-
-    void addIfNotEmpty(String label, String value) {
-      final trimmed = value.trim();
-      if (trimmed.isNotEmpty) chips.add('$label: $trimmed');
-    }
-
-    addIfNotEmpty(l10n.lastName, query.lastName);
-    addIfNotEmpty(l10n.surname, query.surname);
-    addIfNotEmpty(l10n.firstName, query.firstName);
-    return chips;
   }
 
   static bool _shouldBuild(FeeControlState prev, FeeControlState curr) =>

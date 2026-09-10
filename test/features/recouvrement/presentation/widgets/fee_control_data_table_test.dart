@@ -6,12 +6,14 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_data_table.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 FeeControlRow row(
@@ -35,12 +37,20 @@ FeeControlRow row(
       gender: Gender.male,
     ),
   ),
-  aggregate: LocalFeeChargeAggregate.single(
+  line: LocalRecoveryLine(
+    schoolLevelId: 'l1',
     studentId: id,
-    expectedInCents: expected,
-    paidMirrorInCents: mirror,
-    paidPendingInCents: pending,
-    currency: 'USD',
+    charges: [
+      RecoveryChargePosition(
+        feeCode: 'TUITION',
+        position: FeeChargePosition(
+          currency: 'USD',
+          expectedInCents: expected,
+          paidMirrorInCents: mirror,
+          paidPendingInCents: pending,
+        ),
+      ),
+    ],
   ),
 );
 
@@ -48,9 +58,14 @@ Future<void> _pumpTable(
   WidgetTester tester,
   List<FeeControlRow> rows, {
   ValueChanged<FeeControlRow>? onViewRequested,
+  ValueChanged<FeeControlRow>? onRowTapped,
+  Set<String> selected = const <String>{},
+  Set<String> marked = const <String>{},
+  ValueChanged<FeeControlRow>? onSelectionToggled,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: AppTheme.light,
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -58,7 +73,12 @@ Future<void> _pumpTable(
         child: FeeControlDataTable(
           rows: rows,
           totalCount: rows.length,
+          rate: null,
+          selected: selected,
+          marked: marked,
           onViewRequested: onViewRequested ?? (_) {},
+          onRowTapped: onRowTapped ?? (_) {},
+          onSelectionToggled: onSelectionToggled ?? (_) {},
         ),
       ),
     ),
