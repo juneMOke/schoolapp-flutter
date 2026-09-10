@@ -28,6 +28,18 @@ class HomeNavigationUiTokens {
   static const double sidebarHeaderCollapsedHorizontalPadding = 6;
   static const double sidebarHeaderVerticalPadding = 8;
 
+  /// Marque de tête de la barre latérale — le symbole ETEELO, ou le sceau de
+  /// l'école quand elle en a déposé un.
+  ///
+  /// Repliée, la marque tient dans la vignette tactile (48 dp) : les 9 dp de
+  /// marge qui restent de chaque côté suffisent à détacher un sceau de sa
+  /// pastille claire. Dépliée, la marque n'a pas de vignette propre — d'où une
+  /// taille RÉDUITE pour le sceau seul, sans quoi un logo à fond blanc
+  /// toucherait sa pastille bord à bord et s'y confondrait.
+  static const double sidebarBrandCollapsedSize = 30;
+  static const double sidebarBrandExpandedSize = 36;
+  static const double sidebarBrandExpandedSchoolLogoSize = 28;
+
   static const double sidebarMenuExpandedHorizontalMargin = 10;
   static const double sidebarMenuCollapsedHorizontalMargin = 6;
   static const double sidebarMenuVerticalMargin = 3;

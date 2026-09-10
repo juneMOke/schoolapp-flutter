@@ -49,6 +49,10 @@
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplifier la gestion de votre école",
   "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
+  "schoolLogoSemanticsLabel": "Logo de l'école",
+  "@schoolLogoSemanticsLabel": {
+    "description": "Accessibilité : le sceau de l'établissement, servi à la place du symbole ETEELO sur les surfaces de marque (bandeau d'accueil, tête de la barre latérale)"
+  },
   "sessionOfflineBanner": "Session hors-ligne — vérifiée localement",
   "@sessionOfflineBanner": {
     "description": "Bandeau : session ouverte hors ligne (ADR-010)"

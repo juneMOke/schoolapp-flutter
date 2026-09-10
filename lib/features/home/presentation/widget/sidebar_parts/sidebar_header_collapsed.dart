@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
+import 'package:school_app_flutter/features/school/presentation/widget/school_brand_mark.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarHeaderCollapsed extends StatelessWidget {
@@ -13,6 +14,7 @@ class SidebarHeaderCollapsed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final logo = SchoolBrandMark.logoOf(context);
 
     return Center(
       key: const ValueKey('collapsed'),
@@ -34,16 +36,23 @@ class SidebarHeaderCollapsed extends StatelessWidget {
                 child: Center(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: AppColors.textOnDark.withValues(alpha: 0.08),
+                      // La vignette passe en pastille pleine sous un sceau
+                      // d'école : sur le Bleu Profond, un logo aux traits
+                      // foncés disparaîtrait sinon.
+                      color: SchoolBrandMark.plateColor(
+                        logo,
+                        idle: AppColors.textOnDark.withValues(alpha: 0.08),
+                      ),
                       borderRadius: AppRadius.brSm,
                     ),
-                    child: const SizedBox(
+                    child: SizedBox(
                       width: AppDimensions.minTouchTarget,
                       height: AppDimensions.minTouchTarget,
                       child: Center(
-                        child: EteeloLogo(
-                          variant: EteeloLogoVariant.symbolOnDark,
-                          size: 30,
+                        child: SchoolBrandMark(
+                          logo: logo,
+                          size:
+                              HomeNavigationUiTokens.sidebarBrandCollapsedSize,
                         ),
                       ),
                     ),

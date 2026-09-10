@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
 
   @override
+  String get schoolLogoSemanticsLabel => 'School logo';
+
+  @override
   String get sessionOfflineBanner => 'Offline session — verified locally';
 
   @override

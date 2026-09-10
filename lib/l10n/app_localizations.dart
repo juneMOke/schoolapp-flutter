@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT — splash screen'**
   String get splashSemanticsLabel;
 
+  /// Accessibilité : le sceau de l'établissement, servi à la place du symbole ETEELO sur les surfaces de marque (bandeau d'accueil, tête de la barre latérale)
+  ///
+  /// In en, this message translates to:
+  /// **'School logo'**
+  String get schoolLogoSemanticsLabel;
+
   /// Banner: session opened offline (ADR-010)
   ///
   /// In en, this message translates to:

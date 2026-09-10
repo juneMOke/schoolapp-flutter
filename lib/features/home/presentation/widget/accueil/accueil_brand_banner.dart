@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
@@ -10,6 +9,7 @@ import 'package:school_app_flutter/features/home/presentation/widget/accueil/acc
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
+import 'package:school_app_flutter/features/school/presentation/widget/school_brand_mark.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Bandeau de marque de la page d'accueil (spec Accueil §01).
@@ -18,7 +18,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// page) et liseré or en tête. Aucun appel réseau : la salutation vient de la
 /// session ([AuthBloc]), le nom et la ville de l'école du référentiel local
 /// ([SchoolIdentityCubit]), l'année scolaire du contexte académique déjà
-/// résolu, la date de l'horloge du device.
+/// résolu, la date de l'horloge du device. Le médaillon porte le sceau de
+/// l'école quand elle en a déposé un, le symbole ETEELO sinon.
 class AccueilBrandBanner extends StatelessWidget {
   const AccueilBrandBanner({super.key});
 
@@ -251,12 +252,20 @@ class _BannerMedallion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logo = SchoolBrandMark.logoOf(context);
+
     return Container(
       width: AccueilUiTokens.bannerMedaillonSize,
       height: AccueilUiTokens.bannerMedaillonSize,
       decoration: BoxDecoration(
-        color: AppColors.blancCasse.withValues(
-          alpha: AccueilUiTokens.bannerMedaillonFillOpacity,
+        // Le voile translucide du médaillon devient une pastille PLEINE dès
+        // qu'un sceau d'école s'y pose : le symbole ETEELO est dessiné pour le
+        // Bleu Profond, un logo inconnu ne l'est pas.
+        color: SchoolBrandMark.plateColor(
+          logo,
+          idle: AppColors.blancCasse.withValues(
+            alpha: AccueilUiTokens.bannerMedaillonFillOpacity,
+          ),
         ),
         borderRadius: BorderRadius.circular(
           AccueilUiTokens.bannerMedaillonRadius,
@@ -276,9 +285,9 @@ class _BannerMedallion extends StatelessWidget {
           ),
         ],
       ),
-      child: const Center(
-        child: EteeloLogo(
-          variant: EteeloLogoVariant.symbolOnDark,
+      child: Center(
+        child: SchoolBrandMark(
+          logo: logo,
           size: AccueilUiTokens.bannerSymbolSize,
         ),
       ),
