@@ -15426,6 +15426,59 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Produce the named list for {group}'**
   String recouvrementRelanceListA11y(String group);
+
+  /// No description provided for @recouvrementInsightWorstFeeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee furthest behind'**
+  String get recouvrementInsightWorstFeeTitle;
+
+  /// No description provided for @recouvrementInsightWorstFeeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee} tops out at {rate}% recovered: {amount} are still missing. This is the fee to check group by group.'**
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount);
+
+  /// No description provided for @recouvrementInsightControlAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the students'**
+  String get recouvrementInsightControlAction;
+
+  /// No description provided for @recouvrementInsightSpreadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread between groups'**
+  String get recouvrementInsightSpreadTitle;
+
+  /// No description provided for @recouvrementInsightSpreadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The spread runs from {bestRate}% ({bestGroup}) to {worstRate}% ({worstGroup}). A gap this wide says more about follow-up practice than about what families can pay.'**
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  );
+
+  /// No description provided for @recouvrementInsightSimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the simulation says'**
+  String get recouvrementInsightSimulationTitle;
+
+  /// No description provided for @recouvrementInsightSimulationSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'The measure would hold everywhere: {remaining} students would remain, {percent}% of the cohort kept.'**
+  String recouvrementInsightSimulationSafe(int remaining, int percent);
+
+  /// No description provided for @recouvrementInsightSimulationCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal would push {count} groups below {percent}% of their cohort. Staggered follow-up costs less than an emptied class.'**
+  String recouvrementInsightSimulationCritical(int count, int percent);
 }
 
 class _AppLocalizationsDelegate

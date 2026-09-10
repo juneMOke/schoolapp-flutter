@@ -9721,4 +9721,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String recouvrementRelanceListA11y(String group) {
     return 'Éditer la liste nominative de $group';
   }
+
+  @override
+  String get recouvrementInsightWorstFeeTitle => 'Le frais le plus en retard';
+
+  @override
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount) {
+    return '$fee plafonne à $rate % de recouvrement : $amount manquent encore. C\'est le frais à contrôler groupe par groupe.';
+  }
+
+  @override
+  String get recouvrementInsightControlAction => 'Contrôler les élèves';
+
+  @override
+  String get recouvrementInsightSpreadTitle => 'Écart entre groupes';
+
+  @override
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  ) {
+    return 'L\'écart va de $bestRate % ($bestGroup) à $worstRate % ($worstGroup). Un écart de cette ampleur relève plus de la pratique de relance que de la capacité des familles.';
+  }
+
+  @override
+  String get recouvrementInsightSimulationTitle => 'Ce que dit la simulation';
+
+  @override
+  String recouvrementInsightSimulationSafe(int remaining, int percent) {
+    return 'La mesure resterait tenable partout : $remaining élèves resteraient, soit $percent % de l\'effectif conservé.';
+  }
+
+  @override
+  String recouvrementInsightSimulationCritical(int count, int percent) {
+    return 'Le renvoi ferait passer $count groupes sous $percent % de l\'effectif. Une relance échelonnée y coûte moins cher qu\'une classe vidée.';
+  }
 }

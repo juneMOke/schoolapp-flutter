@@ -5746,5 +5746,79 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementInsightWorstFeeTitle": "Le frais le plus en retard",
+  "@recouvrementInsightWorstFeeTitle": {
+      "description": "Titre de la lecture du poste le plus bas"
+  },
+  "recouvrementInsightWorstFeeBody": "{fee} plafonne à {rate} % de recouvrement : {amount} manquent encore. C'est le frais à contrôler groupe par groupe.",
+  "@recouvrementInsightWorstFeeBody": {
+      "description": "Corps de la lecture du poste le plus bas",
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          },
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementInsightControlAction": "Contrôler les élèves",
+  "@recouvrementInsightControlAction": {
+      "description": "Action vers l'écran nominatif"
+  },
+  "recouvrementInsightSpreadTitle": "Écart entre groupes",
+  "@recouvrementInsightSpreadTitle": {
+      "description": "Titre de la lecture de l'écart"
+  },
+  "recouvrementInsightSpreadBody": "L'écart va de {bestRate} % ({bestGroup}) à {worstRate} % ({worstGroup}). Un écart de cette ampleur relève plus de la pratique de relance que de la capacité des familles.",
+  "@recouvrementInsightSpreadBody": {
+      "description": "Corps de la lecture de l'écart",
+      "placeholders": {
+          "bestRate": {
+              "type": "int"
+          },
+          "bestGroup": {
+              "type": "String"
+          },
+          "worstRate": {
+              "type": "int"
+          },
+          "worstGroup": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementInsightSimulationTitle": "Ce que dit la simulation",
+  "@recouvrementInsightSimulationTitle": {
+      "description": "Titre de la lecture de simulation"
+  },
+  "recouvrementInsightSimulationSafe": "La mesure resterait tenable partout : {remaining} élèves resteraient, soit {percent} % de l'effectif conservé.",
+  "@recouvrementInsightSimulationSafe": {
+      "description": "Lecture rassurante",
+      "placeholders": {
+          "remaining": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementInsightSimulationCritical": "Le renvoi ferait passer {count} groupes sous {percent} % de l'effectif. Une relance échelonnée y coûte moins cher qu'une classe vidée.",
+  "@recouvrementInsightSimulationCritical": {
+      "description": "Lecture d'alerte",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
   }
 }

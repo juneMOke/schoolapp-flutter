@@ -9633,4 +9633,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String recouvrementRelanceListA11y(String group) {
     return 'Produce the named list for $group';
   }
+
+  @override
+  String get recouvrementInsightWorstFeeTitle => 'The fee furthest behind';
+
+  @override
+  String recouvrementInsightWorstFeeBody(String fee, int rate, String amount) {
+    return '$fee tops out at $rate% recovered: $amount are still missing. This is the fee to check group by group.';
+  }
+
+  @override
+  String get recouvrementInsightControlAction => 'Check the students';
+
+  @override
+  String get recouvrementInsightSpreadTitle => 'Spread between groups';
+
+  @override
+  String recouvrementInsightSpreadBody(
+    int bestRate,
+    String bestGroup,
+    int worstRate,
+    String worstGroup,
+  ) {
+    return 'The spread runs from $bestRate% ($bestGroup) to $worstRate% ($worstGroup). A gap this wide says more about follow-up practice than about what families can pay.';
+  }
+
+  @override
+  String get recouvrementInsightSimulationTitle => 'What the simulation says';
+
+  @override
+  String recouvrementInsightSimulationSafe(int remaining, int percent) {
+    return 'The measure would hold everywhere: $remaining students would remain, $percent% of the cohort kept.';
+  }
+
+  @override
+  String recouvrementInsightSimulationCritical(int count, int percent) {
+    return 'Dismissal would push $count groups below $percent% of their cohort. Staggered follow-up costs less than an emptied class.';
+  }
 }

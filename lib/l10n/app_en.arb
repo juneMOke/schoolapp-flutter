@@ -5604,5 +5604,63 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementInsightWorstFeeTitle": "The fee furthest behind",
+  "recouvrementInsightWorstFeeBody": "{fee} tops out at {rate}% recovered: {amount} are still missing. This is the fee to check group by group.",
+  "@recouvrementInsightWorstFeeBody": {
+      "placeholders": {
+          "fee": {
+              "type": "String"
+          },
+          "rate": {
+              "type": "int"
+          },
+          "amount": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementInsightControlAction": "Check the students",
+  "recouvrementInsightSpreadTitle": "Spread between groups",
+  "recouvrementInsightSpreadBody": "The spread runs from {bestRate}% ({bestGroup}) to {worstRate}% ({worstGroup}). A gap this wide says more about follow-up practice than about what families can pay.",
+  "@recouvrementInsightSpreadBody": {
+      "placeholders": {
+          "bestRate": {
+              "type": "int"
+          },
+          "bestGroup": {
+              "type": "String"
+          },
+          "worstRate": {
+              "type": "int"
+          },
+          "worstGroup": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementInsightSimulationTitle": "What the simulation says",
+  "recouvrementInsightSimulationSafe": "The measure would hold everywhere: {remaining} students would remain, {percent}% of the cohort kept.",
+  "@recouvrementInsightSimulationSafe": {
+      "placeholders": {
+          "remaining": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementInsightSimulationCritical": "Dismissal would push {count} groups below {percent}% of their cohort. Staggered follow-up costs less than an emptied class.",
+  "@recouvrementInsightSimulationCritical": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "percent": {
+              "type": "int"
+          }
+      }
   }
 }

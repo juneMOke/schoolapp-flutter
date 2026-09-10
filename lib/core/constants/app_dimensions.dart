@@ -234,6 +234,11 @@ class AppDimensions {
   static const recouvrementWarningMaxWidth = 300.0;
   static const recouvrementKeptBarHeight = 8.0;
 
+  // Lectures & alertes (spec §8) : médaillon 34, cartes 260 → 380.
+  static const recouvrementInsightMedallion = 34.0;
+  static const recouvrementInsightMinWidth = 260.0;
+  static const recouvrementInsightMaxWidth = 380.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;

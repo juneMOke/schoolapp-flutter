@@ -4,7 +4,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -20,6 +22,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/widgets/da
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_insights_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/relance_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
@@ -298,10 +301,30 @@ class _Body extends StatelessWidget {
               onGroupTapped: (schoolLevelId) =>
                   _emitRelanceList(context, schoolLevelId, state),
             ),
+            RecouvrementInsightsSection(
+              labels: labels,
+              showCycleInLabels: cycleId == null,
+              onControlRequested: (_) => _openControl(context),
+            ),
           ],
         );
       },
     );
+  }
+
+  /// Ouvre l'écran nominatif, **vierge**.
+  ///
+  /// ⚠️ On ne lui passe PAS le frais. `FeeControlIntent` exige un cycle et un
+  /// niveau, et cette lecture-ci parle de toute l'école : il n'y en a aucun à
+  /// donner. Passer un `extra` d'une autre forme serait pire que rien —
+  /// `fromRouteExtra` le rendrait `null` sans un mot, et l'écran s'ouvrirait
+  /// vierge en laissant croire qu'il porte le frais désigné.
+  ///
+  /// L'utilisateur re-choisit donc son frais là-bas. C'est un clic de plus,
+  /// assumé : le rendre implicite demanderait de rendre le périmètre facultatif
+  /// dans l'intention, ce qui touche l'écran voisin.
+  static void _openControl(BuildContext context) {
+    context.push(AppRoutesNames.recouvrementControl);
   }
 
   /// Édite la liste nominative d'un groupe — **la seule sortie matérielle de
