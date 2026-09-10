@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
@@ -208,6 +209,17 @@ abstract class FinanceOfflineRepository {
   Future<Either<Failure, List<String>>> getFeeCodesForYear(
     String academicYearId,
   );
+
+  /// Position de TOUTE la population sur une SÉLECTION de frais, ventilée par
+  /// niveau et gardant le détail **par frais** — la lecture du tableau de bord
+  /// du Recouvrement, qui en a besoin pour le taux poste par poste.
+  ///
+  /// [feeCodes] vide rend une liste vide, jamais une erreur.
+  Future<Either<Failure, List<LocalRecoveryLine>>> getRecoveryPositions({
+    required String academicYearId,
+    required List<String> feeCodes,
+    String? schoolLevelGroupId,
+  });
 
   /// Position de TOUTE la population sur le frais [feeCode], ventilée par
   /// niveau, éventuellement bornée au cycle [schoolLevelGroupId].
