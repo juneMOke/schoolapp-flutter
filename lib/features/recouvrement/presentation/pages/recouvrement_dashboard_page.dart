@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/money/currency_code.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -14,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/boot
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_actions.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/relance_list_delivery.dart';
@@ -24,7 +21,6 @@ import 'package:school_app_flutter/features/recouvrement/presentation/widgets/da
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_insights_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
-import 'package:school_app_flutter/features/recouvrement/domain/entities/relance_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -233,7 +229,7 @@ class _Body extends StatelessWidget {
       listener: (context, ratesState) =>
           context.read<RecouvrementSimulationCubit>().setLines(
             context.read<RecouvrementDashboardBloc>().lines,
-            rate: _dollarInFrancs(ratesState.rates),
+            rate: dollarInFrancs(ratesState.rates),
           ),
       child: _buildBody(context, l10n),
     );
@@ -253,7 +249,7 @@ class _Body extends StatelessWidget {
         }
         context.read<RecouvrementSimulationCubit>().setLines(
           context.read<RecouvrementDashboardBloc>().lines,
-          rate: _dollarInFrancs(context.read<ExchangeRatesCubit>().state.rates),
+          rate: dollarInFrancs(context.read<ExchangeRatesCubit>().state.rates),
         );
       },
       buildWhen: (prev, curr) =>
@@ -311,7 +307,7 @@ class _Body extends StatelessWidget {
                     ? state.figures.total
                     : null,
                 unbilled: state.unbilled,
-                exchangeRate: _dollarInFrancs(ratesState.rates),
+                exchangeRate: dollarInFrancs(ratesState.rates),
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
@@ -338,92 +334,16 @@ class _Body extends StatelessWidget {
               labels: labels,
               showCycleInLabels: cycleId == null,
               onGroupTapped: (schoolLevelId) =>
-                  _emitRelanceList(context, schoolLevelId, state),
+                  emitRelanceListFor(context, schoolLevelId, state),
             ),
             RecouvrementInsightsSection(
               labels: labels,
               showCycleInLabels: cycleId == null,
-              onControlRequested: (_) => _openControl(context),
+              onControlRequested: (_) => openRecouvrementControl(context),
             ),
           ],
         );
       },
     );
   }
-
-  /// Ouvre l'écran nominatif, **vierge**.
-  ///
-  /// ⚠️ On ne lui passe PAS le frais. `FeeControlIntent` exige un cycle et un
-  /// niveau, et cette lecture-ci parle de toute l'école : il n'y en a aucun à
-  /// donner. Passer un `extra` d'une autre forme serait pire que rien —
-  /// `fromRouteExtra` le rendrait `null` sans un mot, et l'écran s'ouvrirait
-  /// vierge en laissant croire qu'il porte le frais désigné.
-  ///
-  /// L'utilisateur re-choisit donc son frais là-bas. C'est un clic de plus,
-  /// assumé : le rendre implicite demanderait de rendre le périmètre facultatif
-  /// dans l'intention, ce qui touche l'écran voisin.
-  static void _openControl(BuildContext context) {
-    context.push(AppRoutesNames.recouvrementControl);
-  }
-
-  /// Édite la liste nominative d'un groupe — **la seule sortie matérielle de
-  /// l'écran**, et son seul appel réseau.
-  ///
-  /// Les lignes envoyées sont celles que la simulation vise **dans ce groupe**,
-  /// et elles viennent du registre local : lui seul voit les encaissements non
-  /// encore remontés. Le serveur les imprime, il ne les redérive pas.
-  static void _emitRelanceList(
-    BuildContext context,
-    String? schoolLevelId,
-    RecouvrementDashboardState dashboard,
-  ) {
-    // ⚠️ **Un groupe sans niveau n'est pas éditable.** `scope.kind` du contrat
-    // n'a que `CLASSROOM`, `SCHOOL_LEVEL`, `SCHOOL_LEVEL_GROUP` et
-    // `UNASSIGNED` — et `UNASSIGNED` y désigne les élèves sans CLASSE, pas les
-    // créances sans NIVEAU. Les confondre ferait titrer le papier « Non
-    // affectés » sur une population qui n'est pas celle-là. Le dépliage refuse
-    // déjà ce groupe pour une raison voisine ; l'édition le refuse aussi,
-    // plutôt que d'imprimer un titre faux. À rouvrir avec le back si le besoin
-    // se présente.
-    if (schoolLevelId == null) return;
-
-    final simulation = context.read<RecouvrementSimulationCubit>().state;
-    final lines = context.read<RecouvrementDashboardBloc>().lines;
-    final query = dashboard.lastQuery;
-    if (query == null) return;
-
-    // Le même filtre que la simulation, borné au groupe : ce sont les élèves
-    // que l'écran vient d'afficher comme visés, pas une seconde population.
-    final targeted = RecouvrementSimulationProjector.targetsOf(
-      [
-        for (final line in lines)
-          if (line.schoolLevelId == schoolLevelId) line,
-      ],
-      criterion: simulation.criterion,
-      threshold: simulation.threshold,
-      rate: _dollarInFrancs(context.read<ExchangeRatesCubit>().state.rates),
-    );
-    if (targeted.isEmpty) return;
-
-    context.read<RelanceListCubit>().emit_(
-      scope: RelanceScope.schoolLevel(schoolLevelId),
-      feeCodes: query.feeCodes,
-      criterion: simulation.criterion,
-      lines: targeted,
-      thresholdInCents: simulation.threshold?.amountInCents,
-      thresholdCurrency: simulation.threshold?.currency,
-    );
-  }
-
-  /// Le taux dollar → franc en vigueur, ou `null` si l'école n'en a posé aucun.
-  ///
-  /// Le sens contraire rend `null` plutôt qu'un taux retourné : l'inverse d'un
-  /// taux arrondi n'est pas le taux inverse.
-  static ExchangeRate? _dollarInFrancs(List<ExchangeRate> rates) =>
-      ExchangeRates.at(
-        rates,
-        base: CurrencyCode.usd,
-        quote: CurrencyCode.cdf,
-        moment: DateTime.now(),
-      );
 }
