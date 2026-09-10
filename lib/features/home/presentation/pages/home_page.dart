@@ -24,7 +24,7 @@ import 'package:school_app_flutter/features/documents/presentation/pages/documen
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_dashboard_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
@@ -368,7 +368,7 @@ class _HomePageView extends StatelessWidget {
       case MenuConstants.recouvrementDashboardId:
         return const FeeControlFeatureScope(
           key: ValueKey(MenuConstants.recouvrementDashboardId),
-          child: FeeControlDashboardPage(),
+          child: RecouvrementDashboardPage(),
         );
       case MenuConstants.recouvrementControlId:
         return const FeeControlFeatureScope(

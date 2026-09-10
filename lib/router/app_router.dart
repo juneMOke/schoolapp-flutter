@@ -32,8 +32,8 @@ import 'package:school_app_flutter/features/finance/presentation/pages/facturati
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_dashboard_contracts.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_dashboard_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
@@ -403,7 +403,7 @@ class AppRouter {
       routes: [
         GoRoute(
           path: AppRoutesNames.recouvrementDashboard,
-          builder: (context, state) => const FeeControlDashboardPage(),
+          builder: (context, state) => const RecouvrementDashboardPage(),
         ),
         GoRoute(
           path: AppRoutesNames.recouvrementControl,

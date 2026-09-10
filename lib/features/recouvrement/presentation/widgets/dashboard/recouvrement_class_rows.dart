@@ -3,26 +3,26 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_group_row.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_group_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le détail par classe d'un niveau déplié.
 ///
 /// Décalé et sans titre : c'est la même mesure, d'un cran plus fin. Un en-tête
 /// de section en ferait un second tableau.
-class FeeControlDashboardClassRows extends StatelessWidget {
+class RecouvrementClassRows extends StatelessWidget {
   final EnrollmentLoadStatus status;
-  final List<FeeControlClassRow> classes;
+  final List<RecouvrementClassRow> classes;
   final bool classroomsMissing;
 
   /// Ouvre l'écran nominatif sur une classe — `null` pour les non-répartis, qui
   /// ne forment pas une classe à transmettre.
   /// `null` quand le niveau lui-même n'est pas transmissible : aucune de ses
   /// classes ne l'est alors non plus.
-  final void Function(FeeControlClassRow row)? onOpenControl;
+  final void Function(RecouvrementClassRow row)? onOpenControl;
 
-  const FeeControlDashboardClassRows({
+  const RecouvrementClassRows({
     super.key,
     required this.status,
     required this.classes,
@@ -69,7 +69,7 @@ class FeeControlDashboardClassRows extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final row in classes)
-              FeeControlDashboardGroupRow(
+              RecouvrementGroupRowTile(
                 key: ValueKey(row.classroomId ?? '__non-repartis__'),
                 label: row.name ?? l10n.feeControlDashboardUnassigned,
                 breakdown: row.breakdown,

@@ -10,15 +10,26 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_dashboard_page.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/fee_control_dashboard_empty_state.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Cubit de taux muet : la série reste vide, comme sur une école qui n'a jamais
+/// paramétré de cours de guichet.
+class _MockExchangeRatesCubit extends Cubit<ExchangeRatesState>
+    implements ExchangeRatesCubit {
+  _MockExchangeRatesCubit() : super(const ExchangeRatesState());
+
+  @override
+  Future<void> load() async {}
+}
+
 class _MockDashboardBloc
-    extends MockBloc<FeeControlDashboardEvent, FeeControlDashboardState>
-    implements FeeControlDashboardBloc {}
+    extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
+    implements RecouvrementDashboardBloc {}
 
 /// `MockBloc`, et non `Mock` : un `Mock` nu rend `null` sur `stream` et
 /// `close()`, que `BlocProvider` appelle tous deux — l'écran plantait au
@@ -39,7 +50,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const AcademicYearContextRequested());
-    registerFallbackValue(const FeeControlDashboardRefreshRequested());
+    registerFallbackValue(const RecouvrementRefreshRequested());
   });
 
   setUp(() {
@@ -73,14 +84,24 @@ void main() {
       initialState: authState,
     );
 
-    GetIt.instance.registerFactory<FeeControlDashboardBloc>(() => bloc);
+    GetIt.instance.registerFactory<RecouvrementDashboardBloc>(() => bloc);
+    // Le taux du jour n'entre dans aucun calcul de l'écran : il ne sert qu'à
+    // dire, sous le périmètre, à quel cours s'arbitre une comparaison. Un cubit
+    // muet suffit donc ici — et sa série vide est un cas réel : une école qui
+    // n'a posé aucun taux.
+    GetIt.instance.registerFactory<ExchangeRatesCubit>(
+      () => _MockExchangeRatesCubit(),
+    );
   });
 
   tearDown(() async {
     await GetIt.instance.reset();
   });
 
-  Future<void> pump(WidgetTester tester, FeeControlDashboardState state) async {
+  Future<void> pump(
+    WidgetTester tester,
+    RecouvrementDashboardState state,
+  ) async {
     // ⚠️ Le bloc part de `initial` et TRANSITE vers [state] : c'est le
     // changement que la page écoute pour s'auto-sélectionner. Lui donner
     // directement l'état final ferait passer le test à côté de tout —
@@ -89,8 +110,8 @@ void main() {
     // montage (`registerFactory`), donc toujours à `initial`.
     whenListen(
       bloc,
-      Stream<FeeControlDashboardState>.value(state),
-      initialState: const FeeControlDashboardState.initial(),
+      Stream<RecouvrementDashboardState>.value(state),
+      initialState: const RecouvrementDashboardState.initial(),
     );
 
     tester.view.physicalSize = const Size(1400, 900);
@@ -109,7 +130,7 @@ void main() {
             ),
             BlocProvider<AuthBloc>.value(value: authBloc),
           ],
-          child: const FeeControlDashboardPage(),
+          child: const RecouvrementDashboardPage(),
         ),
       ),
     );
@@ -124,12 +145,11 @@ void main() {
     // tableau de bord n'affichait rien — sans la moindre erreur. Les autres
     // tests de ce fichier partaient d'un état où les natures étaient DÉJÀ là :
     // ils ne pouvaient pas le voir.
-    await pump(tester, const FeeControlDashboardState.initial());
+    await pump(tester, const RecouvrementDashboardState.initial());
 
     verify(
-      () => bloc.add(
-        const FeeControlDashboardFeeCodesRequested(academicYearId: 'ay-1'),
-      ),
+      () =>
+          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: 'ay-1')),
     ).called(1);
   });
 
@@ -141,7 +161,7 @@ void main() {
     // synchroniser.
     await pump(
       tester,
-      const FeeControlDashboardState(
+      const RecouvrementDashboardState(
         feeCodesStatus: EnrollmentLoadStatus.failure,
         errorType: EnrollmentErrorType.server,
       ),
@@ -154,9 +174,8 @@ void main() {
 
     // Deux fois : l'amorçage au montage, puis la reprise.
     verify(
-      () => bloc.add(
-        const FeeControlDashboardFeeCodesRequested(academicYearId: 'ay-1'),
-      ),
+      () =>
+          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: 'ay-1')),
     ).called(2);
   });
 
@@ -164,7 +183,7 @@ void main() {
       'PORTÉ — le premier que le grand-livre rend', (tester) async {
     await pump(
       tester,
-      const FeeControlDashboardState(
+      const RecouvrementDashboardState(
         feeCodesStatus: EnrollmentLoadStatus.success,
         // Le DAO les trie par effectif décroissant : TUITION est le plus porté,
         // CANTINE marginal. Un tri alphabétique aurait ouvert sur CANTINE.
@@ -173,11 +192,11 @@ void main() {
     );
 
     final captured = verify(
-      () => bloc.add(captureAny(that: isA<FeeControlDashboardRequested>())),
-    ).captured.cast<FeeControlDashboardRequested>();
+      () => bloc.add(captureAny(that: isA<RecouvrementRequested>())),
+    ).captured.cast<RecouvrementRequested>();
 
     expect(captured, isNotEmpty);
-    expect(captured.first.feeCode, 'TUITION');
+    expect(captured.first.feeCodes, ['TUITION']);
     expect(captured.first.academicYearId, 'ay-1');
     // Aucun cycle : le tableau ouvre sur TOUTE l'école.
     expect(captured.first.schoolLevelGroupId, isNull);
@@ -187,14 +206,14 @@ void main() {
       'd\'offrir deux champs inertes', (tester) async {
     await pump(
       tester,
-      const FeeControlDashboardState(
+      const RecouvrementDashboardState(
         feeCodesStatus: EnrollmentLoadStatus.success,
         feeCodes: <String>[],
       ),
     );
 
-    expect(find.byType(FeeControlDashboardEmptyState), findsOneWidget);
+    expect(find.byType(RecouvrementDashboardEmptyState), findsOneWidget);
     expect(find.text('Aucun frais facturé'), findsOneWidget);
-    verifyNever(() => bloc.add(any(that: isA<FeeControlDashboardRequested>())));
+    verifyNever(() => bloc.add(any(that: isA<RecouvrementRequested>())));
   });
 }

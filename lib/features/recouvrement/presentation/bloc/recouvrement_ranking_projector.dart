@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/recovery_position.dart';
 
 /// Une ligne du classement : un groupe d'élèves et sa position sur le frais.
-class FeeControlGroupRow extends Equatable {
+class RecouvrementGroupRow extends Equatable {
   /// Niveau du groupe. **`null` est une valeur légitime**, pas une absence de
   /// donnée à masquer : `school_level_id` est nullable au grand-livre, et les
   /// créances qui n'en portent pas forment un groupe qui se voit. Les taire
@@ -18,7 +18,7 @@ class FeeControlGroupRow extends Equatable {
   /// des francs et des dollars écrirait un montant qui n'existe pas.
   final MoneyBag remaining;
 
-  const FeeControlGroupRow({
+  const RecouvrementGroupRow({
     required this.schoolLevelId,
     required this.breakdown,
     required this.remaining,
@@ -33,7 +33,7 @@ class FeeControlGroupRow extends Equatable {
 
 /// Ce que le tableau de bord répond pour un frais : la position de l'ensemble,
 /// et le classement des groupes qui la composent.
-class FeeControlDashboardSummary extends Equatable {
+class RecouvrementRankingSummary extends Equatable {
   /// Position de tout le périmètre interrogé (l'école, ou le cycle filtré).
   ///
   /// **Invariant :** c'est exactement la somme des [groups]. Le tableau de bord
@@ -44,19 +44,19 @@ class FeeControlDashboardSummary extends Equatable {
   final MoneyBag remaining;
 
   /// Les groupes, **ce qui décroche en tête** (cf.
-  /// [FeeControlDashboardProjector.project]).
-  final List<FeeControlGroupRow> groups;
+  /// [RecouvrementRankingProjector.project]).
+  final List<RecouvrementGroupRow> groups;
 
-  const FeeControlDashboardSummary({
+  const RecouvrementRankingSummary({
     required this.total,
     required this.remaining,
     required this.groups,
   });
 
-  static const empty = FeeControlDashboardSummary(
+  static const empty = RecouvrementRankingSummary(
     total: FeeControlBreakdown(),
     remaining: MoneyBag.empty,
-    groups: <FeeControlGroupRow>[],
+    groups: <RecouvrementGroupRow>[],
   );
 
   bool get isEmpty => total.isEmpty;
@@ -71,8 +71,8 @@ class FeeControlDashboardSummary extends Equatable {
 ///
 /// Ne lit rien, n'appelle rien : on lui donne ce que le grand-livre a rendu, il
 /// rend ce que l'écran affiche.
-class FeeControlDashboardProjector {
-  const FeeControlDashboardProjector._();
+class RecouvrementRankingProjector {
+  const RecouvrementRankingProjector._();
 
   /// Ventile [positions] par niveau, compte les statuts, et classe les groupes
   /// **du plus en retard au plus en règle**.
@@ -90,10 +90,8 @@ class FeeControlDashboardProjector {
   /// cours d'année) apparaît dans les deux groupes, et compte deux fois dans le
   /// total. C'est voulu : il doit bel et bien à chacun, et c'est ce qui
   /// maintient l'invariant « le total est la somme des groupes ».
-  static FeeControlDashboardSummary project(
-    List<LocalFeeLevelAggregate> positions,
-  ) {
-    if (positions.isEmpty) return FeeControlDashboardSummary.empty;
+  static RecouvrementRankingSummary project(List<RecoveryPosition> positions) {
+    if (positions.isEmpty) return RecouvrementRankingSummary.empty;
 
     final settledBy = <String?, int>{};
     final partialBy = <String?, int>{};
@@ -118,7 +116,7 @@ class FeeControlDashboardProjector {
           noneBy[level] = (noneBy[level] ?? 0) + 1;
           none++;
       }
-      final due = position.charge.remaining;
+      final due = position.remaining;
       remainingBy[level] = (remainingBy[level] ?? MoneyBag.empty) + due;
       remaining = remaining + due;
     }
@@ -130,7 +128,7 @@ class FeeControlDashboardProjector {
     };
     final groups = [
       for (final level in levels)
-        FeeControlGroupRow(
+        RecouvrementGroupRow(
           schoolLevelId: level,
           breakdown: FeeControlBreakdown(
             settled: settledBy[level] ?? 0,
@@ -141,7 +139,7 @@ class FeeControlDashboardProjector {
         ),
     ]..sort(_byRetardThenSize);
 
-    return FeeControlDashboardSummary(
+    return RecouvrementRankingSummary(
       total: FeeControlBreakdown(
         settled: settled,
         partial: partial,
@@ -163,7 +161,7 @@ class FeeControlDashboardProjector {
   /// classe de quarante élèves pèse plus qu'un groupe de trois. L'identifiant
   /// ferme le tri — arbitraire, mais **stable** : deux projections des mêmes
   /// données rendent toujours le même ordre.
-  static int _byRetardThenSize(FeeControlGroupRow a, FeeControlGroupRow b) {
+  static int _byRetardThenSize(RecouvrementGroupRow a, RecouvrementGroupRow b) {
     final aTotal = a.breakdown.total;
     final bTotal = b.breakdown.total;
     if (aTotal > 0 && bTotal > 0) {

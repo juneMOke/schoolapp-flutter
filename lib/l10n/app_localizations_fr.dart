@@ -9569,4 +9569,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String recouvrementCurrencyGroupTitle(String currency) {
     return 'Frais en $currency';
   }
+
+  @override
+  String recouvrementUnbilledNote(int count) {
+    return '$count inscrits ne portent aucun de ces frais';
+  }
 }

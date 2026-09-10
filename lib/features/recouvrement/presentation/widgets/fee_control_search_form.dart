@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_dashboard_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';

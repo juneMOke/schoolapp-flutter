@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_class_rows.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_group_row.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/fee_control_dashboard_empty_state.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_class_rows.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_group_row.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -22,7 +23,7 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 /// Chargement, vide et erreur passent par les widgets partagés (règle #10). Un
 /// échec est ici toujours local : le wrapper ne proposera donc jamais de
 /// « reconnexion », seulement une reprise.
-class FeeControlDashboardRanking extends StatelessWidget {
+class RecouvrementRankingSection extends StatelessWidget {
   /// Vrai quand le tableau porte sur toute l'école : les noms de niveaux sont
   /// alors préfixés de leur cycle, faute de quoi deux « 1ère année » de cycles
   /// différents deviendraient indiscernables.
@@ -34,7 +35,7 @@ class FeeControlDashboardRanking extends StatelessWidget {
   /// lire les classes du niveau.
   final String academicYearId;
 
-  const FeeControlDashboardRanking({
+  const RecouvrementRankingSection({
     super.key,
     required this.labels,
     required this.academicYearId,
@@ -58,7 +59,7 @@ class FeeControlDashboardRanking extends StatelessWidget {
   /// cycles », alors que l'écran nominatif exige un cycle et un niveau.
   void _openControl(
     BuildContext context,
-    FeeControlDashboardState state, {
+    RecouvrementDashboardState state, {
     required String schoolLevelId,
     String? classroomId,
   }) {
@@ -67,13 +68,20 @@ class FeeControlDashboardRanking extends StatelessWidget {
     final groupId = labels.groupIdOf(schoolLevelId);
     if (groupId == null) return;
 
+    // L'écran nominatif ne contrôle qu'UNE nature à la fois. Sur une sélection
+    // qui en porte plusieurs, on ouvre sur la première : c'est un point
+    // d'entrée, pas un contrat — l'écran voisin offre son propre sélecteur, et
+    // ne rien passer aurait obligé à re-choisir un frais qu'on vient de cocher.
+    final feeCode = query.feeCodes.firstOrNull;
+    if (feeCode == null) return;
+
     context.push(
       AppRoutesNames.recouvrementControl,
       extra: FeeControlIntent(
         schoolLevelGroupId: groupId,
         schoolLevelId: schoolLevelId,
         classroomId: classroomId,
-        feeCode: query.feeCode,
+        feeCode: feeCode,
       ),
     );
   }
@@ -83,10 +91,10 @@ class FeeControlDashboardRanking extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    return BlocBuilder<FeeControlDashboardBloc, FeeControlDashboardState>(
+    return BlocBuilder<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||
-          prev.summary != curr.summary ||
+          prev.ranking != curr.ranking ||
           prev.errorType != curr.errorType ||
           prev.expandedLevelId != curr.expandedLevelId ||
           prev.classesStatus != curr.classesStatus ||
@@ -102,13 +110,13 @@ class FeeControlDashboardRanking extends StatelessWidget {
           return EnrollmentResultsErrorState(
             type: state.errorType ?? EnrollmentErrorType.unknown,
             message: state.errorMessage,
-            onRetry: () => context.read<FeeControlDashboardBloc>().add(
-              const FeeControlDashboardRefreshRequested(),
+            onRetry: () => context.read<RecouvrementDashboardBloc>().add(
+              const RecouvrementRefreshRequested(),
             ),
           );
         }
-        if (state.summary.isEmpty) {
-          return FeeControlDashboardEmptyState(
+        if (state.ranking.isEmpty) {
+          return RecouvrementDashboardEmptyState(
             title: l10n.feeControlDashboardEmptyTitle,
             description: l10n.feeControlDashboardEmptyDescription,
           );
@@ -126,8 +134,8 @@ class FeeControlDashboardRanking extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: AppDimensions.spacingS),
-            for (final group in state.summary.groups) ...[
-              FeeControlDashboardGroupRow(
+            for (final group in state.ranking.groups) ...[
+              RecouvrementGroupRowTile(
                 key: ValueKey(group.schoolLevelId ?? '__sans-niveau__'),
                 label: labels.labelFor(
                   group.schoolLevelId,
@@ -151,15 +159,15 @@ class FeeControlDashboardRanking extends StatelessWidget {
                 // inerte plutôt que d'offrir un chevron qui n'ouvre rien.
                 onToggle: group.schoolLevelId == null
                     ? null
-                    : () => context.read<FeeControlDashboardBloc>().add(
-                        FeeControlDashboardGroupToggled(
+                    : () => context.read<RecouvrementDashboardBloc>().add(
+                        RecouvrementGroupToggled(
                           academicYearId: academicYearId,
                           schoolLevelId: group.schoolLevelId,
                         ),
                       ),
               ),
               if (state.expandedLevelId == group.schoolLevelId)
-                FeeControlDashboardClassRows(
+                RecouvrementClassRows(
                   status: state.classesStatus,
                   classes: state.classes,
                   classroomsMissing: state.classroomsMissing,

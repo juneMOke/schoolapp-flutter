@@ -187,12 +187,10 @@ import 'package:school_app_flutter/features/finance/domain/usecases/update_stude
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_positions_by_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
@@ -926,21 +924,16 @@ Future<void> configureDependencies({
     ),
   );
 
-  // Tableau de bord du Contrôle des frais — même lecture locale, mais la
-  // population n'est pas donnée : elle est découverte dans le grand-livre.
-  getIt.registerFactory<FeeControlDashboardBloc>(
-    () => FeeControlDashboardBloc(
-      getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
-      getPositions: getIt<GetFeeChargePositionsByLevelUseCase>(),
-      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
-      getRosters: getIt<GetComposedRostersUseCase>(),
-      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
-    ),
-  );
+  // Tableau de bord du Recouvrement — même lecture locale que l'écran
+  // nominatif, mais la population n'est pas donnée : elle est découverte dans
+  // le grand-livre, sur une SÉLECTION de frais.
   getIt.registerFactory<RecouvrementDashboardBloc>(
     () => RecouvrementDashboardBloc(
       getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
       getPositions: getIt<GetRecoveryPositionsUseCase>(),
+      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
+      getRosters: getIt<GetComposedRostersUseCase>(),
+      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
   );
 

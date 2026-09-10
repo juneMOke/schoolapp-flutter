@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_projector.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_ranking_projector.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
 
@@ -38,7 +38,7 @@ void main() {
     test(
       'compte les trois statuts par niveau, sans jamais les recalculer',
       () async {
-        final summary = FeeControlDashboardProjector.project([
+        final summary = RecouvrementRankingProjector.project([
           at('s1', level: 'lvl-1', paidMirror: 100000), // soldé
           at('s2', level: 'lvl-1', paidMirror: 40000), // partiel
           at('s3', level: 'lvl-1'), // rien versé
@@ -56,7 +56,7 @@ void main() {
     );
 
     test('un encaissement hors ligne compte comme un paiement', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         at('s1', level: 'lvl-1', paidPending: 100000),
       ]);
 
@@ -64,9 +64,9 @@ void main() {
     });
 
     test('population vide → résumé vide, pas de division par zéro', () {
-      final summary = FeeControlDashboardProjector.project([]);
+      final summary = RecouvrementRankingProjector.project([]);
 
-      expect(summary, FeeControlDashboardSummary.empty);
+      expect(summary, RecouvrementRankingSummary.empty);
       expect(summary.settledPercent, 0);
       expect(summary.isEmpty, isTrue);
     });
@@ -74,7 +74,7 @@ void main() {
 
   group('invariant : le total est la somme des groupes', () {
     test('sur une population ordinaire', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         ...level('lvl-1', count: 10, settled: 4),
         ...level('lvl-2', count: 7, settled: 7),
         ...level('lvl-3', count: 3, settled: 0),
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('un élève à cheval sur deux niveaux compte dans les deux (D5)', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         at('s1', level: 'lvl-1', paidMirror: 100000),
         at('s1', level: 'lvl-2'),
       ]);
@@ -104,7 +104,7 @@ void main() {
     });
 
     test('les créances sans niveau forment un groupe qui SE VOIT', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         at('s1', level: null),
         ...level('lvl-1', count: 2, settled: 2),
       ]);
@@ -118,7 +118,7 @@ void main() {
     test(
       'n\'annonce 100 % que si PERSONNE ne reste — 249/250 reste à 99 %',
       () {
-        final summary = FeeControlDashboardProjector.project(
+        final summary = RecouvrementRankingProjector.project(
           level('lvl-1', count: 250, settled: 249),
         );
 
@@ -127,7 +127,7 @@ void main() {
     );
 
     test('n\'annonce 0 % que si PERSONNE n\'a soldé — 1/400 monte à 1 %', () {
-      final summary = FeeControlDashboardProjector.project(
+      final summary = RecouvrementRankingProjector.project(
         level('lvl-1', count: 400, settled: 1),
       );
 
@@ -136,13 +136,13 @@ void main() {
 
     test('les deux bornes exactes, elles, s\'affichent bien', () {
       expect(
-        FeeControlDashboardProjector.project(
+        RecouvrementRankingProjector.project(
           level('lvl-1', count: 5, settled: 5),
         ).settledPercent,
         100,
       );
       expect(
-        FeeControlDashboardProjector.project(
+        RecouvrementRankingProjector.project(
           level('lvl-1', count: 5, settled: 0),
         ).settledPercent,
         0,
@@ -152,7 +152,7 @@ void main() {
 
   group('classement', () {
     test('le plus en retard remonte en tête', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         ...level('lvl-bon', count: 10, settled: 9),
         ...level('lvl-mauvais', count: 10, settled: 2),
         ...level('lvl-moyen', count: 10, settled: 5),
@@ -173,7 +173,7 @@ void main() {
       // départage par identifiant rendrait le bon ordre par accident, et ce
       // test passerait en ne vérifiant rien — ce qu'il faisait à la première
       // écriture, jusqu'à ce que la mutation le dise.
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         ...level('lvl-a-99-8', count: 500, settled: 499),
         ...level('lvl-z-99-4', count: 500, settled: 497),
       ]);
@@ -186,7 +186,7 @@ void main() {
     });
 
     test('à taux égal, le groupe le plus nombreux passe devant', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         ...level('lvl-petit', count: 4, settled: 2),
         ...level('lvl-grand', count: 40, settled: 20),
       ]);
@@ -200,7 +200,7 @@ void main() {
     test(
       'à taux ET effectif égaux, l\'ordre reste STABLE entre deux appels',
       () {
-        List<String?> order() => FeeControlDashboardProjector.project([
+        List<String?> order() => RecouvrementRankingProjector.project([
           ...level('lvl-b', count: 5, settled: 3),
           ...level('lvl-a', count: 5, settled: 3),
         ]).groups.map((g) => g.schoolLevelId).toList();
@@ -213,7 +213,7 @@ void main() {
 
   group('les montants', () {
     test('le reste dû s\'agrège par groupe et pour l\'ensemble', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         at('s1', level: 'lvl-1', expected: 100000, paidMirror: 40000),
         at('s2', level: 'lvl-1', expected: 100000),
         at('s3', level: 'lvl-2', expected: 50000, paidMirror: 50000),
@@ -225,7 +225,7 @@ void main() {
     });
 
     test('deux devises ne sont JAMAIS additionnées', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         at('s1', level: 'lvl-1', expected: 100000, currency: 'USD'),
         at('s2', level: 'lvl-1', expected: 300000, currency: 'CDF'),
       ]);
@@ -239,7 +239,7 @@ void main() {
 
     test('un élève débiteur dans une seule de ses deux devises n\'est pas en '
         'ordre', () {
-      final summary = FeeControlDashboardProjector.project([
+      final summary = RecouvrementRankingProjector.project([
         const LocalFeeLevelAggregate(
           schoolLevelId: 'lvl-1',
           charge: LocalFeeChargeAggregate(

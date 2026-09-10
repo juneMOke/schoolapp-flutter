@@ -4,10 +4,10 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_me
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/recovery_position.dart';
 
 /// Une classe d'un niveau déplié, ou les élèves qu'aucune classe ne porte.
-class FeeControlClassRow extends Equatable {
+class RecouvrementClassRow extends Equatable {
   /// `null` désigne les **non répartis** : le rendu les nomme, le projecteur
   /// n'a pas à connaître la langue.
   final String? classroomId;
@@ -19,7 +19,7 @@ class FeeControlClassRow extends Equatable {
   final FeeControlBreakdown breakdown;
   final MoneyBag remaining;
 
-  const FeeControlClassRow({
+  const RecouvrementClassRow({
     required this.classroomId,
     required this.name,
     required this.breakdown,
@@ -39,8 +39,8 @@ class FeeControlClassRow extends Equatable {
 /// Aucune lecture du grand-livre ici : les positions du niveau sont en mémoire
 /// depuis l'interrogation du frais, et déplier n'est qu'une répartition. C'est
 /// ce qui rend le dépliage instantané et sans coût pour la base.
-class FeeControlDashboardClassProjector {
-  const FeeControlDashboardClassProjector._();
+class RecouvrementClassProjector {
+  const RecouvrementClassProjector._();
 
   /// [positions] : les élèves du niveau déplié, et eux seuls.
   /// [classrooms] : les classes du niveau, pour leurs noms et leur ordre.
@@ -54,23 +54,23 @@ class FeeControlDashboardClassProjector {
   /// elle, la somme des classes serait inférieure au niveau** sans que rien ne
   /// l'explique — et sur un tableau de recouvrement, des élèves qui manquent à
   /// l'appel sans raison visible, c'est le pire des silences.
-  static List<FeeControlClassRow> project({
-    required List<LocalFeeLevelAggregate> positions,
+  static List<RecouvrementClassRow> project({
+    required List<RecoveryPosition> positions,
     required List<OfflineClassroom> classrooms,
     required Map<String, List<ClassroomMember>> rosters,
   }) {
-    if (positions.isEmpty) return const <FeeControlClassRow>[];
+    if (positions.isEmpty) return const <RecouvrementClassRow>[];
 
-    final byStudent = <String, LocalFeeLevelAggregate>{
+    final byStudent = <String, RecoveryPosition>{
       for (final position in positions) position.studentId: position,
     };
 
-    final rows = <FeeControlClassRow>[];
+    final rows = <RecouvrementClassRow>[];
     final placed = <String>{};
 
     for (final classroom in classrooms) {
       final members = rosters[classroom.id] ?? const <ClassroomMember>[];
-      final concerned = <LocalFeeLevelAggregate>[];
+      final concerned = <RecoveryPosition>[];
       for (final member in members) {
         final position = byStudent[member.studentId];
         if (position == null) continue;
@@ -94,10 +94,10 @@ class FeeControlDashboardClassProjector {
     return rows;
   }
 
-  static FeeControlClassRow _rowOf(
+  static RecouvrementClassRow _rowOf(
     String? classroomId,
     String? name,
-    List<LocalFeeLevelAggregate> positions,
+    List<RecoveryPosition> positions,
   ) {
     var settled = 0;
     var partial = 0;
@@ -112,9 +112,9 @@ class FeeControlDashboardClassProjector {
         case StudentChargeStatus.due:
           none++;
       }
-      remaining = remaining + position.charge.remaining;
+      remaining = remaining + position.remaining;
     }
-    return FeeControlClassRow(
+    return RecouvrementClassRow(
       classroomId: classroomId,
       name: name,
       breakdown: FeeControlBreakdown(

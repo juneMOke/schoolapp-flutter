@@ -15186,6 +15186,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fees in {currency}'**
   String recouvrementCurrencyGroupTitle(String currency);
+
+  /// No description provided for @recouvrementUnbilledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} enrolled students carry none of these fees'**
+  String recouvrementUnbilledNote(int count);
 }
 
 class _AppLocalizationsDelegate

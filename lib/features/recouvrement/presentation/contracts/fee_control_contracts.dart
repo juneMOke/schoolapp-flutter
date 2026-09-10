@@ -179,3 +179,40 @@ class FeeControlQuery extends Equatable {
     size,
   ];
 }
+
+/// Ce que le tableau de bord transmet à l'écran nominatif quand on lui demande
+/// « qui, précisément ? ».
+///
+/// Le tableau de bord pose la question, l'écran voisin donne les noms : le
+/// passage doit conserver **exactement** le périmètre lu, sinon la liste ne
+/// répondrait pas de la synthèse qui l'a ouverte.
+class FeeControlIntent extends Equatable {
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
+
+  /// Classe visée, `null` pour tout le niveau — selon qu'on parte d'une ligne
+  /// de classe ou de la ligne du niveau.
+  final String? classroomId;
+
+  final String feeCode;
+
+  const FeeControlIntent({
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
+    this.classroomId,
+    required this.feeCode,
+  });
+
+  /// Reconstruit l'intention depuis `extra` de la route. `null` dès qu'il n'y a
+  /// rien à reconstruire : l'écran s'ouvre alors vierge, comme par le menu.
+  static FeeControlIntent? fromRouteExtra(Object? extra) =>
+      extra is FeeControlIntent ? extra : null;
+
+  @override
+  List<Object?> get props => [
+    schoolLevelGroupId,
+    schoolLevelId,
+    classroomId,
+    feeCode,
+  ];
+}

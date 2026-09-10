@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/boot
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_dashboard_contracts.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_page_helpers.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';

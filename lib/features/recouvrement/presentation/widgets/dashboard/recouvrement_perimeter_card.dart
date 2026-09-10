@@ -34,6 +34,10 @@ class RecouvrementPerimeterCard extends StatelessWidget {
   /// se tait plutôt que d'annoncer zéro.
   final int? concernedCount;
 
+  /// Inscrits du périmètre que **rien de la sélection ne facture**. `null`
+  /// quand on n'a pas pu vérifier — ce qui n'est pas « personne ».
+  final int? unbilled;
+
   /// Le taux de guichet en vigueur, ou `null` si l'école n'en a posé aucun.
   final ExchangeRate? exchangeRate;
 
@@ -47,6 +51,7 @@ class RecouvrementPerimeterCard extends StatelessWidget {
     required this.onCycleChanged,
     this.enabled = true,
     this.concernedCount,
+    this.unbilled,
     this.exchangeRate,
   });
 
@@ -112,7 +117,11 @@ class RecouvrementPerimeterCard extends StatelessWidget {
             },
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          _ContextLine(concernedCount: concernedCount, rate: exchangeRate),
+          _ContextLine(
+            concernedCount: concernedCount,
+            unbilled: unbilled,
+            rate: exchangeRate,
+          ),
         ],
       ),
     );
@@ -126,9 +135,14 @@ class RecouvrementPerimeterCard extends StatelessWidget {
 /// l'arbitrage sans le faire passer pour une mesure.
 class _ContextLine extends StatelessWidget {
   final int? concernedCount;
+  final int? unbilled;
   final ExchangeRate? rate;
 
-  const _ContextLine({required this.concernedCount, required this.rate});
+  const _ContextLine({
+    required this.concernedCount,
+    required this.unbilled,
+    required this.rate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +153,14 @@ class _ContextLine extends StatelessWidget {
     // concerné » avant d'avoir lu serait un chiffre, pas une attente.
     if (count == null) return const SizedBox.shrink();
 
+    final notBilled = unbilled;
     final parts = <String>[
       l10n.recouvrementContextLine(count),
+      // Dit seulement quand il y en a. « 0 non facturé » est un bruit ; `null`
+      // — on n'a pas pu vérifier — se tait aussi, plutôt que de laisser croire
+      // que tout le monde est facturé.
+      if (notBilled != null && notBilled > 0)
+        l10n.recouvrementUnbilledNote(notBilled),
       rate == null
           ? l10n.recouvrementRateMissing
           : l10n.recouvrementRateLine(rate!.formatted()),

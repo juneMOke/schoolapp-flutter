@@ -15,7 +15,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// jugement là où le classement suffit : ce qui décroche est déjà en tête de
 /// liste. La couleur reste donc libre de ne rien dire, et les tokens de statut
 /// gardent leur sens, qui est le statut d'un élève.
-class FeeControlDashboardGroupRow extends StatelessWidget {
+class RecouvrementGroupRowTile extends StatelessWidget {
   final String label;
   final FeeControlBreakdown breakdown;
 
@@ -35,7 +35,7 @@ class FeeControlDashboardGroupRow extends StatelessWidget {
   /// transmettre.
   final VoidCallback? onOpenControl;
 
-  const FeeControlDashboardGroupRow({
+  const RecouvrementGroupRowTile({
     super.key,
     required this.label,
     required this.breakdown,
@@ -168,8 +168,8 @@ class _Bar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final height = dense
-        ? FeeControlDashboardGroupRow._denseBarHeight
-        : FeeControlDashboardGroupRow._barHeight;
+        ? RecouvrementGroupRowTile._denseBarHeight
+        : RecouvrementGroupRowTile._barHeight;
     return ClipRRect(
       borderRadius: BorderRadius.circular(height / 2),
       child: LinearProgressIndicator(

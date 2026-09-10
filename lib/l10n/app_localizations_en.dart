@@ -9484,4 +9484,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String recouvrementCurrencyGroupTitle(String currency) {
     return 'Fees in $currency';
   }
+
+  @override
+  String recouvrementUnbilledNote(int count) {
+    return '$count enrolled students carry none of these fees';
+  }
 }

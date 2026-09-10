@@ -9,11 +9,21 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 
 class MockGetFeeCodes extends Mock implements GetFeeCodesForYearUseCase {}
 
 class MockGetPositions extends Mock implements GetRecoveryPositionsUseCase {}
+
+class MockGetClassrooms extends Mock implements GetOfflineClassroomsUseCase {}
+
+class MockGetRosters extends Mock implements GetComposedRostersUseCase {}
+
+class MockSearchEnrollments extends Mock
+    implements SearchLocalEnrollmentsUseCase {}
 
 LocalRecoveryLine line(
   String studentId, {
@@ -40,14 +50,32 @@ void main() {
   late MockGetFeeCodes getFeeCodes;
   late MockGetPositions getPositions;
 
+  late MockGetClassrooms getClassrooms;
+  late MockGetRosters getRosters;
+  late MockSearchEnrollments searchEnrollments;
+
   RecouvrementDashboardBloc build() => RecouvrementDashboardBloc(
     getFeeCodes: getFeeCodes,
     getPositions: getPositions,
+    getClassrooms: getClassrooms,
+    getRosters: getRosters,
+    searchEnrollments: searchEnrollments,
   );
 
   setUp(() {
     getFeeCodes = MockGetFeeCodes();
     getPositions = MockGetPositions();
+    getClassrooms = MockGetClassrooms();
+    getRosters = MockGetRosters();
+    searchEnrollments = MockSearchEnrollments();
+    // Le comptage des non-facturés est best-effort : sans stub il échouerait,
+    // et c'est précisément ce que le bloc doit savoir absorber sans tomber.
+    when(
+      () => searchEnrollments.currentYearEnrolled(
+        academicYearId: any(named: 'academicYearId'),
+        schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+      ),
+    ).thenAnswer((_) async => const Left(StorageFailure('non lu')));
   });
 
   void stubPositions(List<LocalRecoveryLine> lines) {

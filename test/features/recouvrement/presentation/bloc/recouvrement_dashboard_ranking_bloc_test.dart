@@ -5,10 +5,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_level_aggregate.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_positions_by_level_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
@@ -22,8 +22,8 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 class MockGetFeeCodesForYearUseCase extends Mock
     implements GetFeeCodesForYearUseCase {}
 
-class MockGetFeeChargePositionsByLevelUseCase extends Mock
-    implements GetFeeChargePositionsByLevelUseCase {}
+class MockGetRecoveryPositions extends Mock
+    implements GetRecoveryPositionsUseCase {}
 
 class MockGetOfflineClassroomsUseCase extends Mock
     implements GetOfflineClassroomsUseCase {}
@@ -72,30 +72,35 @@ const tYear = 'ay-1';
 const tFeeCode = 'TUITION';
 const tGroup = 'grp-1';
 
-LocalFeeLevelAggregate at(
+LocalRecoveryLine at(
   String studentId, {
   String? level = 'lvl-1',
   int expected = 100000,
   int paid = 0,
-}) => LocalFeeLevelAggregate(
+}) => LocalRecoveryLine(
   schoolLevelId: level,
-  charge: LocalFeeChargeAggregate.single(
-    studentId: studentId,
-    currency: 'USD',
-    expectedInCents: expected,
-    paidMirrorInCents: paid,
-    paidPendingInCents: 0,
-  ),
+  studentId: studentId,
+  charges: [
+    RecoveryChargePosition(
+      feeCode: tFeeCode,
+      position: FeeChargePosition(
+        currency: 'USD',
+        expectedInCents: expected,
+        paidMirrorInCents: paid,
+        paidPendingInCents: 0,
+      ),
+    ),
+  ],
 );
 
 void main() {
   late MockGetFeeCodesForYearUseCase getFeeCodes;
-  late MockGetFeeChargePositionsByLevelUseCase getPositions;
+  late MockGetRecoveryPositions getPositions;
   late MockGetOfflineClassroomsUseCase getClassrooms;
   late MockGetComposedRostersUseCase getRosters;
   late MockSearchLocalEnrollmentsUseCase searchEnrollments;
 
-  FeeControlDashboardBloc build() => FeeControlDashboardBloc(
+  RecouvrementDashboardBloc build() => RecouvrementDashboardBloc(
     getFeeCodes: getFeeCodes,
     getPositions: getPositions,
     getClassrooms: getClassrooms,
@@ -115,7 +120,7 @@ void main() {
 
   setUp(() {
     getFeeCodes = MockGetFeeCodesForYearUseCase();
-    getPositions = MockGetFeeChargePositionsByLevelUseCase();
+    getPositions = MockGetRecoveryPositions();
     getClassrooms = MockGetOfflineClassroomsUseCase();
     getRosters = MockGetComposedRostersUseCase();
     searchEnrollments = MockSearchLocalEnrollmentsUseCase();
@@ -149,31 +154,30 @@ void main() {
     ).thenAnswer((_) async => outcome);
   }
 
-  void stubPositions(Either<Failure, List<LocalFeeLevelAggregate>> outcome) {
+  void stubPositions(Either<Failure, List<LocalRecoveryLine>> outcome) {
     when(
       () => getPositions(
         academicYearId: any(named: 'academicYearId'),
-        feeCode: any(named: 'feeCode'),
+        feeCodes: any(named: 'feeCodes'),
         schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
       ),
     ).thenAnswer((_) async => outcome);
   }
 
   group('natures de frais', () {
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'chargement puis liste, telle que le grand-livre la rend',
       setUp: () => stubFeeCodes(const Right(['CANTINE', 'TUITION'])),
       build: build,
-      act: (bloc) => bloc.add(
-        const FeeControlDashboardFeeCodesRequested(academicYearId: tYear),
-      ),
+      act: (bloc) =>
+          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: tYear)),
       expect: () => [
-        isA<FeeControlDashboardState>().having(
+        isA<RecouvrementDashboardState>().having(
           (s) => s.feeCodesStatus,
           'feeCodesStatus',
           EnrollmentLoadStatus.loading,
         ),
-        isA<FeeControlDashboardState>()
+        isA<RecouvrementDashboardState>()
             .having(
               (s) => s.feeCodesStatus,
               'feeCodesStatus',
@@ -183,16 +187,15 @@ void main() {
       ],
     );
 
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'un échec de lecture locale se dit « serveur », jamais réseau ni 403',
       setUp: () => stubFeeCodes(const Left(StorageFailure('bases fermée'))),
       build: build,
-      act: (bloc) => bloc.add(
-        const FeeControlDashboardFeeCodesRequested(academicYearId: tYear),
-      ),
+      act: (bloc) =>
+          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: tYear)),
       skip: 1,
       expect: () => [
-        isA<FeeControlDashboardState>()
+        isA<RecouvrementDashboardState>()
             .having(
               (s) => s.feeCodesStatus,
               'feeCodesStatus',
@@ -208,7 +211,7 @@ void main() {
   });
 
   group('position de la population', () {
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'projette le classement et retient de quoi il est le résultat',
       setUp: () => stubPositions(
         Right([
@@ -219,9 +222,9 @@ void main() {
       ),
       build: build,
       act: (bloc) => bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
           schoolLevelGroupId: tGroup,
         ),
       ),
@@ -230,26 +233,26 @@ void main() {
       // non-facturés que la lecture complémentaire ajoute (FCD-5). Seul le
       // premier est décrit ici.
       expect: () => [
-        isA<FeeControlDashboardState>()
+        isA<RecouvrementDashboardState>()
             .having((s) => s.status, 'status', EnrollmentLoadStatus.success)
-            .having((s) => s.summary.total.total, 'concernés', 3)
-            .having((s) => s.summary.total.settled, 'soldés', 2)
+            .having((s) => s.ranking.total.total, 'concernés', 3)
+            .having((s) => s.ranking.total.settled, 'soldés', 2)
             // Le plus en retard en tête : lvl-1 est à 50 %, lvl-2 à 100 %.
             .having(
-              (s) => s.summary.groups.map((g) => g.schoolLevelId),
+              (s) => s.ranking.groups.map((g) => g.schoolLevelId),
               'groupes classés',
               ['lvl-1', 'lvl-2'],
             )
             .having(
               (s) => s.lastQuery,
               'lastQuery',
-              const FeeControlDashboardQuery(
+              const RecouvrementQuery(
                 academicYearId: tYear,
-                feeCode: tFeeCode,
+                feeCodes: const [tFeeCode],
                 schoolLevelGroupId: tGroup,
               ),
             ),
-        isA<FeeControlDashboardState>().having(
+        isA<RecouvrementDashboardState>().having(
           (s) => s.unbilled,
           'non-facturés',
           0,
@@ -257,23 +260,23 @@ void main() {
       ],
     );
 
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'aucun élève concerné : succès à résumé vide, distinct de l\'écran vierge',
-      setUp: () => stubPositions(const Right(<LocalFeeLevelAggregate>[])),
+      setUp: () => stubPositions(const Right(<LocalRecoveryLine>[])),
       build: build,
       act: (bloc) => bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
         ),
       ),
       skip: 1,
       expect: () => [
-        isA<FeeControlDashboardState>()
+        isA<RecouvrementDashboardState>()
             .having((s) => s.status, 'status', EnrollmentLoadStatus.success)
             .having((s) => s.hasEmptyResult, 'hasEmptyResult', isTrue)
             .having((s) => s.lastQuery, 'lastQuery', isNotNull),
-        isA<FeeControlDashboardState>().having(
+        isA<RecouvrementDashboardState>().having(
           (s) => s.unbilled,
           'non-facturés',
           0,
@@ -281,14 +284,14 @@ void main() {
       ],
     );
 
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'un cycle vide ou blanc ne descend PAS jusqu\'au SQL',
-      setUp: () => stubPositions(const Right(<LocalFeeLevelAggregate>[])),
+      setUp: () => stubPositions(const Right(<LocalRecoveryLine>[])),
       build: build,
       act: (bloc) => bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
           schoolLevelGroupId: '   ',
         ),
       ),
@@ -296,26 +299,26 @@ void main() {
         verify(
           () => getPositions(
             academicYearId: tYear,
-            feeCode: tFeeCode,
+            feeCodes: const [tFeeCode],
             schoolLevelGroupId: null,
           ),
         ).called(1);
       },
     );
 
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'un échec EFFACE le classement précédent — le laisser à côté du message '
       'le ferait passer pour valide sous les critères affichés',
       setUp: () {
         when(
           () => getPositions(
             academicYearId: any(named: 'academicYearId'),
-            feeCode: any(named: 'feeCode'),
+            feeCodes: any(named: 'feeCodes'),
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
           ),
         ).thenAnswer((invocation) async {
-          final fee = invocation.namedArguments[#feeCode] as String;
-          return fee == tFeeCode
+          final fees = invocation.namedArguments[#feeCodes] as List<String>;
+          return fees.contains(tFeeCode)
               ? Right([at('s1', paid: 100000)])
               : const Left(StorageFailure('base fermée'));
         });
@@ -323,63 +326,63 @@ void main() {
       build: build,
       act: (bloc) async {
         bloc.add(
-          const FeeControlDashboardRequested(
+          const RecouvrementRequested(
             academicYearId: tYear,
-            feeCode: tFeeCode,
+            feeCodes: const [tFeeCode],
           ),
         );
         await Future<void>.delayed(Duration.zero);
         bloc.add(
-          const FeeControlDashboardRequested(
+          const RecouvrementRequested(
             academicYearId: tYear,
-            feeCode: 'CANTINE',
+            feeCodes: const ['CANTINE'],
           ),
         );
       },
       verify: (bloc) {
         expect(bloc.state.status, EnrollmentLoadStatus.failure);
-        expect(bloc.state.summary, FeeControlDashboardSummary.empty);
-        expect(bloc.state.lastQuery?.feeCode, 'CANTINE');
+        expect(bloc.state.ranking, RecouvrementRankingSummary.empty);
+        expect(bloc.state.lastQuery?.feeCodes, ['CANTINE']);
       },
     );
   });
 
   group('reprise', () {
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'sans lecture antérieure, réessayer ne fait RIEN — une reprise ne doit '
       'pas interroger autre chose que ce qui a échoué',
       build: build,
-      act: (bloc) => bloc.add(const FeeControlDashboardRefreshRequested()),
-      expect: () => const <FeeControlDashboardState>[],
+      act: (bloc) => bloc.add(const RecouvrementRefreshRequested()),
+      expect: () => const <RecouvrementDashboardState>[],
       verify: (_) => verifyNever(
         () => getPositions(
           academicYearId: any(named: 'academicYearId'),
-          feeCode: any(named: 'feeCode'),
+          feeCodes: any(named: 'feeCodes'),
           schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
         ),
       ),
     );
 
-    blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+    blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       'rejoue EXACTEMENT la dernière lecture, cycle compris',
-      setUp: () => stubPositions(const Right(<LocalFeeLevelAggregate>[])),
+      setUp: () => stubPositions(const Right(<LocalRecoveryLine>[])),
       build: build,
       act: (bloc) async {
         bloc.add(
-          const FeeControlDashboardRequested(
+          const RecouvrementRequested(
             academicYearId: tYear,
-            feeCode: tFeeCode,
+            feeCodes: const [tFeeCode],
             schoolLevelGroupId: tGroup,
           ),
         );
         await Future<void>.delayed(Duration.zero);
-        bloc.add(const FeeControlDashboardRefreshRequested());
+        bloc.add(const RecouvrementRefreshRequested());
       },
       verify: (_) {
         verify(
           () => getPositions(
             academicYearId: tYear,
-            feeCode: tFeeCode,
+            feeCodes: const [tFeeCode],
             schoolLevelGroupId: tGroup,
           ),
         ).called(2);
@@ -390,31 +393,31 @@ void main() {
   group('résultats périmés', () {
     test('une lecture doublée puis résolue EN DERNIER ne repeint pas le '
         'classement de la plus récente', () async {
-      final first = Completer<Either<Failure, List<LocalFeeLevelAggregate>>>();
-      final second = Completer<Either<Failure, List<LocalFeeLevelAggregate>>>();
+      final first = Completer<Either<Failure, List<LocalRecoveryLine>>>();
+      final second = Completer<Either<Failure, List<LocalRecoveryLine>>>();
       when(
         () => getPositions(
           academicYearId: any(named: 'academicYearId'),
-          feeCode: any(named: 'feeCode'),
+          feeCodes: any(named: 'feeCodes'),
           schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
         ),
       ).thenAnswer((invocation) {
-        final fee = invocation.namedArguments[#feeCode] as String;
-        return fee == tFeeCode ? first.future : second.future;
+        final fees = invocation.namedArguments[#feeCodes] as List<String>;
+        return fees.contains(tFeeCode) ? first.future : second.future;
       });
 
       final bloc = build();
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: 'CANTINE',
+          feeCodes: const ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -426,9 +429,9 @@ void main() {
       first.complete(Right([at('s-a'), at('s-b'), at('s-c')]));
       await Future<void>.delayed(Duration.zero);
 
-      expect(bloc.state.lastQuery?.feeCode, 'CANTINE');
-      expect(bloc.state.summary.total.total, 1);
-      expect(bloc.state.summary.total.settled, 1);
+      expect(bloc.state.lastQuery?.feeCodes, ['CANTINE']);
+      expect(bloc.state.ranking.total.total, 1);
+      expect(bloc.state.ranking.total.settled, 1);
 
       await bloc.close();
     });
@@ -440,19 +443,19 @@ void main() {
       (const StorageFailure('base fermée'), EnrollmentErrorType.server),
       (const ServerFailure('inattendu'), EnrollmentErrorType.unknown),
     ]) {
-      blocTest<FeeControlDashboardBloc, FeeControlDashboardState>(
+      blocTest<RecouvrementDashboardBloc, RecouvrementDashboardState>(
         '${failure.runtimeType} → $expected',
         setUp: () => stubPositions(Left(failure)),
         build: build,
         act: (bloc) => bloc.add(
-          const FeeControlDashboardRequested(
+          const RecouvrementRequested(
             academicYearId: tYear,
-            feeCode: tFeeCode,
+            feeCodes: const [tFeeCode],
           ),
         ),
         skip: 1,
         expect: () => [
-          isA<FeeControlDashboardState>()
+          isA<RecouvrementDashboardState>()
               .having((s) => s.errorType, 'errorType', expected)
               .having((s) => s.errorMessage, 'errorMessage', failure.message),
         ],
@@ -461,15 +464,15 @@ void main() {
   });
 
   group('dépliage en classes', () {
-    Future<FeeControlDashboardBloc> loaded(
-      List<LocalFeeLevelAggregate> positions,
+    Future<RecouvrementDashboardBloc> loaded(
+      List<LocalRecoveryLine> positions,
     ) async {
       stubPositions(Right(positions));
       final bloc = build();
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -493,7 +496,7 @@ void main() {
         ]);
 
         bloc.add(
-          const FeeControlDashboardGroupToggled(
+          const RecouvrementGroupToggled(
             academicYearId: tYear,
             schoolLevelId: 'lvl-1',
           ),
@@ -508,7 +511,7 @@ void main() {
         verify(
           () => getPositions(
             academicYearId: any(named: 'academicYearId'),
-            feeCode: any(named: 'feeCode'),
+            feeCodes: any(named: 'feeCodes'),
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
           ),
         ).called(1);
@@ -530,7 +533,7 @@ void main() {
         final bloc = await loaded([at('s1', paid: 100000), at('s-orphelin')]);
 
         bloc.add(
-          const FeeControlDashboardGroupToggled(
+          const RecouvrementGroupToggled(
             academicYearId: tYear,
             schoolLevelId: 'lvl-1',
           ),
@@ -543,7 +546,7 @@ void main() {
         expect(rows.last.breakdown.total, 1);
         expect(
           rows.fold(0, (sum, r) => sum + r.breakdown.total),
-          bloc.state.summary.total.total,
+          bloc.state.ranking.total.total,
         );
 
         await bloc.close();
@@ -563,7 +566,7 @@ void main() {
       ]);
 
       bloc.add(
-        const FeeControlDashboardGroupToggled(
+        const RecouvrementGroupToggled(
           academicYearId: tYear,
           schoolLevelId: 'lvl-1',
         ),
@@ -589,7 +592,7 @@ void main() {
       );
       final bloc = await loaded([at('s1')]);
 
-      const toggle = FeeControlDashboardGroupToggled(
+      const toggle = RecouvrementGroupToggled(
         academicYearId: tYear,
         schoolLevelId: 'lvl-1',
       );
@@ -610,7 +613,7 @@ void main() {
       final bloc = await loaded([at('s1', level: null)]);
 
       bloc.add(
-        const FeeControlDashboardGroupToggled(
+        const RecouvrementGroupToggled(
           academicYearId: tYear,
           schoolLevelId: null,
         ),
@@ -636,7 +639,7 @@ void main() {
         final bloc = await loaded([at('s1')]);
 
         bloc.add(
-          const FeeControlDashboardGroupToggled(
+          const RecouvrementGroupToggled(
             academicYearId: tYear,
             schoolLevelId: 'lvl-1',
           ),
@@ -661,7 +664,7 @@ void main() {
       final bloc = await loaded([at('s1')]);
 
       bloc.add(
-        const FeeControlDashboardGroupToggled(
+        const RecouvrementGroupToggled(
           academicYearId: tYear,
           schoolLevelId: 'lvl-1',
         ),
@@ -670,9 +673,9 @@ void main() {
       expect(bloc.state.expandedLevelId, 'lvl-1');
 
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: 'CANTINE',
+          feeCodes: const ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -685,12 +688,12 @@ void main() {
   });
 
   group('les non-facturés', () {
-    Future<FeeControlDashboardBloc> run() async {
+    Future<RecouvrementDashboardBloc> run() async {
       final bloc = build();
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
           schoolLevelGroupId: tGroup,
         ),
       );
@@ -716,8 +719,8 @@ void main() {
 
         expect(bloc.state.unbilled, 2);
         // Et surtout : le TAUX les ignore. Deux concernés, un soldé → 50 %.
-        expect(bloc.state.summary.total.total, 2);
-        expect(bloc.state.summary.settledPercent, 50);
+        expect(bloc.state.ranking.total.total, 2);
+        expect(bloc.state.ranking.settledPercent, 50);
 
         await bloc.close();
       },
@@ -732,7 +735,7 @@ void main() {
 
       // Le classement compte 2 couples (D5) ; la soustraction, elle, porte sur
       // des élèves DISTINCTS : seul `s2` n'est pas facturé.
-      expect(bloc.state.summary.total.total, 2);
+      expect(bloc.state.ranking.total.total, 2);
       expect(bloc.state.unbilled, 1);
 
       await bloc.close();
@@ -760,7 +763,7 @@ void main() {
       final bloc = await run();
 
       expect(bloc.state.status, EnrollmentLoadStatus.success);
-      expect(bloc.state.summary.total.total, 1);
+      expect(bloc.state.ranking.total.total, 1);
       // `null`, jamais `0` : « on n'a pas pu vérifier » n'est pas « personne ».
       expect(bloc.state.unbilled, isNull);
 
@@ -790,7 +793,7 @@ void main() {
     test(
       'le périmètre de la note est celui de l\'écran : le cycle descend',
       () async {
-        stubPositions(const Right(<LocalFeeLevelAggregate>[]));
+        stubPositions(const Right(<LocalRecoveryLine>[]));
 
         final bloc = await run();
 
@@ -827,14 +830,14 @@ void main() {
 
       final bloc = build();
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: tFeeCode,
+          feeCodes: const [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
       bloc.add(
-        const FeeControlDashboardGroupToggled(
+        const RecouvrementGroupToggled(
           academicYearId: tYear,
           schoolLevelId: 'lvl-1',
         ),
@@ -843,9 +846,9 @@ void main() {
 
       // Le frais change pendant que les rosters volent encore.
       bloc.add(
-        const FeeControlDashboardRequested(
+        const RecouvrementRequested(
           academicYearId: tYear,
-          feeCode: 'CANTINE',
+          feeCodes: const ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);

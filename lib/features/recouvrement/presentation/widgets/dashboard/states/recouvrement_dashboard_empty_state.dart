@@ -8,11 +8,11 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 /// créance sur l'appareil » appelle une synchronisation, « personne ne porte ce
 /// frais ici » est un constat sur l'école. Les confondre enverrait chercher une
 /// panne là où il n'y a qu'un frais inapplicable.
-class FeeControlDashboardEmptyState extends StatelessWidget {
+class RecouvrementDashboardEmptyState extends StatelessWidget {
   final String title;
   final String description;
 
-  const FeeControlDashboardEmptyState({
+  const RecouvrementDashboardEmptyState({
     super.key,
     required this.title,
     required this.description,

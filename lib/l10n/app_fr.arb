@@ -5511,5 +5511,15 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementUnbilledNote": "{count} inscrits ne portent aucun de ces frais",
+  "@recouvrementUnbilledNote": {
+      "description": "Note des inscrits non facturés dans la ligne de contexte",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
   }
 }

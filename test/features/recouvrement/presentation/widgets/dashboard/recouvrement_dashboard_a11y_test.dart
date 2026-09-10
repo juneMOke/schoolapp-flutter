@@ -5,12 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_class_rows.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_group_row.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_summary_band.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_class_rows.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_group_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que le tableau de bord dit à qui ne le voit pas.
@@ -21,8 +22,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// lecteur d'écran — qui n'est pas la même chose, et que rien d'autre ne
 /// couvre.
 class _MockDashboardBloc
-    extends MockBloc<FeeControlDashboardEvent, FeeControlDashboardState>
-    implements FeeControlDashboardBloc {}
+    extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
+    implements RecouvrementDashboardBloc {}
 
 /// Un test qui a besoin de l'arbre sémantique.
 ///
@@ -56,7 +57,7 @@ void main() {
         'et jamais quatre fragments', (tester) async {
       await tester.pumpWidget(
         _host(
-          FeeControlDashboardGroupRow(
+          RecouvrementGroupRowTile(
             label: 'Primaire · 1ère année',
             breakdown: const FeeControlBreakdown(settled: 26, none: 5),
             onToggle: () {},
@@ -81,7 +82,7 @@ void main() {
       var toggled = 0;
       await tester.pumpWidget(
         _host(
-          FeeControlDashboardGroupRow(
+          RecouvrementGroupRowTile(
             label: '1ère année',
             breakdown: const FeeControlBreakdown(settled: 5, none: 5),
             onToggle: () => toggled++,
@@ -111,7 +112,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _host(
-          FeeControlDashboardGroupRow(
+          RecouvrementGroupRowTile(
             label: '1ère année',
             breakdown: const FeeControlBreakdown(settled: 5, none: 5),
             expanded: true,
@@ -130,7 +131,7 @@ void main() {
         'n\'ouvre rien est pire qu\'aucun bouton', (tester) async {
       await tester.pumpWidget(
         _host(
-          const FeeControlDashboardGroupRow(
+          const RecouvrementGroupRowTile(
             label: 'Niveau non renseigné',
             breakdown: FeeControlBreakdown(settled: 1, none: 3),
           ),
@@ -148,7 +149,7 @@ void main() {
       var opened = 0;
       await tester.pumpWidget(
         _host(
-          FeeControlDashboardGroupRow(
+          RecouvrementGroupRowTile(
             label: '1ère année',
             breakdown: const FeeControlBreakdown(settled: 5, none: 5),
             onToggle: () {},
@@ -170,13 +171,12 @@ void main() {
   });
 
   group('le dépliage en classes', () {
-    Widget classRows(EnrollmentLoadStatus status) =>
-        FeeControlDashboardClassRows(
-          status: status,
-          classes: const <FeeControlClassRow>[],
-          classroomsMissing: true,
-          onOpenControl: null,
-        );
+    Widget classRows(EnrollmentLoadStatus status) => RecouvrementClassRows(
+      status: status,
+      classes: const <RecouvrementClassRow>[],
+      classroomsMissing: true,
+      onOpenControl: null,
+    );
 
     testSemantics('le chargement se NOMME : c\'est le seul retour que la tape '
         'donne à qui ne voit pas la barre', (tester) async {
@@ -211,27 +211,31 @@ void main() {
     testSemantics('s\'annonce comme une synthèse, et non comme quatre nombres '
         'orphelins', (tester) async {
       final bloc = _MockDashboardBloc();
-      const state = FeeControlDashboardState(
+      final state = RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: FeeControlDashboardSummary(
-          total: FeeControlBreakdown(settled: 26, partial: 3, none: 2),
-          remaining: MoneyBag.empty,
-          groups: <FeeControlGroupRow>[],
+        figures: RecouvrementKeyFigures(
+          total: 31,
+          none: 2,
+          partial: 3,
+          settled: 26,
+          expected: MoneyBag.of([Money.parse(930000, 'USD')]),
+          paid: MoneyBag.of([Money.parse(800000, 'USD')]),
+          remaining: MoneyBag.of([Money.parse(130000, 'USD')]),
         ),
       );
       when(() => bloc.state).thenReturn(state);
       whenListen(
         bloc,
-        const Stream<FeeControlDashboardState>.empty(),
+        const Stream<RecouvrementDashboardState>.empty(),
         initialState: state,
       );
 
       await tester.pumpWidget(
         _host(
-          BlocProvider<FeeControlDashboardBloc>.value(
+          BlocProvider<RecouvrementDashboardBloc>.value(
             value: bloc,
             child: const SingleChildScrollView(
-              child: FeeControlDashboardSummaryBand(),
+              child: RecouvrementKeyFiguresBand(),
             ),
           ),
         ),
@@ -239,13 +243,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Le bandeau se dit d'un seul nœud : son nom D'ABORD, puis les quatre
-      // nombres. Sans le nom en tête, le lecteur d'écran attaquerait par « 31 »
-      // — un nombre sans sujet.
+      // chiffres. Sans le nom en tête, le lecteur d'écran attaquerait par un
+      // montant sans sujet.
       final node = tester.getSemantics(find.byType(EteeloKpiBand));
-      expect(node.label, startsWith('Synthèse du contrôle des frais'));
-      expect(node.label, contains('Élèves concernés'));
-      expect(node.label, contains('Payé'));
-      expect(node.label, contains('À régler'));
+      expect(node.label, startsWith('Chiffres clés du recouvrement'));
+      expect(node.label, contains('Attendu sur ces frais'));
+      expect(node.label, contains('Perçu à ce jour'));
+      expect(node.label, contains('N\'ont rien payé'));
     });
   });
 }

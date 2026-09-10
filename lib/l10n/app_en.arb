@@ -5465,5 +5465,14 @@
               "type": "String"
           }
       }
+  },
+
+  "recouvrementUnbilledNote": "{count} enrolled students carry none of these fees",
+  "@recouvrementUnbilledNote": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
   }
 }

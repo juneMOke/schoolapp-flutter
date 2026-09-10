@@ -4,10 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
@@ -17,19 +15,20 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_group_row.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_ranking.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/fee_control_dashboard_summary_band.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/fee_control_dashboard_empty_state.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_group_row.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
-class MockFeeControlDashboardBloc
-    extends MockBloc<FeeControlDashboardEvent, FeeControlDashboardState>
-    implements FeeControlDashboardBloc {}
+class MockRecouvrementDashboardBloc
+    extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
+    implements RecouvrementDashboardBloc {}
 
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
@@ -41,12 +40,12 @@ class _Session {
   final List<String>? permissions;
 }
 
-FeeControlClassRow classRow(
+RecouvrementClassRow classRow(
   String? id,
   String? name, {
   required int settled,
   required int total,
-}) => FeeControlClassRow(
+}) => RecouvrementClassRow(
   classroomId: id,
   name: name,
   breakdown: FeeControlBreakdown(settled: settled, none: total - settled),
@@ -80,33 +79,33 @@ final tBundles = [
   ),
 ];
 
-FeeControlGroupRow levelRow(
+RecouvrementGroupRow levelRow(
   String? level, {
   required int settled,
   required int total,
-}) => FeeControlGroupRow(
+}) => RecouvrementGroupRow(
   schoolLevelId: level,
   breakdown: FeeControlBreakdown(settled: settled, none: total - settled),
   remaining: MoneyBag.empty,
 );
 
-FeeControlDashboardSummary summaryOf(List<FeeControlGroupRow> groups) {
+RecouvrementRankingSummary summaryOf(List<RecouvrementGroupRow> groups) {
   var settled = 0;
   var none = 0;
   for (final g in groups) {
     settled += g.breakdown.settled;
     none += g.breakdown.none;
   }
-  return FeeControlDashboardSummary(
+  return RecouvrementRankingSummary(
     total: FeeControlBreakdown(settled: settled, none: none),
     remaining: MoneyBag.empty,
     groups: groups,
   );
 }
 
-Future<MockFeeControlDashboardBloc> _pump(
+Future<MockRecouvrementDashboardBloc> _pump(
   WidgetTester tester,
-  FeeControlDashboardState state, {
+  RecouvrementDashboardState state, {
   bool showCycle = true,
   bool withBand = false,
   // ⚠️ Le squelette de chargement shimmer **sans fin** : `pumpAndSettle` ne s'y
@@ -115,11 +114,11 @@ Future<MockFeeControlDashboardBloc> _pump(
   _Session? session,
 }) async {
   pushedIntent = null;
-  final bloc = MockFeeControlDashboardBloc();
+  final bloc = MockRecouvrementDashboardBloc();
   when(() => bloc.state).thenReturn(state);
   whenListen(
     bloc,
-    const Stream<FeeControlDashboardState>.empty(),
+    const Stream<RecouvrementDashboardState>.empty(),
     initialState: state,
   );
 
@@ -144,14 +143,14 @@ Future<MockFeeControlDashboardBloc> _pump(
       GoRoute(
         path: '/dash',
         builder: (context, state) => wrap(
-          BlocProvider<FeeControlDashboardBloc>.value(
+          BlocProvider<RecouvrementDashboardBloc>.value(
             value: bloc,
             child: AppPageBackground(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    if (withBand) const FeeControlDashboardSummaryBand(),
-                    FeeControlDashboardRanking(
+                    if (withBand) const RecouvrementKeyFiguresBand(),
+                    RecouvrementRankingSection(
                       labels: FeeControlDashboardLabels.from(tBundles),
                       academicYearId: 'ay-1',
                       showCycleInLabels: showCycle,
@@ -200,13 +199,13 @@ void main() {
     // ⚠️ Sans ce repli, le premier `any()` sur un événement lève un StateError
     // — et mocktail laisse alors les tests SUIVANTS dans un état où le mock ne
     // répond plus, ce qui les fait échouer sur des messages sans rapport.
-    registerFallbackValue(const FeeControlDashboardRefreshRequested());
+    registerFallbackValue(const RecouvrementRefreshRequested());
   });
 
   testWidgets('rien tant qu\'aucune lecture n\'a été demandée', (tester) async {
-    await _pump(tester, const FeeControlDashboardState.initial());
+    await _pump(tester, const RecouvrementDashboardState.initial());
 
-    expect(find.byType(FeeControlDashboardGroupRow), findsNothing);
+    expect(find.byType(RecouvrementGroupRowTile), findsNothing);
     expect(find.byType(EteeloListSkeleton), findsNothing);
   });
 
@@ -215,7 +214,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      const FeeControlDashboardState(status: EnrollmentLoadStatus.loading),
+      const RecouvrementDashboardState(status: EnrollmentLoadStatus.loading),
       settle: false,
     );
 
@@ -228,7 +227,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      const FeeControlDashboardState(
+      const RecouvrementDashboardState(
         status: EnrollmentLoadStatus.failure,
         errorType: EnrollmentErrorType.server,
         errorMessage: 'base fermée',
@@ -241,10 +240,10 @@ void main() {
   testWidgets('succès sans personne : l\'état vide partagé', (tester) async {
     await _pump(
       tester,
-      const FeeControlDashboardState(status: EnrollmentLoadStatus.success),
+      const RecouvrementDashboardState(status: EnrollmentLoadStatus.success),
     );
 
-    expect(find.byType(FeeControlDashboardEmptyState), findsOneWidget);
+    expect(find.byType(RecouvrementDashboardEmptyState), findsOneWidget);
     expect(find.text('Aucun élève concerné'), findsOneWidget);
   });
 
@@ -253,9 +252,9 @@ void main() {
   ) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([
+        ranking: summaryOf([
           levelRow('lvl-2', settled: 2, total: 10),
           levelRow('lvl-1', settled: 9, total: 10),
         ]),
@@ -263,8 +262,8 @@ void main() {
     );
 
     final rows = tester
-        .widgetList<FeeControlDashboardGroupRow>(
-          find.byType(FeeControlDashboardGroupRow),
+        .widgetList<RecouvrementGroupRowTile>(
+          find.byType(RecouvrementGroupRowTile),
         )
         .toList();
     expect(rows.length, 2);
@@ -280,9 +279,9 @@ void main() {
   ) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow('lvl-1', settled: 1, total: 2)]),
+        ranking: summaryOf([levelRow('lvl-1', settled: 1, total: 2)]),
       ),
     );
 
@@ -293,9 +292,9 @@ void main() {
       'affiche déjà', (tester) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow('lvl-1', settled: 1, total: 2)]),
+        ranking: summaryOf([levelRow('lvl-1', settled: 1, total: 2)]),
       ),
       showCycle: false,
     );
@@ -309,13 +308,13 @@ void main() {
   ) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow(null, settled: 0, total: 3)]),
+        ranking: summaryOf([levelRow(null, settled: 0, total: 3)]),
       ),
     );
 
-    expect(find.byType(FeeControlDashboardGroupRow), findsOneWidget);
+    expect(find.byType(RecouvrementGroupRowTile), findsOneWidget);
     expect(find.text('Niveau non renseigné'), findsOneWidget);
   });
 
@@ -323,9 +322,9 @@ void main() {
       'une synchronisation le réparerait, pas une saisie', (tester) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow('lvl-inconnu', settled: 0, total: 3)]),
+        ranking: summaryOf([levelRow('lvl-inconnu', settled: 0, total: 3)]),
       ),
     );
 
@@ -336,9 +335,9 @@ void main() {
   testWidgets('chaque ligne annonce sa part et son effectif', (tester) async {
     await _pump(
       tester,
-      FeeControlDashboardState(
+      RecouvrementDashboardState(
         status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow('lvl-1', settled: 26, total: 31)]),
+        ranking: summaryOf([levelRow('lvl-1', settled: 26, total: 31)]),
       ),
     );
 
@@ -346,33 +345,14 @@ void main() {
     expect(find.text('26 sur 31'), findsOneWidget);
   });
 
-  testWidgets('le bandeau emprunte l\'anatomie de l\'écran nominatif', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      FeeControlDashboardState(
-        status: EnrollmentLoadStatus.success,
-        summary: summaryOf([levelRow('lvl-1', settled: 26, total: 31)]),
-      ),
-      withBand: true,
-    );
-
-    expect(find.byType(EteeloKpiBand), findsOneWidget);
-    expect(find.text('Élèves concernés'), findsOneWidget);
-    expect(find.text('Payé'), findsOneWidget);
-    // Même arrondi que partout : 26/31 = 83,9 %.
-    expect(find.byKey(const ValueKey('Payé-26-84')), findsOneWidget);
-  });
-
   group('dépliage', () {
-    FeeControlDashboardState expanded({
+    RecouvrementDashboardState expanded({
       EnrollmentLoadStatus classesStatus = EnrollmentLoadStatus.success,
-      List<FeeControlClassRow> classes = const <FeeControlClassRow>[],
+      List<RecouvrementClassRow> classes = const <RecouvrementClassRow>[],
       bool classroomsMissing = false,
-    }) => FeeControlDashboardState(
+    }) => RecouvrementDashboardState(
       status: EnrollmentLoadStatus.success,
-      summary: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
+      ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
       expandedLevelId: 'lvl-1',
       classesStatus: classesStatus,
       classes: classes,
@@ -382,21 +362,21 @@ void main() {
     testWidgets('un niveau replié n\'offre PAS ses classes', (tester) async {
       await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
+          ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
         ),
       );
 
-      expect(find.byType(FeeControlDashboardGroupRow), findsOneWidget);
+      expect(find.byType(RecouvrementGroupRowTile), findsOneWidget);
     });
 
     testWidgets('taper un niveau demande son dépliage', (tester) async {
       final bloc = await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
+          ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
         ),
       );
 
@@ -405,7 +385,7 @@ void main() {
 
       verify(
         () => bloc.add(
-          const FeeControlDashboardGroupToggled(
+          const RecouvrementGroupToggled(
             academicYearId: 'ay-1',
             schoolLevelId: 'lvl-1',
           ),
@@ -417,18 +397,16 @@ void main() {
         'chevron qui n\'ouvre rien', (tester) async {
       final bloc = await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow(null, settled: 1, total: 3)]),
+          ranking: summaryOf([levelRow(null, settled: 1, total: 3)]),
         ),
       );
 
       await tester.tap(find.text('Niveau non renseigné'));
       await tester.pumpAndSettle();
 
-      verifyNever(
-        () => bloc.add(any(that: isA<FeeControlDashboardGroupToggled>())),
-      );
+      verifyNever(() => bloc.add(any(that: isA<RecouvrementGroupToggled>())));
     });
 
     testWidgets('déplié : une sous-ligne par classe, les non-répartis nommés', (
@@ -447,7 +425,7 @@ void main() {
       expect(find.text('6e A'), findsOneWidget);
       expect(find.text('Non répartis'), findsOneWidget);
       // Le niveau plus ses deux classes.
-      expect(find.byType(FeeControlDashboardGroupRow), findsNWidgets(3));
+      expect(find.byType(RecouvrementGroupRowTile), findsNWidgets(3));
     });
 
     testWidgets('aucune classe SANS le droit : l\'écran nomme le DROIT, pas '
@@ -512,65 +490,16 @@ void main() {
     });
   });
 
-  group('les non-facturés', () {
-    FeeControlDashboardState withUnbilled(int? unbilled) =>
-        FeeControlDashboardState(
-          status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-1', settled: 8, total: 10)]),
-          unbilled: unbilled,
-        );
-
-    testWidgets('la note se lit À CÔTÉ du bandeau, jamais dans le taux', (
-      tester,
-    ) async {
-      await _pump(tester, withUnbilled(12), withBand: true);
-
-      expect(
-        find.text('12 élèves inscrits ne portent pas ce frais'),
-        findsOneWidget,
-      );
-      // Le taux, lui, ignore ces douze-là : 8 soldés sur 10 concernés.
-      expect(find.byKey(const ValueKey('Payé-8-80')), findsOneWidget);
-    });
-
-    testWidgets('un seul non-facturé se dit au SINGULIER', (tester) async {
-      await _pump(tester, withUnbilled(1), withBand: true);
-
-      expect(
-        find.text('1 élève inscrit ne porte pas ce frais'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets(
-      'compte inconnu : la note se TAIT plutôt que d\'annoncer zéro',
-      (tester) async {
-        await _pump(tester, withUnbilled(null), withBand: true);
-
-        expect(find.textContaining('ne porte'), findsNothing);
-        expect(find.textContaining('ne portent'), findsNothing);
-      },
-    );
-
-    testWidgets('zéro non-facturé : rien à signaler, rien d\'affiché', (
-      tester,
-    ) async {
-      await _pump(tester, withUnbilled(0), withBand: true);
-
-      expect(find.textContaining('ne portent pas ce frais'), findsNothing);
-    });
-  });
-
   group('pont vers l\'écran nominatif', () {
-    FeeControlDashboardState withQuery({
+    RecouvrementDashboardState withQuery({
       String? expandedLevelId,
-      List<FeeControlClassRow> classes = const <FeeControlClassRow>[],
-    }) => FeeControlDashboardState(
+      List<RecouvrementClassRow> classes = const <RecouvrementClassRow>[],
+    }) => RecouvrementDashboardState(
       status: EnrollmentLoadStatus.success,
-      summary: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
-      lastQuery: const FeeControlDashboardQuery(
+      ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
+      lastQuery: const RecouvrementQuery(
         academicYearId: 'ay-1',
-        feeCode: 'TUITION',
+        feeCodes: const ['TUITION'],
       ),
       expandedLevelId: expandedLevelId,
       classesStatus: expandedLevelId == null
@@ -633,12 +562,12 @@ void main() {
         'non plus', (tester) async {
       await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow(null, settled: 1, total: 3)]),
-          lastQuery: const FeeControlDashboardQuery(
+          ranking: summaryOf([levelRow(null, settled: 1, total: 3)]),
+          lastQuery: const RecouvrementQuery(
             academicYearId: 'ay-1',
-            feeCode: 'TUITION',
+            feeCodes: const ['TUITION'],
           ),
         ),
       );
@@ -651,9 +580,9 @@ void main() {
     ) async {
       await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
+          ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
         ),
       );
 
@@ -669,63 +598,18 @@ void main() {
         'n\'offre pas le passage : le bouton ne ferait rien', (tester) async {
       await _pump(
         tester,
-        FeeControlDashboardState(
+        RecouvrementDashboardState(
           status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-inconnu', settled: 1, total: 4)]),
-          lastQuery: const FeeControlDashboardQuery(
+          ranking: summaryOf([levelRow('lvl-inconnu', settled: 1, total: 4)]),
+          lastQuery: const RecouvrementQuery(
             academicYearId: 'ay-1',
-            feeCode: 'TUITION',
+            feeCodes: const ['TUITION'],
           ),
         ),
       );
 
       expect(find.text('Niveau absent du référentiel'), findsOneWidget);
       expect(find.byIcon(Icons.people_outline), findsNothing);
-    });
-
-    testWidgets('le reste à recouvrer se dit PAR DEVISE, jamais en un total', (
-      tester,
-    ) async {
-      await _pump(
-        tester,
-        FeeControlDashboardState(
-          status: EnrollmentLoadStatus.success,
-          summary: FeeControlDashboardSummary(
-            total: const FeeControlBreakdown(settled: 1, none: 1),
-            remaining: MoneyBag.of([
-              Money.parse(150000, 'USD'),
-              Money.parse(300000, 'CDF'),
-            ]),
-            groups: [levelRow('lvl-1', settled: 1, total: 2)],
-          ),
-        ),
-        withBand: true,
-      );
-
-      final note = tester.widget<Text>(
-        find.byWidgetPredicate(
-          (w) => w is Text && (w.data ?? '').startsWith('Reste à recouvrer'),
-        ),
-      );
-      // Les deux devises côte à côte, chacune avec son symbole : les sommer
-      // écrirait un montant qui n'existe pas — leur rapport d'échelle est de
-      // ×2 800.
-      expect(note.data, contains('FC'));
-      expect(note.data, contains('\$'));
-      expect(note.data, contains('·'));
-    });
-
-    testWidgets('rien à recouvrer : la ligne se tait', (tester) async {
-      await _pump(
-        tester,
-        FeeControlDashboardState(
-          status: EnrollmentLoadStatus.success,
-          summary: summaryOf([levelRow('lvl-1', settled: 2, total: 2)]),
-        ),
-        withBand: true,
-      );
-
-      expect(find.textContaining('Reste à recouvrer'), findsNothing);
     });
   });
 }
