@@ -302,12 +302,39 @@ Content-Encoding: gzip                   → 268 Ko au pire palier au lieu de 1,
 | `403` | — | `finance.charge.read` absente : jamais de « Réessayer » |
 | `429` | — | **« Un document est déjà en préparation sur ce serveur »** — le permis est partagé avec le rapport de caisse et le registre d'inscriptions : le refus peut venir d'un collègue. `Retry-After: 60`. |
 
-### Ce qui attend le back avant d'être figé
+### Les délais, mesurés le 2026-09-10 (lot L4 du back) ✅
 
-- **`sendTimeout`** — non posé aujourd'hui : `dio_client.dart` n'a que
-  `connectTimeout: 6 s` et `receiveTimeout: 12 s`. Il se choisit sur les chiffres
-  de **L4** (brut, gzip et temps de rendu, 4 paliers × 2 formes de sélection),
-  pas au jugé.
+| Palier | Rendu avant le 1ᵉʳ octet | Montant (gzip) | Descendant (PDF) |
+|---|---|---|---|
+| 100 lignes | ~1,1 s | 5 Ko | 65 Ko |
+| **500 lignes — un niveau** | **~3,0 s** | **26 Ko** | **228 Ko** |
+| 2 000 lignes | ~5,9 s | 103 Ko | 833 Ko |
+| 5 000 lignes (plafond, mixte) | ~7,1 s | 257 Ko | 2 050 Ko |
+
+**`receiveTimeout` = 30 s · `sendTimeout` = 60 s.** Ils ne mesurent pas la même
+chose, et c'est ce qui fixe l'écart :
+
+- ⚠️ **`receiveTimeout` joue DEUX rôles.** Sur `request.close()` c'est un
+  **budget total** — l'attente avant les en-têtes, donc le silence de rendu de
+  1 à 7 s. Sur le flux du corps c'est un **intervalle entre chunks**, réarmé à
+  chaque paquet (`handleResponseStream`, Dio 5.9). Le PDF du plafond met
+  5 min 28 à descendre sur 50 kbit/s et **ne coupe pas** pour autant.
+- ⚠️ **`sendTimeout` est un budget TOTAL**, lui : l'adaptateur l'applique à
+  `request.addStream`, qui ne se complète qu'une fois tout le corps écrit.
+  41 s au plafond sur 50 kbit/s — **30 s couperait un envoi sain**.
+
+### 🔴 Ce que les mesures apprennent, et que quatre tours de contrat avaient manqué
+
+**C'est la réponse qui coûte, pas la requête.** Au plafond, le PDF pèse **huit
+fois** le corps compressé (2 050 Ko contre 257 Ko), et il n'y a pas de remède
+symétrique : un PDF est déjà compressé. Nous avons passé quatre tours sur le
+canal montant ; c'est le descendant qui contraint.
+
+**Conséquence produit — déjà tenue par construction.** Un tirage de 5 000 lignes
+n'est pas praticable depuis un guichet étroit, et aucun réglage ne le rendra tel.
+L'écran n'en propose pas : le clic porte sur une ligne de **groupe**, donc un
+niveau — 228 Ko et 3 s de rendu à 500 élèves, qui est l'usage réel. Le plafond de
+5 000 reste une garde de dernier recours, pas un parcours.
 - **Le plafond de taille de corps** — invisible du dépôt back, il vit côté ops.
   L3 enverra un corps réel de 1,62 Mio contre staging. Notre plafond local se
   posera **en dessous** du sien.
@@ -521,10 +548,10 @@ se voyait à l'usage nominal.
 
 ## 12. Ce que ce plan attend encore
 
-- **L4 du back** — brut, gzip et temps de rendu, 4 paliers × 2 formes de
-  sélection, la ligne mixte mesurée sur `List<Money>`. Conditionne le
-  `sendTimeout` et, si 5 000 lignes s'avère trop lent, notre propre plafond.
-- **L3 du back** — le verdict de l'épreuve d'un corps réel de 1,62 Mio contre
-  staging (plafond côté ops) et celui de `Expect: 100-continue` avec Dio.
-
-Aucun des deux ne bloque `REC-0` à `REC-5`.
+- ✅ **L4 du back — rendu le 2026-09-10.** Les deux délais sont posés (§6).
+- **L3 du back** — le verdict de l'épreuve d'un corps réel contre staging
+  (plafond de taille côté ops) et celui de `Expect: 100-continue` avec Dio.
+  Ni l'un ni l'autre ne change le code : le premier fixerait notre plafond
+  local, le second ne ferait qu'épargner un téléversement déjà borné à 257 Ko.
+- **Le groupe sans niveau n'est pas éditable** (§10 bis, n° 2) : `scope.kind`
+  n'a pas de valeur pour lui. À rouvrir si le besoin apparaît.

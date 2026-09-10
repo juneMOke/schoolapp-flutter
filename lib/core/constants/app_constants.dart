@@ -224,6 +224,15 @@ class AppConstants {
   /// au-delà plutôt que tronquée. Le compte est connu AVANT l'envoi : la garde
   /// est locale, et ce refus-ci est un dernier recours.
   ///
+  /// ⚠️ **C'est la RÉPONSE qui coûte, pas la requête.** Au plafond le PDF pèse
+  /// 2 050 Ko contre 257 Ko pour le corps compressé — huit fois plus — et il
+  /// n'y a pas de remède symétrique : un PDF est déjà compressé, aucune
+  /// négociation de contenu ne l'entamera. Un tirage de 5 000 lignes met
+  /// 5 min 28 à descendre sur une liaison à 50 kbit/s, et aucun réglage ne
+  /// rendra cela praticable. L'écran n'en propose pas : le clic porte sur une
+  /// ligne de **groupe**, donc un niveau — 228 Ko et 3 s de rendu à 500 élèves,
+  /// qui est l'usage réel.
+  ///
   /// ⚠️ **Un rendu à la fois côté serveur**, et le permis est **partagé** avec
   /// le rapport de caisse et le registre d'inscriptions : un `429` peut donc
   /// venir d'un document lancé par quelqu'un d'autre. Le message doit le dire.
@@ -235,16 +244,39 @@ class AppConstants {
   /// mégaoctet pour se faire refuser serait absurde.
   static const int recouvrementRelanceListLineCap = 5000;
 
-  /// Délai de réception de la liste de relance.
+  /// Délai de réception de la liste de relance — **mesuré, pas recopié**.
   ///
-  /// ⚠️ **Provisoire, et il le dit.** Le lot L4 du back doit rendre les octets
-  /// bruts, les octets compressés et le temps de rendu à 100 / 500 / 2 000 /
-  /// 5 000 lignes, en sélection simple et mixte. Tant qu'il n'a pas répondu, on
-  /// reprend la valeur du rapport de caisse : même moteur, même permis, mêmes
-  /// bornes. Le `sendTimeout` attend ces mêmes chiffres — le corps peut
-  /// atteindre 1,6 Mio décompressé, et le canal montant d'un guichet est
-  /// toujours le plus étroit.
-  static const Duration recouvrementRelanceListTimeout = Duration(seconds: 60);
+  /// Le back a chronométré la chaîne réelle le 2026-09-10 : le serveur rend
+  /// **entièrement en mémoire avant d'émettre**, donc il y a un silence de
+  /// 1,1 s (100 lignes) à 7,1 s (plafond) avant le premier octet. Trente
+  /// secondes, c'est deux fois le pire mesuré plus la marge d'un serveur
+  /// chargé — ces 7,1 s viennent d'une machine de développement, pas du
+  /// matériel de staging.
+  ///
+  /// ⚠️ **`receiveTimeout` joue DEUX rôles dans Dio, et un seul est contraint
+  /// ici.** Sur `request.close()`, c'est un **budget total** : l'attente avant
+  /// les en-têtes, donc ce silence de rendu. Sur le flux du corps, c'est un
+  /// **intervalle entre chunks**, réarmé à chaque paquet
+  /// (`handleResponseStream`). Le PDF du plafond pèse 2 050 Ko et met 5 min 28
+  /// à descendre sur une liaison à 50 kbit/s — il ne coupe pas pour autant,
+  /// tant que les paquets arrivent. C'est le rendu qu'on borne, pas le
+  /// transfert.
+  static const Duration recouvrementRelanceListTimeout = Duration(seconds: 30);
+
+  /// Délai d'**envoi** de la liste de relance.
+  ///
+  /// ⚠️ **Celui-ci est bien un budget TOTAL** : l'adaptateur l'applique à
+  /// `request.addStream`, qui ne se complète qu'une fois tout le corps écrit.
+  /// Il se dérive donc du lien, pas du serveur.
+  ///
+  /// Le corps gzippé pèse 26 Ko pour un niveau de 500 élèves — 8 s sur une
+  /// liaison à 50 kbit/s — et 257 Ko au plafond, soit 41 s sur la même liaison.
+  /// Soixante secondes couvrent les deux avec de la marge, et détectent un fil
+  /// mort en une minute. Descendre à trente couperait un envoi **sain** au
+  /// plafond depuis un guichet étroit.
+  static const Duration recouvrementRelanceListSendTimeout = Duration(
+    seconds: 60,
+  );
 
   // ── Éditique (documents PDF scellés) ──────────────────────────────────────
   // Toutes ces routes répondent `application/pdf` en corps binaire, sans body

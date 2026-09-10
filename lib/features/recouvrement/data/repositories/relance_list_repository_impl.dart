@@ -70,12 +70,17 @@ class RelanceListRepositoryImpl implements RelanceListRepository {
         requiredAuth,
         body,
         Options(
-          // ⚠️ **Le délai du client ne convient pas à ce document** : 12 s sont
-          // calibrés sur des réponses de guichet, ce rendu prend plusieurs
-          // secondes. Expirer de notre côté laisserait le serveur finir un
-          // document que personne n'attend, et l'appel suivant se heurterait au
-          // 429 d'un rendu cru abandonné.
+          // ⚠️ **Le délai du client ne convient pas à ce document.** Le serveur
+          // rend ENTIÈREMENT en mémoire avant d'émettre : il y a un silence de
+          // 1 à 7 s avant le premier octet (mesures du back, 2026-09-10), et
+          // les 12 s du client sont calibrées sur du JSON de guichet. Expirer
+          // de notre côté laisserait le serveur finir un document que personne
+          // n'attend, et l'appel suivant se heurterait au 429 d'un rendu cru
+          // abandonné.
           receiveTimeout: AppConstants.recouvrementRelanceListTimeout,
+          // Budget TOTAL de la montée, lui — l'adaptateur l'applique au flux
+          // entier. Il se dérive du lien, pas du serveur.
+          sendTimeout: AppConstants.recouvrementRelanceListSendTimeout,
           // Le corps monte à 1,6 Mio décompressé au plafond ; gzippé il tient
           // sous 300 Ko. Sur le canal montant d'un guichet, c'est un facteur
           // six — et c'est le seul remède réel, l'intercepteur du serveur ne

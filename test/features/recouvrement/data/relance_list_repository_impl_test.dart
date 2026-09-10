@@ -163,7 +163,7 @@ void main() {
       expect(utf8.decode(gzip.decode(encoded)), '{"a":1}');
     });
 
-    test('le délai de réception est relevé pour ce seul appel', () async {
+    test('les DEUX délais sont posés pour ce seul appel', () async {
       stub(pdfResponse());
       await emit();
 
@@ -176,7 +176,27 @@ void main() {
       expect(
         options.receiveTimeout,
         AppConstants.recouvrementRelanceListTimeout,
-        reason: 'les 12 s du client sont calibrées sur du JSON de guichet',
+        reason:
+            'les 12 s du client sont calibrées sur du JSON de guichet, et '
+            'le serveur reste muet 1 à 7 s pendant qu\'il rend',
+      );
+      expect(
+        options.sendTimeout,
+        AppConstants.recouvrementRelanceListSendTimeout,
+        reason:
+            'la montée est un budget TOTAL : 41 s au plafond sur une '
+            'liaison à 50 kbit/s, et 30 s couperait un envoi sain',
+      );
+    });
+
+    test('le budget de MONTÉE dépasse celui de la réception — ils ne mesurent '
+        'pas la même chose', () {
+      // `receiveTimeout` borne le rendu serveur (7,1 s au pire mesuré) puis
+      // l'intervalle entre chunks ; `sendTimeout` borne le transfert entier.
+      // Les confondre ferait couper une montée saine sur un lien étroit.
+      expect(
+        AppConstants.recouvrementRelanceListSendTimeout,
+        greaterThan(AppConstants.recouvrementRelanceListTimeout),
       );
     });
   });
