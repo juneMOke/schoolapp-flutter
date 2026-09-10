@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/error/report_line_cap.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_report.dart';
@@ -162,32 +163,15 @@ class FinanceTillReportButton extends StatelessWidget {
   /// dans la nôtre.
   ///
   /// **Ce refus n'appartient pas qu'à la caisse** — le registre des inscriptions
-  /// lève le même `REPORT_LINE_CAP`. Le jour où cet écran-là dira la même
-  /// chose, la lecture des chiffres montera d'un cran ; elle reste ici tant
-  /// qu'un seul appelant la fait.
+  /// et la liste de relance lèvent le même `REPORT_LINE_CAP`. La lecture des
+  /// chiffres est donc montée au socle ([ReportLineCap]) ; il ne reste ici que
+  /// les mots de cet écran.
   static String? _lineCapMessage(Failure failure, AppLocalizations l10n) {
-    if (failure is! ApiErrorDetails) return null;
-    if (failure.detailCode != _lineCapDetailCode) return null;
-
-    final lines = _asInt(failure.details?['lines']);
-    final cap = _asInt(failure.details?['cap']);
-    if (lines == null || cap == null) return null;
-
-    return l10n.financeTillReportTooLarge(lines, cap);
+    final cap = ReportLineCap.of(failure);
+    return cap == null
+        ? null
+        : l10n.financeTillReportTooLarge(cap.lines, cap.cap);
   }
-
-  /// Le code du serveur, partagé par toutes les pièces de période.
-  static const String _lineCapDetailCode = 'REPORT_LINE_CAP';
-
-  /// Un entier du corps d'erreur, quelle que soit la façon dont il a traversé
-  /// le JSON — `int`, `num` ou chaîne. Le contrat ne promet pas la forme, et un
-  /// message perdu pour un `7213` arrivé en texte serait une régression muette.
-  static int? _asInt(Object? value) => switch (value) {
-    final int value => value,
-    final num value => value.toInt(),
-    final String value => int.tryParse(value.trim()),
-    _ => null,
-  };
 }
 
 /// L'étiquette du bouton, qui **dit dans quel état il est**.

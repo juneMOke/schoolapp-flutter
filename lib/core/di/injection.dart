@@ -192,6 +192,10 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/data/datasources/relance_list_remote_data_source.dart';
+import 'package:school_app_flutter/features/recouvrement/data/repositories/relance_list_repository_impl.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/repositories/relance_list_repository.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/usecases/emit_relance_list_usecase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
@@ -930,6 +934,21 @@ Future<void> configureDependencies({
   // le grand-livre, sur une SÉLECTION de frais.
   // Simulation de renvoi — pur et synchrone, sans aucune dépendance : il
   // chiffre ce que le tableau de bord lui donne, et n'écrit jamais.
+  // La liste de relance — le SEUL appel réseau du module, et il écrit un
+  // document. `finance.charge.read` suffit côté serveur.
+  getIt.registerLazySingleton<RelanceListRemoteDataSource>(
+    () => RelanceListRemoteDataSource(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<RelanceListRepository>(
+    () => RelanceListRepositoryImpl(
+      remoteDataSource: getIt<RelanceListRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<EmitRelanceListUseCase>(
+    () => EmitRelanceListUseCase(getIt<RelanceListRepository>()),
+  );
+
   getIt.registerFactory<RecouvrementSimulationCubit>(
     RecouvrementSimulationCubit.new,
   );
