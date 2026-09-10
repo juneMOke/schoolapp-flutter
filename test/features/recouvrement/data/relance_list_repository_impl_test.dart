@@ -23,7 +23,7 @@ class _FakeOptions extends Fake implements Options {}
 LocalRecoveryLine line(String studentId) => LocalRecoveryLine(
   schoolLevelId: 'lvl-1',
   studentId: studentId,
-  charges: [
+  charges: const [
     RecoveryChargePosition(
       feeCode: 'TUITION',
       position: FeeChargePosition(

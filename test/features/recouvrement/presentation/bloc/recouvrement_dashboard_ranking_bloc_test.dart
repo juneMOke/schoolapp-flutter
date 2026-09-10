@@ -224,7 +224,7 @@ void main() {
       act: (bloc) => bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
           schoolLevelGroupId: tGroup,
         ),
       ),
@@ -248,7 +248,7 @@ void main() {
               'lastQuery',
               const RecouvrementQuery(
                 academicYearId: tYear,
-                feeCodes: const [tFeeCode],
+                feeCodes: [tFeeCode],
                 schoolLevelGroupId: tGroup,
               ),
             ),
@@ -267,7 +267,7 @@ void main() {
       act: (bloc) => bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
         ),
       ),
       skip: 1,
@@ -291,7 +291,7 @@ void main() {
       act: (bloc) => bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
           schoolLevelGroupId: '   ',
         ),
       ),
@@ -328,14 +328,14 @@ void main() {
         bloc.add(
           const RecouvrementRequested(
             academicYearId: tYear,
-            feeCodes: const [tFeeCode],
+            feeCodes: [tFeeCode],
           ),
         );
         await Future<void>.delayed(Duration.zero);
         bloc.add(
           const RecouvrementRequested(
             academicYearId: tYear,
-            feeCodes: const ['CANTINE'],
+            feeCodes: ['CANTINE'],
           ),
         );
       },
@@ -371,7 +371,7 @@ void main() {
         bloc.add(
           const RecouvrementRequested(
             academicYearId: tYear,
-            feeCodes: const [tFeeCode],
+            feeCodes: [tFeeCode],
             schoolLevelGroupId: tGroup,
           ),
         );
@@ -410,14 +410,14 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const ['CANTINE'],
+          feeCodes: ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -450,7 +450,7 @@ void main() {
         act: (bloc) => bloc.add(
           const RecouvrementRequested(
             academicYearId: tYear,
-            feeCodes: const [tFeeCode],
+            feeCodes: [tFeeCode],
           ),
         ),
         skip: 1,
@@ -472,7 +472,7 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -675,7 +675,7 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const ['CANTINE'],
+          feeCodes: ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -693,7 +693,7 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
           schoolLevelGroupId: tGroup,
         ),
       );
@@ -832,7 +832,7 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const [tFeeCode],
+          feeCodes: [tFeeCode],
         ),
       );
       await Future<void>.delayed(Duration.zero);
@@ -848,7 +848,7 @@ void main() {
       bloc.add(
         const RecouvrementRequested(
           academicYearId: tYear,
-          feeCodes: const ['CANTINE'],
+          feeCodes: ['CANTINE'],
         ),
       );
       await Future<void>.delayed(Duration.zero);

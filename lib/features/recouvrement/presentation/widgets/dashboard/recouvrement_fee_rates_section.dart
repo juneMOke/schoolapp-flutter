@@ -8,7 +8,6 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_fee_rates.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le taux de recouvrement, **un groupe par devise**.

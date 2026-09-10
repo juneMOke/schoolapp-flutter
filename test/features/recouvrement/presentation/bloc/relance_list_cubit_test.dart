@@ -29,7 +29,7 @@ final _document = RelanceList(
 LocalRecoveryLine line(String studentId) => LocalRecoveryLine(
   schoolLevelId: 'lvl-1',
   studentId: studentId,
-  charges: [
+  charges: const [
     RecoveryChargePosition(
       feeCode: 'TUITION',
       position: FeeChargePosition(

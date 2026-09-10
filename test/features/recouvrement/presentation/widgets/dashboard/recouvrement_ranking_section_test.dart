@@ -545,7 +545,7 @@ void main() {
       ranking: summaryOf([levelRow('lvl-1', settled: 5, total: 10)]),
       lastQuery: const RecouvrementQuery(
         academicYearId: 'ay-1',
-        feeCodes: const ['TUITION'],
+        feeCodes: ['TUITION'],
       ),
       expandedLevelId: expandedLevelId,
       classesStatus: expandedLevelId == null
@@ -613,7 +613,7 @@ void main() {
           ranking: summaryOf([levelRow(null, settled: 1, total: 3)]),
           lastQuery: const RecouvrementQuery(
             academicYearId: 'ay-1',
-            feeCodes: const ['TUITION'],
+            feeCodes: ['TUITION'],
           ),
         ),
       );
@@ -649,7 +649,7 @@ void main() {
           ranking: summaryOf([levelRow('lvl-inconnu', settled: 1, total: 4)]),
           lastQuery: const RecouvrementQuery(
             academicYearId: 'ay-1',
-            feeCodes: const ['TUITION'],
+            feeCodes: ['TUITION'],
           ),
         ),
       );
