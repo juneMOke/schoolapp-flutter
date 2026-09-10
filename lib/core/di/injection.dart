@@ -1387,10 +1387,12 @@ Future<void> configureDependencies({
     ),
   );
 
-  // Exception assumée à la règle « BLoC en registerFactory » : instance unique
-  // app-lifetime, comme `SyncStatusCubit`. L'identité de l'école est la même
-  // pour tout l'arbre et se recharge sur les transitions de session (main.dart).
-  getIt.registerLazySingleton<SchoolIdentityCubit>(
+  // Factory, comme tout BLoC — et comme `SyncStatusCubit`, qui tient pourtant
+  // une instance unique app-lifetime : c'est `main.dart` qui la tient, la
+  // fournit à tout l'arbre par `.value` et la ferme dans son `dispose`. Un
+  // singleton fermé là serait resservi, déjà mort, au montage suivant : `load`
+  // y devient muet (`isClosed`), et la marque ne se relit plus jamais.
+  getIt.registerFactory<SchoolIdentityCubit>(
     () => SchoolIdentityCubit(repository: getIt<SchoolRepository>()),
   );
 }
