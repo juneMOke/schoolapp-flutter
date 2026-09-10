@@ -5521,5 +5521,170 @@
               "type": "int"
           }
       }
+  },
+
+  "recouvrementSimulationTitle": "Simulation de renvoi",
+  "@recouvrementSimulationTitle": {
+      "description": "Titre de la section de simulation"
+  },
+  "recouvrementSimulationSubtitle": "Rien n'est appliqué — appliquer un renvoi passe par les Inscriptions, dossier par dossier",
+  "@recouvrementSimulationSubtitle": {
+      "description": "Sous-titre de la section de simulation"
+  },
+  "recouvrementSimulationWho": "On renvoie les élèves qui…",
+  "@recouvrementSimulationWho": {
+      "description": "Libellé du sélecteur de critère"
+  },
+  "recouvrementCriterionNoPayment": "N'ont rien payé",
+  "@recouvrementCriterionNoPayment": {
+      "description": "Critère : aucun versement"
+  },
+  "recouvrementCriterionNotSettled": "N'ont pas tout soldé",
+  "@recouvrementCriterionNotSettled": {
+      "description": "Critère : rien ou partiel"
+  },
+  "recouvrementCriterionBelowThreshold": "Ont payé moins que…",
+  "@recouvrementCriterionBelowThreshold": {
+      "description": "Critère : sous un plancher"
+  },
+  "recouvrementThresholdLabel": "Montant plancher",
+  "@recouvrementThresholdLabel": {
+      "description": "Libellé du champ plancher"
+  },
+  "recouvrementThresholdMixedWarning": "Le plancher est comparé en équivalent {currency} : la sélection mêle deux devises. C'est un arbitrage, pas une mesure.",
+  "@recouvrementThresholdMixedWarning": {
+      "description": "Avertissement de sélection mixte",
+      "placeholders": {
+          "currency": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementThresholdNoRate": "Aucun taux du jour n'est posé : la comparaison est impossible en sélection mixte.",
+  "@recouvrementThresholdNoRate": {
+      "description": "Plancher indisponible sans taux"
+  },
+  "recouvrementCriticalLabel": "Seuil de groupe ingérable : {percent} % de l'effectif",
+  "@recouvrementCriticalLabel": {
+      "description": "Libellé du curseur de seuil",
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementCriticalA11y": "{percent} % de l'effectif",
+  "@recouvrementCriticalA11y": {
+      "description": "Valeur parlée du curseur",
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementSimHeadcount": "Effectif aujourd'hui",
+  "@recouvrementSimHeadcount": {
+      "description": "Tuile : effectif avant renvoi"
+  },
+  "recouvrementSimHeadcountSubline": "élèves concernés par ces frais",
+  "@recouvrementSimHeadcountSubline": {
+      "description": "Sous-ligne de l'effectif"
+  },
+  "recouvrementSimTargeted": "Élèves visés",
+  "@recouvrementSimTargeted": {
+      "description": "Tuile : élèves que le critère vise"
+  },
+  "recouvrementSimRemaining": "Effectif restant",
+  "@recouvrementSimRemaining": {
+      "description": "Tuile : effectif après renvoi"
+  },
+  "recouvrementSimRemainingSubline": "{percent} % de l'effectif conservé",
+  "@recouvrementSimRemainingSubline": {
+      "description": "Sous-ligne de l'effectif restant",
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementSimCritical": "Groupes ingérables",
+  "@recouvrementSimCritical": {
+      "description": "Tuile : groupes sous le seuil"
+  },
+  "recouvrementSimTableGroup": "Groupe",
+  "@recouvrementSimTableGroup": {
+      "description": "Colonne : niveau"
+  },
+  "recouvrementSimTableHeadcount": "Effectif",
+  "@recouvrementSimTableHeadcount": {
+      "description": "Colonne : effectif"
+  },
+  "recouvrementSimTableLeaving": "À renvoyer",
+  "@recouvrementSimTableLeaving": {
+      "description": "Colonne : partants"
+  },
+  "recouvrementSimTableRemaining": "Restants",
+  "@recouvrementSimTableRemaining": {
+      "description": "Colonne : restants"
+  },
+  "recouvrementSimTableKept": "Effectif conservé",
+  "@recouvrementSimTableKept": {
+      "description": "Colonne : part conservée"
+  },
+  "recouvrementSimTableVerdict": "Verdict",
+  "@recouvrementSimTableVerdict": {
+      "description": "Colonne : verdict"
+  },
+  "recouvrementVerdictManageable": "Tenable",
+  "@recouvrementVerdictManageable": {
+      "description": "Verdict : au-dessus du seuil"
+  },
+  "recouvrementVerdictFragile": "Fragile",
+  "@recouvrementVerdictFragile": {
+      "description": "Verdict : proche du seuil"
+  },
+  "recouvrementVerdictCritical": "Ingérable",
+  "@recouvrementVerdictCritical": {
+      "description": "Verdict : sous le seuil"
+  },
+  "recouvrementSimFootNothingLost": "Ces élèves n'ont rien versé : le renvoi ne ferait perdre aucune recette, mais il abandonne définitivement {missing}.",
+  "@recouvrementSimFootNothingLost": {
+      "description": "Note de pied quand rien n'a été encaissé des visés",
+      "placeholders": {
+          "missing": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementSimFootWithLoss": "Le renvoi rendrait sans objet {lost} déjà encaissés, et abandonnerait {missing} jamais versés.",
+  "@recouvrementSimFootWithLoss": {
+      "description": "Note de pied quand les visés avaient versé",
+      "placeholders": {
+          "lost": {
+              "type": "String"
+          },
+          "missing": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementSimA11yLabel": "Simulation de renvoi — aucune écriture",
+  "@recouvrementSimA11yLabel": {
+      "description": "Libellé a11y de la section"
+  },
+  "recouvrementSimRowA11y": "{group} : {kept} % de l'effectif conservé, {verdict}",
+  "@recouvrementSimRowA11y": {
+      "description": "Description a11y d'une ligne de simulation",
+      "placeholders": {
+          "group": {
+              "type": "String"
+          },
+          "kept": {
+              "type": "int"
+          },
+          "verdict": {
+              "type": "String"
+          }
+      }
   }
 }

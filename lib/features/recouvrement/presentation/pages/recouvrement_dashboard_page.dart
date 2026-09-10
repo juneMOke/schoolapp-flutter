@@ -12,11 +12,13 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/boot
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_rates_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -41,6 +43,9 @@ class RecouvrementDashboardPage extends StatelessWidget {
         // le périmètre, à quel cours s'arbitre une comparaison.
         BlocProvider<ExchangeRatesCubit>(
           create: (_) => getIt<ExchangeRatesCubit>()..load(),
+        ),
+        BlocProvider<RecouvrementSimulationCubit>(
+          create: (_) => getIt<RecouvrementSimulationCubit>(),
         ),
       ],
       child: const _RecouvrementDashboardView(),
@@ -200,10 +205,18 @@ class _Body extends StatelessWidget {
     return BlocConsumer<RecouvrementDashboardBloc, RecouvrementDashboardState>(
       listenWhen: (prev, curr) =>
           prev.feeCodesStatus != curr.feeCodesStatus ||
-          prev.feeCodes != curr.feeCodes,
+          prev.feeCodes != curr.feeCodes ||
+          // Le numéro de lecture est le signal que les lignes hors état ont
+          // changé : c'est lui, et non les chiffres, qui repose la simulation.
+          prev.snapshotId != curr.snapshotId,
       listener: (context, state) {
-        if (state.feeCodesStatus != EnrollmentLoadStatus.success) return;
-        onFeeCodesLoaded(state.feeCodes);
+        if (state.feeCodesStatus == EnrollmentLoadStatus.success) {
+          onFeeCodesLoaded(state.feeCodes);
+        }
+        context.read<RecouvrementSimulationCubit>().setLines(
+          context.read<RecouvrementDashboardBloc>().lines,
+          rate: _dollarInFrancs(context.read<ExchangeRatesCubit>().state.rates),
+        );
       },
       buildWhen: (prev, curr) =>
           prev.feeCodesStatus != curr.feeCodesStatus ||
@@ -271,6 +284,10 @@ class _Body extends StatelessWidget {
               academicYearId: academicYearId,
               // Sans filtre de cycle, deux « 1ère année » de cycles différents
               // deviendraient indiscernables dans le classement.
+              showCycleInLabels: cycleId == null,
+            ),
+            RecouvrementSimulationSection(
+              labels: labels,
               showCycleInLabels: cycleId == null,
             ),
           ],

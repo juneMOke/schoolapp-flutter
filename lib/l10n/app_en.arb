@@ -5474,5 +5474,94 @@
               "type": "int"
           }
       }
+  },
+
+  "recouvrementSimulationTitle": "Dismissal simulation",
+  "recouvrementSimulationSubtitle": "Nothing is applied — a dismissal goes through Enrolments, file by file",
+  "recouvrementSimulationWho": "We dismiss students who…",
+  "recouvrementCriterionNoPayment": "Have paid nothing",
+  "recouvrementCriterionNotSettled": "Have not settled in full",
+  "recouvrementCriterionBelowThreshold": "Have paid less than…",
+  "recouvrementThresholdLabel": "Minimum amount",
+  "recouvrementThresholdMixedWarning": "The floor is compared in {currency} equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.",
+  "@recouvrementThresholdMixedWarning": {
+      "placeholders": {
+          "currency": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementThresholdNoRate": "No rate has been set for today: the comparison is impossible on a mixed selection.",
+  "recouvrementCriticalLabel": "Unmanageable group threshold: {percent}% of the cohort",
+  "@recouvrementCriticalLabel": {
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementCriticalA11y": "{percent}% of the cohort",
+  "@recouvrementCriticalA11y": {
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementSimHeadcount": "Cohort today",
+  "recouvrementSimHeadcountSubline": "students carrying these fees",
+  "recouvrementSimTargeted": "Students targeted",
+  "recouvrementSimRemaining": "Cohort left",
+  "recouvrementSimRemainingSubline": "{percent}% of the cohort kept",
+  "@recouvrementSimRemainingSubline": {
+      "placeholders": {
+          "percent": {
+              "type": "int"
+          }
+      }
+  },
+  "recouvrementSimCritical": "Unmanageable groups",
+  "recouvrementSimTableGroup": "Group",
+  "recouvrementSimTableHeadcount": "Cohort",
+  "recouvrementSimTableLeaving": "To dismiss",
+  "recouvrementSimTableRemaining": "Left",
+  "recouvrementSimTableKept": "Cohort kept",
+  "recouvrementSimTableVerdict": "Verdict",
+  "recouvrementVerdictManageable": "Manageable",
+  "recouvrementVerdictFragile": "Fragile",
+  "recouvrementVerdictCritical": "Unmanageable",
+  "recouvrementSimFootNothingLost": "These students have paid nothing: dismissal would lose no income, but it definitively writes off {missing}.",
+  "@recouvrementSimFootNothingLost": {
+      "placeholders": {
+          "missing": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementSimFootWithLoss": "Dismissal would void {lost} already collected, and write off {missing} never paid.",
+  "@recouvrementSimFootWithLoss": {
+      "placeholders": {
+          "lost": {
+              "type": "String"
+          },
+          "missing": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementSimA11yLabel": "Dismissal simulation — no writes",
+  "recouvrementSimRowA11y": "{group}: {kept}% of the cohort kept, {verdict}",
+  "@recouvrementSimRowA11y": {
+      "placeholders": {
+          "group": {
+              "type": "String"
+          },
+          "kept": {
+              "type": "int"
+          },
+          "verdict": {
+              "type": "String"
+          }
+      }
   }
 }

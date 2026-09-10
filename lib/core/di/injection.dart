@@ -192,6 +192,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_recovery_bloc.dart';
@@ -927,6 +928,11 @@ Future<void> configureDependencies({
   // Tableau de bord du Recouvrement — même lecture locale que l'écran
   // nominatif, mais la population n'est pas donnée : elle est découverte dans
   // le grand-livre, sur une SÉLECTION de frais.
+  // Simulation de renvoi — pur et synchrone, sans aucune dépendance : il
+  // chiffre ce que le tableau de bord lui donne, et n'écrit jamais.
+  getIt.registerFactory<RecouvrementSimulationCubit>(
+    RecouvrementSimulationCubit.new,
+  );
   getIt.registerFactory<RecouvrementDashboardBloc>(
     () => RecouvrementDashboardBloc(
       getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),

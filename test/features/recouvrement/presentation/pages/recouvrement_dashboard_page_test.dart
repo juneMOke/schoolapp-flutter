@@ -11,7 +11,9 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
@@ -92,6 +94,12 @@ void main() {
     GetIt.instance.registerFactory<ExchangeRatesCubit>(
       () => _MockExchangeRatesCubit(),
     );
+    GetIt.instance.registerFactory<RecouvrementSimulationCubit>(
+      RecouvrementSimulationCubit.new,
+    );
+    // Les lignes vivent HORS de l'état : un mock qui ne les stubbe pas rend
+    // `null`, et la page — qui les repasse à la simulation — tombe.
+    when(() => bloc.lines).thenReturn(const <LocalRecoveryLine>[]);
   });
 
   tearDown(() async {

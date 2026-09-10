@@ -9489,4 +9489,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String recouvrementUnbilledNote(int count) {
     return '$count enrolled students carry none of these fees';
   }
+
+  @override
+  String get recouvrementSimulationTitle => 'Dismissal simulation';
+
+  @override
+  String get recouvrementSimulationSubtitle =>
+      'Nothing is applied — a dismissal goes through Enrolments, file by file';
+
+  @override
+  String get recouvrementSimulationWho => 'We dismiss students who…';
+
+  @override
+  String get recouvrementCriterionNoPayment => 'Have paid nothing';
+
+  @override
+  String get recouvrementCriterionNotSettled => 'Have not settled in full';
+
+  @override
+  String get recouvrementCriterionBelowThreshold => 'Have paid less than…';
+
+  @override
+  String get recouvrementThresholdLabel => 'Minimum amount';
+
+  @override
+  String recouvrementThresholdMixedWarning(String currency) {
+    return 'The floor is compared in $currency equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.';
+  }
+
+  @override
+  String get recouvrementThresholdNoRate =>
+      'No rate has been set for today: the comparison is impossible on a mixed selection.';
+
+  @override
+  String recouvrementCriticalLabel(int percent) {
+    return 'Unmanageable group threshold: $percent% of the cohort';
+  }
+
+  @override
+  String recouvrementCriticalA11y(int percent) {
+    return '$percent% of the cohort';
+  }
+
+  @override
+  String get recouvrementSimHeadcount => 'Cohort today';
+
+  @override
+  String get recouvrementSimHeadcountSubline => 'students carrying these fees';
+
+  @override
+  String get recouvrementSimTargeted => 'Students targeted';
+
+  @override
+  String get recouvrementSimRemaining => 'Cohort left';
+
+  @override
+  String recouvrementSimRemainingSubline(int percent) {
+    return '$percent% of the cohort kept';
+  }
+
+  @override
+  String get recouvrementSimCritical => 'Unmanageable groups';
+
+  @override
+  String get recouvrementSimTableGroup => 'Group';
+
+  @override
+  String get recouvrementSimTableHeadcount => 'Cohort';
+
+  @override
+  String get recouvrementSimTableLeaving => 'To dismiss';
+
+  @override
+  String get recouvrementSimTableRemaining => 'Left';
+
+  @override
+  String get recouvrementSimTableKept => 'Cohort kept';
+
+  @override
+  String get recouvrementSimTableVerdict => 'Verdict';
+
+  @override
+  String get recouvrementVerdictManageable => 'Manageable';
+
+  @override
+  String get recouvrementVerdictFragile => 'Fragile';
+
+  @override
+  String get recouvrementVerdictCritical => 'Unmanageable';
+
+  @override
+  String recouvrementSimFootNothingLost(String missing) {
+    return 'These students have paid nothing: dismissal would lose no income, but it definitively writes off $missing.';
+  }
+
+  @override
+  String recouvrementSimFootWithLoss(String lost, String missing) {
+    return 'Dismissal would void $lost already collected, and write off $missing never paid.';
+  }
+
+  @override
+  String get recouvrementSimA11yLabel => 'Dismissal simulation — no writes';
+
+  @override
+  String recouvrementSimRowA11y(String group, int kept, String verdict) {
+    return '$group: $kept% of the cohort kept, $verdict';
+  }
 }

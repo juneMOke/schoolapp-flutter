@@ -15192,6 +15192,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} enrolled students carry none of these fees'**
   String recouvrementUnbilledNote(int count);
+
+  /// No description provided for @recouvrementSimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal simulation'**
+  String get recouvrementSimulationTitle;
+
+  /// No description provided for @recouvrementSimulationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is applied — a dismissal goes through Enrolments, file by file'**
+  String get recouvrementSimulationSubtitle;
+
+  /// No description provided for @recouvrementSimulationWho.
+  ///
+  /// In en, this message translates to:
+  /// **'We dismiss students who…'**
+  String get recouvrementSimulationWho;
+
+  /// No description provided for @recouvrementCriterionNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid nothing'**
+  String get recouvrementCriterionNoPayment;
+
+  /// No description provided for @recouvrementCriterionNotSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Have not settled in full'**
+  String get recouvrementCriterionNotSettled;
+
+  /// No description provided for @recouvrementCriterionBelowThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid less than…'**
+  String get recouvrementCriterionBelowThreshold;
+
+  /// No description provided for @recouvrementThresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum amount'**
+  String get recouvrementThresholdLabel;
+
+  /// No description provided for @recouvrementThresholdMixedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The floor is compared in {currency} equivalent: the selection mixes two currencies. That is a judgement call, not a measurement.'**
+  String recouvrementThresholdMixedWarning(String currency);
+
+  /// No description provided for @recouvrementThresholdNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No rate has been set for today: the comparison is impossible on a mixed selection.'**
+  String get recouvrementThresholdNoRate;
+
+  /// No description provided for @recouvrementCriticalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable group threshold: {percent}% of the cohort'**
+  String recouvrementCriticalLabel(int percent);
+
+  /// No description provided for @recouvrementCriticalA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the cohort'**
+  String recouvrementCriticalA11y(int percent);
+
+  /// No description provided for @recouvrementSimHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort today'**
+  String get recouvrementSimHeadcount;
+
+  /// No description provided for @recouvrementSimHeadcountSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'students carrying these fees'**
+  String get recouvrementSimHeadcountSubline;
+
+  /// No description provided for @recouvrementSimTargeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Students targeted'**
+  String get recouvrementSimTargeted;
+
+  /// No description provided for @recouvrementSimRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort left'**
+  String get recouvrementSimRemaining;
+
+  /// No description provided for @recouvrementSimRemainingSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the cohort kept'**
+  String recouvrementSimRemainingSubline(int percent);
+
+  /// No description provided for @recouvrementSimCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable groups'**
+  String get recouvrementSimCritical;
+
+  /// No description provided for @recouvrementSimTableGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get recouvrementSimTableGroup;
+
+  /// No description provided for @recouvrementSimTableHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort'**
+  String get recouvrementSimTableHeadcount;
+
+  /// No description provided for @recouvrementSimTableLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'To dismiss'**
+  String get recouvrementSimTableLeaving;
+
+  /// No description provided for @recouvrementSimTableRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get recouvrementSimTableRemaining;
+
+  /// No description provided for @recouvrementSimTableKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Cohort kept'**
+  String get recouvrementSimTableKept;
+
+  /// No description provided for @recouvrementSimTableVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdict'**
+  String get recouvrementSimTableVerdict;
+
+  /// No description provided for @recouvrementVerdictManageable.
+  ///
+  /// In en, this message translates to:
+  /// **'Manageable'**
+  String get recouvrementVerdictManageable;
+
+  /// No description provided for @recouvrementVerdictFragile.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragile'**
+  String get recouvrementVerdictFragile;
+
+  /// No description provided for @recouvrementVerdictCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable'**
+  String get recouvrementVerdictCritical;
+
+  /// No description provided for @recouvrementSimFootNothingLost.
+  ///
+  /// In en, this message translates to:
+  /// **'These students have paid nothing: dismissal would lose no income, but it definitively writes off {missing}.'**
+  String recouvrementSimFootNothingLost(String missing);
+
+  /// No description provided for @recouvrementSimFootWithLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal would void {lost} already collected, and write off {missing} never paid.'**
+  String recouvrementSimFootWithLoss(String lost, String missing);
+
+  /// No description provided for @recouvrementSimA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal simulation — no writes'**
+  String get recouvrementSimA11yLabel;
+
+  /// No description provided for @recouvrementSimRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{group}: {kept}% of the cohort kept, {verdict}'**
+  String recouvrementSimRowA11y(String group, int kept, String verdict);
 }
 
 class _AppLocalizationsDelegate

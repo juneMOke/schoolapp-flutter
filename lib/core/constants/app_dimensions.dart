@@ -228,6 +228,12 @@ class AppDimensions {
   static const recouvrementRateBarHeight = 20.0;
   static const recouvrementRateBarRadius = 5.0;
 
+  // Simulation de renvoi (spec §6).
+  static const recouvrementCriterionFieldWidth = 260.0;
+  static const recouvrementThresholdFieldWidth = 190.0;
+  static const recouvrementWarningMaxWidth = 300.0;
+  static const recouvrementKeptBarHeight = 8.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;

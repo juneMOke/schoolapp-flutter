@@ -9574,4 +9574,112 @@ class AppLocalizationsFr extends AppLocalizations {
   String recouvrementUnbilledNote(int count) {
     return '$count inscrits ne portent aucun de ces frais';
   }
+
+  @override
+  String get recouvrementSimulationTitle => 'Simulation de renvoi';
+
+  @override
+  String get recouvrementSimulationSubtitle =>
+      'Rien n\'est appliqué — appliquer un renvoi passe par les Inscriptions, dossier par dossier';
+
+  @override
+  String get recouvrementSimulationWho => 'On renvoie les élèves qui…';
+
+  @override
+  String get recouvrementCriterionNoPayment => 'N\'ont rien payé';
+
+  @override
+  String get recouvrementCriterionNotSettled => 'N\'ont pas tout soldé';
+
+  @override
+  String get recouvrementCriterionBelowThreshold => 'Ont payé moins que…';
+
+  @override
+  String get recouvrementThresholdLabel => 'Montant plancher';
+
+  @override
+  String recouvrementThresholdMixedWarning(String currency) {
+    return 'Le plancher est comparé en équivalent $currency : la sélection mêle deux devises. C\'est un arbitrage, pas une mesure.';
+  }
+
+  @override
+  String get recouvrementThresholdNoRate =>
+      'Aucun taux du jour n\'est posé : la comparaison est impossible en sélection mixte.';
+
+  @override
+  String recouvrementCriticalLabel(int percent) {
+    return 'Seuil de groupe ingérable : $percent % de l\'effectif';
+  }
+
+  @override
+  String recouvrementCriticalA11y(int percent) {
+    return '$percent % de l\'effectif';
+  }
+
+  @override
+  String get recouvrementSimHeadcount => 'Effectif aujourd\'hui';
+
+  @override
+  String get recouvrementSimHeadcountSubline =>
+      'élèves concernés par ces frais';
+
+  @override
+  String get recouvrementSimTargeted => 'Élèves visés';
+
+  @override
+  String get recouvrementSimRemaining => 'Effectif restant';
+
+  @override
+  String recouvrementSimRemainingSubline(int percent) {
+    return '$percent % de l\'effectif conservé';
+  }
+
+  @override
+  String get recouvrementSimCritical => 'Groupes ingérables';
+
+  @override
+  String get recouvrementSimTableGroup => 'Groupe';
+
+  @override
+  String get recouvrementSimTableHeadcount => 'Effectif';
+
+  @override
+  String get recouvrementSimTableLeaving => 'À renvoyer';
+
+  @override
+  String get recouvrementSimTableRemaining => 'Restants';
+
+  @override
+  String get recouvrementSimTableKept => 'Effectif conservé';
+
+  @override
+  String get recouvrementSimTableVerdict => 'Verdict';
+
+  @override
+  String get recouvrementVerdictManageable => 'Tenable';
+
+  @override
+  String get recouvrementVerdictFragile => 'Fragile';
+
+  @override
+  String get recouvrementVerdictCritical => 'Ingérable';
+
+  @override
+  String recouvrementSimFootNothingLost(String missing) {
+    return 'Ces élèves n\'ont rien versé : le renvoi ne ferait perdre aucune recette, mais il abandonne définitivement $missing.';
+  }
+
+  @override
+  String recouvrementSimFootWithLoss(String lost, String missing) {
+    return 'Le renvoi rendrait sans objet $lost déjà encaissés, et abandonnerait $missing jamais versés.';
+  }
+
+  @override
+  String get recouvrementSimA11yLabel =>
+      'Simulation de renvoi — aucune écriture';
+
+  @override
+  String recouvrementSimRowA11y(String group, int kept, String verdict) {
+    return '$group : $kept % de l\'effectif conservé, $verdict';
+  }
 }
