@@ -6,8 +6,12 @@ import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/main.dart';
 import 'core/offline/offline_full_test_db.dart';
+import 'features/school/school_logo_fixture.dart';
 import 'test_helpers/widget_test_utils.dart';
 
 void main() {
@@ -88,6 +92,59 @@ void main() {
       cubit.isHeartbeatActive,
       isTrue,
       reason: 'onResume doit atteindre onForeground du cubit fourni',
+    );
+  });
+
+  testWidgets('App reloads the school identity after a pull brought data', (
+    WidgetTester tester,
+  ) async {
+    // Troisième déclencheur de relecture de l'identité (les deux autres :
+    // ouverture de session, retour réseau). Une tablette posée sur le Wi-Fi de
+    // l'école ne revoit jamais ces deux transitions : sans celui-ci, un sceau
+    // déposé en cours de journée n'apparaîtrait qu'au lancement suivant. Et son
+    // absence ne se voit nulle part — la marque reste sur le symbole ETEELO,
+    // qui est aussi l'affichage légitime d'une école sans logo.
+    await pumpBounded(
+      tester,
+      const MyApp(),
+      frames: 2,
+      step: const Duration(milliseconds: 150),
+    );
+
+    final element = tester.element(find.byType(SyncLifecycleObserver));
+    final syncStatus = element.read<SyncStatusCubit>();
+    final schoolIdentity = element.read<SchoolIdentityCubit>();
+
+    // Le sceau descend APRÈS le montage, comme en pleine session : les deux
+    // autres déclencheurs sont déjà passés.
+    final sha = 'c' * 64;
+    final currentUser = getIt<CurrentUserContext>()
+      ..set('u-logo', schoolId: 'school-logo');
+    addTearDown(currentUser.clear);
+    final logoCache = getIt<SchoolLogoCacheDao>();
+    await logoCache.put(
+      schoolId: 'school-logo',
+      variant: SchoolLogoVariant.display,
+      sha256: sha,
+      bytes: schoolLogoPngBytes,
+      fetchedAt: DateTime(2026, 9, 11),
+    );
+    addTearDown(
+      () => logoCache.delete('school-logo', SchoolLogoVariant.display),
+    );
+    expect(schoolIdentity.state.logo, isNull);
+
+    syncStatus.emit(
+      syncStatus.state.copyWith(
+        lastSyncAtMs: (syncStatus.state.lastSyncAtMs ?? 0) + 1,
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      schoolIdentity.state.logo?.sha256,
+      sha,
+      reason: 'un pull qui a ramené des données doit relire le sceau',
     );
   });
 

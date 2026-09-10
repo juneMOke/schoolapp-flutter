@@ -74,6 +74,7 @@ import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
+import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
 import 'package:school_app_flutter/features/school/data/repositories/school_repository_impl.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -1379,10 +1380,13 @@ Future<void> configureDependencies({
 
   // ── Identité de l'établissement ─────────────────────────────────────────────
   // Lecture locale de `ref_school` (même DAO référentiel que le contexte
-  // académique), scopée à l'école de la session. Aucun pull propre.
+  // académique) et de `school_logo_cache` pour le sceau, scopées à l'école de
+  // la session. Aucun pull propre : les deux caches sont remplis par le pull
+  // référentiel, tirage des octets du logo compris.
   getIt.registerLazySingleton<SchoolRepository>(
     () => SchoolRepositoryImpl(
       referentialDao: getIt<EnrollmentReferentialDao>(),
+      logoCache: getIt<SchoolLogoCacheDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
