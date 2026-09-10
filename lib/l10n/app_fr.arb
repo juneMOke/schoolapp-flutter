@@ -5830,5 +5830,68 @@
   "recouvrementRelanceListNotDeployed": "Cette version du serveur ne sait pas encore établir de liste de relance. Le reste du tableau de bord fonctionne : il se lit sur l'appareil.",
   "@recouvrementRelanceListNotDeployed": {
       "description": "404 — la route n'est pas déployée"
+  },
+
+  "recouvrementCallListTitle": "Élèves visés — {group}",
+  "@recouvrementCallListTitle": {
+      "description": "Titre de l'aperçu nominatif",
+      "placeholders": {
+          "group": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListSubtitle": "{count} élèves · {criterion}",
+  "@recouvrementCallListSubtitle": {
+      "description": "Sous-titre : effectif et critère",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "criterion": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListStudent": "Élève",
+  "@recouvrementCallListStudent": {
+      "description": "Colonne : nom"
+  },
+  "recouvrementCallListDue": "Dû",
+  "@recouvrementCallListDue": {
+      "description": "Colonne : attendu"
+  },
+  "recouvrementCallListPaid": "Payé",
+  "@recouvrementCallListPaid": {
+      "description": "Colonne : versé"
+  },
+  "recouvrementCallListRemaining": "Reste",
+  "@recouvrementCallListRemaining": {
+      "description": "Colonne : reste dû"
+  },
+  "recouvrementCallListUnnamed": "Élève {id}",
+  "@recouvrementCallListUnnamed": {
+      "description": "Élève que les inscriptions ne connaissent pas",
+      "placeholders": {
+          "id": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListUnnamedNote": "Certains élèves ne figurent plus aux inscriptions : ils gardent leur dette, et le document les nommera depuis le référentiel.",
+  "@recouvrementCallListUnnamedNote": {
+      "description": "Note quand un élève n'a pas de nom local"
+  },
+  "recouvrementCallListEmit": "Éditer la liste à signer",
+  "@recouvrementCallListEmit": {
+      "description": "Action d'émission du PDF"
+  },
+  "recouvrementCallListClose": "Fermer",
+  "@recouvrementCallListClose": {
+      "description": "Action de fermeture"
+  },
+  "recouvrementCallListEmpty": "Aucun élève visé dans ce groupe.",
+  "@recouvrementCallListEmpty": {
+      "description": "Aperçu vide"
   }
 }

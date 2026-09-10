@@ -9678,4 +9678,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recouvrementRelanceListNotDeployed =>
       'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.';
+
+  @override
+  String recouvrementCallListTitle(String group) {
+    return 'Students targeted — $group';
+  }
+
+  @override
+  String recouvrementCallListSubtitle(int count, String criterion) {
+    return '$count students · $criterion';
+  }
+
+  @override
+  String get recouvrementCallListStudent => 'Student';
+
+  @override
+  String get recouvrementCallListDue => 'Due';
+
+  @override
+  String get recouvrementCallListPaid => 'Paid';
+
+  @override
+  String get recouvrementCallListRemaining => 'Left';
+
+  @override
+  String recouvrementCallListUnnamed(String id) {
+    return 'Student $id';
+  }
+
+  @override
+  String get recouvrementCallListUnnamedNote =>
+      'Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.';
+
+  @override
+  String get recouvrementCallListEmit => 'Produce the list to sign';
+
+  @override
+  String get recouvrementCallListClose => 'Close';
+
+  @override
+  String get recouvrementCallListEmpty => 'No student targeted in this group.';
 }

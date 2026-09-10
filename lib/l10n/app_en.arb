@@ -5666,5 +5666,41 @@
 
   "recouvrementEmptyResultDescription": "Nobody carries these fees in this scope: they have not been generated yet, or they do not apply here. Change the selection or the cycle.",
 
-  "recouvrementRelanceListNotDeployed": "This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device."
+  "recouvrementRelanceListNotDeployed": "This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.",
+
+  "recouvrementCallListTitle": "Students targeted — {group}",
+  "@recouvrementCallListTitle": {
+      "placeholders": {
+          "group": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListSubtitle": "{count} students · {criterion}",
+  "@recouvrementCallListSubtitle": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "criterion": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListStudent": "Student",
+  "recouvrementCallListDue": "Due",
+  "recouvrementCallListPaid": "Paid",
+  "recouvrementCallListRemaining": "Left",
+  "recouvrementCallListUnnamed": "Student {id}",
+  "@recouvrementCallListUnnamed": {
+      "placeholders": {
+          "id": {
+              "type": "String"
+          }
+      }
+  },
+  "recouvrementCallListUnnamedNote": "Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.",
+  "recouvrementCallListEmit": "Produce the list to sign",
+  "recouvrementCallListClose": "Close",
+  "recouvrementCallListEmpty": "No student targeted in this group."
 }

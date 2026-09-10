@@ -239,6 +239,11 @@ class AppDimensions {
   static const recouvrementInsightMinWidth = 260.0;
   static const recouvrementInsightMaxWidth = 380.0;
 
+  // Aperçu nominatif d'un groupe visé (spec §7).
+  static const recouvrementCallListMaxWidth = 720.0;
+  static const recouvrementCallListMaxHeight = 620.0;
+  static const recouvrementCallListSpinner = 16.0;
+
   static const enrollmentResultsFilterChipVPadding = 4.0;
   static const enrollmentResultsFilterChipIconSize = 13.0;
   static const enrollmentResultsFilterChipCloseIconSize = 12.0;

@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/widgets/da
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_insights_section.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_controls.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -333,8 +334,20 @@ class _Body extends StatelessWidget {
             RecouvrementSimulationSection(
               labels: labels,
               showCycleInLabels: cycleId == null,
-              onGroupTapped: (schoolLevelId) =>
-                  emitRelanceListFor(context, schoolLevelId, state),
+              onGroupTapped: (schoolLevelId) => openCallListFor(
+                context,
+                schoolLevelId,
+                state,
+                groupLabel: labels.labelFor(
+                  schoolLevelId,
+                  l10n,
+                  withGroup: cycleId == null,
+                ),
+                criterionLabel: recouvrementCriterionLabel(
+                  context.read<RecouvrementSimulationCubit>().state.criterion,
+                  l10n,
+                ),
+              ),
             ),
             RecouvrementInsightsSection(
               labels: labels,

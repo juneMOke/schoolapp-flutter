@@ -9766,4 +9766,44 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get recouvrementRelanceListNotDeployed =>
       'Cette version du serveur ne sait pas encore établir de liste de relance. Le reste du tableau de bord fonctionne : il se lit sur l\'appareil.';
+
+  @override
+  String recouvrementCallListTitle(String group) {
+    return 'Élèves visés — $group';
+  }
+
+  @override
+  String recouvrementCallListSubtitle(int count, String criterion) {
+    return '$count élèves · $criterion';
+  }
+
+  @override
+  String get recouvrementCallListStudent => 'Élève';
+
+  @override
+  String get recouvrementCallListDue => 'Dû';
+
+  @override
+  String get recouvrementCallListPaid => 'Payé';
+
+  @override
+  String get recouvrementCallListRemaining => 'Reste';
+
+  @override
+  String recouvrementCallListUnnamed(String id) {
+    return 'Élève $id';
+  }
+
+  @override
+  String get recouvrementCallListUnnamedNote =>
+      'Certains élèves ne figurent plus aux inscriptions : ils gardent leur dette, et le document les nommera depuis le référentiel.';
+
+  @override
+  String get recouvrementCallListEmit => 'Éditer la liste à signer';
+
+  @override
+  String get recouvrementCallListClose => 'Fermer';
+
+  @override
+  String get recouvrementCallListEmpty => 'Aucun élève visé dans ce groupe.';
 }

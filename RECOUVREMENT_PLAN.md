@@ -162,6 +162,15 @@ réécrits. Ce qui change : ils portent une sélection de frais au lieu d'un seu
 
 ### D7 — la simulation est en V1, et elle est le point d'entrée de la liste ✅
 
+⚠️ **Le clic ouvre un APERÇU, il n'édite pas.** La liste qui sort d'ici se signe
+et circule : la faire sortir d'un clic ferait produire un papier que personne n'a
+lu, sur une population qu'on n'a pas vérifiée. L'aperçu nomme les élèves depuis
+les inscriptions locales, et le bouton d'édition vit dans son pied.
+
+L'aperçu et l'édition partagent la **même** population, calculée une seule fois :
+deux appels du prédicat à deux instants pourraient déjà diverger, et l'écran ne
+doit pas montrer douze noms pour en imprimer treize.
+
 C'est du calcul pur en mémoire, sans couche data neuve. Et dans la spec, le
 **clic sur une ligne de classe de la simulation est le seul point d'entrée de la
 liste de relance** : livrer le contrat qu'on vient de négocier en quatre tours
@@ -504,7 +513,7 @@ data/local/dao/   finance_ledger_read_dao.dart      ← + getRecoveryPositions()
 | **REC-4** | **Le classement**, porté du FCD sur une sélection : niveaux triés du plus en retard au plus en règle, dépliage en classes, passage vers l'écran nominatif. Comparaison des taux **en produits croisés d'entiers**, jamais sur un pourcentage borné pour l'affichage. | `widgets/dashboard/classement` · projecteurs repris |
 | **REC-5** | **La simulation.** Critère · plancher · seuil ; quatre tuiles ; tableau trié par effectif conservé croissant. Recalcul **synchrone**, sans chargement. Aucune écriture, aucun bouton « Appliquer ». Cubit pur, testé sans widget. | `recouvrement_simulation_cubit` · `widgets/dashboard/simulation` |
 | **REC-6** | **La liste de relance — data.** Modèle de requête (sacs non élagués), gzip du corps, `@RestApi`, `build_runner`, repository, usecase. Les trois `detailCode` décodés. `REPORT_LINE_CAP` **promu au socle** (3ᵉ appelant). Timeouts posés, `sendTimeout` laissé en `TODO` documenté jusqu'à L4. | `data/**` · `app_constants` · `core/error` · tests mapper + repo |
-| **REC-7** | **La liste de relance — présentation.** Ouverture au clic d'une ligne de simulation. Trois états qui survivent au tap : désarmé pendant le rendu, désarmé le temps du `Retry-After` sur 429, octets rendus puis **abandonnés** (le serveur n'archive rien). Garde locale du plafond avant l'envoi. `Printing.layoutPdf`. | `relance_list_cubit` · `widgets/relance/**` · l10n |
+| **REC-7** | **La liste de relance — présentation.** Le clic d'une ligne de simulation ouvre l'**aperçu nominatif** (§7 de la spec) ; l'édition part de là, jamais du clic. Trois états qui survivent au tap : désarmé pendant le rendu, désarmé le temps du `Retry-After` sur 429, octets rendus puis **abandonnés** (le serveur n'archive rien). Garde locale du plafond avant l'envoi. `Printing.layoutPdf`. | `relance_list_cubit` · `widgets/relance/**` · l10n |
 | **REC-8** | **Suppression de l'onglet Finances ▸ Recouvrement.** Bloc, entités, usecase, datasource, l10n orphelines, tests. `FinanceStatsDashboardPage` retombe à un onglet et devient la Caisse. | `finance/**` · tests |
 | **REC-9** | **Lectures & alertes** (trois `FinInsight` calculées, jamais rédigées en dur) puis **revue adversariale** money-grade : états partagés (règle #10), a11y, `buildWhen`, `mounted` après `await`, `FeatureScope` qui ferme son bloc. | `widgets/dashboard/lectures` · revue |
 

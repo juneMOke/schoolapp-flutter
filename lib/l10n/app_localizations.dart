@@ -15491,6 +15491,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This version of the server cannot produce a call list yet. The rest of the dashboard works: it reads from the device.'**
   String get recouvrementRelanceListNotDeployed;
+
+  /// No description provided for @recouvrementCallListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students targeted — {group}'**
+  String recouvrementCallListTitle(String group);
+
+  /// No description provided for @recouvrementCallListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students · {criterion}'**
+  String recouvrementCallListSubtitle(int count, String criterion);
+
+  /// No description provided for @recouvrementCallListStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get recouvrementCallListStudent;
+
+  /// No description provided for @recouvrementCallListDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get recouvrementCallListDue;
+
+  /// No description provided for @recouvrementCallListPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get recouvrementCallListPaid;
+
+  /// No description provided for @recouvrementCallListRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get recouvrementCallListRemaining;
+
+  /// No description provided for @recouvrementCallListUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {id}'**
+  String recouvrementCallListUnnamed(String id);
+
+  /// No description provided for @recouvrementCallListUnnamedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Some students are no longer on the enrolment list: they keep their debt, and the document will name them from the referential.'**
+  String get recouvrementCallListUnnamedNote;
+
+  /// No description provided for @recouvrementCallListEmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce the list to sign'**
+  String get recouvrementCallListEmit;
+
+  /// No description provided for @recouvrementCallListClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get recouvrementCallListClose;
+
+  /// No description provided for @recouvrementCallListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student targeted in this group.'**
+  String get recouvrementCallListEmpty;
 }
 
 class _AppLocalizationsDelegate

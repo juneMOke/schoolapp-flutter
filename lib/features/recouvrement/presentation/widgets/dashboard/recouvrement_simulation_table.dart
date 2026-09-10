@@ -115,10 +115,16 @@ class _Header extends StatelessWidget {
           child: Text(text, style: AppTextStyles.tableHeader, textAlign: align),
         );
 
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
         vertical: AppDimensions.spacingS,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.spacingS),
+        ),
       ),
       child: Row(
         children: [
@@ -165,9 +171,17 @@ class _Row extends StatelessWidget {
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingS),
+        child: Container(
+          // Un filet entre les lignes, et de l'air : sans eux, six colonnes de
+          // chiffres serrées se lisent en diagonale et l'œil saute de niveau
+          // d'une colonne à l'autre.
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingS,
+            vertical: AppDimensions.spacingM,
+          ),
           child: Row(
             children: [
               Expanded(flex: 5, child: Text(label, style: AppTextStyles.body)),

@@ -101,7 +101,7 @@ class _RecouvrementSimulationControlsState
                         for (final criterion in RecouvrementCriterion.values)
                           EteeloSelectItem<RecouvrementCriterion>(
                             value: criterion,
-                            label: _criterionLabel(criterion, l10n),
+                            label: recouvrementCriterionLabel(criterion, l10n),
                           ),
                       ],
                     ),
@@ -137,16 +137,6 @@ class _RecouvrementSimulationControlsState
       },
     );
   }
-
-  static String _criterionLabel(
-    RecouvrementCriterion criterion,
-    AppLocalizations l10n,
-  ) => switch (criterion) {
-    RecouvrementCriterion.noPayment => l10n.recouvrementCriterionNoPayment,
-    RecouvrementCriterion.notSettled => l10n.recouvrementCriterionNotSettled,
-    RecouvrementCriterion.belowThreshold =>
-      l10n.recouvrementCriterionBelowThreshold,
-  };
 }
 
 /// En sélection mixte, la saisie d'un montant devient un arbitrage : on le dit
@@ -218,3 +208,18 @@ class _CriticalSlider extends StatelessWidget {
     );
   }
 }
+
+/// Le critère en toutes lettres.
+///
+/// Partagé : le sélecteur l'affiche, l'aperçu nominatif le rappelle en
+/// sous-titre, et le papier le portera. Trois surfaces, une seule phrase — deux
+/// copies auraient fini par nommer différemment le même filtre.
+String recouvrementCriterionLabel(
+  RecouvrementCriterion criterion,
+  AppLocalizations l10n,
+) => switch (criterion) {
+  RecouvrementCriterion.noPayment => l10n.recouvrementCriterionNoPayment,
+  RecouvrementCriterion.notSettled => l10n.recouvrementCriterionNotSettled,
+  RecouvrementCriterion.belowThreshold =>
+    l10n.recouvrementCriterionBelowThreshold,
+};
