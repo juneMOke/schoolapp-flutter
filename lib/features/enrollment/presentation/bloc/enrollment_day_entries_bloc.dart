@@ -103,7 +103,12 @@ class EnrollmentDayEntriesBloc
           entries: paged.content,
           totalElements: paged.totalElements,
           totalPages: paged.totalPages,
-          page: paged.page,
+          // ⚠️ **La page affichée est celle DEMANDÉE**, jamais l'écho que la
+          // réponse en fait. C'est cet écho qui bloquait la pagination : lu
+          // sous un nom de champ que le serveur n'envoie pas, il valait
+          // toujours 0, si bien que « suivant » redemandait sans fin la
+          // page 1 et que l'indicateur restait sur « 1 / N ».
+          page: page,
           failure: null,
         ),
       ),

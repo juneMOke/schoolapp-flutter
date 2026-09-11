@@ -129,6 +129,34 @@ void main() {
   );
 
   blocTest<EnrollmentDayEntriesBloc, EnrollmentDayEntriesState>(
+    'la pagination AVANCE : la page affichée est celle demandée',
+    // La régression d'origine : le numéro de page renvoyé par le serveur
+    // était lu sous un nom de champ qu'il n'envoie pas, donc toujours 0 —
+    // « suivant » redemandait sans fin la page 1, et l'indicateur restait sur
+    // « 1 / N ». Le stub reproduit cet écho figé à 0.
+    setUp: () => stub(
+      Right(_page(content: [_entry('a')], totalPages: 4, totalElements: 30)),
+    ),
+    build: build,
+    act: (bloc) async {
+      bloc.add(EnrollmentDayEntriesRequested(DateTime(2026, 9, 5)));
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(EnrollmentDayEntriesPageChanged(bloc.state.page + 1));
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(EnrollmentDayEntriesPageChanged(bloc.state.page + 1));
+    },
+    wait: const Duration(milliseconds: 80),
+    verify: (bloc) {
+      expect(bloc.state.page, 2);
+      verifyInOrder([
+        () => useCase(day: DateTime(2026, 9, 5), page: 0),
+        () => useCase(day: DateTime(2026, 9, 5), page: 1),
+        () => useCase(day: DateTime(2026, 9, 5), page: 2),
+      ]);
+    },
+  );
+
+  blocTest<EnrollmentDayEntriesBloc, EnrollmentDayEntriesState>(
     'changer de journée REMET la pagination à zéro',
     // Rester page 3 en changeant de journée afficherait une page vide d'une
     // liste qui, elle, a des lignes.
