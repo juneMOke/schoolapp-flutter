@@ -57,8 +57,14 @@ class AppConstants {
       '/api/v1/enrollments/students/{studentId}/preview';
 
   static const String enrollmentStatsEndpoint = '/api/v1/enrollment-stats';
-  static const String enrollmentDayEntriesEndpoint =
-      '/api/v1/enrollment-stats/day-entries';
+
+  /// La liste nominative de la fenêtre, paginée — mêmes paramètres de fenêtre
+  /// que l'agrégat, dont elle ne peut donc pas diverger.
+  ///
+  /// Remplace `/day-entries`, qui ne savait servir qu'une journée ; le serveur
+  /// le garde pour les clients déjà déployés.
+  static const String enrollmentEntriesEndpoint =
+      '/api/v1/enrollment-stats/entries';
 
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =

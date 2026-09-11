@@ -9298,33 +9298,58 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ouvrir les pré-inscriptions';
 
   @override
-  String get enrollmentDashboardDayListTitle => 'Liste nominative du jour';
+  String get enrollmentDashboardEntriesTitle => 'Liste nominative des inscrits';
 
   @override
-  String enrollmentDashboardDayListSubtitle(String day) {
-    return 'Les élèves inscrits $day';
+  String enrollmentDashboardEntriesSubtitleDay(String day) {
+    return 'Élèves inscrits le $day';
   }
 
   @override
-  String get enrollmentDashboardDayListColumnHour => 'Heure';
+  String get enrollmentDashboardEntriesSubtitleWeek =>
+      'Élèves inscrits cette semaine';
 
   @override
-  String get enrollmentDashboardDayListColumnStudent => 'Élève';
+  String get enrollmentDashboardEntriesSubtitleMonth =>
+      'Élèves inscrits ce mois-ci';
 
   @override
-  String get enrollmentDashboardDayListColumnLevel => 'Niveau';
+  String enrollmentDashboardEntriesSubtitleYear(String schoolYear) {
+    return 'Élèves inscrits sur l\'année scolaire $schoolYear';
+  }
 
   @override
-  String get enrollmentDashboardDayListColumnType => 'Type';
+  String get enrollmentDashboardEntriesSubtitleSinceOpening =>
+      'Élèves inscrits depuis l\'ouverture des inscriptions';
 
   @override
-  String get enrollmentDashboardDayListColumnRecordedBy => 'Enregistré par';
+  String enrollmentDashboardEntriesSubtitleRange(String from, String to) {
+    return 'Élèves inscrits du $from au $to';
+  }
 
   @override
-  String get enrollmentDashboardDayListUnit => 'inscription';
+  String get enrollmentDashboardEntriesColumnHour => 'Heure';
 
   @override
-  String enrollmentDashboardDayListCount(int count) {
+  String get enrollmentDashboardEntriesColumnDate => 'Date';
+
+  @override
+  String get enrollmentDashboardEntriesColumnStudent => 'Élève';
+
+  @override
+  String get enrollmentDashboardEntriesColumnLevel => 'Niveau';
+
+  @override
+  String get enrollmentDashboardEntriesColumnType => 'Type';
+
+  @override
+  String get enrollmentDashboardEntriesColumnRecordedBy => 'Enregistré par';
+
+  @override
+  String get enrollmentDashboardEntriesUnit => 'inscription';
+
+  @override
+  String enrollmentDashboardEntriesCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -9335,70 +9360,33 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get enrollmentDashboardDayListUnknownAgent => '—';
+  String get enrollmentDashboardEntriesUnknownAgent => '—';
 
   @override
-  String get enrollmentDashboardDayListNoHour => '—';
+  String get enrollmentDashboardEntriesNoHour => '—';
 
   @override
-  String get enrollmentDashboardDayListLoading =>
-      'Chargement de la liste du jour';
+  String get enrollmentDashboardEntriesLoading =>
+      'Chargement de la liste des inscrits';
 
   @override
-  String get enrollmentDashboardDayListEmpty =>
-      'Aucune inscription enregistrée ce jour-là.';
+  String get enrollmentDashboardEntriesEmpty =>
+      'Aucune inscription enregistrée sur cette période.';
 
   @override
-  String get enrollmentDashboardDayListForbidden =>
+  String get enrollmentDashboardEntriesForbidden =>
       'Vous n\'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.';
 
   @override
-  String get enrollmentDashboardDayListError =>
-      'La liste du jour n\'a pas pu être chargée.';
-
-  @override
-  String enrollmentDashboardDayListRowA11y(
-    String name,
-    String gender,
-    String level,
-    String type,
-  ) {
-    return '$name, $gender, $level, $type';
-  }
+  String get enrollmentDashboardEntriesError =>
+      'La liste des inscrits n\'a pas pu être chargée.';
 
   @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override
-  String get enrollmentDashboardExportCsv => 'CSV';
-
-  @override
   String get enrollmentDashboardExportPdfTooltip =>
       'Exporter la répartition par niveau en PDF';
-
-  @override
-  String get enrollmentDashboardExportCsvTooltip =>
-      'Copier la liste du jour au format CSV';
-
-  @override
-  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day) {
-    return 'Année scolaire $schoolYear · $day';
-  }
-
-  @override
-  String enrollmentDashboardDayPdfFooter(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      rowCount,
-      locale: localeName,
-      other: '$rowCount inscriptions',
-      one: '1 inscription',
-    );
-    return '$_temp0 · année scolaire $schoolYear · généré le $generatedOn';
-  }
 
   @override
   String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Inscriptions';
@@ -9438,27 +9426,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardPdfFailed =>
       'L\'export PDF n\'a pas abouti. Réessayez.';
-
-  @override
-  String get enrollmentDashboardCsvColumnLastName => 'Nom';
-
-  @override
-  String get enrollmentDashboardCsvColumnFirstName => 'Prénom';
-
-  @override
-  String get enrollmentDashboardCsvColumnGender => 'Sexe';
-
-  @override
-  String get enrollmentDashboardCsvColumnStatus => 'Statut';
-
-  @override
-  String enrollmentDashboardCsvCopied(String fileName) {
-    return 'Liste du jour copiée au format CSV ($fileName)';
-  }
-
-  @override
-  String get enrollmentDashboardCsvFailed =>
-      'La copie de la liste n\'a pas abouti. Réessayez.';
 
   @override
   String get recouvrementFeePickerLabel => 'Frais retenus';

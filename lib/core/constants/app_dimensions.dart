@@ -365,7 +365,7 @@ class AppDimensions {
   /// à 1 inscription occupe encore le quart de la hauteur.
   static const enrollmentDashboardPaceMinTop = 4.0;
 
-  /// Liste nominative du jour.
+  /// Avatar d'une ligne de la liste nominative des inscrits.
   static const enrollmentDashboardDayAvatarSize = 30.0;
   static const enrollmentDashboardTypePillIconSize = 13.0;
 

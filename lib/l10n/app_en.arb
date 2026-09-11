@@ -5845,81 +5845,60 @@
     }
   },
   "enrollmentDashboardInsightPreAction": "Open pre-enrolments",
-  "enrollmentDashboardDayListTitle": "Named list for the day",
-  "enrollmentDashboardDayListSubtitle": "Students enrolled {day}",
-  "@enrollmentDashboardDayListSubtitle": {
+  "enrollmentDashboardEntriesTitle": "Named list of enrolled students",
+  "enrollmentDashboardEntriesSubtitleDay": "Students enrolled on {day}",
+  "@enrollmentDashboardEntriesSubtitleDay": {
     "placeholders": {
       "day": {
         "type": "String"
       }
     }
   },
-  "enrollmentDashboardDayListColumnHour": "Time",
-  "enrollmentDashboardDayListColumnStudent": "Student",
-  "enrollmentDashboardDayListColumnLevel": "Level",
-  "enrollmentDashboardDayListColumnType": "Type",
-  "enrollmentDashboardDayListColumnRecordedBy": "Recorded by",
-  "enrollmentDashboardDayListUnit": "enrolment",
-  "enrollmentDashboardDayListCount": "{count, plural, =1{1 enrolment} other{{count} enrolments}}",
-  "@enrollmentDashboardDayListCount": {
+  "enrollmentDashboardEntriesSubtitleWeek": "Students enrolled this week",
+  "enrollmentDashboardEntriesSubtitleMonth": "Students enrolled this month",
+  "enrollmentDashboardEntriesSubtitleYear": "Students enrolled over school year {schoolYear}",
+  "@enrollmentDashboardEntriesSubtitleYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesSubtitleSinceOpening": "Students enrolled since enrolment opened",
+  "enrollmentDashboardEntriesSubtitleRange": "Students enrolled from {from} to {to}",
+  "@enrollmentDashboardEntriesSubtitleRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesColumnHour": "Time",
+  "enrollmentDashboardEntriesColumnDate": "Date",
+  "enrollmentDashboardEntriesColumnStudent": "Student",
+  "enrollmentDashboardEntriesColumnLevel": "Level",
+  "enrollmentDashboardEntriesColumnType": "Type",
+  "enrollmentDashboardEntriesColumnRecordedBy": "Recorded by",
+  "enrollmentDashboardEntriesUnit": "enrolment",
+  "enrollmentDashboardEntriesCount": "{count, plural, =1{1 enrolment} other{{count} enrolments}}",
+  "@enrollmentDashboardEntriesCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "enrollmentDashboardDayListUnknownAgent": "—",
-  "enrollmentDashboardDayListNoHour": "—",
-  "enrollmentDashboardDayListLoading": "Loading the day's list",
-  "enrollmentDashboardDayListEmpty": "No enrolment recorded on that day.",
-  "enrollmentDashboardDayListForbidden": "You are not allowed to view the named list. Analytics remain available.",
-  "enrollmentDashboardDayListError": "The day's list could not be loaded.",
-  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
-  "@enrollmentDashboardDayListRowA11y": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "gender": {
-        "type": "String"
-      },
-      "level": {
-        "type": "String"
-      },
-      "type": {
-        "type": "String"
-      }
-    }
-  },
+  "enrollmentDashboardEntriesUnknownAgent": "—",
+  "enrollmentDashboardEntriesNoHour": "—",
+  "enrollmentDashboardEntriesLoading": "Loading the list of enrolled students",
+  "enrollmentDashboardEntriesEmpty": "No enrolment recorded over this period.",
+  "enrollmentDashboardEntriesForbidden": "You are not allowed to view the named list. Analytics remain available.",
+  "enrollmentDashboardEntriesError": "The list of enrolled students could not be loaded.",
   "enrollmentDashboardExportPdf": "PDF",
-  "enrollmentDashboardExportCsv": "CSV",
   "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
-  "enrollmentDashboardExportCsvTooltip": "Copy the day's list as CSV",
-  "enrollmentDashboardDayPdfSubtitle": "School year {schoolYear} · {day}",
-  "@enrollmentDashboardDayPdfSubtitle": {
-    "placeholders": {
-      "schoolYear": {
-        "type": "String"
-      },
-      "day": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}",
-  "@enrollmentDashboardDayPdfFooter": {
-    "placeholders": {
-      "rowCount": {
-        "type": "int"
-      },
-      "schoolYear": {
-        "type": "String"
-      },
-      "generatedOn": {
-        "type": "String"
-      }
-    }
-  },
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Enrolments",
   "enrollmentDashboardPdfTitle": "Breakdown by level",
   "enrollmentDashboardPdfSubtitle": "School year {schoolYear} · as of {generatedOn}",
@@ -5951,19 +5930,6 @@
   "enrollmentDashboardPdfColumnCycle": "Cycle",
   "enrollmentDashboardPdfColumnCount": "Enrolled",
   "enrollmentDashboardPdfFailed": "The PDF export did not complete. Try again.",
-  "enrollmentDashboardCsvColumnLastName": "Last name",
-  "enrollmentDashboardCsvColumnFirstName": "First name",
-  "enrollmentDashboardCsvColumnGender": "Sex",
-  "enrollmentDashboardCsvColumnStatus": "Status",
-  "enrollmentDashboardCsvCopied": "Day list copied as CSV ({fileName})",
-  "@enrollmentDashboardCsvCopied": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again.",
   "recouvrementFeePickerLabel": "Selected fees",
   "recouvrementFeePickerA11yLabel": "Selected fees — multiple choice, at least one",
   "recouvrementFeeChipLockedA11y": "{fee} — only selected fee, cannot be unchecked",

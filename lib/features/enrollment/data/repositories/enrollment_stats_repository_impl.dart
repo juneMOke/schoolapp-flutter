@@ -39,17 +39,22 @@ class EnrollmentStatsRepositoryImpl implements EnrollmentStatsRepository {
   }
 
   @override
-  Future<Either<Failure, PaginatedResponse<DayEnrollmentEntry>>> getDayEntries({
-    required DateTime day,
+  Future<Either<Failure, PaginatedResponse<DayEnrollmentEntry>>> getEntries({
+    required EnrollmentStatsWindow window,
     required int page,
     required int size,
+    required EnrollmentEntriesOrder order,
   }) async {
     try {
-      final response = await remoteDataSource.getDayEntries(
+      final response = await remoteDataSource.getEntries(
         requiredAuth,
-        EnrollmentStatsWindow.formatApiDate(day),
+        window.apiPeriod,
+        window.apiDate,
+        window.apiFrom,
+        window.apiTo,
         page,
         size,
+        order.apiValue,
       );
       return Right(response.toEntity());
     } on DioException catch (e) {

@@ -5916,81 +5916,64 @@
     }
   },
   "enrollmentDashboardInsightPreAction": "Ouvrir les pré-inscriptions",
-  "enrollmentDashboardDayListTitle": "Liste nominative du jour",
-  "enrollmentDashboardDayListSubtitle": "Les élèves inscrits {day}",
-  "@enrollmentDashboardDayListSubtitle": {
+  "enrollmentDashboardEntriesTitle": "Liste nominative des inscrits",
+  "enrollmentDashboardEntriesSubtitleDay": "Élèves inscrits le {day}",
+  "@enrollmentDashboardEntriesSubtitleDay": {
     "placeholders": {
       "day": {
         "type": "String"
       }
     }
   },
-  "enrollmentDashboardDayListColumnHour": "Heure",
-  "enrollmentDashboardDayListColumnStudent": "Élève",
-  "enrollmentDashboardDayListColumnLevel": "Niveau",
-  "enrollmentDashboardDayListColumnType": "Type",
-  "enrollmentDashboardDayListColumnRecordedBy": "Enregistré par",
-  "enrollmentDashboardDayListUnit": "inscription",
-  "enrollmentDashboardDayListCount": "{count, plural, =1{1 inscription} other{{count} inscriptions}}",
-  "@enrollmentDashboardDayListCount": {
+  "enrollmentDashboardEntriesSubtitleWeek": "Élèves inscrits cette semaine",
+  "enrollmentDashboardEntriesSubtitleMonth": "Élèves inscrits ce mois-ci",
+  "enrollmentDashboardEntriesSubtitleYear": "Élèves inscrits sur l'année scolaire {schoolYear}",
+  "@enrollmentDashboardEntriesSubtitleYear": {
+    "description": "Fenêtre « année » : la liste s'y borne par année scolaire et non par dates — un dossier antidaté en fait partie. On nomme donc l'année, jamais deux bornes que la liste ne respecterait pas.",
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesSubtitleSinceOpening": "Élèves inscrits depuis l'ouverture des inscriptions",
+  "enrollmentDashboardEntriesSubtitleRange": "Élèves inscrits du {from} au {to}",
+  "@enrollmentDashboardEntriesSubtitleRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesColumnHour": "Heure",
+  "enrollmentDashboardEntriesColumnDate": "Date",
+  "@enrollmentDashboardEntriesColumnDate": {
+    "description": "Remplace la colonne Heure dès que la fenêtre dépasse une journée : l'heure seule ne situerait plus la ligne."
+  },
+  "enrollmentDashboardEntriesColumnStudent": "Élève",
+  "enrollmentDashboardEntriesColumnLevel": "Niveau",
+  "enrollmentDashboardEntriesColumnType": "Type",
+  "enrollmentDashboardEntriesColumnRecordedBy": "Enregistré par",
+  "enrollmentDashboardEntriesUnit": "inscription",
+  "enrollmentDashboardEntriesCount": "{count, plural, =1{1 inscription} other{{count} inscriptions}}",
+  "@enrollmentDashboardEntriesCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "enrollmentDashboardDayListUnknownAgent": "—",
-  "enrollmentDashboardDayListNoHour": "—",
-  "enrollmentDashboardDayListLoading": "Chargement de la liste du jour",
-  "enrollmentDashboardDayListEmpty": "Aucune inscription enregistrée ce jour-là.",
-  "enrollmentDashboardDayListForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
-  "enrollmentDashboardDayListError": "La liste du jour n'a pas pu être chargée.",
-  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
-  "@enrollmentDashboardDayListRowA11y": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "gender": {
-        "type": "String"
-      },
-      "level": {
-        "type": "String"
-      },
-      "type": {
-        "type": "String"
-      }
-    }
-  },
+  "enrollmentDashboardEntriesUnknownAgent": "—",
+  "enrollmentDashboardEntriesNoHour": "—",
+  "enrollmentDashboardEntriesLoading": "Chargement de la liste des inscrits",
+  "enrollmentDashboardEntriesEmpty": "Aucune inscription enregistrée sur cette période.",
+  "enrollmentDashboardEntriesForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
+  "enrollmentDashboardEntriesError": "La liste des inscrits n'a pas pu être chargée.",
   "enrollmentDashboardExportPdf": "PDF",
-  "enrollmentDashboardExportCsv": "CSV",
   "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
-  "enrollmentDashboardExportCsvTooltip": "Copier la liste du jour au format CSV",
-  "enrollmentDashboardDayPdfSubtitle": "Année scolaire {schoolYear} · {day}",
-  "@enrollmentDashboardDayPdfSubtitle": {
-    "placeholders": {
-      "schoolYear": {
-        "type": "String"
-      },
-      "day": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 inscription} other{{rowCount} inscriptions}} · année scolaire {schoolYear} · généré le {generatedOn}",
-  "@enrollmentDashboardDayPdfFooter": {
-    "placeholders": {
-      "rowCount": {
-        "type": "int"
-      },
-      "schoolYear": {
-        "type": "String"
-      },
-      "generatedOn": {
-        "type": "String"
-      }
-    }
-  },
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",
   "enrollmentDashboardPdfTitle": "Répartition par niveau",
   "enrollmentDashboardPdfSubtitle": "Année scolaire {schoolYear} · au {generatedOn}",
@@ -6022,19 +6005,6 @@
   "enrollmentDashboardPdfColumnCycle": "Cycle",
   "enrollmentDashboardPdfColumnCount": "Inscrits",
   "enrollmentDashboardPdfFailed": "L'export PDF n'a pas abouti. Réessayez.",
-  "enrollmentDashboardCsvColumnLastName": "Nom",
-  "enrollmentDashboardCsvColumnFirstName": "Prénom",
-  "enrollmentDashboardCsvColumnGender": "Sexe",
-  "enrollmentDashboardCsvColumnStatus": "Statut",
-  "enrollmentDashboardCsvCopied": "Liste du jour copiée au format CSV ({fileName})",
-  "@enrollmentDashboardCsvCopied": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez.",
   "recouvrementFeePickerLabel": "Frais retenus",
   "@recouvrementFeePickerLabel": {
     "description": "Titre du sélecteur de frais du tableau de bord Recouvrement"

@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_dashboard_kpi_band.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_day_entries_section.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entries_section.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_export_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_insights_section.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_pace_section.dart';
@@ -22,10 +22,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/dash
 /// Le bandeau d'effectif, lui, est rendu **au-dessus** par la page : il survit
 /// à l'état vide, ce qui n'est pas le cas de cette grille.
 ///
-/// La liste nominative du jour s'insère entre « où » et « lectures », mais
-/// **seulement quand la fenêtre couvre une seule journée**. Au-delà elle est
-/// masquée, pas paginée à l'infini : une liste de noms sur une année n'est pas
-/// une lecture de tableau de bord.
+/// La liste nominative s'insère entre « où » et « lectures », **sur toutes les
+/// fenêtres** : elle suit le sélecteur, page par page, et s'emporte en PDF.
 class EnrollmentDashboardSuccessView extends StatelessWidget {
   final EnrollmentStats stats;
 
@@ -39,8 +37,8 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
   final void Function(LevelStat level)? onLevelTap;
   final VoidCallback? onOpenPreRegistrations;
 
-  /// Ouvre le dossier d'un élève depuis la liste du jour.
-  final void Function(DayEnrollmentEntry entry)? onDayEntryTap;
+  /// Ouvre le dossier d'un élève depuis la liste nominative.
+  final void Function(DayEnrollmentEntry entry)? onEntryTap;
 
   const EnrollmentDashboardSuccessView({
     super.key,
@@ -49,7 +47,7 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
     required this.isSingleDay,
     this.onLevelTap,
     this.onOpenPreRegistrations,
-    this.onDayEntryTap,
+    this.onEntryTap,
   });
 
   @override
@@ -126,22 +124,16 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
             distribution: stats.distributionByCycle,
           ),
         ),
-        // QUI EXACTEMENT — sur une seule journée uniquement.
-        //
-        // La condition est portée ici et pas dans la carte : au-delà d'un
-        // jour, le sous-arbre n'existe pas du tout, donc le second appel n'a
-        // aucun point de montage d'où partir.
-        if (isSingleDay) ...[
-          const SizedBox(height: AppDimensions.spacingL),
-          EteeloEntrance(
-            index: 5,
-            child: EnrollmentDayEntriesSection(
-              onEntryTap: onDayEntryTap,
-              schoolYear: stats.context.schoolYear,
-              generatedAt: stats.context.generatedAt,
-            ),
+        // QUI EXACTEMENT — sur toutes les fenêtres. La carte se retire seule
+        // quand la fenêtre n'a aucune inscription terminée à nommer.
+        const SizedBox(height: AppDimensions.spacingL),
+        EteeloEntrance(
+          index: 5,
+          child: EnrollmentEntriesSection(
+            onEntryTap: onEntryTap,
+            schoolYear: stats.context.schoolYear,
           ),
-        ],
+        ),
         const SizedBox(height: AppDimensions.spacingL),
         // QUOI EN FAIRE
         EteeloEntrance(

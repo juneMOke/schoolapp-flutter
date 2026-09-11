@@ -8,10 +8,14 @@ abstract class EnrollmentStatsRepository {
     EnrollmentStatsWindow window,
   });
 
-  /// Les inscriptions nommées d'une journée, page par page.
-  Future<Either<Failure, PaginatedResponse<DayEnrollmentEntry>>> getDayEntries({
-    required DateTime day,
+  /// Les inscriptions nommées de la fenêtre, page par page.
+  ///
+  /// Même fenêtre que l'agrégat, dérivée par le même code côté serveur : la
+  /// liste ne peut pas compter autre chose que la carte posée au-dessus d'elle.
+  Future<Either<Failure, PaginatedResponse<DayEnrollmentEntry>>> getEntries({
+    required EnrollmentStatsWindow window,
     required int page,
     required int size,
+    required EnrollmentEntriesOrder order,
   });
 }

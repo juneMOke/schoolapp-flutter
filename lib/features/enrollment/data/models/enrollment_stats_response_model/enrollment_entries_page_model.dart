@@ -2,7 +2,7 @@ import 'package:school_app_flutter/features/enrollment/data/models/enrollment_st
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/day_enrollment_entry.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/paginated_response.dart';
 
-/// Une page de la liste nominative du jour.
+/// Une page de la liste nominative des inscrits.
 ///
 /// Modèle **concret** plutôt que `PaginatedResponseModel<T>` : Retrofit
 /// désérialise sur un `fromJson(Map)` à un seul paramètre, et la fabrique
@@ -23,14 +23,14 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/paginated
 ///    `totalPages` — le `PagedModel` que Spring Data propose à la place, et
 ///    vers lequel le serveur peut basculer d'une ligne de configuration ;
 ///  * un entier `page` à la racine — la forme des DTO de page maison.
-class DayEntriesPageModel {
+class EnrollmentEntriesPageModel {
   final List<DayEnrollmentEntryModel> content;
   final int page;
   final int size;
   final int totalElements;
   final int totalPages;
 
-  const DayEntriesPageModel({
+  const EnrollmentEntriesPageModel({
     required this.content,
     required this.page,
     required this.size,
@@ -38,12 +38,12 @@ class DayEntriesPageModel {
     required this.totalPages,
   });
 
-  factory DayEntriesPageModel.fromJson(Map<String, dynamic> json) {
+  factory EnrollmentEntriesPageModel.fromJson(Map<String, dynamic> json) {
     final rawContent = json['content'] as List<dynamic>?;
     final nested = json['page'];
     final meta = nested is Map<String, dynamic> ? nested : json;
 
-    return DayEntriesPageModel(
+    return EnrollmentEntriesPageModel(
       content: (rawContent ?? const <dynamic>[])
           .map(
             (item) =>

@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/enrollment/data/models/enrollment_st
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 
 import '../../../../core/offline/offline_full_test_db.dart';
@@ -151,6 +152,18 @@ void main() {
 
       await firstBloc.close();
       await secondBloc.close();
+    });
+
+    test('getIt resolve la liste nominative en factory', () async {
+      final first = getIt<EnrollmentEntriesBloc>();
+      final second = getIt<EnrollmentEntriesBloc>();
+
+      // Le scope du tableau de bord la ferme en le quittant : un singleton
+      // fermé une fois le resterait pour toutes les visites suivantes.
+      expect(first, isNot(same(second)));
+
+      await first.close();
+      await second.close();
     });
 
     blocTest<EnrollmentStatsBloc, EnrollmentStatsState>(

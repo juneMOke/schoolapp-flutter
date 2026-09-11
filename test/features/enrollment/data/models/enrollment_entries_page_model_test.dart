@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/day_entries_page_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/enrollment_entries_page_model.dart';
 
 Map<String, dynamic> _entryJson() => <String, dynamic>{
   'enrollmentId': 'e1',
@@ -21,9 +21,9 @@ Map<String, dynamic> _entryJson() => <String, dynamic>{
 /// pagination de l'écran n'avance jamais.
 void main() {
   test('la Page Spring brute : `number` est LU', () {
-    // La forme que sert `/day-entries` aujourd'hui. Lire `page` ici rendait
+    // La forme que sert `/entries` aujourd'hui. Lire `page` ici rendait
     // toujours 0 : « suivant » redemandait la page 1 sans fin.
-    final page = DayEntriesPageModel.fromJson(<String, dynamic>{
+    final page = EnrollmentEntriesPageModel.fromJson(<String, dynamic>{
       'content': <dynamic>[_entryJson()],
       'pageable': <String, dynamic>{'pageNumber': 2, 'pageSize': 8},
       'number': 2,
@@ -46,7 +46,7 @@ void main() {
   test('le PagedModel de Spring Data : tout est rangé sous `page`', () {
     // La forme vers laquelle le serveur peut basculer d'une ligne de
     // configuration. Sans elle, `json['page'] as int` aurait levé.
-    final page = DayEntriesPageModel.fromJson(<String, dynamic>{
+    final page = EnrollmentEntriesPageModel.fromJson(<String, dynamic>{
       'content': <dynamic>[],
       'page': <String, dynamic>{
         'size': 8,
@@ -63,7 +63,7 @@ void main() {
   });
 
   test('un DTO de page maison : `page` est un entier à la racine', () {
-    final page = DayEntriesPageModel.fromJson(<String, dynamic>{
+    final page = EnrollmentEntriesPageModel.fromJson(<String, dynamic>{
       'content': <dynamic>[],
       'page': 1,
       'size': 8,
@@ -76,7 +76,7 @@ void main() {
   });
 
   test('rien d\'annoncé : première page, zéro partout — jamais une levée', () {
-    final page = DayEntriesPageModel.fromJson(
+    final page = EnrollmentEntriesPageModel.fromJson(
       const <String, dynamic>{},
     ).toEntity();
 

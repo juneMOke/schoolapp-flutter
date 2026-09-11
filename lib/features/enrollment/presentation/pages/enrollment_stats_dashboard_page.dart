@@ -72,7 +72,7 @@ class _EnrollmentStatsDashboardPageState
     const EnrollmentStatsRequested(window: EnrollmentStatsWindow.year()),
   );
 
-  /// Ouvre le dossier d'un élève depuis la liste du jour.
+  /// Ouvre le dossier d'un élève depuis la liste nominative.
   ///
   /// Même chemin que depuis un listing : un intent porté par `extra`, plus les
   /// mêmes paramètres en requête pour survivre à l'aller-retour GoRouter.
@@ -205,7 +205,7 @@ class _EnrollmentStatsDashboardPageState
         // acceptera une intention, c'est ici que ça se branche.
         onLevelTap: (_) => _openFirstRegistration(),
         onOpenPreRegistrations: _openPreRegistrations,
-        onDayEntryTap: _openDossier,
+        onEntryTap: _openDossier,
       ),
       EnrollmentStatsStatus.empty => EnrollmentDashboardEmptyState(
         windowLabel: _windowLabel(l10n, state.window.kind),

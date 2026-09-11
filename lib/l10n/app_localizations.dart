@@ -14790,106 +14790,131 @@ abstract class AppLocalizations {
   /// **'Open pre-enrolments'**
   String get enrollmentDashboardInsightPreAction;
 
-  /// No description provided for @enrollmentDashboardDayListTitle.
+  /// No description provided for @enrollmentDashboardEntriesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Named list for the day'**
-  String get enrollmentDashboardDayListTitle;
+  /// **'Named list of enrolled students'**
+  String get enrollmentDashboardEntriesTitle;
 
-  /// No description provided for @enrollmentDashboardDayListSubtitle.
+  /// No description provided for @enrollmentDashboardEntriesSubtitleDay.
   ///
   /// In en, this message translates to:
-  /// **'Students enrolled {day}'**
-  String enrollmentDashboardDayListSubtitle(String day);
+  /// **'Students enrolled on {day}'**
+  String enrollmentDashboardEntriesSubtitleDay(String day);
 
-  /// No description provided for @enrollmentDashboardDayListColumnHour.
+  /// No description provided for @enrollmentDashboardEntriesSubtitleWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled this week'**
+  String get enrollmentDashboardEntriesSubtitleWeek;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled this month'**
+  String get enrollmentDashboardEntriesSubtitleMonth;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled over school year {schoolYear}'**
+  String enrollmentDashboardEntriesSubtitleYear(String schoolYear);
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleSinceOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled since enrolment opened'**
+  String get enrollmentDashboardEntriesSubtitleSinceOpening;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled from {from} to {to}'**
+  String enrollmentDashboardEntriesSubtitleRange(String from, String to);
+
+  /// No description provided for @enrollmentDashboardEntriesColumnHour.
   ///
   /// In en, this message translates to:
   /// **'Time'**
-  String get enrollmentDashboardDayListColumnHour;
+  String get enrollmentDashboardEntriesColumnHour;
 
-  /// No description provided for @enrollmentDashboardDayListColumnStudent.
+  /// No description provided for @enrollmentDashboardEntriesColumnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get enrollmentDashboardEntriesColumnDate;
+
+  /// No description provided for @enrollmentDashboardEntriesColumnStudent.
   ///
   /// In en, this message translates to:
   /// **'Student'**
-  String get enrollmentDashboardDayListColumnStudent;
+  String get enrollmentDashboardEntriesColumnStudent;
 
-  /// No description provided for @enrollmentDashboardDayListColumnLevel.
+  /// No description provided for @enrollmentDashboardEntriesColumnLevel.
   ///
   /// In en, this message translates to:
   /// **'Level'**
-  String get enrollmentDashboardDayListColumnLevel;
+  String get enrollmentDashboardEntriesColumnLevel;
 
-  /// No description provided for @enrollmentDashboardDayListColumnType.
+  /// No description provided for @enrollmentDashboardEntriesColumnType.
   ///
   /// In en, this message translates to:
   /// **'Type'**
-  String get enrollmentDashboardDayListColumnType;
+  String get enrollmentDashboardEntriesColumnType;
 
-  /// No description provided for @enrollmentDashboardDayListColumnRecordedBy.
+  /// No description provided for @enrollmentDashboardEntriesColumnRecordedBy.
   ///
   /// In en, this message translates to:
   /// **'Recorded by'**
-  String get enrollmentDashboardDayListColumnRecordedBy;
+  String get enrollmentDashboardEntriesColumnRecordedBy;
 
-  /// No description provided for @enrollmentDashboardDayListUnit.
+  /// No description provided for @enrollmentDashboardEntriesUnit.
   ///
   /// In en, this message translates to:
   /// **'enrolment'**
-  String get enrollmentDashboardDayListUnit;
+  String get enrollmentDashboardEntriesUnit;
 
-  /// No description provided for @enrollmentDashboardDayListCount.
+  /// No description provided for @enrollmentDashboardEntriesCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 enrolment} other{{count} enrolments}}'**
-  String enrollmentDashboardDayListCount(int count);
+  String enrollmentDashboardEntriesCount(int count);
 
-  /// No description provided for @enrollmentDashboardDayListUnknownAgent.
+  /// No description provided for @enrollmentDashboardEntriesUnknownAgent.
   ///
   /// In en, this message translates to:
   /// **'—'**
-  String get enrollmentDashboardDayListUnknownAgent;
+  String get enrollmentDashboardEntriesUnknownAgent;
 
-  /// No description provided for @enrollmentDashboardDayListNoHour.
+  /// No description provided for @enrollmentDashboardEntriesNoHour.
   ///
   /// In en, this message translates to:
   /// **'—'**
-  String get enrollmentDashboardDayListNoHour;
+  String get enrollmentDashboardEntriesNoHour;
 
-  /// No description provided for @enrollmentDashboardDayListLoading.
+  /// No description provided for @enrollmentDashboardEntriesLoading.
   ///
   /// In en, this message translates to:
-  /// **'Loading the day\'s list'**
-  String get enrollmentDashboardDayListLoading;
+  /// **'Loading the list of enrolled students'**
+  String get enrollmentDashboardEntriesLoading;
 
-  /// No description provided for @enrollmentDashboardDayListEmpty.
+  /// No description provided for @enrollmentDashboardEntriesEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No enrolment recorded on that day.'**
-  String get enrollmentDashboardDayListEmpty;
+  /// **'No enrolment recorded over this period.'**
+  String get enrollmentDashboardEntriesEmpty;
 
-  /// No description provided for @enrollmentDashboardDayListForbidden.
+  /// No description provided for @enrollmentDashboardEntriesForbidden.
   ///
   /// In en, this message translates to:
   /// **'You are not allowed to view the named list. Analytics remain available.'**
-  String get enrollmentDashboardDayListForbidden;
+  String get enrollmentDashboardEntriesForbidden;
 
-  /// No description provided for @enrollmentDashboardDayListError.
+  /// No description provided for @enrollmentDashboardEntriesError.
   ///
   /// In en, this message translates to:
-  /// **'The day\'s list could not be loaded.'**
-  String get enrollmentDashboardDayListError;
-
-  /// No description provided for @enrollmentDashboardDayListRowA11y.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}, {gender}, {level}, {type}'**
-  String enrollmentDashboardDayListRowA11y(
-    String name,
-    String gender,
-    String level,
-    String type,
-  );
+  /// **'The list of enrolled students could not be loaded.'**
+  String get enrollmentDashboardEntriesError;
 
   /// No description provided for @enrollmentDashboardExportPdf.
   ///
@@ -14897,39 +14922,11 @@ abstract class AppLocalizations {
   /// **'PDF'**
   String get enrollmentDashboardExportPdf;
 
-  /// No description provided for @enrollmentDashboardExportCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV'**
-  String get enrollmentDashboardExportCsv;
-
   /// No description provided for @enrollmentDashboardExportPdfTooltip.
   ///
   /// In en, this message translates to:
   /// **'Export the breakdown by level as PDF'**
   String get enrollmentDashboardExportPdfTooltip;
-
-  /// No description provided for @enrollmentDashboardExportCsvTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy the day\'s list as CSV'**
-  String get enrollmentDashboardExportCsvTooltip;
-
-  /// No description provided for @enrollmentDashboardDayPdfSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'School year {schoolYear} · {day}'**
-  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day);
-
-  /// No description provided for @enrollmentDashboardDayPdfFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}'**
-  String enrollmentDashboardDayPdfFooter(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-  );
 
   /// No description provided for @enrollmentDashboardPdfOvertitle.
   ///
@@ -14982,42 +14979,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The PDF export did not complete. Try again.'**
   String get enrollmentDashboardPdfFailed;
-
-  /// No description provided for @enrollmentDashboardCsvColumnLastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last name'**
-  String get enrollmentDashboardCsvColumnLastName;
-
-  /// No description provided for @enrollmentDashboardCsvColumnFirstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First name'**
-  String get enrollmentDashboardCsvColumnFirstName;
-
-  /// No description provided for @enrollmentDashboardCsvColumnGender.
-  ///
-  /// In en, this message translates to:
-  /// **'Sex'**
-  String get enrollmentDashboardCsvColumnGender;
-
-  /// No description provided for @enrollmentDashboardCsvColumnStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get enrollmentDashboardCsvColumnStatus;
-
-  /// No description provided for @enrollmentDashboardCsvCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Day list copied as CSV ({fileName})'**
-  String enrollmentDashboardCsvCopied(String fileName);
-
-  /// No description provided for @enrollmentDashboardCsvFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Copying the list did not complete. Try again.'**
-  String get enrollmentDashboardCsvFailed;
 
   /// No description provided for @recouvrementFeePickerLabel.
   ///

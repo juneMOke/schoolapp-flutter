@@ -103,10 +103,11 @@ class EnrollmentStatsWindow extends Equatable {
 
   /// Vrai quand la fenêtre couvre **une seule journée**.
   ///
-  /// C'est la condition de la liste nominative — et elle est vraie pour une
-  /// fenêtre libre dont les deux bornes tombent le même jour, pas seulement
-  /// pour l'onglet « Aujourd'hui ». La borne haute étant incluse, `from == to`
-  /// cadre bien un jour.
+  /// C'est elle qui fait dire « du jour » aux sous-titres, et « Heure » plutôt
+  /// que « Date » à la première colonne de la liste nominative — et elle est
+  /// vraie pour une fenêtre libre dont les deux bornes tombent le même jour,
+  /// pas seulement pour l'onglet « Aujourd'hui ». La borne haute étant
+  /// incluse, `from == to` cadre bien un jour.
   bool get isSingleDay =>
       kind == EnrollmentStatsWindowKind.day ||
       (kind == EnrollmentStatsWindowKind.custom && from == to);

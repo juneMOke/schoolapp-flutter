@@ -298,35 +298,44 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<DayEntriesPageModel> getDayEntries(
+  Future<EnrollmentEntriesPageModel> getEntries(
     Map<String, dynamic> extras,
-    String date,
+    String period,
+    String? date,
+    String? from,
+    String? to,
     int page,
     int size,
+    String sort,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
+      r'period': period,
       r'date': date,
+      r'from': from,
+      r'to': to,
       r'page': page,
       r'size': size,
+      r'sort': sort,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<DayEntriesPageModel>(
+    final _options = _setStreamType<EnrollmentEntriesPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment-stats/day-entries',
+            '/api/v1/enrollment-stats/entries',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late DayEntriesPageModel _value;
+    late EnrollmentEntriesPageModel _value;
     try {
-      _value = DayEntriesPageModel.fromJson(_result.data!);
+      _value = EnrollmentEntriesPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
