@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_entries_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entries_report_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entry_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -20,6 +21,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// période libre — et pagine à huit lignes quelle que soit la largeur de la
 /// fenêtre : le serveur refuse les grandes pages, parce que ce qui protège une
 /// liste de noms est la taille de page, pas l'étroitesse de la fenêtre.
+/// L'exhaustif s'emporte en PDF, composé par le serveur sur la même fenêtre et
+/// dans le même ordre.
 ///
 /// ## L'heure sur un jour, la date au-delà
 ///
@@ -55,6 +58,15 @@ class EnrollmentEntriesSection extends StatelessWidget {
         return EteeloStatsCard(
           title: l10n.enrollmentDashboardEntriesTitle,
           subtitle: window == null ? null : _subtitleOf(context, l10n, window),
+          // Le PDF s'offre dès que la fenêtre a des lignes, et reste en place
+          // pendant qu'une autre page charge : le document ne dépend pas de la
+          // page affichée. Pas en erreur — il n'y aurait rien qu'on ait lu.
+          actions:
+              window != null &&
+                  state.totalElements > 0 &&
+                  state.status != EnrollmentEntriesStatus.error
+              ? [EnrollmentEntriesReportButton(window: window)]
+              : const [],
           child: _body(context, l10n, state),
         );
       },

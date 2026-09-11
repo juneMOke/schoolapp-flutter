@@ -9,9 +9,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// La sortie **composée sur l'appareil** — le classement par niveau — et ce
 /// qu'elle fait quand elle échoue.
 ///
-/// Des comptes, pas des noms. La liste nominative n'a plus de sortie composée
-/// ici : son PDF et son CSV ne portaient que la page à l'écran — huit lignes,
-/// sur une fenêtre qui peut désormais couvrir l'année.
+/// Des comptes, pas des noms : rien qui justifie un aller-retour serveur. La
+/// liste nominative, elle, s'imprime depuis le serveur
+/// (`EnrollmentEntriesReportButton`) : un registre de **toute** la fenêtre,
+/// pas la seule page à l'écran.
 ///
 /// ## Un échec se dit, il ne se tait pas
 ///

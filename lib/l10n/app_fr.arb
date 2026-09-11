@@ -5972,6 +5972,33 @@
   "enrollmentDashboardEntriesEmpty": "Aucune inscription enregistrée sur cette période.",
   "enrollmentDashboardEntriesForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
   "enrollmentDashboardEntriesError": "La liste des inscrits n'a pas pu être chargée.",
+  "enrollmentDashboardEntriesReportTooltip": "Télécharger la liste des inscrits de la période en PDF",
+  "enrollmentDashboardEntriesReportPreparing": "Préparation…",
+  "enrollmentDashboardEntriesReportWaiting": "Patientez…",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans 1 seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "@enrollmentDashboardEntriesReportBusy": {
+    "description": "Le 429 du serveur : il ne compose qu'un document long à la fois, file partagée avec la caisse et la relance. La phrase n'accuse pas l'utilisateur — le rendu en cours peut être celui de quelqu'un d'autre.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesReportForbidden": "La liste nominative demande le droit de lecture des inscriptions.",
+  "enrollmentDashboardEntriesReportTooLarge": "Cette période compte {lines} inscriptions ; le document est plafonné à {cap}. Resserrez la période.",
+  "@enrollmentDashboardEntriesReportTooLarge": {
+    "description": "Le refus de plafond, écrit AVEC NOS MOTS et SES CHIFFRES : reconnu au `detailCode` REPORT_LINE_CAP, les deux nombres lus dans `details`. Aucune issue CSV n'est proposée — la liste nominative des inscriptions n'a pas d'export.",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesReportFailed": "Le document n'a pas pu être produit.",
+  "enrollmentDashboardEntriesReportHandoffFailed": "Le document est prêt, mais l'impression n'a pas pu s'ouvrir.",
   "enrollmentDashboardExportPdf": "PDF",
   "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",

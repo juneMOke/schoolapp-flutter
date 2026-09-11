@@ -338,6 +338,11 @@ class AppDimensions {
   /// décorative : « le choix de la période est l'action la plus fréquente de
   /// l'écran, il ne doit jamais être confondu avec un filtre secondaire ».
   static const enrollmentDashboardTabMinHeight = 44.0;
+
+  /// Trait de l'indicateur qui remplace l'icône d'un bouton d'export pendant
+  /// que le serveur compose — fin, pour tenir dans la case d'une icône de
+  /// 16 dp.
+  static const enrollmentDashboardExportSpinnerStroke = 2.0;
   static const enrollmentDashboardTabsPadding = 6.0;
   static const enrollmentDashboardTabsRadius = 14.0;
   static const enrollmentDashboardTabRadius = 10.0;

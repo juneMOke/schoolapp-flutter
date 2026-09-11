@@ -9300,6 +9300,45 @@ class AppLocalizationsEn extends AppLocalizations {
       'The list of enrolled students could not be loaded.';
 
   @override
+  String get enrollmentDashboardEntriesReportTooltip =>
+      'Download the period\'s list of enrolled students as PDF';
+
+  @override
+  String get enrollmentDashboardEntriesReportPreparing => 'Preparing…';
+
+  @override
+  String get enrollmentDashboardEntriesReportWaiting => 'Please wait…';
+
+  @override
+  String enrollmentDashboardEntriesReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'A document is already being prepared. Try again in $seconds seconds.',
+      one: 'A document is already being prepared. Try again in 1 second.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportForbidden =>
+      'The named list requires the enrolment-read permission.';
+
+  @override
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap) {
+    return 'This period holds $lines enrolments; the document is capped at $cap. Narrow the period.';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportFailed =>
+      'The document could not be produced.';
+
+  @override
+  String get enrollmentDashboardEntriesReportHandoffFailed =>
+      'The document is ready, but printing could not be opened.';
+
+  @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override

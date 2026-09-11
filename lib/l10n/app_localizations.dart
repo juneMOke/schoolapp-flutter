@@ -14916,6 +14916,54 @@ abstract class AppLocalizations {
   /// **'The list of enrolled students could not be loaded.'**
   String get enrollmentDashboardEntriesError;
 
+  /// No description provided for @enrollmentDashboardEntriesReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the period\'s list of enrolled students as PDF'**
+  String get enrollmentDashboardEntriesReportTooltip;
+
+  /// No description provided for @enrollmentDashboardEntriesReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get enrollmentDashboardEntriesReportPreparing;
+
+  /// No description provided for @enrollmentDashboardEntriesReportWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get enrollmentDashboardEntriesReportWaiting;
+
+  /// No description provided for @enrollmentDashboardEntriesReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, one{A document is already being prepared. Try again in 1 second.} other{A document is already being prepared. Try again in {seconds} seconds.}}'**
+  String enrollmentDashboardEntriesReportBusy(int seconds);
+
+  /// No description provided for @enrollmentDashboardEntriesReportForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The named list requires the enrolment-read permission.'**
+  String get enrollmentDashboardEntriesReportForbidden;
+
+  /// No description provided for @enrollmentDashboardEntriesReportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This period holds {lines} enrolments; the document is capped at {cap}. Narrow the period.'**
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap);
+
+  /// No description provided for @enrollmentDashboardEntriesReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be produced.'**
+  String get enrollmentDashboardEntriesReportFailed;
+
+  /// No description provided for @enrollmentDashboardEntriesReportHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is ready, but printing could not be opened.'**
+  String get enrollmentDashboardEntriesReportHandoffFailed;
+
   /// No description provided for @enrollmentDashboardExportPdf.
   ///
   /// In en, this message translates to:

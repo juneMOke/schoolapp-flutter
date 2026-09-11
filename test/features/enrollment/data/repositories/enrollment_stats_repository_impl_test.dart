@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:retrofit/retrofit.dart' show HttpResponse;
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/enrollment_entries_page_model.dart';
@@ -85,6 +89,8 @@ final tResponseModel = EnrollmentStatsResponseModel(
 void main() {
   late MockEnrollmentRemoteDataSource mockRemoteDataSource;
   late EnrollmentStatsRepositoryImpl repository;
+
+  setUpAll(() => registerFallbackValue(Options()));
 
   setUp(() {
     mockRemoteDataSource = MockEnrollmentRemoteDataSource();
@@ -298,6 +304,121 @@ void main() {
       );
 
       expect(result, const Left<Failure, dynamic>(failure));
+    });
+  });
+
+  group('getEntriesReport — le registre PDF', () {
+    HttpResponse<Uint8List> response({
+      String contentType = 'application/pdf',
+      String? disposition,
+    }) {
+      final data = Uint8List.fromList(const [0x25, 0x50, 0x44, 0x46, 0x2D]);
+      return HttpResponse<Uint8List>(
+        data,
+        Response<Uint8List>(
+          requestOptions: RequestOptions(
+            path: '/api/v1/enrollment-stats/entries.pdf',
+          ),
+          statusCode: 200,
+          headers: Headers.fromMap(<String, List<String>>{
+            Headers.contentTypeHeader: <String>[contentType],
+            if (disposition != null)
+              'content-disposition': <String>[disposition],
+          }),
+          data: data,
+        ),
+      );
+    }
+
+    void stubReport(HttpResponse<Uint8List> answer) => when(
+      () => mockRemoteDataSource.getEntriesReport(
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+      ),
+    ).thenAnswer((_) async => answer);
+
+    test('même fenêtre et même ordre que la table, et un délai long', () async {
+      stubReport(
+        response(
+          disposition: 'attachment; filename="inscriptions-2025-2026.pdf"',
+        ),
+      );
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.year(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      // Le nom du serveur, tel quel : il porte le périmètre retenu.
+      expect(
+        result.getOrElse(() => throw StateError('attendu')).fileName,
+        'inscriptions-2025-2026.pdf',
+      );
+      // Tout est capturé : mocktail ne marie pas ici des valeurs littérales à
+      // un `captureAny()` sur les arguments positionnels.
+      final captured = verify(
+        () => mockRemoteDataSource.getEntriesReport(
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+        ),
+      ).captured;
+      expect(captured.sublist(0, 6), <Object?>[
+        tRequiredAuth,
+        'year',
+        null,
+        null,
+        null,
+        'oldest',
+      ]);
+      // Le délai de guichet ne suffit pas à composer une année.
+      expect(
+        (captured[6] as Options).receiveTimeout,
+        AppConstants.enrollmentEntriesReportTimeout,
+      );
+    });
+
+    test('un 200 qui n\'est pas un PDF est refusé, pas remis', () async {
+      stubReport(response(contentType: 'text/html'));
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.week(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      expect(result.fold((f) => f, (_) => null), isA<ServerFailure>());
+    });
+
+    test('un 403 reste un refus de droit', () async {
+      when(
+        () => mockRemoteDataSource.getEntriesReport(
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+        ),
+      ).thenThrow(
+        _dioException(error: const UnauthorizedFailure('Access forbidden')),
+      );
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.week(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      expect(result.fold((f) => f, (_) => null), isA<UnauthorizedFailure>());
     });
   });
 }

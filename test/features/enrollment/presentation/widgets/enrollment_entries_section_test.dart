@@ -7,11 +7,15 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_report_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entries_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockBloc extends MockBloc<EnrollmentEntriesEvent, EnrollmentEntriesState>
     implements EnrollmentEntriesBloc {}
+
+class _MockReportCubit extends MockCubit<EnrollmentEntriesReportState>
+    implements EnrollmentEntriesReportCubit {}
 
 DayEnrollmentEntry _entry({
   String id = 'e1',
@@ -49,6 +53,14 @@ Future<_MockBloc> _pump(
   );
   addTearDown(bloc.close);
 
+  final reportCubit = _MockReportCubit();
+  whenListen(
+    reportCubit,
+    const Stream<EnrollmentEntriesReportState>.empty(),
+    initialState: const EnrollmentEntriesReportState(),
+  );
+  addTearDown(reportCubit.close);
+
   await tester.pumpWidget(
     MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -62,8 +74,13 @@ Future<_MockBloc> _pump(
         body: SingleChildScrollView(
           child: SizedBox(
             width: 1000,
-            child: BlocProvider<EnrollmentEntriesBloc>.value(
-              value: bloc,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider<EnrollmentEntriesBloc>.value(value: bloc),
+                BlocProvider<EnrollmentEntriesReportCubit>.value(
+                  value: reportCubit,
+                ),
+              ],
               child: EnrollmentEntriesSection(schoolYear: schoolYear),
             ),
           ),
@@ -226,18 +243,31 @@ void main() {
     });
   });
 
-  testWidgets('plus de sortie locale : elle ne portait que la page visible', (
-    tester,
-  ) async {
-    // Sur une année, le CSV aurait copié huit lignes sur des centaines, sans
-    // rien qui le dise.
-    await _pump(
-      tester,
-      _loaded([_entry()], window: const EnrollmentStatsWindow.month()),
-    );
+  group('le registre PDF', () {
+    testWidgets('UN bouton PDF, et plus de CSV', (tester) async {
+      // Le CSV copiait la seule page visible : sur une année, huit lignes
+      // sur des centaines, sans rien qui le dise.
+      await _pump(
+        tester,
+        _loaded([_entry()], window: const EnrollmentStatsWindow.month()),
+      );
 
-    expect(find.text('CSV'), findsNothing);
-    expect(find.text('PDF'), findsNothing);
+      expect(find.text('PDF'), findsOneWidget);
+      expect(find.text('CSV'), findsNothing);
+    });
+
+    testWidgets('pas de PDF sur une carte en erreur', (tester) async {
+      await _pump(
+        tester,
+        const EnrollmentEntriesState(
+          status: EnrollmentEntriesStatus.error,
+          window: EnrollmentStatsWindow.week(),
+          failure: NetworkFailure('coupure'),
+        ),
+      );
+
+      expect(find.text('PDF'), findsNothing);
+    });
   });
 
   group('la pagination', () {

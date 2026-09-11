@@ -18,4 +18,11 @@ abstract class EnrollmentStatsRepository {
     required int size,
     required EnrollmentEntriesOrder order,
   });
+
+  /// Les mêmes inscriptions, en registre PDF — sans pagination, plafonné en
+  /// volume par le serveur.
+  Future<Either<Failure, EnrollmentEntriesReport>> getEntriesReport({
+    required EnrollmentStatsWindow window,
+    required EnrollmentEntriesOrder order,
+  });
 }

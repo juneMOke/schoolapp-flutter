@@ -1,4 +1,8 @@
-import 'package:dio/dio.dart';
+import 'dart:typed_data';
+
+// `Headers` est déclaré par dio ET par retrofit : ici c'est l'annotation
+// retrofit qu'on veut, celle de dio est masquée.
+import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_detail_model.dart';
@@ -119,5 +123,28 @@ abstract class EnrollmentRemoteDataSource {
     @Query('page') int page,
     @Query('size') int size,
     @Query('sort') String sort,
+  );
+
+  /// Le **registre PDF** des inscrits de la fenêtre — mêmes paramètres et
+  /// même ordre que [getEntries], sans pagination.
+  ///
+  /// Réponse **binaire** : les octets du document, et son nom dans
+  /// `Content-Disposition`, que le serveur dérive des bornes réellement
+  /// retenues. `HttpResponse` plutôt que les seuls octets, pour pouvoir lire
+  /// cet en-tête.
+  ///
+  /// [options] porte le délai de réception : un registre d'une année dépasse
+  /// le délai de guichet du client.
+  @GET(AppConstants.enrollmentEntriesReportEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getEntriesReport(
+    @Extras() Map<String, dynamic> extras,
+    @Query('period') String period,
+    @Query('date') String? date,
+    @Query('from') String? from,
+    @Query('to') String? to,
+    @Query('sort') String sort,
+    @DioOptions() Options options,
   );
 }

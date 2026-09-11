@@ -9382,6 +9382,45 @@ class AppLocalizationsFr extends AppLocalizations {
       'La liste des inscrits n\'a pas pu être chargée.';
 
   @override
+  String get enrollmentDashboardEntriesReportTooltip =>
+      'Télécharger la liste des inscrits de la période en PDF';
+
+  @override
+  String get enrollmentDashboardEntriesReportPreparing => 'Préparation…';
+
+  @override
+  String get enrollmentDashboardEntriesReportWaiting => 'Patientez…';
+
+  @override
+  String enrollmentDashboardEntriesReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'Un document est déjà en préparation. Réessayez dans $seconds secondes.',
+      one: 'Un document est déjà en préparation. Réessayez dans 1 seconde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportForbidden =>
+      'La liste nominative demande le droit de lecture des inscriptions.';
+
+  @override
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap) {
+    return 'Cette période compte $lines inscriptions ; le document est plafonné à $cap. Resserrez la période.';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportFailed =>
+      'Le document n\'a pas pu être produit.';
+
+  @override
+  String get enrollmentDashboardEntriesReportHandoffFailed =>
+      'Le document est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
+
+  @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override

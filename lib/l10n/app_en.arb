@@ -5897,6 +5897,31 @@
   "enrollmentDashboardEntriesEmpty": "No enrolment recorded over this period.",
   "enrollmentDashboardEntriesForbidden": "You are not allowed to view the named list. Analytics remain available.",
   "enrollmentDashboardEntriesError": "The list of enrolled students could not be loaded.",
+  "enrollmentDashboardEntriesReportTooltip": "Download the period's list of enrolled students as PDF",
+  "enrollmentDashboardEntriesReportPreparing": "Preparing…",
+  "enrollmentDashboardEntriesReportWaiting": "Please wait…",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{A document is already being prepared. Try again in 1 second.} other{A document is already being prepared. Try again in {seconds} seconds.}}",
+  "@enrollmentDashboardEntriesReportBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesReportForbidden": "The named list requires the enrolment-read permission.",
+  "enrollmentDashboardEntriesReportTooLarge": "This period holds {lines} enrolments; the document is capped at {cap}. Narrow the period.",
+  "@enrollmentDashboardEntriesReportTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesReportFailed": "The document could not be produced.",
+  "enrollmentDashboardEntriesReportHandoffFailed": "The document is ready, but printing could not be opened.",
   "enrollmentDashboardExportPdf": "PDF",
   "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Enrolments",

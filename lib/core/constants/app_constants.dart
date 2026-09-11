@@ -66,6 +66,38 @@ class AppConstants {
   static const String enrollmentEntriesEndpoint =
       '/api/v1/enrollment-stats/entries';
 
+  /// Le **registre des inscrits** de la fenêtre, en PDF paginé et scellé.
+  ///
+  /// ⚠️ **Pièce numérotée mais NON archivée** : le serveur n'en garde pas les
+  /// octets, et la redemander en produit une nouvelle sous un nouveau numéro.
+  /// Rien à mettre en cache.
+  ///
+  /// ⚠️ **Plafonnée à 5 000 lignes**, refusée en 400 `REPORT_LINE_CAP`
+  /// au-delà plutôt que tronquée — le refus porte le compte réel. Aucune issue
+  /// CSV : la liste nominative des inscriptions n'a pas d'export.
+  ///
+  /// ⚠️ **Un rendu long à la fois côté serveur**, file partagée avec la caisse
+  /// et la relance : un second appel concurrent part en 429.
+  static const String enrollmentEntriesReportEndpoint =
+      '/api/v1/enrollment-stats/entries.pdf';
+
+  /// Délai de réception du registre PDF.
+  ///
+  /// Le délai de guichet du client ne suffit pas : composer une année prend
+  /// plusieurs secondes, et une expiration côté client laisserait le serveur
+  /// finir pour rien.
+  static const Duration enrollmentEntriesReportTimeout = Duration(seconds: 60);
+
+  /// L'attente retenue quand un 429 du registre n'annonce pas la sienne —
+  /// celle que le serveur pose en `Retry-After`.
+  ///
+  /// Dictée par le protocole, pas par la motion : c'est pourquoi elle vit ici
+  /// et non avec les jetons d'animation (cf.
+  /// [financeTillReportRetryFallback]).
+  static const Duration enrollmentEntriesReportRetryFallback = Duration(
+    seconds: 60,
+  );
+
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =
       '/api/v1/classrooms/{classroomId}/members';
