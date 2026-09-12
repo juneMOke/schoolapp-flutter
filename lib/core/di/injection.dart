@@ -125,7 +125,6 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
@@ -970,8 +969,6 @@ Future<void> configureDependencies({
     () => RecouvrementDashboardBloc(
       getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
       getPositions: getIt<GetRecoveryPositionsUseCase>(),
-      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
-      getRosters: getIt<GetComposedRostersUseCase>(),
       searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
   );

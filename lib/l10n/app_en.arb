@@ -2481,33 +2481,87 @@
   "feeControlEmptyNoEnrollmentForLevel": "No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.",
   "feeControlNoChargeForLevelDescription": "No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.",
   "feeControlDashboardCycleAll": "All cycles",
-  "feeControlDashboardRankingTitle": "Where each level stands",
-  "feeControlDashboardRankingHint": "The levels furthest behind come first.",
-  "feeControlDashboardGroupTally": "{settled} of {total}",
-  "@feeControlDashboardGroupTally": {
+  "recouvrementCyclesTitle": "Where each level stands",
+  "recouvrementCyclesHint": "By cycle, in the school's order. Open a cycle to see its levels.",
+  "recouvrementCycleUnplaced": "Not linked to a cycle",
+  "@recouvrementCycleUnplaced": {
+    "description": "Last group of “Where each level stands”: charges without a level, or on a level this device's reference data does not know."
+  },
+  "recouvrementCycleExpand": "Show the levels of this cycle",
+  "recouvrementCycleCollapse": "Hide the levels",
+  "recouvrementCountSettled": "{count} fully paid",
+  "@recouvrementCountSettled": {
+    "description": "Green part of the three-colour bar: students who paid the selected fees in full.",
     "placeholders": {
-      "settled": {
-        "type": "int"
-      },
-      "total": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "feeControlDashboardGroupA11y": "{level}: {percent}% settled, {settled} of {total} students concerned",
-  "@feeControlDashboardGroupA11y": {
+  "recouvrementCountPartial": "{count} partly paid",
+  "@recouvrementCountPartial": {
+    "description": "Yellow part of the three-colour bar: students who paid part of the selected fees.",
     "placeholders": {
-      "level": {
-        "type": "String"
-      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountNone": "{count} paid nothing",
+  "@recouvrementCountNone": {
+    "description": "Red part of the three-colour bar: students who paid nothing on the selected fees.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountTotal": "{count, plural, one{{count} student} other{{count} students}}",
+  "@recouvrementCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSettledPercent": "{percent}%",
+  "@recouvrementSettledPercent": {
+    "description": "Share of students who paid in full, at the end of the cycle or level name.",
+    "placeholders": {
       "percent": {
         "type": "int"
+      }
+    }
+  },
+  "recouvrementBreakdownA11y": "{name}: {settled} of {total} students paid in full ({percent}%), {partial} partly, {none} nothing",
+  "@recouvrementBreakdownA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       },
       "settled": {
         "type": "int"
       },
       "total": {
         "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "partial": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementLevelView": "View details: {level}",
+  "@recouvrementLevelView": {
+    "description": "Tooltip of a level row's eye: opens the per-student control on that level.",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
     }
   },
@@ -2517,13 +2571,6 @@
   "feeControlDashboardNoFeesDescription": "No charge exists on this device for this year. Sync, then reopen the dashboard.",
   "feeControlDashboardEmptyTitle": "No student concerned",
   "feeControlDashboardEmptyDescription": "Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.",
-  "feeControlDashboardExpand": "Show the classes of this level",
-  "feeControlDashboardCollapse": "Hide the classes",
-  "feeControlDashboardUnassigned": "Unassigned",
-  "feeControlDashboardClassesLoading": "Loading this level’s classes…",
-  "feeControlDashboardClassroomsMissing": "The class composition for this level has not reached this device. Sync, then reopen the level.",
-  "feeControlDashboardClassroomsWithheld": "Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.",
-  "feeControlDashboardClassesFailed": "The classes of this level could not be read on this device.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} enrolled student does not carry this fee} other{{count} enrolled students do not carry this fee}}",
   "@feeControlDashboardUnbilled": {
     "placeholders": {
@@ -2540,7 +2587,6 @@
       }
     }
   },
-  "feeControlDashboardOpenControl": "View students",
   "feeControlCriteriaFee": "Fee: {label}",
   "@feeControlCriteriaFee": {
     "description": "Criteria chip recalling the controlled fee.",

@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fe
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_rates_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_key_figures_band.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_ranking_section.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_cycles_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_insights_section.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_controls.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_section.dart';
@@ -324,13 +324,9 @@ class _Body extends StatelessWidget {
               ),
             const RecouvrementKeyFiguresBand(),
             RecouvrementFeeRatesSection(groups: state.rates),
-            RecouvrementRankingSection(
-              labels: labels,
-              academicYearId: academicYearId,
-              // Sans filtre de cycle, deux « 1ère année » de cycles différents
-              // deviendraient indiscernables dans le classement.
-              showCycleInLabels: cycleId == null,
-            ),
+            // Chaque niveau se lit sous son cycle : plus besoin du préfixe qui
+            // départageait deux « 1ère année » dans l'ancien classement à plat.
+            RecouvrementCyclesSection(labels: labels),
             RecouvrementSimulationSection(
               labels: labels,
               showCycleInLabels: cycleId == null,

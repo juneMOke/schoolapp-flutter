@@ -2426,33 +2426,87 @@
   "feeControlEmptyNoEnrollmentForLevel": "Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d'être saisies ailleurs, synchronisez puis relancez le contrôle.",
   "feeControlNoChargeForLevelDescription": "Aucun élève de ce niveau ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne leur est pas applicable.",
   "feeControlDashboardCycleAll": "Tous les cycles",
-  "feeControlDashboardRankingTitle": "Où en est chaque niveau",
-  "feeControlDashboardRankingHint": "Les niveaux les plus en retard d'abord.",
-  "feeControlDashboardGroupTally": "{settled} sur {total}",
-  "@feeControlDashboardGroupTally": {
+  "recouvrementCyclesTitle": "Où en est chaque niveau",
+  "recouvrementCyclesHint": "Par cycle, dans l'ordre de l'école. Ouvrez un cycle pour voir ses niveaux.",
+  "recouvrementCycleUnplaced": "Non rattachés à un cycle",
+  "@recouvrementCycleUnplaced": {
+    "description": "Dernier groupe de « Où en est chaque niveau » : les créances sans niveau, ou d'un niveau que le référentiel de l'appareil ne connaît pas."
+  },
+  "recouvrementCycleExpand": "Voir les niveaux de ce cycle",
+  "recouvrementCycleCollapse": "Masquer les niveaux",
+  "recouvrementCountSettled": "{count} tout payé",
+  "@recouvrementCountSettled": {
+    "description": "Part verte de la barre tricolore : élèves qui ont tout payé sur les frais retenus.",
     "placeholders": {
-      "settled": {
-        "type": "int"
-      },
-      "total": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "feeControlDashboardGroupA11y": "{level} : {percent} % en ordre, {settled} sur {total} élèves concernés",
-  "@feeControlDashboardGroupA11y": {
+  "recouvrementCountPartial": "{count} partiellement",
+  "@recouvrementCountPartial": {
+    "description": "Part jaune de la barre tricolore : élèves qui ont payé une partie des frais retenus.",
     "placeholders": {
-      "level": {
-        "type": "String"
-      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountNone": "{count} rien payé",
+  "@recouvrementCountNone": {
+    "description": "Part rouge de la barre tricolore : élèves qui n'ont rien payé sur les frais retenus.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountTotal": "{count, plural, one{{count} élève} other{{count} élèves}}",
+  "@recouvrementCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSettledPercent": "{percent} %",
+  "@recouvrementSettledPercent": {
+    "description": "Part des élèves qui ont tout payé, au bout du nom du cycle ou du niveau.",
+    "placeholders": {
       "percent": {
         "type": "int"
+      }
+    }
+  },
+  "recouvrementBreakdownA11y": "{name} : {settled} sur {total} élèves ont tout payé ({percent} %), {partial} en partie, {none} rien",
+  "@recouvrementBreakdownA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       },
       "settled": {
         "type": "int"
       },
       "total": {
         "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "partial": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementLevelView": "Voir le détail : {level}",
+  "@recouvrementLevelView": {
+    "description": "Infobulle de l'œil d'une ligne de niveau : ouvre le contrôle nominatif sur ce niveau.",
+    "placeholders": {
+      "level": {
+        "type": "String"
       }
     }
   },
@@ -2462,13 +2516,6 @@
   "feeControlDashboardNoFeesDescription": "Aucune créance n'existe sur cet appareil pour cette année. Synchronisez, puis rouvrez le tableau de bord.",
   "feeControlDashboardEmptyTitle": "Aucun élève concerné",
   "feeControlDashboardEmptyDescription": "Personne ne porte ce frais dans ce périmètre : il n'a pas encore été généré, ou il ne s'applique pas ici.",
-  "feeControlDashboardExpand": "Voir les classes de ce niveau",
-  "feeControlDashboardCollapse": "Masquer les classes",
-  "feeControlDashboardUnassigned": "Non répartis",
-  "feeControlDashboardClassesLoading": "Chargement des classes de ce niveau…",
-  "feeControlDashboardClassroomsMissing": "La composition des classes de ce niveau n'est pas descendue sur cet appareil. Synchronisez, puis rouvrez le niveau.",
-  "feeControlDashboardClassroomsWithheld": "La composition des classes relève d'un module auquel ce profil n'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.",
-  "feeControlDashboardClassesFailed": "Les classes de ce niveau n'ont pas pu être lues sur cet appareil.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} élève inscrit ne porte pas ce frais} other{{count} élèves inscrits ne portent pas ce frais}}",
   "@feeControlDashboardUnbilled": {
     "placeholders": {
@@ -2485,7 +2532,6 @@
       }
     }
   },
-  "feeControlDashboardOpenControl": "Voir les élèves",
   "feeControlCriteriaFee": "Frais : {label}",
   "@feeControlCriteriaFee": {
     "description": "Puce de critère rappelant le frais contrôlé.",

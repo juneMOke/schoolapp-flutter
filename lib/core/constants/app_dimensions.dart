@@ -228,6 +228,21 @@ class AppDimensions {
   static const recouvrementRateBarHeight = 20.0;
   static const recouvrementRateBarRadius = 5.0;
 
+  // « Où en est chaque niveau » : barre tricolore d'un cycle (10) et, plus
+  // fine, de ses niveaux (6). Un liseré de 2 sépare les parts, pour qu'elles se
+  // distinguent aussi sans la couleur.
+  static const recouvrementTriBarHeight = 10.0;
+  static const recouvrementTriBarDenseHeight = 6.0;
+  static const recouvrementTriBarRadius = 5.0;
+  static const recouvrementTriBarGap = 2.0;
+  static const recouvrementCountDot = 8.0;
+  static const recouvrementChevronSize = 20.0;
+  // Les niveaux se décalent du chevron de leur cycle et de son interligne :
+  // leurs noms s'alignent sur celui du cycle.
+  static const recouvrementLevelIndent = 24.0;
+  static const recouvrementViewButtonSize = 36.0;
+  static const recouvrementViewIconSize = 18.0;
+
   // Simulation de renvoi (spec §6).
   static const recouvrementCriterionFieldWidth = 260.0;
   static const recouvrementThresholdFieldWidth = 190.0;

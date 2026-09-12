@@ -3667,25 +3667,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feeControlDashboardCycleAll => 'All cycles';
 
   @override
-  String get feeControlDashboardRankingTitle => 'Where each level stands';
+  String get recouvrementCyclesTitle => 'Where each level stands';
 
   @override
-  String get feeControlDashboardRankingHint =>
-      'The levels furthest behind come first.';
+  String get recouvrementCyclesHint =>
+      'By cycle, in the school\'s order. Open a cycle to see its levels.';
 
   @override
-  String feeControlDashboardGroupTally(int settled, int total) {
-    return '$settled of $total';
+  String get recouvrementCycleUnplaced => 'Not linked to a cycle';
+
+  @override
+  String get recouvrementCycleExpand => 'Show the levels of this cycle';
+
+  @override
+  String get recouvrementCycleCollapse => 'Hide the levels';
+
+  @override
+  String recouvrementCountSettled(int count) {
+    return '$count fully paid';
   }
 
   @override
-  String feeControlDashboardGroupA11y(
-    String level,
-    int percent,
+  String recouvrementCountPartial(int count) {
+    return '$count partly paid';
+  }
+
+  @override
+  String recouvrementCountNone(int count) {
+    return '$count paid nothing';
+  }
+
+  @override
+  String recouvrementCountTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recouvrementSettledPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String recouvrementBreakdownA11y(
+    String name,
     int settled,
     int total,
+    int percent,
+    int partial,
+    int none,
   ) {
-    return '$level: $percent% settled, $settled of $total students concerned';
+    return '$name: $settled of $total students paid in full ($percent%), $partial partly, $none nothing';
+  }
+
+  @override
+  String recouvrementLevelView(String level) {
+    return 'View details: $level';
   }
 
   @override
@@ -3710,31 +3752,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.';
 
   @override
-  String get feeControlDashboardExpand => 'Show the classes of this level';
-
-  @override
-  String get feeControlDashboardCollapse => 'Hide the classes';
-
-  @override
-  String get feeControlDashboardUnassigned => 'Unassigned';
-
-  @override
-  String get feeControlDashboardClassesLoading =>
-      'Loading this level’s classes…';
-
-  @override
-  String get feeControlDashboardClassroomsMissing =>
-      'The class composition for this level has not reached this device. Sync, then reopen the level.';
-
-  @override
-  String get feeControlDashboardClassroomsWithheld =>
-      'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.';
-
-  @override
-  String get feeControlDashboardClassesFailed =>
-      'The classes of this level could not be read on this device.';
-
-  @override
   String feeControlDashboardUnbilled(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3749,9 +3766,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String feeControlDashboardRemaining(String amounts) {
     return 'Left to collect: $amounts';
   }
-
-  @override
-  String get feeControlDashboardOpenControl => 'View students';
 
   @override
   String feeControlCriteriaFee(String label) {

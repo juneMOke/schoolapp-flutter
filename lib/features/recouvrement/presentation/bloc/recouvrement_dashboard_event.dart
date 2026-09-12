@@ -48,24 +48,3 @@ class RecouvrementRequested extends RecouvrementDashboardEvent {
 class RecouvrementRefreshRequested extends RecouvrementDashboardEvent {
   const RecouvrementRefreshRequested();
 }
-
-/// Déplie un niveau en ses classes, ou le replie s'il l'était déjà.
-///
-/// Un seul niveau reste ouvert à la fois : on déplie celui qui décroche pour
-/// voir laquelle de ses classes le tire, et cette question ne se pose pas sur
-/// deux niveaux en même temps.
-class RecouvrementGroupToggled extends RecouvrementDashboardEvent {
-  final String academicYearId;
-
-  /// `null` — le groupe « niveau non renseigné » — n'est pas dépliable : sans
-  /// niveau, il n'y a pas de classe où chercher.
-  final String? schoolLevelId;
-
-  const RecouvrementGroupToggled({
-    required this.academicYearId,
-    required this.schoolLevelId,
-  });
-
-  @override
-  List<Object?> get props => [academicYearId, schoolLevelId];
-}

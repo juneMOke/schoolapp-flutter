@@ -160,6 +160,17 @@ Le classement par niveau, le dépliage en classes, la bande de synthèse et le
 passage vers l'écran nominatif (`FeeControlIntent`) sont **repris**, pas
 réécrits. Ce qui change : ils portent une sélection de frais au lieu d'un seul.
 
+> **Amendé le 2026-09-12 (demande du user).** « Où en est chaque niveau » ne
+> classe plus à plat : les niveaux se rangent **sous leur cycle, dans l'ordre
+> du référentiel** (accordéon), chaque ligne portant une **barre tricolore en
+> élèves** — tout payé (vert) · en partie (jaune) · rien (rouge). Le
+> **dépliage en classes est retiré** (bloc, état, DI) : l'œil d'un niveau ouvre
+> l'écran nominatif sur (cycle, niveau), qui a son propre filtre de classe. Le
+> classement du projecteur reste — il nourrit la lecture « écart ». Le
+> rangement est pur : `RecouvrementCycleTree`. Les lignes que le référentiel ne
+> sait rattacher à aucun cycle forment un groupe final, pour que le total de la
+> page reste la somme des cycles.
+
 ### D7 — la simulation est en V1, et elle est le point d'entrée de la liste ✅
 
 ⚠️ **Le clic ouvre un APERÇU, il n'édite pas.** La liste qui sort d'ici se signe

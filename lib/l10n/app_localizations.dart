@@ -6038,34 +6038,84 @@ abstract class AppLocalizations {
   /// **'All cycles'**
   String get feeControlDashboardCycleAll;
 
-  /// No description provided for @feeControlDashboardRankingTitle.
+  /// No description provided for @recouvrementCyclesTitle.
   ///
   /// In en, this message translates to:
   /// **'Where each level stands'**
-  String get feeControlDashboardRankingTitle;
+  String get recouvrementCyclesTitle;
 
-  /// No description provided for @feeControlDashboardRankingHint.
+  /// No description provided for @recouvrementCyclesHint.
   ///
   /// In en, this message translates to:
-  /// **'The levels furthest behind come first.'**
-  String get feeControlDashboardRankingHint;
+  /// **'By cycle, in the school\'s order. Open a cycle to see its levels.'**
+  String get recouvrementCyclesHint;
 
-  /// No description provided for @feeControlDashboardGroupTally.
+  /// Last group of “Where each level stands”: charges without a level, or on a level this device's reference data does not know.
   ///
   /// In en, this message translates to:
-  /// **'{settled} of {total}'**
-  String feeControlDashboardGroupTally(int settled, int total);
+  /// **'Not linked to a cycle'**
+  String get recouvrementCycleUnplaced;
 
-  /// No description provided for @feeControlDashboardGroupA11y.
+  /// No description provided for @recouvrementCycleExpand.
   ///
   /// In en, this message translates to:
-  /// **'{level}: {percent}% settled, {settled} of {total} students concerned'**
-  String feeControlDashboardGroupA11y(
-    String level,
-    int percent,
+  /// **'Show the levels of this cycle'**
+  String get recouvrementCycleExpand;
+
+  /// No description provided for @recouvrementCycleCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the levels'**
+  String get recouvrementCycleCollapse;
+
+  /// Green part of the three-colour bar: students who paid the selected fees in full.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fully paid'**
+  String recouvrementCountSettled(int count);
+
+  /// Yellow part of the three-colour bar: students who paid part of the selected fees.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} partly paid'**
+  String recouvrementCountPartial(int count);
+
+  /// Red part of the three-colour bar: students who paid nothing on the selected fees.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} paid nothing'**
+  String recouvrementCountNone(int count);
+
+  /// No description provided for @recouvrementCountTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} student} other{{count} students}}'**
+  String recouvrementCountTotal(int count);
+
+  /// Share of students who paid in full, at the end of the cycle or level name.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String recouvrementSettledPercent(int percent);
+
+  /// No description provided for @recouvrementBreakdownA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {settled} of {total} students paid in full ({percent}%), {partial} partly, {none} nothing'**
+  String recouvrementBreakdownA11y(
+    String name,
     int settled,
     int total,
+    int percent,
+    int partial,
+    int none,
   );
+
+  /// Tooltip of a level row's eye: opens the per-student control on that level.
+  ///
+  /// In en, this message translates to:
+  /// **'View details: {level}'**
+  String recouvrementLevelView(String level);
 
   /// No description provided for @feeControlDashboardLevelUnknown.
   ///
@@ -6103,48 +6153,6 @@ abstract class AppLocalizations {
   /// **'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.'**
   String get feeControlDashboardEmptyDescription;
 
-  /// No description provided for @feeControlDashboardExpand.
-  ///
-  /// In en, this message translates to:
-  /// **'Show the classes of this level'**
-  String get feeControlDashboardExpand;
-
-  /// No description provided for @feeControlDashboardCollapse.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide the classes'**
-  String get feeControlDashboardCollapse;
-
-  /// No description provided for @feeControlDashboardUnassigned.
-  ///
-  /// In en, this message translates to:
-  /// **'Unassigned'**
-  String get feeControlDashboardUnassigned;
-
-  /// No description provided for @feeControlDashboardClassesLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading this level’s classes…'**
-  String get feeControlDashboardClassesLoading;
-
-  /// No description provided for @feeControlDashboardClassroomsMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'The class composition for this level has not reached this device. Sync, then reopen the level.'**
-  String get feeControlDashboardClassroomsMissing;
-
-  /// No description provided for @feeControlDashboardClassroomsWithheld.
-  ///
-  /// In en, this message translates to:
-  /// **'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.'**
-  String get feeControlDashboardClassroomsWithheld;
-
-  /// No description provided for @feeControlDashboardClassesFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The classes of this level could not be read on this device.'**
-  String get feeControlDashboardClassesFailed;
-
   /// No description provided for @feeControlDashboardUnbilled.
   ///
   /// In en, this message translates to:
@@ -6156,12 +6164,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Left to collect: {amounts}'**
   String feeControlDashboardRemaining(String amounts);
-
-  /// No description provided for @feeControlDashboardOpenControl.
-  ///
-  /// In en, this message translates to:
-  /// **'View students'**
-  String get feeControlDashboardOpenControl;
 
   /// Criteria chip recalling the controlled fee.
   ///
