@@ -355,10 +355,14 @@ class TicketReceiptModel extends Equatable {
   /// des unités différentes imprimerait un chiffre qui n'est l'argent de
   /// personne — et à laquelle le solde avait échappé.
   ///
-  /// **Seuls les frais restant dus** y figurent : un frais soldé n'a rien à
-  /// faire sur le papier, même règle que le bloc payeur absent. Le total reste,
-  /// en dernière ligne du bloc — le détail sans total obligerait le parent à
-  /// additionner, le total sans détail est ce qu'on lui reproche.
+  /// **Seuls les frais que CE versement a réglés** y figurent — les clés de
+  /// [allocations] —, soldés compris, à zéro : un parent qui règle les frais
+  /// divers vient chercher leur solde, pas celui de son minerval.
+  ///
+  /// Le total suit en dernière ligne du bloc quand il additionne quelque chose
+  /// — le détail sans total obligerait le parent à additionner, le total sans
+  /// détail est ce qu'on lui reproche. Sous une ligne unique qu'il ne ferait
+  /// que répéter, le gabarit le tait.
   final List<TicketAllocationLine> remainingByCharge;
 
   final TicketLabels labels;

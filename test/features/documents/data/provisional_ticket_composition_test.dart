@@ -163,6 +163,24 @@ void main() {
     });
   }
 
+  /// Une imputation de plus sur le versement `p-1` : un second frais réglé au
+  /// même passage au guichet, ou une seconde tranche du même.
+  Future<void> addAllocation({
+    required String id,
+    required String feeCode,
+    required String label,
+    required int amount,
+    String currency = 'CDF',
+  }) => db.insert('payment_allocations', {
+    'id': id,
+    'client_uuid': id,
+    'payment_id': 'p-1',
+    'fee_code': feeCode,
+    'student_charge_label': label,
+    'amount_in_cents': amount,
+    'currency': currency,
+  });
+
   /// La trace d'impression n'autorise plus rien : elle DIT. La réimpression
   /// est libre, et cette date sert à choisir les mots de la ligne d'écran.
   ///
@@ -442,6 +460,14 @@ void main() {
     /// résolvait.
     test('une ligne par nature, et le total les somme', () async {
       await seedPayment();
+      // Le versement règle AUSSI l'organisation : sans cette imputation, son
+      // solde n'aurait rien à faire sur ce ticket.
+      await addAllocation(
+        id: 'a-om',
+        feeCode: 'OM',
+        label: 'Organisation materiels examens',
+        amount: 10000,
+      );
       when(() => finance.getCharges('s-1')).thenAnswer(
         (_) async => Right([
           _charge(id: 'c-1', expected: 400000, paid: 150000),
@@ -467,6 +493,42 @@ void main() {
 
       // ⚠️ Le total DÉRIVE des lignes : un parent additionne ce qu'il lit.
       expect(model.remainingBalance, MoneyBag.of(const [Money(300000, 'CDF')]));
+    });
+
+    /// ⚠️ **Le cas qui a motivé la règle.** Un parent règle les frais divers ;
+    /// le minerval, dû dans la même devise, sortait jusqu'ici dans le solde de
+    /// CE ticket — le filtre ne portait que sur la devise. Le papier d'un
+    /// versement ne dit que le solde des frais que ce versement a réglés.
+    test('un frais que ce versement n a pas réglé n apparaît pas', () async {
+      await seedPayment(); // règle TUITION, et lui seul
+      when(() => finance.getCharges('s-1')).thenAnswer(
+        (_) async => Right([
+          _charge(id: 'c-1', expected: 400000, paid: 150000),
+          _charge(
+            id: 'c-2',
+            feeCode: 'MINERVAL',
+            label: 'Minerval',
+            expected: 900000,
+            paid: 0,
+          ),
+        ]),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.remainingByCharge, hasLength(1));
+      expect(model.remainingByCharge.single.label, 'Frais scolaires');
+      expect(model.remainingBalance, MoneyBag.of(const [Money(250000, 'CDF')]));
+
+      // Sur le papier : le seul frais réglé, et aucun total pour le redire.
+      final lines = TicketTextLayout.render(model);
+      final title = lines.indexWhere((l) => l.startsWith('Solde'));
+      expect(lines[title + 1], contains('Frais scolaires'));
+      expect(lines.join('\n'), isNot(contains('Minerval')));
+      expect(lines.where((l) => l.startsWith('Total')), isEmpty);
     });
 
     /// Deux tranches d'un même frais font UNE ligne, comme la ventilation.
@@ -521,21 +583,16 @@ void main() {
       );
     });
 
-    /// Un frais soldé n'a rien à faire sur le papier — même règle que le bloc
-    /// payeur : une mention à zéro se lit comme une mention effacée.
-    test('un frais soldé n\'apparaît pas', () async {
+    /// Le frais que ce versement SOLDE s'imprime à zéro. L'escamoter valait
+    /// tant que le bloc listait tous les frais de l'élève ; il ne porte plus
+    /// que ceux que le parent vient de régler, et « 0 » est précisément ce
+    /// qu'il vient lire. Omis, il emporterait le bloc entier — et un ticket
+    /// sans solde se lit comme un solde inconnu.
+    test('le frais que ce versement solde s imprime à zéro', () async {
       await seedPayment();
       when(() => finance.getCharges('s-1')).thenAnswer(
-        (_) async => Right([
-          _charge(id: 'c-1', expected: 400000, paid: 150000),
-          _charge(
-            id: 'c-2',
-            feeCode: 'OM',
-            label: 'Organisation',
-            expected: 60000,
-            paid: 60000,
-          ),
-        ]),
+        (_) async =>
+            Right([_charge(id: 'c-1', expected: 150000, paid: 150000)]),
       );
 
       final model = (await repository.buildForPayment(
@@ -545,6 +602,9 @@ void main() {
 
       expect(model.remainingByCharge, hasLength(1));
       expect(model.remainingByCharge.single.label, 'Frais scolaires');
+      expect(model.remainingByCharge.single.amountInCents, 0);
+      // Un sac à ZÉRO, pas un sac absent : « en francs, il ne reste rien ».
+      expect(model.remainingBalance, MoneyBag.of(const [Money(0, 'CDF')]));
     });
 
     /// Le papier lui-même : titre, détail, filet, total — dans cet ordre.
@@ -554,6 +614,13 @@ void main() {
     /// nouvelle chaîne : c'est elle qui empêche de le redire ligne par ligne.
     test('le papier porte le titre, le détail puis le total', () async {
       await seedPayment();
+      // Deux frais réglés : sous une ligne UNIQUE, le total se tairait.
+      await addAllocation(
+        id: 'a-om',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 10000,
+      );
       when(() => finance.getCharges('s-1')).thenAnswer(
         (_) async => Right([
           _charge(id: 'c-1', expected: 400000, paid: 150000),
@@ -575,7 +642,12 @@ void main() {
       final flat = lines.join('\n');
 
       final title = lines.indexWhere((l) => l.startsWith('Solde'));
-      final detail = lines.indexWhere((l) => l.contains('Organisation'));
+      // Cherché APRÈS le titre : le frais réglé est aussi dans la répartition
+      // au-dessus, sous le même nom.
+      final detail = lines.indexWhere(
+        (l) => l.contains('Organisation'),
+        title + 1,
+      );
       final total = lines.indexWhere((l) => l.startsWith('Total'));
       expect(title, greaterThan(0));
       expect(detail, greaterThan(title));
@@ -824,22 +896,6 @@ void main() {
   /// même ticket, mot pour mot : la répartition n'imprimait que le libellé gelé,
   /// identique d'une tranche à l'autre quand l'école les nomme pareil.
   group('la répartition regroupe par nature', () {
-    Future<void> addAllocation({
-      required String id,
-      required String feeCode,
-      required String label,
-      required int amount,
-      String currency = 'CDF',
-    }) => db.insert('payment_allocations', {
-      'id': id,
-      'client_uuid': id,
-      'payment_id': 'p-1',
-      'fee_code': feeCode,
-      'student_charge_label': label,
-      'amount_in_cents': amount,
-      'currency': currency,
-    });
-
     /// ⚠️ **La régression que le libellé par nature a introduite.** Le code de
     /// tranche `(OM1)` était ce qui distinguait deux imputations d'un même
     /// frais ; en le retirant sans regrouper, trois tranches sortaient sur
