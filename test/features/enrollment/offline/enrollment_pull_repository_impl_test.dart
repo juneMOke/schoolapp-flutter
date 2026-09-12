@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
@@ -31,6 +32,8 @@ void main() {
   late List<ReductionTypeLocalModel> capturedReductionTypes;
   late List<ReductionLineLocalModel> capturedReductionLines;
   late List<String> capturedReductionSchoolIds;
+  late List<FeeCodeSectionLocalModel> capturedSections;
+  late List<String> capturedSectionSchoolIds;
 
   /// Les empreintes de logo passées au seam, cycle par cycle. Sert à prouver
   /// que le tirage est **appelé** — un lot entier peut être vert et inerte.
@@ -52,6 +55,8 @@ void main() {
     capturedReductionTypes = [];
     capturedReductionLines = [];
     capturedReductionSchoolIds = [];
+    capturedSections = [];
+    capturedSectionSchoolIds = [];
     syncedLogoRefs = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
@@ -76,6 +81,10 @@ void main() {
         capturedReductionTypes.addAll(types);
         capturedReductionLines.addAll(lines);
         capturedReductionSchoolIds.add(schoolId);
+      },
+      replaceFeeCodeSections: (sections, schoolId) async {
+        capturedSections.addAll(sections);
+        capturedSectionSchoolIds.add(schoolId);
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
@@ -131,6 +140,7 @@ void main() {
     bool withheldBoutique = true,
     List<RefReductionDto>? reductions,
     RefLogoRefsDto? logoRefs,
+    List<RefFeeCodeSectionDto>? feeCodeSections,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     logoRefs: logoRefs,
@@ -164,6 +174,7 @@ void main() {
     // Défaut `null` = section absente : c'est ce que répond un serveur qui
     // caviarde le barème, et le pull doit s'en accommoder sans rien faire.
     reductions: reductions,
+    feeCodeSections: feeCodeSections,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -359,6 +370,53 @@ void main() {
     });
   });
 
+  group('syncReferential — titres de sections de frais', () {
+    test('section absente → le seam n\'est pas appelé : serveur d\'avant, '
+        'le cache reste', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      await repo.syncReferential();
+
+      expect(capturedSectionSchoolIds, isEmpty);
+    });
+
+    test('titres descendus → stampés de l\'école de la SESSION, rangés à leur '
+        'POSITION', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            feeCodeSections: const [
+              RefFeeCodeSectionDto(
+                code: 'tuition',
+                label: ' Frais scolaires annuels ',
+              ),
+              RefFeeCodeSectionDto(
+                code: 'BOARDING',
+                label: 'Internat',
+                active: false,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      // L'école de la session, jamais `school.id` du bundle (`sch-1`) : c'est
+      // la clé de purge.
+      expect(capturedSectionSchoolIds, ['school-1']);
+      expect(capturedSections.map((s) => s.schoolId).toSet(), {'school-1'});
+      expect(capturedSections.map((s) => s.code), ['TUITION', 'BOARDING']);
+      expect(capturedSections.first.label, 'Frais scolaires annuels');
+      // Une nature masquée descend quand même : on la nomme encore.
+      expect(capturedSections.last.active, isFalse);
+      // L'ordre de la liste fait foi : le rang rangé est la position reçue.
+      expect(capturedSections.map((s) => s.sortOrder), [0, 1]);
+    });
+  });
+
   group('le logo de l\'école', () {
     /// ⚠️ **La preuve que le fil EXISTE.** Le cache, le tirage, le décodeur et
     /// le renderer peuvent tous être verts sans que rien ne les appelle — c'est
@@ -411,6 +469,7 @@ void main() {
         replaceTariffs: (_, _) async {},
         replaceBoutiqueArticles: (_, _) async {},
         replaceReductionCatalog: (_, _, _) async {},
+        replaceFeeCodeSections: (_, _) async {},
         syncSchoolLogo: (_, _) async => throw StateError('route en panne'),
         syncMetaDao: syncMeta,
         requiredAuth: const {},
@@ -821,6 +880,7 @@ void main() {
             throw StateError('ref_fee_tariffs indisponible'),
         replaceBoutiqueArticles: (_, _) async {},
         replaceReductionCatalog: (_, _, _) async {},
+        replaceFeeCodeSections: (_, _) async {},
         syncSchoolLogo: (_, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
@@ -1251,6 +1311,7 @@ void main() {
           replaceTariffs: (_, _) async {},
           replaceBoutiqueArticles: (_, _) async {},
           replaceReductionCatalog: (_, _, _) async {},
+          replaceFeeCodeSections: (_, _) async {},
           syncSchoolLogo: (_, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,

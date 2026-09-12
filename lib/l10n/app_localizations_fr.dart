@@ -125,6 +125,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — écran de démarrage';
 
   @override
+  String get schoolLogoSemanticsLabel => 'Logo de l\'école';
+
+  @override
   String get sessionOfflineBanner => 'Session hors-ligne — vérifiée localement';
 
   @override
@@ -3686,26 +3689,74 @@ class AppLocalizationsFr extends AppLocalizations {
   String get feeControlDashboardCycleAll => 'Tous les cycles';
 
   @override
-  String get feeControlDashboardRankingTitle => 'Où en est chaque niveau';
+  String get recouvrementCyclesTitle => 'Où en est chaque niveau';
 
   @override
-  String get feeControlDashboardRankingHint =>
-      'Les niveaux les plus en retard d\'abord.';
+  String get recouvrementCyclesHint =>
+      'Par cycle, dans l\'ordre de l\'école. Ouvrez un cycle pour voir ses niveaux.';
 
   @override
-  String feeControlDashboardGroupTally(int settled, int total) {
-    return '$settled sur $total';
+  String get recouvrementCycleUnplaced => 'Non rattachés à un cycle';
+
+  @override
+  String get recouvrementCycleExpand => 'Voir les niveaux de ce cycle';
+
+  @override
+  String get recouvrementCycleCollapse => 'Masquer les niveaux';
+
+  @override
+  String recouvrementCountSettled(int count) {
+    return '$count tout payé';
   }
 
   @override
-  String feeControlDashboardGroupA11y(
-    String level,
-    int percent,
+  String recouvrementCountPartial(int count) {
+    return '$count partiellement';
+  }
+
+  @override
+  String recouvrementCountNone(int count) {
+    return '$count rien payé';
+  }
+
+  @override
+  String recouvrementCountTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '$count élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recouvrementSettledPercent(int percent) {
+    return '$percent %';
+  }
+
+  @override
+  String recouvrementBreakdownA11y(
+    String name,
     int settled,
     int total,
+    int percent,
+    int partial,
+    int none,
   ) {
-    return '$level : $percent % en ordre, $settled sur $total élèves concernés';
+    return '$name : $settled sur $total élèves ont tout payé ($percent %), $partial en partie, $none rien';
   }
+
+  @override
+  String recouvrementLevelView(String level) {
+    return 'Voir le détail : $level';
+  }
+
+  @override
+  String get recouvrementControlBack => 'Retour au tableau de bord';
+
+  @override
+  String get facturationOffShellBack => 'Retour';
 
   @override
   String get feeControlDashboardLevelUnknown => 'Niveau non renseigné';
@@ -3728,31 +3779,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Personne ne porte ce frais dans ce périmètre : il n\'a pas encore été généré, ou il ne s\'applique pas ici.';
 
   @override
-  String get feeControlDashboardExpand => 'Voir les classes de ce niveau';
-
-  @override
-  String get feeControlDashboardCollapse => 'Masquer les classes';
-
-  @override
-  String get feeControlDashboardUnassigned => 'Non répartis';
-
-  @override
-  String get feeControlDashboardClassesLoading =>
-      'Chargement des classes de ce niveau…';
-
-  @override
-  String get feeControlDashboardClassroomsMissing =>
-      'La composition des classes de ce niveau n\'est pas descendue sur cet appareil. Synchronisez, puis rouvrez le niveau.';
-
-  @override
-  String get feeControlDashboardClassroomsWithheld =>
-      'La composition des classes relève d\'un module auquel ce profil n\'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.';
-
-  @override
-  String get feeControlDashboardClassesFailed =>
-      'Les classes de ce niveau n\'ont pas pu être lues sur cet appareil.';
-
-  @override
   String feeControlDashboardUnbilled(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3767,9 +3793,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String feeControlDashboardRemaining(String amounts) {
     return 'Reste à recouvrer : $amounts';
   }
-
-  @override
-  String get feeControlDashboardOpenControl => 'Voir les élèves';
 
   @override
   String feeControlCriteriaFee(String label) {
@@ -9295,33 +9318,58 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ouvrir les pré-inscriptions';
 
   @override
-  String get enrollmentDashboardDayListTitle => 'Liste nominative du jour';
+  String get enrollmentDashboardEntriesTitle => 'Liste nominative des inscrits';
 
   @override
-  String enrollmentDashboardDayListSubtitle(String day) {
-    return 'Les élèves inscrits $day';
+  String enrollmentDashboardEntriesSubtitleDay(String day) {
+    return 'Élèves inscrits le $day';
   }
 
   @override
-  String get enrollmentDashboardDayListColumnHour => 'Heure';
+  String get enrollmentDashboardEntriesSubtitleWeek =>
+      'Élèves inscrits cette semaine';
 
   @override
-  String get enrollmentDashboardDayListColumnStudent => 'Élève';
+  String get enrollmentDashboardEntriesSubtitleMonth =>
+      'Élèves inscrits ce mois-ci';
 
   @override
-  String get enrollmentDashboardDayListColumnLevel => 'Niveau';
+  String enrollmentDashboardEntriesSubtitleYear(String schoolYear) {
+    return 'Élèves inscrits sur l\'année scolaire $schoolYear';
+  }
 
   @override
-  String get enrollmentDashboardDayListColumnType => 'Type';
+  String get enrollmentDashboardEntriesSubtitleSinceOpening =>
+      'Élèves inscrits depuis l\'ouverture des inscriptions';
 
   @override
-  String get enrollmentDashboardDayListColumnRecordedBy => 'Enregistré par';
+  String enrollmentDashboardEntriesSubtitleRange(String from, String to) {
+    return 'Élèves inscrits du $from au $to';
+  }
 
   @override
-  String get enrollmentDashboardDayListUnit => 'inscription';
+  String get enrollmentDashboardEntriesColumnHour => 'Heure';
 
   @override
-  String enrollmentDashboardDayListCount(int count) {
+  String get enrollmentDashboardEntriesColumnDate => 'Date';
+
+  @override
+  String get enrollmentDashboardEntriesColumnStudent => 'Élève';
+
+  @override
+  String get enrollmentDashboardEntriesColumnLevel => 'Niveau';
+
+  @override
+  String get enrollmentDashboardEntriesColumnType => 'Type';
+
+  @override
+  String get enrollmentDashboardEntriesColumnRecordedBy => 'Enregistré par';
+
+  @override
+  String get enrollmentDashboardEntriesUnit => 'inscription';
+
+  @override
+  String enrollmentDashboardEntriesCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -9332,70 +9380,72 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get enrollmentDashboardDayListUnknownAgent => '—';
+  String get enrollmentDashboardEntriesUnknownAgent => '—';
 
   @override
-  String get enrollmentDashboardDayListNoHour => '—';
+  String get enrollmentDashboardEntriesNoHour => '—';
 
   @override
-  String get enrollmentDashboardDayListLoading =>
-      'Chargement de la liste du jour';
+  String get enrollmentDashboardEntriesLoading =>
+      'Chargement de la liste des inscrits';
 
   @override
-  String get enrollmentDashboardDayListEmpty =>
-      'Aucune inscription enregistrée ce jour-là.';
+  String get enrollmentDashboardEntriesEmpty =>
+      'Aucune inscription enregistrée sur cette période.';
 
   @override
-  String get enrollmentDashboardDayListForbidden =>
+  String get enrollmentDashboardEntriesForbidden =>
       'Vous n\'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.';
 
   @override
-  String get enrollmentDashboardDayListError =>
-      'La liste du jour n\'a pas pu être chargée.';
+  String get enrollmentDashboardEntriesError =>
+      'La liste des inscrits n\'a pas pu être chargée.';
 
   @override
-  String enrollmentDashboardDayListRowA11y(
-    String name,
-    String gender,
-    String level,
-    String type,
-  ) {
-    return '$name, $gender, $level, $type';
+  String get enrollmentDashboardEntriesReportTooltip =>
+      'Télécharger la liste des inscrits de la période en PDF';
+
+  @override
+  String get enrollmentDashboardEntriesReportPreparing => 'Préparation…';
+
+  @override
+  String get enrollmentDashboardEntriesReportWaiting => 'Patientez…';
+
+  @override
+  String enrollmentDashboardEntriesReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'Un document est déjà en préparation. Réessayez dans $seconds secondes.',
+      one: 'Un document est déjà en préparation. Réessayez dans 1 seconde.',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get enrollmentDashboardEntriesReportForbidden =>
+      'La liste nominative demande le droit de lecture des inscriptions.';
+
+  @override
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap) {
+    return 'Cette période compte $lines inscriptions ; le document est plafonné à $cap. Resserrez la période.';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportFailed =>
+      'Le document n\'a pas pu être produit.';
+
+  @override
+  String get enrollmentDashboardEntriesReportHandoffFailed =>
+      'Le document est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
 
   @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override
-  String get enrollmentDashboardExportCsv => 'CSV';
-
-  @override
   String get enrollmentDashboardExportPdfTooltip =>
       'Exporter la répartition par niveau en PDF';
-
-  @override
-  String get enrollmentDashboardExportCsvTooltip =>
-      'Copier la liste du jour au format CSV';
-
-  @override
-  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day) {
-    return 'Année scolaire $schoolYear · $day';
-  }
-
-  @override
-  String enrollmentDashboardDayPdfFooter(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      rowCount,
-      locale: localeName,
-      other: '$rowCount inscriptions',
-      one: '1 inscription',
-    );
-    return '$_temp0 · année scolaire $schoolYear · généré le $generatedOn';
-  }
 
   @override
   String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Inscriptions';
@@ -9435,27 +9485,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentDashboardPdfFailed =>
       'L\'export PDF n\'a pas abouti. Réessayez.';
-
-  @override
-  String get enrollmentDashboardCsvColumnLastName => 'Nom';
-
-  @override
-  String get enrollmentDashboardCsvColumnFirstName => 'Prénom';
-
-  @override
-  String get enrollmentDashboardCsvColumnGender => 'Sexe';
-
-  @override
-  String get enrollmentDashboardCsvColumnStatus => 'Statut';
-
-  @override
-  String enrollmentDashboardCsvCopied(String fileName) {
-    return 'Liste du jour copiée au format CSV ($fileName)';
-  }
-
-  @override
-  String get enrollmentDashboardCsvFailed =>
-      'La copie de la liste n\'a pas abouti. Réessayez.';
 
   @override
   String get recouvrementFeePickerLabel => 'Frais retenus';

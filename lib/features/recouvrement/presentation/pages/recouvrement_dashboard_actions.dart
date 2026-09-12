@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/relance_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
@@ -13,6 +14,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_call_list_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/recouvrement_call_list_sheet.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -61,6 +63,8 @@ Future<void> openCallListFor(
 
   final callList = getIt<RecouvrementCallListCubit>();
   final relance = context.read<RelanceListCubit>();
+  // Lus AVANT la modale, qui s'ouvre hors de portée des blocs de la page.
+  final titles = context.read<FeeSectionTitlesCubit>().state;
   final query = dashboard.lastQuery;
   final simulation = context.read<RecouvrementSimulationCubit>().state;
   if (query == null || schoolLevelId == null) return;
@@ -88,7 +92,10 @@ Future<void> openCallListFor(
         criterionLabel: criterionLabel,
         onEmit: () => relance.emit_(
           scope: RelanceScope.schoolLevel(schoolLevelId),
-          feeCodes: query.feeCodes,
+          // Le papier imprime les frais dans l'ordre où il les reçoit : celui
+          // de l'école, comme les pastilles — jamais l'ordre alphabétique des
+          // codes que la requête garde pour se comparer.
+          feeCodes: recouvrementSchoolOrder(query.feeCodes, titles),
           criterion: simulation.criterion,
           lines: targeted,
           thresholdInCents: simulation.threshold?.amountInCents,

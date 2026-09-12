@@ -57,8 +57,46 @@ class AppConstants {
       '/api/v1/enrollments/students/{studentId}/preview';
 
   static const String enrollmentStatsEndpoint = '/api/v1/enrollment-stats';
-  static const String enrollmentDayEntriesEndpoint =
-      '/api/v1/enrollment-stats/day-entries';
+
+  /// La liste nominative de la fenêtre, paginée — mêmes paramètres de fenêtre
+  /// que l'agrégat, dont elle ne peut donc pas diverger.
+  ///
+  /// Remplace `/day-entries`, qui ne savait servir qu'une journée ; le serveur
+  /// le garde pour les clients déjà déployés.
+  static const String enrollmentEntriesEndpoint =
+      '/api/v1/enrollment-stats/entries';
+
+  /// Le **registre des inscrits** de la fenêtre, en PDF paginé et scellé.
+  ///
+  /// ⚠️ **Pièce numérotée mais NON archivée** : le serveur n'en garde pas les
+  /// octets, et la redemander en produit une nouvelle sous un nouveau numéro.
+  /// Rien à mettre en cache.
+  ///
+  /// ⚠️ **Plafonnée à 5 000 lignes**, refusée en 400 `REPORT_LINE_CAP`
+  /// au-delà plutôt que tronquée — le refus porte le compte réel. Aucune issue
+  /// CSV : la liste nominative des inscriptions n'a pas d'export.
+  ///
+  /// ⚠️ **Un rendu long à la fois côté serveur**, file partagée avec la caisse
+  /// et la relance : un second appel concurrent part en 429.
+  static const String enrollmentEntriesReportEndpoint =
+      '/api/v1/enrollment-stats/entries.pdf';
+
+  /// Délai de réception du registre PDF.
+  ///
+  /// Le délai de guichet du client ne suffit pas : composer une année prend
+  /// plusieurs secondes, et une expiration côté client laisserait le serveur
+  /// finir pour rien.
+  static const Duration enrollmentEntriesReportTimeout = Duration(seconds: 60);
+
+  /// L'attente retenue quand un 429 du registre n'annonce pas la sienne —
+  /// celle que le serveur pose en `Retry-After`.
+  ///
+  /// Dictée par le protocole, pas par la motion : c'est pourquoi elle vit ici
+  /// et non avec les jetons d'animation (cf.
+  /// [financeTillReportRetryFallback]).
+  static const Duration enrollmentEntriesReportRetryFallback = Duration(
+    seconds: 60,
+  );
 
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =
@@ -771,8 +809,10 @@ class AppConstants {
   /// lieu de déclencher une relecture.
   static const String syncPlanEndpoint = '/api/v1/sync/plan';
 
-  /// Pull du socle référentiel (années, cycles, niveaux, tarifs) — bundle
-  /// conditionnel ETag/304. GET /api/v1/sync/referential.
+  /// Pull du socle référentiel (années, cycles, niveaux, tarifs, titres de
+  /// sections) — **toujours 200, sans ETag** : le socle repart en entier à
+  /// chaque pull, et un renommage se voit au pull suivant.
+  /// GET /api/v1/sync/referential.
   static const String syncReferentialEndpoint = '/api/v1/sync/referential';
 
   /// Pull de la cohorte de réinscription N-1 (bornée/statique, ETag/304)

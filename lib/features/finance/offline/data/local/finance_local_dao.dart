@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/fees/local/fee_code_section_dao.dart';
+import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
 import 'package:school_app_flutter/core/money/local/exchange_rate_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_charge_seed_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_read_dao.dart';
@@ -67,6 +68,13 @@ class FinanceLocalDao {
   /// Cf. `FeeCodeSectionDao.titlesForSchool`.
   Future<Map<String, String>> feeSectionTitlesForSchool(String schoolId) =>
       _feeSections.titlesForSchool(schoolId);
+
+  /// Cf. `FeeCodeSectionDao.replaceForSchool` — la section `feeCodeSections`
+  /// du bundle référentiel, scopée ÉCOLE comme le barème.
+  Future<void> replaceFeeSectionsForSchool(
+    List<FeeCodeSectionLocalModel> sections, {
+    required String schoolId,
+  }) => _feeSections.replaceForSchool(sections, schoolId: schoolId);
 
   // ── Taux de guichet ────────────────────────────────────────────────────────
 

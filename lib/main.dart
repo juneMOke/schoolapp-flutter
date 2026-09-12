@@ -276,6 +276,25 @@ class _MyAppState extends State<MyApp> {
               unawaited(_schoolIdentityCubit.load());
             },
           ),
+          // Un cycle de pull vient de ramener des données : le référentiel a pu
+          // apporter le nom, la ville ou le SCEAU de l'école, dont les octets
+          // sont tirés à l'intérieur même du pull référentiel — donc déjà
+          // rangés quand ce marqueur bouge.
+          //
+          // Sans ce troisième déclencheur, un logo déposé après la première
+          // ouverture de session n'apparaîtrait qu'au lancement suivant : les
+          // deux autres signaux sont des transitions (session, retour réseau)
+          // qu'une tablette posée sur le Wi-Fi de l'école ne revoit jamais.
+          //
+          // Ne coûte un rendu que si quelque chose a changé — l'état d'identité
+          // s'égalise sur le nom et sur l'EMPREINTE du sceau, jamais sur ses
+          // octets.
+          BlocListener<SyncStatusCubit, SyncStatusState>(
+            listenWhen: (previous, current) =>
+                previous.lastSyncAtMs != current.lastSyncAtMs,
+            listener: (context, state) =>
+                unawaited(_schoolIdentityCubit.load()),
+          ),
         ],
         // Troisième déclencheur global de la boucle de synchro (les deux
         // autres événementiels : ouverture de session et retour réseau ; le

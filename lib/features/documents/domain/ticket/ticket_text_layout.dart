@@ -273,15 +273,23 @@ abstract final class TicketTextLayout {
         );
       }
 
-      // Un filet SOUS le détail : le trait d'une addition posée. Il sépare des
-      // lignes de nature différente — des créances au-dessus, ce qu'elles font
-      // ensemble en dessous — là où le filet de la répartition, lui, ouvre une
-      // liste sous son titre.
-      lines.add(_rule(width));
+      // ⚠️ Filet et total **seulement quand le total ADDITIONNE quelque
+      // chose.** Le solde ne porte plus que les frais réglés par ce versement :
+      // le cas courant est UNE ligne, et « Frais divers 500 FC / ---- /
+      // Total 500 FC » dirait deux fois le même chiffre sur un papier qui se
+      // recompte. Le filet qui ferme la zone suit alors directement le détail.
+      if (!_totalRepeatsDetail(balance, model.remainingByCharge)) {
+        // Un filet SOUS le détail : le trait d'une addition posée. Il sépare
+        // des lignes de nature différente — des créances au-dessus, ce
+        // qu'elles font ensemble en dessous — là où le filet de la
+        // répartition, lui, ouvre une liste sous son titre.
+        lines.add(_rule(width));
 
-      // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait le
-      // parent à additionner, le total sans détail est ce qu'on lui reproche.
-      _addTotal(lines, model.labels.balanceTotalLabel, balance, width);
+        // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait
+        // le parent à additionner, le total sans détail est ce qu'on lui
+        // reproche.
+        _addTotal(lines, model.labels.balanceTotalLabel, balance, width);
+      }
     }
 
     lines.add(_rule(width));
@@ -381,6 +389,22 @@ abstract final class TicketTextLayout {
     }
     _addMoneyBag(lines, label, bag, width);
   }
+
+  /// Le total ne ferait-il que **redire** l'unique ligne de détail ?
+  ///
+  /// La question porte sur la répétition, pas sur le nombre de lignes : une
+  /// ligne unique sous un total qui ne lui est pas égal — une seconde devise
+  /// sans détail — garde son total, qui dit alors quelque chose de plus.
+  /// Comparés en sacs, donc devises normalisées des deux côtés.
+  static bool _totalRepeatsDetail(
+    MoneyBag balance,
+    List<TicketAllocationLine> detail,
+  ) =>
+      detail.length == 1 &&
+      balance ==
+          MoneyBag.from(
+            Money.parse(detail.single.amountInCents, detail.single.currency),
+          );
 
   /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».
   ///

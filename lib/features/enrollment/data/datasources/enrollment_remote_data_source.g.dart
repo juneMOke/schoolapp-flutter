@@ -298,40 +298,122 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<DayEntriesPageModel> getDayEntries(
+  Future<EnrollmentEntriesPageModel> getEntries(
     Map<String, dynamic> extras,
-    String date,
+    String period,
+    String? date,
+    String? from,
+    String? to,
     int page,
     int size,
+    String sort,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
+      r'period': period,
       r'date': date,
+      r'from': from,
+      r'to': to,
       r'page': page,
       r'size': size,
+      r'sort': sort,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<DayEntriesPageModel>(
+    final _options = _setStreamType<EnrollmentEntriesPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment-stats/day-entries',
+            '/api/v1/enrollment-stats/entries',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late DayEntriesPageModel _value;
+    late EnrollmentEntriesPageModel _value;
     try {
-      _value = DayEntriesPageModel.fromJson(_result.data!);
+      _value = EnrollmentEntriesPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
     return _value;
+  }
+
+  @override
+  Future<HttpResponse<Uint8List>> getEntriesReport(
+    Map<String, dynamic> extras,
+    String period,
+    String? date,
+    String? from,
+    String? to,
+    String sort,
+    Options options,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{
+      r'period': period,
+      r'date': date,
+      r'from': from,
+      r'to': to,
+      r'sort': sort,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{
+      r'Accept': 'application/pdf, application/json',
+    };
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final newOptions = newRequestOptions(options);
+    newOptions.extra.addAll(_extra);
+    newOptions.headers.addAll(_dio.options.headers);
+    newOptions.headers.addAll(_headers);
+    final _options = newOptions.copyWith(
+      method: 'GET',
+      baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl),
+      responseType: ResponseType.bytes,
+      queryParameters: queryParameters,
+      path: '/api/v1/enrollment-stats/entries.pdf',
+    )..data = _data;
+    final _result = await _dio.fetch<Uint8List>(_options);
+    late Uint8List _value;
+    try {
+      _value = _result.data!;
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  RequestOptions newRequestOptions(Object? options) {
+    if (options is RequestOptions) {
+      return options;
+    }
+    if (options is Options) {
+      return RequestOptions(
+        method: options.method,
+        sendTimeout: options.sendTimeout,
+        receiveTimeout: options.receiveTimeout,
+        extra: options.extra,
+        headers: options.headers,
+        responseType: options.responseType,
+        contentType: options.contentType.toString(),
+        validateStatus: options.validateStatus,
+        receiveDataWhenStatusError: options.receiveDataWhenStatusError,
+        followRedirects: options.followRedirects,
+        maxRedirects: options.maxRedirects,
+        requestEncoder: options.requestEncoder,
+        responseDecoder: options.responseDecoder,
+        path: '',
+      );
+    }
+    return RequestOptions(path: '');
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

@@ -47,6 +47,23 @@ class ReferentialBundleDto {
   /// désérialisation teste la valeur et non la présence de la clé.
   final RefLogoRefsDto? logoRefs;
 
+  /// Les titres que l'école donne à ses natures de frais — **toutes** les
+  /// natures, masquées comprises, dans l'ordre de l'école. À la racine, comme
+  /// [reductions] : la table n'a pas d'année, et renommer y est rétroactif.
+  ///
+  /// **`null` = serveur d'avant**, et c'est le seul sens possible : le serveur
+  /// ne caviarde jamais cette section — un titre n'est ni un prix ni un élève.
+  /// Le cache local reste alors tel quel.
+  ///
+  /// Le contrat la dit **jamais vide** (`minItems: 1`) : une liste vide, ou
+  /// dont aucun élément ne se lit, ne peut être qu'un défaut. Elle est lue
+  /// comme une absence plutôt que comme un ordre de purger les titres.
+  ///
+  /// **L'ordre de la liste fait foi** : `sortOrder` peut porter des ex æquo, et
+  /// le départage du serveur ne se refait pas ici. C'est la POSITION reçue qui
+  /// sera rangée.
+  final List<RefFeeCodeSectionDto>? feeCodeSections;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -55,6 +72,7 @@ class ReferentialBundleDto {
     this.previous,
     this.reductions,
     this.logoRefs,
+    this.feeCodeSections,
     required this.serverTime,
   });
 
@@ -80,8 +98,54 @@ class ReferentialBundleDto {
     logoRefs: j['logoRefs'] == null
         ? null
         : RefLogoRefsDto.fromJson(j['logoRefs'] as Map<String, dynamic>),
+    // Hors de `pullList` lui aussi : `null` doit rester `null`.
+    feeCodeSections: RefFeeCodeSectionDto.listOrNull(j['feeCodeSections']),
     serverTime: j['serverTime'] as String,
   );
+}
+
+/// Une nature de frais telle que l'école la nomme (`FeeCodeDto` côté serveur).
+///
+/// Lue **élément par élément, sans lever** : un titre illisible ne doit pas
+/// faire tomber le socle entier — c'est lui qui porte l'année, les niveaux et
+/// la grille. Un élément sans code est écarté ; un titre blanc, lui, l'est à
+/// l'écriture par le DAO, et la nature retombe sur son nom localisé.
+///
+/// Pas de `sortOrder` ici : le rang rangé est la position dans la liste.
+class RefFeeCodeSectionDto {
+  final String code;
+  final String label;
+  final bool active;
+
+  const RefFeeCodeSectionDto({
+    required this.code,
+    required this.label,
+    this.active = true,
+  });
+
+  /// L'élément, ou `null` s'il ne se lit pas.
+  static RefFeeCodeSectionDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final code = raw['code'];
+    if (code is! String || code.trim().isEmpty) return null;
+    final label = raw['label'];
+    final active = raw['active'];
+    return RefFeeCodeSectionDto(
+      code: code,
+      label: label is String ? label : '',
+      // Un serveur qui ne porterait pas le drapeau décrit une nature encore
+      // proposée : `true` est le repli sûr, et il ne filtre rien à la lecture.
+      active: active is bool ? active : true,
+    );
+  }
+
+  /// La section entière, ou `null` quand elle n'est pas communiquée : clé
+  /// absente, valeur nulle, ou rien de lisible dedans.
+  static List<RefFeeCodeSectionDto>? listOrNull(Object? raw) {
+    if (raw is! List) return null;
+    final sections = [for (final item in raw) ?tryParse(item)];
+    return sections.isEmpty ? null : sections;
+  }
 }
 
 /// Les deux empreintes du logo de l'école, telles que le lot les porte.

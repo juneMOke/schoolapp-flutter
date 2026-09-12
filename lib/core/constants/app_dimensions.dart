@@ -228,6 +228,21 @@ class AppDimensions {
   static const recouvrementRateBarHeight = 20.0;
   static const recouvrementRateBarRadius = 5.0;
 
+  // « Où en est chaque niveau » : barre tricolore d'un cycle (10) et, plus
+  // fine, de ses niveaux (6). Un liseré de 2 sépare les parts, pour qu'elles se
+  // distinguent aussi sans la couleur.
+  static const recouvrementTriBarHeight = 10.0;
+  static const recouvrementTriBarDenseHeight = 6.0;
+  static const recouvrementTriBarRadius = 5.0;
+  static const recouvrementTriBarGap = 2.0;
+  static const recouvrementCountDot = 8.0;
+  static const recouvrementChevronSize = 20.0;
+  // Les niveaux se décalent du chevron de leur cycle et de son interligne :
+  // leurs noms s'alignent sur celui du cycle.
+  static const recouvrementLevelIndent = 24.0;
+  static const recouvrementViewButtonSize = 36.0;
+  static const recouvrementViewIconSize = 18.0;
+
   // Simulation de renvoi (spec §6).
   static const recouvrementCriterionFieldWidth = 260.0;
   static const recouvrementThresholdFieldWidth = 190.0;
@@ -338,6 +353,11 @@ class AppDimensions {
   /// décorative : « le choix de la période est l'action la plus fréquente de
   /// l'écran, il ne doit jamais être confondu avec un filtre secondaire ».
   static const enrollmentDashboardTabMinHeight = 44.0;
+
+  /// Trait de l'indicateur qui remplace l'icône d'un bouton d'export pendant
+  /// que le serveur compose — fin, pour tenir dans la case d'une icône de
+  /// 16 dp.
+  static const enrollmentDashboardExportSpinnerStroke = 2.0;
   static const enrollmentDashboardTabsPadding = 6.0;
   static const enrollmentDashboardTabsRadius = 14.0;
   static const enrollmentDashboardTabRadius = 10.0;
@@ -365,7 +385,7 @@ class AppDimensions {
   /// à 1 inscription occupe encore le quart de la hauteur.
   static const enrollmentDashboardPaceMinTop = 4.0;
 
-  /// Liste nominative du jour.
+  /// Avatar d'une ligne de la liste nominative des inscrits.
   static const enrollmentDashboardDayAvatarSize = 30.0;
   static const enrollmentDashboardTypePillIconSize = 13.0;
 

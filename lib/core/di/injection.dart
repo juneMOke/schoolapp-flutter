@@ -74,6 +74,7 @@ import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
+import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
 import 'package:school_app_flutter/features/school/data/repositories/school_repository_impl.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -124,7 +125,6 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
@@ -155,14 +155,16 @@ import 'package:school_app_flutter/features/enrollment/domain/repositories/enrol
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_day_entries_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_entries_report_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_entries_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_stats_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_day_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_report_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
@@ -579,8 +581,11 @@ Future<void> configureDependencies({
     ),
   );
 
-  getIt.registerFactory<GetEnrollmentDayEntriesUseCase>(
-    () => GetEnrollmentDayEntriesUseCase(getIt<EnrollmentStatsRepository>()),
+  getIt.registerFactory<GetEnrollmentEntriesUseCase>(
+    () => GetEnrollmentEntriesUseCase(getIt<EnrollmentStatsRepository>()),
+  );
+  getIt.registerFactory<GetEnrollmentEntriesReportUseCase>(
+    () => GetEnrollmentEntriesReportUseCase(getIt<EnrollmentStatsRepository>()),
   );
   getIt.registerFactory<GetEnrollmentStatsUseCase>(
     () => GetEnrollmentStatsUseCase(getIt<EnrollmentStatsRepository>()),
@@ -608,9 +613,14 @@ Future<void> configureDependencies({
     ),
   );
 
-  getIt.registerFactory<EnrollmentDayEntriesBloc>(
-    () => EnrollmentDayEntriesBloc(
-      getDayEntriesUseCase: getIt<GetEnrollmentDayEntriesUseCase>(),
+  getIt.registerFactory<EnrollmentEntriesBloc>(
+    () => EnrollmentEntriesBloc(
+      getEntriesUseCase: getIt<GetEnrollmentEntriesUseCase>(),
+    ),
+  );
+  getIt.registerFactory<EnrollmentEntriesReportCubit>(
+    () => EnrollmentEntriesReportCubit(
+      getReportUseCase: getIt<GetEnrollmentEntriesReportUseCase>(),
     ),
   );
   getIt.registerFactory<EnrollmentStatsBloc>(
@@ -959,8 +969,6 @@ Future<void> configureDependencies({
     () => RecouvrementDashboardBloc(
       getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
       getPositions: getIt<GetRecoveryPositionsUseCase>(),
-      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
-      getRosters: getIt<GetComposedRostersUseCase>(),
       searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
   );
@@ -1379,18 +1387,23 @@ Future<void> configureDependencies({
 
   // ── Identité de l'établissement ─────────────────────────────────────────────
   // Lecture locale de `ref_school` (même DAO référentiel que le contexte
-  // académique), scopée à l'école de la session. Aucun pull propre.
+  // académique) et de `school_logo_cache` pour le sceau, scopées à l'école de
+  // la session. Aucun pull propre : les deux caches sont remplis par le pull
+  // référentiel, tirage des octets du logo compris.
   getIt.registerLazySingleton<SchoolRepository>(
     () => SchoolRepositoryImpl(
       referentialDao: getIt<EnrollmentReferentialDao>(),
+      logoCache: getIt<SchoolLogoCacheDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
 
-  // Exception assumée à la règle « BLoC en registerFactory » : instance unique
-  // app-lifetime, comme `SyncStatusCubit`. L'identité de l'école est la même
-  // pour tout l'arbre et se recharge sur les transitions de session (main.dart).
-  getIt.registerLazySingleton<SchoolIdentityCubit>(
+  // Factory, comme tout BLoC — et comme `SyncStatusCubit`, qui tient pourtant
+  // une instance unique app-lifetime : c'est `main.dart` qui la tient, la
+  // fournit à tout l'arbre par `.value` et la ferme dans son `dispose`. Un
+  // singleton fermé là serait resservi, déjà mort, au montage suivant : `load`
+  // y devient muet (`isClosed`), et la marque ne se relit plus jamais.
+  getIt.registerFactory<SchoolIdentityCubit>(
     () => SchoolIdentityCubit(repository: getIt<SchoolRepository>()),
   );
 }

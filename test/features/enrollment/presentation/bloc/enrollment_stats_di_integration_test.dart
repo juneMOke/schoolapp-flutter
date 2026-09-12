@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/enrollment/data/models/enrollment_st
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_report_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 
 import '../../../../core/offline/offline_full_test_db.dart';
@@ -152,6 +154,28 @@ void main() {
       await firstBloc.close();
       await secondBloc.close();
     });
+
+    test(
+      'getIt resolve la liste nominative et son registre en factory',
+      () async {
+        final firstList = getIt<EnrollmentEntriesBloc>();
+        final secondList = getIt<EnrollmentEntriesBloc>();
+        final firstReport = getIt<EnrollmentEntriesReportCubit>();
+        final secondReport = getIt<EnrollmentEntriesReportCubit>();
+
+        // Le scope du tableau de bord les ferme en le quittant : un singleton
+        // fermé une fois le resterait pour toutes les visites suivantes.
+        expect(firstList, isNot(same(secondList)));
+        expect(firstReport, isNot(same(secondReport)));
+
+        await Future.wait([
+          firstList.close(),
+          secondList.close(),
+          firstReport.close(),
+          secondReport.close(),
+        ]);
+      },
+    );
 
     blocTest<EnrollmentStatsBloc, EnrollmentStatsState>(
       'injecte le repository via getIt et emet [loading, success] avec le datasource mocke',

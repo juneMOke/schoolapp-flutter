@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
@@ -41,6 +42,16 @@ class _StubExchangeRatesCubit extends Cubit<ExchangeRatesState>
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Aucun titre de section sur l'appareil : les pastilles se nomment par la
+/// grille, comme avant que le catalogue existe.
+class _StubFeeSectionTitlesCubit extends Cubit<FeeSectionTitlesState>
+    implements FeeSectionTitlesCubit {
+  _StubFeeSectionTitlesCubit() : super(const FeeSectionTitlesState());
+
+  @override
+  Future<void> load() async {}
 }
 
 const tIntent = FeeControlIntent(
@@ -127,6 +138,9 @@ void main() {
     // sur un dépôt bouchonné suffit : aucun taux n'est attendu ici.
     GetIt.instance.registerFactory<ExchangeRatesCubit>(
       () => _StubExchangeRatesCubit(),
+    );
+    GetIt.instance.registerFactory<FeeSectionTitlesCubit>(
+      () => _StubFeeSectionTitlesCubit(),
     );
   });
 

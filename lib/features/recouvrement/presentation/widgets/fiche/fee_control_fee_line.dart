@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_rate.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -22,6 +23,10 @@ class FeeControlFeeLine extends StatelessWidget {
   /// Grille du niveau, pour nommer le frais comme l'école l'a écrit.
   final List<LocalFeeTariff> tariffs;
 
+  /// Le titre que l'école donne à chaque nature. Il prime sur la grille : la
+  /// fiche nomme le frais comme la pastille qui l'a retenu.
+  final FeeSectionTitlesState sectionTitles;
+
   /// Reçu pour homogénéité de signature ; inutilisé — une créance n'a qu'une
   /// devise, et son taux n'a donc jamais besoin d'un cours.
   final ExchangeRate? rate;
@@ -31,6 +36,7 @@ class FeeControlFeeLine extends StatelessWidget {
     required this.charge,
     required this.tariffs,
     required this.rate,
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -48,6 +54,7 @@ class FeeControlFeeLine extends StatelessWidget {
       feeControlFeeOptionFor(tariffs, charge.feeCode),
       charge.feeCode,
       l10n,
+      sectionTitle: sectionTitles.titleOf(charge.feeCode),
     );
 
     return Padding(

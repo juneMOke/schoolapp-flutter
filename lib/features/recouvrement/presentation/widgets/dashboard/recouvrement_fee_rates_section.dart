@@ -6,8 +6,9 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le taux de recouvrement, **un groupe par devise**.
@@ -25,7 +26,15 @@ class RecouvrementFeeRatesSection extends StatelessWidget {
   /// Les groupes déjà projetés — la section ne relit rien elle-même.
   final List<RecouvrementCurrencyGroup> groups;
 
-  const RecouvrementFeeRatesSection({super.key, required this.groups});
+  /// Le titre que l'école donne à chaque nature : un poste se nomme ici comme
+  /// la pastille qui l'a retenu.
+  final FeeSectionTitlesState titles;
+
+  const RecouvrementFeeRatesSection({
+    super.key,
+    required this.groups,
+    this.titles = const FeeSectionTitlesState(),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,8 @@ class RecouvrementFeeRatesSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final group in groups) _CurrencyGroup(group: group),
+                  for (final group in groups)
+                    _CurrencyGroup(group: group, titles: titles),
                 ],
               ),
             ),
@@ -66,8 +76,9 @@ class RecouvrementFeeRatesSection extends StatelessWidget {
 
 class _CurrencyGroup extends StatelessWidget {
   final RecouvrementCurrencyGroup group;
+  final FeeSectionTitlesState titles;
 
-  const _CurrencyGroup({required this.group});
+  const _CurrencyGroup({required this.group, required this.titles});
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +130,11 @@ class _CurrencyGroup extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.spacingS),
           for (final fee in group.fees)
-            _FeeRow(fee: fee, heaviest: group.heaviestExpectedInCents),
+            _FeeRow(
+              fee: fee,
+              heaviest: group.heaviestExpectedInCents,
+              titles: titles,
+            ),
         ],
       ),
     );
@@ -129,13 +144,18 @@ class _CurrencyGroup extends StatelessWidget {
 class _FeeRow extends StatelessWidget {
   final RecouvrementFeeRate fee;
   final int heaviest;
+  final FeeSectionTitlesState titles;
 
-  const _FeeRow({required this.fee, required this.heaviest});
+  const _FeeRow({
+    required this.fee,
+    required this.heaviest,
+    required this.titles,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final label = fee.feeCode.localizedFeeLabel(l10n);
+    final label = recouvrementFeeTitle(fee.feeCode, titles, l10n);
     final remaining = MoneyFormat.format(
       Money(fee.remainingInCents, fee.currency),
     );

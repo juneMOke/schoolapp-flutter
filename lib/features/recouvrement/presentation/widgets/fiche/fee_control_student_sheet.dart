@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_fee_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -31,6 +32,10 @@ class FeeControlStudentSheet extends StatelessWidget {
   /// Grille du niveau, pour nommer chaque frais comme l'école l'a écrit.
   final List<LocalFeeTariff> tariffs;
 
+  /// Le titre que l'école donne à chaque nature. Il prime sur la grille : la
+  /// fiche nomme les frais comme les pastilles qui les ont retenus.
+  final FeeSectionTitlesState sectionTitles;
+
   /// Cours du jour — le taux d'une ligne mixte en dépend, jamais un montant
   /// affiché.
   final ExchangeRate? rate;
@@ -53,6 +58,7 @@ class FeeControlStudentSheet extends StatelessWidget {
     required this.marked,
     required this.onToggleMark,
     required this.onOpenRecord,
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -81,7 +87,12 @@ class FeeControlStudentSheet extends StatelessWidget {
             children: [
               const SizedBox(height: AppDimensions.spacingS),
               for (final charge in row.line.charges)
-                FeeControlFeeLine(charge: charge, tariffs: tariffs, rate: rate),
+                FeeControlFeeLine(
+                  charge: charge,
+                  tariffs: tariffs,
+                  sectionTitles: sectionTitles,
+                  rate: rate,
+                ),
               if (mixed) ...[
                 const SizedBox(height: AppDimensions.spacingS),
                 Text(

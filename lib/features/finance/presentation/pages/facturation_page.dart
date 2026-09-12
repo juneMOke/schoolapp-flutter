@@ -15,11 +15,22 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class FacturationPage extends StatefulWidget {
-  const FacturationPage({super.key});
+  /// Vrai quand l'écran est ouvert par sa ROUTE, hors de la coquille — poussé
+  /// par le contrôle nominatif du Recouvrement (« Facturer »). Il n'a alors ni
+  /// barre latérale ni TopBar, et porte sa propre barre, avec le retour.
+  final bool standalone;
+
+  /// Dans la coquille, dont la TopBar titre déjà l'écran.
+  const FacturationPage({super.key}) : standalone = false;
+
+  /// L'écran tel que sa route le construit : hors de la coquille, donc avec sa
+  /// barre.
+  const FacturationPage.fromRoute({super.key}) : standalone = true;
 
   @override
   State<FacturationPage> createState() => _FacturationPageState();
@@ -40,6 +51,9 @@ class _FacturationPageState extends State<FacturationPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
+      // contexte académique charge ou échoue.
+      appBar: widget.standalone ? const FacturationTopBar() : null,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,

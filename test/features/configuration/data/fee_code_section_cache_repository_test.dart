@@ -82,6 +82,26 @@ void main() {
       expect(await dao.titlesForSchool('school-B'), isEmpty);
     });
 
+    test('range la POSITION reçue, pas le sortOrder du DTO — l\'ordre de la '
+        'liste fait foi', () async {
+      when(() => remote.getFeeCodes(any(), any())).thenAnswer(
+        (_) async => [
+          // Deux ex æquo : seul l'ordre de la liste les départage.
+          model('BOARDING', 'Internat', order: 3),
+          model('TUITION', 'Frais scolaires', order: 3),
+        ],
+      );
+
+      await repository.ensureFeeSectionTitles();
+
+      final rows = await db.query(
+        'ref_fee_code_sections',
+        orderBy: 'sort_order',
+      );
+      expect([for (final r in rows) r['code']], ['BOARDING', 'TUITION']);
+      expect([for (final r in rows) r['sort_order']], [0, 1]);
+    });
+
     test('un titre absent retombe sur le CODE, jamais sur du blanc', () async {
       when(
         () => remote.getFeeCodes(any(), any()),
@@ -258,6 +278,27 @@ void main() {
       // LA vérification : la garde n'a pas claqué, donc le serveur est réinterrogé.
       expect((await fragile.ensureFeeSectionTitles()).isLeft(), isTrue);
       verify(() => remote.getFeeCodes(any(), any())).called(2);
+    });
+
+    test('un 403 est un VERDICT : la session ne redemande plus', () async {
+      // Chaque écran qui monte le cubit relancerait sinon l'appel, et chaque
+      // refus s'inscrirait au journal des refus du serveur.
+      when(() => remote.getFeeCodes(any(), any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/finance/fee-codes'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/finance/fee-codes'),
+            statusCode: 403,
+          ),
+          error: const UnauthorizedFailure('Access forbidden'),
+        ),
+      );
+
+      expect((await repository.ensureFeeSectionTitles()).isLeft(), isTrue);
+      final second = await repository.ensureFeeSectionTitles();
+
+      expect(second.getOrElse(() => -1), 0);
+      verify(() => remote.getFeeCodes(any(), any())).called(1);
     });
 
     test('un renommage arme la garde : plus rien à tirer ensuite', () async {

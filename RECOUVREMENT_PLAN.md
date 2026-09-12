@@ -160,6 +160,17 @@ Le classement par niveau, le dépliage en classes, la bande de synthèse et le
 passage vers l'écran nominatif (`FeeControlIntent`) sont **repris**, pas
 réécrits. Ce qui change : ils portent une sélection de frais au lieu d'un seul.
 
+> **Amendé le 2026-09-12 (demande du user).** « Où en est chaque niveau » ne
+> classe plus à plat : les niveaux se rangent **sous leur cycle, dans l'ordre
+> du référentiel** (accordéon), chaque ligne portant une **barre tricolore en
+> élèves** — tout payé (vert) · en partie (jaune) · rien (rouge). Le
+> **dépliage en classes est retiré** (bloc, état, DI) : l'œil d'un niveau ouvre
+> l'écran nominatif sur (cycle, niveau), qui a son propre filtre de classe. Le
+> classement du projecteur reste — il nourrit la lecture « écart ». Le
+> rangement est pur : `RecouvrementCycleTree`. Les lignes que le référentiel ne
+> sait rattacher à aucun cycle forment un groupe final, pour que le total de la
+> page reste la somme des cycles.
+
 ### D7 — la simulation est en V1, et elle est le point d'entrée de la liste ✅
 
 ⚠️ **Le clic ouvre un APERÇU, il n'édite pas.** La liste qui sort d'ici se signe
@@ -218,6 +229,21 @@ flux, traitées par Encaissements ».
 `GetFeeCodesForYearUseCase` → `List<String>`, triées par effectif porté. Des
 **codes**, jamais des libellés : l'écran est école-wide et un même `fee_code`
 porte des libellés différents d'un niveau à l'autre.
+
+> **Amendé le 2026-09-12 (demande du user).** Les codes restent la seule
+> donnée de l'état ; le rendu les nomme désormais par le **titre de section**
+> de l'école (`ref_fee_code_sections`, via `FeeSectionTitlesCubit`) — un par
+> nature et par école, donc juste école-wide, et identique à ce qu'imprime la
+> liste de relance. Repli : la nature localisée. La règle vit dans
+> `feeControlFeeCodeLabel` / `recouvrementFeeTitle`, commune aux deux écrans
+> (l'écran de contrôle retombe d'abord sur sa grille). Depuis F1, les titres
+> descendent aussi dans le bundle référentiel (`feeCodeSections`, rangés à leur
+> position reçue) : la lecture réseau du cubit (`GET /finance/fee-codes`, une
+> fois par session, muette en échec, close pour la session sur un 403) ne sert
+> plus que de repli face à un serveur d'avant. Les frais se rangent dans
+> l'**ordre de l'école** — pastilles des deux écrans, requête du contrôle,
+> liste de relance ; le taux par frais garde son ordre par poids, et
+> l'ouverture du tableau de bord retient toujours le frais le plus porté.
 
 ### 5.2 Les positions **multi-frais** — **à étendre**
 
@@ -418,6 +444,15 @@ niveau — 228 Ko et 3 s de rendu à 500 élèves, qui est l'usage réel. Le pla
   par élève, sous peine d'un total qui cesse d'être la somme de ses lignes.
 - ⚠️ **Le curseur de seuil doit se sentir immédiat** : recalcul mémoïsé,
   synchrone, sans jamais rejouer un chargement.
+- ⚠️ **Poussé par sa route, l'écran nominatif sort de la coquille** (amendé le
+  2026-09-12). Le tableau de bord l'ouvre par `push` — l'œil d'un niveau, « Voir
+  le contrôle » —, et la route construit la page SEULE : ni barre latérale ni
+  TopBar, donc rien pour dire où l'on est ni pour revenir. `fromRoute` pose
+  `standalone`, qui habille l'écran de `RecouvrementControlTopBar` (sur
+  `OffShellTopBar`, partagée avec la Facturation que « Facturer » pousse) ; sa flèche **dépile**,
+  et le tableau de bord se retrouve tel qu'on l'a quitté. Dans la coquille,
+  aucune barre : la TopBar titre déjà l'écran. Revenir par le menu aurait
+  rechargé le tableau de bord à neuf, sélection de frais perdue.
 
 ### Sur le renommage (REC-0)
 

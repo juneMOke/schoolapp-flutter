@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:retrofit/retrofit.dart' show HttpResponse;
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/day_entries_page_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/enrollment_entries_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
@@ -85,6 +89,8 @@ final tResponseModel = EnrollmentStatsResponseModel(
 void main() {
   late MockEnrollmentRemoteDataSource mockRemoteDataSource;
   late EnrollmentStatsRepositoryImpl repository;
+
+  setUpAll(() => registerFallbackValue(Options()));
 
   setUp(() {
     mockRemoteDataSource = MockEnrollmentRemoteDataSource();
@@ -174,40 +180,103 @@ void main() {
       },
     );
   });
-  group('getDayEntries — ce qui part sur le fil', () {
-    test('la date part au format du contrat, avec page et taille', () async {
-      // `date` est REQUIS côté serveur et n'a pas de défaut à aujourd'hui :
-      // la liste doit pouvoir servir n'importe quelle journée.
-      when(
-        () => mockRemoteDataSource.getDayEntries(
-          tRequiredAuth,
-          '2026-09-05',
-          0,
-          8,
-        ),
-      ).thenAnswer(
-        (_) async => DayEntriesPageModel.fromJson(const <String, dynamic>{
+  group('getEntries — ce qui part sur le fil', () {
+    EnrollmentEntriesPageModel emptyPage() =>
+        EnrollmentEntriesPageModel.fromJson(const <String, dynamic>{
           'content': <dynamic>[],
-          'page': 0,
+          'number': 0,
           'size': 8,
           'totalElements': 0,
           'totalPages': 0,
-        }),
-      );
+        });
 
-      final result = await repository.getDayEntries(
-        day: DateTime(2026, 9, 5),
+    void stubEntries() => when(
+      () => mockRemoteDataSource.getEntries(
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+      ),
+    ).thenAnswer((_) async => emptyPage());
+
+    test('un jour : `date` seul, au format du contrat, et l\'ordre', () async {
+      stubEntries();
+
+      final result = await repository.getEntries(
+        window: EnrollmentStatsWindow.day(DateTime(2026, 9, 5)),
         page: 0,
         size: 8,
+        order: EnrollmentEntriesOrder.oldestFirst,
       );
 
       expect(result.isRight(), isTrue);
       verify(
-        () => mockRemoteDataSource.getDayEntries(
+        () => mockRemoteDataSource.getEntries(
           tRequiredAuth,
+          'day',
           '2026-09-05',
+          null,
+          null,
           0,
           8,
+          'oldest',
+        ),
+      ).called(1);
+    });
+
+    test('une semaine : aucune borne, le serveur dérive la fenêtre', () async {
+      // Le même code que l'agrégat : la liste ne peut pas compter autre chose
+      // que la carte posée au-dessus d'elle.
+      stubEntries();
+
+      await repository.getEntries(
+        window: const EnrollmentStatsWindow.week(),
+        page: 2,
+        size: 8,
+        order: EnrollmentEntriesOrder.newestFirst,
+      );
+
+      verify(
+        () => mockRemoteDataSource.getEntries(
+          tRequiredAuth,
+          'week',
+          null,
+          null,
+          null,
+          2,
+          8,
+          'newest',
+        ),
+      ).called(1);
+    });
+
+    test('une période libre : `from` et `to`, jamais `date`', () async {
+      stubEntries();
+
+      await repository.getEntries(
+        window: EnrollmentStatsWindow.custom(
+          from: DateTime(2026, 9, 1),
+          to: DateTime(2026, 9, 7),
+        ),
+        page: 0,
+        size: 8,
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      verify(
+        () => mockRemoteDataSource.getEntries(
+          tRequiredAuth,
+          'custom',
+          null,
+          '2026-09-01',
+          '2026-09-07',
+          0,
+          8,
+          'oldest',
         ),
       ).called(1);
     });
@@ -215,16 +284,141 @@ void main() {
     test('un 403 remonte tel quel — c\'est un droit, pas une panne', () async {
       const failure = UnauthorizedFailure('Access forbidden');
       when(
-        () => mockRemoteDataSource.getDayEntries(any(), any(), any(), any()),
+        () => mockRemoteDataSource.getEntries(
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+        ),
       ).thenThrow(_dioException(error: failure));
 
-      final result = await repository.getDayEntries(
-        day: DateTime(2026, 9, 5),
+      final result = await repository.getEntries(
+        window: const EnrollmentStatsWindow.month(),
         page: 0,
         size: 8,
+        order: EnrollmentEntriesOrder.oldestFirst,
       );
 
       expect(result, const Left<Failure, dynamic>(failure));
+    });
+  });
+
+  group('getEntriesReport — le registre PDF', () {
+    HttpResponse<Uint8List> response({
+      String contentType = 'application/pdf',
+      String? disposition,
+    }) {
+      final data = Uint8List.fromList(const [0x25, 0x50, 0x44, 0x46, 0x2D]);
+      return HttpResponse<Uint8List>(
+        data,
+        Response<Uint8List>(
+          requestOptions: RequestOptions(
+            path: '/api/v1/enrollment-stats/entries.pdf',
+          ),
+          statusCode: 200,
+          headers: Headers.fromMap(<String, List<String>>{
+            Headers.contentTypeHeader: <String>[contentType],
+            if (disposition != null)
+              'content-disposition': <String>[disposition],
+          }),
+          data: data,
+        ),
+      );
+    }
+
+    void stubReport(HttpResponse<Uint8List> answer) => when(
+      () => mockRemoteDataSource.getEntriesReport(
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+      ),
+    ).thenAnswer((_) async => answer);
+
+    test('même fenêtre et même ordre que la table, et un délai long', () async {
+      stubReport(
+        response(
+          disposition: 'attachment; filename="inscriptions-2025-2026.pdf"',
+        ),
+      );
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.year(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      // Le nom du serveur, tel quel : il porte le périmètre retenu.
+      expect(
+        result.getOrElse(() => throw StateError('attendu')).fileName,
+        'inscriptions-2025-2026.pdf',
+      );
+      // Tout est capturé : mocktail ne marie pas ici des valeurs littérales à
+      // un `captureAny()` sur les arguments positionnels.
+      final captured = verify(
+        () => mockRemoteDataSource.getEntriesReport(
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+          captureAny(),
+        ),
+      ).captured;
+      expect(captured.sublist(0, 6), <Object?>[
+        tRequiredAuth,
+        'year',
+        null,
+        null,
+        null,
+        'oldest',
+      ]);
+      // Le délai de guichet ne suffit pas à composer une année.
+      expect(
+        (captured[6] as Options).receiveTimeout,
+        AppConstants.enrollmentEntriesReportTimeout,
+      );
+    });
+
+    test('un 200 qui n\'est pas un PDF est refusé, pas remis', () async {
+      stubReport(response(contentType: 'text/html'));
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.week(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      expect(result.fold((f) => f, (_) => null), isA<ServerFailure>());
+    });
+
+    test('un 403 reste un refus de droit', () async {
+      when(
+        () => mockRemoteDataSource.getEntriesReport(
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+        ),
+      ).thenThrow(
+        _dioException(error: const UnauthorizedFailure('Access forbidden')),
+      );
+
+      final result = await repository.getEntriesReport(
+        window: const EnrollmentStatsWindow.week(),
+        order: EnrollmentEntriesOrder.oldestFirst,
+      );
+
+      expect(result.fold((f) => f, (_) => null), isA<UnauthorizedFailure>());
     });
   });
 }

@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
@@ -19,6 +20,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_view.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_summary_band.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/recouvrement_control_top_bar.dart';
 
 /// Contrôle des frais : pour un frais d'une classe, qui est soldé, qui est
 /// partiel, qui n'a rien versé.
@@ -31,7 +33,19 @@ class FeeControlPage extends StatelessWidget {
   /// lui. `null` à l'ouverture par le menu : l'écran est alors vierge.
   final FeeControlIntent? intent;
 
-  const FeeControlPage({super.key, this.intent});
+  /// Vrai quand l'écran est ouvert par sa ROUTE, hors de la coquille : il n'a
+  /// alors ni barre latérale ni TopBar, et porte sa propre barre, avec le
+  /// retour. Faux dans la coquille, dont la TopBar le titre déjà.
+  final bool standalone;
+
+  const FeeControlPage({super.key, this.intent, this.standalone = false});
+
+  /// L'écran tel que sa route le construit : hors de la coquille, donc avec sa
+  /// barre ; `extra` porte les critères du tableau de bord, s'il en a posé.
+  factory FeeControlPage.fromRoute(Object? extra) => FeeControlPage(
+    intent: FeeControlIntent.fromRouteExtra(extra),
+    standalone: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +58,13 @@ class FeeControlPage extends StatelessWidget {
         BlocProvider<ExchangeRatesCubit>(
           create: (_) => getIt<ExchangeRatesCubit>()..load(),
         ),
+        // Le titre que l'école donne à chaque nature — celui que le tableau de
+        // bord et la liste de relance écrivent aussi. Local d'abord, une
+        // relecture par session ensuite, muette en échec : un nom d'hier vaut
+        // mieux qu'un écran qui attend le réseau pour nommer un frais.
+        BlocProvider<FeeSectionTitlesCubit>(
+          create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
+        ),
         // Brouillon de séance : les cochés et les marqués « à renvoyer ». Rien
         // n'en sort tant qu'on ne le demande pas, rien n'y survit à la sortie
         // du module.
@@ -51,15 +72,16 @@ class FeeControlPage extends StatelessWidget {
           create: (_) => FeeControlSelectionCubit(),
         ),
       ],
-      child: _FeeControlView(intent: intent),
+      child: _FeeControlView(intent: intent, standalone: standalone),
     );
   }
 }
 
 class _FeeControlView extends StatefulWidget {
   final FeeControlIntent? intent;
+  final bool standalone;
 
-  const _FeeControlView({this.intent});
+  const _FeeControlView({this.intent, required this.standalone});
 
   @override
   State<_FeeControlView> createState() => _FeeControlViewState();
@@ -153,6 +175,9 @@ class _FeeControlViewState extends State<_FeeControlView> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
+      // contexte académique charge ou échoue.
+      appBar: widget.standalone ? const RecouvrementControlTopBar() : null,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,
@@ -224,6 +249,12 @@ class _FeeControlViewState extends State<_FeeControlView> {
                         initial: widget.intent,
                         options: options,
                         tariffs: state.tariffs,
+                        // Abonné : le titre d'une nature peut arriver après la
+                        // grille — la relecture réseau rend plus tard que le
+                        // cache —, et la pastille doit alors se renommer.
+                        sectionTitles: context
+                            .watch<FeeSectionTitlesCubit>()
+                            .state,
                         classrooms: state.classrooms,
                         isTariffsLoading:
                             state.tariffsStatus == EnrollmentLoadStatus.loading,
@@ -268,6 +299,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
                     onMark: () => markSelection(context),
                   ),
                   FeeControlResultsView(
+                    titles: context.watch<FeeSectionTitlesCubit>().state,
                     onViewRequested: (row) =>
                         openFinancialRecord(context, row, academicYearId),
                     onRowTapped: (row) =>

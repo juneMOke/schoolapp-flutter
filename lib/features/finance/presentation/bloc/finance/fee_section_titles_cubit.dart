@@ -11,7 +11,9 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 /// Afficher « impossible de charger les titres » au-dessus d'une fiche de solde
 /// inquiéterait un caissier sur un chemin qui va parfaitement bien.
 class FeeSectionTitlesState extends Equatable {
-  /// Nature (`TUITION`, en majuscules) → titre écrit par l'école.
+  /// Nature (`TUITION`, en majuscules) → titre écrit par l'école, **dans
+  /// l'ordre de l'école** : le DAO rend les titres rangés, et l'ordre des clés
+  /// est celui que les écrans suivent pour ranger les frais.
   final Map<String, String> titles;
 
   const FeeSectionTitlesState({this.titles = const {}});
@@ -27,8 +29,22 @@ class FeeSectionTitlesState extends Equatable {
     return (title == null || title.isEmpty) ? null : title;
   }
 
+  /// Le rang de cette nature dans l'ordre de l'école, `null` si l'appareil ne
+  /// la connaît pas — l'appelant la range alors après les autres.
+  int? rankOf(String feeCode) {
+    final key = feeCode.trim().toUpperCase();
+    var rank = 0;
+    for (final code in titles.keys) {
+      if (code == key) return rank;
+      rank++;
+    }
+    return null;
+  }
+
+  /// L'ordre des clés est une donnée : sans lui dans l'égalité, une école qui
+  /// réordonne ses sections sans les renommer ne rebâtirait aucun écran.
   @override
-  List<Object?> get props => [titles];
+  List<Object?> get props => [titles, titles.keys.toList()];
 }
 
 class FeeSectionTitlesCubit extends Cubit<FeeSectionTitlesState> {

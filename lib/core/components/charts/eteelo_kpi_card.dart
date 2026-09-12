@@ -25,10 +25,18 @@ class EteeloKpiCard extends StatelessWidget {
         : AppDimensions.enrollmentStatsKpiCardHeight;
 
     final card = Container(
-      height: baseHeight + extraValues * AppDimensions.kpiCardExtraValueHeight,
-      constraints: const BoxConstraints(
+      // Une hauteur PLANCHER, jamais une hauteur fixe. La carte garde son
+      // gabarit historique quand le contenu y tient, et grandit quand il n'y
+      // tient plus — un second montant, une police agrandie par le téléphone.
+      // Fixée d'avance, elle débordait : chaque montant de plus lui ajoutait
+      // 22 px, pour une ligne en gras 24 qui en occupe davantage.
+      constraints: BoxConstraints(
         minWidth: AppDimensions.enrollmentStatsKpiCardMinWidth,
+        minHeight:
+            baseHeight + extraValues * AppDimensions.kpiCardExtraValueHeight,
       ),
+      // Le contenu reste centré verticalement dans le plancher, comme avant.
+      alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: AppColors.enrollmentStatsCardSurface,
         borderRadius: BorderRadius.circular(
@@ -55,8 +63,9 @@ class EteeloKpiCard extends StatelessWidget {
         vertical: AppDimensions.spacingS,
       ),
       child: Column(
+        // `min` : la hauteur vient du contenu, le plancher du `Container`.
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
@@ -79,13 +88,10 @@ class EteeloKpiCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppDimensions.spacingXS),
-          // Garde-fou anti-débordement : les valeurs formatées (montants en
-          // devise) peuvent être longues. `scaleDown` ne réduit que si besoin,
-          // donc les compteurs entiers courts restent inchangés.
-          // Une valeur par ligne. `scaleDown` ne réduit que si besoin, donc les
-          // compteurs entiers courts restent inchangés — et deux devises
-          // gardent chacune sa taille pleine au lieu d'être rétrécies ensemble
-          // sur une ligne unique.
+          // Une valeur par ligne. `scaleDown` ne réduit que si la largeur
+          // manque, donc les compteurs entiers courts restent inchangés — et
+          // deux devises gardent chacune sa taille pleine au lieu d'être
+          // rétrécies ensemble sur une ligne unique.
           for (final value in values)
             SizedBox(
               width: double.infinity,
@@ -102,19 +108,17 @@ class EteeloKpiCard extends StatelessWidget {
                 ),
               ),
             ),
-          // Sans sous-ligne : label en `Flexible` (rendu historique, 2 lignes,
-          // anti-débordement). Avec sous-ligne : label compact (1 ligne) +
-          // sous-ligne discrète (ex. « 510 élève-jours »), carte plus haute.
+          // Sans sous-ligne : label sur deux lignes au plus. Avec sous-ligne :
+          // label compact (1 ligne) + sous-ligne discrète (ex. « 510
+          // élève-jours »), sur une carte plus haute.
           if (data.subline == null)
-            Flexible(
-              child: Text(
-                data.label,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            Text(
+              data.label,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             )
           else ...[
             Text(

@@ -41,6 +41,10 @@ class RecouvrementPerimeterCard extends StatelessWidget {
   /// Le taux de guichet en vigueur, ou `null` si l'école n'en a posé aucun.
   final ExchangeRate? exchangeRate;
 
+  /// Le titre que l'école donne à chaque nature, quand l'appareil le connaît.
+  /// Une nature absente retombe sur son libellé localisé.
+  final Map<String, String> feeLabels;
+
   const RecouvrementPerimeterCard({
     super.key,
     required this.feeCodes,
@@ -53,6 +57,7 @@ class RecouvrementPerimeterCard extends StatelessWidget {
     this.concernedCount,
     this.unbilled,
     this.exchangeRate,
+    this.feeLabels = const <String, String>{},
   });
 
   @override
@@ -64,6 +69,7 @@ class RecouvrementPerimeterCard extends StatelessWidget {
       selected: selectedFeeCodes,
       onChanged: onFeeCodesChanged,
       enabled: enabled,
+      labels: feeLabels,
     );
 
     final scope = EteeloSelectInput<String>(

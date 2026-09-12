@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT — splash screen'**
   String get splashSemanticsLabel;
 
+  /// Accessibilité : le sceau de l'établissement, servi à la place du symbole ETEELO sur les surfaces de marque (bandeau d'accueil, tête de la barre latérale)
+  ///
+  /// In en, this message translates to:
+  /// **'School logo'**
+  String get schoolLogoSemanticsLabel;
+
   /// Banner: session opened offline (ADR-010)
   ///
   /// In en, this message translates to:
@@ -6032,34 +6038,96 @@ abstract class AppLocalizations {
   /// **'All cycles'**
   String get feeControlDashboardCycleAll;
 
-  /// No description provided for @feeControlDashboardRankingTitle.
+  /// No description provided for @recouvrementCyclesTitle.
   ///
   /// In en, this message translates to:
   /// **'Where each level stands'**
-  String get feeControlDashboardRankingTitle;
+  String get recouvrementCyclesTitle;
 
-  /// No description provided for @feeControlDashboardRankingHint.
+  /// No description provided for @recouvrementCyclesHint.
   ///
   /// In en, this message translates to:
-  /// **'The levels furthest behind come first.'**
-  String get feeControlDashboardRankingHint;
+  /// **'By cycle, in the school\'s order. Open a cycle to see its levels.'**
+  String get recouvrementCyclesHint;
 
-  /// No description provided for @feeControlDashboardGroupTally.
+  /// Last group of “Where each level stands”: charges without a level, or on a level this device's reference data does not know.
   ///
   /// In en, this message translates to:
-  /// **'{settled} of {total}'**
-  String feeControlDashboardGroupTally(int settled, int total);
+  /// **'Not linked to a cycle'**
+  String get recouvrementCycleUnplaced;
 
-  /// No description provided for @feeControlDashboardGroupA11y.
+  /// No description provided for @recouvrementCycleExpand.
   ///
   /// In en, this message translates to:
-  /// **'{level}: {percent}% settled, {settled} of {total} students concerned'**
-  String feeControlDashboardGroupA11y(
-    String level,
-    int percent,
+  /// **'Show the levels of this cycle'**
+  String get recouvrementCycleExpand;
+
+  /// No description provided for @recouvrementCycleCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the levels'**
+  String get recouvrementCycleCollapse;
+
+  /// Green part of the three-colour bar: students who paid the selected fees in full.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fully paid'**
+  String recouvrementCountSettled(int count);
+
+  /// Yellow part of the three-colour bar: students who paid part of the selected fees.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} partly paid'**
+  String recouvrementCountPartial(int count);
+
+  /// Red part of the three-colour bar: students who paid nothing on the selected fees.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} paid nothing'**
+  String recouvrementCountNone(int count);
+
+  /// No description provided for @recouvrementCountTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} student} other{{count} students}}'**
+  String recouvrementCountTotal(int count);
+
+  /// Share of students who paid in full, at the end of the cycle or level name.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String recouvrementSettledPercent(int percent);
+
+  /// No description provided for @recouvrementBreakdownA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {settled} of {total} students paid in full ({percent}%), {partial} partly, {none} nothing'**
+  String recouvrementBreakdownA11y(
+    String name,
     int settled,
     int total,
+    int percent,
+    int partial,
+    int none,
   );
+
+  /// Tooltip of a level row's eye: opens the per-student control on that level.
+  ///
+  /// In en, this message translates to:
+  /// **'View details: {level}'**
+  String recouvrementLevelView(String level);
+
+  /// Tooltip of the back arrow on the per-student control opened from the dashboard: leaves it and returns to the dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the dashboard'**
+  String get recouvrementControlBack;
+
+  /// Tooltip of the back arrow on Billing opened outside the menu — from the per-student control: returns to the previous screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get facturationOffShellBack;
 
   /// No description provided for @feeControlDashboardLevelUnknown.
   ///
@@ -6097,48 +6165,6 @@ abstract class AppLocalizations {
   /// **'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.'**
   String get feeControlDashboardEmptyDescription;
 
-  /// No description provided for @feeControlDashboardExpand.
-  ///
-  /// In en, this message translates to:
-  /// **'Show the classes of this level'**
-  String get feeControlDashboardExpand;
-
-  /// No description provided for @feeControlDashboardCollapse.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide the classes'**
-  String get feeControlDashboardCollapse;
-
-  /// No description provided for @feeControlDashboardUnassigned.
-  ///
-  /// In en, this message translates to:
-  /// **'Unassigned'**
-  String get feeControlDashboardUnassigned;
-
-  /// No description provided for @feeControlDashboardClassesLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading this level’s classes…'**
-  String get feeControlDashboardClassesLoading;
-
-  /// No description provided for @feeControlDashboardClassroomsMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'The class composition for this level has not reached this device. Sync, then reopen the level.'**
-  String get feeControlDashboardClassroomsMissing;
-
-  /// No description provided for @feeControlDashboardClassroomsWithheld.
-  ///
-  /// In en, this message translates to:
-  /// **'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.'**
-  String get feeControlDashboardClassroomsWithheld;
-
-  /// No description provided for @feeControlDashboardClassesFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The classes of this level could not be read on this device.'**
-  String get feeControlDashboardClassesFailed;
-
   /// No description provided for @feeControlDashboardUnbilled.
   ///
   /// In en, this message translates to:
@@ -6150,12 +6176,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Left to collect: {amounts}'**
   String feeControlDashboardRemaining(String amounts);
-
-  /// No description provided for @feeControlDashboardOpenControl.
-  ///
-  /// In en, this message translates to:
-  /// **'View students'**
-  String get feeControlDashboardOpenControl;
 
   /// Criteria chip recalling the controlled fee.
   ///
@@ -14784,106 +14804,179 @@ abstract class AppLocalizations {
   /// **'Open pre-enrolments'**
   String get enrollmentDashboardInsightPreAction;
 
-  /// No description provided for @enrollmentDashboardDayListTitle.
+  /// No description provided for @enrollmentDashboardEntriesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Named list for the day'**
-  String get enrollmentDashboardDayListTitle;
+  /// **'Named list of enrolled students'**
+  String get enrollmentDashboardEntriesTitle;
 
-  /// No description provided for @enrollmentDashboardDayListSubtitle.
+  /// No description provided for @enrollmentDashboardEntriesSubtitleDay.
   ///
   /// In en, this message translates to:
-  /// **'Students enrolled {day}'**
-  String enrollmentDashboardDayListSubtitle(String day);
+  /// **'Students enrolled on {day}'**
+  String enrollmentDashboardEntriesSubtitleDay(String day);
 
-  /// No description provided for @enrollmentDashboardDayListColumnHour.
+  /// No description provided for @enrollmentDashboardEntriesSubtitleWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled this week'**
+  String get enrollmentDashboardEntriesSubtitleWeek;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled this month'**
+  String get enrollmentDashboardEntriesSubtitleMonth;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled over school year {schoolYear}'**
+  String enrollmentDashboardEntriesSubtitleYear(String schoolYear);
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleSinceOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled since enrolment opened'**
+  String get enrollmentDashboardEntriesSubtitleSinceOpening;
+
+  /// No description provided for @enrollmentDashboardEntriesSubtitleRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Students enrolled from {from} to {to}'**
+  String enrollmentDashboardEntriesSubtitleRange(String from, String to);
+
+  /// No description provided for @enrollmentDashboardEntriesColumnHour.
   ///
   /// In en, this message translates to:
   /// **'Time'**
-  String get enrollmentDashboardDayListColumnHour;
+  String get enrollmentDashboardEntriesColumnHour;
 
-  /// No description provided for @enrollmentDashboardDayListColumnStudent.
+  /// No description provided for @enrollmentDashboardEntriesColumnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get enrollmentDashboardEntriesColumnDate;
+
+  /// No description provided for @enrollmentDashboardEntriesColumnStudent.
   ///
   /// In en, this message translates to:
   /// **'Student'**
-  String get enrollmentDashboardDayListColumnStudent;
+  String get enrollmentDashboardEntriesColumnStudent;
 
-  /// No description provided for @enrollmentDashboardDayListColumnLevel.
+  /// No description provided for @enrollmentDashboardEntriesColumnLevel.
   ///
   /// In en, this message translates to:
   /// **'Level'**
-  String get enrollmentDashboardDayListColumnLevel;
+  String get enrollmentDashboardEntriesColumnLevel;
 
-  /// No description provided for @enrollmentDashboardDayListColumnType.
+  /// No description provided for @enrollmentDashboardEntriesColumnType.
   ///
   /// In en, this message translates to:
   /// **'Type'**
-  String get enrollmentDashboardDayListColumnType;
+  String get enrollmentDashboardEntriesColumnType;
 
-  /// No description provided for @enrollmentDashboardDayListColumnRecordedBy.
+  /// No description provided for @enrollmentDashboardEntriesColumnRecordedBy.
   ///
   /// In en, this message translates to:
   /// **'Recorded by'**
-  String get enrollmentDashboardDayListColumnRecordedBy;
+  String get enrollmentDashboardEntriesColumnRecordedBy;
 
-  /// No description provided for @enrollmentDashboardDayListUnit.
+  /// No description provided for @enrollmentDashboardEntriesUnit.
   ///
   /// In en, this message translates to:
   /// **'enrolment'**
-  String get enrollmentDashboardDayListUnit;
+  String get enrollmentDashboardEntriesUnit;
 
-  /// No description provided for @enrollmentDashboardDayListCount.
+  /// No description provided for @enrollmentDashboardEntriesCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 enrolment} other{{count} enrolments}}'**
-  String enrollmentDashboardDayListCount(int count);
+  String enrollmentDashboardEntriesCount(int count);
 
-  /// No description provided for @enrollmentDashboardDayListUnknownAgent.
+  /// No description provided for @enrollmentDashboardEntriesUnknownAgent.
   ///
   /// In en, this message translates to:
   /// **'—'**
-  String get enrollmentDashboardDayListUnknownAgent;
+  String get enrollmentDashboardEntriesUnknownAgent;
 
-  /// No description provided for @enrollmentDashboardDayListNoHour.
+  /// No description provided for @enrollmentDashboardEntriesNoHour.
   ///
   /// In en, this message translates to:
   /// **'—'**
-  String get enrollmentDashboardDayListNoHour;
+  String get enrollmentDashboardEntriesNoHour;
 
-  /// No description provided for @enrollmentDashboardDayListLoading.
+  /// No description provided for @enrollmentDashboardEntriesLoading.
   ///
   /// In en, this message translates to:
-  /// **'Loading the day\'s list'**
-  String get enrollmentDashboardDayListLoading;
+  /// **'Loading the list of enrolled students'**
+  String get enrollmentDashboardEntriesLoading;
 
-  /// No description provided for @enrollmentDashboardDayListEmpty.
+  /// No description provided for @enrollmentDashboardEntriesEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No enrolment recorded on that day.'**
-  String get enrollmentDashboardDayListEmpty;
+  /// **'No enrolment recorded over this period.'**
+  String get enrollmentDashboardEntriesEmpty;
 
-  /// No description provided for @enrollmentDashboardDayListForbidden.
+  /// No description provided for @enrollmentDashboardEntriesForbidden.
   ///
   /// In en, this message translates to:
   /// **'You are not allowed to view the named list. Analytics remain available.'**
-  String get enrollmentDashboardDayListForbidden;
+  String get enrollmentDashboardEntriesForbidden;
 
-  /// No description provided for @enrollmentDashboardDayListError.
+  /// No description provided for @enrollmentDashboardEntriesError.
   ///
   /// In en, this message translates to:
-  /// **'The day\'s list could not be loaded.'**
-  String get enrollmentDashboardDayListError;
+  /// **'The list of enrolled students could not be loaded.'**
+  String get enrollmentDashboardEntriesError;
 
-  /// No description provided for @enrollmentDashboardDayListRowA11y.
+  /// No description provided for @enrollmentDashboardEntriesReportTooltip.
   ///
   /// In en, this message translates to:
-  /// **'{name}, {gender}, {level}, {type}'**
-  String enrollmentDashboardDayListRowA11y(
-    String name,
-    String gender,
-    String level,
-    String type,
-  );
+  /// **'Download the period\'s list of enrolled students as PDF'**
+  String get enrollmentDashboardEntriesReportTooltip;
+
+  /// No description provided for @enrollmentDashboardEntriesReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get enrollmentDashboardEntriesReportPreparing;
+
+  /// No description provided for @enrollmentDashboardEntriesReportWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get enrollmentDashboardEntriesReportWaiting;
+
+  /// No description provided for @enrollmentDashboardEntriesReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, one{A document is already being prepared. Try again in 1 second.} other{A document is already being prepared. Try again in {seconds} seconds.}}'**
+  String enrollmentDashboardEntriesReportBusy(int seconds);
+
+  /// No description provided for @enrollmentDashboardEntriesReportForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The named list requires the enrolment-read permission.'**
+  String get enrollmentDashboardEntriesReportForbidden;
+
+  /// No description provided for @enrollmentDashboardEntriesReportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This period holds {lines} enrolments; the document is capped at {cap}. Narrow the period.'**
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap);
+
+  /// No description provided for @enrollmentDashboardEntriesReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be produced.'**
+  String get enrollmentDashboardEntriesReportFailed;
+
+  /// No description provided for @enrollmentDashboardEntriesReportHandoffFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is ready, but printing could not be opened.'**
+  String get enrollmentDashboardEntriesReportHandoffFailed;
 
   /// No description provided for @enrollmentDashboardExportPdf.
   ///
@@ -14891,39 +14984,11 @@ abstract class AppLocalizations {
   /// **'PDF'**
   String get enrollmentDashboardExportPdf;
 
-  /// No description provided for @enrollmentDashboardExportCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV'**
-  String get enrollmentDashboardExportCsv;
-
   /// No description provided for @enrollmentDashboardExportPdfTooltip.
   ///
   /// In en, this message translates to:
   /// **'Export the breakdown by level as PDF'**
   String get enrollmentDashboardExportPdfTooltip;
-
-  /// No description provided for @enrollmentDashboardExportCsvTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy the day\'s list as CSV'**
-  String get enrollmentDashboardExportCsvTooltip;
-
-  /// No description provided for @enrollmentDashboardDayPdfSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'School year {schoolYear} · {day}'**
-  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day);
-
-  /// No description provided for @enrollmentDashboardDayPdfFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}'**
-  String enrollmentDashboardDayPdfFooter(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-  );
 
   /// No description provided for @enrollmentDashboardPdfOvertitle.
   ///
@@ -14976,42 +15041,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The PDF export did not complete. Try again.'**
   String get enrollmentDashboardPdfFailed;
-
-  /// No description provided for @enrollmentDashboardCsvColumnLastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last name'**
-  String get enrollmentDashboardCsvColumnLastName;
-
-  /// No description provided for @enrollmentDashboardCsvColumnFirstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First name'**
-  String get enrollmentDashboardCsvColumnFirstName;
-
-  /// No description provided for @enrollmentDashboardCsvColumnGender.
-  ///
-  /// In en, this message translates to:
-  /// **'Sex'**
-  String get enrollmentDashboardCsvColumnGender;
-
-  /// No description provided for @enrollmentDashboardCsvColumnStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get enrollmentDashboardCsvColumnStatus;
-
-  /// No description provided for @enrollmentDashboardCsvCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Day list copied as CSV ({fileName})'**
-  String enrollmentDashboardCsvCopied(String fileName);
-
-  /// No description provided for @enrollmentDashboardCsvFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Copying the list did not complete. Try again.'**
-  String get enrollmentDashboardCsvFailed;
 
   /// No description provided for @recouvrementFeePickerLabel.
   ///

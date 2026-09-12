@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
+import 'package:school_app_flutter/features/school/presentation/widget/school_brand_mark.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarHeaderExpanded extends StatelessWidget {
@@ -14,6 +15,7 @@ class SidebarHeaderExpanded extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final logo = SchoolBrandMark.logoOf(context);
     final schoolAppLabel = l10n.schoolApp.trim();
     final sidebarTitle = schoolAppLabel.contains(' ')
         ? schoolAppLabel.replaceFirst(RegExp(r'\s+'), '\n')
@@ -22,7 +24,28 @@ class SidebarHeaderExpanded extends StatelessWidget {
     return Row(
       key: const ValueKey('expanded'),
       children: [
-        const EteeloLogo(variant: EteeloLogoVariant.symbolOnDark, size: 36),
+        // Dépliée, la marque n'a pas de vignette : celle-ci n'apparaît que
+        // sous un sceau d'école, pour le détacher du Bleu Profond. Sous le
+        // symbole ETEELO, elle reste transparente — une pastille sous lui se
+        // lirait comme un cerne.
+        SizedBox(
+          width: HomeNavigationUiTokens.sidebarBrandExpandedSize,
+          height: HomeNavigationUiTokens.sidebarBrandExpandedSize,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: SchoolBrandMark.plateColor(logo, idle: Colors.transparent),
+              borderRadius: AppRadius.brSm,
+            ),
+            child: Center(
+              child: SchoolBrandMark(
+                logo: logo,
+                size: logo == null
+                    ? HomeNavigationUiTokens.sidebarBrandExpandedSize
+                    : HomeNavigationUiTokens.sidebarBrandExpandedSchoolLogoSize,
+              ),
+            ),
+          ),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(

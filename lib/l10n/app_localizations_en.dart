@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
 
   @override
+  String get schoolLogoSemanticsLabel => 'School logo';
+
+  @override
   String get sessionOfflineBanner => 'Offline session — verified locally';
 
   @override
@@ -3664,26 +3667,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feeControlDashboardCycleAll => 'All cycles';
 
   @override
-  String get feeControlDashboardRankingTitle => 'Where each level stands';
+  String get recouvrementCyclesTitle => 'Where each level stands';
 
   @override
-  String get feeControlDashboardRankingHint =>
-      'The levels furthest behind come first.';
+  String get recouvrementCyclesHint =>
+      'By cycle, in the school\'s order. Open a cycle to see its levels.';
 
   @override
-  String feeControlDashboardGroupTally(int settled, int total) {
-    return '$settled of $total';
+  String get recouvrementCycleUnplaced => 'Not linked to a cycle';
+
+  @override
+  String get recouvrementCycleExpand => 'Show the levels of this cycle';
+
+  @override
+  String get recouvrementCycleCollapse => 'Hide the levels';
+
+  @override
+  String recouvrementCountSettled(int count) {
+    return '$count fully paid';
   }
 
   @override
-  String feeControlDashboardGroupA11y(
-    String level,
-    int percent,
+  String recouvrementCountPartial(int count) {
+    return '$count partly paid';
+  }
+
+  @override
+  String recouvrementCountNone(int count) {
+    return '$count paid nothing';
+  }
+
+  @override
+  String recouvrementCountTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recouvrementSettledPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String recouvrementBreakdownA11y(
+    String name,
     int settled,
     int total,
+    int percent,
+    int partial,
+    int none,
   ) {
-    return '$level: $percent% settled, $settled of $total students concerned';
+    return '$name: $settled of $total students paid in full ($percent%), $partial partly, $none nothing';
   }
+
+  @override
+  String recouvrementLevelView(String level) {
+    return 'View details: $level';
+  }
+
+  @override
+  String get recouvrementControlBack => 'Back to the dashboard';
+
+  @override
+  String get facturationOffShellBack => 'Back';
 
   @override
   String get feeControlDashboardLevelUnknown => 'Level not recorded';
@@ -3707,31 +3758,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.';
 
   @override
-  String get feeControlDashboardExpand => 'Show the classes of this level';
-
-  @override
-  String get feeControlDashboardCollapse => 'Hide the classes';
-
-  @override
-  String get feeControlDashboardUnassigned => 'Unassigned';
-
-  @override
-  String get feeControlDashboardClassesLoading =>
-      'Loading this level’s classes…';
-
-  @override
-  String get feeControlDashboardClassroomsMissing =>
-      'The class composition for this level has not reached this device. Sync, then reopen the level.';
-
-  @override
-  String get feeControlDashboardClassroomsWithheld =>
-      'Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.';
-
-  @override
-  String get feeControlDashboardClassesFailed =>
-      'The classes of this level could not be read on this device.';
-
-  @override
   String feeControlDashboardUnbilled(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3746,9 +3772,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String feeControlDashboardRemaining(String amounts) {
     return 'Left to collect: $amounts';
   }
-
-  @override
-  String get feeControlDashboardOpenControl => 'View students';
 
   @override
   String feeControlCriteriaFee(String label) {
@@ -9212,33 +9235,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentDashboardInsightPreAction => 'Open pre-enrolments';
 
   @override
-  String get enrollmentDashboardDayListTitle => 'Named list for the day';
+  String get enrollmentDashboardEntriesTitle =>
+      'Named list of enrolled students';
 
   @override
-  String enrollmentDashboardDayListSubtitle(String day) {
-    return 'Students enrolled $day';
+  String enrollmentDashboardEntriesSubtitleDay(String day) {
+    return 'Students enrolled on $day';
   }
 
   @override
-  String get enrollmentDashboardDayListColumnHour => 'Time';
+  String get enrollmentDashboardEntriesSubtitleWeek =>
+      'Students enrolled this week';
 
   @override
-  String get enrollmentDashboardDayListColumnStudent => 'Student';
+  String get enrollmentDashboardEntriesSubtitleMonth =>
+      'Students enrolled this month';
 
   @override
-  String get enrollmentDashboardDayListColumnLevel => 'Level';
+  String enrollmentDashboardEntriesSubtitleYear(String schoolYear) {
+    return 'Students enrolled over school year $schoolYear';
+  }
 
   @override
-  String get enrollmentDashboardDayListColumnType => 'Type';
+  String get enrollmentDashboardEntriesSubtitleSinceOpening =>
+      'Students enrolled since enrolment opened';
 
   @override
-  String get enrollmentDashboardDayListColumnRecordedBy => 'Recorded by';
+  String enrollmentDashboardEntriesSubtitleRange(String from, String to) {
+    return 'Students enrolled from $from to $to';
+  }
 
   @override
-  String get enrollmentDashboardDayListUnit => 'enrolment';
+  String get enrollmentDashboardEntriesColumnHour => 'Time';
 
   @override
-  String enrollmentDashboardDayListCount(int count) {
+  String get enrollmentDashboardEntriesColumnDate => 'Date';
+
+  @override
+  String get enrollmentDashboardEntriesColumnStudent => 'Student';
+
+  @override
+  String get enrollmentDashboardEntriesColumnLevel => 'Level';
+
+  @override
+  String get enrollmentDashboardEntriesColumnType => 'Type';
+
+  @override
+  String get enrollmentDashboardEntriesColumnRecordedBy => 'Recorded by';
+
+  @override
+  String get enrollmentDashboardEntriesUnit => 'enrolment';
+
+  @override
+  String enrollmentDashboardEntriesCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -9249,69 +9298,72 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get enrollmentDashboardDayListUnknownAgent => '—';
+  String get enrollmentDashboardEntriesUnknownAgent => '—';
 
   @override
-  String get enrollmentDashboardDayListNoHour => '—';
+  String get enrollmentDashboardEntriesNoHour => '—';
 
   @override
-  String get enrollmentDashboardDayListLoading => 'Loading the day\'s list';
+  String get enrollmentDashboardEntriesLoading =>
+      'Loading the list of enrolled students';
 
   @override
-  String get enrollmentDashboardDayListEmpty =>
-      'No enrolment recorded on that day.';
+  String get enrollmentDashboardEntriesEmpty =>
+      'No enrolment recorded over this period.';
 
   @override
-  String get enrollmentDashboardDayListForbidden =>
+  String get enrollmentDashboardEntriesForbidden =>
       'You are not allowed to view the named list. Analytics remain available.';
 
   @override
-  String get enrollmentDashboardDayListError =>
-      'The day\'s list could not be loaded.';
+  String get enrollmentDashboardEntriesError =>
+      'The list of enrolled students could not be loaded.';
 
   @override
-  String enrollmentDashboardDayListRowA11y(
-    String name,
-    String gender,
-    String level,
-    String type,
-  ) {
-    return '$name, $gender, $level, $type';
+  String get enrollmentDashboardEntriesReportTooltip =>
+      'Download the period\'s list of enrolled students as PDF';
+
+  @override
+  String get enrollmentDashboardEntriesReportPreparing => 'Preparing…';
+
+  @override
+  String get enrollmentDashboardEntriesReportWaiting => 'Please wait…';
+
+  @override
+  String enrollmentDashboardEntriesReportBusy(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other:
+          'A document is already being prepared. Try again in $seconds seconds.',
+      one: 'A document is already being prepared. Try again in 1 second.',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get enrollmentDashboardEntriesReportForbidden =>
+      'The named list requires the enrolment-read permission.';
+
+  @override
+  String enrollmentDashboardEntriesReportTooLarge(int lines, int cap) {
+    return 'This period holds $lines enrolments; the document is capped at $cap. Narrow the period.';
+  }
+
+  @override
+  String get enrollmentDashboardEntriesReportFailed =>
+      'The document could not be produced.';
+
+  @override
+  String get enrollmentDashboardEntriesReportHandoffFailed =>
+      'The document is ready, but printing could not be opened.';
 
   @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override
-  String get enrollmentDashboardExportCsv => 'CSV';
-
-  @override
   String get enrollmentDashboardExportPdfTooltip =>
       'Export the breakdown by level as PDF';
-
-  @override
-  String get enrollmentDashboardExportCsvTooltip =>
-      'Copy the day\'s list as CSV';
-
-  @override
-  String enrollmentDashboardDayPdfSubtitle(String schoolYear, String day) {
-    return 'School year $schoolYear · $day';
-  }
-
-  @override
-  String enrollmentDashboardDayPdfFooter(
-    int rowCount,
-    String schoolYear,
-    String generatedOn,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      rowCount,
-      locale: localeName,
-      other: '$rowCount enrolments',
-      one: '1 enrolment',
-    );
-    return '$_temp0 · school year $schoolYear · generated on $generatedOn';
-  }
 
   @override
   String get enrollmentDashboardPdfOvertitle => 'ETEELO CONNECT · Enrolments';
@@ -9351,27 +9403,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentDashboardPdfFailed =>
       'The PDF export did not complete. Try again.';
-
-  @override
-  String get enrollmentDashboardCsvColumnLastName => 'Last name';
-
-  @override
-  String get enrollmentDashboardCsvColumnFirstName => 'First name';
-
-  @override
-  String get enrollmentDashboardCsvColumnGender => 'Sex';
-
-  @override
-  String get enrollmentDashboardCsvColumnStatus => 'Status';
-
-  @override
-  String enrollmentDashboardCsvCopied(String fileName) {
-    return 'Day list copied as CSV ($fileName)';
-  }
-
-  @override
-  String get enrollmentDashboardCsvFailed =>
-      'Copying the list did not complete. Try again.';
 
   @override
   String get recouvrementFeePickerLabel => 'Selected fees';

@@ -77,16 +77,22 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
       final definitive = await _dao.findDefinitiveNumber(paymentId);
       final provisional = await _dao.findProvisionalNumber(paymentId);
-      // Le solde des SEULES devises que ce versement a touchées, détaillé par
-      // nature : imprimer une dette en francs sur un ticket réglé en dollars
-      // ferait lire au payeur un chiffre qui ne le concerne pas.
+      // Le solde des SEULS frais que ce versement a réglés, une ligne par
+      // (nature, devise) — exactement les clés de la répartition juste
+      // au-dessus. Un parent qui règle les frais divers vient chercher leur
+      // solde : lui imprimer celui du minerval, c'est lui faire lire une dette
+      // qu'il n'est pas venu payer, sur la pièce d'un versement qui ne la
+      // touche pas.
       //
-      // Les devises retenues sont celles des CRÉANCES touchées, pas des billets
-      // posés : un solde se dit dans la devise où la dette existe.
+      // La devise est celle des CRÉANCES touchées, pas des billets posés : un
+      // solde se dit dans la devise où la dette existe.
       final remaining = await _remainingByCharge(
         studentId: payment.studentId,
         academicYearId: payment.academicYearId,
-        currencies: payment.amounts.currencies,
+        paidFees: {
+          for (final allocation in allocations)
+            _feeKey(allocation.feeCode, allocation.currency),
+        },
       );
 
       return Right(
@@ -166,7 +172,8 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
     }
   }
 
-  /// Reste à payer de l'élève, **dans l'année ET la devise du versement**.
+  /// Reste à payer des **frais que ce versement a réglés**, dans l'année du
+  /// versement.
   ///
   /// Les deux filtres sont indispensables, pour deux raisons distinctes :
   ///
@@ -175,55 +182,52 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   ///   élève réinscrit verrait son arriéré N-1 additionné au reste dû N, et le
   ///   ticket imprimerait un solde différent de celui affiché à l'écran au même
   ///   instant — sur un papier remis à un parent ;
-  /// - **les devises du versement** : le solde ne porte que sur celles que ce
-  ///   paiement a touchées. Imprimer une dette en francs sur un ticket réglé en
-  ///   dollars ferait lire au payeur un chiffre qui ne le concerne pas. Et le
-  ///   sac les garde séparées : additionner deux unités produirait un chiffre
-  ///   faux.
+  /// - **les frais réglés** ([paidFees], clés `NATURE|DEVISE` de la
+  ///   répartition) : le ticket est la pièce de CE versement. Le filtre sur la
+  ///   seule devise qui vivait ici imprimait le minerval sous un versement de
+  ///   frais divers dès que les deux étaient en francs. La devise reste dans la
+  ///   clé : additionner deux unités produirait un chiffre faux.
   ///
-  /// `null` dès que la lecture échoue, que l'année est inconnue, ou qu'aucune
-  /// créance ne correspond : le ticket omet alors la ligne, ce qu'il sait faire.
   /// Le reste dû, **une ligne par (nature de frais, devise)**, dans l'ordre où
-  /// les créances remontent.
+  /// les créances remontent. La nature regroupe les tranches : c'est « le solde
+  /// du minerval » qui s'imprime, pas celui de sa deuxième tranche.
   ///
   /// Le nom vient de `ref_fee_code_sections` s'il existe, du libellé de la
   /// créance sinon — **la même règle que la ventilation juste au-dessus**, et
   /// c'est ce qui compte : deux noms pour un même frais sur le même papier
   /// feraient chercher au parent la différence entre eux.
   ///
-  /// Les frais **soldés sont absents**, jamais imprimés à zéro : même règle que
-  /// le bloc payeur, une mention à zéro se lit comme une mention effacée.
+  /// ⚠️ **Un frais soldé s'imprime À ZÉRO**, il n'est plus escamoté.
+  /// L'omission valait tant que le bloc listait tous les frais de l'élève ; il
+  /// ne porte plus que ceux que le parent vient de régler, et « 0 » est
+  /// précisément ce qu'il vient lire. Omis, le frais emporterait le bloc
+  /// entier au versement qui le solde — et un ticket sans solde se lit comme un
+  /// solde inconnu.
+  ///
+  /// Liste vide dès que la lecture échoue, que l'année est inconnue, ou
+  /// qu'aucune créance ne correspond : le ticket omet alors le bloc, ce qu'il
+  /// sait faire.
   Future<List<TicketAllocationLine>> _remainingByCharge({
     required String studentId,
     required String? academicYearId,
-    required Iterable<String> currencies,
+    required Set<String> paidFees,
   }) async {
     const empty = <TicketAllocationLine>[];
     if (academicYearId == null || academicYearId.isEmpty) return empty;
-    if (currencies.isEmpty) return empty;
+    if (paidFees.isEmpty) return empty;
 
     final charges = await _finance.getCharges(studentId);
     final titles = await _dao.feeSectionTitles();
-    final wanted = {
-      for (final currency in currencies) CurrencyCode.normalize(currency),
-    };
 
     return charges.fold<List<TicketAllocationLine>>((_) => empty, (list) {
-      // `belongsToYear` et pas une égalité stricte : une créance sans année
-      // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
-      // vivait ici imprimait une dette plus petite que celle de l'écran.
-      final matching = list
-          .where(
-            (c) =>
-                wanted.contains(CurrencyCode.normalize(c.currency)) &&
-                c.belongsToYear(academicYearId),
-          )
-          .toList(growable: false);
       final grouped = <String, TicketAllocationLine>{};
-      for (final c in matching) {
-        // Un frais soldé n'a rien à faire sur le papier.
-        if (c.optimisticRemainingInCents <= 0) continue;
-        final key = '${c.feeCode.toUpperCase()}|${c.currency}';
+      for (final c in list) {
+        // `belongsToYear` et pas une égalité stricte : une créance sans année
+        // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
+        // vivait ici imprimait une dette plus petite que celle de l'écran.
+        if (!c.belongsToYear(academicYearId)) continue;
+        final key = _feeKey(c.feeCode, c.currency);
+        if (!paidFees.contains(key)) continue;
         final existing = grouped[key];
         grouped[key] = TicketAllocationLine(
           // Premier nom du groupe, comme la ventilation : titre de section s'il
@@ -239,6 +243,14 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       return grouped.values.toList(growable: false);
     });
   }
+
+  /// La clé d'un frais sur le ticket : sa nature et sa devise, normalisées.
+  ///
+  /// Partagée par la répartition (ce que le versement a réglé) et les créances
+  /// (ce qu'il en reste) : une casse ou une espace de trop d'un seul côté
+  /// ferait sortir du solde le frais même qui vient d'être payé.
+  static String _feeKey(String feeCode, String currency) =>
+      '${feeCode.trim().toUpperCase()}|${CurrencyCode.normalize(currency)}';
 
   /// `paid_at` est une date terrain ISO-8601, écrite en **UTC** à
   /// l'encaissement. Le ticket doit porter l'heure du GUICHET : sans

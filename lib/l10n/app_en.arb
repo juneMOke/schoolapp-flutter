@@ -49,6 +49,10 @@
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplify your school management",
   "splashSemanticsLabel": "ETEELO CONNECT — splash screen",
+  "schoolLogoSemanticsLabel": "School logo",
+  "@schoolLogoSemanticsLabel": {
+    "description": "Accessibilité : le sceau de l'établissement, servi à la place du symbole ETEELO sur les surfaces de marque (bandeau d'accueil, tête de la barre latérale)"
+  },
   "sessionOfflineBanner": "Offline session — verified locally",
   "@sessionOfflineBanner": {
     "description": "Banner: session opened offline (ADR-010)"
@@ -2477,35 +2481,97 @@
   "feeControlEmptyNoEnrollmentForLevel": "No student enrolled at this level on this device. If enrolments were entered elsewhere, sync and run the control again.",
   "feeControlNoChargeForLevelDescription": "No student at this level carries this fee: it has not been generated for them yet, or it does not apply to them.",
   "feeControlDashboardCycleAll": "All cycles",
-  "feeControlDashboardRankingTitle": "Where each level stands",
-  "feeControlDashboardRankingHint": "The levels furthest behind come first.",
-  "feeControlDashboardGroupTally": "{settled} of {total}",
-  "@feeControlDashboardGroupTally": {
+  "recouvrementCyclesTitle": "Where each level stands",
+  "recouvrementCyclesHint": "By cycle, in the school's order. Open a cycle to see its levels.",
+  "recouvrementCycleUnplaced": "Not linked to a cycle",
+  "@recouvrementCycleUnplaced": {
+    "description": "Last group of “Where each level stands”: charges without a level, or on a level this device's reference data does not know."
+  },
+  "recouvrementCycleExpand": "Show the levels of this cycle",
+  "recouvrementCycleCollapse": "Hide the levels",
+  "recouvrementCountSettled": "{count} fully paid",
+  "@recouvrementCountSettled": {
+    "description": "Green part of the three-colour bar: students who paid the selected fees in full.",
     "placeholders": {
-      "settled": {
-        "type": "int"
-      },
-      "total": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "feeControlDashboardGroupA11y": "{level}: {percent}% settled, {settled} of {total} students concerned",
-  "@feeControlDashboardGroupA11y": {
+  "recouvrementCountPartial": "{count} partly paid",
+  "@recouvrementCountPartial": {
+    "description": "Yellow part of the three-colour bar: students who paid part of the selected fees.",
     "placeholders": {
-      "level": {
-        "type": "String"
-      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountNone": "{count} paid nothing",
+  "@recouvrementCountNone": {
+    "description": "Red part of the three-colour bar: students who paid nothing on the selected fees.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountTotal": "{count, plural, one{{count} student} other{{count} students}}",
+  "@recouvrementCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSettledPercent": "{percent}%",
+  "@recouvrementSettledPercent": {
+    "description": "Share of students who paid in full, at the end of the cycle or level name.",
+    "placeholders": {
       "percent": {
         "type": "int"
+      }
+    }
+  },
+  "recouvrementBreakdownA11y": "{name}: {settled} of {total} students paid in full ({percent}%), {partial} partly, {none} nothing",
+  "@recouvrementBreakdownA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       },
       "settled": {
         "type": "int"
       },
       "total": {
         "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "partial": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
       }
     }
+  },
+  "recouvrementLevelView": "View details: {level}",
+  "@recouvrementLevelView": {
+    "description": "Tooltip of a level row's eye: opens the per-student control on that level.",
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementControlBack": "Back to the dashboard",
+  "@recouvrementControlBack": {
+    "description": "Tooltip of the back arrow on the per-student control opened from the dashboard: leaves it and returns to the dashboard."
+  },
+  "facturationOffShellBack": "Back",
+  "@facturationOffShellBack": {
+    "description": "Tooltip of the back arrow on Billing opened outside the menu — from the per-student control: returns to the previous screen."
   },
   "feeControlDashboardLevelUnknown": "Level not recorded",
   "feeControlDashboardLevelMissing": "Level missing from the reference data",
@@ -2513,13 +2579,6 @@
   "feeControlDashboardNoFeesDescription": "No charge exists on this device for this year. Sync, then reopen the dashboard.",
   "feeControlDashboardEmptyTitle": "No student concerned",
   "feeControlDashboardEmptyDescription": "Nobody carries this fee in this scope: it has not been generated yet, or it does not apply here.",
-  "feeControlDashboardExpand": "Show the classes of this level",
-  "feeControlDashboardCollapse": "Hide the classes",
-  "feeControlDashboardUnassigned": "Unassigned",
-  "feeControlDashboardClassesLoading": "Loading this level’s classes…",
-  "feeControlDashboardClassroomsMissing": "The class composition for this level has not reached this device. Sync, then reopen the level.",
-  "feeControlDashboardClassroomsWithheld": "Class composition belongs to a module this profile cannot access: the per-class breakdown is unavailable. The level itself stays readable.",
-  "feeControlDashboardClassesFailed": "The classes of this level could not be read on this device.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} enrolled student does not carry this fee} other{{count} enrolled students do not carry this fee}}",
   "@feeControlDashboardUnbilled": {
     "placeholders": {
@@ -2536,7 +2595,6 @@
       }
     }
   },
-  "feeControlDashboardOpenControl": "View students",
   "feeControlCriteriaFee": "Fee: {label}",
   "@feeControlCriteriaFee": {
     "description": "Criteria chip recalling the controlled fee.",
@@ -5841,81 +5899,85 @@
     }
   },
   "enrollmentDashboardInsightPreAction": "Open pre-enrolments",
-  "enrollmentDashboardDayListTitle": "Named list for the day",
-  "enrollmentDashboardDayListSubtitle": "Students enrolled {day}",
-  "@enrollmentDashboardDayListSubtitle": {
+  "enrollmentDashboardEntriesTitle": "Named list of enrolled students",
+  "enrollmentDashboardEntriesSubtitleDay": "Students enrolled on {day}",
+  "@enrollmentDashboardEntriesSubtitleDay": {
     "placeholders": {
       "day": {
         "type": "String"
       }
     }
   },
-  "enrollmentDashboardDayListColumnHour": "Time",
-  "enrollmentDashboardDayListColumnStudent": "Student",
-  "enrollmentDashboardDayListColumnLevel": "Level",
-  "enrollmentDashboardDayListColumnType": "Type",
-  "enrollmentDashboardDayListColumnRecordedBy": "Recorded by",
-  "enrollmentDashboardDayListUnit": "enrolment",
-  "enrollmentDashboardDayListCount": "{count, plural, =1{1 enrolment} other{{count} enrolments}}",
-  "@enrollmentDashboardDayListCount": {
+  "enrollmentDashboardEntriesSubtitleWeek": "Students enrolled this week",
+  "enrollmentDashboardEntriesSubtitleMonth": "Students enrolled this month",
+  "enrollmentDashboardEntriesSubtitleYear": "Students enrolled over school year {schoolYear}",
+  "@enrollmentDashboardEntriesSubtitleYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesSubtitleSinceOpening": "Students enrolled since enrolment opened",
+  "enrollmentDashboardEntriesSubtitleRange": "Students enrolled from {from} to {to}",
+  "@enrollmentDashboardEntriesSubtitleRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesColumnHour": "Time",
+  "enrollmentDashboardEntriesColumnDate": "Date",
+  "enrollmentDashboardEntriesColumnStudent": "Student",
+  "enrollmentDashboardEntriesColumnLevel": "Level",
+  "enrollmentDashboardEntriesColumnType": "Type",
+  "enrollmentDashboardEntriesColumnRecordedBy": "Recorded by",
+  "enrollmentDashboardEntriesUnit": "enrolment",
+  "enrollmentDashboardEntriesCount": "{count, plural, =1{1 enrolment} other{{count} enrolments}}",
+  "@enrollmentDashboardEntriesCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "enrollmentDashboardDayListUnknownAgent": "—",
-  "enrollmentDashboardDayListNoHour": "—",
-  "enrollmentDashboardDayListLoading": "Loading the day's list",
-  "enrollmentDashboardDayListEmpty": "No enrolment recorded on that day.",
-  "enrollmentDashboardDayListForbidden": "You are not allowed to view the named list. Analytics remain available.",
-  "enrollmentDashboardDayListError": "The day's list could not be loaded.",
-  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
-  "@enrollmentDashboardDayListRowA11y": {
+  "enrollmentDashboardEntriesUnknownAgent": "—",
+  "enrollmentDashboardEntriesNoHour": "—",
+  "enrollmentDashboardEntriesLoading": "Loading the list of enrolled students",
+  "enrollmentDashboardEntriesEmpty": "No enrolment recorded over this period.",
+  "enrollmentDashboardEntriesForbidden": "You are not allowed to view the named list. Analytics remain available.",
+  "enrollmentDashboardEntriesError": "The list of enrolled students could not be loaded.",
+  "enrollmentDashboardEntriesReportTooltip": "Download the period's list of enrolled students as PDF",
+  "enrollmentDashboardEntriesReportPreparing": "Preparing…",
+  "enrollmentDashboardEntriesReportWaiting": "Please wait…",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{A document is already being prepared. Try again in 1 second.} other{A document is already being prepared. Try again in {seconds} seconds.}}",
+  "@enrollmentDashboardEntriesReportBusy": {
     "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "gender": {
-        "type": "String"
-      },
-      "level": {
-        "type": "String"
-      },
-      "type": {
-        "type": "String"
+      "seconds": {
+        "type": "int"
       }
     }
   },
-  "enrollmentDashboardExportPdf": "PDF",
-  "enrollmentDashboardExportCsv": "CSV",
-  "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
-  "enrollmentDashboardExportCsvTooltip": "Copy the day's list as CSV",
-  "enrollmentDashboardDayPdfSubtitle": "School year {schoolYear} · {day}",
-  "@enrollmentDashboardDayPdfSubtitle": {
+  "enrollmentDashboardEntriesReportForbidden": "The named list requires the enrolment-read permission.",
+  "enrollmentDashboardEntriesReportTooLarge": "This period holds {lines} enrolments; the document is capped at {cap}. Narrow the period.",
+  "@enrollmentDashboardEntriesReportTooLarge": {
     "placeholders": {
-      "schoolYear": {
-        "type": "String"
-      },
-      "day": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 enrolment} other{{rowCount} enrolments}} · school year {schoolYear} · generated on {generatedOn}",
-  "@enrollmentDashboardDayPdfFooter": {
-    "placeholders": {
-      "rowCount": {
+      "lines": {
         "type": "int"
       },
-      "schoolYear": {
-        "type": "String"
-      },
-      "generatedOn": {
-        "type": "String"
+      "cap": {
+        "type": "int"
       }
     }
   },
+  "enrollmentDashboardEntriesReportFailed": "The document could not be produced.",
+  "enrollmentDashboardEntriesReportHandoffFailed": "The document is ready, but printing could not be opened.",
+  "enrollmentDashboardExportPdf": "PDF",
+  "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Enrolments",
   "enrollmentDashboardPdfTitle": "Breakdown by level",
   "enrollmentDashboardPdfSubtitle": "School year {schoolYear} · as of {generatedOn}",
@@ -5947,19 +6009,6 @@
   "enrollmentDashboardPdfColumnCycle": "Cycle",
   "enrollmentDashboardPdfColumnCount": "Enrolled",
   "enrollmentDashboardPdfFailed": "The PDF export did not complete. Try again.",
-  "enrollmentDashboardCsvColumnLastName": "Last name",
-  "enrollmentDashboardCsvColumnFirstName": "First name",
-  "enrollmentDashboardCsvColumnGender": "Sex",
-  "enrollmentDashboardCsvColumnStatus": "Status",
-  "enrollmentDashboardCsvCopied": "Day list copied as CSV ({fileName})",
-  "@enrollmentDashboardCsvCopied": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardCsvFailed": "Copying the list did not complete. Try again.",
   "recouvrementFeePickerLabel": "Selected fees",
   "recouvrementFeePickerA11yLabel": "Selected fees — multiple choice, at least one",
   "recouvrementFeeChipLockedA11y": "{fee} — only selected fee, cannot be unchecked",

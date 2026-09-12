@@ -49,6 +49,10 @@
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplifier la gestion de votre école",
   "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
+  "schoolLogoSemanticsLabel": "Logo de l'école",
+  "@schoolLogoSemanticsLabel": {
+    "description": "Accessibilité : le sceau de l'établissement, servi à la place du symbole ETEELO sur les surfaces de marque (bandeau d'accueil, tête de la barre latérale)"
+  },
   "sessionOfflineBanner": "Session hors-ligne — vérifiée localement",
   "@sessionOfflineBanner": {
     "description": "Bandeau : session ouverte hors ligne (ADR-010)"
@@ -2422,35 +2426,97 @@
   "feeControlEmptyNoEnrollmentForLevel": "Aucun élève inscrit à ce niveau sur cet appareil. Si des inscriptions viennent d'être saisies ailleurs, synchronisez puis relancez le contrôle.",
   "feeControlNoChargeForLevelDescription": "Aucun élève de ce niveau ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne leur est pas applicable.",
   "feeControlDashboardCycleAll": "Tous les cycles",
-  "feeControlDashboardRankingTitle": "Où en est chaque niveau",
-  "feeControlDashboardRankingHint": "Les niveaux les plus en retard d'abord.",
-  "feeControlDashboardGroupTally": "{settled} sur {total}",
-  "@feeControlDashboardGroupTally": {
+  "recouvrementCyclesTitle": "Où en est chaque niveau",
+  "recouvrementCyclesHint": "Par cycle, dans l'ordre de l'école. Ouvrez un cycle pour voir ses niveaux.",
+  "recouvrementCycleUnplaced": "Non rattachés à un cycle",
+  "@recouvrementCycleUnplaced": {
+    "description": "Dernier groupe de « Où en est chaque niveau » : les créances sans niveau, ou d'un niveau que le référentiel de l'appareil ne connaît pas."
+  },
+  "recouvrementCycleExpand": "Voir les niveaux de ce cycle",
+  "recouvrementCycleCollapse": "Masquer les niveaux",
+  "recouvrementCountSettled": "{count} tout payé",
+  "@recouvrementCountSettled": {
+    "description": "Part verte de la barre tricolore : élèves qui ont tout payé sur les frais retenus.",
     "placeholders": {
-      "settled": {
-        "type": "int"
-      },
-      "total": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "feeControlDashboardGroupA11y": "{level} : {percent} % en ordre, {settled} sur {total} élèves concernés",
-  "@feeControlDashboardGroupA11y": {
+  "recouvrementCountPartial": "{count} partiellement",
+  "@recouvrementCountPartial": {
+    "description": "Part jaune de la barre tricolore : élèves qui ont payé une partie des frais retenus.",
     "placeholders": {
-      "level": {
-        "type": "String"
-      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountNone": "{count} rien payé",
+  "@recouvrementCountNone": {
+    "description": "Part rouge de la barre tricolore : élèves qui n'ont rien payé sur les frais retenus.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementCountTotal": "{count, plural, one{{count} élève} other{{count} élèves}}",
+  "@recouvrementCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recouvrementSettledPercent": "{percent} %",
+  "@recouvrementSettledPercent": {
+    "description": "Part des élèves qui ont tout payé, au bout du nom du cycle ou du niveau.",
+    "placeholders": {
       "percent": {
         "type": "int"
+      }
+    }
+  },
+  "recouvrementBreakdownA11y": "{name} : {settled} sur {total} élèves ont tout payé ({percent} %), {partial} en partie, {none} rien",
+  "@recouvrementBreakdownA11y": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       },
       "settled": {
         "type": "int"
       },
       "total": {
         "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "partial": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
       }
     }
+  },
+  "recouvrementLevelView": "Voir le détail : {level}",
+  "@recouvrementLevelView": {
+    "description": "Infobulle de l'œil d'une ligne de niveau : ouvre le contrôle nominatif sur ce niveau.",
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "recouvrementControlBack": "Retour au tableau de bord",
+  "@recouvrementControlBack": {
+    "description": "Infobulle de la flèche de l'écran nominatif ouvert depuis le tableau de bord : le quitte et ramène au tableau de bord."
+  },
+  "facturationOffShellBack": "Retour",
+  "@facturationOffShellBack": {
+    "description": "Infobulle de la flèche de la Facturation ouverte hors du menu — depuis le contrôle nominatif : ramène à l'écran précédent."
   },
   "feeControlDashboardLevelUnknown": "Niveau non renseigné",
   "feeControlDashboardLevelMissing": "Niveau absent du référentiel",
@@ -2458,13 +2524,6 @@
   "feeControlDashboardNoFeesDescription": "Aucune créance n'existe sur cet appareil pour cette année. Synchronisez, puis rouvrez le tableau de bord.",
   "feeControlDashboardEmptyTitle": "Aucun élève concerné",
   "feeControlDashboardEmptyDescription": "Personne ne porte ce frais dans ce périmètre : il n'a pas encore été généré, ou il ne s'applique pas ici.",
-  "feeControlDashboardExpand": "Voir les classes de ce niveau",
-  "feeControlDashboardCollapse": "Masquer les classes",
-  "feeControlDashboardUnassigned": "Non répartis",
-  "feeControlDashboardClassesLoading": "Chargement des classes de ce niveau…",
-  "feeControlDashboardClassroomsMissing": "La composition des classes de ce niveau n'est pas descendue sur cet appareil. Synchronisez, puis rouvrez le niveau.",
-  "feeControlDashboardClassroomsWithheld": "La composition des classes relève d'un module auquel ce profil n'a pas accès : le détail par classe est indisponible. Le niveau, lui, reste lisible.",
-  "feeControlDashboardClassesFailed": "Les classes de ce niveau n'ont pas pu être lues sur cet appareil.",
   "feeControlDashboardUnbilled": "{count, plural, one{{count} élève inscrit ne porte pas ce frais} other{{count} élèves inscrits ne portent pas ce frais}}",
   "@feeControlDashboardUnbilled": {
     "placeholders": {
@@ -2481,7 +2540,6 @@
       }
     }
   },
-  "feeControlDashboardOpenControl": "Voir les élèves",
   "feeControlCriteriaFee": "Frais : {label}",
   "@feeControlCriteriaFee": {
     "description": "Puce de critère rappelant le frais contrôlé.",
@@ -5912,81 +5970,91 @@
     }
   },
   "enrollmentDashboardInsightPreAction": "Ouvrir les pré-inscriptions",
-  "enrollmentDashboardDayListTitle": "Liste nominative du jour",
-  "enrollmentDashboardDayListSubtitle": "Les élèves inscrits {day}",
-  "@enrollmentDashboardDayListSubtitle": {
+  "enrollmentDashboardEntriesTitle": "Liste nominative des inscrits",
+  "enrollmentDashboardEntriesSubtitleDay": "Élèves inscrits le {day}",
+  "@enrollmentDashboardEntriesSubtitleDay": {
     "placeholders": {
       "day": {
         "type": "String"
       }
     }
   },
-  "enrollmentDashboardDayListColumnHour": "Heure",
-  "enrollmentDashboardDayListColumnStudent": "Élève",
-  "enrollmentDashboardDayListColumnLevel": "Niveau",
-  "enrollmentDashboardDayListColumnType": "Type",
-  "enrollmentDashboardDayListColumnRecordedBy": "Enregistré par",
-  "enrollmentDashboardDayListUnit": "inscription",
-  "enrollmentDashboardDayListCount": "{count, plural, =1{1 inscription} other{{count} inscriptions}}",
-  "@enrollmentDashboardDayListCount": {
+  "enrollmentDashboardEntriesSubtitleWeek": "Élèves inscrits cette semaine",
+  "enrollmentDashboardEntriesSubtitleMonth": "Élèves inscrits ce mois-ci",
+  "enrollmentDashboardEntriesSubtitleYear": "Élèves inscrits sur l'année scolaire {schoolYear}",
+  "@enrollmentDashboardEntriesSubtitleYear": {
+    "description": "Fenêtre « année » : la liste s'y borne par année scolaire et non par dates — un dossier antidaté en fait partie. On nomme donc l'année, jamais deux bornes que la liste ne respecterait pas.",
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesSubtitleSinceOpening": "Élèves inscrits depuis l'ouverture des inscriptions",
+  "enrollmentDashboardEntriesSubtitleRange": "Élèves inscrits du {from} au {to}",
+  "@enrollmentDashboardEntriesSubtitleRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentDashboardEntriesColumnHour": "Heure",
+  "enrollmentDashboardEntriesColumnDate": "Date",
+  "@enrollmentDashboardEntriesColumnDate": {
+    "description": "Remplace la colonne Heure dès que la fenêtre dépasse une journée : l'heure seule ne situerait plus la ligne."
+  },
+  "enrollmentDashboardEntriesColumnStudent": "Élève",
+  "enrollmentDashboardEntriesColumnLevel": "Niveau",
+  "enrollmentDashboardEntriesColumnType": "Type",
+  "enrollmentDashboardEntriesColumnRecordedBy": "Enregistré par",
+  "enrollmentDashboardEntriesUnit": "inscription",
+  "enrollmentDashboardEntriesCount": "{count, plural, =1{1 inscription} other{{count} inscriptions}}",
+  "@enrollmentDashboardEntriesCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "enrollmentDashboardDayListUnknownAgent": "—",
-  "enrollmentDashboardDayListNoHour": "—",
-  "enrollmentDashboardDayListLoading": "Chargement de la liste du jour",
-  "enrollmentDashboardDayListEmpty": "Aucune inscription enregistrée ce jour-là.",
-  "enrollmentDashboardDayListForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
-  "enrollmentDashboardDayListError": "La liste du jour n'a pas pu être chargée.",
-  "enrollmentDashboardDayListRowA11y": "{name}, {gender}, {level}, {type}",
-  "@enrollmentDashboardDayListRowA11y": {
+  "enrollmentDashboardEntriesUnknownAgent": "—",
+  "enrollmentDashboardEntriesNoHour": "—",
+  "enrollmentDashboardEntriesLoading": "Chargement de la liste des inscrits",
+  "enrollmentDashboardEntriesEmpty": "Aucune inscription enregistrée sur cette période.",
+  "enrollmentDashboardEntriesForbidden": "Vous n'avez pas le droit de consulter la liste nominative. Le pilotage reste accessible.",
+  "enrollmentDashboardEntriesError": "La liste des inscrits n'a pas pu être chargée.",
+  "enrollmentDashboardEntriesReportTooltip": "Télécharger la liste des inscrits de la période en PDF",
+  "enrollmentDashboardEntriesReportPreparing": "Préparation…",
+  "enrollmentDashboardEntriesReportWaiting": "Patientez…",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans 1 seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "@enrollmentDashboardEntriesReportBusy": {
+    "description": "Le 429 du serveur : il ne compose qu'un document long à la fois, file partagée avec la caisse et la relance. La phrase n'accuse pas l'utilisateur — le rendu en cours peut être celui de quelqu'un d'autre.",
     "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "gender": {
-        "type": "String"
-      },
-      "level": {
-        "type": "String"
-      },
-      "type": {
-        "type": "String"
+      "seconds": {
+        "type": "int"
       }
     }
   },
-  "enrollmentDashboardExportPdf": "PDF",
-  "enrollmentDashboardExportCsv": "CSV",
-  "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
-  "enrollmentDashboardExportCsvTooltip": "Copier la liste du jour au format CSV",
-  "enrollmentDashboardDayPdfSubtitle": "Année scolaire {schoolYear} · {day}",
-  "@enrollmentDashboardDayPdfSubtitle": {
+  "enrollmentDashboardEntriesReportForbidden": "La liste nominative demande le droit de lecture des inscriptions.",
+  "enrollmentDashboardEntriesReportTooLarge": "Cette période compte {lines} inscriptions ; le document est plafonné à {cap}. Resserrez la période.",
+  "@enrollmentDashboardEntriesReportTooLarge": {
+    "description": "Le refus de plafond, écrit AVEC NOS MOTS et SES CHIFFRES : reconnu au `detailCode` REPORT_LINE_CAP, les deux nombres lus dans `details`. Aucune issue CSV n'est proposée — la liste nominative des inscriptions n'a pas d'export.",
     "placeholders": {
-      "schoolYear": {
-        "type": "String"
-      },
-      "day": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardDayPdfFooter": "{rowCount, plural, =1{1 inscription} other{{rowCount} inscriptions}} · année scolaire {schoolYear} · généré le {generatedOn}",
-  "@enrollmentDashboardDayPdfFooter": {
-    "placeholders": {
-      "rowCount": {
+      "lines": {
         "type": "int"
       },
-      "schoolYear": {
-        "type": "String"
-      },
-      "generatedOn": {
-        "type": "String"
+      "cap": {
+        "type": "int"
       }
     }
   },
+  "enrollmentDashboardEntriesReportFailed": "Le document n'a pas pu être produit.",
+  "enrollmentDashboardEntriesReportHandoffFailed": "Le document est prêt, mais l'impression n'a pas pu s'ouvrir.",
+  "enrollmentDashboardExportPdf": "PDF",
+  "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",
   "enrollmentDashboardPdfTitle": "Répartition par niveau",
   "enrollmentDashboardPdfSubtitle": "Année scolaire {schoolYear} · au {generatedOn}",
@@ -6018,19 +6086,6 @@
   "enrollmentDashboardPdfColumnCycle": "Cycle",
   "enrollmentDashboardPdfColumnCount": "Inscrits",
   "enrollmentDashboardPdfFailed": "L'export PDF n'a pas abouti. Réessayez.",
-  "enrollmentDashboardCsvColumnLastName": "Nom",
-  "enrollmentDashboardCsvColumnFirstName": "Prénom",
-  "enrollmentDashboardCsvColumnGender": "Sexe",
-  "enrollmentDashboardCsvColumnStatus": "Statut",
-  "enrollmentDashboardCsvCopied": "Liste du jour copiée au format CSV ({fileName})",
-  "@enrollmentDashboardCsvCopied": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "enrollmentDashboardCsvFailed": "La copie de la liste n'a pas abouti. Réessayez.",
   "recouvrementFeePickerLabel": "Frais retenus",
   "@recouvrementFeePickerLabel": {
     "description": "Titre du sélecteur de frais du tableau de bord Recouvrement"

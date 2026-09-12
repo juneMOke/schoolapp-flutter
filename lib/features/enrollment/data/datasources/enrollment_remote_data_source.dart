@@ -1,9 +1,13 @@
-import 'package:dio/dio.dart';
+import 'dart:typed_data';
+
+// `Headers` est déclaré par dio ET par retrofit : ici c'est l'annotation
+// retrofit qu'on veut, celle de dio est masquée.
+import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_detail_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/day_entries_page_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model/enrollment_entries_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_page_model.dart';
 
 part 'enrollment_remote_data_source.g.dart';
@@ -91,7 +95,7 @@ abstract class EnrollmentRemoteDataSource {
     @Query('to') String? to,
   );
 
-  /// Les inscriptions d'une journée, **nommément**.
+  /// Les inscriptions de la fenêtre, **nommément**.
   ///
   /// Endpoint distinct de l'agrégat, et pas seulement pour des raisons de
   /// pagination : il porte du nominatif et exige une **seconde permission**
@@ -99,16 +103,48 @@ abstract class EnrollmentRemoteDataSource {
   /// qui n'a que le pilotage reçoit 200 sur l'agrégat et 403 ici — c'est
   /// voulu, et c'est pourquoi cet appel vit dans son propre BLoC.
   ///
-  /// `date` est **requis** : la liste doit pouvoir servir n'importe quelle
-  /// journée, y compris une fenêtre libre dont les deux bornes coïncident.
+  /// **Les mêmes paramètres de fenêtre que l'agrégat**, avec les mêmes
+  /// exclusions (`date` avec `day` seul, `from`/`to` avec `custom` seul) : le
+  /// serveur dérive les deux fenêtres par le même code, et la liste ne peut
+  /// donc pas compter autre chose que la carte posée au-dessus d'elle. En
+  /// `period=year` notamment, elle se borne par année scolaire et non par
+  /// dates — un dossier antidaté en fait partie.
   ///
-  /// Le tri serveur est `(createdAt, id)`, donc la pagination est stable :
-  /// aucune ligne ne peut être sautée entre deux pages.
-  @GET(AppConstants.enrollmentDayEntriesEndpoint)
-  Future<DayEntriesPageModel> getDayEntries(
+  /// `sort` n'est jamais laissé au défaut du serveur : la table et son PDF
+  /// doivent lire dans le même ordre. Le tri `(createdAt, id)` est total, donc
+  /// la pagination est stable.
+  @GET(AppConstants.enrollmentEntriesEndpoint)
+  Future<EnrollmentEntriesPageModel> getEntries(
     @Extras() Map<String, dynamic> extras,
-    @Query('date') String date,
+    @Query('period') String period,
+    @Query('date') String? date,
+    @Query('from') String? from,
+    @Query('to') String? to,
     @Query('page') int page,
     @Query('size') int size,
+    @Query('sort') String sort,
+  );
+
+  /// Le **registre PDF** des inscrits de la fenêtre — mêmes paramètres et
+  /// même ordre que [getEntries], sans pagination.
+  ///
+  /// Réponse **binaire** : les octets du document, et son nom dans
+  /// `Content-Disposition`, que le serveur dérive des bornes réellement
+  /// retenues. `HttpResponse` plutôt que les seuls octets, pour pouvoir lire
+  /// cet en-tête.
+  ///
+  /// [options] porte le délai de réception : un registre d'une année dépasse
+  /// le délai de guichet du client.
+  @GET(AppConstants.enrollmentEntriesReportEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getEntriesReport(
+    @Extras() Map<String, dynamic> extras,
+    @Query('period') String period,
+    @Query('date') String? date,
+    @Query('from') String? from,
+    @Query('to') String? to,
+    @Query('sort') String sort,
+    @DioOptions() Options options,
   );
 }

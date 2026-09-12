@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
 
 /// Identité de l'établissement courant — lecture **100 % locale** du
 /// référentiel Inscription déjà pullé (`ref_school`). Aucun appel réseau : ce
@@ -13,4 +14,15 @@ abstract class SchoolRepository {
   /// de la session (device multi-école). C'est un état légitime, jamais un
   /// échec : l'appelant se rabat sur un libellé générique.
   Future<Either<Failure, School?>> loadCurrentSchool();
+
+  /// Le sceau de l'établissement de la session, `null` s'il n'y en a pas.
+  ///
+  /// `Right(null)` = pas de session, école sans logo, ou octets jamais tirés
+  /// (première installation encore hors ligne). C'est un état légitime, jamais
+  /// un échec : l'appelant se rabat sur le symbole ETEELO.
+  ///
+  /// ⚠️ Contrairement à [loadCurrentSchool], **aucune garde multi-école n'est
+  /// nécessaire ici** : `school_logo_cache` est clavetée par école, là où
+  /// `ref_school` est mono-ligne et peut décrire un autre établissement.
+  Future<Either<Failure, SchoolLogo?>> loadCurrentSchoolLogo();
 }

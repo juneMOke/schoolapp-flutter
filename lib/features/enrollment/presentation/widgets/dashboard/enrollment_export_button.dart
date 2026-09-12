@@ -6,14 +6,27 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 /// Un bouton de sortie : icône **et** libellé, contour, cible tactile 44 dp.
 ///
 /// Le libellé n'est pas décoratif — une icône seule laisse deviner ce qui va
-/// se produire, et deux icônes voisines (imprimer, tableur) se confondent.
-/// C'est ce qui permet au PDF de porter un glyphe de téléchargement sans se
-/// confondre avec le CSV : les deux s'appellent par leur nom.
+/// se produire, et deux icônes voisines se confondent. C'est ce qui permet au
+/// PDF de porter un glyphe de téléchargement sans ambiguïté : chaque bouton
+/// s'appelle par son nom.
+///
+/// ## Un bouton qui attend le dit
+///
+/// Le registre des inscrits est composé par le serveur, un document long à la
+/// fois : le bouton se **désarme** ([onPressed] nul) pendant le rendu et
+/// pendant l'attente d'un 429, et son libellé dit lequel des deux.
 class EnrollmentExportButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final String tooltip;
-  final VoidCallback onPressed;
+
+  /// `null` désarme le bouton — un rendu en cours, une attente imposée.
+  final VoidCallback? onPressed;
+
+  /// Remplace l'icône par un indicateur d'activité, à la même place et à la
+  /// même taille : le libellé dit ce qui se passe, l'indicateur montre que ça
+  /// avance.
+  final bool busy;
 
   const EnrollmentExportButton({
     super.key,
@@ -21,14 +34,19 @@ class EnrollmentExportButton extends StatelessWidget {
     required this.label,
     required this.tooltip,
     required this.onPressed,
+    this.busy = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    final color = enabled ? AppColors.bleuArdoise : AppColors.textMuted;
+
     return Tooltip(
       message: tooltip,
       child: Semantics(
         button: true,
+        enabled: enabled,
         label: tooltip,
         child: ExcludeSemantics(
           child: Material(
@@ -54,17 +72,25 @@ class EnrollmentExportButton extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      icon,
-                      size: AppDimensions.detailMiniIconSize,
-                      color: AppColors.bleuArdoise,
-                    ),
+                    if (busy)
+                      SizedBox.square(
+                        dimension: AppDimensions.detailMiniIconSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: AppDimensions
+                              .enrollmentDashboardExportSpinnerStroke,
+                          color: color,
+                        ),
+                      )
+                    else
+                      Icon(
+                        icon,
+                        size: AppDimensions.detailMiniIconSize,
+                        color: color,
+                      ),
                     const SizedBox(width: AppDimensions.spacingXS),
                     Text(
                       label,
-                      style: AppTextStyles.action.copyWith(
-                        color: AppColors.bleuArdoise,
-                      ),
+                      style: AppTextStyles.action.copyWith(color: color),
                     ),
                   ],
                 ),

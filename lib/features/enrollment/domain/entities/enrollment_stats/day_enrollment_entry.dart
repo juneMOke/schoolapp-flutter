@@ -1,10 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 
-/// Une inscription enregistrée dans la journée, **nommément**.
+/// Une inscription de la fenêtre, **nommément** — une ligne de la liste
+/// nominative.
 ///
 /// C'est le seul bloc nominatif de l'écran, et il porte sa propre permission
 /// côté serveur : lire le pilotage ne donne pas le droit de lire les noms.
+///
+/// Le nom reprend celui du DTO serveur (`DayEnrollmentEntryDto`), resté tel
+/// quand la liste s'est ouverte aux fenêtres plus larges qu'un jour.
 class DayEnrollmentEntry extends Equatable {
   final String enrollmentId;
   final String studentId;

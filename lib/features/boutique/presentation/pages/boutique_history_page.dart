@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_filter.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_sale_tile.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -150,7 +150,7 @@ class _HistoryViewState extends State<_HistoryView> {
         final bloc = context.read<BoutiqueHistoryBloc>();
 
         return AppPageBackground(
-          appBar: BoutiqueTopBar(
+          appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueHistoryEyebrow,
             title: l10n.boutiqueHistoryTitle,
           ),

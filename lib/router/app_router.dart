@@ -32,7 +32,6 @@ import 'package:school_app_flutter/features/finance/presentation/pages/facturati
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
@@ -340,7 +339,8 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoutesNames.facturations,
-          builder: (context, state) => const FacturationPage(),
+          // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
+          builder: (context, state) => const FacturationPage.fromRoute(),
           routes: [
             GoRoute(
               path: 'detail/:studentId/:academicYearId',
@@ -409,9 +409,8 @@ class AppRouter {
           path: AppRoutesNames.recouvrementControl,
           // `extra` porte les critères quand l'écran est ouvert depuis le
           // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
-          builder: (context, state) => FeeControlPage(
-            intent: FeeControlIntent.fromRouteExtra(state.extra),
-          ),
+          // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
+          builder: (context, state) => FeeControlPage.fromRoute(state.extra),
         ),
       ],
     ),

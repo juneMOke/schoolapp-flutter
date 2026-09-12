@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/boutiq
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_confirm_dialog.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_payer_section.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_success_dialog.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le panier, en **page dédiée** — et non en colonne ni en feuille.
@@ -262,7 +262,7 @@ class _BoutiqueCartPageState extends State<BoutiqueCartPage> {
         final bloc = context.read<BoutiqueBloc>();
 
         return AppPageBackground(
-          appBar: BoutiqueTopBar(
+          appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueCartPageEyebrow,
             title: l10n.boutiqueCartTitle,
             onBack: () => Navigator.of(context).maybePop(),

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_form_fields.dart';
@@ -67,6 +68,10 @@ class FeeControlPerimeterCard extends StatefulWidget {
   /// n'a abouti — la carte garde alors son choix local.
   final FeeControlPaymentFilter? situation;
 
+  /// Le titre que l'école donne à chaque nature. Il prime sur la grille dans
+  /// les pastilles : c'est le nom que le tableau de bord écrit aussi.
+  final FeeSectionTitlesState sectionTitles;
+
   const FeeControlPerimeterCard({
     super.key,
     this.initial,
@@ -82,6 +87,7 @@ class FeeControlPerimeterCard extends StatefulWidget {
     required this.onSearch,
     required this.onClear,
     this.situation,
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -272,10 +278,14 @@ class _FeeControlPerimeterCardState extends State<FeeControlPerimeterCard> {
         schoolLevelGroupId: option.schoolLevelGroupId,
         schoolLevelId: option.schoolLevelId,
         classroomId: _selectedClassroomId,
-        // L'ordre de la GRILLE, jamais celui des clics : la phrase qui rejoue
-        // la requête ne doit pas changer selon l'ordre où l'on a coché.
+        // L'ordre de l'ÉCOLE — celui des pastilles —, jamais celui des clics :
+        // la phrase qui rejoue la requête et la feuille d'appel ne doivent pas
+        // changer selon l'ordre où l'on a coché.
         feeCodes: [
-          for (final option in buildFeeControlFeeOptions(widget.tariffs))
+          for (final option in buildFeeControlFeeOptions(
+            widget.tariffs,
+            titles: widget.sectionTitles,
+          ))
             if (_selectedFeeCodes.contains(option.feeCode)) option.feeCode,
         ],
         statusFilter: _situation,
@@ -314,6 +324,7 @@ class _FeeControlPerimeterCardState extends State<FeeControlPerimeterCard> {
           const SizedBox(height: AppDimensions.spacingM),
           FeeControlFeeSlot(
             tariffs: widget.tariffs,
+            sectionTitles: widget.sectionTitles,
             selected: _selectedFeeCodes,
             hasLevel: hasLevel,
             isLoading: widget.isLoading || widget.isTariffsLoading,

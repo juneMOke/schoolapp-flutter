@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_empty_reason.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
@@ -28,11 +29,16 @@ class FeeControlResultsView extends StatelessWidget {
   /// d'encaisser, pas de re-chercher.
   final VoidCallback? onBilling;
 
+  /// Les titres que l'école donne aux natures : la requête rejouée nomme les
+  /// frais comme les pastilles qui les ont retenus.
+  final FeeSectionTitlesState titles;
+
   const FeeControlResultsView({
     super.key,
     required this.onViewRequested,
     required this.onRowTapped,
     this.onBilling,
+    this.titles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -108,7 +114,11 @@ class FeeControlResultsView extends StatelessWidget {
                 enrollment: enrollment,
                 classroom: classroom,
               ),
-              criteria: FeeControlQueryPhrase.chips(state, l10n),
+              criteria: FeeControlQueryPhrase.chips(
+                state,
+                l10n,
+                titles: titles,
+              ),
             ),
           );
         }
@@ -120,6 +130,7 @@ class FeeControlResultsView extends StatelessWidget {
           child: FeeControlResultsSection(
             key: ValueKey(state.status),
             state: state,
+            titles: titles,
             // Même cause, même phrase : sans ce relais le tableau continuerait
             // d'annoncer « aucun élève ne correspond » là où la carte de vide
             // dit désormais la vérité.

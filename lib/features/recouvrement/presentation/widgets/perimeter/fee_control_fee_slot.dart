@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_picker.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -29,6 +30,10 @@ class FeeControlFeeSlot extends StatelessWidget {
   /// une grille vide, qui, elle, est une information.
   final bool loadFailed;
 
+  /// Le titre que l'école donne à chaque nature. Il prime sur le libellé de la
+  /// grille : c'est le nom que le tableau de bord écrit aussi.
+  final FeeSectionTitlesState sectionTitles;
+
   final ValueChanged<Set<String>> onChanged;
 
   /// Rejoue la lecture du niveau courant. Seule porte de sortie de l'échec : au
@@ -46,14 +51,16 @@ class FeeControlFeeSlot extends StatelessWidget {
     required this.loadFailed,
     required this.onChanged,
     required this.onRetry,
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // Une entrée par NATURE — la maille de la mesure, cf.
-    // `buildFeeControlFeeOptions`.
-    final options = buildFeeControlFeeOptions(tariffs);
+    // `buildFeeControlFeeOptions` —, dans l'ordre que l'école donne à ses
+    // sections.
+    final options = buildFeeControlFeeOptions(tariffs, titles: sectionTitles);
 
     if (options.isNotEmpty) {
       return RecouvrementFeePicker(
@@ -67,14 +74,18 @@ class FeeControlFeeSlot extends StatelessWidget {
           for (final option in options)
             if (option.currency != null) option.feeCode: option.currency!,
         },
-        // Nommé par la GRILLE : l'écran est borné à un niveau, donc à une
-        // grille, et c'est le nom que l'école a écrit qui doit apparaître. La
-        // nature localisée ne reprend la main que si elle porte plusieurs
-        // tranches — aucun de leurs libellés ne vaudrait pour l'ensemble.
+        // Le titre de section d'abord — le même nom qu'au tableau de bord et
+        // que sur la liste de relance —, puis le libellé de la grille quand la
+        // nature n'y porte qu'une ligne, puis la nature localisée. La règle vit
+        // dans `feeControlFeeCodeLabel`, une fois pour tout le module.
         labels: {
           for (final option in options)
-            if (option.isSingleTariff && option.tariffLabel.isNotEmpty)
-              option.feeCode: option.tariffLabel,
+            option.feeCode: feeControlFeeCodeLabel(
+              option,
+              option.feeCode,
+              l10n,
+              sectionTitle: sectionTitles.titleOf(option.feeCode),
+            ),
         },
         label: l10n.feeControlFeesLabel,
         semanticsLabel: l10n.feeControlFeesA11yLabel,
