@@ -444,6 +444,15 @@ niveau — 228 Ko et 3 s de rendu à 500 élèves, qui est l'usage réel. Le pla
   par élève, sous peine d'un total qui cesse d'être la somme de ses lignes.
 - ⚠️ **Le curseur de seuil doit se sentir immédiat** : recalcul mémoïsé,
   synchrone, sans jamais rejouer un chargement.
+- ⚠️ **Poussé par sa route, l'écran nominatif sort de la coquille** (amendé le
+  2026-09-12). Le tableau de bord l'ouvre par `push` — l'œil d'un niveau, « Voir
+  le contrôle » —, et la route construit la page SEULE : ni barre latérale ni
+  TopBar, donc rien pour dire où l'on est ni pour revenir. `fromRoute` pose
+  `standalone`, qui habille l'écran de `RecouvrementControlTopBar` (sur
+  `OffShellTopBar`, partagée avec la Facturation que « Facturer » pousse) ; sa flèche **dépile**,
+  et le tableau de bord se retrouve tel qu'on l'a quitté. Dans la coquille,
+  aucune barre : la TopBar titre déjà l'écran. Revenir par le menu aurait
+  rechargé le tableau de bord à neuf, sélection de frais perdue.
 
 ### Sur le renommage (REC-0)
 

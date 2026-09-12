@@ -6117,6 +6117,18 @@ abstract class AppLocalizations {
   /// **'View details: {level}'**
   String recouvrementLevelView(String level);
 
+  /// Tooltip of the back arrow on the per-student control opened from the dashboard: leaves it and returns to the dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the dashboard'**
+  String get recouvrementControlBack;
+
+  /// Tooltip of the back arrow on Billing opened outside the menu — from the per-student control: returns to the previous screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get facturationOffShellBack;
+
   /// No description provided for @feeControlDashboardLevelUnknown.
   ///
   /// In en, this message translates to:

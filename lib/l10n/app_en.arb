@@ -2565,6 +2565,14 @@
       }
     }
   },
+  "recouvrementControlBack": "Back to the dashboard",
+  "@recouvrementControlBack": {
+    "description": "Tooltip of the back arrow on the per-student control opened from the dashboard: leaves it and returns to the dashboard."
+  },
+  "facturationOffShellBack": "Back",
+  "@facturationOffShellBack": {
+    "description": "Tooltip of the back arrow on Billing opened outside the menu — from the per-student control: returns to the previous screen."
+  },
   "feeControlDashboardLevelUnknown": "Level not recorded",
   "feeControlDashboardLevelMissing": "Level missing from the reference data",
   "feeControlDashboardNoFeesTitle": "No fee billed",

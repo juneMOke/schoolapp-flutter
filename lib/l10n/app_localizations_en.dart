@@ -3731,6 +3731,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recouvrementControlBack => 'Back to the dashboard';
+
+  @override
+  String get facturationOffShellBack => 'Back';
+
+  @override
   String get feeControlDashboardLevelUnknown => 'Level not recorded';
 
   @override

@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_view.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_summary_band.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/recouvrement_control_top_bar.dart';
 
 /// Contrôle des frais : pour un frais d'une classe, qui est soldé, qui est
 /// partiel, qui n'a rien versé.
@@ -32,7 +33,19 @@ class FeeControlPage extends StatelessWidget {
   /// lui. `null` à l'ouverture par le menu : l'écran est alors vierge.
   final FeeControlIntent? intent;
 
-  const FeeControlPage({super.key, this.intent});
+  /// Vrai quand l'écran est ouvert par sa ROUTE, hors de la coquille : il n'a
+  /// alors ni barre latérale ni TopBar, et porte sa propre barre, avec le
+  /// retour. Faux dans la coquille, dont la TopBar le titre déjà.
+  final bool standalone;
+
+  const FeeControlPage({super.key, this.intent, this.standalone = false});
+
+  /// L'écran tel que sa route le construit : hors de la coquille, donc avec sa
+  /// barre ; `extra` porte les critères du tableau de bord, s'il en a posé.
+  factory FeeControlPage.fromRoute(Object? extra) => FeeControlPage(
+    intent: FeeControlIntent.fromRouteExtra(extra),
+    standalone: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +72,16 @@ class FeeControlPage extends StatelessWidget {
           create: (_) => FeeControlSelectionCubit(),
         ),
       ],
-      child: _FeeControlView(intent: intent),
+      child: _FeeControlView(intent: intent, standalone: standalone),
     );
   }
 }
 
 class _FeeControlView extends StatefulWidget {
   final FeeControlIntent? intent;
+  final bool standalone;
 
-  const _FeeControlView({this.intent});
+  const _FeeControlView({this.intent, required this.standalone});
 
   @override
   State<_FeeControlView> createState() => _FeeControlViewState();
@@ -161,6 +175,9 @@ class _FeeControlViewState extends State<_FeeControlView> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
+      // contexte académique charge ou échoue.
+      appBar: widget.standalone ? const RecouvrementControlTopBar() : null,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,

@@ -2510,6 +2510,14 @@
       }
     }
   },
+  "recouvrementControlBack": "Retour au tableau de bord",
+  "@recouvrementControlBack": {
+    "description": "Infobulle de la flèche de l'écran nominatif ouvert depuis le tableau de bord : le quitte et ramène au tableau de bord."
+  },
+  "facturationOffShellBack": "Retour",
+  "@facturationOffShellBack": {
+    "description": "Infobulle de la flèche de la Facturation ouverte hors du menu — depuis le contrôle nominatif : ramène à l'écran précédent."
+  },
   "feeControlDashboardLevelUnknown": "Niveau non renseigné",
   "feeControlDashboardLevelMissing": "Niveau absent du référentiel",
   "feeControlDashboardNoFeesTitle": "Aucun frais facturé",

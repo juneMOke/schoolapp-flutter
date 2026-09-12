@@ -3753,6 +3753,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get recouvrementControlBack => 'Retour au tableau de bord';
+
+  @override
+  String get facturationOffShellBack => 'Retour';
+
+  @override
   String get feeControlDashboardLevelUnknown => 'Niveau non renseigné';
 
   @override
