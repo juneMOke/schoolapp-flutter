@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
@@ -43,6 +44,13 @@ class FeeControlPage extends StatelessWidget {
         // converti (doctrine bi-devise, règle 6).
         BlocProvider<ExchangeRatesCubit>(
           create: (_) => getIt<ExchangeRatesCubit>()..load(),
+        ),
+        // Le titre que l'école donne à chaque nature — celui que le tableau de
+        // bord et la liste de relance écrivent aussi. Local d'abord, une
+        // relecture par session ensuite, muette en échec : un nom d'hier vaut
+        // mieux qu'un écran qui attend le réseau pour nommer un frais.
+        BlocProvider<FeeSectionTitlesCubit>(
+          create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
         // Brouillon de séance : les cochés et les marqués « à renvoyer ». Rien
         // n'en sort tant qu'on ne le demande pas, rien n'y survit à la sortie
@@ -224,6 +232,12 @@ class _FeeControlViewState extends State<_FeeControlView> {
                         initial: widget.intent,
                         options: options,
                         tariffs: state.tariffs,
+                        // Abonné : le titre d'une nature peut arriver après la
+                        // grille — la relecture réseau rend plus tard que le
+                        // cache —, et la pastille doit alors se renommer.
+                        sectionTitles: context
+                            .watch<FeeSectionTitlesCubit>()
+                            .state,
                         classrooms: state.classrooms,
                         isTariffsLoading:
                             state.tariffsStatus == EnrollmentLoadStatus.loading,
@@ -268,6 +282,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
                     onMark: () => markSelection(context),
                   ),
                   FeeControlResultsView(
+                    titles: context.watch<FeeSectionTitlesCubit>().state,
                     onViewRequested: (row) =>
                         openFinancialRecord(context, row, academicYearId),
                     onRowTapped: (row) =>

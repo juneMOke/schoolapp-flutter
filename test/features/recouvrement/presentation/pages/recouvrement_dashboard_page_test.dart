@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
@@ -27,6 +28,20 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class _MockExchangeRatesCubit extends Cubit<ExchangeRatesState>
     implements ExchangeRatesCubit {
   _MockExchangeRatesCubit() : super(const ExchangeRatesState());
+
+  @override
+  Future<void> load() async {}
+}
+
+/// Les titres que l'école a écrits pour ses natures. Vides par défaut : c'est
+/// l'appareil où le catalogue n'est jamais descendu, et le nom localisé y
+/// reprend la main.
+Map<String, String> _sectionTitles = const <String, String>{};
+
+class _StubFeeSectionTitlesCubit extends Cubit<FeeSectionTitlesState>
+    implements FeeSectionTitlesCubit {
+  _StubFeeSectionTitlesCubit(Map<String, String> titles)
+    : super(FeeSectionTitlesState(titles: titles));
 
   @override
   Future<void> load() async {}
@@ -103,6 +118,10 @@ void main() {
     GetIt.instance.registerFactory<ExchangeRatesCubit>(
       () => _MockExchangeRatesCubit(),
     );
+    _sectionTitles = const <String, String>{};
+    GetIt.instance.registerFactory<FeeSectionTitlesCubit>(
+      () => _StubFeeSectionTitlesCubit(_sectionTitles),
+    );
     GetIt.instance.registerFactory<RecouvrementSimulationCubit>(
       RecouvrementSimulationCubit.new,
     );
@@ -159,6 +178,23 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('les pastilles des frais retenus portent le TITRE que l\'école '
+      'donne à la nature — celui qu\'imprime la liste de relance', (
+    tester,
+  ) async {
+    _sectionTitles = const {'TUITION': 'Frais scolaires annuels'};
+
+    await pump(
+      tester,
+      const RecouvrementDashboardState(
+        feeCodesStatus: EnrollmentLoadStatus.success,
+        feeCodes: ['TUITION'],
+      ),
+    );
+
+    expect(find.text('Frais scolaires annuels'), findsOneWidget);
+  });
 
   testWidgets('à l\'ouverture, l\'écran DEMANDE la liste des natures — sans '
       'quoi il reste inerte sur un grand-livre plein', (tester) async {

@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_actions.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
@@ -46,6 +48,12 @@ class RecouvrementDashboardPage extends StatelessWidget {
         // le périmètre, à quel cours s'arbitre une comparaison.
         BlocProvider<ExchangeRatesCubit>(
           create: (_) => getIt<ExchangeRatesCubit>()..load(),
+        ),
+        // Le titre que l'école donne à chaque nature — celui qu'imprime la
+        // liste de relance. Local d'abord, une relecture par session ensuite,
+        // muette en échec : un nom d'hier vaut mieux qu'un frais sans nom.
+        BlocProvider<FeeSectionTitlesCubit>(
+          create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
         BlocProvider<RecouvrementSimulationCubit>(
           create: (_) => getIt<RecouvrementSimulationCubit>(),
@@ -291,6 +299,10 @@ class _Body extends StatelessWidget {
           );
         }
 
+        // Abonné : la relecture réseau des titres rend après le cache, et les
+        // noms doivent alors se mettre à jour sans attendre une autre lecture.
+        final titles = context.watch<FeeSectionTitlesCubit>().state;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -309,6 +321,12 @@ class _Body extends StatelessWidget {
                     : null,
                 unbilled: state.unbilled,
                 exchangeRate: dollarInFrancs(ratesState.rates),
+                // Le titre de section, jamais le libellé d'un tarif : l'écran
+                // est école-wide, et c'est le nom que la relance imprime.
+                feeLabels: {
+                  for (final code in state.feeCodes)
+                    code: recouvrementFeeTitle(code, titles, l10n),
+                },
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
@@ -323,7 +341,7 @@ class _Body extends StatelessWidget {
                 description: l10n.recouvrementEmptyResultDescription,
               ),
             const RecouvrementKeyFiguresBand(),
-            RecouvrementFeeRatesSection(groups: state.rates),
+            RecouvrementFeeRatesSection(groups: state.rates, titles: titles),
             // Chaque niveau se lit sous son cycle : plus besoin du préfixe qui
             // départageait deux « 1ère année » dans l'ancien classement à plat.
             RecouvrementCyclesSection(labels: labels),
@@ -348,6 +366,7 @@ class _Body extends StatelessWidget {
             RecouvrementInsightsSection(
               labels: labels,
               showCycleInLabels: cycleId == null,
+              titles: titles,
               onControlRequested: (_) => openRecouvrementControl(context),
             ),
           ],

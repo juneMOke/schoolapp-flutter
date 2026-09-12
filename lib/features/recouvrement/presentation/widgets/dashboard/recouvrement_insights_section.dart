@@ -5,10 +5,11 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trois lectures en fin de page : ce que les chiffres **impliquent**.
@@ -28,6 +29,10 @@ class RecouvrementInsightsSection extends StatelessWidget {
   final FeeControlDashboardLabels labels;
   final bool showCycleInLabels;
 
+  /// Le titre que l'école donne à chaque nature : la lecture nomme le poste
+  /// comme la section du taux, juste au-dessus.
+  final FeeSectionTitlesState titles;
+
   /// Ouvre l'écran nominatif sur le frais le plus en retard.
   final void Function(String feeCode)? onControlRequested;
 
@@ -35,6 +40,7 @@ class RecouvrementInsightsSection extends StatelessWidget {
     super.key,
     required this.labels,
     required this.showCycleInLabels,
+    this.titles = const FeeSectionTitlesState(),
     this.onControlRequested,
   });
 
@@ -98,7 +104,7 @@ class RecouvrementInsightsSection extends StatelessWidget {
       accentSoft: AppColors.financeDetailDangerSoft,
       title: l10n.recouvrementInsightWorstFeeTitle,
       body: l10n.recouvrementInsightWorstFeeBody(
-        worst.feeCode.localizedFeeLabel(l10n),
+        recouvrementFeeTitle(worst.feeCode, titles, l10n),
         worst.rate,
         MoneyFormat.format(Money(worst.remainingInCents, worst.currency)),
       ),

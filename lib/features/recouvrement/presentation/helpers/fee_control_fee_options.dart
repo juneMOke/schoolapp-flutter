@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -143,21 +144,30 @@ String feeControlFeeOptionLabel(
   ].join(' · ');
 }
 
-/// Le nom **court** d'une nature — celui des pastilles et de la phrase qui
-/// rejoue la requête.
+/// Le nom **court** d'une nature — celui des pastilles, des lignes de la fiche
+/// et de la phrase qui rejoue la requête.
 ///
-/// La grille du niveau nomme quand elle ne porte qu'une ligne pour cette
-/// nature : c'est alors le nom que l'école a écrit. Plusieurs tranches, ou une
-/// grille qu'on n'a pas sous la main, retombent sur la nature localisée —
-/// aucun des libellés de tranche ne vaudrait pour l'ensemble.
+/// Trois sources, dans cet ordre :
+///  1. **le titre de section** que l'école a donné à la nature
+///     (`ref_fee_code_sections`). Un par nature et par école : c'est le seul
+///     nom qui vaille sur les deux écrans du module, et c'est celui que la
+///     liste de relance imprime — l'écran et le papier signé disent le même ;
+///  2. la ligne de grille du niveau, quand elle est la seule de sa nature :
+///     c'est alors le nom que l'école a écrit pour ce niveau ;
+///  3. la nature localisée — plusieurs tranches, ou rien sous la main.
+///
+/// Un titre blanc ne compte pas : il remplacerait un nom par du vide.
 ///
 /// Distinct de [feeControlFeeOptionLabel], qui compose en plus le code et le
 /// montant : dans une pastille de 38 dp, ces deux-là ne tiennent pas.
 String feeControlFeeCodeLabel(
   FeeControlFeeOption? option,
   String feeCode,
-  AppLocalizations l10n,
-) {
+  AppLocalizations l10n, {
+  String? sectionTitle,
+}) {
+  final title = sectionTitle?.trim() ?? '';
+  if (title.isNotEmpty) return title;
   if (option != null &&
       option.isSingleTariff &&
       option.tariffLabel.trim().isNotEmpty) {
@@ -165,3 +175,19 @@ String feeControlFeeCodeLabel(
   }
   return feeCode.localizedFeeLabel(l10n);
 }
+
+/// Le nom d'une nature là où aucune grille n'est sous la main — le tableau de
+/// bord, école-wide : le titre de section, sinon la nature localisée.
+///
+/// Jamais le libellé d'un tarif ici : deux niveaux nomment la même nature
+/// différemment, et l'écran n'en retiendrait un qu'au hasard.
+String recouvrementFeeTitle(
+  String feeCode,
+  FeeSectionTitlesState titles,
+  AppLocalizations l10n,
+) => feeControlFeeCodeLabel(
+  null,
+  feeCode,
+  l10n,
+  sectionTitle: titles.titleOf(feeCode),
+);

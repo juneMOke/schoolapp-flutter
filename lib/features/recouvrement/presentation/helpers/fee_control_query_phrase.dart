@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
@@ -11,20 +12,25 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// le plancher — au-dessus du résultat comme dans l'état vide. C'est ce qui
 /// permet de voir *ce qui est trop étroit* sans remonter au formulaire.
 ///
-/// Les frais se nomment **par la grille**, exactement comme les pastilles les
-/// nomment : une phrase qui rappelle « Minerval » là où l'opérateur a coché
-/// « Frais scolaires annuels » lui fait douter de ce qu'il a demandé.
+/// Les frais se nomment **exactement comme les pastilles les nomment** — par
+/// le titre que l'école donne à la nature, sinon par la grille : une phrase qui
+/// rappelle « Minerval » là où l'opérateur a coché « Frais scolaires annuels »
+/// lui fait douter de ce qu'il a demandé.
 class FeeControlQueryPhrase {
   const FeeControlQueryPhrase._();
 
   /// Les morceaux de la requête, dans l'ordre où ils l'expliquent : les frais
   /// et la situation d'abord — ce sont eux qui expliquent une liste vide.
-  static List<String> parts(FeeControlState state, AppLocalizations l10n) {
+  static List<String> parts(
+    FeeControlState state,
+    AppLocalizations l10n, {
+    FeeSectionTitlesState titles = const FeeSectionTitlesState(),
+  }) {
     final query = state.lastQuery;
     if (query == null) return const <String>[];
 
     final parts = <String>[];
-    final fees = _feeLabels(state, l10n);
+    final fees = _feeLabels(state, l10n, titles: titles);
     if (fees.isNotEmpty) parts.add(fees.join(' + '));
 
     // Nom de la classe plutôt que son id — l'id ne dit rien à personne. Le
@@ -52,12 +58,22 @@ class FeeControlQueryPhrase {
 
   /// Le sous-titre de la section de résultat : la requête, puis l'ordre — parce
   /// que cet ordre-là n'est pas alphabétique et surprendrait sans un mot.
-  static String subtitle(FeeControlState state, AppLocalizations l10n) =>
-      [...parts(state, l10n), l10n.feeControlResultOrder].join(' · ');
+  static String subtitle(
+    FeeControlState state,
+    AppLocalizations l10n, {
+    FeeSectionTitlesState titles = const FeeSectionTitlesState(),
+  }) => [
+    ...parts(state, l10n, titles: titles),
+    l10n.feeControlResultOrder,
+  ].join(' · ');
 
   /// Les mêmes morceaux, mais étiquetés — la forme que l'état vide affiche en
   /// puces.
-  static List<String> chips(FeeControlState state, AppLocalizations l10n) {
+  static List<String> chips(
+    FeeControlState state,
+    AppLocalizations l10n, {
+    FeeSectionTitlesState titles = const FeeSectionTitlesState(),
+  }) {
     final query = state.lastQuery;
     if (query == null) return const <String>[];
 
@@ -66,7 +82,7 @@ class FeeControlQueryPhrase {
     // grille et code — là où le sous-titre se contente du nom court : c'est
     // elle qui doit permettre de vérifier qu'on a bien cherché ce qu'on
     // croyait chercher.
-    final fees = _feeLabels(state, l10n, full: true);
+    final fees = _feeLabels(state, l10n, full: true, titles: titles);
     if (fees.isNotEmpty) {
       chips.add(l10n.feeControlCriteriaFee(fees.join(' + ')));
     }
@@ -96,7 +112,7 @@ class FeeControlQueryPhrase {
     return chips;
   }
 
-  /// Chaque frais retenu, nommé par la grille du niveau quand elle le permet.
+  /// Chaque frais retenu, nommé comme sa pastille.
   ///
   /// L'ordre est celui de la **requête**, pas celui de la grille courante : la
   /// phrase doit décrire ce qui a été cherché, même si l'opérateur a changé de
@@ -105,6 +121,7 @@ class FeeControlQueryPhrase {
     FeeControlState state,
     AppLocalizations l10n, {
     bool full = false,
+    required FeeSectionTitlesState titles,
   }) {
     final query = state.lastQuery;
     if (query == null) return const <String>[];
@@ -116,15 +133,24 @@ class FeeControlQueryPhrase {
       for (final code in query.feeCodes)
         if (full)
           feeDesignation(
+            // Une ligne de grille unique se désigne par elle-même — libellé et
+            // code : c'est ce qui permet de vérifier qu'on a cherché la bonne.
+            // Plusieurs tranches n'ont pas de libellé commun : le titre de la
+            // section les nomme, plutôt que la nature générique.
             label: options[code]?.isSingleTariff ?? false
                 ? options[code]!.tariffLabel
-                : '',
+                : (titles.titleOf(code) ?? ''),
             feeCode: code,
             feeTariffCode: options[code]?.tariffCode,
             l10n: l10n,
           )
         else
-          feeControlFeeCodeLabel(options[code], code, l10n),
+          feeControlFeeCodeLabel(
+            options[code],
+            code,
+            l10n,
+            sectionTitle: titles.titleOf(code),
+          ),
     ];
   }
 }

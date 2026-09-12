@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
@@ -34,6 +35,9 @@ Future<void> openStudentSheet(
   final l10n = AppLocalizations.of(context)!;
   final selection = context.read<FeeControlSelectionCubit>();
   final bloc = context.read<FeeControlBloc>();
+  // Lus AVANT la modale : elle s'ouvre sur le navigateur racine, hors de portée
+  // des blocs de la page.
+  final titles = context.read<FeeSectionTitlesCubit>().state;
   final name =
       '${row.summary.student.lastName} ${row.summary.student.firstName}';
 
@@ -45,6 +49,7 @@ Future<void> openStudentSheet(
           builder: (_, state) => FeeControlStudentSheet(
             row: row,
             tariffs: bloc.state.tariffs,
+            sectionTitles: titles,
             rate: bloc.state.lastQuery?.rate,
             marked: state.marked.contains(row.studentId),
             onToggleMark: () {
@@ -108,7 +113,12 @@ Future<void> printCallSheet(BuildContext context) async {
 
   final bytes = await FeeControlCallSheetPdf.build(
     rows: rows,
-    context: FeeControlQueryPhrase.parts(bloc.state, l10n).join(' · '),
+    // Le papier nomme les frais comme l'écran qui l'a produit.
+    context: FeeControlQueryPhrase.parts(
+      bloc.state,
+      l10n,
+      titles: context.read<FeeSectionTitlesCubit>().state,
+    ).join(' · '),
     academicYearLabel: academicYear?.name ?? '',
     issuedOn: DateTime.now(),
     rate: bloc.state.lastQuery?.rate,

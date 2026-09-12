@@ -230,6 +230,17 @@ flux, traitées par Encaissements ».
 **codes**, jamais des libellés : l'écran est école-wide et un même `fee_code`
 porte des libellés différents d'un niveau à l'autre.
 
+> **Amendé le 2026-09-12 (demande du user).** Les codes restent la seule
+> donnée de l'état ; le rendu les nomme désormais par le **titre de section**
+> de l'école (`ref_fee_code_sections`, via `FeeSectionTitlesCubit`) — un par
+> nature et par école, donc juste école-wide, et identique à ce qu'imprime la
+> liste de relance. Repli : la nature localisée. La règle vit dans
+> `feeControlFeeCodeLabel` / `recouvrementFeeTitle`, commune aux deux écrans
+> (l'écran de contrôle retombe d'abord sur sa grille). ⚠️ Le cubit ajoute une
+> lecture réseau de confort (`GET /finance/fee-codes`, une fois par session,
+> muette en échec) : la demande au back de servir ces titres dans le bundle
+> référentiel (`feeCodeSections`) la rendra inutile.
+
 ### 5.2 Les positions **multi-frais** — **à étendre**
 
 Le DAO actuel (`getFeeChargePositionsByLevel`) est borné à **un** `fee_code` et

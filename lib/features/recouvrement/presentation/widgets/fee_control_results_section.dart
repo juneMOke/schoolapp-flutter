@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_c
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_data_table.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le résultat : son en-tête, qui **rejoue la requête**, et le tableau.
@@ -21,12 +22,17 @@ class FeeControlResultsSection extends StatelessWidget {
   final ValueChanged<FeeControlRow> onRowTapped;
   final String? emptyLabel;
 
+  /// Les titres que l'école donne aux natures : l'en-tête nomme les frais comme
+  /// les pastilles qui les ont retenus.
+  final FeeSectionTitlesState titles;
+
   const FeeControlResultsSection({
     super.key,
     required this.state,
     required this.onViewRequested,
     required this.onRowTapped,
     this.emptyLabel,
+    this.titles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -46,7 +52,11 @@ class FeeControlResultsSection extends StatelessWidget {
               // Le total, jamais la page : « Résultat · 21 élèves » sur une
               // page qui en montre dix reste vrai, l'inverse ne l'est pas.
               count: state.totalElements,
-              subtitle: FeeControlQueryPhrase.subtitle(state, l10n),
+              subtitle: FeeControlQueryPhrase.subtitle(
+                state,
+                l10n,
+                titles: titles,
+              ),
               allSelected: allSelected,
               onTogglePage: pageIds.isEmpty
                   ? null

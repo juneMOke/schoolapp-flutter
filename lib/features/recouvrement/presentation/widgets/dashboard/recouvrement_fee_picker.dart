@@ -43,13 +43,14 @@ class RecouvrementFeePicker extends StatelessWidget {
   /// Vide par défaut : le tableau de bord n'affiche pas de symbole.
   final Map<String, String> currencies;
 
-  /// Nom de chaque nature, quand l'écran sait la nommer **par la grille**.
+  /// Nom de chaque nature, tel que l'école l'a écrit.
   ///
-  /// Le tableau de bord n'en passe pas : il est école-wide, et deux niveaux
-  /// nomment la même nature différemment — seule la nature localisée y est
-  /// juste. L'écran de contrôle, lui, est borné à un niveau, donc à une grille :
-  /// il écrit le nom que l'école a écrit. Une nature absente de cette table
-  /// retombe sur son libellé localisé.
+  /// Les deux écrans du module passent d'abord le **titre de section**
+  /// (`ref_fee_code_sections`) : un par nature et par école, il vaut sur tout
+  /// l'établissement — c'est aussi celui qu'imprime la liste de relance.
+  /// L'écran de contrôle, borné à un niveau, retombe ensuite sur le libellé de
+  /// sa grille. Une nature absente de cette table retombe sur son libellé
+  /// localisé.
   final Map<String, String> labels;
 
   /// Libellé de la rangée. Les deux écrans du module ne nomment pas la même

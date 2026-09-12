@@ -8,8 +8,9 @@ class RecouvrementDashboardState extends Equatable {
   final EnrollmentLoadStatus feeCodesStatus;
 
   /// Codes de nature, triés par effectif porté. **Jamais de libellé** : le rendu
-  /// les nomme par `localizedFeeLabel`, l'écran étant école-wide et un même code
-  /// portant des libellés différents d'un niveau à l'autre.
+  /// les nomme par le titre que l'école donne à la nature
+  /// (`recouvrementFeeTitle`), jamais par le libellé d'un tarif — l'écran est
+  /// école-wide, et un même code en porte de différents d'un niveau à l'autre.
   final List<String> feeCodes;
 
   // ── Position de la population sur la sélection ─────────────────────────────
