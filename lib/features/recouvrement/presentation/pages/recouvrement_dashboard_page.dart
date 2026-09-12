@@ -309,7 +309,9 @@ class _Body extends StatelessWidget {
             BlocBuilder<ExchangeRatesCubit, ExchangeRatesState>(
               buildWhen: (prev, curr) => prev.rates != curr.rates,
               builder: (context, ratesState) => RecouvrementPerimeterCard(
-                feeCodes: state.feeCodes,
+                // Les pastilles dans l'ordre de l'école. L'ouverture, elle,
+                // retient toujours le frais le plus porté (`onFeeCodesLoaded`).
+                feeCodes: recouvrementSchoolOrder(state.feeCodes, titles),
                 selectedFeeCodes: feeCodes,
                 cycles: cycles,
                 selectedCycleId: cycleId,

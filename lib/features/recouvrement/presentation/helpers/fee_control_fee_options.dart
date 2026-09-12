@@ -15,12 +15,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// confondues. Offrir une entrée par ligne de grille ferait sept choix qui
 /// donnent tous le même tableau.
 ///
-/// Reste que « Minerval » n'est pas ce que l'école a écrit. Quand la nature ne
-/// porte **qu'une** ligne, cette ligne EST la nature : son libellé et son code
-/// nomment l'entrée, comme partout ailleurs en Finance. Quand elle en porte
-/// plusieurs, aucun des libellés ne vaut pour l'ensemble — l'entrée retombe sur
-/// la nature et **annonce le nombre de tranches**, plutôt que d'emprunter le nom
-/// de la première et de laisser croire qu'on ne contrôle qu'elle.
+/// Reste que « Frais de scolarité » n'est pas ce que l'école a écrit. Quand la
+/// nature ne porte **qu'une** ligne, cette ligne EST la nature : son libellé et
+/// son code nomment l'entrée, comme partout ailleurs en Finance. Quand elle en
+/// porte plusieurs, aucun des libellés ne vaut pour l'ensemble — l'entrée
+/// retombe sur la nature et **annonce le nombre de tranches**, plutôt que
+/// d'emprunter le nom de la première et de laisser croire qu'on ne contrôle
+/// qu'elle.
 class FeeControlFeeOption {
   final String feeCode;
 
@@ -59,23 +60,26 @@ class FeeControlFeeOption {
   bool get isSingleTariff => tariffCount == 1;
 }
 
-/// Regroupe la grille d'un niveau par nature, dans l'ordre de première
-/// apparition (celui du DAO, `fee_code ASC`).
+/// Regroupe la grille d'un niveau par nature, **dans l'ordre que l'école donne
+/// à ses sections** quand l'appareil le connaît ([titles]) — sinon dans l'ordre
+/// de première apparition (celui du DAO, `fee_code ASC`).
 ///
 /// Le regroupement ne sert pas qu'à l'esthétique du menu : sans lui, une grille
 /// portant à la fois un tarif de cycle et un tarif de niveau du même code
 /// produirait deux entrées de même valeur, et le sélecteur casserait.
 List<FeeControlFeeOption> buildFeeControlFeeOptions(
-  List<LocalFeeTariff> tariffs,
-) {
+  List<LocalFeeTariff> tariffs, {
+  FeeSectionTitlesState titles = const FeeSectionTitlesState(),
+}) {
   final grouped = <String, List<LocalFeeTariff>>{};
   for (final tariff in tariffs) {
     (grouped[tariff.feeCode] ??= <LocalFeeTariff>[]).add(tariff);
   }
 
-  return grouped.entries
-      .map((entry) => _optionFor(entry.key, entry.value))
-      .toList(growable: false);
+  return [
+    for (final code in recouvrementSchoolOrder(grouped.keys, titles))
+      _optionFor(code, grouped[code]!),
+  ];
 }
 
 /// L'option d'une nature donnée, à partir des lignes de grille qui la portent.
@@ -191,3 +195,28 @@ String recouvrementFeeTitle(
   l10n,
   sectionTitle: titles.titleOf(feeCode),
 );
+
+/// Range des natures dans l'**ordre que l'école donne à ses sections** — celui
+/// des pastilles, de la requête rejouée et de la liste de relance.
+///
+/// Stable : une nature que l'appareil ne sait pas ranger passe après les
+/// autres, et deux inconnues gardent leur ordre d'arrivée. Sans titres sur
+/// l'appareil, l'ordre d'arrivée est donc rendu tel quel.
+List<String> recouvrementSchoolOrder(
+  Iterable<String> feeCodes,
+  FeeSectionTitlesState titles,
+) {
+  final ranked = [
+    for (final (index, code) in feeCodes.indexed)
+      (index: index, code: code, rank: titles.rankOf(code)),
+  ];
+  ranked.sort((a, b) {
+    final ra = a.rank;
+    final rb = b.rank;
+    if (ra != null && rb != null && ra != rb) return ra.compareTo(rb);
+    if (ra == null && rb != null) return 1;
+    if (ra != null && rb == null) return -1;
+    return a.index.compareTo(b.index);
+  });
+  return [for (final entry in ranked) entry.code];
+}

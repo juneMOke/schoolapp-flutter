@@ -125,6 +125,65 @@ void main() {
     });
   });
 
+  group('l\'ordre de l\'école', () {
+    const ordered = FeeSectionTitlesState(
+      titles: {
+        'REGISTRATION': 'Frais d\'inscription',
+        'TUITION': 'Frais scolaires annuels',
+      },
+    );
+
+    test('les natures suivent l\'ordre des sections, pas celui d\'arrivée', () {
+      expect(recouvrementSchoolOrder(['TUITION', 'REGISTRATION'], ordered), [
+        'REGISTRATION',
+        'TUITION',
+      ]);
+    });
+
+    test('une nature inconnue passe après, et les inconnues gardent leur '
+        'ordre d\'arrivée', () {
+      expect(
+        recouvrementSchoolOrder([
+          'CANTEEN',
+          'TUITION',
+          'BOOKS',
+          'REGISTRATION',
+        ], ordered),
+        ['REGISTRATION', 'TUITION', 'CANTEEN', 'BOOKS'],
+      );
+    });
+
+    test('sans titres sur l\'appareil, l\'ordre d\'arrivée est rendu tel '
+        'quel', () {
+      expect(
+        recouvrementSchoolOrder([
+          'TUITION',
+          'BOOKS',
+        ], const FeeSectionTitlesState()),
+        ['TUITION', 'BOOKS'],
+      );
+    });
+
+    test('la grille du contrôle se range dans l\'ordre de l\'école', () {
+      final options = buildFeeControlFeeOptions([
+        _tariff(),
+        const LocalFeeTariff(
+          id: 't9',
+          feeCode: 'REGISTRATION',
+          label: 'Inscription',
+          amountInCents: 1000,
+          currency: 'USD',
+          schoolLevelId: 'l1',
+        ),
+      ], titles: ordered);
+
+      expect(
+        [for (final option in options) option.feeCode],
+        ['REGISTRATION', 'TUITION'],
+      );
+    });
+  });
+
   group('la requête rejouée', () {
     test('le sous-titre nomme le frais comme sa pastille', () {
       expect(

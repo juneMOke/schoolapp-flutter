@@ -236,10 +236,14 @@ porte des libellés différents d'un niveau à l'autre.
 > nature et par école, donc juste école-wide, et identique à ce qu'imprime la
 > liste de relance. Repli : la nature localisée. La règle vit dans
 > `feeControlFeeCodeLabel` / `recouvrementFeeTitle`, commune aux deux écrans
-> (l'écran de contrôle retombe d'abord sur sa grille). ⚠️ Le cubit ajoute une
-> lecture réseau de confort (`GET /finance/fee-codes`, une fois par session,
-> muette en échec) : la demande au back de servir ces titres dans le bundle
-> référentiel (`feeCodeSections`) la rendra inutile.
+> (l'écran de contrôle retombe d'abord sur sa grille). Depuis F1, les titres
+> descendent aussi dans le bundle référentiel (`feeCodeSections`, rangés à leur
+> position reçue) : la lecture réseau du cubit (`GET /finance/fee-codes`, une
+> fois par session, muette en échec, close pour la session sur un 403) ne sert
+> plus que de repli face à un serveur d'avant. Les frais se rangent dans
+> l'**ordre de l'école** — pastilles des deux écrans, requête du contrôle,
+> liste de relance ; le taux par frais garde son ordre par poids, et
+> l'ouverture du tableau de bord retient toujours le frais le plus porté.
 
 ### 5.2 Les positions **multi-frais** — **à étendre**
 

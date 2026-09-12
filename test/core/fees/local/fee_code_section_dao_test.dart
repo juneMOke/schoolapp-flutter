@@ -115,6 +115,21 @@ void main() {
       );
     });
 
+    test('les titres sortent dans l\'ORDRE de l\'école, pas dans celui '
+        'd\'insertion', () async {
+      await dao.replaceForSchool([
+        section('A', code: 'TUITION', label: 'Frais scolaires', sortOrder: 2),
+        section('A', code: 'REGISTRATION', label: 'Inscription', sortOrder: 0),
+        section('A', code: 'BOOKS', label: 'Fournitures', sortOrder: 1),
+      ], schoolId: 'A');
+
+      expect((await dao.titlesForSchool('A')).keys.toList(), [
+        'REGISTRATION',
+        'BOOKS',
+        'TUITION',
+      ]);
+    });
+
     test('le code est normalisé en majuscules', () async {
       await dao.replaceForSchool([
         section('A', code: 'tuition', label: 'Frais scolaires'),

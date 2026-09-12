@@ -278,10 +278,14 @@ class _FeeControlPerimeterCardState extends State<FeeControlPerimeterCard> {
         schoolLevelGroupId: option.schoolLevelGroupId,
         schoolLevelId: option.schoolLevelId,
         classroomId: _selectedClassroomId,
-        // L'ordre de la GRILLE, jamais celui des clics : la phrase qui rejoue
-        // la requête ne doit pas changer selon l'ordre où l'on a coché.
+        // L'ordre de l'ÉCOLE — celui des pastilles —, jamais celui des clics :
+        // la phrase qui rejoue la requête et la feuille d'appel ne doivent pas
+        // changer selon l'ordre où l'on a coché.
         feeCodes: [
-          for (final option in buildFeeControlFeeOptions(widget.tariffs))
+          for (final option in buildFeeControlFeeOptions(
+            widget.tariffs,
+            titles: widget.sectionTitles,
+          ))
             if (_selectedFeeCodes.contains(option.feeCode)) option.feeCode,
         ],
         statusFilter: _situation,

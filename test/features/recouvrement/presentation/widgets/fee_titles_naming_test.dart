@@ -206,6 +206,41 @@ void main() {
       expect(find.text('Minerval 1ère année'), findsOneWidget);
     });
 
+    testWidgets('les pastilles suivent l\'ordre que l\'école donne à ses '
+        'sections', (tester) async {
+      await _pump(
+        tester,
+        FeeControlFeeSlot(
+          tariffs: const [
+            _tariff,
+            LocalFeeTariff(
+              id: 't2',
+              feeCode: 'REGISTRATION',
+              label: 'Inscription',
+              amountInCents: 1000,
+              currency: 'USD',
+              schoolLevelId: 'l1',
+            ),
+          ],
+          selected: const {'TUITION'},
+          hasLevel: true,
+          isLoading: false,
+          feeGridMissing: false,
+          loadFailed: false,
+          onChanged: (_) {},
+          onRetry: () {},
+          sectionTitles: const FeeSectionTitlesState(
+            titles: {'REGISTRATION': 'Frais d\'inscription', 'TUITION': _title},
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('Frais d\'inscription')).dx,
+        lessThan(tester.getTopLeft(find.text(_title)).dx),
+      );
+    });
+
     testWidgets('la fiche d\'un élève nomme le frais comme sa pastille', (
       tester,
     ) async {

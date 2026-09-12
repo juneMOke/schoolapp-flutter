@@ -58,8 +58,9 @@ class FeeControlFeeSlot extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // Une entrée par NATURE — la maille de la mesure, cf.
-    // `buildFeeControlFeeOptions`.
-    final options = buildFeeControlFeeOptions(tariffs);
+    // `buildFeeControlFeeOptions` —, dans l'ordre que l'école donne à ses
+    // sections.
+    final options = buildFeeControlFeeOptions(tariffs, titles: sectionTitles);
 
     if (options.isNotEmpty) {
       return RecouvrementFeePicker(

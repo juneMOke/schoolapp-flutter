@@ -60,6 +60,10 @@ class FeeCodeSectionDao {
   /// Les titres de cette école, indexés par code — la forme dont un écran a
   /// besoin pour nommer une créance qu'il tient déjà.
   ///
+  /// **Dans l'ordre de l'école** (`sort_order`, le code départageant) : la table
+  /// rendue garde cet ordre, et c'est lui que les écrans suivent pour ranger les
+  /// frais. Le rang rangé est la position que le serveur a servie.
+  ///
   /// ⚠️ **`active` ne filtre pas.** Une section masquée garde son titre : la
   /// masquer dit « ne me la propose plus à la saisie », jamais « ne sais plus la
   /// nommer ». Une créance posée avant le masquage existe toujours, et c'est
@@ -80,6 +84,7 @@ class FeeCodeSectionDao {
       columns: ['code', 'label'],
       where: 'school_id = ?',
       whereArgs: [schoolId],
+      orderBy: 'sort_order ASC, code ASC',
     );
     return <String, String>{
       for (final row in rows)
