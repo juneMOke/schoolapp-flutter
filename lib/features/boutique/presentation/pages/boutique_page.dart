@@ -10,7 +10,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_cart_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_line_tile.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_catalog_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_search_bar.dart';
@@ -171,7 +171,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
         return AppPageBackground(
           // Le panier vit dans la barre, hors du défilement : une caisse dont
           // le panier disparaît sous le catalogue fait recompter le guichet.
-          appBar: BoutiqueTopBar(
+          appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueEyebrow,
             title: l10n.boutiqueTitle,
             action: BoutiqueCartButton(

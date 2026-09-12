@@ -15,7 +15,7 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_t
 import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_detail_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/ticket/sale_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_detail_lines.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
@@ -120,7 +120,7 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
         final detail = state.detail;
 
         return AppPageBackground(
-          appBar: BoutiqueTopBar(
+          appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueSaleDetailEyebrow,
             title: detail == null
                 ? l10n.boutiqueSaleDetailTitle

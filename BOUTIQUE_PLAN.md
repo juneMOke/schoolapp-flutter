@@ -607,7 +607,7 @@ qu'elle s'y mêlait.
 
 ### BQ-12 — Le panier au sommet, hors du défilement ✅
 
-`BoutiqueTopBar` (en `appBar` du `Scaffold`, donc jamais défilée) porte
+`ModuleTopBar` (en `appBar` du `Scaffold`, donc jamais défilée) porte
 l'intitulé à gauche et **le panier à droite**, avec son compte. La disposition à
 deux colonnes et la feuille modale disparaissent toutes deux.
 
@@ -669,7 +669,7 @@ La caisse portait une barre claire et des surfaces grises, là où le reste de
 l'application est en Bleu Profond texturé Kuba : elle se lisait comme un autre
 logiciel.
 
-- `BoutiqueTopBar` reprend l'anatomie de `StudentDetailAppBar` — dégradé Bleu
+- `ModuleTopBar` reprend l'anatomie de `StudentDetailAppBar` — dégradé Bleu
   Profond → Bleu Ardoise, `KubaPatternLayer`, sur-titre or-doux, liseré or. Le
   bouton panier y devient blanc translucide, sa pastille or-doux : un bouton
   clair sur fond bleu faisait une tache.

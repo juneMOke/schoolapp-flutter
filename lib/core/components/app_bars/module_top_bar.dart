@@ -4,32 +4,32 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 
-/// La barre du haut des écrans de la caisse — elle **ne défile pas**.
+/// La barre du haut d'un écran de module qui porte sa propre barre — elle
+/// **ne défile pas**.
 ///
 /// Même anatomie que la barre des dossiers élève : Bleu Profond texturé Kuba,
-/// sur-titre or-doux, liseré or sous la barre. La caisse n'est pas un écran à
-/// part de l'application, et une barre claire l'aurait fait lire comme tel.
+/// sur-titre or-doux, liseré or sous la barre. Un écran ouvert HORS de la
+/// coquille n'a ni barre latérale ni TopBar : sans elle, il se lirait comme un
+/// autre logiciel, et rien ne dirait comment en revenir.
 ///
-/// Elle remplace le fil d'Ariane « Accueil / Finances / Boutique », qui coûtait
-/// une ligne pour ne dire que d'où l'on venait. Ce qui doit rester sous les yeux
-/// d'un guichet, c'est le panier : au sommet, à droite, quelle que soit la
-/// position du catalogue.
+/// Née pour la caisse boutique, où elle remplace aussi le fil d'Ariane et porte
+/// le panier à droite ; tout écran qui s'ouvre hors de la coquille la reprend.
 ///
 /// Posée en `appBar` du `Scaffold` — c'est ce qui la maintient hors du
 /// défilement, que `AppPageBackground` confine à son corps.
-class BoutiqueTopBar extends StatelessWidget implements PreferredSizeWidget {
+class ModuleTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String eyebrow;
   final String title;
 
-  /// Posé à droite, hors du défilement. `null` sur les écrans qui n'ont pas de
-  /// panier à porter.
+  /// Posé à droite, hors du défilement. `null` sur les écrans qui n'ont rien à
+  /// y porter.
   final Widget? action;
 
-  /// `null` sur la page d'entrée du module : elle n'a nulle part où revenir.
+  /// `null` sur la page d'entrée d'un module : elle n'a nulle part où revenir.
   final VoidCallback? onBack;
   final String? backTooltip;
 
-  const BoutiqueTopBar({
+  const ModuleTopBar({
     super.key,
     required this.eyebrow,
     required this.title,
@@ -41,9 +41,13 @@ class BoutiqueTopBar extends StatelessWidget implements PreferredSizeWidget {
   static const double _dividerHeight = 2;
   static const double _backSize = 42;
 
+  /// Hauteur de la barre, liseré compris — pour la barre qui l'enveloppe.
+  static const Size barSize = Size.fromHeight(
+    AppDimensions.topBarHeight + _dividerHeight,
+  );
+
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(AppDimensions.topBarHeight + _dividerHeight);
+  Size get preferredSize => barSize;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +117,7 @@ class BoutiqueTopBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// Bleu Profond → Bleu Ardoise, texturé Kuba : la TopBar applicative, reprise
-/// telle quelle pour que la caisse n'ait pas l'air d'un autre logiciel.
+/// telle quelle pour que l'écran n'ait pas l'air d'un autre logiciel.
 class _KubaTopBarBackground extends StatelessWidget {
   const _KubaTopBarBackground();
 
@@ -174,11 +178,7 @@ class _SquareIconButton extends StatelessWidget {
         child: SizedBox(
           width: size,
           height: size,
-          child: const Icon(
-            Icons.arrow_back_rounded,
-            size: 22,
-            color: AppColors.textOnDark,
-          ),
+          child: Icon(icon, size: 22, color: AppColors.textOnDark),
         ),
       ),
     );

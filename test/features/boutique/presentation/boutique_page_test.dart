@@ -22,7 +22,7 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/record_bout
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_cart_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_top_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_article_card.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_panel.dart';
@@ -276,10 +276,10 @@ void main() {
       await pumpPage(tester);
 
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
-      expect(scaffold.appBar, isA<BoutiqueTopBar>());
+      expect(scaffold.appBar, isA<ModuleTopBar>());
       expect(
         find.descendant(
-          of: find.byType(BoutiqueTopBar),
+          of: find.byType(ModuleTopBar),
           matching: find.byType(BoutiqueCartButton),
         ),
         findsOneWidget,
