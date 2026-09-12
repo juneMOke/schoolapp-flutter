@@ -481,6 +481,65 @@ void main() {
       });
     });
 
+    /// Le solde ne porte plus que les frais réglés par ce versement : le cas
+    /// courant est UNE ligne. Le total ne ferait que la répéter — deux fois le
+    /// même chiffre, sur un papier qui se recompte.
+    ///
+    /// Le pendant est le repli à 32 colonnes plus haut : une ligne unique sous
+    /// un total à DEUX devises garde son total, qui dit alors plus qu'elle.
+    test('une seule ligne de solde : le total ne la répète pas', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+        columns: 48,
+      );
+      final title = lines.indexWhere(
+        (l) => l.startsWith('Solde restant au moment de l\'impression'),
+      );
+
+      expect(title, greaterThan(0));
+      expect(lines.where((l) => l.startsWith('Total')), isEmpty);
+      // Le détail suit le titre, et le filet qui ferme la zone le suit
+      // directement : aucun trait d'addition sous une addition qui n'a pas
+      // lieu.
+      expect(lines[title + 1], startsWith('  Frais scolaires'));
+      expect(lines[title + 1], endsWith('2 500 FC'));
+      expect(lines[title + 2], '-' * 48);
+    });
+
+    /// Un frais que ce versement vient de solder s'imprime À ZÉRO : c'est la
+    /// réponse que le parent vient lire, et un bloc absent se lirait comme un
+    /// solde inconnu.
+    test('un solde à zéro s imprime, il ne s escamote pas', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          remainingBalanceInCents: 0,
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 0,
+              currency: 'CDF',
+            ),
+          ],
+        ),
+        columns: 48,
+      );
+      final title = lines.indexWhere(
+        (l) => l.startsWith('Solde restant au moment de l\'impression'),
+      );
+
+      expect(title, greaterThan(0));
+      expect(lines[title + 1], startsWith('  Frais scolaires'));
+      expect(lines[title + 1], endsWith(' 0 FC'));
+    });
+
     test('imprime la répartition ligne à ligne', () {
       final out = _flat(TicketTextLayout.render(_model()));
 

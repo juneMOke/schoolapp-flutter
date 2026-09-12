@@ -1,6 +1,4 @@
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/core/money/money_bag.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
 ///
@@ -16,27 +14,6 @@ class ProvisionalTicketDao {
   final DatabaseExecutor _db;
 
   const ProvisionalTicketDao(this._db);
-
-  /// Ce que le versement a encaissé, **par devise**, dérivé de ses imputations.
-  ///
-  /// Le versement portait un montant scalaire ; ce n'en était pas une propriété
-  /// mais le résumé de ses allocations. Sur un ticket, la distinction compte :
-  /// c'est la pièce que le payeur emporte.
-  Future<MoneyBag> _amountsOf(String paymentId) async {
-    final rows = await _db.rawQuery(
-      'SELECT currency, SUM(amount_in_cents) AS total '
-      'FROM payment_allocations WHERE payment_id = ? '
-      'GROUP BY currency ORDER BY currency',
-      [paymentId],
-    );
-    return MoneyBag.of([
-      for (final r in rows)
-        Money.parse(
-          (r['total'] as int?) ?? 0,
-          (r['currency'] as String?) ?? '',
-        ),
-    ]);
-  }
 
   /// Ce qui est **entré dans le tiroir** pour ce versement, ligne par ligne.
   ///
@@ -110,7 +87,6 @@ class ProvisionalTicketDao {
       id: r['id'] as String,
       studentId: r['student_id'] as String,
       academicYearId: r['academic_year_id'] as String?,
-      amounts: await _amountsOf(paymentId),
       paidAt: (r['paid_at'] as String?) ?? '',
       cashierFirstName: r['cashier_first_name'] as String?,
       cashierLastName: r['cashier_last_name'] as String?,
@@ -206,11 +182,13 @@ class ProvisionalTicketDao {
     // non déterministe.
     final grouped = <String, TicketAllocationRow>{};
     for (final r in rows) {
+      final feeCode = (r['fee_code'] as String?) ?? '';
       final currency = (r['currency'] as String?) ?? '';
-      final key = '${(r['fee_code'] as String?) ?? ''}|$currency';
+      final key = '$feeCode|$currency';
       final amount = (r['amount_in_cents'] as int?) ?? 0;
       final existing = grouped[key];
       grouped[key] = TicketAllocationRow(
+        feeCode: feeCode,
         // Le PREMIER libellé du groupe, dans l'ordre où la requête les rend —
         // lequel est total (`rowid, id`), donc reproductible.
         label: existing?.label ?? ((r['label'] as String?) ?? ''),
@@ -438,10 +416,6 @@ class TicketPaymentRow {
   final String id;
   final String studentId;
   final String? academicYearId;
-
-  /// Ce qui a été reçu, **par devise** — dérivé des imputations, comme partout
-  /// ailleurs depuis que le versement n'a plus de montant à lui.
-  final MoneyBag amounts;
   final String paidAt;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -465,7 +439,6 @@ class TicketPaymentRow {
     required this.id,
     required this.studentId,
     this.academicYearId,
-    required this.amounts,
     required this.paidAt,
     this.cashierFirstName,
     this.cashierLastName,
@@ -541,6 +514,10 @@ class TicketTenderRow {
 }
 
 class TicketAllocationRow {
+  /// La nature du frais imputé, clé du regroupement. C'est elle qui désigne,
+  /// dans le solde imprimé, les frais que CE versement a réglés.
+  final String feeCode;
+
   final String label;
   final int amountInCents;
 
@@ -548,6 +525,7 @@ class TicketAllocationRow {
   final String currency;
 
   const TicketAllocationRow({
+    required this.feeCode,
     required this.label,
     required this.amountInCents,
     required this.currency,
