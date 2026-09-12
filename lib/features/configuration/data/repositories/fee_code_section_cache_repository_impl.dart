@@ -18,13 +18,15 @@ class FeeCodeSectionCacheRepositoryImpl
   final Map<String, dynamic> _requiredAuth;
   final DateTime Function() _clock;
 
-  /// La session a-t-elle déjà obtenu le catalogue ?
+  /// La session a-t-elle déjà obtenu le catalogue — ou appris qu'elle n'y a pas
+  /// droit ?
   ///
   /// Le repository est un lazy singleton : ce drapeau vit donc aussi longtemps
-  /// que la session, ce qui est exactement la portée voulue. Il n'est armé que
-  /// par un SUCCÈS — un échec réseau doit pouvoir être retenté au prochain
-  /// écran, sans quoi une tablette démarrée hors couverture nommerait ses frais
-  /// par la nature jusqu'à la déconnexion.
+  /// que la session, ce qui est exactement la portée voulue. Il est armé par un
+  /// SUCCÈS, et par un **refus** (403) : un verdict ne change pas d'un écran à
+  /// l'autre. Un échec réseau, lui, doit pouvoir être retenté au prochain écran,
+  /// sans quoi une tablette démarrée hors couverture nommerait ses frais par la
+  /// nature jusqu'à la déconnexion.
   bool _synced = false;
 
   FeeCodeSectionCacheRepositoryImpl({
@@ -49,27 +51,34 @@ class FeeCodeSectionCacheRepositoryImpl
     // simplement rien à faire tant que la session n'a pas d'école.
     if (schoolId.isEmpty) return const Right(0);
 
-    return _guard(() async {
-      // `includeHidden: true`, et ce n'est pas un excès de zèle : la liste par
-      // défaut ne sert pas les sections masquées, et une créance posée sur une
-      // nature depuis masquée retomberait sur la nature localisée alors que
-      // l'école l'a nommée. Masquer dit « ne me la propose plus à la saisie »,
-      // jamais « ne sais plus la nommer ».
-      //
-      // C'est le piège que `SECTIONS_FRAIS_PLAN.md` §3 a déjà rencontré sur le
-      // panneau des tarifs.
-      final models = await _remote.getFeeCodes(_requiredAuth, true);
-      final written = await _persist([
-        for (final (index, model) in models.indexed)
-          model.toEntity(fallbackSortOrder: index),
-      ], schoolId: schoolId);
-      // ⚠️ **Armée APRÈS l'écriture, pas après la réponse.** Une écriture en
-      // base qui échoue laisserait sinon la session avec un cache vide et une
-      // garde fermée : les frais seraient nommés par la nature jusqu'à la
-      // déconnexion, alors que le serveur avait répondu.
-      _synced = true;
-      return written;
-    });
+    return _guard(
+      () async {
+        // `includeHidden: true`, et ce n'est pas un excès de zèle : la liste par
+        // défaut ne sert pas les sections masquées, et une créance posée sur une
+        // nature depuis masquée retomberait sur la nature localisée alors que
+        // l'école l'a nommée. Masquer dit « ne me la propose plus à la saisie »,
+        // jamais « ne sais plus la nommer ».
+        //
+        // C'est le piège que `SECTIONS_FRAIS_PLAN.md` §3 a déjà rencontré sur le
+        // panneau des tarifs.
+        final models = await _remote.getFeeCodes(_requiredAuth, true);
+        final written = await _persist([
+          for (final (index, model) in models.indexed)
+            model.toEntity(fallbackSortOrder: index),
+        ], schoolId: schoolId);
+        // ⚠️ **Armée APRÈS l'écriture, pas après la réponse.** Une écriture en
+        // base qui échoue laisserait sinon la session avec un cache vide et une
+        // garde fermée : les frais seraient nommés par la nature jusqu'à la
+        // déconnexion, alors que le serveur avait répondu.
+        _synced = true;
+        return written;
+      },
+      // Un profil qui a les créances sans le barème (rôle édité) est refusé :
+      // chaque écran qui monte le cubit relancerait sinon l'appel, et chaque
+      // refus s'inscrirait au journal du serveur. Ses titres lui viennent de
+      // toute façon par le socle référentiel, qui ne les caviarde pas.
+      onRefused: () => _synced = true,
+    );
   }
 
   @override
@@ -94,13 +103,16 @@ class FeeCodeSectionCacheRepositoryImpl
     }
   }
 
+  /// Range [sections] **à leur position** : l'ordre de la liste servie fait
+  /// foi, et son `sortOrder` peut porter des ex æquo que seul le serveur sait
+  /// départager. Le rang local est donc l'index, jamais le champ.
   Future<int> _persist(
     List<FeeCodeOption> sections, {
     required String schoolId,
   }) async {
     final syncedAt = _clock().millisecondsSinceEpoch;
     final rows = [
-      for (final section in sections)
+      for (final (index, section) in sections.indexed)
         FeeCodeSectionLocalModel(
           schoolId: schoolId,
           // Le code est normalisé ici, une fois : c'est la forme que sert le
@@ -109,7 +121,7 @@ class FeeCodeSectionCacheRepositoryImpl
           code: section.code.trim().toUpperCase(),
           label: section.label.trim(),
           active: section.active,
-          sortOrder: section.sortOrder,
+          sortOrder: index,
           syncedAt: syncedAt,
         ),
     ];
@@ -121,15 +133,22 @@ class FeeCodeSectionCacheRepositoryImpl
   /// typés par l'intercepteur passent tels quels, le reste retombe sur le code
   /// HTTP puis sur le réseau.
   ///
+  /// [onRefused] est prévenu d'un 403, que l'intercepteur l'ait typé ou non :
+  /// c'est le code de la réponse qui fait foi, pas la forme de l'échec.
+  ///
   /// Pas de cas `UncertainOutcomeFailure` ici, contrairement à l'activation :
   /// une lecture rejouée ne duplique rien.
-  Future<Either<Failure, int>> _guard(Future<int> Function() call) async {
+  Future<Either<Failure, int>> _guard(
+    Future<int> Function() call, {
+    void Function()? onRefused,
+  }) async {
     try {
       return Right(await call());
     } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status == 403) onRefused?.call();
       final failure = error.error;
       if (failure is Failure) return Left(failure);
-      final status = error.response?.statusCode;
       if (status != null) {
         return Left(
           ServerFailure(

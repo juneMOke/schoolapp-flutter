@@ -93,6 +93,91 @@ void main() {
       'email': 'contact@etoile.cd',
     };
 
+    // ── Titres de sections de frais — racine, jamais caviardés ───────────────
+    //
+    // Le serveur les dit jamais null et jamais vides. Ce qu'il reste à tenir
+    // ici : un `null` lu comme « serveur d'avant » (le cache reste), et aucun
+    // chemin où un défaut du fil deviendrait un ordre de purger les titres.
+    group('feeCodeSections', () {
+      Map<String, dynamic> withSections(Object? sections) => {
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-2', current: true),
+        'feeCodeSections': sections,
+        'serverTime': '2026-07-08T10:00:00Z',
+      };
+
+      test('clé absente ou nulle → null : serveur d\'avant', () {
+        final absent = ReferentialBundleDto.fromJson({
+          'school': schoolJson(),
+          'current': yearBundleJson(yearId: 'ay-2', current: true),
+          'serverTime': '2026-07-08T10:00:00Z',
+        });
+
+        expect(absent.feeCodeSections, isNull);
+        expect(
+          ReferentialBundleDto.fromJson(withSections(null)).feeCodeSections,
+          isNull,
+        );
+      });
+
+      test('parse les titres dans l\'ordre reçu, masquées comprises', () {
+        final sections = ReferentialBundleDto.fromJson(
+          withSections([
+            {
+              'code': 'TUITION',
+              'label': 'Frais scolaires annuels',
+              'active': true,
+              'sortOrder': 0,
+            },
+            // Ex æquo sur `sortOrder` : seul l'ordre de la liste départage.
+            {
+              'code': 'BOARDING',
+              'label': 'Internat',
+              'active': false,
+              'sortOrder': 0,
+            },
+          ]),
+        ).feeCodeSections!;
+
+        expect(sections.map((s) => s.code), ['TUITION', 'BOARDING']);
+        expect(sections.first.label, 'Frais scolaires annuels');
+        expect(sections.last.active, isFalse);
+      });
+
+      test('un élément illisible est écarté, sans faire tomber le socle', () {
+        final sections = ReferentialBundleDto.fromJson(
+          withSections([
+            {'code': 'TUITION', 'label': 'Frais scolaires annuels'},
+            {'label': 'Sans code'},
+            'pas un objet',
+            {'code': '  ', 'label': 'Code blanc'},
+          ]),
+        ).feeCodeSections!;
+
+        expect(sections.map((s) => s.code), ['TUITION']);
+        // `active` absent : le repli sûr, qui ne filtre rien.
+        expect(sections.single.active, isTrue);
+      });
+
+      test('une liste vide, ou sans rien de lisible → null : un défaut, '
+          'jamais un ordre de purger les titres', () {
+        expect(
+          ReferentialBundleDto.fromJson(
+            withSections(<dynamic>[]),
+          ).feeCodeSections,
+          isNull,
+        );
+        expect(
+          ReferentialBundleDto.fromJson(
+            withSections([
+              {'label': 'Sans code'},
+            ]),
+          ).feeCodeSections,
+          isNull,
+        );
+      });
+    });
+
     // ── Barème de réductions (ADR-021) — UNE section racine ──────────────────
     //
     // La distinction `null` / `[]` ne vit pas dans la fabrique Dart : elle vit

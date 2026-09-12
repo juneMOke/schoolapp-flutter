@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -106,6 +107,16 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   )
   replaceReductionCatalog;
 
+  /// Seam vers le cache des **titres de sections de frais**, scopé ÉCOLE comme
+  /// [replaceReductionCatalog], et pour la même raison : la section descend à la
+  /// racine du bundle, sans année. Le `schoolId` est celui que le pull a déjà
+  /// résolu — la purge et l'insertion ne peuvent pas tomber sur deux écoles.
+  final Future<void> Function(
+    List<FeeCodeSectionLocalModel> sections,
+    String schoolId,
+  )
+  replaceFeeCodeSections;
+
   /// Seam vers l'identité de l'école pour le **logo**, même raison que
   /// [replaceTariffs] : le bundle porte les empreintes, mais `enrollment` n'a
   /// rien à savoir d'un cache d'images ni d'une route d'octets. L'isolation du
@@ -150,6 +161,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceTariffs,
     required this.replaceBoutiqueArticles,
     required this.replaceReductionCatalog,
+    required this.replaceFeeCodeSections,
     required this.syncSchoolLogo,
     required this.syncMetaDao,
     required this.requiredAuth,
@@ -478,8 +490,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     ];
     final boutiqueApplied = await _applyBoutiqueCatalog(body);
     final reductionsApplied = await _applyReductionCatalog(body, syncedAt);
+    final sectionsApplied = await _applyFeeCodeSections(body, syncedAt);
     if (tariffBundles.isEmpty) {
-      return upserted + boutiqueApplied + reductionsApplied;
+      return upserted + boutiqueApplied + reductionsApplied + sectionsApplied;
     }
 
     final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
@@ -513,7 +526,48 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           .toList(growable: false),
       yearIds,
     );
-    return upserted + allTariffs.length + boutiqueApplied + reductionsApplied;
+    return upserted +
+        allTariffs.length +
+        boutiqueApplied +
+        reductionsApplied +
+        sectionsApplied;
+  }
+
+  /// Titres de sections de frais du bundle → `ref_fee_code_sections`, par le
+  /// seam [replaceFeeCodeSections].
+  ///
+  /// `null` = serveur d'avant, qui ne porte pas la section : non-événement, le
+  /// cache reste — celui qu'a pu remplir `GET /finance/fee-codes`. Le serveur
+  /// ne la caviarde jamais : `null` n'a pas d'autre sens.
+  ///
+  /// **Le rang rangé est la POSITION reçue**, jamais le `sortOrder` du DTO :
+  /// l'ordre de la liste fait foi, et le départage du serveur entre deux
+  /// ex æquo ne se refait pas ici.
+  ///
+  /// `schoolId` vient de [currentUser], **jamais du payload** — c'est la clé de
+  /// purge, même règle que le barème.
+  Future<int> _applyFeeCodeSections(
+    ReferentialBundleDto body,
+    int syncedAt,
+  ) async {
+    final sections = body.feeCodeSections;
+    if (sections == null) return 0;
+
+    final schoolId = currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return 0;
+
+    await replaceFeeCodeSections([
+      for (final (index, section) in sections.indexed)
+        FeeCodeSectionLocalModel(
+          schoolId: schoolId,
+          code: section.code.trim().toUpperCase(),
+          label: section.label.trim(),
+          active: section.active,
+          sortOrder: index,
+          syncedAt: syncedAt,
+        ),
+    ], schoolId);
+    return sections.length;
   }
 
   /// Barème de réductions du bundle → Facturation, par le seam

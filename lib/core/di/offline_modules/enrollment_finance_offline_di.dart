@@ -420,6 +420,11 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
             lines,
             schoolId: schoolId,
           ),
+      // Quatrième seam, scopé ÉCOLE lui aussi : les titres de sections
+      // descendent à la racine du bundle, et l'école est celle que le pull a
+      // résolue — même raison que le barème, ci-dessus.
+      replaceFeeCodeSections: (sections, schoolId) => getIt<FinanceLocalDao>()
+          .replaceFeeSectionsForSchool(sections, schoolId: schoolId),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

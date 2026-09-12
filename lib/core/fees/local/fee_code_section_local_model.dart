@@ -28,9 +28,9 @@ class FeeCodeSectionLocalModel {
   /// pour le jour où un sélecteur lira cette table — il n'en existe aucun.
   final bool active;
 
-  /// Rang d'affichage servi par le serveur. Conservé pour la même raison que
-  /// [active] : rien ne le lit ici, et le perdre obligerait à re-tirer la route
-  /// pour le retrouver.
+  /// Rang de la nature dans l'école : la **position** que le serveur a servie,
+  /// jamais son `sortOrder`, qui peut porter des ex æquo. C'est lui qui range
+  /// les frais à l'écran et sur la liste de relance.
   final int sortOrder;
 
   final int syncedAt;

@@ -809,8 +809,10 @@ class AppConstants {
   /// lieu de déclencher une relecture.
   static const String syncPlanEndpoint = '/api/v1/sync/plan';
 
-  /// Pull du socle référentiel (années, cycles, niveaux, tarifs) — bundle
-  /// conditionnel ETag/304. GET /api/v1/sync/referential.
+  /// Pull du socle référentiel (années, cycles, niveaux, tarifs, titres de
+  /// sections) — **toujours 200, sans ETag** : le socle repart en entier à
+  /// chaque pull, et un renommage se voit au pull suivant.
+  /// GET /api/v1/sync/referential.
   static const String syncReferentialEndpoint = '/api/v1/sync/referential';
 
   /// Pull de la cohorte de réinscription N-1 (bornée/statique, ETag/304)
