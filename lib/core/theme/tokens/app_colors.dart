@@ -12,6 +12,10 @@ class AppColors {
   // panneau (terre-cuite Discipline, bleu-ardoise Présence).
   static const terreCuiteDark = Color(0xFF9A4A21);
   static const terreCuiteSoft = Color(0xFFF7EBE3);
+
+  /// Terre cuite à 70 % — les barres « non mises en avant » du graphique
+  /// d'évolution des dépenses.
+  static const terreCuiteMuted = Color(0xB3B85C2C);
   static const bleuArdoiseSoft = Color(0xFFEBF2F7);
 
   /// Bleu ardoise éclairci — dernier arrêt des dégradés de surface sombre
@@ -231,6 +235,12 @@ class AppColors {
   /// caisse est étanche à la scolarité, la couleur ne doit pas les confondre.
   static const accueilBoutiqueAccent = Color(0xFF8A4F2D);
   static const accueilBoutiqueSoft = Color(0xFFF6EDE7);
+
+  /// Dépenses — brique : la famille terre cuite du décaissement (spec), assez
+  /// sombre pour se distinguer de Cours (terre cuite pure) et de Boutique
+  /// (brun), 7:1 sur son fond doux.
+  static const accueilExpenseAccent = Color(0xFF9C3D2E);
+  static const accueilExpenseSoft = Color(0xFFF8ECE9);
   static const accueilClassesAccent = Color(0xFFB8862B);
   static const accueilClassesSoft = Color(0xFFFBF3E3);
   static const accueilCoursAccent = terreCuite; // #B85C2C

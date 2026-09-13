@@ -9,6 +9,7 @@ class AppColors {
   static const orDoux = tokens.AppColors.orDoux;
   static const terreCuiteDark = tokens.AppColors.terreCuiteDark;
   static const terreCuiteSoft = tokens.AppColors.terreCuiteSoft;
+  static const terreCuiteMuted = tokens.AppColors.terreCuiteMuted;
   static const bleuArdoiseSoft = tokens.AppColors.bleuArdoiseSoft;
   static const vertSavane = tokens.AppColors.vertSavane;
   static const blancCasse = tokens.AppColors.blancCasse;

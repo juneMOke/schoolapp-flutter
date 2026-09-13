@@ -17,6 +17,9 @@ import 'package:school_app_flutter/features/auth/presentation/pages/reset_passwo
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_dashboard_page.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
 import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
@@ -424,6 +427,22 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.boutiqueHistorique,
       builder: (context, state) => const BoutiqueHistoryPage(),
+    ),
+    // Les dépenses ont leur menu et leur scope : il hydrate le registre et le
+    // taux du jour au montage. Aucun partage avec Finances — la source de fonds
+    // ne débite aucune caisse en V1.
+    ShellRoute(
+      builder: (context, state, child) => ExpenseFeatureScope(child: child),
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.expenseDashboard,
+          builder: (context, state) => const ExpenseDashboardPage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.expenseRegister,
+          builder: (context, state) => const ExpenseRegisterPage(),
+        ),
+      ],
     ),
     ShellRoute(
       builder: (context, state, child) => ClassesFeatureScope(child: child),

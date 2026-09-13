@@ -4,9 +4,29 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
 /// Helpers centralisés pour afficher des [SnackBar] cohérents dans l'application.
 abstract final class AppSnackBar {
+  /// Durée d'un accusé qui porte un « Annuler » : assez pour lire et se
+  /// raviser, pas assez pour encombrer le geste suivant.
+  static const Duration undoDuration = Duration(seconds: 6);
+
   /// Affiche un [SnackBar] de succès.
-  static void showSuccess(BuildContext context, String message) {
-    _show(context, message: message, variant: _AppSnackBarVariant.success);
+  /// [actionLabel] + [onAction] posent un geste sur l'accusé — le « Annuler »
+  /// d'un retrait, par exemple, qui ne ralentit pas le cas nominal comme le
+  /// ferait une confirmation.
+  static void showSuccess(
+    BuildContext context,
+    String message, {
+    VoidCallback? onAction,
+    String? actionLabel,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    _show(
+      context,
+      message: message,
+      variant: _AppSnackBarVariant.success,
+      duration: duration,
+      onAction: onAction,
+      actionLabel: actionLabel,
+    );
   }
 
   /// Affiche un [SnackBar] d'erreur.

@@ -113,6 +113,19 @@ const ModuleAccess kAttendanceAmendAccess = ModuleAccess([
   Perm.attendanceAmend,
 ], requiresAll: true);
 
+/// Créer, modifier, dupliquer ou basculer une dépense
+/// (`POST /sync/expenses`).
+///
+/// ⚠️ Masquer n'est pas cosmétique : l'écriture part par l'outbox, où un 403
+/// est terminal — offert sans le droit, le geste mourrait plus tard, en
+/// silence, sur une saisie que l'économe croit enregistrée.
+const ModuleAccess kExpenseWriteAccess = ModuleAccess([Perm.expenseWrite]);
+
+/// Retirer une dépense du registre, ou la restaurer
+/// (`POST /sync/expenses/{id}/deletion`). Retirer n'est pas saisir : une école
+/// peut confier l'un sans l'autre.
+const ModuleAccess kExpenseWithdrawAccess = ModuleAccess([Perm.expenseDelete]);
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
@@ -128,6 +141,8 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
     Perm.academicsGradeWrite,
   ]),
   'répartir ou affecter des élèves': ModuleAccess([Perm.classroomWrite]),
+  'enregistrer une dépense': kExpenseWriteAccess,
+  'retirer une dépense': kExpenseWithdrawAccess,
 };
 
 /// **Source unique** du mapping sous-module → permissions requises.
@@ -189,6 +204,14 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // L'historique lit les MÊMES ventes, en local : même droit. Le distinguer
     // n'inventerait qu'une permission que le serveur ne connaît pas.
     MenuConstants.boutiqueHistoriqueId: ModuleAccess([Perm.boutiqueSaleRead]),
+  },
+  MenuConstants.expenseMenuId: {
+    // Les deux écrans lisent la MÊME liste locale : même droit. Écrire et
+    // retirer sont gardés à part, geste par geste ([kExpenseWriteAccess],
+    // [kExpenseWithdrawAccess]) — un compte qui consulte doit pouvoir lire le
+    // registre sans pouvoir le modifier.
+    MenuConstants.expenseDashboardId: ModuleAccess([Perm.expenseRead]),
+    MenuConstants.expenseRegisterId: ModuleAccess([Perm.expenseRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

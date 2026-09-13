@@ -15844,6 +15844,1032 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open billing'**
   String get feeControlEmptyBilling;
+
+  /// No description provided for @menuExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get menuExpenses;
+
+  /// No description provided for @subMenuExpenseRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating costs'**
+  String get subMenuExpenseRegister;
+
+  /// No description provided for @accueilModuleExpenseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'What the school pays out: the operating costs register and its dashboard.'**
+  String get accueilModuleExpenseDescription;
+
+  /// No description provided for @expenseNewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New expense'**
+  String get expenseNewAction;
+
+  /// No description provided for @expenseOpenRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the register'**
+  String get expenseOpenRegister;
+
+  /// No description provided for @expenseShowWholeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'See the whole month'**
+  String get expenseShowWholeMonth;
+
+  /// No description provided for @expenseResetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get expenseResetFilters;
+
+  /// No description provided for @expenseTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown type'**
+  String get expenseTypeUnknown;
+
+  /// No description provided for @expenseNoSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get expenseNoSupplier;
+
+  /// No description provided for @expenseNoValue.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get expenseNoValue;
+
+  /// No description provided for @expenseNumberPending.
+  ///
+  /// In en, this message translates to:
+  /// **'No. pending'**
+  String get expenseNumberPending;
+
+  /// No description provided for @expenseStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get expenseStatusTitle;
+
+  /// No description provided for @expenseStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get expenseStatusAll;
+
+  /// No description provided for @expenseStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get expenseStatusPaid;
+
+  /// No description provided for @expenseStatusUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get expenseStatusUnpaid;
+
+  /// No description provided for @expenseSyncRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs fixing'**
+  String get expenseSyncRejected;
+
+  /// No description provided for @expenseTypesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense types'**
+  String get expenseTypesTitle;
+
+  /// No description provided for @expenseTypesShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'show all'**
+  String get expenseTypesShowAll;
+
+  /// No description provided for @expenseTypeChipA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{type}: {count, plural, =0{no expense} =1{1 expense} other{{count} expenses}} in the period'**
+  String expenseTypeChipA11y(String type, int count);
+
+  /// No description provided for @expenseSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get expenseSearchLabel;
+
+  /// No description provided for @expenseSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'title, supplier, expense no.…'**
+  String get expenseSearchPlaceholder;
+
+  /// No description provided for @expenseGranularityDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get expenseGranularityDay;
+
+  /// No description provided for @expenseGranularityWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get expenseGranularityWeek;
+
+  /// No description provided for @expenseGranularityMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get expenseGranularityMonth;
+
+  /// No description provided for @expenseGranularitySchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get expenseGranularitySchoolYear;
+
+  /// No description provided for @expensePeriodGranularityA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Period size'**
+  String get expensePeriodGranularityA11y;
+
+  /// No description provided for @expensePeriodPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get expensePeriodPrevious;
+
+  /// No description provided for @expensePeriodNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get expensePeriodNext;
+
+  /// No description provided for @expensePeriodBackToCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the current period'**
+  String get expensePeriodBackToCurrent;
+
+  /// No description provided for @expensePeriodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get expensePeriodToday;
+
+  /// No description provided for @expensePeriodYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get expensePeriodYesterday;
+
+  /// No description provided for @expensePeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get expensePeriodDay;
+
+  /// No description provided for @expensePeriodThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get expensePeriodThisWeek;
+
+  /// No description provided for @expensePeriodLastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week'**
+  String get expensePeriodLastWeek;
+
+  /// No description provided for @expensePeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get expensePeriodWeek;
+
+  /// No description provided for @expensePeriodThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get expensePeriodThisMonth;
+
+  /// No description provided for @expensePeriodLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get expensePeriodLastMonth;
+
+  /// No description provided for @expensePeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get expensePeriodMonth;
+
+  /// No description provided for @expensePeriodThisSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This school year'**
+  String get expensePeriodThisSchoolYear;
+
+  /// No description provided for @expensePeriodLastSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous school year'**
+  String get expensePeriodLastSchoolYear;
+
+  /// No description provided for @expensePeriodSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'School year'**
+  String get expensePeriodSchoolYear;
+
+  /// No description provided for @expensePeriodWeekRange.
+  ///
+  /// In en, this message translates to:
+  /// **'from {from} to {to}'**
+  String expensePeriodWeekRange(String from, String to);
+
+  /// No description provided for @expensePeriodSchoolYearRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start}-{end}'**
+  String expensePeriodSchoolYearRange(String start, String end);
+
+  /// No description provided for @expensePeriodDemonstrative.
+  ///
+  /// In en, this message translates to:
+  /// **'{granularity, select, day{this day} week{this week} month{this month} other{this school year}}'**
+  String expensePeriodDemonstrative(String granularity);
+
+  /// No description provided for @expensePreviousPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'{granularity, select, day{the day before} week{the previous week} month{the previous month} other{the previous school year}}'**
+  String expensePreviousPeriod(String granularity);
+
+  /// No description provided for @expenseKpiSelectionTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection total'**
+  String get expenseKpiSelectionTotal;
+
+  /// No description provided for @expenseKpiPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get expenseKpiPaid;
+
+  /// No description provided for @expenseKpiUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get expenseKpiUnpaid;
+
+  /// No description provided for @expenseKpiShown.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses shown'**
+  String get expenseKpiShown;
+
+  /// No description provided for @expenseKpiShownA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}'**
+  String expenseKpiShownA11y(int count);
+
+  /// No description provided for @expenseKpiPaidCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}'**
+  String expenseKpiPaidCount(int count);
+
+  /// No description provided for @expenseKpiUnpaidCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}'**
+  String expenseKpiUnpaidCount(int count);
+
+  /// No description provided for @expenseKpiNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily rate published: amounts per currency'**
+  String get expenseKpiNoRate;
+
+  /// No description provided for @expenseKpiTotalSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total spent'**
+  String get expenseKpiTotalSpent;
+
+  /// No description provided for @expenseKpiRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to pay'**
+  String get expenseKpiRemaining;
+
+  /// No description provided for @expenseKpiRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses recorded'**
+  String get expenseKpiRecorded;
+
+  /// No description provided for @expenseKpiAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'i.e. {amount} on average'**
+  String expenseKpiAverage(String amount);
+
+  /// No description provided for @expenseKpiMainType.
+  ///
+  /// In en, this message translates to:
+  /// **'Main cost item'**
+  String get expenseKpiMainType;
+
+  /// No description provided for @expenseKpiMainTypeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'no expense'**
+  String get expenseKpiMainTypeNone;
+
+  /// No description provided for @expenseKpiMainTypeShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · {percent}% of the total'**
+  String expenseKpiMainTypeShare(String amount, int percent);
+
+  /// No description provided for @expenseVariation.
+  ///
+  /// In en, this message translates to:
+  /// **'{variation}% vs {previous}'**
+  String expenseVariation(String variation, String previous);
+
+  /// No description provided for @expenseVariationElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{variation}% vs {previous}, same elapsed time'**
+  String expenseVariationElapsed(String variation, String previous);
+
+  /// No description provided for @expenseDayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no expense} =1{1 expense} other{{count} expenses}}'**
+  String expenseDayCount(int count);
+
+  /// No description provided for @expenseUsdEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount}'**
+  String expenseUsdEquivalent(String amount);
+
+  /// No description provided for @expenseUsdEquivalentOfDay.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} at today\'s rate'**
+  String expenseUsdEquivalentOfDay(String amount);
+
+  /// No description provided for @expenseShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count, plural, =1{1 more expense} other{{count} more expenses}} ({remaining, plural, =1{1 left} other{{remaining} left}})'**
+  String expenseShowMore(int count, int remaining);
+
+  /// No description provided for @expenseEmptyPeriodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense in {period}'**
+  String expenseEmptyPeriodTitle(String period);
+
+  /// No description provided for @expenseEmptyPeriodMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was paid out in {detail}. Record an expense, or change the period.'**
+  String expenseEmptyPeriodMessage(String detail);
+
+  /// No description provided for @expenseEmptySearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching expense'**
+  String get expenseEmptySearchTitle;
+
+  /// No description provided for @expenseEmptySearchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The active filters let nothing through in {detail}. Widen the search or record the missing expense.'**
+  String expenseEmptySearchMessage(String detail);
+
+  /// No description provided for @expenseDashboardEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was paid out in {detail}. Widen the period or record the missing expense.'**
+  String expenseDashboardEmptyMessage(String detail);
+
+  /// No description provided for @expenseErrorStorageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register unreadable'**
+  String get expenseErrorStorageTitle;
+
+  /// No description provided for @expenseErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense register could not be read on this device. Try again; if the problem persists, contact support.'**
+  String get expenseErrorStorage;
+
+  /// No description provided for @expenseErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect'**
+  String get expenseErrorNetworkTitle;
+
+  /// No description provided for @expenseErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not be reached. Check the connection, then try again.'**
+  String get expenseErrorNetwork;
+
+  /// No description provided for @expenseErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get expenseErrorUnauthorizedTitle;
+
+  /// No description provided for @expenseErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view the register.'**
+  String get expenseErrorUnauthorized;
+
+  /// No description provided for @expenseErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get expenseErrorForbiddenTitle;
+
+  /// No description provided for @expenseErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense register is not open to your account. Contact the school administrator.'**
+  String get expenseErrorForbidden;
+
+  /// No description provided for @expenseErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get expenseErrorRetry;
+
+  /// No description provided for @expenseErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get expenseErrorReconnect;
+
+  /// No description provided for @expenseErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String expenseErrorIncidentCode(String code);
+
+  /// No description provided for @expenseActionMarkPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get expenseActionMarkPaid;
+
+  /// No description provided for @expenseActionMarkUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unpaid'**
+  String get expenseActionMarkUnpaid;
+
+  /// No description provided for @expenseActionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get expenseActionDuplicate;
+
+  /// No description provided for @expenseActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get expenseActionEdit;
+
+  /// No description provided for @expenseActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get expenseActionDelete;
+
+  /// No description provided for @expenseDialogClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get expenseDialogClose;
+
+  /// No description provided for @expenseToastCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})'**
+  String expenseToastCreated(String amount, String status);
+
+  /// No description provided for @expenseToastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {name} updated.'**
+  String expenseToastUpdated(String name);
+
+  /// No description provided for @expenseToastMarkedPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · marked as paid.'**
+  String expenseToastMarkedPaid(String name);
+
+  /// No description provided for @expenseToastMarkedUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · marked as unpaid.'**
+  String expenseToastMarkedUnpaid(String name);
+
+  /// No description provided for @expenseToastWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {name} deleted.'**
+  String expenseToastWithdrawn(String name);
+
+  /// No description provided for @expenseToastRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {name} restored.'**
+  String expenseToastRestored(String name);
+
+  /// No description provided for @expenseToastUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get expenseToastUndo;
+
+  /// No description provided for @expenseWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense could not be saved on this device. Try again.'**
+  String get expenseWriteFailed;
+
+  /// No description provided for @expenseFundingCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Main cash box'**
+  String get expenseFundingCash;
+
+  /// No description provided for @expenseFundingBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get expenseFundingBank;
+
+  /// No description provided for @expenseFundingMobileMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile money'**
+  String get expenseFundingMobileMoney;
+
+  /// No description provided for @expenseRejectedUnknownType.
+  ///
+  /// In en, this message translates to:
+  /// **'the expense type does not exist for this school'**
+  String get expenseRejectedUnknownType;
+
+  /// No description provided for @expenseRejectedDateInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'the expense date is in the future'**
+  String get expenseRejectedDateInFuture;
+
+  /// No description provided for @expenseRejectedPaidOnInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'the payment date is in the future'**
+  String get expenseRejectedPaidOnInFuture;
+
+  /// No description provided for @expenseRejectedForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'your account is not allowed to record this expense'**
+  String get expenseRejectedForbidden;
+
+  /// No description provided for @expenseRejectedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'the expense was not accepted'**
+  String get expenseRejectedGeneric;
+
+  /// No description provided for @expenseDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {number}'**
+  String expenseDetailEyebrow(String number);
+
+  /// No description provided for @expenseDetailEyebrowPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense · no. pending'**
+  String get expenseDetailEyebrowPending;
+
+  /// No description provided for @expenseDetailType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get expenseDetailType;
+
+  /// No description provided for @expenseDetailSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier / payee'**
+  String get expenseDetailSupplier;
+
+  /// No description provided for @expenseDetailFunding.
+  ///
+  /// In en, this message translates to:
+  /// **'Source of funds'**
+  String get expenseDetailFunding;
+
+  /// No description provided for @expenseDetailRecordedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded by'**
+  String get expenseDetailRecordedBy;
+
+  /// No description provided for @expenseDetailDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense date'**
+  String get expenseDetailDate;
+
+  /// No description provided for @expenseDetailPaidOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on'**
+  String get expenseDetailPaidOn;
+
+  /// No description provided for @expenseDetailNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get expenseDetailNumber;
+
+  /// No description provided for @expenseDetailNumberPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for synchronisation'**
+  String get expenseDetailNumberPending;
+
+  /// No description provided for @expenseDetailNoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description recorded.'**
+  String get expenseDetailNoDescription;
+
+  /// No description provided for @expenseDetailRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server: {reason}. Edit the expense to fix it.'**
+  String expenseDetailRejected(String reason);
+
+  /// No description provided for @expenseFormCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record an operating expense'**
+  String get expenseFormCreateTitle;
+
+  /// No description provided for @expenseFormCreateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the school paid out: a title, a type, an amount, a status.'**
+  String get expenseFormCreateSubtitle;
+
+  /// No description provided for @expenseFormEditEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the expense'**
+  String get expenseFormEditEyebrow;
+
+  /// No description provided for @expenseFormEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {number}'**
+  String expenseFormEditSubtitle(String number);
+
+  /// No description provided for @expenseFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense title'**
+  String get expenseFormTitle;
+
+  /// No description provided for @expenseFormTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. SNEL bill — August'**
+  String get expenseFormTitlePlaceholder;
+
+  /// No description provided for @expenseFormTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A title is needed to find the expense again.'**
+  String get expenseFormTitleRequired;
+
+  /// No description provided for @expenseFormDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get expenseFormDescription;
+
+  /// No description provided for @expenseFormDescriptionPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Details useful for control: period covered, payee, invoice reference…'**
+  String get expenseFormDescriptionPlaceholder;
+
+  /// No description provided for @expenseFormType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get expenseFormType;
+
+  /// No description provided for @expenseFormDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense date'**
+  String get expenseFormDate;
+
+  /// No description provided for @expenseFormAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get expenseFormAmount;
+
+  /// No description provided for @expenseFormAmountPlaceholderCdf.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 250 000'**
+  String get expenseFormAmountPlaceholderCdf;
+
+  /// No description provided for @expenseFormAmountPlaceholderUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 120'**
+  String get expenseFormAmountPlaceholderUsd;
+
+  /// No description provided for @expenseFormAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount actually paid out.'**
+  String get expenseFormAmountRequired;
+
+  /// No description provided for @expenseFormCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Commitment currency'**
+  String get expenseFormCurrency;
+
+  /// No description provided for @expenseFormUsdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} at today\'s rate ({rate} per \$1) — the recorded amount stays in francs.'**
+  String expenseFormUsdHint(String amount, String rate);
+
+  /// No description provided for @expenseFormFunding.
+  ///
+  /// In en, this message translates to:
+  /// **'Source of funds'**
+  String get expenseFormFunding;
+
+  /// No description provided for @expenseFormFundingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The source of funds is recorded for traceability, but it does not yet debit the cash balance of the Finance module.'**
+  String get expenseFormFundingNote;
+
+  /// No description provided for @expenseFormSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier / payee (optional)'**
+  String get expenseFormSupplier;
+
+  /// No description provided for @expenseFormSupplierPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. SNEL, Papyrus bookshop…'**
+  String get expenseFormSupplierPlaceholder;
+
+  /// No description provided for @expenseFormNoTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense types have not reached this device yet. Synchronise, then try again.'**
+  String get expenseFormNoTypes;
+
+  /// No description provided for @expenseFormCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get expenseFormCancel;
+
+  /// No description provided for @expenseFormSaveCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the expense'**
+  String get expenseFormSaveCreate;
+
+  /// No description provided for @expenseFormSaveEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get expenseFormSaveEdit;
+
+  /// No description provided for @expenseEvolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending over time'**
+  String get expenseEvolutionTitle;
+
+  /// No description provided for @expenseEvolutionByMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month by month, over school year {detail}'**
+  String expenseEvolutionByMonth(String detail);
+
+  /// No description provided for @expenseEvolutionByDayOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day, over {detail}'**
+  String expenseEvolutionByDayOf(String detail);
+
+  /// No description provided for @expenseEvolutionByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day, {detail}'**
+  String expenseEvolutionByDay(String detail);
+
+  /// No description provided for @expenseEvolutionLastSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'The seven days up to {detail}'**
+  String expenseEvolutionLastSevenDays(String detail);
+
+  /// No description provided for @expenseEvolutionNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily rate is published: amounts in francs and dollars do not add up, so the trend is not drawn. Totals per currency remain in the key figures.'**
+  String get expenseEvolutionNoRate;
+
+  /// No description provided for @expenseEvolutionNoteRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Each bar adds up the period\'s payments, read in dollars at today\'s rate ({rate} per \$1). Recorded amounts stay in their commitment currency.'**
+  String expenseEvolutionNoteRate(String rate);
+
+  /// No description provided for @expenseEvolutionA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending over time, {detail}'**
+  String expenseEvolutionA11y(String detail);
+
+  /// No description provided for @expenseMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}'**
+  String expenseMonthShort(String month);
+
+  /// No description provided for @expenseWeekdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} other{Sun}}'**
+  String expenseWeekdayShort(String weekday);
+
+  /// No description provided for @expenseBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown by type'**
+  String get expenseBreakdownTitle;
+
+  /// No description provided for @expenseBreakdownSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of each cost item in the total paid out'**
+  String get expenseBreakdownSubtitle;
+
+  /// No description provided for @expenseTopTypesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The 5 costliest items'**
+  String get expenseTopTypesTitle;
+
+  /// No description provided for @expenseTopTypesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an item to open it in the register'**
+  String get expenseTopTypesSubtitle;
+
+  /// No description provided for @expenseTopTypeA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {type} in the register'**
+  String expenseTopTypeA11y(String type);
+
+  /// No description provided for @expenseSharesByCountNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a published daily rate, cost items compare by number of expenses: francs and dollars do not add up.'**
+  String get expenseSharesByCountNote;
+
+  /// No description provided for @expensePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String expensePercent(int percent);
+
+  /// No description provided for @expenseInsightWhereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the money goes'**
+  String get expenseInsightWhereTitle;
+
+  /// No description provided for @expenseInsightWhereBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The top three items ({types}) weigh {percent}% of the total. That is where any cost negotiation happens.'**
+  String expenseInsightWhereBody(String types, int percent);
+
+  /// No description provided for @expenseInsightWhereByCount.
+  ///
+  /// In en, this message translates to:
+  /// **'The most frequent items: {types}. Without a published rate, their weight in money does not compare across currencies.'**
+  String expenseInsightWhereByCount(String types);
+
+  /// No description provided for @expenseInsightWhereNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No cost item has moved yet in {period}.'**
+  String expenseInsightWhereNone(String period);
+
+  /// No description provided for @expenseInsightRemainingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is left to pay'**
+  String get expenseInsightRemainingTitle;
+
+  /// No description provided for @expenseInsightUnpaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 expense is still awaiting payment} other{{count} expenses are still awaiting payment}}, for {amount}. The oldest dates from {date}.'**
+  String expenseInsightUnpaidBody(int count, String amount, String date);
+
+  /// No description provided for @expenseInsightAllPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything committed in {period} has been paid. No supplier arrears.'**
+  String expenseInsightAllPaid(String period);
+
+  /// No description provided for @expenseInsightCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-currency reading'**
+  String get expenseInsightCurrencyTitle;
+
+  /// No description provided for @expenseInsightCurrencyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{francs} were paid out in francs and {dollars} in dollars. The total shown is a reading in dollars at today\'s rate ({rate} per \$1), not an accounting conversion.'**
+  String expenseInsightCurrencyBody(String francs, String dollars, String rate);
+
+  /// No description provided for @expenseInsightNoRateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily rate is published: each amount stays in its currency and totals do not add up. The rate is published in Configuration.'**
+  String get expenseInsightNoRateBody;
+
+  /// No description provided for @expenseJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} · {second}'**
+  String expenseJoin(String first, String second);
+
+  /// No description provided for @expenseReadingWithPair.
+  ///
+  /// In en, this message translates to:
+  /// **'{reading} ({pair})'**
+  String expenseReadingWithPair(String reading, String pair);
+
+  /// No description provided for @expenseRateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts read in dollars at today\'s rate: {rate} per \$1. A reading, not an accounting conversion — each expense stays in its currency.'**
+  String expenseRateNote(String rate);
 }
 
 class _AppLocalizationsDelegate

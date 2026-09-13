@@ -28,6 +28,7 @@ class MenuFactory {
       _createFinancesMenu(l10n),
       _createFeeControlMenu(l10n),
       _createBoutiqueMenu(l10n),
+      _createExpenseMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -202,6 +203,31 @@ class MenuFactory {
           id: MenuConstants.boutiqueHistoriqueId,
           title: l10n.subMenuBoutiqueHistory,
           route: AppRoutesNames.boutiqueHistorique,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Dépenses — ce que l'école décaisse.
+  ///
+  /// Un menu propre, et non un sous-menu de Finances : la source de fonds est
+  /// enregistrée mais ne débite aucune caisse en V1. Le tableau de bord d'abord
+  /// — on mesure avant de détailler — puis le registre, où tout s'écrit.
+  static MenuItem _createExpenseMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.expenseMenuId,
+      title: l10n.menuExpenses,
+      icon: Icons.account_balance_wallet_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.expenseDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.expenseDashboard,
+        ),
+        SubMenuItem(
+          id: MenuConstants.expenseRegisterId,
+          title: l10n.subMenuExpenseRegister,
+          route: AppRoutesNames.expenseRegister,
         ),
       ],
     );

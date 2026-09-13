@@ -6689,5 +6689,576 @@
   "feeControlCallSheetVisaDirection": "Visa de la direction",
   "feeControlCallSheetFailed": "La feuille d'appel n'a pas pu être préparée.",
   "feeControlEmptyWiden": "Voir tous les élèves",
-  "feeControlEmptyBilling": "Ouvrir la facturation"
+  "feeControlEmptyBilling": "Ouvrir la facturation",
+  "menuExpenses": "Dépenses",
+  "subMenuExpenseRegister": "Frais de fonctionnement",
+  "accueilModuleExpenseDescription": "Ce que l'école décaisse : le registre des frais de fonctionnement et son tableau de bord.",
+  "expenseNewAction": "Nouvelle dépense",
+  "expenseOpenRegister": "Ouvrir le registre",
+  "expenseShowWholeMonth": "Voir le mois entier",
+  "expenseResetFilters": "Réinitialiser les filtres",
+  "expenseTypeUnknown": "Type inconnu",
+  "expenseNoSupplier": "—",
+  "expenseNoValue": "—",
+  "expenseNumberPending": "N° en attente",
+  "expenseStatusTitle": "Statut",
+  "expenseStatusAll": "Toutes",
+  "expenseStatusPaid": "Payée",
+  "expenseStatusUnpaid": "Non payée",
+  "expenseSyncRejected": "À corriger",
+  "expenseTypesTitle": "Types de dépense",
+  "expenseTypesShowAll": "tout afficher",
+  "expenseTypeChipA11y": "{type} : {count, plural, =0{aucune dépense} =1{1 dépense} other{{count} dépenses}} sur la période",
+  "@expenseTypeChipA11y": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseSearchLabel": "Rechercher",
+  "expenseSearchPlaceholder": "intitulé, fournisseur, n° de dépense…",
+  "expenseGranularityDay": "Jour",
+  "expenseGranularityWeek": "Semaine",
+  "expenseGranularityMonth": "Mois",
+  "expenseGranularitySchoolYear": "Année",
+  "expensePeriodGranularityA11y": "Taille de la période",
+  "expensePeriodPrevious": "Période précédente",
+  "expensePeriodNext": "Période suivante",
+  "expensePeriodBackToCurrent": "Revenir à la période en cours",
+  "expensePeriodToday": "Aujourd'hui",
+  "expensePeriodYesterday": "Hier",
+  "expensePeriodDay": "Journée",
+  "expensePeriodThisWeek": "Cette semaine",
+  "expensePeriodLastWeek": "Semaine dernière",
+  "expensePeriodWeek": "Semaine",
+  "expensePeriodThisMonth": "Ce mois-ci",
+  "expensePeriodLastMonth": "Mois dernier",
+  "expensePeriodMonth": "Mois",
+  "expensePeriodThisSchoolYear": "Cette année scolaire",
+  "expensePeriodLastSchoolYear": "Année scolaire précédente",
+  "expensePeriodSchoolYear": "Année scolaire",
+  "expensePeriodWeekRange": "du {from} au {to}",
+  "@expensePeriodWeekRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePeriodSchoolYearRange": "{start}-{end}",
+  "@expensePeriodSchoolYearRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePeriodDemonstrative": "{granularity, select, day{cette journée} week{cette semaine} month{ce mois-ci} other{cette année scolaire}}",
+  "@expensePeriodDemonstrative": {
+    "placeholders": {
+      "granularity": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePreviousPeriod": "{granularity, select, day{la veille} week{la semaine précédente} month{le mois précédent} other{l'année scolaire précédente}}",
+  "@expensePreviousPeriod": {
+    "placeholders": {
+      "granularity": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseKpiSelectionTotal": "Total de la sélection",
+  "expenseKpiPaid": "Déjà payé",
+  "expenseKpiUnpaid": "Non payé",
+  "expenseKpiShown": "Dépenses affichées",
+  "expenseKpiShownA11y": "{count, plural, =0{Aucune dépense affichée} =1{1 dépense affichée} other{{count} dépenses affichées}}",
+  "@expenseKpiShownA11y": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiPaidCount": "{count, plural, =0{aucune dépense réglée} =1{1 dépense réglée} other{{count} dépenses réglées}}",
+  "@expenseKpiPaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiUnpaidCount": "{count, plural, =0{aucune dépense en attente} =1{1 dépense en attente} other{{count} dépenses en attente}}",
+  "@expenseKpiUnpaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiNoRate": "Aucun taux du jour publié : montants par devise",
+  "expenseKpiTotalSpent": "Total dépensé",
+  "expenseKpiRemaining": "Restant à payer",
+  "expenseKpiRecorded": "Dépenses enregistrées",
+  "expenseKpiAverage": "soit {amount} en moyenne",
+  "@expenseKpiAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseKpiMainType": "Poste principal",
+  "expenseKpiMainTypeNone": "aucune dépense",
+  "expenseKpiMainTypeShare": "{amount} · {percent} % du total",
+  "@expenseKpiMainTypeShare": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseVariation": "{variation} % vs {previous}",
+  "@expenseVariation": {
+    "placeholders": {
+      "variation": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseVariationElapsed": "{variation} % vs {previous}, à durée égale",
+  "@expenseVariationElapsed": {
+    "placeholders": {
+      "variation": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDayCount": "{count, plural, =0{aucune dépense} =1{1 dépense} other{{count} dépenses}}",
+  "@expenseDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseUsdEquivalent": "≈ {amount}",
+  "@expenseUsdEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseUsdEquivalentOfDay": "≈ {amount} au taux du jour",
+  "@expenseUsdEquivalentOfDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseShowMore": "Afficher {count, plural, =1{1 dépense} other{{count} dépenses}} de plus ({remaining, plural, =1{1 restante} other{{remaining} restantes}})",
+  "@expenseShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseEmptyPeriodTitle": "Aucune dépense sur {period}",
+  "@expenseEmptyPeriodTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEmptyPeriodMessage": "Rien n'a été décaissé sur {detail}. Enregistrez une dépense, ou changez de période.",
+  "@expenseEmptyPeriodMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEmptySearchTitle": "Aucune dépense ne correspond",
+  "expenseEmptySearchMessage": "Les filtres actifs ne laissent rien passer sur {detail}. Élargissez la recherche ou enregistrez la dépense manquante.",
+  "@expenseEmptySearchMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDashboardEmptyMessage": "Rien n'a été décaissé sur {detail}. Élargissez la période ou enregistrez la dépense manquante.",
+  "@expenseDashboardEmptyMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseErrorStorageTitle": "Registre illisible",
+  "expenseErrorStorage": "Le registre des dépenses n'a pas pu être lu sur cet appareil. Réessayez ; si le problème persiste, contactez l'assistance.",
+  "expenseErrorNetworkTitle": "Connexion impossible",
+  "expenseErrorNetwork": "Le serveur n'a pas pu être joint. Vérifiez la connexion, puis réessayez.",
+  "expenseErrorUnauthorizedTitle": "Session expirée",
+  "expenseErrorUnauthorized": "Votre session a expiré. Reconnectez-vous pour consulter le registre.",
+  "expenseErrorForbiddenTitle": "Accès refusé",
+  "expenseErrorForbidden": "Le registre des dépenses n'est pas ouvert à votre compte. Adressez-vous à l'administrateur de l'école.",
+  "expenseErrorRetry": "Réessayer",
+  "expenseErrorReconnect": "Se reconnecter",
+  "expenseErrorIncidentCode": "Code incident : {code}",
+  "@expenseErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseActionMarkPaid": "Marquer payée",
+  "expenseActionMarkUnpaid": "Repasser en non payée",
+  "expenseActionDuplicate": "Dupliquer",
+  "expenseActionEdit": "Modifier",
+  "expenseActionDelete": "Supprimer",
+  "expenseDialogClose": "Fermer",
+  "expenseToastCreated": "Dépense enregistrée · {amount} ({status, select, PAID{payée} other{non payée}})",
+  "@expenseToastCreated": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastUpdated": "Dépense {name} modifiée.",
+  "@expenseToastUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastMarkedPaid": "{name} · marquée payée.",
+  "@expenseToastMarkedPaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastMarkedUnpaid": "{name} · repassée en non payée.",
+  "@expenseToastMarkedUnpaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastWithdrawn": "Dépense {name} supprimée.",
+  "@expenseToastWithdrawn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastRestored": "Dépense {name} restaurée.",
+  "@expenseToastRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastUndo": "Annuler",
+  "expenseWriteFailed": "La dépense n'a pas pu être enregistrée sur cet appareil. Réessayez.",
+  "expenseFundingCash": "Caisse principale",
+  "expenseFundingBank": "Banque",
+  "expenseFundingMobileMoney": "Mobile money",
+  "expenseRejectedUnknownType": "le type de dépense n'existe pas pour cette école",
+  "expenseRejectedDateInFuture": "la date de la dépense est dans le futur",
+  "expenseRejectedPaidOnInFuture": "la date de règlement est dans le futur",
+  "expenseRejectedForbidden": "votre compte n'a pas le droit d'enregistrer cette dépense",
+  "expenseRejectedGeneric": "la dépense n'a pas été acceptée",
+  "expenseDetailEyebrow": "Dépense {number}",
+  "@expenseDetailEyebrow": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDetailEyebrowPending": "Dépense · n° en attente",
+  "expenseDetailType": "Type",
+  "expenseDetailSupplier": "Fournisseur / bénéficiaire",
+  "expenseDetailFunding": "Source de fonds",
+  "expenseDetailRecordedBy": "Enregistrée par",
+  "expenseDetailDate": "Date de la dépense",
+  "expenseDetailPaidOn": "Payée le",
+  "expenseDetailNumber": "Numéro",
+  "expenseDetailNumberPending": "En attente de synchronisation",
+  "expenseDetailNoDescription": "Aucune description enregistrée.",
+  "expenseDetailRejected": "Refusée par le serveur : {reason}. Modifiez la dépense pour la corriger.",
+  "@expenseDetailRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormCreateTitle": "Enregistrer une dépense de fonctionnement",
+  "expenseFormCreateSubtitle": "Ce que l'école a décaissé : un intitulé, un type, un montant, un statut.",
+  "expenseFormEditEyebrow": "Modifier la dépense",
+  "expenseFormEditSubtitle": "Dépense {number}",
+  "@expenseFormEditSubtitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormTitle": "Intitulé de la dépense",
+  "expenseFormTitlePlaceholder": "ex. Facture SNEL — août",
+  "expenseFormTitleRequired": "Un intitulé est nécessaire pour retrouver la dépense.",
+  "expenseFormDescription": "Description (facultative)",
+  "expenseFormDescriptionPlaceholder": "Précisions utiles au contrôle : période couverte, bénéficiaire, référence de facture…",
+  "expenseFormType": "Type",
+  "expenseFormDate": "Date de la dépense",
+  "expenseFormAmount": "Montant",
+  "expenseFormAmountPlaceholderCdf": "ex. 250 000",
+  "expenseFormAmountPlaceholderUsd": "ex. 120",
+  "expenseFormAmountRequired": "Indiquez le montant réellement décaissé.",
+  "expenseFormCurrency": "Devise d'engagement",
+  "expenseFormUsdHint": "≈ {amount} au taux du jour ({rate} pour 1 $) — le montant enregistré reste en francs.",
+  "@expenseFormUsdHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormFunding": "Source de fonds",
+  "expenseFormFundingNote": "La source de fonds est enregistrée pour la traçabilité, mais elle ne débite pas encore le solde de caisse du module Finances.",
+  "expenseFormSupplier": "Fournisseur / bénéficiaire (facultatif)",
+  "expenseFormSupplierPlaceholder": "ex. SNEL, Librairie Papyrus…",
+  "expenseFormNoTypes": "Les types de dépense ne sont pas encore descendus sur cet appareil. Synchronisez, puis réessayez.",
+  "expenseFormCancel": "Annuler",
+  "expenseFormSaveCreate": "Enregistrer la dépense",
+  "expenseFormSaveEdit": "Enregistrer les modifications",
+  "expenseEvolutionTitle": "Évolution des dépenses",
+  "expenseEvolutionByMonth": "Mois par mois, sur l'année scolaire {detail}",
+  "@expenseEvolutionByMonth": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionByDayOf": "Jour par jour, sur {detail}",
+  "@expenseEvolutionByDayOf": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionByDay": "Jour par jour, {detail}",
+  "@expenseEvolutionByDay": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionLastSevenDays": "Les sept jours jusqu'au {detail}",
+  "@expenseEvolutionLastSevenDays": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionNoRate": "Aucun taux du jour n'est publié : des montants en francs et en dollars ne s'additionnent pas, l'évolution n'est donc pas tracée. Les totaux par devise restent dans les chiffres clés.",
+  "expenseEvolutionNoteRate": "Chaque barre additionne les décaissements de la période, lus en dollars au taux du jour ({rate} pour 1 $). Les montants enregistrés, eux, restent dans leur devise d'engagement.",
+  "@expenseEvolutionNoteRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionA11y": "Évolution des dépenses, {detail}",
+  "@expenseEvolutionA11y": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseMonthShort": "{month, select, 1{janv.} 2{févr.} 3{mars} 4{avr.} 5{mai} 6{juin} 7{juil.} 8{août} 9{sept.} 10{oct.} 11{nov.} other{déc.}}",
+  "@expenseMonthShort": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseWeekdayShort": "{weekday, select, 1{lun.} 2{mar.} 3{mer.} 4{jeu.} 5{ven.} 6{sam.} other{dim.}}",
+  "@expenseWeekdayShort": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseBreakdownTitle": "Répartition par type",
+  "expenseBreakdownSubtitle": "Part de chaque poste dans le total décaissé",
+  "expenseTopTypesTitle": "Les 5 postes les plus coûteux",
+  "expenseTopTypesSubtitle": "Touchez un poste pour l'ouvrir dans le registre",
+  "expenseTopTypeA11y": "Ouvrir {type} dans le registre",
+  "@expenseTopTypeA11y": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseSharesByCountNote": "Sans taux du jour publié, les postes se comparent par nombre de dépenses : des francs et des dollars ne s'additionnent pas.",
+  "expensePercent": "{percent} %",
+  "@expensePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseInsightWhereTitle": "Où part l'argent",
+  "expenseInsightWhereBody": "Les trois premiers postes ({types}) pèsent {percent} % du total. C'est là que se joue toute négociation de coût.",
+  "@expenseInsightWhereBody": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseInsightWhereByCount": "Les postes les plus fréquents : {types}. Sans taux publié, leur poids en argent ne se compare pas d'une devise à l'autre.",
+  "@expenseInsightWhereByCount": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightWhereNone": "Aucun poste n'a encore été mouvementé sur {period}.",
+  "@expenseInsightWhereNone": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightRemainingTitle": "Ce qui reste à régler",
+  "expenseInsightUnpaidBody": "{count, plural, =1{1 dépense attend encore paiement} other{{count} dépenses attendent encore paiement}}, pour {amount}. La plus ancienne date du {date}.",
+  "@expenseInsightUnpaidBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightAllPaid": "Tout ce qui a été engagé sur {period} a été payé. Aucun arriéré fournisseur.",
+  "@expenseInsightAllPaid": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightCurrencyTitle": "Lecture bi-devise",
+  "expenseInsightCurrencyBody": "{francs} ont été décaissés en francs et {dollars} en dollars. Le total affiché est une lecture en dollars au taux du jour ({rate} pour 1 $), pas une conversion comptable.",
+  "@expenseInsightCurrencyBody": {
+    "placeholders": {
+      "francs": {
+        "type": "String"
+      },
+      "dollars": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightNoRateBody": "Aucun taux du jour n'est publié : chaque montant reste dans sa devise et les totaux ne s'additionnent pas. Le taux se publie en Configuration.",
+  "expenseJoin": "{first} · {second}",
+  "@expenseJoin": {
+    "description": "Deux mentions accolées sur une même ligne (sous-titre, sous-ligne de carte).",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseReadingWithPair": "{reading} ({pair})",
+  "@expenseReadingWithPair": {
+    "description": "Une lecture en dollars, doublée de la paire brute des devises (doctrine bi-devise).",
+    "placeholders": {
+      "reading": {
+        "type": "String"
+      },
+      "pair": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseRateNote": "Montants lus en dollars au taux du jour : {rate} pour 1 $. Une lecture, pas une conversion comptable — chaque dépense reste dans sa devise.",
+  "@expenseRateNote": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  }
 }

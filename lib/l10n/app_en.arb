@@ -6499,5 +6499,574 @@
     }
   },
   "feeControlEmptyWiden": "See all students",
-  "feeControlEmptyBilling": "Open billing"
+  "feeControlEmptyBilling": "Open billing",
+  "menuExpenses": "Expenses",
+  "subMenuExpenseRegister": "Operating costs",
+  "accueilModuleExpenseDescription": "What the school pays out: the operating costs register and its dashboard.",
+  "expenseNewAction": "New expense",
+  "expenseOpenRegister": "Open the register",
+  "expenseShowWholeMonth": "See the whole month",
+  "expenseResetFilters": "Reset filters",
+  "expenseTypeUnknown": "Unknown type",
+  "expenseNoSupplier": "—",
+  "expenseNoValue": "—",
+  "expenseNumberPending": "No. pending",
+  "expenseStatusTitle": "Status",
+  "expenseStatusAll": "All",
+  "expenseStatusPaid": "Paid",
+  "expenseStatusUnpaid": "Unpaid",
+  "expenseSyncRejected": "Needs fixing",
+  "expenseTypesTitle": "Expense types",
+  "expenseTypesShowAll": "show all",
+  "expenseTypeChipA11y": "{type}: {count, plural, =0{no expense} =1{1 expense} other{{count} expenses}} in the period",
+  "@expenseTypeChipA11y": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseSearchLabel": "Search",
+  "expenseSearchPlaceholder": "title, supplier, expense no.…",
+  "expenseGranularityDay": "Day",
+  "expenseGranularityWeek": "Week",
+  "expenseGranularityMonth": "Month",
+  "expenseGranularitySchoolYear": "Year",
+  "expensePeriodGranularityA11y": "Period size",
+  "expensePeriodPrevious": "Previous period",
+  "expensePeriodNext": "Next period",
+  "expensePeriodBackToCurrent": "Back to the current period",
+  "expensePeriodToday": "Today",
+  "expensePeriodYesterday": "Yesterday",
+  "expensePeriodDay": "Day",
+  "expensePeriodThisWeek": "This week",
+  "expensePeriodLastWeek": "Last week",
+  "expensePeriodWeek": "Week",
+  "expensePeriodThisMonth": "This month",
+  "expensePeriodLastMonth": "Last month",
+  "expensePeriodMonth": "Month",
+  "expensePeriodThisSchoolYear": "This school year",
+  "expensePeriodLastSchoolYear": "Previous school year",
+  "expensePeriodSchoolYear": "School year",
+  "expensePeriodWeekRange": "from {from} to {to}",
+  "@expensePeriodWeekRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePeriodSchoolYearRange": "{start}-{end}",
+  "@expensePeriodSchoolYearRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePeriodDemonstrative": "{granularity, select, day{this day} week{this week} month{this month} other{this school year}}",
+  "@expensePeriodDemonstrative": {
+    "placeholders": {
+      "granularity": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePreviousPeriod": "{granularity, select, day{the day before} week{the previous week} month{the previous month} other{the previous school year}}",
+  "@expensePreviousPeriod": {
+    "placeholders": {
+      "granularity": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseKpiSelectionTotal": "Selection total",
+  "expenseKpiPaid": "Already paid",
+  "expenseKpiUnpaid": "Unpaid",
+  "expenseKpiShown": "Expenses shown",
+  "expenseKpiShownA11y": "{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}",
+  "@expenseKpiShownA11y": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiPaidCount": "{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}",
+  "@expenseKpiPaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiUnpaidCount": "{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}",
+  "@expenseKpiUnpaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseKpiNoRate": "No daily rate published: amounts per currency",
+  "expenseKpiTotalSpent": "Total spent",
+  "expenseKpiRemaining": "Still to pay",
+  "expenseKpiRecorded": "Expenses recorded",
+  "expenseKpiAverage": "i.e. {amount} on average",
+  "@expenseKpiAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseKpiMainType": "Main cost item",
+  "expenseKpiMainTypeNone": "no expense",
+  "expenseKpiMainTypeShare": "{amount} · {percent}% of the total",
+  "@expenseKpiMainTypeShare": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseVariation": "{variation}% vs {previous}",
+  "@expenseVariation": {
+    "placeholders": {
+      "variation": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseVariationElapsed": "{variation}% vs {previous}, same elapsed time",
+  "@expenseVariationElapsed": {
+    "placeholders": {
+      "variation": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDayCount": "{count, plural, =0{no expense} =1{1 expense} other{{count} expenses}}",
+  "@expenseDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseUsdEquivalent": "≈ {amount}",
+  "@expenseUsdEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseUsdEquivalentOfDay": "≈ {amount} at today's rate",
+  "@expenseUsdEquivalentOfDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseShowMore": "Show {count, plural, =1{1 more expense} other{{count} more expenses}} ({remaining, plural, =1{1 left} other{{remaining} left}})",
+  "@expenseShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseEmptyPeriodTitle": "No expense in {period}",
+  "@expenseEmptyPeriodTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEmptyPeriodMessage": "Nothing was paid out in {detail}. Record an expense, or change the period.",
+  "@expenseEmptyPeriodMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEmptySearchTitle": "No matching expense",
+  "expenseEmptySearchMessage": "The active filters let nothing through in {detail}. Widen the search or record the missing expense.",
+  "@expenseEmptySearchMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDashboardEmptyMessage": "Nothing was paid out in {detail}. Widen the period or record the missing expense.",
+  "@expenseDashboardEmptyMessage": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseErrorStorageTitle": "Register unreadable",
+  "expenseErrorStorage": "The expense register could not be read on this device. Try again; if the problem persists, contact support.",
+  "expenseErrorNetworkTitle": "Cannot connect",
+  "expenseErrorNetwork": "The server could not be reached. Check the connection, then try again.",
+  "expenseErrorUnauthorizedTitle": "Session expired",
+  "expenseErrorUnauthorized": "Your session has expired. Sign in again to view the register.",
+  "expenseErrorForbiddenTitle": "Access denied",
+  "expenseErrorForbidden": "The expense register is not open to your account. Contact the school administrator.",
+  "expenseErrorRetry": "Try again",
+  "expenseErrorReconnect": "Sign in again",
+  "expenseErrorIncidentCode": "Incident code: {code}",
+  "@expenseErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseActionMarkPaid": "Mark as paid",
+  "expenseActionMarkUnpaid": "Mark as unpaid",
+  "expenseActionDuplicate": "Duplicate",
+  "expenseActionEdit": "Edit",
+  "expenseActionDelete": "Delete",
+  "expenseDialogClose": "Close",
+  "expenseToastCreated": "Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})",
+  "@expenseToastCreated": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastUpdated": "Expense {name} updated.",
+  "@expenseToastUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastMarkedPaid": "{name} · marked as paid.",
+  "@expenseToastMarkedPaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastMarkedUnpaid": "{name} · marked as unpaid.",
+  "@expenseToastMarkedUnpaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastWithdrawn": "Expense {name} deleted.",
+  "@expenseToastWithdrawn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastRestored": "Expense {name} restored.",
+  "@expenseToastRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseToastUndo": "Undo",
+  "expenseWriteFailed": "The expense could not be saved on this device. Try again.",
+  "expenseFundingCash": "Main cash box",
+  "expenseFundingBank": "Bank",
+  "expenseFundingMobileMoney": "Mobile money",
+  "expenseRejectedUnknownType": "the expense type does not exist for this school",
+  "expenseRejectedDateInFuture": "the expense date is in the future",
+  "expenseRejectedPaidOnInFuture": "the payment date is in the future",
+  "expenseRejectedForbidden": "your account is not allowed to record this expense",
+  "expenseRejectedGeneric": "the expense was not accepted",
+  "expenseDetailEyebrow": "Expense {number}",
+  "@expenseDetailEyebrow": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseDetailEyebrowPending": "Expense · no. pending",
+  "expenseDetailType": "Type",
+  "expenseDetailSupplier": "Supplier / payee",
+  "expenseDetailFunding": "Source of funds",
+  "expenseDetailRecordedBy": "Recorded by",
+  "expenseDetailDate": "Expense date",
+  "expenseDetailPaidOn": "Paid on",
+  "expenseDetailNumber": "Number",
+  "expenseDetailNumberPending": "Waiting for synchronisation",
+  "expenseDetailNoDescription": "No description recorded.",
+  "expenseDetailRejected": "Rejected by the server: {reason}. Edit the expense to fix it.",
+  "@expenseDetailRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormCreateTitle": "Record an operating expense",
+  "expenseFormCreateSubtitle": "What the school paid out: a title, a type, an amount, a status.",
+  "expenseFormEditEyebrow": "Edit the expense",
+  "expenseFormEditSubtitle": "Expense {number}",
+  "@expenseFormEditSubtitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormTitle": "Expense title",
+  "expenseFormTitlePlaceholder": "e.g. SNEL bill — August",
+  "expenseFormTitleRequired": "A title is needed to find the expense again.",
+  "expenseFormDescription": "Description (optional)",
+  "expenseFormDescriptionPlaceholder": "Details useful for control: period covered, payee, invoice reference…",
+  "expenseFormType": "Type",
+  "expenseFormDate": "Expense date",
+  "expenseFormAmount": "Amount",
+  "expenseFormAmountPlaceholderCdf": "e.g. 250 000",
+  "expenseFormAmountPlaceholderUsd": "e.g. 120",
+  "expenseFormAmountRequired": "Enter the amount actually paid out.",
+  "expenseFormCurrency": "Commitment currency",
+  "expenseFormUsdHint": "≈ {amount} at today's rate ({rate} per $1) — the recorded amount stays in francs.",
+  "@expenseFormUsdHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFormFunding": "Source of funds",
+  "expenseFormFundingNote": "The source of funds is recorded for traceability, but it does not yet debit the cash balance of the Finance module.",
+  "expenseFormSupplier": "Supplier / payee (optional)",
+  "expenseFormSupplierPlaceholder": "e.g. SNEL, Papyrus bookshop…",
+  "expenseFormNoTypes": "Expense types have not reached this device yet. Synchronise, then try again.",
+  "expenseFormCancel": "Cancel",
+  "expenseFormSaveCreate": "Save the expense",
+  "expenseFormSaveEdit": "Save changes",
+  "expenseEvolutionTitle": "Spending over time",
+  "expenseEvolutionByMonth": "Month by month, over school year {detail}",
+  "@expenseEvolutionByMonth": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionByDayOf": "Day by day, over {detail}",
+  "@expenseEvolutionByDayOf": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionByDay": "Day by day, {detail}",
+  "@expenseEvolutionByDay": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionLastSevenDays": "The seven days up to {detail}",
+  "@expenseEvolutionLastSevenDays": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionNoRate": "No daily rate is published: amounts in francs and dollars do not add up, so the trend is not drawn. Totals per currency remain in the key figures.",
+  "expenseEvolutionNoteRate": "Each bar adds up the period's payments, read in dollars at today's rate ({rate} per $1). Recorded amounts stay in their commitment currency.",
+  "@expenseEvolutionNoteRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseEvolutionA11y": "Spending over time, {detail}",
+  "@expenseEvolutionA11y": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseMonthShort": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}",
+  "@expenseMonthShort": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseWeekdayShort": "{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} other{Sun}}",
+  "@expenseWeekdayShort": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseBreakdownTitle": "Breakdown by type",
+  "expenseBreakdownSubtitle": "Share of each cost item in the total paid out",
+  "expenseTopTypesTitle": "The 5 costliest items",
+  "expenseTopTypesSubtitle": "Tap an item to open it in the register",
+  "expenseTopTypeA11y": "Open {type} in the register",
+  "@expenseTopTypeA11y": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseSharesByCountNote": "Without a published daily rate, cost items compare by number of expenses: francs and dollars do not add up.",
+  "expensePercent": "{percent}%",
+  "@expensePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseInsightWhereTitle": "Where the money goes",
+  "expenseInsightWhereBody": "The top three items ({types}) weigh {percent}% of the total. That is where any cost negotiation happens.",
+  "@expenseInsightWhereBody": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseInsightWhereByCount": "The most frequent items: {types}. Without a published rate, their weight in money does not compare across currencies.",
+  "@expenseInsightWhereByCount": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightWhereNone": "No cost item has moved yet in {period}.",
+  "@expenseInsightWhereNone": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightRemainingTitle": "What is left to pay",
+  "expenseInsightUnpaidBody": "{count, plural, =1{1 expense is still awaiting payment} other{{count} expenses are still awaiting payment}}, for {amount}. The oldest dates from {date}.",
+  "@expenseInsightUnpaidBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightAllPaid": "Everything committed in {period} has been paid. No supplier arrears.",
+  "@expenseInsightAllPaid": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightCurrencyTitle": "Two-currency reading",
+  "expenseInsightCurrencyBody": "{francs} were paid out in francs and {dollars} in dollars. The total shown is a reading in dollars at today's rate ({rate} per $1), not an accounting conversion.",
+  "@expenseInsightCurrencyBody": {
+    "placeholders": {
+      "francs": {
+        "type": "String"
+      },
+      "dollars": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseInsightNoRateBody": "No daily rate is published: each amount stays in its currency and totals do not add up. The rate is published in Configuration.",
+  "expenseJoin": "{first} · {second}",
+  "@expenseJoin": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseReadingWithPair": "{reading} ({pair})",
+  "@expenseReadingWithPair": {
+    "placeholders": {
+      "reading": {
+        "type": "String"
+      },
+      "pair": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseRateNote": "Amounts read in dollars at today's rate: {rate} per $1. A reading, not an accounting conversion — each expense stays in its currency.",
+  "@expenseRateNote": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  }
 }

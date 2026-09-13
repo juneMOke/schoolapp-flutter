@@ -60,6 +60,11 @@ class AppRoutesNames {
   static const String boutiqueHistorique =
       '/boutique/${MenuConstants.boutiqueHistoriqueId}';
 
+  static const String expenseDashboard =
+      '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseDashboardId}';
+  static const String expenseRegister =
+      '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseRegisterId}';
+
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';

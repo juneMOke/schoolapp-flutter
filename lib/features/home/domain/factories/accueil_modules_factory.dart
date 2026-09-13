@@ -35,6 +35,7 @@ class AccueilModulesFactory {
       _finances(l10n),
       _feeControl(l10n),
       _boutique(l10n),
+      _expenses(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
@@ -200,6 +201,32 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.boutiqueHistoriqueId,
           title: l10n.subMenuBoutiqueHistory,
+        ),
+      ],
+    );
+  }
+
+  /// Les dépenses — une carte propre, comme le menu : tableau de bord, puis
+  /// le registre des frais de fonctionnement.
+  static AccueilModule _expenses(AppLocalizations l10n) {
+    const menuId = MenuConstants.expenseMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuExpenses,
+      description: l10n.accueilModuleExpenseDescription,
+      icon: Icons.account_balance_wallet_outlined,
+      accent: AppColors.accueilExpenseAccent,
+      softBackground: AppColors.accueilExpenseSoft,
+      subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.expenseDashboardId,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.expenseRegisterId,
+          title: l10n.subMenuExpenseRegister,
         ),
       ],
     );

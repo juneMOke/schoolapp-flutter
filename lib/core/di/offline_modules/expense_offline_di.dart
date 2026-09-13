@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -22,6 +23,10 @@ import 'package:school_app_flutter/features/expense/domain/repositories/expense_
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_snapshot_source.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Registrar du module **Dépenses** — le registre des frais de
@@ -82,6 +87,42 @@ void registerExpenseOffline(GetIt getIt) {
   );
   getIt.registerFactory<SyncExpensePullsUseCase>(
     () => SyncExpensePullsUseCase(getIt<PullCoordinator>()),
+  );
+
+  // ── Présentation ────────────────────────────────────────────────────────
+  // La période se partage entre les deux écrans : un porteur mémoire, pas un
+  // BLoC — les cubits restent des factories (règle n°2). Scopé au compte et à
+  // l'école : la période d'une autre session n'a rien à faire ici.
+  getIt.registerLazySingleton<ExpensePeriodMemory>(
+    () => ExpensePeriodMemory(
+      owner: () {
+        final user = getIt<CurrentUserContext>();
+        return '${user.uid}@${user.schoolId}';
+      },
+    ),
+  );
+  getIt.registerFactory<ExpenseSnapshotSource>(
+    () => ExpenseSnapshotSource(
+      load: getIt<LoadExpenseRegisterUseCase>(),
+      bus: getIt<PullCompletionBus>(),
+      engine: getIt<SyncEngine>(),
+    ),
+  );
+  getIt.registerFactory<ExpenseRegisterCubit>(
+    () => ExpenseRegisterCubit(
+      source: getIt<ExpenseSnapshotSource>(),
+      memory: getIt<ExpensePeriodMemory>(),
+      save: getIt<SaveExpenseUseCase>(),
+      setStatus: getIt<SetExpenseStatusUseCase>(),
+      withdraw: getIt<WithdrawExpenseUseCase>(),
+      restore: getIt<RestoreExpenseUseCase>(),
+    ),
+  );
+  getIt.registerFactory<ExpenseDashboardCubit>(
+    () => ExpenseDashboardCubit(
+      source: getIt<ExpenseSnapshotSource>(),
+      memory: getIt<ExpensePeriodMemory>(),
+    ),
   );
 
   // ── Descente ────────────────────────────────────────────────────────────

@@ -393,4 +393,86 @@ class AppDimensions {
   /// la ligne » — chacune a sa condition.
   static const enrollmentDashboardInsightMinWidth = 250.0;
   static const enrollmentDashboardInsightBadgeSize = 28.0;
+
+  // ── Dépenses (spec « Dépenses ▸ Frais de fonctionnement ») ────────────────
+
+  /// Écart entre une icône (ou un libellé) et son voisin sur une même ligne.
+  static const expenseInlineGap = 6.0;
+
+  /// Rayon des médaillons de 34 dp, des notes et des encarts d'alerte.
+  static const expenseIconBoxRadius = 10.0;
+
+  /// Rayon des encarts de lecture et du bandeau de montant de la fiche.
+  static const expenseInsetRadius = 12.0;
+
+  /// Icône d'un médaillon de 34 dp (en-tête de section, encart de lecture).
+  static const expenseMedallionIconSize = 18.0;
+
+  /// Filet d'accent à gauche d'un encart de lecture.
+  static const expenseAccentBorderWidth = 3.0;
+
+  /// Respiration verticale d'une note et d'une ligne de référence de la fiche.
+  static const expenseNotePaddingV = 10.0;
+
+  /// Pastille de légende de la répartition.
+  static const expenseLegendDotSize = 10.0;
+  static const expenseLegendDotRadius = 3.0;
+
+  /// Médaillon d'un type : 26 dp en fiche et en puce, 22 dp dans une ligne.
+  static const expenseTypeTagSize = 26.0;
+  static const expenseTypeTagSizeSmall = 22.0;
+  static const expenseTypeTagRadius = 7.0;
+  static const expenseTypeTagIconSize = 14.0;
+  static const expenseTypeTagIconSizeSmall = 12.0;
+
+  /// Puce de filtre par type : 34 dp de haut, cible portée à 44 par la marge.
+  static const expenseChipHeight = 34.0;
+  static const expenseChipRadius = 999.0;
+  static const expenseChipIconSize = 14.0;
+
+  /// Pas à pas de période : flèches 36 × 36, libellé à largeur fixe pour que
+  /// les flèches ne bougent pas d'un pas à l'autre.
+  static const expensePeriodArrowSize = 36.0;
+  static const expensePeriodArrowRadius = 10.0;
+  static const expensePeriodArrowIconSize = 17.0;
+  static const expensePeriodLabelWidth = 188.0;
+
+  /// Boutons d'action d'une ligne du registre (bascule, duplication).
+  static const expenseRowActionSize = 34.0;
+  static const expenseRowActionRadius = 9.0;
+  static const expenseRowActionIconSize = 15.0;
+
+  /// Sous cette largeur, une ligne du registre passe sur deux rangées.
+  static const expenseRowWideMinWidth = 820.0;
+
+  /// Pastille de statut.
+  static const expenseStatusIconSize = 14.0;
+  static const expenseStatusIconSizeSmall = 12.0;
+
+  /// Modales : formulaire 600, fiche 560.
+  static const expenseFormDialogMaxWidth = 600.0;
+  static const expenseDetailDialogMaxWidth = 560.0;
+  static const expenseDetailMedallionSize = 44.0;
+  static const expenseDetailMedallionIconSize = 22.0;
+  static const expenseDetailLabelWidth = 150.0;
+
+  /// Tableau de bord : hauteur du graphique d'évolution et de l'anneau.
+  static const expenseChartHeight = 190.0;
+  static const expenseDonutHeight = 200.0;
+  static const expenseInsightMinWidth = 260.0;
+  static const expenseInsightMedallionSize = 34.0;
+
+  /// Tableau de bord : répartition et top 5 côte à côte au-delà de cette
+  /// largeur, empilés en dessous.
+  static const expenseDashboardTwoColumnsMinWidth = 800.0;
+
+  /// Formulaire : largeurs des champs d'une même rangée, qui passent en pile
+  /// quand la modale se resserre.
+  static const expenseFormTypeMinWidth = 240.0;
+  static const expenseFormTypeMaxWidth = 360.0;
+  static const expenseFormDateMinWidth = 180.0;
+  static const expenseFormDateMaxWidth = 200.0;
+  static const expenseFormAmountMaxWidth = 240.0;
+  static const expenseFormFundingMinWidth = 200.0;
+  static const expenseFormFundingMaxWidth = 280.0;
 }

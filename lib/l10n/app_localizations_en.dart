@@ -9934,4 +9934,733 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feeControlEmptyBilling => 'Open billing';
+
+  @override
+  String get menuExpenses => 'Expenses';
+
+  @override
+  String get subMenuExpenseRegister => 'Operating costs';
+
+  @override
+  String get accueilModuleExpenseDescription =>
+      'What the school pays out: the operating costs register and its dashboard.';
+
+  @override
+  String get expenseNewAction => 'New expense';
+
+  @override
+  String get expenseOpenRegister => 'Open the register';
+
+  @override
+  String get expenseShowWholeMonth => 'See the whole month';
+
+  @override
+  String get expenseResetFilters => 'Reset filters';
+
+  @override
+  String get expenseTypeUnknown => 'Unknown type';
+
+  @override
+  String get expenseNoSupplier => '—';
+
+  @override
+  String get expenseNoValue => '—';
+
+  @override
+  String get expenseNumberPending => 'No. pending';
+
+  @override
+  String get expenseStatusTitle => 'Status';
+
+  @override
+  String get expenseStatusAll => 'All';
+
+  @override
+  String get expenseStatusPaid => 'Paid';
+
+  @override
+  String get expenseStatusUnpaid => 'Unpaid';
+
+  @override
+  String get expenseSyncRejected => 'Needs fixing';
+
+  @override
+  String get expenseTypesTitle => 'Expense types';
+
+  @override
+  String get expenseTypesShowAll => 'show all';
+
+  @override
+  String expenseTypeChipA11y(String type, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses',
+      one: '1 expense',
+      zero: 'no expense',
+    );
+    return '$type: $_temp0 in the period';
+  }
+
+  @override
+  String get expenseSearchLabel => 'Search';
+
+  @override
+  String get expenseSearchPlaceholder => 'title, supplier, expense no.…';
+
+  @override
+  String get expenseGranularityDay => 'Day';
+
+  @override
+  String get expenseGranularityWeek => 'Week';
+
+  @override
+  String get expenseGranularityMonth => 'Month';
+
+  @override
+  String get expenseGranularitySchoolYear => 'Year';
+
+  @override
+  String get expensePeriodGranularityA11y => 'Period size';
+
+  @override
+  String get expensePeriodPrevious => 'Previous period';
+
+  @override
+  String get expensePeriodNext => 'Next period';
+
+  @override
+  String get expensePeriodBackToCurrent => 'Back to the current period';
+
+  @override
+  String get expensePeriodToday => 'Today';
+
+  @override
+  String get expensePeriodYesterday => 'Yesterday';
+
+  @override
+  String get expensePeriodDay => 'Day';
+
+  @override
+  String get expensePeriodThisWeek => 'This week';
+
+  @override
+  String get expensePeriodLastWeek => 'Last week';
+
+  @override
+  String get expensePeriodWeek => 'Week';
+
+  @override
+  String get expensePeriodThisMonth => 'This month';
+
+  @override
+  String get expensePeriodLastMonth => 'Last month';
+
+  @override
+  String get expensePeriodMonth => 'Month';
+
+  @override
+  String get expensePeriodThisSchoolYear => 'This school year';
+
+  @override
+  String get expensePeriodLastSchoolYear => 'Previous school year';
+
+  @override
+  String get expensePeriodSchoolYear => 'School year';
+
+  @override
+  String expensePeriodWeekRange(String from, String to) {
+    return 'from $from to $to';
+  }
+
+  @override
+  String expensePeriodSchoolYearRange(String start, String end) {
+    return '$start-$end';
+  }
+
+  @override
+  String expensePeriodDemonstrative(String granularity) {
+    String _temp0 = intl.Intl.selectLogic(granularity, {
+      'day': 'this day',
+      'week': 'this week',
+      'month': 'this month',
+      'other': 'this school year',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String expensePreviousPeriod(String granularity) {
+    String _temp0 = intl.Intl.selectLogic(granularity, {
+      'day': 'the day before',
+      'week': 'the previous week',
+      'month': 'the previous month',
+      'other': 'the previous school year',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseKpiSelectionTotal => 'Selection total';
+
+  @override
+  String get expenseKpiPaid => 'Already paid';
+
+  @override
+  String get expenseKpiUnpaid => 'Unpaid';
+
+  @override
+  String get expenseKpiShown => 'Expenses shown';
+
+  @override
+  String expenseKpiShownA11y(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses shown',
+      one: '1 expense shown',
+      zero: 'No expense shown',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseKpiPaidCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses settled',
+      one: '1 expense settled',
+      zero: 'no expense settled',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseKpiUnpaidCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses pending',
+      one: '1 expense pending',
+      zero: 'no expense pending',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseKpiNoRate =>
+      'No daily rate published: amounts per currency';
+
+  @override
+  String get expenseKpiTotalSpent => 'Total spent';
+
+  @override
+  String get expenseKpiRemaining => 'Still to pay';
+
+  @override
+  String get expenseKpiRecorded => 'Expenses recorded';
+
+  @override
+  String expenseKpiAverage(String amount) {
+    return 'i.e. $amount on average';
+  }
+
+  @override
+  String get expenseKpiMainType => 'Main cost item';
+
+  @override
+  String get expenseKpiMainTypeNone => 'no expense';
+
+  @override
+  String expenseKpiMainTypeShare(String amount, int percent) {
+    return '$amount · $percent% of the total';
+  }
+
+  @override
+  String expenseVariation(String variation, String previous) {
+    return '$variation% vs $previous';
+  }
+
+  @override
+  String expenseVariationElapsed(String variation, String previous) {
+    return '$variation% vs $previous, same elapsed time';
+  }
+
+  @override
+  String expenseDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses',
+      one: '1 expense',
+      zero: 'no expense',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseUsdEquivalent(String amount) {
+    return '≈ $amount';
+  }
+
+  @override
+  String expenseUsdEquivalentOfDay(String amount) {
+    return '≈ $amount at today\'s rate';
+  }
+
+  @override
+  String expenseShowMore(int count, int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more expenses',
+      one: '1 more expense',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '$remaining left',
+      one: '1 left',
+    );
+    return 'Show $_temp0 ($_temp1)';
+  }
+
+  @override
+  String expenseEmptyPeriodTitle(String period) {
+    return 'No expense in $period';
+  }
+
+  @override
+  String expenseEmptyPeriodMessage(String detail) {
+    return 'Nothing was paid out in $detail. Record an expense, or change the period.';
+  }
+
+  @override
+  String get expenseEmptySearchTitle => 'No matching expense';
+
+  @override
+  String expenseEmptySearchMessage(String detail) {
+    return 'The active filters let nothing through in $detail. Widen the search or record the missing expense.';
+  }
+
+  @override
+  String expenseDashboardEmptyMessage(String detail) {
+    return 'Nothing was paid out in $detail. Widen the period or record the missing expense.';
+  }
+
+  @override
+  String get expenseErrorStorageTitle => 'Register unreadable';
+
+  @override
+  String get expenseErrorStorage =>
+      'The expense register could not be read on this device. Try again; if the problem persists, contact support.';
+
+  @override
+  String get expenseErrorNetworkTitle => 'Cannot connect';
+
+  @override
+  String get expenseErrorNetwork =>
+      'The server could not be reached. Check the connection, then try again.';
+
+  @override
+  String get expenseErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get expenseErrorUnauthorized =>
+      'Your session has expired. Sign in again to view the register.';
+
+  @override
+  String get expenseErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get expenseErrorForbidden =>
+      'The expense register is not open to your account. Contact the school administrator.';
+
+  @override
+  String get expenseErrorRetry => 'Try again';
+
+  @override
+  String get expenseErrorReconnect => 'Sign in again';
+
+  @override
+  String expenseErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get expenseActionMarkPaid => 'Mark as paid';
+
+  @override
+  String get expenseActionMarkUnpaid => 'Mark as unpaid';
+
+  @override
+  String get expenseActionDuplicate => 'Duplicate';
+
+  @override
+  String get expenseActionEdit => 'Edit';
+
+  @override
+  String get expenseActionDelete => 'Delete';
+
+  @override
+  String get expenseDialogClose => 'Close';
+
+  @override
+  String expenseToastCreated(String amount, String status) {
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'PAID': 'paid',
+      'other': 'unpaid',
+    });
+    return 'Expense recorded · $amount ($_temp0)';
+  }
+
+  @override
+  String expenseToastUpdated(String name) {
+    return 'Expense $name updated.';
+  }
+
+  @override
+  String expenseToastMarkedPaid(String name) {
+    return '$name · marked as paid.';
+  }
+
+  @override
+  String expenseToastMarkedUnpaid(String name) {
+    return '$name · marked as unpaid.';
+  }
+
+  @override
+  String expenseToastWithdrawn(String name) {
+    return 'Expense $name deleted.';
+  }
+
+  @override
+  String expenseToastRestored(String name) {
+    return 'Expense $name restored.';
+  }
+
+  @override
+  String get expenseToastUndo => 'Undo';
+
+  @override
+  String get expenseWriteFailed =>
+      'The expense could not be saved on this device. Try again.';
+
+  @override
+  String get expenseFundingCash => 'Main cash box';
+
+  @override
+  String get expenseFundingBank => 'Bank';
+
+  @override
+  String get expenseFundingMobileMoney => 'Mobile money';
+
+  @override
+  String get expenseRejectedUnknownType =>
+      'the expense type does not exist for this school';
+
+  @override
+  String get expenseRejectedDateInFuture => 'the expense date is in the future';
+
+  @override
+  String get expenseRejectedPaidOnInFuture =>
+      'the payment date is in the future';
+
+  @override
+  String get expenseRejectedForbidden =>
+      'your account is not allowed to record this expense';
+
+  @override
+  String get expenseRejectedGeneric => 'the expense was not accepted';
+
+  @override
+  String expenseDetailEyebrow(String number) {
+    return 'Expense $number';
+  }
+
+  @override
+  String get expenseDetailEyebrowPending => 'Expense · no. pending';
+
+  @override
+  String get expenseDetailType => 'Type';
+
+  @override
+  String get expenseDetailSupplier => 'Supplier / payee';
+
+  @override
+  String get expenseDetailFunding => 'Source of funds';
+
+  @override
+  String get expenseDetailRecordedBy => 'Recorded by';
+
+  @override
+  String get expenseDetailDate => 'Expense date';
+
+  @override
+  String get expenseDetailPaidOn => 'Paid on';
+
+  @override
+  String get expenseDetailNumber => 'Number';
+
+  @override
+  String get expenseDetailNumberPending => 'Waiting for synchronisation';
+
+  @override
+  String get expenseDetailNoDescription => 'No description recorded.';
+
+  @override
+  String expenseDetailRejected(String reason) {
+    return 'Rejected by the server: $reason. Edit the expense to fix it.';
+  }
+
+  @override
+  String get expenseFormCreateTitle => 'Record an operating expense';
+
+  @override
+  String get expenseFormCreateSubtitle =>
+      'What the school paid out: a title, a type, an amount, a status.';
+
+  @override
+  String get expenseFormEditEyebrow => 'Edit the expense';
+
+  @override
+  String expenseFormEditSubtitle(String number) {
+    return 'Expense $number';
+  }
+
+  @override
+  String get expenseFormTitle => 'Expense title';
+
+  @override
+  String get expenseFormTitlePlaceholder => 'e.g. SNEL bill — August';
+
+  @override
+  String get expenseFormTitleRequired =>
+      'A title is needed to find the expense again.';
+
+  @override
+  String get expenseFormDescription => 'Description (optional)';
+
+  @override
+  String get expenseFormDescriptionPlaceholder =>
+      'Details useful for control: period covered, payee, invoice reference…';
+
+  @override
+  String get expenseFormType => 'Type';
+
+  @override
+  String get expenseFormDate => 'Expense date';
+
+  @override
+  String get expenseFormAmount => 'Amount';
+
+  @override
+  String get expenseFormAmountPlaceholderCdf => 'e.g. 250 000';
+
+  @override
+  String get expenseFormAmountPlaceholderUsd => 'e.g. 120';
+
+  @override
+  String get expenseFormAmountRequired => 'Enter the amount actually paid out.';
+
+  @override
+  String get expenseFormCurrency => 'Commitment currency';
+
+  @override
+  String expenseFormUsdHint(String amount, String rate) {
+    return '≈ $amount at today\'s rate ($rate per \$1) — the recorded amount stays in francs.';
+  }
+
+  @override
+  String get expenseFormFunding => 'Source of funds';
+
+  @override
+  String get expenseFormFundingNote =>
+      'The source of funds is recorded for traceability, but it does not yet debit the cash balance of the Finance module.';
+
+  @override
+  String get expenseFormSupplier => 'Supplier / payee (optional)';
+
+  @override
+  String get expenseFormSupplierPlaceholder => 'e.g. SNEL, Papyrus bookshop…';
+
+  @override
+  String get expenseFormNoTypes =>
+      'Expense types have not reached this device yet. Synchronise, then try again.';
+
+  @override
+  String get expenseFormCancel => 'Cancel';
+
+  @override
+  String get expenseFormSaveCreate => 'Save the expense';
+
+  @override
+  String get expenseFormSaveEdit => 'Save changes';
+
+  @override
+  String get expenseEvolutionTitle => 'Spending over time';
+
+  @override
+  String expenseEvolutionByMonth(String detail) {
+    return 'Month by month, over school year $detail';
+  }
+
+  @override
+  String expenseEvolutionByDayOf(String detail) {
+    return 'Day by day, over $detail';
+  }
+
+  @override
+  String expenseEvolutionByDay(String detail) {
+    return 'Day by day, $detail';
+  }
+
+  @override
+  String expenseEvolutionLastSevenDays(String detail) {
+    return 'The seven days up to $detail';
+  }
+
+  @override
+  String get expenseEvolutionNoRate =>
+      'No daily rate is published: amounts in francs and dollars do not add up, so the trend is not drawn. Totals per currency remain in the key figures.';
+
+  @override
+  String expenseEvolutionNoteRate(String rate) {
+    return 'Each bar adds up the period\'s payments, read in dollars at today\'s rate ($rate per \$1). Recorded amounts stay in their commitment currency.';
+  }
+
+  @override
+  String expenseEvolutionA11y(String detail) {
+    return 'Spending over time, $detail';
+  }
+
+  @override
+  String expenseMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'Jan',
+      '2': 'Feb',
+      '3': 'Mar',
+      '4': 'Apr',
+      '5': 'May',
+      '6': 'Jun',
+      '7': 'Jul',
+      '8': 'Aug',
+      '9': 'Sep',
+      '10': 'Oct',
+      '11': 'Nov',
+      'other': 'Dec',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String expenseWeekdayShort(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Mon',
+      '2': 'Tue',
+      '3': 'Wed',
+      '4': 'Thu',
+      '5': 'Fri',
+      '6': 'Sat',
+      'other': 'Sun',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseBreakdownTitle => 'Breakdown by type';
+
+  @override
+  String get expenseBreakdownSubtitle =>
+      'Share of each cost item in the total paid out';
+
+  @override
+  String get expenseTopTypesTitle => 'The 5 costliest items';
+
+  @override
+  String get expenseTopTypesSubtitle =>
+      'Tap an item to open it in the register';
+
+  @override
+  String expenseTopTypeA11y(String type) {
+    return 'Open $type in the register';
+  }
+
+  @override
+  String get expenseSharesByCountNote =>
+      'Without a published daily rate, cost items compare by number of expenses: francs and dollars do not add up.';
+
+  @override
+  String expensePercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get expenseInsightWhereTitle => 'Where the money goes';
+
+  @override
+  String expenseInsightWhereBody(String types, int percent) {
+    return 'The top three items ($types) weigh $percent% of the total. That is where any cost negotiation happens.';
+  }
+
+  @override
+  String expenseInsightWhereByCount(String types) {
+    return 'The most frequent items: $types. Without a published rate, their weight in money does not compare across currencies.';
+  }
+
+  @override
+  String expenseInsightWhereNone(String period) {
+    return 'No cost item has moved yet in $period.';
+  }
+
+  @override
+  String get expenseInsightRemainingTitle => 'What is left to pay';
+
+  @override
+  String expenseInsightUnpaidBody(int count, String amount, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expenses are still awaiting payment',
+      one: '1 expense is still awaiting payment',
+    );
+    return '$_temp0, for $amount. The oldest dates from $date.';
+  }
+
+  @override
+  String expenseInsightAllPaid(String period) {
+    return 'Everything committed in $period has been paid. No supplier arrears.';
+  }
+
+  @override
+  String get expenseInsightCurrencyTitle => 'Two-currency reading';
+
+  @override
+  String expenseInsightCurrencyBody(
+    String francs,
+    String dollars,
+    String rate,
+  ) {
+    return '$francs were paid out in francs and $dollars in dollars. The total shown is a reading in dollars at today\'s rate ($rate per \$1), not an accounting conversion.';
+  }
+
+  @override
+  String get expenseInsightNoRateBody =>
+      'No daily rate is published: each amount stays in its currency and totals do not add up. The rate is published in Configuration.';
+
+  @override
+  String expenseJoin(String first, String second) {
+    return '$first · $second';
+  }
+
+  @override
+  String expenseReadingWithPair(String reading, String pair) {
+    return '$reading ($pair)';
+  }
+
+  @override
+  String expenseRateNote(String rate) {
+    return 'Amounts read in dollars at today\'s rate: $rate per \$1. A reading, not an accounting conversion — each expense stays in its currency.';
+  }
 }

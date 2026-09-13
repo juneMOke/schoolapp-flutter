@@ -36,6 +36,11 @@ class MenuConstants {
   /// Elle a d'ailleurs son propre historique, qui n'est pas celui des paiements.
   static const String boutiqueMenuId = 'boutique';
 
+  /// Les dépenses — ce que l'école **décaisse** (`DEPENSES_PLAN.md`). Un menu
+  /// propre : la source de fonds est enregistrée mais ne débite aucune caisse
+  /// en V1, et le ranger sous Finances laisserait croire le contraire.
+  static const String expenseMenuId = 'depenses';
+
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
   // il précède la coquille, qui n'a rien à afficher sans année académique.
@@ -67,6 +72,13 @@ class MenuConstants {
   /// Les ventes déjà encaissées, lues **en local seulement** : l'historique
   /// d'une caisse doit se consulter le jour où le réseau manque.
   static const String boutiqueHistoriqueId = 'boutique-historique';
+
+  /// Tableau de bord des dépenses : combien, sur quoi, ce qui reste à régler.
+  static const String expenseDashboardId = 'depenses-tableau-de-bord';
+
+  /// Le registre — « Frais de fonctionnement » : c'est ici, et nulle part
+  /// ailleurs, qu'une dépense se crée, se modifie ou se retire.
+  static const String expenseRegisterId = 'depenses-frais-fonctionnement';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
