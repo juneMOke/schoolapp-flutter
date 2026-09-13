@@ -24,25 +24,40 @@ class ExpenseInsightCard extends StatelessWidget {
     this.onAction,
   });
 
+  static const _radius = BorderRadius.all(
+    Radius.circular(AppDimensions.expenseInsetRadius),
+  );
+
   @override
   Widget build(BuildContext context) => ConstrainedBox(
     constraints: const BoxConstraints(
       minWidth: AppDimensions.expenseInsightMinWidth,
     ),
     child: Container(
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      // Le filet recouvre le bord gauche du tour : le retrait lui réserve sa
+      // largeur.
+      padding: const EdgeInsets.fromLTRB(
+        AppDimensions.spacingM + AppDimensions.expenseAccentBorderWidth,
+        AppDimensions.spacingM,
+        AppDimensions.spacingM,
+        AppDimensions.spacingM,
+      ),
+      // Deux couches : Flutter ne peint un rayon que sous une bordure d'UNE
+      // seule couleur visible, et lève au `paint()` sinon. Le tour gris
+      // dessous, le filet d'accent seul par-dessus.
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
+        border: Border.all(color: AppColors.border),
+        borderRadius: _radius,
+      ),
+      foregroundDecoration: BoxDecoration(
         border: Border(
           left: BorderSide(
             color: accent,
             width: AppDimensions.expenseAccentBorderWidth,
           ),
-          top: const BorderSide(color: AppColors.border),
-          right: const BorderSide(color: AppColors.border),
-          bottom: const BorderSide(color: AppColors.border),
         ),
-        borderRadius: BorderRadius.circular(AppDimensions.expenseInsetRadius),
+        borderRadius: _radius,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
