@@ -1,0 +1,30 @@
+import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
+
+/// Le registre des dépenses du poste : lecture locale, écriture en file.
+///
+/// Toute écriture réussit **localement** d'abord (ADR-003) : un refus serveur
+/// arrive plus tard, dans l'accusé, et la ligne porte alors son motif (A4).
+/// Un `Left` ne signale donc qu'une panne du poste lui-même (base, session).
+abstract class ExpenseRepository {
+  Future<Either<Failure, ExpenseRegisterSnapshot>> loadRegister();
+
+  /// Crée, modifie ou duplique ; rend la dépense telle qu'elle est rangée.
+  Future<Either<Failure, Expense>> save(ExpenseDraft draft);
+
+  /// Bascule payée / non payée en un geste, sans formulaire.
+  Future<Either<Failure, Expense>> setStatus(
+    Expense expense,
+    ExpenseStatus status,
+  );
+
+  /// Retire la dépense du registre (D4) — réversible par [restore].
+  Future<Either<Failure, Unit>> withdraw(Expense expense);
+
+  /// Le « Annuler » du toast.
+  Future<Either<Failure, Unit>> restore(Expense expense);
+}
