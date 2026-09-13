@@ -111,19 +111,23 @@ configuration des types, état PDF.
 
 ## 7. État d'exécution
 
-Tout est dans l'arbre de travail de `feat/expense-register`, **non commité**.
+Commité sur `feat/expense-register` en quatre lots, **non poussé** : `cc80fbab`
+(plan), `6d21a8ce` (domaine), `7a5e139c` (données + synchro), `bf220e3c`
+(écrans). Les lots domaine et synchro ont été vérifiés seuls, en worktree :
+analyze à zéro et tests verts. Le dernier correspond à l'arbre passé en suite
+complète (6 776 tests).
 
 | Lot | État | Commit |
 |---|---|---|
-| DEP-0 | ✅ plan | — |
-| DEP-1 | ✅ palier **v48** (`ref_expense_types`, `expenses`), section `expenseTypes` du socle (seam `replaceExpenseTypes`) | — |
-| DEP-2 | ✅ `EXPENSE` + `EXPENSE_WITHDRAWAL`, entrées d'outbox déterministes, accusé LWW jugé contre l'état ENVOYÉ | — |
-| DEP-3 | ✅ pull keyset `expenses@<école>`, clé `expense.expenses`, cible de disparition `expenses` | — |
-| DEP-4 | ✅ périodes (année scolaire ancrée), filtres, recherche sans accents, séries, sacs, lecture USD, variation à durée égale | — |
-| DEP-5 | ✅ `expense.read/write/delete`, menu « Dépenses », deux sous-menus, routes, carte d'accueil | — |
-| DEP-6 | ✅ registre : période, filtres, compteurs, liste par jour, actions, formulaire, fiche, toast « Annuler » | — |
-| DEP-7 | ✅ tableau de bord : chiffres clés, évolution, répartition, top 5, encarts | — |
-| DEP-8 | ✅ deux revues adversariales (sync ; domaine + écrans), 18 défauts corrigés, 1 laissé au socle (ci-dessous) | — |
+| DEP-0 | ✅ plan | `cc80fbab` |
+| DEP-1 | ✅ palier **v48** (`ref_expense_types`, `expenses`), section `expenseTypes` du socle (seam `replaceExpenseTypes`) | `6d21a8ce`, `7a5e139c` |
+| DEP-2 | ✅ `EXPENSE` + `EXPENSE_WITHDRAWAL`, entrées d'outbox déterministes, accusé LWW jugé contre l'état ENVOYÉ | `7a5e139c` |
+| DEP-3 | ✅ pull keyset `expenses@<école>`, clé `expense.expenses`, cible de disparition `expenses` | `7a5e139c` |
+| DEP-4 | ✅ périodes (année scolaire ancrée), filtres, recherche sans accents, séries, sacs, lecture USD, variation à durée égale | `6d21a8ce` |
+| DEP-5 | ✅ `expense.read/write/delete`, menu « Dépenses », deux sous-menus, routes, carte d'accueil | `7a5e139c`, `bf220e3c` |
+| DEP-6 | ✅ registre : période, filtres, compteurs, liste par jour, actions, formulaire, fiche, toast « Annuler » | `bf220e3c` |
+| DEP-7 | ✅ tableau de bord : chiffres clés, évolution, répartition, top 5, encarts | `bf220e3c` |
+| DEP-8 | ✅ deux revues adversariales (sync ; domaine + écrans), 18 défauts corrigés, 1 laissé au socle (ci-dessous) | `6d21a8ce`, `7a5e139c`, `bf220e3c` |
 
 ### DEP-8 — ce que la revue a corrigé
 
