@@ -729,7 +729,14 @@ class AppConstants {
   // s'applique pas ici, et le commentaire de la table le dit.
   // ⚠️ Numéro PRIS, pas réservé : le lot 2 du plan multi-école le visait aussi
   // et renumérotera en v48. Cf. le v24 brûlé — un palier se prend en fusionnant.
-  static const int offlineDbSchemaVersion = 47;
+  // v48 (2026-09-13) : le registre des dépenses (`DEPENSES_PLAN.md`) —
+  // `ref_expense_types` (section `expenseTypes` du socle) et `expenses`
+  // (écrit sur le poste, poussé par l'outbox, redescendu par le flux
+  // `expense.expenses`). Création pure, aucune reprise : le registre naît vide
+  // et se remplit au premier pull.
+  // ⚠️ Même règle qu'à la v47 : si le lot 2 du multi-école fusionne AVANT, ce
+  // palier se renumérote au moment de fusionner — jamais l'inverse.
+  static const int offlineDbSchemaVersion = 48;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -880,6 +887,24 @@ class AppConstants {
   /// `CATALOG_UNRESOLVABLE`), fenêtre `since` — écran de contrôle, hors V1.
   static const String boutiqueSaleAnomaliesEndpoint =
       '/api/v1/boutique/sales/anomalies';
+
+  // ── Offline sync — Dépenses (registre des frais de fonctionnement) ──
+  /// Registre des dépenses :
+  ///  - **POST** = état complet d'une dépense, création comme modification
+  ///    (uuid client honoré, `201` création / `200` sinon), accusé LWW
+  ///    `APPLIED` / `SUPERSEDED` — exige `expense.write` ;
+  ///  - **GET** = pull KEYSET du registre de l'école, retraits compris, 304
+  ///    applicatif — exige `expense.read`.
+  ///
+  /// **Les types ne passent pas par ici** : ils descendent à la racine de
+  /// [syncReferentialEndpoint] (`expenseTypes`), servis à tout compte.
+  static const String syncExpensesEndpoint = '/api/v1/sync/expenses';
+
+  /// Retrait (`deleted: true`) ou restauration (`deleted: false`) d'une
+  /// dépense — le « Annuler » du toast. Exige `expense.delete` : saisir ne
+  /// donne pas le droit de retirer.
+  static const String syncExpenseDeletionEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/deletion';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

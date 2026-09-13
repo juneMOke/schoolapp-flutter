@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
 import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -34,6 +35,8 @@ void main() {
   late List<String> capturedReductionSchoolIds;
   late List<FeeCodeSectionLocalModel> capturedSections;
   late List<String> capturedSectionSchoolIds;
+  late List<ExpenseTypeLocalModel> capturedExpenseTypes;
+  late List<String> capturedExpenseTypeSchoolIds;
 
   /// Les empreintes de logo passées au seam, cycle par cycle. Sert à prouver
   /// que le tirage est **appelé** — un lot entier peut être vert et inerte.
@@ -57,6 +60,8 @@ void main() {
     capturedReductionSchoolIds = [];
     capturedSections = [];
     capturedSectionSchoolIds = [];
+    capturedExpenseTypes = [];
+    capturedExpenseTypeSchoolIds = [];
     syncedLogoRefs = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
@@ -85,6 +90,10 @@ void main() {
       replaceFeeCodeSections: (sections, schoolId) async {
         capturedSections.addAll(sections);
         capturedSectionSchoolIds.add(schoolId);
+      },
+      replaceExpenseTypes: (types, schoolId) async {
+        capturedExpenseTypes.addAll(types);
+        capturedExpenseTypeSchoolIds.add(schoolId);
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
@@ -141,6 +150,7 @@ void main() {
     List<RefReductionDto>? reductions,
     RefLogoRefsDto? logoRefs,
     List<RefFeeCodeSectionDto>? feeCodeSections,
+    List<RefExpenseTypeDto>? expenseTypes,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     logoRefs: logoRefs,
@@ -175,6 +185,7 @@ void main() {
     // caviarde le barème, et le pull doit s'en accommoder sans rien faire.
     reductions: reductions,
     feeCodeSections: feeCodeSections,
+    expenseTypes: expenseTypes,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -417,6 +428,65 @@ void main() {
     });
   });
 
+  group('les types de dépense (section `expenseTypes`)', () {
+    test(
+      'section absente → le seam n\'est jamais appelé, le cache reste',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle()));
+
+        await repo.syncReferential();
+
+        expect(capturedExpenseTypeSchoolIds, isEmpty);
+      },
+    );
+
+    test(
+      'types descendus → école de la SESSION, rang = POSITION reçue',
+      () async {
+        when(() => api.pullReferential(any())).thenAnswer(
+          (_) async => httpOk(
+            bundle(
+              expenseTypes: const [
+                RefExpenseTypeDto(
+                  id: 't-carb',
+                  code: 'CARBURANT',
+                  label: 'Carburant & transport',
+                  shortLabel: 'Transport',
+                  icon: 'arrow-right-left',
+                  color: '#B85C2C',
+                  softColor: '#F9EDE6',
+                  defaultCurrency: 'CDF',
+                ),
+                RefExpenseTypeDto(
+                  id: 't-div',
+                  code: 'DIVERS',
+                  label: 'Divers',
+                  shortLabel: 'Divers',
+                  icon: 'layers',
+                  color: '#8C8478',
+                  softColor: '#F1EFE9',
+                  defaultCurrency: 'CDF',
+                  active: false,
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await repo.syncReferential();
+
+        // L'école de la session, jamais `school.id` du bundle : clé de purge.
+        expect(capturedExpenseTypeSchoolIds, ['school-1']);
+        expect(capturedExpenseTypes.map((t) => t.id), ['t-carb', 't-div']);
+        expect(capturedExpenseTypes.map((t) => t.sortOrder), [0, 1]);
+        // Un type masqué descend quand même : il nomme encore ses dépenses.
+        expect(capturedExpenseTypes.last.active, isFalse);
+      },
+    );
+  });
+
   group('le logo de l\'école', () {
     /// ⚠️ **La preuve que le fil EXISTE.** Le cache, le tirage, le décodeur et
     /// le renderer peuvent tous être verts sans que rien ne les appelle — c'est
@@ -470,6 +540,7 @@ void main() {
         replaceBoutiqueArticles: (_, _) async {},
         replaceReductionCatalog: (_, _, _) async {},
         replaceFeeCodeSections: (_, _) async {},
+        replaceExpenseTypes: (_, _) async {},
         syncSchoolLogo: (_, _) async => throw StateError('route en panne'),
         syncMetaDao: syncMeta,
         requiredAuth: const {},
@@ -881,6 +952,7 @@ void main() {
         replaceBoutiqueArticles: (_, _) async {},
         replaceReductionCatalog: (_, _, _) async {},
         replaceFeeCodeSections: (_, _) async {},
+        replaceExpenseTypes: (_, _) async {},
         syncSchoolLogo: (_, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
@@ -1312,6 +1384,7 @@ void main() {
           replaceBoutiqueArticles: (_, _) async {},
           replaceReductionCatalog: (_, _, _) async {},
           replaceFeeCodeSections: (_, _) async {},
+          replaceExpenseTypes: (_, _) async {},
           syncSchoolLogo: (_, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,

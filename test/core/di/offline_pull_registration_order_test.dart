@@ -29,6 +29,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
@@ -246,11 +247,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('vingt-deux handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(22));
+    test('vingt-trois handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(23));
       expect(
         order().toSet(),
-        hasLength(22),
+        hasLength(23),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -280,20 +281,26 @@ void main() {
       ]);
     });
 
-    // Les vingt autres restent gouvernés par leur permission : sans cette
+    // Les vingt et un autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
-    test('les vingt autres flux déclarent tous une exigence de lecture', () {
-      final sansExigence = coordinator.registered
-          .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
-          .map((h) => h.resource)
-          .toList();
+    test(
+      'les vingt et un autres flux déclarent tous une exigence de lecture',
+      () {
+        final sansExigence = coordinator.registered
+            .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
+            .map((h) => h.resource)
+            .toList();
 
-      // Une exigence vide serait pire qu'un oubli : `canAccess` refuse sur
-      // exigence vide, le flux ne descendrait plus jamais.
-      expect(sansExigence, isEmpty);
-      expect(coordinator.registered.where((h) => !h.isBaseline), hasLength(20));
-    });
+        // Une exigence vide serait pire qu'un oubli : `canAccess` refuse sur
+        // exigence vide, le flux ne descendrait plus jamais.
+        expect(sansExigence, isEmpty);
+        expect(
+          coordinator.registered.where((h) => !h.isBaseline),
+          hasLength(21),
+        );
+      },
+    );
 
     // Les autres handlers, notamment ceux du même module, ne doivent pas
     // récupérer le drapeau par héritage : `EnrollmentPullHandler` le porte en
@@ -319,7 +326,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les vingt-deux ressources attendues sont toutes enregistrées', () {
+  test('les vingt-trois ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
@@ -343,6 +350,7 @@ void main() {
       kAcademicsNotesResourcePrefix,
       kEditiqueDocumentsResource,
       kBoutiqueSalesResource,
+      kExpensesResource,
     });
   });
 

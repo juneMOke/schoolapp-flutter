@@ -126,6 +126,13 @@ abstract final class SyncPlanKeys {
   /// autre module ne lit ces ventes, et l'isolation stricte du module est
   /// précisément ce qu'une arête d'entraînement commencerait à défaire.
   static const String boutiqueSales = 'boutique.sales';
+
+  /// Le registre des dépenses de l'école, retraits compris. **Jamais
+  /// entraîné** : aucun écran d'un autre module ne lit le registre. Il
+  /// entraîne, lui, le taux de guichet en dégradé (`expense.read →
+  /// finance.exchange-rates`) : sans taux, les totaux se replient sur les
+  /// montants par devise.
+  static const String expenseExpenses = 'expense.expenses';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -157,6 +164,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.academicsNotes: ['academics_notes'],
   SyncPlanKeys.editiqueDocuments: ['editique_documents'],
   SyncPlanKeys.boutiqueSales: ['boutique_sales'],
+  SyncPlanKeys.expenseExpenses: ['expenses'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -250,5 +258,7 @@ const Set<String> _kCursorKeyPrefixes = {
   // ferait sinon reprendre le second établissement au point où le premier
   // s'était arrêté, et ses ventes ne descendraient jamais.
   'boutique_sales',
+  // Même raison : le registre est cadré par l'école du jeton.
+  'expenses',
   'enrollment_reenrollment_cohort',
 };

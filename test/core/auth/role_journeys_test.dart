@@ -57,6 +57,10 @@ const _comptabilite = <String>[
   'boutique.catalog.read',
   'boutique.sale.read',
   'boutique.sale.write',
+  // L'économat tient le registre des dépenses — et en corrige les erreurs.
+  'expense.read',
+  'expense.write',
+  'expense.delete',
   'classroom.read',
   'student.read',
   'school.read',

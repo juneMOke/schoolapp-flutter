@@ -78,9 +78,10 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.academicsEvaluations,
   SyncPlanKeys.academicsNotes,
   SyncPlanKeys.editiqueDocuments,
+  SyncPlanKeys.expenseExpenses,
 ];
 
-/// Les huit ressources dont la clé de curseur réelle porte un suffixe.
+/// Les neuf ressources dont la clé de curseur réelle porte un suffixe.
 ///
 /// ⚠️ Déduire cette liste de `mode`/`scope` du plan serait **faux**. Le contrat
 /// annonce « FANOUT ⇒ préfixe » ; la règle est incomplète :
@@ -102,6 +103,7 @@ const Set<String> _kSuffixedCursorResources = {
   'schedule_sessions',
   'editique_documents',
   'boutique_sales',
+  'expenses',
   'enrollment_reenrollment_cohort',
 };
 
@@ -226,17 +228,17 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('vingt et une clés de plan pour vingt-deux ressources de handler', () {
+  test('vingt-deux clés de plan pour vingt-trois ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
-    // retiré.
-    expect(kSyncPlanAliases.length, 21);
-    expect(registeredResources.length, 22);
+    // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
+    expect(kSyncPlanAliases.length, 22);
+    expect(registeredResources.length, 23);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 22);
+    expect(aliased.length, 23);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -254,12 +256,12 @@ void main() {
   });
 
   test(
-    'les vingt et une constantes déclarées sont exactement les clés de la table',
+    'les vingt-deux constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 21);
+      expect(_kDeclaredPlanKeys.length, 22);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        21,
+        22,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -328,9 +330,11 @@ void main() {
     expect(resourcesOf(SyncPlanKeys.classroomClassrooms), ['classrooms']);
     expect(resourcesOf(SyncPlanKeys.attendanceRecords), ['attendance']);
     expect(resourcesOf(SyncPlanKeys.disciplineCases), ['disciplinary_cases']);
+    // La ressource cliente que le catalogue serveur déclare pour le registre.
+    expect(resourcesOf(SyncPlanKeys.expenseExpenses), ['expenses']);
   });
 
-  test('et ce sont les cinq SEULES que la règle mécanique manque', () {
+  test('et ce sont les six SEULES que la règle mécanique manque', () {
     // La démonstration que la table doit exister, et qu'elle n'en fait pas
     // trop : sur les vingt couples (clé, ressource), `.`/`-` → `_` en donne
     // quatorze et manque exactement ces cinq-là. Si un jour la liste des
@@ -352,6 +356,7 @@ void main() {
       'classrooms', // classroom.classrooms — préfixe dédoublé
       'attendance', // attendance.records — suffixe tombé
       'disciplinary_cases', // discipline.cases — discipline → disciplinary
+      'expenses', // expense.expenses — ressource cliente du catalogue serveur
     ]);
   });
 
@@ -391,7 +396,7 @@ void main() {
 
   // ── isCursorKeyPrefix ─────────────────────────────────────────────────────
 
-  test('isCursorKeyPrefix : vrai pour les huit ressources à suffixe', () {
+  test('isCursorKeyPrefix : vrai pour les neuf ressources à suffixe', () {
     // Cf. la docstring de [_kSuffixedCursorResources] : la déduction depuis
     // `mode`/`scope` échouerait sur `editique_documents` et
     // `enrollment_reenrollment_cohort`, d'où une liste explicite.

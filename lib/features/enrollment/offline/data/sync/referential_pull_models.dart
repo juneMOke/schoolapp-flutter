@@ -64,6 +64,15 @@ class ReferentialBundleDto {
   /// sera rangée.
   final List<RefFeeCodeSectionDto>? feeCodeSections;
 
+  /// Les types de dépense de l'école — **masqués compris**, dans l'ordre de
+  /// l'école. À la racine : un type n'appartient à aucune année.
+  ///
+  /// Le contrat les dit **jamais caviardés, jamais `null`**. `null` ne peut
+  /// donc venir que d'un serveur d'avant le module ; une liste vide, que d'une
+  /// école pas encore semée. Dans les deux cas le cache reste tel quel — même
+  /// lecture que [feeCodeSections].
+  final List<RefExpenseTypeDto>? expenseTypes;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -73,6 +82,7 @@ class ReferentialBundleDto {
     this.reductions,
     this.logoRefs,
     this.feeCodeSections,
+    this.expenseTypes,
     required this.serverTime,
   });
 
@@ -100,6 +110,7 @@ class ReferentialBundleDto {
         : RefLogoRefsDto.fromJson(j['logoRefs'] as Map<String, dynamic>),
     // Hors de `pullList` lui aussi : `null` doit rester `null`.
     feeCodeSections: RefFeeCodeSectionDto.listOrNull(j['feeCodeSections']),
+    expenseTypes: RefExpenseTypeDto.listOrNull(j['expenseTypes']),
     serverTime: j['serverTime'] as String,
   );
 }
@@ -145,6 +156,78 @@ class RefFeeCodeSectionDto {
     if (raw is! List) return null;
     final sections = [for (final item in raw) ?tryParse(item)];
     return sections.isEmpty ? null : sections;
+  }
+}
+
+/// Un type de dépense tel que l'école le nomme (`ExpenseTypeDto` côté
+/// serveur).
+///
+/// Lu **élément par élément, sans lever**, comme [RefFeeCodeSectionDto] : un
+/// type illisible ne doit pas faire tomber le socle, qui porte l'année et les
+/// niveaux. Un élément sans identifiant ou sans libellé est écarté ; les
+/// champs de présentation manquants retombent sur un repli neutre (le module
+/// sait dessiner une icône inconnue et une couleur illisible).
+///
+/// Pas de `sortOrder` : le rang rangé est la **position** dans la liste.
+class RefExpenseTypeDto {
+  final String id;
+  final String code;
+  final String label;
+  final String shortLabel;
+  final String icon;
+  final String color;
+  final String softColor;
+  final String defaultCurrency;
+  final bool active;
+
+  const RefExpenseTypeDto({
+    required this.id,
+    required this.code,
+    required this.label,
+    required this.shortLabel,
+    required this.icon,
+    required this.color,
+    required this.softColor,
+    required this.defaultCurrency,
+    this.active = true,
+  });
+
+  /// L'élément, ou `null` s'il ne se lit pas.
+  static RefExpenseTypeDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    String text(String key) {
+      final value = raw[key];
+      return value is String ? value.trim() : '';
+    }
+
+    final id = text('id');
+    final label = text('label');
+    if (id.isEmpty || label.isEmpty) return null;
+    final shortLabel = text('shortLabel');
+    final active = raw['active'];
+    return RefExpenseTypeDto(
+      id: id,
+      code: text('code').toUpperCase(),
+      label: label,
+      shortLabel: shortLabel.isEmpty ? label : shortLabel,
+      icon: text('icon'),
+      color: text('color'),
+      softColor: text('softColor'),
+      // Normalisée, jamais rejetée : une devise ajoutée un jour au serveur ne
+      // doit pas faire écarter le type qui la propose.
+      defaultCurrency: text('defaultCurrency').toUpperCase(),
+      // Sans drapeau, le type est encore proposé : le repli sûr, qui ne masque
+      // rien.
+      active: active is bool ? active : true,
+    );
+  }
+
+  /// La section entière, ou `null` quand elle n'est pas communiquée : clé
+  /// absente, valeur nulle, liste vide ou rien de lisible dedans.
+  static List<RefExpenseTypeDto>? listOrNull(Object? raw) {
+    if (raw is! List) return null;
+    final types = [for (final item in raw) ?tryParse(item)];
+    return types.isEmpty ? null : types;
   }
 }
 

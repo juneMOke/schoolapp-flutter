@@ -52,6 +52,14 @@ enum Perm {
   boutiqueSaleRead('boutique.sale.read'),
   boutiqueSaleWrite('boutique.sale.write'),
 
+  // ── Dépenses ──────────────────────────────────────────────────────────────
+  // Le registre des frais de fonctionnement. Retirer n'est pas saisir : une
+  // école peut confier la saisie sans confier le retrait — même frontière que
+  // l'extourne face à l'encaissement.
+  expenseRead('expense.read'),
+  expenseWrite('expense.write'),
+  expenseDelete('expense.delete'),
+
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),
   classroomWrite('classroom.write'),

@@ -220,4 +220,14 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
       'boutique_sale_tenders': 'sale_id',
     },
   ),
+
+  // ── dépenses ──────────────────────────────────────────────────────────────
+  // Un RETRAIT (supprimer depuis la fiche) descend par le flux ordinaire,
+  // `deleted_at` renseigné : il n'arrive jamais ici. Seule une purge
+  // d'exploitation côté serveur (trigger V132) produit une disparition — et une
+  // ligne encore en attente de remontée ne s'efface pas.
+  'expenses': TombstoneTarget(
+    table: 'expenses',
+    syncStatusColumn: 'sync_status',
+  ),
 };

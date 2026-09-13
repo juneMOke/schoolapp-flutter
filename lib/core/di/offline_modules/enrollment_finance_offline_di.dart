@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_catalog_dao.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/fees/local/fee_code_section_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/configuration/data/datasources/provisioning_remote_data_source.dart';
 import 'package:school_app_flutter/features/configuration/data/repositories/fee_code_section_cache_repository_impl.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/fee_code_section_cache_repository.dart';
@@ -425,6 +426,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // résolue — même raison que le barème, ci-dessus.
       replaceFeeCodeSections: (sections, schoolId) => getIt<FinanceLocalDao>()
           .replaceFeeSectionsForSchool(sections, schoolId: schoolId),
+      // Cinquième seam, scopé ÉCOLE : les types de dépense descendent à la
+      // racine du bundle, et `enrollment` n'importe pas le module Dépenses.
+      replaceExpenseTypes: (types, schoolId) =>
+          getIt<ExpenseTypeDao>().replaceForSchool(types, schoolId: schoolId),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

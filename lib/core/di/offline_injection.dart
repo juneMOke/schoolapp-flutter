@@ -36,6 +36,7 @@ import 'package:school_app_flutter/features/auth/data/services/auth_session_mana
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/expense_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/features/configuration/data/local/provisioning_draft_dao.dart';
@@ -261,6 +262,9 @@ void registerOfflineModules(GetIt getIt) {
   // le retrait effacer la recréation.
   _registerTombstones(getIt);
   registerBoutiqueOffline(getIt); // Boutique — caisse point-de-vente (ADR-020)
+  registerExpenseOffline(
+    getIt,
+  ); // Dépenses — registre des frais de fonctionnement
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)

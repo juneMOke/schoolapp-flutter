@@ -1372,6 +1372,76 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
+  if (upTo(48)) {
+    // v48 — le registre des dépenses : ses types et ses lignes.
+    //
+    // Création pure, aucune donnée touchée : le registre naît vide et se
+    // remplit au premier pull (`expense.expenses`), les types au premier socle.
+    //
+    // DDL INLINE, jamais lu du schéma vivant : une étape qui interroge
+    // `schema.firstWhere` cesse de monter au premier retrait de table.
+    if (!await _hasTable(db, 'ref_expense_types')) {
+      await db.execute('''
+        CREATE TABLE ref_expense_types (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          code TEXT NOT NULL,
+          label TEXT NOT NULL,
+          short_label TEXT NOT NULL,
+          icon TEXT NOT NULL,
+          color TEXT NOT NULL,
+          soft_color TEXT NOT NULL,
+          default_currency TEXT NOT NULL,
+          sort_order INTEGER NOT NULL DEFAULT 0,
+          active INTEGER NOT NULL DEFAULT 1,
+          synced_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ref_expense_types_school '
+        'ON ref_expense_types(school_id, sort_order)',
+      );
+    }
+    if (!await _hasTable(db, 'expenses')) {
+      await db.execute('''
+        CREATE TABLE expenses (
+          id TEXT PRIMARY KEY,
+          school_id TEXT NOT NULL,
+          expense_number TEXT,
+          type_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT,
+          amount_in_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL,
+          status TEXT NOT NULL,
+          paid_on TEXT,
+          expense_date TEXT NOT NULL,
+          supplier TEXT,
+          funding_source TEXT NOT NULL DEFAULT 'CASH',
+          recorded_by_id TEXT,
+          recorded_by_name TEXT,
+          client_updated_at TEXT NOT NULL,
+          deleted_at TEXT,
+          server_deleted_at TEXT,
+          withdrawal_pending_at TEXT,
+          version INTEGER,
+          server_updated_at TEXT,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+          sync_error TEXT,
+          sync_error_code TEXT,
+          updated_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_expenses_school_date '
+        'ON expenses(school_id, expense_date)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_expenses_sync '
+        'ON expenses(sync_status)',
+      );
+    }
+  }
 }
 
 /// Étape v45 : `parents.phone_number` perd son `NOT NULL`.

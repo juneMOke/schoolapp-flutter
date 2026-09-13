@@ -30,6 +30,9 @@ void main() {
     Perm.boutiqueCatalogWrite: 'boutique.catalog.write',
     Perm.boutiqueSaleRead: 'boutique.sale.read',
     Perm.boutiqueSaleWrite: 'boutique.sale.write',
+    Perm.expenseRead: 'expense.read',
+    Perm.expenseWrite: 'expense.write',
+    Perm.expenseDelete: 'expense.delete',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -86,7 +89,12 @@ void main() {
     // n'est pas une symétrie de façade : la comptabilité tient la caisse et LIT
     // le catalogue, mais ne l'écrit pas — sinon l'interdiction du prix libre à
     // la caisse ne garderait plus rien.
-    expect(Perm.values, hasLength(54));
+    //
+    // 54 → 57 : les trois droits du registre des dépenses, semés sur la
+    // Direction, le Super admin et la Comptabilité par la migration serveur
+    // V133. Retirer (`expense.delete`) est nommé à part de saisir : une école
+    // peut confier l'un sans l'autre.
+    expect(Perm.values, hasLength(57));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

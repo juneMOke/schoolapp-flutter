@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/database/schema/classroom_attendance_off
 import 'package:school_app_flutter/core/database/schema/configuration_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/expense_offline_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Table `outbox` — file d'écriture différée idempotente (socle).
@@ -62,4 +63,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...editiqueOfflineTables, // Éditique — index du cache de restitution (ADR-012)
   ...configurationOfflineTables, // Configuration — brouillon de mise en service
   ...boutiqueOfflineTables, // Boutique — caisse point-de-vente (ADR-020)
+  ...expenseOfflineTables, // Dépenses — registre des frais de fonctionnement
 ];
