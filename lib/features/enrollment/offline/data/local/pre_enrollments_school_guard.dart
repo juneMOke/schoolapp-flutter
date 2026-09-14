@@ -45,6 +45,14 @@ const String kPreEnrollmentsSchoolResource =
 /// permissions et que celui du plan de synchro — l'absence d'information n'est
 /// jamais une information rassurante.
 ///
+/// ## Encore utile après l'éclatement par école
+///
+/// Un fichier d'école neuf n'a ni marqueur ni vivier : la garde y purge une
+/// table vide, sans effet. Elle garde son objet sur la base héritée ADOPTÉE
+/// (MULTI_ECOLE_PLAN.md §10.3) : l'école qui l'adopte n'est pas toujours la
+/// dernière à y avoir ouvert une session, et le vivier qu'elle y trouve peut
+/// être celui d'une autre. Conservée pour ce cas, délibérément.
+///
 /// ## Pourquoi à l'ouverture, et pas à la fermeture
 ///
 /// À la fermeture, le contexte courant est déjà vidé et la seule école

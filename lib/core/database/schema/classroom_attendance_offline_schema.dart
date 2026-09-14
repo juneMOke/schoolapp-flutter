@@ -19,7 +19,8 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// - enums en TEXT, valeurs exactes SCREAMING_SNAKE.
 /// - `updated_at` = horloge client (epoch ms), arbitre du last-write-wins.
 /// - `synced_at`  = fraîcheur (ADR-002), distinct de `updated_at`.
-/// - pas de `school_id` local (tablette mono-établissement, scope serveur via token).
+/// - pas de `school_id` local : chaque école a son fichier (MULTI_ECOLE_PLAN.md),
+///   et le scope serveur vient du token.
 
 /// `ref_classrooms` — classes reçues du pull (CF1). Compteurs pré-agrégés serveur.
 /// ⚠️ Ne jamais supposer `total_count = female_count + male_count` : le genre

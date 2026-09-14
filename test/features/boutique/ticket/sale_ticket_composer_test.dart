@@ -122,6 +122,19 @@ void main() {
     expect(model.schoolAddress, contains('Gombe'));
   });
 
+  test('seule l\'école de la vente nomme le ticket', () async {
+    await db.insert('ref_school', {
+      'id': 'E2',
+      'name': 'Une autre école',
+      'municipality': 'Limete',
+      'city': 'Kinshasa',
+    });
+
+    final model = await compose(_recorded());
+
+    expect(model.schoolName, isEmpty);
+  });
+
   test('le nom composé du payeur est celui qui a été figé', () async {
     // Le même que le serveur dérivera : le ticket du guichet et le reçu scellé
     // doivent dire la même chose.

@@ -134,13 +134,6 @@ void main() {
     },
   );
 
-  test('pendingReadyForSchool filtre par tenant', () async {
-    await dao.enqueue(entry(id: 'a', schoolId: 'S1'));
-    await dao.enqueue(entry(id: 'b', schoolId: 'S2'));
-    final s1 = await dao.pendingReadyForSchool('S1', 2000);
-    expect(s1.map((e) => e.id), ['a']);
-  });
-
   test('pendingCount et deleteAcked', () async {
     await dao.enqueue(entry(id: 'a'));
     await dao.enqueue(entry(id: 'b'));

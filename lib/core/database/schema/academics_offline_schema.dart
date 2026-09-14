@@ -31,8 +31,8 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// - `server_updated_at` = temps de visibilité serveur (base du pull keyset,
 ///   ADR-008) ; nullable, posé au pull / à l'ACK. Le curseur de pull lui-même
 ///   reste un jeton opaque dans `sync_meta`.
-/// - pas de `school_id` local (tablette mono-établissement, scope serveur via
-///   le token / le query param métier).
+/// - pas de `school_id` local : chaque école a son fichier (MULTI_ECOLE_PLAN.md),
+///   et le scope serveur vient du token / du query param métier.
 
 /// `ref_time_slots` — trame horaire de l'école (créneaux de sonnerie). Réf pure,
 /// lecture seule, rafraîchie par pull conditionnel. `start_time`/`end_time` en
