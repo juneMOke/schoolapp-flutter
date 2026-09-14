@@ -506,7 +506,17 @@ class AppConstants {
 
   // ─── Offline / Socle local chiffré ───────────────────────────────────────────
   /// Nom du fichier de la base locale chiffrée (SQLCipher).
+  ///
+  /// Depuis la v49 (MULTI_ECOLE_PLAN.md), c'est la base unique HÉRITÉE : elle
+  /// devient le fichier de l'école qui l'adopte, et aucune n'est plus créée.
   static const String offlineDbName = 'school_offline.db';
+
+  /// Nom du fichier de base de l'APPAREIL : comptes vus sur la tablette,
+  /// session locale, index du cache éditique.
+  static const String offlineDeviceDbName = 'device.db';
+
+  /// Préfixe du fichier de base d'une école : `school_<id>.db`.
+  static const String offlineSchoolDbPrefix = 'school_';
 
   /// Version du schéma sqflite local. Bump = nouvelle étape de migration
   /// (onUpgrade dans AppDatabase). V1 = création greenfield.
@@ -736,7 +746,19 @@ class AppConstants {
   // et se remplit au premier pull.
   // ⚠️ Même règle qu'à la v47 : si le lot 2 du multi-école fusionne AVANT, ce
   // palier se renumérote au moment de fusionner — jamais l'inverse.
-  static const int offlineDbSchemaVersion = 48;
+  // v49 (2026-09-14) : une base par école (`MULTI_ECOLE_PLAN.md`, option C) —
+  // `device.db` (comptes, session, index éditique, `device_meta`) et un
+  // `school_<id>.db` par école (tout le reste, outbox et curseurs compris).
+  // L'escalier `migrateOfflineDatabase` s'arrête à la v48
+  // ([legacyOfflineDbSchemaVersion]) : il ne monte plus que la base héritée,
+  // avant qu'une école l'adopte. Au-delà, deux escaliers —
+  // `migrateTenantDatabase` et `migrateDeviceDatabase` — et un palier se
+  // déclare dans celui du fichier qu'il touche.
+  static const int offlineDbSchemaVersion = 49;
+
+  /// Dernière version de la base unique HÉRITÉE : là où l'escalier
+  /// `migrateOfflineDatabase` s'arrête pour toujours.
+  static const int legacyOfflineDbSchemaVersion = 48;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

@@ -16,7 +16,7 @@ Future<Database> openOfflineDatabase({
   required String dbKey,
   required List<TableSchema> schema,
   String dbName = AppConstants.offlineDbName,
-  int version = AppConstants.offlineDbSchemaVersion,
+  int version = AppConstants.legacyOfflineDbSchemaVersion,
 }) async {
   final databasesPath = await sqlcipher.getDatabasesPath();
   final path = p.join(databasesPath, dbName);
@@ -57,11 +57,17 @@ Future<Database> openOfflineDatabase({
 /// pire que pas de test — il fait croire à une couverture.
 ///
 /// Chaque palier se lit donc `if (_step(...))` et non `if (oldVersion < n)`.
+///
+/// **Escalier HÉRITÉ, clos à la v48** ([AppConstants.legacyOfflineDbSchemaVersion]).
+/// Depuis l'éclatement par école (MULTI_ECOLE_PLAN.md), il ne monte plus que la
+/// base unique d'avant, sur le schéma COMPLET, avant qu'une école l'adopte. Un
+/// palier neuf va dans `migrateTenantDatabase` ou `migrateDeviceDatabase`,
+/// jamais ici.
 Future<void> migrateOfflineDatabase(
   DatabaseExecutor db,
   int oldVersion,
   List<TableSchema> schema, {
-  int newVersion = AppConstants.offlineDbSchemaVersion,
+  int newVersion = AppConstants.legacyOfflineDbSchemaVersion,
 }) async {
   bool upTo(int version) => oldVersion < version && version <= newVersion;
 
