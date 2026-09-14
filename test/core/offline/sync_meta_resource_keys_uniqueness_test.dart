@@ -5,7 +5,6 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
@@ -39,9 +38,6 @@ void main() {
       // compte — une pièce est un document d'établissement, deux agents du même
       // guichet partagent le même catalogue.
       'kEditiqueDocumentsResource': kEditiqueDocumentsResource,
-      // Non un curseur : l'école dont les pièces sont sur ce disque, seule trace
-      // qui rende un changement d'école détectable.
-      'kEditiqueCacheSchoolResource': kEditiqueCacheSchoolResource,
       'kAcademicsCoursResourcePrefix': kAcademicsCoursResourcePrefix,
       'kAcademicsCoursBootstrapPrefix': kAcademicsCoursBootstrapPrefix,
       'kAcademicsEvaluationsResourcePrefix':

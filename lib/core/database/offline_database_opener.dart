@@ -33,6 +33,9 @@ Future<Database> openSqlCipherDatabase(
   onUpgrade: onUpgrade,
 );
 
+/// Répertoire des bases de production.
+Future<String> offlineDatabasesDirectory() => sqlcipher.getDatabasesPath();
+
 /// Matérialise [schema] en un batch : le `onCreate` de tout fichier neuf.
 Future<void> createOfflineSchema(Database db, List<TableSchema> schema) async {
   final batch = db.batch();

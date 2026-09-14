@@ -16,6 +16,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../features/offline_full_db.dart';
+import 'package:school_app_flutter/core/database/tenant/device_database.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 /// Le registrar enregistre un handler de pull ; il lui faut un coordinateur,
 /// mais rien ici ne déclenche de cycle.
@@ -49,6 +51,9 @@ void main() {
     // Le registrar ne touche à rien de la plateforme : tout y est paresseux, et
     // ces quatre-là suffisent à le faire tourner.
     getIt.registerSingleton<Database>(db);
+    // Base unique : elle porte l'appareil ET l'école (MULTI_ECOLE_PLAN.md).
+    getIt.registerSingleton<DeviceDatabase>(DeviceDatabase(db));
+    getIt.registerSingleton<TenantScope>(const UnboundTenantScope());
     getIt.registerSingleton<Map<String, dynamic>>(<String, dynamic>{});
     getIt.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
     getIt.registerSingleton<CurrentUserContext>(CurrentUserContext());

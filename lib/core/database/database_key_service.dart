@@ -22,10 +22,6 @@ class DatabaseKeyService {
   static String schoolKeyStorageKey(String schoolId) =>
       '${AppConstants.sqlCipherSchoolKeyStoragePrefix}$schoolId';
 
-  /// Retourne la clé de la base unique, ou en génère+persiste une nouvelle.
-  Future<String> getOrCreateKey() =>
-      _getOrCreate(AppConstants.sqlCipherKeyStorageKey);
-
   /// Clé de `device.db`, générée au premier besoin.
   Future<String> getOrCreateDeviceKey() =>
       _getOrCreate(AppConstants.sqlCipherDeviceKeyStorageKey);

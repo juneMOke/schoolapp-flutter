@@ -99,6 +99,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(const AuthState(status: AuthStatus.unauthenticated));
           return;
         }
+        // L'école de la session s'attache avant tout le reste
+        // (MULTI_ECOLE_PLAN.md §10.2) : sans elle, aucun écran n'a de base. Si
+        // son fichier ne s'ouvre pas, retour à la connexion, jetons effacés —
+        // même invariant qu'une session absente (revue I3).
+        try {
+          await _sessionManager.attachSchool(session.user.schoolId);
+        } catch (_) {
+          try {
+            await _sessionManager.wipeSession();
+          } catch (_) {
+            // Best-effort, comme ci-dessus.
+          }
+          emit(const AuthState(status: AuthStatus.unauthenticated));
+          return;
+        }
         // Amorce l'uid depuis le token store AVANT tout accès aux écrans
         // d'écriture (ADR-010 D-05) : couvre le cold-start où `auth_local` n'a
         // pas de ligne de session (montée de version) — `evaluateFreshness` le

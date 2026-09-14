@@ -7,11 +7,15 @@ import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/database/app_database.dart';
+import 'package:school_app_flutter/core/database/offline_database_opener.dart';
+import 'package:school_app_flutter/core/database/tenant/device_database.dart';
+import 'package:school_app_flutter/core/database/tenant/offline_database_files.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_database.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
 import 'package:school_app_flutter/core/di/offline_modules/enrollment_finance_offline_di.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
-import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -49,13 +53,16 @@ import 'package:school_app_flutter/features/configuration/domain/repositories/pr
 /// (nécessaire pour la clé SQLCipher) et AVANT les features (qui consomment la
 /// base, l'outbox et le moteur de synchro).
 ///
-/// Ouvre la base chiffrée de façon eager (await) car la clé et le schéma
-/// doivent être prêts avant toute lecture/écriture métier.
+/// Ouvre `device.db` de façon eager (await) : le login hors ligne la lit avant
+/// toute école. La base d'ÉCOLE, elle, ne s'attache qu'à l'ouverture de session
+/// (MULTI_ECOLE_PLAN.md §10.2) ; d'ici là, `getIt<Database>()` — un proxy —
+/// refuse tout accès.
 ///
-/// [database] : base pré-ouverte injectée (tests). Fournie, on saute la
-/// génération de clé et l'ouverture SQLCipher (canal plateforme indisponible
-/// hors device) et on l'enregistre telle quelle — les tests passent une base
-/// sqflite en mémoire (ffi) construite depuis `buildOfflineSchema()`.
+/// [database] : base pré-ouverte injectée (tests). Fournie, on saute les clés
+/// et l'ouverture SQLCipher (canal plateforme indisponible hors device) : cette
+/// base unique porte l'appareil ET l'école, et rien ne s'attache ni ne se
+/// détache — le comportement mono-fichier que les suites existantes supposent.
+/// Les tests la construisent depuis `buildOfflineSchema()`.
 Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 
@@ -72,29 +79,53 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
     () => DeviceIdentityService(getIt<FlutterSecureStorage>(), getIt<Uuid>()),
   );
 
-  final Database resolvedDatabase;
-  if (database != null) {
-    resolvedDatabase = database;
-  } else {
-    final dbKey = await getIt<DatabaseKeyService>().getOrCreateKey();
-    resolvedDatabase = await openOfflineDatabase(
-      dbKey: dbKey,
-      schema: buildOfflineSchema(),
-    );
-  }
-  getIt.registerLazySingleton<Database>(() => resolvedDatabase);
-
   // Reprise des versements enfilés AVANT que l'imputation ne désigne sa ligne
   // de grille (v38). Sans elle, ils repartent en 422 `AMBIGUOUS_FEE_CODE` à
   // chaque cycle, indéfiniment — de l'argent réellement encaissé, avec un reçu
   // déjà remis au parent.
   //
   // Ici et pas dans le palier de schéma : c'est une reprise de DONNÉES, elle
-  // lit le grand-livre. Elle est idempotente, donc rejouable à chaque
-  // démarrage — un parc mis à jour par vagues n'a pas de « premier lancement »
-  // commun, et une base restaurée depuis une sauvegarde repasserait sinon à
-  // côté.
-  await PaymentOutboxTariffBackfill(resolvedDatabase).run();
+  // lit le grand-livre. Elle est idempotente, donc rejouable — un parc mis à
+  // jour par vagues n'a pas de « premier lancement » commun, et une base
+  // restaurée depuis une sauvegarde repasserait sinon à côté.
+  //
+  // Rejouée à chaque ATTACHEMENT d'école depuis l'éclatement par école : avant
+  // l'ouverture de session, il n'y a aucune base d'école à reprendre.
+  Future<void> backfillPaymentTariffs(Database school) async {
+    await PaymentOutboxTariffBackfill(school).run();
+  }
+
+  final DeviceDatabase device;
+  final Database schoolDatabase;
+  final TenantScope tenantScope;
+  final TenantSwitch tenants;
+  if (database != null) {
+    device = DeviceDatabase(database);
+    schoolDatabase = database;
+    tenantScope = const UnboundTenantScope();
+    tenants = const PinnedTenantSession();
+    await backfillPaymentTariffs(database);
+  } else {
+    final files = OfflineDatabaseFiles(
+      directory: await offlineDatabasesDirectory(),
+      keys: getIt<DatabaseKeyService>(),
+      open: openSqlCipherDatabase,
+    );
+    device = DeviceDatabase(await files.openDevice());
+    final tenant = TenantDatabase();
+    schoolDatabase = tenant;
+    tenantScope = tenant;
+    tenants = TenantSession(
+      tenant: tenant,
+      files: files,
+      device: device.db,
+      onAttached: [() => backfillPaymentTariffs(tenant)],
+    );
+  }
+  getIt.registerSingleton<DeviceDatabase>(device);
+  getIt.registerLazySingleton<Database>(() => schoolDatabase);
+  getIt.registerSingleton<TenantScope>(tenantScope);
+  getIt.registerSingleton<TenantSwitch>(tenants);
 
   getIt.registerLazySingleton<OutboxDao>(() => OutboxDao(getIt<Database>()));
   // Le taux de guichet est un référentiel d'ÉCOLE, pas un objet de la
@@ -109,8 +140,10 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   getIt.registerLazySingleton<SyncMetaDao>(
     () => SyncMetaDao(getIt<Database>()),
   );
+  // Comptes et session vivent avec l'APPAREIL : le login hors ligne les lit
+  // avant de savoir quelle école ouvrir.
   getIt.registerLazySingleton<AuthLocalDao>(
-    () => AuthLocalDao(getIt<Database>()),
+    () => AuthLocalDao(getIt<DeviceDatabase>().db),
   );
 
   // Configuration — brouillon de mise en service. Pas un module offline (aucune
@@ -152,6 +185,8 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       // Garde d'attribution (tablette partagée) : ne jamais pousser sous le
       // jeton du porteur courant l'écriture hors ligne d'un autre compte.
       currentUser: getIt<CurrentUserContext>(),
+      // Un lot lié à l'école de son départ (MULTI_ECOLE_PLAN.md §10.1).
+      scope: getIt<TenantScope>(),
     ),
   );
 
@@ -203,6 +238,8 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       // « inconnu » en permanence et retombe sur `requiredPermissions` —
       // c'est-à-dire exactement le comportement d'avant ce lot.
       planHolder: getIt<SyncPlanHolder>(),
+      // Un cycle lié à l'école de son départ (MULTI_ECOLE_PLAN.md §10.1).
+      scope: getIt<TenantScope>(),
     ),
   );
 
@@ -301,7 +338,12 @@ void _registerTombstones(GetIt getIt) {
   getIt.registerLazySingleton<TombstonePullRepository>(
     () => TombstonePullRepository(
       api: getIt<TombstonePullApi>(),
-      dao: TombstoneDao(getIt<Database>(), getIt<SyncMetaDao>()),
+      dao: TombstoneDao(
+        getIt<Database>(),
+        getIt<SyncMetaDao>(),
+        // L'index éditique vit avec l'appareil (MULTI_ECOLE_PLAN.md §10.2).
+        deviceDb: getIt<DeviceDatabase>().db,
+      ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),

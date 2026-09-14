@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
-import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/database/tenant/device_database.dart';
+import 'package:school_app_flutter/core/offline/device_sync_meta_dao.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
@@ -49,11 +49,19 @@ void registerDocumentsOffline(GetIt getIt) {
   );
 
   // ── Index (lecture/mesure d'un côté, retrait de l'autre) ──
+  // Au niveau de l'APPAREIL (MULTI_ECOLE_PLAN.md §10.1) : le magasin d'octets
+  // est unique, et son balayage d'orphelins compare le disque à l'index ENTIER.
+  // Chaque lecture de l'index filtre déjà par `school_id`.
   getIt.registerLazySingleton<EditiqueCacheDao>(
-    () => EditiqueCacheDao(getIt<Database>()),
+    () => EditiqueCacheDao(getIt<DeviceDatabase>().db),
   );
   getIt.registerLazySingleton<EditiqueCacheMaintenanceDao>(
-    () => EditiqueCacheMaintenanceDao(getIt<Database>()),
+    () => EditiqueCacheMaintenanceDao(getIt<DeviceDatabase>().db),
+  );
+  // Ses curseurs le suivent : purge et rembobinage restent dans le même
+  // fichier, comme avant l'éclatement.
+  getIt.registerLazySingleton<DeviceSyncMetaDao>(
+    () => DeviceSyncMetaDao(getIt<DeviceDatabase>()),
   );
 
   // ── Magasin d'octets (fichiers chiffrés hors base) ──
@@ -73,7 +81,9 @@ void registerDocumentsOffline(GetIt getIt) {
       keyService: getIt<EditiqueCacheKeyService>(),
       onKeyRotated: () async {
         await getIt<EditiqueCacheMaintenanceDao>().purgeAll();
-        await getIt<SyncMetaDao>().deleteCursorsOf(kEditiqueDocumentsResource);
+        await getIt<DeviceSyncMetaDao>().deleteCursorsOf(
+          kEditiqueDocumentsResource,
+        );
       },
     ),
   );
@@ -122,7 +132,7 @@ void registerDocumentsOffline(GetIt getIt) {
     () => EditiqueCacheSessionGuard(
       cache: getIt<EditiqueDocumentCache>(),
       authLocalDao: getIt<AuthLocalDao>(),
-      syncMetaDao: getIt<SyncMetaDao>(),
+      syncMetaDao: getIt<DeviceSyncMetaDao>(),
     ),
   );
 
@@ -136,7 +146,7 @@ void registerDocumentsOffline(GetIt getIt) {
     () => EditiqueDocumentPullRepositoryImpl(
       api: getIt<EditiqueDocumentPullApi>(),
       cache: getIt<EditiqueDocumentCache>(),
-      syncMetaDao: getIt<SyncMetaDao>(),
+      syncMetaDao: getIt<DeviceSyncMetaDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: requiredAuth,
       // La MÊME autorité que celle qui garde l'écriture de l'index. Sans elle,

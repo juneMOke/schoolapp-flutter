@@ -76,6 +76,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/update_d
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 /// Registrar DI de la branche offline **Classe + Présence/Discipline**.
 ///
@@ -148,6 +149,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
       currentUser: getIt<CurrentUserContext>(),
+      scope: getIt<TenantScope>(),
     ),
   );
   getIt.registerLazySingleton<ClassroomTransferPullRepository>(

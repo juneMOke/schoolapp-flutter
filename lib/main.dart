@@ -99,9 +99,10 @@ class _MyAppState extends State<MyApp> {
   Future<void> _reclaimEditiqueCacheOrphans() async {
     try {
       // D'ABORD ce qu'une ouverture de session décide du cache : un profil sans
-      // droit ou une école qui a changé l'effacent entièrement (ADR-012 D-7,
-      // RG-012-4/21). Réclamer des orphelins avant cette décision les aurait
-      // épargnés le temps d'un cycle.
+      // droit l'efface entièrement (ADR-012 D-7, RG-012-4). Un changement
+      // d'école ne l'efface plus : les écoles du poste coexistent
+      // (MULTI_ECOLE_PLAN.md §10.1). Réclamer des orphelins avant cette
+      // décision les aurait épargnés le temps d'un cycle.
       await getIt<EditiqueCacheSessionGuard>().onSessionOpened();
       await getIt<EditiqueDocumentCache>().reclaimOrphans();
     } catch (_) {
@@ -231,6 +232,10 @@ class _MyAppState extends State<MyApp> {
                 // foulée par le contexte académique — d'où la relecture au
                 // retour réseau plus bas.
                 unawaited(_schoolIdentityCubit.load());
+                // Les anomalies d'encaissement de l'école qui vient d'être
+                // attachée : la relecture d'`initState` est partie avant toute
+                // école (MULTI_ECOLE_PLAN.md §10.2), sur une base absente.
+                unawaited(_paymentAnomaliesCubit.refresh());
                 return;
               }
 

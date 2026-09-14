@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/school_le
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 class AcademicYearContextRepositoryImpl
     implements AcademicYearContextRepository {
@@ -18,15 +19,21 @@ class AcademicYearContextRepositoryImpl
   final ConnectivityService _connectivity;
   final CurrentUserContext _currentUser;
 
+  /// Le pull du référentiel se lie à l'école attachée à son départ
+  /// (MULTI_ECOLE_PLAN.md §10.1) : il contourne le coordinateur.
+  final TenantScope _scope;
+
   const AcademicYearContextRepositoryImpl({
     required EnrollmentReferentialDao referentialDao,
     required EnrollmentPullRepository pullRepository,
     required ConnectivityService connectivity,
     required CurrentUserContext currentUser,
+    TenantScope scope = const UnboundTenantScope(),
   }) : _referentialDao = referentialDao,
        _pullRepository = pullRepository,
        _connectivity = connectivity,
-       _currentUser = currentUser;
+       _currentUser = currentUser,
+       _scope = scope;
 
   @override
   Future<Either<Failure, AcademicYearContext>> loadCurrentContext() async {
@@ -42,10 +49,9 @@ class AcademicYearContextRepositoryImpl
           NetworkFailure('Référentiel indisponible hors connexion'),
         );
       }
-      final pullFailure = (await _pullRepository.syncReferential()).fold(
-        (failure) => failure,
-        (_) => null,
-      );
+      final pullFailure = (await _scope.run(
+        _pullRepository.syncReferential,
+      )).fold((failure) => failure, (_) => null);
       if (pullFailure != null) return Left(pullFailure);
       yearId = await _referentialDao.findCurrentAcademicYearId(schoolId);
       if (yearId == null) {

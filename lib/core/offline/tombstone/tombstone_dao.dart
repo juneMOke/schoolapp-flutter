@@ -53,7 +53,12 @@ class TombstoneDao {
   final DatabaseExecutor _db;
   final SyncMetaDao _syncMetaDao;
 
-  const TombstoneDao(this._db, this._syncMetaDao);
+  /// Base de l'appareil, pour [TombstoneTarget.deviceChildren]. Absente
+  /// (tests, base unique), ces filles se purgent dans la base de l'école.
+  final DatabaseExecutor? _deviceDb;
+
+  const TombstoneDao(this._db, this._syncMetaDao, {DatabaseExecutor? deviceDb})
+    : _deviceDb = deviceDb;
 
   /// Applique une page de retraits.
   Future<TombstoneApplyResult> apply(List<TombstoneDto> tombstones) async {
@@ -120,6 +125,18 @@ class TombstoneDao {
     }
 
     final parentId = matched.first[target.idColumn] as String;
+
+    // L'index éditique, hors du fichier de l'école, passe EN PREMIER : si la
+    // suite échoue, le retrait rejoué au cycle suivant le repurgera sans
+    // dommage. Dans l'ordre inverse, le parent déjà effacé ne serait plus
+    // trouvé au rejeu, et l'index continuerait de servir la pièce retirée.
+    for (final child in target.deviceChildren.entries) {
+      await (_deviceDb ?? _db).delete(
+        child.key,
+        where: '${child.value} = ?',
+        whereArgs: [parentId],
+      );
+    }
 
     // Les descendants d'abord : sqflite n'applique aucune cascade, et un
     // versement retiré qui laisserait ses imputations derrière lui laisserait la

@@ -48,7 +48,6 @@ void main() {
       cache: cache,
       authLocalDao: authLocalDao,
       syncMetaDao: syncMeta,
-      now: () => 1000,
     );
   });
 
@@ -58,6 +57,19 @@ void main() {
     when(
       () => authLocalDao.getSessionUser(),
     ).thenAnswer((_) async => _user(role: role, schoolId: schoolId));
+  }
+
+  Future<void> seedCursors() async {
+    await syncMeta.setCursor(
+      editiqueDocumentsCursorKey('school-1'),
+      cursor: 'op-42',
+      syncedAt: 1,
+    );
+    await syncMeta.setCursor(
+      editiqueDocumentsCursorKey('school-2'),
+      cursor: 'op-7',
+      syncedAt: 1,
+    );
   }
 
   group('profil sans droit', () {
@@ -87,63 +99,16 @@ void main() {
       verify(() => cache.purgeAll()).called(1);
     });
 
-    // Rien ne doit rester derrière lui, pas même la trace de l'école effacée :
-    // sans quoi le profil suivant croirait la tablette déjà à jour.
-    test('ne laisse aucune école mémorisée', () async {
-      await syncMeta.setCursor(
-        kEditiqueCacheSchoolResource,
-        cursor: 'school-1',
-        syncedAt: 1,
-      );
-      sessionOf(role: 'PARENT');
-
-      await guard.onSessionOpened();
-
-      expect(await syncMeta.getCursor(kEditiqueCacheSchoolResource), isNull);
-    });
-  });
-
-  // Vider l'index sans rembobiner le curseur n'efface pas un cache : le delta
-  // est monotone, le cycle suivant demanderait « ce qui a changé depuis », le
-  // serveur répondrait « rien », et le catalogue resterait vide jusqu'à ce que
-  // l'établissement scelle une pièce neuve.
-  group('rembobinage du delta', () {
-    Future<void> seedCursors() async {
-      await syncMeta.setCursor(
-        editiqueDocumentsCursorKey('school-1'),
-        cursor: 'op-42',
-        syncedAt: 1,
-      );
-      await syncMeta.setCursor(
-        editiqueDocumentsCursorKey('school-2'),
-        cursor: 'op-7',
-        syncedAt: 1,
-      );
-    }
-
-    test('un profil sans droit rembobine le curseur', () async {
+    // Vider l'index sans rembobiner le curseur n'efface pas un cache : le delta
+    // est monotone, le cycle suivant demanderait « ce qui a changé depuis », le
+    // serveur répondrait « rien », et le catalogue resterait vide jusqu'à ce que
+    // l'établissement scelle une pièce neuve.
+    //
+    // Toutes les écoles, pas seulement la courante : la purge a effacé leurs
+    // pièces à toutes.
+    test('rembobine le curseur de CHAQUE école', () async {
       await seedCursors();
       sessionOf(role: 'TEACHER');
-
-      await guard.onSessionOpened();
-
-      expect(
-        await syncMeta.getCursor(editiqueDocumentsCursorKey('school-1')),
-        isNull,
-      );
-    });
-
-    // Toutes les écoles, pas seulement l'entrante : la purge efface aussi les
-    // pièces de la sortante, et lui laisser son curseur ferait rater, à un
-    // éventuel retour, tout ce qui existait avant.
-    test('un changement d école rembobine les deux', () async {
-      await seedCursors();
-      await syncMeta.setCursor(
-        kEditiqueCacheSchoolResource,
-        cursor: 'school-1',
-        syncedAt: 1,
-      );
-      sessionOf(role: 'SECRETARY', schoolId: 'school-2');
 
       await guard.onSessionOpened();
 
@@ -156,86 +121,38 @@ void main() {
         isNull,
       );
     });
+  });
 
-    // Le pendant indispensable : une reconnexion ordinaire ne doit RIEN
-    // retélécharger. Un rembobinage inconditionnel serait aussi coûteux que
-    // l'absence de rembobinage serait amputante.
-    test('une reconnexion ordinaire ne rembobine rien', () async {
+  // Les écoles d'un poste coexistent (MULTI_ECOLE_PLAN.md §10.1) : un chef qui
+  // bascule entre ses établissements ne doit pas retrouver, à chaque retour, un
+  // cache vide à retélécharger.
+  group('profil autorisé', () {
+    test('une autre école que la précédente ne purge plus rien', () async {
       await seedCursors();
-      await syncMeta.setCursor(
-        kEditiqueCacheSchoolResource,
-        cursor: 'school-1',
-        syncedAt: 1,
-      );
-      sessionOf(role: 'ACCOUNTANT');
+      sessionOf(role: 'DIRECTOR', schoolId: 'school-2');
+      expect(await guard.onSessionOpened(), isFalse);
 
-      await guard.onSessionOpened();
+      sessionOf(role: 'DIRECTOR', schoolId: 'school-1');
+      expect(await guard.onSessionOpened(), isFalse);
 
+      verifyNever(() => cache.purgeAll());
       expect(
         await syncMeta.getCursor(editiqueDocumentsCursorKey('school-1')),
         'op-42',
       );
     });
 
-    // La clé mémorisant l'école vit dans la même table et commence par un
-    // préfixe voisin : l'effacement des curseurs ne doit pas l'emporter, sans
-    // quoi chaque ouverture croirait à une réaffectation.
-    test('la trace de l école n est pas emportée par le rembobinage', () async {
-      await seedCursors();
-      sessionOf(role: 'DIRECTOR', schoolId: 'school-9');
-
-      await guard.onSessionOpened();
-
-      expect(
-        await syncMeta.getCursor(kEditiqueCacheSchoolResource),
-        'school-9',
-      );
-    });
-  });
-
-  group('réaffectation de tablette', () {
-    // RG-012-21 : les pièces de l'établissement précédent n'ont plus rien à
-    // faire ici.
-    test('un changement d école efface le cache', () async {
-      await syncMeta.setCursor(
-        kEditiqueCacheSchoolResource,
-        cursor: 'school-1',
-        syncedAt: 1,
-      );
-      sessionOf(role: 'SECRETARY', schoolId: 'school-2');
-
-      expect(await guard.onSessionOpened(), isTrue);
-      verify(() => cache.purgeAll()).called(1);
-      expect(
-        await syncMeta.getCursor(kEditiqueCacheSchoolResource),
-        'school-2',
-      );
-    });
-
     // Une déconnexion ordinaire ne doit RIEN coûter : faire retélécharger au
     // guichet ce qu'il détenait la veille viderait le cache de son intérêt.
     test('une reconnexion dans la même école ne touche à rien', () async {
-      await syncMeta.setCursor(
-        kEditiqueCacheSchoolResource,
-        cursor: 'school-1',
-        syncedAt: 1,
-      );
+      await seedCursors();
       sessionOf(role: 'ACCOUNTANT');
 
       expect(await guard.onSessionOpened(), isFalse);
       verifyNever(() => cache.purgeAll());
-    });
-
-    // Première session d'un profil autorisé : rien à effacer, mais l'école se
-    // mémorise — sans elle, le prochain changement serait indétectable.
-    test('une première session mémorise l école sans rien effacer', () async {
-      sessionOf(role: 'DIRECTOR', schoolId: 'school-9');
-
-      expect(await guard.onSessionOpened(), isFalse);
-      verifyNever(() => cache.purgeAll());
       expect(
-        await syncMeta.getCursor(kEditiqueCacheSchoolResource),
-        'school-9',
+        await syncMeta.getCursor(editiqueDocumentsCursorKey('school-1')),
+        'op-42',
       );
     });
   });

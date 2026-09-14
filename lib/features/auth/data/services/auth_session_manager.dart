@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/auth/domain/entities/auth_session.da
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session_snapshot.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 import 'package:school_app_flutter/features/auth/domain/session_freshness.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
 
 /// Horloge murale injectable (epoch ms).
 typedef WallClock = int Function();
@@ -42,6 +43,11 @@ class AuthSessionManager
   final PasswordVerifierService _verifier;
   final SessionRevocationBus? _revocationBus;
   final CurrentUserContext? _currentUser;
+
+  /// L'école de la session (MULTI_ECOLE_PLAN.md §10.2), attachée aux MÊMES
+  /// points que [_currentUser] est posé — et AVANT lui : un contexte posé sur
+  /// une école non attachée laisserait un écran lire la base précédente.
+  final TenantSwitch? _tenants;
 
   /// Ensemble effectif des permissions de la session (ADR-014 §4), tenu à
   /// jour aux MÊMES points que [_currentUser] : les consommateurs hors arbre
@@ -75,6 +81,7 @@ class AuthSessionManager
     CurrentUserContext? currentUser,
     CurrentPermissions? currentPermissions,
     SharedDocumentCache? sharedDocumentCache,
+    TenantSwitch? tenants,
     WallClock now = _systemWallClock,
   }) : _tokenStorage = tokenStorage,
        _authLocalDao = authLocalDao,
@@ -83,11 +90,21 @@ class AuthSessionManager
        _currentUser = currentUser,
        _currentPermissions = currentPermissions,
        _sharedDocumentCache = sharedDocumentCache,
+       _tenants = tenants,
        _now = now;
 
   /// TTL de refresh par défaut si le serveur ne fournit pas `refreshExpiresIn`
   /// (borne offline externe, D-07). 90 jours.
   static const int _defaultRefreshTtlMs = 90 * 24 * 60 * 60 * 1000;
+
+  // ── École de la session (MULTI_ECOLE_PLAN.md §10.2) ───────────────────────
+
+  /// Attache le fichier de [schoolId]. **Lève** s'il ne s'ouvre pas : une
+  /// session sans base d'école n'a aucun écran utilisable, l'appelant doit la
+  /// refuser plutôt que l'ouvrir à vide.
+  Future<void> attachSchool(String schoolId) async {
+    await _tenants?.attach(schoolId);
+  }
 
   // ── Persistance du login online (D-01/D-02) ──────────────────────────────────
 
@@ -152,6 +169,7 @@ class AuthSessionManager
     );
     _observedUserVersion = session.userVersion;
     _clockTampered = false;
+    await _tenants?.attach(session.user.schoolId);
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(uid, schoolId: session.user.schoolId);
     _currentPermissions?.set(permissions);
@@ -242,6 +260,10 @@ class AuthSessionManager
         AuthFailure('Session expirée — reconnexion en ligne requise'),
       );
     }
+
+    // L'école du compte, avant d'ouvrir quoi que ce soit : si son fichier ne
+    // s'ouvre pas, aucune session locale ne doit rester derrière.
+    await _tenants?.attach(user.schoolId);
 
     final mode = _clockTampered ? SessionMode.readOnly : eval.mode;
     await _authLocalDao.markSessionStarted(user.userId, at: nowMs);
@@ -355,6 +377,7 @@ class AuthSessionManager
     // Restaure l'uid/schoolId courants (ex. après redémarrage : la session
     // existe mais le contexte mémoire est vide) — nécessaire pour estampiller
     // authorId (D-05) et scoper le référentiel par école.
+    await _tenants?.attach(user.schoolId);
     _currentUser?.set(user.userId, schoolId: user.schoolId);
     _currentPermissions?.set(user.permissions);
 
@@ -605,6 +628,11 @@ class AuthSessionManager
     _observedUserVersion = null;
     _currentUser?.clear();
     _currentPermissions?.clear();
+    // APRÈS le contexte : un lecteur qui y trouve encore une école doit encore
+    // trouver sa base. Jamais bloquant — fermer la session prime.
+    try {
+      await _tenants?.detach();
+    } catch (_) {}
 
     // Les pièces partagées vivent EN CLAIR dans le cache de l'application, hors
     // de la base chiffrée : elles doivent partir avec la session (ADR-012 D-7).

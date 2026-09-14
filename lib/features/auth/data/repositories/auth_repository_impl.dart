@@ -36,6 +36,16 @@ class AuthRepositoryImpl implements AuthRepository {
       final session = response.toAuthSession(
         nowMs: DateTime.now().millisecondsSinceEpoch,
       );
+      // L'école de la session s'attache AVANT que rien ne soit persisté
+      // (MULTI_ECOLE_PLAN.md §10.2) : sans elle, aucune lecture locale
+      // n'aboutit. Pas de best-effort ici, contrairement à l'ancrage offline
+      // plus bas — un échec rend un `StorageFailure`, et la session ne s'ouvre
+      // pas.
+      try {
+        await sessionManager.attachSchool(session.user.schoolId);
+      } catch (_) {
+        return const Left(StorageFailure('School database unavailable'));
+      }
       await localDataSource.saveSession(session);
       // Ancre la session offline (vérificateur Argon2id + auth_local). Best-effort :
       // un échec ici n'invalide pas un login online réussi.
