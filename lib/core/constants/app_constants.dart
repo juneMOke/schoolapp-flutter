@@ -740,7 +740,19 @@ class AppConstants {
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
+  ///
+  /// Depuis l'éclatement par école (MULTI_ECOLE_PLAN.md), c'est la clé de la
+  /// base unique HÉRITÉE : elle n'ouvre plus que ce fichier, et passe à l'école
+  /// qui l'adopte.
   static const String sqlCipherKeyStorageKey = 'sqlcipher_db_key';
+
+  /// Clé du secure storage hébergeant la clé SQLCipher de `device.db`.
+  static const String sqlCipherDeviceKeyStorageKey = 'sqlcipher_device_key';
+
+  /// Préfixe des clés du secure storage hébergeant la clé SQLCipher d'une
+  /// école — une par école : l'isolement est au repos, pas seulement au
+  /// filtrage.
+  static const String sqlCipherSchoolKeyStoragePrefix = 'sqlcipher_db_key@';
 
   /// Clé du secure storage hébergeant l'identifiant d'installation, généré au
   /// premier besoin (cf. DeviceIdentityService). Imprimé sur le ticket
