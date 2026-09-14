@@ -1,6 +1,6 @@
 # Cloisonnement des données par école — état des lieux et préconisation
 
-> ## ✅ Statut au 2026-09-14 : **option C validée, en cours d'implémentation**
+> ## ✅ Statut au 2026-09-14 : **option C validée et implémentée** — branche `feat/multi-school-tenant-db`, non poussée
 >
 > Arbitrage du 2026-09-14 : **option C** (une base par école), et **l'outbox
 > dans le fichier de l'école**, ce qui revient sur le journal du 09-05 (§10.1).
@@ -23,7 +23,7 @@
 >
 > **Le schéma a bougé depuis** : v46 (extourne d'un encaissement) puis v47 (logo
 > de l'école). Les paliers annoncés plus bas sont corrigés en conséquence.
-> Aucun code de ce plan n'est écrit : il sert à trancher, pas à exécuter.
+> Écrite pour trancher, l'étude a été exécutée depuis : voir le §10.
 
 ---
 
@@ -568,6 +568,7 @@ et le compte multi-humain arrive (U3). Restent trois arbitrages, tous produit :
 | 2026-09-05 | Cas d'usage arbitrés (U1/U2/U3) → **option A close**, option C **confirmée et renforcée** par U3 ; `outbox` et `editique_cache_entries` placés au niveau **appareil** ; lot 0 renversé sur `pendingReadyForSchool` |
 | 2026-09-08 | **Entrée au dépôt**, après relecture contre le code. Quatre corrections : le schéma n'est plus v45 (v46 extourne, **v47 logo**) ; le lot 2 devient **v48** et ne réserve pas son numéro ; **D4 est latent**, pas actif, et disparaît sous l'option C ; le chiffrage « une ligne » ne vaut que pour `sale_ticket_composer`, **D2 coûte 5 sites d'appel et 3 fichiers de test**. Préconisation option C **toujours non validée**. |
 | 2026-09-14 | **Arbitrage : option C validée, outbox dans le fichier de l'école** (revient sur le 09-05) ; index éditique et ses curseurs confirmés au niveau appareil ; **lot 0 abandonné** sauf `sale_ticket_composer`. Relecture contre le code : la v48 est prise (Dépenses) ⇒ **v49** ; la fenêtre « aucune école » est plus large qu'annoncé (reprise des versements au démarrage, listeners d'identité) ; 54 tables et **deux** helpers de test, pas un. Conception d'exécution au §10. |
+| 2026-09-14 | **Implémentation**, lots L1 à L5 (§10.6) : `2a40ebb2`, `2552b2ec`, `65517928`, `9acaf878`, puis la contre-épreuve. Non poussée. |
 
 ---
 
@@ -675,3 +676,47 @@ school_offline.db      la base héritée, jusqu'à ce qu'une école l'adopte
 - **Retirer une école d'un appareil.** Sous C, une tablette réaffectée garde le
   fichier de l'école précédente et ses pièces éditique. La purge D9 ne couvrait
   que les pièces ; un « oublier cette école » reste à spécifier.
+
+### 10.6 Avancement
+
+| lot | commit | état |
+|---|---|---|
+| plan | `73dc693a` | arbitrage et conception |
+| L1 | `2a40ebb2` | socle — 26 tests neufs |
+| L2 | `2552b2ec` | fichiers et migration v49 — `test/core/database` : 268 verts, escalier hérité compris |
+| L3 | `65517928` | cycle de session, liaison des synchros, index éditique à l'appareil |
+| L4 | `9acaf878` | nettoyage |
+| L5 | ce commit | contre-épreuve : `multi_school_isolation_test.dart` |
+
+Ce que l'écriture du code a appris, au-delà du §10.2 :
+
+- **Le proxy rend des `Future` en échec**, jamais une exception levée à
+  l'appel : un appelant en `.then()` la laisserait s'échapper.
+- **`persistOnlineLogin` est best-effort** — le dépôt avale tout ce qui en sort.
+  L'attachement du login en ligne se fait donc dans `AuthRepositoryImpl.login`,
+  AVANT `saveSession` ; son échec rend un `StorageFailure` et rien n'est
+  persisté.
+- **Adoption** : l'absence du fichier hérité se teste AVANT le propriétaire,
+  sans quoi une adoption coupée après le renommage ne se rattrape jamais.
+- **Deux pulls contournent le coordinateur** — `syncReferential` à la porte de
+  navigation, la resynchro des Classes : ils sont liés à leur école eux aussi.
+- **`PreEnrollmentsSchoolGuard` est conservée** : sans effet sur un fichier
+  neuf, elle protège la base héritée ADOPTÉE, dont le vivier peut être celui
+  d'une autre école. Les curseurs déjà scopés `@<école>` restent en place,
+  inertes.
+
+Vérifications :
+
+- **Suite complète sur l'arbre final** : 6 860 verts, aucun rouge ;
+  `flutter analyze` sans aucune remarque.
+- **Suite complète sur le lot 3** : 6 817 verts, 18 rouges, tous dans deux
+  fichiers de test que le lot avait oubliés — un test DI monté sans
+  `DeviceDatabase`, un test d'unicité qui citait le marqueur d'école supprimé.
+  Corrigés dans le même commit.
+- **La contre-épreuve mord.** Deux mutations du câblage la font rougir toutes
+  les deux — la session qui ouvre le fichier de A pour toute école, le proxy
+  qui garde le premier fichier attaché — et le code d'origine la rend verte.
+- **Défauts du §4.** D1, D2, D4, D5 et D6 sont démontrés fermés par la
+  contre-épreuve. D3, D7 et D8 le sont par construction : la cohorte N-1, les
+  drapeaux d'amorçage et les créances sans année vivent désormais dans le
+  fichier de l'école. D9 est levé (§10.1, point 4).
