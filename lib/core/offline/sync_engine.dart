@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 /// Horloge injectable (epoch ms) — permet un backoff déterministe en test.
 typedef Clock = int Function();
@@ -66,6 +67,9 @@ class SyncEngine {
   /// comme avant. Une garde qui se déclenche sur un contexte absent bloquerait
   /// des écritures légitimes — le pire des deux mondes.
   final CurrentUserContext? _currentUser;
+
+  /// L'école à laquelle un lot se lie à son départ (MULTI_ECOLE_PLAN.md §10.1).
+  final TenantScope _scope;
 
   final Clock _now;
   final int _maxAttempts;
@@ -140,12 +144,14 @@ class SyncEngine {
     CurrentUserContext? currentUser,
     Clock now = systemClock,
     int maxAttempts = _defaultMaxAttempts,
+    TenantScope scope = const UnboundTenantScope(),
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _credentialsProbe = credentialsProbe,
        _currentUser = currentUser,
        _now = now,
-       _maxAttempts = maxAttempts;
+       _maxAttempts = maxAttempts,
+       _scope = scope;
 
   /// Enregistre le handler d'un type d'agrégat (appelé par la DI des branches).
   void registerHandler(OutboxSyncHandler handler) {
@@ -167,7 +173,20 @@ class SyncEngine {
   bool get isFlushing => _flushing;
 
   /// Vide l'outbox. Ne lève pas : encapsule tout dans un [SyncFlushReport].
+  ///
+  /// Le lot est lié à l'école attachée à son départ (MULTI_ECOLE_PLAN.md
+  /// §10.1). Si elle change pendant le lot, ce qui reste appartient à la
+  /// précédente — et partira depuis son fichier, sous ses jetons : le lot
+  /// s'arrête, sauté, sans rien marquer.
   Future<SyncFlushReport> flush({int batchLimit = 50}) async {
+    try {
+      return await _scope.run(() => _flush(batchLimit));
+    } on StaleTenantException {
+      return const SyncFlushReport.skipped();
+    }
+  }
+
+  Future<SyncFlushReport> _flush(int batchLimit) async {
     if (_flushing) return const SyncFlushReport.skipped();
     _flushing = true;
     try {
@@ -194,6 +213,10 @@ class SyncEngine {
       final currentUid = _currentUser?.uid;
 
       for (final entry in entries) {
+        // L'école a changé depuis le départ du lot : rien de ce qui suit ne
+        // lui appartient.
+        if (_scope.isStale) throw const StaleTenantException();
+
         // Garde d'attribution, AVANT tout décodage métier et tout appel
         // réseau : une écriture appartenant à un autre compte identifié sera
         // refusée par le serveur (il compare `authorId` au claim `uid`), et
@@ -251,6 +274,10 @@ class SyncEngine {
               await _outbox.markSyncError(entry.id, result.error);
               failed++;
           }
+        } on StaleTenantException {
+          // Pas une erreur de l'entrée : elle n'est plus à nous. Ni tentative
+          // consommée, ni poison — elle attend son école.
+          rethrow;
         } catch (error) {
           // Un handler qui lève est traité comme une erreur transitoire.
           if (await _reschedule(entry, error.toString())) {

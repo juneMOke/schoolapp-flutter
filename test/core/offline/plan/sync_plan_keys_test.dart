@@ -18,6 +18,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../features/offline_full_db.dart';
+import 'package:school_app_flutter/core/database/tenant/device_database.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 /// Rien ici ne déclenche de cycle : la DI a seulement besoin d'un service de
 /// connectivité résoluble. Le dire « hors ligne » garantit en plus qu'un
@@ -124,6 +126,9 @@ void main() {
     // Le strict nécessaire pour que les quatre registrars tournent : tout le
     // reste de leur contenu est paresseux et ne sera jamais résolu ici.
     getIt.registerSingleton<Database>(db);
+    // Base unique : elle porte l'appareil ET l'école (MULTI_ECOLE_PLAN.md).
+    getIt.registerSingleton<DeviceDatabase>(DeviceDatabase(db));
+    getIt.registerSingleton<TenantScope>(const UnboundTenantScope());
     getIt.registerSingleton<Map<String, dynamic>>(<String, dynamic>{});
     getIt.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
     getIt.registerSingleton<Dio>(Dio());

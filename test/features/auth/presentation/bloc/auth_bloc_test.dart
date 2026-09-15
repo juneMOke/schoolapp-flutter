@@ -67,6 +67,7 @@ void main() {
     ).thenAnswer((_) async => null);
     when(() => mockSessionManager.wipeSession()).thenAnswer((_) async {});
     when(() => mockSessionManager.primeCurrentUser(any())).thenReturn(null);
+    when(() => mockSessionManager.attachSchool(any())).thenAnswer((_) async {});
     // Par défaut : aucune copie durable — l'état reste « jamais renseigné »
     // quand la réponse ne communique pas d'ensemble.
     when(

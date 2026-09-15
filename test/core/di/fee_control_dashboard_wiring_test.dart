@@ -20,6 +20,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../features/offline_full_db.dart';
+import 'package:school_app_flutter/core/database/tenant/device_database.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 class _MockAuthSessionManager extends Mock implements AuthSessionManager {}
 
@@ -46,6 +48,9 @@ void main() {
     getIt = GetIt.asNewInstance();
 
     getIt.registerSingleton<Database>(db);
+    // Base unique : elle porte l'appareil ET l'école (MULTI_ECOLE_PLAN.md).
+    getIt.registerSingleton<DeviceDatabase>(DeviceDatabase(db));
+    getIt.registerSingleton<TenantScope>(const UnboundTenantScope());
     getIt.registerSingleton<Map<String, dynamic>>(<String, dynamic>{});
     getIt.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
     getIt.registerSingleton<Dio>(Dio());

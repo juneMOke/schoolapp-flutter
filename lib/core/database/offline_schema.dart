@@ -47,7 +47,53 @@ const TableSchema syncMetaTable = TableSchema(
 /// Tables du socle offline (indépendantes des modules métier).
 const List<TableSchema> coreOfflineTables = [outboxTable, syncMetaTable];
 
-/// Schéma complet de la base locale, consommé par [openOfflineDatabase].
+/// Table `device_meta` — état propre à l'APPAREIL, en clé/valeur
+/// (MULTI_ECOLE_PLAN.md, lot 2) : ce que l'éclatement par école a décidé de la
+/// base héritée, et au nom de quelle école.
+const TableSchema deviceMetaTable = TableSchema(
+  name: 'device_meta',
+  createTableSql: '''
+    CREATE TABLE device_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )
+  ''',
+);
+
+/// Tables qui vivent au niveau de l'APPAREIL (`device.db`) et non dans le
+/// fichier d'une école. Voir `DeviceDatabase` pour la raison de chacune.
+///
+/// Une liste d'EXCLUSION, et c'est délibéré : une table de module neuve atterrit
+/// d'office dans le fichier de l'école, sans que personne ait à y penser. Seul
+/// ce qui appartient réellement au poste a besoin d'être nommé ici.
+const Set<String> kDeviceLevelTables = {
+  'auth_local_user',
+  'auth_local_session',
+  'editique_cache_entries',
+};
+
+/// Schéma d'un fichier d'école (`school_<id>.db`) : tout, sauf l'appareil.
+///
+/// `outbox` et `sync_meta` compris — l'écriture métier et son entrée d'outbox
+/// restent ainsi dans UNE transaction, sur UN fichier.
+List<TableSchema> buildTenantSchema() => buildOfflineSchema()
+    .where((t) => !kDeviceLevelTables.contains(t.name))
+    .toList(growable: false);
+
+/// Schéma de `device.db`. `sync_meta` y figure aussi : les curseurs du
+/// catalogue éditique vivent avec son index.
+List<TableSchema> buildDeviceSchema() => [
+  deviceMetaTable,
+  syncMetaTable,
+  ...buildOfflineSchema().where((t) => kDeviceLevelTables.contains(t.name)),
+];
+
+/// Schéma COMPLET — appareil et école réunis, sans `device_meta`.
+///
+/// C'est le schéma de la base unique d'avant l'éclatement par école : il sert
+/// l'escalier de migration hérité (qui monte ce fichier jusqu'à la v48 avant
+/// qu'une école l'adopte) et les bases de test mono-fichier. Aucun fichier de
+/// production n'est plus créé avec lui.
 ///
 /// Point d'extension additif des branches offline : chaque branche insère la
 /// liste de ses tables ici (`...enrollmentFinanceOfflineTables`,

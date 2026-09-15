@@ -36,22 +36,6 @@ class OutboxDao {
     return rows.map(OutboxEntry.fromMap).toList();
   }
 
-  /// Entrées PENDING d'une école donnée (garde-fou tenant au flush).
-  Future<List<OutboxEntry>> pendingReadyForSchool(
-    String schoolId,
-    int nowMs, {
-    int limit = 50,
-  }) async {
-    final rows = await _db.query(
-      table,
-      where: 'status = ? AND next_attempt_at <= ? AND school_id = ?',
-      whereArgs: [OutboxStatus.pending.dbValue, nowMs, schoolId],
-      orderBy: 'created_at ASC, rowid ASC',
-      limit: limit,
-    );
-    return rows.map(OutboxEntry.fromMap).toList();
-  }
-
   /// Marque une entrée comme acquittée (ACK serveur reçu).
   ///
   /// [expectedCreatedAt] : garde anti-TOCTOU. Si fourni, on n'acquitte QUE si

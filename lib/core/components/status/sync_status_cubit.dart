@@ -179,13 +179,18 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// lecture était en vol, la valeur hydratée (plus ancienne) ne doit pas
   /// écraser la plus récente déjà connue.
   Future<void> _hydrateThenRefresh() async {
+    await _hydrateLastSync();
+    await refresh();
+  }
+
+  Future<void> _hydrateLastSync() async {
     try {
       final hydrated = await _syncMetaDao.getSyncedAt(_kGlobalLastSyncResource);
       if (hydrated != null) await _advanceLastSync(hydrated);
     } catch (_) {
-      // Base indisponible : pas de date affichée plutôt qu'une exception.
+      // Base indisponible — ou aucune école encore attachée, au démarrage :
+      // pas de date affichée plutôt qu'une exception.
     }
-    await refresh();
   }
 
   void _listenConnectivity() {
@@ -257,12 +262,16 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// coordinateur ne connaît ni la sonde de crédentiels ni la
   /// ré-authentification, et un login offline laisse un access vide — chaque
   /// ressource partirait alors en 401, une tentative consommée par entrée.
-  Future<void> syncOnLogin() {
+  Future<void> syncOnLogin() async {
     // Arme aussi la cadence, plutôt que de laisser la racine s'en souvenir : un
     // battement qui n'est jamais armé ne se voit sur aucun écran et ne fait
     // échouer aucun test. Un seul fil de session à ne pas oublier vaut mieux
     // que deux — et celui-ci était déjà branché.
     onSessionOpened();
+    // La date de dernière synchro est celle de l'ÉCOLE (MULTI_ECOLE_PLAN.md) :
+    // relue dans son fichier, qui vient d'être attaché, avant le premier calcul
+    // de la pastille.
+    await _hydrateLastSync();
     return syncNow();
   }
 
@@ -350,12 +359,14 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     // `CurrentPermissions.clear()` et `SyncPlanHolder.clear()` : rien de ce qui
     // décrit une session ne doit survivre à sa fermeture.
     //
-    // `_lastSyncAtMs` n'en fait PAS partie : c'est la date de dernière synchro
-    // de cette TABLETTE, persistée dans `sync_meta` et vraie quel que soit le
-    // porteur. `_hasHeldWork` non plus — il est relu de la file à chaque
-    // `refresh()`, et la file est partagée entre les comptes de la tablette.
+    // `_lastSyncAtMs` aussi, depuis l'éclatement par école (MULTI_ECOLE_PLAN.md)
+    // : persistée dans le `sync_meta` du fichier de l'école, c'est la date de
+    // CETTE école. La garder afficherait chez B la fraîcheur de A ; la
+    // reconnexion relit celle de l'école qu'elle attache (`syncOnLogin`).
+    // `_hasHeldWork`, lui, est relu de la file à chaque `refresh()`.
     _pullDegraded = false;
     _pullRetriable = false;
+    _lastSyncAtMs = null;
     _safeEmit(state.status);
   }
 

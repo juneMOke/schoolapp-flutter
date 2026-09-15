@@ -54,6 +54,11 @@ class TombstoneTarget {
   /// compter.
   final Map<String, String> children;
 
+  /// Tables filles qui vivent dans la base de l'APPAREIL et non dans celle de
+  /// l'école (MULTI_ECOLE_PLAN.md §10.2) — l'index du cache éditique. Purgées
+  /// par l'identifiant du parent, comme [children], mais sur l'autre fichier.
+  final Map<String, String> deviceChildren;
+
   /// Descendants qui ne se rattachent pas au parent par une colonne — les notes
   /// d'un cours passent par ses évaluations. Chaque instruction reçoit un seul
   /// paramètre : l'identifiant du parent. Exécutées **avant** [children], donc
@@ -87,6 +92,7 @@ class TombstoneTarget {
     this.scopeColumn,
     this.syncStatusColumn,
     this.children = const {},
+    this.deviceChildren = const {},
     this.descendantsSql = const [],
     this.scopedCursorPrefixes = const [],
     this.pairedByScope = false,
@@ -210,7 +216,7 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
   // document retiré laisserait son PDF sur l'appareil, servi par le numéro.
   'editique_documents': TombstoneTarget(
     table: 'generated_documents',
-    children: {'editique_cache_entries': 'document_id'},
+    deviceChildren: {'editique_cache_entries': 'document_id'},
   ),
   'boutique_sales': TombstoneTarget(
     table: 'boutique_sales',

@@ -1,47 +1,33 @@
-import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 
-/// Clé `sync_meta` mémorisant l'école dont les pièces sont sur ce disque.
-///
-/// Ce n'est pas un curseur, mais c'est bien la table des métadonnées locales, et
-/// la colonne accueille une valeur opaque. Sans cette trace, aucun changement
-/// d'école ne serait détectable : rien, dans le socle, ne compare l'école
-/// entrante à la précédente.
-const String kEditiqueCacheSchoolResource = 'editique_cache_school';
-
 /// Ce qu'une ouverture de session décide du cache de pièces scellées
-/// (ADR-012 D-7, RG-012-21).
+/// (ADR-012 D-7, RG-012-4).
 ///
 /// ## Pourquoi à l'ouverture, et pas à la fermeture
 ///
-/// À la fermeture, le contexte courant est déjà vidé et la seule école
-/// connaissable serait la **sortante** : purger « les écoles étrangères »
-/// y effacerait exactement l'inverse de ce qu'il faut. Et surtout, effacer à
-/// chaque déconnexion viderait le cache tous les soirs sur une tablette
-/// partagée — la disponibilité hors ligne, seule raison d'être de ce cache,
-/// disparaîtrait avec.
-///
-/// À l'ouverture, au contraire, tout est connu : le rôle, l'école, et ce que le
-/// disque contenait avant. Les octets, eux, sont chiffrés entre-temps.
+/// Effacer à chaque déconnexion viderait le cache tous les soirs sur une
+/// tablette partagée — la disponibilité hors ligne, seule raison d'être de ce
+/// cache, disparaîtrait avec. À l'ouverture, au contraire, le rôle de celui qui
+/// arrive est connu. Les octets, eux, sont chiffrés entre-temps.
 ///
 /// ## Ce qui déclenche un effacement
 ///
-/// Deux situations, et deux seulement :
+/// **Une seule situation : le profil n'a pas droit au cache** (RG-012-4) — un
+/// enseignant ouvre une session sur une tablette d'administration, et ce
+/// qu'elle contenait ne doit pas rester à sa portée.
 ///
-///  - **le profil n'a pas droit au cache** (RG-012-4) — un enseignant ouvre une
-///    session sur une tablette d'administration, et ce qu'elle contenait ne doit
-///    pas rester à sa portée ;
-///  - **l'école a changé** (RG-012-21) — la tablette a été réaffectée, et les
-///    pièces de l'établissement précédent n'ont plus rien à faire ici.
+/// ## Ce qui n'en déclenche plus : le changement d'école
 ///
-/// Une déconnexion ordinaire suivie d'une reconnexion du même profil dans la
-/// même école ne déclenche rien : il n'y a aucune raison de faire retélécharger
-/// à un guichet ce qu'il détenait la veille.
+/// Jusqu'à l'éclatement par école, une école différente de la précédente
+/// effaçait tout (RG-012-21). Les écoles d'un poste coexistent désormais
+/// (MULTI_ECOLE_PLAN.md §10.1) : un chef qui bascule entre ses établissements
+/// retrouverait sinon un cache vide à chaque retour. L'index porte l'école de
+/// chaque pièce, et toutes ses lectures filtrent dessus. Retirer une école d'un
+/// appareil réaffecté reste à spécifier (§10.5).
 ///
 /// ## Ce que l'effacement fait
 ///
@@ -57,9 +43,9 @@ const String kEditiqueCacheSchoolResource = 'editique_cache_school';
 /// resterait en avance. Le cycle suivant demanderait « ce qui a changé depuis »,
 /// le serveur répondrait « rien », et le catalogue resterait vide — non pas le
 /// temps d'un cycle, mais **jusqu'à ce que l'établissement scelle une pièce
-/// nouvelle**. Une purge doit donc rembobiner le curseur au bootstrap, faute de
-/// quoi elle n'efface pas un cache : elle prive la tablette de tout ce que
-/// l'école a produit avant.
+/// nouvelle**. Une purge rembobine donc les curseurs de TOUTES les écoles —
+/// elle a effacé leurs pièces à toutes. Ils vivent avec l'index, dans la base de
+/// l'appareil : la purge et le rembobinage ne quittent pas un même fichier.
 ///
 /// Ne lève jamais. Une ouverture de session ne doit pas échouer parce qu'une
 /// hygiène de disque a échoué.
@@ -67,44 +53,23 @@ class EditiqueCacheSessionGuard {
   final EditiqueDocumentCache _cache;
   final AuthLocalDao _authLocalDao;
   final SyncMetaDao _syncMetaDao;
-  final Clock _now;
 
   const EditiqueCacheSessionGuard({
     required EditiqueDocumentCache cache,
     required AuthLocalDao authLocalDao,
     required SyncMetaDao syncMetaDao,
-    Clock now = systemClock,
   }) : _cache = cache,
        _authLocalDao = authLocalDao,
-       _syncMetaDao = syncMetaDao,
-       _now = now;
+       _syncMetaDao = syncMetaDao;
 
   /// À appeler à chaque ouverture de session. Rend `true` si le cache a été
   /// effacé — utile aux tests et aux diagnostics, jamais consulté par l'appelant.
   Future<bool> onSessionOpened() async {
     try {
       final user = await _authLocalDao.getSessionUser();
-      final previousSchool = await _syncMetaDao.getCursor(
-        kEditiqueCacheSchoolResource,
-      );
-
-      if (!EditiqueCacheEntitlement.isAllowed(user?.role)) {
-        // Aucune école n'est mémorisée pour un profil sans droit : il ne doit
-        // rien laisser derrière lui, pas même la trace de ce qu'il a effacé.
-        await _purge();
-        await _forgetSchool();
-        return true;
-      }
-
-      final school = user!.schoolId;
-      if (previousSchool != null && previousSchool != school) {
-        await _purge();
-        await _rememberSchool(school);
-        return true;
-      }
-
-      await _rememberSchool(school);
-      return false;
+      if (EditiqueCacheEntitlement.isAllowed(user?.role)) return false;
+      await _purge();
+      return true;
     } catch (_) {
       // Base illisible, cache indisponible : sans conséquence sur la session.
       return false;
@@ -117,16 +82,4 @@ class EditiqueCacheSessionGuard {
     await _cache.purgeAll();
     await _syncMetaDao.deleteCursorsOf(kEditiqueDocumentsResource);
   }
-
-  Future<void> _rememberSchool(String schoolId) => _syncMetaDao.setCursor(
-    kEditiqueCacheSchoolResource,
-    cursor: schoolId,
-    syncedAt: _now(),
-  );
-
-  Future<void> _forgetSchool() => _syncMetaDao.setCursor(
-    kEditiqueCacheSchoolResource,
-    cursor: null,
-    syncedAt: _now(),
-  );
 }

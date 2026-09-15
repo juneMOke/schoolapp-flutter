@@ -1,10 +1,16 @@
 # Cloisonnement des données par école — état des lieux et préconisation
 
-> ## ⚠️ Statut au 2026-09-08 : **préconisation, non validée**
+> ## ✅ Statut au 2026-09-14 : **option C validée et implémentée** — branche `feat/multi-school-tenant-db`, non poussée
 >
-> Ce document **recommande** l'option C. Elle n'est **pas arbitrée**, et son §8
-> laisse trois questions produit ouvertes. Entré au dépôt pour être relu et
-> corrigé, pas pour être appliqué : rien de ce qu'il décrit n'est écrit.
+> Arbitrage du 2026-09-14 : **option C** (une base par école), et **l'outbox
+> dans le fichier de l'école**, ce qui revient sur le journal du 09-05 (§10.1).
+> Le lot 0 est abandonné sauf `sale_ticket_composer` : C rend ses autres
+> correctifs caducs. La conception d'exécution est au **§10** ; les §1 à §9
+> restent l'étude qui a mené à la décision, corrigée mais pas réécrite. Le §8
+> garde deux questions produit ouvertes, qui ne bloquent pas C.
+>
+> *Historique* — du 2026-09-04 au 2026-09-14, ce document était une
+> préconisation non validée, entrée au dépôt pour être relue et corrigée.
 >
 > **Il est lui-même la démonstration de son propre argument.** Écrit le
 > 2026-09-04 et gardé quatre jours hors du dépôt, il annonçait un numéro de
@@ -17,7 +23,7 @@
 >
 > **Le schéma a bougé depuis** : v46 (extourne d'un encaissement) puis v47 (logo
 > de l'école). Les paliers annoncés plus bas sont corrigés en conséquence.
-> Aucun code de ce plan n'est écrit : il sert à trancher, pas à exécuter.
+> Écrite pour trancher, l'étude a été exécutée depuis : voir le §10.
 
 ---
 
@@ -103,7 +109,7 @@ Et `CurrentUserContext.schoolId`, aujourd'hui figé pour toute la session, devie
 |---|---|---|
 | basculer d'école | 185 lectures SQL doivent relire l'école **au moment de la requête**, et chaque écran ouvert doit s'invalider | `TenantDatabase.attach(schoolB)` — un appel |
 | BLoC tenant une liste en cache | affiche des lignes de l'autre école jusqu'au prochain chargement | la base sous lui a changé, il recharge |
-| file d'écriture | exige `pendingReadyForSchool` **et** les 6 sites d'estampillage manquants | idem — l'outbox reste au niveau appareil (voir §5) |
+| file d'écriture | exige `pendingReadyForSchool` **et** les 6 sites d'estampillage manquants | rien — l'outbox vit dans le fichier de l'école (§10.1) |
 | coût de U3 une fois le socle posé | un second chantier de la taille du premier | l'écran de bascule, et c'est tout |
 
 **U3 ne rend pas l'option C plus élégante : il la rend décisive.**
@@ -323,6 +329,11 @@ device.db          ← auth_local_user, auth_local_session  (le parc, pas le ten
 school_<uuid>.db   ← les 49 autres tables, outbox et sync_meta compris
 ```
 
+> **Correction du 2026-09-14.** Ce paragraphe mettait l'outbox chez l'école
+> pendant que le §1 bis et le journal du 09-05 la plaçaient au niveau appareil.
+> Tranché : **chez l'école**. Le découpage retenu, qui range aussi l'index
+> éditique et ses curseurs au niveau de l'appareil, est au §10.2.
+
 `Database` reste un `lazySingleton` GetIt, mais l'instance enregistrée devient un
 **proxy** (`TenantDatabase implements Database`) qui délègue au fichier de
 l'école courante. **Aucun DAO ne change** : ils continuent de recevoir
@@ -410,6 +421,12 @@ restent utiles, et deviennent d'ailleurs inutiles sous C (à retirer, cf. D9).
 
 ### Lot 0 — les défauts qui sont déjà faux aujourd'hui *(indépendant du choix)*
 
+> ⛔ **Abandonné le 2026-09-14, sauf `sale_ticket_composer`.** Sous C, D2, D5
+> et D6 disparaissent avec le fichier par école : ces correctifs auraient été
+> jetés dans la même branche. L'estampillage des 6 sites n'avait d'objet que
+> pour une outbox au niveau appareil, et `pendingReadyForSchool` redevient du
+> code mort, supprimé au lot 4.
+
 | tâche | fichier | coût réel |
 |---|---|---|
 | Scoper `findCurrentAcademicYearId()` par école (D2) | `enrollment_seed_dao.dart:137` | **pas une ligne** — voir ci-dessous |
@@ -471,7 +488,10 @@ que file d'attente vide**.
   `deviceOfflineTables` de `tenantOfflineTables` dans `buildOfflineSchema()`,
   une clé SQLCipher par école dans `DatabaseKeyService`.
 
-### Lot 2 — migration v47 → **v48**
+### Lot 2 — migration v48 → **v49**
+
+> Pris finalement en **v49** : la v48 est partie aux Dépenses le 2026-09-13,
+> exactement comme l'encadré ci-dessous le prévoyait.
 
 > ⚠️ **Ce lot ne réserve pas son numéro, il le prendra en fusionnant.** La
 > version initiale de ce document annonçait « v45 → v46 » ; v46 est partie à
@@ -547,3 +567,156 @@ et le compte multi-humain arrive (U3). Restent trois arbitrages, tous produit :
 | 2026-09-04 | Étude complète : 9 défauts, 3 options, préconisation **option C** |
 | 2026-09-05 | Cas d'usage arbitrés (U1/U2/U3) → **option A close**, option C **confirmée et renforcée** par U3 ; `outbox` et `editique_cache_entries` placés au niveau **appareil** ; lot 0 renversé sur `pendingReadyForSchool` |
 | 2026-09-08 | **Entrée au dépôt**, après relecture contre le code. Quatre corrections : le schéma n'est plus v45 (v46 extourne, **v47 logo**) ; le lot 2 devient **v48** et ne réserve pas son numéro ; **D4 est latent**, pas actif, et disparaît sous l'option C ; le chiffrage « une ligne » ne vaut que pour `sale_ticket_composer`, **D2 coûte 5 sites d'appel et 3 fichiers de test**. Préconisation option C **toujours non validée**. |
+| 2026-09-14 | **Arbitrage : option C validée, outbox dans le fichier de l'école** (revient sur le 09-05) ; index éditique et ses curseurs confirmés au niveau appareil ; **lot 0 abandonné** sauf `sale_ticket_composer`. Relecture contre le code : la v48 est prise (Dépenses) ⇒ **v49** ; la fenêtre « aucune école » est plus large qu'annoncé (reprise des versements au démarrage, listeners d'identité) ; 54 tables et **deux** helpers de test, pas un. Conception d'exécution au §10. |
+| 2026-09-14 | **Implémentation**, lots L1 à L5 (§10.6) : `2a40ebb2`, `2552b2ec`, `65517928`, `9acaf878`, puis la contre-épreuve. Non poussée. |
+
+---
+
+## 10. Conception d'exécution (2026-09-14)
+
+### 10.1 Décisions
+
+1. **Option C.** Une base SQLCipher par école, derrière un proxy `Database`.
+2. **L'outbox vit dans le fichier de l'école.** L'enfilage se fait dans la
+   transaction de l'écriture métier : 12 `OutboxDao(txn)` dans 8 fichiers
+   d'écriture. Une outbox au niveau appareil aurait fait de chacune une
+   transaction sur deux fichiers, donc un `ATTACH` SQLCipher sur chaque
+   connexion, et un journal hors WAL à garantir — aucun `journal_mode` n'est
+   posé aujourd'hui, et en WAL SQLite ne rend pas atomique une transaction sur
+   plusieurs bases attachées. Le niveau appareil n'achetait rien en échange :
+   une écriture de A ne part qu'avec un jeton de A, et attend donc le retour de
+   A dans les deux cas. `pendingReadyForSchool` redevient du code mort.
+3. **L'index éditique reste au niveau appareil (09-05), avec ses curseurs.**
+   Son magasin d'octets est un répertoire unique sous une clé unique, et le
+   balayage des orphelins compare le disque à l'index ENTIER : un index par
+   école ferait de chaque pièce d'une autre école un orphelin à effacer. Toutes
+   ses lectures filtrent déjà par `school_id`. Ses curseurs
+   (`editique_documents@<école>`) passent dans le `sync_meta` de l'appareil :
+   purge et rembobinage restent dans le même fichier, comme aujourd'hui.
+4. **D9 : la purge de l'index au changement d'école disparaît** — c'est la
+   coexistence. La purge « profil sans droit » (RG-012-4) reste.
+5. **Un travail de synchro est lié à l'école de son départ.** Un pull de A dont
+   la réponse arrive après la bascule vers B échoue en `StaleTenantException`
+   au lieu d'écrire la page de A et son curseur chez B.
+
+### 10.2 Architecture
+
+```
+device.db              auth_local_user, auth_local_session, editique_cache_entries,
+                       device_meta, sync_meta (curseurs éditique seulement)
+school_<id>.db         les 51 autres tables, outbox et sync_meta compris
+school_offline.db      la base héritée, jusqu'à ce qu'une école l'adopte
+```
+
+- **`TenantDatabase implements Database`** : délègue au fichier attaché.
+  Aucune école ⇒ `NoTenantAttachedException` (échec typé, jamais un vide).
+  Travail lié par `run()` puis bascule ⇒ `StaleTenantException`. Aucun DAO
+  d'école ne change.
+- **`DeviceDatabase`** : un type à part, pour que `getIt<Database>()` reste
+  sans ambiguïté la base de l'école.
+- **`kDeviceLevelTables`** est une liste d'EXCLUSION : une table de module
+  neuve atterrit chez l'école par construction.
+- **Clés** : `sqlcipher_device_key` pour l'appareil, `sqlcipher_db_key@<id>`
+  par école ; `sqlcipher_db_key`, l'héritée, passe à l'école qui adopte.
+- **Cycle de session** : l'école est attachée dans `AuthSessionManager` avant
+  chaque `CurrentUserContext.set` — login en ligne (**hors** du best-effort de
+  `persistOnlineLogin`, qui avale tout), login hors ligne, démarrage, tic de
+  fraîcheur — et détachée dans `wipeSession`, après `clear()`. Les fichiers
+  restent ouverts : la bascule suivante est instantanée, et une transaction en
+  vol finit sur son fichier.
+- **Lecteurs d'avant-login** : `SyncStatusCubit` (hydratation et `refresh()`,
+  défensifs), `PaymentAnomaliesCubit.refresh()` (défensif, relu à l'ouverture
+  de session), `SchoolIdentityCubit` (gardé par `schoolId` nul). La reprise des
+  versements (`PaymentOutboxTariffBackfill`) passe du démarrage à
+  **l'attachement** de chaque école.
+- **Date de dernière synchro** : elle devient celle de l'école — remise à zéro
+  à la fermeture de session, relue à l'ouverture.
+- **Tombstones** : `editique_documents` purge son index par une liste
+  `deviceChildren`, dans `device.db`, **avant** le parent — idempotent si la
+  suite échoue et que le retrait est rejoué.
+
+### 10.3 Migration v48 → v49
+
+1. **Au démarrage**, si `school_offline.db` existe et n'a pas été éclatée :
+   copie des comptes, de la session, de l'index éditique et de ses curseurs
+   dans **une** transaction de `device.db`, avec le nom de l'école
+   propriétaire, puis `legacy.state = split`. La base héritée n'est pas touchée
+   : l'étape se rejoue tant qu'elle n'a pas abouti.
+2. **Propriétaire** : l'école des écritures en attente si elle est unique —
+   l'argent d'abord — puis celle de la session active, puis celle du compte vu
+   le plus récemment. Sans aucun compte, la première école qui ouvre une
+   session adopte.
+3. **Adoption**, à l'attachement du propriétaire : clé transférée, fichier
+   renommé, `legacy.state = adopted`, puis ouverture en v49 — le palier retire
+   du fichier adopté les tables passées à l'appareil. Chaque étape se rejoue
+   sans dommage après une coupure.
+4. **Base héritée illisible** (clé absente) : laissée en place, jamais adoptée,
+   jamais effacée.
+5. **Limite assumée (U2)** : sur une tablette de staging dont la base héritée
+   porte des écritures en attente de DEUX écoles, celles de l'école non
+   propriétaire restent dans le fichier adopté, en attente de leur auteur, et
+   visibles dans la feuille de reprise. Contournement : vider la file avant la
+   mise à jour.
+
+### 10.4 Lots d'exécution
+
+| lot | contenu |
+|---|---|
+| L1 | socle : proxy, base de l'appareil, partage du schéma, clés |
+| L2 | fichiers et migration v49 (éclatement, adoption, palier) |
+| L3 | cycle de session, liaison des synchros, index éditique à l'appareil |
+| L4 | nettoyage : `pendingReadyForSchool`, commentaires « mono-établissement », `sale_ticket_composer` |
+| L5 | contre-épreuve : deux écoles dans une même suite, A→B→A |
+
+### 10.5 Hors périmètre
+
+- **U3** — la bascule sans re-login attend `POST /auth/switch-school` et
+  `user_schools` côté back, ainsi que la réponse au §8.3 (permissions par
+  école).
+- **Retirer une école d'un appareil.** Sous C, une tablette réaffectée garde le
+  fichier de l'école précédente et ses pièces éditique. La purge D9 ne couvrait
+  que les pièces ; un « oublier cette école » reste à spécifier.
+
+### 10.6 Avancement
+
+| lot | commit | état |
+|---|---|---|
+| plan | `73dc693a` | arbitrage et conception |
+| L1 | `2a40ebb2` | socle — 26 tests neufs |
+| L2 | `2552b2ec` | fichiers et migration v49 — `test/core/database` : 268 verts, escalier hérité compris |
+| L3 | `65517928` | cycle de session, liaison des synchros, index éditique à l'appareil |
+| L4 | `9acaf878` | nettoyage |
+| L5 | ce commit | contre-épreuve : `multi_school_isolation_test.dart` |
+
+Ce que l'écriture du code a appris, au-delà du §10.2 :
+
+- **Le proxy rend des `Future` en échec**, jamais une exception levée à
+  l'appel : un appelant en `.then()` la laisserait s'échapper.
+- **`persistOnlineLogin` est best-effort** — le dépôt avale tout ce qui en sort.
+  L'attachement du login en ligne se fait donc dans `AuthRepositoryImpl.login`,
+  AVANT `saveSession` ; son échec rend un `StorageFailure` et rien n'est
+  persisté.
+- **Adoption** : l'absence du fichier hérité se teste AVANT le propriétaire,
+  sans quoi une adoption coupée après le renommage ne se rattrape jamais.
+- **Deux pulls contournent le coordinateur** — `syncReferential` à la porte de
+  navigation, la resynchro des Classes : ils sont liés à leur école eux aussi.
+- **`PreEnrollmentsSchoolGuard` est conservée** : sans effet sur un fichier
+  neuf, elle protège la base héritée ADOPTÉE, dont le vivier peut être celui
+  d'une autre école. Les curseurs déjà scopés `@<école>` restent en place,
+  inertes.
+
+Vérifications :
+
+- **Suite complète sur l'arbre final** : 6 860 verts, aucun rouge ;
+  `flutter analyze` sans aucune remarque.
+- **Suite complète sur le lot 3** : 6 817 verts, 18 rouges, tous dans deux
+  fichiers de test que le lot avait oubliés — un test DI monté sans
+  `DeviceDatabase`, un test d'unicité qui citait le marqueur d'école supprimé.
+  Corrigés dans le même commit.
+- **La contre-épreuve mord.** Deux mutations du câblage la font rougir toutes
+  les deux — la session qui ouvre le fichier de A pour toute école, le proxy
+  qui garde le premier fichier attaché — et le code d'origine la rend verte.
+- **Défauts du §4.** D1, D2, D4, D5 et D6 sont démontrés fermés par la
+  contre-épreuve. D3, D7 et D8 le sont par construction : la cohorte N-1, les
+  drapeaux d'amorçage et les créances sans année vivent désormais dans le
+  fichier de l'école. D9 est levé (§10.1, point 4).

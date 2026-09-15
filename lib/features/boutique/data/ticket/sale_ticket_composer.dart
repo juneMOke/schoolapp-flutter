@@ -80,11 +80,18 @@ class SaleTicketComposer {
 
   /// Une lecture d'en-tête ne fait jamais tomber un ticket : l'échec rend
   /// `null`, et l'école reste anonyme sur le papier.
+  ///
+  /// L'école de la VENTE, pas « la » ligne de `ref_school`. La table est
+  /// mono-ligne dans le fichier d'une école (MULTI_ECOLE_PLAN.md) et le filtre
+  /// n'y change rien aujourd'hui ; mais un identifiant reçu puis ignoré se lit
+  /// comme une garde qui n'existe pas.
   Future<TicketSchoolIdentity?> _findSchool(String schoolId) async {
     try {
       final rows = await _db.query(
         'ref_school',
         columns: const ['name', 'address', 'municipality', 'city'],
+        where: 'id = ?',
+        whereArgs: [schoolId],
         limit: 1,
       );
       if (rows.isEmpty) return null;

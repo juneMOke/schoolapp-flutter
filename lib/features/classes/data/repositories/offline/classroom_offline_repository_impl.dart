@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/offline/reco
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 /// Type d'agrégat outbox du transfert d'élève (routage du handler de push).
 const String kClassroomTransferAggregateType = 'CLASSROOM_TRANSFER';
@@ -41,6 +42,10 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
   final CurrentUserContext? _currentUser;
   final Clock now;
 
+  /// Chaque flux se lie à l'école attachée à son départ (MULTI_ECOLE_PLAN.md
+  /// §10.1) : ce pull contourne le coordinateur.
+  final TenantScope _scope;
+
   /// Fraîcheur exposée par ce repository = celle du flux `classrooms` (les
   /// deux flux keyset partagent le même `now()` à chaque orchestration
   /// manuelle, cf. [syncClassrooms]).
@@ -55,7 +60,9 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
     required this.syncEngine,
     CurrentUserContext? currentUser,
     this.now = systemClock,
-  }) : _currentUser = currentUser;
+    TenantScope scope = const UnboundTenantScope(),
+  }) : _currentUser = currentUser,
+       _scope = scope;
 
   @override
   Future<Either<Failure, ClassroomSyncOutcome>> syncClassrooms({
@@ -65,11 +72,15 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
     // Chaque flux tourne indépendamment (pas de court-circuit) : un flux peut
     // avoir plusieurs pages pendant que l'autre est déjà à jour, et l'échec de
     // l'un ne doit pas empêcher l'autre de progresser.
-    final classroomsResult = await classroomPullRepository.syncClassrooms(
-      academicYearId: academicYearId,
+    final classroomsResult = await _scope.run(
+      () => classroomPullRepository.syncClassrooms(
+        academicYearId: academicYearId,
+      ),
     );
-    final membersResult = await classroomMemberPullRepository.syncMembers(
-      academicYearId: academicYearId,
+    final membersResult = await _scope.run(
+      () => classroomMemberPullRepository.syncMembers(
+        academicYearId: academicYearId,
+      ),
     );
     return classroomsResult.fold(
       Left.new,

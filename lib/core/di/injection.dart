@@ -223,6 +223,8 @@ import 'package:school_app_flutter/features/student/domain/usecases/update_stude
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_personal_info_use_case.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -449,6 +451,7 @@ Future<void> configureDependencies({
       currentUser: getIt<CurrentUserContext>(),
       currentPermissions: getIt<CurrentPermissions>(),
       sharedDocumentCache: getIt<SharedDocumentCache>(),
+      tenants: getIt<TenantSwitch>(),
     ),
   );
 
@@ -1370,6 +1373,7 @@ Future<void> configureDependencies({
       pullRepository: getIt<EnrollmentPullRepository>(),
       connectivity: getIt<ConnectivityService>(),
       currentUser: getIt<CurrentUserContext>(),
+      scope: getIt<TenantScope>(),
     ),
   );
 

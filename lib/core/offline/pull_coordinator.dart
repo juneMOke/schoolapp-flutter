@@ -13,6 +13,7 @@ import 'package:school_app_flutter/core/offline/pull_run_report.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart'
     show kTombstonesResource;
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 
 // Ré-exporté : le rapport a été sorti d'ici pour tenir la cible de taille, et
 // une quinzaine d'appelants l'importent via ce fichier.
@@ -47,6 +48,10 @@ class PullCoordinator {
   final CurrentPermissions? _permissions;
   final SessionCredentialsProbe? _credentialsProbe;
   final SyncPlanHolder? _planHolder;
+
+  /// L'école à laquelle un cycle se lie à son départ (MULTI_ECOLE_PLAN.md
+  /// §10.1).
+  final TenantScope _scope;
   final Map<String, PullHandler> _handlers = {};
   final PullCycleGuard _guard = PullCycleGuard();
 
@@ -58,11 +63,13 @@ class PullCoordinator {
     CurrentPermissions? permissions,
     SessionCredentialsProbe? credentialsProbe,
     SyncPlanHolder? planHolder,
+    TenantScope scope = const UnboundTenantScope(),
   }) : _connectivity = connectivity,
        _completionBus = completionBus,
        _permissions = permissions,
        _credentialsProbe = credentialsProbe,
-       _planHolder = planHolder;
+       _planHolder = planHolder,
+       _scope = scope;
 
   /// Enregistre le handler d'une ressource (appelé par la DI des branches).
   void registerHandler(PullHandler handler) {
@@ -131,7 +138,19 @@ class PullCoordinator {
   }
 
   /// Le corps de cycle, unique — cf. la docstring de classe.
+  ///
+  /// Lié à l'école attachée à son départ (MULTI_ECOLE_PLAN.md §10.1) : la
+  /// réponse d'un flux de A arrivée après la bascule vers B n'écrit ni sa page
+  /// ni son curseur chez B. Le cycle s'arrête, sauté.
   Future<PullRunReport> _runCycle(List<PullHandler> handlers) async {
+    try {
+      return await _scope.run(() => _runBoundCycle(handlers));
+    } on StaleTenantException {
+      return const PullRunReport.skipped();
+    }
+  }
+
+  Future<PullRunReport> _runBoundCycle(List<PullHandler> handlers) async {
     if (!await _connectivity.isOnline()) {
       return const PullRunReport.offline();
     }
@@ -242,6 +261,11 @@ class PullCoordinator {
     };
 
     for (final handler in handlers) {
+      // L'école a changé depuis le départ du cycle : les flux suivants
+      // tireraient pour l'école précédente, sous des jetons qui ne sont plus
+      // les siens.
+      if (_scope.isStale) return const PullRunReport.skipped();
+
       // ── L'AUTORITÉ DE PÉRIMÈTRE (ADR-015 O) ────────────────────────────────
       //
       // **Substitution, jamais union.** Le repli local s'applique PARCE QUE le

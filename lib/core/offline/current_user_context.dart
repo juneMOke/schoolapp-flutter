@@ -6,8 +6,9 @@
 /// chemins offline pour estampiller `authorId` sur chaque payload `/sync` :
 /// l'auteur est figé à la **saisie** (D-06), pas au moment de la synchro — même
 /// si un autre utilisateur se connecte ensuite sur la tablette, l'écriture garde
-/// son auteur. `schoolId` est lu par les repositories de pull référentiel pour
-/// scoper les données à l'école courante (multi-école sur un même device).
+/// son auteur. `schoolId` est l'école de la session : son fichier est attaché
+/// AVANT que ce contexte la porte (MULTI_ECOLE_PLAN.md §10.2), et les
+/// repositories de pull référentiel la lisent pour scoper leurs requêtes.
 ///
 /// Le serveur (`SyncAttributionGuard`, A3) **rejette en 403** tout item d'outbox
 /// dont `authorId ≠ uid` du JWT présenté : ce contexte est donc la source de
