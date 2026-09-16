@@ -26,6 +26,11 @@ const _currency = 'USD';
 
 /// Ce qui est encaissé, par devise — le versement n'a plus de montant à lui.
 final _amounts = MoneyBag.of(const [Money(_amountInCents, _currency)]);
+
+/// Le jour désigné au guichet. Le chemin ONLINE l'ignore — `CreatePaymentUseCase`
+/// n'en prend pas — mais l'événement le porte pour tout le monde depuis qu'il est
+/// saisissable.
+final _paidAt = DateTime(2026, 9, 16);
 const _payerFirstName = 'Jean';
 const _payerLastName = 'Dupont';
 const _payerMiddleName = 'Pierre';
@@ -158,6 +163,7 @@ void main() {
         PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
+          paidAt: _paidAt,
           amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,
@@ -204,6 +210,7 @@ void main() {
         PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
+          paidAt: _paidAt,
           amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,
@@ -245,6 +252,7 @@ void main() {
         PaymentsCreateRequested(
           studentId: _studentId,
           academicYearId: _academicYearId,
+          paidAt: _paidAt,
           amounts: _amounts,
           payerFirstName: _payerFirstName,
           payerLastName: _payerLastName,

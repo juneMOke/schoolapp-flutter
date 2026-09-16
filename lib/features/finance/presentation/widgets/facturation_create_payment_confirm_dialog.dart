@@ -277,6 +277,12 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                     ? _ConfirmBody(
                         totalLabel: widget.totalLabel,
                         rateLabel: widget.rateLabel,
+                        // ⚠️ Lu sur la REQUÊTE, jamais sur un paramètre jumeau :
+                        // le récapitulatif existe pour rattraper une erreur de
+                        // date, il doit donc montrer la valeur qui part
+                        // réellement en base — pas une seconde copie qui
+                        // pourrait diverger sans que rien ne le dise.
+                        paidAt: widget.request.paidAt,
                         studentName: widget.studentName,
                         payerName: widget.payerName,
                         payerPhone: widget.payerPhone,
@@ -395,6 +401,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
 class _ConfirmBody extends StatelessWidget {
   final String totalLabel;
   final String? rateLabel;
+  final DateTime paidAt;
   final String studentName;
   final String? payerName;
   final String payerPhone;
@@ -403,6 +410,7 @@ class _ConfirmBody extends StatelessWidget {
   const _ConfirmBody({
     required this.totalLabel,
     this.rateLabel,
+    required this.paidAt,
     required this.studentName,
     this.payerName,
     required this.payerPhone,
@@ -440,6 +448,32 @@ class _ConfirmBody extends StatelessWidget {
             style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
         ],
+        // La date, sous le montant : c'est le seul écran où une erreur de jour
+        // se rattrape encore. Formatée comme partout ailleurs dans Facturation
+        // (`MaterialLocalizations`), pour qu'elle se lise comme celle du
+        // grand-livre et du ticket.
+        const SizedBox(height: AppDimensions.spacingXS),
+        Row(
+          children: [
+            const Icon(
+              Icons.event_outlined,
+              size: AppDimensions.financeRowIconSize,
+              color: AppColors.textMuted,
+            ),
+            const SizedBox(width: AppDimensions.spacingXS),
+            Flexible(
+              child: Text(
+                '${l10n.facturationCreatePaymentDateLabel} : '
+                '${MaterialLocalizations.of(context).formatShortDate(paidAt)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: AppDimensions.spacingM),
         // Deux phrases, pas une phrase à trou : « réglé par - » nommerait un
         // tiret comme on nomme quelqu'un, sur le dernier écran avant d'engager

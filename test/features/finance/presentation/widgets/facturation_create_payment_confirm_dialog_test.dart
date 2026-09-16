@@ -33,6 +33,7 @@ class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
 final _request = PaymentsCreateRequested(
   studentId: 's1',
   academicYearId: 'y1',
+  paidAt: DateTime(2026, 9, 16),
   amounts: MoneyBag.of(const [Money(700000, 'CDF')]),
   payerFirstName: 'Paul',
   payerLastName: 'Mukendi',

@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/components/app_bars/student_detail_app_b
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -29,6 +31,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_action_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_date_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payer_search_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -53,6 +56,27 @@ class FacturationCreatePaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Borne basse du sélecteur de date (A2) : la rentrée de l'année que ce
+    // versement solde. Le contexte académique est fourni à la racine de
+    // l'application, donc au-dessus de cette route.
+    //
+    // ⚠️ La date n'est retenue que si l'année portée par le contexte est bien
+    // CELLE du versement. Encaisser sur l'année précédente depuis un poste calé
+    // sur l'année courante prendrait sinon la borne à la mauvaise rentrée — et
+    // interdirait précisément les saisies de rattrapage que ce champ existe pour
+    // permettre.
+    // `select` et non `watch` (règle n°9) : seule la rentrée nous intéresse, et
+    // l'état porte aussi les drapeaux de session (401/403, provisioning) qui
+    // reconstruiraient la page pour rien.
+    final earliestPaidAt = context.select<AcademicYearContextBloc, DateTime?>((
+      bloc,
+    ) {
+      final year = bloc.state.context?.academicYear;
+      return year != null && year.id == intent.academicYearId
+          ? year.startDate
+          : null;
+    });
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<FinanceOfflineBloc>(
@@ -84,6 +108,7 @@ class FacturationCreatePaymentPage extends StatelessWidget {
                 intent: intent,
                 rates: rates.rates,
                 sectionTitles: titles,
+                earliestPaidAt: earliestPaidAt,
               ),
             ),
       ),
@@ -103,11 +128,22 @@ class FacturationCreatePaymentView extends StatefulWidget {
   /// localisée, c'est-à-dire l'écran d'avant.
   final FeeSectionTitlesState sectionTitles;
 
+  /// La rentrée de l'année que ce versement solde, quand le référentiel la
+  /// connaît. Borne basse du sélecteur de date (A2) ; `null` retombe sur le même
+  /// jour un an plus tôt.
+  final DateTime? earliestPaidAt;
+
+  /// Instant de référence — **injecté par les tests seulement**. `null` =
+  /// l'horloge du poste.
+  final DateTime? now;
+
   const FacturationCreatePaymentView({
     super.key,
     required this.intent,
     this.rates = const [],
     this.sectionTitles = const FeeSectionTitlesState(),
+    this.earliestPaidAt,
+    this.now,
   });
 
   @override
@@ -156,6 +192,46 @@ class _FacturationCreatePaymentViewState
   /// du référentiel, qui en porte six. Un geste sans intention changerait le
   /// montant encaissé.
   final Map<String, String> _rateSeeds = {};
+
+  /// Le jour choisi par le caissier, **quand il en a choisi un**.
+  ///
+  /// `null` = « aujourd'hui », et c'est un aujourd'hui **vivant** : il se
+  /// recalcule à chaque lecture. Figer la valeur à l'ouverture de la page
+  /// daterait de la veille un versement encaissé après minuit sur une tablette
+  /// restée allumée — ce que l'horodatage automatique, lui, ne faisait jamais.
+  DateTime? _paidDayOverride;
+
+  /// Le **jour** porté par le versement (A1) : l'aujourd'hui de l'ÉCOLE tant que
+  /// le caissier n'a rien changé, et non celui de la tablette — c'est le fuseau
+  /// de Kinshasa qui découpe les journées de caisse.
+  DateTime get _paidDay => _paidDayOverride ?? _today;
+
+  DateTime get _now => widget.now ?? DateTime.now();
+
+  /// Le jour courant de l'école — borne haute du sélecteur (A3). Une date
+  /// future ne s'offre pas, elle n'a donc jamais à être refusée.
+  DateTime get _today => SchoolTime.today(_now);
+
+  /// Borne basse (A2) : la rentrée quand on la connaît, sinon le même jour un an
+  /// plus tôt.
+  DateTime get _firstSelectableDay {
+    final start = widget.earliestPaidAt;
+    // Rentrée inconnue — référentiel muet, ou versement porté par une AUTRE
+    // année que celle du contexte, qui est justement le cas du rattrapage. Une
+    // fenêtre d'un an partant d'aujourd'hui amputerait alors le début de l'année
+    // précédente : on en ouvre deux. Cela écarte toujours une saisie absurde
+    // sans fermer la porte au rattrapage.
+    if (start == null) {
+      return SchoolTime.oneYearBefore(SchoolTime.oneYearBefore(_today));
+    }
+    // ⚠️ Champs de calendrier lus BRUTS, et surtout pas via `SchoolTime` : une
+    // date de rentrée est un jour, pas un instant. La faire traverser un fuseau
+    // la reculerait d'un jour sur toute machine à l'est d'UTC+1.
+    final day = DateTime(start.year, start.month, start.day);
+    // Une rentrée postérieure à aujourd'hui (référentiel en avance d'une année)
+    // fermerait le sélecteur sur une plage vide, et `showDatePicker` lève.
+    return day.isAfter(_today) ? _today : day;
+  }
 
   @override
   void initState() {
@@ -206,6 +282,83 @@ class _FacturationCreatePaymentViewState
 
   void _onChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// Changer la date re-propose les taux du jour désigné (A4).
+  ///
+  /// ⚠️ **Il ne suffit pas de mémoriser le jour.** Les montants convertis déjà
+  /// affichés ont été dérivés au taux de l'ancienne date et restent dans leurs
+  /// contrôleurs ; or la soumission, elle, recompose les `tenders` sur le
+  /// règlement COURANT. Sans re-dérivation, l'écran annoncerait un chiffre et le
+  /// versement en porterait un autre — sur de l'argent déjà posé au comptoir.
+  ///
+  /// On rejoue donc exactement ce que fait un changement de devise, et dans le
+  /// même sens : ce que le caissier a **tapé** ne bouge jamais, c'est ce qui en
+  /// **découle** qui est recalculé. Les taux corrigés à la main sont épargnés de
+  /// la même façon — `overriddenRates` l'emporte déjà sur le référentiel.
+  ///
+  /// ⚠️ **Les natures d'abord, les tranches ensuite.** Les deux boucles passent
+  /// bien sur les mêmes créances — une nature convertie propage sa devise à ses
+  /// tranches (`setTenderCurrency`) — donc l'ordre compte : re-dériver les
+  /// tranches avant la cascade de leur nature laisserait des comptoirs calculés
+  /// sur des imputations périmées.
+  void _onPaidDayChanged(DateTime day) {
+    final chosen = DateTime(day.year, day.month, day.day);
+    // Re-confirmer le même jour n'est pas un changement. Le sélecteur rappelle
+    // `onChanged` dès qu'on valide, même sans avoir rien bougé : sans cette
+    // garde, rouvrir le calendrier suffirait à rejouer toutes les dérivations —
+    // et un aller-retour imputation→comptoir→imputation ne rend pas toujours le
+    // même centime.
+    if (chosen == _paidDay) return;
+
+    setState(() {
+      _paidDayOverride = chosen;
+      _closeUntouchedRateEditors();
+    });
+
+    for (final group in _groups) {
+      if (!group.isConverted) continue;
+      // ⚠️ `groupIsSource` AUTANT que `tenderIsSource` : une nature qui a rendu
+      // la main à ses tranches n'est plus l'unité de règlement, et rejouer sa
+      // cascade écraserait la ventilation saisie à la main.
+      if (group.groupIsSource && group.tenderIsSource) {
+        // Le parent a posé des billets sur la nature : ce nombre est un fait,
+        // c'est l'imputation qui se recalcule au nouveau taux.
+        _onGroupTenderEdited(group);
+      } else {
+        setState(() => _reflectGroupTender(group));
+      }
+    }
+
+    for (final entry in _entries) {
+      if (!entry.isConverted) continue;
+      if (entry.tenderIsSource) {
+        _onTenderEdited(entry);
+      } else {
+        setState(() => _reflectTender(entry));
+      }
+    }
+  }
+
+  /// Referme les boîtes de taux **ouvertes mais restées intactes**.
+  ///
+  /// Elles affichent le taux amorcé à l'ANCIENNE date, pendant que les montants,
+  /// eux, repartent du référentiel du nouveau jour : le champ dirait 2 000,00
+  /// quand le comptoir compte à 1 666,67. Refermées, la ligne réaffiche le taux
+  /// du jour désigné, qui est le bon.
+  ///
+  /// Un taux réellement **corrigé à la main** survit (A4) : c'est une intention
+  /// du caissier, pas une valeur dérivée de la date.
+  void _closeUntouchedRateEditors() {
+    final untouched = [
+      for (final key in _editingRates)
+        if (_rateControllers[key]?.text == _rateSeeds[key]) key,
+    ];
+    for (final key in untouched) {
+      _editingRates.remove(key);
+      _rateSeeds.remove(key);
+      _rateControllers[key]?.clear();
+    }
   }
 
   /// Demande de sortie (flèche de la barre, retour système) : passe toujours
@@ -376,9 +529,12 @@ class _FacturationCreatePaymentViewState
   /// une devise par ligne et des taux par paire.
   TenderSettlement _settlement() => TenderSettlement(
     rates: widget.rates,
-    // Le taux qui vaut à l'heure du versement, pas celui d'aujourd'hui : un
-    // encaissement hors ligne remonte parfois trois jours plus tard.
-    at: DateTime.now(),
+    // Le taux qui vaut au jour DÉSIGNÉ, pas celui d'aujourd'hui : un
+    // encaissement rattrapé trois jours plus tard se propose au taux de ce
+    // jour-là — et c'est la même série, à la même date, que le serveur relira
+    // pour juger d'un écart. Proposer le taux du jour ferait signaler comme
+    // divergent un versement que personne n'a mal converti.
+    at: SchoolTime.composeInstant(day: _paidDay, now: _now),
     overriddenRates: {
       for (final key in _editingRates) key: ?_rateMicrosOf(key),
     },
@@ -480,6 +636,13 @@ class _FacturationCreatePaymentViewState
     final group = _groupOf(entry);
     if (group == null) return;
     group.groupIsSource = false;
+    // ⚠️ La nature cesse d'être l'unité de règlement : son comptoir n'est donc
+    // plus une SOURCE, il redevient un reflet. Sans cette ligne, l'état
+    // « groupe non source, mais comptoir de groupe source » restait stable et
+    // inatteignable par l'écran — le champ qui aurait pu le défaire est masqué
+    // dès que `groupIsSource` tombe. Tout rejeu de `_onGroupTenderEdited`
+    // écrasait alors la ventilation que le caissier venait de saisir à la main.
+    group.tenderIsSource = false;
     group.reflectFromTranches();
     _reflectGroupTender(group);
   }
@@ -806,6 +969,9 @@ class _FacturationCreatePaymentViewState
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
       academicYearId: widget.intent.academicYearId,
+      // Le JOUR seulement : l'heure du geste lui sera rendue au moment d'écrire,
+      // dans le fuseau de l'école.
+      paidAt: _paidDay,
       // `amounts` reste l'IMPUTÉ — la devise de chaque créance. Ce que le
       // tiroir reçoit voyage dans `tenders`, et rien ne relie les deux sans le
       // taux.
@@ -974,6 +1140,21 @@ class _FacturationCreatePaymentViewState
             phoneController: _payer.phone,
             onPickPayer: _pickPayer,
             phoneErrorText: _payer.phoneErrorText(l10n),
+            readOnly: _collectInFlight,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.detailSectionSpacing),
+        // La date a sa propre section : elle ne dit rien de qui paie, et la
+        // loger sous l'identité du payeur obligeait à expliquer en commentaire
+        // pourquoi elle échappait à la mention « facultatif » qui la précédait.
+        FinanceSectionCard(
+          backgroundColor: AppColors.surfaceRaised,
+          borderColor: AppColors.border,
+          child: FacturationCreatePaymentDateSection(
+            paidAt: _paidDay,
+            firstPaidAt: _firstSelectableDay,
+            lastPaidAt: _today,
+            onPaidAtChanged: _collectInFlight ? null : _onPaidDayChanged,
             readOnly: _collectInFlight,
           ),
         ),
