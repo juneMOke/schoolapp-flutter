@@ -25,13 +25,46 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/core/money/tender_settlement.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_group_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_rate_board.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_settlement_reads.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
+
+/// Ce que le guichet s'apprête à encaisser — **en types de domaine seulement**.
+///
+/// Ni widget, ni BLoC : `PaymentsCreateRequested` est déclarée dans un `part` de
+/// `payments_bloc.dart` et n'est pas importable seule. La faire entrer ici
+/// ferait entrer le BLoC entier dans un modèle qui n'en a pas besoin, et
+/// alourdirait des tests qui s'exécutent aujourd'hui en quelques millisecondes.
+///
+/// C'est donc la page qui assemble l'événement à partir de ceci : la dépendance
+/// au BLoC reste là où elle appartient.
+class FacturationCollectDraft {
+  /// Ce qui est **imputé**, par devise de créance.
+  final MoneyBag amounts;
+
+  /// Ce qui **entre dans le tiroir**, une entrée par couple de devises.
+  final List<TenderDraft> tenders;
+
+  final List<CreatePaymentAllocationInput> allocations;
+
+  /// Le **jour** désigné. L'heure du geste lui sera rendue au moment d'écrire,
+  /// dans le fuseau de l'école.
+  final DateTime paidAt;
+
+  const FacturationCollectDraft({
+    required this.amounts,
+    required this.tenders,
+    required this.allocations,
+    required this.paidAt,
+  });
+}
 
 class FacturationCollectFormModel {
   /// Les lignes payables — ce qui porte les contrôleurs, ce qui est disposé, et
@@ -297,6 +330,44 @@ class FacturationCollectFormModel {
       return;
     }
     group.writeTenderAmount(groupTenderCents(settlementOf(), group));
+  }
+
+  // ── Ce qui part au serveur ─────────────────────────────────────────────────
+
+  /// Ce que ce versement encaisse — `null` quand il n'y a **rien** à encaisser.
+  ///
+  /// Un versement mixte est un cas NOMINAL depuis que le contrat porte
+  /// `amounts[]` : c'est un acte de guichet, donc un versement, un reçu. Reste à
+  /// refuser le versement vide, et c'est le seul refus que ce modèle prononce —
+  /// « ai-je le droit d'encaisser maintenant » (payeur valide, geste déjà en
+  /// vol) regarde la page, pas lui.
+  FacturationCollectDraft? buildDraft() {
+    final settlement = settlementOf();
+    final amounts = settledBagOf(settlement, entries);
+    if (amounts.isEmpty || amounts.isAllZero) return null;
+
+    return FacturationCollectDraft(
+      amounts: amounts,
+      // Ce que le tiroir reçoit voyage à part : rien ne relie l'imputé au perçu
+      // sans le taux, et c'est tout l'objet de ces deux listes distinctes.
+      tenders: settlement.tendersFor(linesOf(settlement, entries)),
+      allocations: [
+        for (final entry in entries)
+          if (entry.effectiveCents > 0)
+            CreatePaymentAllocationInput(
+              studentChargeId: entry.charge.id,
+              // La ligne de grille, pas seulement la nature du frais : le
+              // serveur ne départage plus deux tranches d'un même minerval sans
+              // elle.
+              feeTariffId: designatedFeeTariffId(entry.charge),
+              feeCode: entry.charge.feeCode,
+              studentChargeLabel: entry.charge.label,
+              amountInCents: entry.effectiveCents,
+              currency: entry.charge.currency,
+            ),
+      ],
+      paidAt: paidDay,
+    );
   }
 
   // ── Le changement de date (A4) ─────────────────────────────────────────────

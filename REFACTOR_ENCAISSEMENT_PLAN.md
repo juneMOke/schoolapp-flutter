@@ -106,7 +106,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 | **R3** ✅ | Sortir le tableau des taux | déplacement | faible |
 | **R4** ✅ | Sortir les lectures pures | déplacement | faible |
 | **R5** ✅ | Sortir l'état et les gestes | déplacement | **le seul délicat** |
-| **R6** | `_onCollect` → `model.buildRequest()` ; la page ne garde que la navigation | déplacement | faible |
+| **R6** ✅ | `_onCollect` → `model.buildDraft()` ; la page ne garde que la navigation | déplacement | faible |
 
 ### R0 — le filet avant tout
 
@@ -325,6 +325,39 @@ Les deux pièges sont **évités par construction**, et non par vigilance :
 - **P2** — aucune méthode du modèle n'appelle `setState`. Tout passe par `_act`,
   seul endroit où un geste devient un rendu.
 
+### R6 — ce qui part au serveur
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` **projet entier** | ✅ clean |
+| Suite `test/features/finance` | **1 100 verts** (+5) |
+| Page | 701 → **689** lignes |
+
+#### Le vrai résultat du lot est un REFUS
+
+`model.buildRequest()` était le nom prévu. Il n'a pas été écrit ainsi :
+`PaymentsCreateRequested` est déclarée dans un **`part` de `payments_bloc.dart`**
+et n'est pas importable seule. La faire entrer dans le modèle y aurait fait
+entrer le BLoC entier et `flutter_bloc` — dans un helper sans widget qui teste en
+millisecondes.
+
+Le modèle rend donc `buildDraft()`, un objet en **types de domaine seulement**
+(`MoneyBag`, `TenderDraft`, `CreatePaymentAllocationInput`), et **la page
+assemble l'événement**. La dépendance au BLoC reste là où elle appartient.
+
+Le modèle ne prononce qu'un seul refus — « il n'y a rien à encaisser ». « Ai-je le
+droit maintenant » (payeur valide, geste déjà en vol) reste à la page. Deux refus
+qui ne disent pas la même chose ne se confondent plus.
+
+#### ⚠️ Troisième estimation trop optimiste
+
+**−12 lignes, et non les ~65 annoncées.** Après R1 (−200 annoncées, −80 réelles)
+et la cible globale, le motif est constant : **j'estime ce qui part, jamais ce
+qui reste ni les commentaires que j'ajoute en partant.** À retenir pour les
+prochains chantiers de ce dépôt.
+
 ## 5. Les trois pièges, repérés en lisant le code
 
 ### 🔴 P1 — Le modèle ne doit JAMAIS mémoriser les taux
@@ -367,11 +400,36 @@ revue adversariale**, dans cet ordre. La leçon a été payée sur le lot préc�
 
 **Le chantier est terminé quand :**
 
-- [ ] ~~la page fait ≤ 350 lignes~~ — **critère révisé après R5, voir ci-dessous** ;
-- [ ] **aucun fichier de test existant n'a été modifié** par un lot de déplacement ;
-- [ ] les quatre fichiers neufs ont leurs tests unitaires ;
-- [ ] les drapeaux de source sont privés, et un test échoue si l'on retire la
-      garde (test de mutation).
+- [x] ~~la page fait ≤ 350 lignes~~ — **critère révisé** (voir ci-dessous) : la
+      page fait **689 lignes**, contre 1 208 au départ, et ce qui reste est du
+      rendu ;
+- [x] **aucun fichier de test existant n'a été modifié** par un lot de
+      déplacement — avec deux nuances dites plutôt que tues : **R2** en a modifié
+      deux, parce qu'il changeait l'API (c'était annoncé avant d'écrire) ; **R6**
+      a modifié le test du modèle né en R5, de façon purement **additive**
+      (5 tests neufs), et non par adaptation à un comportement changé ;
+- [x] les quatre fichiers neufs ont leurs tests unitaires — **67 tests
+      instantanés** : libellés (19), tableau des taux (14), lectures (16),
+      modèle (18) ;
+- [x] les drapeaux de source sont privés, et un test échoue si l'on retire la
+      garde — **prouvé par mutation** : deux tests tombent, et l'on a découvert
+      au passage que la garde de page posée en R0 tient seule elle aussi.
+
+### Ce que le chantier a réellement changé
+
+Ce n'est pas le décompte de lignes, et il vaut mieux le dire ainsi : **la
+propriété de l'état**. Les invariants d'argent sont désormais portés par des
+objets qui les font respecter, et non par la discipline de leurs appelants.
+
+- l'état « la nature ne commande plus, mais son comptoir est encore source » —
+  celui qui écrasait une ventilation de caissier — **ne s'écrit plus** ;
+- le modèle **ne peut pas** convertir au taux d'une série périmée : il ne
+  mémorise jamais le règlement ;
+- `setState` n'a plus qu'un seul point d'entrée, donc un seul endroit où
+  l'oublier.
+
+Trois comportements qui tenaient à la vigilance tiennent maintenant à la
+structure.
 
 ---
 

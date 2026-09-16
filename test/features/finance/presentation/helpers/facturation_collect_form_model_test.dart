@@ -204,6 +204,56 @@ void main() {
     });
   });
 
+  group('ce qui part au serveur', () {
+    test('rien de coché ⇒ AUCUN versement', () {
+      // Le seul refus que le modèle prononce. « Ai-je le droit maintenant »
+      // regarde la page.
+      expect(modele().buildDraft(), isNull);
+    });
+
+    test('porte le jour désigné, pas un instant', () {
+      final m = modele();
+      m.toggle(m.entries.first, true);
+      m.paidDayChanged(DateTime(2026, 9, 12));
+
+      expect(m.buildDraft()!.paidAt, DateTime(2026, 9, 12));
+    });
+
+    test('n\'impute QUE les lignes qui portent un montant', () {
+      final m = modele();
+      m.toggle(m.entries.first, true);
+
+      final draft = m.buildDraft()!;
+
+      expect(draft.allocations, hasLength(1));
+      expect(draft.allocations.single.amountInCents, 5000);
+      expect(draft.allocations.single.studentChargeId, 'T1');
+    });
+
+    test('désigne la ligne de grille, et pas seulement la nature', () {
+      // Sans `feeTariffId`, le serveur ne départage plus deux tranches d'un même
+      // minerval et refuse par AMBIGUOUS_FEE_CODE.
+      final m = modele();
+      m.toggle(m.entries.first, true);
+
+      expect(m.buildDraft()!.allocations.single.feeTariffId, isNotNull);
+    });
+
+    test('sépare l\'imputé du perçu', () {
+      final m = modele();
+      final entry = m.entries.first;
+      m.toggle(entry, true);
+      m.tenderCurrencyChanged(entry, 'CDF');
+
+      final draft = m.buildDraft()!;
+
+      // 50,00 $ imputés, 100 000 FC au tiroir : deux unités, deux listes.
+      expect(draft.amounts.entries.single.currency, 'USD');
+      expect(draft.tenders.single.currency, 'CDF');
+      expect(draft.tenders.single.amountInCents, 10000000);
+    });
+  });
+
   group('changer la date re-dérive', () {
     test('sans détruire une ventilation saisie à la main', () {
       // Le parcours qui a coûté de l'argent avant R2, rejoué au niveau du

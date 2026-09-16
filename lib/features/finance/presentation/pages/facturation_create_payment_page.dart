@@ -8,7 +8,6 @@ import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
@@ -24,7 +23,6 @@ import 'package:school_app_flutter/features/finance/presentation/helpers/factura
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payer_form_controller.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_rate_board.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_settlement_reads.dart';
-import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_action_bar.dart';
@@ -412,37 +410,40 @@ class _FacturationCreatePaymentViewState
   }
 
   Future<void> _onCollect(AppLocalizations l10n) async {
+    // Deux refus, et ils ne disent pas la même chose. Celui-ci est un DROIT —
+    // ai-je un payeur valide, un geste n'est-il pas déjà en vol — et il regarde
+    // la page. Celui du modèle, juste en dessous, dit qu'il n'y a RIEN à
+    // encaisser.
+    //
+    // Un versement mixte, lui, est un cas NOMINAL depuis que le contrat porte
+    // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
+    if (!_payer.isValid || _collectInFlight) return;
+
+    final draft = _model.buildDraft();
+    if (draft == null) return;
+
     final settlement = _settlement();
-    final bag = settledBagOf(settlement, _model.entries);
     final converted = hasConversion(settlement, _model.entries);
     // Ce qu'on valide est ce que le parent va poser sur le comptoir : la popin
     // annonce le PERÇU, et détaille dessous ce que ce versement éteint.
     final totalLabel = converted
         ? bagLabel(tenderBagOf(settlement, _model.entries))
-        : bagLabel(bag);
-    // Un versement mixte est un cas NOMINAL depuis que le contrat porte
-    // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
-    // Reste à refuser le versement vide — rien à encaisser n'est pas un
-    // encaissement.
-    if (!_payer.isValid || bag.isEmpty || bag.isAllZero || _collectInFlight) {
-      return;
-    }
+        : bagLabel(draft.amounts);
 
-    final retained = _model.entries.where((e) => e.effectiveCents > 0).toList();
     final offlineBloc = context.read<FinanceOfflineBloc>();
     final phone = _payer.phone.text.trim();
 
+    // L'événement est assemblé ICI, et non dans le modèle : `PaymentsCreateRequested`
+    // est déclarée dans un `part` de `payments_bloc.dart` et n'est pas
+    // importable seule. La faire entrer dans le modèle y ferait entrer le BLoC
+    // entier — le modèle rend donc ce qu'il sait en types de domaine, et la page
+    // porte la dépendance, là où elle appartient.
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
       academicYearId: widget.intent.academicYearId,
-      // Le JOUR seulement : l'heure du geste lui sera rendue au moment d'écrire,
-      // dans le fuseau de l'école.
-      paidAt: _model.paidDay,
-      // `amounts` reste l'IMPUTÉ — la devise de chaque créance. Ce que le
-      // tiroir reçoit voyage dans `tenders`, et rien ne relie les deux sans le
-      // taux.
-      amounts: bag,
-      tenders: settlement.tendersFor(linesOf(settlement, _model.entries)),
+      paidAt: draft.paidAt,
+      amounts: draft.amounts,
+      tenders: draft.tenders,
       // Les quatre partent en `null` quand rien n'a été saisi — jamais en `''`.
       // « Pas de payeur » est un fait, pas un nom de longueur zéro : c'est la
       // distinction que le serveur s'est donnée en V114, et une chaîne vide la
@@ -451,19 +452,7 @@ class _FacturationCreatePaymentViewState
       payerLastName: _payer.valueOf(_payer.lastName),
       payerMiddleName: _payer.valueOf(_payer.middleName),
       payerPhoneNumber: _payer.valueOf(_payer.phone),
-      allocations: [
-        for (final entry in retained)
-          CreatePaymentAllocationInput(
-            studentChargeId: entry.charge.id,
-            // La ligne de grille, pas seulement la nature du frais : le serveur
-            // ne départage plus deux tranches d'un même minerval sans elle.
-            feeTariffId: designatedFeeTariffId(entry.charge),
-            feeCode: entry.charge.feeCode,
-            studentChargeLabel: entry.charge.label,
-            amountInCents: entry.effectiveCents,
-            currency: entry.charge.currency,
-          ),
-      ],
+      allocations: draft.allocations,
     );
 
     setState(() => _collectInFlight = true);
