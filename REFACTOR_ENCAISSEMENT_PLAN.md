@@ -57,7 +57,7 @@ test, aucun compilateur ne pouvait le signaler.
 | Fichier | Responsabilité | ~lignes |
 |---|---|---|
 | `helpers/facturation_collect_labels.dart` ✅ | formatage pur : montants, taux, monnaie à rendre, identité de l'élève | **125** (livré) |
-| `helpers/facturation_rate_board.dart` | le tableau des taux corrigés à la main (contrôleurs, amorces, édition) | ~90 |
+| `helpers/facturation_rate_board.dart` ✅ | le tableau des taux corrigés à la main (contrôleurs, amorces, édition) | **119** (livré) |
 | `helpers/facturation_settlement_reads.dart` | lectures pures `(règlement, entrées) → chiffres` | ~120 |
 | `helpers/facturation_collect_form_model.dart` | **l'état et les gestes** : entrées, natures, jour désigné, dérivations | ~280 |
 | `pages/facturation_create_payment_page.dart` | fournisseurs, `build`, `_body`, navigation, cycle de vie | **~300** |
@@ -103,7 +103,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 | **R0** ✅ | Mesurer la couverture réelle de la page, combler les gestes non couverts | filet | nul |
 | **R1** ✅ | Sortir les libellés | déplacement pur | nul |
 | **R2** ✅ | **Rendre l'invariant inviolable** | changement d'API | faible |
-| **R3** | Sortir le tableau des taux | déplacement | faible |
+| **R3** ✅ | Sortir le tableau des taux | déplacement | faible |
 | **R4** | Sortir les lectures pures | déplacement | faible |
 | **R5** | Sortir l'état et les gestes | déplacement | **le seul délicat** |
 | **R6** | `_onCollect` → `model.buildRequest()` ; la page ne garde que la navigation | déplacement | faible |
@@ -227,6 +227,41 @@ seule : le test unitaire éprouve la garde de l'entité, le test de widget celle
 la page. Les garder toutes les deux est délibéré — c'est un chemin d'argent.
 
 ---
+
+### R3 — le tableau des taux
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` **projet entier** | ✅ clean |
+| Suite `test/features/finance` | **1 066 verts** (+14) |
+| Page | 1 122 → **1 056** lignes (15 insertions, 81 suppressions) |
+| `facturation_rate_board.dart` | **119 lignes**, 14 tests unitaires |
+| **Règle d'or** | ✅ **strictement** tenue — aucun test existant modifié |
+
+Trois fichiers touchés, dont **deux neufs** : c'est la signature d'un déplacement
+pur, et le contraste avec R2 est net — là-bas le changement d'API imposait de
+reprendre deux fichiers de test, ici aucun n'a bougé.
+
+Les trois champs d'état (`_rateControllers`, `_editingRates`, `_rateSeeds`) et
+leurs trois méthodes formaient en réalité **un objet** : ce que le caissier a
+corrigé, et ce qu'il n'a fait qu'ouvrir.
+
+Le **piège P2 est évité par construction** : le rappel de rafraîchissement est
+injecté au constructeur du tableau, qui pose l'écoute sur chaque contrôleur qu'il
+crée. `setState` reste donc dans la page, et la nouvelle classe ne connaît ni
+widget ni cycle de rendu. Ce n'est pas une vigilance à tenir, c'est une
+dépendance qui n'existe pas.
+
+#### Ce qui n'a PAS été traité, et pourquoi
+
+L'écart **« affiché ≠ soumis »** sur le taux corrigé (cf. §7) vit précisément
+dans cette zone. Il n'a pas été corrigé au passage : R3 est un lot de
+déplacement, et y glisser un changement de comportement rendrait la preuve
+inutilisable — on ne saurait plus si un test rouge vient du déplacement ou de la
+correction. C'est la règle d'or, et elle vaut surtout quand la tentation est
+grande.
 
 ## 5. Les trois pièges, repérés en lisant le code
 

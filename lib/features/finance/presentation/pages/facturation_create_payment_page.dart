@@ -9,7 +9,6 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
@@ -25,6 +24,7 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_collect_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payer_form_controller.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_rate_board.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
@@ -174,24 +174,12 @@ class _FacturationCreatePaymentViewState
   /// pour un seul acte de guichet.
   bool _collectInFlight = false;
 
-  /// Les taux corrigés à la main, **par paire** (`USD>CDF`) : un contrôleur et
-  /// un état d'édition chacun.
+  /// Les taux corrigés à la main, **par paire** (`USD>CDF`).
   ///
-  /// Par paire, parce que deux frais de devises différentes n'ont pas « le »
-  /// même taux — mais jamais par ligne : deux lignes d'une même paire partagent
-  /// leur taux, et en écrire deux dans un seul versement est précisément ce que
-  /// la garde locale refuse.
-  final Map<String, TextEditingController> _rateControllers = {};
-  final Set<String> _editingRates = {};
-
-  /// Le texte que « Modifier » a **pré-rempli**, par paire.
-  ///
-  /// Sert à distinguer « le caissier a ouvert le champ » de « le caissier a
-  /// corrigé le taux ». Sans cette distinction, ouvrir le champ sans rien taper
-  /// appliquerait la valeur affichée — arrondie au centième — à la place du taux
-  /// du référentiel, qui en porte six. Un geste sans intention changerait le
-  /// montant encaissé.
-  final Map<String, String> _rateSeeds = {};
+  /// Contrôleurs, boîtes ouvertes et amorces formaient trois champs de cette
+  /// classe ; ils forment en réalité un objet — [FacturationRateBoard] — et les
+  /// règles qui les lient y sont écrites, avec leurs tests.
+  late final FacturationRateBoard _rates;
 
   /// Le jour choisi par le caissier, **quand il en a choisi un**.
   ///
@@ -236,6 +224,7 @@ class _FacturationCreatePaymentViewState
   @override
   void initState() {
     super.initState();
+    _rates = FacturationRateBoard(onChanged: _onChanged);
     _entries = [
       for (final charge in widget.intent.unpaidCharges)
         if (chargeRemainingInCents(charge) > 0) FacturationChargeEntry(charge),
@@ -254,9 +243,7 @@ class _FacturationCreatePaymentViewState
 
   @override
   void dispose() {
-    for (final controller in _rateControllers.values) {
-      controller.dispose();
-    }
+    _rates.dispose();
     _payer.dispose();
     // Les groupes d'abord : ils ne possèdent que leurs propres contrôleurs, et
     // les tranches leur survivent le temps de cette boucle.
@@ -268,17 +255,6 @@ class _FacturationCreatePaymentViewState
     }
     super.dispose();
   }
-
-  /// Le contrôleur de taux de cette paire, créé à la demande.
-  TextEditingController _rateControllerOf(String pairKey) =>
-      _rateControllers.putIfAbsent(pairKey, () {
-        final controller = TextEditingController();
-        // Sans écoute, corriger un taux ne rafraîchirait ni les montants
-        // dérivés, ni le total de la barre, ni le CTA : le caissier taperait
-        // dans un champ sans effet visible.
-        controller.addListener(_onChanged);
-        return controller;
-      });
 
   void _onChanged() {
     if (mounted) setState(() {});
@@ -313,7 +289,7 @@ class _FacturationCreatePaymentViewState
 
     setState(() {
       _paidDayOverride = chosen;
-      _closeUntouchedRateEditors();
+      _rates.closeUntouched();
     });
 
     for (final group in _groups) {
@@ -337,27 +313,6 @@ class _FacturationCreatePaymentViewState
       } else {
         setState(() => _reflectTender(entry));
       }
-    }
-  }
-
-  /// Referme les boîtes de taux **ouvertes mais restées intactes**.
-  ///
-  /// Elles affichent le taux amorcé à l'ANCIENNE date, pendant que les montants,
-  /// eux, repartent du référentiel du nouveau jour : le champ dirait 2 000,00
-  /// quand le comptoir compte à 1 666,67. Refermées, la ligne réaffiche le taux
-  /// du jour désigné, qui est le bon.
-  ///
-  /// Un taux réellement **corrigé à la main** survit (A4) : c'est une intention
-  /// du caissier, pas une valeur dérivée de la date.
-  void _closeUntouchedRateEditors() {
-    final untouched = [
-      for (final key in _editingRates)
-        if (_rateControllers[key]?.text == _rateSeeds[key]) key,
-    ];
-    for (final key in untouched) {
-      _editingRates.remove(key);
-      _rateSeeds.remove(key);
-      _rateControllers[key]?.clear();
     }
   }
 
@@ -530,23 +485,8 @@ class _FacturationCreatePaymentViewState
     // pour juger d'un écart. Proposer le taux du jour ferait signaler comme
     // divergent un versement que personne n'a mal converti.
     at: SchoolTime.composeInstant(day: _paidDay, now: _now),
-    overriddenRates: {
-      for (final key in _editingRates) key: ?_rateMicrosOf(key),
-    },
+    overriddenRates: _rates.overrides,
   );
-
-  /// Le taux saisi pour cette paire, en micro-unités. `null` tant que rien n'a
-  /// été corrigé, ou quand la saisie n'est pas un nombre.
-  int? _rateMicrosOf(String pairKey) {
-    final raw = _rateControllers[pairKey]?.text ?? '';
-    // Champ ouvert mais intact : le référentiel garde la main.
-    if (raw == _rateSeeds[pairKey]) return null;
-    final parsed = parseMonetaryAmount(raw);
-    if (parsed == null || parsed <= 0) return null;
-    // Deux décimales, celles qui seront stockées : ce qui s'affiche, ce qui
-    // s'imprime et ce qui part sur le fil sont le même nombre.
-    return (parsed * 100).round() * (ExchangeRate.scale ~/ 100);
-  }
 
   /// Le règlement d'une ligne : ce qu'elle éteint, ce que le tiroir garde, et
   /// ce qui repart avec le parent.
@@ -706,17 +646,11 @@ class _FacturationCreatePaymentViewState
         FacturationRatePair(
           rate: rate,
           referenceRate: settlement.referenceRateFor(rate.base, rate.quote),
-          controller: _rateControllerOf(key),
-          editing: _editingRates.contains(key),
-          onEdit: () => setState(() {
-            _editingRates.add(key);
-            final controller = _rateControllerOf(key);
-            if (controller.text.isEmpty) {
-              final seed = rate.formatted(space: '');
-              controller.text = seed;
-              _rateSeeds[key] = seed;
-            }
-          }),
+          controller: _rates.controllerOf(key),
+          editing: _rates.isEditing(key),
+          // `setState` reste ICI : le tableau des taux ne connaît ni widget ni
+          // cycle de rendu, il reçoit un rappel et s'en tient là.
+          onEdit: () => setState(() => _rates.open(key, rate)),
           diverges: settlement.divergesFor(rate.base, rate.quote),
         ),
       );
