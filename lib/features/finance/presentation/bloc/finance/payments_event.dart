@@ -37,6 +37,15 @@ class PaymentsCreateRequested extends PaymentsEvent {
   final String studentId;
   final String academicYearId;
 
+  /// Le **jour** de l'encaissement, tel que le guichet le désigne : aujourd'hui
+  /// par défaut, reculé quand on rattrape une saisie tardive.
+  ///
+  /// C'est un jour de calendrier, jamais un instant. L'heure du versement reste
+  /// celle du geste, et les deux ne sont recomposés qu'au moment d'écrire, dans
+  /// le fuseau de l'école (`SchoolTime.composeInstant`) — sans quoi une tablette
+  /// mal réglée ferait basculer le versement d'une journée de caisse à l'autre.
+  final DateTime paidAt;
+
   /// Ce qui est encaissé, **par devise** : un passage au guichet peut solder
   /// une créance en dollars et une en francs.
   final MoneyBag amounts;
@@ -64,6 +73,7 @@ class PaymentsCreateRequested extends PaymentsEvent {
   const PaymentsCreateRequested({
     required this.studentId,
     required this.academicYearId,
+    required this.paidAt,
     required this.amounts,
     this.payerFirstName,
     this.payerLastName,
@@ -77,6 +87,9 @@ class PaymentsCreateRequested extends PaymentsEvent {
   List<Object?> get props => [
     studentId,
     academicYearId,
+    // Sans la date ici, deux saisies identiques faites à des jours différents
+    // seraient tenues pour le même événement.
+    paidAt,
     tenders,
     amounts,
     payerFirstName,

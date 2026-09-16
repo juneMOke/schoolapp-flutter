@@ -129,6 +129,11 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
       ),
     );
 
+    // ⚠️ `event.paidAt` n'est PAS transmis, et ce n'est pas un oubli : le
+    // contrat online (`CreatePaymentRequest`) ne porte aucune date — seul le
+    // push offline (`PaymentInput`, `POST /api/v1/sync/payments`) l'exige. Qui
+    // ranimerait ce chemin doit d'abord faire évoluer le DTO serveur, sans quoi
+    // la date désignée au guichet se perdrait ici en silence.
     final result = await _createPaymentUseCase(
       studentId: event.studentId,
       academicYearId: event.academicYearId,
