@@ -262,6 +262,60 @@ void main() {
       expect(champDate(tester).value, DateTime(2026, 9, 12));
     });
 
+    testWidgets(
+      'recalcule l\'imputé quand le COMPTOIR de la tranche est source',
+      (tester) async {
+        // Chemin `_onTenderEdited` rejoué au changement de date — nu jusqu'à R0.
+        await ouvrir(
+          tester,
+          charges: [charge('1', 'USD', 3000)],
+          rates: [_tauxAncien, _tauxRecent],
+        );
+        await cocher(tester, 0);
+        await choisirDevise(tester, 0, 'FC');
+
+        // Le parent pose des billets : le comptoir devient la source.
+        await tester.enterText(
+          find
+              .descendant(
+                of: find
+                    .byType(FacturationCreatePaymentChargeAllocationLine)
+                    .at(0),
+                matching: find.byType(TextField),
+              )
+              .last,
+          '50000',
+        );
+        await tester.pumpAndSettle();
+
+        String impute() =>
+            tester
+                .widget<TextField>(
+                  find
+                      .descendant(
+                        of: find
+                            .byType(
+                              FacturationCreatePaymentChargeAllocationLine,
+                            )
+                            .at(0),
+                        matching: find.byType(TextField),
+                      )
+                      .first,
+                )
+                .controller
+                ?.text ??
+            '';
+
+        final au16 = impute();
+
+        await choisirDate(tester, DateTime(2026, 9, 12));
+
+        // Les billets ne bougent pas ; ce qu'ils éteignent, si.
+        expect(comptoir(tester, 0), '50000');
+        expect(impute(), isNot(au16));
+      },
+    );
+
     testWidgets('déplace le taux proposé sur celui du jour désigné (A4)', (
       tester,
     ) async {
