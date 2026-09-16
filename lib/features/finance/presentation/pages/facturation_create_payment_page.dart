@@ -19,7 +19,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_entry.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_collect_form_model.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_collect_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payer_form_controller.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_rate_board.dart';
@@ -154,15 +154,13 @@ class _FacturationCreatePaymentViewState
     extends State<FacturationCreatePaymentView> {
   final _payer = FacturationPayerFormController();
 
-  late final List<FacturationChargeEntry> _entries;
-
-  /// Les natures, repliées sur les mêmes entrées.
+  /// L'état de la saisie et les gestes qui le font évoluer.
   ///
-  /// ⚠️ **Une vue, pas une seconde liste de vérité.** `_entries` reste ce qui
-  /// porte les contrôleurs, ce qui est disposé, et surtout ce qui produit les
-  /// imputations envoyées au serveur : la requête sortante est identique à
-  /// celle d'une saisie tranche par tranche.
-  late final List<FacturationChargeGroupEntry> _groups;
+  /// La page ne garde que ce qui relève du widget : les verrous de navigation,
+  /// le rendu, et l'enveloppe `setState`. Tout le reste — lignes, natures, jour
+  /// désigné, dérivations — vit dans [FacturationCollectFormModel], avec ses
+  /// tests unitaires.
+  late final FacturationCollectFormModel _model;
 
   /// Anti double-dialogue : un second déclencheur (retour système pendant que
   /// la flèche a déjà ouvert la confirmation) est ignoré.
@@ -180,24 +178,7 @@ class _FacturationCreatePaymentViewState
   /// règles qui les lient y sont écrites, avec leurs tests.
   late final FacturationRateBoard _rates;
 
-  /// Le jour choisi par le caissier, **quand il en a choisi un**.
-  ///
-  /// `null` = « aujourd'hui », et c'est un aujourd'hui **vivant** : il se
-  /// recalcule à chaque lecture. Figer la valeur à l'ouverture de la page
-  /// daterait de la veille un versement encaissé après minuit sur une tablette
-  /// restée allumée — ce que l'horodatage automatique, lui, ne faisait jamais.
-  DateTime? _paidDayOverride;
-
-  /// Le **jour** porté par le versement (A1) : l'aujourd'hui de l'ÉCOLE tant que
-  /// le caissier n'a rien changé, et non celui de la tablette — c'est le fuseau
-  /// de Kinshasa qui découpe les journées de caisse.
-  DateTime get _paidDay => _paidDayOverride ?? _today;
-
   DateTime get _now => widget.now ?? DateTime.now();
-
-  /// Le jour courant de l'école — borne haute du sélecteur (A3). Une date
-  /// future ne s'offre pas, elle n'a donc jamais à être refusée.
-  DateTime get _today => SchoolTime.today(_now);
 
   /// Borne basse (A2) : la rentrée quand on la connaît, sinon le même jour un an
   /// plus tôt.
@@ -209,7 +190,7 @@ class _FacturationCreatePaymentViewState
     // précédente : on en ouvre deux. Cela écarte toujours une saisie absurde
     // sans fermer la porte au rattrapage.
     if (start == null) {
-      return SchoolTime.oneYearBefore(SchoolTime.oneYearBefore(_today));
+      return SchoolTime.oneYearBefore(SchoolTime.oneYearBefore(_model.today));
     }
     // ⚠️ Champs de calendrier lus BRUTS, et surtout pas via `SchoolTime` : une
     // date de rentrée est un jour, pas un instant. La faire traverser un fuseau
@@ -217,26 +198,23 @@ class _FacturationCreatePaymentViewState
     final day = DateTime(start.year, start.month, start.day);
     // Une rentrée postérieure à aujourd'hui (référentiel en avance d'une année)
     // fermerait le sélecteur sur une plage vide, et `showDatePicker` lève.
-    return day.isAfter(_today) ? _today : day;
+    return day.isAfter(_model.today) ? _model.today : day;
   }
 
   @override
   void initState() {
     super.initState();
     _rates = FacturationRateBoard(onChanged: _onChanged);
-    _entries = [
-      for (final charge in widget.intent.unpaidCharges)
-        if (chargeRemainingInCents(charge) > 0) FacturationChargeEntry(charge),
-    ];
-    _groups = groupPayableEntries(_entries);
-    for (final entry in _entries) {
-      entry.controller.addListener(_onChanged);
-      entry.tenderController.addListener(_onChanged);
-    }
-    for (final group in _groups) {
-      group.controller.addListener(_onChanged);
-      group.tenderController.addListener(_onChanged);
-    }
+    _model = FacturationCollectFormModel.fromCharges(
+      charges: widget.intent.unpaidCharges,
+      rates: _rates,
+      // ⚠️ Un RAPPEL, jamais une valeur : la série de taux arrive en asynchrone,
+      // et un modèle qui l'aurait captée ici convertirait au taux d'une série
+      // périmée (piège P1).
+      settlementOf: _settlement,
+      nowOf: () => _now,
+    );
+    _model.addListener(_onChanged);
     _payer.addListener(_onChanged);
   }
 
@@ -244,14 +222,7 @@ class _FacturationCreatePaymentViewState
   void dispose() {
     _rates.dispose();
     _payer.dispose();
-    // Les groupes d'abord : ils ne possèdent que leurs propres contrôleurs, et
-    // les tranches leur survivent le temps de cette boucle.
-    for (final group in _groups) {
-      group.dispose();
-    }
-    for (final entry in _entries) {
-      entry.dispose();
-    }
+    _model.dispose();
     super.dispose();
   }
 
@@ -259,61 +230,12 @@ class _FacturationCreatePaymentViewState
     if (mounted) setState(() {});
   }
 
-  /// Changer la date re-propose les taux du jour désigné (A4).
+  /// Le seul endroit où un geste devient un rendu.
   ///
-  /// ⚠️ **Il ne suffit pas de mémoriser le jour.** Les montants convertis déjà
-  /// affichés ont été dérivés au taux de l'ancienne date et restent dans leurs
-  /// contrôleurs ; or la soumission, elle, recompose les `tenders` sur le
-  /// règlement COURANT. Sans re-dérivation, l'écran annoncerait un chiffre et le
-  /// versement en porterait un autre — sur de l'argent déjà posé au comptoir.
-  ///
-  /// On rejoue donc exactement ce que fait un changement de devise, et dans le
-  /// même sens : ce que le caissier a **tapé** ne bouge jamais, c'est ce qui en
-  /// **découle** qui est recalculé. Les taux corrigés à la main sont épargnés de
-  /// la même façon — `overriddenRates` l'emporte déjà sur le référentiel.
-  ///
-  /// ⚠️ **Les natures d'abord, les tranches ensuite.** Les deux boucles passent
-  /// bien sur les mêmes créances — une nature convertie propage sa devise à ses
-  /// tranches (`setTenderCurrency`) — donc l'ordre compte : re-dériver les
-  /// tranches avant la cascade de leur nature laisserait des comptoirs calculés
-  /// sur des imputations périmées.
-  void _onPaidDayChanged(DateTime day) {
-    final chosen = DateTime(day.year, day.month, day.day);
-    // Re-confirmer le même jour n'est pas un changement. Le sélecteur rappelle
-    // `onChanged` dès qu'on valide, même sans avoir rien bougé : sans cette
-    // garde, rouvrir le calendrier suffirait à rejouer toutes les dérivations —
-    // et un aller-retour imputation→comptoir→imputation ne rend pas toujours le
-    // même centime.
-    if (chosen == _paidDay) return;
-
-    setState(() {
-      _paidDayOverride = chosen;
-      _rates.closeUntouched();
-    });
-
-    for (final group in _groups) {
-      if (!group.isConverted) continue;
-      // ⚠️ `groupIsSource` AUTANT que `tenderIsSource` : une nature qui a rendu
-      // la main à ses tranches n'est plus l'unité de règlement, et rejouer sa
-      // cascade écraserait la ventilation saisie à la main.
-      if (group.groupIsSource && group.tenderIsSource) {
-        // Le parent a posé des billets sur la nature : ce nombre est un fait,
-        // c'est l'imputation qui se recalcule au nouveau taux.
-        _onGroupTenderEdited(group);
-      } else {
-        setState(() => _reflectGroupTender(group));
-      }
-    }
-
-    for (final entry in _entries) {
-      if (!entry.isConverted) continue;
-      if (entry.tenderIsSource) {
-        _onTenderEdited(entry);
-      } else {
-        setState(() => _reflectTender(entry));
-      }
-    }
-  }
+  /// Les gestes vivent dans le modèle et ne connaissent ni widget ni `setState`
+  /// (piège P2). Tout passe par ici : oublier l'enveloppe donnerait un écran qui
+  /// ne se rafraîchit pas, sans la moindre erreur pour le dire.
+  void _act(void Function() gesture) => setState(gesture);
 
   /// Demande de sortie (flèche de la barre, retour système) : passe toujours
   /// par une confirmation, contrairement au succès d'encaissement qui referme
@@ -340,138 +262,17 @@ class _FacturationCreatePaymentViewState
     }
   }
 
-  void _onToggle(FacturationChargeEntry entry, bool value) {
-    setState(() {
-      entry.selected = value;
-      if (value) {
-        entry.tenderIsSource = false;
-        entry.writeDerived(
-          entry.controller,
-          formatPlainAmount(entry.remainingInCents),
-        );
-        _reflectTender(entry);
-      } else {
-        entry.controller.clear();
-        entry.tenderController.clear();
-        entry.tenderIsSource = false;
-      }
-      _handOverToTranches(entry);
-    });
-  }
-
-  void _onSettleAll(FacturationChargeEntry entry) {
-    setState(() {
-      entry.tenderIsSource = false;
-      entry.writeDerived(
-        entry.controller,
-        formatPlainAmount(entry.remainingInCents),
-      );
-      _reflectTender(entry);
-    });
-  }
-
-  // ── Les gestes d'une NATURE (GE-3) ─────────────────────────────────────────
-
-  /// Le groupe qui porte cette tranche.
-  ///
-  /// Résolu par recherche, et non par un pointeur remontant depuis la tranche :
-  /// un lien de l'enfant vers le parent créerait un cycle de propriété entre
-  /// deux objets dont l'un ne possède déjà pas l'autre, et ce genre de lien
-  /// survit à un `dispose()`. La liste tient au plus une vingtaine d'entrées.
-  FacturationChargeGroupEntry? _groupOf(FacturationChargeEntry entry) {
-    for (final group in _groups) {
-      if (group.tranches.contains(entry)) return group;
-    }
-    return null;
-  }
-
-  void _onGroupToggle(FacturationChargeGroupEntry group, bool value) {
-    setState(() {
-      group.groupCommands();
-      if (!value) {
-        group.clear();
-        return;
-      }
-      // Cocher une nature la solde : c'est ce que fait déjà la case d'une
-      // ligne, et le caissier corrige ensuite s'il encaisse moins.
-      group.controller.text = formatPlainAmount(group.capInCents);
-      group.applyCascade(group.controller.text);
-      _reflectGroupTender(group);
-    });
-  }
-
-  void _onGroupSettleAll(FacturationChargeGroupEntry group) {
-    setState(() {
-      group.groupCommands();
-      group.controller.text = formatPlainAmount(group.capInCents);
-      group.applyCascade(group.controller.text);
-      _reflectGroupTender(group);
-    });
-  }
-
-  /// Le caissier a tapé le montant de la nature : la cascade écrit les tranches.
-  void _onGroupAmountEdited(FacturationChargeGroupEntry group) {
-    setState(() {
-      group.amountBecomesSource();
-      group.applyCascade(group.controller.text);
-      _reflectGroupTender(group);
-    });
-  }
-
   /// Le caissier a tapé ce qui est posé sur le comptoir.
   ///
   /// **Une seule conversion, au niveau de la nature**, puis la cascade en devise
   /// de créance. Convertir tranche par tranche tronquerait N fois là où une
   /// seule troncature suffit — et le parent verrait un total qui ne retombe pas
   /// sur ce qu'il a posé.
-  void _onGroupTenderEdited(FacturationChargeGroupEntry group) {
-    setState(() {
-      group.tenderBecomesSource();
-      final settlement = _settlement();
-      final line = settlement.fromTender(
-        settledCurrency: group.currency,
-        tenderCurrency: group.effectiveTenderCurrency,
-        tenderedCents: group.tenderedCents,
-      );
-      // Borné au restant de la nature : le surplus repart avec le parent, il ne
-      // s'impute pas. Le porter en imputation fabriquerait un trop-perçu que
-      // personne n'a décidé.
-      final settled = line.settledCents > group.capInCents
-          ? group.capInCents
-          : line.settledCents;
-      group.applyCascadeCents(settled);
-      group.writeGroupAmount(settled);
-    });
-  }
-
-  void _onGroupTenderCurrencyChanged(
-    FacturationChargeGroupEntry group,
-    String currency,
-  ) {
-    setState(() {
-      group.setTenderCurrency(currency);
-      group.tenderStopsBeingSource();
-      _reflectGroupTender(group);
-    });
-  }
-
-  void _onGroupToggleExpanded(FacturationChargeGroupEntry group) {
-    setState(() => group.expanded = !group.expanded);
-  }
-
   /// Recopie dans le comptoir de la nature ce que ses tranches font entrer.
   ///
   /// Somme des `tenderCents` des lignes — donc exactement ce que
   /// `tendersFor` agrégera pour le serveur. Recalculer autrement afficherait un
   /// chiffre que le versement ne portera pas.
-  void _reflectGroupTender(FacturationChargeGroupEntry group) {
-    if (!group.isConverted) {
-      group.writeTenderAmount(null);
-      return;
-    }
-    group.writeTenderAmount(groupTenderCents(_settlement(), group));
-  }
-
   /// L'état du règlement : les taux du référentiel, plus ceux corrigés.
   ///
   /// Reconstruit à chaque rendu — il n'y a pas d'état à synchroniser, seulement
@@ -483,7 +284,7 @@ class _FacturationCreatePaymentViewState
     // jour-là — et c'est la même série, à la même date, que le serveur relira
     // pour juger d'un écart. Proposer le taux du jour ferait signaler comme
     // divergent un versement que personne n'a mal converti.
-    at: SchoolTime.composeInstant(day: _paidDay, now: _now),
+    at: SchoolTime.composeInstant(day: _model.paidDay, now: _now),
     overriddenRates: _rates.overrides,
   );
 
@@ -496,81 +297,11 @@ class _FacturationCreatePaymentViewState
   /// comptoir en découle exactement.
   /// Recopie dans le champ du comptoir ce que l'imputation vaut, sans jamais
   /// toucher au champ qui a le curseur.
-  void _reflectTender(FacturationChargeEntry entry) {
-    if (!entry.isConverted) {
-      entry.writeDerived(entry.tenderController, '');
-      return;
-    }
-    final line = lineOf(_settlement(), entry);
-    entry.writeDerived(
-      entry.tenderController,
-      formatPlainAmount(line.tenderCents),
-    );
-  }
-
-  /// Le caissier a tapé l'imputation : le comptoir en découle.
-  void _onAllocationEdited(FacturationChargeEntry entry) {
-    setState(() {
-      entry.tenderIsSource = false;
-      _reflectTender(entry);
-      // La source bascule : le caissier a désigné UNE tranche, le montant de la
-      // nature n'est plus qu'un total affiché. Sans cette bascule, la prochaine
-      // ventilation écraserait la saisie qu'il vient de faire.
-      _handOverToTranches(entry);
-    });
-  }
-
-  /// Rend la main aux tranches sur la nature qui porte [entry].
-  void _handOverToTranches(FacturationChargeEntry entry) {
-    final group = _groupOf(entry);
-    if (group == null) return;
-    // Les deux drapeaux tombent ensemble, et c'est désormais la seule façon de
-    // les poser : l'état « groupe non source, mais comptoir de groupe source »
-    // n'est plus exprimable (cf. `handsOverToTranches`).
-    group.handsOverToTranches();
-    group.reflectFromTranches();
-    _reflectGroupTender(group);
-  }
-
-  /// Le caissier a tapé ce qui est posé sur le comptoir : l'imputation en
-  /// découle, vers le bas.
-  void _onTenderEdited(FacturationChargeEntry entry) {
-    if (!entry.isConverted) return;
-    setState(() {
-      entry.tenderIsSource = true;
-      final line = lineOf(_settlement(), entry);
-      entry.writeDerived(
-        entry.controller,
-        formatPlainAmount(line.settledCents),
-      );
-      _handOverToTranches(entry);
-    });
-  }
-
-  /// Changer de devise sur une ligne : le montant imputé reste, le comptoir se
-  /// recalcule.
-  ///
-  /// L'imputation est ce que le caissier a décidé d'éteindre ; elle n'a aucune
-  /// raison de bouger parce que le parent sort d'autres billets.
-  void _onTenderCurrencyChanged(FacturationChargeEntry entry, String currency) {
-    setState(() {
-      entry.tenderCurrency = currency == entry.charge.currency
-          ? null
-          : currency;
-      entry.tenderIsSource = false;
-      _reflectTender(entry);
-      // La devise d'une tranche est un geste ciblé : la nature cesse d'être
-      // l'unité de règlement, et son sélecteur disparaît. Deux devises
-      // concurrentes pour un même versement ne se lisent pas.
-      _handOverToTranches(entry);
-    });
-  }
-
   /// Les taux à afficher — un par paire réellement convertie.
   List<FacturationRatePair> _ratePairs(TenderSettlement settlement) {
     final seen = <String>{};
     final pairs = <FacturationRatePair>[];
-    for (final line in linesOf(settlement, _entries)) {
+    for (final line in linesOf(settlement, _model.entries)) {
       final rate = line.rate;
       if (rate == null) continue;
       final key = TenderSettlement.pairKey(rate.base, rate.quote);
@@ -600,7 +331,7 @@ class _FacturationCreatePaymentViewState
     TenderSettlement settlement,
     AppLocalizations l10n,
   ) => [
-    for (final group in _groups)
+    for (final group in _model.groups)
       if (group.allocatedCents > 0)
         FacturationConfirmAllocationGroup(
           label: group.isSingleTranche
@@ -682,12 +413,12 @@ class _FacturationCreatePaymentViewState
 
   Future<void> _onCollect(AppLocalizations l10n) async {
     final settlement = _settlement();
-    final bag = settledBagOf(settlement, _entries);
-    final converted = hasConversion(settlement, _entries);
+    final bag = settledBagOf(settlement, _model.entries);
+    final converted = hasConversion(settlement, _model.entries);
     // Ce qu'on valide est ce que le parent va poser sur le comptoir : la popin
     // annonce le PERÇU, et détaille dessous ce que ce versement éteint.
     final totalLabel = converted
-        ? bagLabel(tenderBagOf(settlement, _entries))
+        ? bagLabel(tenderBagOf(settlement, _model.entries))
         : bagLabel(bag);
     // Un versement mixte est un cas NOMINAL depuis que le contrat porte
     // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
@@ -697,7 +428,7 @@ class _FacturationCreatePaymentViewState
       return;
     }
 
-    final retained = _entries.where((e) => e.effectiveCents > 0).toList();
+    final retained = _model.entries.where((e) => e.effectiveCents > 0).toList();
     final offlineBloc = context.read<FinanceOfflineBloc>();
     final phone = _payer.phone.text.trim();
 
@@ -706,12 +437,12 @@ class _FacturationCreatePaymentViewState
       academicYearId: widget.intent.academicYearId,
       // Le JOUR seulement : l'heure du geste lui sera rendue au moment d'écrire,
       // dans le fuseau de l'école.
-      paidAt: _paidDay,
+      paidAt: _model.paidDay,
       // `amounts` reste l'IMPUTÉ — la devise de chaque créance. Ce que le
       // tiroir reçoit voyage dans `tenders`, et rien ne relie les deux sans le
       // taux.
       amounts: bag,
-      tenders: settlement.tendersFor(linesOf(settlement, _entries)),
+      tenders: settlement.tendersFor(linesOf(settlement, _model.entries)),
       // Les quatre partent en `null` quand rien n'a été saisi — jamais en `''`.
       // « Pas de payeur » est un fait, pas un nom de longueur zéro : c'est la
       // distinction que le serveur s'est donnée en V114, et une chaîne vide la
@@ -747,7 +478,7 @@ class _FacturationCreatePaymentViewState
       // Le taux, sous le montant validé — et seulement quand il y en a UN à
       // dire. Deux taux sur une ligne se liraient comme un seul, et le parent
       // conteste au guichet le chiffre qu'il a lu.
-      rateLabel: singleRateLabel(linesOf(settlement, _entries)),
+      rateLabel: singleRateLabel(linesOf(settlement, _model.entries)),
       studentName: studentFullName(widget.intent, l10n),
       // `null` quand rien n'a été saisi : le récapitulatif escamote alors son
       // bloc payeur au lieu d'y afficher un tiret. On valide ce qu'on a saisi,
@@ -785,17 +516,17 @@ class _FacturationCreatePaymentViewState
     // Un montant compté hors tolérance éteint le CTA : la garde locale le
     // refuserait de toute façon, et un refus après le geste se lit comme une
     // panne alors que c'est une saisie à corriger.
-    final allocations = settledBagOf(settlement, _entries);
+    final allocations = settledBagOf(settlement, _model.entries);
     final canCollect =
         _payer.isValid &&
         !allocations.isAllZero &&
         !_collectInFlight &&
-        !tenderInvariantBroken(settlement, _entries);
+        !tenderInvariantBroken(settlement, _model.entries);
     // « Converti » n'est pas « une devise a été choisie » : régler en dollars
     // des créances en dollars n'est pas une conversion. Ce qui compte est qu'un
     // taux s'applique réellement quelque part — sinon la barre annoncerait « À
     // percevoir » sur un versement où rien n'a bougé d'unité.
-    final converted = hasConversion(settlement, _entries);
+    final converted = hasConversion(settlement, _model.entries);
 
     return PopScope(
       // Bloque le retour système / `maybePop` : toute sortie passe par
@@ -827,7 +558,7 @@ class _FacturationCreatePaymentViewState
         bottomNavigationBar: widget.intent.hasDisplayContext
             ? FacturationCollectActionBar(
                 totalLabel: converted
-                    ? bagLabel(tenderBagOf(settlement, _entries))
+                    ? bagLabel(tenderBagOf(settlement, _model.entries))
                     : bagLabel(allocations),
                 settledLabel: converted ? bagLabel(allocations) : null,
                 onCollect: canCollect ? () => _onCollect(l10n) : null,
@@ -887,34 +618,50 @@ class _FacturationCreatePaymentViewState
           backgroundColor: AppColors.surfaceRaised,
           borderColor: AppColors.border,
           child: FacturationCreatePaymentDateSection(
-            paidAt: _paidDay,
+            paidAt: _model.paidDay,
             firstPaidAt: _firstSelectableDay,
-            lastPaidAt: _today,
-            onPaidAtChanged: _collectInFlight ? null : _onPaidDayChanged,
+            lastPaidAt: _model.today,
+            onPaidAtChanged: _collectInFlight
+                ? null
+                : (day) => _act(() => _model.paidDayChanged(day)),
             readOnly: _collectInFlight,
           ),
         ),
         const SizedBox(height: AppDimensions.detailSectionSpacing),
         FacturationCreatePaymentChargesSection(
-          groups: _groups,
+          groups: _model.groups,
           schoolTitleOf: widget.sectionTitles.titleOf,
-          onGroupToggle: _collectInFlight ? null : _onGroupToggle,
-          onGroupSettleAll: _collectInFlight ? null : _onGroupSettleAll,
-          onGroupAmountEdited: _collectInFlight ? null : _onGroupAmountEdited,
-          onGroupTenderEdited: _collectInFlight ? null : _onGroupTenderEdited,
+          onGroupToggle: _collectInFlight
+              ? null
+              : (group, value) => _act(() => _model.groupToggle(group, value)),
+          onGroupSettleAll: _collectInFlight
+              ? null
+              : (group) => _act(() => _model.groupSettleAll(group)),
+          onGroupAmountEdited: _collectInFlight
+              ? null
+              : (group) => _act(() => _model.groupAmountEdited(group)),
+          onGroupTenderEdited: _collectInFlight
+              ? null
+              : (group) => _act(() => _model.groupTenderEdited(group)),
           onGroupToggleExpanded: _collectInFlight
               ? null
-              : _onGroupToggleExpanded,
+              : (group) => _act(() => _model.groupToggleExpanded(group)),
           onGroupTenderCurrencyChanged: _collectInFlight
               ? null
-              : _onGroupTenderCurrencyChanged,
+              : (group, currency) => _act(
+                  () => _model.groupTenderCurrencyChanged(group, currency),
+                ),
           groupCurrencyOptionsOf: (group) =>
               settlement.optionsFor(group.currency),
           groupRateLabelOf: (group) => _groupRateLabel(settlement, group),
           groupChangeLabelOf: (group) =>
               _groupChangeLabel(settlement, group, l10n),
-          onToggle: _collectInFlight ? null : _onToggle,
-          onSettleAll: _collectInFlight ? null : _onSettleAll,
+          onToggle: _collectInFlight
+              ? null
+              : (entry, value) => _act(() => _model.toggle(entry, value)),
+          onSettleAll: _collectInFlight
+              ? null
+              : (entry) => _act(() => _model.settleAll(entry)),
           // Le taux vit au-dessus des lignes : il est le même pour toutes
           // celles d'une même paire, et l'écrire deux fois en ferait deux.
           settlement: TenderSettlementSection(
@@ -928,16 +675,21 @@ class _FacturationCreatePaymentViewState
             // tout est en place.
             explainWhenUnavailable: hasNoConvertibleCharge(
               settlement,
-              _entries,
+              _model.entries,
             ),
           ),
           currencyOptionsOf: (entry) =>
               settlement.optionsFor(entry.charge.currency),
           onTenderCurrencyChanged: _collectInFlight
               ? null
-              : _onTenderCurrencyChanged,
-          onAllocationEdited: _collectInFlight ? null : _onAllocationEdited,
-          onTenderEdited: _collectInFlight ? null : _onTenderEdited,
+              : (entry, currency) =>
+                    _act(() => _model.tenderCurrencyChanged(entry, currency)),
+          onAllocationEdited: _collectInFlight
+              ? null
+              : (entry) => _act(() => _model.allocationEdited(entry)),
+          onTenderEdited: _collectInFlight
+              ? null
+              : (entry) => _act(() => _model.tenderEdited(entry)),
           rateLabelOf: (entry) => lineRateLabel(lineOf(settlement, entry)),
           changeLabelOf: (entry) =>
               lineChangeLabel(lineOf(settlement, entry), l10n),

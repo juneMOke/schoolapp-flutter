@@ -59,7 +59,7 @@ test, aucun compilateur ne pouvait le signaler.
 | `helpers/facturation_collect_labels.dart` ✅ | formatage pur : montants, taux, monnaie à rendre, identité de l'élève | **125** (livré) |
 | `helpers/facturation_rate_board.dart` ✅ | le tableau des taux corrigés à la main (contrôleurs, amorces, édition) | **119** (livré) |
 | `helpers/facturation_settlement_reads.dart` ✅ | lectures pures `(règlement, entrées) → chiffres` | **150** (livré) |
-| `helpers/facturation_collect_form_model.dart` | **l'état et les gestes** : entrées, natures, jour désigné, dérivations | ~280 |
+| `helpers/facturation_collect_form_model.dart` ✅ | **l'état et les gestes** : entrées, natures, jour désigné, dérivations | **348** (livré) |
 | `pages/facturation_create_payment_page.dart` | fournisseurs, `build`, `_body`, navigation, cycle de vie | **~300** |
 
 ### Pourquoi ~300 et non 250
@@ -105,7 +105,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 | **R2** ✅ | **Rendre l'invariant inviolable** | changement d'API | faible |
 | **R3** ✅ | Sortir le tableau des taux | déplacement | faible |
 | **R4** ✅ | Sortir les lectures pures | déplacement | faible |
-| **R5** | Sortir l'état et les gestes | déplacement | **le seul délicat** |
+| **R5** ✅ | Sortir l'état et les gestes | déplacement | **le seul délicat** |
 | **R6** | `_onCollect` → `model.buildRequest()` ; la page ne garde que la navigation | déplacement | faible |
 
 ### R0 — le filet avant tout
@@ -299,6 +299,32 @@ Comme en R1, deux fonctions n'étaient pas pures et ont été corrigées **avant
 d'écrire plutôt que découvertes après : `_lines` et `_hasNoConvertibleCharge`
 parcourent `_entries`. Elles reçoivent désormais les entrées en argument.
 
+### R5 — l'état et les gestes
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` **projet entier** | ✅ clean |
+| Suite `test/features/finance` | **1 095 verts** (+13) |
+| Page | 948 → **701** lignes |
+| `facturation_collect_form_model.dart` | **348 lignes**, 13 tests unitaires |
+| **Règle d'or** | ✅ **strictement** tenue |
+
+Le lot annoncé comme le seul délicat s'est révélé **le plus propre** : aucun
+fichier de test existant n'a bougé, trois fichiers touchés dont deux neufs, et
+pas une erreur dans le recâblage des vingt sites d'appel — l'analyseur n'a
+signalé que la méthode qui restait à supprimer.
+
+Les deux pièges sont **évités par construction**, et non par vigilance :
+
+- **P1** — le modèle reçoit `settlementOf`, un *rappel*. Il ne mémorise jamais la
+  série de taux, donc ne peut pas convertir au taux d'une série périmée quand le
+  cubit finit de charger. Un test l'épingle : une série arrivée **après** la
+  construction est bien prise en compte.
+- **P2** — aucune méthode du modèle n'appelle `setState`. Tout passe par `_act`,
+  seul endroit où un geste devient un rendu.
+
 ## 5. Les trois pièges, repérés en lisant le code
 
 ### 🔴 P1 — Le modèle ne doit JAMAIS mémoriser les taux
@@ -341,13 +367,35 @@ revue adversariale**, dans cet ordre. La leçon a été payée sur le lot préc�
 
 **Le chantier est terminé quand :**
 
-- [ ] la page fait ≤ 350 lignes ;
+- [ ] ~~la page fait ≤ 350 lignes~~ — **critère révisé après R5, voir ci-dessous** ;
 - [ ] **aucun fichier de test existant n'a été modifié** par un lot de déplacement ;
 - [ ] les quatre fichiers neufs ont leurs tests unitaires ;
 - [ ] les drapeaux de source sont privés, et un test échoue si l'on retire la
       garde (test de mutation).
 
 ---
+
+### ⚠️ Recalibration de la cible, après R5
+
+**Les ~350 lignes ne seront pas atteintes par R6 seul**, et mon estimation de
+départ était optimiste — comme celle de R1 (−200 annoncées, −80 réelles).
+
+R6 ne touche que `_onCollect` : on atterrira autour de **635 lignes**. Ce qui
+reste ensuite n'est plus de la machine à états mais du **rendu** — `_body`,
+`build`, le wrapper `Page`, et quatre constructeurs de view-models
+(`_ratePairs`, `_confirmGroups`, les deux libellés de nature).
+
+Deux voies :
+
+1. **un lot R7** — sortir les view-models et découper `_body` en sous-widgets ;
+2. **réviser le critère** — une page de ~600 lignes dont l'essentiel est du rendu
+   déclaratif n'est plus le god-object de départ.
+
+**Recommandation : la voie 2.** Le mal qu'on soignait était la **propriété de
+l'état**, pas le nombre de lignes. Les invariants d'argent sont désormais portés
+par des objets qui les font respecter, et éprouvés par 62 tests unitaires
+instantanés là où il fallait monter un écran. Le décompte de lignes était un
+symptôme, pas la maladie.
 
 ## 7. Hors périmètre
 
