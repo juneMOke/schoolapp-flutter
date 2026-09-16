@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
-import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
@@ -24,6 +23,7 @@ import 'package:school_app_flutter/features/finance/presentation/helpers/student
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_entry.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_collect_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payer_form_controller.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
@@ -386,9 +386,6 @@ class _FacturationCreatePaymentViewState
     }
   }
 
-  String _formatWithCurrency(int cents, String currency) =>
-      formatMonetaryAmountWithCurrency(amount: cents / 100, currency: currency);
-
   void _onToggle(FacturationChargeEntry entry, bool value) {
     setState(() {
       entry.selected = value;
@@ -694,10 +691,6 @@ class _FacturationCreatePaymentViewState
   MoneyBag _tenderBag(TenderSettlement settlement) =>
       settlement.tenderBag(_lines(settlement));
 
-  /// Un total rendu sur une ligne — les devises séparées, jamais sommées.
-  String _bagLabel(MoneyBag bag) =>
-      bag.entries.map(MoneyFormat.format).join(' · ');
-
   /// Vrai quand au moins une ligne convertit : c'est ce qui décide d'annoncer
   /// le perçu en tête de la barre.
   ///
@@ -737,30 +730,6 @@ class _FacturationCreatePaymentViewState
     return pairs;
   }
 
-  /// Le taux de cette ligne, rendu « 2 800 FC / \$ ».
-  String? _lineRateLabel(
-    TenderSettlement settlement,
-    FacturationChargeEntry entry,
-  ) {
-    final rate = _lineOf(settlement, entry).rate;
-    if (rate == null) return null;
-    return '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
-        '${MoneyFormat.symbolOf(rate.base)}';
-  }
-
-  /// Ce qui repart avec le parent sur cette ligne, ou `null`.
-  String? _lineChangeLabel(
-    TenderSettlement settlement,
-    FacturationChargeEntry entry,
-    AppLocalizations l10n,
-  ) {
-    final line = _lineOf(settlement, entry);
-    if (line.changeCents <= 0) return null;
-    return l10n.facturationCreatePaymentChangeDue(
-      _formatWithCurrency(line.changeCents, line.tenderCurrency),
-    );
-  }
-
   /// Le récapitulatif à valider : une entrée par nature réglée, ses tranches
   /// dessous.
   ///
@@ -780,8 +749,11 @@ class _FacturationCreatePaymentViewState
                   l10n,
                   schoolTitle: widget.sectionTitles.titleOf(group.feeCode),
                 ),
-          amount: _formatWithCurrency(group.allocatedCents, group.currency),
-          derivedAmount: _groupTenderLabel(settlement, group),
+          amount: moneyLabel(group.allocatedCents, group.currency),
+          derivedAmount: tenderLabel(
+            _groupTenderCents(settlement, group),
+            group.effectiveTenderCurrency,
+          ),
           items: group.isSingleTranche
               ? const []
               : [
@@ -789,26 +761,17 @@ class _FacturationCreatePaymentViewState
                     if (tranche.effectiveCents > 0)
                       FacturationConfirmAllocationItem(
                         label: chargeDesignation(tranche.charge, l10n),
-                        amount: _formatWithCurrency(
+                        amount: moneyLabel(
                           tranche.effectiveCents,
                           tranche.charge.currency,
                         ),
-                        derivedAmount: _tenderLabelOf(settlement, tranche),
+                        derivedAmount: tenderLabelOf(
+                          _lineOf(settlement, tranche),
+                        ),
                       ),
                 ],
         ),
   ];
-
-  /// Ce qu'une nature fait entrer dans le tiroir, rendu — `null` sans
-  /// conversion.
-  String? _groupTenderLabel(
-    TenderSettlement settlement,
-    FacturationChargeGroupEntry group,
-  ) {
-    final kept = _groupTenderCents(settlement, group);
-    if (kept <= 0) return null;
-    return _formatWithCurrency(kept, group.effectiveTenderCurrency);
-  }
 
   /// Ce que le tiroir conserve pour cette nature : la somme de ce que ses
   /// tranches y font entrer — donc exactement ce que `tendersFor` agrégera.
@@ -839,9 +802,7 @@ class _FacturationCreatePaymentViewState
       group.currency,
       group.effectiveTenderCurrency,
     );
-    if (rate == null) return null;
-    return '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
-        '${MoneyFormat.symbolOf(rate.base)}';
+    return rate == null ? null : rateLabel(rate);
   }
 
   /// Ce qui repart avec le parent sur cette nature, ou `null`.
@@ -856,10 +817,10 @@ class _FacturationCreatePaymentViewState
     AppLocalizations l10n,
   ) {
     if (!group.isConverted || !group.tenderIsSource) return null;
-    final change = group.tenderedCents - _groupTenderCents(settlement, group);
-    if (change <= 0) return null;
-    return l10n.facturationCreatePaymentChangeDue(
-      _formatWithCurrency(change, group.effectiveTenderCurrency),
+    return changeLabel(
+      group.tenderedCents - _groupTenderCents(settlement, group),
+      group.effectiveTenderCurrency,
+      l10n,
     );
   }
 
@@ -892,31 +853,6 @@ class _FacturationCreatePaymentViewState
     );
   }
 
-  /// Le taux du versement, rendu — `null` dès qu'il y en a plusieurs.
-  ///
-  /// La popin valide UN montant : y poser deux taux les ferait lire comme un
-  /// seul. Chaque ligne porte le sien, là où il s'applique.
-  String? _singleRateLabel(TenderSettlement settlement) {
-    final rates = <String>{
-      for (final line in _lines(settlement))
-        if (line.rate case final rate?)
-          '${rate.formatted()} ${MoneyFormat.symbolOf(rate.quote)} / '
-              '${MoneyFormat.symbolOf(rate.base)}',
-    };
-    return rates.length == 1 ? rates.single : null;
-  }
-
-  /// Ce qu'une ligne fait entrer dans le tiroir, rendu — `null` quand elle ne
-  /// convertit pas.
-  String? _tenderLabelOf(
-    TenderSettlement settlement,
-    FacturationChargeEntry entry,
-  ) {
-    final line = _lineOf(settlement, entry);
-    if (!line.isConverted || line.tenderCents <= 0) return null;
-    return _formatWithCurrency(line.tenderCents, line.tenderCurrency);
-  }
-
   /// Ouvre l'annuaire local des payeurs et reprend celui qui en revient.
   Future<void> _pickPayer() async {
     final payer = await showFacturationPayerSearchDialog(
@@ -927,24 +863,6 @@ class _FacturationCreatePaymentViewState
     _payer.applyPayer(payer);
   }
 
-  String _studentFullName(AppLocalizations l10n) {
-    final name = [
-      widget.intent.lastName,
-      widget.intent.surname,
-      widget.intent.firstName,
-    ].map((v) => v.trim()).where((v) => v.isNotEmpty).join(' ');
-    return name.isEmpty ? l10n.facturationDetailUnknownValue : name;
-  }
-
-  /// Classe affichée dans le sur-titre « Encaissement · {classe} », comme sur
-  /// la fiche d'où l'on vient.
-  String _classLabel(AppLocalizations l10n) {
-    final value = widget.intent.levelName.trim().isNotEmpty
-        ? widget.intent.levelName.trim()
-        : widget.intent.levelGroupName.trim();
-    return value.isEmpty ? l10n.facturationDetailUnknownValue : value;
-  }
-
   Future<void> _onCollect(AppLocalizations l10n) async {
     final settlement = _settlement();
     final bag = _settledBag(settlement);
@@ -952,8 +870,8 @@ class _FacturationCreatePaymentViewState
     // Ce qu'on valide est ce que le parent va poser sur le comptoir : la popin
     // annonce le PERÇU, et détaille dessous ce que ce versement éteint.
     final totalLabel = converted
-        ? _bagLabel(_tenderBag(settlement))
-        : _bagLabel(bag);
+        ? bagLabel(_tenderBag(settlement))
+        : bagLabel(bag);
     // Un versement mixte est un cas NOMINAL depuis que le contrat porte
     // `amounts[]` : c'est un acte de guichet, donc un versement, un reçu.
     // Reste à refuser le versement vide — rien à encaisser n'est pas un
@@ -1012,8 +930,8 @@ class _FacturationCreatePaymentViewState
       // Le taux, sous le montant validé — et seulement quand il y en a UN à
       // dire. Deux taux sur une ligne se liraient comme un seul, et le parent
       // conteste au guichet le chiffre qu'il a lu.
-      rateLabel: _singleRateLabel(settlement),
-      studentName: _studentFullName(l10n),
+      rateLabel: singleRateLabel(_lines(settlement)),
+      studentName: studentFullName(widget.intent, l10n),
       // `null` quand rien n'a été saisi : le récapitulatif escamote alors son
       // bloc payeur au lieu d'y afficher un tiret. On valide ce qu'on a saisi,
       // et un tiret dans un récapitulatif de validation se lit comme une donnée
@@ -1073,9 +991,10 @@ class _FacturationCreatePaymentViewState
       },
       child: AppPageBackground(
         appBar: StudentDetailAppBar(
-          fullName: _studentFullName(l10n),
+          fullName: studentFullName(widget.intent, l10n),
           eyebrow:
-              '${l10n.facturationCreatePaymentEyebrow} · ${_classLabel(l10n)}',
+              '${l10n.facturationCreatePaymentEyebrow} · '
+              '${classLabel(widget.intent, l10n)}',
           firstName: widget.intent.firstName,
           lastName: widget.intent.lastName,
           fallbackRoute: AppRoutesNames.facturationDetailPath(
@@ -1091,9 +1010,9 @@ class _FacturationCreatePaymentViewState
         bottomNavigationBar: widget.intent.hasDisplayContext
             ? FacturationCollectActionBar(
                 totalLabel: converted
-                    ? _bagLabel(_tenderBag(settlement))
-                    : _bagLabel(allocations),
-                settledLabel: converted ? _bagLabel(allocations) : null,
+                    ? bagLabel(_tenderBag(settlement))
+                    : bagLabel(allocations),
+                settledLabel: converted ? bagLabel(allocations) : null,
                 onCollect: canCollect ? () => _onCollect(l10n) : null,
               )
             : null,
@@ -1199,8 +1118,9 @@ class _FacturationCreatePaymentViewState
               : _onTenderCurrencyChanged,
           onAllocationEdited: _collectInFlight ? null : _onAllocationEdited,
           onTenderEdited: _collectInFlight ? null : _onTenderEdited,
-          rateLabelOf: (entry) => _lineRateLabel(settlement, entry),
-          changeLabelOf: (entry) => _lineChangeLabel(settlement, entry, l10n),
+          rateLabelOf: (entry) => lineRateLabel(_lineOf(settlement, entry)),
+          changeLabelOf: (entry) =>
+              lineChangeLabel(_lineOf(settlement, entry), l10n),
         ),
       ],
     );

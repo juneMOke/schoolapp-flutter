@@ -56,7 +56,7 @@ test, aucun compilateur ne pouvait le signaler.
 
 | Fichier | Responsabilité | ~lignes |
 |---|---|---|
-| `helpers/facturation_collect_labels.dart` | formatage pur : libellés de taux, de monnaie à rendre, view-models du récapitulatif | ~200 |
+| `helpers/facturation_collect_labels.dart` ✅ | formatage pur : montants, taux, monnaie à rendre, identité de l'élève | **125** (livré) |
 | `helpers/facturation_rate_board.dart` | le tableau des taux corrigés à la main (contrôleurs, amorces, édition) | ~90 |
 | `helpers/facturation_settlement_reads.dart` | lectures pures `(règlement, entrées) → chiffres` | ~120 |
 | `helpers/facturation_collect_form_model.dart` | **l'état et les gestes** : entrées, natures, jour désigné, dérivations | ~280 |
@@ -100,8 +100,8 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 
 | # | Lot | Nature | Risque |
 |---|---|---|---|
-| **R0** | Mesurer la couverture réelle de la page, combler les gestes non couverts | filet | nul |
-| **R1** | Sortir les libellés et view-models | déplacement pur | nul |
+| **R0** ✅ | Mesurer la couverture réelle de la page, combler les gestes non couverts | filet | nul |
+| **R1** ✅ | Sortir les libellés | déplacement pur | nul |
 | **R2** | **Rendre l'invariant inviolable** | changement d'API | faible |
 | **R3** | Sortir le tableau des taux | déplacement | faible |
 | **R4** | Sortir les lectures pures | déplacement | faible |
@@ -114,6 +114,67 @@ Ce n'est pas une formalité. On ne *suppose* pas que 57 cas couvrent les 28
 méthodes qui vont bouger : on mesure (`flutter test --coverage`), on lit les
 lignes non couvertes, on comble les gestes nus. **Aucune ligne de production
 n'est touchée dans ce lot.**
+
+#### ✅ Résultat — livré le 2026-09-16, commit `f5d3db2d`
+
+| | Départ | Fin de R0 |
+|---|---|---|
+| Couverture de la page | 399/480 | **445/480** |
+| Lignes nues | 81 | **35** |
+| **Famille B** (le code qui déménage) | ~34 | **0** |
+| Suite `test/features/finance` | — | **1 031 verts** |
+
+Le pourcentage global n'a jamais été le critère : ce qui comptait est que les
+lignes nues restantes soient toutes de la **plomberie qui reste en place** —
+31 lignes de famille A (le corps de `Page.build`, que nul test ne monte, et les
+branches d'erreur) et 4 replis de libellés. **Aucune ne bouge pendant le
+chantier.**
+
+Ce qui était nu et ne l'est plus : « Tout solder » sur une tranche comme sur une
+nature (deux gestes entiers) ; l'écrêtage aux deux niveaux ; la lecture d'un taux
+corrigé à la main et la fermeture d'une boîte de taux intacte ; les deux branches
+de `_onPaidDayChanged` où le comptoir est source.
+
+614 lignes de tests neufs, **zéro ligne de production**.
+
+### R1 — les libellés
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| Page | 1 208 → **1 128** lignes (28 insertions, 108 suppressions) |
+| Bibliothèque `facturation_collect_labels.dart` | **125 lignes** |
+| Tests unitaires | **199 lignes, 19 cas**, instantanés |
+| Suite `test/features/finance` | **1 050 verts** |
+| **Règle d'or** | ✅ **aucun fichier de test existant modifié** |
+
+**L'estimation de ~200 lignes retirées était fausse** : la page n'en perd que 80.
+Deux méthodes sont restées, réduites à leur garde — `_groupRateLabel` et
+`_groupChangeLabel` portent `isConverted` / `tenderIsSource` et un calcul de
+cents, qui ne sont pas du formatage — et plusieurs sites d'appel se sont
+allongés d'une ligne.
+
+Le gain est ailleurs, et il vaut mieux que le décompte :
+
+- **trois duplications supprimées.** L'expression du taux était écrite **trois
+  fois à l'identique** (ligne, nature, récapitulatif) ; la monnaie à rendre et ce
+  que le tiroir conserve, deux fois chacun. Trois écritures d'un même nombre qui
+  divergent, c'est le parent qui recompte au guichet et ne retombe pas sur son
+  total.
+- **dix comportements passés du widget à l'unitaire.** Les mêmes règles coûtaient
+  267 lignes de test d'écran ; elles tiennent en 19 tests qui s'exécutent en
+  moins d'une seconde. C'est la thèse du chantier, vérifiée sur le lot le moins
+  risqué.
+
+#### ⚠️ Rectification du découpage
+
+Le classement initial rangeait en famille C deux méthodes qui **ne sont pas
+pures**. Elles n'ont donc pas bougé, et le plan est corrigé :
+
+- `_ratePairs` fabrique des contrôleurs et des closures `setState` → elle
+  appartient au **tableau des taux (R3)** ;
+- `_confirmGroups` parcourt `_groups` et lit `widget.sectionTitles` → **R4/R5**.
 
 ### R2 — en deuxième, et non à la fin
 
@@ -187,6 +248,25 @@ revue adversariale**, dans cet ordre. La leçon a été payée sur le lot préc�
 - **`SchoolTime` code UTC+1 en dur** alors que le serveur déclare son fuseau dans
   la réponse Caisse.
 
+### 🔴 Trouvé par R0 — « affiché ≠ soumis » sur le taux corrigé
+
+Une correction de taux atteint le règlement — donc ce qui partira en base via
+`tendersFor` — **mais pas le montant affiché au comptoir**. Trois faits vérifiés
+l'établissent, et ils se contredisent :
+
+1. le champ porte bien la correction saisie ;
+2. `overriddenRates` la contient — prouvé indépendamment par l'avertissement de
+   divergence, qui ne s'affiche **que** par elle ;
+3. `rateFor`, `fromSettled` et `fromTender` la consultent (lu en source) ;
+4. et pourtant le comptaffiché reste au taux du référentiel, même après un geste
+   censé le re-dériver.
+
+Préexistant, hors périmètre du chantier. `..._rate_override_test.dart` **cloue le
+comportement observé** avec un commentaire disant que ce n'est pas le
+comportement souhaitable : le jour où ce sera traité, ce test échouera, et c'est
+ce qu'on lui demande. Mérite son propre ticket — il touche l'argent que le
+caissier lit.
+
 ---
 
 ## Annexe — inventaire de départ
@@ -221,8 +301,14 @@ Les 56 déclarations de la page, par famille. Numéros relevés à `e67ba6c2`.
 
 ### C — Formatage pur (→ libellés)
 
-`389` `_formatWithCurrency` · `698` `_bagLabel` · `710` `_ratePairs` ·
-`741` `_lineRateLabel` · `752` `_lineChangeLabel` · `769` `_confirmGroups` ·
-`804` `_groupTenderLabel` · `833` `_groupRateLabel` · `853` `_groupChangeLabel` ·
-`899` `_singleRateLabel` · `911` `_tenderLabelOf` · `930` `_studentFullName` ·
-`941` `_classLabel`
+**Sorties en R1** : `_formatWithCurrency` · `_bagLabel` · `_lineRateLabel` ·
+`_lineChangeLabel` · `_groupTenderLabel` · `_singleRateLabel` ·
+`_tenderLabelOf` · `_studentFullName` · `_classLabel`.
+
+**Restées, réduites à leur garde** : `_groupRateLabel` et `_groupChangeLabel` —
+elles portent `isConverted` / `tenderIsSource` et un calcul de cents, qui sont de
+l'état, pas du formatage.
+
+**Reclassées** (elles n'étaient pas pures) : `_ratePairs` → **R3** (contrôleurs
+et closures `setState`) ; `_confirmGroups` → **R4/R5** (parcourt `_groups`, lit
+`widget.sectionTitles`).
