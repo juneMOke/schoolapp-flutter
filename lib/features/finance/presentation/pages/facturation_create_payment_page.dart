@@ -433,7 +433,7 @@ class _FacturationCreatePaymentViewState
 
   void _onGroupToggle(FacturationChargeGroupEntry group, bool value) {
     setState(() {
-      group.groupIsSource = true;
+      group.groupCommands();
       if (!value) {
         group.clear();
         return;
@@ -448,7 +448,7 @@ class _FacturationCreatePaymentViewState
 
   void _onGroupSettleAll(FacturationChargeGroupEntry group) {
     setState(() {
-      group.groupIsSource = true;
+      group.groupCommands();
       group.controller.text = formatPlainAmount(group.capInCents);
       group.applyCascade(group.controller.text);
       _reflectGroupTender(group);
@@ -458,8 +458,7 @@ class _FacturationCreatePaymentViewState
   /// Le caissier a tapé le montant de la nature : la cascade écrit les tranches.
   void _onGroupAmountEdited(FacturationChargeGroupEntry group) {
     setState(() {
-      group.groupIsSource = true;
-      group.tenderIsSource = false;
+      group.amountBecomesSource();
       group.applyCascade(group.controller.text);
       _reflectGroupTender(group);
     });
@@ -473,8 +472,7 @@ class _FacturationCreatePaymentViewState
   /// sur ce qu'il a posé.
   void _onGroupTenderEdited(FacturationChargeGroupEntry group) {
     setState(() {
-      group.groupIsSource = true;
-      group.tenderIsSource = true;
+      group.tenderBecomesSource();
       final settlement = _settlement();
       final line = settlement.fromTender(
         settledCurrency: group.currency,
@@ -498,7 +496,7 @@ class _FacturationCreatePaymentViewState
   ) {
     setState(() {
       group.setTenderCurrency(currency);
-      group.tenderIsSource = false;
+      group.tenderStopsBeingSource();
       _reflectGroupTender(group);
     });
   }
@@ -632,14 +630,10 @@ class _FacturationCreatePaymentViewState
   void _handOverToTranches(FacturationChargeEntry entry) {
     final group = _groupOf(entry);
     if (group == null) return;
-    group.groupIsSource = false;
-    // ⚠️ La nature cesse d'être l'unité de règlement : son comptoir n'est donc
-    // plus une SOURCE, il redevient un reflet. Sans cette ligne, l'état
-    // « groupe non source, mais comptoir de groupe source » restait stable et
-    // inatteignable par l'écran — le champ qui aurait pu le défaire est masqué
-    // dès que `groupIsSource` tombe. Tout rejeu de `_onGroupTenderEdited`
-    // écrasait alors la ventilation que le caissier venait de saisir à la main.
-    group.tenderIsSource = false;
+    // Les deux drapeaux tombent ensemble, et c'est désormais la seule façon de
+    // les poser : l'état « groupe non source, mais comptoir de groupe source »
+    // n'est plus exprimable (cf. `handsOverToTranches`).
+    group.handsOverToTranches();
     group.reflectFromTranches();
     _reflectGroupTender(group);
   }

@@ -208,7 +208,7 @@ void main() {
       final group = groupOf([charge(id: '1'), charge(id: '2')]);
 
       // Le caissier a déplié et tapé sur la deuxième tranche seulement.
-      group.groupIsSource = false;
+      group.handsOverToTranches();
       group.tranches[1].selected = true;
       group.tranches[1].controller.text = '420';
       group.reflectFromTranches();
@@ -220,7 +220,7 @@ void main() {
     test('la somme reflétée est bornée au restant, comme l\'imputation', () {
       final group = groupOf([charge(id: '1')]);
 
-      group.groupIsSource = false;
+      group.handsOverToTranches();
       group.tranches.single.selected = true;
       group.tranches.single.controller.text = '9999';
       group.reflectFromTranches();
@@ -232,10 +232,55 @@ void main() {
     test('rien de réglé : le champ du groupe reste vide, pas « 0 »', () {
       final group = groupOf([charge(id: '1')]);
 
-      group.groupIsSource = false;
+      group.handsOverToTranches();
       group.reflectFromTranches();
 
       expect(group.controller.text, isEmpty);
+    });
+
+    test('rendre la main aux tranches ÉTEINT aussi le comptoir source', () {
+      // L'invariant du lot R2, et il a coûté de l'argent avant d'être posé :
+      // une nature qui rend la main n'a plus de comptoir « source ». L'état
+      // contraire était stable et invisible — le champ qui aurait pu le défaire
+      // disparaît de l'écran dès que `groupIsSource` tombe — et tout rejeu de la
+      // cascade écrasait la ventilation saisie à la main.
+      //
+      // Ce test échoue si l'on retire la remise à zéro dans
+      // `handsOverToTranches`.
+      final group = groupOf([charge(id: '1'), charge(id: '2')]);
+      group.tenderBecomesSource();
+      expect(group.tenderIsSource, isTrue);
+
+      group.handsOverToTranches();
+
+      expect(group.groupIsSource, isFalse);
+      expect(group.tenderIsSource, isFalse);
+    });
+
+    test('aucun geste ne laisse « non source » avec un comptoir source', () {
+      // La garde par l'API : on rejoue les cinq bascules et on vérifie que
+      // l'état coupable ne se produit jamais.
+      final group = groupOf([charge(id: '1'), charge(id: '2')]);
+
+      void interdit() => expect(
+        group.groupIsSource || !group.tenderIsSource,
+        isTrue,
+        reason: 'comptoir source alors que les tranches commandent',
+      );
+
+      for (final geste in <void Function()>[
+        group.groupCommands,
+        group.amountBecomesSource,
+        group.tenderBecomesSource,
+        group.tenderStopsBeingSource,
+        group.handsOverToTranches,
+        group.tenderBecomesSource,
+        group.handsOverToTranches,
+        group.groupCommands,
+      ]) {
+        geste();
+        interdit();
+      }
     });
   });
 

@@ -102,7 +102,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 |---|---|---|---|
 | **R0** ✅ | Mesurer la couverture réelle de la page, combler les gestes non couverts | filet | nul |
 | **R1** ✅ | Sortir les libellés | déplacement pur | nul |
-| **R2** | **Rendre l'invariant inviolable** | changement d'API | faible |
+| **R2** ✅ | **Rendre l'invariant inviolable** | changement d'API | faible |
 | **R3** | Sortir le tableau des taux | déplacement | faible |
 | **R4** | Sortir les lectures pures | déplacement | faible |
 | **R5** | Sortir l'état et les gestes | déplacement | **le seul délicat** |
@@ -186,6 +186,45 @@ Le compilateur désigne alors les 21 sites.
 Ces sites rebougeront en R5 : c'est mécanique et guidé par le compilateur. Faire
 l'inverse ferait porter le lot le plus risqué du chantier par un invariant encore
 mou.
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` **projet entier** | ✅ clean |
+| Suite `test/features/finance` | **1 052 verts** (+2 tests d'invariant) |
+| Fichiers touchés | 4, dont **exactement les deux** fichiers de test annoncés |
+
+Les deux drapeaux sont privés, exposés en lecture seule, et ne se posent plus que
+par cinq gestes nommés par l'intention : `groupCommands()`,
+`amountBecomesSource()`, `tenderBecomesSource()`, `tenderStopsBeingSource()`,
+`handsOverToTranches()`. **Aucun** ne laisse « la nature ne commande plus » avec
+« son comptoir est encore source » : l'état qui a coûté une ventilation de
+caissier ne s'écrit plus.
+
+L'analyse a porté sur **tout le projet**, et non sur les fichiers touchés :
+privatiser un champ peut casser n'importe quel appelant, y compris un qu'un grep
+manquerait.
+
+C'est le **seul lot du chantier où des tests existants bougent** — l'API change.
+Deux fichiers, annoncés avant l'écriture ; les 1 048 autres passent sans avoir
+été touchés.
+
+#### Preuve par mutation
+
+La garde retirée de `handsOverToTranches()`, **deux tests tombent** : « rendre la
+main aux tranches ÉTEINT aussi le comptoir source » et « aucun geste ne laisse
+non source avec un comptoir source ». La garde est porteuse, pas décorative.
+
+⚠️ **J'en attendais trois.** Le test de widget de R0 — celui qui reconstitue le
+parcours du caissier — ne tombe PAS, et c'est instructif : `_onPaidDayChanged`
+porte sa **propre** garde (`groupIsSource && tenderIsSource`), posée en R0. Avec
+la mutation, `groupIsSource` vaut faux, la condition est fausse, et la cascade
+n'est pas rejouée.
+
+Les deux protections sont donc **redondantes par construction**, et chacune tient
+seule : le test unitaire éprouve la garde de l'entité, le test de widget celle de
+la page. Les garder toutes les deux est délibéré — c'est un chemin d'argent.
 
 ---
 

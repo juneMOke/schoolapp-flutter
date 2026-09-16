@@ -190,7 +190,7 @@ void main() {
       // Deux vérités pour un montant, c'est un montant qu'on ne sait plus lire.
       final group = groupOf([charge(id: '1'), charge(id: '2')]);
       group.applyCascade('600');
-      group.groupIsSource = false;
+      group.handsOverToTranches();
 
       await pump(tester, group);
 
