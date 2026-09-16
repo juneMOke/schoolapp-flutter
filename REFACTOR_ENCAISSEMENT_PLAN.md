@@ -1,12 +1,12 @@
 # Refonte interne de la page d'encaissement — plan de chantier
 
 > Rédigé le 2026-09-16 sur `feat/editable-payment-date` (base `origin/main` `b82d7fc6`,
-> relevés au commit `e67ba6c2`). Source : lecture du code, pas d'une spec — le
+> relevés au commit `274c1cd3`). Source : lecture du code, pas d'une spec — le
 > chantier naît d'un défaut d'argent trouvé en revue adversariale sur le lot
 > « date d'encaissement saisissable », dont la racine était structurelle.
 >
 > ⚠️ **Les numéros de ligne de l'annexe dérivent dès le lot R1.** Ils datent de
-> `e67ba6c2` et servent à cadrer l'effort, pas à guider un `sed`.
+> `274c1cd3` et servent à cadrer l'effort, pas à guider un `sed`.
 
 ---
 
@@ -116,7 +116,7 @@ méthodes qui vont bouger : on mesure (`flutter test --coverage`), on lit les
 lignes non couvertes, on comble les gestes nus. **Aucune ligne de production
 n'est touchée dans ce lot.**
 
-#### ✅ Résultat — livré le 2026-09-16, commit `f5d3db2d`
+#### ✅ Résultat — livré le 2026-09-16, commit `93b82020`
 
 | | Départ | Fin de R0 |
 |---|---|---|
@@ -541,7 +541,7 @@ caissier lit.
 
 ## Annexe — inventaire de départ
 
-Les 56 déclarations de la page, par famille. Numéros relevés à `e67ba6c2`.
+Les 56 déclarations de la page, par famille. Numéros relevés à `274c1cd3`.
 
 ### A — Plomberie widget (reste dans la page)
 
