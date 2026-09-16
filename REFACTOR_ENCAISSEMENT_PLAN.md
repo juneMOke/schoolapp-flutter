@@ -58,7 +58,7 @@ test, aucun compilateur ne pouvait le signaler.
 |---|---|---|
 | `helpers/facturation_collect_labels.dart` ✅ | formatage pur : montants, taux, monnaie à rendre, identité de l'élève | **125** (livré) |
 | `helpers/facturation_rate_board.dart` ✅ | le tableau des taux corrigés à la main (contrôleurs, amorces, édition) | **119** (livré) |
-| `helpers/facturation_settlement_reads.dart` | lectures pures `(règlement, entrées) → chiffres` | ~120 |
+| `helpers/facturation_settlement_reads.dart` ✅ | lectures pures `(règlement, entrées) → chiffres` | **150** (livré) |
 | `helpers/facturation_collect_form_model.dart` | **l'état et les gestes** : entrées, natures, jour désigné, dérivations | ~280 |
 | `pages/facturation_create_payment_page.dart` | fournisseurs, `build`, `_body`, navigation, cycle de vie | **~300** |
 
@@ -104,7 +104,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 | **R1** ✅ | Sortir les libellés | déplacement pur | nul |
 | **R2** ✅ | **Rendre l'invariant inviolable** | changement d'API | faible |
 | **R3** ✅ | Sortir le tableau des taux | déplacement | faible |
-| **R4** | Sortir les lectures pures | déplacement | faible |
+| **R4** ✅ | Sortir les lectures pures | déplacement | faible |
 | **R5** | Sortir l'état et les gestes | déplacement | **le seul délicat** |
 | **R6** | `_onCollect` → `model.buildRequest()` ; la page ne garde que la navigation | déplacement | faible |
 
@@ -262,6 +262,42 @@ déplacement, et y glisser un changement de comportement rendrait la preuve
 inutilisable — on ne saurait plus si un test rouge vient du déplacement ou de la
 correction. C'est la règle d'or, et elle vaut surtout quand la tentation est
 grande.
+
+### R4 — les lectures
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` **projet entier** | ✅ clean |
+| Suite `test/features/finance` | **1 082 verts** (+16) |
+| Page | 1 056 → **948** lignes |
+| `facturation_settlement_reads.dart` | **150 lignes**, 16 tests unitaires |
+| **Règle d'or** | ✅ **strictement** tenue |
+
+**Le plus gros lot du chantier** : −108 lignes d'un coup, et trois fichiers
+touchés dont deux neufs.
+
+Huit lectures ont quitté la classe `State` : `lineOf` et sa branche d'écrêtage,
+`linesOf`, les deux sacs de devises, `hasConversion`, `groupTenderCents`, et les
+deux gardes du CTA. Elles ne touchaient à rien — on leur donne un règlement et
+des lignes de saisie, elles rendent un chiffre.
+
+#### Une optimisation écartée, délibérément
+
+Ces fonctions **recalculent les lignes à chaque appel** — trois fois par rendu.
+Les faire prendre des lignes déjà calculées aurait été facile et tentant.
+
+Ce n'a pas été fait : ce serait un changement de comportement glissé dans un lot
+de déplacement, et l'on ne saurait plus attribuer un test rouge. L'inefficacité
+est préservée **à l'identique**, et elle pourra se traiter seule, dans un lot qui
+ne fait que cela.
+
+#### Rectification du découpage (suite)
+
+Comme en R1, deux fonctions n'étaient pas pures et ont été corrigées **avant**
+d'écrire plutôt que découvertes après : `_lines` et `_hasNoConvertibleCharge`
+parcourent `_entries`. Elles reçoivent désormais les entrées en argument.
 
 ## 5. Les trois pièges, repérés en lisant le code
 
