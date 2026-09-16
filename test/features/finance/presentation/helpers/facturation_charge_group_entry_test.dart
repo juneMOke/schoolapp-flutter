@@ -336,7 +336,7 @@ void main() {
       // Leur montant imputé est la source, leur comptoir en découle : sinon la
       // page recalculerait le champ qui a le curseur.
       final group = groupOf([charge(id: '1'), charge(id: '2')]);
-      group.tranches.first.tenderIsSource = true;
+      group.tranches.first.tenderBecomesSource();
 
       group.setTenderCurrency('USD');
 

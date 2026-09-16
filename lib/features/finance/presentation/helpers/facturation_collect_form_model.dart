@@ -162,7 +162,7 @@ class FacturationCollectFormModel {
   void toggle(FacturationChargeEntry entry, bool value) {
     entry.selected = value;
     if (value) {
-      entry.tenderIsSource = false;
+      entry.tenderStopsBeingSource();
       entry.writeDerived(
         entry.controller,
         formatPlainAmount(entry.remainingInCents),
@@ -171,13 +171,13 @@ class FacturationCollectFormModel {
     } else {
       entry.controller.clear();
       entry.tenderController.clear();
-      entry.tenderIsSource = false;
+      entry.tenderStopsBeingSource();
     }
     handOverToTranches(entry);
   }
 
   void settleAll(FacturationChargeEntry entry) {
-    entry.tenderIsSource = false;
+    entry.tenderStopsBeingSource();
     entry.writeDerived(
       entry.controller,
       formatPlainAmount(entry.remainingInCents),
@@ -187,7 +187,7 @@ class FacturationCollectFormModel {
 
   /// Le caissier a tapé l'imputation : le comptoir en découle.
   void allocationEdited(FacturationChargeEntry entry) {
-    entry.tenderIsSource = false;
+    entry.tenderStopsBeingSource();
     reflectTender(entry);
     // La source bascule : le caissier a désigné UNE tranche, le montant de la
     // nature n'est plus qu'un total affiché. Sans cette bascule, la prochaine
@@ -199,7 +199,7 @@ class FacturationCollectFormModel {
   /// découle, vers le bas.
   void tenderEdited(FacturationChargeEntry entry) {
     if (!entry.isConverted) return;
-    entry.tenderIsSource = true;
+    entry.tenderBecomesSource();
     final line = lineOf(settlementOf(), entry);
     entry.writeDerived(entry.controller, formatPlainAmount(line.settledCents));
     handOverToTranches(entry);
@@ -212,7 +212,7 @@ class FacturationCollectFormModel {
   /// raison de bouger parce que le parent sort d'autres billets.
   void tenderCurrencyChanged(FacturationChargeEntry entry, String currency) {
     entry.tenderCurrency = currency == entry.charge.currency ? null : currency;
-    entry.tenderIsSource = false;
+    entry.tenderStopsBeingSource();
     reflectTender(entry);
     // La devise d'une tranche est un geste ciblé : la nature cesse d'être
     // l'unité de règlement, et son sélecteur disparaît.

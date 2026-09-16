@@ -154,7 +154,7 @@ class FacturationChargeGroupEntry {
       tranche.tenderCurrency = _tenderCurrency;
       // La tranche ne pilote jamais la conversion quand le groupe commande :
       // son montant imputé est la source, son comptoir en découle.
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
     }
     if (_tenderCurrency == null) tenderController.clear();
   }
@@ -249,7 +249,7 @@ class FacturationChargeGroupEntry {
       // à zéro : une imputation vide ne part pas au serveur, et une case cochée
       // sans montant se lit comme un oubli de saisie.
       tranche.selected = allocated > 0;
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
       tranche.writeDerived(
         tranche.controller,
         allocated > 0 ? formatPlainAmount(allocated) : '',
@@ -268,7 +268,7 @@ class FacturationChargeGroupEntry {
       tranche.selected = false;
       tranche.controller.clear();
       tranche.tenderController.clear();
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
     }
   }
 

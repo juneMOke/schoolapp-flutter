@@ -31,12 +31,29 @@ class FacturationChargeEntry {
   String? tenderCurrency;
 
   /// Le dernier champ édité est celui du comptoir.
-  bool tenderIsSource = false;
+  ///
+  /// **En lecture seule au-dehors.** Le drapeau jumeau de la nature a coûté de
+  /// l'argent parce qu'un appelant pouvait le laisser à vrai sans le dire ; R2
+  /// l'a rendu inexprimable là-haut, R7 applique ici la même règle. La valeur
+  /// ne se pose plus, elle se nomme.
+  bool get tenderIsSource => _tenderIsSource;
+  bool _tenderIsSource = false;
 
   FacturationChargeEntry(this.charge)
     : controller = TextEditingController(),
       tenderController = TextEditingController(),
       selected = false;
+
+  /// Le caissier vient de taper le comptoir : c'est lui qui commande, et
+  /// l'imputation se déduit vers le bas.
+  void tenderBecomesSource() => _tenderIsSource = true;
+
+  /// L'imputation redevient la source, le comptoir en découle.
+  ///
+  /// C'est l'état au repos, et le seul chemin de retour : toute écriture de
+  /// l'imputé — saisie, solde, cascade de la nature, changement de devise —
+  /// passe par ici.
+  void tenderStopsBeingSource() => _tenderIsSource = false;
 
   int get remainingInCents => chargeRemainingInCents(charge);
 

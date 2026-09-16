@@ -107,6 +107,7 @@ Corollaire, et c'est le seul garde-fou qui ne mente pas :
 | **R4** ✅ | Sortir les lectures pures | déplacement | faible |
 | **R5** ✅ | Sortir l'état et les gestes | déplacement | **le seul délicat** |
 | **R6** ✅ | `_onCollect` → `model.buildDraft()` ; la page ne garde que la navigation | déplacement | faible |
+| **R7** ✅ | Privatiser le drapeau de source de la **tranche** | changement d'API | faible |
 
 ### R0 — le filet avant tout
 
@@ -358,6 +359,53 @@ et la cible globale, le motif est constant : **j'estime ce qui part, jamais ce
 qui reste ni les commentaires que j'ajoute en partant.** À retenir pour les
 prochains chantiers de ce dépôt.
 
+### R7 — le drapeau de la tranche
+
+#### ✅ Résultat — livré le 2026-09-16
+
+| | |
+|---|---|
+| `flutter analyze` (finance) | ✅ clean |
+| Suite `test/features/finance/presentation` | **662 verts** |
+| Page | **inchangée** — R7 ne la touche pas |
+| Preuve par mutation | **3 tests** tombent sur une transition, **4** sur l'autre |
+
+#### Ce lot n'était pas prévu — il naît d'une vérification de mémoire
+
+En consignant les leçons du chantier, j'ai écrit que les drapeaux de source
+« n'ont plus de setter public ». Puis j'ai vérifié les symboles dans le code au
+lieu de me fier à mon souvenir — et j'ai pris ma propre affirmation en défaut :
+**R2 n'avait privatisé que la nature.** `facturation_charge_entry.dart` portait
+toujours `bool tenderIsSource = false;` en champ public.
+
+#### Neuf sites d'écriture, dont trois hors du modèle
+
+L'inventaire complet en compte **neuf**, et non les six du modèle : la nature
+écrit elle aussi le drapeau de ses tranches, dans `setTenderCurrency`,
+`applyCascadeCents` et `clear`. S'en tenir aux six sites cités de mémoire aurait
+laissé le trou à moitié bouché.
+
+Un seul de ces neuf posait `true`. Une **paire** de transitions suffit donc, et
+elle reprend mot pour mot le vocabulaire de la nature —
+`tenderBecomesSource()` / `tenderStopsBeingSource()` — pour qu'un lecteur qui
+connaît un niveau lise l'autre sans rien réapprendre.
+
+#### Le coût, mesuré et non estimé
+
+`+18/−1` dans `facturation_charge_entry.dart`, plus neuf renommages de sites
+d'appel : le dépôt **grossit** d'une quinzaine de lignes. Comme R2, ce lot
+n'achète pas du volume, il achète une garantie — ce qui tenait à la discipline
+des appelants devient une propriété de l'objet.
+
+#### Quatre lignes de test modifiées, annoncées avant d'écrire
+
+`facturation_settlement_reads_test.dart` (3) et
+`facturation_charge_group_entry_test.dart` (1) installaient l'état par
+`..tenderIsSource = true` ; elles l'installent désormais par
+`..tenderBecomesSource()`. Aucun test ne change de **sens** : même état posé,
+même assertion. C'est le régime de R2 — un lot qui change l'API a le droit de
+toucher aux tests, à condition de le dire avant d'écrire.
+
 ## 5. Les trois pièges, repérés en lisant le code
 
 ### 🔴 P1 — Le modèle ne doit JAMAIS mémoriser les taux
@@ -404,16 +452,21 @@ revue adversariale**, dans cet ordre. La leçon a été payée sur le lot préc�
       page fait **689 lignes**, contre 1 208 au départ, et ce qui reste est du
       rendu ;
 - [x] **aucun fichier de test existant n'a été modifié** par un lot de
-      déplacement — avec deux nuances dites plutôt que tues : **R2** en a modifié
-      deux, parce qu'il changeait l'API (c'était annoncé avant d'écrire) ; **R6**
-      a modifié le test du modèle né en R5, de façon purement **additive**
-      (5 tests neufs), et non par adaptation à un comportement changé ;
+      déplacement — avec trois nuances dites plutôt que tues : **R2** en a
+      modifié deux, parce qu'il changeait l'API (c'était annoncé avant d'écrire) ;
+      **R6** a modifié le test du modèle né en R5, de façon purement **additive**
+      (5 tests neufs), et non par adaptation à un comportement changé ; **R7** a
+      modifié quatre lignes dans deux fichiers, au même titre que R2 et pour la
+      même raison — aucune des quatre ne change le sens de son test ;
 - [x] les quatre fichiers neufs ont leurs tests unitaires — **67 tests
       instantanés** : libellés (19), tableau des taux (14), lectures (16),
       modèle (18) ;
-- [x] les drapeaux de source sont privés, et un test échoue si l'on retire la
-      garde — **prouvé par mutation** : deux tests tombent, et l'on a découvert
-      au passage que la garde de page posée en R0 tient seule elle aussi.
+- [x] les drapeaux de source sont privés **aux deux niveaux** — la nature en R2,
+      la tranche en R7 — et un test échoue si l'on retire la garde : **prouvé par
+      mutation** dans les deux cas (R2 : deux tests tombent, et l'on a découvert
+      au passage que la garde de page posée en R0 tient seule elle aussi ; R7 :
+      trois tests sur une transition, quatre sur l'autre). Plus **aucune**
+      écriture directe d'un drapeau de source ne subsiste dans `lib/` ni `test/`.
 
 ### Ce que le chantier a réellement changé
 
@@ -445,7 +498,8 @@ reste ensuite n'est plus de la machine à états mais du **rendu** — `_body`,
 
 Deux voies :
 
-1. **un lot R7** — sortir les view-models et découper `_body` en sous-widgets ;
+1. **un lot R8** — sortir les view-models et découper `_body` en sous-widgets
+   (renuméroté : « R7 » est allé au drapeau de la tranche) ;
 2. **réviser le critère** — une page de ~600 lignes dont l'essentiel est du rendu
    déclaratif n'est plus le god-object de départ.
 

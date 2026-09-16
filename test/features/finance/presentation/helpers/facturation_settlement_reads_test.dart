@@ -59,7 +59,7 @@ void main() {
         // Le parent pose 40 000 FC ; à 2 000,00 cela éteint 20,00 $.
         final entry = _entree()
           ..tenderCurrency = 'CDF'
-          ..tenderIsSource = true;
+          ..tenderBecomesSource();
         entry.tenderController.text = '40000';
 
         final line = lineOf(_reglement(rates: [_taux]), entry);
@@ -72,7 +72,7 @@ void main() {
       // 30,00 $ dus. Le parent pose 999 999 FC, soit ~500 $ au taux du jour.
       final entry = _entree()
         ..tenderCurrency = 'CDF'
-        ..tenderIsSource = true;
+        ..tenderBecomesSource();
       entry.tenderController.text = '999999';
 
       final line = lineOf(_reglement(rates: [_taux]), entry);
@@ -102,7 +102,7 @@ void main() {
       // la ligne existe, elle ne doit pas disparaître du total.
       final entry = _entree(impute: 0)
         ..tenderCurrency = 'CDF'
-        ..tenderIsSource = true;
+        ..tenderBecomesSource();
       entry.controller.text = '';
       entry.tenderController.text = '40000';
 
