@@ -64,7 +64,11 @@ class FacturationChargeGroupEntry {
   bool expanded = false;
 
   /// Le montant du groupe commande-t-il les tranches ?
-  bool groupIsSource = true;
+  ///
+  /// ⚠️ **En lecture seule de l'extérieur.** Voir l'invariant porté par
+  /// [handsOverToTranches].
+  bool get groupIsSource => _groupIsSource;
+  bool _groupIsSource = true;
 
   /// La devise dans laquelle CETTE nature est réglée. `null` = celle de la
   /// créance, c'est-à-dire le cas courant, qui ne coûte rien.
@@ -78,7 +82,11 @@ class FacturationChargeGroupEntry {
   String? _tenderCurrency;
 
   /// Le dernier champ édité est celui du comptoir.
-  bool tenderIsSource = false;
+  ///
+  /// ⚠️ **En lecture seule de l'extérieur**, et jamais indépendamment de
+  /// [groupIsSource] : voir [handsOverToTranches].
+  bool get tenderIsSource => _tenderIsSource;
+  bool _tenderIsSource = false;
 
   FacturationChargeGroupEntry({
     required this.feeCode,
@@ -86,6 +94,48 @@ class FacturationChargeGroupEntry {
     required this.tranches,
   }) : controller = TextEditingController(),
        tenderController = TextEditingController();
+
+  // ── La bascule de source ───────────────────────────────────────────────────
+  //
+  // Les deux drapeaux sont privés, et ne se posent que par ces cinq gestes.
+  // C'est ce qui rend l'invariant INEXPRIMABLE plutôt que simplement documenté :
+  // aucune de ces méthodes ne laisse `groupIsSource` à faux avec
+  // `tenderIsSource` à vrai.
+  //
+  // Cet état-là a réellement existé, et il coûtait de l'argent. Quand la nature
+  // rendait la main à ses tranches sans que son comptoir cesse d'être source,
+  // l'état devenait STABLE ET INVISIBLE — le champ qui aurait pu le défaire
+  // disparaît de l'écran dès que `groupIsSource` tombe. Tout rejeu de la cascade
+  // écrasait alors la ventilation que le caissier venait de saisir à la main, et
+  // l'argent changeait de créance sans un mot.
+
+  /// La nature commande ses tranches. Ne dit rien du comptoir.
+  void groupCommands() => _groupIsSource = true;
+
+  /// Le caissier a tapé le MONTANT de la nature : le comptoir en découle.
+  void amountBecomesSource() {
+    _groupIsSource = true;
+    _tenderIsSource = false;
+  }
+
+  /// Le caissier a tapé le COMPTOIR de la nature : l'imputation en découle.
+  void tenderBecomesSource() {
+    _groupIsSource = true;
+    _tenderIsSource = true;
+  }
+
+  /// Le comptoir cesse d'être la source — un changement de devise, par exemple —
+  /// sans que la nature cesse de commander.
+  void tenderStopsBeingSource() => _tenderIsSource = false;
+
+  /// La nature **rend la main à ses tranches**.
+  ///
+  /// Elle cesse d'être l'unité de règlement, donc son comptoir cesse d'être une
+  /// source : les deux vont ensemble, et c'est tout l'objet de cette méthode.
+  void handsOverToTranches() {
+    _groupIsSource = false;
+    _tenderIsSource = false;
+  }
 
   /// La devise de règlement effective — celle des créances par défaut.
   String get effectiveTenderCurrency => _tenderCurrency ?? currency;
@@ -104,7 +154,7 @@ class FacturationChargeGroupEntry {
       tranche.tenderCurrency = _tenderCurrency;
       // La tranche ne pilote jamais la conversion quand le groupe commande :
       // son montant imputé est la source, son comptoir en découle.
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
     }
     if (_tenderCurrency == null) tenderController.clear();
   }
@@ -199,7 +249,7 @@ class FacturationChargeGroupEntry {
       // à zéro : une imputation vide ne part pas au serveur, et une case cochée
       // sans montant se lit comme un oubli de saisie.
       tranche.selected = allocated > 0;
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
       tranche.writeDerived(
         tranche.controller,
         allocated > 0 ? formatPlainAmount(allocated) : '',
@@ -213,12 +263,12 @@ class FacturationChargeGroupEntry {
   void clear() {
     controller.clear();
     tenderController.clear();
-    tenderIsSource = false;
+    _tenderIsSource = false;
     for (final tranche in tranches) {
       tranche.selected = false;
       tranche.controller.clear();
       tranche.tenderController.clear();
-      tranche.tenderIsSource = false;
+      tranche.tenderStopsBeingSource();
     }
   }
 

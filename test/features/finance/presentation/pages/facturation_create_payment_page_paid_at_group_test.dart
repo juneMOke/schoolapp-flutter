@@ -235,6 +235,40 @@ void main() {
   );
 
   testWidgets(
+    'quand le COMPTOIR de la nature est source, la date recalcule l\'imputé',
+    (tester) async {
+      // Chemin `_onGroupTenderEdited` rejoué au changement de date — nu jusqu'à
+      // R0. C'est la branche `groupIsSource && tenderIsSource` : le parent a
+      // posé des billets sur la nature, ce nombre est un fait, et c'est
+      // l'imputation qui doit se recalculer au taux du jour désigné.
+      await ouvrir(tester);
+
+      await cocherLaNature(tester);
+      await reglerEnFrancs(tester);
+      await taperLeComptoirDeLaNature(tester, '200000');
+
+      final imputeAu16 = valeur(
+        tester,
+        find.widgetWithText(TextField, 'Montant réglé').first,
+      );
+
+      await choisirDate(tester, DateTime(2026, 9, 12));
+
+      final imputeAu12 = valeur(
+        tester,
+        find.widgetWithText(TextField, 'Montant réglé').first,
+      );
+
+      // Les billets posés ne bougent pas ; ce qu'ils éteignent, si.
+      expect(
+        valeur(tester, find.widgetWithText(TextField, 'Reçu en caisse').first),
+        '200000',
+      );
+      expect(imputeAu12, isNot(imputeAu16));
+    },
+  );
+
+  testWidgets(
     'quand la NATURE commande encore, la date re-dérive bien son comptoir',
     (tester) async {
       // La contre-épreuve : la branche corrigée ne doit pas avoir éteint la

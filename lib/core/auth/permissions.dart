@@ -40,6 +40,22 @@ enum Perm {
   financeGridWrite('finance.grid.write'),
   financeStatsRead('finance.stats.read'),
 
+  /// Imposer au guichet un taux de change **autre** que celui de l'école, sur
+  /// un versement en cours.
+  ///
+  /// Séparée de [financeGridWrite] à dessein. Les deux touchent à la vérité
+  /// monétaire, mais pas à la même échelle : réécrire la grille change ce que
+  /// TOUTE l'école doit, corriger un taux ne change qu'un versement, devant le
+  /// parent qui a posé les billets. Se rabattre sur `finance.grid.write`
+  /// donnerait à qui peut corriger un taux le pouvoir de réécrire les montants
+  /// de l'école entière — exactement la fusion que l'ADR-014 §125 refuse.
+  ///
+  /// ⚠️ **Semée par le serveur avant que cette garde ne serve à quelque chose.**
+  /// Tant qu'aucun rôle ne la détient, le déclencheur est masqué pour tous : le
+  /// taux de l'école s'applique, ce qui est le repli sûr — mais la fonction est
+  /// alors inaccessible, pas protégée.
+  financeRateOverride('finance.rate.override'),
+
   // ── Boutique ──────────────────────────────────────────────────────────────
   // Caisse point-de-vente (ADR-020). La scission `catalog` / `sale` reprend
   // celle de `finance.grid` / `finance.payment`, et pour la même raison : si

@@ -26,6 +26,7 @@ void main() {
     Perm.financeGridRead: 'finance.grid.read',
     Perm.financeGridWrite: 'finance.grid.write',
     Perm.financeStatsRead: 'finance.stats.read',
+    Perm.financeRateOverride: 'finance.rate.override',
     Perm.boutiqueCatalogRead: 'boutique.catalog.read',
     Perm.boutiqueCatalogWrite: 'boutique.catalog.write',
     Perm.boutiqueSaleRead: 'boutique.sale.read',
@@ -73,7 +74,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 54 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 58 permissions (v1.8 du catalogue serveur)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -94,7 +95,17 @@ void main() {
     // Direction, le Super admin et la Comptabilité par la migration serveur
     // V133. Retirer (`expense.delete`) est nommé à part de saisir : une école
     // peut confier l'un sans l'autre.
-    expect(Perm.values, hasLength(57));
+    //
+    // 57 → 58 : `finance.rate.override`, qui garde la correction d'un taux au
+    // guichet. ⚠️ **Le client la déclare AVANT que le serveur ne la sème** —
+    // l'inverse des ajouts précédents. C'est sans danger dans ce sens : un
+    // ensemble effectif qui ne la porte pas masque le déclencheur, et le taux de
+    // l'école s'applique. Mais tant que le template serveur ne l'accorde à
+    // personne, la correction de taux est **inaccessible à toute l'école** — et
+    // c'est pour cela que l'exigence n'est pas encore inscrite dans
+    // `kGuardedWriteActions` : elle y ferait rougir, à raison, le test « aucune
+    // exigence n'est hors de portée de tous ».
+    expect(Perm.values, hasLength(58));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule
