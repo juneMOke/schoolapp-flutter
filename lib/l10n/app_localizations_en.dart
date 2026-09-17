@@ -7790,15 +7790,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The server is producing the document. This may take a few seconds.';
 
   @override
-  String get editiqueViewerPrintLabel => 'Print';
-
-  @override
-  String get editiqueViewerShareLabel => 'Share';
-
-  @override
-  String get editiqueViewerCloseLabel => 'Close';
-
-  @override
   String get editiqueViewerActionFailed =>
       'This action could not be completed on this device.';
 

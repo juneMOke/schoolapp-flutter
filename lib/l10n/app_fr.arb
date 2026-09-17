@@ -5128,9 +5128,6 @@
   "editiqueViewerReceiptTitle": "Reçu de paiement",
   "editiqueViewerLoadingTitle": "Préparation du document…",
   "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",
-  "editiqueViewerPrintLabel": "Imprimer",
-  "editiqueViewerShareLabel": "Partager",
-  "editiqueViewerCloseLabel": "Fermer",
   "editiqueViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
   "editiqueViewerDocumentNumberLabel": "Pièce n° {number}",
   "@editiqueViewerDocumentNumberLabel": {

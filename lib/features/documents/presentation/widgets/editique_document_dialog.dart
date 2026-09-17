@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
@@ -410,10 +410,17 @@ class EditiqueDocumentDialogView extends StatelessWidget {
                   ),
                 ),
                 const Divider(height: 1, color: AppColors.border),
-                _Footer(
-                  document: document,
-                  onPrint: _print,
-                  onShare: _share,
+                // Le pied partagé par toutes les sorties papier. Les deux
+                // gestes sont **désarmés tant que la pièce n'est pas arrivée** :
+                // le pied est monté dès le chargement, et un bouton qui ne fait
+                // rien est pire qu'un bouton éteint.
+                DocumentViewerFooter(
+                  onPrint: document == null
+                      ? null
+                      : () => _print(context, document),
+                  onShare: document == null
+                      ? null
+                      : () => _share(context, document),
                   onClose: () => _close(context),
                 ),
               ],
@@ -495,59 +502,6 @@ class _LoadingBody extends StatelessWidget {
             child: EteeloSkeletonBox(
               height: AppDimensions.documentViewerSkeletonHeight,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  final EditiqueDocument? document;
-  final Future<void> Function(BuildContext context, EditiqueDocument document)
-  onPrint;
-  final Future<void> Function(BuildContext context, EditiqueDocument document)
-  onShare;
-  final VoidCallback onClose;
-
-  const _Footer({
-    required this.document,
-    required this.onPrint,
-    required this.onShare,
-    required this.onClose,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final ready = document;
-
-    return Padding(
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      child: Wrap(
-        alignment: WrapAlignment.end,
-        spacing: AppDimensions.spacingS,
-        runSpacing: AppDimensions.spacingS,
-        children: [
-          // `fullWidth: false` obligatoire hors colonne : le thème rend les
-          // boutons pleine largeur, ce qui casse une disposition en ligne.
-          EteeloButton.secondary(
-            label: l10n.editiqueViewerPrintLabel,
-            icon: Icons.print_outlined,
-            onPressed: ready == null ? null : () => onPrint(context, ready),
-            fullWidth: false,
-          ),
-          EteeloButton.secondary(
-            label: l10n.editiqueViewerShareLabel,
-            icon: Icons.share_outlined,
-            onPressed: ready == null ? null : () => onShare(context, ready),
-            fullWidth: false,
-          ),
-          EteeloButton.primary(
-            label: l10n.editiqueViewerCloseLabel,
-            icon: Icons.check_rounded,
-            onPressed: onClose,
-            fullWidth: false,
           ),
         ],
       ),

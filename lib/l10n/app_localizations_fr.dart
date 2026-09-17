@@ -7865,15 +7865,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le serveur produit la pièce. Cela peut prendre quelques secondes.';
 
   @override
-  String get editiqueViewerPrintLabel => 'Imprimer';
-
-  @override
-  String get editiqueViewerShareLabel => 'Partager';
-
-  @override
-  String get editiqueViewerCloseLabel => 'Fermer';
-
-  @override
   String get editiqueViewerActionFailed =>
       'L\'action n\'a pas pu aboutir sur cet appareil.';
 

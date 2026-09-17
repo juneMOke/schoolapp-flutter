@@ -12563,24 +12563,6 @@ abstract class AppLocalizations {
   /// **'The server is producing the document. This may take a few seconds.'**
   String get editiqueViewerLoadingMessage;
 
-  /// No description provided for @editiqueViewerPrintLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Print'**
-  String get editiqueViewerPrintLabel;
-
-  /// No description provided for @editiqueViewerShareLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get editiqueViewerShareLabel;
-
-  /// No description provided for @editiqueViewerCloseLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get editiqueViewerCloseLabel;
-
   /// No description provided for @editiqueViewerActionFailed.
   ///
   /// In en, this message translates to:
