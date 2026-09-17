@@ -77,6 +77,25 @@ const ModuleAccess kPaymentCollectAccess = ModuleAccess([
   Perm.editiqueWrite,
 ], requiresAll: true);
 
+/// Imposer un taux de change autre que celui de l'école, sur le versement en
+/// cours (guichet d'encaissement, bloc « Taux du jour »).
+///
+/// **Ni conjonction ni repli sur la grille** : corriger un taux ne change qu'un
+/// versement, réécrire la grille change ce que toute l'école doit. Les fondre
+/// donnerait le second à qui ne doit détenir que le premier.
+///
+/// ⚠️ **Délibérément ABSENTE de [kGuardedWriteActions] pour l'instant.** Aucun
+/// rôle du template serveur ne détient encore `finance.rate.override` ; l'y
+/// inscrire ferait rougir — à raison — le test « aucune exigence n'est hors de
+/// portée de tous », qui dit qu'une exigence que personne ne détient est une
+/// fonction inaccessible plutôt que protégée. **À inscrire le jour où le serveur
+/// la sème**, en même temps que la copie du template dans
+/// `role_journeys_test.dart` — et pas avant, sous peine d'ajuster un attendu
+/// pour faire passer un test.
+const ModuleAccess kRateOverrideAccess = ModuleAccess([
+  Perm.financeRateOverride,
+]);
+
 /// Encaisser une vente boutique (`POST /sync/boutique/sales`), et réclamer son
 /// reçu (`POST /boutique/sales/{id}/receipt`).
 ///
