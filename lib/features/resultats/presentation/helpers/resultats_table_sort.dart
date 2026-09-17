@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/resultat_eleve_ligne.dart';
-import 'package:school_app_flutter/features/resultats/presentation/helpers/resultats_labels.dart';
 
 /// Champ de tri de la table de la vue classe.
 enum ResultatsSortField { eleve, sousPeriode, moyenne }
@@ -68,10 +68,19 @@ List<ResultatEleveLigne> applyResultatsSort(
   return [...classed, ...unclassed];
 }
 
+/// Nom → Post-nom → Prénom, comme toutes les listes d'élèves de l'application.
+///
+/// La comparaison portait sur « Prénom Nom » concaténé : la colonne « élève »
+/// s'ordonnait donc par PRÉNOM, et sans repli d'accents « Émile » se rangeait
+/// après « Zacharie ». L'ordre par défaut de la table, lui, ne change pas —
+/// c'est toujours le rang du backend (tri `null`).
 int _compareNames(ResultatEleveLigne a, ResultatEleveLigne b) {
-  final an = resultatsShortName(a.prenom, a.nom).toLowerCase();
-  final bn = resultatsShortName(b.prenom, b.nom).toLowerCase();
-  return an.compareTo(bn);
+  final byName = StudentNameComparator.comparePart(a.nom, b.nom);
+  if (byName != 0) return byName;
+  final bySurname = StudentNameComparator.comparePart(a.postnom, b.postnom);
+  if (bySurname != 0) return bySurname;
+  final byFirst = StudentNameComparator.comparePart(a.prenom, b.prenom);
+  return byFirst != 0 ? byFirst : a.studentId.compareTo(b.studentId);
 }
 
 double? _pourcentageAt(ResultatEleveLigne ligne, int index) {
