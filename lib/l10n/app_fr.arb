@@ -4093,9 +4093,6 @@
   "@financeTillReportFailed": {
     "description": "Repli SEULEMENT : le message du serveur prime quand il en porte un — c'est lui qui dit le nombre de lignes sur le refus de plafond, et « resserrez la période » sans ce chiffre ne guide rien."
   },
-  "@financeTillReportHandoffFailed": {
-    "description": "Le canal natif du spouleur peut manquer. Le document est arrivé : c'est le geste qui a échoué, et le taire ne laisserait rien à l'écran."
-  },
   "@financeTillReceiptsSplitTenderNote": {
     "description": "Rendue SEULEMENT quand la page en porte une. Scopée sur une caisse, la table ne montrait qu'une des deux moitiés ; toutes caisses, elles sont voisines et se lisent comme un doublon."
   },
@@ -6495,9 +6492,6 @@
   "recouvrementRelanceListFailed": "La liste n'a pas pu être établie.",
   "@recouvrementRelanceListFailed": {
     "description": "Échec générique"
-  },
-  "@recouvrementRelanceListHandoffFailed": {
-    "description": "Le canal d'impression a échoué"
   },
   "recouvrementRelanceListA11y": "Éditer la liste nominative de {group}",
   "@recouvrementRelanceListA11y": {
