@@ -520,22 +520,56 @@ symptôme, pas la maladie.
 
 ### 🔴 Trouvé par R0 — « affiché ≠ soumis » sur le taux corrigé
 
-Une correction de taux atteint le règlement — donc ce qui partira en base via
-`tendersFor` — **mais pas le montant affiché au comptoir**. Trois faits vérifiés
-l'établissent, et ils se contredisent :
+⚠️ **Portée corrigée le 2026-09-17, après MESURE.** Ce qui suit remplace une
+description qui surestimait l'écart : elle recopiait l'affirmation d'un test qui
+passait pour une raison étrangère à ce qu'il prétendait prouver.
 
-1. le champ porte bien la correction saisie ;
-2. `overriddenRates` la contient — prouvé indépendamment par l'avertissement de
-   divergence, qui ne s'affiche **que** par elle ;
-3. `rateFor`, `fromSettled` et `fromTender` la consultent (lu en source) ;
-4. et pourtant le comptaffiché reste au taux du référentiel, même après un geste
-   censé le re-dériver.
+**Le défaut réel, en une phrase** : le champ « montant au comptoir » d'une ligne
+garde la valeur calculée à l'ANCIEN taux **jusqu'au prochain geste sur cette
+ligne**.
 
-Préexistant, hors périmètre du chantier. `..._rate_override_test.dart` **cloue le
-comportement observé** avec un commentaire disant que ce n'est pas le
-comportement souhaitable : le jour où ce sera traité, ce test échouera, et c'est
-ce qu'on lui demande. Mérite son propre ticket — il touche l'argent que le
-caissier lit.
+Deux natures d'état cohabitent dans cette page, et une seule se rafraîchit seule :
+
+- **dérivé au RENDU** — l'avertissement de divergence, la légende de taux de la
+  ligne, le CTA, tout le récapitulatif. Chacun relit le règlement à chaque
+  `build`, donc suit la correction immédiatement ;
+- **dérivé au GESTE** — le `.text` des contrôleurs de montant, écrit uniquement
+  par `reflectTender` / `reflectGroupTender`. Corriger un taux ne déclenche qu'un
+  `setState`, qui redessine le champ sans recalculer son contenu.
+
+**Mesuré** (créance de 30,00 $, taux du jour 2 000,00 corrigé à 2 500,00, aucun
+geste ensuite) :
+
+| Surface | Affiche |
+|---|---|
+| Champ comptoir de la ligne | **60 000 FC** — périmé |
+| Légende de taux, juste en dessous | 2 500,00 FC / $ |
+| CTA de la page | Encaisser **75 000 FC** |
+| Récapitulatif — titre, corps, total, taux | **75 000 FC** |
+| Ce qui part en base | **75 000 FC** |
+
+Donc **un seul chiffre est faux**, et il est contredit sur le même écran par la
+légende posée sous lui. Tout ce que le caissier valide, et tout ce qui est
+stocké, est juste. La gravité est nettement moindre que ce que ce plan annonçait
+— mais l'incohérence demeure, sur un écran d'argent.
+
+**Ce qui était écrit ici et qui est FAUX** : « le comptoir reste au taux du
+référentiel même après un geste censé le re-dériver ». Le test qui l'établissait
+ressaisissait `'30'` dans un champ contenant déjà `'30'` — or `onChanged` ne part
+pas sans changement de valeur, donc le geste n'avait jamais eu lieu. Avec une
+valeur réellement différente, le taux corrigé S'APPLIQUE (25,00 $ ⇒ 62 500 FC).
+`..._rate_override_test.dart` porte désormais cette mesure à la place de
+l'affirmation, et continue de clouer le vrai défaut : le jour où il sera traité,
+sa première assertion échouera, et c'est ce qu'on lui demande.
+
+**La NATURE a exactement le même défaut**, vérifié par inventaire exhaustif des
+sites d'écriture : `group.writeTenderAmount` n'est appelé que depuis
+`reflectGroupTender` et `groupTenderEdited`, tous deux sur geste. Aucun écrivain
+au rendu, aux deux niveaux.
+
+Préexistant, hors périmètre du chantier. Mérite toujours son ticket — non plus
+pour « l'argent que le caissier lit », qui s'avère juste partout où il engage
+quelque chose, mais pour le champ qui le contredit tant qu'on n'y a pas touché.
 
 ---
 

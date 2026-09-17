@@ -197,34 +197,38 @@ void main() {
       findsOneWidget,
     );
 
-    // ⚠️ COMPORTEMENT ACTUEL, épinglé tel quel : le champ comptoir ne bouge
-    // PAS. Son texte n'est écrit que par `_reflectTender`, appelé depuis un
-    // geste ; le contrôleur de taux, lui, n'écoute qu'un `setState` nu. Ce qui
-    // partira en base suit déjà le taux corrigé, mais ce que le caissier lit
-    // est resté au taux d'avant.
-    //
-    // C'est la divergence « affiché ≠ soumis ». Préexistante, hors périmètre de
-    // R0 — on la fixe ici pour qu'elle ne puisse pas empirer en silence pendant
-    // le chantier, et pour qu'on la voie quand on décidera de la traiter.
-    expect(comptoir(tester), auReferentiel);
-
     // 🔴 ÉCART TROUVÉ PAR R0, épinglé tel quel — ce n'est PAS le comportement
     // souhaitable, c'est celui d'aujourd'hui.
     //
-    // Même après un geste qui re-dérive la ligne, le comptaffiché reste au taux
-    // du référentiel. Or les trois faits ci-dessus sont établis : le champ porte
-    // la correction, `overriddenRates` la contient (l'avertissement de
-    // divergence ne s'affiche QUE par elle), et `rateFor` la consulte. Ce qui
-    // partira en base via `tendersFor` suit donc le taux corrigé — pas ce que le
-    // caissier lit.
+    // Le champ comptoir ne bouge pas. Son texte n'est écrit que par
+    // `reflectTender`, appelé depuis un GESTE ; corriger un taux ne déclenche
+    // qu'un `setState`, qui redessine le champ sans recalculer son contenu.
+    // L'avertissement de divergence, lui, se dérive au rendu — d'où le fait
+    // qu'il paraisse pendant que le montant, lui, reste périmé.
     //
-    // Divergence « affiché ≠ soumis », préexistante et hors périmètre de R0. Ce
-    // test la CLOUE : le jour où elle sera traitée, il échouera, et c'est
-    // exactement ce qu'on lui demande.
-    await tester.enterText(champsDeLigne().first, '30');
+    // C'est la divergence « affiché ≠ soumis » : ce qui partira en base suit
+    // déjà le taux corrigé (75 000 FC), ce que le caissier lit est resté au taux
+    // d'avant (60 000). Ce test la CLOUE : le jour où elle sera traitée, il
+    // échouera, et c'est exactement ce qu'on lui demande.
+    expect(comptoir(tester), auReferentiel);
+
+    // ⚠️ La PORTÉE de l'écart, MESURÉE le 2026-09-17 et non supposée : il dure
+    // jusqu'au prochain geste sur la ligne, pas au-delà.
+    //
+    // Cette assertion affirmait le contraire — « même après un geste qui
+    // re-dérive la ligne, le comptoir reste au référentiel » — en ressaisissant
+    // `'30'` dans un champ qui contenait DÉJÀ `'30'`. Or `onChanged` ne part pas
+    // quand le texte ne change pas : le geste n'avait jamais eu lieu, et
+    // l'assertion passait pour une raison étrangère à ce qu'elle prétendait
+    // montrer. Un test qui se trompe de raison est pire qu'un test absent — il
+    // fait croire qu'un chemin d'argent est surveillé.
+    //
+    // Avec une valeur réellement différente, le taux corrigé S'APPLIQUE :
+    // 25,00 $ à 2 500,00 font 62 500 FC, et non 50 000 au taux du référentiel.
+    await tester.enterText(champsDeLigne().first, '25');
     await tester.pumpAndSettle();
 
-    expect(comptoir(tester), auReferentiel);
+    expect(comptoir(tester), '62500');
   });
 
   testWidgets(
