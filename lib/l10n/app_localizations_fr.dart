@@ -7860,6 +7860,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Liste de relance';
 
   @override
+  String get boutiqueTicketDocumentTitle => 'Ticket de vente';
+
+  @override
   String get editiqueViewerReceiptTitle => 'Reçu de paiement';
 
   @override

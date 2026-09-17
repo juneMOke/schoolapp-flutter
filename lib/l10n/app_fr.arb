@@ -5127,6 +5127,7 @@
   "enrollmentDashboardEntriesReportTitle": "Registre des inscrits",
   "financeTillReportTitle": "Rapport des paiements",
   "recouvrementRelanceListTitle": "Liste de relance",
+  "boutiqueTicketDocumentTitle": "Ticket de vente",
   "editiqueViewerReceiptTitle": "Reçu de paiement",
   "editiqueViewerLoadingTitle": "Préparation du document…",
   "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",

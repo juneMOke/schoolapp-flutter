@@ -93,8 +93,31 @@ abstract final class PdfTicketRenderer {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
     TicketLogoBand? logoBand,
+  }) => renderLines(
+    TicketTextLayout.render(model, columns: columns),
+    format: format,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+  );
+
+  /// Même rendu, à partir de lignes **déjà composées**.
+  ///
+  /// Pendant exact de `EscPosTicketRenderer.renderLines`, et exposé pour la même
+  /// raison : un gabarit qui n'est pas le ticket de perception. Le ticket de
+  /// vente de la boutique compose les siennes avec `SaleTicketTextLayout`, sur
+  /// les mêmes 48 colonnes — il obtient donc un PDF sans qu'aucun gabarit ne
+  /// soit réécrit, et les deux sorties restent le même papier.
+  ///
+  /// ⚠️ **Un [format] de hauteur INFINIE — le rouleau — ne se montre pas à
+  /// l'écran.** La rastérisation d'un aperçu ne sait pas mesurer une telle page :
+  /// pour afficher un ticket, passer une feuille. C'est un défaut qui ne se voit
+  /// qu'à l'exécution.
+  static Future<Uint8List> renderLines(
+    List<String> lines, {
+    PdfPageFormat format = pageFormat,
+    String? cutNotice,
+    TicketLogoBand? logoBand,
   }) async {
-    final lines = TicketTextLayout.render(model, columns: columns);
     final document = pw.Document();
     final band = (logoBand != null && logoBand.isUsable) ? logoBand : null;
 

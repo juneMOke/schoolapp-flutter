@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
@@ -41,10 +47,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// ⚠️ Rien ici n'est un échec d'encaissement : le versement est **déjà écrit
 /// localement**. Tout ce qui suit ne coûte que du papier.
+/// [previewBuilder] substitue l'aperçu, et c'est la seule façon de tester ce
+/// flux : le vrai `PdfPreview` rasterise par canal de plateforme, et son gabarit
+/// de chargement anime en boucle — `pumpAndSettle` n'y rendrait jamais la main.
 Future<void> printProvisionalTicketWithFallback(
   BuildContext context, {
   required String paymentId,
   required ScaffoldMessengerState? messenger,
+  Widget Function(BuildContext context, PrintableDocument document)?
+  previewBuilder,
 }) async {
   final l10n = AppLocalizations.of(context)!;
   // Tout ce qui vient du contexte est prélevé MAINTENANT. Ce qui suit doit
@@ -101,7 +112,8 @@ Future<void> printProvisionalTicketWithFallback(
   );
 
   // Même raison qu'au-dessus, un cran plus tôt : sans surface, on ne peut plus
-  // demander l'imprimante, mais on peut encore remettre un papier.
+  // demander l'imprimante, ni montrer quoi que ce soit — mais on peut encore
+  // remettre un papier.
   if (!context.mounted) {
     await printProvisionalTicket(
       model: model,
@@ -111,6 +123,65 @@ Future<void> printProvisionalTicketWithFallback(
     return;
   }
 
+  // ## L'aperçu d'abord, et c'est LUI qui décide
+  //
+  // Le caissier voit le ticket avant qu'il ne sorte, comme pour toute autre
+  // pièce de l'application — puis c'est le pied de la visionneuse qui lance
+  // l'impression. Rien ne part tant qu'il n'a pas appuyé : refermer l'aperçu
+  // sans imprimer ne consomme pas de papier.
+  //
+  // ⚠️ L'aperçu se compose sur une **feuille** : le rouleau a une hauteur
+  // infinie, que la rastérisation d'une visionneuse ne sait pas mesurer. Les
+  // octets montrés viennent du MÊME modèle que ceux qui partiront à
+  // l'imprimante — le papier montré est le papier tiré.
+  final preview = await PdfTicketRenderer.render(
+    model,
+    format: PdfPageFormat.a4,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+  );
+  if (!context.mounted) return;
+
+  await showEteeloDocumentViewer(
+    context,
+    title: model.labels.documentTitle,
+    document: PrintableDocument(
+      bytes: preview,
+      fileName: '${model.reference}.pdf',
+      reference: model.reference,
+    ),
+    previewBuilder: previewBuilder,
+    // Le papier est sorti (ou la cause est dite) : garder l'aperçu n'a plus
+    // d'objet, et le message d'échec doit redevenir atteignable.
+    closeAfterPrint: true,
+    // ⚠️ **Jamais le spouleur ici.** Sur le parc ETEELO la NT-8003DD lui est
+    // invisible : l'impression d'un ticket est thermique, et le PDF n'est que
+    // le filet (AM-11).
+    onPrint: () => _sendTicketToPrinter(
+      context,
+      model: model,
+      paymentId: paymentId,
+      cutNotice: cutNotice,
+      logoBand: logoBand,
+      messenger: messenger,
+      l10n: l10n,
+    ),
+  );
+}
+
+/// Sort le papier : la thermique, puis le filet PDF si elle n'a pas pu.
+///
+/// Extrait du flux parce que c'est désormais le **geste du pied de la
+/// visionneuse**, et non la suite automatique de la composition.
+Future<void> _sendTicketToPrinter(
+  BuildContext context, {
+  required TicketReceiptModel model,
+  required String paymentId,
+  required String cutNotice,
+  required TicketLogoBand? logoBand,
+  required ScaffoldMessengerState? messenger,
+  required AppLocalizations l10n,
+}) async {
   final outcome = await printThermalTicket(
     context,
     model: model,
@@ -128,7 +199,7 @@ Future<void> printProvisionalTicketWithFallback(
     case ThermalTicketCancelled():
       return;
 
-    // Personne n'a renoncé : la modale s'est fermée pendant la préparation.
+    // Personne n'a renoncé : la surface a disparu pendant la préparation.
     // Le repli, silencieux — il n'y a aucune cause à annoncer, et plus d'écran
     // pour la lire.
     case ThermalTicketNoSurface():

@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_geometry.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 
@@ -65,6 +66,45 @@ void main() {
     expect(bytes, isNotEmpty);
     // Signature %PDF — même garde que le mapper d'éditique côté serveur.
     expect(String.fromCharCodes(bytes.take(4)), '%PDF');
+  });
+
+  group('renderLines — le rendu à partir de lignes déjà composées', () {
+    // Ce que l'extraction doit garantir : `render` n'est plus qu'un appelant de
+    // `renderLines`. Si les deux divergeaient, le ticket de vente de la boutique
+    // — qui n'a que ce chemin-là — sortirait sur un autre papier que le ticket
+    // de perception.
+    test('rend exactement ce que rend le modèle', () async {
+      final model = _model();
+      final viaModel = await PdfTicketRenderer.render(model);
+      final viaLines = await PdfTicketRenderer.renderLines(
+        TicketTextLayout.render(model, columns: PdfTicketRenderer.columns),
+      );
+
+      expect(viaLines.length, viaModel.length);
+    });
+
+    test('accepte un gabarit qui n est pas un ticket de perception', () async {
+      final bytes = await PdfTicketRenderer.renderLines(const [
+        'BOUTIQUE LA COLOMBE',
+        '--------------------------------',
+        'Cahier 100p          x2    4,00',
+      ], format: PdfPageFormat.a4);
+
+      expect(String.fromCharCodes(bytes.take(4)), '%PDF');
+    });
+
+    // ⚠️ La garde qui compte pour l'aperçu : le rouleau a une hauteur INFINIE,
+    // que la rastérisation d'une visionneuse ne sait pas mesurer. Un ticket
+    // montré à l'écran se compose donc sur une feuille.
+    test('sur une feuille, le bloc reste mesurable', () async {
+      final bytes = await PdfTicketRenderer.renderLines(const [
+        'Ligne unique',
+      ], format: PdfPageFormat.a4);
+
+      expect(bytes, isNotEmpty);
+      expect(PdfPageFormat.a4.height.isFinite, isTrue);
+      expect(TicketBlockGeometry.rollFormat.height.isInfinite, isTrue);
+    });
   });
 
   // `pw.MultiPage` asserte contre une hauteur infinie, que `roll80` porte par

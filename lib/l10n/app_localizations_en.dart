@@ -7785,6 +7785,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Reminder list';
 
   @override
+  String get boutiqueTicketDocumentTitle => 'Sale ticket';
+
+  @override
   String get editiqueViewerReceiptTitle => 'Payment receipt';
 
   @override

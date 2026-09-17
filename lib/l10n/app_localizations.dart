@@ -12557,6 +12557,12 @@ abstract class AppLocalizations {
   /// **'Reminder list'**
   String get recouvrementRelanceListTitle;
 
+  /// No description provided for @boutiqueTicketDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale ticket'**
+  String get boutiqueTicketDocumentTitle;
+
   /// No description provided for @editiqueViewerReceiptTitle.
   ///
   /// In en, this message translates to:

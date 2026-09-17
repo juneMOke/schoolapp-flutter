@@ -5056,6 +5056,7 @@
   "enrollmentDashboardEntriesReportTitle": "Enrolment register",
   "financeTillReportTitle": "Payments report",
   "recouvrementRelanceListTitle": "Reminder list",
+  "boutiqueTicketDocumentTitle": "Sale ticket",
   "editiqueViewerReceiptTitle": "Payment receipt",
   "editiqueViewerLoadingTitle": "Preparing the document…",
   "editiqueViewerLoadingMessage": "The server is producing the document. This may take a few seconds.",

@@ -94,6 +94,12 @@ void main() {
                   context,
                   paymentId: 'pay-1',
                   messenger: ScaffoldMessenger.maybeOf(context),
+                  // ⚠️ Aperçu de substitution OBLIGATOIRE : le vrai `PdfPreview`
+                  // rasterise par canal de plateforme, et son gabarit de
+                  // chargement anime en boucle — `pumpAndSettle` n'y rendrait
+                  // jamais la main, et le fichier entier expirerait au lieu
+                  // d'échouer franchement.
+                  previewBuilder: (_, _) => const SizedBox.shrink(),
                 ),
                 child: const Text('go'),
               ),
@@ -118,6 +124,15 @@ void main() {
 
     await tester.tap(find.text('go'));
     await tester.pumpAndSettle();
+
+    // L'aperçu s'ouvre d'abord, et c'est LUI qui lance l'impression : rien ne
+    // part tant que personne n'a appuyé. Le bouton manque quand le flux a
+    // court-circuité avant de montrer quoi que ce soit — versement introuvable,
+    // nom d'élève vide : c'est alors le refus qu'on éprouve, pas l'impression.
+    if (find.text('Imprimer').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Imprimer'));
+      await tester.pumpAndSettle();
+    }
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
       await tester.tap(find.text(choose ?? 'Annuler'));
@@ -261,6 +276,28 @@ void main() {
     // ici sortirait un SECOND papier pour le même versement.
     expect(printing.laidOut, isEmpty);
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  /// Le contrat NEUF de l'aperçu, et la raison pour laquelle il est tenable au
+  /// comptoir : **rien ne part tant que personne n'a appuyé**. Refermer la
+  /// visionneuse est un renoncement, et il ne coûte pas une feuille — ni la
+  /// thermique, ni le filet, ni la trace qui ferait croire à un papier remis.
+  testWidgets('refermer l aperçu sans imprimer ne sort aucun papier', (
+    tester,
+  ) async {
+    await tester.pumpWidget(harness(withTrigger: true));
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+
+    // L'aperçu est bien là : il porte le nom de la pièce, pas celui de l'écran.
+    expect(find.text('Ticket de perception'), findsOne);
+
+    await tester.tap(find.text('Fermer'));
+    await tester.pumpAndSettle();
+
+    expect(port.sentTo, isEmpty);
+    expect(printing.laidOut, isEmpty);
+    expect(repository.marked, isZero);
   });
 
   testWidgets('caissier qui renonce : rien, et surtout pas le PDF', (
