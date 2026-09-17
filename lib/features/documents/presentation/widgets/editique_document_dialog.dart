@@ -381,7 +381,7 @@ class EditiqueDocumentDialogView extends StatelessWidget {
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: AppDimensions.editiqueViewerMaxWidth,
+          maxWidth: AppDimensions.documentViewerMaxWidth,
           maxHeight: maxHeight,
         ),
         child: BlocBuilder<EditiqueDocumentBloc, EditiqueDocumentState>(
@@ -493,7 +493,7 @@ class _LoadingBody extends StatelessWidget {
           // elle tient, et se réduit sinon.
           const Flexible(
             child: EteeloSkeletonBox(
-              height: AppDimensions.editiqueViewerSkeletonHeight,
+              height: AppDimensions.documentViewerSkeletonHeight,
             ),
           ),
         ],

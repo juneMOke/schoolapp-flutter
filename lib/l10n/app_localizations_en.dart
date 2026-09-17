@@ -7760,6 +7760,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'These writes are kept and will be sent as soon as their condition clears.';
 
   @override
+  String get documentViewerPrintLabel => 'Print';
+
+  @override
+  String get documentViewerShareLabel => 'Share';
+
+  @override
+  String get documentViewerCloseLabel => 'Close';
+
+  @override
+  String get documentViewerActionFailed =>
+      'This action could not be completed on this device.';
+
+  @override
+  String get documentViewerRenderFailedTitle => 'Preview unavailable';
+
+  @override
+  String get documentViewerRenderFailedMessage =>
+      'The document is here, but this device could not display its pages. You can still print or share it.';
+
+  @override
   String get editiqueViewerReceiptTitle => 'Payment receipt';
 
   @override

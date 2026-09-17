@@ -30,7 +30,7 @@ class EditiqueDocumentPreview extends StatelessWidget {
       canChangePageFormat: false,
       canChangeOrientation: false,
       canDebug: false,
-      maxPageWidth: AppDimensions.editiqueViewerMaxWidth,
+      maxPageWidth: AppDimensions.documentViewerMaxWidth,
       pdfFileName: document.fileName,
       scrollViewDecoration: const BoxDecoration(color: AppColors.surfaceAlt),
       // Le rendu des pages passe par le canal natif du plugin. Il échoue si le
@@ -52,7 +52,7 @@ class EditiqueDocumentPreview extends StatelessWidget {
       loadingWidget: const Padding(
         padding: EdgeInsets.all(AppDimensions.spacingM),
         child: EteeloSkeletonBox(
-          height: AppDimensions.editiqueViewerSkeletonHeight,
+          height: AppDimensions.documentViewerSkeletonHeight,
         ),
       ),
     );

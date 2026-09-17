@@ -37,13 +37,13 @@ class AppDimensions {
   /// Post-nom, Prénom), posés dans un `Wrap`.
   static const facturationPayerSearchCriterionWidth = 200.0;
   static const facturationPayerSearchResultsMinHeight = 200.0;
-  // Visionneuse de pièce d'éditique : plus large que les modales de saisie —
-  // une page A4 portrait doit rester lisible sans zoom sur tablette paysage
-  // (1280×800 dp de référence).
-  static const editiqueViewerMaxWidth = 760.0;
-  // Hauteur du gabarit de page pendant la production du document par le
-  // serveur : proportion A4 approchée à la largeur de la visionneuse.
-  static const editiqueViewerSkeletonHeight = 420.0;
+  // Visionneuse de document — pièce scellée, rapport, registre, ticket : plus
+  // large que les modales de saisie — une page A4 portrait doit rester lisible
+  // sans zoom sur tablette paysage (1280×800 dp de référence).
+  static const documentViewerMaxWidth = 760.0;
+  // Hauteur du gabarit de page pendant la préparation du document :
+  // proportion A4 approchée à la largeur de la visionneuse.
+  static const documentViewerSkeletonHeight = 420.0;
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
   static const searchFieldGap = 10.0;

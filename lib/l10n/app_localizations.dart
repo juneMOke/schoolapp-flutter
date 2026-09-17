@@ -12509,6 +12509,42 @@ abstract class AppLocalizations {
   /// **'These writes are kept and will be sent as soon as their condition clears.'**
   String get syncErrorsHeldSubtitle;
 
+  /// No description provided for @documentViewerPrintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get documentViewerPrintLabel;
+
+  /// No description provided for @documentViewerShareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get documentViewerShareLabel;
+
+  /// No description provided for @documentViewerCloseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get documentViewerCloseLabel;
+
+  /// No description provided for @documentViewerActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This action could not be completed on this device.'**
+  String get documentViewerActionFailed;
+
+  /// No description provided for @documentViewerRenderFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview unavailable'**
+  String get documentViewerRenderFailedTitle;
+
+  /// No description provided for @documentViewerRenderFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is here, but this device could not display its pages. You can still print or share it.'**
+  String get documentViewerRenderFailedMessage;
+
   /// No description provided for @editiqueViewerReceiptTitle.
   ///
   /// In en, this message translates to:

@@ -7835,6 +7835,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ces écritures sont conservées et repartiront dès que leur condition sera levée.';
 
   @override
+  String get documentViewerPrintLabel => 'Imprimer';
+
+  @override
+  String get documentViewerShareLabel => 'Partager';
+
+  @override
+  String get documentViewerCloseLabel => 'Fermer';
+
+  @override
+  String get documentViewerActionFailed =>
+      'L\'action n\'a pas pu aboutir sur cet appareil.';
+
+  @override
+  String get documentViewerRenderFailedTitle => 'Aperçu indisponible';
+
+  @override
+  String get documentViewerRenderFailedMessage =>
+      'Le document est bien là, mais cet appareil n\'a pas pu en afficher les pages. Vous pouvez tout de même l\'imprimer ou le partager.';
+
+  @override
   String get editiqueViewerReceiptTitle => 'Reçu de paiement';
 
   @override
