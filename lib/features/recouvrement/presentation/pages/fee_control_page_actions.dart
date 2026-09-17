@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
@@ -93,8 +94,10 @@ void markSelection(BuildContext context) {
 /// élève coché page 1 doit figurer sur la feuille éditée page 3, et la
 /// numérotation imprimée doit se relire comme l'écran.
 ///
-/// `Printing.layoutPdf` plutôt que `sharePdf` : le second écrit le document en
-/// clair dans le cache de l'appareil, et cette feuille est nominative.
+/// La feuille s'affiche d'abord : on la relit, puis on l'imprime ou on la
+/// partage. ⚠️ Le partage dépose la pièce **en clair** dans le cache de
+/// l'appareil jusqu'à la fin de session, et cette feuille est nominative —
+/// arbitrage assumé, le pied de la visionneuse offre les mêmes gestes partout.
 Future<void> printCallSheet(BuildContext context) async {
   final l10n = AppLocalizations.of(context)!;
   final selected = context.read<FeeControlSelectionCubit>().state.selected;
@@ -125,7 +128,19 @@ Future<void> printCallSheet(BuildContext context) async {
     l10n: l10n,
   );
 
-  await Printing.layoutPdf(onLayout: (_) async => bytes);
+  // La composition précède l'aperçu, et elle a pu traverser un `await` : sans
+  // cette garde, l'écran a pu disparaître entre-temps.
+  if (!context.mounted) return;
+  await showEteeloDocumentViewer(
+    context,
+    title: l10n.feeControlCallListAction,
+    document: PrintableDocument(
+      bytes: bytes,
+      // Le nom manquait : le spouleur retombait sur un intitulé par défaut, et
+      // deux éditions se confondaient dans le dossier de téléchargement.
+      fileName: l10n.feeControlCallListAction,
+    ),
+  );
 }
 
 /// Ouvre la **Facturation**. L'issue d'un écran où personne n'a payé n'est pas

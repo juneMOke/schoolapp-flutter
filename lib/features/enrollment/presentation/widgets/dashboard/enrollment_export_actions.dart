@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/export/enrollment_levels_pdf.dart';
@@ -73,12 +74,17 @@ abstract final class EnrollmentExportActions {
         ),
       );
 
-      // Le document est composé AVANT d'ouvrir le spouleur : une composition
+      // Le document est composé AVANT d'ouvrir l'aperçu : une composition
       // impossible se dit tout de suite, plutôt qu'après avoir ouvert une
-      // boîte de dialogue d'impression qui se refermerait seule.
-      await Printing.layoutPdf(
-        onLayout: (_) async => bytes,
-        name: l10n.enrollmentDashboardPdfTitle,
+      // fenêtre qui se refermerait seule.
+      if (!context.mounted) return;
+      await showEteeloDocumentViewer(
+        context,
+        title: l10n.enrollmentDashboardPdfTitle,
+        document: PrintableDocument(
+          bytes: bytes,
+          fileName: l10n.enrollmentDashboardPdfTitle,
+        ),
       );
     } catch (_) {
       // Canal de plateforme absent, service d'impression indisponible : les
