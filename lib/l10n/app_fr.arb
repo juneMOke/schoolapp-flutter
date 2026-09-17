@@ -4093,7 +4093,6 @@
   "@financeTillReportFailed": {
     "description": "Repli SEULEMENT : le message du serveur prime quand il en porte un — c'est lui qui dit le nombre de lignes sur le refus de plafond, et « resserrez la période » sans ce chiffre ne guide rien."
   },
-  "financeTillReportHandoffFailed": "Le rapport est prêt, mais l'impression n'a pas pu s'ouvrir.",
   "@financeTillReportHandoffFailed": {
     "description": "Le canal natif du spouleur peut manquer. Le document est arrivé : c'est le geste qui a échoué, et le taire ne laisserait rien à l'écran."
   },
@@ -5125,6 +5124,9 @@
   "documentViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
   "documentViewerRenderFailedTitle": "Aperçu indisponible",
   "documentViewerRenderFailedMessage": "Le document est bien là, mais cet appareil n'a pas pu en afficher les pages. Vous pouvez tout de même l'imprimer ou le partager.",
+  "enrollmentDashboardEntriesReportTitle": "Registre des inscrits",
+  "financeTillReportTitle": "Rapport des paiements",
+  "recouvrementRelanceListTitle": "Liste de relance",
   "editiqueViewerReceiptTitle": "Reçu de paiement",
   "editiqueViewerLoadingTitle": "Préparation du document…",
   "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",
@@ -6055,7 +6057,6 @@
     }
   },
   "enrollmentDashboardEntriesReportFailed": "Le document n'a pas pu être produit.",
-  "enrollmentDashboardEntriesReportHandoffFailed": "Le document est prêt, mais l'impression n'a pas pu s'ouvrir.",
   "enrollmentDashboardExportPdf": "PDF",
   "enrollmentDashboardExportPdfTooltip": "Exporter la répartition par niveau en PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Inscriptions",
@@ -6494,7 +6495,6 @@
   "@recouvrementRelanceListFailed": {
     "description": "Échec générique"
   },
-  "recouvrementRelanceListHandoffFailed": "La liste est arrivée, mais l'aperçu n'a pas pu s'ouvrir.",
   "@recouvrementRelanceListHandoffFailed": {
     "description": "Le canal d'impression a échoué"
   },

@@ -10717,12 +10717,6 @@ abstract class AppLocalizations {
   /// **'This window holds {lines} lines; the report is capped at {cap}. Narrow the period.'**
   String financeTillReportTooLarge(int lines, int cap);
 
-  /// No description provided for @financeTillReportHandoffFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The report is ready, but printing could not be opened.'**
-  String get financeTillReportHandoffFailed;
-
   /// No description provided for @financeTillEmptyGlobalTitle.
   ///
   /// In en, this message translates to:
@@ -12544,6 +12538,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The document is here, but this device could not display its pages. You can still print or share it.'**
   String get documentViewerRenderFailedMessage;
+
+  /// No description provided for @enrollmentDashboardEntriesReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment register'**
+  String get enrollmentDashboardEntriesReportTitle;
+
+  /// No description provided for @financeTillReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments report'**
+  String get financeTillReportTitle;
+
+  /// No description provided for @recouvrementRelanceListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder list'**
+  String get recouvrementRelanceListTitle;
 
   /// No description provided for @editiqueViewerReceiptTitle.
   ///
@@ -14990,12 +15002,6 @@ abstract class AppLocalizations {
   /// **'The document could not be produced.'**
   String get enrollmentDashboardEntriesReportFailed;
 
-  /// No description provided for @enrollmentDashboardEntriesReportHandoffFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The document is ready, but printing could not be opened.'**
-  String get enrollmentDashboardEntriesReportHandoffFailed;
-
   /// No description provided for @enrollmentDashboardExportPdf.
   ///
   /// In en, this message translates to:
@@ -15461,12 +15467,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The list could not be produced.'**
   String get recouvrementRelanceListFailed;
-
-  /// No description provided for @recouvrementRelanceListHandoffFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The list arrived, but the preview could not open.'**
-  String get recouvrementRelanceListHandoffFailed;
 
   /// No description provided for @recouvrementRelanceListA11y.
   ///

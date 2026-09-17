@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/error/report_line_cap.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -46,29 +47,30 @@ class RelanceListDelivery extends StatelessWidget {
     if (!cubit.isClosed) cubit.acknowledge();
   }
 
-  /// `Printing.layoutPdf` et non `sharePdf` : le partage système **écrit la
-  /// pièce en clair dans le cache de l'application et ne l'efface jamais**, et
-  /// cette liste porte des noms d'élèves. Le spouleur, lui, propose
-  /// « enregistrer en PDF » sans laisser de copie derrière lui.
+  /// On voit la liste d'abord, on décide ensuite.
+  ///
+  /// ⚠️ **Le partage dépose la pièce en clair** dans le cache de l'application
+  /// jusqu'à la fin de session (`SharedDocumentCache` le purge alors), et cette
+  /// liste porte des noms d'élèves. Arbitrage assumé : le pied de la visionneuse
+  /// propose les mêmes gestes partout.
+  ///
+  /// L'échec du canal natif est porté par la visionneuse : il n'y a plus rien à
+  /// rattraper ici.
   static Future<void> _handOver(
     BuildContext context,
     RelanceList document,
     AppLocalizations l10n,
   ) async {
-    try {
-      await Printing.layoutPdf(
-        onLayout: (_) => document.bytes,
+    await showEteeloDocumentViewer(
+      context,
+      title: l10n.recouvrementRelanceListTitle,
+      document: PrintableDocument(
+        bytes: document.bytes,
         // Le nom vient du serveur et n'est jamais réécrit : il porte le
         // périmètre réellement retenu.
-        name: document.fileName,
-      );
-    } catch (_) {
-      // Le canal natif peut manquer — binaire antérieur à la dépendance, ou
-      // plateforme sans service d'impression. Le document est arrivé ; c'est le
-      // geste qui a échoué, et le taire ne laisserait rien à l'écran.
-      if (!context.mounted) return;
-      AppSnackBar.showError(context, l10n.recouvrementRelanceListHandoffFailed);
-    }
+        fileName: document.fileName,
+      ),
+    );
   }
 
   /// Ce qu'on dit au lecteur, dans **sa** langue quand c'est possible.

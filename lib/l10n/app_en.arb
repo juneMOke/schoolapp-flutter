@@ -4098,7 +4098,6 @@
       }
     }
   },
-  "financeTillReportHandoffFailed": "The report is ready, but printing could not be opened.",
   "financeTillEmptyGlobalTitle": "No collections · {window}",
   "@financeTillEmptyGlobalTitle": {
     "placeholders": {
@@ -5054,6 +5053,9 @@
   "documentViewerActionFailed": "This action could not be completed on this device.",
   "documentViewerRenderFailedTitle": "Preview unavailable",
   "documentViewerRenderFailedMessage": "The document is here, but this device could not display its pages. You can still print or share it.",
+  "enrollmentDashboardEntriesReportTitle": "Enrolment register",
+  "financeTillReportTitle": "Payments report",
+  "recouvrementRelanceListTitle": "Reminder list",
   "editiqueViewerReceiptTitle": "Payment receipt",
   "editiqueViewerLoadingTitle": "Preparing the document…",
   "editiqueViewerLoadingMessage": "The server is producing the document. This may take a few seconds.",
@@ -5978,7 +5980,6 @@
     }
   },
   "enrollmentDashboardEntriesReportFailed": "The document could not be produced.",
-  "enrollmentDashboardEntriesReportHandoffFailed": "The document is ready, but printing could not be opened.",
   "enrollmentDashboardExportPdf": "PDF",
   "enrollmentDashboardExportPdfTooltip": "Export the breakdown by level as PDF",
   "enrollmentDashboardPdfOvertitle": "ETEELO CONNECT · Enrolments",
@@ -6260,7 +6261,6 @@
   "recouvrementRelanceListInconsistent": "The list could not be produced: some rows contradict themselves. Refresh the screen.",
   "recouvrementRelanceListForbidden": "You are not allowed to produce a named list.",
   "recouvrementRelanceListFailed": "The list could not be produced.",
-  "recouvrementRelanceListHandoffFailed": "The list arrived, but the preview could not open.",
   "recouvrementRelanceListA11y": "Produce the named list for {group}",
   "@recouvrementRelanceListA11y": {
     "placeholders": {

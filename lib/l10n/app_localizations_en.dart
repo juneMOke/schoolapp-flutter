@@ -6582,10 +6582,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get financeTillReportHandoffFailed =>
-      'The report is ready, but printing could not be opened.';
-
-  @override
   String financeTillEmptyGlobalTitle(String window) {
     return 'No collections · $window';
   }
@@ -7778,6 +7774,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentViewerRenderFailedMessage =>
       'The document is here, but this device could not display its pages. You can still print or share it.';
+
+  @override
+  String get enrollmentDashboardEntriesReportTitle => 'Enrolment register';
+
+  @override
+  String get financeTillReportTitle => 'Payments report';
+
+  @override
+  String get recouvrementRelanceListTitle => 'Reminder list';
 
   @override
   String get editiqueViewerReceiptTitle => 'Payment receipt';
@@ -9366,10 +9371,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The document could not be produced.';
 
   @override
-  String get enrollmentDashboardEntriesReportHandoffFailed =>
-      'The document is ready, but printing could not be opened.';
-
-  @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override
@@ -9666,10 +9667,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recouvrementRelanceListFailed => 'The list could not be produced.';
-
-  @override
-  String get recouvrementRelanceListHandoffFailed =>
-      'The list arrived, but the preview could not open.';
 
   @override
   String recouvrementRelanceListA11y(String group) {

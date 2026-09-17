@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -79,12 +80,14 @@ class FinanceTillReportButton extends StatelessWidget {
     );
   }
 
-  /// Remet le document — ou dit pourquoi il n'y en a pas — puis vide l'état.
+  /// Montre le document — ou dit pourquoi il n'y en a pas — puis vide l'état.
   ///
-  /// `Printing.layoutPdf` et non `sharePdf` : le partage système **écrit la
-  /// pièce en clair dans le cache de l'application et ne l'efface jamais**, et
-  /// ce rapport porte des noms d'élèves et de caissiers. Le spouleur, lui,
-  /// propose « enregistrer en PDF » sans laisser de copie derrière lui.
+  /// ⚠️ **Le partage y est offert, et il dépose la pièce en clair.**
+  /// `Printing.sharePdf` écrit le fichier dans le cache de l'application, où il
+  /// reste jusqu'à la fin de session (`SharedDocumentCache` le purge alors) —
+  /// or ce rapport porte des noms d'élèves et de caissiers. C'est un arbitrage
+  /// assumé : l'aperçu propose les mêmes gestes partout, plutôt qu'un pied qui
+  /// change d'un écran à l'autre sans que personne ne sache pourquoi.
   static Future<void> _deliver(
     BuildContext context,
     FinanceTillReportState state,
@@ -104,25 +107,26 @@ class FinanceTillReportButton extends StatelessWidget {
     if (!cubit.isClosed) cubit.acknowledge();
   }
 
+  /// On voit le rapport d'abord, on décide ensuite.
+  ///
+  /// La visionneuse porte l'échec du canal natif — imprimer et partager
+  /// traversent une surface système qui peut manquer —, si bien qu'il n'y a
+  /// plus rien à rattraper ici.
   static Future<void> _handOver(
     BuildContext context,
     TillReport report,
     AppLocalizations l10n,
   ) async {
-    try {
-      await Printing.layoutPdf(
-        onLayout: (_) => report.bytes,
+    await showEteeloDocumentViewer(
+      context,
+      title: l10n.financeTillReportTitle,
+      document: PrintableDocument(
+        bytes: report.bytes,
         // Le nom vient du serveur et n'est jamais réécrit : il porte les bornes
         // réellement retenues.
-        name: report.fileName,
-      );
-    } catch (_) {
-      // Le canal natif peut manquer — binaire antérieur à la dépendance, ou
-      // plateforme sans service d'impression. Le document est arrivé ; c'est le
-      // geste qui a échoué, et le taire ne laisserait rien à l'écran.
-      if (!context.mounted) return;
-      AppSnackBar.showError(context, l10n.financeTillReportHandoffFailed);
-    }
+        fileName: report.fileName,
+      ),
+    );
   }
 
   /// Ce qu'on dit au lecteur, dans **sa** langue quand c'est possible.

@@ -6649,10 +6649,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get financeTillReportHandoffFailed =>
-      'Le rapport est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
-
-  @override
   String financeTillEmptyGlobalTitle(String window) {
     return 'Aucun encaissement · $window';
   }
@@ -7853,6 +7849,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentViewerRenderFailedMessage =>
       'Le document est bien là, mais cet appareil n\'a pas pu en afficher les pages. Vous pouvez tout de même l\'imprimer ou le partager.';
+
+  @override
+  String get enrollmentDashboardEntriesReportTitle => 'Registre des inscrits';
+
+  @override
+  String get financeTillReportTitle => 'Rapport des paiements';
+
+  @override
+  String get recouvrementRelanceListTitle => 'Liste de relance';
 
   @override
   String get editiqueViewerReceiptTitle => 'Reçu de paiement';
@@ -9448,10 +9453,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le document n\'a pas pu être produit.';
 
   @override
-  String get enrollmentDashboardEntriesReportHandoffFailed =>
-      'Le document est prêt, mais l\'impression n\'a pas pu s\'ouvrir.';
-
-  @override
   String get enrollmentDashboardExportPdf => 'PDF';
 
   @override
@@ -9752,10 +9753,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get recouvrementRelanceListFailed =>
       'La liste n\'a pas pu être établie.';
-
-  @override
-  String get recouvrementRelanceListHandoffFailed =>
-      'La liste est arrivée, mais l\'aperçu n\'a pas pu s\'ouvrir.';
 
   @override
   String recouvrementRelanceListA11y(String group) {
