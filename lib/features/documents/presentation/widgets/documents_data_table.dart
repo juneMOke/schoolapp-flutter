@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_summary_sorter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 enum _DocumentsSortColumn { lastName, surname, firstName }
@@ -17,10 +18,12 @@ enum _DocumentsSortColumn { lastName, surname, firstName }
 ///   ignorerait tout ce qui a été émis depuis une autre tablette, et la spec
 ///   exige précisément que cette puce ne puisse **jamais** diverger de la
 ///   pastille du catalogue. Mieux vaut ne rien afficher qu'un chiffre faux.
-/// - **le tri ne porte que sur la page courante**, comme partout ailleurs dans
-///   l'application : le moteur de liste pagine avant de trier. Le corriger
-///   suppose de toucher le projector partagé avec la Facturation, la
-///   Réinscription et la Pré-inscription.
+/// - **le tri par colonne ne porte que sur la page courante.** L'ordre par
+///   défaut, lui, est désormais global : le bloc de liste ordonne le corpus
+///   entier par nom avant de le paginer. Mais cliquer « Post-nom » ou
+///   « Prénom » ne réordonne que les lignes visibles — le rendre global
+///   supposerait de remonter la colonne triée jusqu'au bloc, seul à tenir le
+///   corpus complet.
 ///
 /// L'action de ligne est un chevron et non un œil : on n'ouvre pas une fiche en
 /// lecture, on entre dans le catalogue des pièces de l'élève.
@@ -172,22 +175,14 @@ class _DocumentsDataTableState extends State<DocumentsDataTable> {
     });
   }
 
-  List<EnrollmentSummary> _sortSummaries(List<EnrollmentSummary> summaries) {
-    final list = [...summaries];
-    list.sort((a, b) {
-      final valA = switch (_sortColumn) {
-        _DocumentsSortColumn.lastName => a.student.lastName,
-        _DocumentsSortColumn.surname => a.student.surname,
-        _DocumentsSortColumn.firstName => a.student.firstName,
-      };
-      final valB = switch (_sortColumn) {
-        _DocumentsSortColumn.lastName => b.student.lastName,
-        _DocumentsSortColumn.surname => b.student.surname,
-        _DocumentsSortColumn.firstName => b.student.firstName,
-      };
-      final cmp = valA.compareTo(valB);
-      return _sortAscending ? cmp : -cmp;
-    });
-    return list;
-  }
+  /// Délègue au tri partagé : Inscriptions, Facturation et Documents rendent
+  /// les mêmes colonnes et les ordonnent par la même règle — accents repliés,
+  /// casse ignorée, cascade Nom → Post-nom → Prénom en départage. Cette table
+  /// comparait jusqu'ici sans même minusculer.
+  List<EnrollmentSummary> _sortSummaries(List<EnrollmentSummary> summaries) =>
+      EnrollmentSummarySorter.sort(summaries, switch (_sortColumn) {
+        _DocumentsSortColumn.lastName => EnrollmentSummarySortField.lastName,
+        _DocumentsSortColumn.surname => EnrollmentSummarySortField.surname,
+        _DocumentsSortColumn.firstName => EnrollmentSummarySortField.firstName,
+      }, ascending: _sortAscending);
 }

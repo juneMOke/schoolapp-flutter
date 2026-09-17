@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -112,14 +113,22 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
 
   List<ClassesListStudentRow> get _sortedRows {
     final column = _effectiveSortColumn;
-    final rows = [...widget.rows];
-    rows.sort((left, right) {
-      final leftValue = _valueFor(left, column);
-      final rightValue = _valueFor(right, column);
-      final result = leftValue.compareTo(rightValue);
-      return _sortAscending ? result : -result;
-    });
-    return rows;
+
+    // Les lignes dont le champ trié est vide ferment la marche, y compris en
+    // ordre descendant : inverser le tri n'est pas une raison de promouvoir en
+    // tête celles dont on ne sait justement rien.
+    final named = <ClassesListStudentRow>[];
+    final blank = <ClassesListStudentRow>[];
+    for (final row in widget.rows) {
+      (_leadingValue(row, column).trim().isEmpty ? blank : named).add(row);
+    }
+
+    named.sort(_comparatorFor(column));
+    final ordered = _sortAscending
+        ? named
+        : named.reversed.toList(growable: false);
+
+    return [...ordered, ...blank];
   }
 
   @override
@@ -261,12 +270,39 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
     }
   }
 
-  String _valueFor(ClassesListStudentRow row, _ClassesListSortColumn column) {
-    return switch (column) {
-      _ClassesListSortColumn.lastName => row.lastName.toLowerCase(),
-      _ClassesListSortColumn.surname => row.surname.toLowerCase(),
-      _ClassesListSortColumn.firstName => row.firstName.toLowerCase(),
-      _ClassesListSortColumn.level => row.levelLabel.toLowerCase(),
+  /// Le champ cliqué d'abord, la cascade Nom → Post-nom → Prénom en départage.
+  ///
+  /// La table comparait un seul champ minusculé, sans départage ni repli
+  /// d'accents : deux homonymes du champ trié s'ordonnaient au hasard de leur
+  /// arrivée, et « Émile » se rangeait après « Zacharie ».
+  Comparator<ClassesListStudentRow> _comparatorFor(
+    _ClassesListSortColumn column,
+  ) {
+    final identity = StudentNameComparator.by<ClassesListStudentRow>(
+      lastName: (row) => row.lastName,
+      surname: (row) => row.surname,
+      firstName: (row) => row.firstName,
+      id: (row) => row.studentId,
+    );
+    if (column == _ClassesListSortColumn.lastName) {
+      return identity;
+    }
+    return (left, right) {
+      final byLeading = StudentNameComparator.comparePart(
+        _leadingValue(left, column),
+        _leadingValue(right, column),
+      );
+      return byLeading != 0 ? byLeading : identity(left, right);
     };
   }
+
+  String _leadingValue(
+    ClassesListStudentRow row,
+    _ClassesListSortColumn column,
+  ) => switch (column) {
+    _ClassesListSortColumn.lastName => row.lastName,
+    _ClassesListSortColumn.surname => row.surname,
+    _ClassesListSortColumn.firstName => row.firstName,
+    _ClassesListSortColumn.level => row.levelLabel,
+  };
 }

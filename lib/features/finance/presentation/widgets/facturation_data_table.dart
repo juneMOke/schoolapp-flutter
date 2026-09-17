@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_summary_sorter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 // ─── Enum de tri (privé au fichier) ───────────────────────────────────────────
@@ -172,22 +173,14 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
     });
   }
 
-  List<EnrollmentSummary> _sortSummaries(List<EnrollmentSummary> summaries) {
-    final list = [...summaries];
-    list.sort((a, b) {
-      final valA = switch (_sortColumn) {
-        _FacturationSortColumn.lastName => a.student.lastName,
-        _FacturationSortColumn.surname => a.student.surname,
-        _FacturationSortColumn.firstName => a.student.firstName,
-      };
-      final valB = switch (_sortColumn) {
-        _FacturationSortColumn.lastName => b.student.lastName,
-        _FacturationSortColumn.surname => b.student.surname,
-        _FacturationSortColumn.firstName => b.student.firstName,
-      };
-      final cmp = valA.compareTo(valB);
-      return _sortAscending ? cmp : -cmp;
-    });
-    return list;
-  }
+  /// Délègue au tri partagé — même règle que les Inscriptions et les Documents,
+  /// qui rendent les mêmes colonnes : accents repliés, casse ignorée, cascade
+  /// Nom → Post-nom → Prénom en départage.
+  List<EnrollmentSummary> _sortSummaries(List<EnrollmentSummary> summaries) =>
+      EnrollmentSummarySorter.sort(summaries, switch (_sortColumn) {
+        _FacturationSortColumn.lastName => EnrollmentSummarySortField.lastName,
+        _FacturationSortColumn.surname => EnrollmentSummarySortField.surname,
+        _FacturationSortColumn.firstName =>
+          EnrollmentSummarySortField.firstName,
+      }, ascending: _sortAscending);
 }
