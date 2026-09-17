@@ -446,8 +446,11 @@ void main() {
     ),
     expect: () => [
       isA<EnrollmentLocalListState>(),
+      // Diop (e2) avant Ndiaye (e1) : le bloc ordonne le corpus par nom avant
+      // de le mettre en cache, donc avant de le paginer. L'ordre du DAO
+      // (`updated_at DESC`, ici e1 puis e2) ne survit plus à l'affichage.
       isA<EnrollmentLocalListState>()
-          .having(ids, 'ids', ['e1', 'e2'])
+          .having(ids, 'ids', ['e2', 'e1'])
           .having(
             (s) => s.summariesQueryType,
             'type',
@@ -538,8 +541,10 @@ void main() {
     ),
     expect: () => [
       isA<EnrollmentLocalListState>(),
+      // Diop (e2) avant Ndiaye (e1) : l'ordre de la liste est alphabétique dès
+      // le bloc, pas celui du DAO (`updated_at DESC`, ici e1 puis e2).
       isA<EnrollmentLocalListState>()
-          .having(ids, 'ids', ['e1', 'e2'])
+          .having(ids, 'ids', ['e2', 'e1'])
           .having(
             (s) => s.summariesQueryType,
             'type',

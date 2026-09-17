@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/helpers/client_side_paginator.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
+import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_summary_mapper.dart';
@@ -170,6 +171,34 @@ class EnrollmentLocalListProjector {
         )
         .where((s) => dob.isEmpty || s.student.dateOfBirth == dob)
         .toList(growable: false);
+  }
+
+  /// Ordonne un corpus **entier** par Nom → Post-nom → Prénom, avant toute
+  /// pagination.
+  ///
+  /// C'est le cœur du correctif : le moteur de liste paginait *avant* que le
+  /// widget ne trie, si bien que chaque page réamorçait l'alphabet sur ses dix
+  /// lignes et qu'un « A » pouvait dormir en page 7. Trier le corpus ici rend
+  /// l'ordre global, et la page découpée ensuite est enfin la bonne.
+  ///
+  /// Délibérément **hors** de [project] : le Contrôle des frais projette avec
+  /// [project] puis impose son propre ordre — le taux de paiement croissant,
+  /// qui EST sa priorité de relance. Trier dans [project] le lui écraserait
+  /// pour rien, et brouillerait une intention métier explicite.
+  ///
+  /// Ne trie jamais la liste des dossiers locaux passée à
+  /// [projectReenrollment] / [projectPreEnrollment] : leur superposition
+  /// read-your-writes retient « le PREMIER dossier rencontré », et dépend donc
+  /// de l'ordre `updated_at DESC` du DAO. Seule la **sortie** s'ordonne.
+  static List<EnrollmentSummary> sortByName(List<EnrollmentSummary> summaries) {
+    return [...summaries]..sort(
+      StudentNameComparator.by<EnrollmentSummary>(
+        lastName: (s) => s.student.lastName,
+        surname: (s) => s.student.surname,
+        firstName: (s) => s.student.firstName,
+        id: (s) => s.student.id,
+      ),
+    );
   }
 
   /// Découpe la page [page] (bornée) d'une liste déjà filtrée/projetée.
