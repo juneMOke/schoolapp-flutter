@@ -481,6 +481,12 @@ class _FacturationCreatePaymentViewState
       // figurera sur la note de perception.
       allocations: _confirmGroups(settlement, l10n),
       request: request,
+      // La MÊME horloge que le reste de la page. Sans elle, la popin recomposait
+      // `paidAt` sur `DateTime.now()` : le jour désigné arrivait juste en
+      // production, mais aucun test ne pouvait le prouver — et trois d'entre eux
+      // rougissaient une heure par jour, quand l'heure murale de l'école passait
+      // minuit et que la recomposition reculait d'un jour.
+      now: widget.now,
     );
 
     if (!mounted) {

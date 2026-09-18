@@ -223,26 +223,35 @@ void main() {
 
     await encaisser(tester);
 
-    // ⚠️ On assère le JOUR, pas l'instant complet. L'heure vient de l'horloge
-    // RÉELLE : la popin appelle le mapper sans horloge injectée, et c'est voulu
-    // — A1 dit « le jour choisi, à l'heure du geste ». La composition exacte est
-    // épinglée à la microseconde par `school_time_test` et le test du mapper ;
-    // ici, ce qui doit être prouvé est que le jour désigné arrive jusqu'en base.
-    expect(captureDraft().draft.paidAt, startsWith('2026-09-12T'));
+    // L'instant COMPLET, et plus seulement le jour : l'horloge de la page
+    // traverse désormais jusqu'au mapper, donc la recomposition est entièrement
+    // déterminée. `_maintenant` = 08 h UTC = 09 h murale à Kinshasa, reposée sur
+    // le 12 puis ramenée en UTC — d'où 08 h.
+    //
+    // ⚠️ C'est cette injection qui rend le fait vérifiable. Tant que la popin
+    // lisait `DateTime.now()`, ce test ne pouvait asserter qu'un préfixe de jour,
+    // et il rougissait une heure par jour : entre 23 h et minuit UTC, l'heure
+    // murale passait 00 h, la recomposition retirait l'heure de décalage, et le
+    // jour reculait d'un cran.
+    expect(
+      captureDraft().draft.paidAt,
+      DateTime.utc(2026, 9, 12, 8).toIso8601String(),
+    );
   });
 
   testWidgets('sans rien changer, c\'est aujourd\'hui qui part', (
     tester,
   ) async {
     // Non-régression A1 : le chemin par défaut doit rendre exactement ce que
-    // produisait l'horodatage automatique.
+    // produisait l'horodatage automatique — donc `_maintenant`, à l'instant près
+    // et non au jour près.
     await ouvrir(tester);
     await cocher(tester);
     await remplirPayeur(tester);
 
     await encaisser(tester);
 
-    expect(captureDraft().draft.paidAt, startsWith('2026-09-16T'));
+    expect(captureDraft().draft.paidAt, _maintenant.toIso8601String());
   });
 
   testWidgets('le récapitulatif montre la date qui part', (tester) async {
@@ -289,7 +298,9 @@ void main() {
     await choisirDate(tester, DateTime(2026, 9, 16));
     await encaisser(tester);
 
-    expect(captureDraft().draft.paidAt, startsWith('2026-09-16T'));
+    // Re-désigner le jour courant doit rendre EXACTEMENT ce que rendait le
+    // chemin par défaut : même instant, pas seulement même jour.
+    expect(captureDraft().draft.paidAt, _maintenant.toIso8601String());
   });
 
   testWidgets('le jour par défaut SUIT l\'horloge, il n\'est pas figé', (
