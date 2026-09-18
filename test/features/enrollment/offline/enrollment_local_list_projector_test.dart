@@ -31,6 +31,81 @@ LocalEnrollmentListItem _item({
 );
 
 void main() {
+  group('EnrollmentLocalListProjector.sortByName', () {
+    test('ordonne par Nom → Post-nom → Prénom', () {
+      final sorted = EnrollmentLocalListProjector.sortByName(
+        EnrollmentLocalListProjector.project([
+          _item(enrollmentId: 'e1', studentId: 's1', lastName: 'Ndiaye'),
+          _item(enrollmentId: 'e2', studentId: 's2', lastName: 'Diop'),
+          _item(enrollmentId: 'e3', studentId: 's3', lastName: 'Kabongo'),
+        ]),
+      );
+
+      expect(sorted.map((s) => s.student.lastName), [
+        'Diop',
+        'Kabongo',
+        'Ndiaye',
+      ]);
+    });
+
+    test('un nom accentué se range à sa lettre, pas après Z', () {
+      final sorted = EnrollmentLocalListProjector.sortByName(
+        EnrollmentLocalListProjector.project([
+          _item(enrollmentId: 'e1', studentId: 's1', lastName: 'Zacharie'),
+          _item(enrollmentId: 'e2', studentId: 's2', lastName: 'Émile'),
+        ]),
+      );
+
+      expect(sorted.map((s) => s.student.lastName), ['Émile', 'Zacharie']);
+    });
+
+    test(
+      'trie le corpus ENTIER : la 1re page porte le début de l’alphabet',
+      () {
+        // Dix-huit dossiers dans l'ordre du DAO (`updated_at DESC`), donc
+        // alphabétiquement quelconque : le seul « A » du lot arrive en dernier,
+        // et tomberait en page 2 si l'on triait après avoir découpé.
+        final items = [
+          for (var i = 0; i < 17; i++)
+            _item(enrollmentId: 'e$i', studentId: 's$i', lastName: 'Zoulou$i'),
+          _item(enrollmentId: 'last', studentId: 'slast', lastName: 'Abo'),
+        ];
+
+        final page = EnrollmentLocalListProjector.paginate(
+          EnrollmentLocalListProjector.sortByName(
+            EnrollmentLocalListProjector.project(items),
+          ),
+          page: 0,
+          size: 10,
+        );
+
+        expect(
+          page.content.first.student.lastName,
+          'Abo',
+          reason:
+              'trier après la découpe laissait « Abo » en page 2, chaque page '
+              "réamorçant l'alphabet sur ses dix lignes",
+        );
+      },
+    );
+
+    test('project ne trie pas : l’ordre du DAO reste intact', () {
+      final summaries = EnrollmentLocalListProjector.project([
+        _item(enrollmentId: 'e1', studentId: 's1', lastName: 'Ndiaye'),
+        _item(enrollmentId: 'e2', studentId: 's2', lastName: 'Diop'),
+      ]);
+
+      expect(
+        summaries.map((s) => s.student.lastName),
+        ['Ndiaye', 'Diop'],
+        reason:
+            'le Contrôle des frais projette avec project() puis impose son '
+            'ordre métier — le taux de paiement croissant, sa priorité de '
+            'relance : trier dans project() le lui écraserait',
+      );
+    });
+  });
+
   group('EnrollmentLocalListProjector.project', () {
     final items = [
       _item(enrollmentId: 'e1', firstName: 'Awa', lastName: 'Ndiaye'),

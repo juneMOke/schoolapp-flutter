@@ -409,9 +409,15 @@ class EnrollmentLocalListBloc
         );
       },
       (projected) {
-        _cache = projected;
+        // Ordre alphabétique posé AVANT la mise en cache, donc avant la
+        // pagination : le tri des widgets ne portait que sur les dix lignes
+        // déjà découpées, si bien que chaque page réamorçait l'alphabet. Trié
+        // ici, `_cache` sert un ordre global — à la pagination comme à l'export
+        // (`loadedSummaries`).
+        final ordered = EnrollmentLocalListProjector.sortByName(projected);
+        _cache = ordered;
         final pageData = EnrollmentLocalListProjector.paginate(
-          projected,
+          ordered,
           page: query.page,
           size: query.size,
         );

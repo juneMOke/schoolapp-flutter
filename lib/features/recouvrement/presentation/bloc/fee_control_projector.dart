@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -224,12 +225,23 @@ class FeeControlProjector {
       if (rb == null) return -1;
       return ra.compareTo(rb);
     }
-    final byName = a.summary.student.lastName.toLowerCase().compareTo(
-      b.summary.student.lastName.toLowerCase(),
+    // Le taux reste le premier mot de l'ordre — c'est la priorité de relance.
+    // Seul le départage change : cascade complète Nom → Post-nom → Prénom,
+    // accents repliés, là où deux fiches de même nom se classaient sans
+    // post-nom et où « Émile » passait après « Zacharie ».
+    final byName = StudentNameComparator.comparePart(
+      a.summary.student.lastName,
+      b.summary.student.lastName,
     );
     if (byName != 0) return byName;
-    final byFirst = a.summary.student.firstName.toLowerCase().compareTo(
-      b.summary.student.firstName.toLowerCase(),
+    final bySurname = StudentNameComparator.comparePart(
+      a.summary.student.surname,
+      b.summary.student.surname,
+    );
+    if (bySurname != 0) return bySurname;
+    final byFirst = StudentNameComparator.comparePart(
+      a.summary.student.firstName,
+      b.summary.student.firstName,
     );
     return byFirst != 0 ? byFirst : a.studentId.compareTo(b.studentId);
   }

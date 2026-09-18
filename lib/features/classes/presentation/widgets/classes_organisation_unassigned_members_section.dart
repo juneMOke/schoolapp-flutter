@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/classes/presentation/widgets/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_summary_sorter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// PARCOURS 8 — Section ambre « Élèves non répartis ».
@@ -120,7 +121,7 @@ class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
               return Wrap(
                 spacing: gap,
                 runSpacing: gap,
-                children: enrollments
+                children: _orderedEnrollments
                     .map(
                       (enrollment) => SizedBox(
                         width: tileWidth,
@@ -144,6 +145,18 @@ class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
       ),
     );
   }
+
+  /// Les non-répartis par ordre alphabétique, comme toute autre liste d'élèves.
+  ///
+  /// C'était la seule liste du module à rendre l'ordre brut du DAO
+  /// (`updated_at DESC`, le dernier modifié en tête) — donc un bandeau ambre
+  /// rangé par hasard, juste au-dessus de grilles de classes rangées par nom.
+  List<EnrollmentSummary> get _orderedEnrollments =>
+      EnrollmentSummarySorter.sort(
+        enrollments,
+        EnrollmentSummarySortField.identity,
+        ascending: true,
+      );
 
   /// Véhicule d'affichage pour la tuile partagée. `id` porte l'`enrollmentId`
   /// (identité de la ligne à l'écran) ; `classroomId`/`academicYearId` sont

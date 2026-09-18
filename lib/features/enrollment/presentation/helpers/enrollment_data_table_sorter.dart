@@ -1,12 +1,18 @@
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_summary_sorter.dart';
 
 /// Énumération des colonnes triables dans la table Enrollment.
 enum EnrollmentSortColumn { student, dateOfBirth }
 
-/// Service stateless pour gérer le tri des résumés d'inscription.
+/// Traduit une colonne de la table Enrollment en champ de tri.
 ///
-/// Extrait la logique tri de [EnrollmentDataTable] pour la rendre
-/// testable et réutilisable.
+/// La règle d'ordre elle-même vit dans [EnrollmentSummarySorter], partagée avec
+/// la Facturation et les Documents : ce fichier ne fait plus que nommer la
+/// colonne cliquée.
+///
+/// La clé de la colonne « élève » concaténait `Nom|Prénom|Post-nom` alors que la
+/// table affiche « Nom Post-nom Prénom » — deux fiches de même nom se classaient
+/// donc dans un ordre que la colonne ne montrait pas.
 class EnrollmentDataTableSorter {
   const EnrollmentDataTableSorter._();
 
@@ -15,26 +21,8 @@ class EnrollmentDataTableSorter {
     List<EnrollmentSummary> enrollments,
     EnrollmentSortColumn column,
     bool ascending,
-  ) {
-    final list = [...enrollments];
-    list.sort((a, b) {
-      final aValue = _getColumnValue(a, column);
-      final bValue = _getColumnValue(b, column);
-      final cmp = aValue.compareTo(bValue);
-      return ascending ? cmp : -cmp;
-    });
-    return list;
-  }
-
-  /// Extrait la valeur d'une colonne pour un [EnrollmentSummary].
-  static String _getColumnValue(
-    EnrollmentSummary enrollment,
-    EnrollmentSortColumn column,
-  ) {
-    return switch (column) {
-      EnrollmentSortColumn.student =>
-        '${enrollment.student.lastName}|${enrollment.student.firstName}|${enrollment.student.surname}',
-      EnrollmentSortColumn.dateOfBirth => enrollment.student.dateOfBirth,
-    };
-  }
+  ) => EnrollmentSummarySorter.sort(enrollments, switch (column) {
+    EnrollmentSortColumn.student => EnrollmentSummarySortField.identity,
+    EnrollmentSortColumn.dateOfBirth => EnrollmentSummarySortField.dateOfBirth,
+  }, ascending: ascending);
 }

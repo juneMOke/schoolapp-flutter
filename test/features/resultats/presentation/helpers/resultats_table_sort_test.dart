@@ -7,6 +7,7 @@ ResultatEleveLigne _ligne(
   String studentId,
   String prenom,
   String nom, {
+  String? postnom,
   int? rang,
   bool nonClasse = false,
   double? moyenne,
@@ -15,6 +16,7 @@ ResultatEleveLigne _ligne(
   rang: rang,
   studentId: studentId,
   nom: nom,
+  postnom: postnom,
   prenom: prenom,
   nonClasse: nonClasse,
   moyenneGroupe: moyenne,
@@ -55,12 +57,45 @@ void main() {
     expect(_ids(sorted), ['A', 'B', 'D', 'C']);
   });
 
-  test('tri par nom (prénom nom) croissant', () {
+  test('tri par élève croissant : Nom → Post-nom → Prénom', () {
     final sorted = applyResultatsSort(
       lignes,
       const ResultatsSort(field: ResultatsSortField.eleve, ascending: true),
     );
-    expect(_ids(sorted), ['A', 'B', 'D', 'C']);
+    // Par NOM : Adam (B), Ngoy (D), Zoe (A) ; le non classé (C) reste en fin.
+    // La colonne s'ordonnait auparavant par PRÉNOM (Alice, Bob, Dan) — un
+    // ordre que la colonne elle-même n'affichait pas.
+    expect(_ids(sorted), ['B', 'D', 'A', 'C']);
+  });
+
+  test('tri par élève : le post-nom départage deux mêmes noms', () {
+    final tshibangu = _ligne(
+      'T',
+      'Awa',
+      'Kabongo',
+      postnom: 'Tshibangu',
+      rang: 1,
+      moyenne: 70,
+    );
+    final mwamba = _ligne(
+      'M',
+      'Awa',
+      'Kabongo',
+      postnom: 'Mwamba',
+      rang: 2,
+      moyenne: 60,
+    );
+
+    final sorted = applyResultatsSort([
+      tshibangu,
+      mwamba,
+    ], const ResultatsSort(field: ResultatsSortField.eleve, ascending: true));
+
+    expect(
+      _ids(sorted),
+      ['M', 'T'],
+      reason: 'même nom et même prénom : seul le post-nom peut trancher',
+    );
   });
 
   test('tri sous-période : null en fin dans les DEUX sens', () {
