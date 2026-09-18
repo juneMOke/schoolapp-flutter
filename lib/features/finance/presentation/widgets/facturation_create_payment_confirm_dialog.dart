@@ -89,6 +89,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   required List<FacturationConfirmAllocationGroup> allocations,
   required PaymentsCreateRequested request,
   VoidCallback? onDownloadReceipt,
+  DateTime? now,
 }) async {
   final outcome = await showDialog<FacturationCollectOutcome>(
     context: context,
@@ -107,6 +108,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
         allocations: allocations,
         request: request,
         onDownloadReceipt: onDownloadReceipt,
+        now: now,
       ),
     ),
   );
@@ -135,6 +137,18 @@ class _CollectFlowDialog extends StatefulWidget {
   final PaymentsCreateRequested request;
   final VoidCallback? onDownloadReceipt;
 
+  /// L'horloge qui recompose `paidAt`, **celle de la page** et non la sienne.
+  ///
+  /// `null` en production : le mapper retombe alors sur `DateTime.now()`, ce qui
+  /// est le comportement voulu — le jour vient du guichet, l'heure du geste.
+  ///
+  /// ⚠️ Elle existe parce que son absence rendait le fait central de cet écran
+  /// **invérifiable** : la popin recomposait la date sur l'horloge réelle, si
+  /// bien qu'aucun test ne pouvait prouver que le jour désigné part bien en base.
+  /// Trois d'entre eux rougissaient une heure par jour — quand l'heure murale de
+  /// l'école venait de passer minuit, la recomposition reculait d'un jour.
+  final DateTime? now;
+
   const _CollectFlowDialog({
     required this.totalLabel,
     this.rateLabel,
@@ -144,6 +158,7 @@ class _CollectFlowDialog extends StatefulWidget {
     required this.allocations,
     required this.request,
     this.onDownloadReceipt,
+    this.now,
   });
 
   @override
@@ -169,7 +184,9 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     // de l'appel réseau. La confirmation « succès » reflète la mise en file
     // (pending-sync), pas encore l'acquittement serveur.
     context.read<FinanceOfflineBloc>().add(
-      RecordLocalPayment(recordPaymentDraftFromRequest(widget.request)),
+      RecordLocalPayment(
+        recordPaymentDraftFromRequest(widget.request, now: widget.now),
+      ),
     );
   }
 
