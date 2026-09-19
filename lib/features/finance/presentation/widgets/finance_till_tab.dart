@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/finance_till/till_receipt.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_receipt_record_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_loading_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_period_filter.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_success_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/states/finance_stats_results_error_state.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'onglet **Caisse** : ce qui est entré dans le tiroir sur la fenêtre.
@@ -138,6 +142,11 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
                 onWindowRequested: (window) => context
                     .read<FinanceTillBloc>()
                     .add(FinanceTillRequested(window: window)),
+                // L'œil de la table : la fiche de facturation de l'élève, pas
+                // sa pièce scellée. C'est ici qu'il aboutit et nulle part
+                // ailleurs — la section ne connaît que sa table, et pousser une
+                // route lui ferait connaître le routeur.
+                onOpenRecord: (receipt) => _openRecord(context, receipt),
               ),
               FinanceTillStatus.error => FinanceStatsResultsErrorState(
                 failure:
@@ -151,6 +160,35 @@ class _FinanceTillTabState extends State<FinanceTillTab> {
           ),
         );
       },
+    );
+  }
+
+  /// Ouvre la fiche de facturation de l'élève d'une ligne d'encaissement.
+  ///
+  /// `push` et non `go` : la fiche s'empile, et sa barre de détail dépile au
+  /// retour — on revient donc ICI, sur la caisse, et non sur la Facturation.
+  ///
+  /// L'intent est construit par une fonction pure qui rend `null` quand la ligne
+  /// n'a pas de quoi ouvrir. Cette garde-ci est donc la seconde : l'œil est déjà
+  /// éteint dans ce cas, et rien ne devrait nous amener ici. Elle reste parce
+  /// qu'un bouton désarmé n'est pas une preuve — un test, un raccourci clavier
+  /// ou un futur clic de ligne pourraient l'emprunter autrement.
+  void _openRecord(BuildContext context, TillReceipt receipt) {
+    final intent = tillReceiptRecordIntent(
+      receipt,
+      academicYearId: context
+          .read<FinanceTillReceiptsBloc>()
+          .state
+          .academicYearId,
+    );
+    if (intent == null) return;
+
+    context.push(
+      AppRoutesNames.facturationDetailPath(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+      extra: intent,
     );
   }
 }

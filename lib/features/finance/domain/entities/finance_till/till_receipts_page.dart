@@ -39,6 +39,18 @@ class TillReceiptsPage extends Equatable {
   /// qu'on dérive.
   final int withoutReceiptNumber;
 
+  /// L'année scolaire sur laquelle la page est filtrée — **portée par
+  /// l'enveloppe, jamais par la ligne**.
+  ///
+  /// Ce n'est pas une propriété du versement affiché : c'est le paramètre de la
+  /// requête, résolu une fois comme année courante de l'école. La répéter ligne
+  /// à ligne laisserait croire qu'une page peut en mêler deux, ce que la requête
+  /// interdit.
+  ///
+  /// Nullable tant que le contrat ne la sert pas. Sans elle, la fiche n'a pas
+  /// son second paramètre de route : l'œil reste éteint.
+  final String? academicYearId;
+
   const TillReceiptsPage({
     required this.content,
     required this.page,
@@ -46,6 +58,7 @@ class TillReceiptsPage extends Equatable {
     required this.totalElements,
     required this.totalPages,
     required this.withoutReceiptNumber,
+    this.academicYearId,
   });
 
   static const TillReceiptsPage empty = TillReceiptsPage(
@@ -76,5 +89,6 @@ class TillReceiptsPage extends Equatable {
     totalElements,
     totalPages,
     withoutReceiptNumber,
+    academicYearId,
   ];
 }

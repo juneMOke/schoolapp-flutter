@@ -104,6 +104,10 @@ class FinanceTillReceiptsBloc
         state.copyWith(
           status: FinanceTillReceiptsStatus.error,
           receipts: const [],
+          // L'année part avec les lignes : elle n'a de sens que pour celles qui
+          // sont à l'écran. La garder laisserait une fenêtre datée sous un
+          // message d'erreur, et des yeux prêts à ouvrir des lignes disparues.
+          academicYearId: null,
           failure: failure,
         ),
       ),
@@ -117,6 +121,8 @@ class FinanceTillReceiptsBloc
           totalElements: paged.totalElements,
           totalPages: paged.totalPages,
           withoutReceiptNumber: paged.withoutReceiptNumber,
+          // Portée par l'enveloppe, donc valable pour les n lignes de la page.
+          academicYearId: paged.academicYearId,
           failure: null,
         ),
       ),

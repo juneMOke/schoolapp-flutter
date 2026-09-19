@@ -10561,6 +10561,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 without a sealed receipt (back-entry)} other{{count} without a sealed receipt (back-entries)}}'**
   String financeTillReceiptsUnsealed(int count);
 
+  /// No description provided for @financeTillReceiptsOpenRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the financial record'**
+  String get financeTillReceiptsOpenRecord;
+
   /// No description provided for @financeTillReceiptsColumnDate.
   ///
   /// In en, this message translates to:

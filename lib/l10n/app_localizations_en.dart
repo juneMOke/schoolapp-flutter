@@ -6474,6 +6474,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get financeTillReceiptsOpenRecord => 'Open the financial record';
+
+  @override
   String get financeTillReceiptsColumnDate => 'Date';
 
   @override

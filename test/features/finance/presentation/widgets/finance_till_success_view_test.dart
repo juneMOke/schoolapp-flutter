@@ -188,6 +188,9 @@ void main() {
     // changements : une remise posée en état initial ne le réveillerait pas.
     FinanceTillReportState? reportEmits,
     List<String>? permissions,
+    // L'œil de la table. `null` par défaut : les 100 cas qui précèdent montent
+    // la vue sans lui, et un œil éteint est justement ce qu'ils doivent voir.
+    ValueChanged<TillReceipt>? onOpenRecord,
     // Le bouton en préparation porte un indicateur circulaire, qui tourne sans
     // fin : `pumpAndSettle` ne rendrait jamais la main.
     bool settle = true,
@@ -253,6 +256,7 @@ void main() {
                 selectedBlock: selected,
                 onCurrencySelected: selectedByTap.add,
                 onWindowRequested: windowsByTap.add,
+                onOpenRecord: onOpenRecord,
               ),
             ),
           ),
@@ -1944,6 +1948,133 @@ void main() {
           reason: 'une icône de la teinte du fond est une icône absente',
         );
       }
+    });
+  });
+
+  /// L'œil de la table d'encaissement : **il n'apparaît actif que quand il peut
+  /// aboutir.**
+  ///
+  /// Ce qu'ils défendent : un bouton actif qui ouvrirait une fiche sans
+  /// grand-livre serait pire qu'un bouton éteint — il aurait promis. Les deux
+  /// causes d'extinction sont distinctes et toutes deux couvertes : l'identité
+  /// manque sur la LIGNE, ou l'année manque sur l'ENVELOPPE.
+  group('l œil vers la fiche financière', () {
+    FinanceTillReceiptsState receipts({
+      String? studentId = 'stu-1',
+      String? firstName = 'Kevin',
+      String? lastName = 'MAKELA',
+      String? studentName = 'MAKELA Kevin Mbuyi',
+      String? academicYearId = 'ay-2526',
+    }) => FinanceTillReceiptsState(
+      status: FinanceTillReceiptsStatus.success,
+      totalElements: 1,
+      totalPages: 1,
+      academicYearId: academicYearId,
+      receipts: [
+        TillReceipt(
+          paymentId: 'p-1',
+          paidAt: DateTime.utc(2026, 5, 15, 10),
+          source: 'FACTURATION',
+          amount: 115000,
+          currency: 'USD',
+          receiptNumber: 'ETL-RC-2526-000214',
+          studentName: studentName,
+          classroom: '5e A',
+          studentId: studentId,
+          firstName: firstName,
+          lastName: lastName,
+          surname: 'Mbuyi',
+        ),
+      ],
+    );
+
+    Finder eye() => find.byIcon(Icons.visibility_outlined);
+
+    /// L'état désarmé se lit sur le **geste**, jamais sur une teinte : le socle
+    /// coupe `InkWell.onTap` quand la ligne ne peut pas ouvrir. Un œil gris qui
+    /// répondrait quand même est exactement le défaut visé.
+    bool enabled(WidgetTester tester) =>
+        tester
+            .widget<InkWell>(
+              find.ancestor(of: eye(), matching: find.byType(InkWell)).first,
+            )
+            .onTap !=
+        null;
+
+    testWidgets('une ligne complète porte un œil actif, et il ouvre', (
+      tester,
+    ) async {
+      TillReceipt? opened;
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: receipts(),
+        onOpenRecord: (receipt) => opened = receipt,
+      );
+
+      expect(eye(), findsOneWidget);
+      expect(enabled(tester), isTrue);
+
+      await tester.tap(eye());
+      await tester.pump();
+
+      expect(opened?.studentId, 'stu-1');
+    });
+
+    /// Le cas que le back a nommé : l'identifiant reste bon, mais l'annuaire ne
+    /// résout plus l'élève. La colonne affiche un tiret — et la fiche, elle, ne
+    /// chargerait rien.
+    testWidgets('sans nom résolu, l œil est grisé mais reste visible', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: receipts(
+          firstName: null,
+          lastName: null,
+          studentName: null,
+        ),
+        onOpenRecord: (_) {},
+      );
+
+      expect(eye(), findsOneWidget, reason: 'éteint, pas supprimé');
+      expect(enabled(tester), isFalse);
+    });
+
+    /// Le cas d'avant la livraison serveur. Le même grisage couvre les deux, et
+    /// c'est ce qui rend ce front livrable AVANT le back : l'œil s'allumera de
+    /// lui-même au déploiement, sans rien coordonner.
+    testWidgets('sans identifiant servi, l œil est grisé', (tester) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: receipts(studentId: null),
+        onOpenRecord: (_) {},
+      );
+
+      expect(enabled(tester), isFalse);
+    });
+
+    /// L'autre cause, et elle vient de l'ENVELOPPE : la ligne est parfaitement
+    /// ouvrable, mais la route manquerait son second paramètre.
+    testWidgets('sans année sur l enveloppe, l œil est grisé', (tester) async {
+      await pump(
+        tester,
+        _till([_block('USD')]),
+        receiptsState: receipts(academicYearId: null),
+        onOpenRecord: (_) {},
+      );
+
+      expect(enabled(tester), isFalse);
+    });
+
+    /// Sans destinataire, le geste n'existe pas : c'est ce qui laisse un
+    /// appelant monter cette table sans promettre d'ouverture.
+    testWidgets('sans callback, aucun œil actif', (tester) async {
+      await pump(tester, _till([_block('USD')]), receiptsState: receipts());
+
+      expect(enabled(tester), isFalse);
     });
   });
 }

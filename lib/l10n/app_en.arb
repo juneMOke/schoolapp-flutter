@@ -4036,6 +4036,7 @@
       }
     }
   },
+  "financeTillReceiptsOpenRecord": "Open the financial record",
   "financeTillReceiptsColumnDate": "Date",
   "financeTillReceiptsColumnReceipt": "Receipt",
   "financeTillReceiptsColumnStudent": "Student",
