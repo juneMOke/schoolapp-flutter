@@ -10,8 +10,10 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrol
 
 class _MockRepository extends Mock implements EnrollmentStatsRepository {}
 
-/// La table et son PDF **lisent dans le même ordre** : le document doit se
-/// superposer, ligne pour ligne, à ce qu'on vient de lire à l'écran.
+/// La table et son PDF ne lisent **pas** dans le même ordre, et chacun demande
+/// le sien explicitement : l'écran suit l'ordre du guichet, le registre
+/// imprimé se range par nom — on ne cherche pas sur le papier ce qu'on
+/// regarde à l'écran.
 void main() {
   late _MockRepository repository;
 
@@ -22,7 +24,7 @@ void main() {
 
   setUp(() => repository = _MockRepository());
 
-  test('la table et le registre demandent le MÊME ordre', () async {
+  test('la table et le registre demandent CHACUN leur ordre', () async {
     when(
       () => repository.getEntries(
         window: any(named: 'window'),
@@ -72,16 +74,22 @@ void main() {
     ).captured.single;
 
     expect(listOrder, EnrollmentEntriesOrder.dashboard);
-    expect(reportOrder, EnrollmentEntriesOrder.dashboard);
+    expect(reportOrder, EnrollmentEntriesOrder.document);
   });
 
-  test('l’ordre du tableau de bord est celui du registre', () {
-    // Ce que la table montrait déjà sur une journée, et l'ordre dans lequel
-    // une direction pointe un registre imprimé.
+  test('la table suit le guichet, le registre imprimé se range par nom', () {
+    // Les deux ne répondent pas à la même question : l'écran montre ce qui
+    // vient d'arriver, le papier sert à retrouver quelqu'un — et c'est le tri
+    // par nom qui fait paraître l'index par initiale.
     expect(
       EnrollmentEntriesOrder.dashboard,
       EnrollmentEntriesOrder.oldestFirst,
     );
     expect(EnrollmentEntriesOrder.dashboard.apiValue, 'oldest');
+
+    expect(EnrollmentEntriesOrder.document, EnrollmentEntriesOrder.byName);
+    // La valeur de fil, épinglée : c'est le seul mot que le serveur accepte
+    // pour l'alphabet, et il refuse tout le reste en 400.
+    expect(EnrollmentEntriesOrder.document.apiValue, 'name');
   });
 }

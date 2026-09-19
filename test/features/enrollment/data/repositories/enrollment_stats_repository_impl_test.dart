@@ -342,50 +342,53 @@ void main() {
       ),
     ).thenAnswer((_) async => answer);
 
-    test('même fenêtre et même ordre que la table, et un délai long', () async {
-      stubReport(
-        response(
-          disposition: 'attachment; filename="inscriptions-2025-2026.pdf"',
-        ),
-      );
+    test(
+      'même fenêtre que la table, rangé par nom, et un délai long',
+      () async {
+        stubReport(
+          response(
+            disposition: 'attachment; filename="inscriptions-2025-2026.pdf"',
+          ),
+        );
 
-      final result = await repository.getEntriesReport(
-        window: const EnrollmentStatsWindow.year(),
-        order: EnrollmentEntriesOrder.oldestFirst,
-      );
+        final result = await repository.getEntriesReport(
+          window: const EnrollmentStatsWindow.year(),
+          order: EnrollmentEntriesOrder.document,
+        );
 
-      // Le nom du serveur, tel quel : il porte le périmètre retenu.
-      expect(
-        result.getOrElse(() => throw StateError('attendu')).fileName,
-        'inscriptions-2025-2026.pdf',
-      );
-      // Tout est capturé : mocktail ne marie pas ici des valeurs littérales à
-      // un `captureAny()` sur les arguments positionnels.
-      final captured = verify(
-        () => mockRemoteDataSource.getEntriesReport(
-          captureAny(),
-          captureAny(),
-          captureAny(),
-          captureAny(),
-          captureAny(),
-          captureAny(),
-          captureAny(),
-        ),
-      ).captured;
-      expect(captured.sublist(0, 6), <Object?>[
-        tRequiredAuth,
-        'year',
-        null,
-        null,
-        null,
-        'oldest',
-      ]);
-      // Le délai de guichet ne suffit pas à composer une année.
-      expect(
-        (captured[6] as Options).receiveTimeout,
-        AppConstants.enrollmentEntriesReportTimeout,
-      );
-    });
+        // Le nom du serveur, tel quel : il porte le périmètre retenu.
+        expect(
+          result.getOrElse(() => throw StateError('attendu')).fileName,
+          'inscriptions-2025-2026.pdf',
+        );
+        // Tout est capturé : mocktail ne marie pas ici des valeurs littérales à
+        // un `captureAny()` sur les arguments positionnels.
+        final captured = verify(
+          () => mockRemoteDataSource.getEntriesReport(
+            captureAny(),
+            captureAny(),
+            captureAny(),
+            captureAny(),
+            captureAny(),
+            captureAny(),
+            captureAny(),
+          ),
+        ).captured;
+        expect(captured.sublist(0, 6), <Object?>[
+          tRequiredAuth,
+          'year',
+          null,
+          null,
+          null,
+          'name',
+        ]);
+        // Le délai de guichet ne suffit pas à composer une année.
+        expect(
+          (captured[6] as Options).receiveTimeout,
+          AppConstants.enrollmentEntriesReportTimeout,
+        );
+      },
+    );
 
     test('un 200 qui n\'est pas un PDF est refusé, pas remis', () async {
       stubReport(response(contentType: 'text/html'));
