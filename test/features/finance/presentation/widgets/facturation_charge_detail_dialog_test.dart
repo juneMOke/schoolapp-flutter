@@ -31,7 +31,7 @@ FacturationChargeDetailIntent _intent({
 
 Future<void> _pump(
   WidgetTester tester, {
-  required VoidCallback onPrint,
+  required VoidCallback onCopy,
   FacturationChargeDetailIntent? intent,
 }) {
   return tester.pumpWidget(
@@ -44,7 +44,7 @@ Future<void> _pump(
           child: FacturationChargeDetailDialogView(
             intent: intent ?? _intent(),
             allocations: const Text('ALLOC_SLOT'),
-            onPrintStatements: onPrint,
+            onCopyStatement: onCopy,
           ),
         ),
       ),
@@ -58,7 +58,7 @@ void main() {
   testWidgets(
     'popin détail frais : en-tête, pastille statut, barre, clé/valeurs, pied',
     (tester) async {
-      await _pump(tester, onPrint: () {});
+      await _pump(tester, onCopy: () {});
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -82,17 +82,17 @@ void main() {
       expect(find.text('ALLOC_SLOT'), findsOneWidget);
 
       // Pied : impression / fermer.
-      expect(find.text('Imprimer les relevés'), findsOneWidget);
+      expect(find.text('Copier le relevé'), findsOneWidget);
       expect(find.text('Fermer'), findsOneWidget);
     },
   );
 
-  testWidgets('« Imprimer les relevés » déclenche le callback', (tester) async {
+  testWidgets('« Copier le relevé » déclenche le callback', (tester) async {
     var printed = false;
-    await _pump(tester, onPrint: () => printed = true);
+    await _pump(tester, onCopy: () => printed = true);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Imprimer les relevés'));
+    await tester.tap(find.text('Copier le relevé'));
     await tester.pump();
 
     expect(printed, isTrue);
@@ -105,11 +105,11 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await _pump(tester, onPrint: () {});
+    await _pump(tester, onCopy: () {});
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Imprimer les relevés'), findsOneWidget);
+    expect(find.text('Copier le relevé'), findsOneWidget);
     expect(find.text('Fermer'), findsOneWidget);
   });
 
@@ -128,7 +128,7 @@ void main() {
       tester.view.reset();
     });
 
-    await _pump(tester, onPrint: () {});
+    await _pump(tester, onCopy: () {});
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
@@ -144,7 +144,7 @@ void main() {
     testWidgets('libellé + code du tarif', (tester) async {
       await _pump(
         tester,
-        onPrint: () {},
+        onCopy: () {},
         intent: _intent(
           chargeLabel: 'Organisation matériel examens — 2/3',
           feeCode: 'EXAMINATION',
@@ -166,7 +166,7 @@ void main() {
     testWidgets('intent sans libellé → repli sur la nature localisée', (
       tester,
     ) async {
-      await _pump(tester, onPrint: () {});
+      await _pump(tester, onCopy: () {});
       await tester.pumpAndSettle();
 
       final l10n = AppLocalizationsFr();

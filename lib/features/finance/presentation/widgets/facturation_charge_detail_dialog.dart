@@ -61,7 +61,7 @@ Future<void> showFacturationChargeDetailDialog(
             paidAmountInCents: intent.amountPaidInCents,
             currency: intent.currency,
           ),
-          onPrintStatements: () => _exportChargeStatement(blocContext, intent),
+          onCopyStatement: () => _exportChargeStatement(blocContext, intent),
         ),
       ),
     ),
@@ -107,20 +107,20 @@ Future<void> _exportChargeStatement(
 class FacturationChargeDetailDialogView extends StatelessWidget {
   final FacturationChargeDetailIntent intent;
   final Widget allocations;
-  final VoidCallback? onPrintStatements;
+  final VoidCallback? onCopyStatement;
 
   const FacturationChargeDetailDialogView({
     super.key,
     required this.intent,
     required this.allocations,
-    this.onPrintStatements,
+    this.onCopyStatement,
   });
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
 
-  void _onPrint(BuildContext context) {
-    if (onPrintStatements != null) {
-      onPrintStatements!();
+  void _onCopyStatement(BuildContext context) {
+    if (onCopyStatement != null) {
+      onCopyStatement!();
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
@@ -219,9 +219,12 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
           footer: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
-              secondaryLabel: l10n.facturationPrintStatementsLabel,
-              secondaryIcon: Icons.download_outlined,
-              onSecondary: () => _onPrint(context),
+              // Ce geste copie le relevé dans le presse-papiers — il n'imprime
+              // rien et ne télécharge rien. Libellé et glyphe disent désormais
+              // ce qu'il fait.
+              secondaryLabel: l10n.facturationCopyStatementLabel,
+              secondaryIcon: Icons.content_copy_outlined,
+              onSecondary: () => _onCopyStatement(context),
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => _close(context),

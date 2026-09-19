@@ -88,9 +88,12 @@ class _ExportButton extends StatelessWidget {
         order: const NumericFocusOrder(9),
         child: EteeloButton.secondary(
           onPressed: canExport ? onPressed : null,
-          icon: Icons.download_rounded,
-          label: l10n.classesListExportPdf,
-          tooltip: l10n.classesListExportPdf,
+          // Le geste copie un CSV dans le presse-papiers : ni PDF, ni fichier
+          // téléchargé. Le libellé ET le glyphe le disent, sans quoi le bouton
+          // promet une pièce que personne ne recevra.
+          icon: Icons.content_copy_rounded,
+          label: l10n.classesListCopyCsv,
+          tooltip: l10n.classesListCopyCsv,
         ),
       ),
     );

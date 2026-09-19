@@ -53,12 +53,20 @@ class FinanceTillSuccessView extends StatelessWidget {
   /// empruntait un autre chemin.
   final ValueChanged<TillWindow> onWindowRequested;
 
+  /// Ouvrir la fiche de facturation de l'élève d'une ligne d'encaissement.
+  ///
+  /// Remonté jusqu'à l'onglet, qui porte le contexte de navigation : pousser une
+  /// route depuis une section de table lui ferait connaître le routeur, qu'elle
+  /// n'a aucune raison de connaître. `null` éteint les yeux.
+  final ValueChanged<TillReceipt>? onOpenRecord;
+
   const FinanceTillSuccessView({
     super.key,
     required this.till,
     required this.selectedBlock,
     required this.onCurrencySelected,
     required this.onWindowRequested,
+    this.onOpenRecord,
   });
 
   @override
@@ -196,7 +204,10 @@ class FinanceTillSuccessView extends StatelessWidget {
             //
             // Elle reçoit donc les totaux de TOUTES les caisses, jamais ceux de
             // `selected`.
-            FinanceTillReceiptsSection(tillTotals: _paidTotals(till)),
+            FinanceTillReceiptsSection(
+              tillTotals: _paidTotals(till),
+              onOpenRecord: onOpenRecord,
+            ),
             const SizedBox(height: AppDimensions.spacingXL),
           ],
         ],

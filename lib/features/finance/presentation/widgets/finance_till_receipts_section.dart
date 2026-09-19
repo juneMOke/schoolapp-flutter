@@ -48,7 +48,19 @@ class FinanceTillReceiptsSection extends StatelessWidget {
   /// **jamais additionnés** — ce sont deux unités.
   final List<String> tillTotals;
 
-  const FinanceTillReceiptsSection({super.key, required this.tillTotals});
+  /// Ouvrir la fiche de facturation de l'élève d'une ligne.
+  ///
+  /// Remonté plutôt que traité ici : pousser une route demande le contexte de
+  /// navigation de la page, et cette section ne connaît que sa table. `null`
+  /// éteint tous les yeux — c'est ce qui rend le geste optionnel pour un
+  /// appelant qui n'en veut pas.
+  final ValueChanged<TillReceipt>? onOpenRecord;
+
+  const FinanceTillReceiptsSection({
+    super.key,
+    required this.tillTotals,
+    this.onOpenRecord,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +133,13 @@ class FinanceTillReceiptsSection extends StatelessWidget {
 
     return DataTableView(
       rows: [
-        for (final receipt in state.receipts) _rowOf(context, l10n, receipt),
+        for (final receipt in state.receipts)
+          _rowOf(
+            context,
+            l10n,
+            receipt,
+            hasAcademicYear: state.academicYearId?.trim().isNotEmpty ?? false,
+          ),
       ],
       config: DataTableViewConfig(
         isLoading: state.status == FinanceTillReceiptsStatus.loading,
@@ -203,17 +221,38 @@ class FinanceTillReceiptsSection extends StatelessWidget {
   DataTableRowSpec _rowOf(
     BuildContext context,
     AppLocalizations l10n,
-    TillReceipt receipt,
-  ) {
+    TillReceipt receipt, {
+    required bool hasAcademicYear,
+  }) {
     final materialL10n = MaterialLocalizations.of(context);
+    // L'année vient de l'ENVELOPPE, l'identité de la LIGNE : les deux sont
+    // nécessaires pour pousser la route, et il en manque une jusqu'à ce que le
+    // serveur serve les deux.
+    final canOpen =
+        onOpenRecord != null &&
+        hasAcademicYear &&
+        receipt.canOpenFinancialRecord;
 
     return DataTableRowSpec(
       // La clé porte aussi la devise : un panier mixte rend **deux lignes** sous
       // le même `paymentId`, et une clé qui l'ignorerait en ferait un doublon.
       id: '${receipt.paymentId}#${receipt.currency}',
       displayName: receipt.studentName ?? l10n.financeTillReceiptsNoStudent,
-      // Le reçu s'ouvre depuis Facturation, jamais depuis le tableau de bord :
-      // pas de clic promis ici.
+      // ⚠️ **La PIÈCE scellée s'ouvre depuis Facturation, jamais d'ici** — et
+      // cela n'a pas changé. Ce que l'œil ouvre est la **fiche de facturation**
+      // de l'élève : son grand-livre, pas son reçu. Aucun clic n'est promis sur
+      // la ligne elle-même, il n'y a pas d'aperçu à montrer ici.
+      trailing: DataTableTrailingSpec(
+        type: DataTableTrailingType.eye,
+        tooltip: l10n.financeTillReceiptsOpenRecord,
+        // Éteint quand la ligne ne porte pas de quoi ouvrir : identifiant, nom
+        // et prénom. Deux causes, un seul effet — l'annuaire qui ne résout plus
+        // l'élève, et le serveur qui ne sert pas encore ces champs. Un bouton
+        // éteint dit « pas ici » ; un bouton actif qui rendrait « contexte
+        // indisponible » dirait « j'ai essayé », ce qui est pire.
+        enabled: canOpen,
+        onTap: canOpen ? () => onOpenRecord?.call(receipt) : null,
+      ),
       cells: [
         DataTableCellSpec(
           text: materialL10n.formatCompactDate(receipt.paidAt.toLocal()),

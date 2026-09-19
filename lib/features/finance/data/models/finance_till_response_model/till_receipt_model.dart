@@ -8,6 +8,19 @@ class TillReceiptModel {
   final String? receiptNumber;
   final String? studentName;
   final String? classroom;
+
+  /// L'identifiant de l'élève et les trois composants de son nom.
+  ///
+  /// Nullables **même si le serveur les garantit** : ils n'arrivent qu'avec la
+  /// version du contrat qui les ajoute, et un binaire déployé avant elle doit
+  /// lire la table sans lever. Ils manquent alors ensemble, comme quand
+  /// l'annuaire ne résout plus l'élève — et l'œil reste éteint dans les deux
+  /// cas, pour la même raison.
+  final String? studentId;
+  final String? firstName;
+  final String? lastName;
+  final String? surname;
+
   final String? collectedBy;
   final String source;
   final int amount;
@@ -25,6 +38,10 @@ class TillReceiptModel {
     this.receiptNumber,
     this.studentName,
     this.classroom,
+    this.studentId,
+    this.firstName,
+    this.lastName,
+    this.surname,
     this.collectedBy,
     this.settledAmount,
     this.settledCurrency,
@@ -53,6 +70,13 @@ class TillReceiptModel {
       receiptNumber: _text(json['receiptNumber']),
       studentName: _text(json['studentName']),
       classroom: _text(json['classroom']),
+      // `_text` ramène l'absent ET le vide à `null` : les deux disent la même
+      // chose pour l'ouverture de la fiche, qui n'a que faire d'un prénom
+      // réduit à une espace.
+      studentId: _text(json['studentId']),
+      firstName: _text(json['firstName']),
+      lastName: _text(json['lastName']),
+      surname: _text(json['surname']),
       collectedBy: _text(json['collectedBy']),
       source: ((json['source'] as String?) ?? '').trim().toUpperCase(),
       amount: (json['amount'] as num).toInt(),
@@ -78,6 +102,10 @@ class TillReceiptModel {
     receiptNumber: receiptNumber,
     studentName: studentName,
     classroom: classroom,
+    studentId: studentId,
+    firstName: firstName,
+    lastName: lastName,
+    surname: surname,
     collectedBy: collectedBy,
     source: source,
     amount: amount,

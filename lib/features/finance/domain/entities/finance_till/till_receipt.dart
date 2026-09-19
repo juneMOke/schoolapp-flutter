@@ -45,6 +45,32 @@ class TillReceipt extends Equatable {
   /// Sa classe. `null` pour la même raison.
   final String? classroom;
 
+  /// L'identifiant de l'élève — **ce qui rend la fiche ouvrable depuis ici**.
+  ///
+  /// Le serveur le lit depuis `payments.student_id`, colonne `NOT NULL` : une
+  /// ligne de caisse désigne toujours quelqu'un. Il reste néanmoins **nullable
+  /// ici**, et c'est délibéré : le champ n'est servi que depuis la version du
+  /// contrat qui l'ajoute, et un binaire déployé avant elle doit continuer de
+  /// lire la table sans lever. L'œil s'allume alors de lui-même au déploiement
+  /// serveur, sans rien coordonner.
+  final String? studentId;
+
+  /// Le prénom, le nom et le post-nom, **séparés**.
+  ///
+  /// [studentName] est un libellé déjà composé, bon pour la colonne « Élève » et
+  /// pour rien d'autre : la fiche de facturation exige les composants, et
+  /// découper « MAKELA Kevin Mbuyi » serait une invention — l'ordre n'est pas
+  /// délimité et le nombre de mots varie (un nom composé, un post-nom absent).
+  ///
+  /// Ils suivent [studentName] : les quatre manquent ensemble quand l'annuaire
+  /// ne résout plus l'élève. C'est ce cas-là qui éteint l'œil.
+  final String? firstName;
+  final String? lastName;
+
+  /// Le post-nom. **Son absence est ordinaire** et n'empêche rien : la fiche
+  /// filtre les composants vides avant de composer le nom qu'elle affiche.
+  final String? surname;
+
   /// Le caissier qui a encaissé. **`null` quand l'annuaire ne résout pas** —
   /// compte supprimé, ou écriture système : on affiche un tiret, une
   /// attribution inventée étant pire qu'absente.
@@ -91,11 +117,31 @@ class TillReceipt extends Equatable {
     this.receiptNumber,
     this.studentName,
     this.classroom,
+    this.studentId,
+    this.firstName,
+    this.lastName,
+    this.surname,
     this.collectedBy,
     this.settledAmount,
     this.settledCurrency,
     this.rateMicros,
   });
+
+  /// La ligne porte de quoi ouvrir la fiche de facturation de son élève.
+  ///
+  /// Trois conditions, et pas une de plus : l'identifiant, le nom, le prénom.
+  /// C'est **exactement** la garde que la fiche applique de son côté
+  /// (`FacturationDetailIntent.hasStudentIdentity`), reportée ici pour que le
+  /// bouton ne promette jamais ce que l'écran suivant refuserait — il rendrait
+  /// une carte « contexte indisponible » à la place du grand-livre.
+  ///
+  /// Le **post-nom n'en fait pas partie** : beaucoup d'élèves n'en ont pas.
+  /// Le niveau et le cycle non plus — la fiche s'ouvre sans eux et affiche
+  /// « Facturation · - » en sur-titre.
+  bool get canOpenFinancialRecord =>
+      (studentId?.trim().isNotEmpty ?? false) &&
+      (firstName?.trim().isNotEmpty ?? false) &&
+      (lastName?.trim().isNotEmpty ?? false);
 
   /// La ligne a réglé un frais fixé dans une **autre** devise que celle tendue.
   ///
@@ -118,6 +164,14 @@ class TillReceipt extends Equatable {
     receiptNumber,
     studentName,
     classroom,
+    // ⚠️ Les quatre composants entrent dans l'égalité comme les autres. Un
+    // `props` incomplet rendrait deux lignes différentes égales, et ce dépôt a
+    // déjà payé cet oubli ailleurs : la cécité se propage ensuite à tout ce qui
+    // compare, y compris les tests censés attraper la régression.
+    studentId,
+    firstName,
+    lastName,
+    surname,
     collectedBy,
     source,
     amount,

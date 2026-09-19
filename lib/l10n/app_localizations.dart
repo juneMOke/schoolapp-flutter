@@ -2300,11 +2300,11 @@ abstract class AppLocalizations {
   /// **'There is no data to export for this search.'**
   String get classesListExportNothingToExport;
 
-  /// No description provided for @classesListExportPdf.
+  /// No description provided for @classesListCopyCsv.
   ///
   /// In en, this message translates to:
-  /// **'Export as PDF'**
-  String get classesListExportPdf;
+  /// **'Copy as CSV'**
+  String get classesListCopyCsv;
 
   /// Classes list sub-menu title
   ///
@@ -6811,35 +6811,11 @@ abstract class AppLocalizations {
   /// **'An unexpected error occurred while loading payments.'**
   String get facturationPaymentsUnknownError;
 
-  /// No description provided for @facturationPrintReceiptLabel.
+  /// No description provided for @facturationCopyStatementLabel.
   ///
   /// In en, this message translates to:
-  /// **'Print receipt'**
-  String get facturationPrintReceiptLabel;
-
-  /// No description provided for @facturationPrintReceiptSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate and download the receipt for this payment'**
-  String get facturationPrintReceiptSubtitle;
-
-  /// No description provided for @facturationPaymentDownloadPdfLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Download PDF'**
-  String get facturationPaymentDownloadPdfLabel;
-
-  /// No description provided for @facturationPrintStatementsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Print statements'**
-  String get facturationPrintStatementsLabel;
-
-  /// No description provided for @facturationPrintStatementsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate and download the billing statements for this student'**
-  String get facturationPrintStatementsSubtitle;
+  /// **'Copy statement'**
+  String get facturationCopyStatementLabel;
 
   /// No description provided for @facturationChargeDetailBackLabel.
   ///
@@ -10584,6 +10560,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 without a sealed receipt (back-entry)} other{{count} without a sealed receipt (back-entries)}}'**
   String financeTillReceiptsUnsealed(int count);
+
+  /// No description provided for @financeTillReceiptsOpenRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the financial record'**
+  String get financeTillReceiptsOpenRecord;
 
   /// No description provided for @financeTillReceiptsColumnDate.
   ///

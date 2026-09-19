@@ -26,6 +26,13 @@ class FinanceTillReceiptsState extends Equatable {
   /// parlent de la même chose.
   final int withoutReceiptNumber;
 
+  /// L'année de la fenêtre servie, lue sur **l'enveloppe** de la page.
+  ///
+  /// Second paramètre de route de la fiche de facturation. `null` tant que le
+  /// contrat ne la sert pas — et alors aucun œil ne s'allume : pousser une route
+  /// à laquelle il manque un paramètre est refusé par le redirect de garde.
+  final String? academicYearId;
+
   /// L'échec lui-même, pour que la vue distingue un **droit manquant** d'une
   /// panne : un 403 ici est normal pour un porteur du seul pilotage, et il ne
   /// doit ni ressembler à une erreur réseau ni emporter les cartes.
@@ -39,6 +46,7 @@ class FinanceTillReceiptsState extends Equatable {
     this.totalElements = 0,
     this.totalPages = 0,
     this.withoutReceiptNumber = 0,
+    this.academicYearId,
     this.failure,
   });
 
@@ -57,6 +65,7 @@ class FinanceTillReceiptsState extends Equatable {
     int? totalElements,
     int? totalPages,
     int? withoutReceiptNumber,
+    Object? academicYearId = _undefined,
     Object? failure = _undefined,
   }) => FinanceTillReceiptsState(
     status: status ?? this.status,
@@ -66,6 +75,12 @@ class FinanceTillReceiptsState extends Equatable {
     totalElements: totalElements ?? this.totalElements,
     totalPages: totalPages ?? this.totalPages,
     withoutReceiptNumber: withoutReceiptNumber ?? this.withoutReceiptNumber,
+    // Sentinelle et non `??` : `null` est une valeur SIGNIFIANTE ici — l'échec
+    // efface l'année, et un `??` ne saurait pas distinguer « efface-la » de
+    // « n'y touche pas ».
+    academicYearId: identical(academicYearId, _undefined)
+        ? this.academicYearId
+        : academicYearId as String?,
     failure: identical(failure, _undefined)
         ? this.failure
         : failure as Failure?,
@@ -80,6 +95,7 @@ class FinanceTillReceiptsState extends Equatable {
     totalElements,
     totalPages,
     withoutReceiptNumber,
+    academicYearId,
     failure,
   ];
 }

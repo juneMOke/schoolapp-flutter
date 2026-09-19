@@ -16,6 +16,10 @@ class TillReceiptPageModel {
   final int totalPages;
   final int withoutReceiptNumber;
 
+  /// L'année de la fenêtre. Nullable : elle n'arrive qu'avec la version du
+  /// contrat qui l'ajoute, et son absence doit laisser la table se lire.
+  final String? academicYearId;
+
   const TillReceiptPageModel({
     required this.content,
     required this.page,
@@ -23,6 +27,7 @@ class TillReceiptPageModel {
     required this.totalElements,
     required this.totalPages,
     required this.withoutReceiptNumber,
+    this.academicYearId,
   });
 
   /// Les compteurs cèdent à zéro, `content` à une liste vide : une page est une
@@ -43,6 +48,13 @@ class TillReceiptPageModel {
       // pas encore ne doit pas faire annoncer un compte inventé.
       withoutReceiptNumber:
           (json['withoutReceiptNumber'] as num?)?.toInt() ?? 0,
+      // Absent ⇒ `null` ⇒ aucun œil ne s'allume. Un serveur qui ne la sert pas
+      // encore ne doit pas faire pousser une route à laquelle il manque un
+      // paramètre.
+      academicYearId: switch (json['academicYearId']) {
+        final String raw when raw.trim().isNotEmpty => raw.trim(),
+        _ => null,
+      },
     );
   }
 
@@ -53,5 +65,6 @@ class TillReceiptPageModel {
     totalElements: totalElements,
     totalPages: totalPages,
     withoutReceiptNumber: withoutReceiptNumber,
+    academicYearId: academicYearId,
   );
 }

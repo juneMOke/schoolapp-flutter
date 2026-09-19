@@ -1411,7 +1411,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'There is no data to export for this search.';
 
   @override
-  String get classesListExportPdf => 'Export as PDF';
+  String get classesListCopyCsv => 'Copy as CSV';
 
   @override
   String get subMenuClassesList => 'Class lists';
@@ -4186,21 +4186,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'An unexpected error occurred while loading payments.';
 
   @override
-  String get facturationPrintReceiptLabel => 'Print receipt';
-
-  @override
-  String get facturationPrintReceiptSubtitle =>
-      'Generate and download the receipt for this payment';
-
-  @override
-  String get facturationPaymentDownloadPdfLabel => 'Download PDF';
-
-  @override
-  String get facturationPrintStatementsLabel => 'Print statements';
-
-  @override
-  String get facturationPrintStatementsSubtitle =>
-      'Generate and download the billing statements for this student';
+  String get facturationCopyStatementLabel => 'Copy statement';
 
   @override
   String get facturationChargeDetailBackLabel => 'Back to billing detail';
@@ -6486,6 +6472,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeTillReceiptsOpenRecord => 'Open the financial record';
 
   @override
   String get financeTillReceiptsColumnDate => 'Date';
