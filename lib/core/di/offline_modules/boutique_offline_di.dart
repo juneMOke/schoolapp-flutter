@@ -4,9 +4,13 @@ import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_history_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_receipt_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_history_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_receipt_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
@@ -138,6 +142,23 @@ void registerBoutiqueOffline(GetIt getIt) {
   );
   getIt.registerFactory<MarkSaleTicketPrintedUseCase>(
     () => MarkSaleTicketPrintedUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+
+  // ── Réclamation du reçu scellé ──────────────────────────────────────────
+  // Réseau OBLIGATOIRE, donc délibérément hors de l'historique : celui-ci est
+  // une lecture locale seule, et c'est ce qui le rend consultable quand le
+  // réseau manque. Une pièce d'éditique, elle, est produite maintenant ou pas
+  // du tout et ne passe jamais par l'outbox.
+  getIt.registerLazySingleton<BoutiqueReceiptRepository>(
+    () => BoutiqueReceiptRepositoryImpl(
+      api: getIt<BoutiqueSyncApi>(),
+      dao: getIt<BoutiqueSaleWriteDao>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<ClaimSaleReceiptUseCase>(
+    () => ClaimSaleReceiptUseCase(getIt<BoutiqueReceiptRepository>()),
   );
   // `registerFactory`, jamais singleton : la fenêtre choisie appartient à
   // l'écran ouvert, et un bloc partagé ferait revenir la période d'une visite

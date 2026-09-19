@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
@@ -15,6 +16,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class _MockGetDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
 
 class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
+
+class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
 
 BoutiqueSaleLocalModel _sale({
   String? collectedByName = 'Mbala Céline',
@@ -62,12 +65,15 @@ SaleDetail _detail({
 void main() {
   late _MockGetDetail getDetail;
   late _MockMarkPrinted markPrinted;
+  late _MockClaimReceipt claimReceipt;
 
   setUp(() {
     getDetail = _MockGetDetail();
     markPrinted = _MockMarkPrinted();
+    claimReceipt = _MockClaimReceipt();
     GetIt.I.registerFactory<GetBoutiqueSaleDetailUseCase>(() => getDetail);
     GetIt.I.registerFactory<MarkSaleTicketPrintedUseCase>(() => markPrinted);
+    GetIt.I.registerFactory<ClaimSaleReceiptUseCase>(() => claimReceipt);
   });
 
   tearDown(() => GetIt.I.reset());
@@ -178,6 +184,87 @@ void main() {
 
     expect(find.text('Ouvrir le reçu scellé'), findsOneWidget);
     expect(find.text('RV-2026-0007'), findsWidgets);
+  });
+
+  testWidgets('scellee ET numerotee : il n y a RIEN a reclamer', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: _detail(
+        sale: _sale(
+          receiptNumber: 'ETL-RV-2526-000413',
+          receiptDocumentId: 'doc-7',
+        ),
+      ),
+    );
+
+    expect(find.text('Ouvrir le reçu scellé'), findsOneWidget);
+    expect(find.text('Réclamer le reçu scellé'), findsNothing);
+    expect(find.textContaining('numéro n\'a pas été communiqué'), findsNothing);
+  });
+
+  testWidgets('aucune piece : le recu se RECLAME, au lieu d attendre', (
+    tester,
+  ) async {
+    // Le scellement serveur est best-effort : sans ce bouton, une vente dont
+    // l'ACK est revenu sans document attend un pull qui n'apportera jamais son
+    // numéro.
+    await pumpDetail(tester, detail: _detail());
+
+    expect(find.text('Réclamer le reçu scellé'), findsOneWidget);
+  });
+
+  testWidgets('scellee mais SANS numero : la piece s ouvre, le numero se '
+      'reclame', (tester) async {
+    // ⚠️ Le cas qui mentait durablement : le delta porte l'identifiant
+    // d'archive mais jamais le numéro, donc le reçu s'ouvrait très bien pendant
+    // que la ligne « Reçu » affichait une référence provisoire — pour toujours.
+    await pumpDetail(
+      tester,
+      detail: _detail(sale: _sale(receiptDocumentId: 'doc-7')),
+    );
+
+    expect(find.text('Ouvrir le reçu scellé'), findsOneWidget);
+    expect(find.text('Réclamer le reçu scellé'), findsOneWidget);
+    expect(
+      find.textContaining('numéro n\'a pas été communiqué'),
+      findsOneWidget,
+    );
+    // La référence provisoire est bien ce qui s'affiche en attendant.
+    expect(find.textContaining('PROV-'), findsWidgets);
+  });
+
+  testWidgets('une vente NON PARTIE ne reclame rien', (tester) async {
+    // L'identifiant qu'on présenterait est un uuid client que le serveur ne
+    // trouverait pas : le bouton promettrait un 404.
+    await pumpDetail(
+      tester,
+      detail: _detail(sale: _sale(syncStatus: 'PENDING_SYNC')),
+    );
+
+    expect(find.text('Réclamer le reçu scellé'), findsNothing);
+  });
+
+  testWidgets('un echec de reclamation ne coute que du papier, et le DIT', (
+    tester,
+  ) async {
+    // La vente est encaissée et le ticket fait foi. La route étant idempotente
+    // sous verrou, la réclamation se refait sans risque — donc le bouton
+    // redevient actif.
+    when(
+      () => claimReceipt(any()),
+    ).thenAnswer((_) async => const Left(ServerFailure('boom')));
+    await pumpDetail(tester, detail: _detail());
+
+    await tester.tap(find.text('Réclamer le reçu scellé'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('n\'a pas pu être réclamé'), findsOneWidget);
+    final button = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Réclamer le reçu scellé'),
+    );
+    expect(button.onPressed, isNotNull);
   });
 
   testWidgets('une vente en attente le DIT sur sa fiche', (tester) async {

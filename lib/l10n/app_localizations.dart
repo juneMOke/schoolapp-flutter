@@ -14222,6 +14222,24 @@ abstract class AppLocalizations {
   /// **'The receipt will be sealed at synchronisation. The ticket stands in the meantime.'**
   String get boutiqueSaleDetailReceiptPending;
 
+  /// No description provided for @boutiqueSaleDetailClaimReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim the sealed receipt'**
+  String get boutiqueSaleDetailClaimReceipt;
+
+  /// No description provided for @boutiqueSaleDetailClaimReceiptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt could not be claimed. The ticket stands, and claiming it again is safe.'**
+  String get boutiqueSaleDetailClaimReceiptFailed;
+
+  /// No description provided for @boutiqueSaleDetailReceiptNumberMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt is sealed but its number was not sent: the reference above stays provisional. Claim it to obtain the final number.'**
+  String get boutiqueSaleDetailReceiptNumberMissing;
+
   /// No description provided for @boutiqueSaleDetailReceiptTitle.
   ///
   /// In en, this message translates to:
