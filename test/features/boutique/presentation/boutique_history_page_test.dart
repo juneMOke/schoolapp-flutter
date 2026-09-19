@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/sale_histor
 import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
@@ -40,6 +41,8 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 class _MockGetSaleDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
 
 class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
+
+class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
 
 SaleHistoryEntry _sale({
   String id = 's-1',
@@ -191,6 +194,10 @@ void main() {
     GetIt.I.registerFactory<MarkSaleTicketPrintedUseCase>(
       () => _MockMarkPrinted(),
     );
+    // Enregistré sans être stubé, et c'est suffisant : la lecture répond
+    // « introuvable », donc la fiche n'atteint jamais l'état où un reçu se
+    // réclame. Ce que ce test vérifie est le CHAÎNAGE, pas la réclamation.
+    GetIt.I.registerFactory<ClaimSaleReceiptUseCase>(() => _MockClaimReceipt());
 
     await pumpPage(tester);
     await tester.tap(find.byType(BoutiqueHistorySaleTile));

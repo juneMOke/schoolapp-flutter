@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -10,6 +14,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_detail_cubit.dart';
@@ -61,6 +66,7 @@ class BoutiqueSaleDetailPage extends StatelessWidget {
     create: (_) => SaleDetailCubit(
       getDetail: getIt<GetBoutiqueSaleDetailUseCase>(),
       markPrinted: getIt<MarkSaleTicketPrintedUseCase>(),
+      claimReceipt: getIt<ClaimSaleReceiptUseCase>(),
       saleId: saleId,
     )..load(),
     child: _SaleDetailView(levelLabels: levelLabels),
@@ -80,6 +86,10 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
   /// Vrai pendant l'envoi à l'imprimante — le bouton se neutralise plutôt que
   /// de laisser empiler deux envois vers la même machine.
   bool _isPrinting = false;
+
+  /// Vrai pendant la réclamation du reçu, pour la même raison : deux demandes
+  /// pour la même pièce ne serviraient à rien.
+  bool _isClaiming = false;
 
   /// Réimprime le ticket, et ne note la trace **que si le papier est sorti**.
   ///
@@ -101,8 +111,16 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
     }
   }
 
-  /// Ouvre le reçu scellé : la copie locale d'abord, le re-téléchargement
-  /// ensuite (ADR-012 D-1). Rien n'est émis, aucun numéro n'est consommé.
+  /// Ouvre le reçu scellé par **restitution** : rien n'est émis, aucun numéro
+  /// n'est consommé.
+  ///
+  /// ⚠️ **Et jamais depuis une copie locale**, contrairement à ce que cette
+  /// ligne annonçait : le `RV` est absent de `cacheableDocTypes` **et** du
+  /// `CHECK` SQL du cache, donc la lecture locale rend toujours `null` et la
+  /// mise en cache est neutralisée. Chaque ouverture est un `GET` réseau.
+  /// Écart assumé : ouvrir le cache au RV coûterait une reconstruction de table
+  /// (SQLite ne sait pas ajouter un `CHECK` par `ALTER`) et y déposerait le
+  /// payeur, son téléphone, les prénoms des enfants et les prix.
   Future<void> _openReceipt(SaleDetail detail) => showEditiqueRestitutionDialog(
     context,
     type: EditiqueDocumentType.saleReceipt,
@@ -110,6 +128,52 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
     documentId: detail.sale.sale.receiptDocumentId,
     documentNumber: detail.sale.sale.receiptNumber,
   );
+
+  /// Réclame au serveur la pièce que son scellement *best-effort* n'a pas
+  /// rendue, puis la **montre**.
+  ///
+  /// Les octets arrivent avec la réponse : on les affiche directement plutôt que
+  /// de repasser par la restitution, qui re-téléchargerait la pièce qui vient
+  /// d'arriver — le `RV` n'étant pas mis en cache, ce serait un second appel
+  /// réseau pour le même PDF.
+  ///
+  /// La relecture de la fiche est faite par le cubit : c'est elle qui fait
+  /// disparaître la référence `PROV-` de la ligne « Reçu », du titre, et de tout
+  /// ticket réimprimé ensuite.
+  Future<void> _claimReceipt() async {
+    final cubit = context.read<SaleDetailCubit>();
+    // Tout ce qui vient du contexte est prélevé AVANT l'attente : la demande
+    // dure, et le messager doit survivre à ce qui se ferme entre-temps.
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final title = l10n.boutiqueSaleDetailReceiptTitle;
+    final failedNotice = l10n.boutiqueSaleDetailClaimReceiptFailed;
+
+    setState(() => _isClaiming = true);
+    final outcome = await cubit.claimReceipt();
+    if (!mounted) return;
+    setState(() => _isClaiming = false);
+
+    await outcome.fold<Future<void>>(
+      // La vente est encaissée et le ticket fait foi : l'échec ne coûte que du
+      // papier, et la réclamation se refait sans risque — la route est
+      // idempotente sous verrou.
+      (_) async =>
+          messenger?.showSnackBar(SnackBar(content: Text(failedNotice))),
+      (document) async {
+        if (!context.mounted) return;
+        await showEteeloDocumentViewer(
+          context,
+          title: title,
+          document: PrintableDocument(
+            bytes: document.bytes,
+            fileName: document.fileName,
+            reference: document.documentNumber,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +218,10 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
             SaleDetailStatus.ready => _Body(
               detail: detail!,
               isPrinting: _isPrinting,
+              isClaiming: _isClaiming,
               onPrintTicket: () => _printTicket(detail),
               onOpenReceipt: () => _openReceipt(detail),
+              onClaimReceipt: _claimReceipt,
             ),
           },
         );
@@ -174,14 +240,18 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
 class _Body extends StatelessWidget {
   final SaleDetail detail;
   final bool isPrinting;
+  final bool isClaiming;
   final VoidCallback onPrintTicket;
   final VoidCallback onOpenReceipt;
+  final VoidCallback onClaimReceipt;
 
   const _Body({
     required this.detail,
     required this.isPrinting,
+    required this.isClaiming,
     required this.onPrintTicket,
     required this.onOpenReceipt,
+    required this.onClaimReceipt,
   });
 
   @override
@@ -263,8 +333,10 @@ class _Body extends StatelessWidget {
         _Actions(
           detail: detail,
           isPrinting: isPrinting,
+          isClaiming: isClaiming,
           onPrintTicket: onPrintTicket,
           onOpenReceipt: onOpenReceipt,
+          onClaimReceipt: onClaimReceipt,
         ),
         const SizedBox(height: AppDimensions.spacingXL),
       ],
@@ -375,14 +447,18 @@ class _AmountBanner extends StatelessWidget {
 class _Actions extends StatelessWidget {
   final SaleDetail detail;
   final bool isPrinting;
+  final bool isClaiming;
   final VoidCallback onPrintTicket;
   final VoidCallback onOpenReceipt;
+  final VoidCallback onClaimReceipt;
 
   const _Actions({
     required this.detail,
     required this.isPrinting,
+    required this.isClaiming,
     required this.onPrintTicket,
     required this.onOpenReceipt,
+    required this.onClaimReceipt,
   });
 
   @override
@@ -453,6 +529,50 @@ class _Actions extends StatelessWidget {
             color: AppColors.textMuted,
             text: l10n.boutiqueSaleDetailReceiptPending,
           ),
+        // **Réclamer, et non émettre.** Le serveur scelle la pièce au push de la
+        // vente, mais son scellement est *best-effort* : sans ce geste, une
+        // vente dont l'ACK est revenu sans document attend un pull qui
+        // n'apportera jamais son numéro. Le serveur journalise lui-même qu'il
+        // compte sur cet appel.
+        //
+        // Deux manques le déclenchent, et le second mérite sa phrase : une pièce
+        // scellée dont le NUMÉRO est inconnu s'ouvre très bien tout en laissant
+        // la ligne « Reçu » afficher une référence provisoire, indéfiniment.
+        if (detail.canClaimReceipt) ...[
+          if (detail.hasSealedReceipt) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            _Notice(
+              icon: Icons.pin_outlined,
+              color: AppColors.warning,
+              text: l10n.boutiqueSaleDetailReceiptNumberMissing,
+            ),
+          ],
+          const SizedBox(height: AppDimensions.spacingS),
+          // La route exige `boutique.sale.write` ET `editique.write`. La garde
+          // est prise au registre plutôt qu'écrite ici : recopiée, elle
+          // finirait par diverger — et sans sa conjonction, le porteur d'une
+          // seule des deux permissions verrait la porte pour prendre un 403.
+          PermissionGate.access(
+            kBoutiqueCollectAccess,
+            child: OutlinedButton.icon(
+              onPressed: isClaiming ? null : onClaimReceipt,
+              icon: isClaiming
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_download_outlined, size: 20),
+              label: Text(l10n.boutiqueSaleDetailClaimReceipt),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

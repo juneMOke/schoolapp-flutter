@@ -117,6 +117,43 @@ class BoutiqueSaleWriteDao {
     }
   }
 
+  /// Pose sur une vente le reçu que la **réclamation** vient d'obtenir.
+  ///
+  /// Distincte de [applySaleAck], et la distinction n'est pas cosmétique :
+  /// celle-ci ne touche **ni** `sync_status`, **ni** `sync_error`, **ni**
+  /// `synced_at`. La vente est déjà partie et déjà acquittée ; seule sa pièce
+  /// arrive en retard. Réutiliser le chemin de l'ACK ferait réécrire l'état de
+  /// synchro d'une vente dont la synchro n'est pas en cause.
+  ///
+  /// ⚠️ **Un champ absent n'écrase JAMAIS un champ connu.** Le numéro ne voyage
+  /// que dans un `Content-Disposition` que le contrat ne documente sur aucune
+  /// route : si le serveur ne le pose pas, la réclamation rend `null`. Écrire ce
+  /// `null` effacerait le numéro qu'un ACK antérieur avait posé — une
+  /// réclamation ne peut qu'**ajouter**.
+  Future<void> applyClaimedReceipt(
+    String saleId, {
+    required int nowMs,
+    String? documentId,
+    String? documentNumber,
+  }) async {
+    final claimed = <String, Object?>{
+      if ((documentId ?? '').trim().isNotEmpty)
+        'receipt_document_id': documentId!.trim(),
+      if ((documentNumber ?? '').trim().isNotEmpty)
+        'receipt_number': documentNumber!.trim(),
+    };
+    // Rien d'exploitable : on ne bouge pas `updated_at` pour une non-écriture,
+    // sinon la vente paraîtrait avoir changé alors que rien n'a changé.
+    if (claimed.isEmpty) return;
+
+    await _db.update(
+      'boutique_sales',
+      {...claimed, 'updated_at': nowMs},
+      where: 'id = ?',
+      whereArgs: [saleId],
+    );
+  }
+
   /// Bascule une vente en échec **terminal**, avec la raison.
   ///
   /// Le montant reste lisible en local : l'argent reçu n'est jamais « reperdu »

@@ -8896,6 +8896,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.';
 
   @override
+  String get boutiqueSaleDetailClaimReceipt => 'Réclamer le reçu scellé';
+
+  @override
+  String get boutiqueSaleDetailClaimReceiptFailed =>
+      'Le reçu n\'a pas pu être réclamé. Le ticket fait foi, et la réclamation peut être refaite sans risque.';
+
+  @override
+  String get boutiqueSaleDetailReceiptNumberMissing =>
+      'Le reçu est scellé mais son numéro n\'a pas été communiqué : la référence ci-dessus reste provisoire. Réclamez-le pour obtenir le numéro définitif.';
+
+  @override
   String get boutiqueSaleDetailReceiptTitle => 'Reçu de vente';
 
   @override

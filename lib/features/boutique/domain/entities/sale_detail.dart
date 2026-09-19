@@ -29,6 +29,23 @@ class SaleDetail extends Equatable {
 
   bool get ticketWasPrinted => ticketPrintedAt != null;
 
+  /// La vente a-t-elle quelque chose à **réclamer** au serveur ?
+  ///
+  /// Deux manques distincts, et le second est le plus sournois :
+  ///  - **aucune pièce** — le scellement au push est *best-effort*, et l'ACK
+  ///    peut revenir sans document sur un 201 parfaitement en ligne ;
+  ///  - **une pièce sans son numéro** — le delta des ventes porte l'identifiant
+  ///    d'archive mais **jamais** le numéro (il ne l'invente pas). Le reçu est
+  ///    alors ouvrable, et la ligne « Reçu » affiche pourtant une référence
+  ///    provisoire — pour toujours, sur une vente parfaitement scellée.
+  ///
+  /// ⚠️ Réservé aux ventes que le serveur **connaît**. Sur une vente encore en
+  /// attente de synchro, l'identifiant présenté est un uuid client qu'il ne
+  /// trouverait pas : le bouton promettrait un 404.
+  bool get canClaimReceipt =>
+      sale.sale.syncStatus == 'SYNCED' &&
+      (!hasSealedReceipt || (sale.sale.receiptNumber ?? '').trim().isEmpty);
+
   /// ⚠️ C'était `[sale.id, ticketPrintedAt]`, et c'est **le** piège de cet
   /// écran : `SaleDetailState` compare son `detail`, donc un cubit qui relit une
   /// vente dont seul un champ a changé émettait un état jugé ÉGAL au précédent —
