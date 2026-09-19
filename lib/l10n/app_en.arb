@@ -1316,7 +1316,7 @@
   "classesListExportSuccess": "Export copied to clipboard.",
   "classesListExportFailed": "Unable to prepare the export right now.",
   "classesListExportNothingToExport": "There is no data to export for this search.",
-  "classesListExportPdf": "Export as PDF",
+  "classesListCopyCsv": "Copy as CSV",
   "subMenuClassesList": "Class lists",
   "@subMenuClassesList": {
     "description": "Classes list sub-menu title"
@@ -2805,11 +2805,7 @@
   "facturationPaymentsStorageError": "A local error prevents payments from being displayed.",
   "facturationPaymentsAuthError": "An authentication error prevents payments from loading.",
   "facturationPaymentsUnknownError": "An unexpected error occurred while loading payments.",
-  "facturationPrintReceiptLabel": "Print receipt",
-  "facturationPrintReceiptSubtitle": "Generate and download the receipt for this payment",
-  "facturationPaymentDownloadPdfLabel": "Download PDF",
-  "facturationPrintStatementsLabel": "Print statements",
-  "facturationPrintStatementsSubtitle": "Generate and download the billing statements for this student",
+  "facturationCopyStatementLabel": "Copy statement",
   "facturationChargeDetailBackLabel": "Back to billing detail",
   "facturationChargeDetailHeroTitle": "Fee details",
   "facturationChargeDetailHeroSubtitle": "Review this charge status and the payments allocated to it.",
