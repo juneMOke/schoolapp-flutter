@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/tender_composition.dart';
 import 'package:school_app_flutter/core/money/money.dart';
@@ -7,7 +8,13 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 ///
 /// `id` est l'uuid **client** honoré par le serveur : il n'y a pas de
 /// `client_uuid` séparé comme sur `payments`, parce qu'il n'y a rien à remapper.
-class BoutiqueSaleLocalModel {
+/// ⚠️ **`Equatable` n'est pas décoratif ici.** Ces modèles voyagent dans
+/// [RecordedSale], que l'état d'un cubit compare pour décider s'il émet. Sans
+/// valeur d'égalité, deux relectures de la MÊME vente se comparaient par
+/// identité — et les entités qui les portent avaient contourné le problème en
+/// n'épinglant que `sale.id`, ce qui rendait tout changement de champ invisible
+/// à l'écran : une vente qui recevait son numéro de reçu ne reconstruisait rien.
+class BoutiqueSaleLocalModel extends Equatable {
   final String id;
   final String schoolId;
   final String academicYearId;
@@ -97,10 +104,38 @@ class BoutiqueSaleLocalModel {
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         updatedAt: (map['updated_at'] as num?)?.toInt() ?? 0,
       );
+
+  /// **Tous** les champs, et c'est la seule liste tenable : une égalité partielle
+  /// se choisit en fonction de ce qui compte aujourd'hui, et se trompe le jour
+  /// où autre chose compte. Le reçu en est la démonstration — il est arrivé
+  /// après, et aucune liste écrite avant lui ne l'aurait contenu.
+  @override
+  List<Object?> get props => [
+    id,
+    schoolId,
+    academicYearId,
+    payerLastName,
+    payerMiddleName,
+    payerFirstName,
+    payerPhoneNumber,
+    payerName,
+    collectedById,
+    collectedByName,
+    soldAt,
+    receiptDocumentId,
+    receiptNumber,
+    deviceId,
+    syncStatus,
+    updatedAt,
+  ];
 }
 
 /// Une ligne du panier, figée à la vente.
-class BoutiqueSaleLineLocalModel {
+///
+/// `Equatable` pour la même raison que [BoutiqueSaleLocalModel] : les lignes
+/// entrent dans l'égalité de [RecordedSale], et sans elle une liste relue se
+/// comparait par identité.
+class BoutiqueSaleLineLocalModel extends Equatable {
   final String id;
   final String saleId;
   final String articleId;
@@ -182,6 +217,25 @@ class BoutiqueSaleLineLocalModel {
         catalogPriceInCents: (map['catalog_price_in_cents'] as num?)?.toInt(),
         position: (map['position'] as num?)?.toInt() ?? 0,
       );
+
+  @override
+  List<Object?> get props => [
+    id,
+    saleId,
+    articleId,
+    articleLabel,
+    articleCode,
+    beneficiaryStudentId,
+    beneficiaryName,
+    schoolLevelId,
+    size,
+    quantity,
+    unitPriceInCents,
+    lineTotalInCents,
+    currency,
+    catalogPriceInCents,
+    position,
+  ];
 }
 
 /// Les montants d'une vente, **dérivés de ses lignes**.

@@ -16,6 +16,12 @@ class RecordedSale extends Equatable {
   /// Somme des quantités — ce que le client compte en recevant ses articles.
   int get articleCount => lines.fold(0, (sum, line) => sum + line.quantity);
 
+  /// La vente ENTIÈRE et ses lignes entières.
+  ///
+  /// ⚠️ C'était `[sale.id, lines.length]` — une égalité qui ne voyait ni un
+  /// changement de champ, ni une ligne remplacée par une autre à nombre égal.
+  /// Deux ventes différentes s'y déclaraient identiques, et l'écran qui les
+  /// compare ne se reconstruisait pas.
   @override
-  List<Object?> get props => [sale.id, lines.length];
+  List<Object?> get props => [sale, lines];
 }

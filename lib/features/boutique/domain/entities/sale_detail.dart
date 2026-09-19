@@ -29,6 +29,11 @@ class SaleDetail extends Equatable {
 
   bool get ticketWasPrinted => ticketPrintedAt != null;
 
+  /// ⚠️ C'était `[sale.id, ticketPrintedAt]`, et c'est **le** piège de cet
+  /// écran : `SaleDetailState` compare son `detail`, donc un cubit qui relit une
+  /// vente dont seul un champ a changé émettait un état jugé ÉGAL au précédent —
+  /// et un `Cubit` n'émet pas un état égal. L'écran restait sur ses valeurs
+  /// périmées sans que rien ne le signale.
   @override
-  List<Object?> get props => [sale.id, ticketPrintedAt];
+  List<Object?> get props => [sale, ticketPrintedAt];
 }
