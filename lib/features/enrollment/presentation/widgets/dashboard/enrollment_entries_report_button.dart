@@ -18,11 +18,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ## Le serveur compose, l'écran remet
 ///
 /// Le document n'est plus composé sur l'appareil à partir de la page visible :
-/// il vient de `/entries.pdf`, qui lit la même fenêtre et dans le même ordre
-/// que la table, mais **toutes les lignes** — pas les huit à l'écran. En-tête
-/// d'établissement, pagination `n / N`, numéro de pièce et scellement : c'est
-/// le registre qu'une direction signe et classe. Même chemin que le rapport de
-/// la caisse, sur le tableau de bord Finances.
+/// il vient de `/entries.pdf`, qui lit la même fenêtre que la table mais
+/// **toutes les lignes** — pas les huit à l'écran — et les range **par nom**,
+/// avec un index par initiale. L'écran montre ce qui vient d'arriver ; sur le
+/// papier, on cherche un élève. En-tête d'établissement, pagination `n / N`,
+/// numéro de pièce et scellement : c'est le registre qu'une direction signe et
+/// classe. Même chemin que le rapport de la caisse, sur le tableau de bord
+/// Finances.
 ///
 /// ## La fenêtre est celle de la LISTE, pas celle du sélecteur
 ///
