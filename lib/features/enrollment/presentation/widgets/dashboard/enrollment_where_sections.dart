@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart'
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_cycle_palette.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_who_sections.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -91,6 +92,8 @@ class EnrollmentLevelSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardLevelTitle,
+      tone: EnrollmentDashboardTones.sectionTint('niveau'),
+      toneStrength: EnrollmentDashboardTones.sectionStrength('niveau'),
       icon: Icons.layers_outlined,
       subtitle: l10n.enrollmentDashboardLevelSubtitle(
         isSingleDay
@@ -151,6 +154,8 @@ class EnrollmentCycleSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardCycleTitle,
+      tone: EnrollmentDashboardTones.sectionTint('cycle'),
+      toneStrength: EnrollmentDashboardTones.sectionStrength('cycle'),
       icon: Icons.school_outlined,
       child: cycles.isEmpty
           ? EnrollmentDashboardNote(text: l10n.enrollmentDashboardLevelEmpty)

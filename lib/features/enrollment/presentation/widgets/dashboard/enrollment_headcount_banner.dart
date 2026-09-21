@@ -12,6 +12,18 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// fenêtre** : il compte les dossiers terminés depuis l'ouverture des
 /// inscriptions, quelle que soit la période affichée dessous.
 ///
+/// ## La seule surface dégradée de l'écran
+///
+/// Tout le reste du tableau de bord est clair — cartes blanches ou teintées.
+/// Ce bandeau prend le dégradé bleu de l'accueil, ce qui le situe dans la même
+/// famille que le pavé du module. Il porte donc des **encres crème**, et c'est
+/// la seule zone de l'écran où le contraste se lit à l'envers.
+///
+/// ⚠️ **Le chiffre est en sans-serif**, alors que le reste du produit met ses
+/// grands nombres en Lora. C'est une règle explicite de la spec couleurs — « le
+/// serif est réservé aux titres, jamais aux nombres » — et elle prime ici sur
+/// l'habitude, parce qu'un effectif est une donnée, pas un titre.
+///
 /// ## Ce qu'il dit qu'il ne compte pas
 ///
 /// La ligne fine sous le total n'est pas un ornement. Un effectif est le
@@ -54,40 +66,60 @@ class EnrollmentHeadcountBanner extends StatelessWidget {
           margin: const EdgeInsets.only(
             bottom: AppDimensions.enrollmentDashboardBannerGap,
           ),
-          padding: const EdgeInsets.symmetric(
-            vertical: AppDimensions.enrollmentDashboardBannerPaddingV,
-            horizontal: AppDimensions.enrollmentDashboardBannerPaddingH,
-          ),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: AppColors.bleuArdoiseSoft,
-            borderRadius: BorderRadius.circular(
-              AppDimensions.sectionCardRadius,
+            // 105° : la lumière file vers la droite en descendant très
+            // légèrement, comme le bandeau de l'accueil. L'arrêt est à 72 % et
+            // non 78 % : ce bandeau est moins haut, la bascule doit arriver
+            // plus tôt pour rester visible.
+            gradient: const LinearGradient(
+              begin: Alignment(-1, -0.26),
+              end: Alignment(1, 0.26),
+              colors: [
+                AppColors.bleuProfond,
+                AppColors.bleuArdoise,
+                AppColors.bleuArdoiseLight,
+              ],
+              stops: [0, 0.72, 1],
             ),
-            border: Border.all(color: AppColors.enrollmentStatsChartGrid),
+            borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              _Overtitle(label: l10n.enrollmentDashboardHeadcountOvertitle),
-              const SizedBox(height: AppDimensions.spacingS),
-              _Total(value: total),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                l10n.enrollmentDashboardHeadcountCaption(
-                  total,
-                  schoolYear ?? '',
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppDimensions.enrollmentDashboardBannerPaddingV,
+                  horizontal: AppDimensions.enrollmentDashboardBannerPaddingH,
                 ),
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Overtitle(
+                      label: l10n.enrollmentDashboardHeadcountOvertitle,
+                    ),
+                    const SizedBox(height: AppDimensions.spacingS),
+                    _Total(value: total),
+                    const SizedBox(height: AppDimensions.spacingXS),
+                    Text(
+                      l10n.enrollmentDashboardHeadcountCaption(
+                        total,
+                        schoolYear ?? '',
+                      ),
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.insInkUnit,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingM),
+                    Text(
+                      l10n.enrollmentDashboardHeadcountExclusion,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.insInkMeta,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Text(
-                l10n.enrollmentDashboardHeadcountExclusion,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
+              const _GoldFilet(),
             ],
           ),
         ),
@@ -96,6 +128,10 @@ class EnrollmentHeadcountBanner extends StatelessWidget {
   }
 }
 
+/// Le sur-titre, en or sur l'extrémité **sombre** du dégradé.
+///
+/// L'or ne tient que 3,4:1 sur l'extrémité claire ; il est ici à 6,3:1 parce
+/// qu'il est ancré à gauche. Ne pas le centrer ni le pousser à droite.
 class _Overtitle extends StatelessWidget {
   final String label;
 
@@ -109,14 +145,14 @@ class _Overtitle extends StatelessWidget {
         const Icon(
           Icons.groups_rounded,
           size: AppDimensions.enrollmentDashboardBannerIconSize,
-          color: AppColors.bleuArdoise,
+          color: AppColors.orDoux,
         ),
         const SizedBox(width: AppDimensions.spacingS),
         Flexible(
           child: Text(
             label.toUpperCase(),
             style: AppTextStyles.badge.copyWith(
-              color: AppColors.bleuArdoise,
+              color: AppColors.orDoux,
               letterSpacing:
                   AppDimensions.enrollmentDashboardOvertitleLetterSpacing,
             ),
@@ -127,7 +163,7 @@ class _Overtitle extends StatelessWidget {
   }
 }
 
-/// Le total, en serif et en chiffres tabulaires.
+/// Le total, en **sans-serif** et en chiffres tabulaires.
 ///
 /// Tabulaires pour que le chiffre ne « danse » pas d'une fenêtre à l'autre :
 /// à cette taille, un 1 plus étroit qu'un 8 décale visiblement tout le nombre.
@@ -143,11 +179,38 @@ class _Total extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         EnrollmentDashboardFormat.count(value),
-        style: AppTextStyles.totalAmountLora.copyWith(
+        style: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: AppDimensions.enrollmentDashboardHeadcountFontSize,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           height: 1,
-          color: AppColors.bleuArdoise,
+          letterSpacing: -1,
+          color: AppColors.insInkMain,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+}
+
+/// Filet d'or en tête, effacé vers la droite — la signature discrète que
+/// partagent le bandeau d'accueil et celui-ci.
+class _GoldFilet extends StatelessWidget {
+  const _GoldFilet();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: AppDimensions.insBannerFiletHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.orDoux, Color(0x00D9A24E)],
+            stops: [0, AppDimensions.insSectionFiletFadeStop],
+          ),
         ),
       ),
     );

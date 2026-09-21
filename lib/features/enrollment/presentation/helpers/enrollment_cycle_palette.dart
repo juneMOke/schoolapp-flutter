@@ -23,12 +23,22 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 ///
 /// La couleur ne porte **aucune information** : chaque ligne écrit déjà son
 /// libellé et son effectif. Elle sert seulement à regrouper l'œil.
+/// ⚠️ **L'or `#D9A24E` n'y figure pas**, et ne doit pas y revenir.
+///
+/// Il y était, en cinquième rang. Mesuré, il ne tient que **2,28:1 sur blanc
+/// et 2,01:1 sur une carte teintée** — un objet graphique en demande 3. Une
+/// école dont le code de cycle n'est reconnu par aucune famille tombait sur ce
+/// rang et obtenait une barre quasi invisible : un défaut qui ne se déclenche
+/// que chez certains clients, donc qu'aucune relecture ne voit.
+///
+/// L'ocre `#A66A00` le remplace — 3,96:1 sur la carte « cycle », et déjà le
+/// ton de cette section.
 const _cyclePalette = <Color>[
   AppColors.enrollmentStatsCyclePrimaire,
   AppColors.enrollmentStatsCycleSecondaire,
   AppColors.enrollmentStatsCycleMaternelle,
   AppColors.vertSavane,
-  AppColors.orDoux,
+  AppColors.insOcre,
   AppColors.enrollmentStatsInProgress,
 ];
 

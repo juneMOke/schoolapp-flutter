@@ -29,6 +29,19 @@ class EteeloKpiCardData {
   final Color accentSoft;
   final IconData icon;
 
+  /// Fond plein d'un pavé **sombre**, ou `null` — le défaut — pour la carte
+  /// claire historique.
+  ///
+  /// Un seul champ plutôt qu'un booléen doublé d'une couleur : il est ainsi
+  /// impossible de déclarer une carte pleine sans dire de quelle couleur, ou
+  /// une couleur de fond qui ne serait jamais peinte.
+  ///
+  /// La couleur n'est pas calculée ici : le socle ne connaît pas la formule
+  /// d'assombrissement d'un écran donné. L'appelant la dérive — pour le
+  /// tableau de bord des inscriptions, `EnrollmentDashboardTones.pave()` — et
+  /// la passe. Un autre écran pourra adopter la variante avec la sienne.
+  final Color? filledBackground;
+
   /// Sous-ligne optionnelle affichee sous la valeur (ex. « 510 eleve-jours »).
   /// Rendue en caption discrete ; les cartes qui en ont sont legerement plus
   /// hautes ([AppDimensions.kpiCardHeightWithSubline]) — celles qui n'en ont
@@ -58,6 +71,7 @@ class EteeloKpiCardData {
     this.subline,
     this.onTap,
     this.selected = false,
+    this.filledBackground,
   }) : assert(
          value != null || valueText != null || valueLines != null,
          'KpiCardData : fournir value (entier), valueText (formaté) ou '
@@ -68,6 +82,9 @@ class EteeloKpiCardData {
          'KpiCardData : valueLines vide rendrait une carte muette. Passer '
          'null, ou une ligne disant ce que le vide veut dire.',
        );
+
+  /// Vrai quand la carte se peint en pavé sombre plutôt qu'en carte claire.
+  bool get isFilled => filledBackground != null;
 
   /// Les valeurs à afficher, de haut en bas. Une seule dans le cas courant.
   List<String> get displayValues {

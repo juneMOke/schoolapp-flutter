@@ -213,6 +213,45 @@ class AppDimensions {
   static const enrollmentStatsDonutMaxHeight = 360.0;
   static const enrollmentStatsHeaderTitleFontSize = 20.0;
 
+  // Tableau de bord des inscriptions — pavés pleins et cartes teintées
+  // (spec couleurs §03 et §04). 1 px CSS = 1 dp.
+  static const insPaveRadius = 16.0;
+  static const insPavePaddingH = 20.0;
+  static const insPavePaddingTop = 18.0;
+  static const insPavePaddingBottom = 16.0;
+  static const insPaveHaloSize = 170.0;
+  static const insPaveHaloTop = -70.0;
+  static const insPaveHaloRight = -50.0;
+  static const insPaveMedallionSize = 26.0;
+  static const insPaveMedallionRadius = 8.0;
+  static const insPaveMedallionIconSize = 15.0;
+  static const insPaveHeaderGap = 9.0;
+  static const insPaveLabelLetterSpacing = 0.66; // ~.06em sur 11 sp
+  static const insPaveLabelFontSize = 11.0;
+  static const insPaveValueFontSize = 34.0;
+  static const insPaveSublineFontSize = 12.0;
+  static const insPaveShadowBlur = 26.0;
+  static const insPaveShadowOffsetY = 10.0;
+
+  /// Plancher de hauteur d'un pavé plein. Plus haut que celui d'une carte
+  /// claire : la valeur y est en 34 sp au lieu de 24, et le libellé passe
+  /// au-dessus d'elle au lieu d'en dessous.
+  static const insPaveMinHeight = 140.0;
+
+  /// Médaillon d'en-tête d'une carte de section **teintée** — plus grand que
+  /// la pastille de 16 dp des cartes blanches ([statsCardIconSize]), qu'il ne
+  /// remplace pas : les deux coexistent selon que la carte porte un ton.
+  static const insSectionRadius = 16.0;
+  static const insSectionMedallionSize = 34.0;
+  static const insSectionMedallionRadius = 11.0;
+  static const insSectionMedallionIconSize = 18.0;
+  static const insSectionFiletHeight = 1.0;
+  static const insSectionFiletFadeStop = 0.62;
+
+  /// Filet d'or en tête du bandeau d'effectif — la seule surface dégradée de
+  /// l'écran. Il s'efface au même arrêt que le filet de section.
+  static const insBannerFiletHeight = 3.0;
+
   // Enrollment results bar tokens
   static const enrollmentResultsBarGap = 10.0;
   static const enrollmentResultsFilterChipHPadding = 10.0;

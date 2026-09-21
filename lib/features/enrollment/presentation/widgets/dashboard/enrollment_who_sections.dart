@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_format.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Qui » — filles et garçons sur la fenêtre.
@@ -61,6 +62,8 @@ class EnrollmentGenderSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardGenderTitle,
+      tone: EnrollmentDashboardTones.sectionTint('sexe'),
+      toneStrength: EnrollmentDashboardTones.sectionStrength('sexe'),
       icon: Icons.people_outline,
       // UNE seule mention de la fenêtre, portée par l'indice.
       //
@@ -200,6 +203,8 @@ class EnrollmentTypeSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardTypeTitle,
+      tone: EnrollmentDashboardTones.sectionTint('type'),
+      toneStrength: EnrollmentDashboardTones.sectionStrength('type'),
       icon: Icons.category_outlined,
       subtitle: isSingleDay
           ? l10n.enrollmentDashboardSubtitleDay

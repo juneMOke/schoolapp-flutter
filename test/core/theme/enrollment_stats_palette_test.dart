@@ -27,9 +27,14 @@ void main() {
     });
 
     test('barre normale du rythme — un remplissage, pas une surface', () {
-      // Spec l.377. `enrollmentStatsPreSoft` (#E8F3F7) est un fond de carte :
-      // employé comme barre, il noyait le relief du bucket courant.
-      expect(AppColors.enrollmentStatsPaceBar, const Color(0xFFA9C4D6));
+      // `enrollmentStatsPreSoft` (#E8F3F7) est un fond de carte : employé
+      // comme barre, il noyait le relief du bucket courant.
+      //
+      // Son remplaçant `#A9C4D6` a été mesuré depuis : 1,82:1 sur blanc,
+      // 1,54:1 sur la carte teintée du rythme. La correction d'alors allait
+      // dans le bon sens, mais s'était arrêtée à mi-chemin — une barre est un
+      // objet graphique et doit tenir 3:1 contre son fond.
+      expect(AppColors.enrollmentStatsPaceBar, const Color(0xFF5F8297));
       expect(
         AppColors.enrollmentStatsPaceBar,
         isNot(AppColors.enrollmentStatsPreSoft),

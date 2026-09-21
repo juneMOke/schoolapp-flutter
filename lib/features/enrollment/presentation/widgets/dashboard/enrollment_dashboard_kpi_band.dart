@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les quatre chiffres clés de la fenêtre.
@@ -53,6 +54,7 @@ class EnrollmentDashboardKpiBand extends StatelessWidget {
               accent: AppColors.enrollmentStatsAccent,
               accentSoft: AppColors.enrollmentStatsAccentSoft,
               icon: Icons.how_to_reg_rounded,
+              filledBackground: EnrollmentDashboardTones.kpiFill('total'),
             ),
             EteeloKpiCardData(
               label: l10n.enrollmentDashboardKpiFirst,
@@ -65,6 +67,7 @@ class EnrollmentDashboardKpiBand extends StatelessWidget {
               accent: AppColors.enrollmentStatsFirst,
               accentSoft: AppColors.enrollmentStatsFirstSoft,
               icon: Icons.person_add_rounded,
+              filledBackground: EnrollmentDashboardTones.kpiFill('first'),
             ),
             EteeloKpiCardData(
               label: l10n.enrollmentDashboardKpiRe,
@@ -77,6 +80,7 @@ class EnrollmentDashboardKpiBand extends StatelessWidget {
               accent: AppColors.enrollmentStatsRe,
               accentSoft: AppColors.enrollmentStatsReSoft,
               icon: Icons.refresh_rounded,
+              filledBackground: EnrollmentDashboardTones.kpiFill('re'),
             ),
             EteeloKpiCardData(
               label: l10n.enrollmentDashboardKpiPre,
@@ -89,6 +93,7 @@ class EnrollmentDashboardKpiBand extends StatelessWidget {
               accent: AppColors.enrollmentStatsPre,
               accentSoft: AppColors.enrollmentStatsPreSoft,
               icon: Icons.public_rounded,
+              filledBackground: EnrollmentDashboardTones.kpiFill('pre'),
             ),
           ],
         ),
