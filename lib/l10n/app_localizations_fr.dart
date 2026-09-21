@@ -2081,7 +2081,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Ces modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
+      'Ces modules couvrent la vie de l\'école — chaque bloc ouvre son tableau de bord ou ses pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>

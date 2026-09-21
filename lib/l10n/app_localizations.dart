@@ -3233,7 +3233,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'These modules cover the life of the school — each card opens its dashboard or its pages.'**
+  /// **'These modules cover the life of the school — each block opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.

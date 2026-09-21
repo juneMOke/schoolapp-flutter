@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_brand_banner.dart';
-import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_card.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_no_access_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -78,7 +78,7 @@ void main() {
     await pump(tester, permissions: const []);
 
     expect(find.byType(AccueilNoAccessState), findsOneWidget);
-    expect(find.byType(AccueilModuleCard), findsNothing);
+    expect(find.byType(AccueilModuleBloc), findsNothing);
     expect(find.text('Aucun module accessible'), findsOneWidget);
   });
 
@@ -125,7 +125,7 @@ void main() {
     await pump(tester, permissions: const ['classroom.read']);
 
     expect(find.byType(AccueilNoAccessState), findsNothing);
-    expect(find.byType(AccueilModuleCard), findsOneWidget);
+    expect(find.byType(AccueilModuleBloc), findsOneWidget);
   });
 
   // Fail-closed : une permission que cette version de l'application ne connaît
@@ -170,7 +170,7 @@ void main() {
     testWidgets('aucun CTA d\'écriture n\'est offert', (tester) async {
       await pump(tester, permissions: null);
 
-      expect(find.byType(AccueilModuleCard), findsNothing);
+      expect(find.byType(AccueilModuleBloc), findsNothing);
     });
   });
 }

@@ -10,14 +10,14 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/dev/dev_tools_entry.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
-import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_card.dart';
-import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_sub_module_row.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_sub_module_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
-/// Tous les droits déclarés : ces tests portent sur la mise en page des cartes,
+/// Tous les droits déclarés : ces tests portent sur la mise en page des pavés,
 /// pas sur le filtrage (couvert par `module_access_registry_test.dart`).
 const _tousDroits = <String>[
   'enrollment.read',
@@ -90,40 +90,39 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets(
-    'affiche les huit cartes modules et annonce leur page d\'entrée',
-    (tester) async {
-      final semantics = tester.ensureSemantics();
-      await pumpAccueil(tester);
+  testWidgets('affiche les huit pavés modules et annonce leur page d\'entrée', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpAccueil(tester);
 
-      expect(find.byType(AccueilModuleCard), findsNWidgets(8));
+    expect(find.byType(AccueilModuleBloc), findsNWidgets(8));
 
-      // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
-      // le tableau de bord quand il existe, sinon la première page du module.
-      const entryByModule = {
-        'Inscriptions': 'Tableau de bord',
-        'Finances': 'Tableau de bord',
-        // Module propre depuis 2026-09-02. Depuis qu'il a un tableau de bord,
-        // l'en-tête y mène — la synthèse d'abord, les noms ensuite.
-        'Recouvrement': 'Tableau de bord',
-        'Classes': 'Tableau de bord',
-        'Cours': 'Emploi du temps',
-        'Résultats': 'Résultats par classe',
-        'Disciplines': 'Tableau de bord',
-        // Page unique : l'en-tête mène là où mène l'unique ligne.
-        'Configuration': 'Paramètres de l\'école',
-      };
-      for (final module in entryByModule.entries) {
-        expect(
-          find.bySemanticsLabel('${module.key} — ouvrir ${module.value}'),
-          findsOneWidget,
-          reason: 'carte « ${module.key} »',
-        );
-      }
+    // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
+    // le tableau de bord quand il existe, sinon la première page du module.
+    const entryByModule = {
+      'Inscriptions': 'Tableau de bord',
+      'Finances': 'Tableau de bord',
+      // Module propre depuis 2026-09-02. Depuis qu'il a un tableau de bord,
+      // l'en-tête y mène — la synthèse d'abord, les noms ensuite.
+      'Recouvrement': 'Tableau de bord',
+      'Classes': 'Tableau de bord',
+      'Cours': 'Emploi du temps',
+      'Résultats': 'Résultats par classe',
+      'Disciplines': 'Tableau de bord',
+      // Page unique : l'en-tête mène là où mène l'unique ligne.
+      'Configuration': 'Paramètres de l\'école',
+    };
+    for (final module in entryByModule.entries) {
+      expect(
+        find.bySemanticsLabel('${module.key} — ouvrir ${module.value}'),
+        findsOneWidget,
+        reason: 'pavé « ${module.key} »',
+      );
+    }
 
-      semantics.dispose();
-    },
-  );
+    semantics.dispose();
+  });
 
   testWidgets('annonce le nombre de pages de chaque module', (tester) async {
     await pumpAccueil(tester);
@@ -139,7 +138,7 @@ void main() {
     expect(find.text('4 pages'), findsNothing);
   });
 
-  testWidgets('l\'en-tête d\'une carte ouvre le tableau de bord du module', (
+  testWidgets('l\'en-tête d\'un pavé ouvre le tableau de bord du module', (
     tester,
   ) async {
     await pumpAccueil(tester);
@@ -171,36 +170,36 @@ void main() {
     expect(navigationBloc.state.selectedSubMenuId, MenuConstants.timetableId);
   });
 
-  testWidgets('une ligne sous-module navigue vers son propre écran', (
+  testWidgets('une pastille de sous-module navigue vers son propre écran', (
     tester,
   ) async {
     await pumpAccueil(tester);
 
     // Le témoin était « Pré-inscriptions », masquée depuis (`kHiddenSubMenus`).
-    // « Contrôle par frais » est la LIGNE ; la carte qui la porte s'intitule
+    // « Contrôle par frais » est la PASTILLE ; le pavé qui la porte s'intitule
     // « Recouvrement » depuis le renommage du module (RECOUVREMENT_PLAN.md D2).
     await tester.tap(find.text('Contrôle par frais'));
     await tester.pumpAndSettle();
 
-    // La ligne absorbe le tap : on atterrit sur le sous-écran, pas sur le
-    // tableau de bord de la carte parente.
+    // La pastille absorbe le tap : on atterrit sur le sous-écran, pas sur
+    // le tableau de bord du pavé parent.
     expect(
       navigationBloc.state.selectedSubMenuId,
       MenuConstants.recouvrementControlId,
     );
   });
 
-  testWidgets('chaque page de chaque module a sa ligne dans un pied de carte', (
+  testWidgets('chaque page de chaque module a sa pastille sur le pavé', (
     tester,
   ) async {
     await pumpAccueil(tester);
 
     // 2 + 2 + 2 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03 ; Finances redescendue
     // à 2, le Recouvrement ayant emporté sa page dans son propre module,
-    // où il en a depuis deux ; plus la carte Configuration). Inscriptions est
+    // où il en a depuis deux ; plus le pavé Configuration). Inscriptions est
     // descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées par
     // décision produit (`kHiddenSubMenus`).
-    expect(find.byType(AccueilSubModuleRow), findsNWidgets(16));
+    expect(find.byType(AccueilSubModulePill), findsNWidgets(16));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

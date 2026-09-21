@@ -263,4 +263,18 @@ class AppColors {
   static const academicsScoreWeakSoft = tokens.AppColors.academicsScoreWeakSoft;
   static const academicsScoreGood = tokens.AppColors.academicsScoreGood;
   static const academicsScoreGoodSoft = tokens.AppColors.academicsScoreGoodSoft;
+
+  // Inscriptions ▸ tableau de bord — encres et verdicts (spec couleurs)
+  static const bleuArdoiseLight = tokens.AppColors.bleuArdoiseLight;
+  static const insInkMain = tokens.AppColors.insInkMain;
+  static const insInkLabel = tokens.AppColors.insInkLabel;
+  static const insInkSub = tokens.AppColors.insInkSub;
+  static const insInkUnit = tokens.AppColors.insInkUnit;
+  static const insInkMeta = tokens.AppColors.insInkMeta;
+  static const insVerdictOk = tokens.AppColors.insVerdictOk;
+  static const insVerdictWarn = tokens.AppColors.insVerdictWarn;
+  static const insVerdictBad = tokens.AppColors.insVerdictBad;
+  static const ambreInk = tokens.AppColors.ambreInk;
+  static const insOcre = tokens.AppColors.insOcre;
+  static const textMutedAa = tokens.AppColors.textMutedAa;
 }
