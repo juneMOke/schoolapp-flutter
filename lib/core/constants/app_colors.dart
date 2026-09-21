@@ -277,4 +277,9 @@ class AppColors {
   static const ambreInk = tokens.AppColors.ambreInk;
   static const insOcre = tokens.AppColors.insOcre;
   static const textMutedAa = tokens.AppColors.textMutedAa;
+
+  // Écrans de liste (spec Première inscription)
+  static const terreCuiteInk = tokens.AppColors.terreCuiteInk;
+  static const listeInkSubtitle = tokens.AppColors.listeInkSubtitle;
+  static const listeInkDrawerSub = tokens.AppColors.listeInkDrawerSub;
 }

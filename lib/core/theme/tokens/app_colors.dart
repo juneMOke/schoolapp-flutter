@@ -378,6 +378,28 @@ class AppColors {
   /// et teinte du cycle Maternelle, où il remplace l'or, illisible en surface.
   static const insOcre = feeStatusPartial;
 
+  /// Terre cuite **lisible en texte**.
+  ///
+  /// [terreCuite] (#B85C2C) est une couleur de surface : dès qu'elle porte un
+  /// libellé sur un voile clair, le couple tombe (4,04:1 sur `#FBEFE8`). Cette
+  /// version assombrie le relève à 6,28:1. Deux specs la prescrivent
+  /// indépendamment — Première inscription E2 et Tableaux de bord E2 — ce qui
+  /// en fait l'encre terre cuite du produit, pas un correctif local.
+  static const terreCuiteInk = Color(0xFF8F421E);
+
+  // ---- Écrans de liste (spec Première inscription) ----
+  //
+  // Le bleu appartient à la SAISIE — recherche, champs, filtres — et la terre
+  // cuite au RETOUR de la machine : barre de résultats, en-tête de tableau,
+  // zébrure, bouton d'écriture. L'œil sait donc, sans lire, s'il regarde ce
+  // qu'il a demandé ou ce qu'on lui répond.
+  static const listeInkSubtitle = Color(0xFFE4D9CB); // sous-titre sur dégradé
+
+  /// Sous-texte de tiroir — **opaque**, là où l'implémentation d'origine
+  /// employait un blanc à 75 %. Une encre translucide sur une surface sombre
+  /// retombe sous le seuil dès que le fond s'éclaircit.
+  static const listeInkDrawerSub = Color(0xFFC2CFD4);
+
   /// Gris **lisible** sur surface teintée.
   ///
   /// [textMuted] (#8C8478) ne tient pas : 3,69:1 sur blanc, 3,13:1 sur une

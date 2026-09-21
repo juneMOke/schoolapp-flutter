@@ -248,6 +248,15 @@ class AppDimensions {
   static const insSectionFiletHeight = 1.0;
   static const insSectionFiletFadeStop = 0.62;
 
+  /// Rayon du cadre d'une table **teintée** (spec Première inscription §04).
+  /// Une table non teintée n'a pas de cadre, donc pas de rayon : c'est le
+  /// bandeau d'en-tête coloré qui rend l'arrondi nécessaire.
+  static const listeTableRadius = 10.0;
+
+  /// Rayon de la barre de résultats — la surface qui **nomme l'état** de la
+  /// recherche, et la seule teintée en permanence quel que soit cet état.
+  static const listeBarRadius = 14.0;
+
   /// Filet d'or en tête du bandeau d'effectif — la seule surface dégradée de
   /// l'écran. Il s'efface au même arrêt que le filet de section.
   static const insBannerFiletHeight = 3.0;

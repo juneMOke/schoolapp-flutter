@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 
 /// Type de texte pour une cellule de table.
 enum DataTableCellTextVariant { regular, strong, mono }
@@ -186,6 +187,13 @@ class DataTableViewConfig {
   final DataTableDensity density;
   final String? semanticsLabel;
 
+  /// Habillage teinté de la table, ou `null` — le défaut — pour le rendu
+  /// historique : surface blanche, en-tête blanc, aucune zébrure.
+  ///
+  /// Les couleurs arrivent **déjà calculées** : le socle ne connaît pas les
+  /// formules de dérivation d'un écran. Cf. [DataTableTone].
+  final DataTableTone? tone;
+
   const DataTableViewConfig({
     required this.columns,
     this.isLoading = false,
@@ -199,6 +207,7 @@ class DataTableViewConfig {
     this.footer,
     this.density = DataTableDensity.comfortable,
     this.semanticsLabel,
+    this.tone,
   });
 }
 
