@@ -3,9 +3,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_listing_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_counter_filters.dart';
@@ -52,9 +52,13 @@ class EnrollmentResultsBar extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.brCard,
+      // La barre est la première apparition de la terre cuite : c'est la
+      // réponse de la machine. Elle est **toujours** présente, quel que soit
+      // l'état — c'est elle qui nomme l'état — donc sa couleur ne bouge jamais.
+      decoration: BoxDecoration(
+        color: EnrollmentListingTones.barreFond,
+        border: Border.all(color: EnrollmentListingTones.barreBord),
+        borderRadius: BorderRadius.circular(AppDimensions.listeBarRadius),
         boxShadow: AppElevation.shadowCard,
       ),
       child: Column(
@@ -64,8 +68,10 @@ class EnrollmentResultsBar extends StatelessWidget {
           // Eyebrow label
           Text(
             l10n.enrollmentResults.toUpperCase(),
+            // La terre cuite **assombrie**, jamais #B85C2C : celui-ci tombe à
+            // 4,04:1 sur le voile de la barre (écart E2 de la spec).
             style: AppTypography.labelSmall.copyWith(
-              color: AppColors.terreCuite,
+              color: EnrollmentListingTones.inkTerreCuite,
               letterSpacing: 1.32,
             ),
           ),
