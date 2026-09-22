@@ -126,8 +126,48 @@ class DashboardTones {
   /// segment de barre — où il est parfaitement lisible et où il porte le sens.
   /// Version d'un accent qui peut **fonder un pavé** — assez sombre pour
   /// porter l'encre crème.
-  static Color paveAccentSur(Color accent) =>
-      _substitutsFond[accent.toARGB32()] ?? accent;
+  /// ⚠️ Table d'abord, **calcul en repli** — même raison que pour
+  /// [encreLisibleSur] : l'accent du pavé « poste principal » des Dépenses
+  /// descend de `ref_expense_types.color`, donc du **serveur**, et une table de
+  /// quatre valeurs ne peut rien pour une teinte qu'une école a configurée
+  /// elle-même.
+  ///
+  /// Le critère n'est pas le même que pour une encre : un fond de pavé doit
+  /// être assez sombre pour que **toutes** les encres qu'il porte s'y lisent.
+  ///
+  /// ⚠️ Et c'est bien *toutes*, pas la première. Une version antérieure de
+  /// cette fonction s'arrêtait dès que [inkValeur] `#FAFAF7` franchissait le
+  /// seuil ; mais [inkSousLigne] `#F1E8E0` est plus sombre, et restait à
+  /// **3,90** sur un fond dérivé d'une teinte menthe. C'est exactement l'angle
+  /// mort que ce garde-fou existe pour fermer — *une surface vérifiée par une
+  /// seule de ses encres* — reproduit à l'intérieur du garde-fou lui-même.
+  ///
+  /// On boucle donc sur les trois plutôt que de coder en dur la plus sombre :
+  /// une encre ajoutée demain entrera dans le critère sans qu'on y pense.
+  ///
+  /// Les cinq sens de [DashboardSense] satisfont déjà ce critère plus strict —
+  /// c'est asserté — donc le repli ne se déclenche que là où il n'existait
+  /// aucune protection.
+  static Color paveAccentSur(Color accent) {
+    final substitut = _substitutsFond[accent.toARGB32()];
+    if (substitut != null) return substitut;
+    if (_toutesLesEncresTiennent(accent)) return accent;
+    for (var pas = 1; pas <= 50; pas++) {
+      final candidat = ColorMix.mix(accent, AppColors.bleuProfond, pas * 0.02);
+      if (_toutesLesEncresTiennent(candidat)) return candidat;
+    }
+    return AppColors.bleuProfond;
+  }
+
+  /// Les trois encres d'un pavé franchissent-elles le seuil sur le fond que
+  /// [accent] produirait ?
+  static bool _toutesLesEncresTiennent(Color accent) {
+    final fond = pave(accent);
+    for (final encre in const [inkValeur, inkLibelle, inkSousLigne]) {
+      if (contraste(encre, fond) < seuilTexte) return false;
+    }
+    return true;
+  }
 
   /// Version d'un accent qui peut **porter du texte sur une surface claire**.
   ///
@@ -142,6 +182,55 @@ class DashboardTones {
   /// ici vers la même encre lisible, celle que les specs prescrivent.
   static Color encreLisible(Color accent) =>
       _substitutsEncre[accent.toARGB32()] ?? accent;
+
+  /// Seuil d'un texte normal, et seuil d'un objet graphique.
+  static const double seuilTexte = 4.5;
+  static const double seuilGraphique = 3.0;
+
+  /// Version lisible d'un accent **sur une surface donnée**, table d'abord,
+  /// calcul en repli.
+  ///
+  /// ⚠️ [encreLisible] ne connaît que **quatre valeurs exactes** de la palette
+  /// maison. Elle ne peut donc rien pour une couleur venue du **serveur** — et
+  /// c'est précisément le cas du pavé « poste principal » des Dépenses, dont
+  /// l'accent descend de `ref_expense_types.color`, rempli par le pull
+  /// référentiel. Une école qui configure une teinte claire passe au travers :
+  /// menthe `#7FD1AE` 1,81:1, jaune `#F2C94C` 1,59:1 sur blanc. Le garde-fou
+  /// que j'avais documenté comme le correctif de cet écart n'en couvrait que
+  /// la forme prévisible — les valeurs du seed.
+  ///
+  /// Le repli assombrit vers le bleu profond par pas de 2 % jusqu'à franchir
+  /// [seuil]. Il ne se déclenche **que** si l'accent échoue : une couleur déjà
+  /// lisible traverse inchangée, et les substituts de marque — choisis,
+  /// mesurés, assertés — gardent la priorité sur le calcul.
+  ///
+  /// ⚠️ Les teintes qu'il produit ne sont pas des **valeurs publiées**, ce que
+  /// [ColorMix] pose pourtant comme un contrat. La contradiction n'est
+  /// qu'apparente : le repli ne s'applique qu'à des couleurs qui n'ont aucune
+  /// valeur publiée, puisqu'elles n'existent nulle part dans le design system.
+  static Color encreLisibleSur(
+    Color accent,
+    Color fond, {
+    double seuil = seuilTexte,
+  }) {
+    final substitut = _substitutsEncre[accent.toARGB32()];
+    if (substitut != null) return substitut;
+    if (contraste(accent, fond) >= seuil) return accent;
+    for (var pas = 1; pas <= 50; pas++) {
+      final candidat = ColorMix.mix(accent, AppColors.bleuProfond, pas * 0.02);
+      if (contraste(candidat, fond) >= seuil) return candidat;
+    }
+    return AppColors.bleuProfond;
+  }
+
+  /// Le rapport de contraste WCAG entre deux couleurs **opaques**.
+  static double contraste(Color a, Color b) {
+    final la = a.computeLuminance();
+    final lb = b.computeLuminance();
+    final claire = la > lb ? la : lb;
+    final sombre = la > lb ? lb : la;
+    return (claire + 0.05) / (sombre + 0.05);
+  }
 
   /// Vrai si [accent] est une couleur de surface, à ne jamais écrire telle
   /// quelle sur un fond clair.

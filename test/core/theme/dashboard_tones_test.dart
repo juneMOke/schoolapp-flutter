@@ -297,4 +297,108 @@ void main() {
       }
     });
   });
+
+  group('repli de luminance — les couleurs venues du serveur', () {
+    // La table ne connaît que quatre valeurs exactes. L'accent du pavé
+    // « poste principal » des Dépenses descend de `ref_expense_types.color` :
+    // une école peut y mettre n'importe quoi, et la table ne le verra pas.
+
+    test('la table garde la priorité sur le calcul', () {
+      // Les substituts de marque sont choisis, pas dérivés. Le calcul rendrait
+      // #887349 pour l'or ; c'est `ambreInk` qui doit sortir.
+      for (final (nom, avant, apres) in [
+        ('or', AppColors.orDoux, AppColors.ambreInk),
+        ('ambre', AppColors.warning, AppColors.ambreInk),
+        ('ocre', AppColors.insOcre, AppColors.ambreInk),
+        ('gris', AppColors.textMuted, AppColors.textMutedAa),
+      ]) {
+        expect(
+          DashboardTones.encreLisibleSur(avant, AppColors.surfaceRaised),
+          apres,
+          reason: 'le substitut de marque de $nom doit primer',
+        );
+      }
+    });
+
+    test('une couleur déjà lisible traverse inchangée', () {
+      for (final accent in [
+        AppColors.bleuArdoise,
+        AppColors.bleuProfond,
+        AppColors.error,
+        AppColors.vertSavane,
+      ]) {
+        expect(
+          DashboardTones.encreLisibleSur(accent, AppColors.surfaceRaised),
+          accent,
+        );
+      }
+    });
+
+    test('une teinte serveur claire est relevée jusqu\'au seuil', () {
+      // Quatre couleurs qu'une école pourrait configurer et que la table
+      // n'intercepte pas. Chacune échoue avant, passe après.
+      for (final (nom, brut) in [
+        ('menthe', const Color(0xFF7FD1AE)),
+        ('jaune', const Color(0xFFF2C94C)),
+        ('rose', const Color(0xFFF2A2C0)),
+        ('cyan', const Color(0xFF56CCF2)),
+      ]) {
+        expect(
+          ratio(brut, AppColors.surfaceRaised),
+          lessThan(seuil),
+          reason: 'contre-épreuve : $nom devait échouer brut',
+        );
+        expect(
+          ratio(
+            DashboardTones.encreLisibleSur(brut, AppColors.surfaceRaised),
+            AppColors.surfaceRaised,
+          ),
+          greaterThanOrEqualTo(seuil),
+          reason: '$nom relevé',
+        );
+      }
+    });
+
+    test('le seuil graphique relève moins loin que le seuil texte', () {
+      const brut = Color(0xFF7FD1AE);
+      final pourTexte = DashboardTones.encreLisibleSur(
+        brut,
+        AppColors.surfaceRaised,
+      );
+      final pourGlyphe = DashboardTones.encreLisibleSur(
+        brut,
+        AppColors.surfaceRaised,
+        seuil: DashboardTones.seuilGraphique,
+      );
+      expect(
+        ratio(pourGlyphe, AppColors.surfaceRaised),
+        greaterThanOrEqualTo(DashboardTones.seuilGraphique),
+      );
+      // Un glyphe n'a pas à être aussi sombre qu'un texte : la garde ne doit
+      // pas assombrir au-delà de ce que son seuil exige.
+      expect(
+        pourGlyphe.computeLuminance(),
+        greaterThan(pourTexte.computeLuminance()),
+      );
+    });
+
+    test('le contraste calculé est celui de WCAG', () {
+      // Repère connu : le noir sur blanc vaut 21, et l'ordre des arguments
+      // ne change rien.
+      expect(
+        DashboardTones.contraste(
+          const Color(0xFF000000),
+          const Color(0xFFFFFFFF),
+        ),
+        closeTo(21.0, 0.01),
+      );
+      expect(
+        DashboardTones.contraste(AppColors.orDoux, AppColors.surfaceRaised),
+        closeTo(
+          DashboardTones.contraste(AppColors.surfaceRaised, AppColors.orDoux),
+          0.0001,
+        ),
+      );
+    });
+  });
 }
