@@ -363,6 +363,19 @@ class AppColors {
   // l'extrémité claire du dégradé, le vert savane tombe à 1,6:1.
   static const insVerdictOk = Color(0xFFBFE3C8);
   static const insVerdictWarn = Color(0xFFF3D9A6);
+
+  /// L'or **sur fond sombre** — la seule forme de l'or qui tienne sur un pavé.
+  ///
+  /// `orDoux` #D9A24E est une couleur de surface claire. Posé en glyphe sur un
+  /// pavé, il ne franchit le seuil de 3:1 des objets graphiques que sur le plus
+  /// bleu des cinq (3,00, tout juste) et tombe à 2,33 sur le vert, 1,97 sur la
+  /// terre cuite, 1,93 sur l'ocre. Baisser le voile n'y suffit pas : à voile
+  /// nul, trois fonds sur cinq échouent encore.
+  ///
+  /// Cet or-ci passe partout (4,98 à 3,20 sur voile 14 %). C'est exactement la
+  /// valeur que le doc-comment de `DashboardSense.prestige` prescrit déjà pour
+  /// les fonds sombres — la règle existait, elle n'était pas appliquée.
+  static const orSurPave = insVerdictWarn;
   static const insVerdictBad = Color(0xFFF6C0B4);
 
   /// Ambre **lisible** sur fond clair.

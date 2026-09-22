@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -114,9 +115,16 @@ class FinanceTillBucketsSection extends StatelessWidget {
         BarChartItem(
           label: shortBucketLabel(bucket.key, granularity: granularity),
           value: bucket.total.toDouble(),
+          // **La série suit la caisse dessinée** — c'est le seul graphique du
+          // produit dont la teinte est pilotée par la donnée sélectionnée. Le
+          // bleu en dur disait « dollars » même devant une caisse en francs.
+          //
+          // L'intervalle en cours garde la terre cuite : son relief est une
+          // information distincte de la devise, et il reste doublé de son
+          // étiquette de montant, la couleur ne le portant jamais seule.
           color: bucket.isCurrent
               ? AppColors.terreCuite
-              : AppColors.bleuArdoise,
+              : tillCurrencyAccent(currency),
         ),
     ];
 

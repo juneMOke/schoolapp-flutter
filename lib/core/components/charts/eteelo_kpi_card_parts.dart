@@ -152,13 +152,22 @@ class EteeloKpiCardFilledContent extends StatelessWidget {
                   AppDimensions.insPaveMedallionRadius,
                 ),
               ),
-              // L'or est ici un glyphe de 15 dp, pas du texte : il est toléré
-              // à 3,5:1 sur ce voile, et proscrit partout où il porterait un
-              // libellé.
+              // ⚠️ L'or **clair**, pas `orDoux`.
+              //
+              // Un glyphe est un objet graphique : le seuil est 3:1, plus bas
+              // que pour du texte, mais il s'applique. `orDoux` #D9A24E ne le
+              // franchit que sur le pavé le plus bleu (3,00, tout juste) et
+              // tombe à 2,33 sur le vert, 1,97 sur la terre cuite, 1,93 sur
+              // l'ocre — et baisser le voile n'y change rien, puisqu'à voile
+              // nul trois fonds sur cinq échouent encore.
+              //
+              // Le commentaire précédent annonçait « toléré à 3,5:1 » : ce
+              // chiffre valait pour les seuls pavés bleus d'Inscriptions, et
+              // il est devenu faux dès qu'un pavé vert ou ocre est apparu.
               child: Icon(
                 data.icon,
                 size: AppDimensions.insPaveMedallionIconSize,
-                color: AppColors.orDoux,
+                color: AppColors.orSurPave,
               ),
             ),
             const SizedBox(width: AppDimensions.insPaveHeaderGap),

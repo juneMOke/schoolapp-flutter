@@ -273,6 +273,7 @@ class AppColors {
   static const insInkMeta = tokens.AppColors.insInkMeta;
   static const insVerdictOk = tokens.AppColors.insVerdictOk;
   static const insVerdictWarn = tokens.AppColors.insVerdictWarn;
+  static const orSurPave = tokens.AppColors.orSurPave;
   static const insVerdictBad = tokens.AppColors.insVerdictBad;
   static const ambreInk = tokens.AppColors.ambreInk;
   static const insOcre = tokens.AppColors.insOcre;
