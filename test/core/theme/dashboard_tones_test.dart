@@ -229,4 +229,72 @@ void main() {
       );
     });
   });
+
+  group('encre de seconde devise', () {
+    test('chaque nuance tient sur SON pavé', () {
+      for (final (nom, sens, attendue) in [
+        ('attendu', DashboardSense.attendu, AppColors.paveInkAttendu),
+        ('perçu', DashboardSense.encaisse, AppColors.paveInkPercu),
+        ('reste', DashboardSense.manquant, AppColors.paveInkReste),
+      ]) {
+        expect(
+          DashboardTones.encreSecondeValeur(sens),
+          attendue,
+          reason: 'nuance du pavé « $nom »',
+        );
+        expect(
+          ratio(attendue, DashboardTones.pave(sens)),
+          greaterThanOrEqualTo(seuil),
+          reason: 'seconde devise du pavé « $nom »',
+        );
+      }
+    });
+
+    test('la nuance se distingue vraiment de l\'encre générique', () {
+      // Sans cela la table serait décorative : trois entrées qui rendraient
+      // toutes la même chose que le défaut.
+      for (final nuance in [
+        AppColors.paveInkAttendu,
+        AppColors.paveInkPercu,
+        AppColors.paveInkReste,
+      ]) {
+        expect(nuance, isNot(DashboardTones.inkValeur));
+        expect(nuance, isNot(DashboardTones.inkSousLigne));
+      }
+    });
+
+    test('un sens sans nuance déclarée retombe sur l\'encre pleine', () {
+      // L'attente et la marque ne portent qu'un chiffre : aucune seconde
+      // devise à distinguer, donc aucune nuance — et un défaut qui reste
+      // lisible plutôt qu'une entrée inventée.
+      for (final sens in [DashboardSense.attente, DashboardSense.marque]) {
+        final ink = DashboardTones.encreSecondeValeur(sens);
+        expect(ink, DashboardTones.inkValeur);
+        expect(
+          ratio(ink, DashboardTones.pave(sens)),
+          greaterThanOrEqualTo(seuil),
+        );
+      }
+    });
+
+    test('contre-épreuve : une nuance sur ces deux pavés-là tomberait', () {
+      // Le repli sur l'encre pleine n'est pas une commodité. Les deux pavés
+      // clairs du jeu — l'attente et la marque — refusent les nuances claires,
+      // et c'est mesurable. Si ce test passe au vert un jour, c'est que les
+      // pavés ont bougé : la table pourra alors s'étendre, mais il faudra
+      // l'avoir constaté plutôt que supposé.
+      for (final (nuance, sens) in [
+        (AppColors.paveInkAttendu, DashboardSense.attente),
+        (AppColors.paveInkAttendu, DashboardSense.marque),
+        (AppColors.paveInkReste, DashboardSense.attente),
+        (AppColors.paveInkReste, DashboardSense.marque),
+      ]) {
+        expect(
+          ratio(nuance, DashboardTones.pave(sens)),
+          lessThan(seuil),
+          reason: 'ce croisement devait échouer',
+        );
+      }
+    });
+  });
 }

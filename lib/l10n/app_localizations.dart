@@ -15120,6 +15120,12 @@ abstract class AppLocalizations {
   /// **'Collected to date'**
   String get recouvrementCollectedLabel;
 
+  /// No description provided for @recouvrementRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to collect'**
+  String get recouvrementRemainingLabel;
+
   /// No description provided for @recouvrementSettledSubline.
   ///
   /// In en, this message translates to:

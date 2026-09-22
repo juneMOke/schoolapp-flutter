@@ -42,6 +42,20 @@ class EteeloKpiCardData {
   /// la passe. Un autre écran pourra adopter la variante avec la sienne.
   final Color? filledBackground;
 
+  /// Encre des valeurs **après la première**, sur un pavé plein.
+  ///
+  /// `null` — le défaut — les peint comme la première, ce qui laisse le rendu
+  /// historique inchangé à l'octet pour toutes les cartes existantes.
+  ///
+  /// N'a d'effet qu'avec [filledBackground] et [valueLines] : c'est le cas de
+  /// la carte bi-devise, où la seconde ligne est un **second montant** et non
+  /// un commentaire du premier. La nuance le dit sans mot.
+  ///
+  /// Comme [filledBackground], la couleur vient de l'appelant : le socle ne
+  /// connaît pas la teinte du pavé, donc pas la nuance qui s'y lit. Le
+  /// tableau de bord la dérive par `DashboardTones.encreSecondeValeur()`.
+  final Color? filledSecondaryInk;
+
   /// Sous-ligne optionnelle affichee sous la valeur (ex. « 510 eleve-jours »).
   /// Rendue en caption discrete ; les cartes qui en ont sont legerement plus
   /// hautes ([AppDimensions.kpiCardHeightWithSubline]) — celles qui n'en ont
@@ -72,6 +86,7 @@ class EteeloKpiCardData {
     this.onTap,
     this.selected = false,
     this.filledBackground,
+    this.filledSecondaryInk,
   }) : assert(
          value != null || valueText != null || valueLines != null,
          'KpiCardData : fournir value (entier), valueText (formaté) ou '

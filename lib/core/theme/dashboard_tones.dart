@@ -207,4 +207,42 @@ class DashboardTones {
   /// produit où une sous-ligne porte une nuance, et elle y signale une monnaie
   /// dont le montant ne s'additionne pas au premier.
   static const Color inkSousLigne = AppColors.insInkSub;
+
+  /// Encre de la **seconde** valeur d'un pavé bi-devise.
+  ///
+  /// C'est le seul endroit du produit où une valeur secondaire porte une
+  /// nuance plutôt que l'encre générique, et la nuance a un sens précis : elle
+  /// dit « second montant », pas « commentaire ». Un pavé qui affiche
+  /// `184 500 $` puis `3 420 000 FC` montre deux sommes dont le total
+  /// n'existe pas ; les écrire toutes deux en encre pleine laisserait croire
+  /// qu'on peut les additionner.
+  ///
+  /// Une table plutôt qu'une teinte unique, pour deux raisons qui se
+  /// renforcent. La première est de **sens** : la seconde ligne emprunte la
+  /// teinte de *son* chiffre — rosée sous le reste, verte sous le perçu — et
+  /// se lit donc comme lui appartenant.
+  ///
+  /// La seconde est **mesurée**, et elle interdit d'étendre la table à la
+  /// légère : une nuance n'est pas universellement sûre. Chacune tient
+  /// largement sur son propre pavé (7,45 / 5,94 / 5,19) et sur les deux autres
+  /// pavés froids, mais posée sur les deux pavés clairs — l'attente `#855D0F`
+  /// et la marque `#935231` — elle tombe **sous le seuil** : 4,37 et 4,46 pour
+  /// la nuance de l'attendu, 4,26 et 4,35 pour celle du reste.
+  ///
+  /// C'est pourquoi ces deux sens-là n'en déclarent aucune et retombent sur
+  /// [inkValeur] `#FAFAF7`, qui passe sur les cinq pavés. Le repli n'est pas
+  /// une commodité : c'est la seule encre correcte à cet endroit.
+  ///
+  /// Un accent sans nuance déclarée retombe sur [inkValeur], qui est lisible
+  /// sur les cinq pavés — le défaut est sûr, jamais illisible.
+  static Color encreSecondeValeur(Color accent) =>
+      _encresSecondes[accent.toARGB32()] ?? inkValeur;
+
+  /// Les trois sens qui peuvent porter deux devises : ce qui est dû, ce qui
+  /// est rentré, ce qui reste.
+  static final Map<int, Color> _encresSecondes = {
+    DashboardSense.attendu.toARGB32(): AppColors.paveInkAttendu,
+    DashboardSense.encaisse.toARGB32(): AppColors.paveInkPercu,
+    DashboardSense.manquant.toARGB32(): AppColors.paveInkReste,
+  };
 }

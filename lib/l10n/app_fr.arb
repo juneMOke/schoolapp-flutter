@@ -6125,6 +6125,10 @@
   "@recouvrementCollectedLabel": {
     "description": "Carte KPI : montant perçu"
   },
+  "recouvrementRemainingLabel": "Reste à percevoir",
+  "@recouvrementRemainingLabel": {
+    "description": "Carte KPI : reste dû, planché créance par créance"
+  },
   "recouvrementSettledSubline": "{count} élèves ont tout soldé, soit {percent} % de l'effectif",
   "@recouvrementSettledSubline": {
     "description": "Sous-ligne de la carte Perçu",

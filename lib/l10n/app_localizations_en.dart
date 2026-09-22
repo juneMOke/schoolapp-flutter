@@ -9448,6 +9448,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recouvrementCollectedLabel => 'Collected to date';
 
   @override
+  String get recouvrementRemainingLabel => 'Left to collect';
+
+  @override
   String recouvrementSettledSubline(int count, int percent) {
     return '$count students have settled in full, $percent% of the cohort';
   }

@@ -199,22 +199,28 @@ class EteeloKpiCardFilledContent extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppDimensions.spacingS),
-        for (final value in values)
+        for (var i = 0; i < values.length; i++)
           SizedBox(
             width: double.infinity,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                value,
+                values[i],
                 maxLines: 1,
-                style: const TextStyle(
+                // La première valeur porte l'encre pleine. Les suivantes — une
+                // seconde devise — prennent la nuance du pavé quand l'appelant
+                // en fournit une, et l'encre pleine sinon : le défaut reste
+                // identique à l'octet pour les cartes qui n'en déclarent pas.
+                style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: AppDimensions.insPaveValueFontSize,
                   fontWeight: FontWeight.w700,
                   height: 1.08,
-                  color: AppColors.insInkMain,
-                  fontFeatures: [FontFeature.tabularFigures()],
+                  color: i == 0
+                      ? AppColors.insInkMain
+                      : (data.filledSecondaryInk ?? AppColors.insInkMain),
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),

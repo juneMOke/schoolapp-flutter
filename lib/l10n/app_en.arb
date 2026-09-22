@@ -6029,6 +6029,7 @@
   "recouvrementExpectedLabel": "Expected on these fees",
   "recouvrementExpectedMixedSubline": "Two currencies — never added together",
   "recouvrementCollectedLabel": "Collected to date",
+  "recouvrementRemainingLabel": "Left to collect",
   "recouvrementSettledSubline": "{count} students have settled in full, {percent}% of the cohort",
   "@recouvrementSettledSubline": {
     "placeholders": {

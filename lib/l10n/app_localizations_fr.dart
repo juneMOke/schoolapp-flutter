@@ -9530,6 +9530,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recouvrementCollectedLabel => 'Perçu à ce jour';
 
   @override
+  String get recouvrementRemainingLabel => 'Reste à percevoir';
+
+  @override
   String recouvrementSettledSubline(int count, int percent) {
     return '$count élèves ont tout soldé, soit $percent % de l\'effectif';
   }
