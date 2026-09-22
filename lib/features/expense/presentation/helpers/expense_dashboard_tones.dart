@@ -38,4 +38,30 @@ class ExpenseDashboardTones {
   /// Le garde-fou, puis la formule. Jamais l'inverse.
   static Color _pave(Color accent) =>
       DashboardTones.pave(DashboardTones.paveAccentSur(accent));
+
+  // ---- Cartes de section (spec § 05 · forces normalisées par le § 02) ----
+  //
+  // La spec donne deux tons pour trois sections : **évolution** et
+  // **répartition** en terre cuite, **postes coûteux** en bleu ardoise. Les
+  // membres ci-dessous sont donc nommés par le **ton** et non par la section :
+  // trois jeux pour deux teintes inviteraient la dérive au premier ajustement.
+  //
+  // Le médaillon de l'en-tête suit le ton de sa carte. Il portait jusqu'ici le
+  // même bleu dans les trois sections, sans rapport avec leur contenu.
+
+  /// La marque — l'argent qui sort. Évolution et répartition.
+  static Color get fondMarque =>
+      DashboardTones.section(AppColors.terreCuite).$1;
+  static Color get bordMarque =>
+      DashboardTones.section(AppColors.terreCuite).$2;
+  static const Color accentMarque = AppColors.terreCuite;
+  static const Color accentSoftMarque = AppColors.terreCuiteSoft;
+
+  /// Le neutre structurel — le classement des postes.
+  static Color get fondNeutre =>
+      DashboardTones.section(AppColors.bleuArdoise).$1;
+  static Color get bordNeutre =>
+      DashboardTones.section(AppColors.bleuArdoise).$2;
+  static const Color accentNeutre = AppColors.bleuArdoise;
+  static const Color accentSoftNeutre = AppColors.bleuArdoiseSoft;
 }

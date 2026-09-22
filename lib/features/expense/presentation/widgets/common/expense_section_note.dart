@@ -31,7 +31,7 @@ class ExpenseSectionNote extends StatelessWidget {
         const Icon(
           Icons.info_outline,
           size: AppDimensions.detailMiniIconSize,
-          color: AppColors.textMuted,
+          color: AppColors.textMutedAa,
         ),
         const SizedBox(width: AppDimensions.spacingS),
         Expanded(

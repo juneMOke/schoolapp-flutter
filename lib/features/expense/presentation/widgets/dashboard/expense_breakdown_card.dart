@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_dashboard_tones.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/projections/expense_dashboard_view.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_card.dart';
@@ -31,10 +32,14 @@ class ExpenseBreakdownCard extends StatelessWidget {
         byCount ? s.totals.count : (s.totals.usdCents ?? 0);
     final total = view.shares.fold<num>(0, (sum, s) => sum + weight(s));
     return ExpenseCard(
+      surfaceColor: ExpenseDashboardTones.fondMarque,
+      borderColor: ExpenseDashboardTones.bordMarque,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ExpenseSectionHead(
+            accent: ExpenseDashboardTones.accentMarque,
+            accentSoft: ExpenseDashboardTones.accentSoftMarque,
             icon: Icons.donut_large_outlined,
             title: l10n.expenseBreakdownTitle,
             subtitle: l10n.expenseBreakdownSubtitle,
@@ -136,7 +141,7 @@ class _LegendRow extends StatelessWidget {
           const SizedBox(width: AppDimensions.spacingS),
           Text(
             l10n.expensePercent(percent),
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
         ],
       ),

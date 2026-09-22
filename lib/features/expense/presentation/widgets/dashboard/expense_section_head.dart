@@ -9,11 +9,23 @@ class ExpenseSectionHead extends StatelessWidget {
   final String title;
   final String? subtitle;
 
+  /// Teinte du médaillon — **celle de la section**, et non un bleu unique.
+  ///
+  /// Les trois sections du tableau de bord portaient le même médaillon bleu,
+  /// sans rapport avec leur contenu : l'évolution des dépenses, leur
+  /// répartition et le classement des postes se ressemblaient là où leurs
+  /// cartes vont désormais différer. Le défaut — bleu ardoise — garde le rendu
+  /// d'avant pour tout appelant qui ne déclare rien.
+  final Color accent;
+  final Color accentSoft;
+
   const ExpenseSectionHead({
     super.key,
     required this.icon,
     required this.title,
     this.subtitle,
+    this.accent = AppColors.bleuArdoise,
+    this.accentSoft = AppColors.bleuArdoiseSoft,
   });
 
   @override
@@ -25,7 +37,7 @@ class ExpenseSectionHead extends StatelessWidget {
           width: AppDimensions.expenseInsightMedallionSize,
           height: AppDimensions.expenseInsightMedallionSize,
           decoration: BoxDecoration(
-            color: AppColors.bleuArdoiseSoft,
+            color: accentSoft,
             borderRadius: BorderRadius.circular(
               AppDimensions.expenseIconBoxRadius,
             ),
@@ -33,7 +45,7 @@ class ExpenseSectionHead extends StatelessWidget {
           child: Icon(
             icon,
             size: AppDimensions.expenseMedallionIconSize,
-            color: AppColors.bleuArdoise,
+            color: accent,
           ),
         ),
         const SizedBox(width: AppDimensions.spacingS + AppDimensions.spacingXS),
@@ -45,8 +57,10 @@ class ExpenseSectionHead extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
+                  // `textMutedAa` : le gris muet ne tient que 3,69:1 sur du
+                  // blanc, et moins encore sur un fond teinté.
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted,
+                    color: AppColors.textMutedAa,
                   ),
                 ),
             ],

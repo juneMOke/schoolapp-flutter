@@ -118,4 +118,77 @@ void main() {
       }
     });
   });
+
+  group('les cartes de section', () {
+    const seuilGraphique = 3.0;
+
+    final sections = <String, (Color accent, Color soft, Color fond)>{
+      'marque — évolution et répartition': (
+        ExpenseDashboardTones.accentMarque,
+        ExpenseDashboardTones.accentSoftMarque,
+        ExpenseDashboardTones.fondMarque,
+      ),
+      'neutre — postes coûteux': (
+        ExpenseDashboardTones.accentNeutre,
+        ExpenseDashboardTones.accentSoftNeutre,
+        ExpenseDashboardTones.fondNeutre,
+      ),
+    };
+
+    test('les deux fonds suivent la grammaire partagée', () {
+      // Force 9 pour la terre cuite — ton chaud saturé — et 10 pour le bleu.
+      expect(hex(ExpenseDashboardTones.fondMarque), '#F9F0EC');
+      expect(hex(ExpenseDashboardTones.fondNeutre), '#E8EDF0');
+    });
+
+    test('aucune section n\'est restée blanche', () {
+      sections.forEach((nom, s) {
+        expect(s.$3, isNot(AppColors.surfaceRaised), reason: nom);
+      });
+    });
+
+    test('les trois encres tiennent sur les deux fonds', () {
+      sections.forEach((nom, s) {
+        for (final (role, ink) in [
+          ('titre', AppColors.textPrimary),
+          ('corps', AppColors.textSecondary),
+          ('sous-titre', AppColors.textMutedAa),
+        ]) {
+          expect(
+            ratio(ink, s.$3),
+            greaterThanOrEqualTo(seuil),
+            reason: '$role sur « $nom » ${hex(s.$3)}',
+          );
+        }
+      });
+    });
+
+    test('le médaillon suit son ton, et son glyphe reste lisible', () {
+      // ⚠️ Ce qui se mesure ici, c'est le **glyphe** — le porteur. Pas le
+      // remplissage du médaillon contre le fond de la carte : un aplat pâle
+      // n'a jamais désigné quoi que ce soit, et le mesurer conduit à annoncer
+      // des défauts qui n'existent pas.
+      sections.forEach((nom, s) {
+        expect(
+          ratio(s.$1, s.$2),
+          greaterThanOrEqualTo(seuilGraphique),
+          reason: 'glyphe sur son voile — $nom',
+        );
+        expect(
+          ratio(s.$1, s.$3),
+          greaterThanOrEqualTo(seuilGraphique),
+          reason: 'glyphe sur le fond de sa carte — $nom',
+        );
+      });
+    });
+
+    test('contre-épreuve : le gris muet ne tiendrait sur aucun des deux', () {
+      // Ce qui rend la conversion vers `textMutedAa` nécessaire, et non
+      // cosmétique. Il échouait déjà sur blanc à 3,69 : la teinte aggrave,
+      // elle n'invente pas.
+      sections.forEach((nom, s) {
+        expect(ratio(AppColors.textMuted, s.$3), lessThan(seuil), reason: nom);
+      });
+    });
+  });
 }
