@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recou
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/recouvrement_cycle_tree.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/recouvrement_dashboard_tones.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_breakdown_tile.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -213,6 +214,8 @@ class _RecouvrementCyclesSectionState extends State<RecouvrementCyclesSection> {
     child: BiToneSectionCard(
       title: l10n.recouvrementCyclesTitle,
       subtitle: l10n.recouvrementCyclesHint,
+      surfaceColor: RecouvrementDashboardTones.fondCycles,
+      borderColor: RecouvrementDashboardTones.bordCycles,
       child: child,
     ),
   );

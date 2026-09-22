@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/recouvrement_dashboard_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le taux de recouvrement, **un groupe par devise**.
@@ -56,6 +57,8 @@ class RecouvrementFeeRatesSection extends StatelessWidget {
             label: l10n.recouvrementRatesA11yLabel,
             child: BiToneSectionCard(
               title: l10n.recouvrementRatesTitle,
+              surfaceColor: RecouvrementDashboardTones.fondTaux,
+              borderColor: RecouvrementDashboardTones.bordTaux,
               subtitle: feeCount <= 1
                   ? l10n.recouvrementRatesSubtitleOne
                   : l10n.recouvrementRatesSubtitleMany(feeCount),

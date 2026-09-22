@@ -34,6 +34,19 @@ class BiToneSectionCard extends StatelessWidget {
     Color(0xFFFBF6EF),
   ];
 
+  /// ⚠️ Le filet bas reste **neutre**, même sur une carte teintée.
+  ///
+  /// Le faire suivre [borderColor] serait plus cohérent — un séparateur gris
+  /// entre un en-tête pâle et un corps coloré se remarque. Mais **sept
+  /// appelants déclarent déjà un `borderColor`** sans rien demander de tel :
+  /// `classes_organisation_split_states`, `..._pending_distribution_card`,
+  /// `facturation_detail_page`, `facturation_create_payment_page`,
+  /// `first_registration_search_form` et `status_badge`. Le changement aurait
+  /// donc retouché l'en-tête de sept écrans au passage.
+  ///
+  /// La règle de ce chantier prime : un composant partagé ne change pas de
+  /// rendu par défaut. Si la cohérence du filet devient gênante, elle se
+  /// traitera par une option explicite, écran par écran.
   static const BoxDecoration _headerDecoration = BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.centerLeft,
