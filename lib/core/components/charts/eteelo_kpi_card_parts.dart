@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.d
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 
 /// Contenus d'une carte KPI — un par habillage.
 ///
@@ -65,8 +66,20 @@ class EteeloKpiCardPlainContent extends StatelessWidget {
               child: Text(
                 value,
                 maxLines: 1,
+                // ⚠️ La valeur passe par le garde-fou, pas par l'accent brut.
+                //
+                // L'accent peint aussi le liseré et le médaillon, où il est
+                // lisible et porte le sens — l'ambre dit « justifié », l'or dit
+                // « électricité ». Mais posé sur du BLANC en 24 dp gras, l'or
+                // tombe à 2,28:1 et l'ambre à 2,82:1. Et sur la bande des
+                // Dépenses, cet accent vient du **serveur** : aucune relecture
+                // ne verra le défaut, qui ne se déclenche que chez les écoles
+                // dont le poste dominant est celui-là.
+                //
+                // Corriger ici plutôt qu'à chaque appel : les quatre bandes de
+                // KPI du produit en bénéficient, et la cinquième aussi.
                 style: AppTextStyles.pageTitle.copyWith(
-                  color: data.accent,
+                  color: DashboardTones.encreLisible(data.accent),
                   fontFeatures: AppTextStyles.tabularFigures,
                 ),
               ),

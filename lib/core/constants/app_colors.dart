@@ -282,4 +282,10 @@ class AppColors {
   static const terreCuiteInk = tokens.AppColors.terreCuiteInk;
   static const listeInkSubtitle = tokens.AppColors.listeInkSubtitle;
   static const listeInkDrawerSub = tokens.AppColors.listeInkDrawerSub;
+
+  // Tableaux de bord — sous-lignes teintées et anneau
+  static const paveInkAttendu = tokens.AppColors.paveInkAttendu;
+  static const paveInkPercu = tokens.AppColors.paveInkPercu;
+  static const paveInkReste = tokens.AppColors.paveInkReste;
+  static const finRingTrack = tokens.AppColors.finRingTrack;
 }

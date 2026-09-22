@@ -400,6 +400,20 @@ class AppColors {
   /// retombe sous le seuil dès que le fond s'éclaircit.
   static const listeInkDrawerSub = Color(0xFFC2CFD4);
 
+  // ---- Tableaux de bord — sous-lignes teintées d'un pavé bi-devise ----
+  //
+  // Le **seul** endroit du produit où la sous-ligne d'un pavé porte une nuance
+  // plutôt que l'encre générique : elle signale une seconde devise, dont le
+  // montant ne s'additionne pas au premier. La teinte dit « autre monnaie »
+  // sans qu'il faille l'écrire.
+  static const paveInkAttendu = Color(0xFFEBDCC6); // crème, 7,5:1
+  static const paveInkPercu = Color(0xFFD9E9DB); // vert pâle, 5,9:1
+  static const paveInkReste = Color(0xFFF2D5CF); // rose pâle, 5,2:1
+
+  /// Piste de l'anneau de recouvrement — la seule carte blanche au milieu
+  /// d'une rangée de pavés sombres, et c'est ce qui la fait remarquer.
+  static const finRingTrack = Color(0xFFE8E4D8);
+
   /// Gris **lisible** sur surface teintée.
   ///
   /// [textMuted] (#8C8478) ne tient pas : 3,69:1 sur blanc, 3,13:1 sur une
