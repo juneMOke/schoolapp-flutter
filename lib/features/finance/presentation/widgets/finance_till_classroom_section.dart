@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/finance_till_tones.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -40,9 +41,13 @@ class FinanceTillClassroomSection extends StatelessWidget {
     String money(int cents) =>
         MoneyFormat.format(Money.parse(cents, block.currency));
 
+    final (fond, bord) = FinanceTillTones.sectionParClasse;
+
     return FinanceStatsChartCard(
       title: l10n.financeTillClassroomHeading,
       icon: Icons.groups_outlined,
+      surfaceColor: fond,
+      borderColor: bord,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,7 +55,7 @@ class FinanceTillClassroomSection extends StatelessWidget {
           // « top 8 » figé : une école de cinq classes en montre cinq.
           Text(
             l10n.financeTillClassroomHint(rows.length),
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           if (rows.isEmpty)
@@ -111,7 +116,11 @@ class _UnassignedNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, size: 16, color: AppColors.textMuted),
+          const Icon(
+            Icons.info_outline,
+            size: 16,
+            color: AppColors.textMutedAa,
+          ),
           const SizedBox(width: AppDimensions.spacingS),
           Expanded(
             child: Text(

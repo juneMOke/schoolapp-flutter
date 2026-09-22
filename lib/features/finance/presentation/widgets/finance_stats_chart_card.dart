@@ -24,6 +24,21 @@ class FinanceStatsChartCard extends StatelessWidget {
 
   final Widget child;
 
+  /// Fond de la carte.
+  ///
+  /// Le défaut — blanc — est celui de toutes les cartes de l'application, et il
+  /// ne doit pas bouger : la teinte est une **option** que chaque section
+  /// déclare, jamais un changement global.
+  final Color surfaceColor;
+
+  /// Bord de la carte, et couleur du filet sous la ligne de titre.
+  ///
+  /// `null` — le défaut — laisse la carte **sans bord**, comme elle l'a
+  /// toujours été, et son filet en [AppColors.border]. Une carte teintée en
+  /// prend un : sur un fond coloré, un aplat sans contour se confond avec la
+  /// page dès que les deux se rapprochent.
+  final Color? borderColor;
+
   /// Assez petite pour rester sous la hauteur de la ligne de titre : au-delà,
   /// l'icône pousserait la ligne de séparation vers le bas et la carte ne
   /// s'alignerait plus sur sa voisine.
@@ -35,6 +50,8 @@ class FinanceStatsChartCard extends StatelessWidget {
     this.icon,
     this.trailing,
     required this.child,
+    this.surfaceColor = AppColors.surfaceRaised,
+    this.borderColor,
   });
 
   /// Le **même cadre**, avec un bloc à la place du titre.
@@ -43,19 +60,28 @@ class FinanceStatsChartCard extends StatelessWidget {
   /// ajustement de rayon ou d'ombre — et le contenu sauterait en arrivant, ce
   /// que le squelette existe précisément pour éviter. Ici le cadre est le même
   /// objet ; seule sa première ligne change.
+  /// ⚠️ Le squelette reste **neutre**, sans teinte ni bord.
+  ///
+  /// C'est la doctrine de cet écran : aucune couleur avant de connaître la
+  /// donnée. Elle vaut d'autant plus ici que la section « jour par jour »
+  /// prend le ton de la caisse affichée — teinter son squelette annoncerait
+  /// une devise que la réponse n'a pas encore nommée.
   const FinanceStatsChartCard.skeleton({super.key, required this.child})
     : title = null,
       icon = null,
-      trailing = null;
+      trailing = null,
+      surfaceColor = AppColors.surfaceRaised,
+      borderColor = null;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(
           AppDimensions.enrollmentStatsChartRadius,
         ),
+        border: borderColor == null ? null : Border.all(color: borderColor!),
         boxShadow: [
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: 0.04),
@@ -109,7 +135,9 @@ class FinanceStatsChartCard extends StatelessWidget {
               ),
             ),
           const SizedBox(height: AppDimensions.spacingS),
-          Container(height: 1, color: AppColors.border),
+          // Le filet suit le bord quand la carte est teintée : un séparateur
+          // resté neutre trancherait sur un fond coloré.
+          Container(height: 1, color: borderColor ?? AppColors.border),
           const SizedBox(height: AppDimensions.spacingM),
           child,
         ],

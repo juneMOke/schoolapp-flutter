@@ -162,4 +162,69 @@ void main() {
       );
     });
   });
+
+  group('les cartes de section', () {
+    final sections = <String, (Color fond, Color bord)>{
+      'jour par jour · USD': FinanceTillTones.sectionJourParJour('USD'),
+      'jour par jour · CDF': FinanceTillTones.sectionJourParJour('CDF'),
+      'par source': FinanceTillTones.sectionParSource,
+      'poste imputé': FinanceTillTones.sectionPosteImpute,
+      'par classe': FinanceTillTones.sectionParClasse,
+      'reçus de la caisse': FinanceTillTones.sectionDesRecus,
+    };
+
+    test('les fonds sont ceux que la grammaire dérive', () {
+      expect(hex(FinanceTillTones.sectionPosteImpute.$1), '#E8EDF0');
+      expect(hex(FinanceTillTones.sectionParClasse.$1), '#ECF0ED');
+      expect(hex(FinanceTillTones.sectionParSource.$1), '#F9F0EC');
+      // ⚠️ La spec écrit la force 9 pour les reçus, la grammaire rend 10 :
+      // `#F6F0E6` au lieu de `#F7F2E8`. L'écart est invisible et la
+      // normalisation entre écrans prime — mais il est épinglé ici pour qu'il
+      // reste un choix, et non une dérive qu'on découvrirait plus tard.
+      expect(hex(FinanceTillTones.sectionDesRecus.$1), '#F6F0E6');
+    });
+
+    test('seul le jour par jour change avec la caisse', () {
+      expect(
+        FinanceTillTones.sectionJourParJour('USD').$1,
+        isNot(FinanceTillTones.sectionJourParJour('CDF').$1),
+      );
+      // Les dollars partagent le bleu ardoise du poste imputé : c'est le même
+      // ton, donc le même fond. Rien à corriger — c'est ce que la spec décrit.
+      expect(
+        FinanceTillTones.sectionJourParJour('USD').$1,
+        FinanceTillTones.sectionPosteImpute.$1,
+      );
+    });
+
+    test('titre, corps, mention et icône tiennent sur les six fonds', () {
+      sections.forEach((nom, tone) {
+        for (final (role, ink, seuil) in [
+          ('titre', AppColors.textPrimary, seuilTexte),
+          ('corps', AppColors.textSecondary, seuilTexte),
+          ('mention', AppColors.textMutedAa, seuilTexte),
+          ('icône', AppColors.bleuArdoise, seuilGraphique),
+        ]) {
+          expect(
+            ratio(ink, tone.$1),
+            greaterThanOrEqualTo(seuil),
+            reason: '$role sur « $nom » ${hex(tone.$1)}',
+          );
+        }
+      });
+    });
+
+    test('contre-épreuve : le gris muet ne tiendrait sur aucun', () {
+      // 3,13 à 3,29 selon le fond — c'est ce qui rend les conversions vers
+      // `textMutedAa` nécessaires et non cosmétiques. Il échouait déjà sur
+      // blanc à 3,69 : la teinte aggrave, elle n'invente pas.
+      sections.forEach((nom, tone) {
+        expect(
+          ratio(AppColors.textMuted, tone.$1),
+          lessThan(seuilTexte),
+          reason: 'si le gris muet passe sur « $nom », revoir les conversions',
+        );
+      });
+    });
+  });
 }

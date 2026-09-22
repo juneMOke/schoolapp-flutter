@@ -215,7 +215,7 @@ class _RangeCaption extends StatelessWidget {
         const Icon(
           Icons.calendar_today_outlined,
           size: 15,
-          color: AppColors.textMuted,
+          color: AppColors.textMutedAa,
         ),
         const SizedBox(width: AppDimensions.spacingXS),
         Flexible(
@@ -223,7 +223,7 @@ class _RangeCaption extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
         ),
       ],

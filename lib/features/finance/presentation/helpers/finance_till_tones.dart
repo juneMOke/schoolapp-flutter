@@ -70,6 +70,38 @@ class FinanceTillTones {
   /// être employée ici.
   static const Color inkBoutique = AppColors.terreCuiteInk;
 
+  // ---- Cartes de section (spec §03 · forces normalisées par le §02) ----
+  //
+  // Les cinq tons vivent **ici et pas dans les widgets** : éparpillés, cinq
+  // sections voisines dériveraient l'une après l'autre au premier ajustement.
+  //
+  // ⚠️ La force vient de [DashboardTones.forceDe], pas du chiffre écrit dans
+  // la spec section par section. Les deux ne divergent que sur les reçus — la
+  // spec écrit 9, la grammaire rend 10 — soit `#F7F2E8` contre `#F6F0E6`, un
+  // écart invisible. Normaliser ces forces **entre écrans** est précisément la
+  // raison d'être du § 02 ; suivre le chiffre local le contredirait.
+
+  /// « Jour par jour » — le seul ton piloté par la donnée : il suit la caisse
+  /// affichée, comme les barres qu'il encadre.
+  static (Color fond, Color bord) sectionJourParJour(String currency) =>
+      DashboardTones.section(tillCurrencyAccent(currency));
+
+  /// « Par source » — la marque, parce qu'on y parle de la boutique.
+  static (Color fond, Color bord) get sectionParSource =>
+      DashboardTones.section(AppColors.terreCuite);
+
+  /// « Poste imputé » — le neutre structurel.
+  static (Color fond, Color bord) get sectionPosteImpute =>
+      DashboardTones.section(AppColors.bleuArdoise);
+
+  /// « Par classe » — l'encaissé.
+  static (Color fond, Color bord) get sectionParClasse =>
+      DashboardTones.section(AppColors.vertSavane);
+
+  /// « Reçus de la caisse » — l'ocre, le même que le bandeau de sa table.
+  static (Color fond, Color bord) get sectionDesRecus =>
+      DashboardTones.section(DashboardSense.attente);
+
   /// L'habillage du tableau des reçus — ton ocre `#A66A00`.
   ///
   /// Les couleurs arrivent calculées : le composant de table ne sait pas qu'un

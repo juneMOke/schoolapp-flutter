@@ -165,12 +165,12 @@ class _MixedBasketsNote extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+        const Icon(Icons.info_outline, size: 14, color: AppColors.textMutedAa),
         const SizedBox(width: AppDimensions.spacingXS),
         Expanded(
           child: Text(
             l10n.financeTillReceiptsIssuedMixedNote,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
         ),
       ],

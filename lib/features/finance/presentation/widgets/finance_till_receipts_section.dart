@@ -69,8 +69,12 @@ class FinanceTillReceiptsSection extends StatelessWidget {
 
     return BlocBuilder<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
       builder: (context, state) {
+        final (fond, bord) = FinanceTillTones.sectionDesRecus;
+
         return FinanceStatsChartCard(
           title: l10n.financeTillReceiptsHeading,
+          surfaceColor: fond,
+          borderColor: bord,
           // Les versements de Facturation portent la même.
           icon: Icons.payments_outlined,
           // La fenêtre vient de l'état des reçus : c'est celle qui a produit
@@ -495,7 +499,7 @@ class _InlineMessage extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.textMuted),
+              Icon(icon, size: 18, color: AppColors.textMutedAa),
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
                 child: Text(

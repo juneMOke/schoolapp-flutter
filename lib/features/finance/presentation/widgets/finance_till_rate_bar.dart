@@ -103,7 +103,7 @@ class FinanceTillRateBar extends StatelessWidget {
                           child: Text(
                             l10n.financeTillRateNone,
                             style: AppTextStyles.body.copyWith(
-                              color: AppColors.textMuted,
+                              color: AppColors.textMutedAa,
                             ),
                           ),
                         ),
