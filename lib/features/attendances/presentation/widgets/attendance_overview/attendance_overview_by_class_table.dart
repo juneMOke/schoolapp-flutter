@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_overview/class_attendance_stat.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_overview_format.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_overview_palette.dart';
@@ -333,8 +334,14 @@ class _AttendanceOverviewByClassTableState
           AttendanceOverviewFormat.rate(rate, context),
         ),
         textAlign: TextAlign.end,
+        // La garde vit **ici** et non aux trois sites d'appel : une cellule de
+        // taux est toujours du texte, et les couleurs déjà conformes — le vert
+        // de la présence, le rouge de l'alerte — la traversent inchangées.
+        // Seul l'ambre de la colonne « justifiée » est substitué : 2,82:1 brut,
+        // 6,04 une fois remplacé par `ambreInk`. Les lignes alternées, à
+        // `#F9F7F2`, le laissent à 5,64 — le seuil tient sur les deux fonds.
         style: (bold ? AppTextStyles.bodyStrong : AppTextStyles.body).copyWith(
-          color: color,
+          color: DashboardTones.encreLisibleSur(color, AppColors.surfaceRaised),
           fontFeatures: AppTextStyles.tabularFigures,
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_overview/attendance_kpis.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_overview_format.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_overview/attendance_overview_card.dart';
@@ -157,8 +158,19 @@ class AttendanceOverviewSplitBar extends StatelessWidget {
                 l10n.attendanceOverviewRateValue(
                   AttendanceOverviewFormat.rate(segment.rate, context),
                 ),
+                // ⚠️ L'**encre**, pas la couleur du segment.
+                //
+                // `segment.color` peint trois choses : le segment de la barre,
+                // la pastille de légende, et cette valeur. Les deux premières
+                // sont des surfaces et gardent la teinte pleine ; celle-ci est
+                // du texte, et l'ambre `#D68910` n'y tient que 2,82:1. Le
+                // garde-fou le remplace par `ambreInk` (6,04) et laisse
+                // traverser le vert et le rouge, déjà conformes.
                 style: AppTextStyles.bodyStrong.copyWith(
-                  color: segment.color,
+                  color: DashboardTones.encreLisibleSur(
+                    segment.color,
+                    AppColors.surfaceRaised,
+                  ),
                   fontFeatures: AppTextStyles.tabularFigures,
                 ),
               ),

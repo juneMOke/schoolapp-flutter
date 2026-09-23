@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/recouvrement_dashboard_tones.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_controls.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_simulation_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -64,6 +65,8 @@ class RecouvrementSimulationSection extends StatelessWidget {
               child: BiToneSectionCard(
                 title: l10n.recouvrementSimulationTitle,
                 subtitle: l10n.recouvrementSimulationSubtitle,
+                surfaceColor: RecouvrementDashboardTones.fondSimulation,
+                borderColor: RecouvrementDashboardTones.bordSimulation,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

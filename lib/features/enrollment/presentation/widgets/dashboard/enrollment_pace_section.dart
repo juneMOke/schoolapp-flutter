@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_format.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_who_sections.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -73,6 +74,8 @@ class EnrollmentPaceSection extends StatelessWidget {
     if (!buckets.any((bucket) => bucket.value > 0)) {
       return EteeloStatsCard(
         title: l10n.enrollmentDashboardPaceTitle,
+        tone: EnrollmentDashboardTones.sectionTint('rythme'),
+        toneStrength: EnrollmentDashboardTones.sectionStrength('rythme'),
         icon: Icons.bar_chart_outlined,
         child: EnrollmentDashboardNote(text: l10n.enrollmentDashboardPaceEmpty),
       );
@@ -99,6 +102,8 @@ class EnrollmentPaceSection extends StatelessWidget {
 
     return EteeloStatsCard(
       title: l10n.enrollmentDashboardPaceTitle,
+      tone: EnrollmentDashboardTones.sectionTint('rythme'),
+      toneStrength: EnrollmentDashboardTones.sectionStrength('rythme'),
       icon: Icons.bar_chart_outlined,
       child: Semantics(
         container: true,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -16,6 +17,9 @@ class DataTableHeader extends StatelessWidget {
   final bool showTrailingSlot;
   final DataTableDensity density;
 
+  /// Habillage teinté, ou `null` pour l'en-tête blanc historique.
+  final DataTableTone? tone;
+
   const DataTableHeader({
     super.key,
     required this.columns,
@@ -25,6 +29,7 @@ class DataTableHeader extends StatelessWidget {
     required this.showLeadingSlot,
     required this.showTrailingSlot,
     this.density = DataTableDensity.comfortable,
+    this.tone,
   });
 
   @override
@@ -34,7 +39,7 @@ class DataTableHeader extends StatelessWidget {
         horizontal: EteeloDataTableTheme.headerHorizontalPadding,
         vertical: density.headerVerticalPadding,
       ),
-      color: EteeloDataTableTheme.headerBackground,
+      color: tone?.header ?? EteeloDataTableTheme.headerBackground,
       child: Row(
         children: [
           if (showLeadingSlot) ...[
@@ -65,6 +70,7 @@ class DataTableHeader extends StatelessWidget {
             activeSortColumn: activeSortColumn,
             sortAscending: sortAscending,
             onSortChanged: onSortChanged,
+            tone: tone,
           ),
         ),
       );
@@ -83,6 +89,7 @@ class _DataTableHeaderCell extends StatefulWidget {
   final int? activeSortColumn;
   final bool sortAscending;
   final OnDataTableSort? onSortChanged;
+  final DataTableTone? tone;
 
   const _DataTableHeaderCell({
     required this.column,
@@ -90,6 +97,7 @@ class _DataTableHeaderCell extends StatefulWidget {
     required this.activeSortColumn,
     required this.sortAscending,
     required this.onSortChanged,
+    required this.tone,
   });
 
   @override
@@ -116,8 +124,10 @@ class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
       overflow: TextOverflow.ellipsis,
       style: EteeloDataTableTheme.headerLabelStyle.copyWith(
         color: isActive
-            ? EteeloDataTableTheme.headerSortActiveColor
-            : EteeloDataTableTheme.headerSortInactiveColor,
+            ? (widget.tone?.headerInkSorted ??
+                  EteeloDataTableTheme.headerSortActiveColor)
+            : (widget.tone?.headerInk ??
+                  EteeloDataTableTheme.headerSortInactiveColor),
       ),
     );
 
@@ -195,8 +205,10 @@ class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
                             : Icons.unfold_more_rounded,
                         size: 12,
                         color: isActive
-                            ? EteeloDataTableTheme.headerSortActiveColor
-                            : EteeloDataTableTheme.headerSortInactiveColor,
+                            ? (widget.tone?.headerInkSorted ??
+                                  EteeloDataTableTheme.headerSortActiveColor)
+                            : (widget.tone?.headerInk ??
+                                  EteeloDataTableTheme.headerSortInactiveColor),
                       ),
                     ),
                   ],

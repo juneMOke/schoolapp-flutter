@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_series_builder.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_dashboard_tones.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/projections/expense_dashboard_view.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_card.dart';
@@ -46,10 +47,14 @@ class ExpenseEvolutionCard extends StatelessWidget {
     final drawable = readable || currencies.length <= 1;
 
     return ExpenseCard(
+      surfaceColor: ExpenseDashboardTones.fondMarque,
+      borderColor: ExpenseDashboardTones.bordMarque,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ExpenseSectionHead(
+            accent: ExpenseDashboardTones.accentMarque,
+            accentSoft: ExpenseDashboardTones.accentSoftMarque,
             icon: Icons.trending_up,
             title: l10n.expenseEvolutionTitle,
             subtitle: switch (granularity) {

@@ -46,7 +46,7 @@ class FinanceTillFreshnessCaption extends StatelessWidget {
             const Icon(
               Icons.schedule_outlined,
               size: 13,
-              color: AppColors.textMuted,
+              color: AppColors.textMutedAa,
             ),
             const SizedBox(width: AppDimensions.spacingXS),
             Flexible(
@@ -55,7 +55,7 @@ class FinanceTillFreshnessCaption extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedAa,
                 ),
               ),
             ),

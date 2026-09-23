@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_summary_sorter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -84,6 +85,12 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
           unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
+        // La table appartient au temps du RÉSULTAT : elle porte donc la terre
+        // cuite, pendant que le formulaire au-dessus garde le bleu de la
+        // saisie. Ici la table est la SEULE surface de la réponse — cet écran
+        // n'a pas de barre de résultats, et son compte vit dans le pied
+        // ci-dessus.
+        tone: ListingTones.table,
       ),
     );
   }

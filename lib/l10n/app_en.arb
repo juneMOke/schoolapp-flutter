@@ -1770,7 +1770,7 @@
   },
   "accueilModulesEyebrow": "Your modules",
   "accueilModulesTitle": "Where would you like to go?",
-  "accueilModulesIntro": "These modules cover the life of the school — each card opens its dashboard or its pages.",
+  "accueilModulesIntro": "These modules cover the life of the school — each block opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
@@ -6029,6 +6029,7 @@
   "recouvrementExpectedLabel": "Expected on these fees",
   "recouvrementExpectedMixedSubline": "Two currencies — never added together",
   "recouvrementCollectedLabel": "Collected to date",
+  "recouvrementRemainingLabel": "Left to collect",
   "recouvrementSettledSubline": "{count} students have settled in full, {percent}% of the cohort",
   "@recouvrementSettledSubline": {
     "placeholders": {

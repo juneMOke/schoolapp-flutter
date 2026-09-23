@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_entries_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_entries_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_dashboard_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entries_report_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entry_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -57,6 +58,8 @@ class EnrollmentEntriesSection extends StatelessWidget {
         final window = state.window;
         return EteeloStatsCard(
           title: l10n.enrollmentDashboardEntriesTitle,
+          tone: EnrollmentDashboardTones.sectionTint('jour'),
+          toneStrength: EnrollmentDashboardTones.sectionStrength('jour'),
           subtitle: window == null ? null : _subtitleOf(context, l10n, window),
           // Le PDF s'offre dès que la fenêtre a des lignes, et reste en place
           // pendant qu'une autre page charge : le document ne dépend pas de la

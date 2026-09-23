@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/finance_till_tones.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_fee_code_palette.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
@@ -63,8 +64,12 @@ class FinanceTillImputationSection extends StatelessWidget {
         return byAmount != 0 ? byAmount : a.code.compareTo(b.code);
       });
 
+    final (fond, bord) = FinanceTillTones.sectionPosteImpute;
+
     return FinanceStatsChartCard(
       title: l10n.financeTillImputationCardTitle(symbol),
+      surfaceColor: fond,
+      borderColor: bord,
       // L'icône que Facturation donne déjà à ses créances : c'est le même objet
       // qu'on regarde ici, éteint plutôt qu'ouvert.
       icon: Icons.receipt_long_outlined,
@@ -86,7 +91,7 @@ class FinanceTillImputationSection extends StatelessWidget {
           // pas.
           Text(
             l10n.financeTillImputationCardHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           if (lines.isEmpty)
@@ -193,7 +198,7 @@ class _ShareLegend extends StatelessWidget {
                       // les « 7 % » s'alignent, ou la légende se relit ligne à
                       // ligne.
                       style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
+                        color: AppColors.textMutedAa,
                         fontFeatures: AppTextStyles.tabularFigures,
                       ),
                     ),

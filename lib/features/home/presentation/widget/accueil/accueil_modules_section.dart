@@ -3,18 +3,18 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_entrance.dart';
-import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_card.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Section « Vos modules » : en-tête éditorial + grille responsive de cartes
+/// Section « Vos modules » : en-tête éditorial + grille responsive de pavés
 /// (spec Accueil §02/§03). La grille se reconfigure par largeur minimale d'item
 /// (auto-fill minmax(272, 1fr)) : 1 → 2 → 3 colonnes.
 class AccueilModulesSection extends StatelessWidget {
   final List<AccueilModule> modules;
 
-  /// Rang de la première carte dans la séquence d'entrée de la page (le
-  /// bandeau occupe les rangs précédents) — cf. [AccueilEntrance].
+  /// Rang du premier pavé dans la séquence d'entrée de la page (le bandeau
+  /// occupe les rangs précédents) — cf. [AccueilEntrance].
   final int entranceIndexOffset;
 
   const AccueilModulesSection({
@@ -67,8 +67,8 @@ class AccueilModulesSection extends StatelessWidget {
 }
 
 /// Grille manuelle : on calcule le nombre de colonnes comme le ferait
-/// `auto-fill minmax(272, 1fr)`, puis on dispose les cartes en rangées
-/// d'égale hauteur (`IntrinsicHeight`) pour aligner les pieds de cartes.
+/// `auto-fill minmax(272, 1fr)`, puis on dispose les pavés en rangées
+/// d'égale hauteur (`IntrinsicHeight`) pour que les pastilles s'alignent d'un pavé à l'autre.
 class _ModulesGrid extends StatelessWidget {
   final List<AccueilModule> modules;
   final int entranceIndexOffset;
@@ -117,13 +117,13 @@ class _ModulesGrid extends StatelessWidget {
         children.add(const SizedBox(width: AccueilUiTokens.gridGap));
       }
       // Les emplacements vides de la dernière rangée gardent la largeur des
-      // cartes constante d'une rangée à l'autre.
+      // pavés constante d'une rangée à l'autre.
       children.add(
         Expanded(
           child: i < rowModules.length
               ? AccueilEntrance(
                   index: entranceIndexOffset + firstModuleIndex + i,
-                  child: AccueilModuleCard(module: rowModules[i]),
+                  child: AccueilModuleBloc(module: rowModules[i]),
                 )
               : const SizedBox.shrink(),
         ),

@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/recouvrement_dashboard_tones.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_picker.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -89,6 +90,8 @@ class RecouvrementPerimeterCard extends StatelessWidget {
 
     return BiToneSectionCard(
       title: l10n.recouvrementScopeLabel,
+      surfaceColor: RecouvrementDashboardTones.fondPerimetre,
+      borderColor: RecouvrementDashboardTones.bordPerimetre,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

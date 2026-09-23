@@ -220,7 +220,14 @@ class _IncidentCodeChip extends StatelessWidget {
   }
 }
 
-extension _EteeloErrorTypeX on EteeloErrorType {
+/// Le « ERROR_META » du produit : une tonalité, un voile, une **encre** et un
+/// glyphe par type de panne.
+///
+/// Publique parce que la tonalité ne sert pas qu'à la carte d'erreur : une
+/// barre de résultats qui annonce « Échec du chargement » doit écrire ces mots
+/// dans la **même famille** que le médaillon qui les explique, sans pour autant
+/// reprendre sa couleur de surface.
+extension EteeloErrorTypeX on EteeloErrorType {
   IconData get icon => switch (this) {
     EteeloErrorType.network => Icons.power_off_rounded,
     EteeloErrorType.unauthorized => Icons.lock_outline_rounded,
@@ -238,4 +245,21 @@ extension _EteeloErrorTypeX on EteeloErrorType {
   };
 
   Color get toneSoft => tone.withValues(alpha: 0.16);
+
+  /// Encre des **mots**, distincte du [tone] qui peint le médaillon.
+  ///
+  /// L'ambre `#D68910` des cas 401/403 est une couleur de surface et de
+  /// glyphe : posée sur du texte elle plafonne à 2,5:1, très loin du seuil.
+  /// Le médaillon la garde — il est large et porte un pictogramme, pas des
+  /// mots — et le texte prend l'ambre lisible.
+  ///
+  /// Le réseau et le serveur gardent leur tonalité : le bleu ardoise et le
+  /// rouge d'erreur tiennent tous deux le seuil sur une surface claire.
+  Color get ink => switch (this) {
+    EteeloErrorType.unauthorized ||
+    EteeloErrorType.forbidden => AppColors.ambreInk,
+    EteeloErrorType.network ||
+    EteeloErrorType.server ||
+    EteeloErrorType.unknown => tone,
+  };
 }

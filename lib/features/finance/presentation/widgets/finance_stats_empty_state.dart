@@ -61,7 +61,7 @@ class FinanceStatsEmptyState extends StatelessWidget {
                       Text(
                         hint!,
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textMuted,
+                          color: AppColors.textMutedAa,
                         ),
                       ),
                     ],

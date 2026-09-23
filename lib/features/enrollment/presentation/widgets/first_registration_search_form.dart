@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_listing_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_filter_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -238,6 +239,13 @@ class _FirstRegistrationSearchFormState
       title: l10n.searchStudents,
       subtitle: l10n.searchFormSubtitleFirstRegistration,
       icon: Icons.search_rounded,
+      // Le bleu appartient à la SAISIE. Ce bandeau ouvre l'écran de travail
+      // avec le dégradé de marque, et le corps du formulaire est très
+      // légèrement bleuté — assez pour appartenir à l'en-tête, pas assez pour
+      // teinter les champs, qui restent d'un blanc franc.
+      headerVariant: BiToneHeaderVariant.brand,
+      surfaceColor: EnrollmentListingTones.formulaireFond,
+      borderColor: EnrollmentListingTones.formulaireBord,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

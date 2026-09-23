@@ -57,7 +57,12 @@ class EnrollmentResultsCounterFilters extends StatelessWidget {
             isLoading
                 ? l10n.loadingStudents
                 : l10n.enrollmentResultsCount(count),
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+            // La barre est teintée, son texte reste neutre — mais LISIBLE :
+            // `textMuted` tombe à 3,16:1 sur une surface claire, et davantage
+            // encore sur le voile terre cuite de la barre (spec §03).
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
       ],

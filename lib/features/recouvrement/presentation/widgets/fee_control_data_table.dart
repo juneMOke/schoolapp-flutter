@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_table_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -98,6 +99,12 @@ class FeeControlDataTable extends StatelessWidget {
               unit: l10n.unitStudents,
               pagination: _pagination(),
             ),
+            // La table appartient au temps du RÉSULTAT : elle porte donc la
+            // terre cuite, pendant que la carte de périmètre garde le bleu de
+            // la saisie. L'intention existait déjà ici — l'icône de l'en-tête
+            // de résultats est terre cuite depuis toujours ; il lui manquait
+            // la surface qui la porte.
+            tone: ListingTones.table,
           ),
         );
       },

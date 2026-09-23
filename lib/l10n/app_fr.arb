@@ -1713,7 +1713,7 @@
   },
   "accueilModulesEyebrow": "Vos modules",
   "accueilModulesTitle": "Où souhaitez-vous aller ?",
-  "accueilModulesIntro": "Ces modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
+  "accueilModulesIntro": "Ces modules couvrent la vie de l'école — chaque bloc ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleFeeControlDescription": "Pour un frais donné, qui l'a soldé, qui n'a versé qu'une part, qui n'a rien versé.",
@@ -6124,6 +6124,10 @@
   "recouvrementCollectedLabel": "Perçu à ce jour",
   "@recouvrementCollectedLabel": {
     "description": "Carte KPI : montant perçu"
+  },
+  "recouvrementRemainingLabel": "Reste à percevoir",
+  "@recouvrementRemainingLabel": {
+    "description": "Carte KPI : reste dû, planché créance par créance"
   },
   "recouvrementSettledSubline": "{count} élèves ont tout soldé, soit {percent} % de l'effectif",
   "@recouvrementSettledSubline": {

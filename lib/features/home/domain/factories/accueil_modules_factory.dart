@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
+import 'package:school_app_flutter/features/home/domain/factories/accueil_module_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Construit les cartes modules de la page d'accueil avec leur copy localisée,
-/// leurs accents (spec §03) et leur mappage de navigation (spec §11).
+/// Construit les pavés modules de la page d'accueil avec leur copy localisée,
+/// leur teinte (spec couleurs §02) et leur mappage de navigation (spec §11).
 ///
 /// Les libellés de sous-modules réutilisent les titres de sous-menus existants
 /// pour rester cohérents avec la sidebar (le `\n` de « Composition des classes »
-/// est neutralisé). Les titres de cartes réutilisent les titres de menus.
+/// est neutralisé). Les titres de pavés réutilisent les titres de menus.
 ///
 /// Plusieurs modules n'ont pas de tableau de bord (Cours, Résultats, Boutique,
 /// Configuration) : leur page d'entrée est simplement leur premier sous-module
@@ -97,8 +97,7 @@ class AccueilModulesFactory {
       title: l10n.menuInscriptions,
       description: l10n.accueilModuleInscriptionsDescription,
       icon: Icons.person_add_alt_1_outlined,
-      accent: AppColors.accueilInscriptionsAccent,
-      softBackground: AppColors.accueilInscriptionsSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -131,8 +130,7 @@ class AccueilModulesFactory {
       title: l10n.menuFinances,
       description: l10n.accueilModuleFinancesDescription,
       icon: Icons.account_balance_outlined,
-      accent: AppColors.accueilFinancesAccent,
-      softBackground: AppColors.accueilFinancesSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -161,8 +159,7 @@ class AccueilModulesFactory {
       title: l10n.menuRecouvrement,
       description: l10n.accueilModuleFeeControlDescription,
       icon: Icons.fact_check_outlined,
-      accent: AppColors.accueilFeeControlAccent,
-      softBackground: AppColors.accueilFeeControlSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -189,8 +186,7 @@ class AccueilModulesFactory {
       title: l10n.menuBoutique,
       description: l10n.accueilModuleBoutiqueDescription,
       icon: Icons.storefront_outlined,
-      accent: AppColors.accueilBoutiqueAccent,
-      softBackground: AppColors.accueilBoutiqueSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _page(
           menuId: menuId,
@@ -215,8 +211,7 @@ class AccueilModulesFactory {
       title: l10n.menuExpenses,
       description: l10n.accueilModuleExpenseDescription,
       icon: Icons.account_balance_wallet_outlined,
-      accent: AppColors.accueilExpenseAccent,
-      softBackground: AppColors.accueilExpenseSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -239,8 +234,7 @@ class AccueilModulesFactory {
       title: l10n.menuClasses,
       description: l10n.accueilModuleClassesDescription,
       icon: Icons.grid_view_outlined,
-      accent: AppColors.accueilClassesAccent,
-      softBackground: AppColors.accueilClassesSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -271,8 +265,7 @@ class AccueilModulesFactory {
       title: l10n.menuCourses,
       description: l10n.accueilModuleCoursDescription,
       icon: Icons.menu_book_outlined,
-      accent: AppColors.accueilCoursAccent,
-      softBackground: AppColors.accueilCoursSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _page(
           menuId: menuId,
@@ -296,8 +289,7 @@ class AccueilModulesFactory {
       title: l10n.menuResultats,
       description: l10n.accueilModuleResultatsDescription,
       icon: Icons.percent,
-      accent: AppColors.accueilResultatsAccent,
-      softBackground: AppColors.accueilResultatsSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _page(
           menuId: menuId,
@@ -315,8 +307,7 @@ class AccueilModulesFactory {
       title: l10n.menuDisciplines,
       description: l10n.accueilModuleDisciplinesDescription,
       icon: Icons.school_outlined,
-      accent: AppColors.accueilDisciplinesAccent,
-      softBackground: AppColors.accueilDisciplinesSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _dashboard(
           l10n,
@@ -347,8 +338,7 @@ class AccueilModulesFactory {
       title: l10n.menuConfiguration,
       description: l10n.accueilModuleConfigurationDescription,
       icon: Icons.tune_rounded,
-      accent: AppColors.accueilConfigurationAccent,
-      softBackground: AppColors.accueilConfigurationSoft,
+      tone: AccueilModuleTones.of(menuId),
       subModules: [
         _page(
           menuId: menuId,

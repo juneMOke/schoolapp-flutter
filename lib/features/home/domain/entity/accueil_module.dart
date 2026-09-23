@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/home/domain/entity/accueil_module_tone.dart';
 
 /// Cible de navigation interne à la coquille (menu › sous-écran).
 ///
@@ -37,19 +38,24 @@ class AccueilSubModule {
   });
 }
 
-/// Carte de présentation d'un module sur la page d'accueil (spec §03).
+/// Pavé de présentation d'un module sur la page d'accueil (spec
+/// Accueil-Couleurs §05).
 ///
-/// Décrit l'application : un médaillon coloré, un titre, le nombre de pages,
-/// une phrase de description et la liste de ses sous-modules. L'en-tête mène à
-/// la page d'entrée du module ([entryTarget]) ; chaque ligne à son sous-écran.
+/// Décrit l'application : un médaillon, un titre, le nombre de pages, une
+/// phrase de description et la liste de ses sous-modules. L'en-tête mène à la
+/// page d'entrée du module ([entry]) ; chaque pastille à son sous-écran.
 @immutable
 class AccueilModule {
   final String id;
   final String title;
   final String description;
   final IconData icon;
-  final Color accent;
-  final Color softBackground;
+
+  /// Fond plein du pavé et accent de son médaillon. Vient de la table
+  /// `AccueilModuleTones`, jamais d'une couleur choisie ici : un module garde
+  /// sa teinte d'un écran à l'autre, c'est ce qui la rend mémorisable (§02).
+  final AccueilModuleTone tone;
+
   final List<AccueilSubModule> subModules;
 
   const AccueilModule({
@@ -57,8 +63,7 @@ class AccueilModule {
     required this.title,
     required this.description,
     required this.icon,
-    required this.accent,
-    required this.softBackground,
+    required this.tone,
     required this.subModules,
   }) : assert(subModules.length > 0, 'Un module a au moins une page');
 
@@ -73,8 +78,8 @@ class AccueilModule {
   /// Nombre de pages annoncé sous le titre de la carte.
   int get pageCount => subModules.length;
 
-  /// Utilisé par la fabrique pour restreindre la carte aux sous-modules
-  /// autorisés (ADR-014). [pageCount] et [entry] suivent : une carte filtrée
+  /// Utilisé par la fabrique pour restreindre le pavé aux sous-modules
+  /// autorisés (ADR-014). [pageCount] et [entry] suivent : un pavé filtré
   /// annonce le nombre de pages réellement offertes et s'ouvre sur la première
   /// que l'utilisateur peut atteindre.
   AccueilModule copyWith({List<AccueilSubModule>? subModules}) => AccueilModule(
@@ -82,8 +87,7 @@ class AccueilModule {
     title: title,
     description: description,
     icon: icon,
-    accent: accent,
-    softBackground: softBackground,
+    tone: tone,
     subModules: subModules ?? this.subModules,
   );
 }

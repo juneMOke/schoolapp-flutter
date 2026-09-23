@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/finance_till_tones.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -35,8 +36,12 @@ class FinanceTillSourceSection extends StatelessWidget {
     final fees = money(summary.fees);
     final boutique = money(summary.boutique);
 
+    final (fond, bord) = FinanceTillTones.sectionParSource;
+
     return FinanceStatsChartCard(
       title: l10n.financeTillSourceHeading,
+      surfaceColor: fond,
+      borderColor: bord,
       // **La pastille de la table, promue en repère de carte.** C'est déjà
       // l'icône de la source « facturation » dans « Reçus de la caisse » ; en
       // reprendre une autre ici ferait de la ventilation et de ses lignes deux
@@ -47,7 +52,7 @@ class FinanceTillSourceSection extends StatelessWidget {
         children: [
           Text(
             l10n.financeTillSourceHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           EteeloSplitBar(

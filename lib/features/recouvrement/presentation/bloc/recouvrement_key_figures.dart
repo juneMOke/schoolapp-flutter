@@ -3,13 +3,14 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 
-/// Les quatre chiffres de tête du tableau de bord : deux montants et deux
+/// Les cinq chiffres de tête du tableau de bord : trois montants et deux
 /// effectifs.
 ///
-/// Dans cet ordre, et il n'est pas décoratif : **attendu**, **perçu**, puis
-/// combien d'élèves n'ont rien payé et combien ont commencé. La distinction
-/// entre « rien » et « partiel » est la seule qui compte pour la relance — un
-/// élève qui a fait un geste ne se traite pas comme un élève absent du registre.
+/// Dans cet ordre, et il n'est pas décoratif : **attendu**, **perçu**,
+/// **reste**, puis combien d'élèves n'ont rien payé et combien ont commencé. La
+/// distinction entre « rien » et « partiel » est la seule qui compte pour la
+/// relance — un élève qui a fait un geste ne se traite pas comme un élève
+/// absent du registre.
 ///
 /// « Tout soldé » n'a pas de tuile propre : il se lit dans la sous-ligne du
 /// perçu. Trois tuiles d'effectif pour une population qui n'en a que trois

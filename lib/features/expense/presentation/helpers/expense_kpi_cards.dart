@@ -20,6 +20,15 @@ EteeloKpiCardData expenseMoneyKpi({
   required IconData icon,
   String? subline,
   VoidCallback? onTap,
+
+  /// Fond plein d'un pavé, ou `null` — le défaut — pour la carte claire.
+  ///
+  /// Le socle ne calcule pas cette teinte : l'appelant la dérive et la passe,
+  /// comme pour les trois autres tableaux de bord.
+  Color? filledBackground,
+
+  /// Nuance des valeurs après la première, sur un pavé bi-devise.
+  Color? filledSecondaryInk,
 }) {
   if (totals.bag.isEmpty) {
     return EteeloKpiCardData(
@@ -30,6 +39,8 @@ EteeloKpiCardData expenseMoneyKpi({
       icon: icon,
       subline: subline,
       onTap: onTap,
+      filledBackground: filledBackground,
+      filledSecondaryInk: filledSecondaryInk,
     );
   }
   if (totals.usdCents == null) {
@@ -41,6 +52,8 @@ EteeloKpiCardData expenseMoneyKpi({
       icon: icon,
       subline: subline,
       onTap: onTap,
+      filledBackground: filledBackground,
+      filledSecondaryInk: filledSecondaryInk,
     );
   }
   final reading = ExpenseMoneyText.reading(totals);
@@ -55,5 +68,7 @@ EteeloKpiCardData expenseMoneyKpi({
         ? subline
         : (subline == null ? pair : l10n.expenseJoin(pair, subline)),
     onTap: onTap,
+    filledBackground: filledBackground,
+    filledSecondaryInk: filledSecondaryInk,
   );
 }

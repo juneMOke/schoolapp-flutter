@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_receipts_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/finance_till_tones.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_report_button.dart';
@@ -68,8 +69,12 @@ class FinanceTillReceiptsSection extends StatelessWidget {
 
     return BlocBuilder<FinanceTillReceiptsBloc, FinanceTillReceiptsState>(
       builder: (context, state) {
+        final (fond, bord) = FinanceTillTones.sectionDesRecus;
+
         return FinanceStatsChartCard(
           title: l10n.financeTillReceiptsHeading,
+          surfaceColor: fond,
+          borderColor: bord,
           // Les versements de Facturation portent la même.
           icon: Icons.payments_outlined,
           // La fenêtre vient de l'état des reçus : c'est celle qui a produit
@@ -142,6 +147,11 @@ class FinanceTillReceiptsSection extends StatelessWidget {
           ),
       ],
       config: DataTableViewConfig(
+        // Le ton ocre de la spec : bandeau `#885E0D`, zébrure `#F5F1E8`. Les
+        // deux valeurs étaient déjà assertées dans `dashboard_tones_test.dart`
+        // sous un test nommé « le bandeau et la zébrure du tableau des reçus »
+        // — la mécanique existait, il manquait ce paramètre.
+        tone: FinanceTillTones.tableDesRecus,
         isLoading: state.status == FinanceTillReceiptsStatus.loading,
         loadingLabel: l10n.financeTillReceiptsLoading,
         emptyLabel: l10n.financeTillReceiptsEmpty,
@@ -364,7 +374,16 @@ class _SourcePill extends StatelessWidget {
     final label = isBoutique
         ? l10n.financeTillSourceBoutique
         : l10n.financeTillSourceFees;
+    // ⚠️ **Deux valeurs, pas une.** L'icône est un objet graphique — seuil 3:1,
+    // que la terre cuite pleine franchit sur son voile (3,90). Le libellé est
+    // du texte — seuil 4,5, qu'elle n'atteint pas. Les peindre de la même
+    // couleur, comme c'était le cas, rendait la moitié de la pastille
+    // non conforme ; c'est l'écart E2 de la spec, dont le remède
+    // (`terreCuiteInk`) existait déjà sans être employé ici.
     final accent = isBoutique ? AppColors.terreCuite : AppColors.bleuArdoise;
+    final ink = isBoutique
+        ? FinanceTillTones.inkBoutique
+        : AppColors.bleuArdoise;
     final surface = isBoutique
         ? AppColors.terreCuiteSoft
         : AppColors.bleuArdoiseSoft;
@@ -393,7 +412,7 @@ class _SourcePill extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.caption.copyWith(color: accent),
+              style: AppTextStyles.caption.copyWith(color: ink),
             ),
           ),
         ],
@@ -446,8 +465,11 @@ class _Subtitle extends StatelessWidget {
       parts.join(' · '),
       // Trois chiffres de la même fenêtre, faits pour être comparés entre eux
       // et avec les tuiles : ils s'alignent comme le reste.
+      // `textMutedAa` et non `textMuted` : le gris muet ne tient que 3,69:1 sur
+      // du blanc, et 3,28 sur la zébrure ocre que la table porte désormais.
+      // C'est le même substitut que le garde-fou applique partout ailleurs.
       style: AppTextStyles.caption.copyWith(
-        color: AppColors.textMuted,
+        color: AppColors.textMutedAa,
         fontFeatures: AppTextStyles.tabularFigures,
       ),
     );
@@ -477,7 +499,7 @@ class _InlineMessage extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.textMuted),
+              Icon(icon, size: 18, color: AppColors.textMutedAa),
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
                 child: Text(

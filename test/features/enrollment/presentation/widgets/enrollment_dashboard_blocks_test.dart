@@ -129,11 +129,33 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Inscriptions · année'), findsOneWidget);
-      expect(find.text('Premières inscriptions'), findsOneWidget);
-      expect(find.text('Réinscriptions'), findsOneWidget);
-      expect(find.text('Pré-inscriptions en attente'), findsOneWidget);
+      // Les libellés sont RENDUS en capitales depuis que la bande est en
+      // pavés pleins (spec couleurs §03). La chaîne annoncée aux lecteurs
+      // d'écran, elle, garde sa casse — c'est le test suivant qui le vérifie.
+      expect(find.text('INSCRIPTIONS · ANNÉE'), findsOneWidget);
+      expect(find.text('PREMIÈRES INSCRIPTIONS'), findsOneWidget);
+      expect(find.text('RÉINSCRIPTIONS'), findsOneWidget);
+      expect(find.text('PRÉ-INSCRIPTIONS EN ATTENTE'), findsOneWidget);
       expect(find.textContaining('En cours'), findsNothing);
+    });
+
+    testWidgets('les capitales sont un rendu, pas le libellé annoncé', (
+      tester,
+    ) async {
+      // Flutter n'a pas de `text-transform` : afficher des capitales oblige à
+      // majusculer la chaîne. Laissée telle quelle dans l'arbre sémantique,
+      // elle se fait épeler lettre par lettre par certains lecteurs d'écran —
+      // et sur un pavé de chiffre clé, le libellé EST l'information.
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _host(EnrollmentDashboardKpiBand(kpis: _kpis(), windowLabel: 'Année')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Inscriptions · année'), findsOneWidget);
+      expect(find.bySemanticsLabel('Premières inscriptions'), findsOneWidget);
+
+      semantics.dispose();
     });
 
     testWidgets('un compteur à zéro le dit en toutes lettres', (tester) async {

@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/finance_till_tones.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -163,12 +165,12 @@ class _MixedBasketsNote extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+        const Icon(Icons.info_outline, size: 14, color: AppColors.textMutedAa),
         const SizedBox(width: AppDimensions.spacingXS),
         Expanded(
           child: Text(
             l10n.financeTillReceiptsIssuedMixedNote,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
         ),
       ],
@@ -190,27 +192,20 @@ class _CashBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = tillCurrencyAccent(block.currency);
     final summary = block.summary;
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
+        // **Le pavé entier porte la devise**, là où un liseré haut de 3 dp la
+        // portait seul. Ce liseré disparaît donc : de la couleur de l'accent
+        // sur un fond qui est ce même accent assombri, il ne se verrait plus.
+        //
+        // La doctrine de l'écran ne change pas — la teinte repère, elle
+        // n'informe pas : le symbole de la devise reste dans le montant, et le
+        // libellé la nomme en toutes lettres.
+        color: FinanceTillTones.paveDeCaisse(block.currency),
         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: Border(
-          // Bord **haut**, et non latéral comme les cartes KPI du socle : c'est
-          // le seul marqueur chromatique de devise, et il est toujours doublé
-          // du symbole dans le montant — la couleur ne porte jamais seule
-          // l'information de devise.
-          top: BorderSide(color: accent, width: 3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: DashboardTones.paveShadow,
       ),
       padding: const EdgeInsets.fromLTRB(
         AppDimensions.spacingL,
@@ -224,12 +219,16 @@ class _CashBox extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Le médaillon de la maquette : la teinte de la caisse, doublée
-              // partout du symbole dans le montant.
+              // Sur un pavé, le médaillon devient un voile clair et son glyphe
+              // l'or **clair** : `orDoux` tomberait à 3,00 sur le pavé dollars
+              // et 2,33 sur le pavé francs, sous le seuil des objets
+              // graphiques.
               _Medallion(
                 icon: Icons.account_balance_wallet_outlined,
-                accent: accent,
-                surface: tillCurrencySoftAccent(block.currency),
+                accent: AppColors.orSurPave,
+                surface: AppColors.insInkMain.withValues(
+                  alpha: FinanceTillTones.voileMedaillon,
+                ),
               ),
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
@@ -241,7 +240,7 @@ class _CashBox extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted,
+                    color: DashboardTones.inkLibelle,
                     letterSpacing: 0.06 * 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -255,7 +254,7 @@ class _CashBox extends StatelessWidget {
             style: AppTextStyles.totalAmountLora.copyWith(
               fontSize: 34,
               height: 1.05,
-              color: accent,
+              color: DashboardTones.inkValeur,
             ),
           ),
           const SizedBox(height: AppDimensions.spacingXS),
@@ -276,7 +275,7 @@ class _CashBox extends StatelessWidget {
               // d'un coup d'œil — c'est pourtant le geste que la bande invite
               // à faire.
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
+                color: DashboardTones.inkSousLigne,
                 fontFeatures: AppTextStyles.tabularFigures,
               ),
             ),
@@ -293,7 +292,9 @@ class _CashBox extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingXS),
             Text(
               l10n.financeTillCashBoxNoComparablePeriod,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+              style: AppTextStyles.caption.copyWith(
+                color: DashboardTones.inkSousLigne,
+              ),
             ),
           ],
         ],
@@ -345,7 +346,13 @@ class _Trend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rising = percent >= 0;
-    final color = rising ? AppColors.vertSavane : AppColors.error;
+    // ⚠️ **Pas `vertSavane` / `error`.** Ces deux teintes disaient la hausse et
+    // la baisse sur une tuile blanche ; sur le pavé elles tombent à 1,63 et
+    // 1,85 (dollars), 1,21 et 1,38 (francs) — la ligne devient invisible, pas
+    // seulement difficile. Les deux nuances claires tiennent de 5,43 à 7,95.
+    final color = rising
+        ? FinanceTillTones.inkTendanceHausse
+        : FinanceTillTones.inkTendanceBaisse;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -391,18 +398,13 @@ class _ReceiptsIssuedTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
+        // L'ocre, et non le neutre d'avant ni une teinte de devise. Ce que la
+        // neutralité disait — « ce n'est pas un montant, ne le comparez pas
+        // aux deux caisses » — l'ocre le dit aussi, en étant la seule des trois
+        // teintes qui n'appartient à aucune devise.
+        color: FinanceTillTones.paveDesRecus,
         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: const Border(
-          top: BorderSide(color: AppColors.border, width: 3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: DashboardTones.paveShadow,
       ),
       padding: const EdgeInsets.fromLTRB(
         AppDimensions.spacingL,
@@ -416,13 +418,14 @@ class _ReceiptsIssuedTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Médaillon **neutre** : lui donner une teinte de devise le
-              // rendrait comparable aux deux caisses, alors qu'il ne compte pas
-              // dans la même unité.
-              const _Medallion(
+              // Même voile et même or que les deux caisses : ce qui distingue
+              // cette tuile est la teinte de son pavé, pas son médaillon.
+              _Medallion(
                 icon: Icons.receipt_long_outlined,
-                accent: AppColors.textSecondary,
-                surface: AppColors.surfaceAlt,
+                accent: AppColors.orSurPave,
+                surface: AppColors.insInkMain.withValues(
+                  alpha: FinanceTillTones.voileMedaillon,
+                ),
               ),
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
@@ -431,7 +434,7 @@ class _ReceiptsIssuedTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted,
+                    color: DashboardTones.inkLibelle,
                     letterSpacing: 0.06 * 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -445,14 +448,14 @@ class _ReceiptsIssuedTile extends StatelessWidget {
             style: AppTextStyles.totalAmountLora.copyWith(
               fontSize: 34,
               height: 1.05,
-              color: AppColors.textSecondary,
+              color: DashboardTones.inkValeur,
             ),
           ),
           const SizedBox(height: AppDimensions.spacingXS),
           Text(
             l10n.financeTillReceiptsIssuedSubline,
             style: AppTextStyles.caption.copyWith(
-              color: AppColors.textSecondary,
+              color: DashboardTones.inkSousLigne,
             ),
           ),
         ],

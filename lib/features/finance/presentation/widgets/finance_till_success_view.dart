@@ -375,7 +375,7 @@ class _WindowCaption extends StatelessWidget {
         if (till.hasTimeZone)
           Text(
             l10n.financeTillTimeZoneHint(till.timeZone),
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
           ),
       ],
     );

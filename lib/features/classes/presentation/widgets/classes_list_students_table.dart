@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -154,6 +155,9 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
           unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
+        // La table appartient au temps du RÉSULTAT : elle porte donc la terre
+        // cuite, comme la barre au-dessus d'elle.
+        tone: ListingTones.table,
       ),
     );
   }

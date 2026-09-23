@@ -2081,7 +2081,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Ces modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
+      'Ces modules couvrent la vie de l\'école — chaque bloc ouvre son tableau de bord ou ses pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -9528,6 +9528,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recouvrementCollectedLabel => 'Perçu à ce jour';
+
+  @override
+  String get recouvrementRemainingLabel => 'Reste à percevoir';
 
   @override
   String recouvrementSettledSubline(int count, int percent) {

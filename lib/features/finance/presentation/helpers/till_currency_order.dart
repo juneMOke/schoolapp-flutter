@@ -75,16 +75,12 @@ Color tillCurrencyAccent(String currency) => switch (currency) {
   _ => AppColors.textSecondary,
 };
 
-/// Le fond du médaillon d'une caisse — la teinte douce qui accompagne
-/// [tillCurrencyAccent].
-///
-/// Même règle : elle repère, elle n'informe pas. Une devise inconnue prend le
-/// fond neutre plutôt qu'une couleur inventée.
-Color tillCurrencySoftAccent(String currency) => switch (currency) {
-  'USD' => AppColors.bleuArdoiseSoft,
-  'CDF' => AppColors.feeStatusPaidSoft,
-  _ => AppColors.surfaceAlt,
-};
+// La teinte douce qui accompagnait [tillCurrencyAccent] vivait ici — le fond du
+// médaillon d'une tuile de caisse. Les tuiles étant devenues des pavés sombres,
+// leur médaillon est un voile clair et non plus un aplat teinté : la fonction
+// n'avait plus un seul appelant, et une fonction publique sans appelant finit
+// par être recopiée ailleurs « puisqu'elle existe ». Elle reste dans l'histoire
+// du dépôt si un écran clair en redemande une.
 
 /// « dollars », « francs » — et le **code lui-même** pour toute autre devise.
 ///

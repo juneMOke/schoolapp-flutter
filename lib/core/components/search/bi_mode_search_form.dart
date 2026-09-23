@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/search/search_mode_switch.dar
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -236,6 +237,23 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
       title: labels.title,
       subtitle: labels.helpBanner,
       icon: Icons.search_rounded,
+      // Le bleu appartient à la SAISIE. Ce bandeau ouvre un écran de travail
+      // avec le dégradé de marque, et le corps du formulaire est très
+      // légèrement bleuté — assez pour appartenir à l'en-tête, pas assez pour
+      // teinter les champs, qui restent d'un blanc franc.
+      //
+      // La teinte est posée ici plutôt qu'offerte en option, contrairement à
+      // ce qu'exige d'ordinaire un composant partagé. La raison est que les
+      // **quatre** consommateurs de cette carte — réinscription,
+      // pré-inscription, Documents, Facturation — sont les quatre écrans de
+      // liste de la même grammaire, et qu'aucun autre appelant n'existe : une
+      // option n'aurait eu d'autre usage que d'être passée quatre fois à
+      // l'identique, en invitant la divergence au premier oubli. Une modale de
+      // recherche qui monterait cette carte demain devra, elle, se poser la
+      // question — c'est `SearchModeSwitch` qu'elles emploient aujourd'hui.
+      headerVariant: BiToneHeaderVariant.brand,
+      surfaceColor: ListingTones.formulaireFond,
+      borderColor: ListingTones.formulaireBord,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

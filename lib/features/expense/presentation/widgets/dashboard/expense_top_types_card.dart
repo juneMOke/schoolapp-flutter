@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_dashboard_tones.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/projections/expense_dashboard_view.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_card.dart';
@@ -25,10 +26,14 @@ class ExpenseTopTypesCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final byCount = view.sharesRankedByCount;
     return ExpenseCard(
+      surfaceColor: ExpenseDashboardTones.fondNeutre,
+      borderColor: ExpenseDashboardTones.bordNeutre,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ExpenseSectionHead(
+            accent: ExpenseDashboardTones.accentNeutre,
+            accentSoft: ExpenseDashboardTones.accentSoftNeutre,
             icon: Icons.bar_chart_rounded,
             title: l10n.expenseTopTypesTitle,
             subtitle: l10n.expenseTopTypesSubtitle,

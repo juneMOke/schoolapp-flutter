@@ -138,7 +138,15 @@ class AppColors {
   /// ⚠️ NE PAS reprendre `enrollmentStatsPreSoft` (#E8F3F7) ici : c'est un
   /// token de **surface**, un fond quasi blanc. Employé comme remplissage, il
   /// donnait des barres si pâles que le relief du bucket courant s'y noyait.
-  static const enrollmentStatsPaceBar = Color(0xFFA9C4D6);
+  ///
+  /// ⚠️ Et ne pas revenir non plus à `#A9C4D6`, qui l'a remplacé : la première
+  /// correction allait dans le bon sens mais s'est arrêtée à **1,82:1 sur
+  /// blanc et 1,54:1 sur la carte teintée** — une barre est un objet
+  /// graphique, elle doit tenir 3:1 contre son fond. `#5F8297` donne 4,10 et
+  /// 3,47. Le relief du bucket courant, lui, ne repose pas sur l'écart entre
+  /// les deux teintes (2,2:1) mais sur la valeur écrite au sommet de chaque
+  /// barre — `showValueLabels` est activé sur ce graphique.
+  static const enrollmentStatsPaceBar = Color(0xFF5F8297);
 
   // Teintes de cycle du tableau de bord des inscriptions.
   //
@@ -217,43 +225,58 @@ class AppColors {
   static const classesFocusRing = Color(0xFF1A73E8);
   static const classesDisabledBg = Color(0xFFE5E7EB);
 
-  // Accueil — cartes modules (spec Accueil §03 : un accent + un fond doux par
-  // module). Les fonds doux reprennent les teintes de la synthèse d'inscription.
-  static const accueilInscriptionsAccent = bleuArdoise; // #1B4D6B
-  static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
-  static const accueilFinancesAccent = vertSavane; // #3D6B4A
+  // ---- Accueil — palette des pavés modules (spec Accueil-Couleurs) ----
+  //
+  // Depuis la variante « blocs », un module n'est plus une carte blanche à
+  // accent discret mais un PAVÉ PLEIN. La palette est **fermée à cinq fonds**
+  // — quatre bleus, une terre cuite —, tous assez sombres pour porter une
+  // encre crème au-dessus de 4,5:1. Introduire un sixième fond est un écart à
+  // refuser en revue (§09) : dix teintes, c'est plus aucune hiérarchie.
+  //
+  // Le mappage module → fond vit dans `AccueilModuleTones.table`, jamais dans
+  // un widget, et `accueil_module_tones_test.dart` remesure chaque couple
+  // encre/fond à chaque exécution.
+  static const accueilBlocBleuProfond = bleuProfond; // #0E2D42 — 13,6:1
+  static const accueilBlocBleuEncre = Color(0xFF123A53); // 11,4:1
+  static const accueilBlocBleuArdoise = bleuArdoise; // #1B4D6B — 8,7:1
+  static const accueilBlocBleuArdoiseB = Color(0xFF164760); // 9,5:1
+
+  /// Terre cuite assombrie des pavés.
+  ///
+  /// ⚠️ La spec §02 écrit `#8F421E`, valeur que ce token **n'adopte pas**. Aux
+  /// voiles du §06, `#8F421E` fait tomber le libellé de la pastille « Tableau
+  /// de bord » à 4,43:1 au repos et 3,70:1 au survol — sous le seuil de 4,5:1
+  /// que la spec pose au §04 et fait respecter au §09. La contradiction est
+  /// interne à la spec, qui n'a mesuré la pastille que sur `#1B4D6B` et jamais
+  /// en survol. `#6E3215` la lève sans toucher à une seule encre.
+  ///
+  /// Ne pas la remonter vers `#8F421E` sans redescendre d'autant les voiles de
+  /// `AccueilUiTokens` : le test de contraste échouera, et c'est son rôle.
+  static const accueilBlocTerreFoncee = Color(0xFF6E3215);
+
+  // Encres des pavés — toutes OPAQUES. Le réflexe `blanc à 70 %` est proscrit
+  // (§09) : il passe sous le seuil dès que le fond s'éclaircit.
+  static const accueilBlocInkMain = blancCasse; // #FAFAF7 — titre, flèche
+  static const accueilBlocInkBody = Color(0xFFFAF4EF); // description
+  static const accueilBlocInkMeta = Color(0xFFF0E0D2); // « N pages »
+
+  /// Or de marque — glyphe de médaillon des pavés bleus **uniquement**. Il ne
+  /// colore jamais un texte : 2,4 à 2,9:1 selon le fond (§04). Toléré ici
+  /// parce qu'un glyphe de 24 dp n'est pas du texte.
+  static const accueilBlocAccentOr = orDoux; // #D9A24E
+
+  /// Crème — libellé de la pastille « Tableau de bord » sur **tous** les
+  /// pavés, et glyphe de médaillon des pavés terre cuite, où l'or ne tient pas.
+  static const accueilBlocAccentCreme = Color(0xFFFAF0E4);
+
+  // Rescapés de l'ancienne palette « cartes » de l'Accueil : ces trois-là sont
+  // consommés AILLEURS (Academics pour les deux voiles, l'état vide du
+  // Recouvrement pour l'accent) et survivent donc au passage aux pavés, où ils
+  // ne servent plus. Leur nom `accueil*` est désormais trompeur — le corriger
+  // demande de toucher ces deux modules, hors périmètre de ce lot.
   static const accueilFinancesSoft = Color(0xFFEDF5EF);
-
-  /// Le contrôle des frais : un vert-de-gris sourd, voisin du vert Finances
-  /// sans s'y confondre — la parenté dit le domaine partagé, l'écart dit que
-  /// c'est un regard et non un guichet.
   static const accueilFeeControlAccent = Color(0xFF2F6B62);
-  static const accueilFeeControlSoft = Color(0xFFE9F2F0);
-  // Or profond propre à l'Accueil : l'or-doux de marque (#D9A24E) est trop
-  // clair pour porter un titre ou une icône sur fond papier (spec §03).
-  /// La caisse boutique : un cuivre chaud, distinct du vert Finances — la
-  /// caisse est étanche à la scolarité, la couleur ne doit pas les confondre.
-  static const accueilBoutiqueAccent = Color(0xFF8A4F2D);
-  static const accueilBoutiqueSoft = Color(0xFFF6EDE7);
-
-  /// Dépenses — brique : la famille terre cuite du décaissement (spec), assez
-  /// sombre pour se distinguer de Cours (terre cuite pure) et de Boutique
-  /// (brun), 7:1 sur son fond doux.
-  static const accueilExpenseAccent = Color(0xFF9C3D2E);
-  static const accueilExpenseSoft = Color(0xFFF8ECE9);
-  static const accueilClassesAccent = Color(0xFFB8862B);
-  static const accueilClassesSoft = Color(0xFFFBF3E3);
-  static const accueilCoursAccent = terreCuite; // #B85C2C
-  static const accueilCoursSoft = Color(0xFFF8EEE6);
-  static const accueilResultatsAccent = Color(0xFF7A4E68);
-  static const accueilResultatsSoft = Color(0xFFF5EDF2);
-  static const accueilDisciplinesAccent = info; // #2E6E8E
   static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
-  // Configuration — gris ardoise, volontairement le moins saturé des sept :
-  // c'est une carte de réglages, elle ne doit pas concurrencer les modules
-  // métier dans la grille.
-  static const accueilConfigurationAccent = Color(0xFF4A5568);
-  static const accueilConfigurationSoft = Color(0xFFEEF0F3);
 
   // Boutique — caisse point-de-vente (ADR-020, spec §19).
   //
@@ -322,4 +345,93 @@ class AppColors {
   // sans que la page entière bascule en erreur »).
   static const documentsRowErrorSoft = Color(0xFFFCF2F0);
   static const documentsRowErrorBorder = Color(0xFFE4B9B3);
+
+  // ---- Inscriptions ▸ tableau de bord — encres (spec couleurs) ----
+  //
+  // L'écran dérive TOUTES ses surfaces par formule (cf.
+  // `EnrollmentDashboardTones`) : fonds de pavés et teintes de section se
+  // calculent, ils ne se déclarent pas. Ne vivent ici que les **encres**, qui
+  // ne se calculent pas — et elles sont toutes opaques. Une encre translucide
+  // sur un pavé sombre retombe sous le seuil dès que le fond s'éclaircit.
+  static const insInkMain = blancCasse; // #FAFAF7 — valeur d'un pavé
+  static const insInkLabel = Color(0xFFF8F0E9); // libellé de pavé, capitales
+  static const insInkSub = Color(0xFFF1E8E0); // sous-ligne et delta
+  static const insInkUnit = Color(0xFFEDE4D8); // « élèves · année … »
+  static const insInkMeta = Color(0xFFD8C9B4); // libellés du bandeau
+
+  // Verdicts du bandeau — trois pastels, et non les sémantiques pleines : sur
+  // l'extrémité claire du dégradé, le vert savane tombe à 1,6:1.
+  static const insVerdictOk = Color(0xFFBFE3C8);
+  static const insVerdictWarn = Color(0xFFF3D9A6);
+
+  /// L'or **sur fond sombre** — la seule forme de l'or qui tienne sur un pavé.
+  ///
+  /// `orDoux` #D9A24E est une couleur de surface claire. Posé en glyphe sur un
+  /// pavé, il ne franchit le seuil de 3:1 des objets graphiques que sur le plus
+  /// bleu des cinq (3,00, tout juste) et tombe à 2,33 sur le vert, 1,97 sur la
+  /// terre cuite, 1,93 sur l'ocre. Baisser le voile n'y suffit pas : à voile
+  /// nul, trois fonds sur cinq échouent encore.
+  ///
+  /// Cet or-ci passe partout (4,98 à 3,20 sur voile 14 %). C'est exactement la
+  /// valeur que le doc-comment de `DashboardSense.prestige` prescrit déjà pour
+  /// les fonds sombres — la règle existait, elle n'était pas appliquée.
+  static const orSurPave = insVerdictWarn;
+  static const insVerdictBad = Color(0xFFF6C0B4);
+
+  /// Ambre **lisible** sur fond clair.
+  ///
+  /// À employer partout où `#A66A00` portait du texte : il plafonne à 4,48:1
+  /// sur blanc et 4,23:1 sur son propre voile — sous le seuil dans les deux
+  /// cas. Il reste légitime en surface (fond de médaillon, remplissage).
+  static const ambreInk = Color(0xFF8A5800);
+
+  /// L'ocre du tableau de bord des inscriptions — **alias**, pas une valeur
+  /// neuve : c'est exactement [feeStatusPartial] (#A66A00) portant un autre
+  /// rôle. Ton de la section « par cycle », accent du pavé « pré-inscriptions »
+  /// et teinte du cycle Maternelle, où il remplace l'or, illisible en surface.
+  static const insOcre = feeStatusPartial;
+
+  /// Terre cuite **lisible en texte**.
+  ///
+  /// [terreCuite] (#B85C2C) est une couleur de surface : dès qu'elle porte un
+  /// libellé sur un voile clair, le couple tombe (4,04:1 sur `#FBEFE8`). Cette
+  /// version assombrie le relève à 6,28:1. Deux specs la prescrivent
+  /// indépendamment — Première inscription E2 et Tableaux de bord E2 — ce qui
+  /// en fait l'encre terre cuite du produit, pas un correctif local.
+  static const terreCuiteInk = Color(0xFF8F421E);
+
+  // ---- Écrans de liste (spec Première inscription) ----
+  //
+  // Le bleu appartient à la SAISIE — recherche, champs, filtres — et la terre
+  // cuite au RETOUR de la machine : barre de résultats, en-tête de tableau,
+  // zébrure, bouton d'écriture. L'œil sait donc, sans lire, s'il regarde ce
+  // qu'il a demandé ou ce qu'on lui répond.
+  static const listeInkSubtitle = Color(0xFFE4D9CB); // sous-titre sur dégradé
+
+  /// Sous-texte de tiroir — **opaque**, là où l'implémentation d'origine
+  /// employait un blanc à 75 %. Une encre translucide sur une surface sombre
+  /// retombe sous le seuil dès que le fond s'éclaircit.
+  static const listeInkDrawerSub = Color(0xFFC2CFD4);
+
+  // ---- Tableaux de bord — sous-lignes teintées d'un pavé bi-devise ----
+  //
+  // Le **seul** endroit du produit où la sous-ligne d'un pavé porte une nuance
+  // plutôt que l'encre générique : elle signale une seconde devise, dont le
+  // montant ne s'additionne pas au premier. La teinte dit « autre monnaie »
+  // sans qu'il faille l'écrire.
+  static const paveInkAttendu = Color(0xFFEBDCC6); // crème, 7,5:1
+  static const paveInkPercu = Color(0xFFD9E9DB); // vert pâle, 5,9:1
+  static const paveInkReste = Color(0xFFF2D5CF); // rose pâle, 5,2:1
+
+  /// Piste de l'anneau de recouvrement — la seule carte blanche au milieu
+  /// d'une rangée de pavés sombres, et c'est ce qui la fait remarquer.
+  static const finRingTrack = Color(0xFFE8E4D8);
+
+  /// Gris **lisible** sur surface teintée.
+  ///
+  /// [textMuted] (#8C8478) ne tient pas : 3,69:1 sur blanc, 3,13:1 sur une
+  /// carte teintée, 3,36:1 sur le fond de page. Ce token le remplace dès que
+  /// le gris porte du texte ; la substitution générale dans l'application est
+  /// un chantier à part, hors du périmètre de ce lot.
+  static const textMutedAa = Color(0xFF6F685C);
 }

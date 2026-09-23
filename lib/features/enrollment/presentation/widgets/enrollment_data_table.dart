@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_data_table_sorter.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_listing_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -104,6 +105,10 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         ),
         density: widget.density,
         semanticsLabel: l10n.enrollmentResultsA11yLabel,
+        // La table appartient au temps du RÉSULTAT : elle porte donc la terre
+        // cuite, comme la barre au-dessus d'elle. C'est la seule table teintée
+        // de l'application — toutes les autres gardent le rendu blanc.
+        tone: EnrollmentListingTones.table,
       ),
     );
   }

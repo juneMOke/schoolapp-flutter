@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_header.dart
 import 'package:school_app_flutter/core/components/tables/data_table_loading_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_row_item.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -32,6 +33,20 @@ class DataTableView extends StatelessWidget {
     this.showRowDividers = true,
   });
 
+  /// Sans teinte, exactement la décoration d'avant. Avec, le cadre apparaît —
+  /// un bandeau d'en-tête coloré a besoin d'un contour et d'un arrondi, sans
+  /// quoi il flotte sur le fond de page.
+  BoxDecoration get _decoration {
+    final tone = config.tone;
+    if (tone == null) return _tableDecoration;
+    return BoxDecoration(
+      color: EteeloDataTableTheme.tableBackground,
+      border: Border.all(color: tone.border),
+      borderRadius: BorderRadius.circular(AppDimensions.listeTableRadius),
+      boxShadow: AppElevation.shadowCard,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -52,7 +67,8 @@ class DataTableView extends StatelessWidget {
       liveRegion: config.isLoading || config.isError,
       label: config.semanticsLabel,
       child: Container(
-        decoration: _tableDecoration,
+        decoration: _decoration,
+        clipBehavior: config.tone == null ? Clip.none : Clip.antiAlias,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -64,6 +80,7 @@ class DataTableView extends StatelessWidget {
               showLeadingSlot: showLeadingSlot,
               showTrailingSlot: showTrailingSlot,
               density: config.density,
+              tone: config.tone,
             ),
             const Divider(
               height: EteeloDataTableTheme.separatorThickness,
@@ -136,6 +153,7 @@ class DataTableView extends StatelessWidget {
         isEven: index.isEven,
         trailingBuilders: trailingBuilders,
         density: config.density,
+        tone: config.tone,
       ),
     );
   }

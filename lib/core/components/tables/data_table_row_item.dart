@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_widget.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 
@@ -13,6 +14,10 @@ class DataTableRowItem extends StatefulWidget {
   final Map<DataTableTrailingType, DataTableTrailingBuilder> trailingBuilders;
   final DataTableDensity density;
 
+  /// Habillage teinté, ou `null` pour le rendu historique — deux lignes de la
+  /// même surface blanche, sans zébrure.
+  final DataTableTone? tone;
+
   const DataTableRowItem({
     super.key,
     required this.row,
@@ -20,6 +25,7 @@ class DataTableRowItem extends StatefulWidget {
     required this.isEven,
     this.trailingBuilders = const {},
     this.density = DataTableDensity.comfortable,
+    this.tone,
   });
 
   @override
@@ -38,9 +44,13 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
     final hasLeading = widget.row.leading != null;
     final hasTrailing = widget.row.trailing.type != DataTableTrailingType.none;
     final isActive = _isHovered || _isPressed;
+    // ⚠️ `isEven` vient de l'index, donc la PREMIÈRE ligne est « paire ». La
+    // spec laisse les lignes impaires transparentes au sens CSS — c'est-à-dire
+    // la 1re, la 3e… — donc la zébrure se pose sur `!isEven`. Sans teinte, les
+    // deux branches rendent la même surface : le rendu historique ne bouge pas.
     final baseRowBackground = widget.isEven
         ? EteeloDataTableTheme.rowEvenBackground
-        : EteeloDataTableTheme.rowOddBackground;
+        : (widget.tone?.zebra ?? EteeloDataTableTheme.rowOddBackground);
 
     return MouseRegion(
       cursor: hasTap ? SystemMouseCursors.click : MouseCursor.defer,

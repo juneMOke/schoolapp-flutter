@@ -3233,7 +3233,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'These modules cover the life of the school — each card opens its dashboard or its pages.'**
+  /// **'These modules cover the life of the school — each block opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.
@@ -15119,6 +15119,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collected to date'**
   String get recouvrementCollectedLabel;
+
+  /// No description provided for @recouvrementRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to collect'**
+  String get recouvrementRemainingLabel;
 
   /// No description provided for @recouvrementSettledSubline.
   ///

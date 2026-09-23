@@ -50,13 +50,14 @@ class AccueilContextPill extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: AccueilUiTokens.pillFontSize,
                 fontWeight: FontWeight.w500,
-                color: AppColors.blancCasse.withValues(
-                  alpha: AccueilUiTokens.pillTextOpacity,
-                ),
+                // Encre PLEINE : le blanc transparent sur une surface sombre
+                // est proscrit (spec couleurs §09), il passe sous le seuil dès
+                // que le fond s'éclaircit — ici, la fin du dégradé du bandeau.
+                color: AppColors.blancCasse,
               ),
             ),
           ),
