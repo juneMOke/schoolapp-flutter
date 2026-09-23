@@ -156,4 +156,85 @@ void main() {
     // Sinon une colonne ajoutée à l'une manquerait à l'autre en production.
     expect(migrated, await columnsOf(fresh, 'expenses'));
   });
+
+  group('le fil', () {
+    Future<List<String>> indexesOf(Database on, String table) async => [
+      for (final row in await on.rawQuery("PRAGMA index_list('$table')"))
+        row['name'] as String,
+    ];
+
+    test(
+      'la table du fil naît, avec son index de lecture et d’ordre',
+      () async {
+        await migrateTenantDatabase(db, 49);
+
+        expect(await columnsOf(db, 'expense_messages'), [
+          'id',
+          'school_id',
+          'expense_id',
+          'body',
+          'act',
+          'author_id',
+          'author_name',
+          'created_at',
+          'sync_status',
+        ]);
+        expect(
+          await indexesOf(db, 'expense_messages'),
+          contains('idx_expense_messages_thread'),
+        );
+      },
+    );
+
+    test(
+      'rejouable : ni table ni index en double, et le fil déjà écrit reste',
+      () async {
+        await migrateTenantDatabase(db, 49);
+        await db.insert('expense_messages', {
+          'id': 'm-1',
+          'school_id': 'school-A',
+          'expense_id': 'e-1',
+          'body': 'Approuvée',
+          'act': 'APPROVAL',
+          'created_at': '2026-09-20T08:00:00.000Z',
+        });
+
+        await expectLater(migrateTenantDatabase(db, 49), completes);
+
+        expect(await db.query('expense_messages'), hasLength(1));
+        expect(
+          (await indexesOf(
+            db,
+            'expense_messages',
+          )).where((i) => i == 'idx_expense_messages_thread'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('une base montée et une base créée à neuf ont le même fil', () async {
+      await migrateTenantDatabase(db, 49);
+      final migrated = await columnsOf(db, 'expense_messages');
+
+      final fresh = await _openDb();
+      addTearDown(fresh.close);
+      final live = buildOfflineSchema().firstWhere(
+        (t) => t.name == 'expense_messages',
+      );
+      await fresh.execute(live.createTableSql);
+
+      expect(migrated, await columnsOf(fresh, 'expense_messages'));
+    });
+
+    test('une base sans registre ne fabrique pas de fil orphelin', () async {
+      final bare = await _openDb();
+      addTearDown(bare.close);
+
+      await migrateTenantDatabase(bare, 49);
+
+      // Le palier s'arrête à l'absence de `expenses` : pas de demande, donc
+      // pas de fil — et le test précédent dit que le fil naît dès qu'il y en a.
+      expect(await columnsOf(bare, 'expense_messages'), isEmpty);
+    });
+  });
 }

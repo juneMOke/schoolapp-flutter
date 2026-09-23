@@ -70,12 +70,18 @@ class ExpenseRegisterActions {
 
   Future<void> open(Expense expense) async {
     final cubit = _cubit;
+    // Le fil se lit avant d'ouvrir : une lecture locale est immédiate, et la
+    // fiche n'a donc ni squelette ni erreur à porter. `null` = illisible.
+    final thread = (await cubit.thread(expense.id)).fold((_) => null, (m) => m);
+    if (!context.mounted) return;
     final snapshot = cubit.state.snapshot;
     final choice = await showExpenseDetailDialog(
       context,
       expense: expense,
       type: snapshot.typesById[expense.typeId],
       reader: snapshot.usdReader,
+      thread: thread,
+      accountId: _agentId(),
     );
     if (choice == null || !context.mounted) return;
     // Un pull a pu redescendre la ligne pendant que la fiche était ouverte :
@@ -141,6 +147,16 @@ class ExpenseRegisterActions {
   ];
 
   static String _name(Expense expense) => expense.number ?? expense.title;
+
+  /// L'identifiant du compte, pour reconnaître ses propres messages dans le
+  /// fil (F24) — jamais le nom : deux homonymes dans une école suffiraient à
+  /// s'attribuer les messages l'un de l'autre. Vide sur une session héritée,
+  /// et il vaut alors `null` : mieux vaut ne reconnaître personne que tout le
+  /// monde.
+  String? _agentId() {
+    final id = PermissionGate.maybeBlocOf(context)?.state.user?.id;
+    return id == null || id.isEmpty ? null : id;
+  }
 
   /// L'agent est pris de la session, jamais saisi.
   String? _agentName() {

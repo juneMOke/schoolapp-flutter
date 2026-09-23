@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_peri
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_snapshot_source.dart';
@@ -23,6 +24,8 @@ class _MockSave extends Mock implements SaveExpenseUseCase {}
 class _MockWithdraw extends Mock implements WithdrawExpenseUseCase {}
 
 class _MockRestore extends Mock implements RestoreExpenseUseCase {}
+
+class _MockThread extends Mock implements LoadExpenseThreadUseCase {}
 
 const _types = [
   ExpenseType(
@@ -103,6 +106,7 @@ void main() {
       save: _MockSave(),
       withdraw: _MockWithdraw(),
       restore: _MockRestore(),
+      thread: _MockThread(),
       now: () => DateTime(2026, 9, 12),
     );
     addTearDown(cubit.close);

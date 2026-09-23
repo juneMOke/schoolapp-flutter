@@ -6,10 +6,12 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_register_query.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_snapshot_source.dart';
@@ -26,6 +28,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   final SaveExpenseUseCase _save;
   final WithdrawExpenseUseCase _withdraw;
   final RestoreExpenseUseCase _restore;
+  final LoadExpenseThreadUseCase _thread;
   final DateTime Function() _now;
   void Function()? _unwatch;
 
@@ -35,12 +38,14 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     required SaveExpenseUseCase save,
     required WithdrawExpenseUseCase withdraw,
     required RestoreExpenseUseCase restore,
+    required LoadExpenseThreadUseCase thread,
     DateTime Function() now = DateTime.now,
   }) : _source = source,
        _memory = memory,
        _save = save,
        _withdraw = withdraw,
        _restore = restore,
+       _thread = thread,
        _now = now,
        super(
          ExpenseRegisterState.initial(
@@ -142,6 +147,14 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
 
   Future<Either<Failure, Unit>> restore(Expense expense) =>
       _thenRefresh(_restore(expense));
+
+  /// Le fil d'une demande, lu à l'ouverture de sa fiche.
+  ///
+  /// Une lecture, donc aucun état émis et aucune relecture du registre : le fil
+  /// ne vit pas dans l'instantané — il est trop long pour y dormir, et il n'est
+  /// regardé qu'une fiche à la fois.
+  Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId) =>
+      _thread(expenseId);
 
   Future<T> _thenRefresh<T>(Future<T> write) async {
     final result = await write;

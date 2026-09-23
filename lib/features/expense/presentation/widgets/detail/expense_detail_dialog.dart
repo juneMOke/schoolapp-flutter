@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_dialog_header.dart';
@@ -18,27 +19,42 @@ enum ExpenseDetailChoice { withdraw, duplicate, edit }
 
 /// Ouvre la fiche d'une dépense. Les trois gestes offerts ferment la fiche et
 /// rendent leur choix.
+///
+/// Le fil est **déjà lu** quand la fiche s'ouvre : `null` dit qu'il n'a pas pu
+/// l'être, et une liste vide qu'il n'y a rien à lire. La fiche ne charge donc
+/// rien elle-même — une lecture locale n'a pas besoin d'un écran d'attente.
 Future<ExpenseDetailChoice?> showExpenseDetailDialog(
   BuildContext context, {
   required Expense expense,
   required ExpenseType? type,
   required ExpenseUsdReader reader,
+  required List<ExpenseMessage>? thread,
+  String? accountId,
 }) => showDialog<ExpenseDetailChoice>(
   context: context,
-  builder: (_) =>
-      ExpenseDetailDialog(expense: expense, type: type, reader: reader),
+  builder: (_) => ExpenseDetailDialog(
+    expense: expense,
+    type: type,
+    reader: reader,
+    thread: thread,
+    accountId: accountId,
+  ),
 );
 
 class ExpenseDetailDialog extends StatefulWidget {
   final Expense expense;
   final ExpenseType? type;
   final ExpenseUsdReader reader;
+  final List<ExpenseMessage>? thread;
+  final String? accountId;
 
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
     required this.type,
     required this.reader,
+    required this.thread,
+    this.accountId,
   });
 
   @override
@@ -84,6 +100,8 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
               expense: _expense,
               type: widget.type,
               reader: widget.reader,
+              thread: widget.thread,
+              accountId: widget.accountId,
             ),
           ),
           footer: [

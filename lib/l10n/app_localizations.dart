@@ -16565,6 +16565,84 @@ abstract class AppLocalizations {
   /// **'Rejected by the server: {reason}. Edit the expense to fix it.'**
   String expenseDetailRejected(String reason);
 
+  /// No description provided for @expenseThreadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request thread'**
+  String get expenseThreadTitle;
+
+  /// No description provided for @expenseThreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no message} =1{1 message} other{{count} messages}}'**
+  String expenseThreadCount(int count);
+
+  /// No description provided for @expenseThreadEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No message yet — every decision will be written here.'**
+  String get expenseThreadEmpty;
+
+  /// No description provided for @expenseThreadUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The thread could not be read on this device.'**
+  String get expenseThreadUnreadable;
+
+  /// No description provided for @expenseActDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted'**
+  String get expenseActDeposit;
+
+  /// No description provided for @expenseActReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get expenseActReminder;
+
+  /// No description provided for @expenseActApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval'**
+  String get expenseActApproval;
+
+  /// No description provided for @expenseActRefusal.
+  ///
+  /// In en, this message translates to:
+  /// **'Refusal'**
+  String get expenseActRefusal;
+
+  /// No description provided for @expenseActPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get expenseActPayment;
+
+  /// No description provided for @expenseActRetraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Request retracted'**
+  String get expenseActRetraction;
+
+  /// No description provided for @expenseActReopening.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision cancelled'**
+  String get expenseActReopening;
+
+  /// No description provided for @expenseActCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'Request corrected and resubmitted'**
+  String get expenseActCorrection;
+
+  /// No description provided for @expenseActEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request edited'**
+  String get expenseActEdit;
+
   /// No description provided for @expenseFormCreateTitle.
   ///
   /// In en, this message translates to:

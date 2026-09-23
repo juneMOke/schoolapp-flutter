@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -57,6 +58,7 @@ void main() {
     reader: ExpenseReadDao(db),
     writer: ExpenseWriteDao(db),
     types: ExpenseTypeDao(db),
+    messages: ExpenseMessageDao(db),
     currentUser: user,
     ids: _Ids(),
     rates: _Rates([
@@ -242,5 +244,71 @@ void main() {
     expect(snapshot.usdToCdf?.rateMicros, 2800 * ExchangeRate.scale);
     expect(snapshot.anchor.month, 9);
     expect(snapshot.anchor.day, 7);
+  });
+
+  group('thread', () {
+    Future<void> writeMessage(
+      String id, {
+      required String createdAt,
+      String? act,
+      String body = 'Un mot',
+    }) => db.insert('expense_messages', {
+      'id': id,
+      'school_id': 'school-1',
+      'expense_id': 'e-new',
+      'body': body,
+      'act': act,
+      'author_id': 'u-1',
+      'author_name': 'Moke Junior',
+      'created_at': createdAt,
+      'sync_status': 'SYNCED',
+    });
+
+    test('le fil remonte en entités, du plus ancien au plus récent', () async {
+      await saved(_draft());
+      await writeMessage(
+        'm-2',
+        createdAt: '2026-09-20T09:00:00.000Z',
+        act: 'APPROVAL',
+        body: 'Accordée',
+      );
+      await writeMessage(
+        'm-1',
+        createdAt: '2026-09-20T08:00:00.000Z',
+        act: 'DEPOSIT',
+        body: 'Déposée',
+      );
+
+      final thread = (await repo.thread(
+        'e-new',
+      )).fold((f) => fail('$f'), (m) => m);
+
+      expect([for (final m in thread) m.body], ['Déposée', 'Accordée']);
+      expect(thread.first.act, ExpenseAct.deposit);
+      expect(thread.last.act, ExpenseAct.approval);
+    });
+
+    test('un message dont l’horloge est illisible est ÉCARTÉ, pas placé au '
+        'hasard', () async {
+      await saved(_draft());
+      await writeMessage('m-ok', createdAt: '2026-09-20T08:00:00.000Z');
+      await writeMessage('m-cassé', createdAt: 'hier');
+
+      final thread = (await repo.thread(
+        'e-new',
+      )).fold((f) => fail('$f'), (m) => m);
+
+      expect(thread, hasLength(1));
+      expect(thread.single.id, 'm-ok');
+    });
+
+    test('une demande sans message rend un fil VIDE — pas une panne', () async {
+      await saved(_draft());
+
+      expect(
+        (await repo.thread('e-new')).fold((f) => fail('$f'), (m) => m),
+        isEmpty,
+      );
+    });
   });
 }

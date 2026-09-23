@@ -11,6 +11,20 @@ String expenseFundingLabel(
   ExpenseFundingSource.mobileMoney => l10n.expenseFundingMobileMoney,
 };
 
+/// Ce que dit un acte du fil (F33). Un commentaire libre n'a pas d'acte : le
+/// fil l'affiche sans ligne de constat, et il n'y a donc rien à nommer.
+String expenseActLabel(AppLocalizations l10n, ExpenseAct act) => switch (act) {
+  ExpenseAct.deposit => l10n.expenseActDeposit,
+  ExpenseAct.reminder => l10n.expenseActReminder,
+  ExpenseAct.approval => l10n.expenseActApproval,
+  ExpenseAct.refusal => l10n.expenseActRefusal,
+  ExpenseAct.payment => l10n.expenseActPayment,
+  ExpenseAct.retraction => l10n.expenseActRetraction,
+  ExpenseAct.reopening => l10n.expenseActReopening,
+  ExpenseAct.correction => l10n.expenseActCorrection,
+  ExpenseAct.edit => l10n.expenseActEdit,
+};
+
 /// Le motif d'un refus serveur, dit à l'économe (A4) — par son code machine
 /// quand on le connaît, par la phrase générique sinon.
 String expenseRejectionLabel(AppLocalizations l10n, String? code) =>

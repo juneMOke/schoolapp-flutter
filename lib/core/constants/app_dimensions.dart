@@ -504,6 +504,13 @@ class AppDimensions {
   static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;
 
+  /// Fil de la demande : vignette d'acte et bulle de message.
+  static const expenseThreadMedallionSize = 30.0;
+  static const expenseThreadMedallionRadius = 9.0;
+  static const expenseThreadMedallionIconSize = 15.0;
+  static const expenseThreadBubbleRadius = 11.0;
+  static const expenseThreadBubblePaddingH = 13.0;
+
   /// Tableau de bord : hauteur du graphique d'évolution et de l'anneau.
   static const expenseChartHeight = 190.0;
   static const expenseDonutHeight = 200.0;

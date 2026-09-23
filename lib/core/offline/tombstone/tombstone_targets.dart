@@ -235,5 +235,8 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
   'expenses': TombstoneTarget(
     table: 'expenses',
     syncStatusColumn: 'sync_status',
+    // Le fil part avec sa demande : sans cette ligne, une purge laisserait des
+    // messages rattachés à une dépense que rien ne montre plus.
+    children: {'expense_messages': 'expense_id'},
   ),
 };

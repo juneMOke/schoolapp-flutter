@@ -10493,6 +10493,56 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseThreadTitle => 'Fil de la demande';
+
+  @override
+  String expenseThreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'aucun message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseThreadEmpty =>
+      'Aucun message pour l\'instant — chaque décision s\'inscrira ici.';
+
+  @override
+  String get expenseThreadUnreadable =>
+      'Le fil n\'a pas pu être lu sur ce poste.';
+
+  @override
+  String get expenseActDeposit => 'Demande déposée';
+
+  @override
+  String get expenseActReminder => 'Relance';
+
+  @override
+  String get expenseActApproval => 'Approbation';
+
+  @override
+  String get expenseActRefusal => 'Refus';
+
+  @override
+  String get expenseActPayment => 'Paiement constaté';
+
+  @override
+  String get expenseActRetraction => 'Demande retirée';
+
+  @override
+  String get expenseActReopening => 'Décision annulée';
+
+  @override
+  String get expenseActCorrection => 'Demande corrigée et renvoyée';
+
+  @override
+  String get expenseActEdit => 'Demande modifiée';
+
+  @override
   String get expenseFormCreateTitle =>
       'Enregistrer une dépense de fonctionnement';
 

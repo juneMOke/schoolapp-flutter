@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -18,6 +19,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
@@ -31,6 +33,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   final ExpenseReadDao _reader;
   final ExpenseWriteDao _writer;
   final ExpenseTypeDao _types;
+  final ExpenseMessageDao _messages;
   final CurrentUserContext _currentUser;
   final IdGenerator _ids;
   final ExchangeRateReader _rates;
@@ -47,6 +50,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     required ExpenseReadDao reader,
     required ExpenseWriteDao writer,
     required ExpenseTypeDao types,
+    required ExpenseMessageDao messages,
     required CurrentUserContext currentUser,
     required IdGenerator ids,
     required ExchangeRateReader rates,
@@ -56,6 +60,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }) : _reader = reader,
        _writer = writer,
        _types = types,
+       _messages = messages,
        _currentUser = currentUser,
        _ids = ids,
        _rates = rates,
@@ -89,6 +94,20 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       );
     } catch (e) {
       return Left(StorageFailure('Registre local illisible : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    try {
+      final rows = await _messages.threadFor(expenseId, schoolId: schoolId);
+      // Un message dont l'horloge est illisible est écarté plutôt que placé au
+      // hasard : le fil se lit dans l'ordre ou ne se lit pas.
+      return Right([for (final row in rows) ?row.toEntity()]);
+    } catch (e) {
+      return Left(StorageFailure('Fil local illisible : $e'));
     }
   }
 

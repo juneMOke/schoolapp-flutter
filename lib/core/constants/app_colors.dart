@@ -138,6 +138,7 @@ class AppColors {
   static const feeStatusPartial = tokens.AppColors.feeStatusPartial;
   static const feeStatusPartialSoft = tokens.AppColors.feeStatusPartialSoft;
   static const feeStatusPartialBorder = tokens.AppColors.feeStatusPartialBorder;
+  static const feeStatusPartialInk = tokens.AppColors.feeStatusPartialInk;
   static const feeStatusDue = tokens.AppColors.feeStatusDue;
   static const feeStatusDueSoft = tokens.AppColors.feeStatusDueSoft;
   static const feeStatusDueBorder = tokens.AppColors.feeStatusDueBorder;

@@ -10403,6 +10403,56 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseThreadTitle => 'Request thread';
+
+  @override
+  String expenseThreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'no message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseThreadEmpty =>
+      'No message yet — every decision will be written here.';
+
+  @override
+  String get expenseThreadUnreadable =>
+      'The thread could not be read on this device.';
+
+  @override
+  String get expenseActDeposit => 'Request submitted';
+
+  @override
+  String get expenseActReminder => 'Reminder';
+
+  @override
+  String get expenseActApproval => 'Approval';
+
+  @override
+  String get expenseActRefusal => 'Refusal';
+
+  @override
+  String get expenseActPayment => 'Payment recorded';
+
+  @override
+  String get expenseActRetraction => 'Request retracted';
+
+  @override
+  String get expenseActReopening => 'Decision cancelled';
+
+  @override
+  String get expenseActCorrection => 'Request corrected and resubmitted';
+
+  @override
+  String get expenseActEdit => 'Request edited';
+
+  @override
   String get expenseFormCreateTitle => 'Record an operating expense';
 
   @override

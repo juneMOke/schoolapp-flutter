@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
@@ -22,6 +23,7 @@ import 'package:school_app_flutter/features/expense/domain/repositories/expense_
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
@@ -46,6 +48,9 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerLazySingleton<ExpenseWriteDao>(
     () => ExpenseWriteDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<ExpenseMessageDao>(
+    () => ExpenseMessageDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<ExpenseSyncDao>(
     () => ExpenseSyncDao(getIt<Database>()),
   );
@@ -59,6 +64,7 @@ void registerExpenseOffline(GetIt getIt) {
       reader: getIt<ExpenseReadDao>(),
       writer: getIt<ExpenseWriteDao>(),
       types: getIt<ExpenseTypeDao>(),
+      messages: getIt<ExpenseMessageDao>(),
       currentUser: getIt<CurrentUserContext>(),
       ids: getIt<IdGenerator>(),
       rates: getIt<ExchangeRateReader>(),
@@ -72,6 +78,9 @@ void registerExpenseOffline(GetIt getIt) {
   );
   getIt.registerFactory<LoadExpenseRegisterUseCase>(
     () => LoadExpenseRegisterUseCase(getIt<ExpenseRepository>()),
+  );
+  getIt.registerFactory<LoadExpenseThreadUseCase>(
+    () => LoadExpenseThreadUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<SaveExpenseUseCase>(
     () => SaveExpenseUseCase(getIt<ExpenseRepository>()),
@@ -112,6 +121,7 @@ void registerExpenseOffline(GetIt getIt) {
       save: getIt<SaveExpenseUseCase>(),
       withdraw: getIt<WithdrawExpenseUseCase>(),
       restore: getIt<RestoreExpenseUseCase>(),
+      thread: getIt<LoadExpenseThreadUseCase>(),
     ),
   );
   getIt.registerFactory<ExpenseDashboardCubit>(

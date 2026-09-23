@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
@@ -216,6 +217,7 @@ void main() {
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader(_rate),
+          thread: const [],
         ),
       );
 
@@ -237,6 +239,7 @@ void main() {
           expense: _snel(status: ExpenseStatus.paid),
           type: _types.first,
           reader: ExpenseUsdReader(_rate),
+          thread: const [],
         ),
       );
 
@@ -254,6 +257,7 @@ void main() {
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
         );
       });
 
@@ -279,6 +283,7 @@ void main() {
           ),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
         ),
       );
 
@@ -286,6 +291,95 @@ void main() {
         find.textContaining('la date de la dépense est dans le futur'),
         findsOneWidget,
       );
+    });
+  });
+
+  group('fil de la demande', () {
+    ExpenseMessage message(
+      String id, {
+      required String body,
+      ExpenseAct? act,
+      String? authorId = 'u-9',
+      int hour = 8,
+    }) => ExpenseMessage(
+      id: id,
+      expenseId: 'e-1',
+      body: body,
+      act: act,
+      authorId: authorId,
+      authorName: 'Mbala Thérèse',
+      createdAt: DateTime.utc(2026, 9, 20, hour),
+    );
+
+    Future<void> pumpThread(
+      WidgetTester tester,
+      List<ExpenseMessage>? thread, {
+      String? accountId,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: thread,
+          accountId: accountId,
+        ),
+      );
+    }
+
+    testWidgets('chaque geste est nommé, les messages sont comptés, et un '
+        'commentaire libre ne constate rien', (tester) async {
+      await pumpThread(tester, [
+        message('m-1', body: 'Facture du mois', act: ExpenseAct.deposit),
+        message('m-2', body: 'Accordée', act: ExpenseAct.approval, hour: 9),
+        message('m-3', body: 'Payer avant vendredi', hour: 10),
+      ]);
+
+      expect(find.text('Fil de la demande'), findsOneWidget);
+      expect(find.text('3 messages'), findsOneWidget);
+      expect(find.text('Demande déposée'), findsOneWidget);
+      expect(find.text('Approbation'), findsOneWidget);
+      expect(find.text('Payer avant vendredi'), findsOneWidget);
+      // Le commentaire libre n'emprunte l'étiquette d'aucun acte.
+      expect(find.text('Paiement constaté'), findsNothing);
+    });
+
+    testWidgets('un fil vide annonce ce qui viendra : ce n’est pas un échec, '
+        'et il ne réclame aucune action', (tester) async {
+      await pumpThread(tester, const []);
+
+      expect(find.text('aucun message'), findsOneWidget);
+      expect(
+        find.textContaining("chaque décision s'inscrira ici"),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('un fil ILLISIBLE se dit, et ne se confond pas avec un fil '
+        'vide', (tester) async {
+      await pumpThread(tester, null);
+
+      expect(
+        find.text("Le fil n'a pas pu être lu sur ce poste."),
+        findsOneWidget,
+      );
+      expect(find.textContaining('chaque décision'), findsNothing);
+      // Rien à compter quand rien n'a été lu.
+      expect(find.text('aucun message'), findsNothing);
+    });
+
+    testWidgets('l’auteur est nommé, et la propriété se juge sur le COMPTE : '
+        'un homonyme ne s’approprie pas le message', (tester) async {
+      await pumpThread(tester, [
+        message('m-1', body: 'Accordée', act: ExpenseAct.approval),
+      ], accountId: 'u-1');
+
+      expect(find.text('Mbala Thérèse'), findsOneWidget);
+      expect(find.text('Accordée'), findsOneWidget);
     });
   });
 }

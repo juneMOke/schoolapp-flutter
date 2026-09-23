@@ -113,8 +113,53 @@ const TableSchema expensesTable = TableSchema(
   ],
 );
 
+/// `expense_messages` — le fil d'une demande (v2, F30).
+///
+/// **Append-only** : on ajoute, on ne modifie ni ne supprime. Un geste de
+/// décision y écrit son message, et c'est ce message qui porte l'ordre.
+///
+/// - `id` : uuid fabriqué par le poste. Clé d'idempotence du message **et du
+///   geste** qui le porte (Q3) — un rejeu est inerte côté serveur.
+/// - `act` : l'un des neuf actes anglais (F33) ; `NULL` = commentaire libre.
+/// - `author_id` / `author_name` : l'identifiant pour juger la propriété
+///   (F24), le nom pour l'afficher. Jamais le nom seul : deux Ilunga dans une
+///   école suffisent à rendre la comparaison fausse.
+/// - `created_at` : ISO-8601 UTC. **C'est lui qui ordonne la séquence** des
+///   gestes d'une même dépense (F31), donc son format ne varie pas : deux
+///   écritures de forme différente se compareraient de travers.
+/// - `sync_status` : `PENDING_SYNC` tant que le serveur n'a pas accusé. Le
+///   pull n'écrase jamais un message encore en attente, et c'est ce signal que
+///   lira la garde d'ordre.
+///
+/// `body` SENSIBLE : un motif de refus nomme des fournisseurs et des
+/// collègues. La base est chiffrée (SQLCipher), et aucun corps de message ne
+/// part dans un journal.
+const TableSchema expenseMessagesTable = TableSchema(
+  name: 'expense_messages',
+  createTableSql: '''
+    CREATE TABLE expense_messages (
+      id TEXT PRIMARY KEY,
+      school_id TEXT NOT NULL,
+      expense_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      act TEXT,
+      author_id TEXT,
+      author_name TEXT,
+      created_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC'
+    )
+  ''',
+  createIndexSql: [
+    // Il sert l'affichage du fil ET la garde d'ordre, qui cherche le plus
+    // ancien message non synchronisé d'une dépense.
+    'CREATE INDEX idx_expense_messages_thread '
+        'ON expense_messages(expense_id, created_at)',
+  ],
+);
+
 /// Tables du module Dépenses.
 const List<TableSchema> expenseOfflineTables = [
   refExpenseTypesTable,
   expensesTable,
+  expenseMessagesTable,
 ];

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 
 /// Le registre des dépenses du poste : lecture locale, écriture en file.
@@ -20,4 +21,8 @@ abstract class ExpenseRepository {
 
   /// Le « Annuler » du toast.
   Future<Either<Failure, Unit>> restore(Expense expense);
+
+  /// Le fil d'une demande, du plus ancien au plus récent (F30) — lecture
+  /// locale, comme le reste du module.
+  Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId);
 }

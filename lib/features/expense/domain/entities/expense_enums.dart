@@ -95,3 +95,54 @@ enum ExpenseSyncState {
     return pending;
   }
 }
+
+/// Les neuf actes du fil (F33) — **en anglais**, comme tout ce qui voyage déjà
+/// dans ce module (`PAID`, `CASH`, `MOBILE_MONEY`). Les libellés affichés
+/// restent en français, dans les `.arb`.
+///
+/// `null` n'est pas une valeur manquante : c'est le **commentaire libre**, le
+/// seul message du fil qui ne constate aucun geste.
+enum ExpenseAct {
+  /// La demande est déposée — premier message de tout fil.
+  deposit('DEPOSIT'),
+
+  /// Le demandeur pousse : le compteur de relances monte d'un.
+  reminder('REMINDER'),
+
+  approval('APPROVAL'),
+
+  /// Toujours motivé : un refus sans motif laisse le demandeur sans issue.
+  refusal('REFUSAL'),
+
+  payment('PAYMENT'),
+
+  /// Reprise par son demandeur, réengageable après correction.
+  retraction('RETRACTION'),
+
+  /// La direction défait une décision : la demande revient en attente.
+  reopening('REOPENING'),
+
+  /// Corrigée puis renvoyée par son demandeur — deux gestes, un acte.
+  correction('CORRECTION'),
+
+  /// Modifiée sans changer d'état : elle était déjà en attente.
+  edit('EDIT');
+
+  const ExpenseAct(this.wireValue);
+
+  final String wireValue;
+
+  /// Lecture tolérante, et son défaut est **`null`** : un acte qu'on ne sait
+  /// pas lire — un serveur plus récent que ce poste — se rend comme un
+  /// commentaire libre. Le texte reste lisible, seule la vignette perd son
+  /// nom. Le deviner serait pire : « Refus » affiché sur un acte inconnu
+  /// mentirait sur ce qui s'est passé.
+  static ExpenseAct? fromWire(String? raw) {
+    final value = raw?.trim().toUpperCase();
+    if (value == null || value.isEmpty) return null;
+    for (final act in values) {
+      if (act.wireValue == value) return act;
+    }
+    return null;
+  }
+}

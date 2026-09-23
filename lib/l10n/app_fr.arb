@@ -7006,6 +7006,26 @@
       }
     }
   },
+  "expenseThreadTitle": "Fil de la demande",
+  "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
+  "@expenseThreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseThreadEmpty": "Aucun message pour l'instant — chaque décision s'inscrira ici.",
+  "expenseThreadUnreadable": "Le fil n'a pas pu être lu sur ce poste.",
+  "expenseActDeposit": "Demande déposée",
+  "expenseActReminder": "Relance",
+  "expenseActApproval": "Approbation",
+  "expenseActRefusal": "Refus",
+  "expenseActPayment": "Paiement constaté",
+  "expenseActRetraction": "Demande retirée",
+  "expenseActReopening": "Décision annulée",
+  "expenseActCorrection": "Demande corrigée et renvoyée",
+  "expenseActEdit": "Demande modifiée",
   "expenseFormCreateTitle": "Enregistrer une dépense de fonctionnement",
   "expenseFormCreateSubtitle": "Ce que l'école a décaissé : un intitulé, un type, un montant, un statut.",
   "expenseFormEditEyebrow": "Modifier la dépense",
