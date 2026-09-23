@@ -13124,6 +13124,18 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get ticketBalanceTotalLabel;
 
+  /// No description provided for @ticketHistoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history'**
+  String get ticketHistoryLabel;
+
+  /// No description provided for @ticketHistoryTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid'**
+  String get ticketHistoryTotalLabel;
+
   /// No description provided for @ticketThanksNotice.
   ///
   /// In en, this message translates to:

@@ -292,6 +292,80 @@ abstract final class TicketTextLayout {
       }
     }
 
+    // ── Z6 — les versements de l'année, CE TICKET COMPRIS.
+    //
+    // Le versement courant y figure, et ce n'est pas une redite du « Montant
+    // reçu » : ce qui se lit ici, c'est le CUMUL de l'année, que le total du
+    // bloc porte en dernière ligne. Sans lui le cumul s'arrêterait la veille, et
+    // le parent devrait ajouter de tête le chiffre imprimé cinq lignes plus
+    // haut. C'est `printedPayments` qui l'insère — à sa date, jamais épinglé en
+    // tête, parce que la date d'encaissement est saisissable au guichet.
+    //
+    // Le bloc ne disparaît donc qu'aux deux cas où il n'y a **rien** à lister :
+    // année inconnue, ou versement sans ligne de tiroir. Au tout premier
+    // versement de l'année il sort avec sa ligne unique et sans total — un total
+    // qui ne coifferait qu'une ligne la redirait, règle déjà appliquée au solde.
+    //
+    // ⚠️ Il vient APRÈS le solde, et l'ordre n'est pas indifférent : le parent
+    // lit ce qu'il vient de payer, ce qu'il lui reste, puis tout ce qu'il a
+    // versé. Remonter le bloc au-dessus du solde ferait finir la pièce sur une
+    // dette.
+    final printedPayments = model.printedPayments;
+    if (printedPayments.isNotEmpty) {
+      // Le filet qui SÉPARE du bloc précédent — répartition, solde, ou le
+      // montant reçu seul. Posé sans condition : il ferme ce qui précède, pas
+      // ce qui suit.
+      lines.add(_rule(width));
+
+      // Titre REPLIÉ, comme celui du solde : « Historique des paiements » fait
+      // 24 caractères, il tient à 48 et à 32 — mais un libellé traduit plus long
+      // déborderait, et le repli coûte moins qu'une ligne coupée au papier.
+      //
+      // ⚠️ Filet du dessous conditionné au titre, pour la raison déjà payée par
+      // le bloc de solde : `_wrapped('')` rend une liste VIDE, et un libellé
+      // vide — ce qu'une traduction incomplète produit sans bruit — collerait
+      // deux filets l'un sur l'autre.
+      final title = _wrapped(model.labels.historyLabel, width);
+      if (title.isNotEmpty) {
+        lines.addAll(title);
+        // Le filet qui OUVRE la liste sous son titre, comme celui de la
+        // répartition : sans lui, la première date se lit comme un prolongement
+        // du mot « Historique ».
+        lines.add(_rule(width));
+      }
+
+      // Une ligne par versement : la date à gauche, le perçu à droite. Celui
+      // du jour ne porte AUCUNE marque — sa date est déjà celle imprimée en
+      // tête du ticket, il se reconnaît donc seul, et une mention lui coûterait
+      // onze colonnes que les 32 d'un papier 58 mm n'ont pas.
+      //
+      // Un versement qui a mêlé deux devises prend deux lignes, la date sur la
+      // première seulement — `_addMoneyBag` ne répète jamais son libellé, et
+      // une date répétée se lirait comme deux versements du même jour.
+      for (final entry in printedPayments) {
+        _addMoneyBag(
+          lines,
+          '  ${_formatDate(entry.paidAt)}',
+          entry.received,
+          width,
+        );
+      }
+
+      // Filet et total **seulement quand le total additionne quelque chose** —
+      // même règle que le solde, et pour la même raison : un versement unique
+      // suivi d'un total qui le répète dirait deux fois le même chiffre sur un
+      // papier qui se recompte.
+      if (!_totalRepeatsHistory(printedPayments)) {
+        lines.add(_rule(width));
+        _addTotal(
+          lines,
+          model.labels.historyTotalLabel,
+          model.printedPaymentsTotal,
+          width,
+        );
+      }
+    }
+
     lines.add(_rule(width));
 
     // Phrase de conservation (RG-012-12) : sans elle, l'établissement n'a aucun
@@ -405,6 +479,19 @@ abstract final class TicketTextLayout {
           MoneyBag.from(
             Money.parse(detail.single.amountInCents, detail.single.currency),
           );
+
+  /// Le total de l'historique ne ferait-il que **redire** l'unique versement
+  /// qu'il coiffe ?
+  ///
+  /// Jumeau de [_totalRepeatsDetail], mais la réponse y est plus simple, et il
+  /// faut dire pourquoi : une entrée d'historique porte un **sac**, là où une
+  /// ligne de solde porte un scalaire. Le total d'un versement unique est donc
+  /// toujours ce versement, y compris quand il a mêlé deux devises — il les
+  /// réécrirait sur une ligne de plus, dans l'autre sens, sans rien apprendre.
+  /// Le nombre de versements suffit à trancher, et l'égalité qui vivait ici
+  /// était vraie par construction.
+  static bool _totalRepeatsHistory(List<TicketHistoryEntry> history) =>
+      history.length == 1;
 
   /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».
   ///

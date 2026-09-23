@@ -8115,6 +8115,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketBalanceTotalLabel => 'Total';
 
   @override
+  String get ticketHistoryLabel => 'Payment history';
+
+  @override
+  String get ticketHistoryTotalLabel => 'Total paid';
+
+  @override
   String get ticketThanksNotice => 'Thank you for your trust.';
 
   @override

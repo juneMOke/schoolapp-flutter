@@ -5283,6 +5283,8 @@
   "ticketAdvanceLabel": "Avance (non imputée)",
   "ticketBalanceLabel": "Solde restant au moment de l'impression",
   "ticketBalanceTotalLabel": "Total",
+  "ticketHistoryLabel": "Historique des paiements",
+  "ticketHistoryTotalLabel": "Total versé",
   "ticketThanksNotice": "Nous vous remercions pour votre confiance.",
   "ticketEditorNotice": "Reçu édité par ETEELO CONNECT",
   "ticketEditorSite": "eteeloconnect.com",

@@ -36,6 +36,8 @@ abstract final class TicketBenchFixtures {
     advanceLabel: 'Avance',
     balanceLabel: 'Solde restant au moment de l\'impression',
     balanceTotalLabel: 'Total',
+    historyLabel: 'Historique des paiements',
+    historyTotalLabel: 'Total verse',
     keepTicketNotice:
         'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
     thanksNotice: 'Nous vous remercions pour votre confiance.',
@@ -53,7 +55,9 @@ abstract final class TicketBenchFixtures {
   /// * cinq lignes de répartition dont deux libellés trop longs pour tenir en
   ///   face de leur montant — c'est le chemin `_addPair` qui reporte la valeur ;
   /// * un montant à six chiffres, pour voir le groupement des milliers ;
-  /// * un solde présent, seul porteur de la mention de réserve.
+  /// * un solde présent, seul porteur de la mention de réserve ;
+  /// * un historique de trois versements, dont un à deux devises — c'est lui
+  ///   qui allonge le papier, donc lui qui décide de l'avance à déchirer.
   static final TicketReceiptModel torture = TicketReceiptModel(
     schoolName: 'Complexe scolaire Sacré-Cœur de l’Étoile',
     schoolLocality: 'Kinshasa · Ngaliema',
@@ -95,6 +99,25 @@ abstract final class TicketBenchFixtures {
       ),
     ],
     remainingBalance: MoneyBag.of(const [Money(25000000, 'CDF')]),
+    paymentHistory: [
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 28, 10, 12),
+        received: MoneyBag.of(const [Money(5000000, 'CDF')]),
+      ),
+      // Un passage au guichet qui a mêlé deux piles de billets : deux lignes
+      // sous une seule date, le cas qui casse une colonne s'il est mal posé.
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 12, 8, 45),
+        received: MoneyBag.of(const [
+          Money(2500000, 'CDF'),
+          Money(10000, 'USD'),
+        ]),
+      ),
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 3, 9, 30),
+        received: MoneyBag.of(const [Money(1234567, 'CDF')]),
+      ),
+    ],
     labels: labels,
   );
 

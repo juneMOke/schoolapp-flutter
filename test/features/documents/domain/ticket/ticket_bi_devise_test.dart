@@ -30,6 +30,8 @@ const _labels = TicketLabels(
   advanceLabel: 'Avance (non imputée)',
   balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',

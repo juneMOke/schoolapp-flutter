@@ -5,14 +5,12 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_labels.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
 
-// Les lignes et les libellés vivent dans leurs propres fichiers : trois
-// préoccupations sans rapport tenaient dans celui-ci, qui atteignait 527
-// lignes.
-//
-// Ils restent visibles d'ici. Une quinzaine de sites construisent
-// `TicketLabels` en n'important que ce fichier : les réexporter découpe la
-// source sans faire de churn d'imports, et sans imposer à un appelant de savoir
-// dans lequel des trois vit le type qu'il nomme.
+// Les lignes et les libellés vivent dans leurs propres fichiers depuis qu'un
+// troisième bloc d'argent est venu s'ajouter — mais ils restent visibles d'ici.
+// Une quinzaine de sites construisent `TicketLabels` en n'important que ce
+// fichier : les réexporter découpe la source sans faire de churn d'imports, et
+// sans imposer à un appelant de savoir dans lequel des trois vit le type qu'il
+// nomme.
 export 'package:school_app_flutter/features/documents/domain/ticket/ticket_labels.dart';
 export 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
 
@@ -145,6 +143,26 @@ class TicketReceiptModel extends Equatable {
   /// que répéter, le gabarit le tait.
   final List<TicketAllocationLine> remainingByCharge;
 
+  // ── Z6 : ce qui a déjà été versé ────────────────────────────────────────────
+  /// Les versements **antérieurs** de l'élève sur l'année, du plus récent au
+  /// plus ancien.
+  ///
+  /// ⚠️ **Le versement courant n'est PAS dans ce champ**, et il est pourtant
+  /// imprimé : c'est [printedPayments] qui l'y ajoute. La séparation est
+  /// délibérée — ce champ porte ce que la BASE sait d'autre sur cet élève, le
+  /// getter porte ce que le PAPIER montre. Poser le versement courant dans le
+  /// champ obligerait chaque appelant à ne pas l'oublier, et le premier qui
+  /// l'oublierait sortirait un cumul faux sans que rien ne le dise.
+  ///
+  /// Deux exclusions, et chacune répond à une question qu'un parent pourrait
+  /// poser devant le papier :
+  ///
+  /// - **les versements extournés n'y sont pas** — ils ne comptent plus dans
+  ///   les soldes, et les imprimer ferait croire à un argent encore acquis ;
+  /// - **l'année est celle du versement** — un arriéré N-1 additionné au versé
+  ///   N donnerait un cumul que plus aucun écran ne confirme.
+  final List<TicketHistoryEntry> paymentHistory;
+
   final TicketLabels labels;
 
   const TicketReceiptModel({
@@ -166,6 +184,7 @@ class TicketReceiptModel extends Equatable {
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
     this.remainingByCharge = const <TicketAllocationLine>[],
+    this.paymentHistory = const <TicketHistoryEntry>[],
     required this.labels,
   });
 
@@ -282,6 +301,53 @@ class TicketReceiptModel extends Equatable {
     ]).withoutZeros;
   }
 
+  /// Les versements de l'année **tels que le bloc les imprime** : ceux de
+  /// [paymentHistory] et **celui-ci**, du plus récent au plus ancien.
+  ///
+  /// ## Inséré à sa date, jamais épinglé en tête
+  ///
+  /// Le versement courant est presque toujours le plus récent, donc presque
+  /// toujours premier — mais « presque » ne suffit pas : la date d'encaissement
+  /// est **saisissable au guichet**, et un versement antidaté épinglé en tête
+  /// d'une liste qui s'annonce chronologique ferait douter de l'ordre entier.
+  /// Il prend donc sa place par comparaison, et passe **devant** les versements
+  /// de même date — à date égale, c'est lui qui vient d'avoir lieu.
+  ///
+  /// ## Il n'entre que s'il a un montant à montrer
+  ///
+  /// Sans ligne de tiroir, [amountReceived] est vide et la ligne sortirait
+  /// **datée mais sans chiffre** : `_addMoneyBag` n'imprime rien d'un sac vide.
+  /// Une date seule sur une colonne de montants ne se lit pas ; mieux vaut un
+  /// versement de moins qu'une ligne qu'on ne peut pas interpréter.
+  List<TicketHistoryEntry> get printedPayments {
+    if (amountReceived.isEmpty) return paymentHistory;
+
+    final current = TicketHistoryEntry(
+      paidAt: paidAt,
+      received: amountReceived,
+    );
+    final printed = <TicketHistoryEntry>[];
+    var placed = false;
+    for (final entry in paymentHistory) {
+      if (!placed && !entry.paidAt.isAfter(paidAt)) {
+        printed.add(current);
+        placed = true;
+      }
+      printed.add(entry);
+    }
+    if (!placed) printed.add(current);
+    return printed;
+  }
+
+  /// Le cumul versé sur l'année, **ce ticket compris**, par devise reçue.
+  ///
+  /// Dérivé des lignes imprimées, jamais recalculé à côté : un parent additionne
+  /// ce qu'il lit, et deux chemins de calcul finiraient par diverger. C'est la
+  /// même règle que [remainingBalance], qui dérive lui aussi de son détail.
+  MoneyBag get printedPaymentsTotal => MoneyBag.of([
+    for (final entry in printedPayments) ...entry.received.entries,
+  ]);
+
   @override
   List<Object?> get props => [
     schoolName,
@@ -302,6 +368,7 @@ class TicketReceiptModel extends Equatable {
     allocations,
     remainingBalance,
     remainingByCharge,
+    paymentHistory,
     labels,
   ];
 }

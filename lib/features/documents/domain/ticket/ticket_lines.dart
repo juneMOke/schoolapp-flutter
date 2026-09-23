@@ -87,3 +87,32 @@ class TicketAllocationLine extends Equatable {
   @override
   List<Object?> get props => [label, amountInCents, currency];
 }
+
+/// Un versement **antérieur** de l'élève, tel que le pied du ticket le rappelle.
+///
+/// Ce n'est ni une imputation ni un perçu de CE versement : c'est un fait
+/// d'historique, et il ne porte donc que ce qui se relit — la date, et ce qui
+/// est entré dans le tiroir ce jour-là.
+///
+/// [received] est un sac, jamais un scalaire, pour la même raison que le
+/// montant reçu du ticket : un passage au guichet peut avoir mêlé des francs et
+/// des dollars, et les additionner imprimerait un chiffre qui n'est l'argent de
+/// personne.
+///
+/// ⚠️ **Le perçu, pas l'imputé.** L'historique se lit sous « Montant reçu » et
+/// se recompte avec lui ; l'alimenter depuis les imputations ferait diverger
+/// deux colonnes de la même pièce dès qu'un franc règle un dollar.
+class TicketHistoryEntry extends Equatable {
+  /// La date du versement, **déjà en heure locale**. Le gabarit n'en imprime
+  /// que le jour : l'heure d'un versement ancien n'aide personne à le
+  /// reconnaître, et elle coûterait une colonne au montant.
+  final DateTime paidAt;
+
+  /// Ce qui est entré dans le tiroir ce jour-là, par devise reçue.
+  final MoneyBag received;
+
+  const TicketHistoryEntry({required this.paidAt, required this.received});
+
+  @override
+  List<Object?> get props => [paidAt, received];
+}

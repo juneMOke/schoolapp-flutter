@@ -199,6 +199,77 @@ class ProvisionalTicketDao {
     return grouped.values.toList(growable: false);
   }
 
+  /// Les versements **antérieurs** de l'élève sur l'année, du plus récent au
+  /// plus ancien, une ligne par (versement, devise reçue).
+  ///
+  /// Lu sur `payment_tenders` comme [findTenders], et pour la même raison :
+  /// l'historique se relit sous « Montant reçu » et se recompte avec lui.
+  /// L'alimenter depuis `payment_allocations` ferait diverger deux colonnes de
+  /// la même pièce le jour où un franc règle un dollar.
+  ///
+  /// ## Les trois filtres, et ce que chacun empêche d'imprimer
+  ///
+  /// - **[excludePaymentId]** : le versement courant occupe déjà tout le ticket
+  ///   au-dessus. Le rappeler ici ferait compter deux fois le même argent au
+  ///   parent qui additionne.
+  /// - **`cancelled_at IS NULL`** : une extourne ne compte plus dans les soldes
+  ///   (c'est la règle de `finance_ledger_read_dao`), et l'imprimer ferait
+  ///   croire à un argent encore acquis. Elle est **omise**, pas barrée : le
+  ///   papier n'a pas la typographie qui distinguerait les deux.
+  /// - **l'année** : `academic_year_id IS NULL OR = ?`, exactement la règle que
+  ///   `PaymentsOfflineFirstRepository` applique à l'écran. Un versement sans
+  ///   année compte dans TOUTES les années ; l'égalité stricte en perdrait, et
+  ///   le papier annoncerait un cumul plus petit que celui affiché au même
+  ///   instant.
+  ///
+  /// ⚠️ **`JOIN`, pas `LEFT JOIN`** — l'inverse de [findAllocations], et c'est
+  /// délibéré. Un versement sans ligne de tiroir n'existe pas (backfill v41) ;
+  /// s'il en existait un, la jointure externe imprimerait une date sans montant,
+  /// c'est-à-dire une ligne qu'aucun parent ne peut lire.
+  ///
+  /// Liste vide quand l'année est inconnue : sans elle on ne sait pas de quel
+  /// historique on parle, et un cumul toutes années confondues n'est confirmé
+  /// par aucun écran. Le ticket omet alors le bloc, ce qu'il sait faire.
+  Future<List<TicketHistoryRow>> findPaymentHistory({
+    required String studentId,
+    required String? academicYearId,
+    required String excludePaymentId,
+  }) async {
+    // Aucun `null` en argument lié : l'année absente sort ICI, avant la
+    // requête, plutôt que de voyager jusqu'au pilote.
+    if (academicYearId == null || academicYearId.isEmpty) {
+      return const <TicketHistoryRow>[];
+    }
+
+    final rows = await _db.rawQuery(
+      '''
+      SELECT p.id AS payment_id,
+             p.paid_at AS paid_at,
+             t.currency AS currency,
+             SUM(t.amount_in_cents) AS total
+      FROM payments p
+      JOIN payment_tenders t ON t.payment_id = p.id
+      WHERE p.student_id = ?
+        AND p.id <> ?
+        AND p.cancelled_at IS NULL
+        AND (p.academic_year_id IS NULL OR p.academic_year_id = ?)
+      GROUP BY p.id, t.currency
+      ORDER BY p.paid_at DESC, p.id DESC, t.currency ASC
+      ''',
+      [studentId, excludePaymentId, academicYearId],
+    );
+
+    return [
+      for (final r in rows)
+        TicketHistoryRow(
+          paymentId: (r['payment_id'] as String?) ?? '',
+          paidAt: (r['paid_at'] as String?) ?? '',
+          amountInCents: (r['total'] as int?) ?? 0,
+          currency: (r['currency'] as String?) ?? '',
+        ),
+    ];
+  }
+
   /// Retient qu'un papier est SORTI pour ce versement.
   ///
   /// Écrit **uniquement** après une impression thermique réussie : c'est le seul
@@ -527,6 +598,31 @@ class TicketAllocationRow {
   const TicketAllocationRow({
     required this.feeCode,
     required this.label,
+    required this.amountInCents,
+    required this.currency,
+  });
+}
+
+/// Un versement antérieur de l'élève, une ligne par devise reçue.
+///
+/// **Plate, et pas déjà regroupée par versement** : le repliage en sacs de
+/// monnaie appartient au repository, qui possède déjà `MoneyBag`. Le DAO rend
+/// des lignes, l'ordre étant ce qu'il garantit — le plus récent d'abord, et
+/// total (`paid_at`, puis `id`) pour que deux tirages du même ticket sortent
+/// identiques.
+class TicketHistoryRow {
+  final String paymentId;
+
+  /// `paid_at` brut, ISO-8601 **UTC** — la conversion en heure de guichet
+  /// appartient au repository, qui la fait déjà pour le versement courant.
+  final String paidAt;
+
+  final int amountInCents;
+  final String currency;
+
+  const TicketHistoryRow({
+    required this.paymentId,
+    required this.paidAt,
     required this.amountInCents,
     required this.currency,
   });

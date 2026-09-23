@@ -27,6 +27,8 @@ const _labels = TicketLabels(
   advanceLabel: 'Avance',
   balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
   thanksNotice: 'Nous vous remercions pour votre confiance.',

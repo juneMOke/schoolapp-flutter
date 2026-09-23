@@ -36,6 +36,8 @@ const _labels = TicketLabels(
   advanceLabel: 'Avance',
   balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
@@ -1103,6 +1105,250 @@ void main() {
 
       final lines = await dao.findAllocations('p-1');
       expect(lines.single.label, 'TUITION');
+    });
+  });
+
+  group('l\'historique des versements antérieurs', () {
+    /// Un versement ANTÉRIEUR du même élève, avec sa ligne de tiroir.
+    ///
+    /// Aucune imputation : l'historique se lit sur `payment_tenders`, et un
+    /// versement sans allocation doit y figurer comme les autres.
+    Future<void> seedPast(
+      String id, {
+      required String paidAt,
+      int amount = 5000000,
+      String currency = 'CDF',
+      String? academicYearId = 'y-1',
+      String studentId = 's-1',
+      int? cancelledAt,
+    }) async {
+      await db.insert('payments', {
+        'id': id,
+        'client_uuid': id,
+        'student_id': studentId,
+        'academic_year_id': academicYearId,
+        'method': 'CASH',
+        'paid_at': paidAt,
+        'sync_status': 'SYNCED',
+        'cancelled_at': cancelledAt,
+        'updated_at': 0,
+      });
+      await db.insert('payment_tenders', {
+        'id': 't-$id',
+        'client_uuid': 't-$id',
+        'payment_id': id,
+        'amount_in_cents': amount,
+        'currency': currency,
+        'rate_micros': 1000000,
+        'pivot_currency': currency,
+      });
+    }
+
+    Future<List<TicketHistoryEntry>> history() async {
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      return built.fold((f) => throw StateError('$f'), (m) => m.paymentHistory);
+    }
+
+    /// La séparation qui porte toute la règle : le champ dit ce que la BASE
+    /// sait d'autre, le getter dit ce que le PAPIER montre.
+    test('absent du champ, présent dans la liste imprimée', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      final model = built.fold((f) => throw StateError('$f'), (m) => m);
+
+      expect(model.paymentHistory.map((e) => e.paidAt.day), [3]);
+      expect(model.printedPayments.map((e) => e.paidAt.day), [4, 3]);
+      expect(model.printedPaymentsTotal.entries.single.amountInCents, 5150000);
+    });
+
+    test(
+      'le versement COURANT ne figure pas dans son propre historique',
+      () async {
+        await seedPayment();
+
+        expect(await history(), isEmpty);
+      },
+    );
+
+    test('du plus récent au plus ancien', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+      await seedPast('p-2', paidAt: '2026-07-12T09:30:00.000Z');
+
+      final lines = await history();
+      expect(lines.map((e) => e.paidAt.day), [12, 3]);
+    });
+
+    test('un versement extourné est OMIS, pas barré', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+      await seedPast(
+        'p-2',
+        paidAt: '2026-07-12T09:30:00.000Z',
+        cancelledAt: 1700000000000,
+      );
+
+      final lines = await history();
+      expect(lines.map((e) => e.paidAt.day), [3]);
+    });
+
+    test('une autre année reste dehors', () async {
+      await seedPayment();
+      await seedPast(
+        'p-0',
+        paidAt: '2025-07-03T09:30:00.000Z',
+        academicYearId: 'y-0',
+      );
+
+      expect(await history(), isEmpty);
+    });
+
+    test('un versement SANS année compte dans toutes les années', () async {
+      await seedPayment();
+      await seedPast(
+        'p-0',
+        paidAt: '2026-07-03T09:30:00.000Z',
+        academicYearId: null,
+      );
+
+      expect((await history()).single.paidAt.day, 3);
+    });
+
+    test('un autre élève reste dehors', () async {
+      await seedPayment();
+      await seedPast(
+        'p-0',
+        paidAt: '2026-07-03T09:30:00.000Z',
+        studentId: 's-2',
+      );
+
+      expect(await history(), isEmpty);
+    });
+
+    test(
+      'deux devises du même versement font UN sac, pas deux entrées',
+      () async {
+        await seedPayment();
+        await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+        await db.insert('payment_tenders', {
+          'id': 't-p-0-usd',
+          'client_uuid': 't-p-0-usd',
+          'payment_id': 'p-0',
+          'amount_in_cents': 10000,
+          'currency': 'USD',
+          'rate_micros': 1000000,
+          'pivot_currency': 'USD',
+        });
+
+        final lines = await history();
+        expect(lines, hasLength(1));
+        expect(lines.single.received.entries, hasLength(2));
+      },
+    );
+
+    /// Le perçu, jamais l'imputé : un versement dont le tiroir a vu des francs
+    /// pour une créance en dollars s'imprime en francs, comme le « Montant
+    /// reçu » du ticket courant.
+    test('lit le TIROIR, pas les imputations', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+      await db.update(
+        'payment_tenders',
+        {'pivot_currency': 'USD', 'rate_micros': 2850000000},
+        where: 'payment_id = ?',
+        whereArgs: ['p-0'],
+      );
+
+      final lines = await history();
+      expect(lines.single.received.entries.single.currency, 'CDF');
+    });
+
+    /// Sans `toLocal()`, un versement pris à 00 h 30 à Kinshasa (UTC+1)
+    /// s'imprimerait daté de la veille, et l'historique contredirait la ligne
+    /// « Date : » d'un ticket tiré ce jour-là.
+    test('la date passe à l\'heure du guichet', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+
+      final at = (await history()).single.paidAt;
+      expect(at.isUtc, isFalse);
+      expect(at, DateTime.parse('2026-07-03T09:30:00.000Z').toLocal());
+    });
+
+    /// Le repli d'instant courant de `_parsePaidAt` vaut pour le versement en
+    /// cours, dont le geste a bien lieu maintenant. Appliqué à un versement
+    /// ANCIEN, il le daterait d'aujourd'hui — une date fausse sur un papier
+    /// remis à un parent.
+    test('une date illisible fait sauter la ligne', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: 'pas-une-date');
+      await seedPast('p-2', paidAt: '2026-07-12T09:30:00.000Z');
+
+      final lines = await history();
+      expect(lines.map((e) => e.paidAt.day), [12]);
+    });
+
+    /// ⚠️ Le bloc n'est alors PAS vide : il porte la ligne du jour, comme au
+    /// premier versement de l'année. Les deux cas sont indistinguables sur le
+    /// papier — c'est la contrepartie assumée d'un bloc qui sort toujours.
+    test(
+      'année inconnue : aucun antérieur, mais la ligne du jour reste',
+      () async {
+        await seedPayment();
+        await db.update(
+          'payments',
+          {'academic_year_id': null},
+          where: 'id = ?',
+          whereArgs: ['p-1'],
+        );
+        await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+
+        final built = await repository.buildForPayment(
+          paymentId: 'p-1',
+          labels: _labels,
+        );
+        final model = built.fold((f) => throw StateError('$f'), (m) => m);
+
+        expect(model.paymentHistory, isEmpty);
+        expect(model.printedPayments.map((e) => e.paidAt.day), [4]);
+      },
+    );
+
+    test('le papier porte le titre, les dates puis le total', () async {
+      await seedPayment();
+      await seedPast('p-0', paidAt: '2026-07-03T09:30:00.000Z');
+      await seedPast(
+        'p-2',
+        paidAt: '2026-07-12T09:30:00.000Z',
+        amount: 2500000,
+      );
+
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      final lines = built.fold(
+        (f) => throw StateError('$f'),
+        (m) => TicketTextLayout.render(m),
+      );
+
+      expect(lines.any((l) => l.contains('Historique des paiements')), isTrue);
+      expect(lines.any((l) => l.contains('12/07/2026')), isTrue);
+      expect(lines.any((l) => l.contains('03/07/2026')), isTrue);
+      // 50 000 + 25 000 versés avant, 1 500 sur ce ticket : le total est le
+      // CUMUL de l'année, pas un sous-total arrêté la veille.
+      expect(
+        lines.any((l) => l.contains('Total verse') && l.contains('76 500 FC')),
+        isTrue,
+      );
     });
   });
 }

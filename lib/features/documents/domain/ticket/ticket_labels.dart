@@ -79,6 +79,23 @@ class TicketLabels extends Equatable {
   /// « Total » — la dernière ligne du bloc, sous le filet.
   final String balanceTotalLabel;
 
+  /// « Historique des paiements » — le TITRE du bloc de pied, qui liste les
+  /// versements de l'élève sur l'année, **celui de ce ticket compris**.
+  ///
+  /// Le versement du jour y a sa ligne, datée comme les autres et sans mention
+  /// particulière : c'est ce qui fait du total du bloc un CUMUL D'ANNÉE plutôt
+  /// qu'un sous-total arrêté la veille.
+  final String historyLabel;
+
+  /// « Total versé » — la dernière ligne du bloc d'historique, sous le filet.
+  /// C'est le **cumul de l'année, ce versement compris**.
+  ///
+  /// Distinct de [balanceTotalLabel] bien que les deux puissent s'écrire
+  /// « Total » : l'un totalise ce qui RESTE, l'autre ce qui a été VERSÉ. Deux
+  /// totaux voisins sur le même papier doivent se distinguer par leur libellé,
+  /// faute de quoi le parent lit deux fois la même nature de nombre.
+  final String historyTotalLabel;
+
   /// « Conservez ce ticket jusqu'à la remise de votre reçu définitif. »
   ///
   /// ⚠️ **Imprimée seulement sur une pièce NON scellée.** Sur un ticket qui
@@ -116,6 +133,8 @@ class TicketLabels extends Equatable {
     required this.advanceLabel,
     required this.balanceLabel,
     required this.balanceTotalLabel,
+    required this.historyLabel,
+    required this.historyTotalLabel,
     required this.keepTicketNotice,
     required this.thanksNotice,
     required this.editorNotice,
@@ -141,6 +160,8 @@ class TicketLabels extends Equatable {
     advanceLabel,
     balanceLabel,
     balanceTotalLabel,
+    historyLabel,
+    historyTotalLabel,
     keepTicketNotice,
     thanksNotice,
     editorNotice,

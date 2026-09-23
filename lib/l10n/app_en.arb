@@ -5215,6 +5215,8 @@
   "ticketAdvanceLabel": "Advance (unallocated)",
   "ticketBalanceLabel": "Remaining balance as of printing",
   "ticketBalanceTotalLabel": "Total",
+  "ticketHistoryLabel": "Payment history",
+  "ticketHistoryTotalLabel": "Total paid",
   "ticketThanksNotice": "Thank you for your trust.",
   "ticketEditorNotice": "Receipt issued by ETEELO CONNECT",
   "ticketEditorSite": "eteeloconnect.com",

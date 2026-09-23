@@ -23,6 +23,8 @@ const _labels = TicketLabels(
   advanceLabel: 'Avance',
   balanceLabel: 'Solde restant au moment de l\'impression',
   balanceTotalLabel: 'Total',
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
   thanksNotice: 'Nous vous remercions pour votre confiance.',
@@ -52,6 +54,8 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   advanceLabel: _labels.advanceLabel,
   balanceLabel: '',
   balanceTotalLabel: _labels.balanceTotalLabel,
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
   keepTicketNotice: _labels.keepTicketNotice,
   thanksNotice: _labels.thanksNotice,
   editorNotice: _labels.editorNotice,
@@ -70,6 +74,11 @@ TicketReceiptModel _model({
   /// dire.
   MoneyBag? remainingBalance,
   List<TicketAllocationLine> remainingByCharge = const [],
+  List<TicketHistoryEntry> paymentHistory = const [],
+
+  /// Un versement sans ligne de tiroir — le seul cas où le bloc d'historique
+  /// n'a plus rien à lister, le versement courant compris.
+  List<TicketTenderLine>? tenders,
 
   /// Permet de composer un ticket dont le TITRE de solde est vide — ce qu'une
   /// traduction incomplète produit sans bruit, et le seul cas où les deux
@@ -97,9 +106,9 @@ TicketReceiptModel _model({
   isProvisional: true,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
-  tenders: TicketTenderLine.identityFrom(
-    MoneyBag.of(const [Money(150000, 'CDF')]),
-  ),
+  tenders:
+      tenders ??
+      TicketTenderLine.identityFrom(MoneyBag.of(const [Money(150000, 'CDF')])),
   allocations: allocations,
   remainingBalance:
       remainingBalance ??
@@ -107,7 +116,15 @@ TicketReceiptModel _model({
           ? null
           : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')])),
   remainingByCharge: remainingByCharge,
+  paymentHistory: paymentHistory,
   labels: labels,
+);
+
+/// Un versement antérieur, dans la forme que le repository compose : une date
+/// déjà locale, et un sac de monnaie.
+TicketHistoryEntry _past(int day, List<Money> amounts) => TicketHistoryEntry(
+  paidAt: DateTime(2026, 7, day, 9, 30),
+  received: MoneyBag.of(amounts),
 );
 
 /// Un solde à deux devises, détaillé — la forme que le porteur veut voir sur le
@@ -849,6 +866,211 @@ void main() {
     test('l\'alignement à 48 colonnes tient malgré l\'allongement', () {
       for (final line in TicketTextLayout.render(exotic())) {
         expect(line.length, lessThanOrEqualTo(48), reason: line);
+      }
+    });
+  });
+
+  group('historique des paiements', () {
+    /// Les lignes du bloc d'historique SEULES.
+    ///
+    /// ⚠️ Indispensable : la date du versement courant est imprimée DEUX fois
+    /// sur le ticket — en zone de traçabilité (« Date : … ») et dans ce bloc.
+    /// Chercher sur tout le papier attrapait la première et faisait passer un
+    /// test d'ordre pour une raison étrangère.
+    List<String> blocHistorique(TicketReceiptModel model) {
+      final lines = TicketTextLayout.render(model);
+      final debut = lines.indexWhere((l) => l.contains('Historique'));
+      if (debut < 0) return const [];
+      return lines.sublist(debut);
+    }
+
+    test(
+      'le versement du ticket y figure, seul, dès le premier de l\'année',
+      () {
+        final lines = TicketTextLayout.render(_model());
+
+        expect(lines.any((l) => l.contains('Historique')), isTrue);
+        // `_model` encaisse 150 000 centimes le 04/08/2026.
+        expect(
+          lines.any((l) => l.contains('04/08/2026') && l.contains('1 500 FC')),
+          isTrue,
+        );
+        expect(
+          lines.any((l) => l.contains('Total verse')),
+          isFalse,
+          reason: 'un total qui ne coiffe qu\'une ligne la redirait',
+        );
+      },
+    );
+
+    test('sans ligne de tiroir, le bloc ENTIER disparaît', () {
+      final lines = TicketTextLayout.render(_model(tenders: const []));
+
+      expect(
+        lines.any((l) => l.contains('Historique')),
+        isFalse,
+        reason: 'une date seule sur une colonne de montants ne se lit pas',
+      );
+    });
+
+    test('le versement du jour vient en tête des versements passés', () {
+      final bloc = blocHistorique(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final jour = bloc.indexWhere((l) => l.contains('04/08/2026'));
+      final premier = bloc.indexWhere((l) => l.contains('12/07/2026'));
+      final second = bloc.indexWhere((l) => l.contains('03/07/2026'));
+
+      expect(jour, isNonNegative);
+      expect(premier, greaterThan(jour));
+      expect(second, greaterThan(premier));
+    });
+
+    /// La date d'encaissement est **saisissable au guichet**. Épinglé en tête,
+    /// un versement antidaté ferait douter de l'ordre entier de la liste.
+    test('antidaté, il prend sa place dans l\'ordre et n\'est pas épinglé', () {
+      final bloc = blocHistorique(
+        _model(
+          // Encaissé le 04/08/2026, donc APRÈS le 12/07 mais avant un 20/08.
+          paymentHistory: [
+            TicketHistoryEntry(
+              paidAt: DateTime(2026, 8, 20, 9, 30),
+              received: MoneyBag.of(const [Money(5000000, 'CDF')]),
+            ),
+            _past(12, const [Money(2500000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final recent = bloc.indexWhere((l) => l.contains('20/08/2026'));
+      final jour = bloc.indexWhere((l) => l.contains('04/08/2026'));
+      final ancien = bloc.indexWhere((l) => l.contains('12/07/2026'));
+
+      expect(recent, isNonNegative);
+      expect(jour, greaterThan(recent));
+      expect(ancien, greaterThan(jour));
+    });
+
+    test('le total est le CUMUL de l\'année, ce versement compris', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      // 25 000 + 50 000 versés avant, 1 500 aujourd'hui.
+      expect(
+        lines.any((l) => l.contains('Total verse') && l.contains('76 500 FC')),
+        isTrue,
+      );
+    });
+
+    test('un versement en deux devises garde sa date sur une seule ligne', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF'), Money(10000, 'USD')]),
+          ],
+        ),
+      );
+
+      expect(lines.where((l) => l.contains('12/07/2026')).length, 1);
+      expect(lines.any((l) => l.contains('100,00 \$')), isTrue);
+    });
+
+    test('le bloc vient APRÈS le solde et AVANT la phrase de conservation', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final solde = lines.indexWhere((l) => l.contains('Solde restant'));
+      final historique = lines.indexWhere((l) => l.contains('Historique'));
+      final conservation = lines.indexWhere((l) => l.contains('Conservez'));
+
+      expect(solde, isNonNegative);
+      expect(historique, greaterThan(solde));
+      expect(conservation, greaterThan(historique));
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32 colonnes', () {
+      final model = _model(
+        paymentHistory: [
+          _past(12, const [Money(999999900, 'CDF')]),
+          _past(3, const [Money(9999900, 'USD')]),
+        ],
+      );
+
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(model, columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
+        }
+      }
+    });
+
+    test('un titre vide ne colle pas deux filets l\'un sur l\'autre', () {
+      final labels = TicketLabels(
+        documentTitle: _labels.documentTitle,
+        provisionalMention: _labels.provisionalMention,
+        referenceLabel: _labels.referenceLabel,
+        dateLabel: _labels.dateLabel,
+        payerLabel: _labels.payerLabel,
+        phoneLabel: _labels.phoneLabel,
+        cashierLabel: _labels.cashierLabel,
+        studentLabel: _labels.studentLabel,
+        matriculationLabel: _labels.matriculationLabel,
+        classroomLabel: _labels.classroomLabel,
+        amountReceivedLabel: _labels.amountReceivedLabel,
+        rateLabel: _labels.rateLabel,
+        derivedAmountPrefix: _labels.derivedAmountPrefix,
+        allocationsLabel: _labels.allocationsLabel,
+        advanceLabel: _labels.advanceLabel,
+        balanceLabel: _labels.balanceLabel,
+        balanceTotalLabel: _labels.balanceTotalLabel,
+        historyLabel: '',
+        historyTotalLabel: _labels.historyTotalLabel,
+        keepTicketNotice: _labels.keepTicketNotice,
+        thanksNotice: _labels.thanksNotice,
+        editorNotice: _labels.editorNotice,
+        editorSite: _labels.editorSite,
+      );
+
+      final lines = TicketTextLayout.render(
+        _model(
+          labels: labels,
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final rule = '-' * 48;
+      for (var i = 0; i + 1 < lines.length; i++) {
+        expect(
+          lines[i] == rule && lines[i + 1] == rule,
+          isFalse,
+          reason: 'deux filets consécutifs à la ligne $i',
+        );
       }
     });
   });
