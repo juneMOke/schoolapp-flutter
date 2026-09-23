@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
@@ -308,6 +309,12 @@ class _FeeControlPerimeterCardState extends State<FeeControlPerimeterCard> {
       title: l10n.feeControlSearchTitle,
       subtitle: l10n.feeControlSearchHelpBanner,
       icon: Icons.fact_check_outlined,
+      // Le bleu appartient à la SAISIE. Cette carte choisit les frais, la
+      // classe et la situation : c'est le périmètre demandé, donc la même
+      // teinte que les formulaires des six autres écrans de liste.
+      headerVariant: BiToneHeaderVariant.brand,
+      surfaceColor: ListingTones.formulaireFond,
+      borderColor: ListingTones.formulaireBord,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
