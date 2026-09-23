@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -5,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_geometry.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/core/money/money.dart';
@@ -26,10 +28,11 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceLabel: 'Solde restant à payer pour ce(s) frais',
   balanceTotalLabel: 'Total',
   historyLabel: 'Historique des paiements',
   historyTotalLabel: 'Total verse',
+  signatureLabel: 'Signature du caissier',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
@@ -78,11 +81,30 @@ void main() {
     test('rend exactement ce que rend le modèle', () async {
       final model = _model();
       final viaModel = await PdfTicketRenderer.render(model);
-      final viaLines = await PdfTicketRenderer.renderLines(
-        TicketTextLayout.render(model, columns: PdfTicketRenderer.columns),
+      // ⚠️ Par le pivot RICHE, et c'est ce qui a changé : `render` compose
+      // désormais des lignes attribuées. Comparé à la façade texte nu, l'écart
+      // ne serait plus un défaut mais le gras lui-même — le test rougirait pour
+      // la bonne raison, ce qui ne ferait pas un bon test.
+      final viaLines = await PdfTicketRenderer.renderRichLines(
+        TicketTextLayout.renderRich(model, columns: PdfTicketRenderer.columns),
       );
 
       expect(viaLines.length, viaModel.length);
+    });
+
+    /// La façade texte nu reste un chemin complet — c'est le seul dont dispose
+    /// le ticket de vente boutique. Elle rend le même papier, en maigre.
+    test('la façade texte nu rend le même papier, sans gras', () async {
+      final model = _model();
+      final nu = await PdfTicketRenderer.renderLines(
+        TicketTextLayout.render(model, columns: PdfTicketRenderer.columns),
+      );
+
+      expect(String.fromCharCodes(nu.take(4)), '%PDF');
+      expect(
+        'Courier-Bold'.allMatches(latin1.decode(nu, allowInvalid: true)),
+        isEmpty,
+      );
     });
 
     test('accepte un gabarit qui n est pas un ticket de perception', () async {
@@ -411,6 +433,71 @@ void main() {
 
       expect('MediaBox'.allMatches(_latin1(bytes)).length, 1);
     });
+  });
+
+  group('gras', () {
+    /// Les polices Type1 que le document CITE, lues dans ses octets : le nom de
+    /// base d'une police standard n'est pas compressé.
+    int cite(Uint8List bytes, String police) =>
+        police.allMatches(latin1.decode(bytes, allowInvalid: true)).length;
+
+    /// ⚠️ **La démonstration sur laquelle repose tout le gras.**
+    ///
+    /// `TicketBlockGeometry` dérive le corps de texte d'une chasse de 0,6 em et
+    /// de 48 colonnes. Si `Courier-Bold` était plus large d'un millième, chaque
+    /// ligne grasse pleine largeur se replierait — le défaut typographique que
+    /// la classe documente déjà, et qu'aucun test de mise en page ne voit.
+    ///
+    /// Mesuré, pas affirmé.
+    test('Courier-Bold a exactement la chasse de Courier', () {
+      final doc = PdfDocument();
+      final maigre = PdfFont.courier(doc);
+      final gras = PdfFont.courierBold(doc);
+      const ligne = 'Montant recu                            1 500 FC';
+
+      expect(ligne.length, 48);
+      expect(
+        gras.stringMetrics(ligne).advanceWidth,
+        maigre.stringMetrics(ligne).advanceWidth,
+      );
+      expect(
+        maigre.stringMetrics('x').advanceWidth,
+        closeTo(0.6, 0.0001),
+        reason: 'la chasse que TicketBlockGeometry tient pour acquise',
+      );
+    });
+
+    test('le ticket cite Courier-Bold', () async {
+      final bytes = await PdfTicketRenderer.render(_model());
+
+      expect(cite(bytes, 'Courier-Bold'), greaterThan(0));
+    });
+
+    /// La façade texte nu — celle du ticket de vente boutique — reste maigre.
+    test('la façade texte nu ne cite aucune police grasse', () async {
+      final bytes = await PdfTicketRenderer.renderLines(const [
+        'TITRE',
+        'detail',
+      ]);
+
+      expect(cite(bytes, 'Courier-Bold'), 0);
+    });
+
+    /// Distingue « la police est déclarée » de « la ligne l'a vraiment
+    /// reçue » : avec une seule ligne, et grasse, le document ne peut plus
+    /// citer Courier maigre.
+    test(
+      'une ligne grasse est rendue en gras, pas seulement déclarée',
+      () async {
+        final bytes = await PdfTicketRenderer.renderRichLines(const [
+          TicketLine('TITRE', bold: true),
+        ]);
+        final texte = latin1.decode(bytes, allowInvalid: true);
+
+        expect(cite(bytes, 'Courier-Bold'), greaterThan(0));
+        expect(RegExp(r'/Courier(?!-)').allMatches(texte), isEmpty);
+      },
+    );
   });
 }
 

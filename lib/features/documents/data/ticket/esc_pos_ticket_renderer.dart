@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/documents/data/ticket/ticket_code_pa
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
 /// Ce que le massicot doit faire en fin de ticket.
@@ -102,8 +103,8 @@ abstract final class EscPosTicketRenderer {
     TicketCutMode cut = TicketCutMode.none,
     int feedLines = defaultFeedLines,
     TicketLogoBand? logoBand,
-  }) => renderLines(
-    TicketTextLayout.render(model, columns: columns),
+  }) => renderRichLines(
+    TicketTextLayout.renderRich(model, columns: columns),
     codePage: codePage,
     cut: cut,
     feedLines: feedLines,
@@ -122,6 +123,35 @@ abstract final class EscPosTicketRenderer {
   /// matérielle, pour une ligne accentuée.
   static Uint8List renderLines(
     List<String> lines, {
+    TicketCodePage codePage = TicketCodePage.cp1252,
+    TicketCutMode cut = TicketCutMode.none,
+    int feedLines = defaultFeedLines,
+    TicketLogoBand? logoBand,
+  }) => renderRichLines(
+    [for (final line in lines) TicketLine.plain(line)],
+    codePage: codePage,
+    cut: cut,
+    feedLines: feedLines,
+    logoBand: logoBand,
+  );
+
+  /// Même flux, à partir de lignes **attribuées**.
+  ///
+  /// C'est ici que le gras entre sur le fil, et nulle part ailleurs :
+  /// `ESC E 1` avant la ligne, `ESC E 0` après. Deux raisons de l'émettre
+  /// ligne à ligne plutôt qu'en plages :
+  ///
+  /// - **le flux reste recomposable** — n'importe quelle ligne peut être lue,
+  ///   retirée ou réordonnée sans laisser le mécanisme en gras derrière elle ;
+  /// - **six octets par ligne grasse**, sur un ticket qui en compte une
+  ///   poignée : le gain d'une plage ne se mesurerait pas.
+  ///
+  /// ⚠️ `ESC E` est une **double frappe dans la même cellule** : la largeur de
+  /// caractère ne bouge pas, et l'invariant de 48 colonnes tient. C'est ce qui
+  /// sépare le gras de la double largeur (`GS ! n`), que ce renderer n'émet
+  /// jamais.
+  static Uint8List renderRichLines(
+    List<TicketLine> lines, {
     TicketCodePage codePage = TicketCodePage.cp1252,
     TicketCutMode cut = TicketCutMode.none,
     int feedLines = defaultFeedLines,
@@ -145,7 +175,12 @@ abstract final class EscPosTicketRenderer {
     }
 
     for (final line in lines) {
-      out.add(encodeLine(line, codePage));
+      // `ESC E 1` / `ESC E 0` — accentuation. Posée et RETIRÉE autour de chaque
+      // ligne : `ESC @` en tête remet le mécanisme à zéro, mais rien d'autre ne
+      // le ferait si une ligne grasse était la dernière du flux.
+      if (line.bold) out.add(const <int>[_esc, 0x45, 0x01]);
+      out.add(encodeLine(line.text, codePage));
+      if (line.bold) out.add(const <int>[_esc, 0x45, 0x00]);
       out.addByte(_lf);
     }
 

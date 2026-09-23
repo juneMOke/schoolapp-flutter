@@ -27,6 +27,7 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   balanceTotalLabel: l10n.ticketBalanceTotalLabel,
   historyLabel: l10n.ticketHistoryLabel,
   historyTotalLabel: l10n.ticketHistoryTotalLabel,
+  signatureLabel: l10n.ticketSignatureLabel,
   keepTicketNotice: l10n.ticketKeepNotice,
   thanksNotice: l10n.ticketThanksNotice,
   editorNotice: l10n.ticketEditorNotice,

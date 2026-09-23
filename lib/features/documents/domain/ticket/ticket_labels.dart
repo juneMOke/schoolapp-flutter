@@ -68,12 +68,20 @@ class TicketLabels extends Equatable {
   /// que pour empêcher un écart muet entre le reçu et la ventilation.
   final String advanceLabel;
 
-  /// « Solde au moment de l'impression » — le TITRE du bloc, qui coiffe le
-  /// détail comme « Répartition » coiffe le sien.
+  /// « Solde restant à payer pour ce(s) frais » — le TITRE du bloc, qui coiffe
+  /// le détail comme « Répartition » coiffe le sien.
   ///
-  /// Le qualificatif de temps est DANS le titre, et n'a plus de ligne à lui :
-  /// il se lit avant les chiffres au lieu de les suivre, et une réserve posée
-  /// sous le total se lisait comme une incertitude sur le total seul.
+  /// Le titre nomme le PÉRIMÈTRE, et c'est ce qu'il devait faire : le bloc ne
+  /// porte que les frais que CE versement a réglés, jamais toute la dette de
+  /// l'élève — un parent venu payer les frais divers ne doit pas y lire le solde
+  /// de son minerval.
+  ///
+  /// ⚠️ **Le qualificatif de TEMPS a disparu avec l'ancien libellé** (« …au
+  /// moment de l'impression », arbitré par le user le 2026-09-24). C'était le
+  /// seul endroit de la pièce qui disait que ce chiffre est un instantané, que
+  /// la synchro peut déplacer. Le solde s'imprime donc désormais sans réserve,
+  /// comme le montant reçu et la répartition — à rouvrir avec le porteur, pas
+  /// à rétablir en douce.
   final String balanceLabel;
 
   /// « Total » — la dernière ligne du bloc, sous le filet.
@@ -103,6 +111,20 @@ class TicketLabels extends Equatable {
   /// pas de reçu à venir, celui-là l'est. Sa raison d'être (RG-012-12, le levier
   /// de rappel de l'établissement) ne vaut que hors ligne.
   final String keepTicketNotice;
+
+  /// « Signature du caissier » — coiffe la zone à signer, en pied de pièce.
+  ///
+  /// C'est le CAISSIER qui signe, pas le payeur : sur un papier que le parent
+  /// emporte, la signature du parent ne prouverait rien à l'école — elle ne
+  /// vaudrait que contre une souche, et la thermique n'en produit aucune.
+  /// Celle du caissier, elle, contresigne à la main le nom déjà imprimé en
+  /// zone de traçabilité (RG-012-11 : sur une pièce non scellée, l'imputabilité
+  /// est humaine).
+  ///
+  /// ⚠️ **Libellé vide ⇒ la zone entière disparaît**, blancs et trait compris.
+  /// Un trait à signer sans rien qui dise qui signe ne se remplit pas, et deux
+  /// lignes blanches inexpliquées se lisent comme un défaut d'impression.
+  final String signatureLabel;
 
   /// « Nous vous remercions pour votre confiance. »
   final String thanksNotice;
@@ -135,6 +157,7 @@ class TicketLabels extends Equatable {
     required this.balanceTotalLabel,
     required this.historyLabel,
     required this.historyTotalLabel,
+    required this.signatureLabel,
     required this.keepTicketNotice,
     required this.thanksNotice,
     required this.editorNotice,
@@ -162,6 +185,7 @@ class TicketLabels extends Equatable {
     balanceTotalLabel,
     historyLabel,
     historyTotalLabel,
+    signatureLabel,
     keepTicketNotice,
     thanksNotice,
     editorNotice,

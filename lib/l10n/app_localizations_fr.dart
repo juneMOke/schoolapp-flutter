@@ -8184,7 +8184,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAdvanceLabel => 'Avance (non imputée)';
 
   @override
-  String get ticketBalanceLabel => 'Solde restant au moment de l\'impression';
+  String get ticketBalanceLabel => 'Solde restant à payer pour ce(s) frais';
 
   @override
   String get ticketBalanceTotalLabel => 'Total';
@@ -8207,6 +8207,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ticketKeepNotice =>
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.';
+
+  @override
+  String get ticketSignatureLabel => 'Signature du caissier';
 
   @override
   String get ticketPrintLabel => 'Imprimer le ticket de perception';

@@ -13115,7 +13115,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Remaining balance as of printing'**
+  /// **'Remaining balance on these fees'**
   String get ticketBalanceLabel;
 
   /// No description provided for @ticketBalanceTotalLabel.
@@ -13159,6 +13159,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep this ticket until you receive your final receipt.'**
   String get ticketKeepNotice;
+
+  /// No description provided for @ticketSignatureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier\'s signature'**
+  String get ticketSignatureLabel;
 
   /// No description provided for @ticketPrintLabel.
   ///

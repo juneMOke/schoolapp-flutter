@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_geometry.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
 /// Rend le reçu provisoire en PDF **80 mm** — sortie de repli de RG-012-10,
@@ -93,8 +94,8 @@ abstract final class PdfTicketRenderer {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
     TicketLogoBand? logoBand,
-  }) => renderLines(
-    TicketTextLayout.render(model, columns: columns),
+  }) => renderRichLines(
+    TicketTextLayout.renderRich(model, columns: columns),
     format: format,
     cutNotice: cutNotice,
     logoBand: logoBand,
@@ -114,6 +115,25 @@ abstract final class PdfTicketRenderer {
   /// qu'à l'exécution.
   static Future<Uint8List> renderLines(
     List<String> lines, {
+    PdfPageFormat format = pageFormat,
+    String? cutNotice,
+    TicketLogoBand? logoBand,
+  }) => renderRichLines(
+    [for (final line in lines) TicketLine.plain(line)],
+    format: format,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+  );
+
+  /// Même rendu, à partir de lignes **attribuées**.
+  ///
+  /// Le gras y est rendu par `Courier-Bold`, qui a **exactement la chasse de
+  /// Courier** (600/1000) : le corps dérivé par `TicketBlockGeometry` reste
+  /// juste, et aucune ligne ne se replie parce qu'on l'a emphatisée. C'est la
+  /// contrepartie exacte de `ESC E` sur la thermique — même papier, mêmes
+  /// colonnes.
+  static Future<Uint8List> renderRichLines(
+    List<TicketLine> lines, {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
     TicketLogoBand? logoBand,
@@ -170,13 +190,15 @@ abstract final class PdfTicketRenderer {
 
   static void _addRollPage(
     pw.Document document,
-    List<String> lines,
+    List<TicketLine> lines,
     PdfPageFormat format,
     TicketLogoBand? band,
   ) {
-    final style = _textStyle(
-      TicketBlockGeometry.fontSizeFor(TicketBlockGeometry.textWidthFor(format)),
+    final size = TicketBlockGeometry.fontSizeFor(
+      TicketBlockGeometry.textWidthFor(format),
     );
+    final style = _textStyle(size);
+    final boldStyle = _textStyle(size, bold: true);
 
     document.addPage(
       pw.Page(
@@ -187,7 +209,7 @@ abstract final class PdfTicketRenderer {
           children: [
             if (band != null)
               _bandWidget(band, TicketBlockGeometry.textWidthFor(format)),
-            for (final line in lines) _line(line, style),
+            for (final line in lines) _line(line, style, boldStyle),
           ],
         ),
       ),
@@ -198,14 +220,16 @@ abstract final class PdfTicketRenderer {
 
   static void _addSheetPages(
     pw.Document document,
-    List<String> lines,
+    List<TicketLine> lines,
     PdfPageFormat format,
     String? cutNotice,
     TicketLogoBand? band,
   ) {
     final block = TicketBlockGeometry.blockWidthFor(format);
     final textWidth = TicketBlockGeometry.textWidthFor(format);
-    final style = _textStyle(TicketBlockGeometry.fontSizeFor(textWidth));
+    final size = TicketBlockGeometry.fontSizeFor(textWidth);
+    final style = _textStyle(size);
+    final boldStyle = _textStyle(size, bold: true);
     final padding = (block - textWidth) / 2;
     final framed = TicketBlockGeometry.hasPaperToCut(format);
     final notice = framed ? cutNotice?.trim() : null;
@@ -238,7 +262,10 @@ abstract final class PdfTicketRenderer {
               // que les verticales suivent.
               pw.Padding(
                 padding: pw.EdgeInsets.symmetric(horizontal: padding),
-                child: pw.SizedBox(width: textWidth, child: _line(line, style)),
+                child: pw.SizedBox(
+                  width: textWidth,
+                  child: _line(line, style, boldStyle),
+                ),
               ),
             ),
           // Fermeture du cadre en UN seul enfant : trois enfants indépendants
@@ -339,17 +366,27 @@ abstract final class PdfTicketRenderer {
 
   // ── Communs ────────────────────────────────────────────────────────────────
 
-  static pw.TextStyle _textStyle(double size) =>
-      pw.TextStyle(font: pw.Font.courier(), fontSize: size);
+  /// Le style d'une ligne. **`Courier-Bold` a la chasse de `Courier`**, donc le
+  /// gras ne déplace aucune colonne — c'est la raison pour laquelle il est le
+  /// seul attribut admis ici.
+  static pw.TextStyle _textStyle(double size, {bool bold = false}) =>
+      pw.TextStyle(
+        font: bold ? pw.Font.courierBold() : pw.Font.courier(),
+        fontSize: size,
+      );
 
-  static pw.Widget _line(String line, pw.TextStyle style) {
+  static pw.Widget _line(
+    TicketLine line,
+    pw.TextStyle style,
+    pw.TextStyle boldStyle,
+  ) {
     // Une ligne vide doit être un blanc de hauteur NON NULLE. La matérialiser
     // par une espace ne suffisait pas : le moteur de texte découpe sur les
     // espaces, ne trouve aucun mot, n'ajoute aucune ligne et rend une boîte de
     // hauteur zéro. Le blanc de respiration du gabarit — celui qui sépare le
     // montant reçu de la répartition — n'existait donc pas sur le papier.
-    if (line.isEmpty) return pw.SizedBox(height: style.fontSize);
-    return _text(line, style);
+    if (line.text.isEmpty) return pw.SizedBox(height: style.fontSize);
+    return _text(line.text, line.bold ? boldStyle : style);
   }
 
   static pw.Widget _text(String line, pw.TextStyle style) => pw.Text(

@@ -34,10 +34,11 @@ const _labels = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceLabel: 'Solde restant à payer pour ce(s) frais',
   balanceTotalLabel: 'Total',
   historyLabel: 'Historique des paiements',
   historyTotalLabel: 'Total verse',
+  signatureLabel: 'Signature du caissier',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
@@ -650,7 +651,9 @@ void main() {
         (l) => l.contains('Organisation'),
         title + 1,
       );
-      final total = lines.indexWhere((l) => l.startsWith('Total'));
+      // Cherché APRÈS le détail, lui aussi : le bloc d'historique porte
+      // désormais son propre « Total verse » plus bas sur le papier.
+      final total = lines.indexWhere((l) => l.startsWith('Total'), detail + 1);
       expect(title, greaterThan(0));
       expect(detail, greaterThan(title));
       expect(total, greaterThan(detail));
@@ -659,12 +662,16 @@ void main() {
       // fait du total une somme posée plutôt qu'une ligne de détail de plus.
       expect(lines[total - 1], '-' * 48);
 
-      // Le qualificatif de temps se dit UNE fois, dans le titre. Répété par
-      // ligne, il se lirait comme une incertitude sur chaque frais.
+      // La qualification se dit UNE fois, dans le titre. Répétée par ligne,
+      // elle se lirait comme une réserve sur chaque frais.
+      //
+      // ⚠️ Le titre qualifie le PÉRIMÈTRE depuis le 2026-09-24 (« pour ce(s)
+      // frais ») ; il portait avant un qualificatif de TEMPS (« au moment de
+      // l'impression »), retiré par décision du porteur. Ne pas le rétablir.
       expect(
-        'au moment de l\'impression'.allMatches(flat).length,
+        'pour ce(s) frais'.allMatches(flat).length,
         1,
-        reason: 'le qualificatif ne se répète pas',
+        reason: 'la qualification ne se répète pas',
       );
     });
   });

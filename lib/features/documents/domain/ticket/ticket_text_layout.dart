@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -21,13 +22,45 @@ abstract final class TicketTextLayout {
   /// thermique standard. 58 mm donnerait 32, la police B 64.
   static const int defaultColumns = 48;
 
-  /// Rend le ticket. [columns] est le nombre de caractères par ligne.
+  /// Rend le ticket **en texte nu**. [columns] est le nombre de caractères par
+  /// ligne.
+  ///
+  /// Façade sur [renderRich], et elle reste la forme de référence : c'est sur
+  /// elle que se vérifie le critère d'acceptation de l'ADR-012 — « même contenu
+  /// textuel entre les deux sorties ». Le gras n'est pas du contenu, il ne s'y
+  /// invite donc pas.
   static List<String> render(
+    TicketReceiptModel model, {
+    int columns = defaultColumns,
+  }) => [for (final line in renderRich(model, columns: columns)) line.text];
+
+  /// Rend le ticket **avec ses attributs de composition**.
+  ///
+  /// C'est ce que consomment les deux renderers. Le gras est posé par
+  /// `emphasised`, qui marque tout ce que le bloc qu'il enveloppe a ajouté :
+  /// aucun calcul d'indice au point d'appel, et les cas multi-lignes — un titre
+  /// replié, un montant en deux devises — sont couverts sans y penser.
+  static List<TicketLine> renderRich(
     TicketReceiptModel model, {
     int columns = defaultColumns,
   }) {
     final width = columns < 24 ? 24 : columns;
     final lines = <String>[];
+
+    // Les indices des lignes grasses. Un ensemble plutôt qu'une liste
+    // parallèle : la seconde devrait rester alignée sur la première à chaque
+    // `addAll`, ce qui est exactement le genre d'invariant qui se casse en
+    // silence.
+    final bold = <int>{};
+
+    /// Marque en gras TOUT ce que [build] ajoute — une ligne ou dix.
+    void emphasised(void Function() build) {
+      final from = lines.length;
+      build();
+      for (var i = from; i < lines.length; i++) {
+        bold.add(i);
+      }
+    }
 
     // ── Z1 — l'établissement, en-tête complet : nom, adresse, localité, email,
     // téléphone. Le logo, lui, n'est PAS ici : c'est une bande posée par chaque
@@ -42,7 +75,9 @@ abstract final class TicketTextLayout {
     // d'espaces. Une école mal renseignée sort un en-tête plus COURT, jamais un
     // en-tête troué — et sur une pièce, une ligne blanche se lirait comme une
     // mention effacée.
-    lines.addAll(_centered(model.schoolName.toUpperCase(), width));
+    emphasised(
+      () => lines.addAll(_centered(model.schoolName.toUpperCase(), width)),
+    );
     lines.addAll(_centered(model.schoolAddress ?? '', width));
     lines.addAll(_centered(model.schoolLocality ?? '', width));
     lines.addAll(_centered(model.schoolEmail ?? '', width));
@@ -146,11 +181,13 @@ abstract final class TicketTextLayout {
     // Une ligne PAR DEVISE : un versement peut solder une créance en dollars et
     // une en francs. Les additionner imprimerait, sur la pièce que le payeur
     // emporte, un chiffre qui n'est l'argent de personne.
-    _addMoneyBag(
-      lines,
-      model.labels.amountReceivedLabel,
-      model.amountReceived,
-      width,
+    emphasised(
+      () => _addMoneyBag(
+        lines,
+        model.labels.amountReceivedLabel,
+        model.amountReceived,
+        width,
+      ),
     );
 
     // Le taux, sous le montant reçu, et **seulement** quand les deux unités
@@ -184,7 +221,9 @@ abstract final class TicketTextLayout {
     // ne ferait que dupliquer le montant reçu deux lignes plus haut.
     if (model.allocations.isNotEmpty) {
       lines.add('');
-      lines.add(TicketCharset.printable(model.labels.allocationsLabel));
+      emphasised(
+        () => lines.add(TicketCharset.printable(model.labels.allocationsLabel)),
+      );
       // Un filet sous le titre : sans lui, la première ligne de répartition se
       // lit comme un prolongement du mot « Répartition » plutôt que comme la
       // première d'une liste.
@@ -254,7 +293,7 @@ abstract final class TicketTextLayout {
       // ensemble ou aucun ferme le cas à la source plutôt qu'en aval.
       if (title.isNotEmpty) {
         lines.add(_rule(width));
-        lines.addAll(title);
+        emphasised(() => lines.addAll(title));
       }
 
       // Le reste PAR NATURE avant le total. « Il vous reste 10 000 FC et
@@ -288,7 +327,10 @@ abstract final class TicketTextLayout {
         // Le total en DERNIÈRE ligne du bloc : le détail sans total obligerait
         // le parent à additionner, le total sans détail est ce qu'on lui
         // reproche.
-        _addTotal(lines, model.labels.balanceTotalLabel, balance, width);
+        emphasised(
+          () =>
+              _addTotal(lines, model.labels.balanceTotalLabel, balance, width),
+        );
       }
     }
 
@@ -327,7 +369,7 @@ abstract final class TicketTextLayout {
       // deux filets l'un sur l'autre.
       final title = _wrapped(model.labels.historyLabel, width);
       if (title.isNotEmpty) {
-        lines.addAll(title);
+        emphasised(() => lines.addAll(title));
         // Le filet qui OUVRE la liste sous son titre, comme celui de la
         // répartition : sans lui, la première date se lit comme un prolongement
         // du mot « Historique ».
@@ -357,11 +399,13 @@ abstract final class TicketTextLayout {
       // papier qui se recompte.
       if (!_totalRepeatsHistory(printedPayments)) {
         lines.add(_rule(width));
-        _addTotal(
-          lines,
-          model.labels.historyTotalLabel,
-          model.printedPaymentsTotal,
-          width,
+        emphasised(
+          () => _addTotal(
+            lines,
+            model.labels.historyTotalLabel,
+            model.printedPaymentsTotal,
+            width,
+          ),
         );
       }
     }
@@ -380,6 +424,39 @@ abstract final class TicketTextLayout {
       lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
     }
 
+    // ── La zone à signer, juste avant les remerciements.
+    //
+    // C'est le CAISSIER qui signe : sur un papier que le parent emporte, la
+    // signature du parent ne vaudrait que contre une souche, et la thermique
+    // n'en produit aucune.
+    //
+    // Trois lignes, dans cet ordre, parce que c'est la forme d'une vraie zone
+    // de signature : le libellé dit qui signe, le blanc donne la hauteur du
+    // geste, le trait dit où il s'arrête. On signe AU-DESSUS du trait — le
+    // remplacer par un pointillé sur la ligne du libellé ferait signer dans une
+    // hauteur de ligne thermique, soit deux millimètres.
+    //
+    // ⚠️ Conditionnée au libellé, comme le titre du solde : `_wrapped('')` rend
+    // une liste VIDE, et un trait à signer sans rien qui dise qui signe ne se
+    // remplit pas. Une traduction incomplète escamote la zone entière plutôt
+    // que d'imprimer deux blancs et un trait orphelins.
+    final signature = _wrapped(model.labels.signatureLabel, width);
+    if (signature.isNotEmpty) {
+      lines.add(_rule(width));
+      emphasised(() => lines.addAll(signature));
+      lines.add('');
+      lines.add('');
+      // Le trait, à DROITE et sur la moitié de la laize : une signature se pose
+      // à droite sur une pièce, et la moitié suffit — plus large, il toucherait
+      // le bord que la thermique n'imprime jamais tout à fait.
+      //
+      // En pointillé, jamais en trait plein ni en soulignés : le gabarit pose
+      // déjà ses filets en `-` pour cette raison (le rendu thermique d'un trait
+      // continu bave), et un pointillé se distingue d'un filet de section.
+      lines.add(('.' * (width ~/ 2)).padLeft(width));
+      lines.add(_rule(width));
+    }
+
     // Le pied, sur les deux sorties et dans tous les cas.
     //
     // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
@@ -390,7 +467,10 @@ abstract final class TicketTextLayout {
     lines.addAll(_centered(model.labels.editorNotice, width));
     lines.addAll(_centered(model.labels.editorSite, width));
 
-    return lines;
+    return [
+      for (var i = 0; i < lines.length; i++)
+        TicketLine(lines[i], bold: bold.contains(i)),
+    ];
   }
 
   /// Un libellé, puis **une ligne par devise**.

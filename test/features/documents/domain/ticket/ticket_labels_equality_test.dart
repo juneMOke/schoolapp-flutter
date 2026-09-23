@@ -19,10 +19,11 @@ const _base = TicketLabels(
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance (non imputée)',
-  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceLabel: 'Solde restant à payer pour ce(s) frais',
   balanceTotalLabel: 'Total',
   historyLabel: 'Historique des paiements',
   historyTotalLabel: 'Total versé',
+  signatureLabel: 'Signature du caissier',
   keepTicketNotice: 'Conservez ce ticket.',
   thanksNotice: 'Merci.',
   editorNotice: 'Recu edite par ETEELO CONNECT',
@@ -64,6 +65,7 @@ void main() {
       'editorNotice': _copyWith(editorNotice: 'Edite par AUTRE'),
       'editorSite': _copyWith(editorSite: 'autre.example'),
       'keepTicketNotice': _copyWith(keepTicketNotice: 'Gardez ce papier.'),
+      'signatureLabel': _copyWith(signatureLabel: 'Visa du guichet'),
     };
 
     for (final entry in variants.entries) {
@@ -103,6 +105,7 @@ TicketLabels _copyWith({
   String? balanceTotalLabel,
   String? historyLabel,
   String? historyTotalLabel,
+  String? signatureLabel,
   String? keepTicketNotice,
   String? thanksNotice,
   String? editorNotice,
@@ -127,6 +130,7 @@ TicketLabels _copyWith({
   balanceTotalLabel: balanceTotalLabel ?? _base.balanceTotalLabel,
   historyLabel: historyLabel ?? _base.historyLabel,
   historyTotalLabel: historyTotalLabel ?? _base.historyTotalLabel,
+  signatureLabel: signatureLabel ?? _base.signatureLabel,
   keepTicketNotice: keepTicketNotice ?? _base.keepTicketNotice,
   thanksNotice: thanksNotice ?? _base.thanksNotice,
   editorNotice: editorNotice ?? _base.editorNotice,

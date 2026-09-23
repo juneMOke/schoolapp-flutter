@@ -8109,7 +8109,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAdvanceLabel => 'Advance (unallocated)';
 
   @override
-  String get ticketBalanceLabel => 'Remaining balance as of printing';
+  String get ticketBalanceLabel => 'Remaining balance on these fees';
 
   @override
   String get ticketBalanceTotalLabel => 'Total';
@@ -8132,6 +8132,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ticketKeepNotice =>
       'Keep this ticket until you receive your final receipt.';
+
+  @override
+  String get ticketSignatureLabel => 'Cashier\'s signature';
 
   @override
   String get ticketPrintLabel => 'Print collection ticket';
