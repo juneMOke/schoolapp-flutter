@@ -1,10 +1,11 @@
 # Module Dépenses — plan front (V1 + v2)
 
-> **Où on en est, en une ligne** : la V1 est livrée ; la **v2 — circuit de
-> validation** est à mi-chemin et ses lots DEP-9 à DEP-11 sont **déjà dans
-> `main`**, DEP-12 à DEP-15 restent à faire. Tout est en **partie II**, à partir
-> du §8 — c'est là qu'il faut reprendre. ⚠️ Lire d'abord l'encadré du §12 : `main`
-> porte un circuit à moitié construit, et cela a deux conséquences vérifiées.
+> **Où on en est, en une ligne** : la V1 est livrée dans `main` ; la **v2 —
+> circuit de validation** est à mi-chemin sur la branche
+> **`feat/expense-validation-circuit`** (lots DEP-9 à DEP-11 faits, DEP-12 à
+> DEP-15 à faire) et **`main` n'en porte rien**. Tout est en **partie II**, à
+> partir du §8 — c'est là qu'il faut reprendre. ⚠️ Lire d'abord l'encadré du §12 :
+> le chantier est à moitié construit, et cela a deux conséquences vérifiées.
 
 > Rédigé le 2026-09-13 sur `feat/expense-register` (base `origin/main` 6252762e).
 > Sources : spec design `ui_kits/app/Depenses-Frais-Fonctionnement-Spec.html`
@@ -345,11 +346,16 @@ sur un écran qui la croirait non décidée.
 
 ## 12. Lots v2 et état d'exécution
 
-Développés sur la branche locale `feat/expense-validation-circuit` (base
-`a8ff5c7c`), puis **poussés directement dans `main`** en avance rapide jusqu'à
-`e1da561a`, **sans PR** — vérifié par `git ls-remote origin refs/heads/main`.
-Aucune branche distante ne porte ce nom. Chaque lot compile, passe
+Sur **`feat/expense-validation-circuit`** (base `a8ff5c7c`, le sommet de `main`
+juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
 `flutter analyze` à zéro et sa suite ciblée ; la suite complète tourne au dernier.
+
+> Note d'historique, pour qui verrait une divergence : ces commits ont d'abord
+> atterri **dans `main`** en avance rapide (jusqu'à `e1da561a`, le 2026-09-23),
+> puis `main` a été ramené à `a8ff5c7c` — décision explicite : **`main` ne garde
+> aucune modification Dépenses tant que le circuit n'est pas fini** (l'encadré
+> ci-dessous dit pourquoi). Les commits sont les mêmes, ils vivent désormais sur
+> la branche seule.
 
 | Lot | État | Commit |
 |---|---|---|
@@ -366,11 +372,11 @@ Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
 → **504 verts**. La suite complète n'a pas encore tourné (elle est prévue à
 DEP-15).
 
-### ⚠️ `main` porte un circuit à moitié construit — deux conséquences vérifiées
+### ⚠️ Un circuit à moitié construit — deux conséquences vérifiées
 
-Les statuts et le fil sont dans `main`, les **gestes** et la **remontée** n'y sont
-pas. Un build de `main` se comporte donc ainsi, et **ce n'est pas livrable en
-l'état** :
+Les statuts et le fil existent, les **gestes** et la **remontée** non. Un build de
+la branche se comporte donc ainsi, et **ce n'est pas livrable en l'état** — c'est
+la raison pour laquelle `main` n'en porte rien :
 
 1. **La poussée d'une dépense neuve sort du contrat servi.** Le dépôt crée une
    demande en `PENDING` (`expense_repository_impl.dart:133`) et
@@ -380,12 +386,12 @@ l'état** :
    sont **écrits dans les deux plans mais pas encore servis**. Un 400 de
    validation est classé terminal par F5 ⇒ la dépense reste sur le poste, ligne
    « à corriger », et **ne repart jamais**. Tant que le back n'a pas livré ses
-   lots C0→C3, aucune dépense créée depuis `main` n'atteint le serveur.
+   lots C0→C3, aucune dépense créée depuis cette branche n'atteint le serveur.
 2. **Rien ne peut faire sortir une demande de « En attente ».** La bascule payée
    / non payée de la V1 a été retirée à DEP-10 et les gestes de décision
    arrivent à DEP-12/DEP-14. Comme le tableau de bord ne compte que l'argent
-   **ferme** (approuvée + payée), une dépense saisie depuis `main` ne compte dans
-   aucun total — et personne ne peut l'approuver ni la marquer payée.
+   **ferme** (approuvée + payée), une dépense saisie ne compte dans aucun total —
+   et personne ne peut l'approuver ni la marquer payée.
 
 Corollaire à surveiller, aujourd'hui **vide mais pas théorique** : un `UNPAID`
 redescendu par le pull n'est plus connu du front (`ExpenseStatus.fromWire`
@@ -395,10 +401,10 @@ le pull rapporte ensuite. C'est sans effet aussi longtemps que D11 tient —
 **aucune dépense en base, ni en production ni en staging** — et c'est la
 première chose à revérifier si une ligne apparaît.
 
-**Porte de sortie** : il n'y a rien à défaire côté serveur ; la suite du chantier
-(DEP-12 → DEP-14) referme les deux points, et la livraison back C0→C3 referme le
-premier. La règle tient : **pas de release du module Dépenses avant DEP-14 et la
-livraison back.**
+**Porte de sortie** : la suite du chantier (DEP-12 → DEP-14) referme les deux
+points, et la livraison back C0→C3 referme le premier. D'ici là : **rien ne fusionne
+dans `main`, et pas de release du module Dépenses avant DEP-14 et la livraison
+back.**
 
 ### Décisions prises pendant DEP-10 / DEP-11 — ne pas les rouvrir
 
@@ -487,10 +493,9 @@ avait rendu dix-huit défauts), puis la suite complète avec `-j 4` et **le code
 sortie capturé sans pipe** (`| tail` masque le code et fait annoncer « 0 » sur une
 suite rouge).
 
-> ⚠️ **Rien n'est livrable avant DEP-14** : sans la remontée, DEP-12 et DEP-13
-> laissent des gestes locaux qu'aucune file ne peut pousser — et comme les lots
-> déjà faits sont **dans `main`** (§12), cette règle vaut pour `main` lui-même,
-> pas pour une branche isolée.
+> ⚠️ **La branche n'est pas livrable avant DEP-14** : sans la remontée, DEP-12 et
+> DEP-13 laissent des gestes locaux qu'aucune file ne peut pousser. C'est aussi ce
+> qui la tient hors de `main` (§12).
 
 ## 14. Hors périmètre v2
 
