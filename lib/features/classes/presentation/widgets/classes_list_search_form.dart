@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
 import 'package:school_app_flutter/core/components/search/search_refine_name_field.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_search_form_logic.dart';
@@ -228,6 +229,13 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
           ? null
           : l10n.classesListSearchHint,
       icon: Icons.search_rounded,
+      // Le bleu appartient à la SAISIE. Cette carte porte la même teinte que
+      // les quatre écrans montés sur `BiModeSearchForm` : elle en a l'anatomie
+      // sans l'envelopper — son mode « Par classe » a un sélecteur de plus —
+      // et rien ne justifierait qu'elle s'en distingue par la couleur.
+      headerVariant: BiToneHeaderVariant.brand,
+      surfaceColor: ListingTones.formulaireFond,
+      borderColor: ListingTones.formulaireBord,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

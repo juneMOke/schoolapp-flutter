@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,10 +24,18 @@ class ClassesListResultsToolbar extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.spacingM),
+      // La barre est la première apparition de la terre cuite : c'est la
+      // réponse de la machine. Elle est **toujours** présente, quel que soit
+      // l'état — c'est elle qui nomme l'état — donc sa couleur ne bouge jamais.
+      //
+      // ⚠️ Le rayon change aussi : 18 (carte de section) → 14. Ce n'est pas un
+      // détail esthétique laissé au hasard — `listeBarRadius` existe pour ce
+      // rôle précis, « la surface qui nomme l'état de la recherche », et cette
+      // barre en est une. Aucun test ne figeait cette géométrie.
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
+        color: ListingTones.barreFond,
+        borderRadius: BorderRadius.circular(AppDimensions.listeBarRadius),
+        border: Border.all(color: ListingTones.barreBord),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
