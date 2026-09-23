@@ -37,7 +37,7 @@ void main() {
   final today = DateTime(2026, 9, 12, 15, 30);
 
   test('création : le premier type offert (ordre du référentiel, aucun code '
-      'en dur), sa devise, payée, aujourd’hui', () {
+      'en dur), sa devise, aujourd’hui', () {
     final seed = ExpenseFormSeed.blank(
       types: [_type('ELECTRICITE', 'cdf'), _type('FOURNITURES', 'USD')],
       today: today,
@@ -46,7 +46,6 @@ void main() {
     expect(seed.id, isNull);
     expect(seed.typeId, 't-ELECTRICITE');
     expect(seed.currency, 'CDF');
-    expect(seed.status, ExpenseStatus.paid);
     expect(seed.expenseDate, DateTime(2026, 9, 12));
   });
 
@@ -56,11 +55,12 @@ void main() {
     expect(seed.currency, 'USD');
   });
 
-  test('duplication : id vidé, date du jour, non payée — le reste recopié', () {
+  /// Le formulaire ne porte plus de statut (D8) : la copie repartira en
+  /// attente comme toute demande neuve, sans que la graine ait à le dire.
+  test('duplication : id vidé, date du jour — le reste recopié', () {
     final seed = ExpenseFormSeed.duplicate(_paidCdf, today: today);
     expect(seed.id, isNull);
     expect(seed.expenseDate, DateTime(2026, 9, 12));
-    expect(seed.status, ExpenseStatus.unpaid);
     expect(seed.title, 'Facture SNEL');
     expect(seed.currency, 'CDF');
     expect(seed.fundingSource, ExpenseFundingSource.bank);

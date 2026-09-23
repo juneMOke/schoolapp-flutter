@@ -15995,17 +15995,35 @@ abstract class AppLocalizations {
   /// **'All'**
   String get expenseStatusAll;
 
+  /// No description provided for @expenseStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get expenseStatusPending;
+
+  /// No description provided for @expenseStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get expenseStatusApproved;
+
   /// No description provided for @expenseStatusPaid.
   ///
   /// In en, this message translates to:
   /// **'Paid'**
   String get expenseStatusPaid;
 
-  /// No description provided for @expenseStatusUnpaid.
+  /// No description provided for @expenseStatusRefused.
   ///
   /// In en, this message translates to:
-  /// **'Unpaid'**
-  String get expenseStatusUnpaid;
+  /// **'Refused'**
+  String get expenseStatusRefused;
+
+  /// No description provided for @expenseStatusRetracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Retracted'**
+  String get expenseStatusRetracted;
 
   /// No description provided for @expenseSyncRejected.
   ///
@@ -16187,53 +16205,11 @@ abstract class AppLocalizations {
   /// **'{granularity, select, day{the day before} week{the previous week} month{the previous month} other{the previous school year}}'**
   String expensePreviousPeriod(String granularity);
 
-  /// No description provided for @expenseKpiSelectionTotal.
+  /// No description provided for @expenseKpiApprovedCount.
   ///
   /// In en, this message translates to:
-  /// **'Selection total'**
-  String get expenseKpiSelectionTotal;
-
-  /// No description provided for @expenseKpiPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Already paid'**
-  String get expenseKpiPaid;
-
-  /// No description provided for @expenseKpiUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Unpaid'**
-  String get expenseKpiUnpaid;
-
-  /// No description provided for @expenseKpiShown.
-  ///
-  /// In en, this message translates to:
-  /// **'Expenses shown'**
-  String get expenseKpiShown;
-
-  /// No description provided for @expenseKpiShownA11y.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}'**
-  String expenseKpiShownA11y(int count);
-
-  /// No description provided for @expenseKpiPaidCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}'**
-  String expenseKpiPaidCount(int count);
-
-  /// No description provided for @expenseKpiUnpaidCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}'**
-  String expenseKpiUnpaidCount(int count);
-
-  /// No description provided for @expenseKpiNoRate.
-  ///
-  /// In en, this message translates to:
-  /// **'No daily rate published: amounts per currency'**
-  String get expenseKpiNoRate;
+  /// **'{count, plural, =0{no expense approved} =1{1 expense approved} other{{count} expenses approved}}'**
+  String expenseKpiApprovedCount(num count);
 
   /// No description provided for @expenseKpiTotalSpent.
   ///
@@ -16409,18 +16385,6 @@ abstract class AppLocalizations {
   /// **'Incident code: {code}'**
   String expenseErrorIncidentCode(String code);
 
-  /// No description provided for @expenseActionMarkPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark as paid'**
-  String get expenseActionMarkPaid;
-
-  /// No description provided for @expenseActionMarkUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark as unpaid'**
-  String get expenseActionMarkUnpaid;
-
   /// No description provided for @expenseActionDuplicate.
   ///
   /// In en, this message translates to:
@@ -16456,18 +16420,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expense {name} updated.'**
   String expenseToastUpdated(String name);
-
-  /// No description provided for @expenseToastMarkedPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} · marked as paid.'**
-  String expenseToastMarkedPaid(String name);
-
-  /// No description provided for @expenseToastMarkedUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} · marked as unpaid.'**
-  String expenseToastMarkedUnpaid(String name);
 
   /// No description provided for @expenseToastWithdrawn.
   ///

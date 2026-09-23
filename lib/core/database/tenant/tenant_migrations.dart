@@ -36,6 +36,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(51)) {
     await _addAnnualMatriculationNumber(db);
   }
+  if (upTo(52)) {
+    await _expenseValidationCircuit(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -119,5 +122,42 @@ Future<void> _returnDeviceTables(DatabaseExecutor db) async {
   await db.execute(
     "DELETE FROM sync_meta WHERE resource = 'editique_cache_school' "
     "OR substr(resource, 1, 18) = 'editique_documents'",
+  );
+}
+
+/// v50 — la dépense devient une **demande** soumise à décision.
+///
+/// Six colonnes portent la décision, la pression du demandeur et la fraîcheur
+/// du fil. DDL inline, jamais lu du schéma vivant ; chaque ajout est gardé
+/// pour que le palier se rejoue sans dommage.
+///
+/// **Renommage défensif** des deux statuts de la V1 : le serveur a vérifié
+/// qu'aucune dépense n'existe en base (D11 close), mais un `count(*)` distant
+/// ne dit rien des bases locales des postes de développement — et une ligne
+/// au statut inconnu se lirait « en attente » sur un écran qui la croirait
+/// non décidée. `UNPAID` valait « engagée, reste à payer » : c'est
+/// `APPROVED`. `PAID` ne bouge pas.
+Future<void> _expenseValidationCircuit(DatabaseExecutor db) async {
+  const columns = {
+    'decided_by_id': 'TEXT',
+    'decided_by_name': 'TEXT',
+    'decided_at': 'TEXT',
+    'decision_reason': 'TEXT',
+    'reminder_count': 'INTEGER NOT NULL DEFAULT 0',
+    'last_message_at': 'TEXT',
+  };
+  final existing = {
+    for (final row in await db.rawQuery('PRAGMA table_info(expenses)'))
+      row['name'] as String,
+  };
+  if (existing.isEmpty) return; // Table absente : rien à monter.
+  for (final column in columns.entries) {
+    if (existing.contains(column.key)) continue;
+    await db.execute(
+      'ALTER TABLE expenses ADD COLUMN ${column.key} ${column.value}',
+    );
+  }
+  await db.execute(
+    "UPDATE expenses SET status = 'APPROVED' WHERE status = 'UNPAID'",
   );
 }

@@ -10099,10 +10099,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseStatusAll => 'Toutes';
 
   @override
+  String get expenseStatusPending => 'En attente';
+
+  @override
+  String get expenseStatusApproved => 'Approuvée';
+
+  @override
   String get expenseStatusPaid => 'Payée';
 
   @override
-  String get expenseStatusUnpaid => 'Non payée';
+  String get expenseStatusRefused => 'Refusée';
+
+  @override
+  String get expenseStatusRetracted => 'Retirée';
 
   @override
   String get expenseSyncRejected => 'À corriger';
@@ -10225,56 +10234,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get expenseKpiSelectionTotal => 'Total de la sélection';
-
-  @override
-  String get expenseKpiPaid => 'Déjà payé';
-
-  @override
-  String get expenseKpiUnpaid => 'Non payé';
-
-  @override
-  String get expenseKpiShown => 'Dépenses affichées';
-
-  @override
-  String expenseKpiShownA11y(int count) {
+  String expenseKpiApprovedCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count dépenses affichées',
-      one: '1 dépense affichée',
-      zero: 'Aucune dépense affichée',
+      other: '$count dépenses accordées',
+      one: '1 dépense accordée',
+      zero: 'aucune dépense accordée',
     );
     return '$_temp0';
   }
-
-  @override
-  String expenseKpiPaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dépenses réglées',
-      one: '1 dépense réglée',
-      zero: 'aucune dépense réglée',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String expenseKpiUnpaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dépenses en attente',
-      one: '1 dépense en attente',
-      zero: 'aucune dépense en attente',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get expenseKpiNoRate =>
-      'Aucun taux du jour publié : montants par devise';
 
   @override
   String get expenseKpiTotalSpent => 'Total dépensé';
@@ -10413,12 +10382,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get expenseActionMarkPaid => 'Marquer payée';
-
-  @override
-  String get expenseActionMarkUnpaid => 'Repasser en non payée';
-
-  @override
   String get expenseActionDuplicate => 'Dupliquer';
 
   @override
@@ -10442,16 +10405,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String expenseToastUpdated(String name) {
     return 'Dépense $name modifiée.';
-  }
-
-  @override
-  String expenseToastMarkedPaid(String name) {
-    return '$name · marquée payée.';
-  }
-
-  @override
-  String expenseToastMarkedUnpaid(String name) {
-    return '$name · repassée en non payée.';
   }
 
   @override

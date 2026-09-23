@@ -76,9 +76,6 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerFactory<SaveExpenseUseCase>(
     () => SaveExpenseUseCase(getIt<ExpenseRepository>()),
   );
-  getIt.registerFactory<SetExpenseStatusUseCase>(
-    () => SetExpenseStatusUseCase(getIt<ExpenseRepository>()),
-  );
   getIt.registerFactory<WithdrawExpenseUseCase>(
     () => WithdrawExpenseUseCase(getIt<ExpenseRepository>()),
   );
@@ -113,7 +110,6 @@ void registerExpenseOffline(GetIt getIt) {
       source: getIt<ExpenseSnapshotSource>(),
       memory: getIt<ExpensePeriodMemory>(),
       save: getIt<SaveExpenseUseCase>(),
-      setStatus: getIt<SetExpenseStatusUseCase>(),
       withdraw: getIt<WithdrawExpenseUseCase>(),
       restore: getIt<RestoreExpenseUseCase>(),
     ),

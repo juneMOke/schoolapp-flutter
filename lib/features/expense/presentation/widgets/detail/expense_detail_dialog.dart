@@ -16,37 +16,29 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Ce que la fiche demande à l'écran de faire après sa fermeture.
 enum ExpenseDetailChoice { withdraw, duplicate, edit }
 
-/// Ouvre la fiche d'une dépense. La bascule de statut s'y joue **sans
-/// fermer** : le badge change sous les yeux ; les trois autres gestes ferment
-/// la fiche et rendent leur choix.
+/// Ouvre la fiche d'une dépense. Les trois gestes offerts ferment la fiche et
+/// rendent leur choix.
 Future<ExpenseDetailChoice?> showExpenseDetailDialog(
   BuildContext context, {
   required Expense expense,
   required ExpenseType? type,
   required ExpenseUsdReader reader,
-  required Future<Expense?> Function(Expense expense) onToggle,
 }) => showDialog<ExpenseDetailChoice>(
   context: context,
-  builder: (_) => ExpenseDetailDialog(
-    expense: expense,
-    type: type,
-    reader: reader,
-    onToggle: onToggle,
-  ),
+  builder: (_) =>
+      ExpenseDetailDialog(expense: expense, type: type, reader: reader),
 );
 
 class ExpenseDetailDialog extends StatefulWidget {
   final Expense expense;
   final ExpenseType? type;
   final ExpenseUsdReader reader;
-  final Future<Expense?> Function(Expense expense) onToggle;
 
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
     required this.type,
     required this.reader,
-    required this.onToggle,
   });
 
   @override
@@ -54,19 +46,7 @@ class ExpenseDetailDialog extends StatefulWidget {
 }
 
 class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
-  late Expense _expense = widget.expense;
-  bool _busy = false;
-
-  Future<void> _toggle() async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    final updated = await widget.onToggle(_expense);
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      if (updated != null) _expense = updated;
-    });
-  }
+  late final Expense _expense = widget.expense;
 
   void _close([ExpenseDetailChoice? choice]) =>
       Navigator.of(context).pop(choice);
@@ -145,19 +125,6 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                           label: l10n.expenseActionEdit,
                           icon: Icons.edit_outlined,
                           onPressed: () => _close(ExpenseDetailChoice.edit),
-                          fullWidth: false,
-                        ),
-                        // La bascule en primaire : c'est le geste le plus
-                        // fréquent depuis une fiche.
-                        EteeloButton.primary(
-                          label: _expense.isPaid
-                              ? l10n.expenseActionMarkUnpaid
-                              : l10n.expenseActionMarkPaid,
-                          icon: _expense.isPaid
-                              ? Icons.undo
-                              : Icons.check_circle_outline,
-                          isLoading: _busy,
-                          onPressed: _toggle,
                           fullWidth: false,
                         ),
                       ],

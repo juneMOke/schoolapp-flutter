@@ -22,7 +22,6 @@ class ExpenseRegisterList extends StatelessWidget {
   final Map<String, ExpenseType> typesById;
   final ExpenseUsdReader reader;
   final ValueChanged<Expense> onOpen;
-  final ValueChanged<Expense> onToggle;
   final ValueChanged<Expense> onDuplicate;
   final VoidCallback onShowMore;
 
@@ -32,7 +31,6 @@ class ExpenseRegisterList extends StatelessWidget {
     required this.typesById,
     required this.reader,
     required this.onOpen,
-    required this.onToggle,
     required this.onDuplicate,
     required this.onShowMore,
   });
@@ -58,7 +56,6 @@ class ExpenseRegisterList extends StatelessWidget {
                 type: typesById[expense.typeId],
                 reader: reader,
                 onOpen: () => onOpen(expense),
-                onToggle: () => onToggle(expense),
                 onDuplicate: () => onDuplicate(expense),
               ),
           ],

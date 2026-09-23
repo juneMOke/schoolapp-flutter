@@ -24,7 +24,6 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   final ExpenseSnapshotSource _source;
   final ExpensePeriodMemory _memory;
   final SaveExpenseUseCase _save;
-  final SetExpenseStatusUseCase _setStatus;
   final WithdrawExpenseUseCase _withdraw;
   final RestoreExpenseUseCase _restore;
   final DateTime Function() _now;
@@ -34,14 +33,12 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     required ExpenseSnapshotSource source,
     required ExpensePeriodMemory memory,
     required SaveExpenseUseCase save,
-    required SetExpenseStatusUseCase setStatus,
     required WithdrawExpenseUseCase withdraw,
     required RestoreExpenseUseCase restore,
     DateTime Function() now = DateTime.now,
   }) : _source = source,
        _memory = memory,
        _save = save,
-       _setStatus = setStatus,
        _withdraw = withdraw,
        _restore = restore,
        _now = now,
@@ -136,8 +133,9 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   Future<Either<Failure, Expense>> save(ExpenseDraft draft) =>
       _thenRefresh(_save(draft));
 
-  Future<Either<Failure, Expense>> toggleStatus(Expense expense) =>
-      _thenRefresh(_setStatus(expense, expense.status.toggled));
+  // La bascule payée / non payée de la V1 a disparu avec le circuit : le
+  // statut ne change plus que par un geste de décision, qui arrive au lot
+  // suivant avec sa permission et son message de fil.
 
   Future<Either<Failure, Unit>> withdraw(Expense expense) =>
       _thenRefresh(_withdraw(expense));

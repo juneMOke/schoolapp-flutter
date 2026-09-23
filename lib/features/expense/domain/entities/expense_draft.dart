@@ -4,7 +4,11 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 /// Ce que le formulaire soumet — création, modification ou duplication.
 ///
 /// Trois cas, un seul objet, distingués par la présence d'un [id] : une
-/// duplication est une **création** (id vidé, date du jour, non payée).
+/// duplication est une **création** (id vidé, date du jour).
+///
+/// **Aucun statut** (D8) : une demande naît en attente, et le circuit ne se
+/// décide que par un geste dédié. Le champ Statut de la V1 a disparu du
+/// formulaire — nul ne s'auto-approuve en déposant sa propre demande.
 class ExpenseDraft extends Equatable {
   /// `null` = création (duplication comprise) ; l'identifiant est alors
   /// fabriqué par le poste, clé d'idempotence de la remontée.
@@ -14,7 +18,6 @@ class ExpenseDraft extends Equatable {
   final String? description;
   final int amountInCents;
   final String currency;
-  final ExpenseStatus status;
   final DateTime expenseDate;
   final String? supplier;
   final ExpenseFundingSource fundingSource;
@@ -30,7 +33,6 @@ class ExpenseDraft extends Equatable {
     this.description,
     required this.amountInCents,
     required this.currency,
-    required this.status,
     required this.expenseDate,
     this.supplier,
     this.fundingSource = ExpenseFundingSource.cash,
@@ -47,7 +49,6 @@ class ExpenseDraft extends Equatable {
     description,
     amountInCents,
     currency,
-    status,
     expenseDate,
     supplier,
     fundingSource,

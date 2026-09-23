@@ -36,18 +36,13 @@ class _Rates implements ExchangeRateReader {
 // Samedi 12 septembre 2026, 15 h.
 final _now = DateTime(2026, 9, 12, 15);
 
-ExpenseDraft _draft({
-  String? id,
-  ExpenseStatus status = ExpenseStatus.paid,
-  DateTime? day,
-}) => ExpenseDraft(
+ExpenseDraft _draft({String? id, DateTime? day}) => ExpenseDraft(
   id: id,
   typeId: 't-elec',
   title: '  Facture SNEL  ',
   description: '   ',
   amountInCents: 38500000,
   currency: 'cdf',
-  status: status,
   expenseDate: day ?? DateTime(2026, 9, 3, 18, 30),
   supplier: 'SNEL',
   recordedByName: 'Moke Junior',
@@ -91,15 +86,19 @@ void main() {
       (await repo.save(draft)).fold((f) => fail('$f'), (e) => e);
 
   group('save', () {
-    test('création payée : ligne en attente, date de règlement = date de la '
-        'dépense (A2), et UNE entrée d’outbox portant l’auteur', () async {
+    test('dépôt : la demande naît EN ATTENTE, sans date de règlement, et UNE '
+        'entrée d’outbox portant l’auteur', () async {
       final expense = await saved(_draft());
 
       expect(expense.id, 'e-new');
       expect(expense.title, 'Facture SNEL');
       expect(expense.description, isNull);
       expect(expense.currency, 'CDF');
-      expect(expense.paidOn, DateTime(2026, 9, 3));
+      // D8 : le statut n'est pas une saisie, et rien n'est décaissé avant
+      // approbation — la date de règlement viendra du geste de paiement.
+      expect(expense.status, ExpenseStatus.pending);
+      expect(expense.paidOn, isNull);
+      expect(expense.isFirm, isFalse);
       expect(expense.syncState, ExpenseSyncState.pending);
       expect(expense.number, isNull, reason: 'A3 : numéro en attente');
 
@@ -109,31 +108,37 @@ void main() {
       final payload = jsonDecode(entries.single['payload'] as String) as Map;
       expect(payload['authorId'], 'u-1');
       expect(payload['expense']['expenseDate'], '2026-09-03');
-      expect(payload['expense']['paidOn'], '2026-09-03');
+      expect(payload['expense']['paidOn'], isNull);
       expect(payload['expense']['amountInCents'], 38500000);
     });
 
     test(
-      'bascule en payée : réglée AUJOURD’HUI ; en non payée : sans date',
+      'corriger une demande déjà tranchée ne touche NI au statut NI au '
+      'règlement : le circuit ne se contourne pas par le formulaire',
       () async {
-        final created = await saved(_draft(status: ExpenseStatus.unpaid));
-        expect(created.paidOn, isNull);
+        await saved(_draft());
+        // Le serveur a approuvé puis constaté le paiement pendant ce temps.
+        await db.update('expenses', {
+          'status': 'PAID',
+          'paid_on': '2026-09-10',
+          'decided_by_name': 'Nsimba Patrick',
+          'decided_at': '2026-09-08T09:12:40.000Z',
+          'reminder_count': 2,
+        });
 
-        final paid = (await repo.setStatus(
-          created,
-          ExpenseStatus.paid,
-        )).fold((f) => fail('$f'), (e) => e);
-        expect(paid.paidOn, DateTime(2026, 9, 12));
+        final edited = await saved(
+          _draft(id: 'e-new', day: DateTime(2026, 9, 4)),
+        );
 
-        // Une modification qui la laisse payée garde sa date de règlement.
-        final edited = await saved(_draft(id: paid.id));
-        expect(edited.paidOn, DateTime(2026, 9, 12));
-
-        final unpaid = (await repo.setStatus(
-          edited,
-          ExpenseStatus.unpaid,
-        )).fold((f) => fail('$f'), (e) => e);
-        expect(unpaid.paidOn, isNull);
+        expect(edited.status, ExpenseStatus.paid);
+        expect(edited.paidOn, DateTime(2026, 9, 10));
+        expect(edited.decidedByName, 'Nsimba Patrick');
+        expect(edited.reminderCount, 2);
+        expect(
+          edited.expenseDate,
+          DateTime(2026, 9, 4),
+          reason: 'le contenu, si',
+        );
         // Toujours une seule entrée : chaque geste remplace le précédent.
         expect(await outbox(), hasLength(1));
       },

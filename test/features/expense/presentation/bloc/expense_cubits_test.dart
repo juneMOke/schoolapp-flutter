@@ -18,8 +18,6 @@ class _MockSource extends Mock implements ExpenseSnapshotSource {}
 
 class _MockSave extends Mock implements SaveExpenseUseCase {}
 
-class _MockSetStatus extends Mock implements SetExpenseStatusUseCase {}
-
 class _MockWithdraw extends Mock implements WithdrawExpenseUseCase {}
 
 class _MockRestore extends Mock implements RestoreExpenseUseCase {}
@@ -32,7 +30,7 @@ Expense _expense(String id, {String day = '2026-09-03'}) => Expense(
   title: 'Dépense $id',
   amountInCents: 1000,
   currency: 'USD',
-  status: ExpenseStatus.unpaid,
+  status: ExpenseStatus.paid,
   expenseDate: DateTime.parse(day),
   clientUpdatedAt: DateTime.utc(2026),
 );
@@ -54,7 +52,6 @@ void main() {
         title: 'x',
         amountInCents: 1,
         currency: 'USD',
-        status: ExpenseStatus.paid,
         expenseDate: DateTime(2026),
       ),
     );
@@ -75,7 +72,6 @@ void main() {
     source: source,
     memory: memory,
     save: save,
-    setStatus: _MockSetStatus(),
     withdraw: _MockWithdraw(),
     restore: _MockRestore(),
     now: () => _today,
@@ -160,7 +156,6 @@ void main() {
           title: 'x',
           amountInCents: 1,
           currency: 'USD',
-          status: ExpenseStatus.paid,
           expenseDate: _today,
         ),
       );

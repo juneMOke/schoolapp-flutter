@@ -24,7 +24,6 @@ class ExpenseRegisterRow extends StatelessWidget {
   final ExpenseType? type;
   final ExpenseUsdReader reader;
   final VoidCallback onOpen;
-  final VoidCallback onToggle;
   final VoidCallback onDuplicate;
 
   const ExpenseRegisterRow({
@@ -33,7 +32,6 @@ class ExpenseRegisterRow extends StatelessWidget {
     required this.type,
     required this.reader,
     required this.onOpen,
-    required this.onToggle,
     required this.onDuplicate,
   });
 
@@ -72,11 +70,7 @@ class ExpenseRegisterRow extends StatelessWidget {
       ),
       const SizedBox(width: AppDimensions.spacingM),
       Expanded(flex: 8, child: _Badges(expense: expense)),
-      ExpenseRowActions(
-        expense: expense,
-        onToggle: onToggle,
-        onDuplicate: onDuplicate,
-      ),
+      ExpenseRowActions(onDuplicate: onDuplicate),
     ],
   );
 
@@ -98,11 +92,7 @@ class ExpenseRegisterRow extends StatelessWidget {
           const SizedBox(width: AppDimensions.spacingS),
           Flexible(child: _Badges(expense: expense)),
           const Spacer(),
-          ExpenseRowActions(
-            expense: expense,
-            onToggle: onToggle,
-            onDuplicate: onDuplicate,
-          ),
+          ExpenseRowActions(onDuplicate: onDuplicate),
         ],
       ),
     ],

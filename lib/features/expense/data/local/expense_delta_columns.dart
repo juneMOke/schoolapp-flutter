@@ -17,15 +17,19 @@ abstract final class ExpenseDeltaColumns {
     'description': d.description,
     'amount_in_cents': d.amountInCents,
     'currency': d.currency,
-    'status': d.status,
-    'paid_on': d.paidOn,
     'expense_date': d.expenseDate,
     'supplier': d.supplier,
     'funding_source': d.fundingSource,
     'client_updated_at': d.clientUpdatedAt,
   };
 
+  /// Le **statut et la date de règlement ont changé de famille en v2** : le
+  /// poste ne les écrit plus (D8), le serveur seul les arbitre. Les laisser
+  /// côté contenu les aurait fait retenir par une saisie locale plus récente —
+  /// une décision prise ailleurs serait restée invisible sur ce poste.
   static Map<String, Object?> server(ExpenseDeltaDto d) => {
+    'status': d.status,
+    'paid_on': d.paidOn,
     'expense_number': ?d.expenseNumber,
     'recorded_by_id': d.recordedById,
     'recorded_by_name': d.recordedByName,

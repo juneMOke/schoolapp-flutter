@@ -762,7 +762,12 @@ class AppConstants {
   // matricule de l'élève pour CETTE année, calculé serveur. Il appartient à
   // l'INSCRIPTION, pas à l'élève : un élève à deux années en a deux. Palier
   // d'école, donc déclaré dans `migrateTenantDatabase`.
-  static const int offlineDbSchemaVersion = 51;
+  // v52 (2026-09-23, renuméroté au rebase du 2026-09-25) : le circuit de
+  // validation des dépenses — `expenses` gagne la décision (`decided_*`,
+  // `decision_reason`), le compteur de relances et la fraîcheur du fil. La
+  // reprise des lignes serveur est faite côté back (V139/V140) ; ici, seulement
+  // le renommage défensif `UNPAID` → `APPROVED` des bases locales.
+  static const int offlineDbSchemaVersion = 52;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

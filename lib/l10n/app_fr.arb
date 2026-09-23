@@ -6712,8 +6712,11 @@
   "expenseNumberPending": "N° en attente",
   "expenseStatusTitle": "Statut",
   "expenseStatusAll": "Toutes",
+  "expenseStatusPending": "En attente",
+  "expenseStatusApproved": "Approuvée",
   "expenseStatusPaid": "Payée",
-  "expenseStatusUnpaid": "Non payée",
+  "expenseStatusRefused": "Refusée",
+  "expenseStatusRetracted": "Retirée",
   "expenseSyncRejected": "À corriger",
   "expenseTypesTitle": "Types de dépense",
   "expenseTypesShowAll": "tout afficher",
@@ -6788,35 +6791,14 @@
       }
     }
   },
-  "expenseKpiSelectionTotal": "Total de la sélection",
-  "expenseKpiPaid": "Déjà payé",
-  "expenseKpiUnpaid": "Non payé",
-  "expenseKpiShown": "Dépenses affichées",
-  "expenseKpiShownA11y": "{count, plural, =0{Aucune dépense affichée} =1{1 dépense affichée} other{{count} dépenses affichées}}",
-  "@expenseKpiShownA11y": {
+  "expenseKpiApprovedCount": "{count, plural, =0{aucune dépense accordée} =1{1 dépense accordée} other{{count} dépenses accordées}}",
+  "@expenseKpiApprovedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "num"
       }
     }
   },
-  "expenseKpiPaidCount": "{count, plural, =0{aucune dépense réglée} =1{1 dépense réglée} other{{count} dépenses réglées}}",
-  "@expenseKpiPaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiUnpaidCount": "{count, plural, =0{aucune dépense en attente} =1{1 dépense en attente} other{{count} dépenses en attente}}",
-  "@expenseKpiUnpaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiNoRate": "Aucun taux du jour publié : montants par devise",
   "expenseKpiTotalSpent": "Total dépensé",
   "expenseKpiRemaining": "Restant à payer",
   "expenseKpiRecorded": "Dépenses enregistrées",
@@ -6949,8 +6931,6 @@
       }
     }
   },
-  "expenseActionMarkPaid": "Marquer payée",
-  "expenseActionMarkUnpaid": "Repasser en non payée",
   "expenseActionDuplicate": "Dupliquer",
   "expenseActionEdit": "Modifier",
   "expenseActionDelete": "Supprimer",
@@ -6968,22 +6948,6 @@
   },
   "expenseToastUpdated": "Dépense {name} modifiée.",
   "@expenseToastUpdated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedPaid": "{name} · marquée payée.",
-  "@expenseToastMarkedPaid": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedUnpaid": "{name} · repassée en non payée.",
-  "@expenseToastMarkedUnpaid": {
     "placeholders": {
       "name": {
         "type": "String"

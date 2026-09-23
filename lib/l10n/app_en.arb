@@ -6525,8 +6525,11 @@
   "expenseNumberPending": "No. pending",
   "expenseStatusTitle": "Status",
   "expenseStatusAll": "All",
+  "expenseStatusPending": "Pending",
+  "expenseStatusApproved": "Approved",
   "expenseStatusPaid": "Paid",
-  "expenseStatusUnpaid": "Unpaid",
+  "expenseStatusRefused": "Refused",
+  "expenseStatusRetracted": "Retracted",
   "expenseSyncRejected": "Needs fixing",
   "expenseTypesTitle": "Expense types",
   "expenseTypesShowAll": "show all",
@@ -6601,35 +6604,7 @@
       }
     }
   },
-  "expenseKpiSelectionTotal": "Selection total",
-  "expenseKpiPaid": "Already paid",
-  "expenseKpiUnpaid": "Unpaid",
-  "expenseKpiShown": "Expenses shown",
-  "expenseKpiShownA11y": "{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}",
-  "@expenseKpiShownA11y": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiPaidCount": "{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}",
-  "@expenseKpiPaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiUnpaidCount": "{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}",
-  "@expenseKpiUnpaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiNoRate": "No daily rate published: amounts per currency",
+  "expenseKpiApprovedCount": "{count, plural, =0{no expense approved} =1{1 expense approved} other{{count} expenses approved}}",
   "expenseKpiTotalSpent": "Total spent",
   "expenseKpiRemaining": "Still to pay",
   "expenseKpiRecorded": "Expenses recorded",
@@ -6762,8 +6737,6 @@
       }
     }
   },
-  "expenseActionMarkPaid": "Mark as paid",
-  "expenseActionMarkUnpaid": "Mark as unpaid",
   "expenseActionDuplicate": "Duplicate",
   "expenseActionEdit": "Edit",
   "expenseActionDelete": "Delete",
@@ -6781,22 +6754,6 @@
   },
   "expenseToastUpdated": "Expense {name} updated.",
   "@expenseToastUpdated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedPaid": "{name} · marked as paid.",
-  "@expenseToastMarkedPaid": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedUnpaid": "{name} · marked as unpaid.",
-  "@expenseToastMarkedUnpaid": {
     "placeholders": {
       "name": {
         "type": "String"

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/skeletons/eteelo_dashboard_skeletons.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -11,7 +10,6 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_actions.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_section_note.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/register/expense_register_filters_card.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/register/expense_register_kpi_band.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/register/expense_register_list.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_empty_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_results_error_state.dart';
@@ -79,12 +77,12 @@ class ExpenseRegisterView extends StatelessWidget {
           onCreate: actions.create,
         ),
         const SizedBox(height: AppDimensions.spacingM),
-        if (state.isLoading)
-          const EteeloKpiBandSkeleton(count: 4)
-        else ...[
-          ExpenseRegisterKpiBand(view: view, periodDetail: label.detail),
+        // Le registre ne porte plus de tuiles chiffrées (spec §04, v2.1) : les
+        // montants vivent au tableau de bord, l'attente et les retards dans la
+        // file. Le squelette ne les annonce donc plus non plus — il ne promet
+        // pas des tuiles qui n'arriveront pas.
+        if (!state.isLoading)
           ExpenseRateNote(rate: state.snapshot.usdToCdf, totals: view.total),
-        ],
         const SizedBox(height: AppDimensions.spacingM),
         if (state.isLoading)
           const EteeloListSkeleton(rowCount: 6, showAvatar: false)
@@ -107,7 +105,6 @@ class ExpenseRegisterView extends StatelessWidget {
             typesById: state.snapshot.typesById,
             reader: state.snapshot.usdReader,
             onOpen: actions.open,
-            onToggle: actions.toggle,
             onDuplicate: actions.duplicate,
             onShowMore: cubit.showMore,
           ),

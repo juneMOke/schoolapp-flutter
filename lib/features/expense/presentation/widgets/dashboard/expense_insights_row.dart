@@ -91,8 +91,8 @@ class ExpenseInsightsRow extends StatelessWidget {
   }
 
   Widget _remaining(BuildContext context, AppLocalizations l10n) {
-    final unpaid = view.unpaid;
-    final oldest = view.oldestUnpaid;
+    final unpaid = view.approvedToPay;
+    final oldest = view.oldestApproved;
     if (unpaid.isEmpty || oldest == null) {
       return ExpenseInsightCard(
         icon: Icons.check_circle_outline,

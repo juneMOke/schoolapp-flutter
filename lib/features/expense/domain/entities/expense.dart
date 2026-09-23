@@ -21,8 +21,27 @@ class Expense extends Equatable {
   final String currency;
   final ExpenseStatus status;
 
-  /// Date de règlement (A2) ; `null` si non payée.
+  /// Date de règlement (A2) ; posée par le geste de paiement, et par lui
+  /// seul — jamais dérivée du statut à la sauvegarde (F20).
   final DateTime? paidOn;
+
+  /// Qui a tranché, et quand. `null` tant que rien n'est décidé ; remis à
+  /// `null` par une correction ou une annulation de décision.
+  final String? decidedById;
+  final String? decidedByName;
+  final DateTime? decidedAt;
+
+  /// Motif — obligatoire si [ExpenseStatus.refused], `null` sinon.
+  final String? decisionReason;
+
+  /// Relances du demandeur ; remises à 0 au retour en attente — une nouvelle
+  /// version repart avec un compteur neuf.
+  final int reminderCount;
+
+  /// Fraîcheur du fil, **distincte** de [clientUpdatedAt] : un message ne doit
+  /// jamais faire perdre une décision à l'arbitrage. Sert aussi l'indice
+  /// « n msg » de la liste.
+  final DateTime? lastMessageAt;
 
   /// Date de la dépense, pas de la saisie.
   final DateTime expenseDate;
@@ -54,6 +73,12 @@ class Expense extends Equatable {
     required this.currency,
     required this.status,
     this.paidOn,
+    this.decidedById,
+    this.decidedByName,
+    this.decidedAt,
+    this.decisionReason,
+    this.reminderCount = 0,
+    this.lastMessageAt,
     required this.expenseDate,
     this.supplier,
     this.fundingSource = ExpenseFundingSource.cash,
@@ -65,7 +90,18 @@ class Expense extends Equatable {
     this.syncErrorCode,
   });
 
+  /// L'argent est engagé pour de bon (approuvée ou payée). **Toute somme du
+  /// module passe par là** — jamais par une égalité de statut.
+  bool get isFirm => status.isFirm;
+
+  /// Décaissée et soldée — ce qui autorise la ligne « Payée le … ».
   bool get isPaid => status == ExpenseStatus.paid;
+
+  /// Déposée, pas encore décidée : elle attend dans la file.
+  bool get isPending => status == ExpenseStatus.pending;
+
+  /// Une décision a été rendue sur cette demande.
+  bool get isDecided => decidedAt != null;
 
   bool get isWithdrawn => deletedAt != null;
 
@@ -85,6 +121,12 @@ class Expense extends Equatable {
     currency,
     status,
     paidOn,
+    decidedById,
+    decidedByName,
+    decidedAt,
+    decisionReason,
+    reminderCount,
+    lastMessageAt,
     expenseDate,
     supplier,
     fundingSource,

@@ -109,8 +109,12 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         description: _blankToNull(draft.description),
         amountInCents: draft.amountInCents,
         currency: CurrencyCode.normalize(draft.currency),
-        status: draft.status,
-        paidOn: _paidOnFor(draft, previous, now),
+        // Le circuit n'est pas une saisie : une demande neuve naît en attente,
+        // une modification garde l'état que le serveur a arrêté (D8, F20).
+        status: previous == null
+            ? ExpenseStatus.pending
+            : ExpenseStatus.fromWire(previous.status),
+        paidOn: ExpenseDay.tryParse(previous?.paidOn),
         expenseDate: ExpenseDay.of(draft.expenseDate),
         supplier: _blankToNull(draft.supplier),
         fundingSource: draft.fundingSource,
@@ -138,12 +142,6 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       return Left(StorageFailure('Dépense non enregistrée : $e'));
     }
   }
-
-  @override
-  Future<Either<Failure, Expense>> setStatus(
-    Expense expense,
-    ExpenseStatus status,
-  ) => save(expense.toDraft().withStatus(status));
 
   @override
   Future<Either<Failure, Unit>> withdraw(Expense expense) =>
@@ -197,25 +195,6 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } catch (e) {
       return Left(StorageFailure('Retrait non enregistré : $e'));
     }
-  }
-
-  /// Date de règlement (A2) : la date de la dépense si elle est **créée**
-  /// payée, aujourd'hui quand elle le devient, inchangée quand elle le reste.
-  static DateTime? _paidOnFor(
-    ExpenseDraft draft,
-    ExpenseLocalModel? previous,
-    DateTime now,
-  ) {
-    if (draft.status != ExpenseStatus.paid) return null;
-    final kept = ExpenseDay.tryParse(previous?.paidOn);
-    if (previous != null &&
-        previous.status == ExpenseStatus.paid.wireValue &&
-        kept != null) {
-      return kept;
-    }
-    return previous == null
-        ? ExpenseDay.of(draft.expenseDate)
-        : ExpenseDay.of(now);
   }
 
   static const _noAgent = ValidationFailure(

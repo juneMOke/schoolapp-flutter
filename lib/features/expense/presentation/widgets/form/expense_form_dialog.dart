@@ -175,10 +175,8 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
           onAmountChanged: () => setState(() {}),
         ),
         gap,
-        ExpenseStatusFundingFields(
-          status: _form.status,
+        ExpenseFundingField(
           funding: _form.funding,
-          onStatusChanged: (value) => setState(() => _form.status = value),
           onFundingChanged: (value) {
             if (value != null) setState(() => _form.funding = value);
           },

@@ -85,7 +85,7 @@ void main() {
         day: '2026-09-03',
         typeId: 't-four',
         title: 'Ramettes de papier',
-        status: ExpenseStatus.unpaid,
+        status: ExpenseStatus.pending,
         number: 'DEP-0413',
       ),
     ];
@@ -128,7 +128,7 @@ void main() {
         rows,
         const ExpenseQuery(
           typeIds: {'t-elec', 't-four'},
-          status: ExpenseStatus.unpaid,
+          status: ExpenseStatus.pending,
         ),
         types,
       );

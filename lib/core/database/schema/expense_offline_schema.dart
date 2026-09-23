@@ -58,6 +58,13 @@ const TableSchema refExpenseTypesTable = TableSchema(
 ///   Annuler ».
 /// - `expense_number` : `DEP-0412`, `NULL` tant que le serveur ne l'a pas
 ///   attribué (« en attente », A3).
+/// - `status` : les cinq états du circuit de validation (v2) — jamais saisi,
+///   toujours le résultat d'un geste de décision.
+/// - `decided_*`, `decision_reason`, `reminder_count` : la décision et la
+///   pression du demandeur ; tout revient à zéro au retour en attente.
+/// - `last_message_at` : fraîcheur du fil, **distincte** de
+///   `client_updated_at` — un message ne doit jamais faire perdre une
+///   décision à l'arbitrage (le défaut du module Discipline).
 const TableSchema expensesTable = TableSchema(
   name: 'expenses',
   createTableSql: '''
@@ -86,7 +93,17 @@ const TableSchema expensesTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      -- Colonnes du circuit (v50), EN FIN DE TABLE : `ALTER TABLE` ne sait
+      -- qu'ajouter à la fin, et une base montée doit finir identique à une
+      -- base créée à neuf. Les déclarer ailleurs casse cet invariant, que le
+      -- test de palier vérifie colonne par colonne, dans l'ordre.
+      decided_by_id TEXT,
+      decided_by_name TEXT,
+      decided_at TEXT,
+      decision_reason TEXT,
+      reminder_count INTEGER NOT NULL DEFAULT 0,
+      last_message_at TEXT
     )
   ''',
   createIndexSql: [

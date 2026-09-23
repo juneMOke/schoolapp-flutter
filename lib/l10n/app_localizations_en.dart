@@ -10011,10 +10011,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseStatusAll => 'All';
 
   @override
+  String get expenseStatusPending => 'Pending';
+
+  @override
+  String get expenseStatusApproved => 'Approved';
+
+  @override
   String get expenseStatusPaid => 'Paid';
 
   @override
-  String get expenseStatusUnpaid => 'Unpaid';
+  String get expenseStatusRefused => 'Refused';
+
+  @override
+  String get expenseStatusRetracted => 'Retracted';
 
   @override
   String get expenseSyncRejected => 'Needs fixing';
@@ -10136,56 +10145,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get expenseKpiSelectionTotal => 'Selection total';
-
-  @override
-  String get expenseKpiPaid => 'Already paid';
-
-  @override
-  String get expenseKpiUnpaid => 'Unpaid';
-
-  @override
-  String get expenseKpiShown => 'Expenses shown';
-
-  @override
-  String expenseKpiShownA11y(int count) {
+  String expenseKpiApprovedCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count expenses shown',
-      one: '1 expense shown',
-      zero: 'No expense shown',
+      other: '$count expenses approved',
+      one: '1 expense approved',
+      zero: 'no expense approved',
     );
     return '$_temp0';
   }
-
-  @override
-  String expenseKpiPaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count expenses settled',
-      one: '1 expense settled',
-      zero: 'no expense settled',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String expenseKpiUnpaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count expenses pending',
-      one: '1 expense pending',
-      zero: 'no expense pending',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get expenseKpiNoRate =>
-      'No daily rate published: amounts per currency';
 
   @override
   String get expenseKpiTotalSpent => 'Total spent';
@@ -10324,12 +10293,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get expenseActionMarkPaid => 'Mark as paid';
-
-  @override
-  String get expenseActionMarkUnpaid => 'Mark as unpaid';
-
-  @override
   String get expenseActionDuplicate => 'Duplicate';
 
   @override
@@ -10353,16 +10316,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String expenseToastUpdated(String name) {
     return 'Expense $name updated.';
-  }
-
-  @override
-  String expenseToastMarkedPaid(String name) {
-    return '$name · marked as paid.';
-  }
-
-  @override
-  String expenseToastMarkedUnpaid(String name) {
-    return '$name · marked as unpaid.';
   }
 
   @override

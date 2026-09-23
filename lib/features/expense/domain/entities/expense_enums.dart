@@ -1,25 +1,49 @@
-/// Statut d'une dépense — binaire en V1 (ni approbation ni annulation : une
-/// saisie erronée se **retire**).
+/// Où en est une **demande** de dépense dans le circuit de validation (v2).
 ///
-/// Une énumération plutôt qu'un booléen : un statut ajouté en V2 ne touchera
-/// ni le filtre ni la pastille, qui itèrent sur [values].
+/// Cinq états, et un drapeau qui les partage en deux : [isFirm] dit si
+/// l'argent est engagé pour de bon. Toute agrégation d'argent du module passe
+/// par lui — une comparaison de statut écrite en dur dans une vue est un
+/// défaut de conception, pas un raccourci.
+///
+/// Le statut n'est **jamais saisi** : il naît [pending] et ne change que par
+/// un geste de décision (D8). Le formulaire ne l'offre plus.
 enum ExpenseStatus {
-  paid('PAID'),
-  unpaid('UNPAID');
+  /// Déposée, pas encore décidée. Hors des totaux : rien n'est engagé tant
+  /// que rien n'est décidé.
+  pending('PENDING', isFirm: false),
 
-  const ExpenseStatus(this.wireValue);
+  /// Accordée — reste à payer. Porte le décideur et sa date.
+  approved('APPROVED', isFirm: true),
+
+  /// Décaissée et soldée ; jamais sans décision préalable.
+  paid('PAID', isFirm: true),
+
+  /// Rejetée avec motif — corrigeable par son demandeur.
+  refused('REFUSED', isFirm: false),
+
+  /// Reprise par son demandeur ; réengageable après correction. Ce n'est pas
+  /// une suppression — celle-ci reste le retrait du registre (`deletedAt`).
+  retracted('RETRACTED', isFirm: false);
+
+  const ExpenseStatus(this.wireValue, {required this.isFirm});
 
   /// Valeur du contrat (`ExpenseStatus` de l'`openApi.yaml`).
   final String wireValue;
 
-  /// Lecture tolérante : une valeur inconnue devient `unpaid`, le sens
-  /// prudent — une dépense qu'on ne sait pas lire n'est pas comptée réglée.
+  /// Engagement ferme : approuvée et payée, elles seules, comptent comme de
+  /// l'argent sorti.
+  final bool isFirm;
+
+  /// Lecture tolérante : une valeur inconnue devient [pending], le sens
+  /// prudent — une demande qu'on ne sait pas lire n'est pas de l'argent
+  /// engagé, et elle n'est pas non plus décidée.
   static ExpenseStatus fromWire(String? raw) {
     final value = raw?.trim().toUpperCase();
-    return value == paid.wireValue ? paid : unpaid;
+    for (final status in values) {
+      if (status.wireValue == value) return status;
+    }
+    return pending;
   }
-
-  ExpenseStatus get toggled => this == paid ? unpaid : paid;
 }
 
 /// Source des fonds — enregistrée pour la traçabilité, elle ne débite

@@ -20,7 +20,6 @@ class ExpenseFormSeed {
   final String description;
   final String amountText;
   final String currency;
-  final ExpenseStatus status;
   final DateTime expenseDate;
   final String supplier;
   final ExpenseFundingSource fundingSource;
@@ -34,15 +33,15 @@ class ExpenseFormSeed {
     required this.description,
     required this.amountText,
     required this.currency,
-    required this.status,
     required this.expenseDate,
     required this.supplier,
     required this.fundingSource,
   });
 
   /// Création : le premier type offert — l'ordre du référentiel de l'école,
-  /// jamais un code écrit en dur — ; sa devise habituelle ; payée ;
-  /// aujourd'hui.
+  /// jamais un code écrit en dur — ; sa devise habituelle ; aujourd'hui.
+  ///
+  /// Aucun statut : la demande naîtra **en attente** (D8).
   factory ExpenseFormSeed.blank({
     required List<ExpenseType> types,
     required DateTime today,
@@ -55,7 +54,6 @@ class ExpenseFormSeed {
       description: '',
       amountText: '',
       currency: defaultCurrencyOf(type),
-      status: ExpenseStatus.paid,
       expenseDate: ExpenseDay.of(today),
       supplier: '',
       fundingSource: ExpenseFundingSource.cash,
@@ -71,16 +69,16 @@ class ExpenseFormSeed {
     description: expense.description ?? '',
     amountText: ExpenseAmountInput.fromCents(expense.amountInCents),
     currency: expense.currency,
-    status: expense.status,
     expenseDate: expense.expenseDate,
     supplier: expense.supplier ?? '',
     fundingSource: expense.fundingSource,
   );
 
-  /// Duplication : le report d'une charge récurrente — id vidé, **date du
-  /// jour** (hériter de la date reporterait la dépense au mois précédent) et
-  /// **non payée** (hériter de « payée » enregistrerait un paiement qui n'a
-  /// pas eu lieu).
+  /// Duplication : le report d'une charge récurrente — id vidé et **date du
+  /// jour** (hériter de la date reporterait la dépense au mois précédent).
+  ///
+  /// La copie repart **en attente**, comme toute demande neuve : hériter d'un
+  /// statut enregistrerait une approbation que personne n'a donnée.
   factory ExpenseFormSeed.duplicate(
     Expense expense, {
     required DateTime today,
@@ -91,7 +89,6 @@ class ExpenseFormSeed {
     description: expense.description ?? '',
     amountText: ExpenseAmountInput.fromCents(expense.amountInCents),
     currency: expense.currency,
-    status: ExpenseStatus.unpaid,
     expenseDate: ExpenseDay.of(today),
     supplier: expense.supplier ?? '',
     fundingSource: expense.fundingSource,

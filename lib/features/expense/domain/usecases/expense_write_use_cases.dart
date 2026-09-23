@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
-import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 
 // Les quatre gestes d'écriture du registre. Chacun réussit localement d'abord ;
@@ -16,18 +15,6 @@ class SaveExpenseUseCase {
 
   Future<Either<Failure, Expense>> call(ExpenseDraft draft) =>
       _repository.save(draft);
-}
-
-/// Marquer payée / repasser en non payée, sans formulaire.
-class SetExpenseStatusUseCase {
-  final ExpenseRepository _repository;
-
-  const SetExpenseStatusUseCase(this._repository);
-
-  Future<Either<Failure, Expense>> call(
-    Expense expense,
-    ExpenseStatus status,
-  ) => _repository.setStatus(expense, status);
 }
 
 /// Retirer du registre (D4).

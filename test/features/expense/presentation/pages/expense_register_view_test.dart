@@ -20,8 +20,6 @@ class _MockSource extends Mock implements ExpenseSnapshotSource {}
 
 class _MockSave extends Mock implements SaveExpenseUseCase {}
 
-class _MockSetStatus extends Mock implements SetExpenseStatusUseCase {}
-
 class _MockWithdraw extends Mock implements WithdrawExpenseUseCase {}
 
 class _MockRestore extends Mock implements RestoreExpenseUseCase {}
@@ -103,7 +101,6 @@ void main() {
       source: source,
       memory: ExpensePeriodMemory(),
       save: _MockSave(),
-      setStatus: _MockSetStatus(),
       withdraw: _MockWithdraw(),
       restore: _MockRestore(),
       now: () => DateTime(2026, 9, 12),

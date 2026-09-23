@@ -49,7 +49,7 @@ final _rate = ExchangeRate(
 final _today = DateTime(2026, 9, 12);
 
 Expense _snel({
-  ExpenseStatus status = ExpenseStatus.unpaid,
+  ExpenseStatus status = ExpenseStatus.pending,
   ExpenseSyncState sync = ExpenseSyncState.synced,
   String? code,
 }) => Expense(
@@ -157,7 +157,6 @@ void main() {
       expect(draft!.typeId, 't-elec');
       expect(draft!.currency, 'CDF');
       expect(draft!.amountInCents, 14250);
-      expect(draft!.status, ExpenseStatus.paid);
       expect(draft!.expenseDate, _today);
       expect(draft!.recordedByName, 'Moke Junior');
     });
@@ -206,7 +205,8 @@ void main() {
   });
 
   group('fiche', () {
-    testWidgets('la bascule se joue sans fermer la fiche', (tester) async {
+    testWidgets('la fiche nomme l’état du circuit, et n’offre AUCUN geste de '
+        'décision : décider n’est pas un clic de liste', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1280, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await _pumpHost(
@@ -216,17 +216,31 @@ void main() {
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader(_rate),
-          onToggle: (_) async => _snel(status: ExpenseStatus.paid),
         ),
       );
-      expect(find.text('Non payée'), findsOneWidget);
 
-      await tester.tap(find.text('Marquer payée'));
-      await tester.pumpAndSettle();
+      expect(find.text('En attente'), findsOneWidget);
+      expect(find.text('Marquer payée'), findsNothing);
+      // Une demande non réglée ne montre pas de date de règlement (A2).
+      expect(find.text('Payée le'), findsNothing);
+    });
+
+    testWidgets('payée : le badge et la date de règlement (A2)', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(status: ExpenseStatus.paid),
+          type: _types.first,
+          reader: ExpenseUsdReader(_rate),
+        ),
+      );
 
       expect(find.text('Payée'), findsOneWidget);
-      expect(find.text('Repasser en non payée'), findsOneWidget);
-      // « Payée le … » apparaît (A2).
       expect(find.text('Payée le'), findsOneWidget);
     });
 
@@ -240,7 +254,6 @@ void main() {
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
-          onToggle: (_) async => null,
         );
       });
 
@@ -266,7 +279,6 @@ void main() {
           ),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
-          onToggle: (_) async => null,
         ),
       );
 

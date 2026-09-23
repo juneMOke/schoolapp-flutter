@@ -1,8 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
@@ -70,31 +68,18 @@ class ExpenseRegisterActions {
     );
   }
 
-  Future<void> toggle(Expense expense) async {
-    final cubit = _cubit;
-    final l10n = AppLocalizations.of(context)!;
-    final result = await cubit.toggleStatus(expense);
-    if (!context.mounted) return;
-    _reportToggle(result, l10n);
-  }
-
   Future<void> open(Expense expense) async {
     final cubit = _cubit;
-    final l10n = AppLocalizations.of(context)!;
     final snapshot = cubit.state.snapshot;
     final choice = await showExpenseDetailDialog(
       context,
       expense: expense,
       type: snapshot.typesById[expense.typeId],
       reader: snapshot.usdReader,
-      onToggle: (current) async {
-        final result = await cubit.toggleStatus(current);
-        if (!context.mounted) return null;
-        return _reportToggle(result, l10n);
-      },
     );
     if (choice == null || !context.mounted) return;
-    // La fiche a pu basculer le statut : on repart de la ligne relue.
+    // Un pull a pu redescendre la ligne pendant que la fiche était ouverte :
+    // on repart de ce que le registre porte maintenant.
     final latest = cubit.state.snapshot.expenses.firstWhere(
       (e) => e.id == expense.id,
       orElse: () => expense,
@@ -147,26 +132,6 @@ class ExpenseRegisterActions {
       },
     );
   }
-
-  Expense? _reportToggle(
-    Either<Failure, Expense> result,
-    AppLocalizations l10n,
-  ) => result.fold(
-    (_) {
-      AppSnackBar.showError(context, l10n.expenseWriteFailed);
-      return null;
-    },
-    (saved) {
-      _notifyLocalWrite();
-      AppSnackBar.showSuccess(
-        context,
-        saved.isPaid
-            ? l10n.expenseToastMarkedPaid(_name(saved))
-            : l10n.expenseToastMarkedUnpaid(_name(saved)),
-      );
-      return saved;
-    },
-  );
 
   /// Les types offerts : actifs, plus celui de la dépense modifiée s'il a été
   /// masqué depuis — il la nomme encore.
