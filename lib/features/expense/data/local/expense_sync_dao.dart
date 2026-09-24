@@ -246,8 +246,20 @@ class ExpenseSyncDao {
   });
 
   /// La dépense n'existe plus côté serveur (410) : la ligne s'efface.
-  Future<void> deleteExpense(String expenseId) =>
-      _db.delete(table, where: 'id = ?', whereArgs: [expenseId]);
+  /// Purge physique côté serveur (410) : la demande s'efface, **et son fil
+  /// avec elle**.
+  ///
+  /// Laisser les messages derrière ferait un fil orphelin qu'aucun écran ne
+  /// montre et que rien ne nettoie — et que le prochain pull de la même
+  /// dépense, si elle revenait, mélangerait à son propre historique.
+  Future<void> deleteExpense(String expenseId) => _db.transaction((txn) async {
+    await txn.delete(table, where: 'id = ?', whereArgs: [expenseId]);
+    await txn.delete(
+      ExpenseMessageDao.table,
+      where: 'expense_id = ?',
+      whereArgs: [expenseId],
+    );
+  });
 
   /// Le pull : insère l'inconnu, remplace le synchronisé, ne pose que les
   /// champs serveur sur une ligne en attente ou refusée. Rend le nombre de

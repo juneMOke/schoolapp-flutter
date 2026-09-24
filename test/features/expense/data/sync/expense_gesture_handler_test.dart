@@ -494,4 +494,17 @@ void main() {
     // Le message du serveur entre ; celui du poste est le nôtre, déjà là.
     expect(thread.map((m) => m.id), containsAll(['m-serveur', 'm-1']));
   });
+
+  test('une purge serveur (410) emporte le fil avec la demande', () async {
+    await seedMessage('m-1', at: '2026-09-04T08:00:00.000Z');
+    when(() => api.decideExpense(any(), any(), any())).thenThrow(http(410));
+
+    final result = await handler().dispatch(entry('m-1'));
+
+    expect(result.outcome, OutboxDispatchOutcome.acked);
+    expect(await reader.find('e-1'), isNull);
+    // Un fil orphelin qu'aucun écran ne montre, et que le prochain pull de la
+    // même dépense mélangerait à son propre historique.
+    expect(await messages.threadFor('e-1', schoolId: 'school-1'), isEmpty);
+  });
 }

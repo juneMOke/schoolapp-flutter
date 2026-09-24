@@ -176,6 +176,16 @@ class ExpenseWriteDao {
         OutboxStatus.acked.dbValue,
       ],
     );
+    // Et les gestes du circuit avec eux. Ils sont identifiés par l'uuid de
+    // leur message, donc innombrables : c'est l'agrégat qui les désigne. Les
+    // laisser en file les ferait pousser vers une dépense que le serveur ne
+    // connaîtra jamais — un 404 par geste, tous terminaux.
+    await txn.update(
+      OutboxDao.table,
+      {'status': OutboxStatus.acked.dbValue},
+      where: 'aggregate_type = ? AND aggregate_id = ? AND status <> ?',
+      whereArgs: [gestureAggregateType, expenseId, OutboxStatus.acked.dbValue],
+    );
     return true;
   });
 }
