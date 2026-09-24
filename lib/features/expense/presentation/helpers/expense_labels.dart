@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/expense/data/sync/expense_error_codes.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_queue_sort.dart';
@@ -40,14 +41,35 @@ String expenseActLabel(AppLocalizations l10n, ExpenseAct act) => switch (act) {
 
 /// Le motif d'un refus serveur, dit à l'économe (A4) — par son code machine
 /// quand on le connaît, par la phrase générique sinon.
-String expenseRejectionLabel(AppLocalizations l10n, String? code) =>
-    switch (code) {
-      'UNKNOWN_EXPENSE_TYPE' => l10n.expenseRejectedUnknownType,
-      'EXPENSE_DATE_IN_FUTURE' => l10n.expenseRejectedDateInFuture,
-      'PAYMENT_DATE_IN_FUTURE' => l10n.expenseRejectedPaidOnInFuture,
-      'HTTP_403' => l10n.expenseRejectedForbidden,
-      _ => l10n.expenseRejectedGeneric,
-    };
+String expenseRejectionLabel(
+  AppLocalizations l10n,
+  String? code,
+) => switch (code) {
+  ExpenseErrorCodes.unknownExpenseType => l10n.expenseRejectedUnknownType,
+  ExpenseErrorCodes.expenseDateInFuture => l10n.expenseRejectedDateInFuture,
+  ExpenseErrorCodes.paymentDateInFuture => l10n.expenseRejectedPaidOnInFuture,
+  ExpenseErrorCodes.decisionAlreadyTaken => l10n.expenseRejectedAlreadyDecided,
+  ExpenseErrorCodes.selfApprovalForbidden => l10n.expenseRejectedSelfApproval,
+  ExpenseErrorCodes.notRequestOwner => l10n.expenseRejectedNotOwner,
+  ExpenseErrorCodes.reasonRequired => l10n.expenseRejectedReasonRequired,
+  ExpenseErrorCodes.transitionOutOfOrder => l10n.expenseRejectedOutOfOrder,
+  'HTTP_403' => l10n.expenseRejectedForbidden,
+  _ => l10n.expenseRejectedGeneric,
+};
+
+/// Les refus qui viennent d'un **geste du circuit**, et non d'une saisie.
+///
+/// La distinction n'est pas cosmétique : « Modifiez la dépense pour la
+/// corriger » est un bon conseil sur un contenu refusé, et un contresens sur
+/// une approbation refusée — il n'y a rien à corriger dans la dépense, le
+/// geste n'a simplement pas eu lieu.
+bool expenseRejectionIsGesture(String? code) => const {
+  ExpenseErrorCodes.decisionAlreadyTaken,
+  ExpenseErrorCodes.selfApprovalForbidden,
+  ExpenseErrorCodes.notRequestOwner,
+  ExpenseErrorCodes.reasonRequired,
+  ExpenseErrorCodes.transitionOutOfOrder,
+}.contains(code);
 
 /// Le mot du bouton qui pose un geste.
 ///

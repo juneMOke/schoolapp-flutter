@@ -10872,6 +10872,28 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseRejectedAlreadyDecided => 'un collègue avait déjà tranché';
+
+  @override
+  String get expenseRejectedSelfApproval =>
+      'on n\'approuve pas sa propre demande';
+
+  @override
+  String get expenseRejectedNotOwner => 'ce geste est réservé au demandeur';
+
+  @override
+  String get expenseRejectedReasonRequired => 'un refus exige son motif';
+
+  @override
+  String get expenseRejectedOutOfOrder =>
+      'un geste antérieur n\'est pas encore parti';
+
+  @override
+  String expenseDetailGestureRejected(String reason) {
+    return 'Geste refusé par le serveur : $reason. La demande est restée telle qu\'elle était.';
+  }
+
+  @override
   String get expenseThreadTitle => 'Fil de la demande';
 
   @override

@@ -1,4 +1,7 @@
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Le fil d'une demande : lecture chronologique, et un ajout **atomique**.
@@ -83,6 +86,7 @@ class ExpenseMessageDao {
     ExpenseMessageLocalModel message, {
     Map<String, Object?> columns = const {},
     bool bumpsReminder = false,
+    OutboxEntry? entry,
   }) => _db.transaction((txn) async {
     final existing = await txn.query(
       table,
@@ -93,6 +97,10 @@ class ExpenseMessageDao {
     );
     if (existing.isNotEmpty) return false;
     await txn.insert(table, message.toMap());
+    // L'entrée de file entre ICI, dans la même transaction : un geste sans
+    // entrée ne partirait jamais, une entrée sans geste pousserait un fait
+    // que la base ne porte pas.
+    if (entry != null) await OutboxDao(txn).enqueue(entry);
     if (columns.isNotEmpty) {
       await txn.update(
         expensesTable,
@@ -118,4 +126,105 @@ class ExpenseMessageDao {
     );
     return true;
   });
+
+  /// Applique le fil descendu par le pull.
+  ///
+  /// **Un message encore `PENDING_SYNC` est SAUTÉ.** Le poste l'a écrit, la
+  /// file ne l'a pas encore poussé : le réécrire depuis une page serveur qui
+  /// l'ignore l'effacerait, et le marquer accusé mentirait. C'est l'accusé du
+  /// geste qui le réglera.
+  ///
+  /// Rend le nombre de messages réellement écrits.
+  Future<int> applyPulled(
+    List<ExpenseMessageLocalModel> messages, {
+    required String expenseId,
+  }) => _db.transaction(
+    (txn) => applyPulledIn(txn, messages, expenseId: expenseId),
+  );
+
+  /// Le même geste, **dans la transaction de l'appelant** — c'est ainsi que
+  /// le pull écrit une demande et son fil sans jamais laisser l'une sans
+  /// l'autre.
+  static Future<int> applyPulledIn(
+    DatabaseExecutor txn,
+    List<ExpenseMessageLocalModel> messages, {
+    required String expenseId,
+  }) async {
+    if (messages.isEmpty) return 0;
+    final pending = <String>{
+      for (final row in await txn.query(
+        table,
+        columns: const ['id'],
+        where: 'expense_id = ? AND sync_status = ?',
+        whereArgs: [expenseId, ExpenseSyncState.pending.dbValue],
+      ))
+        row['id'] as String,
+    };
+    var written = 0;
+    for (final message in messages) {
+      if (pending.contains(message.id)) continue;
+      await txn.insert(
+        table,
+        message.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      written++;
+    }
+    return written;
+  }
+
+  /// Remonte la fraîcheur du fil — **jamais en arrière**.
+  ///
+  /// Comparaison textuelle d'ISO-8601 UTC, ce que la forme unique imposée par
+  /// [ExpenseMessageLocalModel.at] autorise.
+  static Future<void> bumpLastMessageAtIn(
+    DatabaseExecutor txn,
+    String expenseId,
+    String? at,
+  ) async {
+    if (at == null) return;
+    await txn.update(
+      expensesTable,
+      {'last_message_at': at},
+      where: 'id = ? AND (last_message_at IS NULL OR last_message_at < ?)',
+      whereArgs: [expenseId, at],
+    );
+  }
+
+  /// Le **plus ancien message non accusé** d'une demande — le registre
+  /// d'ordre de F31.
+  ///
+  /// C'est le fil qui ordonne les gestes, et rien d'autre : le moteur
+  /// d'outbox ne lit jamais `aggregate_id`, poursuit après un `retry`, et son
+  /// backoff retire une entrée de la course pendant 1 à 256 s. Tout ordre est
+  /// à la charge du handler.
+  ///
+  /// L'index `(expense_id, created_at)` sert cette lecture autant que
+  /// l'affichage du fil.
+  Future<({String id, ExpenseSyncState state})?> oldestUnsettled(
+    String expenseId,
+  ) async {
+    final rows = await _db.query(
+      table,
+      columns: const ['id', 'sync_status'],
+      where: 'expense_id = ? AND sync_status <> ?',
+      whereArgs: [expenseId, ExpenseSyncState.synced.dbValue],
+      orderBy: 'created_at, id',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return (
+      id: rows.single['id'] as String,
+      state: ExpenseSyncState.fromDb(rows.single['sync_status'] as String?),
+    );
+  }
+
+  /// Marque l'issue d'un message poussé.
+  Future<void> markMessage(String messageId, ExpenseSyncState state) =>
+      _db.update(
+        table,
+        {'sync_status': state.dbValue},
+        where: 'id = ?',
+        whereArgs: [messageId],
+      );
 }

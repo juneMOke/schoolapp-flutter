@@ -953,6 +953,33 @@ class AppConstants {
   static const String syncExpenseDeletionEndpoint =
       '/api/v1/sync/expenses/{expenseId}/deletion';
 
+  /// Les **sept routes de geste** du circuit de validation (v2).
+  ///
+  /// Toutes sur `POST …/{expenseId}/<geste>`, toutes idempotentes par l'uuid
+  /// du message qu'elles portent : un rejeu rend 200, l'état canonique, et ne
+  /// fait pas monter le compteur de relances.
+  ///
+  /// Chacune a sa propre garde côté serveur — c'est pourquoi le geste est
+  /// dans le CHEMIN et non dans un champ du corps : une route unique ferait
+  /// dépendre l'autorisation d'une valeur postée.
+  static const String syncExpenseDecisionEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/decision';
+  static const String syncExpensePaymentEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/payment';
+  static const String syncExpenseReopenEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/reopen';
+  static const String syncExpenseRetractionEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/retraction';
+  static const String syncExpenseResubmitEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/resubmit';
+  static const String syncExpenseReminderEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/reminder';
+
+  /// Commenter — la seule route du circuit **sans** contrôle de propriété :
+  /// c'est ce qui permet au validateur d'écrire dans le fil d'un collègue.
+  static const String syncExpenseMessagesEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/messages';
+
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
   ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé

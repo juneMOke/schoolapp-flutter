@@ -17051,6 +17051,42 @@ abstract class AppLocalizations {
   /// **'See all {count} approved expenses in the register'**
   String expenseQueueSeeAllApproved(int count);
 
+  /// No description provided for @expenseRejectedAlreadyDecided.
+  ///
+  /// In en, this message translates to:
+  /// **'a colleague had already settled it'**
+  String get expenseRejectedAlreadyDecided;
+
+  /// No description provided for @expenseRejectedSelfApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'one does not approve one\'s own request'**
+  String get expenseRejectedSelfApproval;
+
+  /// No description provided for @expenseRejectedNotOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'that gesture belongs to the requester'**
+  String get expenseRejectedNotOwner;
+
+  /// No description provided for @expenseRejectedReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'a refusal needs its reason'**
+  String get expenseRejectedReasonRequired;
+
+  /// No description provided for @expenseRejectedOutOfOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'an earlier gesture has not gone out yet'**
+  String get expenseRejectedOutOfOrder;
+
+  /// No description provided for @expenseDetailGestureRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Gesture refused by the server: {reason}. The request stayed as it was.'**
+  String expenseDetailGestureRejected(String reason);
+
   /// No description provided for @expenseThreadTitle.
   ///
   /// In en, this message translates to:

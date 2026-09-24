@@ -85,7 +85,12 @@ class ApiErrorParser {
     return Duration(seconds: seconds);
   }
 
-  /// Cause précise nommée par le serveur sur un 422, `null` sinon.
+  /// Cause précise nommée par le serveur, `null` quand il n'en donne pas.
+  ///
+  /// ⚠️ **Sur n'importe quel statut, pas seulement un 422** : le registre des
+  /// dépenses en fait dépendre deux conduites opposées sur un même 409
+  /// (`DECISION_ALREADY_TAKEN` contre `TRANSITION_OUT_OF_ORDER`). Le corps
+  /// est lu tel quel, sans regarder le code HTTP.
   ///
   /// Rendue **telle quelle**, sans énumération côté client : le catalogue est
   /// ouvert par module (`BoutiqueErrorCodes` en nomme six à lui seul) et

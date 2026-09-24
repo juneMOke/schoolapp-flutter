@@ -6915,6 +6915,13 @@
   "expenseQueueApprovedUndated": "approved — this device does not know the decider yet",
   "expenseQueueSeeAllApproved": "See all {count} approved expenses in the register",
   "@expenseQueueSeeAllApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseRejectedAlreadyDecided": "a colleague had already settled it",
+  "expenseRejectedSelfApproval": "one does not approve one's own request",
+  "expenseRejectedNotOwner": "that gesture belongs to the requester",
+  "expenseRejectedReasonRequired": "a refusal needs its reason",
+  "expenseRejectedOutOfOrder": "an earlier gesture has not gone out yet",
+  "expenseDetailGestureRejected": "Gesture refused by the server: {reason}. The request stayed as it was.",
+  "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
   "expenseThreadTitle": "Request thread",
   "expenseThreadCount": "{count, plural, =0{no message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

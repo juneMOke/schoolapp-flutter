@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/features/expense/data/local/expense_delta_columns.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
@@ -111,6 +113,52 @@ class ExpenseSyncDao {
     );
   });
 
+  /// Accusé d'un **geste du circuit** : la ligne se range sur l'état
+  /// canonique, fil compris.
+  ///
+  /// Seule la famille **serveur** est posée — jamais le contenu : un geste ne
+  /// dit rien de l'intitulé ni du montant, et les réécrire depuis son accusé
+  /// effacerait une correction saisie entre-temps. L'état de synchro du
+  /// CONTENU n'est pas touché non plus : le geste voyage seul.
+  Future<void> applyGestureAck(
+    ExpenseDeltaDto canonical, {
+    required String schoolId,
+    required int nowMs,
+  }) => _db.transaction((txn) async {
+    final updated = await txn.update(
+      table,
+      {...ExpenseDeltaColumns.server(canonical), 'updated_at': nowMs},
+      where: 'id = ?',
+      whereArgs: [canonical.id],
+    );
+    // Le serveur connaît une demande que ce poste ignore : c'est au pull de
+    // la poser, pas à l'accusé d'un geste d'en inventer la moitié.
+    if (updated == 0) return;
+    await _applyThread(txn, canonical, schoolId: schoolId);
+  });
+
+  /// Refus terminal d'un geste : la ligne porte son motif (A4).
+  ///
+  /// À la différence du contenu, **aucune horloge à comparer** : un geste ne
+  /// s'écrase pas, il s'ajoute — et celui qu'on vient de refuser est bien
+  /// celui qui vient d'être tenté.
+  Future<void> markGestureRejected(
+    String expenseId, {
+    required String? code,
+    required String reason,
+    required int nowMs,
+  }) => _db.update(
+    table,
+    {
+      'sync_status': ExpenseSyncState.rejected.dbValue,
+      'sync_error': reason,
+      'sync_error_code': code,
+      'updated_at': nowMs,
+    },
+    where: 'id = ?',
+    whereArgs: [expenseId],
+  );
+
   /// Refus terminal d'un contenu : la ligne porte son motif (A4).
   ///
   /// Rend `false` — et ne touche à rien — quand une saisie plus récente a
@@ -204,6 +252,7 @@ class ExpenseSyncDao {
         final row = await reader.find(delta.id);
         if (row == null) {
           await _insert(txn, delta, schoolId: schoolId, nowMs: nowMs);
+          await _applyThread(txn, delta, schoolId: schoolId);
           continue;
         }
         final synced = row.syncStatus == ExpenseSyncState.synced.dbValue;
@@ -218,9 +267,36 @@ class ExpenseSyncDao {
           where: 'id = ?',
           whereArgs: [delta.id],
         );
+        await _applyThread(txn, delta, schoolId: schoolId);
       }
       return deltas.length;
     });
+  }
+
+  /// Le fil descend **entier** avec sa demande, dans la même transaction :
+  /// une demande sans son fil laisserait l'écran annoncer des messages qu'il
+  /// ne sait pas montrer.
+  ///
+  /// La fraîcheur, elle, ne se pose que si elle avance — un geste écrit ici
+  /// et pas encore poussé est plus récent que ce que le serveur connaît.
+  static Future<void> _applyThread(
+    DatabaseExecutor txn,
+    ExpenseDeltaDto delta, {
+    required String schoolId,
+  }) async {
+    await ExpenseMessageDao.applyPulledIn(txn, [
+      for (final message in delta.messages)
+        ExpenseMessageLocalModel.fromDelta(
+          message,
+          schoolId: schoolId,
+          expenseId: delta.id,
+        ),
+    ], expenseId: delta.id);
+    await ExpenseMessageDao.bumpLastMessageAtIn(
+      txn,
+      delta.id,
+      delta.lastMessageAt,
+    );
   }
 
   static Future<void> _insert(

@@ -7109,6 +7109,13 @@
   "expenseQueueApprovedUndated": "approuvée — décideur non encore connu de ce poste",
   "expenseQueueSeeAllApproved": "Voir les {count} dépenses approuvées dans le registre",
   "@expenseQueueSeeAllApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseRejectedAlreadyDecided": "un collègue avait déjà tranché",
+  "expenseRejectedSelfApproval": "on n'approuve pas sa propre demande",
+  "expenseRejectedNotOwner": "ce geste est réservé au demandeur",
+  "expenseRejectedReasonRequired": "un refus exige son motif",
+  "expenseRejectedOutOfOrder": "un geste antérieur n'est pas encore parti",
+  "expenseDetailGestureRejected": "Geste refusé par le serveur : {reason}. La demande est restée telle qu'elle était.",
+  "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
   "expenseThreadTitle": "Fil de la demande",
   "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

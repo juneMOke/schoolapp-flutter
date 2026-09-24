@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/repositories/expense_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/expense/data/repositories/expense_repository_impl.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_pull_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
@@ -172,6 +173,15 @@ void registerExpenseOffline(GetIt getIt) {
       reader: getIt<ExpenseReadDao>(),
       writer: getIt<ExpenseWriteDao>(),
       dao: getIt<ExpenseSyncDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt<SyncEngine>().registerHandler(
+    ExpenseGestureOutboxHandler(
+      api: getIt<ExpenseSyncApi>(),
+      dao: getIt<ExpenseSyncDao>(),
+      messages: getIt<ExpenseMessageDao>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: getIt<Map<String, dynamic>>(),
     ),

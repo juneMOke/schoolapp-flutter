@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -7,6 +8,8 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_gesture_columns.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
@@ -16,6 +19,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/mappers/expense_mappers.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_payload.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
@@ -146,10 +150,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         return const Left(_staleGesture);
       }
       final now = _now();
+      final messageId = _ids.newId();
       await _messages.appendGesture(
         ExpenseMessageLocalModel.at(
           now,
-          id: _ids.newId(),
+          id: messageId,
           schoolId: schoolId,
           expenseId: current.id,
           body: body,
@@ -165,10 +170,34 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           reason: body,
         ),
         bumpsReminder: gesture == ExpenseGesture.remind,
+        entry: OutboxEntry(
+          id: ExpenseWriteDao.gestureEntryId(messageId),
+          aggregateType: ExpenseWriteDao.gestureAggregateType,
+          aggregateId: current.id,
+          operation: OutboxOperation.create,
+          payload: jsonEncode(
+            ExpenseGesturePayload(
+              expenseId: current.id,
+              gesture: gesture,
+              messageId: messageId,
+              body: body,
+              decidedAt: now.toUtc().toIso8601String(),
+              // F32 — seul le renvoi porte l'horloge du contenu qu'il croit en
+              // place : le serveur refuse tant que sa copie est plus ancienne,
+              // et le validateur ne relit jamais le texte qui l'avait fait
+              // refuser.
+              expectedClientUpdatedAt: gesture == ExpenseGesture.resubmit
+                  ? current.clientUpdatedAt.toUtc().toIso8601String()
+                  : null,
+              authorId: actorId,
+            ).toJson(),
+          ),
+          // Sans école, l'entrée deviendrait inéligible au flush scopé.
+          schoolId: schoolId,
+          createdAt: now.millisecondsSinceEpoch,
+        ),
       );
-      // Aucun appel au moteur : le geste n'a pas encore d'entrée d'outbox —
-      // elle entre dans la transaction de `appendGesture` à DEP-14. Pousser
-      // maintenant ne ferait que réveiller la file pour rien.
+      _flush();
       return const Right(unit);
     } catch (e) {
       return Left(StorageFailure('Geste non enregistré : $e'));

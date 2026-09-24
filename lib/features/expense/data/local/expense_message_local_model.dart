@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/expense/data/sync/expense_delta_dto.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 
@@ -51,6 +52,24 @@ class ExpenseMessageLocalModel {
     authorName: authorName,
     createdAt: moment.toUtc().toIso8601String(),
     syncStatus: syncState.dbValue,
+  );
+
+  /// Un message tel que le serveur le rend : il est **accusé par
+  /// construction** — c'est lui qui fait foi.
+  factory ExpenseMessageLocalModel.fromDelta(
+    ExpenseMessageDeltaDto dto, {
+    required String schoolId,
+    required String expenseId,
+  }) => ExpenseMessageLocalModel(
+    id: dto.id,
+    schoolId: schoolId,
+    expenseId: expenseId,
+    body: dto.body,
+    act: dto.act,
+    authorId: dto.authorId,
+    authorName: dto.authorName,
+    createdAt: dto.createdAt,
+    syncStatus: ExpenseSyncState.synced.dbValue,
   );
 
   factory ExpenseMessageLocalModel.fromMap(Map<String, Object?> map) =>

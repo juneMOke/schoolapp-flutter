@@ -36,7 +36,23 @@ abstract final class ExpenseDeltaColumns {
     'version': d.version,
     'server_updated_at': d.serverUpdatedAt,
     'server_deleted_at': d.deletedAt,
+    // Les six colonnes de décision suivent le statut, et pour la même raison :
+    // une décision est prise AILLEURS. Les laisser côté contenu les ferait
+    // retenir par une saisie locale plus récente, et le poste afficherait une
+    // demande « en attente » que la direction a déjà tranchée.
+    'decided_by_id': d.decidedById,
+    'decided_by_name': d.decidedByName,
+    'decided_at': d.decidedAt,
+    'decision_reason': d.decisionReason,
+    'reminder_count': d.reminderCount,
   };
+
+  /// ⚠️ `last_message_at` n'est **PAS** dans [server], et ce n'est pas un
+  /// oubli : la fraîcheur du fil **ne recule jamais** (règle verrouillée à
+  /// DEP-11). Le serveur ne connaît pas encore le message qu'un geste local
+  /// vient d'écrire ; poser sa valeur telle quelle rendrait la demande plus
+  /// calme qu'elle n'est. Elle se pose donc sous condition, par
+  /// [ExpenseMessageDao.bumpLastMessageAt].
 
   /// La ligne porte désormais exactement ce que le serveur a retenu.
   static Map<String, Object?> get synced => {

@@ -10784,6 +10784,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseRejectedAlreadyDecided =>
+      'a colleague had already settled it';
+
+  @override
+  String get expenseRejectedSelfApproval =>
+      'one does not approve one\'s own request';
+
+  @override
+  String get expenseRejectedNotOwner => 'that gesture belongs to the requester';
+
+  @override
+  String get expenseRejectedReasonRequired => 'a refusal needs its reason';
+
+  @override
+  String get expenseRejectedOutOfOrder =>
+      'an earlier gesture has not gone out yet';
+
+  @override
+  String expenseDetailGestureRejected(String reason) {
+    return 'Gesture refused by the server: $reason. The request stayed as it was.';
+  }
+
+  @override
   String get expenseThreadTitle => 'Request thread';
 
   @override

@@ -366,18 +366,60 @@ void main() {
     });
 
     test(
-      'un geste ne met RIEN en file : la remontée arrive à DEP-14',
+      'un geste met UNE entrée en file, identifiée par l\'uuid de son message',
       () async {
         final expense = await deposeeParUnCollegue();
         final avant = (await outbox()).length;
 
         await gestes.applyGesture(expense, ExpenseGesture.approve);
 
-        // Une entrée d'outbox posée ici partirait sur une route que le serveur
-        // ne sert pas encore, pour un 400 terminal.
-        expect((await outbox()).length, avant);
+        final entries = await outbox();
+        expect(entries.length, avant + 1);
+        final geste = entries.last;
+        expect(geste['aggregate_type'], ExpenseWriteDao.gestureAggregateType);
+        // L'agrégat reste la DÉPENSE — c'est par elle que l'ordre se juge —
+        // mais l'identifiant d'entrée est celui du message : deux gestes sur
+        // la même demande doivent coexister dans la file, là où deux contenus
+        // se remplacent.
+        expect(geste['aggregate_id'], 'e-new');
+        expect(geste['id'], ExpenseWriteDao.gestureEntryId('m-1'));
       },
     );
+
+    test(
+      'deux gestes successifs font DEUX entrées, pas un remplacement',
+      () async {
+        final expense = await deposeeParUnCollegue();
+        final avant = (await outbox()).length;
+
+        await gestes.applyGesture(expense, ExpenseGesture.approve);
+        await gestes.applyGesture(expense, ExpenseGesture.pay);
+
+        // Approuver puis payer, ce sont deux faits : le serveur ne recevra
+        // jamais « l'état final », il ne saurait pas l'atteindre.
+        expect((await outbox()).length, avant + 2);
+      },
+    );
+
+    test('seul le RENVOI porte l\'horloge du contenu attendu (F32)', () async {
+      final expense = await saved(_draft());
+      await gestes.applyGesture(expense, ExpenseGesture.retract);
+      await gestes.applyGesture(expense, ExpenseGesture.resubmit);
+
+      final gestures = (await outbox())
+          .where(
+            (e) => e['aggregate_type'] == ExpenseWriteDao.gestureAggregateType,
+          )
+          .map(
+            (e) => jsonDecode(e['payload'] as String) as Map<String, dynamic>,
+          )
+          .toList();
+
+      final retrait = gestures.firstWhere((p) => p['gesture'] == 'retract');
+      final renvoi = gestures.firstWhere((p) => p['gesture'] == 'resubmit');
+      expect(retrait['expectedClientUpdatedAt'], isNull);
+      expect(renvoi['expectedClientUpdatedAt'], isNotNull);
+    });
 
     test('refuser SANS motif est refusé sur place, et n\'écrit rien', () async {
       final expense = await deposeeParUnCollegue();

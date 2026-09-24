@@ -34,7 +34,13 @@ class ExpenseDetailRejection extends StatelessWidget {
           const SizedBox(width: AppDimensions.spacingS),
           Expanded(
             child: Text(
-              l10n.expenseDetailRejected(expenseRejectionLabel(l10n, code)),
+              expenseRejectionIsGesture(code)
+                  ? l10n.expenseDetailGestureRejected(
+                      expenseRejectionLabel(l10n, code),
+                    )
+                  : l10n.expenseDetailRejected(
+                      expenseRejectionLabel(l10n, code),
+                    ),
               style: AppTextStyles.caption.copyWith(color: AppColors.error),
             ),
           ),
