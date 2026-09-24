@@ -12,6 +12,10 @@ class SchoolRow {
   final String? municipality;
   final String? address;
   final String? phone;
+
+  /// Le numéro de la CAISSE (v50), distinct de [phone].
+  final String? tillPhone;
+
   final String? email;
 
   const SchoolRow({
@@ -23,6 +27,7 @@ class SchoolRow {
     this.municipality,
     this.address,
     this.phone,
+    this.tillPhone,
     this.email,
   });
 }

@@ -140,6 +140,7 @@ class SchoolIdentityFormCubit extends Cubit<SchoolIdentityFormState> {
           municipality: '',
           address: current.address,
           phone: current.phone,
+          tillPhone: current.tillPhone,
           email: current.email,
         ),
         justSaved: false,

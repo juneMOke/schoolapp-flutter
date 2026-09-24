@@ -275,6 +275,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationSchoolPhone => 'Téléphone de l\'école';
 
   @override
+  String get configurationSchoolTillPhone => 'Téléphone de la caisse';
+
+  @override
   String get configurationSchoolEmail => 'E-mail de l\'école';
 
   @override
@@ -8160,10 +8163,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketCashierLabel => 'Caissier :';
 
   @override
+  String get ticketSchoolPhoneLabel => 'Tél. Promoteur :';
+
+  @override
+  String get ticketTillPhoneLabel => 'Tél. caisse :';
+
+  @override
   String get ticketStudentLabel => 'Élève :';
 
   @override
   String get ticketMatriculationLabel => 'Matricule :';
+
+  @override
+  String get ticketAnnualMatriculationLabel => 'Mat. annuel :';
 
   @override
   String get ticketClassroomLabel => 'Classe :';
@@ -8184,10 +8196,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAdvanceLabel => 'Avance (non imputée)';
 
   @override
-  String get ticketBalanceLabel => 'Solde restant au moment de l\'impression';
+  String get ticketBalanceLabel => 'Solde restant à payer pour ce(s) frais';
 
   @override
   String get ticketBalanceTotalLabel => 'Total';
+
+  @override
+  String get ticketHistoryLabel => 'Historique des paiements';
+
+  @override
+  String get ticketHistoryTotalLabel => 'Total versé';
 
   @override
   String get ticketThanksNotice => 'Nous vous remercions pour votre confiance.';
@@ -8201,6 +8219,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ticketKeepNotice =>
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.';
+
+  @override
+  String get ticketSignatureLabel => 'Signature du caissier';
 
   @override
   String get ticketPrintLabel => 'Imprimer le ticket de perception';

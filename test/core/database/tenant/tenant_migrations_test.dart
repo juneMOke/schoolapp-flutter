@@ -105,4 +105,156 @@ void main() {
 
     expect(await db.query('outbox'), hasLength(1));
   });
+
+  group('v50 — le téléphone de la caisse', () {
+    /// Une `ref_school` d'AVANT la v50 : le schéma vivant porte déjà la
+    /// colonne, il faut donc la retirer pour exercer le palier.
+    Future<void> seedSansColonne() async {
+      await db.execute('DROP TABLE ref_school');
+      await db.execute('''
+        CREATE TABLE ref_school (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          phone TEXT,
+          synced_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.insert('ref_school', {
+        'id': 'A',
+        'name': 'EP Kimbanguiste',
+        'phone': '+243 000 000 000',
+      });
+    }
+
+    Future<Set<String>> colonnes() async => {
+      for (final r in await db.rawQuery('PRAGMA table_info(ref_school)'))
+        r['name']! as String,
+    };
+
+    test('la colonne arrive, et la ligne existante survit', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 49);
+
+      expect(await colonnes(), contains('till_phone'));
+      final row = (await db.query('ref_school')).single;
+      expect(row['name'], 'EP Kimbanguiste');
+      expect(row['phone'], '+243 000 000 000');
+      // Aucune reprise : le référentiel est renvoyé en ENTIER à chaque pull,
+      // donc la colonne se remplit d'elle-même au prochain cycle.
+      expect(row['till_phone'], isNull);
+    });
+
+    /// SQLite refuse un `ADD COLUMN` sur une colonne existante, et une base
+    /// héritée adoptée repasse par cet escalier.
+    test('rejouable : la colonne déjà là ne fait pas lever', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 49);
+      await migrateTenantDatabase(db, 49);
+
+      expect(await colonnes(), contains('till_phone'));
+    });
+
+    test('une base déjà en v50 n est pas touchée', () async {
+      await db.insert('ref_school', {
+        'id': 'A',
+        'name': 'EP Kimbanguiste',
+        'till_phone': '+243 811 111 111',
+      });
+
+      await migrateTenantDatabase(db, 50);
+
+      final row = (await db.query('ref_school')).single;
+      expect(row['till_phone'], '+243 811 111 111');
+    });
+  });
+
+  group('v51 — le matricule annuel', () {
+    /// Une `enrollments` d'AVANT la v51 : le schéma vivant porte déjà la
+    /// colonne, il faut donc la retirer pour exercer le palier.
+    Future<void> seedSansColonne() async {
+      await db.execute('DROP TABLE enrollments');
+      await db.execute('''
+        CREATE TABLE enrollments (
+          id TEXT PRIMARY KEY,
+          student_id TEXT NOT NULL,
+          enrollment_type TEXT NOT NULL,
+          status TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          enrollment_date TEXT NOT NULL,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+          updated_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.insert('enrollments', {
+        'id': 'e1',
+        'student_id': 'stu-1',
+        'enrollment_type': 'NEW_ENROLLMENT',
+        'status': 'COMPLETED',
+        'academic_year_id': 'ay-1',
+        'enrollment_date': '2026-07-01',
+      });
+    }
+
+    Future<Set<String>> colonnes() async => {
+      for (final r in await db.rawQuery('PRAGMA table_info(enrollments)'))
+        r['name']! as String,
+    };
+
+    test('la colonne arrive, et la ligne existante survit', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 50);
+
+      expect(await colonnes(), contains('annual_matriculation_number'));
+      final row = (await db.query('enrollments')).single;
+      expect(row['student_id'], 'stu-1');
+      // Aucune reprise : le champ se remplit par le pull, au fil des
+      // inscriptions modifiées.
+      expect(row['annual_matriculation_number'], isNull);
+    });
+
+    test('rejouable : la colonne déjà là ne fait pas lever', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 50);
+      await migrateTenantDatabase(db, 50);
+
+      expect(await colonnes(), contains('annual_matriculation_number'));
+    });
+
+    test('une base déjà en v51 n est pas touchée', () async {
+      await db.insert('enrollments', {
+        'id': 'e1',
+        'student_id': 'stu-1',
+        'enrollment_type': 'NEW_ENROLLMENT',
+        'status': 'COMPLETED',
+        'academic_year_id': 'ay-1',
+        'enrollment_date': '2026-07-01',
+        'annual_matriculation_number': 'CF-P4-000018',
+      });
+
+      await migrateTenantDatabase(db, 51);
+
+      final row = (await db.query('enrollments')).single;
+      expect(row['annual_matriculation_number'], 'CF-P4-000018');
+    });
+
+    /// 🔴 Aucun index sur ce champ, délibérément : ce n'est pas une clé (la
+    /// séquence repart à 1 chaque année), et en poser un inviterait à s'en
+    /// servir pour chercher ou dédoublonner.
+    test('aucun index ne le désigne', () async {
+      final index = await db.rawQuery(
+        "SELECT sql FROM sqlite_master WHERE type = 'index' "
+        "AND tbl_name = 'enrollments'",
+      );
+      for (final r in index) {
+        expect(
+          (r['sql'] as String? ?? '').contains('annual_matriculation_number'),
+          isFalse,
+        );
+      }
+    });
+  });
 }

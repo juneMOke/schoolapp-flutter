@@ -72,11 +72,26 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
         studentId: payment.studentId,
         academicYearId: payment.academicYearId,
       );
+      // Le matricule de l'ANNÉE du versement : il vit sur l'inscription, pas
+      // sur l'élève.
+      final annualMatriculation = await _dao.findAnnualMatriculationNumber(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+      );
       final allocations = await _dao.findAllocations(paymentId);
       final tenders = await _dao.findTenders(paymentId);
       // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
       final definitive = await _dao.findDefinitiveNumber(paymentId);
       final provisional = await _dao.findProvisionalNumber(paymentId);
+      // Ce que l'élève a déjà versé cette année, AVANT ce ticket. Le bloc se
+      // lit sous le solde : ce que je viens de payer, ce qu'il me reste, ce que
+      // j'avais déjà versé.
+      final history = await _dao.findPaymentHistory(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+        excludePaymentId: paymentId,
+      );
+
       // Le solde des SEULS frais que ce versement a réglés, une ligne par
       // (nature, devise) — exactement les clés de la répartition juste
       // au-dessus. Un parent qui règle les frais divers vient chercher leur
@@ -106,8 +121,10 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           schoolAddress: school?.address,
           schoolEmail: school?.email,
           schoolPhone: school?.phone,
+          schoolTillPhone: school?.tillPhone,
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
+          annualMatriculationNumber: annualMatriculation,
           classroomName: classroomName,
           // Sans ligne documentaire (cas anormal mais non bloquant, et cas
           // NORMAL d'un versement encaissé sur une autre caisse), on retombe sur
@@ -154,6 +171,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
               )
               .toList(growable: false),
           remainingByCharge: remaining,
+          paymentHistory: _historyEntries(history),
           // ⚠️ Le total **dérive des lignes imprimées**, il n'est pas recalculé
           // à côté. Un parent additionne ce qu'il lit : deux chemins de calcul
           // finiraient par diverger, et l'écart apparaîtrait sur le papier —
@@ -170,6 +188,46 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
     } catch (e) {
       return Left(StorageFailure('Ticket illisible en local : $e'));
     }
+  }
+
+  /// Replie les lignes plates du DAO en **un sac de monnaie par versement**.
+  ///
+  /// L'ordre de la requête est conservé — le plus récent d'abord — parce qu'une
+  /// `Map` Dart itère dans l'ordre d'insertion. C'est ce qui fait que deux
+  /// tirages du même ticket sortent identiques, là où un regroupement par clé
+  /// triée les rendrait dépendants de l'alphabet des uuid.
+  ///
+  /// Les dates passent par `toLocal()` comme celle du versement courant : sans
+  /// elle, un versement pris à 00 h 30 à Kinshasa s'imprimerait daté de la
+  /// veille, et l'historique contredirait la ligne « Date : » d'un ticket tiré
+  /// ce jour-là.
+  ///
+  /// ⚠️ **Mais PAS par [_parsePaidAt], et c'est la seule divergence.** Celui-ci
+  /// retombe sur l'instant courant quand la chaîne est illisible — juste pour
+  /// le versement en cours, dont le geste de caisse a bien lieu maintenant.
+  /// Appliqué à un versement ANCIEN, ce repli le daterait d'aujourd'hui : une
+  /// date fausse sur un papier remis à un parent, là où l'omission de la ligne
+  /// ne coûte qu'un versement de moins sous un total qui reste, lui, la somme
+  /// exacte de ce qui est imprimé.
+  static List<TicketHistoryEntry> _historyEntries(List<TicketHistoryRow> rows) {
+    final byPayment = <String, List<Money>>{};
+    final paidAt = <String, DateTime>{};
+    for (final row in rows) {
+      final at =
+          paidAt[row.paymentId] ?? DateTime.tryParse(row.paidAt)?.toLocal();
+      if (at == null) continue;
+      paidAt[row.paymentId] = at;
+      (byPayment[row.paymentId] ??= <Money>[]).add(
+        Money.parse(row.amountInCents, row.currency),
+      );
+    }
+    return [
+      for (final entry in byPayment.entries)
+        TicketHistoryEntry(
+          paidAt: paidAt[entry.key]!,
+          received: MoneyBag.of(entry.value),
+        ),
+    ];
   }
 
   /// Reste à payer des **frais que ce versement a réglés**, dans l'année du

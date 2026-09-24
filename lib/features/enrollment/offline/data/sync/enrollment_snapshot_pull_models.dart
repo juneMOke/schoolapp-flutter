@@ -110,6 +110,16 @@ class EnrollmentSnapshotDto {
   final String? medicalNotes;
   final String? cancellationReason;
 
+  /// Le matricule de l'élève pour CETTE année (contrat back du 2026-09-24).
+  ///
+  /// Calculé serveur, **lecture seule**, jamais poussé. `null` légitime quand le
+  /// niveau est hors catalogue officiel ou que le matricule classique ne suit
+  /// pas le format `XXX-AAAA-NNNNNN` (imports).
+  ///
+  /// 🔴 **Ce n'est PAS une clé** : la séquence repart à 1 chaque année civile,
+  /// deux élèves d'un même niveau peuvent la partager.
+  final String? annualMatriculationNumber;
+
   final String? updatedAt; // ISO-8601 (LWW), optionnel au contrat
 
   const EnrollmentSnapshotDto({
@@ -121,6 +131,7 @@ class EnrollmentSnapshotDto {
     required this.status,
     required this.enrollmentType,
     required this.enrollmentCode,
+    this.annualMatriculationNumber,
     required this.enrollmentDate,
     required this.firstName,
     required this.lastName,
@@ -151,6 +162,7 @@ class EnrollmentSnapshotDto {
         status: j['status'] as String,
         enrollmentType: j['enrollmentType'] as String,
         enrollmentCode: j['enrollmentCode'] as String,
+        annualMatriculationNumber: j['annualMatriculationNumber'] as String?,
         enrollmentDate: j['enrollmentDate'] as String,
         firstName: j['firstName'] as String,
         lastName: j['lastName'] as String,

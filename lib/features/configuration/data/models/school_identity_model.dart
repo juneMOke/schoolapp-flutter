@@ -16,6 +16,16 @@ class SchoolIdentityModel {
   final String municipality;
   final String address;
   final String phone;
+
+  /// Facultatif, contrairement aux huit autres (contrat back du 2026-09-24).
+  ///
+  /// ⚠️ **`null` quand le champ est vide, jamais `''`.** Le serveur traite
+  /// l'absence et le `null` de la même façon — il CONSERVE la valeur déjà
+  /// saisie — et c'est exactement ce qu'on veut d'un champ laissé vide. Envoyer
+  /// une chaîne vide demanderait au serveur d'en faire quelque chose que le
+  /// contrat ne dit pas.
+  final String? tillPhone;
+
   final String email;
 
   const SchoolIdentityModel({
@@ -27,6 +37,7 @@ class SchoolIdentityModel {
     required this.municipality,
     required this.address,
     required this.phone,
+    this.tillPhone,
     required this.email,
   });
 
@@ -45,6 +56,9 @@ class SchoolIdentityModel {
         municipality: identity.municipality.trim(),
         address: identity.address.trim(),
         phone: identity.phone.trim(),
+        tillPhone: identity.tillPhone.trim().isEmpty
+            ? null
+            : identity.tillPhone.trim(),
         email: identity.email.trim(),
       );
 
@@ -61,6 +75,7 @@ class SchoolIdentityModel {
     municipality: municipality,
     address: address,
     phone: phone,
+    tillPhone: tillPhone ?? '',
     email: email,
   );
 }

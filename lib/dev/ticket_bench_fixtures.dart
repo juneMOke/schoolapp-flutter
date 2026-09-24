@@ -26,16 +26,22 @@ abstract final class TicketBenchFixtures {
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',
+    schoolPhoneLabel: 'Tél. Promoteur :',
+    tillPhoneLabel: 'Tél. caisse :',
     studentLabel: 'Élève :',
     matriculationLabel: 'Matricule :',
+    annualMatriculationLabel: 'Mat. annuel :',
     classroomLabel: 'Classe :',
     amountReceivedLabel: 'Montant reçu',
     rateLabel: 'Taux',
     derivedAmountPrefix: 'soit',
     allocationsLabel: 'Répartition',
     advanceLabel: 'Avance',
-    balanceLabel: 'Solde restant au moment de l\'impression',
+    balanceLabel: 'Solde restant à payer pour ce(s) frais',
     balanceTotalLabel: 'Total',
+    historyLabel: 'Historique des paiements',
+    historyTotalLabel: 'Total verse',
+    signatureLabel: 'Signature du caissier',
     keepTicketNotice:
         'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
     thanksNotice: 'Nous vous remercions pour votre confiance.',
@@ -53,12 +59,21 @@ abstract final class TicketBenchFixtures {
   /// * cinq lignes de répartition dont deux libellés trop longs pour tenir en
   ///   face de leur montant — c'est le chemin `_addPair` qui reporte la valeur ;
   /// * un montant à six chiffres, pour voir le groupement des milliers ;
-  /// * un solde présent, seul porteur de la mention de réserve.
+  /// * un solde présent, seul porteur de la mention de réserve ;
+  /// * un historique de trois versements, dont un à deux devises — c'est lui
+  ///   qui allonge le papier, donc lui qui décide de l'avance à déchirer.
   static final TicketReceiptModel torture = TicketReceiptModel(
     schoolName: 'Complexe scolaire Sacré-Cœur de l’Étoile',
     schoolLocality: 'Kinshasa · Ngaliema',
+    schoolAddress: 'Av. de la Libération n°42',
+    schoolEmail: 'contact@cslagrace.cd',
+    schoolPhone: '+243 000 000 000',
+    schoolTillPhone: '+243 811 111 111',
     studentFullName: 'Mbala-Kasa Ndombasi Amina Ɛlodie',
     matriculationNumber: 'MAT-2026-000481',
+    // Le cas limite : 32 caractères avec son libellé, la largeur exacte d'un
+    // papier 58 mm.
+    annualMatriculationNumber: 'CF-HG-SCI-1-000123',
     classroomName: '5e primaire A',
     reference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
     isProvisional: true,
@@ -95,6 +110,25 @@ abstract final class TicketBenchFixtures {
       ),
     ],
     remainingBalance: MoneyBag.of(const [Money(25000000, 'CDF')]),
+    paymentHistory: [
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 28, 10, 12),
+        received: MoneyBag.of(const [Money(5000000, 'CDF')]),
+      ),
+      // Un passage au guichet qui a mêlé deux piles de billets : deux lignes
+      // sous une seule date, le cas qui casse une colonne s'il est mal posé.
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 12, 8, 45),
+        received: MoneyBag.of(const [
+          Money(2500000, 'CDF'),
+          Money(10000, 'USD'),
+        ]),
+      ),
+      TicketHistoryEntry(
+        paidAt: DateTime(2026, 7, 3, 9, 30),
+        received: MoneyBag.of(const [Money(1234567, 'CDF')]),
+      ),
+    ],
     labels: labels,
   );
 

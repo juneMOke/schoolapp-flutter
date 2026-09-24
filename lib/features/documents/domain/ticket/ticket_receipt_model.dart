@@ -2,239 +2,17 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_labels.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
 
-/// Une ligne de **perçu** : ce qui est entré dans le tiroir, dans son unité.
-///
-/// Complémentaire de [TicketAllocationLine], et dans l'autre devise. Une
-/// imputation éteint une créance, donc elle est en devise de créance ; un
-/// tender décrit une pile de billets, donc il est en devise reçue. [rateMicros]
-/// est le seul nombre qui relie les deux, et il est **gelé** au versement.
-class TicketTenderLine extends Equatable {
-  /// Le net conservé, jamais le montant présenté.
-  final int amountInCents;
-
-  /// La devise reçue.
-  final String currency;
-
-  /// Le taux appliqué, en micro-unités. `1 000 000` = perçu et imputé dans la
-  /// même unité, ce qui est le cas courant et tout l'historique.
-  final int rateMicros;
-
-  /// La devise de la créance contre laquelle ce taux s'applique.
-  final String pivotCurrency;
-
-  const TicketTenderLine({
-    required this.amountInCents,
-    required this.currency,
-    this.rateMicros = ExchangeRate.scale,
-    required this.pivotCurrency,
-  });
-
-  /// Les lignes de perçu d'un versement réglé **dans la devise de la créance** :
-  /// une par devise, taux 1.
-  ///
-  /// C'est le cas courant, et tout l'historique d'avant la V2 — la forme que le
-  /// backfill de la v41 écrit en base. Elle ne coûte aucune arithmétique et
-  /// n'imprime aucun taux.
-  static List<TicketTenderLine> identityFrom(MoneyBag bag) => [
-    for (final amount in bag.entries)
-      TicketTenderLine(
-        amountInCents: amount.amountInCents,
-        currency: amount.currency,
-        pivotCurrency: amount.currency,
-      ),
-  ];
-
-  /// Vrai quand cette ligne ne fait que redire l'imputation — le ticket
-  /// n'imprime alors **aucun taux** : un « 1,00 » sur un papier de guichet ferait
-  /// chercher au parent ce qui a été converti.
-  bool get isIdentity =>
-      rateMicros == ExchangeRate.scale && currency == pivotCurrency;
-
-  ExchangeRate get rate => ExchangeRate.parse(
-    base: pivotCurrency,
-    quote: currency,
-    rateMicros: rateMicros,
-    effectiveFrom: DateTime.utc(1970),
-  );
-
-  Money get amount => Money.parse(amountInCents, currency);
-
-  @override
-  List<Object?> get props => [
-    amountInCents,
-    currency,
-    rateMicros,
-    pivotCurrency,
-  ];
-}
-
-/// Une ligne de répartition du versement (zone Z5).
-class TicketAllocationLine extends Equatable {
-  final String label;
-  final int amountInCents;
-
-  /// La devise de CETTE imputation : elle solde une créance, donc elle en tient
-  /// exactement une. Scalaire, définitivement.
-  final String currency;
-
-  const TicketAllocationLine({
-    required this.label,
-    required this.amountInCents,
-    required this.currency,
-  });
-
-  @override
-  List<Object?> get props => [label, amountInCents, currency];
-}
-
-/// Libellés fixes du ticket, injectés depuis `AppLocalizations`.
-///
-/// Le modèle et son rendu restent **purs** — aucun `BuildContext`, aucune
-/// dépendance Flutter — tout en respectant l'interdiction des chaînes en dur :
-/// c'est l'appelant qui traduit, le gabarit qui arrange.
-class TicketLabels extends Equatable {
-  /// Nature de la pièce, imprimée en tête : « Ticket de perception ».
-  ///
-  /// ⚠️ **Distinct de la « note de perception »** (`EditiqueDocumentType.NP`),
-  /// qui est une pièce **annuelle scellée** au niveau élève. Deux objets
-  /// différents : celui-ci atteste **le montant reçu** lors d'un encaissement,
-  /// trop-perçu ou non — l'imputation exacte appartient au reçu scellé.
-  final String documentTitle;
-
-  /// La mention discrète du cas NON scellé, posée en fin de libellé de
-  /// référence : « Réf. provisoire `<numéro>` ».
-  ///
-  /// Ce n'est plus un bandeau. Le bandeau pleine largeur a disparu avec la
-  /// décision de rendre le ticket officiel dès qu'il porte un numéro définitif ;
-  /// ce champ nomme donc désormais une MENTION, et son nom suit.
-  ///
-  /// Le mot est accolé au libellé et non ajouté en fin de ligne, pour deux
-  /// raisons. Il qualifie ainsi le NUMÉRO — l'argent, lui, est reçu, et le
-  /// ticket l'affirme — là où un mot flottant qualifierait le versement. Et il
-  /// se replie proprement : mis entre parenthèses en fin de ligne, il se coupait
-  /// en deux quand la référence retombe sur l'UUID du paiement.
-  final String provisionalMention;
-  final String referenceLabel;
-
-  /// « Date : » — coiffe la date de versement, l'heure restant calée à droite
-  /// sur la même ligne. Aucune ligne de papier ajoutée : à 48 colonnes il reste
-  /// 27 caractères de battement, et 11 à 32 colonnes.
-  final String dateLabel;
-
-  final String cashierLabel;
-
-  /// « PAYEUR : » — en tête du bloc payeur, quand il y en a un.
-  final String payerLabel;
-
-  /// « Tél. » — le numéro du payeur. Seul, il suffit à garder le bloc.
-  final String phoneLabel;
-
-  final String studentLabel;
-  final String matriculationLabel;
-  final String classroomLabel;
-  final String amountReceivedLabel;
-
-  /// « Taux » — imprimé **seulement** quand perçu et imputé ne sont pas dans la
-  /// même unité. C'est le chiffre que le parent conteste au guichet ; le laisser
-  /// déduire par division ferait apparaître un taux dérivé de l'arrondi
-  /// (2 847,3 là où le caissier a annoncé 2 850), ce qui fait amateur.
-  final String rateLabel;
-
-  /// « soit » — coiffe la valeur d'un poste **en devise reçue**, sous son
-  /// montant imputé. Sans ce mot, une seconde ligne de chiffres sous la première
-  /// se lirait comme un second montant dû.
-  final String derivedAmountPrefix;
-
-  final String allocationsLabel;
-
-  /// Part du montant reçu qu'aucune créance n'absorbe — imprimée comme dernière
-  /// ligne de la répartition, et seulement quand elle est strictement positive.
-  ///
-  /// Le ticket **atteste le montant perçu**, il n'arbitre pas son imputation :
-  /// c'est le reçu scellé qui fait apparaître le trop-perçu. Ce libellé n'est là
-  /// que pour empêcher un écart muet entre le reçu et la ventilation.
-  final String advanceLabel;
-
-  /// « Solde au moment de l'impression » — le TITRE du bloc, qui coiffe le
-  /// détail comme « Répartition » coiffe le sien.
-  ///
-  /// Le qualificatif de temps est DANS le titre, et n'a plus de ligne à lui :
-  /// il se lit avant les chiffres au lieu de les suivre, et une réserve posée
-  /// sous le total se lisait comme une incertitude sur le total seul.
-  final String balanceLabel;
-
-  /// « Total » — la dernière ligne du bloc, sous le filet.
-  final String balanceTotalLabel;
-
-  /// « Conservez ce ticket jusqu'à la remise de votre reçu définitif. »
-  ///
-  /// ⚠️ **Imprimée seulement sur une pièce NON scellée.** Sur un ticket qui
-  /// porte déjà son numéro définitif, elle est factuellement fausse : il n'y a
-  /// pas de reçu à venir, celui-là l'est. Sa raison d'être (RG-012-12, le levier
-  /// de rappel de l'établissement) ne vaut que hors ligne.
-  final String keepTicketNotice;
-
-  /// « Nous vous remercions pour votre confiance. »
-  final String thanksNotice;
-
-  /// « Reçu édité par ETEELO CONNECT » — l'éditeur du logiciel, en pied.
-  final String editorNotice;
-
-  /// « eteeloconnect.com » — **sans schéma**. C'est l'usage sur un reçu, ça
-  /// économise la largeur, et ça n'imprime pas un `http://` sur un papier que
-  /// des familles gardent.
-  final String editorSite;
-
-  const TicketLabels({
-    required this.documentTitle,
-    required this.provisionalMention,
-    required this.referenceLabel,
-    required this.dateLabel,
-    required this.cashierLabel,
-    required this.payerLabel,
-    required this.phoneLabel,
-    required this.studentLabel,
-    required this.matriculationLabel,
-    required this.classroomLabel,
-    required this.amountReceivedLabel,
-    required this.rateLabel,
-    required this.derivedAmountPrefix,
-    required this.allocationsLabel,
-    required this.advanceLabel,
-    required this.balanceLabel,
-    required this.balanceTotalLabel,
-    required this.keepTicketNotice,
-    required this.thanksNotice,
-    required this.editorNotice,
-    required this.editorSite,
-  });
-
-  @override
-  List<Object?> get props => [
-    documentTitle,
-    provisionalMention,
-    referenceLabel,
-    dateLabel,
-    cashierLabel,
-    payerLabel,
-    phoneLabel,
-    studentLabel,
-    matriculationLabel,
-    classroomLabel,
-    amountReceivedLabel,
-    rateLabel,
-    derivedAmountPrefix,
-    allocationsLabel,
-    advanceLabel,
-    balanceLabel,
-    balanceTotalLabel,
-    keepTicketNotice,
-    thanksNotice,
-    editorNotice,
-    editorSite,
-  ];
-}
+// Les lignes et les libellés vivent dans leurs propres fichiers depuis qu'un
+// troisième bloc d'argent est venu s'ajouter — mais ils restent visibles d'ici.
+// Une quinzaine de sites construisent `TicketLabels` en n'important que ce
+// fichier : les réexporter découpe la source sans faire de churn d'imports, et
+// sans imposer à un appelant de savoir dans lequel des trois vit le type qu'il
+// nomme.
+export 'package:school_app_flutter/features/documents/domain/ticket/ticket_labels.dart';
+export 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
 
 /// Le reçu provisoire, tel qu'il sera imprimé.
 ///
@@ -265,11 +43,35 @@ class TicketReceiptModel extends Equatable {
 
   final String? schoolAddress;
   final String? schoolEmail;
+
+  /// Le téléphone de l'ÉTABLISSEMENT, imprimé « Tél. Promoteur ».
   final String? schoolPhone;
+
+  /// Le téléphone de la CAISSE, imprimé « Tél. caisse » sur sa propre ligne.
+  ///
+  /// Deux lignes nommées plutôt qu'un numéro nu : l'en-tête en portait un seul,
+  /// sans libellé, et un parent qui a une question de paiement n'avait aucun
+  /// moyen de savoir s'il tombait sur le bon poste. Nommer les deux est ce qui
+  /// rend le second utile — et ce qui oblige à nommer le premier.
+  ///
+  /// `null` tant que le serveur ne le sert pas : le gabarit tait alors la ligne,
+  /// et l'en-tête reste celui d'avant, au libellé près.
+  final String? schoolTillPhone;
 
   // ── Z2 : l'élève ────────────────────────────────────────────────────────────
   final String studentFullName;
   final String? matriculationNumber;
+
+  /// Le matricule de l'élève pour l'année du versement — imprimé sous le
+  /// matricule classique, qui reste.
+  ///
+  /// ⚠️ Il vient de l'INSCRIPTION, pas de l'élève : un élève réinscrit en a un
+  /// par année. `null` quand le niveau est hors catalogue, quand le matricule
+  /// classique n'a pas le format attendu, ou quand le versement ne porte aucune
+  /// année — trois silences que le gabarit traite de la même façon : pas de
+  /// ligne.
+  final String? annualMatriculationNumber;
+
   final String? classroomName;
 
   // ── Z3 : la traçabilité ─────────────────────────────────────────────────────
@@ -365,6 +167,26 @@ class TicketReceiptModel extends Equatable {
   /// que répéter, le gabarit le tait.
   final List<TicketAllocationLine> remainingByCharge;
 
+  // ── Z6 : ce qui a déjà été versé ────────────────────────────────────────────
+  /// Les versements **antérieurs** de l'élève sur l'année, du plus récent au
+  /// plus ancien.
+  ///
+  /// ⚠️ **Le versement courant n'est PAS dans ce champ**, et il est pourtant
+  /// imprimé : c'est [printedPayments] qui l'y ajoute. La séparation est
+  /// délibérée — ce champ porte ce que la BASE sait d'autre sur cet élève, le
+  /// getter porte ce que le PAPIER montre. Poser le versement courant dans le
+  /// champ obligerait chaque appelant à ne pas l'oublier, et le premier qui
+  /// l'oublierait sortirait un cumul faux sans que rien ne le dise.
+  ///
+  /// Deux exclusions, et chacune répond à une question qu'un parent pourrait
+  /// poser devant le papier :
+  ///
+  /// - **les versements extournés n'y sont pas** — ils ne comptent plus dans
+  ///   les soldes, et les imprimer ferait croire à un argent encore acquis ;
+  /// - **l'année est celle du versement** — un arriéré N-1 additionné au versé
+  ///   N donnerait un cumul que plus aucun écran ne confirme.
+  final List<TicketHistoryEntry> paymentHistory;
+
   final TicketLabels labels;
 
   const TicketReceiptModel({
@@ -373,8 +195,10 @@ class TicketReceiptModel extends Equatable {
     this.schoolAddress,
     this.schoolEmail,
     this.schoolPhone,
+    this.schoolTillPhone,
     required this.studentFullName,
     this.matriculationNumber,
+    this.annualMatriculationNumber,
     this.classroomName,
     required this.reference,
     required this.isProvisional,
@@ -386,6 +210,7 @@ class TicketReceiptModel extends Equatable {
     this.allocations = const <TicketAllocationLine>[],
     this.remainingBalance,
     this.remainingByCharge = const <TicketAllocationLine>[],
+    this.paymentHistory = const <TicketHistoryEntry>[],
     required this.labels,
   });
 
@@ -502,6 +327,53 @@ class TicketReceiptModel extends Equatable {
     ]).withoutZeros;
   }
 
+  /// Les versements de l'année **tels que le bloc les imprime** : ceux de
+  /// [paymentHistory] et **celui-ci**, du plus récent au plus ancien.
+  ///
+  /// ## Inséré à sa date, jamais épinglé en tête
+  ///
+  /// Le versement courant est presque toujours le plus récent, donc presque
+  /// toujours premier — mais « presque » ne suffit pas : la date d'encaissement
+  /// est **saisissable au guichet**, et un versement antidaté épinglé en tête
+  /// d'une liste qui s'annonce chronologique ferait douter de l'ordre entier.
+  /// Il prend donc sa place par comparaison, et passe **devant** les versements
+  /// de même date — à date égale, c'est lui qui vient d'avoir lieu.
+  ///
+  /// ## Il n'entre que s'il a un montant à montrer
+  ///
+  /// Sans ligne de tiroir, [amountReceived] est vide et la ligne sortirait
+  /// **datée mais sans chiffre** : `_addMoneyBag` n'imprime rien d'un sac vide.
+  /// Une date seule sur une colonne de montants ne se lit pas ; mieux vaut un
+  /// versement de moins qu'une ligne qu'on ne peut pas interpréter.
+  List<TicketHistoryEntry> get printedPayments {
+    if (amountReceived.isEmpty) return paymentHistory;
+
+    final current = TicketHistoryEntry(
+      paidAt: paidAt,
+      received: amountReceived,
+    );
+    final printed = <TicketHistoryEntry>[];
+    var placed = false;
+    for (final entry in paymentHistory) {
+      if (!placed && !entry.paidAt.isAfter(paidAt)) {
+        printed.add(current);
+        placed = true;
+      }
+      printed.add(entry);
+    }
+    if (!placed) printed.add(current);
+    return printed;
+  }
+
+  /// Le cumul versé sur l'année, **ce ticket compris**, par devise reçue.
+  ///
+  /// Dérivé des lignes imprimées, jamais recalculé à côté : un parent additionne
+  /// ce qu'il lit, et deux chemins de calcul finiraient par diverger. C'est la
+  /// même règle que [remainingBalance], qui dérive lui aussi de son détail.
+  MoneyBag get printedPaymentsTotal => MoneyBag.of([
+    for (final entry in printedPayments) ...entry.received.entries,
+  ]);
+
   @override
   List<Object?> get props => [
     schoolName,
@@ -509,10 +381,12 @@ class TicketReceiptModel extends Equatable {
     schoolAddress,
     schoolEmail,
     schoolPhone,
+    schoolTillPhone,
     payerFullName,
     payerPhoneNumber,
     studentFullName,
     matriculationNumber,
+    annualMatriculationNumber,
     classroomName,
     reference,
     isProvisional,
@@ -522,6 +396,7 @@ class TicketReceiptModel extends Equatable {
     allocations,
     remainingBalance,
     remainingByCharge,
+    paymentHistory,
     labels,
   ];
 }

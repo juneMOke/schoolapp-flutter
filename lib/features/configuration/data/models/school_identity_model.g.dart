@@ -16,6 +16,7 @@ SchoolIdentityModel _$SchoolIdentityModelFromJson(Map<String, dynamic> json) =>
       municipality: json['municipality'] as String,
       address: json['address'] as String,
       phone: json['phone'] as String,
+      tillPhone: json['tillPhone'] as String?,
       email: json['email'] as String,
     );
 
@@ -30,5 +31,6 @@ Map<String, dynamic> _$SchoolIdentityModelToJson(
   'municipality': instance.municipality,
   'address': instance.address,
   'phone': instance.phone,
+  'tillPhone': instance.tillPhone,
   'email': instance.email,
 };

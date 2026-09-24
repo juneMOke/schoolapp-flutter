@@ -274,6 +274,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationSchoolPhone => 'School phone';
 
   @override
+  String get configurationSchoolTillPhone => 'Till phone number';
+
+  @override
   String get configurationSchoolEmail => 'School email';
 
   @override
@@ -8085,10 +8088,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketCashierLabel => 'Cashier:';
 
   @override
+  String get ticketSchoolPhoneLabel => 'Promoter tel.:';
+
+  @override
+  String get ticketTillPhoneLabel => 'Till tel.:';
+
+  @override
   String get ticketStudentLabel => 'Student:';
 
   @override
   String get ticketMatriculationLabel => 'Student no.:';
+
+  @override
+  String get ticketAnnualMatriculationLabel => 'Annual no.:';
 
   @override
   String get ticketClassroomLabel => 'Class:';
@@ -8109,10 +8121,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAdvanceLabel => 'Advance (unallocated)';
 
   @override
-  String get ticketBalanceLabel => 'Remaining balance as of printing';
+  String get ticketBalanceLabel => 'Remaining balance on these fees';
 
   @override
   String get ticketBalanceTotalLabel => 'Total';
+
+  @override
+  String get ticketHistoryLabel => 'Payment history';
+
+  @override
+  String get ticketHistoryTotalLabel => 'Total paid';
 
   @override
   String get ticketThanksNotice => 'Thank you for your trust.';
@@ -8126,6 +8144,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ticketKeepNotice =>
       'Keep this ticket until you receive your final receipt.';
+
+  @override
+  String get ticketSignatureLabel => 'Cashier\'s signature';
 
   @override
   String get ticketPrintLabel => 'Print collection ticket';

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -13,16 +14,22 @@ const _labels = TicketLabels(
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
+  schoolPhoneLabel: 'Tél. Promoteur :',
+  tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
+  annualMatriculationLabel: 'Mat. annuel :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   rateLabel: 'Taux',
   derivedAmountPrefix: 'soit',
   allocationsLabel: 'Répartition',
   advanceLabel: 'Avance',
-  balanceLabel: 'Solde restant au moment de l\'impression',
+  balanceLabel: 'Solde restant à payer pour ce(s) frais',
   balanceTotalLabel: 'Total',
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
+  signatureLabel: 'Signature du caissier',
   keepTicketNotice:
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.',
   thanksNotice: 'Nous vous remercions pour votre confiance.',
@@ -42,8 +49,11 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
+  schoolPhoneLabel: _labels.schoolPhoneLabel,
+  tillPhoneLabel: _labels.tillPhoneLabel,
   studentLabel: _labels.studentLabel,
   matriculationLabel: _labels.matriculationLabel,
+  annualMatriculationLabel: _labels.annualMatriculationLabel,
   classroomLabel: _labels.classroomLabel,
   amountReceivedLabel: _labels.amountReceivedLabel,
   rateLabel: _labels.rateLabel,
@@ -52,6 +62,9 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   advanceLabel: _labels.advanceLabel,
   balanceLabel: '',
   balanceTotalLabel: _labels.balanceTotalLabel,
+  historyLabel: 'Historique des paiements',
+  historyTotalLabel: 'Total verse',
+  signatureLabel: _labels.signatureLabel,
   keepTicketNotice: _labels.keepTicketNotice,
   thanksNotice: _labels.thanksNotice,
   editorNotice: _labels.editorNotice,
@@ -61,8 +74,15 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
 TicketReceiptModel _model({
   String studentFullName = 'Mbala Kasa Amina',
   String? matriculationNumber = 'MAT-0042',
+  String? annualMatriculationNumber = 'CF-P4-000018',
   String? classroomName = '5e primaire A',
   String? cashierFullName = 'Jean Kabeya',
+
+  /// Une pièce SCELLÉE tait la phrase de conservation — le seul cas où rien ne
+  /// sépare le solde du bloc de signature.
+  bool isProvisional = true,
+  String? schoolPhone = '+243 000 000 000',
+  String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
 
   /// Passe outre [remainingBalanceInCents] quand il est fourni — le seul moyen
@@ -70,6 +90,11 @@ TicketReceiptModel _model({
   /// dire.
   MoneyBag? remainingBalance,
   List<TicketAllocationLine> remainingByCharge = const [],
+  List<TicketHistoryEntry> paymentHistory = const [],
+
+  /// Un versement sans ligne de tiroir — le seul cas où le bloc d'historique
+  /// n'a plus rien à lister, le versement courant compris.
+  List<TicketTenderLine>? tenders,
 
   /// Permet de composer un ticket dont le TITRE de solde est vide — ce qu'une
   /// traduction incomplète produit sans bruit, et le seul cas où les deux
@@ -90,16 +115,19 @@ TicketReceiptModel _model({
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   schoolLocality: 'Kinshasa · Ngaliema',
+  schoolPhone: schoolPhone,
+  schoolTillPhone: schoolTillPhone,
   studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
+  annualMatriculationNumber: annualMatriculationNumber,
   classroomName: classroomName,
   reference: 'PROV-A1B2C3-9F8E7D6C',
-  isProvisional: true,
+  isProvisional: isProvisional,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   cashierFullName: cashierFullName,
-  tenders: TicketTenderLine.identityFrom(
-    MoneyBag.of(const [Money(150000, 'CDF')]),
-  ),
+  tenders:
+      tenders ??
+      TicketTenderLine.identityFrom(MoneyBag.of(const [Money(150000, 'CDF')])),
   allocations: allocations,
   remainingBalance:
       remainingBalance ??
@@ -107,7 +135,15 @@ TicketReceiptModel _model({
           ? null
           : MoneyBag.of([Money(remainingBalanceInCents, 'CDF')])),
   remainingByCharge: remainingByCharge,
+  paymentHistory: paymentHistory,
   labels: labels,
+);
+
+/// Un versement antérieur, dans la forme que le repository compose : une date
+/// déjà locale, et un sac de monnaie.
+TicketHistoryEntry _past(int day, List<Money> amounts) => TicketHistoryEntry(
+  paidAt: DateTime(2026, 7, day, 9, 30),
+  received: MoneyBag.of(amounts),
 );
 
 /// Un solde à deux devises, détaillé — la forme que le porteur veut voir sur le
@@ -279,31 +315,28 @@ void main() {
     });
 
     // RG-012-13 : le montant reçu et la répartition sont des FAITS (la
-    // répartition est une saisie, pas un calcul) — seul le solde est incertain.
-    // Le doute est donc porté par le TITRE du bloc solde, et par lui seul.
-    test(
-      'ne qualifie de « restant au moment de l\'impression » que le solde',
-      () {
-        final lines = TicketTextLayout.render(_model());
-        final titleIndex = lines.indexWhere(
-          (l) => l.contains('restant au moment de l\'impression'),
-        );
-        final amountIndex = lines.indexWhere((l) => l.contains('Montant reçu'));
+    // répartition est une saisie, pas un calcul) — seul le solde demande une
+    // qualification, et c'est son TITRE qui la porte, lui seul.
+    //
+    // ⚠️ Le qualificatif de TEMPS (« au moment de l'impression ») a été RETIRÉ
+    // par décision du porteur le 2026-09-24 : le titre ne qualifie plus que le
+    // PÉRIMÈTRE (« pour ce(s) frais »). Ce test suit ce libellé-là — il ne
+    // faut pas rétablir l'ancien sur la foi de ce commentaire.
+    test('seul le solde est qualifié, et une seule fois', () {
+      final lines = TicketTextLayout.render(_model());
+      final titleIndex = lines.indexWhere(
+        (l) => l.contains('pour ce(s) frais'),
+      );
+      final amountIndex = lines.indexWhere((l) => l.contains('Montant reçu'));
 
-        expect(titleIndex, greaterThan(amountIndex));
+      expect(titleIndex, greaterThan(amountIndex));
 
-        // Assertion NÉGATIVE : aucune autre ligne ne porte le qualificatif. Sans
-        // elle, un gabarit qui le remettrait sous le total passerait — c'est
-        // exactement ce qu'on vient de retirer.
-        expect(
-          lines
-              .where((l) => l.contains('restant au moment de l\'impression'))
-              .length,
-          1,
-        );
-        expect(lines[amountIndex], isNot(contains('au moment de')));
-      },
-    );
+      // Assertion NÉGATIVE : aucune autre ligne ne porte la qualification. Sans
+      // elle, un gabarit qui la remettrait sous le total passerait — c'est
+      // exactement ce qu'on avait retiré.
+      expect(lines.where((l) => l.contains('pour ce(s) frais')).length, 1);
+      expect(lines[amountIndex], isNot(contains('frais')));
+    });
 
     /// La forme exacte du bloc, exigée par le porteur : ligne blanche, titre,
     /// détail indenté, filet, `Total`.
@@ -315,7 +348,7 @@ void main() {
     test('le bloc solde : filet, titre, détail, filet, total', () {
       final lines = TicketTextLayout.render(_biDevise(), columns: 48);
       final title = lines.indexWhere(
-        (l) => l.startsWith('Solde restant au moment de l\'impression'),
+        (l) => l.startsWith('Solde restant à payer pour ce(s) frais'),
       );
       final total = lines.indexWhere((l) => l.startsWith('Total'));
 
@@ -501,7 +534,7 @@ void main() {
         columns: 48,
       );
       final title = lines.indexWhere(
-        (l) => l.startsWith('Solde restant au moment de l\'impression'),
+        (l) => l.startsWith('Solde restant à payer pour ce(s) frais'),
       );
 
       expect(title, greaterThan(0));
@@ -532,7 +565,7 @@ void main() {
         columns: 48,
       );
       final title = lines.indexWhere(
-        (l) => l.startsWith('Solde restant au moment de l\'impression'),
+        (l) => l.startsWith('Solde restant à payer pour ce(s) frais'),
       );
 
       expect(title, greaterThan(0));
@@ -624,6 +657,10 @@ void main() {
           _model(
             studentFullName: '',
             matriculationNumber: null,
+            // Le matricule annuel appartient à la MÊME zone : la laisser vide
+            // veut dire le taire aussi, sans quoi ce test mesurerait une zone
+            // à une ligne plutôt qu'une zone absente.
+            annualMatriculationNumber: null,
             classroomName: null,
           ),
           columns: 48,
@@ -849,6 +886,560 @@ void main() {
     test('l\'alignement à 48 colonnes tient malgré l\'allongement', () {
       for (final line in TicketTextLayout.render(exotic())) {
         expect(line.length, lessThanOrEqualTo(48), reason: line);
+      }
+    });
+  });
+
+  group('historique des paiements', () {
+    /// Les lignes du bloc d'historique SEULES.
+    ///
+    /// ⚠️ Indispensable : la date du versement courant est imprimée DEUX fois
+    /// sur le ticket — en zone de traçabilité (« Date : … ») et dans ce bloc.
+    /// Chercher sur tout le papier attrapait la première et faisait passer un
+    /// test d'ordre pour une raison étrangère.
+    List<String> blocHistorique(TicketReceiptModel model) {
+      final lines = TicketTextLayout.render(model);
+      final debut = lines.indexWhere((l) => l.contains('Historique'));
+      if (debut < 0) return const [];
+      return lines.sublist(debut);
+    }
+
+    test(
+      'le versement du ticket y figure, seul, dès le premier de l\'année',
+      () {
+        final lines = TicketTextLayout.render(_model());
+
+        expect(lines.any((l) => l.contains('Historique')), isTrue);
+        // `_model` encaisse 150 000 centimes le 04/08/2026.
+        expect(
+          lines.any((l) => l.contains('04/08/2026') && l.contains('1 500 FC')),
+          isTrue,
+        );
+        expect(
+          lines.any((l) => l.contains('Total verse')),
+          isFalse,
+          reason: 'un total qui ne coiffe qu\'une ligne la redirait',
+        );
+      },
+    );
+
+    test('sans ligne de tiroir, le bloc ENTIER disparaît', () {
+      final lines = TicketTextLayout.render(_model(tenders: const []));
+
+      expect(
+        lines.any((l) => l.contains('Historique')),
+        isFalse,
+        reason: 'une date seule sur une colonne de montants ne se lit pas',
+      );
+    });
+
+    test('le versement du jour vient en tête des versements passés', () {
+      final bloc = blocHistorique(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final jour = bloc.indexWhere((l) => l.contains('04/08/2026'));
+      final premier = bloc.indexWhere((l) => l.contains('12/07/2026'));
+      final second = bloc.indexWhere((l) => l.contains('03/07/2026'));
+
+      expect(jour, isNonNegative);
+      expect(premier, greaterThan(jour));
+      expect(second, greaterThan(premier));
+    });
+
+    /// La date d'encaissement est **saisissable au guichet**. Épinglé en tête,
+    /// un versement antidaté ferait douter de l'ordre entier de la liste.
+    test('antidaté, il prend sa place dans l\'ordre et n\'est pas épinglé', () {
+      final bloc = blocHistorique(
+        _model(
+          // Encaissé le 04/08/2026, donc APRÈS le 12/07 mais avant un 20/08.
+          paymentHistory: [
+            TicketHistoryEntry(
+              paidAt: DateTime(2026, 8, 20, 9, 30),
+              received: MoneyBag.of(const [Money(5000000, 'CDF')]),
+            ),
+            _past(12, const [Money(2500000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final recent = bloc.indexWhere((l) => l.contains('20/08/2026'));
+      final jour = bloc.indexWhere((l) => l.contains('04/08/2026'));
+      final ancien = bloc.indexWhere((l) => l.contains('12/07/2026'));
+
+      expect(recent, isNonNegative);
+      expect(jour, greaterThan(recent));
+      expect(ancien, greaterThan(jour));
+    });
+
+    test('le total est le CUMUL de l\'année, ce versement compris', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      // 25 000 + 50 000 versés avant, 1 500 aujourd'hui.
+      expect(
+        lines.any((l) => l.contains('Total verse') && l.contains('76 500 FC')),
+        isTrue,
+      );
+    });
+
+    test('un versement en deux devises garde sa date sur une seule ligne', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF'), Money(10000, 'USD')]),
+          ],
+        ),
+      );
+
+      expect(lines.where((l) => l.contains('12/07/2026')).length, 1);
+      expect(lines.any((l) => l.contains('100,00 \$')), isTrue);
+    });
+
+    test('le bloc vient APRÈS le solde et AVANT la phrase de conservation', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          remainingByCharge: const [
+            TicketAllocationLine(
+              label: 'Frais scolaires',
+              amountInCents: 250000,
+              currency: 'CDF',
+            ),
+          ],
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final solde = lines.indexWhere((l) => l.contains('Solde restant'));
+      final historique = lines.indexWhere((l) => l.contains('Historique'));
+      final conservation = lines.indexWhere((l) => l.contains('Conservez'));
+
+      expect(solde, isNonNegative);
+      expect(historique, greaterThan(solde));
+      expect(conservation, greaterThan(historique));
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32 colonnes', () {
+      final model = _model(
+        paymentHistory: [
+          _past(12, const [Money(999999900, 'CDF')]),
+          _past(3, const [Money(9999900, 'USD')]),
+        ],
+      );
+
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(model, columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
+        }
+      }
+    });
+
+    test('un titre vide ne colle pas deux filets l\'un sur l\'autre', () {
+      final labels = TicketLabels(
+        documentTitle: _labels.documentTitle,
+        provisionalMention: _labels.provisionalMention,
+        referenceLabel: _labels.referenceLabel,
+        dateLabel: _labels.dateLabel,
+        payerLabel: _labels.payerLabel,
+        phoneLabel: _labels.phoneLabel,
+        cashierLabel: _labels.cashierLabel,
+        schoolPhoneLabel: _labels.schoolPhoneLabel,
+        tillPhoneLabel: _labels.tillPhoneLabel,
+        studentLabel: _labels.studentLabel,
+        matriculationLabel: _labels.matriculationLabel,
+        annualMatriculationLabel: _labels.annualMatriculationLabel,
+        classroomLabel: _labels.classroomLabel,
+        amountReceivedLabel: _labels.amountReceivedLabel,
+        rateLabel: _labels.rateLabel,
+        derivedAmountPrefix: _labels.derivedAmountPrefix,
+        allocationsLabel: _labels.allocationsLabel,
+        advanceLabel: _labels.advanceLabel,
+        balanceLabel: _labels.balanceLabel,
+        balanceTotalLabel: _labels.balanceTotalLabel,
+        historyLabel: '',
+        historyTotalLabel: _labels.historyTotalLabel,
+        signatureLabel: _labels.signatureLabel,
+        keepTicketNotice: _labels.keepTicketNotice,
+        thanksNotice: _labels.thanksNotice,
+        editorNotice: _labels.editorNotice,
+        editorSite: _labels.editorSite,
+      );
+
+      final lines = TicketTextLayout.render(
+        _model(
+          labels: labels,
+          paymentHistory: [
+            _past(12, const [Money(2500000, 'CDF')]),
+            _past(3, const [Money(5000000, 'CDF')]),
+          ],
+        ),
+      );
+
+      final rule = '-' * 48;
+      for (var i = 0; i + 1 < lines.length; i++) {
+        expect(
+          lines[i] == rule && lines[i + 1] == rule,
+          isFalse,
+          reason: 'deux filets consécutifs à la ligne $i',
+        );
+      }
+    });
+  });
+
+  group('zone de signature', () {
+    /// Les mêmes libellés, celui de la signature VIDE — ce qu'une traduction
+    /// incomplète produit sans bruit.
+    TicketLabels sansSignature() => TicketLabels(
+      documentTitle: _labels.documentTitle,
+      provisionalMention: _labels.provisionalMention,
+      referenceLabel: _labels.referenceLabel,
+      dateLabel: _labels.dateLabel,
+      payerLabel: _labels.payerLabel,
+      phoneLabel: _labels.phoneLabel,
+      cashierLabel: _labels.cashierLabel,
+      schoolPhoneLabel: _labels.schoolPhoneLabel,
+      tillPhoneLabel: _labels.tillPhoneLabel,
+      studentLabel: _labels.studentLabel,
+      matriculationLabel: _labels.matriculationLabel,
+      annualMatriculationLabel: _labels.annualMatriculationLabel,
+      classroomLabel: _labels.classroomLabel,
+      amountReceivedLabel: _labels.amountReceivedLabel,
+      rateLabel: _labels.rateLabel,
+      derivedAmountPrefix: _labels.derivedAmountPrefix,
+      allocationsLabel: _labels.allocationsLabel,
+      advanceLabel: _labels.advanceLabel,
+      balanceLabel: _labels.balanceLabel,
+      balanceTotalLabel: _labels.balanceTotalLabel,
+      historyLabel: _labels.historyLabel,
+      historyTotalLabel: _labels.historyTotalLabel,
+      signatureLabel: '',
+      keepTicketNotice: _labels.keepTicketNotice,
+      thanksNotice: _labels.thanksNotice,
+      editorNotice: _labels.editorNotice,
+      editorSite: _labels.editorSite,
+    );
+
+    test('libellé, deux blancs, puis le trait à signer', () {
+      final lines = TicketTextLayout.render(_model());
+      final i = lines.indexWhere((l) => l.contains('Signature du caissier'));
+
+      expect(i, isNonNegative);
+      expect(lines[i + 1], isEmpty);
+      expect(lines[i + 2], isEmpty);
+      expect(lines[i + 3].trim(), '.' * 24);
+      expect(
+        lines[i + 3].endsWith('.'),
+        isTrue,
+        reason: 'le trait se pose à DROITE, comme une signature sur une pièce',
+      );
+    });
+
+    test('le bloc vient juste avant les remerciements', () {
+      final lines = TicketTextLayout.render(_model());
+      final signature = lines.indexWhere((l) => l.contains('Signature'));
+      final trait = lines.indexWhere((l) => l.trim().startsWith('...'));
+      final merci = lines.indexWhere((l) => l.contains('remercions'));
+
+      expect(signature, isNonNegative);
+      expect(merci, greaterThan(trait));
+      // Un seul filet entre le trait et les remerciements : le bloc se ferme,
+      // rien ne s'intercale.
+      expect(merci - trait, 2);
+    });
+
+    /// Sur une pièce scellée, la phrase de conservation ne s'imprime pas : le
+    /// bloc de signature doit quand même se poser, et sans coller au solde.
+    test('il se pose aussi quand la phrase de conservation est tue', () {
+      final lines = TicketTextLayout.render(_model(isProvisional: false));
+
+      expect(lines.any((l) => l.contains('Conservez')), isFalse);
+      expect(lines.any((l) => l.contains('Signature du caissier')), isTrue);
+    });
+
+    test('libellé vide : ni blancs ni trait orphelins', () {
+      final avec = TicketTextLayout.render(_model());
+      final sans = TicketTextLayout.render(_model(labels: sansSignature()));
+
+      expect(sans.any((l) => l.contains('Signature')), isFalse);
+      expect(
+        sans.any((l) => l.trim().startsWith('...')),
+        isFalse,
+        reason:
+            'un trait à signer sans rien qui dise qui signe ne se remplit pas',
+      );
+      // Compté en DIFFÉRENCE : le bloc « Répartition » pose déjà une ligne
+      // blanche à lui, et une assertion d'absence passerait pour une raison
+      // étrangère le jour où elle disparaîtrait.
+      expect(
+        avec.where((l) => l.isEmpty).length -
+            sans.where((l) => l.isEmpty).length,
+        2,
+        reason: 'les deux blancs appartiennent au bloc et partent avec lui',
+      );
+    });
+
+    test('le trait ne déborde pas, ni à 48 ni à 32 colonnes', () {
+      for (final width in const [48, 32]) {
+        final lines = TicketTextLayout.render(_model(), columns: width);
+        final trait = lines.firstWhere((l) => l.trim().startsWith('...'));
+        expect(trait.length, width);
+        expect(trait.trim().length, width ~/ 2);
+      }
+    });
+  });
+
+  group('gras', () {
+    List<TicketLine> riche({int columns = 48}) => TicketTextLayout.renderRich(
+      _model(
+        // Détail et total cohérents : le papier de ce test est un papier
+        // possible, pas une fixture qui s'additionne mal.
+        remainingBalance: MoneyBag.of(const [Money(290000, 'CDF')]),
+        remainingByCharge: const [
+          TicketAllocationLine(
+            label: 'Frais scolaires',
+            amountInCents: 250000,
+            currency: 'CDF',
+          ),
+          TicketAllocationLine(
+            label: 'Fournitures',
+            amountInCents: 40000,
+            currency: 'CDF',
+          ),
+        ],
+        paymentHistory: [
+          _past(12, const [Money(2500000, 'CDF')]),
+        ],
+      ),
+      columns: columns,
+    );
+
+    /// Le critère d'acceptation de l'ADR-012 porte sur le contenu TEXTUEL. Le
+    /// gras n'en est pas, et la façade doit continuer de rendre exactement ce
+    /// qu'elle rendait.
+    test('la façade texte est le texte du rendu riche, à la ligne près', () {
+      final model = _model();
+      expect(TicketTextLayout.render(model), [
+        for (final line in TicketTextLayout.renderRich(model)) line.text,
+      ]);
+    });
+
+    test('exactement le nom de l\'école, les titres et les totaux', () {
+      // Espaces d'alignement écrasées : ce test dit QUELLES lignes sont
+      // grasses, pas comment elles sont calées — la largeur a ses propres
+      // tests, et y faire dépendre celui-ci le ferait rougir au premier
+      // montant d'un chiffre de plus.
+      final gras = [
+        for (final line in riche())
+          if (line.bold) line.text.trim().replaceAll(RegExp(r'\s+'), ' '),
+      ];
+
+      expect(gras, [
+        'COMPLEXE SCOLAIRE LA COLOMBE',
+        'Montant reçu 1 500 FC',
+        'Répartition',
+        'Solde restant à payer pour ce(s) frais',
+        // 2 500 FC + 400 FC de détail : le total les somme.
+        'Total 2 900 FC',
+        'Historique des paiements',
+        'Total verse 26 500 FC',
+        'Signature du caissier',
+      ]);
+    });
+
+    /// Assertion NÉGATIVE, sans quoi un gabarit qui emphatiserait tout
+    /// passerait les cas positifs ci-dessus.
+    test('aucune ligne de détail, aucun filet, aucun pied n\'est gras', () {
+      for (final line in riche()) {
+        if (!line.bold) continue;
+        expect(line.text.trim(), isNot(startsWith('-')), reason: line.text);
+        expect(line.text.trim(), isNot(startsWith('  ')), reason: line.text);
+      }
+      // Le titre de la pièce reste maigre : arbitré par le porteur.
+      expect(
+        riche().firstWhere((l) => l.text.contains('TICKET DE PERCEPTION')).bold,
+        isFalse,
+      );
+      expect(
+        riche().firstWhere((l) => l.text.contains('remercions')).bold,
+        isFalse,
+      );
+    });
+
+    /// Le gras est posé par bloc, pas par ligne : un montant en deux devises
+    /// ou un titre replié doit sortir gras SUR TOUTES ses lignes, sans quoi la
+    /// seconde ligne se lirait comme un montant d'une autre nature.
+    test('un bloc multi-lignes est gras de bout en bout', () {
+      final lines = TicketTextLayout.renderRich(
+        _model(
+          tenders: TicketTenderLine.identityFrom(
+            MoneyBag.of(const [Money(150000, 'CDF'), Money(10000, 'USD')]),
+          ),
+        ),
+      );
+      final i = lines.indexWhere((l) => l.text.contains('Montant reçu'));
+
+      expect(lines[i].bold, isTrue);
+      expect(lines[i + 1].text.trim(), '100,00 \$');
+      expect(
+        lines[i + 1].bold,
+        isTrue,
+        reason: 'la seconde devise appartient au même bloc',
+      );
+    });
+
+    test('un titre replié à 32 colonnes est gras sur ses deux lignes', () {
+      final lines = riche(columns: 32);
+      final i = lines.indexWhere((l) => l.text.startsWith('Solde restant'));
+
+      expect(i, isNonNegative);
+      expect(lines[i].bold, isTrue);
+      expect(
+        lines[i + 1].text.startsWith('-'),
+        isFalse,
+        reason: 'le titre doit vraiment se replier à 32 colonnes',
+      );
+      expect(lines[i + 1].bold, isTrue);
+    });
+
+    test('le gras ne déplace aucune colonne', () {
+      for (final width in const [48, 32]) {
+        for (final line in riche(columns: width)) {
+          expect(line.text.length, lessThanOrEqualTo(width), reason: line.text);
+        }
+      }
+    });
+  });
+
+  group('les deux téléphones de l en-tête', () {
+    test('chacun sur sa ligne, chacun nommé', () {
+      final lines = TicketTextLayout.render(_model());
+
+      final promoteur = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+      final caisse = lines.indexWhere((l) => l.contains('Tél. caisse :'));
+
+      expect(promoteur, isNonNegative);
+      expect(caisse, promoteur + 1);
+      expect(lines[promoteur], contains('+243 000 000 000'));
+      expect(lines[caisse], contains('+243 811 111 111'));
+    });
+
+    /// L'en-tête n'invente jamais : un champ absent ne laisse pas même une
+    /// ligne d'espaces, et surtout pas son libellé tout seul — qui se lirait
+    /// comme un numéro effacé.
+    test('numéro de caisse absent : ni ligne ni libellé', () {
+      final lines = TicketTextLayout.render(_model(schoolTillPhone: null));
+
+      expect(lines.any((l) => l.contains('Tél. caisse')), isFalse);
+      expect(lines.any((l) => l.contains('Tél. Promoteur :')), isTrue);
+    });
+
+    test('les deux absents : l en-tête se raccourcit, il ne se troue pas', () {
+      final lines = TicketTextLayout.render(
+        _model(schoolPhone: null, schoolTillPhone: null),
+      );
+
+      expect(lines.any((l) => l.contains('Tél.')), isFalse);
+      expect(lines.any((l) => l.trim().isEmpty && l.isNotEmpty), isFalse);
+    });
+
+    /// ⚠️ Le défaut que ce repli ferme : « Tél. Promoteur : +243 000 000 000 »
+    /// fait 33 caractères et déborde à 32 colonnes. Replié sur les espaces, il
+    /// rendait `+243 000 000` puis `000` — un numéro que personne ne compose.
+    test(
+      'à 32 colonnes, le libellé passe au-dessus et le numéro reste entier',
+      () {
+        final lines = TicketTextLayout.render(_model(), columns: 32);
+        final i = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+
+        expect(i, isNonNegative);
+        expect(lines[i].trim(), 'Tél. Promoteur :');
+        expect(lines[i + 1].trim(), '+243 000 000 000');
+      },
+    );
+
+    test('un numéro court reste sur la ligne de son libellé', () {
+      final lines = TicketTextLayout.render(
+        _model(schoolPhone: '+243 811'),
+        columns: 32,
+      );
+      final i = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+
+      expect(lines[i].trim(), 'Tél. Promoteur : +243 811');
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32', () {
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(_model(), columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
+        }
+      }
+    });
+  });
+
+  group('matricule annuel', () {
+    test('sous le matricule classique, qui reste', () {
+      final lines = TicketTextLayout.render(_model());
+
+      final classique = lines.indexWhere((l) => l.startsWith('Matricule :'));
+      final annuel = lines.indexWhere((l) => l.startsWith('Mat. annuel :'));
+
+      expect(classique, isNonNegative);
+      expect(annuel, classique + 1);
+      expect(lines[annuel], contains('CF-P4-000018'));
+    });
+
+    test('absent : ni ligne ni libellé', () {
+      final lines = TicketTextLayout.render(
+        _model(annualMatriculationNumber: null),
+      );
+
+      expect(lines.any((l) => l.contains('Mat. annuel')), isFalse);
+      expect(lines.any((l) => l.startsWith('Matricule :')), isTrue);
+    });
+
+    /// Le matricule classique peut manquer hors ligne (attribué à l'ACK) sans
+    /// que l'annuel manque : ils ne viennent pas de la même table.
+    test('il sort même si le matricule classique manque', () {
+      final lines = TicketTextLayout.render(_model(matriculationNumber: null));
+
+      expect(lines.any((l) => l.startsWith('Matricule :')), isFalse);
+      expect(lines.any((l) => l.startsWith('Mat. annuel :')), isTrue);
+    });
+
+    /// ⚠️ Le cas limite, et c'est lui qui compte : le plus long code catalogue
+    /// connu donne une ligne de 32 caractères, soit EXACTEMENT la largeur d'un
+    /// papier 58 mm. Un libellé plus long y replierait le matricule.
+    test('le plus long matricule tient pile à 32 colonnes', () {
+      final lines = TicketTextLayout.render(
+        _model(annualMatriculationNumber: 'CF-HG-SCI-1-000123'),
+        columns: 32,
+      );
+      final i = lines.indexWhere((l) => l.startsWith('Mat. annuel :'));
+
+      expect(i, isNonNegative);
+      expect(lines[i], 'Mat. annuel : CF-HG-SCI-1-000123');
+      expect(lines[i].length, 32);
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32', () {
+      final model = _model(annualMatriculationNumber: 'CF-HG-SCI-1-000123');
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(model, columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
+        }
       }
     });
   });

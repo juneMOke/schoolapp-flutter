@@ -30,6 +30,17 @@ class EnrollmentDeltaDto {
   final String id;
   final String studentId;
   final String? matriculationNumber;
+
+  /// Le matricule de l'élève pour CETTE année (contrat back du 2026-09-24).
+  ///
+  /// Calculé serveur, **lecture seule**, jamais poussé. `null` légitime quand le
+  /// niveau est hors catalogue officiel ou que le matricule classique ne suit
+  /// pas le format `XXX-AAAA-NNNNNN` (imports).
+  ///
+  /// 🔴 **Ce n'est PAS une clé** : la séquence repart à 1 chaque année civile,
+  /// deux élèves d'un même niveau peuvent la partager.
+  final String? annualMatriculationNumber;
+
   final String? schoolLevelId;
   final String? academicYearId;
   final String status;
@@ -40,6 +51,7 @@ class EnrollmentDeltaDto {
     required this.id,
     required this.studentId,
     this.matriculationNumber,
+    this.annualMatriculationNumber,
     this.schoolLevelId,
     this.academicYearId,
     required this.status,
@@ -52,6 +64,7 @@ class EnrollmentDeltaDto {
         id: j['id'] as String,
         studentId: j['studentId'] as String,
         matriculationNumber: j['matriculationNumber'] as String?,
+        annualMatriculationNumber: j['annualMatriculationNumber'] as String?,
         schoolLevelId: j['schoolLevelId'] as String?,
         academicYearId: j['academicYearId'] as String?,
         status: j['status'] as String,

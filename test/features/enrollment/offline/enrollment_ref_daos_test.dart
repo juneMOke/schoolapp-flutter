@@ -143,9 +143,11 @@ void main() {
     String status = 'ACTIVE',
     String? schoolLevelId = 'lvl-2',
     String updatedAt = '2026-07-08T10:00:00Z',
+    String? annualMatriculationNumber,
   }) => EnrollmentDeltaDto(
     id: id,
     studentId: 'stu-1',
+    annualMatriculationNumber: annualMatriculationNumber,
     schoolLevelId: schoolLevelId,
     academicYearId: 'ay-1',
     status: status,
@@ -1657,6 +1659,161 @@ void main() {
       final links = await db.query('student_parent');
       expect(links, hasLength(1));
       expect(links.single['parent_id'], 'par-A');
+    });
+  });
+
+  group('le téléphone de la caisse (v50)', () {
+    /// Distinct du téléphone de l'établissement : le ticket imprime les deux,
+    /// nommés, l'un sous l'autre.
+    test('descend du référentiel et se relit', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            phone: '+243 000 000 000',
+            tillPhone: '+243 811 111 111',
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      final school = await referentialDao.getSchool();
+      expect(school!.phone, '+243 000 000 000');
+      expect(school.tillPhone, '+243 811 111 111');
+    });
+
+    /// Le champ est additif : tant que le serveur ne le sert pas, il arrive
+    /// absent du JSON et personne ne s'en trouve mal.
+    test('absent du contrat servi : `null`, pas une chaîne vide', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.tillPhone, isNull);
+    });
+
+    /// ⚠️ `ref_school` est un cache MONO-LIGNE réécrit en entier à chaque pull.
+    /// Un numéro qui survivrait à un pull qui ne le porte plus serait un
+    /// résidu — le référentiel fait autorité, et il est renvoyé complet.
+    test('un pull sans le champ efface la valeur locale', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            tillPhone: '+243 811 111 111',
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+        ),
+        syncedAt: 600,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.tillPhone, isNull);
+    });
+
+    test('le JSON du contrat porte bien `tillPhone`', () {
+      final dto = RefSchoolDto.fromJson(const {
+        'id': 'sch-1',
+        'name': 'Ecole Etoile',
+        'tillPhone': '+243 811 111 111',
+      });
+
+      expect(dto.tillPhone, '+243 811 111 111');
+    });
+  });
+
+  group('le matricule annuel (v51)', () {
+    Future<String?> lu({String id = 'e1'}) async =>
+        (await db.query(
+              'enrollments',
+              columns: ['annual_matriculation_number'],
+              where: 'id = ?',
+              whereArgs: [id],
+            )).single['annual_matriculation_number']
+            as String?;
+
+    test('le delta le pose sur une inscription SYNCED', () async {
+      await seedEnrollment();
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      expect(await lu(), 'CF-P4-000018');
+    });
+
+    /// ⚠️ L'affectation est FRANCHE, à l'inverse du matricule classique qui
+    /// porte une garde `!= null`. Un niveau corrigé hors catalogue fait
+    /// légitimement disparaître l'annuel côté serveur ; le retenir imprimerait
+    /// sur le ticket un matricule que le serveur a retiré.
+    test('un nul venu du serveur EFFACE la valeur locale', () async {
+      await seedEnrollment();
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(updatedAt: '2026-07-09T10:00:00Z'),
+      ], syncedAt: 901);
+
+      expect(await lu(), isNull);
+    });
+
+    /// Le delta n'écrase jamais une écriture locale non remontée.
+    test('une inscription non SYNCED reste intacte', () async {
+      await seedEnrollment(syncStatus: 'PENDING_SYNC');
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      expect(await lu(), isNull);
+    });
+
+    test('le JSON du delta porte bien le champ', () {
+      final dto = EnrollmentDeltaDto.fromJson(const {
+        'id': 'e1',
+        'studentId': 'stu-1',
+        'annualMatriculationNumber': 'CF-P4-000018',
+        'status': 'ACTIVE',
+        'updatedAt': '2026-07-08T10:00:00Z',
+        'serverUpdatedAt': '2026-07-08T10:00:00Z',
+      });
+
+      expect(dto.annualMatriculationNumber, 'CF-P4-000018');
+    });
+
+    test('le JSON du snapshot porte bien le champ', () {
+      final dto = EnrollmentSnapshotDto.fromJson(const {
+        'id': 'e1',
+        'studentId': 'stu-1',
+        'academicYearId': 'ay-1',
+        'status': 'COMPLETED',
+        'enrollmentType': 'NEW_ENROLLMENT',
+        'enrollmentCode': 'C1',
+        'annualMatriculationNumber': 'CF-P4-000018',
+        'enrollmentDate': '2026-07-01',
+        'firstName': 'Amina',
+        'lastName': 'Moke',
+        'surname': 'Kasa',
+        'dateOfBirth': '2015-04-02',
+        'gender': 'FEMALE',
+      });
+
+      expect(dto.annualMatriculationNumber, 'CF-P4-000018');
     });
   });
 }

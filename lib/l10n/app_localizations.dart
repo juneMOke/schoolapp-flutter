@@ -584,6 +584,12 @@ abstract class AppLocalizations {
   /// **'School phone'**
   String get configurationSchoolPhone;
 
+  /// No description provided for @configurationSchoolTillPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Till phone number'**
+  String get configurationSchoolTillPhone;
+
   /// School email field
   ///
   /// In en, this message translates to:
@@ -13064,6 +13070,18 @@ abstract class AppLocalizations {
   /// **'Cashier:'**
   String get ticketCashierLabel;
 
+  /// No description provided for @ticketSchoolPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoter tel.:'**
+  String get ticketSchoolPhoneLabel;
+
+  /// No description provided for @ticketTillPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till tel.:'**
+  String get ticketTillPhoneLabel;
+
   /// No description provided for @ticketStudentLabel.
   ///
   /// In en, this message translates to:
@@ -13075,6 +13093,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Student no.:'**
   String get ticketMatriculationLabel;
+
+  /// No description provided for @ticketAnnualMatriculationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual no.:'**
+  String get ticketAnnualMatriculationLabel;
 
   /// No description provided for @ticketClassroomLabel.
   ///
@@ -13115,7 +13139,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Remaining balance as of printing'**
+  /// **'Remaining balance on these fees'**
   String get ticketBalanceLabel;
 
   /// No description provided for @ticketBalanceTotalLabel.
@@ -13123,6 +13147,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total'**
   String get ticketBalanceTotalLabel;
+
+  /// No description provided for @ticketHistoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history'**
+  String get ticketHistoryLabel;
+
+  /// No description provided for @ticketHistoryTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid'**
+  String get ticketHistoryTotalLabel;
 
   /// No description provided for @ticketThanksNotice.
   ///
@@ -13147,6 +13183,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep this ticket until you receive your final receipt.'**
   String get ticketKeepNotice;
+
+  /// No description provided for @ticketSignatureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier\'s signature'**
+  String get ticketSignatureLabel;
 
   /// No description provided for @ticketPrintLabel.
   ///

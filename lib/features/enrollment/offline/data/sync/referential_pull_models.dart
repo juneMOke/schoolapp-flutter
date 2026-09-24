@@ -330,6 +330,15 @@ class RefSchoolDto {
   final String? municipality;
   final String? address;
   final String? phone;
+
+  /// Le numéro que la famille appelle pour une question de PAIEMENT, distinct
+  /// de [phone] qui est celui de l'établissement.
+  ///
+  /// Additif et facultatif (contrat back du 2026-09-24) : il arrive `null` tant
+  /// que le serveur ne le sert pas, et personne ne s'en trouve mal — le ticket
+  /// tait la ligne, l'écran laisse le champ vide.
+  final String? tillPhone;
+
   final String? email;
 
   const RefSchoolDto({
@@ -341,6 +350,7 @@ class RefSchoolDto {
     this.municipality,
     this.address,
     this.phone,
+    this.tillPhone,
     this.email,
   });
 
@@ -353,6 +363,7 @@ class RefSchoolDto {
     municipality: j['municipality'] as String?,
     address: j['address'] as String?,
     phone: j['phone'] as String?,
+    tillPhone: j['tillPhone'] as String?,
     email: j['email'] as String?,
   );
 }

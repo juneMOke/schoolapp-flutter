@@ -66,6 +66,15 @@ class EnrollmentReconciliationDao {
     final changed = await txn.rawUpdate(
       'UPDATE enrollments SET '
       'status = ?, '
+      // Affectation FRANCHE, ni COALESCE ni garde `!= null` — à l'inverse du
+      // matricule classique vingt lignes plus bas, et il faut dire pourquoi
+      // sous peine de voir les deux « harmonisées » un jour.
+      //
+      // Le matricule classique ne devient jamais nul légitimement : le garder
+      // sous une garde protège d'une perte. L'annuel, si — un niveau corrigé
+      // hors catalogue le fait disparaître côté serveur. Le retenir ici
+      // imprimerait sur le ticket un matricule que le serveur a retiré.
+      'annual_matriculation_number = ?, '
       'school_level_id = COALESCE(?, school_level_id), '
       'school_level_group_id = CASE WHEN ? IS NULL '
       'THEN school_level_group_id '
@@ -77,6 +86,9 @@ class EnrollmentReconciliationDao {
       'WHERE id = ? AND sync_status = ? AND updated_at <= ?',
       [
         d.status,
+        // ⚠️ Rang EXACT : cette liste est positionnelle, et un décalage écrit
+        // la bonne valeur dans la mauvaise colonne sans rien lever.
+        d.annualMatriculationNumber,
         d.schoolLevelId,
         d.schoolLevelId,
         d.schoolLevelId,
@@ -229,6 +241,7 @@ class EnrollmentReconciliationDao {
       'school_level_group_id': e.schoolLevelGroupId,
       'enrollment_date': e.enrollmentDate,
       'enrollment_code': e.enrollmentCode,
+      'annual_matriculation_number': e.annualMatriculationNumber,
       'previous_school_name': e.previousSchoolName,
       'previous_academic_year': e.previousAcademicYear,
       'previous_school_level_group': e.previousSchoolLevelGroup,
