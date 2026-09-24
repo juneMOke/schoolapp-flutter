@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_queue_sort.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que dit un état du circuit. Partagé par la pastille, le filtre de
@@ -81,3 +82,11 @@ String expenseGestureToast(
   ExpenseGesture.remind => l10n.expenseToastReminded(name),
   ExpenseGesture.comment => l10n.expenseToastCommented(name),
 };
+
+/// Les trois lectures de la file.
+String expenseQueueSortLabel(AppLocalizations l10n, ExpenseQueueSort sort) =>
+    switch (sort) {
+      ExpenseQueueSort.age => l10n.expenseQueueSortAge,
+      ExpenseQueueSort.amount => l10n.expenseQueueSortAmount,
+      ExpenseQueueSort.requester => l10n.expenseQueueSortRequester,
+    };

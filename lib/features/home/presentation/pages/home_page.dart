@@ -34,6 +34,7 @@ import 'package:school_app_flutter/features/boutique/presentation/pages/boutique
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_dashboard_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
@@ -200,6 +201,7 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
         state.selectedSubMenuId == MenuConstants.expenseDashboardId ||
         state.selectedSubMenuId == MenuConstants.expenseRegisterId ||
+        state.selectedSubMenuId == MenuConstants.expenseQueueId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
@@ -362,7 +364,7 @@ class _HomePageView extends StatelessWidget {
 
       case MenuConstants.boutiqueHistoriqueId:
         return const BoutiqueHistoryPage();
-      // Les deux écrans des dépenses partagent le même type de scope au même
+      // Les trois écrans des dépenses partagent le même type de scope au même
       // emplacement du switch : une clé par sous-menu, sinon Flutter recycle
       // l'Element et le pull de montage ne rejoue pas en passant de l'un à
       // l'autre.
@@ -375,6 +377,11 @@ class _HomePageView extends StatelessWidget {
         return const ExpenseFeatureScope(
           key: ValueKey(MenuConstants.expenseRegisterId),
           child: ExpenseRegisterPage(),
+        );
+      case MenuConstants.expenseQueueId:
+        return const ExpenseFeatureScope(
+          key: ValueKey(MenuConstants.expenseQueueId),
+          child: ExpenseQueuePage(),
         );
       // Scope PROPRE depuis que le contrôle est un module à part : plus rien
       // ne le partage avec la Facturation, donc plus de `ValueKey` à poser

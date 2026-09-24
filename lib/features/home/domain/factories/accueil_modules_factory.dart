@@ -223,6 +223,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.expenseRegisterId,
           title: l10n.subMenuExpenseRegister,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.expenseQueueId,
+          title: l10n.subMenuExpenseQueue,
+        ),
       ],
     );
   }

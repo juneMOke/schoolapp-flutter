@@ -265,6 +265,10 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // registre sans pouvoir le modifier.
     MenuConstants.expenseDashboardId: ModuleAccess([Perm.expenseRead]),
     MenuConstants.expenseRegisterId: ModuleAccess([Perm.expenseRead]),
+    // La file LIT la même liste locale : `expense.read` suffit. Lui demander
+    // `expense.decide` la fermerait à celui qui dépose — or il doit y voir sa
+    // demande attendre, et pouvoir la relancer ou la retirer.
+    MenuConstants.expenseQueueId: ModuleAccess([Perm.expenseRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

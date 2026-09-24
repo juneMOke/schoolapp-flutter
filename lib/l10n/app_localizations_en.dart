@@ -9977,6 +9977,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuExpenseRegister => 'Operating costs';
 
   @override
+  String get subMenuExpenseQueue => 'Approvals';
+
+  @override
   String get accueilModuleExpenseDescription =>
       'What the school pays out: the operating costs register and its dashboard.';
 
@@ -10530,6 +10533,255 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expenseThreadSendFailed =>
       'The message could not be written on this device. Try again.';
+
+  @override
+  String get expenseQueueTitle => 'Request approvals';
+
+  @override
+  String get expenseQueueSubtitle =>
+      'The queue of pending requests, from the oldest to the most recent.';
+
+  @override
+  String get expenseQueueWaitingToday => 'today';
+
+  @override
+  String expenseQueueWaitingDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'for $count days',
+      one: 'for 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueReminderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reminders',
+      one: '1 reminder',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueDepositedOn(String date) {
+    return 'Submitted on $date';
+  }
+
+  @override
+  String get expenseQueueYou => 'you';
+
+  @override
+  String expenseQueueMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count msgs',
+      one: '1 msg',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueSelectAll => 'Select all';
+
+  @override
+  String get expenseQueueSortTitle => 'Sort by';
+
+  @override
+  String get expenseQueueSortAge => 'Age';
+
+  @override
+  String get expenseQueueSortAmount => 'Amount';
+
+  @override
+  String get expenseQueueSortRequester => 'Requester';
+
+  @override
+  String get expenseQueueOrderNote =>
+      'Delay shows up first: the queue opens on the request that has waited longest.';
+
+  @override
+  String get expenseQueueReadOnlyNote =>
+      'You can see the queue but not decide. On your own requests you can still correct, withdraw or send a reminder.';
+
+  @override
+  String get expenseQueueStatPending => 'Awaiting a decision';
+
+  @override
+  String expenseQueueStatPendingSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count requests — nothing is committed until something is decided',
+      one: '1 request — nothing is committed until something is decided',
+      zero: 'no request',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueStatOverdue => 'Waiting 5 days or more';
+
+  @override
+  String expenseQueueStatOverdueSub(int days) {
+    return 'the oldest has waited $days days';
+  }
+
+  @override
+  String get expenseQueueStatNoOverdue => 'nothing overdue';
+
+  @override
+  String get expenseQueueStatReminded => 'Requests with a reminder';
+
+  @override
+  String get expenseQueueStatRemindedSub =>
+      'the requester is waiting for an answer';
+
+  @override
+  String get expenseQueueStatNoReminder => 'no reminder';
+
+  @override
+  String get expenseQueueStatApproved => 'Approved, left to pay';
+
+  @override
+  String expenseQueueStatApprovedSub(String amount) {
+    return '$amount already granted';
+  }
+
+  @override
+  String get expenseQueueEmptyTitle => 'The queue is empty';
+
+  @override
+  String get expenseQueueEmptyMessage =>
+      'No request is awaiting a decision: everything submitted has been settled.';
+
+  @override
+  String expenseQueueEmptyWithApproved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count approved expenses are',
+      one: '1 approved expense is',
+    );
+    return 'No request is awaiting a decision. $_temp0 left to pay.';
+  }
+
+  @override
+  String get expenseQueueOpenRequest => 'Open the request';
+
+  @override
+  String get expenseQueueOpenRegister => 'Open the register';
+
+  @override
+  String expenseQueueSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count requests selected',
+      one: '1 request selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueDeselect => 'Deselect';
+
+  @override
+  String get expenseQueueApproveBatch => 'Approve as a batch';
+
+  @override
+  String get expenseQueueRefuseBatch => 'Refuse as a batch';
+
+  @override
+  String expenseQueueBatchReasonLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Shared reason for refusal — $count requests',
+      one: 'Reason for refusal — 1 request',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueBatchReasonHint =>
+      'The same reason will be written into every thread, with your name and the date.';
+
+  @override
+  String expenseQueueBatchConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Confirm the refusal of $count requests',
+      one: 'Confirm the refusal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueBatchDone(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count requests handled',
+      one: '1 request handled',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String expenseQueueBatchPartial(int done, int failed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done requests handled',
+      one: '1 request handled',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      failed,
+      locale: localeName,
+      other: '$failed could not be',
+      one: '1 could not be',
+    );
+    return '$_temp0 — $_temp1.';
+  }
+
+  @override
+  String get expenseQueueBatchNone =>
+      'No request could be handled: their state has changed.';
+
+  @override
+  String get expenseQueueApprovedTitle => 'Approved, awaiting payment';
+
+  @override
+  String expenseQueueApprovedSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count granted expenses',
+      one: '1 granted expense',
+    );
+    return '$_temp0 — payment is recorded here or from the detail sheet.';
+  }
+
+  @override
+  String expenseQueueApprovedOn(String date, String name) {
+    return 'approved on $date by $name';
+  }
+
+  @override
+  String get expenseQueueApprovedUndated =>
+      'approved — this device does not know the decider yet';
+
+  @override
+  String expenseQueueSeeAllApproved(int count) {
+    return 'See all $count approved expenses in the register';
+  }
 
   @override
   String get expenseThreadTitle => 'Request thread';

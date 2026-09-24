@@ -31,6 +31,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   required List<ExpenseMessage>? thread,
   String? accountId,
   Future<ExpenseCommentResult> Function(String body)? onComment,
+  bool startRefusing = false,
 }) => showDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
@@ -40,6 +41,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
     thread: thread,
     accountId: accountId,
     onComment: onComment,
+    startRefusing: startRefusing,
   ),
 );
 
@@ -53,6 +55,11 @@ class ExpenseDetailDialog extends StatefulWidget {
   /// Écrit le commentaire et rend le fil relu. `null` : fil en lecture seule.
   final Future<ExpenseCommentResult> Function(String body)? onComment;
 
+  /// Ouvre la fiche avec le panneau de motif déjà déplié : c'est le
+  /// « Refuser » d'une ligne de file, qui amène le décideur devant ce qu'il
+  /// refuse plutôt que de lui demander un mot dans le vide.
+  final bool startRefusing;
+
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
@@ -61,6 +68,7 @@ class ExpenseDetailDialog extends StatefulWidget {
     required this.thread,
     this.accountId,
     this.onComment,
+    this.startRefusing = false,
   });
 
   @override
@@ -76,7 +84,7 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   late List<ExpenseMessage>? _thread = widget.thread;
 
   /// Le panneau de motif est ouvert : le refus attend son mot.
-  bool _refusing = false;
+  late bool _refusing = widget.startRefusing;
 
   Future<ExpenseCommentResult> _send(String body) async {
     final result = await widget.onComment!(body);

@@ -16,8 +16,7 @@ typedef ExpenseReading = ({String primary, String? pair});
 /// une **lecture** en dollars, une **paire** jamais additionnée.
 abstract final class ExpenseMoneyText {
   /// Le montant d'une dépense, dans sa devise d'engagement.
-  static String of(Expense expense) =>
-      MoneyFormat.format(Money(expense.amountInCents, expense.currency));
+  static String of(Expense expense) => MoneyFormat.format(expense.money);
 
   /// Une lecture en dollars (des centimes de dollar).
   static String usd(int cents) =>

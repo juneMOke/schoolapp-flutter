@@ -212,7 +212,14 @@ class MenuFactory {
   ///
   /// Un menu propre, et non un sous-menu de Finances : la source de fonds est
   /// enregistrée mais ne débite aucune caisse en V1. Le tableau de bord d'abord
-  /// — on mesure avant de détailler — puis le registre, où tout s'écrit.
+  /// — on mesure avant de détailler —, puis le registre où tout s'écrit, puis
+  /// la file où tout se tranche.
+  ///
+  /// ⚠️ **Le sous-menu ne porte pas le compteur d'attente** que la maquette
+  /// met sur son onglet. Le socle de menu n'a pas de pastille, et lui en
+  /// donner une supposerait que la barre latérale s'abonne au registre des
+  /// dépenses — une dépendance de `home` vers un module métier, pour un seul
+  /// appelant. Le compte vit donc sur l'écran de la file, en tête.
   static MenuItem _createExpenseMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.expenseMenuId,
@@ -228,6 +235,11 @@ class MenuFactory {
           id: MenuConstants.expenseRegisterId,
           title: l10n.subMenuExpenseRegister,
           route: AppRoutesNames.expenseRegister,
+        ),
+        SubMenuItem(
+          id: MenuConstants.expenseQueueId,
+          title: l10n.subMenuExpenseQueue,
+          route: AppRoutesNames.expenseQueue,
         ),
       ],
     );

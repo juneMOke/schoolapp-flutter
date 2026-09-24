@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
@@ -31,7 +30,7 @@ class ExpenseDetailBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = ExpenseTypeColors.of(type);
     final usd = ExpenseMoneyText.showsUsdEquivalent(expense.currency)
-        ? reader.usdCentsOf(Money(expense.amountInCents, expense.currency))
+        ? reader.usdCentsOf(expense.money)
         : null;
     return Container(
       padding: const EdgeInsets.all(AppDimensions.spacingM),

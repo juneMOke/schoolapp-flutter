@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 
@@ -89,6 +90,11 @@ class Expense extends Equatable {
     this.syncState = ExpenseSyncState.synced,
     this.syncErrorCode,
   });
+
+  /// Le montant **dans sa devise d'engagement** — la seule forme sous
+  /// laquelle il se transporte. La lecture en dollars est un calcul
+  /// d'affichage, faite par `ExpenseUsdReader` et jamais rangée ici.
+  Money get money => Money(amountInCents, currency);
 
   /// L'argent est engagé pour de bon (approuvée ou payée). **Toute somme du
   /// module passe par là** — jamais par une égalité de statut.

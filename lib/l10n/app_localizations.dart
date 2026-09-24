@@ -15929,6 +15929,12 @@ abstract class AppLocalizations {
   /// **'Operating costs'**
   String get subMenuExpenseRegister;
 
+  /// No description provided for @subMenuExpenseQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get subMenuExpenseQueue;
+
   /// No description provided for @accueilModuleExpenseDescription.
   ///
   /// In en, this message translates to:
@@ -16774,6 +16780,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The message could not be written on this device. Try again.'**
   String get expenseThreadSendFailed;
+
+  /// No description provided for @expenseQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request approvals'**
+  String get expenseQueueTitle;
+
+  /// No description provided for @expenseQueueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue of pending requests, from the oldest to the most recent.'**
+  String get expenseQueueSubtitle;
+
+  /// No description provided for @expenseQueueWaitingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get expenseQueueWaitingToday;
+
+  /// No description provided for @expenseQueueWaitingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{for 1 day} other{for {count} days}}'**
+  String expenseQueueWaitingDays(int count);
+
+  /// No description provided for @expenseQueueReminderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reminder} other{{count} reminders}}'**
+  String expenseQueueReminderCount(int count);
+
+  /// No description provided for @expenseQueueDepositedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted on {date}'**
+  String expenseQueueDepositedOn(String date);
+
+  /// No description provided for @expenseQueueYou.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get expenseQueueYou;
+
+  /// No description provided for @expenseQueueMessageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 msg} other{{count} msgs}}'**
+  String expenseQueueMessageCount(int count);
+
+  /// No description provided for @expenseQueueSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get expenseQueueSelectAll;
+
+  /// No description provided for @expenseQueueSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get expenseQueueSortTitle;
+
+  /// No description provided for @expenseQueueSortAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get expenseQueueSortAge;
+
+  /// No description provided for @expenseQueueSortAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get expenseQueueSortAmount;
+
+  /// No description provided for @expenseQueueSortRequester.
+  ///
+  /// In en, this message translates to:
+  /// **'Requester'**
+  String get expenseQueueSortRequester;
+
+  /// No description provided for @expenseQueueOrderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay shows up first: the queue opens on the request that has waited longest.'**
+  String get expenseQueueOrderNote;
+
+  /// No description provided for @expenseQueueReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can see the queue but not decide. On your own requests you can still correct, withdraw or send a reminder.'**
+  String get expenseQueueReadOnlyNote;
+
+  /// No description provided for @expenseQueueStatPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting a decision'**
+  String get expenseQueueStatPending;
+
+  /// No description provided for @expenseQueueStatPendingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no request} =1{1 request — nothing is committed until something is decided} other{{count} requests — nothing is committed until something is decided}}'**
+  String expenseQueueStatPendingSub(int count);
+
+  /// No description provided for @expenseQueueStatOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting 5 days or more'**
+  String get expenseQueueStatOverdue;
+
+  /// No description provided for @expenseQueueStatOverdueSub.
+  ///
+  /// In en, this message translates to:
+  /// **'the oldest has waited {days} days'**
+  String expenseQueueStatOverdueSub(int days);
+
+  /// No description provided for @expenseQueueStatNoOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing overdue'**
+  String get expenseQueueStatNoOverdue;
+
+  /// No description provided for @expenseQueueStatReminded.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests with a reminder'**
+  String get expenseQueueStatReminded;
+
+  /// No description provided for @expenseQueueStatRemindedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'the requester is waiting for an answer'**
+  String get expenseQueueStatRemindedSub;
+
+  /// No description provided for @expenseQueueStatNoReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'no reminder'**
+  String get expenseQueueStatNoReminder;
+
+  /// No description provided for @expenseQueueStatApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved, left to pay'**
+  String get expenseQueueStatApproved;
+
+  /// No description provided for @expenseQueueStatApprovedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} already granted'**
+  String expenseQueueStatApprovedSub(String amount);
+
+  /// No description provided for @expenseQueueEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue is empty'**
+  String get expenseQueueEmptyTitle;
+
+  /// No description provided for @expenseQueueEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No request is awaiting a decision: everything submitted has been settled.'**
+  String get expenseQueueEmptyMessage;
+
+  /// No description provided for @expenseQueueEmptyWithApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'No request is awaiting a decision. {count, plural, =1{1 approved expense is} other{{count} approved expenses are}} left to pay.'**
+  String expenseQueueEmptyWithApproved(int count);
+
+  /// No description provided for @expenseQueueOpenRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the request'**
+  String get expenseQueueOpenRequest;
+
+  /// No description provided for @expenseQueueOpenRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the register'**
+  String get expenseQueueOpenRegister;
+
+  /// No description provided for @expenseQueueSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request selected} other{{count} requests selected}}'**
+  String expenseQueueSelected(int count);
+
+  /// No description provided for @expenseQueueDeselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get expenseQueueDeselect;
+
+  /// No description provided for @expenseQueueApproveBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve as a batch'**
+  String get expenseQueueApproveBatch;
+
+  /// No description provided for @expenseQueueRefuseBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse as a batch'**
+  String get expenseQueueRefuseBatch;
+
+  /// No description provided for @expenseQueueBatchReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Reason for refusal — 1 request} other{Shared reason for refusal — {count} requests}}'**
+  String expenseQueueBatchReasonLabel(int count);
+
+  /// No description provided for @expenseQueueBatchReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The same reason will be written into every thread, with your name and the date.'**
+  String get expenseQueueBatchReasonHint;
+
+  /// No description provided for @expenseQueueBatchConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Confirm the refusal} other{Confirm the refusal of {count} requests}}'**
+  String expenseQueueBatchConfirm(int count);
+
+  /// No description provided for @expenseQueueBatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request handled} other{{count} requests handled}} · {amount}'**
+  String expenseQueueBatchDone(int count, String amount);
+
+  /// No description provided for @expenseQueueBatchPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{done, plural, =1{1 request handled} other{{done} requests handled}} — {failed, plural, =1{1 could not be} other{{failed} could not be}}.'**
+  String expenseQueueBatchPartial(int done, int failed);
+
+  /// No description provided for @expenseQueueBatchNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No request could be handled: their state has changed.'**
+  String get expenseQueueBatchNone;
+
+  /// No description provided for @expenseQueueApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved, awaiting payment'**
+  String get expenseQueueApprovedTitle;
+
+  /// No description provided for @expenseQueueApprovedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 granted expense} other{{count} granted expenses}} — payment is recorded here or from the detail sheet.'**
+  String expenseQueueApprovedSubtitle(int count);
+
+  /// No description provided for @expenseQueueApprovedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'approved on {date} by {name}'**
+  String expenseQueueApprovedOn(String date, String name);
+
+  /// No description provided for @expenseQueueApprovedUndated.
+  ///
+  /// In en, this message translates to:
+  /// **'approved — this device does not know the decider yet'**
+  String get expenseQueueApprovedUndated;
+
+  /// No description provided for @expenseQueueSeeAllApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'See all {count} approved expenses in the register'**
+  String expenseQueueSeeAllApproved(int count);
 
   /// No description provided for @expenseThreadTitle.
   ///

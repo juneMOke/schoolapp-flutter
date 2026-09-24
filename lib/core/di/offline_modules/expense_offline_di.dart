@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/expense/domain/usecases/load_expense
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_snapshot_source.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -124,6 +125,13 @@ void registerExpenseOffline(GetIt getIt) {
       save: getIt<SaveExpenseUseCase>(),
       withdraw: getIt<WithdrawExpenseUseCase>(),
       restore: getIt<RestoreExpenseUseCase>(),
+      gesture: getIt<ApplyExpenseGestureUseCase>(),
+      thread: getIt<LoadExpenseThreadUseCase>(),
+    ),
+  );
+  getIt.registerFactory<ExpenseQueueCubit>(
+    () => ExpenseQueueCubit(
+      source: getIt<ExpenseSnapshotSource>(),
       gesture: getIt<ApplyExpenseGestureUseCase>(),
       thread: getIt<LoadExpenseThreadUseCase>(),
     ),
