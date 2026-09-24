@@ -578,3 +578,8 @@ propre lot et profiterait aussi aux paiements et aux ventes.
 - **Le motif de refus nomme des fournisseurs et des collègues** : aucun corps de
   message dans un journal, ici comme côté serveur (`ExpenseMessage` et sa ligne
   locale ont `stringify = false`).
+- 🔴 **Les permissions n'arrivent qu'au login.** Sans incrément de
+  `user_version` à la release, un poste **déjà connecté** ne verra aucun bouton
+  de décision — et gardera le bouton Supprimer que la comptabilité vient de
+  perdre, pour un 403 terminal. À faire au moment où le back sème
+  `expense.decide` / `expense.pay` / `expense.reopen`, pas avant.
