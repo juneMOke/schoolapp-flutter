@@ -75,6 +75,22 @@ enum Perm {
   expenseRead('expense.read'),
   expenseWrite('expense.write'),
   expenseDelete('expense.delete'),
+  // Le circuit de validation (v2) nomme trois gestes de plus, et la frontière
+  // y est celle qu'on trace partout ailleurs ici : déposer n'est pas accorder,
+  // et accorder n'est pas décaisser. Annuler une décision est le filet de la
+  // direction — jamais un geste de guichet, sans quoi celui qu'on vient de
+  // refuser déferait son propre refus.
+  //
+  // ⚠️ **Déclarées AVANT que le serveur ne les sème**, comme
+  // `finance.rate.override`. C'est sans danger dans ce sens : un ensemble
+  // effectif qui ne les porte pas masque les gestes, la demande reste en
+  // attente, et rien ne part dans l'outbox pour y mourir en 403. Mais tant que
+  // la livraison back C0→C3 ne les a pas semées, décider est inaccessible à
+  // toute l'école — c'est pourquoi elles ne figurent pas non plus dans
+  // `kGuardedWriteActions`.
+  expenseDecide('expense.decide'),
+  expensePay('expense.pay'),
+  expenseReopen('expense.reopen'),
 
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),

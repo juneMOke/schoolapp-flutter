@@ -145,6 +145,40 @@ const ModuleAccess kExpenseWriteAccess = ModuleAccess([Perm.expenseWrite]);
 /// peut confier l'un sans l'autre.
 const ModuleAccess kExpenseWithdrawAccess = ModuleAccess([Perm.expenseDelete]);
 
+/// Accorder ou refuser une demande (`POST /sync/expenses/{id}/decision`).
+///
+/// **Ni conjonction avec [kExpenseWriteAccess], ni repli sur elle** : décider
+/// n'est pas saisir. Les fondre rendrait toute demande auto-approuvable par son
+/// auteur, et le circuit ne garderait plus rien — c'est exactement ce que le
+/// `422 SELF_APPROVAL_FORBIDDEN` du serveur refuse. L'écran masque d'ailleurs
+/// Approuver / Refuser sur ses PROPRES demandes (F29), droit ou pas : un geste
+/// qu'on sait condamné ne s'offre pas.
+const ModuleAccess kExpenseDecideAccess = ModuleAccess([Perm.expenseDecide]);
+
+/// Constater le décaissement d'une demande accordée
+/// (`POST /sync/expenses/{id}/payment`).
+///
+/// Séparée de la décision parce que ce ne sont pas les mêmes mains : la
+/// direction accorde, l'économat décaisse. Une école qui confie les deux au
+/// même compte le fera en lui donnant les deux droits — c'est son choix, et il
+/// reste lisible.
+const ModuleAccess kExpensePayAccess = ModuleAccess([Perm.expensePay]);
+
+/// Annuler une décision déjà rendue et ramener la demande en attente
+/// (`POST /sync/expenses/{id}/reopen`).
+///
+/// Le filet de la direction, et le seul geste du circuit qui défait. Le donner
+/// à qui dépose reviendrait à lui donner le dernier mot sur son propre refus.
+const ModuleAccess kExpenseReopenAccess = ModuleAccess([Perm.expenseReopen]);
+
+/// ⚠️ **Les trois accès du circuit sont délibérément ABSENTS de
+/// [kGuardedWriteActions]**, pour la raison exacte de [kRateOverrideAccess] :
+/// aucun rôle du template serveur ne détient encore `expense.decide`,
+/// `expense.pay` ni `expense.reopen`. Les y inscrire ferait rougir — à raison —
+/// le test « aucune exigence n'est hors de portée de tous ». **À inscrire le
+/// jour où le back sème ces droits (lots C0→C3)**, en même temps que la copie
+/// du template dans `role_journeys_test.dart`, et pas avant.
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
