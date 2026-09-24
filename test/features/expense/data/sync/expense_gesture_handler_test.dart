@@ -214,22 +214,59 @@ void main() {
       expect(sent, ['m-1', 'm-2', 'm-3']);
     });
 
-    test('un prédécesseur en ERREUR libère ses suivants au lieu de les '
-        'geler', () async {
+    test('un geste qui échoue condamne SUR-LE-CHAMP la suite qu\'il '
+        'portait', () async {
       // ⚠️ L'échappatoire, sans laquelle la garde devient un gel : `blocked`
       // n'incrémente rien et ne s'empoisonne jamais, donc un prédécesseur
       // refusé pour de bon bloquerait la demande pour toujours.
+      await seedMessage('m-1', at: '2026-09-04T08:00:00.000Z');
+      await seedMessage('m-2', at: '2026-09-04T09:00:00.000Z');
+      when(() => api.decideExpense(any(), any(), any())).thenThrow(
+        http(
+          422,
+          body: {'detailCode': ExpenseErrorCodes.selfApprovalForbidden},
+        ),
+      );
+
+      await handler().dispatch(entry('m-1'));
+
+      expect(await messageState('m-1'), ExpenseSyncState.rejected);
+      // Payer une demande dont l'approbation a été refusée n'a aucun sens.
+      expect(await messageState('m-2'), ExpenseSyncState.rejected);
+    });
+
+    test('un geste condamné échoue au lieu d\'attendre son tour', () async {
+      await seedMessage(
+        'm-2',
+        at: '2026-09-04T09:00:00.000Z',
+        state: ExpenseSyncState.rejected,
+      );
+
+      final result = await handler().dispatch(entry('m-2'));
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      verifyNever(() => api.decideExpense(any(), any(), any()));
+    });
+
+    test('🔴 un geste NEUF n\'est pas condamné par un mort plus ancien — '
+        'sinon le premier refus gèlerait la demande pour toujours', () async {
+      // Le scénario de réparation : l'agent voit « à corriger », et agit de
+      // nouveau. Son geste est le plus ancien EN ATTENTE, donc il part.
       await seedMessage(
         'm-1',
         at: '2026-09-04T08:00:00.000Z',
         state: ExpenseSyncState.rejected,
       );
-      await seedMessage('m-2', at: '2026-09-04T09:00:00.000Z');
+      await seedMessage('m-neuf', at: '2026-09-05T08:00:00.000Z');
+      when(() => api.decideExpense(any(), any(), any())).thenAnswer(
+        (_) async =>
+            ExpenseSyncResponseDto(expense: canonical(), lwwOutcome: 'APPLIED'),
+      );
 
-      final result = await handler().dispatch(entry('m-2'));
+      final result = await handler().dispatch(entry('m-neuf'));
 
-      expect(result.outcome, OutboxDispatchOutcome.failed);
-      expect(await messageState('m-2'), ExpenseSyncState.rejected);
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect(await messageState('m-neuf'), ExpenseSyncState.synced);
     });
 
     test('un fil entièrement accusé ne bloque personne', () async {
@@ -353,9 +390,71 @@ void main() {
       );
     });
 
+    test(
+      'un COMMENTAIRE refusé ne rend pas la dépense « à corriger »',
+      () async {
+        // Il n'y a rien à corriger dans une demande parce qu'un mot n'a pas pu
+        // s'écrire — la ligne n'a même pas bougé.
+        when(
+          () => api.commentExpense(any(), any(), any()),
+        ).thenThrow(http(403));
+
+        final result = await handler().dispatch(
+          entry('m-1', gesture: ExpenseGesture.comment),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+        expect(await messageState('m-1'), ExpenseSyncState.rejected);
+        expect(
+          (await reader.find('e-1'))!.syncStatus,
+          ExpenseSyncState.synced.dbValue,
+        );
+      },
+    );
+
+    test('un geste qui PASSE lève le « à corriger » posé par un geste '
+        'précédent', () async {
+      await syncDao.markGestureRejected(
+        'e-1',
+        code: ExpenseErrorCodes.transitionOutOfOrder,
+        reason: 'hors séquence',
+        nowMs: 1,
+      );
+      when(() => api.decideExpense(any(), any(), any())).thenAnswer(
+        (_) async =>
+            ExpenseSyncResponseDto(expense: canonical(), lwwOutcome: 'APPLIED'),
+      );
+
+      await handler().dispatch(entry('m-1'));
+
+      final row = await reader.find('e-1');
+      expect(row!.syncStatus, ExpenseSyncState.synced.dbValue);
+      expect(row.syncErrorCode, isNull);
+    });
+
+    test('mais il ne lève PAS un refus de CONTENU : celui-là attend une '
+        'vraie correction', () async {
+      await syncDao.markGestureRejected(
+        'e-1',
+        code: ExpenseErrorCodes.unknownExpenseType,
+        reason: 'type inconnu',
+        nowMs: 1,
+      );
+      when(() => api.decideExpense(any(), any(), any())).thenAnswer(
+        (_) async =>
+            ExpenseSyncResponseDto(expense: canonical(), lwwOutcome: 'APPLIED'),
+      );
+
+      await handler().dispatch(entry('m-1'));
+
+      final row = await reader.find('e-1');
+      expect(row!.syncStatus, ExpenseSyncState.rejected.dbValue);
+      expect(row.syncErrorCode, ExpenseErrorCodes.unknownExpenseType);
+    });
+
     test('un payload illisible ne se répare pas en le rejouant', () async {
       final result = await handler().dispatch(
-        OutboxEntry(
+        const OutboxEntry(
           id: 'EXPENSE_GESTURE:x',
           aggregateType: ExpenseWriteDao.gestureAggregateType,
           aggregateId: 'e-1',

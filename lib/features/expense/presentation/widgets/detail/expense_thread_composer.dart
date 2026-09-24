@@ -102,20 +102,29 @@ class _ExpenseThreadComposerState extends State<ExpenseThreadComposer> {
   }
 }
 
-/// « en attente d'envoi » — le message est écrit sur ce poste, le serveur ne
-/// l'a pas accusé.
+/// Où en est un message : « en attente d'envoi » tant que le serveur ne l'a
+/// pas accusé, « non envoyé » quand il ne partira plus.
 ///
-/// Un mot, pas une couleur seule : le fil porte déjà des teintes de décision,
-/// et une nuance de plus n'y serait pas lue.
-class ExpenseThreadPendingTag extends StatelessWidget {
-  const ExpenseThreadPendingTag({super.key});
+/// Les deux prennent la **place de l'horloge**, et c'est tout l'enjeu : un
+/// message mort qui montrerait sa date se lirait comme un geste qui a eu
+/// lieu. Un mot, pas une couleur seule — le fil porte déjà des teintes de
+/// décision, et une nuance de plus n'y serait pas lue.
+class ExpenseThreadStateTag extends StatelessWidget {
+  final bool rejected;
+
+  const ExpenseThreadStateTag({super.key, required this.rejected});
 
   @override
-  Widget build(BuildContext context) => Text(
-    AppLocalizations.of(context)!.expenseThreadPending,
-    style: AppTextStyles.caption.copyWith(
-      color: AppColors.feeStatusPartialInk,
-      fontStyle: FontStyle.italic,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Text(
+      rejected ? l10n.expenseThreadRejected : l10n.expenseThreadPending,
+      style: AppTextStyles.caption.copyWith(
+        color: rejected
+            ? AppColors.feeStatusDue
+            : AppColors.feeStatusPartialInk,
+        fontStyle: FontStyle.italic,
+      ),
+    );
+  }
 }

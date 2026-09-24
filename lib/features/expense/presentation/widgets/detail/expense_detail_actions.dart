@@ -34,6 +34,12 @@ class ExpenseDetailActions extends StatelessWidget {
   /// Refuser ne part pas d'ici : le panneau de motif s'ouvre d'abord.
   final VoidCallback onRefuse;
 
+  /// Supprimer, dupliquer et modifier rouvrent une modale de saisie, et cette
+  /// saisie appartient au **registre**. La file ne les offre donc pas : un
+  /// bouton qui renverrait vers un autre écran sans rien faire serait pire
+  /// que son absence.
+  final bool allowShortcuts;
+
   const ExpenseDetailActions({
     super.key,
     required this.expense,
@@ -41,6 +47,7 @@ class ExpenseDetailActions extends StatelessWidget {
     required this.onShortcut,
     required this.onGesture,
     required this.onRefuse,
+    this.allowShortcuts = true,
   });
 
   /// L'ordre du pied, de la reprise à la décision : ce que le demandeur peut
@@ -83,42 +90,44 @@ class ExpenseDetailActions extends StatelessWidget {
           // fiche est déjà un pas délibéré. Le mot nomme le RETRAIT DU
           // REGISTRE ; la reprise par son demandeur s'appelle « Retirer »
           // (F25).
-          PermissionGate.access(
-            kExpenseWithdrawAccess,
-            child: TextButton.icon(
-              onPressed: () => onShortcut(ExpenseDetailChoice.withdraw),
-              style: TextButton.styleFrom(foregroundColor: AppColors.error),
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.expenseActionDelete),
+          if (allowShortcuts)
+            PermissionGate.access(
+              kExpenseWithdrawAccess,
+              child: TextButton.icon(
+                onPressed: () => onShortcut(ExpenseDetailChoice.withdraw),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.expenseActionDelete),
+              ),
             ),
-          ),
-          PermissionGate.access(
-            kExpenseWriteAccess,
-            child: Wrap(
-              spacing: AppDimensions.spacingS,
-              runSpacing: AppDimensions.spacingS,
-              children: [
-                EteeloButton.secondary(
-                  label: l10n.expenseActionDuplicate,
-                  icon: Icons.copy_outlined,
-                  onPressed: () => onShortcut(ExpenseDetailChoice.duplicate),
-                  fullWidth: false,
-                ),
-                // Modifier suit la même règle que les gestes du demandeur :
-                // tant que personne n'a décidé, et sur sa propre demande. Une
-                // dépense accordée dont on réécrirait le montant ne serait
-                // plus celle qui a été accordée.
-                if (expense.status == ExpenseStatus.pending &&
-                    expense.isRequestedBy(accountId))
+          if (allowShortcuts)
+            PermissionGate.access(
+              kExpenseWriteAccess,
+              child: Wrap(
+                spacing: AppDimensions.spacingS,
+                runSpacing: AppDimensions.spacingS,
+                children: [
                   EteeloButton.secondary(
-                    label: l10n.expenseActionEdit,
-                    icon: Icons.edit_outlined,
-                    onPressed: () => onShortcut(ExpenseDetailChoice.edit),
+                    label: l10n.expenseActionDuplicate,
+                    icon: Icons.copy_outlined,
+                    onPressed: () => onShortcut(ExpenseDetailChoice.duplicate),
                     fullWidth: false,
                   ),
-              ],
+                  // Modifier suit la même règle que les gestes du demandeur :
+                  // tant que personne n'a décidé, et sur sa propre demande. Une
+                  // dépense accordée dont on réécrirait le montant ne serait
+                  // plus celle qui a été accordée.
+                  if (expense.status == ExpenseStatus.pending &&
+                      expense.isRequestedBy(accountId))
+                    EteeloButton.secondary(
+                      label: l10n.expenseActionEdit,
+                      icon: Icons.edit_outlined,
+                      onPressed: () => onShortcut(ExpenseDetailChoice.edit),
+                      fullWidth: false,
+                    ),
+                ],
+              ),
             ),
-          ),
           for (final gesture in _order)
             if (offered.contains(gesture))
               PermissionGate.access(

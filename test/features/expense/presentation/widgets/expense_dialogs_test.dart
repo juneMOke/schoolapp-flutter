@@ -619,4 +619,76 @@ void main() {
       expect(find.textContaining('20 sept.'), findsOneWidget);
     });
   });
+
+  group('ce que la fiche offre selon d\'où on l\'ouvre', () {
+    Future<void> pumpSheet(
+      WidgetTester tester, {
+      required bool allowShortcuts,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
+          allowShortcuts: allowShortcuts,
+        ),
+      );
+    }
+
+    testWidgets('depuis le REGISTRE : les raccourcis de saisie sont là', (
+      tester,
+    ) async {
+      await pumpSheet(tester, allowShortcuts: true);
+
+      expect(find.text('Supprimer'), findsOneWidget);
+      expect(find.text('Dupliquer'), findsOneWidget);
+    });
+
+    testWidgets('depuis la FILE : aucun raccourci de saisie — un bouton qui '
+        'renverrait ailleurs sans rien faire serait pire que son absence', (
+      tester,
+    ) async {
+      await pumpSheet(tester, allowShortcuts: false);
+
+      expect(find.text('Supprimer'), findsNothing);
+      expect(find.text('Dupliquer'), findsNothing);
+      expect(find.text('Modifier'), findsNothing);
+      // Les gestes du circuit, eux, restent : c'est le travail de la file.
+      expect(find.text('Approuver'), findsOneWidget);
+    });
+  });
+
+  testWidgets('un message REFUSÉ ne se lit pas comme accusé', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpHost(
+      tester,
+      (context) => showExpenseDetailDialog(
+        context,
+        expense: _snel(),
+        type: _types.first,
+        reader: ExpenseUsdReader.withoutRate,
+        thread: [
+          ExpenseMessage(
+            id: 'm-1',
+            expenseId: 'e-1',
+            body: 'Approuvée',
+            act: ExpenseAct.approval,
+            authorName: 'Mbala Thérèse',
+            createdAt: DateTime.utc(2026, 9, 20, 8),
+            syncState: ExpenseSyncState.rejected,
+          ),
+        ],
+      ),
+    );
+
+    // L'horloge seule laisserait croire que le geste a eu lieu.
+    expect(find.text('non envoyé'), findsOneWidget);
+    expect(find.text("en attente d'envoi"), findsNothing);
+  });
 }

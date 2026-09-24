@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_message_d
 import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_error_codes.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -125,15 +126,26 @@ class ExpenseSyncDao {
     required String schoolId,
     required int nowMs,
   }) => _db.transaction((txn) async {
-    final updated = await txn.update(
+    final row = await ExpenseReadDao(txn).find(canonical.id);
+    // Le serveur connaît une demande que ce poste ignore : c'est au pull de
+    // la poser, pas à l'accusé d'un geste d'en inventer la moitié.
+    if (row == null) return;
+    // Un geste qui passe lève le « à corriger » qu'un geste précédent avait
+    // posé — et LUI SEUL : un refus de contenu attend, lui, une vraie
+    // correction, et l'effacer ferait disparaître la consigne avec le motif.
+    final clears = ExpenseErrorCodes.gestureRefusals.contains(
+      row.syncErrorCode,
+    );
+    await txn.update(
       table,
-      {...ExpenseDeltaColumns.server(canonical), 'updated_at': nowMs},
+      {
+        ...ExpenseDeltaColumns.server(canonical),
+        if (clears) ...ExpenseDeltaColumns.synced,
+        'updated_at': nowMs,
+      },
       where: 'id = ?',
       whereArgs: [canonical.id],
     );
-    // Le serveur connaît une demande que ce poste ignore : c'est au pull de
-    // la poser, pas à l'accusé d'un geste d'en inventer la moitié.
-    if (updated == 0) return;
     await _applyThread(txn, canonical, schoolId: schoolId);
   });
 

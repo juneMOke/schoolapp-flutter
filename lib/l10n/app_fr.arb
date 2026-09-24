@@ -7116,6 +7116,7 @@
   "expenseRejectedOutOfOrder": "un geste antérieur n'est pas encore parti",
   "expenseDetailGestureRejected": "Geste refusé par le serveur : {reason}. La demande est restée telle qu'elle était.",
   "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
+  "expenseThreadRejected": "non envoyé",
   "expenseThreadTitle": "Fil de la demande",
   "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

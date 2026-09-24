@@ -30,9 +30,11 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 ///
 /// ⚠️ **`blocked` ne s'épuise jamais.** Sans échappatoire, un prédécesseur
 /// refusé pour de bon gèlerait derrière lui tous les gestes de la même
-/// demande, pour toujours. Quand le plus ancien message non accusé est en
-/// `SYNC_ERROR`, ses suivants échouent donc à leur tour — la ligne passe « à
-/// corriger », ce qui est un état dont on sort.
+/// demande, pour toujours. Un geste qui échoue condamne donc **sur-le-champ**
+/// la suite qu'il portait (`rejectFrom`), et la ligne passe « à corriger » —
+/// un état dont on sort. Un message mort reste au fil, mais il ne barre plus
+/// la route : le geste neuf par lequel l'agent vient réparer est le plus
+/// ancien EN ATTENTE, donc il part.
 ///
 /// ## Les deux 409, aux conduites opposées (F34)
 ///
@@ -98,25 +100,27 @@ class ExpenseGestureOutboxHandler implements OutboxSyncHandler {
     }
   }
 
-  /// Le geste porte-t-il le plus ancien message non accusé de sa dépense ?
+  /// Le geste porte-t-il le plus ancien message **en attente** de sa
+  /// dépense ?
   ///
   /// Rend `null` quand il peut partir.
   Future<OutboxDispatchResult?> _orderGuard(
     ExpenseGesturePayload payload,
   ) async {
-    final oldest = await _messages.oldestUnsettled(payload.expenseId);
-    // Plus rien en attente : le message a déjà été accusé, et l'entrée court
-    // après un geste réglé. Elle part quand même — le rejeu est inerte.
-    if (oldest == null || oldest.id == payload.messageId) return null;
-    if (oldest.state == ExpenseSyncState.rejected) {
-      // L'échappatoire : le prédécesseur ne partira plus, et attendre son
-      // tour reviendrait à ne jamais partir.
-      await _messages.markMessage(payload.messageId, ExpenseSyncState.rejected);
+    // L'échappatoire se CONSOMME ici : un geste antérieur a échoué, et il a
+    // condamné la suite qu'il portait. Attendre son tour reviendrait à ne
+    // jamais partir.
+    final mine = await _messages.stateOf(payload.messageId);
+    if (mine == ExpenseSyncState.rejected) {
       return const OutboxDispatchResult.failed(
         'Un geste antérieur sur cette demande a été refusé : '
         'la suite ne peut plus partir dans l\'ordre',
       );
     }
+    final oldest = await _messages.oldestPendingId(payload.expenseId);
+    // Plus rien en attente : le message a déjà été accusé, et l'entrée court
+    // après un geste réglé. Elle part quand même — le rejeu est inerte.
+    if (oldest == null || oldest == payload.messageId) return null;
     return const OutboxDispatchResult.blocked(
       'Un geste antérieur sur cette demande attend encore son tour',
     );
@@ -168,13 +172,24 @@ class ExpenseGestureOutboxHandler implements OutboxSyncHandler {
     }
     // 403, 422 : terminal. Le geste est défait côté serveur — il n'a jamais
     // eu lieu — et la ligne passe « à corriger » (A4, F22).
-    await _messages.markMessage(payload.messageId, ExpenseSyncState.rejected);
-    await _dao.markGestureRejected(
+    //
+    // Et la suite meurt avec lui : une séquence dont la première marche a
+    // cédé est incohérente, et la laisser en attente la gèlerait pour
+    // toujours derrière un prédécesseur qui ne partira plus.
+    await _messages.rejectFrom(
       payload.expenseId,
-      code: failure.storedCode,
-      reason: failure.reason,
-      nowMs: _now(),
+      fromCreatedAt: payload.decidedAt,
     );
+    // Un COMMENTAIRE refusé ne rend pas la dépense « à corriger » : il n'y a
+    // rien à corriger dans une demande parce qu'un mot n'a pas pu s'écrire.
+    if (payload.gesture.movesStatus) {
+      await _dao.markGestureRejected(
+        payload.expenseId,
+        code: failure.storedCode,
+        reason: failure.reason,
+        nowMs: _now(),
+      );
+    }
     return OutboxDispatchResult.failed(failure.reason);
   }
 }

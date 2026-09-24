@@ -44,6 +44,14 @@ class ExpenseMessage extends Equatable {
   /// Le serveur n'a pas encore accusé ce message ; il attend dans la file.
   bool get isPending => syncState == ExpenseSyncState.pending;
 
+  /// Le serveur l'a **refusé**, ou un geste antérieur l'a condamné : il ne
+  /// partira plus.
+  ///
+  /// Il reste au fil — celui-ci est append-only — mais il ne doit surtout pas
+  /// s'y lire comme accusé : l'horloge seule laisserait croire que le geste a
+  /// eu lieu.
+  bool get isRejected => syncState == ExpenseSyncState.rejected;
+
   /// Écrit par le compte de la session ? La comparaison se fait sur
   /// l'identifiant, jamais sur le nom (F24) — et **deux identifiants vides ne
   /// se ressemblent pas** : une session héritée sans `uid` ne s'approprierait

@@ -17087,6 +17087,12 @@ abstract class AppLocalizations {
   /// **'Gesture refused by the server: {reason}. The request stayed as it was.'**
   String expenseDetailGestureRejected(String reason);
 
+  /// No description provided for @expenseThreadRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'not sent'**
+  String get expenseThreadRejected;
+
   /// No description provided for @expenseThreadTitle.
   ///
   /// In en, this message translates to:

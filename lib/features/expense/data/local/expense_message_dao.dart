@@ -191,33 +191,64 @@ class ExpenseMessageDao {
     );
   }
 
-  /// Le **plus ancien message non accusé** d'une demande — le registre
-  /// d'ordre de F31.
+  /// Le **plus ancien message encore en attente** d'une demande — le
+  /// registre d'ordre de F31.
   ///
   /// C'est le fil qui ordonne les gestes, et rien d'autre : le moteur
   /// d'outbox ne lit jamais `aggregate_id`, poursuit après un `retry`, et son
   /// backoff retire une entrée de la course pendant 1 à 256 s. Tout ordre est
   /// à la charge du handler.
   ///
+  /// ⚠️ **En attente seulement, jamais « non accusé ».** Un message mort
+  /// (`SYNC_ERROR`) reste dans le fil — il est append-only — mais il ne barre
+  /// plus la route : sinon le premier geste refusé condamnerait la demande
+  /// pour toujours, y compris le geste neuf par lequel l'agent vient réparer.
+  ///
   /// L'index `(expense_id, created_at)` sert cette lecture autant que
   /// l'affichage du fil.
-  Future<({String id, ExpenseSyncState state})?> oldestUnsettled(
-    String expenseId,
-  ) async {
+  Future<String?> oldestPendingId(String expenseId) async {
     final rows = await _db.query(
       table,
-      columns: const ['id', 'sync_status'],
-      where: 'expense_id = ? AND sync_status <> ?',
-      whereArgs: [expenseId, ExpenseSyncState.synced.dbValue],
+      columns: const ['id'],
+      where: 'expense_id = ? AND sync_status = ?',
+      whereArgs: [expenseId, ExpenseSyncState.pending.dbValue],
       orderBy: 'created_at, id',
       limit: 1,
     );
-    if (rows.isEmpty) return null;
-    return (
-      id: rows.single['id'] as String,
-      state: ExpenseSyncState.fromDb(rows.single['sync_status'] as String?),
-    );
+    return rows.isEmpty ? null : rows.single['id'] as String;
   }
+
+  /// L'état de remontée d'un message, ou `null` s'il n'existe plus.
+  Future<ExpenseSyncState?> stateOf(String messageId) async {
+    final rows = await _db.query(
+      table,
+      columns: const ['sync_status'],
+      where: 'id = ?',
+      whereArgs: [messageId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return ExpenseSyncState.fromDb(rows.single['sync_status'] as String?);
+  }
+
+  /// **L'échappatoire de la garde d'ordre** : un geste meurt, et toute la
+  /// suite qu'il portait meurt avec lui.
+  ///
+  /// Marque en erreur le message d'horloge [fromCreatedAt] **et tous les
+  /// suivants encore en attente** sur la même demande. Une séquence dont la
+  /// première marche a cédé est incohérente — payer une demande dont
+  /// l'approbation a été refusée n'a aucun sens —, et sans cela `blocked`,
+  /// qui ne consomme aucune tentative et ne s'empoisonne jamais, les gèlerait
+  /// pour toujours.
+  ///
+  /// Rend le nombre de messages condamnés.
+  Future<int> rejectFrom(String expenseId, {required String fromCreatedAt}) =>
+      _db.update(
+        table,
+        {'sync_status': ExpenseSyncState.rejected.dbValue},
+        where: 'expense_id = ? AND created_at >= ? AND sync_status = ?',
+        whereArgs: [expenseId, fromCreatedAt, ExpenseSyncState.pending.dbValue],
+      );
 
   /// Marque l'issue d'un message poussé.
   Future<void> markMessage(String messageId, ExpenseSyncState state) =>

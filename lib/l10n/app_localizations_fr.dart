@@ -10894,6 +10894,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseThreadRejected => 'non envoyé';
+
+  @override
   String get expenseThreadTitle => 'Fil de la demande';
 
   @override

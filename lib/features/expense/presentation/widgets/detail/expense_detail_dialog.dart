@@ -32,6 +32,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   String? accountId,
   Future<ExpenseCommentResult> Function(String body)? onComment,
   bool startRefusing = false,
+  bool allowShortcuts = true,
 }) => showDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
@@ -42,6 +43,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
     accountId: accountId,
     onComment: onComment,
     startRefusing: startRefusing,
+    allowShortcuts: allowShortcuts,
   ),
 );
 
@@ -60,6 +62,10 @@ class ExpenseDetailDialog extends StatefulWidget {
   /// refuse plutôt que de lui demander un mot dans le vide.
   final bool startRefusing;
 
+  /// Les raccourcis d'écran (supprimer, dupliquer, modifier) ouvrent une
+  /// saisie, et la saisie appartient au registre.
+  final bool allowShortcuts;
+
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
@@ -69,6 +75,7 @@ class ExpenseDetailDialog extends StatefulWidget {
     this.accountId,
     this.onComment,
     this.startRefusing = false,
+    this.allowShortcuts = true,
   });
 
   @override
@@ -159,6 +166,7 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
               onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
               onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
               onRefuse: () => setState(() => _refusing = true),
+              allowShortcuts: widget.allowShortcuts,
             ),
           ],
         ),

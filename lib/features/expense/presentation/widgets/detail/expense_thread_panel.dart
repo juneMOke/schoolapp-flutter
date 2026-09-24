@@ -182,8 +182,8 @@ class _Message extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppDimensions.spacingS),
-                    message.isPending
-                        ? const ExpenseThreadPendingTag()
+                    message.isPending || message.isRejected
+                        ? ExpenseThreadStateTag(rejected: message.isRejected)
                         : Text(
                             l10n.expenseJoin(
                               dates.formatShortMonthDay(moment),

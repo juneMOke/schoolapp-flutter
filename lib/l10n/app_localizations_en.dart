@@ -10807,6 +10807,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseThreadRejected => 'not sent';
+
+  @override
   String get expenseThreadTitle => 'Request thread';
 
   @override

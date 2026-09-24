@@ -63,13 +63,8 @@ String expenseRejectionLabel(
 /// corriger » est un bon conseil sur un contenu refusé, et un contresens sur
 /// une approbation refusée — il n'y a rien à corriger dans la dépense, le
 /// geste n'a simplement pas eu lieu.
-bool expenseRejectionIsGesture(String? code) => const {
-  ExpenseErrorCodes.decisionAlreadyTaken,
-  ExpenseErrorCodes.selfApprovalForbidden,
-  ExpenseErrorCodes.notRequestOwner,
-  ExpenseErrorCodes.reasonRequired,
-  ExpenseErrorCodes.transitionOutOfOrder,
-}.contains(code);
+bool expenseRejectionIsGesture(String? code) =>
+    ExpenseErrorCodes.gestureRefusals.contains(code);
 
 /// Le mot du bouton qui pose un geste.
 ///

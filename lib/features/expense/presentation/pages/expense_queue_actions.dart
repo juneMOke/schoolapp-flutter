@@ -43,6 +43,9 @@ class ExpenseQueueActions {
       thread: thread,
       accountId: _agentId(),
       startRefusing: refusing,
+      // La file tranche ; elle ne saisit pas. Déposer, corriger et supprimer
+      // restent au registre, qui est le seul écran d'écriture de contenu.
+      allowShortcuts: false,
       onComment: (body) => _comment(expense, body),
     );
     if (outcome == null || !context.mounted) return;
@@ -52,9 +55,9 @@ class ExpenseQueueActions {
       orElse: () => expense,
     );
     switch (outcome) {
-      // Les raccourcis d'écran (dupliquer, modifier, supprimer) appartiennent
-      // au registre : la file y renvoie plutôt que de rouvrir un formulaire
-      // par-dessus une file de décision.
+      // La fiche n'offre aucun raccourci depuis la file (`allowShortcuts`
+      // à `false`) : ce cas est inatteignable, et il est écrit pour que le
+      // `switch` reste exhaustif si la décision change un jour.
       case ExpenseDetailShortcut():
         context.go(AppRoutesNames.expenseRegister);
       case ExpenseDetailGesture(:final gesture, :final note):

@@ -46,4 +46,18 @@ abstract final class ExpenseErrorCodes {
   /// **403** — le geste est réservé au demandeur (retirer, renvoyer,
   /// relancer, modifier le contenu).
   static const String notRequestOwner = 'NOT_REQUEST_OWNER';
+
+  /// Les refus qui viennent d'un **geste**, et non d'une saisie.
+  ///
+  /// La distinction se paie à deux endroits : l'écran ne conseille pas de
+  /// corriger une dépense à laquelle il n'y a rien à corriger, et un geste
+  /// réussi lève le « à corriger » qu'un geste précédent avait posé — là où
+  /// un refus de CONTENU attend, lui, une vraie correction.
+  static const Set<String> gestureRefusals = {
+    decisionAlreadyTaken,
+    transitionOutOfOrder,
+    reasonRequired,
+    selfApprovalForbidden,
+    notRequestOwner,
+  };
 }
