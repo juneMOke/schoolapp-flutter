@@ -504,6 +504,15 @@ class AppDimensions {
   static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;
 
+  /// Chaîne de validation : trois jalons accolés en tête de fiche.
+  static const expenseChainPaddingV = 11.0;
+  static const expenseChainPaddingH = 14.0;
+  static const expenseChainIconSize = 15.0;
+
+  /// Le jalon hors d'atteinte — « ne sera pas payée » — reste lisible mais
+  /// visiblement éteint.
+  static const expenseChainDimmedOpacity = 0.5;
+
   /// Fil de la demande : vignette d'acte et bulle de message.
   static const expenseThreadMedallionSize = 30.0;
   static const expenseThreadMedallionRadius = 9.0;

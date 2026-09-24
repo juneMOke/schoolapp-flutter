@@ -1,6 +1,17 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Ce que dit un état du circuit. Partagé par la pastille, le filtre de
+/// statut et la chaîne de validation — trois lectures du même mot.
+String expenseStatusLabel(AppLocalizations l10n, ExpenseStatus status) =>
+    switch (status) {
+      ExpenseStatus.pending => l10n.expenseStatusPending,
+      ExpenseStatus.approved => l10n.expenseStatusApproved,
+      ExpenseStatus.paid => l10n.expenseStatusPaid,
+      ExpenseStatus.refused => l10n.expenseStatusRefused,
+      ExpenseStatus.retracted => l10n.expenseStatusRetracted,
+    };
+
 /// Libellé d'une source de fonds.
 String expenseFundingLabel(
   AppLocalizations l10n,

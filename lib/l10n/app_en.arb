@@ -6812,6 +6812,13 @@
       }
     }
   },
+  "expenseChainRequested": "Requested",
+  "expenseChainAwaiting": "awaiting",
+  "expenseChainNeverPaid": "will not be paid",
+  "expenseSituationDecide": "Yours to decide: approve, or refuse with a reason.",
+  "expenseSituationAwaitingDecision": "Awaiting a decision from the approver.",
+  "expenseRefusalReasonBy": "Reason for refusal — {decider}",
+  "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
   "expenseThreadTitle": "Request thread",
   "expenseThreadCount": "{count, plural, =0{no message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

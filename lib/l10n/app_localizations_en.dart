@@ -10403,6 +10403,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseChainRequested => 'Requested';
+
+  @override
+  String get expenseChainAwaiting => 'awaiting';
+
+  @override
+  String get expenseChainNeverPaid => 'will not be paid';
+
+  @override
+  String get expenseSituationDecide =>
+      'Yours to decide: approve, or refuse with a reason.';
+
+  @override
+  String get expenseSituationAwaitingDecision =>
+      'Awaiting a decision from the approver.';
+
+  @override
+  String expenseRefusalReasonBy(String decider) {
+    return 'Reason for refusal — $decider';
+  }
+
+  @override
   String get expenseThreadTitle => 'Request thread';
 
   @override

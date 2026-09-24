@@ -4,14 +4,15 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_status_visuals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les cinq états du circuit — une icône et un mot en plus de la teinte : la
 /// couleur ne porte jamais seule une information.
 ///
-/// Les teintes viennent des jetons du socle, jamais des hexadécimaux de la
-/// spec : l'attente et le refus empruntent la famille des frais (même ambre,
-/// même rouge), l'approbation le bleu de marque, le retrait l'encre muette.
+/// Les teintes viennent de `expenseStatusVisuals`, partagé avec la chaîne de
+/// validation.
 class ExpenseStatusBadge extends StatelessWidget {
   final ExpenseStatus status;
   final bool small;
@@ -25,7 +26,7 @@ class ExpenseStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final visuals = _visualsOf(status);
+    final visuals = expenseStatusVisuals(status);
     return _Pill(
       icon: visuals.icon,
       label: expenseStatusLabel(l10n, status),
@@ -36,48 +37,6 @@ class ExpenseStatusBadge extends StatelessWidget {
     );
   }
 }
-
-/// Champs **nommés** : un enregistrement positionnel de quatre couleurs se
-/// lirait de travers au premier changement d'ordre, sans que rien ne le dise.
-typedef _StatusVisuals = ({
-  Color color,
-  Color soft,
-  Color border,
-  IconData icon,
-});
-
-_StatusVisuals _visualsOf(ExpenseStatus status) => switch (status) {
-  ExpenseStatus.pending => (
-    color: AppColors.feeStatusPartial,
-    soft: AppColors.feeStatusPartialSoft,
-    border: AppColors.feeStatusPartialBorder,
-    icon: Icons.schedule,
-  ),
-  ExpenseStatus.approved => (
-    color: AppColors.bleuArdoise,
-    soft: AppColors.bleuArdoiseSoft,
-    border: AppColors.border,
-    icon: Icons.verified_outlined,
-  ),
-  ExpenseStatus.paid => (
-    color: AppColors.feeStatusPaid,
-    soft: AppColors.feeStatusPaidSoft,
-    border: AppColors.feeStatusPaidBorder,
-    icon: Icons.check_circle_outline,
-  ),
-  ExpenseStatus.refused => (
-    color: AppColors.feeStatusDue,
-    soft: AppColors.feeStatusDueSoft,
-    border: AppColors.feeStatusDueBorder,
-    icon: Icons.cancel_outlined,
-  ),
-  ExpenseStatus.retracted => (
-    color: AppColors.textMuted,
-    soft: AppColors.surfaceAlt,
-    border: AppColors.border,
-    icon: Icons.undo,
-  ),
-};
 
 /// Où en est la remontée : « N° en attente » tant que le serveur n'a pas
 /// numéroté la dépense (A3), « À corriger » quand il l'a refusée (A4). Rien
@@ -114,15 +73,6 @@ class ExpenseSyncBadge extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-
-String expenseStatusLabel(AppLocalizations l10n, ExpenseStatus status) =>
-    switch (status) {
-      ExpenseStatus.pending => l10n.expenseStatusPending,
-      ExpenseStatus.approved => l10n.expenseStatusApproved,
-      ExpenseStatus.paid => l10n.expenseStatusPaid,
-      ExpenseStatus.refused => l10n.expenseStatusRefused,
-      ExpenseStatus.retracted => l10n.expenseStatusRetracted,
-    };
 
 class _Pill extends StatelessWidget {
   final IconData icon;

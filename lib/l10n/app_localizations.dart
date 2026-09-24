@@ -16565,6 +16565,42 @@ abstract class AppLocalizations {
   /// **'Rejected by the server: {reason}. Edit the expense to fix it.'**
   String expenseDetailRejected(String reason);
 
+  /// No description provided for @expenseChainRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get expenseChainRequested;
+
+  /// No description provided for @expenseChainAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'awaiting'**
+  String get expenseChainAwaiting;
+
+  /// No description provided for @expenseChainNeverPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'will not be paid'**
+  String get expenseChainNeverPaid;
+
+  /// No description provided for @expenseSituationDecide.
+  ///
+  /// In en, this message translates to:
+  /// **'Yours to decide: approve, or refuse with a reason.'**
+  String get expenseSituationDecide;
+
+  /// No description provided for @expenseSituationAwaitingDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting a decision from the approver.'**
+  String get expenseSituationAwaitingDecision;
+
+  /// No description provided for @expenseRefusalReasonBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for refusal — {decider}'**
+  String expenseRefusalReasonBy(String decider);
+
   /// No description provided for @expenseThreadTitle.
   ///
   /// In en, this message translates to:

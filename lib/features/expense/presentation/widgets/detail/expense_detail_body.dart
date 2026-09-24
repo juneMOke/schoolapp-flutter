@@ -7,15 +7,17 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_mess
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_chain.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_banner.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_reference_row.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_rejection.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_situation_note.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le corps de la fiche (spec §8) : le montant en tête, à l'échelle du titre
-/// — c'est le fait que l'on vient vérifier — puis un tableau de références, et
-/// le fil de la demande en pied.
+/// — c'est le fait que l'on vient vérifier —, la chaîne de validation et ce
+/// que la demande attend, puis un tableau de références, et le fil en pied.
 class ExpenseDetailBody extends StatelessWidget {
   final Expense expense;
   final ExpenseType? type;
@@ -75,6 +77,11 @@ class ExpenseDetailBody extends StatelessWidget {
           ),
           ExpenseDetailRejection(code: expense.syncErrorCode),
         ],
+        const SizedBox(height: AppDimensions.spacingM),
+        // La chaîne d'abord, l'encart ensuite : où en est la demande, puis ce
+        // qu'elle attend. L'inverse ferait lire la conséquence avant l'état.
+        ExpenseChain(expense: expense),
+        ExpenseSituationNote(expense: expense),
         const SizedBox(height: AppDimensions.spacingM),
         expense.description == null
             ? Text(

@@ -7006,6 +7006,13 @@
       }
     }
   },
+  "expenseChainRequested": "Demandée",
+  "expenseChainAwaiting": "en attente",
+  "expenseChainNeverPaid": "ne sera pas payée",
+  "expenseSituationDecide": "À vous de décider : approuver ou refuser avec motif.",
+  "expenseSituationAwaitingDecision": "En attente d'une décision du validateur.",
+  "expenseRefusalReasonBy": "Motif du refus — {decider}",
+  "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
   "expenseThreadTitle": "Fil de la demande",
   "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

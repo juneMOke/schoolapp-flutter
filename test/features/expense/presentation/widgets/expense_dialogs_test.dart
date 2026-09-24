@@ -243,8 +243,12 @@ void main() {
         ),
       );
 
-      expect(find.text('Payée'), findsOneWidget);
+      // Deux fois « Payée » : la pastille de la tête, et le jalon de la
+      // chaîne. Le mot est le même parce que l'état l'est.
+      expect(find.text('Payée'), findsNWidgets(2));
       expect(find.text('Payée le'), findsOneWidget);
+      // La chaîne n'attend plus rien sur une demande soldée.
+      expect(find.text('en attente'), findsNothing);
     });
 
     testWidgets('supprimer ferme la fiche et rend le choix', (tester) async {
