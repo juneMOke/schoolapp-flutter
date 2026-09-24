@@ -368,9 +368,9 @@ juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
 | DEP-15 | ⏳ **revue et clôture** | — |
 
 Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
-`flutter test -j 4 test/features/expense` → **274 verts**, et
-`test/core/auth` + `test/core/database` avec. La suite complète est prévue à
-DEP-15.
+`flutter test -j 4` **complet** → **7185 verts**, code de sortie capturé sans
+pipe. La revue adversariale de DEP-15, elle, reste à faire — une suite verte
+n'en tient pas lieu.
 
 > ⚠️ **`flutter analyze` doit être relancé APRÈS le commit**, pas avant : le
 > hook `pre-commit` reformate les fichiers stagés sur le disque, et un `if`
