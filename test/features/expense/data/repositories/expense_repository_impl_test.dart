@@ -415,7 +415,7 @@ void main() {
 
       final result = await gestes.applyGesture(expense, ExpenseGesture.approve);
 
-      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      expect(result.fold((f) => f, (_) => null), isA<ConflictFailure>());
       expect(await fil(), isEmpty);
     });
 
@@ -480,7 +480,9 @@ void main() {
       // `perimee` dit encore « en attente » ; la ligne, elle, est accordée.
       final result = await gestes.applyGesture(perimee, ExpenseGesture.approve);
 
-      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      // Un CONFLIT, pas une saisie invalide : rien à corriger dans ce que
+      // l'agent a tapé, donc l'écran ne doit pas lui dire « Réessayez ».
+      expect(result.fold((f) => f, (_) => null), isA<ConflictFailure>());
       expect(await fil(), hasLength(1));
     });
 

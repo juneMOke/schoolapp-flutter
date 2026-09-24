@@ -25,6 +25,8 @@ class _MockWithdraw extends Mock implements WithdrawExpenseUseCase {}
 
 class _MockRestore extends Mock implements RestoreExpenseUseCase {}
 
+class _MockGesture extends Mock implements ApplyExpenseGestureUseCase {}
+
 class _MockThread extends Mock implements LoadExpenseThreadUseCase {}
 
 const _types = [
@@ -106,6 +108,7 @@ void main() {
       save: _MockSave(),
       withdraw: _MockWithdraw(),
       restore: _MockRestore(),
+      gesture: _MockGesture(),
       thread: _MockThread(),
       now: () => DateTime(2026, 9, 12),
     );

@@ -291,7 +291,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   /// L'état a bougé sous l'écran — le geste n'est plus celui qu'on croyait
   /// faire. Refuser est la seule conduite sûre : l'appliquer quand même
   /// écrirait une transition absente de la table.
-  static const _staleGesture = ValidationFailure(
+  ///
+  /// **Un conflit, pas une saisie invalide** : rien n'est à corriger dans ce
+  /// que l'agent a tapé, et « Réessayez » ne l'aiderait pas. L'écran doit le
+  /// dire autrement, et c'est le type qui le lui permet.
+  static const _staleGesture = ConflictFailure(
     'La demande a changé d\'état : geste abandonné.',
   );
 

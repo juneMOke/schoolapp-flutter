@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
@@ -28,6 +29,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   final SaveExpenseUseCase _save;
   final WithdrawExpenseUseCase _withdraw;
   final RestoreExpenseUseCase _restore;
+  final ApplyExpenseGestureUseCase _gesture;
   final LoadExpenseThreadUseCase _thread;
   final DateTime Function() _now;
   void Function()? _unwatch;
@@ -38,6 +40,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     required SaveExpenseUseCase save,
     required WithdrawExpenseUseCase withdraw,
     required RestoreExpenseUseCase restore,
+    required ApplyExpenseGestureUseCase gesture,
     required LoadExpenseThreadUseCase thread,
     DateTime Function() now = DateTime.now,
   }) : _source = source,
@@ -45,6 +48,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
        _save = save,
        _withdraw = withdraw,
        _restore = restore,
+       _gesture = gesture,
        _thread = thread,
        _now = now,
        super(
@@ -138,9 +142,21 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   Future<Either<Failure, Expense>> save(ExpenseDraft draft) =>
       _thenRefresh(_save(draft));
 
-  // La bascule payée / non payée de la V1 a disparu avec le circuit : le
-  // statut ne change plus que par un geste de décision, qui arrive au lot
-  // suivant avec sa permission et son message de fil.
+  /// Un geste du circuit — le statut ne change plus que par là (D8), jamais
+  /// par un clic de liste ni par le formulaire.
+  ///
+  /// Comme les autres écritures : la base d'abord, la relecture ensuite. Un
+  /// refus local (l'état a bougé sous l'écran, le motif manque) revient en
+  /// `Left` et l'écran le dit ; un refus serveur viendra plus tard, dans
+  /// l'accusé.
+  Future<Either<Failure, Unit>> applyGesture(
+    Expense expense,
+    ExpenseGesture gesture, {
+    String note = '',
+    String? actorName,
+  }) => _thenRefresh(
+    _gesture(expense, gesture, note: note, actorName: actorName),
+  );
 
   Future<Either<Failure, Unit>> withdraw(Expense expense) =>
       _thenRefresh(_withdraw(expense));

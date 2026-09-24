@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
@@ -254,9 +255,9 @@ void main() {
     testWidgets('supprimer ferme la fiche et rend le choix', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1280, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      ExpenseDetailChoice? choice;
+      ExpenseDetailOutcome? outcome;
       await _pumpHost(tester, (context) async {
-        choice = await showExpenseDetailDialog(
+        outcome = await showExpenseDetailDialog(
           context,
           expense: _snel(),
           type: _types.first,
@@ -268,7 +269,16 @@ void main() {
       await tester.tap(find.text('Supprimer'));
       await tester.pumpAndSettle();
 
-      expect(choice, ExpenseDetailChoice.withdraw);
+      // Supprimer reste un RACCOURCI d'écran : il retire la ligne du
+      // registre, il ne pose aucun geste du circuit.
+      expect(
+        outcome,
+        isA<ExpenseDetailShortcut>().having(
+          (o) => o.choice,
+          'choice',
+          ExpenseDetailChoice.withdraw,
+        ),
+      );
       expect(find.text('Facture SNEL'), findsNothing);
     });
 
@@ -384,6 +394,105 @@ void main() {
 
       expect(find.text('Mbala Thérèse'), findsOneWidget);
       expect(find.text('Accordée'), findsOneWidget);
+    });
+  });
+
+  group('panneau de refus', () {
+    const motifDevis =
+        'Devis manquant : joindre au moins deux offres avant de réengager la '
+        'dépense.';
+
+    /// Rend un **lecteur**, pas une valeur : la fiche n'est pas encore fermée
+    /// quand cette fonction rend la main, et renvoyer `outcome` tel quel
+    /// donnerait `null` quoi qu'il arrive ensuite — une assertion toujours
+    /// vraie, donc muette.
+    Future<ExpenseDetailOutcome? Function()> ouvrirEtRefuser(
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      ExpenseDetailOutcome? outcome;
+      await _pumpHost(tester, (context) async {
+        outcome = await showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
+        );
+      });
+      await tester.tap(find.text('Refuser'));
+      await tester.pumpAndSettle();
+      return () => outcome;
+    }
+
+    Future<void> confirmer(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Confirmer le refus'));
+      await tester.tap(find.text('Confirmer le refus'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Refuser ouvre le panneau sans fermer la fiche', (
+      tester,
+    ) async {
+      await ouvrirEtRefuser(tester);
+
+      expect(find.text('Refuser la demande'), findsOneWidget);
+      // Le décideur garde sous les yeux ce qu'il refuse.
+      expect(find.text('Facture SNEL'), findsOneWidget);
+    });
+
+    testWidgets('confirmer SANS motif : le geste ne part pas, et la fiche le '
+        'dit', (tester) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await confirmer(tester);
+
+      expect(
+        find.text('Un refus sans motif laisse le demandeur sans issue.'),
+        findsOneWidget,
+      );
+      expect(outcome(), isNull);
+      expect(find.text('Facture SNEL'), findsOneWidget);
+
+      // Ligne de contrôle : le même lecteur DOIT voir passer un refus motivé,
+      // sinon le `isNull` ci-dessus ne prouverait rien.
+      await tester.ensureVisible(find.text(motifDevis));
+      await tester.tap(find.text(motifDevis));
+      await tester.pumpAndSettle();
+      await confirmer(tester);
+      expect(outcome(), isNotNull);
+    });
+
+    testWidgets('un motif tout prêt remplit le champ, et le refus part avec '
+        'lui', (tester) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await tester.ensureVisible(find.text(motifDevis));
+      await tester.tap(find.text(motifDevis));
+      await tester.pumpAndSettle();
+      await confirmer(tester);
+
+      expect(
+        outcome(),
+        isA<ExpenseDetailGesture>()
+            .having((o) => o.gesture, 'gesture', ExpenseGesture.refuse)
+            .having((o) => o.note, 'note', motifDevis),
+      );
+    });
+
+    testWidgets('annuler referme le panneau et laisse la demande intacte', (
+      tester,
+    ) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await tester.ensureVisible(find.text('Annuler'));
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Refuser la demande'), findsNothing);
+      expect(outcome(), isNull);
+      expect(find.text('Refuser'), findsOneWidget);
     });
   });
 }

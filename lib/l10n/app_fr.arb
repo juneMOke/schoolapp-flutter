@@ -6935,13 +6935,10 @@
   "expenseActionEdit": "Modifier",
   "expenseActionDelete": "Supprimer",
   "expenseDialogClose": "Fermer",
-  "expenseToastCreated": "Dépense enregistrée · {amount} ({status, select, PAID{payée} other{non payée}})",
+  "expenseToastCreated": "Demande déposée · {amount} — en attente de décision.",
   "@expenseToastCreated": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      },
-      "status": {
         "type": "String"
       }
     }
@@ -7013,6 +7010,39 @@
   "expenseSituationAwaitingDecision": "En attente d'une décision du validateur.",
   "expenseRefusalReasonBy": "Motif du refus — {decider}",
   "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
+  "expenseGestureApprove": "Approuver",
+  "expenseGestureRefuse": "Refuser",
+  "expenseGesturePay": "Marquer payée",
+  "expenseGestureRetract": "Retirer",
+  "expenseGestureResubmit": "Corriger et renvoyer",
+  "expenseGestureReopen": "Annuler la décision",
+  "expenseGestureRemind": "Relancer",
+  "expenseGestureComment": "Envoyer",
+  "expenseRefusalTitle": "Refuser la demande",
+  "expenseRefusalReasonLabel": "Motif du refus (obligatoire)",
+  "expenseRefusalReasonHint": "Dites au demandeur ce qui manque ou ce qui bloque — il pourra corriger et renvoyer.",
+  "expenseRefusalReasonMissing": "Un refus sans motif laisse le demandeur sans issue.",
+  "expenseRefusalConfirm": "Confirmer le refus",
+  "expenseRefusalSuggestionQuote": "Devis manquant : joindre au moins deux offres avant de réengager la dépense.",
+  "expenseRefusalSuggestionAmount": "Montant trop élevé pour ce poste ce mois-ci — à replanifier au trimestre suivant.",
+  "expenseRefusalSuggestionDuplicate": "Dépense déjà couverte par une ligne enregistrée la semaine dernière.",
+  "expenseToastApproved": "Demande {name} approuvée.",
+  "@expenseToastApproved": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRefused": "Demande {name} refusée.",
+  "@expenseToastRefused": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastPaid": "Dépense {name} marquée payée.",
+  "@expenseToastPaid": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRetracted": "Demande {name} retirée.",
+  "@expenseToastRetracted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastResubmitted": "Demande {name} renvoyée en attente de décision.",
+  "@expenseToastResubmitted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReopened": "Décision annulée : {name} repart en attente.",
+  "@expenseToastReopened": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReminded": "Relance envoyée pour {name}.",
+  "@expenseToastReminded": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastCommented": "Message ajouté au fil de {name}.",
+  "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
+  "expenseGestureRefused": "Ce geste n'est plus possible sur cette demande : son état a changé.",
   "expenseThreadTitle": "Fil de la demande",
   "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

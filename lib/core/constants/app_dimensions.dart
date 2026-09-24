@@ -513,6 +513,9 @@ class AppDimensions {
   /// visiblement éteint.
   static const expenseChainDimmedOpacity = 0.5;
 
+  /// Panneau de refus : un motif tout prêt reste sur une ligne.
+  static const expenseRefusalChipMaxWidth = 260.0;
+
   /// Fil de la demande : vignette d'acte et bulle de message.
   static const expenseThreadMedallionSize = 30.0;
   static const expenseThreadMedallionRadius = 9.0;

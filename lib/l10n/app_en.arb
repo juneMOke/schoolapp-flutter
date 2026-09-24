@@ -6741,13 +6741,10 @@
   "expenseActionEdit": "Edit",
   "expenseActionDelete": "Delete",
   "expenseDialogClose": "Close",
-  "expenseToastCreated": "Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})",
+  "expenseToastCreated": "Request submitted · {amount} — awaiting a decision.",
   "@expenseToastCreated": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      },
-      "status": {
         "type": "String"
       }
     }
@@ -6819,6 +6816,39 @@
   "expenseSituationAwaitingDecision": "Awaiting a decision from the approver.",
   "expenseRefusalReasonBy": "Reason for refusal — {decider}",
   "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
+  "expenseGestureApprove": "Approve",
+  "expenseGestureRefuse": "Refuse",
+  "expenseGesturePay": "Mark as paid",
+  "expenseGestureRetract": "Withdraw",
+  "expenseGestureResubmit": "Correct and resend",
+  "expenseGestureReopen": "Undo the decision",
+  "expenseGestureRemind": "Send a reminder",
+  "expenseGestureComment": "Send",
+  "expenseRefusalTitle": "Refuse the request",
+  "expenseRefusalReasonLabel": "Reason for refusal (required)",
+  "expenseRefusalReasonHint": "Tell the requester what is missing or blocking — they can correct it and resend.",
+  "expenseRefusalReasonMissing": "A refusal without a reason leaves the requester with no way out.",
+  "expenseRefusalConfirm": "Confirm the refusal",
+  "expenseRefusalSuggestionQuote": "Quote missing: attach at least two offers before committing the spend again.",
+  "expenseRefusalSuggestionAmount": "Too high for this budget line this month — reschedule to next term.",
+  "expenseRefusalSuggestionDuplicate": "Already covered by an entry recorded last week.",
+  "expenseToastApproved": "Request {name} approved.",
+  "@expenseToastApproved": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRefused": "Request {name} refused.",
+  "@expenseToastRefused": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastPaid": "Expense {name} marked as paid.",
+  "@expenseToastPaid": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRetracted": "Request {name} withdrawn.",
+  "@expenseToastRetracted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastResubmitted": "Request {name} sent back for a decision.",
+  "@expenseToastResubmitted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReopened": "Decision undone: {name} is pending again.",
+  "@expenseToastReopened": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReminded": "Reminder sent for {name}.",
+  "@expenseToastReminded": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastCommented": "Message added to the thread for {name}.",
+  "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
+  "expenseGestureRefused": "That gesture is no longer possible on this request: its state has changed.",
   "expenseThreadTitle": "Request thread",
   "expenseThreadCount": "{count, plural, =0{no message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

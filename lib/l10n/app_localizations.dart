@@ -16412,8 +16412,8 @@ abstract class AppLocalizations {
   /// No description provided for @expenseToastCreated.
   ///
   /// In en, this message translates to:
-  /// **'Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})'**
-  String expenseToastCreated(String amount, String status);
+  /// **'Request submitted · {amount} — awaiting a decision.'**
+  String expenseToastCreated(String amount);
 
   /// No description provided for @expenseToastUpdated.
   ///
@@ -16600,6 +16600,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason for refusal — {decider}'**
   String expenseRefusalReasonBy(String decider);
+
+  /// No description provided for @expenseGestureApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get expenseGestureApprove;
+
+  /// No description provided for @expenseGestureRefuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse'**
+  String get expenseGestureRefuse;
+
+  /// No description provided for @expenseGesturePay.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get expenseGesturePay;
+
+  /// No description provided for @expenseGestureRetract.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get expenseGestureRetract;
+
+  /// No description provided for @expenseGestureResubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct and resend'**
+  String get expenseGestureResubmit;
+
+  /// No description provided for @expenseGestureReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the decision'**
+  String get expenseGestureReopen;
+
+  /// No description provided for @expenseGestureRemind.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a reminder'**
+  String get expenseGestureRemind;
+
+  /// No description provided for @expenseGestureComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get expenseGestureComment;
+
+  /// No description provided for @expenseRefusalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse the request'**
+  String get expenseRefusalTitle;
+
+  /// No description provided for @expenseRefusalReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for refusal (required)'**
+  String get expenseRefusalReasonLabel;
+
+  /// No description provided for @expenseRefusalReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the requester what is missing or blocking — they can correct it and resend.'**
+  String get expenseRefusalReasonHint;
+
+  /// No description provided for @expenseRefusalReasonMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'A refusal without a reason leaves the requester with no way out.'**
+  String get expenseRefusalReasonMissing;
+
+  /// No description provided for @expenseRefusalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the refusal'**
+  String get expenseRefusalConfirm;
+
+  /// No description provided for @expenseRefusalSuggestionQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote missing: attach at least two offers before committing the spend again.'**
+  String get expenseRefusalSuggestionQuote;
+
+  /// No description provided for @expenseRefusalSuggestionAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Too high for this budget line this month — reschedule to next term.'**
+  String get expenseRefusalSuggestionAmount;
+
+  /// No description provided for @expenseRefusalSuggestionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Already covered by an entry recorded last week.'**
+  String get expenseRefusalSuggestionDuplicate;
+
+  /// No description provided for @expenseToastApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} approved.'**
+  String expenseToastApproved(String name);
+
+  /// No description provided for @expenseToastRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} refused.'**
+  String expenseToastRefused(String name);
+
+  /// No description provided for @expenseToastPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {name} marked as paid.'**
+  String expenseToastPaid(String name);
+
+  /// No description provided for @expenseToastRetracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} withdrawn.'**
+  String expenseToastRetracted(String name);
+
+  /// No description provided for @expenseToastResubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} sent back for a decision.'**
+  String expenseToastResubmitted(String name);
+
+  /// No description provided for @expenseToastReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision undone: {name} is pending again.'**
+  String expenseToastReopened(String name);
+
+  /// No description provided for @expenseToastReminded.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder sent for {name}.'**
+  String expenseToastReminded(String name);
+
+  /// No description provided for @expenseToastCommented.
+  ///
+  /// In en, this message translates to:
+  /// **'Message added to the thread for {name}.'**
+  String expenseToastCommented(String name);
+
+  /// No description provided for @expenseGestureRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'That gesture is no longer possible on this request: its state has changed.'**
+  String get expenseGestureRefused;
 
   /// No description provided for @expenseThreadTitle.
   ///

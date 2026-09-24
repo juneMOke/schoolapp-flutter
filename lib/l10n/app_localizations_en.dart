@@ -10305,12 +10305,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseDialogClose => 'Close';
 
   @override
-  String expenseToastCreated(String amount, String status) {
-    String _temp0 = intl.Intl.selectLogic(status, {
-      'PAID': 'paid',
-      'other': 'unpaid',
-    });
-    return 'Expense recorded · $amount ($_temp0)';
+  String expenseToastCreated(String amount) {
+    return 'Request submitted · $amount — awaiting a decision.';
   }
 
   @override
@@ -10423,6 +10419,103 @@ class AppLocalizationsEn extends AppLocalizations {
   String expenseRefusalReasonBy(String decider) {
     return 'Reason for refusal — $decider';
   }
+
+  @override
+  String get expenseGestureApprove => 'Approve';
+
+  @override
+  String get expenseGestureRefuse => 'Refuse';
+
+  @override
+  String get expenseGesturePay => 'Mark as paid';
+
+  @override
+  String get expenseGestureRetract => 'Withdraw';
+
+  @override
+  String get expenseGestureResubmit => 'Correct and resend';
+
+  @override
+  String get expenseGestureReopen => 'Undo the decision';
+
+  @override
+  String get expenseGestureRemind => 'Send a reminder';
+
+  @override
+  String get expenseGestureComment => 'Send';
+
+  @override
+  String get expenseRefusalTitle => 'Refuse the request';
+
+  @override
+  String get expenseRefusalReasonLabel => 'Reason for refusal (required)';
+
+  @override
+  String get expenseRefusalReasonHint =>
+      'Tell the requester what is missing or blocking — they can correct it and resend.';
+
+  @override
+  String get expenseRefusalReasonMissing =>
+      'A refusal without a reason leaves the requester with no way out.';
+
+  @override
+  String get expenseRefusalConfirm => 'Confirm the refusal';
+
+  @override
+  String get expenseRefusalSuggestionQuote =>
+      'Quote missing: attach at least two offers before committing the spend again.';
+
+  @override
+  String get expenseRefusalSuggestionAmount =>
+      'Too high for this budget line this month — reschedule to next term.';
+
+  @override
+  String get expenseRefusalSuggestionDuplicate =>
+      'Already covered by an entry recorded last week.';
+
+  @override
+  String expenseToastApproved(String name) {
+    return 'Request $name approved.';
+  }
+
+  @override
+  String expenseToastRefused(String name) {
+    return 'Request $name refused.';
+  }
+
+  @override
+  String expenseToastPaid(String name) {
+    return 'Expense $name marked as paid.';
+  }
+
+  @override
+  String expenseToastRetracted(String name) {
+    return 'Request $name withdrawn.';
+  }
+
+  @override
+  String expenseToastResubmitted(String name) {
+    return 'Request $name sent back for a decision.';
+  }
+
+  @override
+  String expenseToastReopened(String name) {
+    return 'Decision undone: $name is pending again.';
+  }
+
+  @override
+  String expenseToastReminded(String name) {
+    return 'Reminder sent for $name.';
+  }
+
+  @override
+  String expenseToastCommented(String name) {
+    return 'Message added to the thread for $name.';
+  }
+
+  @override
+  String get expenseGestureRefused =>
+      'That gesture is no longer possible on this request: its state has changed.';
 
   @override
   String get expenseThreadTitle => 'Request thread';

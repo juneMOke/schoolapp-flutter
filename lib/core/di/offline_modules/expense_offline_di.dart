@@ -91,6 +91,9 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerFactory<RestoreExpenseUseCase>(
     () => RestoreExpenseUseCase(getIt<ExpenseRepository>()),
   );
+  getIt.registerFactory<ApplyExpenseGestureUseCase>(
+    () => ApplyExpenseGestureUseCase(getIt<ExpenseRepository>()),
+  );
   getIt.registerFactory<SyncExpensePullsUseCase>(
     () => SyncExpensePullsUseCase(getIt<PullCoordinator>()),
   );
@@ -121,6 +124,7 @@ void registerExpenseOffline(GetIt getIt) {
       save: getIt<SaveExpenseUseCase>(),
       withdraw: getIt<WithdrawExpenseUseCase>(),
       restore: getIt<RestoreExpenseUseCase>(),
+      gesture: getIt<ApplyExpenseGestureUseCase>(),
       thread: getIt<LoadExpenseThreadUseCase>(),
     ),
   );

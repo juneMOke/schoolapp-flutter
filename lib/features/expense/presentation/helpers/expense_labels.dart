@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que dit un état du circuit. Partagé par la pastille, le filtre de
@@ -46,3 +47,37 @@ String expenseRejectionLabel(AppLocalizations l10n, String? code) =>
       'HTTP_403' => l10n.expenseRejectedForbidden,
       _ => l10n.expenseRejectedGeneric,
     };
+
+/// Le mot du bouton qui pose un geste.
+///
+/// ⚠️ « Retirer » nomme la **reprise par son demandeur**, pas le retrait du
+/// registre : celui-ci s'appelle « Supprimer » à l'écran (F25). Les
+/// intervertir ferait croire qu'on efface une demande qu'on ne fait que
+/// reprendre.
+String expenseGestureLabel(AppLocalizations l10n, ExpenseGesture gesture) =>
+    switch (gesture) {
+      ExpenseGesture.approve => l10n.expenseGestureApprove,
+      ExpenseGesture.refuse => l10n.expenseGestureRefuse,
+      ExpenseGesture.pay => l10n.expenseGesturePay,
+      ExpenseGesture.retract => l10n.expenseGestureRetract,
+      ExpenseGesture.resubmit => l10n.expenseGestureResubmit,
+      ExpenseGesture.reopen => l10n.expenseGestureReopen,
+      ExpenseGesture.remind => l10n.expenseGestureRemind,
+      ExpenseGesture.comment => l10n.expenseGestureComment,
+    };
+
+/// L'accusé d'un geste posé, nommant la demande.
+String expenseGestureToast(
+  AppLocalizations l10n,
+  ExpenseGesture gesture,
+  String name,
+) => switch (gesture) {
+  ExpenseGesture.approve => l10n.expenseToastApproved(name),
+  ExpenseGesture.refuse => l10n.expenseToastRefused(name),
+  ExpenseGesture.pay => l10n.expenseToastPaid(name),
+  ExpenseGesture.retract => l10n.expenseToastRetracted(name),
+  ExpenseGesture.resubmit => l10n.expenseToastResubmitted(name),
+  ExpenseGesture.reopen => l10n.expenseToastReopened(name),
+  ExpenseGesture.remind => l10n.expenseToastReminded(name),
+  ExpenseGesture.comment => l10n.expenseToastCommented(name),
+};
