@@ -8175,6 +8175,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketMatriculationLabel => 'Matricule :';
 
   @override
+  String get ticketAnnualMatriculationLabel => 'Mat. annuel :';
+
+  @override
   String get ticketClassroomLabel => 'Classe :';
 
   @override

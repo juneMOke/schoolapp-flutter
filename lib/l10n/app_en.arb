@@ -5210,6 +5210,7 @@
   "ticketTillPhoneLabel": "Till tel.:",
   "ticketStudentLabel": "Student:",
   "ticketMatriculationLabel": "Student no.:",
+  "ticketAnnualMatriculationLabel": "Annual no.:",
   "ticketClassroomLabel": "Class:",
   "ticketAmountReceivedLabel": "Amount received",
   "ticketAllocationsLabel": "Breakdown",

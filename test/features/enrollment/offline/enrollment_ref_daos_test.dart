@@ -143,9 +143,11 @@ void main() {
     String status = 'ACTIVE',
     String? schoolLevelId = 'lvl-2',
     String updatedAt = '2026-07-08T10:00:00Z',
+    String? annualMatriculationNumber,
   }) => EnrollmentDeltaDto(
     id: id,
     studentId: 'stu-1',
+    annualMatriculationNumber: annualMatriculationNumber,
     schoolLevelId: schoolLevelId,
     academicYearId: 'ay-1',
     status: status,
@@ -1730,6 +1732,88 @@ void main() {
       });
 
       expect(dto.tillPhone, '+243 811 111 111');
+    });
+  });
+
+  group('le matricule annuel (v51)', () {
+    Future<String?> lu({String id = 'e1'}) async =>
+        (await db.query(
+              'enrollments',
+              columns: ['annual_matriculation_number'],
+              where: 'id = ?',
+              whereArgs: [id],
+            )).single['annual_matriculation_number']
+            as String?;
+
+    test('le delta le pose sur une inscription SYNCED', () async {
+      await seedEnrollment();
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      expect(await lu(), 'CF-P4-000018');
+    });
+
+    /// ⚠️ L'affectation est FRANCHE, à l'inverse du matricule classique qui
+    /// porte une garde `!= null`. Un niveau corrigé hors catalogue fait
+    /// légitimement disparaître l'annuel côté serveur ; le retenir imprimerait
+    /// sur le ticket un matricule que le serveur a retiré.
+    test('un nul venu du serveur EFFACE la valeur locale', () async {
+      await seedEnrollment();
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(updatedAt: '2026-07-09T10:00:00Z'),
+      ], syncedAt: 901);
+
+      expect(await lu(), isNull);
+    });
+
+    /// Le delta n'écrase jamais une écriture locale non remontée.
+    test('une inscription non SYNCED reste intacte', () async {
+      await seedEnrollment(syncStatus: 'PENDING_SYNC');
+
+      await reconciliationDao.applyEnrollmentDelta([
+        delta(annualMatriculationNumber: 'CF-P4-000018'),
+      ], syncedAt: 900);
+
+      expect(await lu(), isNull);
+    });
+
+    test('le JSON du delta porte bien le champ', () {
+      final dto = EnrollmentDeltaDto.fromJson(const {
+        'id': 'e1',
+        'studentId': 'stu-1',
+        'annualMatriculationNumber': 'CF-P4-000018',
+        'status': 'ACTIVE',
+        'updatedAt': '2026-07-08T10:00:00Z',
+        'serverUpdatedAt': '2026-07-08T10:00:00Z',
+      });
+
+      expect(dto.annualMatriculationNumber, 'CF-P4-000018');
+    });
+
+    test('le JSON du snapshot porte bien le champ', () {
+      final dto = EnrollmentSnapshotDto.fromJson(const {
+        'id': 'e1',
+        'studentId': 'stu-1',
+        'academicYearId': 'ay-1',
+        'status': 'COMPLETED',
+        'enrollmentType': 'NEW_ENROLLMENT',
+        'enrollmentCode': 'C1',
+        'annualMatriculationNumber': 'CF-P4-000018',
+        'enrollmentDate': '2026-07-01',
+        'firstName': 'Amina',
+        'lastName': 'Moke',
+        'surname': 'Kasa',
+        'dateOfBirth': '2015-04-02',
+        'gender': 'FEMALE',
+      });
+
+      expect(dto.annualMatriculationNumber, 'CF-P4-000018');
     });
   });
 }

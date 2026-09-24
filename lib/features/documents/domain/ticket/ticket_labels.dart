@@ -60,6 +60,14 @@ class TicketLabels extends Equatable {
 
   final String studentLabel;
   final String matriculationLabel;
+
+  /// « Mat. annuel : » — le matricule de l'année, sous le classique.
+  ///
+  /// ⚠️ **Court à dessein.** `Mat. annuel : CF-HG-SCI-1-000123` fait 32
+  /// caractères, soit exactement la largeur d'un papier 58 mm : un libellé plus
+  /// long y ferait replier le matricule. « Matricule annuel : » en coûtait six
+  /// de plus.
+  final String annualMatriculationLabel;
   final String classroomLabel;
   final String amountReceivedLabel;
 
@@ -165,6 +173,7 @@ class TicketLabels extends Equatable {
     required this.phoneLabel,
     required this.studentLabel,
     required this.matriculationLabel,
+    required this.annualMatriculationLabel,
     required this.classroomLabel,
     required this.amountReceivedLabel,
     required this.rateLabel,
@@ -195,6 +204,7 @@ class TicketLabels extends Equatable {
     phoneLabel,
     studentLabel,
     matriculationLabel,
+    annualMatriculationLabel,
     classroomLabel,
     amountReceivedLabel,
     rateLabel,

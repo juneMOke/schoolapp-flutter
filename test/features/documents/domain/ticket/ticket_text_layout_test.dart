@@ -18,6 +18,7 @@ const _labels = TicketLabels(
   tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
+  annualMatriculationLabel: 'Mat. annuel :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   rateLabel: 'Taux',
@@ -52,6 +53,7 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   tillPhoneLabel: _labels.tillPhoneLabel,
   studentLabel: _labels.studentLabel,
   matriculationLabel: _labels.matriculationLabel,
+  annualMatriculationLabel: _labels.annualMatriculationLabel,
   classroomLabel: _labels.classroomLabel,
   amountReceivedLabel: _labels.amountReceivedLabel,
   rateLabel: _labels.rateLabel,
@@ -72,6 +74,7 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
 TicketReceiptModel _model({
   String studentFullName = 'Mbala Kasa Amina',
   String? matriculationNumber = 'MAT-0042',
+  String? annualMatriculationNumber = 'CF-P4-000018',
   String? classroomName = '5e primaire A',
   String? cashierFullName = 'Jean Kabeya',
 
@@ -116,6 +119,7 @@ TicketReceiptModel _model({
   schoolTillPhone: schoolTillPhone,
   studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
+  annualMatriculationNumber: annualMatriculationNumber,
   classroomName: classroomName,
   reference: 'PROV-A1B2C3-9F8E7D6C',
   isProvisional: isProvisional,
@@ -653,6 +657,10 @@ void main() {
           _model(
             studentFullName: '',
             matriculationNumber: null,
+            // Le matricule annuel appartient à la MÊME zone : la laisser vide
+            // veut dire le taire aussi, sans quoi ce test mesurerait une zone
+            // à une ligne plutôt qu'une zone absente.
+            annualMatriculationNumber: null,
             classroomName: null,
           ),
           columns: 48,
@@ -1052,6 +1060,7 @@ void main() {
         tillPhoneLabel: _labels.tillPhoneLabel,
         studentLabel: _labels.studentLabel,
         matriculationLabel: _labels.matriculationLabel,
+        annualMatriculationLabel: _labels.annualMatriculationLabel,
         classroomLabel: _labels.classroomLabel,
         amountReceivedLabel: _labels.amountReceivedLabel,
         rateLabel: _labels.rateLabel,
@@ -1105,6 +1114,7 @@ void main() {
       tillPhoneLabel: _labels.tillPhoneLabel,
       studentLabel: _labels.studentLabel,
       matriculationLabel: _labels.matriculationLabel,
+      annualMatriculationLabel: _labels.annualMatriculationLabel,
       classroomLabel: _labels.classroomLabel,
       amountReceivedLabel: _labels.amountReceivedLabel,
       rateLabel: _labels.rateLabel,
@@ -1373,6 +1383,61 @@ void main() {
     test('aucune ligne ne déborde, ni à 48 ni à 32', () {
       for (final width in const [48, 32]) {
         for (final line in TicketTextLayout.render(_model(), columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
+        }
+      }
+    });
+  });
+
+  group('matricule annuel', () {
+    test('sous le matricule classique, qui reste', () {
+      final lines = TicketTextLayout.render(_model());
+
+      final classique = lines.indexWhere((l) => l.startsWith('Matricule :'));
+      final annuel = lines.indexWhere((l) => l.startsWith('Mat. annuel :'));
+
+      expect(classique, isNonNegative);
+      expect(annuel, classique + 1);
+      expect(lines[annuel], contains('CF-P4-000018'));
+    });
+
+    test('absent : ni ligne ni libellé', () {
+      final lines = TicketTextLayout.render(
+        _model(annualMatriculationNumber: null),
+      );
+
+      expect(lines.any((l) => l.contains('Mat. annuel')), isFalse);
+      expect(lines.any((l) => l.startsWith('Matricule :')), isTrue);
+    });
+
+    /// Le matricule classique peut manquer hors ligne (attribué à l'ACK) sans
+    /// que l'annuel manque : ils ne viennent pas de la même table.
+    test('il sort même si le matricule classique manque', () {
+      final lines = TicketTextLayout.render(_model(matriculationNumber: null));
+
+      expect(lines.any((l) => l.startsWith('Matricule :')), isFalse);
+      expect(lines.any((l) => l.startsWith('Mat. annuel :')), isTrue);
+    });
+
+    /// ⚠️ Le cas limite, et c'est lui qui compte : le plus long code catalogue
+    /// connu donne une ligne de 32 caractères, soit EXACTEMENT la largeur d'un
+    /// papier 58 mm. Un libellé plus long y replierait le matricule.
+    test('le plus long matricule tient pile à 32 colonnes', () {
+      final lines = TicketTextLayout.render(
+        _model(annualMatriculationNumber: 'CF-HG-SCI-1-000123'),
+        columns: 32,
+      );
+      final i = lines.indexWhere((l) => l.startsWith('Mat. annuel :'));
+
+      expect(i, isNonNegative);
+      expect(lines[i], 'Mat. annuel : CF-HG-SCI-1-000123');
+      expect(lines[i].length, 32);
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32', () {
+      final model = _model(annualMatriculationNumber: 'CF-HG-SCI-1-000123');
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(model, columns: width)) {
           expect(line.length, lessThanOrEqualTo(width), reason: line);
         }
       }

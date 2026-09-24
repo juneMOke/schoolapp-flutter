@@ -22,6 +22,7 @@ const _labels = TicketLabels(
   tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
+  annualMatriculationLabel: 'Mat. annuel :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   rateLabel: 'Taux',

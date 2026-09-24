@@ -155,6 +155,15 @@ abstract final class TicketTextLayout {
       model.matriculationNumber,
       width,
     );
+    // Sous le matricule classique, qui reste — c'est ainsi que le serveur les
+    // pose sur le reçu scellé, et les deux papiers finissent dans les mains du
+    // même parent.
+    _addOptional(
+      lines,
+      model.labels.annualMatriculationLabel,
+      model.annualMatriculationNumber,
+      width,
+    );
     _addOptional(
       lines,
       model.labels.classroomLabel,

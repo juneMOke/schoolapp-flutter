@@ -33,6 +33,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(50)) {
     await _addTillPhone(db);
   }
+  if (upTo(51)) {
+    await _addAnnualMatriculationNumber(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -42,6 +45,38 @@ Future<void> migrateDeviceDatabase(
   int oldVersion, {
   int newVersion = AppConstants.offlineDbSchemaVersion,
 }) async {}
+
+/// v51 — `enrollments.annual_matriculation_number`.
+///
+/// Le matricule classique ne change jamais ; l'annuel reprend son préfixe et ses
+/// six chiffres et **remplace l'année par le code catalogue du niveau** où
+/// l'élève est inscrit cette année-là (`CF-2026-000018` en P4 →
+/// `CF-P4-000018`). Il suit donc l'élève d'un niveau à l'autre.
+///
+/// ⚠️ **Il appartient à l'INSCRIPTION, pas à l'élève** — d'où cette colonne-ci
+/// plutôt qu'une sur `students` : un élève à deux inscriptions en a deux, et
+/// toute lecture est scopée à une année.
+///
+/// 🔴 **Ce n'est PAS une clé.** La séquence à six chiffres repart à 1 chaque
+/// année civile : deux élèves d'un même niveau peuvent la partager. Jamais de
+/// recherche, de déduplication ni de jointure dessus — le matricule classique
+/// et les UUID restent les seuls identifiants. Aucun index ici, délibérément :
+/// en poser un inviterait à s'en servir.
+///
+/// **Aucune reprise de données.** La colonne naît vide et se remplit par le
+/// pull, au fil des inscriptions modifiées. La re-hydratation des inscriptions
+/// déjà synchronisées est un geste SÉPARÉ, qui ne part qu'après le déploiement
+/// serveur — cf. `MATRICULE_ANNUEL_PLAN.md` §11.1.
+///
+/// ⚠️ Garde de colonne, même raison qu'à la v50 : une base héritée adoptée
+/// repasse par cet escalier.
+Future<void> _addAnnualMatriculationNumber(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(enrollments)');
+  if (info.any((row) => row['name'] == 'annual_matriculation_number')) return;
+  await db.execute(
+    'ALTER TABLE enrollments ADD COLUMN annual_matriculation_number TEXT',
+  );
+}
 
 /// v50 — `ref_school.till_phone`, le numéro de la CAISSE.
 ///

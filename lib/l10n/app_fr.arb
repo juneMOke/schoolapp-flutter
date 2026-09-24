@@ -5278,6 +5278,7 @@
   "ticketTillPhoneLabel": "Tél. caisse :",
   "ticketStudentLabel": "Élève :",
   "ticketMatriculationLabel": "Matricule :",
+  "ticketAnnualMatriculationLabel": "Mat. annuel :",
   "ticketClassroomLabel": "Classe :",
   "ticketAmountReceivedLabel": "Montant reçu",
   "ticketAllocationsLabel": "Répartition",

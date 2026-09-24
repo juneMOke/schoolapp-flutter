@@ -13094,6 +13094,12 @@ abstract class AppLocalizations {
   /// **'Student no.:'**
   String get ticketMatriculationLabel;
 
+  /// No description provided for @ticketAnnualMatriculationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual no.:'**
+  String get ticketAnnualMatriculationLabel;
+
   /// No description provided for @ticketClassroomLabel.
   ///
   /// In en, this message translates to:

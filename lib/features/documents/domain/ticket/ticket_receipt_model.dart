@@ -61,6 +61,17 @@ class TicketReceiptModel extends Equatable {
   // ── Z2 : l'élève ────────────────────────────────────────────────────────────
   final String studentFullName;
   final String? matriculationNumber;
+
+  /// Le matricule de l'élève pour l'année du versement — imprimé sous le
+  /// matricule classique, qui reste.
+  ///
+  /// ⚠️ Il vient de l'INSCRIPTION, pas de l'élève : un élève réinscrit en a un
+  /// par année. `null` quand le niveau est hors catalogue, quand le matricule
+  /// classique n'a pas le format attendu, ou quand le versement ne porte aucune
+  /// année — trois silences que le gabarit traite de la même façon : pas de
+  /// ligne.
+  final String? annualMatriculationNumber;
+
   final String? classroomName;
 
   // ── Z3 : la traçabilité ─────────────────────────────────────────────────────
@@ -187,6 +198,7 @@ class TicketReceiptModel extends Equatable {
     this.schoolTillPhone,
     required this.studentFullName,
     this.matriculationNumber,
+    this.annualMatriculationNumber,
     this.classroomName,
     required this.reference,
     required this.isProvisional,
@@ -374,6 +386,7 @@ class TicketReceiptModel extends Equatable {
     payerPhoneNumber,
     studentFullName,
     matriculationNumber,
+    annualMatriculationNumber,
     classroomName,
     reference,
     isProvisional,

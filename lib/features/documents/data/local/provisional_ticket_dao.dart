@@ -407,6 +407,46 @@ class ProvisionalTicketDao {
     );
   }
 
+  /// Le matricule de l'élève pour **l'année du versement**, `null` quand il
+  /// n'est pas connu.
+  ///
+  /// ⚠️ Lu sur `enrollments`, pas sur `students` : ce matricule appartient à
+  /// l'INSCRIPTION. Un élève réinscrit en a un par année, et imprimer celui
+  /// d'une autre année mettrait sur le papier un niveau qui n'est plus le sien.
+  ///
+  /// ## Le tri est TOTAL, et ce n'est pas une précaution
+  ///
+  /// `(élève, année)` peut rendre plusieurs lignes — une inscription annulée et
+  /// celle qui vit. Le ticket étant **librement réimprimable**, deux tirages du
+  /// même versement porteraient sinon deux matricules différents, sur des
+  /// papiers qu'une famille garde côte à côte. `status` écarte l'annulée,
+  /// `updated_at` départage, `id` rend le tri strict.
+  ///
+  /// `null` dès que l'année est inconnue : sans elle on ne sait pas de quelle
+  /// inscription on parle, et le gabarit tait alors la ligne — ce qu'il sait
+  /// faire. Sortie AVANT la requête, pour qu'aucun `null` ne voyage en argument
+  /// lié.
+  Future<String?> findAnnualMatriculationNumber({
+    required String studentId,
+    required String? academicYearId,
+  }) async {
+    if (academicYearId == null || academicYearId.isEmpty) return null;
+
+    final rows = await _db.rawQuery(
+      '''
+      SELECT annual_matriculation_number AS number
+      FROM enrollments
+      WHERE student_id = ? AND academic_year_id = ?
+      ORDER BY (status = 'CANCELLED') ASC, updated_at DESC, id ASC
+      LIMIT 1
+      ''',
+      [studentId, academicYearId],
+    );
+    if (rows.isEmpty) return null;
+    final number = (rows.first['number'] as String?)?.trim();
+    return (number != null && number.isNotEmpty) ? number : null;
+  }
+
   /// En-tête complet de l'établissement (zone Z1). `null` tant que le
   /// référentiel n'a pas été pullé.
   ///

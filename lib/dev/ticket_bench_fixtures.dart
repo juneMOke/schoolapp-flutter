@@ -30,6 +30,7 @@ abstract final class TicketBenchFixtures {
     tillPhoneLabel: 'Tél. caisse :',
     studentLabel: 'Élève :',
     matriculationLabel: 'Matricule :',
+    annualMatriculationLabel: 'Mat. annuel :',
     classroomLabel: 'Classe :',
     amountReceivedLabel: 'Montant reçu',
     rateLabel: 'Taux',
@@ -70,6 +71,9 @@ abstract final class TicketBenchFixtures {
     schoolTillPhone: '+243 811 111 111',
     studentFullName: 'Mbala-Kasa Ndombasi Amina Ɛlodie',
     matriculationNumber: 'MAT-2026-000481',
+    // Le cas limite : 32 caractères avec son libellé, la largeur exacte d'un
+    // papier 58 mm.
+    annualMatriculationNumber: 'CF-HG-SCI-1-000123',
     classroomName: '5e primaire A',
     reference: 'PROV-A1B2C3D4-9F8E7D6C5B4A3928',
     isProvisional: true,

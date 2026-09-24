@@ -19,6 +19,7 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   tillPhoneLabel: l10n.ticketTillPhoneLabel,
   studentLabel: l10n.ticketStudentLabel,
   matriculationLabel: l10n.ticketMatriculationLabel,
+  annualMatriculationLabel: l10n.ticketAnnualMatriculationLabel,
   classroomLabel: l10n.ticketClassroomLabel,
   amountReceivedLabel: l10n.ticketAmountReceivedLabel,
   rateLabel: l10n.ticketRateLabel,

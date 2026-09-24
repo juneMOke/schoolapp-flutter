@@ -72,6 +72,12 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
         studentId: payment.studentId,
         academicYearId: payment.academicYearId,
       );
+      // Le matricule de l'ANNÉE du versement : il vit sur l'inscription, pas
+      // sur l'élève.
+      final annualMatriculation = await _dao.findAnnualMatriculationNumber(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+      );
       final allocations = await _dao.findAllocations(paymentId);
       final tenders = await _dao.findTenders(paymentId);
       // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
@@ -118,6 +124,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           schoolTillPhone: school?.tillPhone,
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
+          annualMatriculationNumber: annualMatriculation,
           classroomName: classroomName,
           // Sans ligne documentaire (cas anormal mais non bloquant, et cas
           // NORMAL d'un versement encaissé sur une autre caisse), on retombe sur

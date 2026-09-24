@@ -30,6 +30,7 @@ const _labels = TicketLabels(
   tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
+  annualMatriculationLabel: 'Mat. annuel :',
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   rateLabel: 'Taux',
@@ -1358,6 +1359,124 @@ void main() {
         lines.any((l) => l.contains('Total verse') && l.contains('76 500 FC')),
         isTrue,
       );
+    });
+  });
+
+  group('le matricule annuel', () {
+    /// Une inscription de l'élève, sur une année donnée.
+    Future<void> seedInscription({
+      String id = 'enr-1',
+      String academicYearId = 'y-1',
+      String status = 'COMPLETED',
+      String? annual = 'CF-P4-000018',
+      int updatedAt = 100,
+    }) => db.insert('enrollments', {
+      'id': id,
+      'student_id': 's-1',
+      'enrollment_type': 'NEW_ENROLLMENT',
+      'status': status,
+      'academic_year_id': academicYearId,
+      'enrollment_date': '2026-07-01',
+      'annual_matriculation_number': annual,
+      'sync_status': 'SYNCED',
+      'updated_at': updatedAt,
+    });
+
+    Future<String?> lu() async {
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      return built.fold(
+        (f) => throw StateError('$f'),
+        (m) => m.annualMatriculationNumber,
+      );
+    }
+
+    test('prend celui de l année du versement', () async {
+      await seedPayment();
+      await seedInscription();
+      await seedInscription(
+        id: 'enr-0',
+        academicYearId: 'y-0',
+        annual: 'CF-P3-000018',
+      );
+
+      expect(await lu(), 'CF-P4-000018');
+    });
+
+    /// `(élève, année)` peut rendre plusieurs lignes : une inscription annulée
+    /// et celle qui vit.
+    test('préfère l inscription non annulée', () async {
+      await seedPayment();
+      await seedInscription(
+        id: 'enr-annulee',
+        status: 'CANCELLED',
+        annual: 'CF-P9-999999',
+        updatedAt: 999,
+      );
+      await seedInscription(id: 'enr-vive', annual: 'CF-P4-000018');
+
+      expect(await lu(), 'CF-P4-000018');
+    });
+
+    /// Le ticket est librement réimprimable : deux tirages du même versement ne
+    /// doivent pas porter deux matricules. Le tri est total.
+    test('deux lectures rendent le même matricule', () async {
+      await seedPayment();
+      await seedInscription(id: 'enr-a', annual: 'CF-P4-000018');
+      await seedInscription(id: 'enr-b', annual: 'CF-P5-000018');
+
+      expect(await lu(), await lu());
+    });
+
+    test('année inconnue sur le versement : aucun matricule annuel', () async {
+      await seedPayment();
+      await seedInscription();
+      await db.update(
+        'payments',
+        {'academic_year_id': null},
+        where: 'id = ?',
+        whereArgs: ['p-1'],
+      );
+
+      expect(await lu(), isNull);
+    });
+
+    test('aucune inscription : le gabarit tait la ligne', () async {
+      await seedPayment();
+
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      final lines = built.fold(
+        (f) => throw StateError('$f'),
+        (m) => TicketTextLayout.render(m),
+      );
+
+      expect(lines.any((l) => l.contains('Mat. annuel')), isFalse);
+    });
+
+    test('le papier le porte sous le matricule classique', () async {
+      await seedPayment();
+      await seedInscription();
+
+      final built = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+      final lines = built.fold(
+        (f) => throw StateError('$f'),
+        (m) => TicketTextLayout.render(m),
+      );
+
+      final classique = lines.indexWhere((l) => l.startsWith('Matricule :'));
+      final annuel = lines.indexWhere((l) => l.startsWith('Mat. annuel :'));
+
+      expect(classique, isNonNegative);
+      expect(annuel, classique + 1);
+      expect(lines[annuel], contains('CF-P4-000018'));
     });
   });
 }

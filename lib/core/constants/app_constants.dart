@@ -758,7 +758,11 @@ class AppConstants {
   // appelle pour une question de paiement, distinct du téléphone de
   // l'établissement. Palier d'ÉCOLE, donc déclaré dans `migrateTenantDatabase` :
   // l'escalier hérité est clos à la v48.
-  static const int offlineDbSchemaVersion = 50;
+  // v51 (2026-09-24) : `enrollments.annual_matriculation_number` — le
+  // matricule de l'élève pour CETTE année, calculé serveur. Il appartient à
+  // l'INSCRIPTION, pas à l'élève : un élève à deux années en a deux. Palier
+  // d'école, donc déclaré dans `migrateTenantDatabase`.
+  static const int offlineDbSchemaVersion = 51;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

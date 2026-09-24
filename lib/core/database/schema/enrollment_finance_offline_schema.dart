@@ -190,6 +190,7 @@ const TableSchema enrollmentsTable = TableSchema(
       school_level_group_id TEXT,
       enrollment_date TEXT NOT NULL,
       enrollment_code TEXT,
+      annual_matriculation_number TEXT,
       source_ref TEXT,
       previous_school_name TEXT,
       previous_academic_year TEXT,
