@@ -10518,6 +10518,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'That gesture is no longer possible on this request: its state has changed.';
 
   @override
+  String get expenseThreadComposerLabel => 'Add a comment';
+
+  @override
+  String get expenseThreadComposerHint =>
+      'A detail, a question for the requester, a payment instruction…';
+
+  @override
+  String get expenseThreadPending => 'not sent yet';
+
+  @override
+  String get expenseThreadSendFailed =>
+      'The message could not be written on this device. Try again.';
+
+  @override
   String get expenseThreadTitle => 'Request thread';
 
   @override

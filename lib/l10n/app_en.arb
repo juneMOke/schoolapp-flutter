@@ -6849,6 +6849,10 @@
   "expenseToastCommented": "Message added to the thread for {name}.",
   "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
   "expenseGestureRefused": "That gesture is no longer possible on this request: its state has changed.",
+  "expenseThreadComposerLabel": "Add a comment",
+  "expenseThreadComposerHint": "A detail, a question for the requester, a payment instruction…",
+  "expenseThreadPending": "not sent yet",
+  "expenseThreadSendFailed": "The message could not be written on this device. Try again.",
   "expenseThreadTitle": "Request thread",
   "expenseThreadCount": "{count, plural, =0{no message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

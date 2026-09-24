@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_type
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -493,6 +494,129 @@ void main() {
       expect(find.text('Refuser la demande'), findsNothing);
       expect(outcome(), isNull);
       expect(find.text('Refuser'), findsOneWidget);
+    });
+  });
+
+  group('champ du fil', () {
+    ExpenseMessage message(String id, {required ExpenseSyncState sync}) =>
+        ExpenseMessage(
+          id: id,
+          expenseId: 'e-1',
+          body: 'Facture du mois',
+          act: ExpenseAct.deposit,
+          authorId: 'u-9',
+          authorName: 'Mbala Thérèse',
+          createdAt: DateTime.utc(2026, 9, 20, 8),
+          syncState: sync,
+        );
+
+    Future<void> pumpSheet(
+      WidgetTester tester, {
+      List<ExpenseMessage>? thread = const [],
+      Future<ExpenseCommentResult> Function(String body)? onComment,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: thread,
+          onComment: onComment,
+        ),
+      );
+    }
+
+    testWidgets('sans écrivain branché, le fil reste en LECTURE seule', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+
+      expect(find.text('Ajouter un commentaire'), findsNothing);
+    });
+
+    testWidgets('un fil ILLISIBLE n\'offre pas où écrire : on ne sait pas ce '
+        'que le message compléterait', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: null,
+        onComment: (_) async => (sent: true, thread: const <ExpenseMessage>[]),
+      );
+
+      expect(find.text('Ajouter un commentaire'), findsNothing);
+    });
+
+    testWidgets('envoyer écrit le message, vide le champ et rallonge le fil '
+        'SANS fermer la fiche', (tester) async {
+      String? sent;
+      await pumpSheet(
+        tester,
+        onComment: (body) async {
+          sent = body;
+          return (
+            sent: true,
+            thread: [message('m-1', sync: ExpenseSyncState.pending)],
+          );
+        },
+      );
+
+      await tester.enterText(_field('Ajouter un commentaire'), '  Vu  ');
+      await tester.ensureVisible(find.text('Envoyer'));
+      await tester.tap(find.text('Envoyer'));
+      await tester.pumpAndSettle();
+
+      expect(sent, 'Vu');
+      // On commente EN LISANT : la fiche ne se ferme pas.
+      expect(find.text('Facture SNEL'), findsOneWidget);
+      expect(find.text('Facture du mois'), findsOneWidget);
+      expect(find.text('1 message'), findsOneWidget);
+    });
+
+    testWidgets('un envoi refusé se dit DANS le champ — un toast sous une '
+        'modale serait inatteignable', (tester) async {
+      await pumpSheet(
+        tester,
+        onComment: (_) async => (sent: false, thread: null),
+      );
+
+      await tester.enterText(_field('Ajouter un commentaire'), 'Vu');
+      await tester.ensureVisible(find.text('Envoyer'));
+      await tester.tap(find.text('Envoyer'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Le message n\'a pas pu être écrit sur cet appareil. Réessayez.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Facture SNEL'), findsOneWidget);
+    });
+
+    testWidgets('un message non accusé porte « en attente d\'envoi » à la '
+        'place de son horloge', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: [message('m-1', sync: ExpenseSyncState.pending)],
+      );
+
+      expect(find.text('en attente d\'envoi'), findsOneWidget);
+    });
+
+    // Ligne de contrôle du test ci-dessus, dans SON propre `testWidgets` : un
+    // second `pumpSheet` empilerait une fiche par-dessus la première, et le
+    // marqueur de la précédente serait encore trouvé.
+    testWidgets('accusé, le même message montre son horloge', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: [message('m-1', sync: ExpenseSyncState.synced)],
+      );
+
+      expect(find.text('en attente d\'envoi'), findsNothing);
+      expect(find.textContaining('20 sept.'), findsOneWidget);
     });
   });
 }

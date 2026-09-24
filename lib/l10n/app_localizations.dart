@@ -16751,6 +16751,30 @@ abstract class AppLocalizations {
   /// **'That gesture is no longer possible on this request: its state has changed.'**
   String get expenseGestureRefused;
 
+  /// No description provided for @expenseThreadComposerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment'**
+  String get expenseThreadComposerLabel;
+
+  /// No description provided for @expenseThreadComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A detail, a question for the requester, a payment instruction…'**
+  String get expenseThreadComposerHint;
+
+  /// No description provided for @expenseThreadPending.
+  ///
+  /// In en, this message translates to:
+  /// **'not sent yet'**
+  String get expenseThreadPending;
+
+  /// No description provided for @expenseThreadSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The message could not be written on this device. Try again.'**
+  String get expenseThreadSendFailed;
+
   /// No description provided for @expenseThreadTitle.
   ///
   /// In en, this message translates to:

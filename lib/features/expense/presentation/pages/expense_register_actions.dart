@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -94,6 +95,9 @@ class ExpenseRegisterActions {
       reader: snapshot.usdReader,
       thread: thread,
       accountId: _agentId(),
+      // Commenter est le seul geste qui ne ferme pas la fiche : on commente
+      // en lisant. Il écrit puis relit le fil, et la fiche le réaffiche.
+      onComment: (body) => _comment(expense, body),
     );
     if (outcome == null || !context.mounted) return;
     // Un pull a pu redescendre la ligne pendant que la fiche était ouverte :
@@ -120,6 +124,27 @@ class ExpenseRegisterActions {
       case ExpenseDetailGesture(:final gesture, :final note):
         await applyGesture(latest, gesture, note: note);
     }
+  }
+
+  /// Écrit un commentaire au fil, puis le relit.
+  ///
+  /// L'échec ne passe **pas** par un toast : une `SnackBar` levée sous une
+  /// modale est inatteignable, et l'agent croirait son message parti. Le
+  /// champ le dit lui-même.
+  Future<ExpenseCommentResult> _comment(Expense expense, String body) async {
+    final cubit = _cubit;
+    final written = await cubit.applyGesture(
+      expense,
+      ExpenseGesture.comment,
+      note: body,
+      actorName: _agentName(),
+    );
+    if (written.isLeft()) return (sent: false, thread: null);
+    if (context.mounted) _notifyLocalWrite();
+    // Le message est écrit : une relecture manquée ne le défait pas, et
+    // annoncer « non envoyé » ferait retaper un message que le fil porte déjà.
+    final thread = (await cubit.thread(expense.id)).fold((_) => null, (m) => m);
+    return (sent: true, thread: thread);
   }
 
   Future<void> _correctAndResend(Expense expense) async {

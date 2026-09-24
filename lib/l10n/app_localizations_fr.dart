@@ -10608,6 +10608,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce geste n\'est plus possible sur cette demande : son état a changé.';
 
   @override
+  String get expenseThreadComposerLabel => 'Ajouter un commentaire';
+
+  @override
+  String get expenseThreadComposerHint =>
+      'Une précision, une question au demandeur, une consigne de paiement…';
+
+  @override
+  String get expenseThreadPending => 'en attente d\'envoi';
+
+  @override
+  String get expenseThreadSendFailed =>
+      'Le message n\'a pas pu être écrit sur cet appareil. Réessayez.';
+
+  @override
   String get expenseThreadTitle => 'Fil de la demande';
 
   @override

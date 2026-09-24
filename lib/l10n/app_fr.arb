@@ -7043,6 +7043,10 @@
   "expenseToastCommented": "Message ajouté au fil de {name}.",
   "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
   "expenseGestureRefused": "Ce geste n'est plus possible sur cette demande : son état a changé.",
+  "expenseThreadComposerLabel": "Ajouter un commentaire",
+  "expenseThreadComposerHint": "Une précision, une question au demandeur, une consigne de paiement…",
+  "expenseThreadPending": "en attente d'envoi",
+  "expenseThreadSendFailed": "Le message n'a pas pu être écrit sur cet appareil. Réessayez.",
   "expenseThreadTitle": "Fil de la demande",
   "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
   "@expenseThreadCount": {

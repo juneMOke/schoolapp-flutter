@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/detail/
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_body.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_refusal_panel.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 export 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
@@ -29,6 +30,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   required ExpenseUsdReader reader,
   required List<ExpenseMessage>? thread,
   String? accountId,
+  Future<ExpenseCommentResult> Function(String body)? onComment,
 }) => showDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
@@ -37,6 +39,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
     reader: reader,
     thread: thread,
     accountId: accountId,
+    onComment: onComment,
   ),
 );
 
@@ -47,6 +50,9 @@ class ExpenseDetailDialog extends StatefulWidget {
   final List<ExpenseMessage>? thread;
   final String? accountId;
 
+  /// Écrit le commentaire et rend le fil relu. `null` : fil en lecture seule.
+  final Future<ExpenseCommentResult> Function(String body)? onComment;
+
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
@@ -54,6 +60,7 @@ class ExpenseDetailDialog extends StatefulWidget {
     required this.reader,
     required this.thread,
     this.accountId,
+    this.onComment,
   });
 
   @override
@@ -63,8 +70,23 @@ class ExpenseDetailDialog extends StatefulWidget {
 class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   late final Expense _expense = widget.expense;
 
+  /// Le fil **vit** dans la fiche : commenter est le seul geste qui ne la
+  /// ferme pas, parce qu'on commente en lisant. Les autres transitionnent, et
+  /// la fiche rouvre sur un registre relu.
+  late List<ExpenseMessage>? _thread = widget.thread;
+
   /// Le panneau de motif est ouvert : le refus attend son mot.
   bool _refusing = false;
+
+  Future<ExpenseCommentResult> _send(String body) async {
+    final result = await widget.onComment!(body);
+    if (!mounted) return result;
+    final thread = result.thread;
+    // Une relecture manquée ne défait pas le fil affiché : le message est
+    // écrit, il apparaîtra à la prochaine ouverture.
+    if (thread != null) setState(() => _thread = thread);
+    return result;
+  }
 
   void _close([ExpenseDetailOutcome? outcome]) =>
       Navigator.of(context).pop(outcome);
@@ -105,8 +127,9 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                   expense: _expense,
                   type: widget.type,
                   reader: widget.reader,
-                  thread: widget.thread,
+                  thread: _thread,
                   accountId: widget.accountId,
+                  onSend: widget.onComment == null ? null : _send,
                 ),
                 // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
                 // garde sous les yeux le montant, la chaîne et l'historique —

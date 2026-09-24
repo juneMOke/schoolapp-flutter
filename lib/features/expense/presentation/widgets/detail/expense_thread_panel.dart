@@ -5,15 +5,15 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_act_visuals.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le fil d'une demande, au bas de sa fiche : un message par geste, horodaté,
 /// jamais effaçable.
 ///
-/// **Lecture seule à ce lot.** Écrire dans le fil, c'est poser un geste : il
-/// lui faut sa permission et son entrée de file, sans quoi on offrirait un
-/// bouton qui fabrique un message que rien ne pousserait. Le champ de saisie
-/// arrive donc avec les gestes.
+/// Écrire dans le fil **est** un geste : le champ ne s'offre donc qu'à qui
+/// détient `expense.write`, et la propriété n'y entre pas — commenter la
+/// demande d'un collègue est tout l'objet de la route dédiée (Q1).
 class ExpenseThreadPanel extends StatelessWidget {
   /// `null` quand le fil n'a **pas pu être lu** — une panne de la base locale,
   /// qui ne se confond pas avec un fil vide.
@@ -22,7 +22,16 @@ class ExpenseThreadPanel extends StatelessWidget {
   /// Le compte de la session : ce qui distingue ses propres messages (F24).
   final String? accountId;
 
-  const ExpenseThreadPanel({super.key, required this.messages, this.accountId});
+  /// Envoie un commentaire ; `null` laisse le fil en lecture seule — un fil
+  /// illisible n'a pas de place où écrire.
+  final Future<ExpenseCommentResult> Function(String body)? onSend;
+
+  const ExpenseThreadPanel({
+    super.key,
+    required this.messages,
+    this.accountId,
+    this.onSend,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +82,10 @@ class ExpenseThreadPanel extends StatelessWidget {
                 mine: message.isMine(accountId),
               ),
             ),
+        // Rien à écrire sous un fil qu'on n'a pas su lire : on ne sait pas ce
+        // que le message viendrait compléter.
+        if (onSend != null && thread != null)
+          ExpenseThreadComposer(onSend: onSend!),
       ],
     );
   }
@@ -169,15 +182,19 @@ class _Message extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppDimensions.spacingS),
-                    Text(
-                      l10n.expenseJoin(
-                        dates.formatShortMonthDay(moment),
-                        dates.formatTimeOfDay(TimeOfDay.fromDateTime(moment)),
-                      ),
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
+                    message.isPending
+                        ? const ExpenseThreadPendingTag()
+                        : Text(
+                            l10n.expenseJoin(
+                              dates.formatShortMonthDay(moment),
+                              dates.formatTimeOfDay(
+                                TimeOfDay.fromDateTime(moment),
+                              ),
+                            ),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                          ),
                   ],
                 ),
                 if (act != null)

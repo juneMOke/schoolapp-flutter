@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/detail/
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_reference_row.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_rejection.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_situation_note.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -29,6 +30,9 @@ class ExpenseDetailBody extends StatelessWidget {
   /// Le compte de la session, pour reconnaître ses propres messages.
   final String? accountId;
 
+  /// Envoie un commentaire ; `null` laisse le fil en lecture seule.
+  final Future<ExpenseCommentResult> Function(String body)? onSend;
+
   const ExpenseDetailBody({
     super.key,
     required this.expense,
@@ -36,6 +40,7 @@ class ExpenseDetailBody extends StatelessWidget {
     required this.reader,
     required this.thread,
     this.accountId,
+    this.onSend,
   });
 
   @override
@@ -112,7 +117,11 @@ class ExpenseDetailBody extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
-          child: ExpenseThreadPanel(messages: thread, accountId: accountId),
+          child: ExpenseThreadPanel(
+            messages: thread,
+            accountId: accountId,
+            onSend: onSend,
+          ),
         ),
       ],
     );
