@@ -236,6 +236,7 @@
     "description": "School address field"
   },
   "configurationSchoolPhone": "School phone",
+  "configurationSchoolTillPhone": "Till phone number",
   "@configurationSchoolPhone": {
     "description": "School phone field"
   },
@@ -5205,6 +5206,8 @@
   "ticketPayerLabel": "PAYER:",
   "ticketPhoneLabel": "Tel.",
   "ticketCashierLabel": "Cashier:",
+  "ticketSchoolPhoneLabel": "Promoter tel.:",
+  "ticketTillPhoneLabel": "Till tel.:",
   "ticketStudentLabel": "Student:",
   "ticketMatriculationLabel": "Student no.:",
   "ticketClassroomLabel": "Class:",

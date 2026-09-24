@@ -1659,4 +1659,77 @@ void main() {
       expect(links.single['parent_id'], 'par-A');
     });
   });
+
+  group('le téléphone de la caisse (v50)', () {
+    /// Distinct du téléphone de l'établissement : le ticket imprime les deux,
+    /// nommés, l'un sous l'autre.
+    test('descend du référentiel et se relit', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            phone: '+243 000 000 000',
+            tillPhone: '+243 811 111 111',
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      final school = await referentialDao.getSchool();
+      expect(school!.phone, '+243 000 000 000');
+      expect(school.tillPhone, '+243 811 111 111');
+    });
+
+    /// Le champ est additif : tant que le serveur ne le sert pas, il arrive
+    /// absent du JSON et personne ne s'en trouve mal.
+    test('absent du contrat servi : `null`, pas une chaîne vide', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.tillPhone, isNull);
+    });
+
+    /// ⚠️ `ref_school` est un cache MONO-LIGNE réécrit en entier à chaque pull.
+    /// Un numéro qui survivrait à un pull qui ne le porte plus serait un
+    /// résidu — le référentiel fait autorité, et il est renvoyé complet.
+    test('un pull sans le champ efface la valeur locale', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            tillPhone: '+243 811 111 111',
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+        ),
+        syncedAt: 600,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.tillPhone, isNull);
+    });
+
+    test('le JSON du contrat porte bien `tillPhone`', () {
+      final dto = RefSchoolDto.fromJson(const {
+        'id': 'sch-1',
+        'name': 'Ecole Etoile',
+        'tillPhone': '+243 811 111 111',
+      });
+
+      expect(dto.tillPhone, '+243 811 111 111');
+    });
+  });
 }

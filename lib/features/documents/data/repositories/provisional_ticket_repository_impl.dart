@@ -115,6 +115,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           schoolAddress: school?.address,
           schoolEmail: school?.email,
           schoolPhone: school?.phone,
+          schoolTillPhone: school?.tillPhone,
           studentFullName: student?.fullName ?? '',
           matriculationNumber: student?.matriculationNumber,
           classroomName: classroomName,

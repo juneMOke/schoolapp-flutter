@@ -584,6 +584,12 @@ abstract class AppLocalizations {
   /// **'School phone'**
   String get configurationSchoolPhone;
 
+  /// No description provided for @configurationSchoolTillPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Till phone number'**
+  String get configurationSchoolTillPhone;
+
   /// School email field
   ///
   /// In en, this message translates to:
@@ -13063,6 +13069,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cashier:'**
   String get ticketCashierLabel;
+
+  /// No description provided for @ticketSchoolPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoter tel.:'**
+  String get ticketSchoolPhoneLabel;
+
+  /// No description provided for @ticketTillPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Till tel.:'**
+  String get ticketTillPhoneLabel;
 
   /// No description provided for @ticketStudentLabel.
   ///

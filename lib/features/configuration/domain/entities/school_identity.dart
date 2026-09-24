@@ -24,6 +24,18 @@ class SchoolIdentity extends Equatable {
 
   final String address;
   final String phone;
+
+  /// Le numéro de la CAISSE — celui que la famille appelle pour une question de
+  /// paiement. **Le seul champ facultatif de cette identité**, et il ne compte
+  /// donc pas dans [missingFields].
+  ///
+  /// ⚠️ **Il ne se vide pas.** Le serveur conserve la valeur déjà saisie quand
+  /// le `PUT` l'omet ou l'envoie à `null` — c'est ce qui protège les clients qui
+  /// ne le connaissent pas encore de l'effacer. Conséquence : effacer le champ
+  /// à l'écran ne l'efface PAS côté serveur, et il réapparaît au rechargement.
+  /// Pour le changer, il faut en saisir un autre.
+  final String tillPhone;
+
   final String email;
 
   const SchoolIdentity({
@@ -35,6 +47,7 @@ class SchoolIdentity extends Equatable {
     required this.municipality,
     required this.address,
     required this.phone,
+    this.tillPhone = '',
     required this.email,
   });
 
@@ -66,6 +79,7 @@ class SchoolIdentity extends Equatable {
     String? municipality,
     String? address,
     String? phone,
+    String? tillPhone,
     String? email,
   }) {
     return SchoolIdentity(
@@ -79,6 +93,7 @@ class SchoolIdentity extends Equatable {
       municipality: municipality ?? this.municipality,
       address: address ?? this.address,
       phone: phone ?? this.phone,
+      tillPhone: tillPhone ?? this.tillPhone,
       email: email ?? this.email,
     );
   }
@@ -93,6 +108,7 @@ class SchoolIdentity extends Equatable {
     municipality,
     address,
     phone,
+    tillPhone,
     email,
   ];
 }

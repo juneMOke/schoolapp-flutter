@@ -100,6 +100,8 @@ final TicketReceiptModel _model = TicketReceiptModel(
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',
+    schoolPhoneLabel: 'Tél. Promoteur :',
+    tillPhoneLabel: 'Tél. caisse :',
     studentLabel: 'Élève :',
     matriculationLabel: 'Matricule :',
     classroomLabel: 'Classe :',

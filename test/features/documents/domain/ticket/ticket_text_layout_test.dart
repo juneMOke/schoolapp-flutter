@@ -14,6 +14,8 @@ const _labels = TicketLabels(
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
+  schoolPhoneLabel: 'Tél. Promoteur :',
+  tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
@@ -46,6 +48,8 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
+  schoolPhoneLabel: _labels.schoolPhoneLabel,
+  tillPhoneLabel: _labels.tillPhoneLabel,
   studentLabel: _labels.studentLabel,
   matriculationLabel: _labels.matriculationLabel,
   classroomLabel: _labels.classroomLabel,
@@ -74,6 +78,8 @@ TicketReceiptModel _model({
   /// Une pièce SCELLÉE tait la phrase de conservation — le seul cas où rien ne
   /// sépare le solde du bloc de signature.
   bool isProvisional = true,
+  String? schoolPhone = '+243 000 000 000',
+  String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
 
   /// Passe outre [remainingBalanceInCents] quand il est fourni — le seul moyen
@@ -106,6 +112,8 @@ TicketReceiptModel _model({
 }) => TicketReceiptModel(
   schoolName: 'Complexe scolaire La Colombe',
   schoolLocality: 'Kinshasa · Ngaliema',
+  schoolPhone: schoolPhone,
+  schoolTillPhone: schoolTillPhone,
   studentFullName: studentFullName,
   matriculationNumber: matriculationNumber,
   classroomName: classroomName,
@@ -1040,6 +1048,8 @@ void main() {
         payerLabel: _labels.payerLabel,
         phoneLabel: _labels.phoneLabel,
         cashierLabel: _labels.cashierLabel,
+        schoolPhoneLabel: _labels.schoolPhoneLabel,
+        tillPhoneLabel: _labels.tillPhoneLabel,
         studentLabel: _labels.studentLabel,
         matriculationLabel: _labels.matriculationLabel,
         classroomLabel: _labels.classroomLabel,
@@ -1091,6 +1101,8 @@ void main() {
       payerLabel: _labels.payerLabel,
       phoneLabel: _labels.phoneLabel,
       cashierLabel: _labels.cashierLabel,
+      schoolPhoneLabel: _labels.schoolPhoneLabel,
+      tillPhoneLabel: _labels.tillPhoneLabel,
       studentLabel: _labels.studentLabel,
       matriculationLabel: _labels.matriculationLabel,
       classroomLabel: _labels.classroomLabel,
@@ -1296,6 +1308,72 @@ void main() {
       for (final width in const [48, 32]) {
         for (final line in riche(columns: width)) {
           expect(line.text.length, lessThanOrEqualTo(width), reason: line.text);
+        }
+      }
+    });
+  });
+
+  group('les deux téléphones de l en-tête', () {
+    test('chacun sur sa ligne, chacun nommé', () {
+      final lines = TicketTextLayout.render(_model());
+
+      final promoteur = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+      final caisse = lines.indexWhere((l) => l.contains('Tél. caisse :'));
+
+      expect(promoteur, isNonNegative);
+      expect(caisse, promoteur + 1);
+      expect(lines[promoteur], contains('+243 000 000 000'));
+      expect(lines[caisse], contains('+243 811 111 111'));
+    });
+
+    /// L'en-tête n'invente jamais : un champ absent ne laisse pas même une
+    /// ligne d'espaces, et surtout pas son libellé tout seul — qui se lirait
+    /// comme un numéro effacé.
+    test('numéro de caisse absent : ni ligne ni libellé', () {
+      final lines = TicketTextLayout.render(_model(schoolTillPhone: null));
+
+      expect(lines.any((l) => l.contains('Tél. caisse')), isFalse);
+      expect(lines.any((l) => l.contains('Tél. Promoteur :')), isTrue);
+    });
+
+    test('les deux absents : l en-tête se raccourcit, il ne se troue pas', () {
+      final lines = TicketTextLayout.render(
+        _model(schoolPhone: null, schoolTillPhone: null),
+      );
+
+      expect(lines.any((l) => l.contains('Tél.')), isFalse);
+      expect(lines.any((l) => l.trim().isEmpty && l.isNotEmpty), isFalse);
+    });
+
+    /// ⚠️ Le défaut que ce repli ferme : « Tél. Promoteur : +243 000 000 000 »
+    /// fait 33 caractères et déborde à 32 colonnes. Replié sur les espaces, il
+    /// rendait `+243 000 000` puis `000` — un numéro que personne ne compose.
+    test(
+      'à 32 colonnes, le libellé passe au-dessus et le numéro reste entier',
+      () {
+        final lines = TicketTextLayout.render(_model(), columns: 32);
+        final i = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+
+        expect(i, isNonNegative);
+        expect(lines[i].trim(), 'Tél. Promoteur :');
+        expect(lines[i + 1].trim(), '+243 000 000 000');
+      },
+    );
+
+    test('un numéro court reste sur la ligne de son libellé', () {
+      final lines = TicketTextLayout.render(
+        _model(schoolPhone: '+243 811'),
+        columns: 32,
+      );
+      final i = lines.indexWhere((l) => l.contains('Tél. Promoteur :'));
+
+      expect(lines[i].trim(), 'Tél. Promoteur : +243 811');
+    });
+
+    test('aucune ligne ne déborde, ni à 48 ni à 32', () {
+      for (final width in const [48, 32]) {
+        for (final line in TicketTextLayout.render(_model(), columns: width)) {
+          expect(line.length, lessThanOrEqualTo(width), reason: line);
         }
       }
     });

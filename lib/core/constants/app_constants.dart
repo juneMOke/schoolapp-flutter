@@ -754,7 +754,11 @@ class AppConstants {
   // avant qu'une école l'adopte. Au-delà, deux escaliers —
   // `migrateTenantDatabase` et `migrateDeviceDatabase` — et un palier se
   // déclare dans celui du fichier qu'il touche.
-  static const int offlineDbSchemaVersion = 49;
+  // v50 (2026-09-24) : `ref_school.till_phone` — le numéro que la famille
+  // appelle pour une question de paiement, distinct du téléphone de
+  // l'établissement. Palier d'ÉCOLE, donc déclaré dans `migrateTenantDatabase` :
+  // l'escalier hérité est clos à la v48.
+  static const int offlineDbSchemaVersion = 50;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

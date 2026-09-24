@@ -18,6 +18,8 @@ const _labels = TicketLabels(
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
+  schoolPhoneLabel: 'Tél. Promoteur :',
+  tillPhoneLabel: 'Tél. caisse :',
   studentLabel: 'Élève :',
   matriculationLabel: 'Matricule :',
   classroomLabel: 'Classe :',
@@ -70,6 +72,19 @@ TicketReceiptModel _model({
 /// Index de la première ligne qui contient [needle], ou `-1`.
 int _indexOf(List<String> lines, String needle) =>
     lines.indexWhere((l) => l.contains(needle));
+
+/// Le papier ne porte-t-il AUCUNE ligne de téléphone du PAYEUR ?
+///
+/// ⚠️ Cherché sur la forme de la ligne, pas sur le mot « Tél. » : l'en-tête
+/// d'école en porte deux depuis la v50 — « Tél. Promoteur : » et
+/// « Tél. caisse : » —, et un `isNot(contains('Tél.'))` sur tout le papier
+/// rougissait alors pour des lignes qui n'ont rien à voir avec le payeur.
+///
+/// La ligne du payeur est la seule CADRÉE À GAUCHE (`_addOptional`), là où
+/// l'en-tête est centré, et la seule où le numéro suit immédiatement le
+/// libellé nu. `Tél. +` les départage.
+bool sansTelephonePayeur(List<String> lines) =>
+    !lines.any((l) => l.startsWith('Tél. +'));
 
 void main() {
   group('en-tête de l\'établissement', () {
@@ -213,7 +228,7 @@ void main() {
     test('sans payeur, le bloc entier disparaît', () {
       final lines = TicketTextLayout.render(_model(), columns: 48);
       expect(lines.join('\n'), isNot(contains('PAYEUR')));
-      expect(lines.join('\n'), isNot(contains('Tél.')));
+      expect(sansTelephonePayeur(lines), isTrue);
 
       final rule = '-' * 48;
       for (var i = 0; i < lines.length - 1; i++) {
@@ -242,7 +257,7 @@ void main() {
         columns: 48,
       );
       expect(lines.join('\n'), contains('PAYEUR : MBALA KASA PAPA'));
-      expect(lines.join('\n'), isNot(contains('Tél.')));
+      expect(sansTelephonePayeur(lines), isTrue);
     });
 
     test('un nom composé long se replie sans troncature', () {

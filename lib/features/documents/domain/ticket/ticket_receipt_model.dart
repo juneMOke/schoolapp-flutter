@@ -43,7 +43,20 @@ class TicketReceiptModel extends Equatable {
 
   final String? schoolAddress;
   final String? schoolEmail;
+
+  /// Le téléphone de l'ÉTABLISSEMENT, imprimé « Tél. Promoteur ».
   final String? schoolPhone;
+
+  /// Le téléphone de la CAISSE, imprimé « Tél. caisse » sur sa propre ligne.
+  ///
+  /// Deux lignes nommées plutôt qu'un numéro nu : l'en-tête en portait un seul,
+  /// sans libellé, et un parent qui a une question de paiement n'avait aucun
+  /// moyen de savoir s'il tombait sur le bon poste. Nommer les deux est ce qui
+  /// rend le second utile — et ce qui oblige à nommer le premier.
+  ///
+  /// `null` tant que le serveur ne le sert pas : le gabarit tait alors la ligne,
+  /// et l'en-tête reste celui d'avant, au libellé près.
+  final String? schoolTillPhone;
 
   // ── Z2 : l'élève ────────────────────────────────────────────────────────────
   final String studentFullName;
@@ -171,6 +184,7 @@ class TicketReceiptModel extends Equatable {
     this.schoolAddress,
     this.schoolEmail,
     this.schoolPhone,
+    this.schoolTillPhone,
     required this.studentFullName,
     this.matriculationNumber,
     this.classroomName,
@@ -355,6 +369,7 @@ class TicketReceiptModel extends Equatable {
     schoolAddress,
     schoolEmail,
     schoolPhone,
+    schoolTillPhone,
     payerFullName,
     payerPhoneNumber,
     studentFullName,

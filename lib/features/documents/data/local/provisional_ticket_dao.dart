@@ -423,6 +423,7 @@ class ProvisionalTicketDao {
         'city',
         'email',
         'phone',
+        'till_phone',
       ],
       limit: 1,
     );
@@ -436,6 +437,7 @@ class ProvisionalTicketDao {
       city: r['city'] as String?,
       email: r['email'] as String?,
       phone: r['phone'] as String?,
+      tillPhone: r['till_phone'] as String?,
     );
   }
 
@@ -657,6 +659,11 @@ class TicketSchoolRow {
   final String? email;
   final String? phone;
 
+  /// Le numéro de la CAISSE (v50). Imprimé sur sa propre ligne, nommée, à côté
+  /// de [phone] qui devient « Tél. Promoteur » : un seul numéro nu laissait le
+  /// parent deviner lequel appeler pour une question de paiement.
+  final String? tillPhone;
+
   const TicketSchoolRow({
     required this.name,
     this.address,
@@ -664,6 +671,7 @@ class TicketSchoolRow {
     this.city,
     this.email,
     this.phone,
+    this.tillPhone,
   });
 
   /// La ligne « ville » de l'en-tête — **la ville d'abord, la commune à défaut**.

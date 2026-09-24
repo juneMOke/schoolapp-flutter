@@ -274,6 +274,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationSchoolPhone => 'School phone';
 
   @override
+  String get configurationSchoolTillPhone => 'Till phone number';
+
+  @override
   String get configurationSchoolEmail => 'School email';
 
   @override
@@ -8083,6 +8086,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketCashierLabel => 'Cashier:';
+
+  @override
+  String get ticketSchoolPhoneLabel => 'Promoter tel.:';
+
+  @override
+  String get ticketTillPhoneLabel => 'Till tel.:';
 
   @override
   String get ticketStudentLabel => 'Student:';

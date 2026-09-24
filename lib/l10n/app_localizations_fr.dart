@@ -275,6 +275,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationSchoolPhone => 'Téléphone de l\'école';
 
   @override
+  String get configurationSchoolTillPhone => 'Téléphone de la caisse';
+
+  @override
   String get configurationSchoolEmail => 'E-mail de l\'école';
 
   @override
@@ -8158,6 +8161,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ticketCashierLabel => 'Caissier :';
+
+  @override
+  String get ticketSchoolPhoneLabel => 'Tél. Promoteur :';
+
+  @override
+  String get ticketTillPhoneLabel => 'Tél. caisse :';
 
   @override
   String get ticketStudentLabel => 'Élève :';

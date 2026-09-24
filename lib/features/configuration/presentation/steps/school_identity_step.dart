@@ -32,6 +32,7 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
   final _name = TextEditingController();
   final _address = TextEditingController();
   final _phone = TextEditingController();
+  final _tillPhone = TextEditingController();
   final _email = TextEditingController();
 
   AddressGeoCatalog? _geo;
@@ -58,6 +59,7 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
     _name.dispose();
     _address.dispose();
     _phone.dispose();
+    _tillPhone.dispose();
     _email.dispose();
     super.dispose();
   }
@@ -76,6 +78,7 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
     _name.text = identity.name;
     _address.text = identity.address;
     _phone.text = identity.phone;
+    _tillPhone.text = identity.tillPhone;
     _email.text = identity.email;
   }
 
@@ -212,6 +215,19 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
                     required: true,
                     onChanged: (value) =>
                         cubit.edit(identity.copyWith(phone: value)),
+                  ),
+                  // Le numéro de la caisse, à côté de celui du promoteur : ce
+                  // sont deux numéros de la même nature, et le ticket les
+                  // imprime l'un sous l'autre.
+                  //
+                  // ⚠️ Facultatif, et **il ne se vide pas** : le serveur
+                  // conserve la valeur déjà saisie quand le PUT l'envoie à
+                  // `null`. L'effacer ici ne l'efface pas là-bas.
+                  EteeloPhoneInput(
+                    controller: _tillPhone,
+                    label: l10n.configurationSchoolTillPhone,
+                    onChanged: (value) =>
+                        cubit.edit(identity.copyWith(tillPhone: value)),
                   ),
                   EteeloEmailInput(
                     controller: _email,

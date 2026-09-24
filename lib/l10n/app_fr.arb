@@ -236,6 +236,7 @@
     "description": "Champ adresse de l'établissement"
   },
   "configurationSchoolPhone": "Téléphone de l'école",
+  "configurationSchoolTillPhone": "Téléphone de la caisse",
   "@configurationSchoolPhone": {
     "description": "Champ téléphone de l'établissement"
   },
@@ -5273,6 +5274,8 @@
   "ticketPayerLabel": "PAYEUR :",
   "ticketPhoneLabel": "Tél.",
   "ticketCashierLabel": "Caissier :",
+  "ticketSchoolPhoneLabel": "Tél. Promoteur :",
+  "ticketTillPhoneLabel": "Tél. caisse :",
   "ticketStudentLabel": "Élève :",
   "ticketMatriculationLabel": "Matricule :",
   "ticketClassroomLabel": "Classe :",

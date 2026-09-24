@@ -30,6 +30,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(49)) {
     await _returnDeviceTables(db);
   }
+  if (upTo(50)) {
+    await _addTillPhone(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -39,6 +42,30 @@ Future<void> migrateDeviceDatabase(
   int oldVersion, {
   int newVersion = AppConstants.offlineDbSchemaVersion,
 }) async {}
+
+/// v50 — `ref_school.till_phone`, le numéro de la CAISSE.
+///
+/// Distinct de `phone`, qui est le téléphone de l'établissement : sur le ticket
+/// les deux s'impriment désormais en deux lignes nommées, « Tél. Promoteur » et
+/// « Tél. caisse ». Un seul numéro nu laissait le parent deviner lequel appeler
+/// pour une question de paiement.
+///
+/// Additif et facultatif des deux côtés : le champ arrive `null` tant que le
+/// serveur ne le sert pas, et le gabarit tait une ligne vide. **Aucune reprise
+/// de données** — le référentiel est renvoyé en ENTIER à chaque pull, donc la
+/// colonne se remplit d'elle-même au prochain cycle, sans curseur à toucher.
+///
+/// ⚠️ Garde de colonne : SQLite refuse un `ADD COLUMN` sur une colonne
+/// existante, et une base héritée adoptée repasse par cet escalier.
+///
+/// ⚠️ Ce numéro a été ATTRIBUÉ, pas réservé. Si un autre lot fusionne avant,
+/// c'est celui qui fusionne en SECOND qui renumérote — la règle posée à la v47,
+/// et le trou brûlé de la v24 dit pourquoi on ne réattribue jamais.
+Future<void> _addTillPhone(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(ref_school)');
+  if (info.any((row) => row['name'] == 'till_phone')) return;
+  await db.execute('ALTER TABLE ref_school ADD COLUMN till_phone TEXT');
+}
 
 /// v49 — la base adoptée rend à l'appareil ce qui lui appartient.
 ///

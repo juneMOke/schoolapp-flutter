@@ -84,6 +84,7 @@ class EnrollmentReferentialDao {
         'municipality': bundle.school.municipality,
         'address': bundle.school.address,
         'phone': bundle.school.phone,
+        'till_phone': bundle.school.tillPhone,
         'email': bundle.school.email,
         // Les empreintes seules — les octets vivent dans `school_logo_cache`,
         // que cette purge ne touche pas. C'est ce qui évite de retélécharger le
@@ -201,6 +202,7 @@ class EnrollmentReferentialDao {
       municipality: r['municipality'] as String?,
       address: r['address'] as String?,
       phone: r['phone'] as String?,
+      tillPhone: r['till_phone'] as String?,
       email: r['email'] as String?,
     );
   }

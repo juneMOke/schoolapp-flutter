@@ -36,6 +36,22 @@ class TicketLabels extends Equatable {
 
   final String cashierLabel;
 
+  /// « Tél. Promoteur : » — le téléphone de l'ÉTABLISSEMENT, en en-tête.
+  ///
+  /// Il s'imprimait nu jusqu'ici, comme les autres lignes d'école. Il prend un
+  /// libellé le jour où un SECOND numéro entre dans l'en-tête : deux numéros
+  /// sans nom ne valent pas mieux qu'aucun.
+  final String schoolPhoneLabel;
+
+  /// « Tél. caisse : » — le numéro que la famille appelle pour une question de
+  /// paiement (`ref_school.till_phone`, v50).
+  ///
+  /// ⚠️ Même libellé que celui que le SERVEUR imprime sur le reçu scellé, où il
+  /// figure dans le bloc du montant. Les deux papiers finissent dans les mains
+  /// du même parent : deux noms pour un même numéro lui feraient chercher la
+  /// différence entre eux.
+  final String tillPhoneLabel;
+
   /// « PAYEUR : » — en tête du bloc payeur, quand il y en a un.
   final String payerLabel;
 
@@ -143,6 +159,8 @@ class TicketLabels extends Equatable {
     required this.referenceLabel,
     required this.dateLabel,
     required this.cashierLabel,
+    required this.schoolPhoneLabel,
+    required this.tillPhoneLabel,
     required this.payerLabel,
     required this.phoneLabel,
     required this.studentLabel,
@@ -171,6 +189,8 @@ class TicketLabels extends Equatable {
     referenceLabel,
     dateLabel,
     cashierLabel,
+    schoolPhoneLabel,
+    tillPhoneLabel,
     payerLabel,
     phoneLabel,
     studentLabel,

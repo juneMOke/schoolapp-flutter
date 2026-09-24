@@ -53,6 +53,39 @@ abstract final class TicketTextLayout {
     // silence.
     final bold = <int>{};
 
+    /// Une ligne d'en-tête NOMMÉE, centrée, et **escamotée quand elle est
+    /// vide** — la règle de tout l'en-tête, étendue aux lignes à libellé.
+    ///
+    /// `_addOptional` ferait le même escamotage mais aligne à gauche ; ici les
+    /// lignes d'école sont centrées, et une seule d'entre elles cadrée à gauche
+    /// se lirait comme un défaut de composition.
+    ///
+    /// ## Le repli : le libellé au-dessus, jamais le numéro coupé
+    ///
+    /// « Tél. Promoteur : +243 000 000 000 » fait 33 caractères. Il tient à 48
+    /// et **déborde à 32** — le papier 58 mm —, où `_centered` le replierait sur
+    /// les espaces et rendrait `+243 000 000` puis `000` : un numéro coupé en
+    /// deux, que personne ne peut composer.
+    ///
+    /// Quand les deux ne tiennent pas ensemble, le libellé prend donc sa propre
+    /// ligne et la valeur la suivante, entière. C'est la règle que le gabarit
+    /// applique déjà partout où une valeur ne rentre pas — `_addPair` reporte le
+    /// montant, `_addTotal` revient à une ligne par devise : **on ne tronque
+    /// jamais une valeur, on la reporte.**
+    void centeredOptional(String label, String? value) {
+      final trimmed = value?.trim() ?? '';
+      if (trimmed.isEmpty) return;
+      // Mesure sur la forme TRANSLITTÉRÉE, des deux côtés : c'est elle qui
+      // s'imprime, et « é » → « e » ne change pas la longueur mais « œ » si.
+      final oneLine = TicketCharset.printable('$label $trimmed');
+      if (oneLine.length <= width) {
+        lines.addAll(_centered(oneLine, width));
+        return;
+      }
+      lines.addAll(_centered(label, width));
+      lines.addAll(_centered(trimmed, width));
+    }
+
     /// Marque en gras TOUT ce que [build] ajoute — une ligne ou dix.
     void emphasised(void Function() build) {
       final from = lines.length;
@@ -81,7 +114,22 @@ abstract final class TicketTextLayout {
     lines.addAll(_centered(model.schoolAddress ?? '', width));
     lines.addAll(_centered(model.schoolLocality ?? '', width));
     lines.addAll(_centered(model.schoolEmail ?? '', width));
-    lines.addAll(_centered(model.schoolPhone ?? '', width));
+
+    // Les DEUX téléphones, chacun sur sa ligne et chacun NOMMÉ.
+    //
+    // L'en-tête n'en portait qu'un, nu comme les autres lignes d'école. Le
+    // second ne pouvait pas y entrer ainsi : deux numéros sans libellé laissent
+    // le parent deviner lequel appeler pour une question de paiement, ce qui
+    // est précisément la question que le numéro de caisse existe pour clore.
+    // Nommer le second oblige donc à nommer le premier — c'est le prix de
+    // l'ajout, et il se paie en libellés, pas en lignes.
+    //
+    // ⚠️ Nommés, mais toujours ESCAMOTABLES : un libellé sans numéro se lirait
+    // comme un numéro effacé. `centeredOptional` garde donc la règle de tout
+    // l'en-tête — un champ absent ne laisse pas même une ligne d'espaces —, là
+    // où `_centered('$label ')` aurait imprimé le libellé seul.
+    centeredOptional(model.labels.schoolPhoneLabel, model.schoolPhone);
+    centeredOptional(model.labels.tillPhoneLabel, model.schoolTillPhone);
     lines.add(_rule(width));
 
     // Nature de la pièce, sous l'en-tête : quelqu'un qui trie une liasse de fin
