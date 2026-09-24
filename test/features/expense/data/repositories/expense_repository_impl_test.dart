@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
@@ -16,6 +17,7 @@ import 'package:school_app_flutter/features/expense/data/repositories/expense_re
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
@@ -23,6 +25,15 @@ import '../../../offline_full_db.dart';
 class _Ids implements IdGenerator {
   @override
   String newId() => 'e-new';
+}
+
+/// ⚠️ [_Ids] rend TOUJOURS le même identifiant : deux gestes de suite y
+/// porteraient le même uuid, et le second serait jugé rejeu — inerte. Les
+/// gestes prennent donc celui-ci.
+class _SeqIds implements IdGenerator {
+  int _next = 0;
+  @override
+  String newId() => 'm-${++_next}';
 }
 
 class _MockEngine extends Mock implements SyncEngine {}
@@ -54,25 +65,26 @@ void main() {
   late ExpenseRepositoryImpl repo;
   late CurrentUserContext user;
 
-  ExpenseRepositoryImpl build({SyncEngine? engine}) => ExpenseRepositoryImpl(
-    reader: ExpenseReadDao(db),
-    writer: ExpenseWriteDao(db),
-    types: ExpenseTypeDao(db),
-    messages: ExpenseMessageDao(db),
-    currentUser: user,
-    ids: _Ids(),
-    rates: _Rates([
-      ExchangeRate(
-        base: 'USD',
-        quote: 'CDF',
-        rateMicros: 2800 * ExchangeRate.scale,
-        effectiveFrom: DateTime.utc(2026, 9, 1),
-      ),
-    ]),
-    schoolYearStart: () async => DateTime(2025, 9, 7),
-    syncEngine: engine,
-    now: () => _now,
-  );
+  ExpenseRepositoryImpl build({SyncEngine? engine, IdGenerator? ids}) =>
+      ExpenseRepositoryImpl(
+        reader: ExpenseReadDao(db),
+        writer: ExpenseWriteDao(db),
+        types: ExpenseTypeDao(db),
+        messages: ExpenseMessageDao(db),
+        currentUser: user,
+        ids: ids ?? _Ids(),
+        rates: _Rates([
+          ExchangeRate(
+            base: 'USD',
+            quote: 'CDF',
+            rateMicros: 2800 * ExchangeRate.scale,
+            effectiveFrom: DateTime.utc(2026, 9, 1),
+          ),
+        ]),
+        schoolYearStart: () async => DateTime(2025, 9, 7),
+        syncEngine: engine,
+        now: () => _now,
+      );
 
   setUp(() async {
     db = await openFullOfflineDb();
@@ -309,6 +321,186 @@ void main() {
         (await repo.thread('e-new')).fold((f) => fail('$f'), (m) => m),
         isEmpty,
       );
+    });
+  });
+
+  group('applyGesture', () {
+    late ExpenseRepositoryImpl gestes;
+
+    setUp(() => gestes = build(ids: _SeqIds()));
+
+    Future<Map<String, Object?>> row(String id) async =>
+        (await db.query('expenses', where: 'id = ?', whereArgs: [id])).single;
+
+    Future<List<Map<String, Object?>>> fil() =>
+        db.query('expense_messages', orderBy: 'created_at, id');
+
+    /// La demande est déposée par `u-1` ; le décideur se connecte ensuite.
+    Future<Expense> deposeeParUnCollegue() async {
+      final expense = await saved(_draft());
+      user.set('u-direction', schoolId: 'school-1');
+      return expense;
+    }
+
+    test('approuver déplace la demande ET écrit son acte au fil', () async {
+      final expense = await deposeeParUnCollegue();
+
+      final result = await gestes.applyGesture(
+        expense,
+        ExpenseGesture.approve,
+        actorName: 'Mbala Thérèse',
+      );
+
+      expect(result.isRight(), isTrue);
+      final ligne = await row('e-new');
+      expect(ligne['status'], ExpenseStatus.approved.wireValue);
+      expect(ligne['decided_by_id'], 'u-direction');
+      expect(ligne['decided_by_name'], 'Mbala Thérèse');
+      expect(ligne['decided_at'], _now.toUtc().toIso8601String());
+
+      final messages = await fil();
+      expect(messages, hasLength(1));
+      expect(messages.single['act'], ExpenseAct.approval.wireValue);
+      expect(messages.single['author_id'], 'u-direction');
+      expect(messages.single['sync_status'], ExpenseSyncState.pending.dbValue);
+    });
+
+    test(
+      'un geste ne met RIEN en file : la remontée arrive à DEP-14',
+      () async {
+        final expense = await deposeeParUnCollegue();
+        final avant = (await outbox()).length;
+
+        await gestes.applyGesture(expense, ExpenseGesture.approve);
+
+        // Une entrée d'outbox posée ici partirait sur une route que le serveur
+        // ne sert pas encore, pour un 400 terminal.
+        expect((await outbox()).length, avant);
+      },
+    );
+
+    test('refuser SANS motif est refusé sur place, et n\'écrit rien', () async {
+      final expense = await deposeeParUnCollegue();
+
+      final result = await gestes.applyGesture(expense, ExpenseGesture.refuse);
+
+      // Le miroir local du `422 REASON_REQUIRED` : laisser partir le geste
+      // fabriquerait une ligne « à corriger » pour une faute de saisie.
+      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      expect(await fil(), isEmpty);
+      expect((await row('e-new'))['status'], ExpenseStatus.pending.wireValue);
+    });
+
+    test(
+      'refuser porte son motif sur la ligne ET dans le corps du message',
+      () async {
+        final expense = await deposeeParUnCollegue();
+
+        await gestes.applyGesture(
+          expense,
+          ExpenseGesture.refuse,
+          note: '  Devis non joint  ',
+        );
+
+        expect((await row('e-new'))['decision_reason'], 'Devis non joint');
+        expect((await fil()).single['body'], 'Devis non joint');
+      },
+    );
+
+    test('approuver SA PROPRE demande est refusé — jamais offert, jamais '
+        'accepté', () async {
+      // A11 : l'auto-approbation est refusée par la direction, sans réglage
+      // d'école. L'écran masque les deux boutons ; le dépôt ne s'y fie pas.
+      final expense = await saved(_draft());
+
+      final result = await gestes.applyGesture(expense, ExpenseGesture.approve);
+
+      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      expect(await fil(), isEmpty);
+    });
+
+    test('payer après approbation pose la date de règlement, et garde le '
+        'décideur', () async {
+      final expense = await deposeeParUnCollegue();
+      await gestes.applyGesture(
+        expense,
+        ExpenseGesture.approve,
+        actorName: 'Mbala Thérèse',
+      );
+
+      final result = await gestes.applyGesture(expense, ExpenseGesture.pay);
+
+      expect(result.isRight(), isTrue);
+      final ligne = await row('e-new');
+      expect(ligne['status'], ExpenseStatus.paid.wireValue);
+      expect(ligne['paid_on'], '2026-09-12');
+      // Payer ne décide pas : l'écran continue de nommer qui a accordé.
+      expect(ligne['decided_by_name'], 'Mbala Thérèse');
+      expect(await fil(), hasLength(2));
+    });
+
+    test('relancer sa demande monte le compteur sans la déplacer', () async {
+      final expense = await saved(_draft());
+
+      await gestes.applyGesture(expense, ExpenseGesture.remind);
+
+      final ligne = await row('e-new');
+      expect(ligne['reminder_count'], 1);
+      expect(ligne['status'], ExpenseStatus.pending.wireValue);
+    });
+
+    test(
+      'annuler la décision efface décideur, motif, règlement et compteur',
+      () async {
+        final expense = await deposeeParUnCollegue();
+        await gestes.applyGesture(
+          expense,
+          ExpenseGesture.refuse,
+          note: 'Devis non joint',
+        );
+
+        await gestes.applyGesture(expense, ExpenseGesture.reopen);
+
+        final ligne = await row('e-new');
+        expect(ligne['status'], ExpenseStatus.pending.wireValue);
+        expect(ligne['decided_by_id'], isNull);
+        expect(ligne['decision_reason'], isNull);
+        expect(ligne['paid_on'], isNull);
+        expect(ligne['reminder_count'], 0);
+        // Le retour en attente n'efface JAMAIS le fil : l'historique reste
+        // lisible, seule la situation courante est réécrite.
+        expect(await fil(), hasLength(2));
+      },
+    );
+
+    test('un geste jugé sur une copie PÉRIMÉE est abandonné', () async {
+      final perimee = await deposeeParUnCollegue();
+      await gestes.applyGesture(perimee, ExpenseGesture.approve);
+
+      // `perimee` dit encore « en attente » ; la ligne, elle, est accordée.
+      final result = await gestes.applyGesture(perimee, ExpenseGesture.approve);
+
+      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      expect(await fil(), hasLength(1));
+    });
+
+    test('sans agent connecté, aucun geste ne s\'écrit', () async {
+      final expense = await saved(_draft());
+      user.set(null, schoolId: 'school-1');
+
+      final result = await gestes.applyGesture(expense, ExpenseGesture.remind);
+
+      expect(result.fold((f) => f, (_) => null), isA<ValidationFailure>());
+      expect(await fil(), isEmpty);
+    });
+
+    test('une demande inconnue du registre rend NotFound', () async {
+      final expense = await saved(_draft());
+      await db.delete('expenses', where: 'id = ?', whereArgs: ['e-new']);
+
+      final result = await gestes.applyGesture(expense, ExpenseGesture.remind);
+
+      expect(result.fold((f) => f, (_) => null), isA<NotFoundFailure>());
     });
   });
 }

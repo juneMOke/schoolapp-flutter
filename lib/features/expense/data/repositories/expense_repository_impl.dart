@@ -8,8 +8,10 @@ import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_gesture_columns.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -19,10 +21,12 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_gesture_policy.dart';
 
 /// Le registre du poste : lecture locale, écriture locale **et** mise en file.
 ///
@@ -108,6 +112,66 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       return Right([for (final row in rows) ?row.toEntity()]);
     } catch (e) {
       return Left(StorageFailure('Fil local illisible : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> applyGesture(
+    Expense expense,
+    ExpenseGesture gesture, {
+    String note = '',
+    String? actorName,
+  }) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    final actorId = _currentUser.uid;
+    if (actorId == null) return const Left(_noAgent);
+    final body = note.trim();
+    // Le miroir local des deux refus que le serveur oppose (`REASON_REQUIRED`,
+    // et un commentaire vide qui n'est pas un commentaire). Les attraper ici
+    // évite de fabriquer un geste qui mourrait terminal à l'accusé.
+    if (body.isEmpty &&
+        (gesture.requiresNote || gesture == ExpenseGesture.comment)) {
+      return const Left(_noReason);
+    }
+    try {
+      // La demande passée peut dater : un pull ou une décision prise sur ce
+      // poste a pu la déplacer depuis que l'écran l'a lue. C'est la ligne
+      // relue qui juge, jamais la copie de l'appelant.
+      final current = (await _reader.find(expense.id))?.toEntity();
+      if (current == null) {
+        return const Left(NotFoundFailure('Dépense inconnue'));
+      }
+      if (!ExpenseGesturePolicy.allows(gesture, current, accountId: actorId)) {
+        return const Left(_staleGesture);
+      }
+      final now = _now();
+      await _messages.appendGesture(
+        ExpenseMessageLocalModel.at(
+          now,
+          id: _ids.newId(),
+          schoolId: schoolId,
+          expenseId: current.id,
+          body: body,
+          act: gesture.act,
+          authorId: actorId,
+          authorName: actorName,
+        ),
+        columns: ExpenseGestureColumns.of(
+          gesture,
+          actorId: actorId,
+          actorName: actorName,
+          at: now,
+          reason: body,
+        ),
+        bumpsReminder: gesture == ExpenseGesture.remind,
+      );
+      // Aucun appel au moteur : le geste n'a pas encore d'entrée d'outbox —
+      // elle entre dans la transaction de `appendGesture` à DEP-14. Pousser
+      // maintenant ne ferait que réveiller la file pour rien.
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure('Geste non enregistré : $e'));
     }
   }
 
@@ -218,6 +282,17 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
 
   static const _noAgent = ValidationFailure(
     'Aucun utilisateur courant : dépense non enregistrée.',
+  );
+
+  static const _noReason = ValidationFailure(
+    'Ce geste demande un motif : dépense inchangée.',
+  );
+
+  /// L'état a bougé sous l'écran — le geste n'est plus celui qu'on croyait
+  /// faire. Refuser est la seule conduite sûre : l'appliquer quand même
+  /// écrirait une transition absente de la table.
+  static const _staleGesture = ValidationFailure(
+    'La demande a changé d\'état : geste abandonné.',
   );
 
   /// Le moteur ne lève jamais, et se tait hors ligne.

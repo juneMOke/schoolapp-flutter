@@ -161,4 +161,111 @@ void main() {
       );
     });
   });
+
+  group('appendGesture', () {
+    test('la demande bouge et le fil s\u2019allonge, dans la m\u00eame '
+        'transaction', () async {
+      final applique = await dao.appendGesture(
+        message('m-1', createdAt: clock, act: ExpenseAct.approval),
+        columns: const {
+          'status': 'APPROVED',
+          'decided_by_id': 'u-direction',
+          'decided_at': clock,
+        },
+      );
+
+      final row = await expenseRow('e-1');
+      expect(applique, isTrue);
+      expect(row['status'], 'APPROVED');
+      expect(row['decided_by_id'], 'u-direction');
+      expect(row['last_message_at'], clock);
+      expect(await dao.threadFor('e-1', schoolId: 'school-1'), hasLength(1));
+    });
+
+    test('un geste ne touche ni au contenu ni \u00e0 la synchro de la '
+        'd\u00e9pense', () async {
+      await dao.appendGesture(
+        message('m-1', createdAt: clock, act: ExpenseAct.payment),
+        columns: const {'status': 'PAID', 'paid_on': '2026-09-20'},
+      );
+
+      final row = await expenseRow('e-1');
+      // Le geste voyage seul (Q1) : repousser le contenu lui ferait perdre
+      // une d\u00e9cision \u00e0 l'arbitrage du dernier \u00e9crit.
+      expect(row['client_updated_at'], clock);
+      expect(row['sync_status'], ExpenseSyncState.synced.dbValue);
+      expect(row['updated_at'], 42);
+    });
+
+    test('relancer monte le compteur d\u2019un, et deux relances comptent '
+        'deux', () async {
+      await dao.appendGesture(
+        message('m-1', createdAt: clock, act: ExpenseAct.reminder),
+        bumpsReminder: true,
+      );
+      expect((await expenseRow('e-1'))['reminder_count'], 1);
+
+      await dao.appendGesture(
+        message(
+          'm-2',
+          createdAt: '2026-09-21T08:00:00.000Z',
+          act: ExpenseAct.reminder,
+        ),
+        bumpsReminder: true,
+      );
+      expect((await expenseRow('e-1'))['reminder_count'], 2);
+    });
+
+    test('rejouer le m\u00eame geste est INERTE : le compteur ne compte pas '
+        'double', () async {
+      // L'uuid du message est la cl\u00e9 d'idempotence du geste (Q3), la
+      // m\u00eame que celle du serveur. C'est ce qui s\u00e9pare
+      // `appendGesture` d'`append`, qui \u00e9crase d\u00e9lib\u00e9r\u00e9ment
+      // parce qu'il sert le pull.
+      final relance = message(
+        'm-1',
+        createdAt: clock,
+        act: ExpenseAct.reminder,
+      );
+      expect(await dao.appendGesture(relance, bumpsReminder: true), isTrue);
+      expect(await dao.appendGesture(relance, bumpsReminder: true), isFalse);
+
+      expect((await expenseRow('e-1'))['reminder_count'], 1);
+      expect(await dao.threadFor('e-1', schoolId: 'school-1'), hasLength(1));
+    });
+
+    test('un rejeu ne d\u00e9fait pas non plus la colonne d\u00e9j\u00e0 '
+        '\u00e9crite', () async {
+      final geste = message('m-1', createdAt: clock, act: ExpenseAct.approval);
+      await dao.appendGesture(geste, columns: const {'status': 'APPROVED'});
+      await dao.appendGesture(geste, columns: const {'status': 'PENDING'});
+
+      expect((await expenseRow('e-1'))['status'], 'APPROVED');
+    });
+
+    test(
+      'commenter n\u2019\u00e9crit que le fil et sa fra\u00eecheur',
+      () async {
+        await dao.appendGesture(message('m-1', createdAt: clock));
+
+        final row = await expenseRow('e-1');
+        expect(row['status'], 'PENDING');
+        expect(row['last_message_at'], clock);
+      },
+    );
+
+    test('la fra\u00eecheur ne recule pas davantage par un geste', () async {
+      await dao.appendGesture(
+        message('m-2', createdAt: '2026-09-20T09:00:00.000Z'),
+      );
+      await dao.appendGesture(
+        message('m-1', createdAt: '2026-09-20T08:30:00.000Z'),
+      );
+
+      expect(
+        (await expenseRow('e-1'))['last_message_at'],
+        '2026-09-20T09:00:00.000Z',
+      );
+    });
+  });
 }

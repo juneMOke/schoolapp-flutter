@@ -105,6 +105,16 @@ class Expense extends Equatable {
 
   bool get isWithdrawn => deletedAt != null;
 
+  /// Déposée par le compte de la session ? La comparaison se fait sur
+  /// l'identifiant, **jamais sur le nom** (F24), et **deux identifiants vides
+  /// ne se ressemblent pas** : une ligne sans demandeur connu n'appartient à
+  /// personne plutôt qu'à tout le monde.
+  bool isRequestedBy(String? accountId) =>
+      accountId != null &&
+      accountId.isNotEmpty &&
+      recordedById != null &&
+      recordedById == accountId;
+
   bool get isRejected => syncState == ExpenseSyncState.rejected;
 
   /// `YYYY-MM-DD` — clé de période et de groupe de jour.

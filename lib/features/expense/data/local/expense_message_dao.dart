@@ -65,4 +65,57 @@ class ExpenseMessageDao {
       );
     });
   }
+
+  /// Applique un **geste du circuit** : la demande bouge et son fil s'allonge,
+  /// dans la même transaction. L'un sans l'autre serait un mensonge — une
+  /// décision sans trace, ou une trace sans décision.
+  ///
+  /// **Inerte au rejeu, par l'uuid du message** — la même clé d'idempotence
+  /// que le serveur (Q3). Rend `false` sans rien écrire quand le message
+  /// existe déjà : c'est ce qui garantit qu'une relance rejouée ne compte
+  /// jamais double, là où [append] écrase délibérément (il sert le pull, dont
+  /// le rôle est justement de réaligner).
+  ///
+  /// [columns] ne porte que ce que le geste réécrit
+  /// (`ExpenseGestureColumns`) ; il est vide pour un commentaire ou une
+  /// relance, qui ne déplacent pas la demande.
+  Future<bool> appendGesture(
+    ExpenseMessageLocalModel message, {
+    Map<String, Object?> columns = const {},
+    bool bumpsReminder = false,
+  }) => _db.transaction((txn) async {
+    final existing = await txn.query(
+      table,
+      columns: const ['id'],
+      where: 'id = ?',
+      whereArgs: [message.id],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) return false;
+    await txn.insert(table, message.toMap());
+    if (columns.isNotEmpty) {
+      await txn.update(
+        expensesTable,
+        columns,
+        where: 'id = ?',
+        whereArgs: [message.expenseId],
+      );
+    }
+    // Lu et réécrit dans la transaction : deux relances simultanées comptent
+    // deux, jamais une. Une carte de colonnes ne sait pas dire « + 1 ».
+    if (bumpsReminder) {
+      await txn.rawUpdate(
+        'UPDATE $expensesTable SET reminder_count = reminder_count + 1 '
+        'WHERE id = ?',
+        [message.expenseId],
+      );
+    }
+    await txn.update(
+      expensesTable,
+      {'last_message_at': message.createdAt},
+      where: 'id = ? AND (last_message_at IS NULL OR last_message_at < ?)',
+      whereArgs: [message.expenseId, message.createdAt],
+    );
+    return true;
+  });
 }
