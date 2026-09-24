@@ -363,14 +363,13 @@ juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
 | DEP-10 | ✅ **cinq statuts** : énumération + `isFirm`, six sites binaires ouverts, `paidOn` dé-dérivé, palier v50 (volet statut), bascule payée/non payée retirée, compteurs du registre supprimés, `ExpenseTransitions` + matrice de transitions testée | `d25197b6` |
 | DEP-11 | ✅ **le fil** : palier v50 (volet fil), 9 actes anglais, `ExpenseMessage`, `ExpenseMessageDao` (append atomique), `ExpenseRepository.thread()`, `ExpenseThreadPanel` dans la fiche, fiche découpée | `4d2a855c` |
 | DEP-12 | ✅ **les gestes et les droits**, en cinq commits : les trois droits (`expense.decide`/`pay`/`reopen`, hors de `kGuardedWriteActions` tant que le back ne les sème pas) · `ExpenseGesture` + `ExpenseGesturePolicy` + `appendGesture` (inerte au rejeu) · la chaîne à trois jalons et les encarts de situation · le pied de fiche, le panneau de refus et les toasts · le champ du fil | `9b6e1d17` `86c08082` `a9a9607b` `d8b5d7c4` `00dc085e` |
-| DEP-13 | ⏳ **la file** | — |
-| DEP-14 | ⏳ **la remontée, et l'ordre** | — |
-| DEP-15 | ⏳ **revue et clôture** | — |
+| DEP-13 | ✅ **la file** : sous-menu, route et accès · `ExpenseWait` (tiède 3 j, chaud 5 j) · `ExpenseQueueOrder` (3 tris, stables) · `ExpenseQueueView` + cubit + écran · sélection et lot local · bloc « approuvées, à payer » | `fa041209` |
+| DEP-14 | ✅ **la remontée et l'ordre** : 7 routes + `ExpenseGesturePayload` · entrée d'outbox dans la transaction de `appendGesture` · garde d'ordre F31 **et** son échappatoire · les deux 409 (F34) · delta enrichi (6 colonnes + `messages[]`) · page à 50 | `9f8ac54d` |
+| DEP-15 | ✅ **revue et clôture** : 7 défauts trouvés et corrigés | `7bfdf394` `8006cfe3` |
 
 Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
-`flutter test -j 4` **complet** → **7185 verts**, code de sortie capturé sans
-pipe. La revue adversariale de DEP-15, elle, reste à faire — une suite verte
-n'en tient pas lieu.
+`flutter test -j 4` **complet** → vert, code de sortie capturé sans pipe. La
+revue adversariale de DEP-15 a été jouée, et §13 dit ce qu'elle a rendu.
 
 > ⚠️ **`flutter analyze` doit être relancé APRÈS le commit**, pas avant : le
 > hook `pre-commit` reformate les fichiers stagés sur le disque, et un `if`
@@ -378,44 +377,28 @@ n'en tient pas lieu.
 > `curly_braces_in_flow_control_structures` que le contrôle d'avant-commit ne
 > pouvait pas voir. Payé à DEP-12 (commit amendé).
 
-### ⚠️ Un circuit à moitié construit — deux conséquences vérifiées
+### ⚠️ Le circuit est complet côté poste — et toujours pas livrable
 
-Les statuts, le fil et les **gestes** existent ; la **remontée** non. Un build de
-la branche se comporte donc ainsi, et **ce n'est pas livrable en l'état** — c'est
-la raison pour laquelle `main` n'en porte rien :
+Les cinq statuts, le fil, les gestes, la file et la remontée existent. Ce qui
+manque n'est plus à nous :
 
-1. **La poussée d'une dépense neuve sort du contrat servi.** Le dépôt crée une
-   demande en `PENDING` (`expense_repository_impl.dart:133`) et
-   `ExpenseInputDto.toJson` envoie ce statut tel quel. Or l'`openApi.yaml`
-   déployé déclare `ExpenseStatus: enum [PAID, UNPAID]`
-   (ligne ~18126, « Binaire en V1 ») : les routes de geste et les cinq statuts
-   sont **écrits dans les deux plans mais pas encore servis**. Un 400 de
-   validation est classé terminal par F5 ⇒ la dépense reste sur le poste, ligne
-   « à corriger », et **ne repart jamais**. Tant que le back n'a pas livré ses
-   lots C0→C3, aucune dépense créée depuis cette branche n'atteint le serveur.
-2. **Les gestes écrivent en local, et rien ne les pousse.** Depuis DEP-12, la
-   fiche approuve, refuse, paie, relance, retire, renvoie et rouvre : la ligne
-   bouge, le fil s'allonge, le tableau de bord recompte. Mais **aucune entrée
-   d'outbox n'est créée** — l'agrégat `EXPENSE_GESTURE` et ses sept routes
-   arrivent à DEP-14. Une décision prise sur un poste n'existe donc que sur ce
-   poste, et le prochain pull la **défait** : `status` et `paid_on` sont dans la
-   famille serveur d'`ExpenseDeltaColumns` (« toujours posée ») pendant que les
-   six colonnes de décision ne descendent pas encore. C'est la face visible de
-   « la décision est optimiste et restaurable » (F22), et c'est intenable en
-   production.
+1. **La poussée sort du contrat servi.** Le dépôt crée une demande en
+   `PENDING` et l'`openApi.yaml` déployé déclare encore
+   `ExpenseStatus: enum [PAID, UNPAID]` (~l. 18126). Un 400 de validation est
+   terminal par F5 ⇒ la dépense reste « à corriger » et n'atteint jamais le
+   serveur. Les **sept routes de geste n'existent pas non plus** : chaque
+   geste y mourra en 404, terminal lui aussi.
+2. **Donc : rien ne fusionne dans `main`, et pas de release du module Dépenses
+   avant la livraison back C0→C3.** C'est la seule dépendance qui reste, et
+   elle n'a pas de contournement côté poste — un module qui écrit dans une
+   outbox dont chaque entrée meurt terminale est pire qu'un module absent.
 
 Corollaire à surveiller, aujourd'hui **vide mais pas théorique** : un `UNPAID`
 redescendu par le pull n'est plus connu du front (`ExpenseStatus.fromWire`
-retombe sur `pending`) et se lirait « En attente », donc hors des totaux. Le
-renommage défensif du palier 50 ne touche que les lignes déjà locales, pas ce que
-le pull rapporte ensuite. C'est sans effet aussi longtemps que D11 tient —
-**aucune dépense en base, ni en production ni en staging** — et c'est la
-première chose à revérifier si une ligne apparaît.
-
-**Porte de sortie** : la suite du chantier (DEP-12 → DEP-14) referme les deux
-points, et la livraison back C0→C3 referme le premier. D'ici là : **rien ne fusionne
-dans `main`, et pas de release du module Dépenses avant DEP-14 et la livraison
-back.**
+retombe sur `pending`) et se lirait « En attente », donc hors des totaux.
+C'est sans effet aussi longtemps que D11 tient — **aucune dépense en base, ni
+en production ni en staging** — et c'est la première chose à revérifier si une
+ligne apparaît.
 
 ### Décisions prises pendant DEP-12 — ne pas les rouvrir
 
@@ -489,54 +472,62 @@ back.**
   `feeStatusPartial` fonde un pavé mais ne s'écrit qu'à **3,83** sur la bulle
   neutre, sous le seuil, là où l'encre atteint **5,44**.
 
-## 13. Reprendre ici — ce qui reste
+## 13. Ce que la revue de clôture a trouvé (DEP-15)
 
-### DEP-13 — la file (sans serveur)
+Revue adversariale de la synchro, puis du domaine et des écrans — le même
+exercice qu'à DEP-8, qui avait rendu dix-huit défauts. Sept ici, dont **un
+bloquant**.
 
-- Troisième sous-menu et sa route, badge d'attente compté sur **toute** la liste
-  et non sur la période.
-- Quatre compteurs, trois tris, sélection et lot local, bloc « approuvées, à
-  payer », ancienneté d'une demande (`DepAgeTag` : tiède à 3 jours, chaud à 5).
-- États : le vide de la file est une **bonne nouvelle** — il ne passe pas par
-  l'anatomie d'échec de la règle n°10.
+| # | Défaut | Corrigé par |
+|---|---|---|
+| 1 | 🔴 **La garde d'ordre gelait la demande pour toujours.** Elle lisait le plus ancien message *non accusé*, et un message mort reste au fil (il est append-only). Après le premier refus terminal, tout geste suivant échouait à vue — **y compris le geste neuf par lequel l'agent venait réparer**. | La garde lit le plus ancien message **en attente** ; l'échappatoire condamne la suite **sur-le-champ** (`rejectFrom`) au lieu de la découvrir une dispatch à la fois |
+| 2 | Un **commentaire** refusé marquait toute la dépense « à corriger » — il n'y a rien à corriger dans une demande parce qu'un mot n'a pas pu s'écrire, et la ligne n'avait même pas bougé | `markGestureRejected` seulement si le geste transitionne |
+| 3 | Un geste réussi laissait en place le « à corriger » qu'un geste précédent avait posé | `applyGestureAck` le lève — **et lui seul** : un refus de contenu attend une vraie correction |
+| 4 | Un message **refusé** montrait son horloge comme un message accusé : le fil laissait croire que le geste avait eu lieu | `ExpenseThreadStateTag` : « en attente d'envoi » / « non envoyé », à la place de l'horloge |
+| 5 | La fiche ouverte **depuis la file** offrait Supprimer / Dupliquer / Modifier, qui renvoyaient au registre **sans rien faire** | `allowShortcuts: false` depuis la file |
+| 6 | L'abandon local d'une dépense jamais acceptée neutralisait contenu et retrait, **pas les gestes** — un 404 par geste, tous terminaux | `setLocalOnlyWithdrawal` neutralise l'agrégat `EXPENSE_GESTURE` entier |
+| 7 | Une purge serveur (410) effaçait la demande et **laissait son fil** orphelin | `deleteExpense` emporte les messages |
 
-### DEP-14 — la remontée, et l'ordre (le cœur du lot)
+Vérification de clôture : `flutter analyze` → **No issues found**,
+`flutter test -j 4` **complet** → vert, **code de sortie capturé sans pipe**
+(`| tail` masque le code et fait annoncer « 0 » sur une suite rouge).
 
-- Agrégat `EXPENSE_GESTURE`, une entrée par geste, sept routes ; DTO de geste et
-  de message ; l'entrée d'outbox entre dans la transaction de `appendGesture`.
-- **La garde d'ordre de F31 ET son échappatoire**, plus l'attente du contenu de
-  F32. ⚠️ L'échappatoire s'écrit **en même temps** que la garde, sinon elle
-  devient un gel : `blocked` n'incrémente rien et ne s'empoisonne jamais. Si le
-  geste le plus ancien part en `SYNC_ERROR`, ses suivants sur la même dépense
-  sont marqués en erreur à leur tour et la ligne passe « à corriger ».
-- **Les deux 409 et leurs conduites opposées** (§9, F34) ; les nouveaux
-  `detailCode` traduits (`expense_error_codes.dart` + `expense_labels.dart` + les
-  deux `.arb`) ; commentaire `api_error_parser.dart:88` à corriger.
-- Delta enrichi au pull (les six colonnes de décision **et** `messages[]`, que
-  `ExpenseDeltaColumns` ne porte pas encore) ; le pull **saute** un message encore
-  `PENDING_SYNC` ; page ramenée à 50. ⚠️ **Tant que ce volet manque, le pull
-  DÉFAIT toute décision prise en local** : `status` et `paid_on` sont dans la
-  famille serveur, « toujours posée ».
-- ⚠️ **Le message `DEPOSIT` n'est écrit par personne côté poste** : les sept
-  routes de geste n'en portent pas, et le contenu ne voyage plus avec ses
-  messages (Q1). C'est donc le **serveur** qui l'assemble — à confirmer avec le
-  back avant C2, sinon tout fil créé hors ligne s'ouvre sur son premier
-  commentaire au lieu de son dépôt.
-- Tests attendus : séquence de trois gestes rejouée dans l'ordre ; geste doublé
-  par le backoff qui attend au lieu de partir ; prédécesseur en erreur qui libère
-  ses suivants ; rejeu inerte ; `DECISION_ALREADY_TAKEN` qui réaligne sans
-  rejouer ; `TRANSITION_OUT_OF_ORDER` qui rejoue sans réaligner.
+### Écarts assumés avec la spec design (v2)
 
-### DEP-15 — revue et clôture
+- **Le sous-menu ne porte pas le compteur d'attente** que la maquette met sur
+  son onglet : le socle de menu n'a pas de pastille, et lui en donner une
+  supposerait que la barre latérale s'abonne au registre des dépenses — une
+  dépendance de `home` vers un module métier, pour un seul appelant. Le compte
+  vit sur l'écran de la file, en tête.
+- **Le sélecteur de rôle et le bandeau de rôle ne passent pas** : ce sont des
+  outils de revue de la maquette, et les « trois rôles » n'existent pas dans
+  l'application — ce sont trois combinaisons de permissions (F29). Seul le
+  repli « vous voyez la file mais ne décidez pas » est repris.
+- **La file ne modifie ni ne duplique** : la saisie appartient au registre.
+- **« Refuser » reste `secondary` et non `danger`** : le socle n'a pas de
+  variante rouge sortante, et deux boutons pleins côte à côte se disputeraient
+  l'accent. Le rouge arrive au panneau de motif.
+- **Pas de palier « 40 de plus » sur la file** : une file qu'il faut paginer
+  est une file qu'on ne traite pas.
 
-Revue adversariale ciblée (synchro, puis domaine et écrans — comme DEP-8, qui
-avait rendu dix-huit défauts), puis la suite complète avec `-j 4` et **le code de
-sortie capturé sans pipe** (`| tail` masque le code et fait annoncer « 0 » sur une
-suite rouge).
+### Ce qui reste, et qui ne dépend plus de nous
 
-> ⚠️ **La branche n'est pas livrable avant DEP-14** : sans la remontée, DEP-12 et
-> DEP-13 laissent des gestes locaux qu'aucune file ne peut pousser. C'est aussi ce
-> qui la tient hors de `main` (§12).
+- 🔴 **La livraison back C0→C3.** Tant qu'elle n'est pas déployée, la poussée
+  d'une dépense neuve sort du contrat servi (`enum [PAID, UNPAID]`) et meurt en
+  400 terminal, et les sept routes de geste n'existent pas. **Rien ne fusionne
+  dans `main` avant.**
+- 🔴 **Le message `DEPOSIT` n'est écrit par personne côté poste.** Les sept
+  routes de geste n'en portent pas et le contenu ne voyage plus avec ses
+  messages (Q1) : c'est au **serveur** de l'assembler à la création, et `EDIT`
+  à la modification. **À trancher avec le back avant C2** — sinon tout fil créé
+  hors ligne s'ouvre sur son premier commentaire au lieu de son dépôt.
+- ⚠️ **Le corps des six routes autres que `/decision` est une déduction.**
+  Seul celui de `/decision` est écrit dans le plan back ; les autres reprennent
+  la même enveloppe. L'`openApi.yaml` fera foi — la sérialisation tient en une
+  fonction (`ExpenseGesturePayload.toWireJson`) pour qu'un renommage soit une
+  ligne.
+- ⚠️ **`user_version` à incrémenter à la release** qui sème les trois droits
+  (cf. §15).
 
 ## 14. Hors périmètre v2
 
