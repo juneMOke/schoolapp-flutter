@@ -362,19 +362,25 @@ juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
 | DEP-9 | ✅ ce document (partie II) | le commit qui le porte |
 | DEP-10 | ✅ **cinq statuts** : énumération + `isFirm`, six sites binaires ouverts, `paidOn` dé-dérivé, palier v50 (volet statut), bascule payée/non payée retirée, compteurs du registre supprimés, `ExpenseTransitions` + matrice de transitions testée | `d25197b6` |
 | DEP-11 | ✅ **le fil** : palier v50 (volet fil), 9 actes anglais, `ExpenseMessage`, `ExpenseMessageDao` (append atomique), `ExpenseRepository.thread()`, `ExpenseThreadPanel` dans la fiche, fiche découpée | `4d2a855c` |
-| DEP-12 | ⏳ **les gestes et les droits** | — |
+| DEP-12 | ✅ **les gestes et les droits**, en cinq commits : les trois droits (`expense.decide`/`pay`/`reopen`, hors de `kGuardedWriteActions` tant que le back ne les sème pas) · `ExpenseGesture` + `ExpenseGesturePolicy` + `appendGesture` (inerte au rejeu) · la chaîne à trois jalons et les encarts de situation · le pied de fiche, le panneau de refus et les toasts · le champ du fil | `9b6e1d17` `86c08082` `a9a9607b` `d8b5d7c4` `00dc085e` |
 | DEP-13 | ⏳ **la file** | — |
 | DEP-14 | ⏳ **la remontée, et l'ordre** | — |
 | DEP-15 | ⏳ **revue et clôture** | — |
 
 Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
-`flutter test -j 4 test/features/expense test/core/database test/core/offline/tombstone`
-→ **504 verts**. La suite complète n'a pas encore tourné (elle est prévue à
-DEP-15).
+`flutter test -j 4 test/features/expense` → **274 verts**, et
+`test/core/auth` + `test/core/database` avec. La suite complète est prévue à
+DEP-15.
+
+> ⚠️ **`flutter analyze` doit être relancé APRÈS le commit**, pas avant : le
+> hook `pre-commit` reformate les fichiers stagés sur le disque, et un `if`
+> d'une ligne que le formateur éclate en deux fait apparaître un
+> `curly_braces_in_flow_control_structures` que le contrôle d'avant-commit ne
+> pouvait pas voir. Payé à DEP-12 (commit amendé).
 
 ### ⚠️ Un circuit à moitié construit — deux conséquences vérifiées
 
-Les statuts et le fil existent, les **gestes** et la **remontée** non. Un build de
+Les statuts, le fil et les **gestes** existent ; la **remontée** non. Un build de
 la branche se comporte donc ainsi, et **ce n'est pas livrable en l'état** — c'est
 la raison pour laquelle `main` n'en porte rien :
 
@@ -387,11 +393,16 @@ la raison pour laquelle `main` n'en porte rien :
    validation est classé terminal par F5 ⇒ la dépense reste sur le poste, ligne
    « à corriger », et **ne repart jamais**. Tant que le back n'a pas livré ses
    lots C0→C3, aucune dépense créée depuis cette branche n'atteint le serveur.
-2. **Rien ne peut faire sortir une demande de « En attente ».** La bascule payée
-   / non payée de la V1 a été retirée à DEP-10 et les gestes de décision
-   arrivent à DEP-12/DEP-14. Comme le tableau de bord ne compte que l'argent
-   **ferme** (approuvée + payée), une dépense saisie ne compte dans aucun total —
-   et personne ne peut l'approuver ni la marquer payée.
+2. **Les gestes écrivent en local, et rien ne les pousse.** Depuis DEP-12, la
+   fiche approuve, refuse, paie, relance, retire, renvoie et rouvre : la ligne
+   bouge, le fil s'allonge, le tableau de bord recompte. Mais **aucune entrée
+   d'outbox n'est créée** — l'agrégat `EXPENSE_GESTURE` et ses sept routes
+   arrivent à DEP-14. Une décision prise sur un poste n'existe donc que sur ce
+   poste, et le prochain pull la **défait** : `status` et `paid_on` sont dans la
+   famille serveur d'`ExpenseDeltaColumns` (« toujours posée ») pendant que les
+   six colonnes de décision ne descendent pas encore. C'est la face visible de
+   « la décision est optimiste et restaurable » (F22), et c'est intenable en
+   production.
 
 Corollaire à surveiller, aujourd'hui **vide mais pas théorique** : un `UNPAID`
 redescendu par le pull n'est plus connu du front (`ExpenseStatus.fromWire`
@@ -405,6 +416,47 @@ première chose à revérifier si une ligne apparaît.
 points, et la livraison back C0→C3 referme le premier. D'ici là : **rien ne fusionne
 dans `main`, et pas de release du module Dépenses avant DEP-14 et la livraison
 back.**
+
+### Décisions prises pendant DEP-12 — ne pas les rouvrir
+
+- **Les trois droits sont déclarés avant d'être semés**, comme
+  `finance.rate.override`, et restent **hors de `kGuardedWriteActions`** : les
+  y inscrire ferait rougir, à raison, le test « aucune exigence n'est hors de
+  portée de tous ». Le jour où le back les sème (C0→C3), les inscrire **et**
+  mettre à jour la copie du template dans `role_journeys_test.dart`, ensemble.
+- **`ExpenseGesture` porte les huit gestes** — sept routes, `decision` en sert
+  deux — avec l'acte qu'ils écrivent, l'état qu'ils visent et à qui ils
+  appartiennent. Trois filtres à l'écran, tous des ET : `PermissionGate.access`
+  (réactif), l'état et la propriété (`ExpenseGesturePolicy`).
+- **La propriété indécidable ne penche pas du même côté selon le geste** : ce
+  qu'on ne sait pas prouver sien n'ouvre pas les gestes du demandeur
+  (fail-closed), mais ne ferme pas une approbation légitime (fail-open) — le
+  serveur, lui, sait, et son 422 rattrape.
+- **`appendGesture` est INERTE au rejeu**, par l'uuid du message, comme le
+  serveur (Q3) : c'est ce qui garantit qu'une relance rejouée ne compte pas
+  double. Il se distingue d'`append`, qui écrase délibérément parce qu'il sert
+  le pull.
+- **Le dépôt relit la ligne avant d'écrire** : la copie de l'écran peut dater,
+  et un geste jugé sur elle écrirait une transition absente de la table. Le
+  refus est un **`ConflictFailure`**, pas un `ValidationFailure` — rien n'est à
+  corriger dans ce que l'agent a tapé, et « Réessayez » ne l'aiderait pas.
+- **Modifier suit la règle des gestes du demandeur** (en attente + sienne), ce
+  que la V1 n'imposait pas : une demande accordée dont on réécrirait le montant
+  ne serait plus celle qui a été accordée. C'est `depActions` de la maquette.
+- **Refuser n'est jamais direct** : le bouton ouvre le panneau de motif, dans
+  la fiche et non par-dessus, pour que le décideur garde le montant, la chaîne
+  et le fil sous les yeux.
+- **Commenter ne ferme pas la fiche** — on commente en lisant. C'est le seul
+  geste dans ce cas, et son échec se dit **dans le champ** : une `SnackBar`
+  levée sous une modale est inatteignable.
+- **Un jalon franchi sans date affiche « — », pas « en attente »** : se
+  contredire dans la même cellule serait pire que se taire. Cas courant tant
+  que le pull ne rapporte pas les colonnes de décision.
+- **Refuser reste `secondary` et non `danger`** : le socle n'a pas de variante
+  rouge sortante, et deux boutons pleins côte à côte se disputeraient l'accent.
+  Le rouge arrive au panneau.
+- Le toast de dépôt ne dit plus « non payée » : une demande neuve est toujours
+  en attente, donc la formule disait la même chose à chaque fois, et à tort.
 
 ### Décisions prises pendant DEP-10 / DEP-11 — ne pas les rouvrir
 
@@ -427,8 +479,9 @@ back.**
 - `threadFor` est **scopé par école**, comme `expensesForSchool`.
 - Un acte inconnu se lit comme un commentaire libre ; un message dont l'horloge
   est illisible est **écarté** du fil, jamais placé au hasard.
-- L'entrée d'outbox du geste s'ajoutera **dans la transaction de `append`** à
-  DEP-14 : aucun seam n'a été pré-construit pour elle.
+- L'entrée d'outbox du geste s'ajoutera **dans la transaction de
+  `appendGesture`** à DEP-14 (la méthode est née à DEP-12, `append` reste au
+  pull) : aucun seam n'a été pré-construit pour elle.
 - `expense_messages` est déclarée **fille de `expenses`** dans
   `tombstone_targets.dart` : sans cela, une purge serveur aurait effacé la
   demande en laissant son fil orphelin.
@@ -437,25 +490,6 @@ back.**
   neutre, sous le seuil, là où l'encre atteint **5,44**.
 
 ## 13. Reprendre ici — ce qui reste
-
-### DEP-12 — les gestes et les droits (sans serveur)
-
-- Trois permissions neuves : `expense.decide`, `expense.pay`, `expense.reopen`
-  (58 → 61), le registre d'accès, le masquage réactif, auto-approbation masquée
-  (F29). ⚠️ **La table figée de `permissions_test.dart:34-36` rougit** tant
-  qu'elle n'est pas complétée, et les permissions **n'apparaissent qu'au login** :
-  sans incrément de `user_version` à la release, un poste déjà connecté ne verra
-  aucun bouton de décision — et gardera le bouton Supprimer que la comptabilité
-  vient de perdre, pour un 403 terminal.
-- Les transitions **locales** : approuver, refuser avec motif, payer, relancer,
-  retirer, corriger et renvoyer, annuler la décision — chacune écrivant son
-  message par `ExpenseMessageDao.append`. `ExpenseTransitions` dit déjà ce qui
-  est permis ; aucune paire absente de sa table ne doit être atteignable.
-- La chaîne à trois jalons (`DepChain` de la maquette), les encarts de situation,
-  le panneau de refus (motif obligatoire + motifs proposés), les toasts.
-- Le champ de saisie du fil arrive ici, avec sa permission — et le marqueur
-  « en attente d'envoi » d'un message non accusé (l'entité porte déjà
-  `isPending`).
 
 ### DEP-13 — la file (sans serveur)
 
@@ -469,7 +503,7 @@ back.**
 ### DEP-14 — la remontée, et l'ordre (le cœur du lot)
 
 - Agrégat `EXPENSE_GESTURE`, une entrée par geste, sept routes ; DTO de geste et
-  de message ; l'entrée d'outbox entre dans la transaction de `append`.
+  de message ; l'entrée d'outbox entre dans la transaction de `appendGesture`.
 - **La garde d'ordre de F31 ET son échappatoire**, plus l'attente du contenu de
   F32. ⚠️ L'échappatoire s'écrit **en même temps** que la garde, sinon elle
   devient un gel : `blocked` n'incrémente rien et ne s'empoisonne jamais. Si le
@@ -480,7 +514,14 @@ back.**
   deux `.arb`) ; commentaire `api_error_parser.dart:88` à corriger.
 - Delta enrichi au pull (les six colonnes de décision **et** `messages[]`, que
   `ExpenseDeltaColumns` ne porte pas encore) ; le pull **saute** un message encore
-  `PENDING_SYNC` ; page ramenée à 50.
+  `PENDING_SYNC` ; page ramenée à 50. ⚠️ **Tant que ce volet manque, le pull
+  DÉFAIT toute décision prise en local** : `status` et `paid_on` sont dans la
+  famille serveur, « toujours posée ».
+- ⚠️ **Le message `DEPOSIT` n'est écrit par personne côté poste** : les sept
+  routes de geste n'en portent pas, et le contenu ne voyage plus avec ses
+  messages (Q1). C'est donc le **serveur** qui l'assemble — à confirmer avec le
+  back avant C2, sinon tout fil créé hors ligne s'ouvre sur son premier
+  commentaire au lieu de son dépôt.
 - Tests attendus : séquence de trois gestes rejouée dans l'ordre ; geste doublé
   par le backoff qui attend au lieu de partir ; prédécesseur en erreur qui libère
   ses suivants ; rejeu inerte ; `DECISION_ALREADY_TAKEN` qui réaligne sans
