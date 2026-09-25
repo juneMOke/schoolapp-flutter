@@ -10,7 +10,6 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_type_visuals.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Type + date de la dépense. La date est plafonnée à aujourd'hui (A8) : la
@@ -115,63 +114,42 @@ class ExpenseCurrencyField extends StatelessWidget {
   }
 }
 
-/// Statut + source de fonds.
-class ExpenseStatusFundingFields extends StatelessWidget {
-  final ExpenseStatus status;
+/// Source de fonds — seule.
+///
+/// Le champ **Statut** de la V1 a disparu (D8) : le statut est le résultat
+/// d'une décision, pas une saisie. Le formulaire ne l'offre plus, « pas même
+/// à un validateur qui dépose sa propre demande » (spec §07) — le laisser
+/// rendrait le circuit contournable par l'écran qui l'ouvre.
+class ExpenseFundingField extends StatelessWidget {
   final ExpenseFundingSource funding;
-  final ValueChanged<ExpenseStatus> onStatusChanged;
   final ValueChanged<ExpenseFundingSource?> onFundingChanged;
 
-  const ExpenseStatusFundingFields({
+  const ExpenseFundingField({
     super.key,
-    required this.status,
     required this.funding,
-    required this.onStatusChanged,
     required this.onFundingChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Wrap(
-      spacing: AppDimensions.spacingM,
-      runSpacing: AppDimensions.spacingM,
-      crossAxisAlignment: WrapCrossAlignment.end,
-      children: [
-        ExpenseLabelled(
-          label: l10n.expenseStatusTitle,
-          child: SegmentedTabFilter<ExpenseStatus>(
-            semanticsLabel: l10n.expenseStatusTitle,
-            selected: status,
-            onSelected: onStatusChanged,
-            options: [
-              for (final value in ExpenseStatus.values)
-                SegmentedTabOption(
-                  label: expenseStatusLabel(l10n, value),
-                  value: value,
-                ),
-            ],
-          ),
-        ),
-        ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: AppDimensions.expenseFormFundingMinWidth,
-            maxWidth: AppDimensions.expenseFormFundingMaxWidth,
-          ),
-          child: EteeloSelectInput<ExpenseFundingSource>(
-            label: l10n.expenseFormFunding,
-            value: funding,
-            onChanged: onFundingChanged,
-            items: [
-              for (final source in ExpenseFundingSource.values)
-                EteeloSelectItem(
-                  value: source,
-                  label: expenseFundingLabel(l10n, source),
-                ),
-            ],
-          ),
-        ),
-      ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: AppDimensions.expenseFormFundingMinWidth,
+        maxWidth: AppDimensions.expenseFormFundingMaxWidth,
+      ),
+      child: EteeloSelectInput<ExpenseFundingSource>(
+        label: l10n.expenseFormFunding,
+        value: funding,
+        onChanged: onFundingChanged,
+        items: [
+          for (final source in ExpenseFundingSource.values)
+            EteeloSelectItem(
+              value: source,
+              label: expenseFundingLabel(l10n, source),
+            ),
+        ],
+      ),
     );
   }
 }

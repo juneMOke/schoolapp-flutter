@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/database/tenant/tenant_migrations.dart';
 import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
@@ -88,6 +89,13 @@ void main() {
 
   test('les colonnes du palier sont celles du schéma vivant', () async {
     await migrateFrom(47);
+    // L'escalier hérité s'arrête à la v48, avec son DDL figé : pour comparer
+    // au schéma vivant il faut monter jusqu'en haut, donc passer la main à
+    // l'escalier d'école. On y entre **en 51**, juste sous le circuit : les
+    // paliers 49 à 51 (adoption par une école, téléphone de la caisse,
+    // matricule annuel) touchent des tables que cette base de test n'a jamais
+    // portées. Seul le v52 nous concerne ici.
+    await migrateTenantDatabase(db, 51);
     final migrated = await columnsOf('expenses');
 
     final fresh = await _openLegacyDb();

@@ -5,10 +5,13 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -49,7 +52,7 @@ final _rate = ExchangeRate(
 final _today = DateTime(2026, 9, 12);
 
 Expense _snel({
-  ExpenseStatus status = ExpenseStatus.unpaid,
+  ExpenseStatus status = ExpenseStatus.pending,
   ExpenseSyncState sync = ExpenseSyncState.synced,
   String? code,
 }) => Expense(
@@ -157,7 +160,6 @@ void main() {
       expect(draft!.typeId, 't-elec');
       expect(draft!.currency, 'CDF');
       expect(draft!.amountInCents, 14250);
-      expect(draft!.status, ExpenseStatus.paid);
       expect(draft!.expenseDate, _today);
       expect(draft!.recordedByName, 'Moke Junior');
     });
@@ -206,7 +208,8 @@ void main() {
   });
 
   group('fiche', () {
-    testWidgets('la bascule se joue sans fermer la fiche', (tester) async {
+    testWidgets('la fiche nomme l’état du circuit, et n’offre AUCUN geste de '
+        'décision : décider n’est pas un clic de liste', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1280, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await _pumpHost(
@@ -216,38 +219,67 @@ void main() {
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader(_rate),
-          onToggle: (_) async => _snel(status: ExpenseStatus.paid),
+          thread: const [],
         ),
       );
-      expect(find.text('Non payée'), findsOneWidget);
 
-      await tester.tap(find.text('Marquer payée'));
-      await tester.pumpAndSettle();
+      expect(find.text('En attente'), findsOneWidget);
+      expect(find.text('Marquer payée'), findsNothing);
+      // Une demande non réglée ne montre pas de date de règlement (A2).
+      expect(find.text('Payée le'), findsNothing);
+    });
 
-      expect(find.text('Payée'), findsOneWidget);
-      expect(find.text('Repasser en non payée'), findsOneWidget);
-      // « Payée le … » apparaît (A2).
+    testWidgets('payée : le badge et la date de règlement (A2)', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(status: ExpenseStatus.paid),
+          type: _types.first,
+          reader: ExpenseUsdReader(_rate),
+          thread: const [],
+        ),
+      );
+
+      // Deux fois « Payée » : la pastille de la tête, et le jalon de la
+      // chaîne. Le mot est le même parce que l'état l'est.
+      expect(find.text('Payée'), findsNWidgets(2));
       expect(find.text('Payée le'), findsOneWidget);
+      // La chaîne n'attend plus rien sur une demande soldée.
+      expect(find.text('en attente'), findsNothing);
     });
 
     testWidgets('supprimer ferme la fiche et rend le choix', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1280, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      ExpenseDetailChoice? choice;
+      ExpenseDetailOutcome? outcome;
       await _pumpHost(tester, (context) async {
-        choice = await showExpenseDetailDialog(
+        outcome = await showExpenseDetailDialog(
           context,
           expense: _snel(),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
-          onToggle: (_) async => null,
+          thread: const [],
         );
       });
 
       await tester.tap(find.text('Supprimer'));
       await tester.pumpAndSettle();
 
-      expect(choice, ExpenseDetailChoice.withdraw);
+      // Supprimer reste un RACCOURCI d'écran : il retire la ligne du
+      // registre, il ne pose aucun geste du circuit.
+      expect(
+        outcome,
+        isA<ExpenseDetailShortcut>().having(
+          (o) => o.choice,
+          'choice',
+          ExpenseDetailChoice.withdraw,
+        ),
+      );
       expect(find.text('Facture SNEL'), findsNothing);
     });
 
@@ -266,7 +298,7 @@ void main() {
           ),
           type: _types.first,
           reader: ExpenseUsdReader.withoutRate,
-          onToggle: (_) async => null,
+          thread: const [],
         ),
       );
 
@@ -275,5 +307,388 @@ void main() {
         findsOneWidget,
       );
     });
+  });
+
+  group('fil de la demande', () {
+    ExpenseMessage message(
+      String id, {
+      required String body,
+      ExpenseAct? act,
+      String? authorId = 'u-9',
+      int hour = 8,
+    }) => ExpenseMessage(
+      id: id,
+      expenseId: 'e-1',
+      body: body,
+      act: act,
+      authorId: authorId,
+      authorName: 'Mbala Thérèse',
+      createdAt: DateTime.utc(2026, 9, 20, hour),
+    );
+
+    Future<void> pumpThread(
+      WidgetTester tester,
+      List<ExpenseMessage>? thread, {
+      String? accountId,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: thread,
+          accountId: accountId,
+        ),
+      );
+    }
+
+    testWidgets('chaque geste est nommé, les messages sont comptés, et un '
+        'commentaire libre ne constate rien', (tester) async {
+      await pumpThread(tester, [
+        message('m-1', body: 'Facture du mois', act: ExpenseAct.deposit),
+        message('m-2', body: 'Accordée', act: ExpenseAct.approval, hour: 9),
+        message('m-3', body: 'Payer avant vendredi', hour: 10),
+      ]);
+
+      expect(find.text('Fil de la demande'), findsOneWidget);
+      expect(find.text('3 messages'), findsOneWidget);
+      expect(find.text('Demande déposée'), findsOneWidget);
+      expect(find.text('Approbation'), findsOneWidget);
+      expect(find.text('Payer avant vendredi'), findsOneWidget);
+      // Le commentaire libre n'emprunte l'étiquette d'aucun acte.
+      expect(find.text('Paiement constaté'), findsNothing);
+    });
+
+    testWidgets('un fil vide annonce ce qui viendra : ce n’est pas un échec, '
+        'et il ne réclame aucune action', (tester) async {
+      await pumpThread(tester, const []);
+
+      expect(find.text('aucun message'), findsOneWidget);
+      expect(
+        find.textContaining("chaque décision s'inscrira ici"),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('un fil ILLISIBLE se dit, et ne se confond pas avec un fil '
+        'vide', (tester) async {
+      await pumpThread(tester, null);
+
+      expect(
+        find.text("Le fil n'a pas pu être lu sur ce poste."),
+        findsOneWidget,
+      );
+      expect(find.textContaining('chaque décision'), findsNothing);
+      // Rien à compter quand rien n'a été lu.
+      expect(find.text('aucun message'), findsNothing);
+    });
+
+    testWidgets('l’auteur est nommé, et la propriété se juge sur le COMPTE : '
+        'un homonyme ne s’approprie pas le message', (tester) async {
+      await pumpThread(tester, [
+        message('m-1', body: 'Accordée', act: ExpenseAct.approval),
+      ], accountId: 'u-1');
+
+      expect(find.text('Mbala Thérèse'), findsOneWidget);
+      expect(find.text('Accordée'), findsOneWidget);
+    });
+  });
+
+  group('panneau de refus', () {
+    const motifDevis =
+        'Devis manquant : joindre au moins deux offres avant de réengager la '
+        'dépense.';
+
+    /// Rend un **lecteur**, pas une valeur : la fiche n'est pas encore fermée
+    /// quand cette fonction rend la main, et renvoyer `outcome` tel quel
+    /// donnerait `null` quoi qu'il arrive ensuite — une assertion toujours
+    /// vraie, donc muette.
+    Future<ExpenseDetailOutcome? Function()> ouvrirEtRefuser(
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      ExpenseDetailOutcome? outcome;
+      await _pumpHost(tester, (context) async {
+        outcome = await showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
+        );
+      });
+      await tester.tap(find.text('Refuser'));
+      await tester.pumpAndSettle();
+      return () => outcome;
+    }
+
+    Future<void> confirmer(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Confirmer le refus'));
+      await tester.tap(find.text('Confirmer le refus'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Refuser ouvre le panneau sans fermer la fiche', (
+      tester,
+    ) async {
+      await ouvrirEtRefuser(tester);
+
+      expect(find.text('Refuser la demande'), findsOneWidget);
+      // Le décideur garde sous les yeux ce qu'il refuse.
+      expect(find.text('Facture SNEL'), findsOneWidget);
+    });
+
+    testWidgets('confirmer SANS motif : le geste ne part pas, et la fiche le '
+        'dit', (tester) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await confirmer(tester);
+
+      expect(
+        find.text('Un refus sans motif laisse le demandeur sans issue.'),
+        findsOneWidget,
+      );
+      expect(outcome(), isNull);
+      expect(find.text('Facture SNEL'), findsOneWidget);
+
+      // Ligne de contrôle : le même lecteur DOIT voir passer un refus motivé,
+      // sinon le `isNull` ci-dessus ne prouverait rien.
+      await tester.ensureVisible(find.text(motifDevis));
+      await tester.tap(find.text(motifDevis));
+      await tester.pumpAndSettle();
+      await confirmer(tester);
+      expect(outcome(), isNotNull);
+    });
+
+    testWidgets('un motif tout prêt remplit le champ, et le refus part avec '
+        'lui', (tester) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await tester.ensureVisible(find.text(motifDevis));
+      await tester.tap(find.text(motifDevis));
+      await tester.pumpAndSettle();
+      await confirmer(tester);
+
+      expect(
+        outcome(),
+        isA<ExpenseDetailGesture>()
+            .having((o) => o.gesture, 'gesture', ExpenseGesture.refuse)
+            .having((o) => o.note, 'note', motifDevis),
+      );
+    });
+
+    testWidgets('annuler referme le panneau et laisse la demande intacte', (
+      tester,
+    ) async {
+      final outcome = await ouvrirEtRefuser(tester);
+
+      await tester.ensureVisible(find.text('Annuler'));
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Refuser la demande'), findsNothing);
+      expect(outcome(), isNull);
+      expect(find.text('Refuser'), findsOneWidget);
+    });
+  });
+
+  group('champ du fil', () {
+    ExpenseMessage message(String id, {required ExpenseSyncState sync}) =>
+        ExpenseMessage(
+          id: id,
+          expenseId: 'e-1',
+          body: 'Facture du mois',
+          act: ExpenseAct.deposit,
+          authorId: 'u-9',
+          authorName: 'Mbala Thérèse',
+          createdAt: DateTime.utc(2026, 9, 20, 8),
+          syncState: sync,
+        );
+
+    Future<void> pumpSheet(
+      WidgetTester tester, {
+      List<ExpenseMessage>? thread = const [],
+      Future<ExpenseCommentResult> Function(String body)? onComment,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: thread,
+          onComment: onComment,
+        ),
+      );
+    }
+
+    testWidgets('sans écrivain branché, le fil reste en LECTURE seule', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+
+      expect(find.text('Ajouter un commentaire'), findsNothing);
+    });
+
+    testWidgets('un fil ILLISIBLE n\'offre pas où écrire : on ne sait pas ce '
+        'que le message compléterait', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: null,
+        onComment: (_) async => (sent: true, thread: const <ExpenseMessage>[]),
+      );
+
+      expect(find.text('Ajouter un commentaire'), findsNothing);
+    });
+
+    testWidgets('envoyer écrit le message, vide le champ et rallonge le fil '
+        'SANS fermer la fiche', (tester) async {
+      String? sent;
+      await pumpSheet(
+        tester,
+        onComment: (body) async {
+          sent = body;
+          return (
+            sent: true,
+            thread: [message('m-1', sync: ExpenseSyncState.pending)],
+          );
+        },
+      );
+
+      await tester.enterText(_field('Ajouter un commentaire'), '  Vu  ');
+      await tester.ensureVisible(find.text('Envoyer'));
+      await tester.tap(find.text('Envoyer'));
+      await tester.pumpAndSettle();
+
+      expect(sent, 'Vu');
+      // On commente EN LISANT : la fiche ne se ferme pas.
+      expect(find.text('Facture SNEL'), findsOneWidget);
+      expect(find.text('Facture du mois'), findsOneWidget);
+      expect(find.text('1 message'), findsOneWidget);
+    });
+
+    testWidgets('un envoi refusé se dit DANS le champ — un toast sous une '
+        'modale serait inatteignable', (tester) async {
+      await pumpSheet(
+        tester,
+        onComment: (_) async => (sent: false, thread: null),
+      );
+
+      await tester.enterText(_field('Ajouter un commentaire'), 'Vu');
+      await tester.ensureVisible(find.text('Envoyer'));
+      await tester.tap(find.text('Envoyer'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Le message n\'a pas pu être écrit sur cet appareil. Réessayez.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Facture SNEL'), findsOneWidget);
+    });
+
+    testWidgets('un message non accusé porte « en attente d\'envoi » à la '
+        'place de son horloge', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: [message('m-1', sync: ExpenseSyncState.pending)],
+      );
+
+      expect(find.text('en attente d\'envoi'), findsOneWidget);
+    });
+
+    // Ligne de contrôle du test ci-dessus, dans SON propre `testWidgets` : un
+    // second `pumpSheet` empilerait une fiche par-dessus la première, et le
+    // marqueur de la précédente serait encore trouvé.
+    testWidgets('accusé, le même message montre son horloge', (tester) async {
+      await pumpSheet(
+        tester,
+        thread: [message('m-1', sync: ExpenseSyncState.synced)],
+      );
+
+      expect(find.text('en attente d\'envoi'), findsNothing);
+      expect(find.textContaining('20 sept.'), findsOneWidget);
+    });
+  });
+
+  group('ce que la fiche offre selon d\'où on l\'ouvre', () {
+    Future<void> pumpSheet(
+      WidgetTester tester, {
+      required bool allowShortcuts,
+    }) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
+          allowShortcuts: allowShortcuts,
+        ),
+      );
+    }
+
+    testWidgets('depuis le REGISTRE : les raccourcis de saisie sont là', (
+      tester,
+    ) async {
+      await pumpSheet(tester, allowShortcuts: true);
+
+      expect(find.text('Supprimer'), findsOneWidget);
+      expect(find.text('Dupliquer'), findsOneWidget);
+    });
+
+    testWidgets('depuis la FILE : aucun raccourci de saisie — un bouton qui '
+        'renverrait ailleurs sans rien faire serait pire que son absence', (
+      tester,
+    ) async {
+      await pumpSheet(tester, allowShortcuts: false);
+
+      expect(find.text('Supprimer'), findsNothing);
+      expect(find.text('Dupliquer'), findsNothing);
+      expect(find.text('Modifier'), findsNothing);
+      // Les gestes du circuit, eux, restent : c'est le travail de la file.
+      expect(find.text('Approuver'), findsOneWidget);
+    });
+  });
+
+  testWidgets('un message REFUSÉ ne se lit pas comme accusé', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpHost(
+      tester,
+      (context) => showExpenseDetailDialog(
+        context,
+        expense: _snel(),
+        type: _types.first,
+        reader: ExpenseUsdReader.withoutRate,
+        thread: [
+          ExpenseMessage(
+            id: 'm-1',
+            expenseId: 'e-1',
+            body: 'Approuvée',
+            act: ExpenseAct.approval,
+            authorName: 'Mbala Thérèse',
+            createdAt: DateTime.utc(2026, 9, 20, 8),
+            syncState: ExpenseSyncState.rejected,
+          ),
+        ],
+      ),
+    );
+
+    // L'horloge seule laisserait croire que le geste a eu lieu.
+    expect(find.text('non envoyé'), findsOneWidget);
+    expect(find.text("en attente d'envoi"), findsNothing);
   });
 }

@@ -1,4 +1,11 @@
-# Module Dépenses — plan front (V1)
+# Module Dépenses — plan front (V1 + v2)
+
+> **Où on en est, en une ligne** : la V1 est livrée dans `main` ; la **v2 —
+> circuit de validation** est à mi-chemin sur la branche
+> **`feat/expense-validation-circuit`** (lots DEP-9 à DEP-11 faits, DEP-12 à
+> DEP-15 à faire) et **`main` n'en porte rien**. Tout est en **partie II**, à
+> partir du §8 — c'est là qu'il faut reprendre. ⚠️ Lire d'abord l'encadré du §12 :
+> le chantier est à moitié construit, et cela a deux conséquences vérifiées.
 
 > Rédigé le 2026-09-13 sur `feat/expense-register` (base `origin/main` 6252762e).
 > Sources : spec design `ui_kits/app/Depenses-Frais-Fonctionnement-Spec.html`
@@ -8,6 +15,10 @@
 > son `openApi.yaml`. **Le serveur fait foi** : là où la spec design parle
 > d'un « dépôt serveur » et d'identifiants `DEP-0001` fabriqués par le poste,
 > c'est le contrat qui l'emporte.
+
+---
+
+# Partie I — V1 : le registre (livré, dans `main`)
 
 ## 1. Ce que le module fait
 
@@ -109,6 +120,13 @@ Approbation, budget, pièce jointe, référentiel fournisseurs, récurrence
 automatique, période libre, débit de caisse par la source de fonds,
 configuration des types, état PDF.
 
+> ⚠️ **Périmé depuis la v2 pour un point** : l'**approbation** est entrée dans le
+> produit (§8 et suivants) — la dépense est devenue une demande soumise à
+> décision. Le reste de cette liste tient toujours ; le hors-périmètre de la v2
+> est au §13.
+
+---
+
 ## 7. État d'exécution
 
 Commité sur `feat/expense-register` en quatre lots, **non poussé** : `cc80fbab`
@@ -194,3 +212,399 @@ de test, et mérite son propre lot.
   classent par nombre de dépenses (A5 poussé jusqu'au classement).
 - **Formulaire** : le scrim ne ferme pas la modale (une saisie est du travail
   non enregistré) ; fermeture par « Annuler » ou la croix.
+
+---
+
+# Partie II — v2 : le circuit de validation
+
+> Plan front publié et révisé deux fois le 2026-09-23 :
+> artifact **`V5HXc9yjnjSEkWBhrvttAN`** (« Décider hors ligne ») — à republier sur
+> cette URL, ne pas en créer un second. Plan back en regard : artifact
+> **`LyahMoYhZ3c7M9LvuxGjDX`** (« Demander avant de dépenser »), lots C0→C3.
+> Spec design `ui_kits/app/Depenses-Frais-Fonctionnement-Spec.html` (+ `Depense*.jsx`)
+> — **elle n'est pas sur le disque** : projet Claude Design « ETEELO CONNECT
+> Design System », `DesignSync get_file`, projectId
+> `9a727b6b-c244-415d-975c-a476d6114f3e`. `DepenseViews.jsx` porte l'anatomie du
+> fil, de la chaîne de validation et de la fiche ; il est bien plus court que la
+> spec (175 KB).
+>
+> **Le contrat est figé** : les dix questions au back sont tranchées, plus aucune
+> n'est ouverte de part et d'autre.
+
+## 8. Ce que la v2 change
+
+Une dépense n'est plus un fait constaté, c'est une **demande** : elle naît en
+attente, quelqu'un la tranche, le paiement se constate après. Le poste sait déjà
+tout faire seul (lecture 100 % locale, écriture 100 % outbox, F2) ; ce qui change
+pour lui, c'est qu'une décision **ne s'arbitre plus à l'horloge** — le serveur a
+le droit de la refuser, et il exige que les gestes lui arrivent **dans l'ordre où
+ils ont été faits**.
+
+| | V1 | v2 |
+|---|---|---|
+| Statut | `PAID` \| `UNPAID`, basculé d'un clic de liste | 5 états, jamais saisis, résultat d'un geste |
+| Argent engagé | `== PAID` lu en six endroits | le drapeau `isFirm` (approuvée + payée), et lui seul |
+| Date de règlement | dérivée du statut à la sauvegarde | posée par le geste de paiement, par lui seul |
+| Fil | aucun | `expense_messages`, append-only, un message par geste |
+| Remontée | 2 agrégats d'outbox | + `EXPENSE_GESTURE`, une entrée **par geste**, en séquence |
+| Écrans | registre + tableau de bord | + la **file de validation** |
+
+## 9. Contrat serveur v2 (delta)
+
+Sept routes de geste, toutes en `POST /api/v1/sync/expenses/{id}/…` :
+`decision`, `payment`, `reopen`, `retraction`, `resubmit`, `reminder`,
+`messages`. Telles que le plan back les arrête ; **l'`openApi.yaml` fera foi à la
+livraison**.
+
+- **L'uuid du message est la clé d'idempotence** de chaque geste (Q3) : un rejeu
+  est inerte — 200, état canonique, compteur de relances inchangé.
+- **Les messages quittent la poussée de contenu** (Q1) : `POST /sync/expenses`
+  n'en porte plus aucun. Commenter a sa propre route, sous `expense.write` mais
+  **sans contrôle de propriété** — c'est ce qui permet au validateur de commenter
+  la demande d'un collègue.
+- **La poussée de contenu ne transitionne JAMAIS** (Q2, D8) : « corriger et
+  renvoyer » = deux gestes dans l'ordre, contenu **puis** `/resubmit`.
+  `/retraction` n'est plus une bascule ; c'est `/resubmit` qui réengage.
+- `/resubmit` porte le `clientUpdatedAt` du contenu attendu (**F32**, offre du
+  back acceptée) : tant que la copie serveur est plus ancienne, il refuse. **À
+  transmettre au back avant son lot C2 si ce n'est pas déjà fait.**
+- Le **409 porte le fil** (Q8) : le poste réaligne statut et fil d'un seul geste.
+- Pull : `messages[]` en `{ id, body, act, createdAt, authorId, authorName }`,
+  **toujours entier** (la pagination porte sur les demandes, jamais sur les
+  messages). Page à ramener de 100 à **50** :
+  `expense_pull_repository_impl.dart:50`.
+- Refus : `422 REASON_REQUIRED`. (`422 SELF_APPROVAL_FORBIDDEN` a été
+  abandonné le 2026-09-25, cf. §13.) **`422
+  INVALID_TRANSITION` a disparu des routes de geste** (Q10) : le serveur ne peut
+  pas distinguer un geste hors séquence d'un geste impossible — payer une demande
+  en attente est absurde jusqu'à ce que l'approbation arrive.
+
+### 🔴 Les deux 409, aux conduites OPPOSÉES
+
+Seul le `detailCode` les sépare, et s'y tromper réécrit la décision d'un collègue :
+
+| `detailCode` | Conduite | Jamais |
+|---|---|---|
+| `DECISION_ALREADY_TAKEN` | se réaligner sur l'état canonique renvoyé, fil compris ; toast rouge nommant le décideur | **ne jamais rejouer** |
+| `TRANSITION_OUT_OF_ORDER` | rejouer : la ligne locale est juste, c'est le serveur qui n'a pas vu le prédécesseur | **ne jamais réaligner** |
+
+C'est **F34**. `ExpensePushFailure.isTransient`
+(`expense_push_failure.dart:44-45`) juge sur le SEUL statut
+(`transientStatuses = {401, 408, 409, 429}`) : en l'état il rejouerait une
+décision déjà prise. ✅ Vérifié : le socle n'est pas en cause —
+`ApiErrorParser.detailCodeOf` (`api_error_parser.dart:94`) lit `body['detailCode']`
+quel que soit le statut, et `ExpensePushFailure.of:24` l'appelle déjà sans
+condition. Seul le commentaire `api_error_parser.dart:88` (« sur un 422, `null`
+sinon ») deviendra faux et est à corriger.
+
+## 10. Décisions front v2 (F19 → F34)
+
+La numérotation continue celle de la V1. Détail et justification dans l'artifact.
+
+| # | Décision |
+|---|---|
+| F19 | `ExpenseStatus` = 5 valeurs portant `wireValue` + `isFirm` ; toute somme lit `isFirm`, jamais une égalité de statut |
+| F20 | `paidOn` cesse d'être dérivé du statut (`_paidOnFor` supprimé) |
+| F21 | Un geste = une entrée d'outbox `EXPENSE_GESTURE`, identifiée par l'uuid de son message. **L'inverse du contenu, délibérément** : le contenu s'écrase (LWW), un geste jamais — approuver puis annuler puis refuser, ce sont trois faits |
+| F22 | La décision est optimiste et **restaurable** ; `DECISION_ALREADY_TAKEN` réaligne, 403 et 422 sont terminaux (ligne « à corriger ») |
+| F23 | Le lot est un geste d'écran, pas un appel réseau (le back a retiré la route de lot) ; le refus en lot recopie son motif dans chaque geste |
+| F24 | La propriété se juge sur `recordedById` / `authorId`, **jamais sur le nom** — deux homonymes suffisent à se tromper |
+| F25 | Le geste V1 `/deletion` s'appelle **Supprimer** à l'écran ; le mot « Retirer » est rendu au circuit (contrat inchangé) |
+| F26 | « Année » reste l'année scolaire — amendement A13 refusé (D2 tient) |
+| F27 | La recherche reste insensible aux accents (A12 déjà acquis, F11) |
+| F28 | Les compteurs du registre disparaissent : les montants vivent au tableau de bord, l'attente dans la file |
+| F29 | Aucun geste n'est offert pour échouer : `PermissionGate.access` croisé avec le statut et la propriété ; Approuver/Refuser **masqués** sur ses propres demandes |
+| F30 | Le fil recopie le patron Discipline **sans ses défauts** : auteur = identifiant résolu, fraîcheur du fil dans sa propre colonne, et il remonte geste par geste au lieu d'être imbriqué dans la poussée du parent |
+| F31 | **Le fil est le registre d'ordre** : un geste n'est dispatchable que s'il porte le plus ancien message non synchronisé de sa dépense, sinon `blocked` |
+| F32 | « Corriger et renvoyer » = deux entrées dans l'ordre ; le renvoi attend l'accusé du contenu |
+| F33 | Les actes du fil sont en **anglais** (décision utilisateur) : `DEPOSIT · REMINDER · APPROVAL · REFUSAL · PAYMENT · RETRACTION · REOPENING · CORRECTION · EDIT`, `null` = commentaire libre |
+| F34 | Un 409 ne se lit **jamais** au seul code HTTP (voir §9) |
+
+## 11. Données locales v2 — palier **52**
+
+L'escalier hérité est clos à 48 : un palier neuf va dans
+`tenant_migrations.dart` (`if (upTo(52))`), **jamais** dans `app_database.dart`.
+DDL écrit en clair dans l'étape, jamais relu du schéma vivant, et l'étape reste
+rejouable.
+
+Six colonnes sur `expenses`, **en fin de table** (`ALTER TABLE` ne sait
+qu'ajouter à la fin, et une base montée doit finir identique à une base créée à
+neuf — le test de palier le vérifie colonne par colonne, dans l'ordre) :
+`decided_by_id`, `decided_by_name`, `decided_at`, `decision_reason`,
+`reminder_count` (`INTEGER NOT NULL DEFAULT 0`), `last_message_at`.
+
+Table neuve `expense_messages` : `id` PK (uuid du poste), `school_id`,
+`expense_id`, `body`, `act` NULL, `author_id`, `author_name`, `created_at`
+(ISO-8601 UTC), `sync_status` (`DEFAULT 'PENDING_SYNC'`). Index
+`(expense_id, created_at)` — il sert l'affichage **et** la garde d'ordre de F31.
+
+**Reprise : il n'y a rien à reprendre** (D11 close — le back a vérifié qu'aucune
+dépense n'existe en base). Le palier garde tout de même le renommage défensif
+`UNPAID` → `APPROVED` : un `count(*)` serveur ne dit rien des bases locales des
+postes de développement, et une ligne au statut inconnu se lirait « en attente »
+sur un écran qui la croirait non décidée.
+
+## 12. Lots v2 et état d'exécution
+
+Sur **`feat/expense-validation-circuit`**, **PR #59**. Partie de `a8ff5c7c`
+(le sommet de `main` juste après la PR #56), rebasée le 2026-09-25 sur `main`
+après les PR #57 et #58 : le palier du circuit est passé de **v50 à v52**,
+derrière `till_phone` (v50) et le matricule annuel (v51). Chaque lot compile, passe
+`flutter analyze` à zéro et sa suite ciblée ; la suite complète tourne au dernier.
+
+> Note d'historique, pour qui verrait une divergence : ces commits ont d'abord
+> atterri **dans `main`** en avance rapide (jusqu'à `660cfbc5`, le 2026-09-23),
+> puis `main` a été ramené à `a8ff5c7c` — décision explicite : **`main` ne garde
+> aucune modification Dépenses tant que le circuit n'est pas fini** (l'encadré
+> ci-dessous dit pourquoi). Les commits sont les mêmes, ils vivent désormais sur
+> la branche seule.
+
+| Lot | État | Commit |
+|---|---|---|
+| DEP-9 | ✅ ce document (partie II) | le commit qui le porte |
+| DEP-10 | ✅ **cinq statuts** : énumération + `isFirm`, six sites binaires ouverts, `paidOn` dé-dérivé, palier v52 (volet statut), bascule payée/non payée retirée, compteurs du registre supprimés, `ExpenseTransitions` + matrice de transitions testée | `559e1746` |
+| DEP-11 | ✅ **le fil** : palier v52 (volet fil), 9 actes anglais, `ExpenseMessage`, `ExpenseMessageDao` (append atomique), `ExpenseRepository.thread()`, `ExpenseThreadPanel` dans la fiche, fiche découpée | `504ebbfe` |
+| DEP-12 | ✅ **les gestes et les droits**, en cinq commits : les trois droits (`expense.decide`/`pay`/`reopen`, hors de `kGuardedWriteActions` tant que le back ne les sème pas) · `ExpenseGesture` + `ExpenseGesturePolicy` + `appendGesture` (inerte au rejeu) · la chaîne à trois jalons et les encarts de situation · le pied de fiche, le panneau de refus et les toasts · le champ du fil | `5f4990ce` `29793ade` `9d0e9db7` `e5d9712d` `d7c30363` |
+| DEP-13 | ✅ **la file** : sous-menu, route et accès · `ExpenseWait` (tiède 3 j, chaud 5 j) · `ExpenseQueueOrder` (3 tris, stables) · `ExpenseQueueView` + cubit + écran · sélection et lot local · bloc « approuvées, à payer » | `2610b7fa` |
+| DEP-14 | ✅ **la remontée et l'ordre** : 7 routes + `ExpenseGesturePayload` · entrée d'outbox dans la transaction de `appendGesture` · garde d'ordre F31 **et** son échappatoire · les deux 409 (F34) · delta enrichi (6 colonnes + `messages[]`) · page à 50 | `cbfabbc5` |
+| DEP-15 | ✅ **revue et clôture** : 7 défauts trouvés et corrigés | `42e2a080` `4875da4f` |
+
+Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
+`flutter test -j 4` **complet** → vert, code de sortie capturé sans pipe. La
+revue adversariale de DEP-15 a été jouée, et §13 dit ce qu'elle a rendu.
+
+> ⚠️ **`flutter analyze` doit être relancé APRÈS le commit**, pas avant : le
+> hook `pre-commit` reformate les fichiers stagés sur le disque, et un `if`
+> d'une ligne que le formateur éclate en deux fait apparaître un
+> `curly_braces_in_flow_control_structures` que le contrôle d'avant-commit ne
+> pouvait pas voir. Payé à DEP-12 (commit amendé).
+
+### ⚠️ Le circuit est complet côté poste — et toujours pas livrable
+
+Les cinq statuts, le fil, les gestes, la file et la remontée existent. Ce qui
+manque n'est plus à nous :
+
+1. **La poussée sort du contrat servi.** Le dépôt crée une demande en
+   `PENDING` et l'`openApi.yaml` déployé déclare encore
+   `ExpenseStatus: enum [PAID, UNPAID]` (~l. 18126). Un 400 de validation est
+   terminal par F5 ⇒ la dépense reste « à corriger » et n'atteint jamais le
+   serveur. Les **sept routes de geste n'existent pas non plus** : chaque
+   geste y mourra en 404, terminal lui aussi.
+2. **Donc : rien ne fusionne dans `main`, et pas de release du module Dépenses
+   avant la livraison back C0→C3.** C'est la seule dépendance qui reste, et
+   elle n'a pas de contournement côté poste — un module qui écrit dans une
+   outbox dont chaque entrée meurt terminale est pire qu'un module absent.
+
+Corollaire à surveiller, aujourd'hui **vide mais pas théorique** : un `UNPAID`
+redescendu par le pull n'est plus connu du front (`ExpenseStatus.fromWire`
+retombe sur `pending`) et se lirait « En attente », donc hors des totaux.
+C'est sans effet aussi longtemps que D11 tient — **aucune dépense en base, ni
+en production ni en staging** — et c'est la première chose à revérifier si une
+ligne apparaît.
+
+### Décisions prises pendant DEP-12 — ne pas les rouvrir
+
+- **Les trois droits sont déclarés avant d'être semés**, comme
+  `finance.rate.override`, et restent **hors de `kGuardedWriteActions`** : les
+  y inscrire ferait rougir, à raison, le test « aucune exigence n'est hors de
+  portée de tous ». Le jour où le back les sème (C0→C3), les inscrire **et**
+  mettre à jour la copie du template dans `role_journeys_test.dart`, ensemble.
+- **`ExpenseGesture` porte les huit gestes** — sept routes, `decision` en sert
+  deux — avec l'acte qu'ils écrivent, l'état qu'ils visent et à qui ils
+  appartiennent. Trois filtres à l'écran, tous des ET : `PermissionGate.access`
+  (réactif), l'état et la propriété (`ExpenseGesturePolicy`).
+- **La propriété indécidable ne penche pas du même côté selon le geste** : ce
+  qu'on ne sait pas prouver sien n'ouvre pas les gestes du demandeur
+  (fail-closed), mais ne ferme pas une approbation légitime (fail-open) — le
+  serveur, lui, sait, et son 422 rattrape.
+- **`appendGesture` est INERTE au rejeu**, par l'uuid du message, comme le
+  serveur (Q3) : c'est ce qui garantit qu'une relance rejouée ne compte pas
+  double. Il se distingue d'`append`, qui écrase délibérément parce qu'il sert
+  le pull.
+- **Le dépôt relit la ligne avant d'écrire** : la copie de l'écran peut dater,
+  et un geste jugé sur elle écrirait une transition absente de la table. Le
+  refus est un **`ConflictFailure`**, pas un `ValidationFailure` — rien n'est à
+  corriger dans ce que l'agent a tapé, et « Réessayez » ne l'aiderait pas.
+- **Modifier suit la règle des gestes du demandeur** (en attente + sienne), ce
+  que la V1 n'imposait pas : une demande accordée dont on réécrirait le montant
+  ne serait plus celle qui a été accordée. C'est `depActions` de la maquette.
+- **Refuser n'est jamais direct** : le bouton ouvre le panneau de motif, dans
+  la fiche et non par-dessus, pour que le décideur garde le montant, la chaîne
+  et le fil sous les yeux.
+- **Commenter ne ferme pas la fiche** — on commente en lisant. C'est le seul
+  geste dans ce cas, et son échec se dit **dans le champ** : une `SnackBar`
+  levée sous une modale est inatteignable.
+- **Un jalon franchi sans date affiche « — », pas « en attente »** : se
+  contredire dans la même cellule serait pire que se taire. Cas courant tant
+  que le pull ne rapporte pas les colonnes de décision.
+- **Refuser reste `secondary` et non `danger`** : le socle n'a pas de variante
+  rouge sortante, et deux boutons pleins côte à côte se disputeraient l'accent.
+  Le rouge arrive au panneau.
+- Le toast de dépôt ne dit plus « non payée » : une demande neuve est toujours
+  en attente, donc la formule disait la même chose à chaque fois, et à tort.
+
+### Décisions prises pendant DEP-10 / DEP-11 — ne pas les rouvrir
+
+- Le **statut n'est plus saisissable** : le formulaire ne l'offre plus, et
+  `ExpenseDeltaColumns` l'a fait passer du contenu vers la **famille serveur**
+  (avec `paid_on`) — côté contenu, une saisie locale plus récente aurait retenu
+  une décision prise ailleurs, qui serait restée invisible sur ce poste.
+- Le fil est **lu avant** l'ouverture de la fiche et lui est passé en argument
+  **obligatoire** : `null` = illisible, `[]` = rien à lire. Aucun `FutureBuilder`
+  dans une modale, donc ni squelette ni anatomie d'échec de la règle n°10 — et
+  « pas fourni » ne peut pas se lire « illisible ».
+- **Aucun champ de saisie dans le fil avant DEP-12** : écrire est un geste, il
+  lui faut sa permission et son entrée d'outbox. Un champ offert plus tôt
+  fabriquerait des messages que rien ne pousse.
+- `ExpenseMessageDao.append` ne touche **que** `last_message_at` sur la dépense —
+  jamais `client_updated_at`, `sync_status` ni `updated_at`. C'est précisément le
+  défaut du fil de la Discipline, et un test le verrouille. La fraîcheur **ne
+  recule jamais** (comparaison textuelle d'ISO-8601 UTC, d'où la forme unique
+  imposée par `ExpenseMessageLocalModel.at`).
+- `threadFor` est **scopé par école**, comme `expensesForSchool`.
+- Un acte inconnu se lit comme un commentaire libre ; un message dont l'horloge
+  est illisible est **écarté** du fil, jamais placé au hasard.
+- L'entrée d'outbox du geste s'ajoutera **dans la transaction de
+  `appendGesture`** à DEP-14 (la méthode est née à DEP-12, `append` reste au
+  pull) : aucun seam n'a été pré-construit pour elle.
+- `expense_messages` est déclarée **fille de `expenses`** dans
+  `tombstone_targets.dart` : sans cela, une purge serveur aurait effacé la
+  demande en laissant son fil orphelin.
+- La famille ambre a reçu son encre, `AppColors.feeStatusPartialInk` (#7A5A16) :
+  `feeStatusPartial` fonde un pavé mais ne s'écrit qu'à **3,83** sur la bulle
+  neutre, sous le seuil, là où l'encre atteint **5,44**.
+
+## 13. Ce que la revue de clôture a trouvé (DEP-15)
+
+Revue adversariale de la synchro, puis du domaine et des écrans — le même
+exercice qu'à DEP-8, qui avait rendu dix-huit défauts. Sept ici, dont **un
+bloquant**.
+
+| # | Défaut | Corrigé par |
+|---|---|---|
+| 1 | 🔴 **La garde d'ordre gelait la demande pour toujours.** Elle lisait le plus ancien message *non accusé*, et un message mort reste au fil (il est append-only). Après le premier refus terminal, tout geste suivant échouait à vue — **y compris le geste neuf par lequel l'agent venait réparer**. | La garde lit le plus ancien message **en attente** ; l'échappatoire condamne la suite **sur-le-champ** (`rejectFrom`) au lieu de la découvrir une dispatch à la fois |
+| 2 | Un **commentaire** refusé marquait toute la dépense « à corriger » — il n'y a rien à corriger dans une demande parce qu'un mot n'a pas pu s'écrire, et la ligne n'avait même pas bougé | `markGestureRejected` seulement si le geste transitionne |
+| 3 | Un geste réussi laissait en place le « à corriger » qu'un geste précédent avait posé | `applyGestureAck` le lève — **et lui seul** : un refus de contenu attend une vraie correction |
+| 4 | Un message **refusé** montrait son horloge comme un message accusé : le fil laissait croire que le geste avait eu lieu | `ExpenseThreadStateTag` : « en attente d'envoi » / « non envoyé », à la place de l'horloge |
+| 5 | La fiche ouverte **depuis la file** offrait Supprimer / Dupliquer / Modifier, qui renvoyaient au registre **sans rien faire** | `allowShortcuts: false` depuis la file |
+| 6 | L'abandon local d'une dépense jamais acceptée neutralisait contenu et retrait, **pas les gestes** — un 404 par geste, tous terminaux | `setLocalOnlyWithdrawal` neutralise l'agrégat `EXPENSE_GESTURE` entier |
+| 7 | Une purge serveur (410) effaçait la demande et **laissait son fil** orphelin | `deleteExpense` emporte les messages |
+
+Vérification de clôture : `flutter analyze` → **No issues found**,
+`flutter test -j 4` **complet** → vert, **code de sortie capturé sans pipe**
+(`| tail` masque le code et fait annoncer « 0 » sur une suite rouge).
+
+### Écarts assumés avec la spec design (v2)
+
+- **Le sous-menu ne porte pas le compteur d'attente** que la maquette met sur
+  son onglet : le socle de menu n'a pas de pastille, et lui en donner une
+  supposerait que la barre latérale s'abonne au registre des dépenses — une
+  dépendance de `home` vers un module métier, pour un seul appelant. Le compte
+  vit sur l'écran de la file, en tête.
+- **Le sélecteur de rôle et le bandeau de rôle ne passent pas** : ce sont des
+  outils de revue de la maquette, et les « trois rôles » n'existent pas dans
+  l'application — ce sont trois combinaisons de permissions (F29). Seul le
+  repli « vous voyez la file mais ne décidez pas » est repris.
+- **La file ne modifie ni ne duplique** : la saisie appartient au registre.
+- **« Refuser » reste `secondary` et non `danger`** : le socle n'a pas de
+  variante rouge sortante, et deux boutons pleins côte à côte se disputeraient
+  l'accent. Le rouge arrive au panneau de motif.
+- **Pas de palier « 40 de plus » sur la file** : une file qu'il faut paginer
+  est une file qu'on ne traite pas.
+
+### Tranché avec le back le 2026-09-25
+
+Réponses du back en commentaires sur la page « Dépenses v2 — ce que le front
+attend du back » (Claude Docs, artifact `4af59671-e169-4ea5-bc0b-35245434c6a1`).
+
+- **`DEPOSIT` et `EDIT` sont écrits par le serveur.** `DEPOSIT` à la création
+  seulement (corps = description, auteur = déposant, instant = le
+  `clientUpdatedAt` borné) ; `EDIT` à chaque modification `APPLIED`, jamais sur
+  un `SUPERSEDED` ni un rejeu, **corps vide**. uuid5 déterministes (dépense +
+  acte, + `clientUpdatedAt` pour un `EDIT`). Le poste ne les écrit jamais en
+  local : il les reçoit par le pull.
+- **Une seule enveloppe pour les sept routes**, celle du poste :
+  `{ action?, decidedAt, message: { id, body }, expectedClientUpdatedAt?, authorId }`.
+  `reason` sort du contrat : le serveur recopie `message.body` dans
+  `decisionReason`. `/messages` passe de `createdAt` à `decidedAt` en C2.
+  `body` peut être vide, sauf pour un refus (422) et un commentaire (400).
+- **`/resubmit` sur une copie serveur plus ancienne** → 409
+  `TRANSITION_OUT_OF_ORDER`, rejouable, jamais un 422.
+- **A11 abandonnée : `SELF_APPROVAL_FORBIDDEN` disparaît.** Seule la direction
+  décide (DIRECTOR, SUPER_ADMIN), et refuser l'auto-approbation aurait gelé
+  pour toujours les demandes du directeur. La propriété n'entre plus dans
+  décider ; le code reste reconnu en lecture.
+- **Droits (migration V140)** : `expense.decide` et `expense.reopen` →
+  DIRECTOR, SUPER_ADMIN ; `expense.pay` → ACCOUNTANT, DIRECTOR, SUPER_ADMIN
+  (**hypothèse non confirmée**) ; `expense.delete` retiré à ACCOUNTANT.
+- **Reprise des données** : la production compte 3 dépenses, toutes `PAID`.
+  V139.0.0 convertit les `UNPAID` en `APPROVED` avant toute descente ; les
+  `PAID` reçoivent une décision datée de leur saisie, V140 un message de
+  reprise. Le corollaire « `UNPAID` lu comme en attente » (§12) ne se
+  produira donc pas.
+
+Appliqué côté poste le même jour : décider offert sur sa propre demande
+(`ExpenseGestureOwnership.othersOnly` supprimé), `reason` retiré du corps de
+`/decision`, et le fil n'affiche plus de ligne vide sous un message au corps
+vide.
+
+### Ce qui reste, et qui ne dépend plus de nous
+
+- 🔴 **La livraison back C0→C3.** Tant qu'elle n'est pas déployée, la poussée
+  d'une dépense neuve sort du contrat servi (`enum [PAID, UNPAID]`) et meurt en
+  400 terminal, et les sept routes de geste n'existent pas. **Rien ne fusionne
+  dans `main` avant.**
+- 🔴 **Release conjointe, back et front v2 ensemble, mise à jour des tablettes
+  forcée.** La V1 de `main` lit tout statut autre que `PAID` comme non payé :
+  les demandes `PENDING` et `REFUSED` y entreraient dans les totaux, et sa
+  bascule payé / non payé serait ignorée puis écrasée au pull. Aucune fenêtre
+  entre les deux déploiements.
+- ⚠️ **`user_version` à incrémenter à la release** qui sème les trois droits
+  (cf. §15).
+- ⚠️ **`expense.pay` pour ACCOUNTANT** reste une hypothèse du back.
+
+## 14. Hors périmètre v2
+
+Seuils, paliers et délégation (une seule chaîne, la direction comme filet) ·
+notification de relance (A14 : le badge d'onglet reste le seul canal) ·
+référentiel fournisseurs, pièce jointe, budget par type, récurrence (la
+duplication manuelle en tient lieu) · câblage de la caisse (la source de fonds
+reste « envisagée » et ne débite rien) · clôture de période (une approbation
+tardive recompte un mois déjà lu : comptablement juste, et cela fait bouger un
+total passé) · **une file par agrégat au socle** : la garde de F31 est écrite dans
+le module, sur un signal métier, comme les quatre autres modules qui ont eu le
+même besoin ; un vrai ordonnancement par `aggregate_id` dans le moteur mérite son
+propre lot et profiterait aussi aux paiements et aux ventes.
+
+## 15. Pièges connus de la v2
+
+- **Le moteur d'outbox n'ordonne rien par agrégat** : il ne lit jamais
+  `aggregate_id`, poursuit après un `retry`, et le backoff retire une entrée de la
+  course pendant 1 à 256 s. Tout ordre est à la charge du handler.
+- **`blocked` n'est pas un statut** : c'est un `PENDING` repoussé de 5 s, sans
+  tentative consommée — il ne s'empoisonne donc jamais.
+- **Le palier va dans le bon escalier** : v49+ dans `tenant_migrations.dart`,
+  `if (upTo(52))` et non `if (oldVersion < 52)`.
+- **Dix tests hors module cassent** dès qu'on touche au socle : table figée des
+  permissions, migration du registre, ordre d'enregistrement des pulls, clés de
+  plan, placement du module dans le menu.
+- **Les `.arb` n'écrivent que l'apostrophe droite** (zéro apostrophe
+  typographique dans `app_fr.arb`) : un `find.text` qui cite une chaîne l10n doit
+  **copier la valeur du `.arb`**, sinon il ne trouve rien — et les deux
+  caractères se ressemblent dans le terminal.
+- **`dart format lib/l10n/` suit `flutter gen-l10n`**, sinon le diff enfle de
+  quinze cents lignes pour rien. Une clé à paramètre porte son bloc `@` juste
+  après elle.
+- **En test de widget, un cubit ne peint qu'à la seconde frame** : `pump()` deux
+  fois, ne jamais conclure sur la première.
+- **`intl` n'est pas une dépendance** : les dates passent par
+  `MaterialLocalizations`. Et `enterText` avec la valeur déjà présente ne
+  déclenche pas `onChanged` — le test serait vert pour une raison étrangère.
+- **Le motif de refus nomme des fournisseurs et des collègues** : aucun corps de
+  message dans un journal, ici comme côté serveur (`ExpenseMessage` et sa ligne
+  locale ont `stringify = false`).
+- 🔴 **Les permissions n'arrivent qu'au login.** Sans incrément de
+  `user_version` à la release, un poste **déjà connecté** ne verra aucun bouton
+  de décision — et gardera le bouton Supprimer que la comptabilité vient de
+  perdre, pour un 403 terminal. À faire au moment où le back sème
+  `expense.decide` / `expense.pay` / `expense.reopen`, pas avant.

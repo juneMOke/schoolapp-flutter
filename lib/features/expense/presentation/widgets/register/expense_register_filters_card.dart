@@ -11,9 +11,9 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_register_query.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_card.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_period_bar.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_status_badge.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/register/expense_type_chips.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 

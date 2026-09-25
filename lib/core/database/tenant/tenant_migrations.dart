@@ -36,6 +36,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(51)) {
     await _addAnnualMatriculationNumber(db);
   }
+  if (upTo(52)) {
+    await _expenseValidationCircuit(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -119,5 +122,75 @@ Future<void> _returnDeviceTables(DatabaseExecutor db) async {
   await db.execute(
     "DELETE FROM sync_meta WHERE resource = 'editique_cache_school' "
     "OR substr(resource, 1, 18) = 'editique_documents'",
+  );
+}
+
+/// v52 — la dépense devient une **demande** soumise à décision.
+///
+/// Six colonnes portent la décision, la pression du demandeur et la fraîcheur
+/// du fil ; une table neuve porte le fil lui-même. DDL inline, jamais lu du
+/// schéma vivant ; chaque ajout est gardé pour que le palier se rejoue sans
+/// dommage.
+///
+/// **Renommage défensif** des deux statuts de la V1 : le serveur a vérifié
+/// qu'aucune dépense n'existe en base (D11 close), mais un `count(*)` distant
+/// ne dit rien des bases locales des postes de développement — et une ligne
+/// au statut inconnu se lirait « en attente » sur un écran qui la croirait
+/// non décidée. `UNPAID` valait « engagée, reste à payer » : c'est
+/// `APPROVED`. `PAID` ne bouge pas.
+Future<void> _expenseValidationCircuit(DatabaseExecutor db) async {
+  const columns = {
+    'decided_by_id': 'TEXT',
+    'decided_by_name': 'TEXT',
+    'decided_at': 'TEXT',
+    'decision_reason': 'TEXT',
+    'reminder_count': 'INTEGER NOT NULL DEFAULT 0',
+    'last_message_at': 'TEXT',
+  };
+  final existing = {
+    for (final row in await db.rawQuery('PRAGMA table_info(expenses)'))
+      row['name'] as String,
+  };
+  // Table absente : rien à monter, fil compris — une base sans registre des
+  // dépenses n'a pas de demande à faire discuter.
+  if (existing.isEmpty) return;
+  for (final column in columns.entries) {
+    if (existing.contains(column.key)) continue;
+    await db.execute(
+      'ALTER TABLE expenses ADD COLUMN ${column.key} ${column.value}',
+    );
+  }
+  await db.execute(
+    "UPDATE expenses SET status = 'APPROVED' WHERE status = 'UNPAID'",
+  );
+  await _expenseThread(db);
+}
+
+/// Le fil d'une demande — table neuve du palier 52.
+///
+/// Append-only, uuid client : c'est le patron du fil de la Discipline, sans
+/// son défaut — la fraîcheur du fil vit dans `expenses.last_message_at`, pas
+/// dans l'horloge d'arbitrage du contenu, et un message ne fera donc jamais
+/// perdre une décision à l'arbitrage.
+///
+/// `IF NOT EXISTS` sur la table **et** sur son index : le palier se rejoue sur
+/// une base déjà montée, et une base créée à neuf porte déjà les deux.
+Future<void> _expenseThread(DatabaseExecutor db) async {
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS expense_messages (
+      id TEXT PRIMARY KEY,
+      school_id TEXT NOT NULL,
+      expense_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      act TEXT,
+      author_id TEXT,
+      author_name TEXT,
+      created_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC'
+    )
+  ''');
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_expense_messages_thread '
+    'ON expense_messages(expense_id, created_at)',
   );
 }

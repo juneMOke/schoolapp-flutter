@@ -13,16 +13,18 @@ void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
 
-  test('un menu propre : le tableau de bord, puis le registre', () {
+  test('un menu propre : le tableau de bord, le registre, puis la file', () {
     final menus = MenuFactory.createMenuItems(l10n, permissions: tousDroits);
     final depenses = menus.firstWhere(
       (menu) => menu.id == MenuConstants.expenseMenuId,
     );
+    // L'ordre dit le métier : on mesure, puis on écrit, puis on tranche.
     expect(depenses.subMenus.map((sub) => sub.id), [
       MenuConstants.expenseDashboardId,
       MenuConstants.expenseRegisterId,
+      MenuConstants.expenseQueueId,
     ]);
-    expect(depenses.subMenus.last.title, 'Frais de fonctionnement');
+    expect(depenses.subMenus.last.title, 'Validations');
   });
 
   test('Finances ne porte pas les dépenses', () {
@@ -44,6 +46,7 @@ void main() {
     expect(depenses.subModules.map((sub) => sub.target.subMenuId), [
       MenuConstants.expenseDashboardId,
       MenuConstants.expenseRegisterId,
+      MenuConstants.expenseQueueId,
     ]);
   });
 
@@ -60,7 +63,7 @@ void main() {
     );
   });
 
-  test('`expense.read` seul suffit à consulter les deux écrans', () {
+  test('`expense.read` seul suffit à consulter les trois écrans', () {
     final menus = MenuFactory.createMenuItems(
       l10n,
       permissions: [Perm.expenseRead.wire],
@@ -68,6 +71,6 @@ void main() {
     final depenses = menus.firstWhere(
       (menu) => menu.id == MenuConstants.expenseMenuId,
     );
-    expect(depenses.subMenus, hasLength(2));
+    expect(depenses.subMenus, hasLength(3));
   });
 }

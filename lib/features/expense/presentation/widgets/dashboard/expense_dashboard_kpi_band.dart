@@ -33,12 +33,12 @@ class ExpenseDashboardKpiBand extends StatelessWidget {
         expenseMoneyKpi(
           l10n: l10n,
           label: l10n.expenseKpiRemaining,
-          totals: view.unpaid,
+          totals: view.approvedToPay,
           accent: AppColors.feeStatusPartial,
           accentSoft: AppColors.feeStatusPartialSoft,
-          icon: Icons.schedule,
+          icon: Icons.verified_outlined,
           filledBackground: ExpenseDashboardTones.paveRestant,
-          subline: l10n.expenseKpiUnpaidCount(view.unpaid.count),
+          subline: l10n.expenseKpiApprovedCount(view.approvedToPay.count),
         ),
         EteeloKpiCardData(
           label: l10n.expenseKpiRecorded,

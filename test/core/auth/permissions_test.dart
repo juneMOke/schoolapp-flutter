@@ -34,6 +34,9 @@ void main() {
     Perm.expenseRead: 'expense.read',
     Perm.expenseWrite: 'expense.write',
     Perm.expenseDelete: 'expense.delete',
+    Perm.expenseDecide: 'expense.decide',
+    Perm.expensePay: 'expense.pay',
+    Perm.expenseReopen: 'expense.reopen',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -74,7 +77,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 58 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 61 permissions (v1.8 du catalogue serveur)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -105,7 +108,15 @@ void main() {
     // c'est pour cela que l'exigence n'est pas encore inscrite dans
     // `kGuardedWriteActions` : elle y ferait rougir, à raison, le test « aucune
     // exigence n'est hors de portée de tous ».
-    expect(Perm.values, hasLength(58));
+    //
+    // 58 → 61 : les trois gestes du circuit de validation des dépenses
+    // (`expense.decide`, `expense.pay`, `expense.reopen`). ⚠️ **Mêmes réserves
+    // que `finance.rate.override` ci-dessus, et pour la même raison** : le
+    // client les déclare avant que le serveur ne les sème (livraison back
+    // C0→C3). D'ici là aucun rôle ne les détient, décider reste inaccessible à
+    // toute l'école, et c'est pourquoi les trois `ModuleAccess` correspondants
+    // sont hors de `kGuardedWriteActions`.
+    expect(Perm.values, hasLength(61));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

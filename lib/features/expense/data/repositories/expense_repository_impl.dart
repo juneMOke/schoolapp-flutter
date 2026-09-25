@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -7,20 +8,29 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_gesture_columns.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/mappers/expense_mappers.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_payload.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_gesture_policy.dart';
 
 /// Le registre du poste : lecture locale, écriture locale **et** mise en file.
 ///
@@ -31,6 +41,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   final ExpenseReadDao _reader;
   final ExpenseWriteDao _writer;
   final ExpenseTypeDao _types;
+  final ExpenseMessageDao _messages;
   final CurrentUserContext _currentUser;
   final IdGenerator _ids;
   final ExchangeRateReader _rates;
@@ -47,6 +58,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     required ExpenseReadDao reader,
     required ExpenseWriteDao writer,
     required ExpenseTypeDao types,
+    required ExpenseMessageDao messages,
     required CurrentUserContext currentUser,
     required IdGenerator ids,
     required ExchangeRateReader rates,
@@ -56,6 +68,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }) : _reader = reader,
        _writer = writer,
        _types = types,
+       _messages = messages,
        _currentUser = currentUser,
        _ids = ids,
        _rates = rates,
@@ -93,6 +106,105 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    try {
+      final rows = await _messages.threadFor(expenseId, schoolId: schoolId);
+      // Un message dont l'horloge est illisible est écarté plutôt que placé au
+      // hasard : le fil se lit dans l'ordre ou ne se lit pas.
+      return Right([for (final row in rows) ?row.toEntity()]);
+    } catch (e) {
+      return Left(StorageFailure('Fil local illisible : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> applyGesture(
+    Expense expense,
+    ExpenseGesture gesture, {
+    String note = '',
+    String? actorName,
+  }) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    final actorId = _currentUser.uid;
+    if (actorId == null) return const Left(_noAgent);
+    final body = note.trim();
+    // Le miroir local des deux refus que le serveur oppose (`REASON_REQUIRED`,
+    // et un commentaire vide qui n'est pas un commentaire). Les attraper ici
+    // évite de fabriquer un geste qui mourrait terminal à l'accusé.
+    if (body.isEmpty &&
+        (gesture.requiresNote || gesture == ExpenseGesture.comment)) {
+      return const Left(_noReason);
+    }
+    try {
+      // La demande passée peut dater : un pull ou une décision prise sur ce
+      // poste a pu la déplacer depuis que l'écran l'a lue. C'est la ligne
+      // relue qui juge, jamais la copie de l'appelant.
+      final current = (await _reader.find(expense.id))?.toEntity();
+      if (current == null) {
+        return const Left(NotFoundFailure('Dépense inconnue'));
+      }
+      if (!ExpenseGesturePolicy.allows(gesture, current, accountId: actorId)) {
+        return const Left(_staleGesture);
+      }
+      final now = _now();
+      final messageId = _ids.newId();
+      await _messages.appendGesture(
+        ExpenseMessageLocalModel.at(
+          now,
+          id: messageId,
+          schoolId: schoolId,
+          expenseId: current.id,
+          body: body,
+          act: gesture.act,
+          authorId: actorId,
+          authorName: actorName,
+        ),
+        columns: ExpenseGestureColumns.of(
+          gesture,
+          actorId: actorId,
+          actorName: actorName,
+          at: now,
+          reason: body,
+        ),
+        bumpsReminder: gesture == ExpenseGesture.remind,
+        entry: OutboxEntry(
+          id: ExpenseWriteDao.gestureEntryId(messageId),
+          aggregateType: ExpenseWriteDao.gestureAggregateType,
+          aggregateId: current.id,
+          operation: OutboxOperation.create,
+          payload: jsonEncode(
+            ExpenseGesturePayload(
+              expenseId: current.id,
+              gesture: gesture,
+              messageId: messageId,
+              body: body,
+              decidedAt: now.toUtc().toIso8601String(),
+              // F32 — seul le renvoi porte l'horloge du contenu qu'il croit en
+              // place : le serveur refuse tant que sa copie est plus ancienne,
+              // et le validateur ne relit jamais le texte qui l'avait fait
+              // refuser.
+              expectedClientUpdatedAt: gesture == ExpenseGesture.resubmit
+                  ? current.clientUpdatedAt.toUtc().toIso8601String()
+                  : null,
+              authorId: actorId,
+            ).toJson(),
+          ),
+          // Sans école, l'entrée deviendrait inéligible au flush scopé.
+          schoolId: schoolId,
+          createdAt: now.millisecondsSinceEpoch,
+        ),
+      );
+      _flush();
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure('Geste non enregistré : $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Expense>> save(ExpenseDraft draft) async {
     final schoolId = _currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
@@ -109,8 +221,12 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         description: _blankToNull(draft.description),
         amountInCents: draft.amountInCents,
         currency: CurrencyCode.normalize(draft.currency),
-        status: draft.status,
-        paidOn: _paidOnFor(draft, previous, now),
+        // Le circuit n'est pas une saisie : une demande neuve naît en attente,
+        // une modification garde l'état que le serveur a arrêté (D8, F20).
+        status: previous == null
+            ? ExpenseStatus.pending
+            : ExpenseStatus.fromWire(previous.status),
+        paidOn: ExpenseDay.tryParse(previous?.paidOn),
         expenseDate: ExpenseDay.of(draft.expenseDate),
         supplier: _blankToNull(draft.supplier),
         fundingSource: draft.fundingSource,
@@ -138,12 +254,6 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       return Left(StorageFailure('Dépense non enregistrée : $e'));
     }
   }
-
-  @override
-  Future<Either<Failure, Expense>> setStatus(
-    Expense expense,
-    ExpenseStatus status,
-  ) => save(expense.toDraft().withStatus(status));
 
   @override
   Future<Either<Failure, Unit>> withdraw(Expense expense) =>
@@ -199,27 +309,23 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     }
   }
 
-  /// Date de règlement (A2) : la date de la dépense si elle est **créée**
-  /// payée, aujourd'hui quand elle le devient, inchangée quand elle le reste.
-  static DateTime? _paidOnFor(
-    ExpenseDraft draft,
-    ExpenseLocalModel? previous,
-    DateTime now,
-  ) {
-    if (draft.status != ExpenseStatus.paid) return null;
-    final kept = ExpenseDay.tryParse(previous?.paidOn);
-    if (previous != null &&
-        previous.status == ExpenseStatus.paid.wireValue &&
-        kept != null) {
-      return kept;
-    }
-    return previous == null
-        ? ExpenseDay.of(draft.expenseDate)
-        : ExpenseDay.of(now);
-  }
-
   static const _noAgent = ValidationFailure(
     'Aucun utilisateur courant : dépense non enregistrée.',
+  );
+
+  static const _noReason = ValidationFailure(
+    'Ce geste demande un motif : dépense inchangée.',
+  );
+
+  /// L'état a bougé sous l'écran — le geste n'est plus celui qu'on croyait
+  /// faire. Refuser est la seule conduite sûre : l'appliquer quand même
+  /// écrirait une transition absente de la table.
+  ///
+  /// **Un conflit, pas une saisie invalide** : rien n'est à corriger dans ce
+  /// que l'agent a tapé, et « Réessayez » ne l'aiderait pas. L'écran doit le
+  /// dire autrement, et c'est le type qui le lui permet.
+  static const _staleGesture = ConflictFailure(
+    'La demande a changé d\'état : geste abandonné.',
   );
 
   /// Le moteur ne lève jamais, et se tait hors ligne.

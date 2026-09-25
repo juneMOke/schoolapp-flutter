@@ -762,7 +762,12 @@ class AppConstants {
   // matricule de l'élève pour CETTE année, calculé serveur. Il appartient à
   // l'INSCRIPTION, pas à l'élève : un élève à deux années en a deux. Palier
   // d'école, donc déclaré dans `migrateTenantDatabase`.
-  static const int offlineDbSchemaVersion = 51;
+  // v52 (2026-09-23, renuméroté au rebase du 2026-09-25) : le circuit de
+  // validation des dépenses — `expenses` gagne la décision (`decided_*`,
+  // `decision_reason`), le compteur de relances et la fraîcheur du fil. La
+  // reprise des lignes serveur est faite côté back (V139/V140) ; ici, seulement
+  // le renommage défensif `UNPAID` → `APPROVED` des bases locales.
+  static const int offlineDbSchemaVersion = 52;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -947,6 +952,33 @@ class AppConstants {
   /// donne pas le droit de retirer.
   static const String syncExpenseDeletionEndpoint =
       '/api/v1/sync/expenses/{expenseId}/deletion';
+
+  /// Les **sept routes de geste** du circuit de validation (v2).
+  ///
+  /// Toutes sur `POST …/{expenseId}/<geste>`, toutes idempotentes par l'uuid
+  /// du message qu'elles portent : un rejeu rend 200, l'état canonique, et ne
+  /// fait pas monter le compteur de relances.
+  ///
+  /// Chacune a sa propre garde côté serveur — c'est pourquoi le geste est
+  /// dans le CHEMIN et non dans un champ du corps : une route unique ferait
+  /// dépendre l'autorisation d'une valeur postée.
+  static const String syncExpenseDecisionEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/decision';
+  static const String syncExpensePaymentEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/payment';
+  static const String syncExpenseReopenEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/reopen';
+  static const String syncExpenseRetractionEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/retraction';
+  static const String syncExpenseResubmitEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/resubmit';
+  static const String syncExpenseReminderEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/reminder';
+
+  /// Commenter — la seule route du circuit **sans** contrôle de propriété :
+  /// c'est ce qui permet au validateur d'écrire dans le fil d'un collègue.
+  static const String syncExpenseMessagesEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/messages';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

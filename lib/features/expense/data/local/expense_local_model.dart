@@ -19,6 +19,12 @@ class ExpenseLocalModel {
   final String currency;
   final String status;
   final String? paidOn;
+  final String? decidedById;
+  final String? decidedByName;
+  final String? decidedAt;
+  final String? decisionReason;
+  final int reminderCount;
+  final String? lastMessageAt;
   final String expenseDate;
   final String? supplier;
   final String fundingSource;
@@ -49,6 +55,12 @@ class ExpenseLocalModel {
     required this.currency,
     required this.status,
     this.paidOn,
+    this.decidedById,
+    this.decidedByName,
+    this.decidedAt,
+    this.decisionReason,
+    this.reminderCount = 0,
+    this.lastMessageAt,
     required this.expenseDate,
     this.supplier,
     this.fundingSource = 'CASH',
@@ -78,6 +90,12 @@ class ExpenseLocalModel {
         currency: (map['currency'] as String?) ?? '',
         status: (map['status'] as String?) ?? '',
         paidOn: map['paid_on'] as String?,
+        decidedById: map['decided_by_id'] as String?,
+        decidedByName: map['decided_by_name'] as String?,
+        decidedAt: map['decided_at'] as String?,
+        decisionReason: map['decision_reason'] as String?,
+        reminderCount: (map['reminder_count'] as num?)?.toInt() ?? 0,
+        lastMessageAt: map['last_message_at'] as String?,
         expenseDate: (map['expense_date'] as String?) ?? '',
         supplier: map['supplier'] as String?,
         fundingSource: (map['funding_source'] as String?) ?? 'CASH',
@@ -98,6 +116,10 @@ class ExpenseLocalModel {
   /// Ligne locale d'une saisie : tout ce que le serveur attribue reste tel
   /// que [previous] le portait (numéro, agent, version), l'état de synchro
   /// passe « en attente ».
+  ///
+  /// **Le circuit ne se saisit pas** (D8) : statut, date de règlement,
+  /// décision et relances viennent de [previous] — une demande neuve naît en
+  /// attente. Une modification de contenu ne les déplace jamais.
   factory ExpenseLocalModel.forLocalWrite(
     Expense expense, {
     required String schoolId,
@@ -112,8 +134,14 @@ class ExpenseLocalModel {
     description: expense.description,
     amountInCents: expense.amountInCents,
     currency: expense.currency,
-    status: expense.status.wireValue,
-    paidOn: expense.paidOn == null ? null : ExpenseDay.format(expense.paidOn!),
+    status: previous?.status ?? ExpenseStatus.pending.wireValue,
+    paidOn: previous?.paidOn,
+    decidedById: previous?.decidedById,
+    decidedByName: previous?.decidedByName,
+    decidedAt: previous?.decidedAt,
+    decisionReason: previous?.decisionReason,
+    reminderCount: previous?.reminderCount ?? 0,
+    lastMessageAt: previous?.lastMessageAt,
     expenseDate: ExpenseDay.format(expense.expenseDate),
     supplier: expense.supplier,
     fundingSource: expense.fundingSource.wireValue,
@@ -140,6 +168,12 @@ class ExpenseLocalModel {
     'currency': currency,
     'status': status,
     'paid_on': paidOn,
+    'decided_by_id': decidedById,
+    'decided_by_name': decidedByName,
+    'decided_at': decidedAt,
+    'decision_reason': decisionReason,
+    'reminder_count': reminderCount,
+    'last_message_at': lastMessageAt,
     'expense_date': expenseDate,
     'supplier': supplier,
     'funding_source': fundingSource,
@@ -161,14 +195,16 @@ class ExpenseLocalModel {
   /// l'état de synchro, rien d'autre. Numéro, version, retrait et agent
   /// restent ceux que la base porte au moment de l'écriture — un accusé
   /// appliqué entre la lecture et l'écriture n'est jamais défait.
+  ///
+  /// **Ni le statut ni la décision n'y figurent** (D8) : une correction de
+  /// contenu ne décide de rien, et le retour en attente est un geste à part.
+  /// Les y remettre rendrait le circuit contournable par le formulaire.
   Map<String, Object?> toLocalWriteMap() => <String, Object?>{
     'type_id': typeId,
     'title': title,
     'description': description,
     'amount_in_cents': amountInCents,
     'currency': currency,
-    'status': status,
-    'paid_on': paidOn,
     'expense_date': expenseDate,
     'supplier': supplier,
     'funding_source': fundingSource,
@@ -194,6 +230,14 @@ class ExpenseLocalModel {
       currency: currency,
       status: ExpenseStatus.fromWire(status),
       paidOn: ExpenseDay.tryParse(paidOn),
+      decidedById: decidedById,
+      decidedByName: decidedByName,
+      decidedAt: decidedAt == null ? null : DateTime.tryParse(decidedAt!),
+      decisionReason: decisionReason,
+      reminderCount: reminderCount,
+      lastMessageAt: lastMessageAt == null
+          ? null
+          : DateTime.tryParse(lastMessageAt!),
       expenseDate: day,
       supplier: supplier,
       fundingSource: ExpenseFundingSource.fromWire(fundingSource),

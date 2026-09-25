@@ -3,23 +3,19 @@ import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les deux gestes à portée de main d'une ligne (spec §6) : basculer le
-/// statut et dupliquer. Masqués sans `expense.write` — un geste d'outbox
-/// offert sans le droit mourrait plus tard, en silence (403 terminal).
+/// Le geste à portée de main d'une ligne : dupliquer. Masqué sans
+/// `expense.write` — un geste d'outbox offert sans le droit mourrait plus
+/// tard, en silence (403 terminal).
+///
+/// La bascule payée / non payée de la V1 a disparu avec le circuit : décider
+/// n'est plus un clic de liste, et les gestes de décision arrivent au lot
+/// suivant, avec leur permission et leur message de fil.
 class ExpenseRowActions extends StatelessWidget {
-  final Expense expense;
-  final VoidCallback onToggle;
   final VoidCallback onDuplicate;
 
-  const ExpenseRowActions({
-    super.key,
-    required this.expense,
-    required this.onToggle,
-    required this.onDuplicate,
-  });
+  const ExpenseRowActions({super.key, required this.onDuplicate});
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +25,6 @@ class ExpenseRowActions extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ExpenseRowAction(
-            // L'icône montre l'ACTION, pas l'état — l'état est dans le badge.
-            icon: expense.isPaid ? Icons.undo : Icons.check,
-            tooltip: expense.isPaid
-                ? l10n.expenseActionMarkUnpaid
-                : l10n.expenseActionMarkPaid,
-            onPressed: onToggle,
-          ),
-          const SizedBox(width: AppDimensions.expenseInlineGap),
           ExpenseRowAction(
             icon: Icons.copy_outlined,
             tooltip: l10n.expenseActionDuplicate,

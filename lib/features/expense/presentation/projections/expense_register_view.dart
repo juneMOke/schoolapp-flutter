@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
-import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
@@ -21,9 +20,10 @@ class ExpenseRegisterView extends Equatable {
   /// Les lignes retenues, dans l'ordre du registre.
   final List<Expense> rows;
 
+  /// **Les engagements fermes de la sélection**, et eux seuls : une demande
+  /// en attente, refusée ou retirée n'est pas de l'argent sorti (spec §16
+  /// règle 3). Le registre ne totalise rien d'autre.
   final ExpenseTotals total;
-  final ExpenseTotals paid;
-  final ExpenseTotals unpaid;
 
   /// Les groupes de jour des [limit] premières lignes seulement : un palier
   /// « 40 de plus » ne recalcule jamais les groupes déjà rendus.
@@ -41,8 +41,6 @@ class ExpenseRegisterView extends Equatable {
     required this.typeCounts,
     required this.rows,
     required this.total,
-    required this.paid,
-    required this.unpaid,
     required this.groups,
     required this.dayTotals,
     required this.remaining,
@@ -64,23 +62,18 @@ class ExpenseRegisterView extends Equatable {
     final rows = ExpenseRegisterQuery.apply(inRange, query, snapshot.typesById);
     final reader = snapshot.usdReader;
     final shown = rows.length <= limit ? rows : rows.sublist(0, limit);
+    // Les en-têtes de jour annoncent ce qui est « engagé » : seules les
+    // demandes fermes y entrent, sur TOUTES les lignes retenues — le palier
+    // coupe une journée, jamais ce que son en-tête annonce.
     final byDay = <String, List<Expense>>{};
     for (final expense in rows) {
-      (byDay[expense.dayKey] ??= []).add(expense);
+      if (expense.isFirm) (byDay[expense.dayKey] ??= []).add(expense);
     }
     return ExpenseRegisterView(
       range: range,
       typeCounts: ExpenseRegisterQuery.countByType(inRange),
       rows: rows,
-      total: ExpenseTotals.of(rows, reader),
-      paid: ExpenseTotals.of(
-        rows.where((e) => e.status == ExpenseStatus.paid),
-        reader,
-      ),
-      unpaid: ExpenseTotals.of(
-        rows.where((e) => e.status == ExpenseStatus.unpaid),
-        reader,
-      ),
+      total: ExpenseTotals.of(rows.where((e) => e.isFirm), reader),
       groups: ExpenseRegisterQuery.groupByDay(shown),
       dayTotals: {
         for (final day in byDay.entries)
@@ -98,8 +91,6 @@ class ExpenseRegisterView extends Equatable {
     typeCounts,
     rows,
     total,
-    paid,
-    unpaid,
     groups,
     dayTotals,
     remaining,

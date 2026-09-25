@@ -6704,6 +6704,7 @@
   "feeControlEmptyBilling": "Ouvrir la facturation",
   "menuExpenses": "Dépenses",
   "subMenuExpenseRegister": "Frais de fonctionnement",
+  "subMenuExpenseQueue": "Validations",
   "accueilModuleExpenseDescription": "Ce que l'école décaisse : le registre des frais de fonctionnement et son tableau de bord.",
   "expenseNewAction": "Nouvelle dépense",
   "expenseOpenRegister": "Ouvrir le registre",
@@ -6715,8 +6716,11 @@
   "expenseNumberPending": "N° en attente",
   "expenseStatusTitle": "Statut",
   "expenseStatusAll": "Toutes",
+  "expenseStatusPending": "En attente",
+  "expenseStatusApproved": "Approuvée",
   "expenseStatusPaid": "Payée",
-  "expenseStatusUnpaid": "Non payée",
+  "expenseStatusRefused": "Refusée",
+  "expenseStatusRetracted": "Retirée",
   "expenseSyncRejected": "À corriger",
   "expenseTypesTitle": "Types de dépense",
   "expenseTypesShowAll": "tout afficher",
@@ -6791,35 +6795,14 @@
       }
     }
   },
-  "expenseKpiSelectionTotal": "Total de la sélection",
-  "expenseKpiPaid": "Déjà payé",
-  "expenseKpiUnpaid": "Non payé",
-  "expenseKpiShown": "Dépenses affichées",
-  "expenseKpiShownA11y": "{count, plural, =0{Aucune dépense affichée} =1{1 dépense affichée} other{{count} dépenses affichées}}",
-  "@expenseKpiShownA11y": {
+  "expenseKpiApprovedCount": "{count, plural, =0{aucune dépense accordée} =1{1 dépense accordée} other{{count} dépenses accordées}}",
+  "@expenseKpiApprovedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "num"
       }
     }
   },
-  "expenseKpiPaidCount": "{count, plural, =0{aucune dépense réglée} =1{1 dépense réglée} other{{count} dépenses réglées}}",
-  "@expenseKpiPaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiUnpaidCount": "{count, plural, =0{aucune dépense en attente} =1{1 dépense en attente} other{{count} dépenses en attente}}",
-  "@expenseKpiUnpaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiNoRate": "Aucun taux du jour publié : montants par devise",
   "expenseKpiTotalSpent": "Total dépensé",
   "expenseKpiRemaining": "Restant à payer",
   "expenseKpiRecorded": "Dépenses enregistrées",
@@ -6952,41 +6935,20 @@
       }
     }
   },
-  "expenseActionMarkPaid": "Marquer payée",
-  "expenseActionMarkUnpaid": "Repasser en non payée",
   "expenseActionDuplicate": "Dupliquer",
   "expenseActionEdit": "Modifier",
   "expenseActionDelete": "Supprimer",
   "expenseDialogClose": "Fermer",
-  "expenseToastCreated": "Dépense enregistrée · {amount} ({status, select, PAID{payée} other{non payée}})",
+  "expenseToastCreated": "Demande déposée · {amount} — en attente de décision.",
   "@expenseToastCreated": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      },
-      "status": {
         "type": "String"
       }
     }
   },
   "expenseToastUpdated": "Dépense {name} modifiée.",
   "@expenseToastUpdated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedPaid": "{name} · marquée payée.",
-  "@expenseToastMarkedPaid": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedUnpaid": "{name} · repassée en non payée.",
-  "@expenseToastMarkedUnpaid": {
     "placeholders": {
       "name": {
         "type": "String"
@@ -7045,6 +7007,139 @@
       }
     }
   },
+  "expenseChainRequested": "Demandée",
+  "expenseChainAwaiting": "en attente",
+  "expenseChainNeverPaid": "ne sera pas payée",
+  "expenseSituationDecide": "À vous de décider : approuver ou refuser avec motif.",
+  "expenseSituationAwaitingDecision": "En attente d'une décision du validateur.",
+  "expenseRefusalReasonBy": "Motif du refus — {decider}",
+  "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
+  "expenseGestureApprove": "Approuver",
+  "expenseGestureRefuse": "Refuser",
+  "expenseGesturePay": "Marquer payée",
+  "expenseGestureRetract": "Retirer",
+  "expenseGestureResubmit": "Corriger et renvoyer",
+  "expenseGestureReopen": "Annuler la décision",
+  "expenseGestureRemind": "Relancer",
+  "expenseGestureComment": "Envoyer",
+  "expenseRefusalTitle": "Refuser la demande",
+  "expenseRefusalReasonLabel": "Motif du refus (obligatoire)",
+  "expenseRefusalReasonHint": "Dites au demandeur ce qui manque ou ce qui bloque — il pourra corriger et renvoyer.",
+  "expenseRefusalReasonMissing": "Un refus sans motif laisse le demandeur sans issue.",
+  "expenseRefusalConfirm": "Confirmer le refus",
+  "expenseRefusalSuggestionQuote": "Devis manquant : joindre au moins deux offres avant de réengager la dépense.",
+  "expenseRefusalSuggestionAmount": "Montant trop élevé pour ce poste ce mois-ci — à replanifier au trimestre suivant.",
+  "expenseRefusalSuggestionDuplicate": "Dépense déjà couverte par une ligne enregistrée la semaine dernière.",
+  "expenseToastApproved": "Demande {name} approuvée.",
+  "@expenseToastApproved": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRefused": "Demande {name} refusée.",
+  "@expenseToastRefused": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastPaid": "Dépense {name} marquée payée.",
+  "@expenseToastPaid": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRetracted": "Demande {name} retirée.",
+  "@expenseToastRetracted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastResubmitted": "Demande {name} renvoyée en attente de décision.",
+  "@expenseToastResubmitted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReopened": "Décision annulée : {name} repart en attente.",
+  "@expenseToastReopened": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReminded": "Relance envoyée pour {name}.",
+  "@expenseToastReminded": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastCommented": "Message ajouté au fil de {name}.",
+  "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
+  "expenseGestureRefused": "Ce geste n'est plus possible sur cette demande : son état a changé.",
+  "expenseThreadComposerLabel": "Ajouter un commentaire",
+  "expenseThreadComposerHint": "Une précision, une question au demandeur, une consigne de paiement…",
+  "expenseThreadPending": "en attente d'envoi",
+  "expenseThreadSendFailed": "Le message n'a pas pu être écrit sur cet appareil. Réessayez.",
+  "expenseQueueTitle": "Validations des demandes",
+  "expenseQueueSubtitle": "La file des demandes en attente, de la plus ancienne à la plus récente.",
+  "expenseQueueWaitingToday": "aujourd'hui",
+  "expenseQueueWaitingDays": "{count, plural, =1{depuis 1 jour} other{depuis {count} jours}}",
+  "@expenseQueueWaitingDays": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueReminderCount": "{count, plural, =1{1 relance} other{{count} relances}}",
+  "@expenseQueueReminderCount": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueDepositedOn": "Déposée le {date}",
+  "@expenseQueueDepositedOn": {"placeholders": {"date": {"type": "String"}}},
+  "expenseQueueYou": "vous",
+  "expenseQueueMessageCount": "{count, plural, =1{1 msg} other{{count} msg}}",
+  "@expenseQueueMessageCount": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueSelectAll": "Tout sélectionner",
+  "expenseQueueSortTitle": "Trier par",
+  "expenseQueueSortAge": "Ancienneté",
+  "expenseQueueSortAmount": "Montant",
+  "expenseQueueSortRequester": "Demandeur",
+  "expenseQueueOrderNote": "Le retard se voit en premier : la file s'ouvre sur la demande qui attend depuis le plus longtemps.",
+  "expenseQueueReadOnlyNote": "Vous voyez la file mais ne décidez pas. Sur vos propres demandes, vous pouvez encore corriger, retirer ou relancer.",
+  "expenseQueueStatPending": "En attente de décision",
+  "expenseQueueStatPendingSub": "{count, plural, =0{aucune demande} =1{1 demande — rien n'est engagé tant que rien n'est décidé} other{{count} demandes — rien n'est engagé tant que rien n'est décidé}}",
+  "@expenseQueueStatPendingSub": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueStatOverdue": "Attendent depuis 5 jours ou plus",
+  "expenseQueueStatOverdueSub": "la plus ancienne attend depuis {days} jours",
+  "@expenseQueueStatOverdueSub": {"placeholders": {"days": {"type": "int"}}},
+  "expenseQueueStatNoOverdue": "aucun retard",
+  "expenseQueueStatReminded": "Demandes relancées",
+  "expenseQueueStatRemindedSub": "le demandeur attend une réponse",
+  "expenseQueueStatNoReminder": "aucune relance",
+  "expenseQueueStatApproved": "Approuvées, à payer",
+  "expenseQueueStatApprovedSub": "{amount} déjà accordés",
+  "@expenseQueueStatApprovedSub": {"placeholders": {"amount": {"type": "String"}}},
+  "expenseQueueEmptyTitle": "La file est vide",
+  "expenseQueueEmptyMessage": "Aucune demande n'attend de décision : tout ce qui a été déposé a été tranché.",
+  "expenseQueueEmptyWithApproved": "Aucune demande n'attend de décision. {count, plural, =1{1 dépense approuvée reste} other{{count} dépenses approuvées restent}} à payer.",
+  "@expenseQueueEmptyWithApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueOpenRequest": "Ouvrir la demande",
+  "expenseQueueOpenRegister": "Ouvrir le registre",
+  "expenseQueueSelected": "{count, plural, =1{1 demande sélectionnée} other{{count} demandes sélectionnées}}",
+  "@expenseQueueSelected": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueDeselect": "Désélectionner",
+  "expenseQueueApproveBatch": "Approuver en lot",
+  "expenseQueueRefuseBatch": "Refuser en lot",
+  "expenseQueueBatchReasonLabel": "{count, plural, =1{Motif du refus — 1 demande} other{Motif commun du refus — {count} demandes}}",
+  "@expenseQueueBatchReasonLabel": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueBatchReasonHint": "Le même motif sera inscrit dans chaque fil, avec votre nom et la date.",
+  "expenseQueueBatchConfirm": "{count, plural, =1{Confirmer le refus} other{Confirmer le refus de {count} demandes}}",
+  "@expenseQueueBatchConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueBatchDone": "{count, plural, =1{1 demande traitée} other{{count} demandes traitées}} · {amount}",
+  "@expenseQueueBatchDone": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}}},
+  "expenseQueueBatchPartial": "{done, plural, =1{1 demande traitée} other{{done} demandes traitées}} — {failed, plural, =1{1 n'a pas pu l'être} other{{failed} n'ont pas pu l'être}}.",
+  "@expenseQueueBatchPartial": {"placeholders": {"done": {"type": "int"}, "failed": {"type": "int"}}},
+  "expenseQueueBatchNone": "Aucune demande n'a pu être traitée : leur état a changé.",
+  "expenseQueueApprovedTitle": "Approuvées, en attente de paiement",
+  "expenseQueueApprovedSubtitle": "{count, plural, =1{1 dépense accordée} other{{count} dépenses accordées}} — le paiement se constate ici ou depuis la fiche.",
+  "@expenseQueueApprovedSubtitle": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueApprovedOn": "approuvée le {date} par {name}",
+  "@expenseQueueApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "expenseQueueApprovedUndated": "approuvée — décideur non encore connu de ce poste",
+  "expenseQueueSeeAllApproved": "Voir les {count} dépenses approuvées dans le registre",
+  "@expenseQueueSeeAllApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseRejectedAlreadyDecided": "un collègue avait déjà tranché",
+  "expenseRejectedSelfApproval": "on n'approuve pas sa propre demande",
+  "expenseRejectedNotOwner": "ce geste est réservé au demandeur",
+  "expenseRejectedReasonRequired": "un refus exige son motif",
+  "expenseRejectedOutOfOrder": "un geste antérieur n'est pas encore parti",
+  "expenseDetailGestureRejected": "Geste refusé par le serveur : {reason}. La demande est restée telle qu'elle était.",
+  "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
+  "expenseThreadRejected": "non envoyé",
+  "expenseThreadTitle": "Fil de la demande",
+  "expenseThreadCount": "{count, plural, =0{aucun message} =1{1 message} other{{count} messages}}",
+  "@expenseThreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseThreadEmpty": "Aucun message pour l'instant — chaque décision s'inscrira ici.",
+  "expenseThreadUnreadable": "Le fil n'a pas pu être lu sur ce poste.",
+  "expenseActDeposit": "Demande déposée",
+  "expenseActReminder": "Relance",
+  "expenseActApproval": "Approbation",
+  "expenseActRefusal": "Refus",
+  "expenseActPayment": "Paiement constaté",
+  "expenseActRetraction": "Demande retirée",
+  "expenseActReopening": "Décision annulée",
+  "expenseActCorrection": "Demande corrigée et renvoyée",
+  "expenseActEdit": "Demande modifiée",
   "expenseFormCreateTitle": "Enregistrer une dépense de fonctionnement",
   "expenseFormCreateSubtitle": "Ce que l'école a décaissé : un intitulé, un type, un montant, un statut.",
   "expenseFormEditEyebrow": "Modifier la dépense",

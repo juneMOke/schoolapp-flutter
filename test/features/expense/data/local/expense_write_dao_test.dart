@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -106,6 +109,43 @@ void main() {
       final r = await row();
       expect(r.deletedAt, _sent);
       expect(r.withdrawalPendingAt, isNull);
+    });
+
+    test('neutralise AUSSI les gestes du circuit encore en file', () async {
+      // Ils sont identifiés par l'uuid de leur message, donc innombrables :
+      // les laisser partir vers une dépense que le serveur ne connaîtra
+      // jamais ferait un 404 par geste, tous terminaux.
+      final rejected = _model(syncStatus: 'SYNC_ERROR');
+      await dao.saveExpense(
+        row: rejected,
+        request: _request(rejected),
+        nowMs: 1,
+      );
+      await OutboxDao(db).enqueue(
+        OutboxEntry(
+          id: ExpenseWriteDao.gestureEntryId('m-1'),
+          aggregateType: ExpenseWriteDao.gestureAggregateType,
+          aggregateId: 'e-1',
+          operation: OutboxOperation.create,
+          payload: '{}',
+          schoolId: 'school-1',
+          createdAt: 2,
+        ),
+      );
+
+      final settled = await dao.setLocalOnlyWithdrawal(
+        expenseId: 'e-1',
+        deletedAt: _sent,
+        nowMs: 3,
+      );
+
+      expect(settled, isTrue);
+      final geste = (await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [ExpenseWriteDao.gestureAggregateType],
+      )).single;
+      expect(geste['status'], 'ACKED');
     });
 
     test('accusée entre-temps : rien n’est écrit, la file décidera', () async {

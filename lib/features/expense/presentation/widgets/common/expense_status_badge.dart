@@ -4,10 +4,15 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_status_visuals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Payée / Non payée — une icône et un mot en plus de la teinte : la couleur
-/// ne porte jamais seule une information.
+/// Les cinq états du circuit — une icône et un mot en plus de la teinte : la
+/// couleur ne porte jamais seule une information.
+///
+/// Les teintes viennent de `expenseStatusVisuals`, partagé avec la chaîne de
+/// validation.
 class ExpenseStatusBadge extends StatelessWidget {
   final ExpenseStatus status;
   final bool small;
@@ -21,15 +26,13 @@ class ExpenseStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final paid = status == ExpenseStatus.paid;
+    final visuals = expenseStatusVisuals(status);
     return _Pill(
-      icon: paid ? Icons.check_circle_outline : Icons.schedule,
+      icon: visuals.icon,
       label: expenseStatusLabel(l10n, status),
-      color: paid ? AppColors.feeStatusPaid : AppColors.feeStatusPartial,
-      soft: paid ? AppColors.feeStatusPaidSoft : AppColors.feeStatusPartialSoft,
-      border: paid
-          ? AppColors.feeStatusPaidBorder
-          : AppColors.feeStatusPartialBorder,
+      color: visuals.color,
+      soft: visuals.soft,
+      border: visuals.border,
       small: small,
     );
   }
@@ -70,12 +73,6 @@ class ExpenseSyncBadge extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-
-String expenseStatusLabel(AppLocalizations l10n, ExpenseStatus status) =>
-    switch (status) {
-      ExpenseStatus.paid => l10n.expenseStatusPaid,
-      ExpenseStatus.unpaid => l10n.expenseStatusUnpaid,
-    };
 
 class _Pill extends StatelessWidget {
   final IconData icon;

@@ -1,9 +1,9 @@
 /// Codes machine (`detailCode`) des refus du registre des dépenses
 /// (`ExpenseErrorCodes` côté serveur).
 ///
-/// **Aucun n'est récupérable par un rejeu** : la dépense se corrige sur le
-/// poste (A4 — la ligne porte son motif). C'est pourquoi le handler les classe
-/// tous en échec terminal plutôt qu'en tentative.
+/// Ceux de la **V1** ne sont récupérables par aucun rejeu : la dépense se
+/// corrige sur le poste (A4 — la ligne porte son motif). Ceux du **circuit**
+/// se lisent un par un : deux 409 y portent des conduites opposées (F34).
 abstract final class ExpenseErrorCodes {
   /// Le type désigné n'existe pas pour cette école.
   static const String unknownExpenseType = 'UNKNOWN_EXPENSE_TYPE';
@@ -17,4 +17,48 @@ abstract final class ExpenseErrorCodes {
   /// Dépense purgée physiquement côté serveur (410) : le poste efface sa
   /// ligne au lieu de la rejouer.
   static const String aggregateTombstoned = 'AGGREGATE_TOMBSTONED';
+
+  // ── Circuit de validation (v2) ──────────────────────────────────────────
+
+  /// **409** — un collègue a tranché avant nous.
+  ///
+  /// Le poste se **réaligne** sur l'état canonique renvoyé, fil compris, et
+  /// nomme le décideur. Il ne rejoue **jamais** : rejouer réécrirait la
+  /// décision d'un autre.
+  static const String decisionAlreadyTaken = 'DECISION_ALREADY_TAKEN';
+
+  /// **409** — le geste est arrivé avant son prédécesseur.
+  ///
+  /// Conduite **exactement inverse** de la précédente : le poste **rejoue**,
+  /// et ne réaligne rien — sa ligne est juste, c'est le serveur qui n'a pas
+  /// encore vu ce qui vient avant. Le serveur ne peut pas distinguer un geste
+  /// hors séquence d'un geste impossible (Q10), donc il n'oppose plus de 422
+  /// sur les routes de geste.
+  static const String transitionOutOfOrder = 'TRANSITION_OUT_OF_ORDER';
+
+  /// **422** — un refus sans motif laisse le demandeur sans issue.
+  static const String reasonRequired = 'REASON_REQUIRED';
+
+  /// **422** — on n'approuvait pas sa propre demande (A11). Abandonné le
+  /// 2026-09-25 : le serveur ne l'émet plus. Gardé en lecture, le
+  /// reconnaître ne coûte rien.
+  static const String selfApprovalForbidden = 'SELF_APPROVAL_FORBIDDEN';
+
+  /// **403** — le geste est réservé au demandeur (retirer, renvoyer,
+  /// relancer, modifier le contenu).
+  static const String notRequestOwner = 'NOT_REQUEST_OWNER';
+
+  /// Les refus qui viennent d'un **geste**, et non d'une saisie.
+  ///
+  /// La distinction se paie à deux endroits : l'écran ne conseille pas de
+  /// corriger une dépense à laquelle il n'y a rien à corriger, et un geste
+  /// réussi lève le « à corriger » qu'un geste précédent avait posé — là où
+  /// un refus de CONTENU attend, lui, une vraie correction.
+  static const Set<String> gestureRefusals = {
+    decisionAlreadyTaken,
+    transitionOutOfOrder,
+    reasonRequired,
+    selfApprovalForbidden,
+    notRequestOwner,
+  };
 }

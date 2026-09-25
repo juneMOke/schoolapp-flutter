@@ -69,7 +69,7 @@ void main() {
         _expense(
           'e$i',
           day: '2026-09-${(i % 12 + 1).toString().padLeft(2, '0')}',
-          status: i.isEven ? ExpenseStatus.paid : ExpenseStatus.unpaid,
+          status: i.isEven ? ExpenseStatus.paid : ExpenseStatus.pending,
           typeId: i % 3 == 0 ? 'four' : 'elec',
         ),
       _expense('aout', day: '2026-08-31'),
@@ -88,9 +88,11 @@ void main() {
         expect(view.rows, hasLength(45));
         expect(view.remaining, 5);
         expect(view.groups.expand((g) => g.expenses), hasLength(40));
-        // Les compteurs décrivent la sélection entière, pas le palier.
-        expect(view.paid.count + view.unpaid.count, 45);
-        expect(view.total.usdCents, 45 * 1000);
+        // Le total ne compte QUE le ferme (23 lignes paires sur 45) : une
+        // demande en attente n'est pas de l'argent sorti — mais elle reste
+        // affichée dans le registre.
+        expect(view.total.count, 23);
+        expect(view.total.usdCents, 23 * 1000);
       },
     );
 
@@ -102,14 +104,14 @@ void main() {
           period: ExpensePeriod.initial,
           query: const ExpenseQuery(
             typeIds: {'four'},
-            status: ExpenseStatus.unpaid,
+            status: ExpenseStatus.pending,
           ),
           limit: 40,
           today: _today,
         );
         expect(
           view.rows.every(
-            (e) => e.typeId == 'four' && e.status == ExpenseStatus.unpaid,
+            (e) => e.typeId == 'four' && e.status == ExpenseStatus.pending,
           ),
           isTrue,
         );
@@ -120,8 +122,16 @@ void main() {
 
     test('une journée coupée par le palier garde son effectif et son total '
         'entiers dans l’en-tête', () {
+      // Toutes fermes : l'en-tête mesure ici le palier, pas le circuit.
       final view = ExpenseRegisterView.compute(
-        snapshot: _snapshot(rows),
+        snapshot: _snapshot([
+          for (var i = 0; i < 45; i++)
+            _expense(
+              'e$i',
+              day: '2026-09-${(i % 12 + 1).toString().padLeft(2, '0')}',
+              typeId: i % 3 == 0 ? 'four' : 'elec',
+            ),
+        ]),
         period: ExpensePeriod.initial,
         query: ExpenseQuery.none,
         limit: 40,
@@ -206,18 +216,33 @@ void main() {
       },
     );
 
-    test('la plus ancienne dépense non payée, et le vide', () {
+    test('la plus ancienne demande accordée non réglée, et le vide', () {
       final view = ExpenseDashboardView.compute(
         snapshot: _snapshot([
-          _expense('recente', day: '2026-09-10', status: ExpenseStatus.unpaid),
-          _expense('ancienne', day: '2026-09-02', status: ExpenseStatus.unpaid),
+          _expense(
+            'recente',
+            day: '2026-09-10',
+            status: ExpenseStatus.approved,
+          ),
+          _expense(
+            'ancienne',
+            day: '2026-09-02',
+            status: ExpenseStatus.approved,
+          ),
           _expense('payee', day: '2026-09-01'),
+          // En attente : ni engagée, ni à payer — elle ne compte nulle part.
+          _expense(
+            'demandee',
+            day: '2026-09-04',
+            status: ExpenseStatus.pending,
+          ),
         ]),
         period: ExpensePeriod.initial,
         today: _today,
       );
-      expect(view.oldestUnpaid?.id, 'ancienne');
-      expect(view.unpaid.count, 2);
+      expect(view.oldestApproved?.id, 'ancienne');
+      expect(view.approvedToPay.count, 2);
+      expect(view.total.count, 3, reason: 'approuvées + payée, pas l’attente');
 
       final empty = ExpenseDashboardView.compute(
         snapshot: _snapshot(const []),

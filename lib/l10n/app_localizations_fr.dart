@@ -10074,6 +10074,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuExpenseRegister => 'Frais de fonctionnement';
 
   @override
+  String get subMenuExpenseQueue => 'Validations';
+
+  @override
   String get accueilModuleExpenseDescription =>
       'Ce que l\'école décaisse : le registre des frais de fonctionnement et son tableau de bord.';
 
@@ -10108,10 +10111,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseStatusAll => 'Toutes';
 
   @override
+  String get expenseStatusPending => 'En attente';
+
+  @override
+  String get expenseStatusApproved => 'Approuvée';
+
+  @override
   String get expenseStatusPaid => 'Payée';
 
   @override
-  String get expenseStatusUnpaid => 'Non payée';
+  String get expenseStatusRefused => 'Refusée';
+
+  @override
+  String get expenseStatusRetracted => 'Retirée';
 
   @override
   String get expenseSyncRejected => 'À corriger';
@@ -10234,56 +10246,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get expenseKpiSelectionTotal => 'Total de la sélection';
-
-  @override
-  String get expenseKpiPaid => 'Déjà payé';
-
-  @override
-  String get expenseKpiUnpaid => 'Non payé';
-
-  @override
-  String get expenseKpiShown => 'Dépenses affichées';
-
-  @override
-  String expenseKpiShownA11y(int count) {
+  String expenseKpiApprovedCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count dépenses affichées',
-      one: '1 dépense affichée',
-      zero: 'Aucune dépense affichée',
+      other: '$count dépenses accordées',
+      one: '1 dépense accordée',
+      zero: 'aucune dépense accordée',
     );
     return '$_temp0';
   }
-
-  @override
-  String expenseKpiPaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dépenses réglées',
-      one: '1 dépense réglée',
-      zero: 'aucune dépense réglée',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String expenseKpiUnpaidCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dépenses en attente',
-      one: '1 dépense en attente',
-      zero: 'aucune dépense en attente',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get expenseKpiNoRate =>
-      'Aucun taux du jour publié : montants par devise';
 
   @override
   String get expenseKpiTotalSpent => 'Total dépensé';
@@ -10422,12 +10394,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get expenseActionMarkPaid => 'Marquer payée';
-
-  @override
-  String get expenseActionMarkUnpaid => 'Repasser en non payée';
-
-  @override
   String get expenseActionDuplicate => 'Dupliquer';
 
   @override
@@ -10440,27 +10406,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseDialogClose => 'Fermer';
 
   @override
-  String expenseToastCreated(String amount, String status) {
-    String _temp0 = intl.Intl.selectLogic(status, {
-      'PAID': 'payée',
-      'other': 'non payée',
-    });
-    return 'Dépense enregistrée · $amount ($_temp0)';
+  String expenseToastCreated(String amount) {
+    return 'Demande déposée · $amount — en attente de décision.';
   }
 
   @override
   String expenseToastUpdated(String name) {
     return 'Dépense $name modifiée.';
-  }
-
-  @override
-  String expenseToastMarkedPaid(String name) {
-    return '$name · marquée payée.';
-  }
-
-  @override
-  String expenseToastMarkedUnpaid(String name) {
-    return '$name · repassée en non payée.';
   }
 
   @override
@@ -10547,6 +10499,461 @@ class AppLocalizationsFr extends AppLocalizations {
   String expenseDetailRejected(String reason) {
     return 'Refusée par le serveur : $reason. Modifiez la dépense pour la corriger.';
   }
+
+  @override
+  String get expenseChainRequested => 'Demandée';
+
+  @override
+  String get expenseChainAwaiting => 'en attente';
+
+  @override
+  String get expenseChainNeverPaid => 'ne sera pas payée';
+
+  @override
+  String get expenseSituationDecide =>
+      'À vous de décider : approuver ou refuser avec motif.';
+
+  @override
+  String get expenseSituationAwaitingDecision =>
+      'En attente d\'une décision du validateur.';
+
+  @override
+  String expenseRefusalReasonBy(String decider) {
+    return 'Motif du refus — $decider';
+  }
+
+  @override
+  String get expenseGestureApprove => 'Approuver';
+
+  @override
+  String get expenseGestureRefuse => 'Refuser';
+
+  @override
+  String get expenseGesturePay => 'Marquer payée';
+
+  @override
+  String get expenseGestureRetract => 'Retirer';
+
+  @override
+  String get expenseGestureResubmit => 'Corriger et renvoyer';
+
+  @override
+  String get expenseGestureReopen => 'Annuler la décision';
+
+  @override
+  String get expenseGestureRemind => 'Relancer';
+
+  @override
+  String get expenseGestureComment => 'Envoyer';
+
+  @override
+  String get expenseRefusalTitle => 'Refuser la demande';
+
+  @override
+  String get expenseRefusalReasonLabel => 'Motif du refus (obligatoire)';
+
+  @override
+  String get expenseRefusalReasonHint =>
+      'Dites au demandeur ce qui manque ou ce qui bloque — il pourra corriger et renvoyer.';
+
+  @override
+  String get expenseRefusalReasonMissing =>
+      'Un refus sans motif laisse le demandeur sans issue.';
+
+  @override
+  String get expenseRefusalConfirm => 'Confirmer le refus';
+
+  @override
+  String get expenseRefusalSuggestionQuote =>
+      'Devis manquant : joindre au moins deux offres avant de réengager la dépense.';
+
+  @override
+  String get expenseRefusalSuggestionAmount =>
+      'Montant trop élevé pour ce poste ce mois-ci — à replanifier au trimestre suivant.';
+
+  @override
+  String get expenseRefusalSuggestionDuplicate =>
+      'Dépense déjà couverte par une ligne enregistrée la semaine dernière.';
+
+  @override
+  String expenseToastApproved(String name) {
+    return 'Demande $name approuvée.';
+  }
+
+  @override
+  String expenseToastRefused(String name) {
+    return 'Demande $name refusée.';
+  }
+
+  @override
+  String expenseToastPaid(String name) {
+    return 'Dépense $name marquée payée.';
+  }
+
+  @override
+  String expenseToastRetracted(String name) {
+    return 'Demande $name retirée.';
+  }
+
+  @override
+  String expenseToastResubmitted(String name) {
+    return 'Demande $name renvoyée en attente de décision.';
+  }
+
+  @override
+  String expenseToastReopened(String name) {
+    return 'Décision annulée : $name repart en attente.';
+  }
+
+  @override
+  String expenseToastReminded(String name) {
+    return 'Relance envoyée pour $name.';
+  }
+
+  @override
+  String expenseToastCommented(String name) {
+    return 'Message ajouté au fil de $name.';
+  }
+
+  @override
+  String get expenseGestureRefused =>
+      'Ce geste n\'est plus possible sur cette demande : son état a changé.';
+
+  @override
+  String get expenseThreadComposerLabel => 'Ajouter un commentaire';
+
+  @override
+  String get expenseThreadComposerHint =>
+      'Une précision, une question au demandeur, une consigne de paiement…';
+
+  @override
+  String get expenseThreadPending => 'en attente d\'envoi';
+
+  @override
+  String get expenseThreadSendFailed =>
+      'Le message n\'a pas pu être écrit sur cet appareil. Réessayez.';
+
+  @override
+  String get expenseQueueTitle => 'Validations des demandes';
+
+  @override
+  String get expenseQueueSubtitle =>
+      'La file des demandes en attente, de la plus ancienne à la plus récente.';
+
+  @override
+  String get expenseQueueWaitingToday => 'aujourd\'hui';
+
+  @override
+  String expenseQueueWaitingDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'depuis $count jours',
+      one: 'depuis 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueReminderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relances',
+      one: '1 relance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueDepositedOn(String date) {
+    return 'Déposée le $date';
+  }
+
+  @override
+  String get expenseQueueYou => 'vous';
+
+  @override
+  String expenseQueueMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count msg',
+      one: '1 msg',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueSelectAll => 'Tout sélectionner';
+
+  @override
+  String get expenseQueueSortTitle => 'Trier par';
+
+  @override
+  String get expenseQueueSortAge => 'Ancienneté';
+
+  @override
+  String get expenseQueueSortAmount => 'Montant';
+
+  @override
+  String get expenseQueueSortRequester => 'Demandeur';
+
+  @override
+  String get expenseQueueOrderNote =>
+      'Le retard se voit en premier : la file s\'ouvre sur la demande qui attend depuis le plus longtemps.';
+
+  @override
+  String get expenseQueueReadOnlyNote =>
+      'Vous voyez la file mais ne décidez pas. Sur vos propres demandes, vous pouvez encore corriger, retirer ou relancer.';
+
+  @override
+  String get expenseQueueStatPending => 'En attente de décision';
+
+  @override
+  String expenseQueueStatPendingSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count demandes — rien n\'est engagé tant que rien n\'est décidé',
+      one: '1 demande — rien n\'est engagé tant que rien n\'est décidé',
+      zero: 'aucune demande',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueStatOverdue => 'Attendent depuis 5 jours ou plus';
+
+  @override
+  String expenseQueueStatOverdueSub(int days) {
+    return 'la plus ancienne attend depuis $days jours';
+  }
+
+  @override
+  String get expenseQueueStatNoOverdue => 'aucun retard';
+
+  @override
+  String get expenseQueueStatReminded => 'Demandes relancées';
+
+  @override
+  String get expenseQueueStatRemindedSub => 'le demandeur attend une réponse';
+
+  @override
+  String get expenseQueueStatNoReminder => 'aucune relance';
+
+  @override
+  String get expenseQueueStatApproved => 'Approuvées, à payer';
+
+  @override
+  String expenseQueueStatApprovedSub(String amount) {
+    return '$amount déjà accordés';
+  }
+
+  @override
+  String get expenseQueueEmptyTitle => 'La file est vide';
+
+  @override
+  String get expenseQueueEmptyMessage =>
+      'Aucune demande n\'attend de décision : tout ce qui a été déposé a été tranché.';
+
+  @override
+  String expenseQueueEmptyWithApproved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dépenses approuvées restent',
+      one: '1 dépense approuvée reste',
+    );
+    return 'Aucune demande n\'attend de décision. $_temp0 à payer.';
+  }
+
+  @override
+  String get expenseQueueOpenRequest => 'Ouvrir la demande';
+
+  @override
+  String get expenseQueueOpenRegister => 'Ouvrir le registre';
+
+  @override
+  String expenseQueueSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count demandes sélectionnées',
+      one: '1 demande sélectionnée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueDeselect => 'Désélectionner';
+
+  @override
+  String get expenseQueueApproveBatch => 'Approuver en lot';
+
+  @override
+  String get expenseQueueRefuseBatch => 'Refuser en lot';
+
+  @override
+  String expenseQueueBatchReasonLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Motif commun du refus — $count demandes',
+      one: 'Motif du refus — 1 demande',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseQueueBatchReasonHint =>
+      'Le même motif sera inscrit dans chaque fil, avec votre nom et la date.';
+
+  @override
+  String expenseQueueBatchConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Confirmer le refus de $count demandes',
+      one: 'Confirmer le refus',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseQueueBatchDone(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count demandes traitées',
+      one: '1 demande traitée',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String expenseQueueBatchPartial(int done, int failed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done demandes traitées',
+      one: '1 demande traitée',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      failed,
+      locale: localeName,
+      other: '$failed n\'ont pas pu l\'être',
+      one: '1 n\'a pas pu l\'être',
+    );
+    return '$_temp0 — $_temp1.';
+  }
+
+  @override
+  String get expenseQueueBatchNone =>
+      'Aucune demande n\'a pu être traitée : leur état a changé.';
+
+  @override
+  String get expenseQueueApprovedTitle => 'Approuvées, en attente de paiement';
+
+  @override
+  String expenseQueueApprovedSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dépenses accordées',
+      one: '1 dépense accordée',
+    );
+    return '$_temp0 — le paiement se constate ici ou depuis la fiche.';
+  }
+
+  @override
+  String expenseQueueApprovedOn(String date, String name) {
+    return 'approuvée le $date par $name';
+  }
+
+  @override
+  String get expenseQueueApprovedUndated =>
+      'approuvée — décideur non encore connu de ce poste';
+
+  @override
+  String expenseQueueSeeAllApproved(int count) {
+    return 'Voir les $count dépenses approuvées dans le registre';
+  }
+
+  @override
+  String get expenseRejectedAlreadyDecided => 'un collègue avait déjà tranché';
+
+  @override
+  String get expenseRejectedSelfApproval =>
+      'on n\'approuve pas sa propre demande';
+
+  @override
+  String get expenseRejectedNotOwner => 'ce geste est réservé au demandeur';
+
+  @override
+  String get expenseRejectedReasonRequired => 'un refus exige son motif';
+
+  @override
+  String get expenseRejectedOutOfOrder =>
+      'un geste antérieur n\'est pas encore parti';
+
+  @override
+  String expenseDetailGestureRejected(String reason) {
+    return 'Geste refusé par le serveur : $reason. La demande est restée telle qu\'elle était.';
+  }
+
+  @override
+  String get expenseThreadRejected => 'non envoyé';
+
+  @override
+  String get expenseThreadTitle => 'Fil de la demande';
+
+  @override
+  String expenseThreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'aucun message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get expenseThreadEmpty =>
+      'Aucun message pour l\'instant — chaque décision s\'inscrira ici.';
+
+  @override
+  String get expenseThreadUnreadable =>
+      'Le fil n\'a pas pu être lu sur ce poste.';
+
+  @override
+  String get expenseActDeposit => 'Demande déposée';
+
+  @override
+  String get expenseActReminder => 'Relance';
+
+  @override
+  String get expenseActApproval => 'Approbation';
+
+  @override
+  String get expenseActRefusal => 'Refus';
+
+  @override
+  String get expenseActPayment => 'Paiement constaté';
+
+  @override
+  String get expenseActRetraction => 'Demande retirée';
+
+  @override
+  String get expenseActReopening => 'Décision annulée';
+
+  @override
+  String get expenseActCorrection => 'Demande corrigée et renvoyée';
+
+  @override
+  String get expenseActEdit => 'Demande modifiée';
 
   @override
   String get expenseFormCreateTitle =>

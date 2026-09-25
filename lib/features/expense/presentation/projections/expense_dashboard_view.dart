@@ -42,8 +42,14 @@ class ExpenseTypeShare extends Equatable {
 /// la même liste locale que le registre.
 class ExpenseDashboardView extends Equatable {
   final ExpenseDateRange range;
+
+  /// Les engagements fermes de la période — approuvées et payées, elles
+  /// seules comptent comme de l'argent sorti (spec §16 règle 3).
   final ExpenseTotals total;
-  final ExpenseTotals unpaid;
+
+  /// Accordées mais pas encore décaissées : l'écart entre « engagé » et
+  /// « payé », qui gonflerait en silence si personne ne le regardait.
+  final ExpenseTotals approvedToPay;
 
   /// Variation contre la période précédente (A6), `null` si elle n'informe
   /// pas (référence nulle, totaux non comparables).
@@ -57,8 +63,9 @@ class ExpenseDashboardView extends Equatable {
   /// sont écartés (ils restent dans les puces du registre, pas ici).
   final List<ExpenseTypeShare> shares;
 
-  /// La plus ancienne dépense non payée de la période, ou `null`.
-  final Expense? oldestUnpaid;
+  /// La plus ancienne demande accordée et non réglée de la période, ou
+  /// `null` — celle qui attend son décaissement depuis le plus longtemps.
+  final Expense? oldestApproved;
 
   /// Les postes se classent par lecture en dollars ; sans lecture possible
   /// (A5), par nombre de dépenses — jamais par des montants de devises
@@ -68,12 +75,12 @@ class ExpenseDashboardView extends Equatable {
   const ExpenseDashboardView({
     required this.range,
     required this.total,
-    required this.unpaid,
+    required this.approvedToPay,
     required this.variationPercent,
     required this.variationElapsedOnly,
     required this.series,
     required this.shares,
-    required this.oldestUnpaid,
+    required this.oldestApproved,
     required this.sharesRankedByCount,
   });
 
@@ -89,18 +96,30 @@ class ExpenseDashboardView extends Equatable {
     final reader = snapshot.usdReader;
     final range = resolver.rangeOf(period);
     final rows = ExpenseRegisterQuery.inRange(snapshot.expenses, range);
-    final unpaidRows = [
+    final firmRows = [
       for (final e in rows)
-        if (e.status == ExpenseStatus.unpaid) e,
+        if (e.isFirm) e,
+    ];
+    final approvedRows = [
+      for (final e in rows)
+        if (e.status == ExpenseStatus.approved) e,
     ];
 
+    // La variation compare des engagements fermes, jamais des demandes : un
+    // mois riche en demandes non tranchées n'est pas un mois dépensier.
     final windows = resolver.comparisonOf(period);
     final current = ExpenseTotals.of(
-      ExpenseRegisterQuery.inRange(snapshot.expenses, windows.current),
+      ExpenseRegisterQuery.inRange(
+        snapshot.expenses,
+        windows.current,
+      ).where((e) => e.isFirm),
       reader,
     );
     final reference = ExpenseTotals.of(
-      ExpenseRegisterQuery.inRange(snapshot.expenses, windows.reference),
+      ExpenseRegisterQuery.inRange(
+        snapshot.expenses,
+        windows.reference,
+      ).where((e) => e.isFirm),
       reader,
     );
 
@@ -113,14 +132,14 @@ class ExpenseDashboardView extends Equatable {
     // distribue sur tout le registre, pas sur les seules lignes de la journée.
     final lanes = ExpenseSeriesBuilder.distribute(
       buckets,
-      snapshot.expenses.where((e) => !e.isWithdrawn),
+      snapshot.expenses.where((e) => !e.isWithdrawn && e.isFirm),
     );
 
-    final shares = _shares(rows, snapshot, reader);
+    final shares = _shares(firmRows, snapshot, reader);
     return ExpenseDashboardView(
       range: range,
-      total: ExpenseTotals.of(rows, reader),
-      unpaid: ExpenseTotals.of(unpaidRows, reader),
+      total: ExpenseTotals.of(firmRows, reader),
+      approvedToPay: ExpenseTotals.of(approvedRows, reader),
       variationPercent: expenseVariationPercent(current, reference),
       variationElapsedOnly: windows.elapsedOnly,
       series: [
@@ -132,7 +151,7 @@ class ExpenseDashboardView extends Equatable {
       ],
       shares: shares,
       // Le registre est trié du plus récent au plus ancien.
-      oldestUnpaid: unpaidRows.isEmpty ? null : unpaidRows.last,
+      oldestApproved: approvedRows.isEmpty ? null : approvedRows.last,
       sharesRankedByCount: shares.any((s) => s.totals.usdCents == null),
     );
   }
@@ -174,12 +193,12 @@ class ExpenseDashboardView extends Equatable {
   List<Object?> get props => [
     range,
     total,
-    unpaid,
+    approvedToPay,
     variationPercent,
     variationElapsedOnly,
     series,
     shares,
-    oldestUnpaid,
+    oldestApproved,
     sharesRankedByCount,
   ];
 }

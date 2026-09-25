@@ -18,7 +18,6 @@ class ExpenseFormModel {
   final TextEditingController supplier;
   String typeId;
   String currency;
-  ExpenseStatus status;
   DateTime date;
   ExpenseFundingSource funding;
 
@@ -32,7 +31,6 @@ class ExpenseFormModel {
       supplier = TextEditingController(text: seed.supplier),
       typeId = seed.typeId,
       currency = seed.currency,
-      status = seed.status,
       date = seed.expenseDate,
       funding = seed.fundingSource;
 
@@ -75,7 +73,6 @@ class ExpenseFormModel {
       description: description.text,
       amountInCents: cents,
       currency: currency,
-      status: status,
       expenseDate: date,
       supplier: supplier.text,
       fundingSource: funding,

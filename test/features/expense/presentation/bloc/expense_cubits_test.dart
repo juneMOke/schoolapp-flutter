@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
@@ -18,11 +19,13 @@ class _MockSource extends Mock implements ExpenseSnapshotSource {}
 
 class _MockSave extends Mock implements SaveExpenseUseCase {}
 
-class _MockSetStatus extends Mock implements SetExpenseStatusUseCase {}
-
 class _MockWithdraw extends Mock implements WithdrawExpenseUseCase {}
 
 class _MockRestore extends Mock implements RestoreExpenseUseCase {}
+
+class _MockGesture extends Mock implements ApplyExpenseGestureUseCase {}
+
+class _MockThread extends Mock implements LoadExpenseThreadUseCase {}
 
 final _today = DateTime(2026, 9, 12);
 
@@ -32,7 +35,7 @@ Expense _expense(String id, {String day = '2026-09-03'}) => Expense(
   title: 'Dépense $id',
   amountInCents: 1000,
   currency: 'USD',
-  status: ExpenseStatus.unpaid,
+  status: ExpenseStatus.paid,
   expenseDate: DateTime.parse(day),
   clientUpdatedAt: DateTime.utc(2026),
 );
@@ -54,7 +57,6 @@ void main() {
         title: 'x',
         amountInCents: 1,
         currency: 'USD',
-        status: ExpenseStatus.paid,
         expenseDate: DateTime(2026),
       ),
     );
@@ -75,9 +77,10 @@ void main() {
     source: source,
     memory: memory,
     save: save,
-    setStatus: _MockSetStatus(),
     withdraw: _MockWithdraw(),
     restore: _MockRestore(),
+    gesture: _MockGesture(),
+    thread: _MockThread(),
     now: () => _today,
   );
 
@@ -160,7 +163,6 @@ void main() {
           title: 'x',
           amountInCents: 1,
           currency: 'USD',
-          status: ExpenseStatus.paid,
           expenseDate: _today,
         ),
       );

@@ -178,6 +178,12 @@ class AppColors {
   static const feeStatusPartial = Color(0xFFA66A00);
   static const feeStatusPartialSoft = Color(0xFFFBF1DF);
   static const feeStatusPartialBorder = Color(0xFFEAD9B0);
+
+  /// L'**encre** de la famille ambre, à distinguer de sa teinte de fond :
+  /// `feeStatusPartial` fonde un pavé, mais ne s'écrit qu'à 3,83 sur le papier
+  /// — sous le seuil. Cette encre y passe à 5,44, et c'est elle qu'il faut dès
+  /// qu'un mot ambre se pose sur une surface neutre.
+  static const feeStatusPartialInk = Color(0xFF7A5A16);
   static const feeStatusDue = error;
   static const feeStatusDueSoft = Color(0xFFFBEAE7);
   static const feeStatusDueBorder = Color(0xFFF0CDC7);

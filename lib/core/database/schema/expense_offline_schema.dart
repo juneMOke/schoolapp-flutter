@@ -58,6 +58,13 @@ const TableSchema refExpenseTypesTable = TableSchema(
 ///   Annuler ».
 /// - `expense_number` : `DEP-0412`, `NULL` tant que le serveur ne l'a pas
 ///   attribué (« en attente », A3).
+/// - `status` : les cinq états du circuit de validation (v2) — jamais saisi,
+///   toujours le résultat d'un geste de décision.
+/// - `decided_*`, `decision_reason`, `reminder_count` : la décision et la
+///   pression du demandeur ; tout revient à zéro au retour en attente.
+/// - `last_message_at` : fraîcheur du fil, **distincte** de
+///   `client_updated_at` — un message ne doit jamais faire perdre une
+///   décision à l'arbitrage (le défaut du module Discipline).
 const TableSchema expensesTable = TableSchema(
   name: 'expenses',
   createTableSql: '''
@@ -86,7 +93,17 @@ const TableSchema expensesTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      -- Colonnes du circuit (v52), EN FIN DE TABLE : `ALTER TABLE` ne sait
+      -- qu'ajouter à la fin, et une base montée doit finir identique à une
+      -- base créée à neuf. Les déclarer ailleurs casse cet invariant, que le
+      -- test de palier vérifie colonne par colonne, dans l'ordre.
+      decided_by_id TEXT,
+      decided_by_name TEXT,
+      decided_at TEXT,
+      decision_reason TEXT,
+      reminder_count INTEGER NOT NULL DEFAULT 0,
+      last_message_at TEXT
     )
   ''',
   createIndexSql: [
@@ -96,8 +113,53 @@ const TableSchema expensesTable = TableSchema(
   ],
 );
 
+/// `expense_messages` — le fil d'une demande (v2, F30).
+///
+/// **Append-only** : on ajoute, on ne modifie ni ne supprime. Un geste de
+/// décision y écrit son message, et c'est ce message qui porte l'ordre.
+///
+/// - `id` : uuid fabriqué par le poste. Clé d'idempotence du message **et du
+///   geste** qui le porte (Q3) — un rejeu est inerte côté serveur.
+/// - `act` : l'un des neuf actes anglais (F33) ; `NULL` = commentaire libre.
+/// - `author_id` / `author_name` : l'identifiant pour juger la propriété
+///   (F24), le nom pour l'afficher. Jamais le nom seul : deux Ilunga dans une
+///   école suffisent à rendre la comparaison fausse.
+/// - `created_at` : ISO-8601 UTC. **C'est lui qui ordonne la séquence** des
+///   gestes d'une même dépense (F31), donc son format ne varie pas : deux
+///   écritures de forme différente se compareraient de travers.
+/// - `sync_status` : `PENDING_SYNC` tant que le serveur n'a pas accusé. Le
+///   pull n'écrase jamais un message encore en attente, et c'est ce signal que
+///   lira la garde d'ordre.
+///
+/// `body` SENSIBLE : un motif de refus nomme des fournisseurs et des
+/// collègues. La base est chiffrée (SQLCipher), et aucun corps de message ne
+/// part dans un journal.
+const TableSchema expenseMessagesTable = TableSchema(
+  name: 'expense_messages',
+  createTableSql: '''
+    CREATE TABLE expense_messages (
+      id TEXT PRIMARY KEY,
+      school_id TEXT NOT NULL,
+      expense_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      act TEXT,
+      author_id TEXT,
+      author_name TEXT,
+      created_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC'
+    )
+  ''',
+  createIndexSql: [
+    // Il sert l'affichage du fil ET la garde d'ordre, qui cherche le plus
+    // ancien message non synchronisé d'une dépense.
+    'CREATE INDEX idx_expense_messages_thread '
+        'ON expense_messages(expense_id, created_at)',
+  ],
+);
+
 /// Tables du module Dépenses.
 const List<TableSchema> expenseOfflineTables = [
   refExpenseTypesTable,
   expensesTable,
+  expenseMessagesTable,
 ];

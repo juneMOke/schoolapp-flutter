@@ -34,10 +34,21 @@ class ExpenseWriteDao {
   /// Retrait ou restauration — un geste à part, sur sa propre horloge.
   static const String withdrawalAggregateType = 'EXPENSE_WITHDRAWAL';
 
+  /// Un **geste du circuit** — et l'inverse du contenu, délibérément : le
+  /// contenu s'écrase (LWW), un geste jamais. Approuver puis annuler puis
+  /// refuser, ce sont trois entrées, trois messages, trois requêtes.
+  static const String gestureAggregateType = 'EXPENSE_GESTURE';
+
   static String contentEntryId(String expenseId) => '$aggregateType:$expenseId';
 
   static String withdrawalEntryId(String expenseId) =>
       '$withdrawalAggregateType:$expenseId';
+
+  /// L'identifiant d'entrée d'un geste est l'uuid de **son message**, et non
+  /// celui de la dépense : deux gestes sur la même demande doivent coexister
+  /// dans la file, là où deux contenus se remplacent.
+  static String gestureEntryId(String messageId) =>
+      '$gestureAggregateType:$messageId';
 
   /// Enregistre l'état complet d'une dépense et le met en file.
   ///
@@ -164,6 +175,16 @@ class ExpenseWriteDao {
         withdrawalEntryId(expenseId),
         OutboxStatus.acked.dbValue,
       ],
+    );
+    // Et les gestes du circuit avec eux. Ils sont identifiés par l'uuid de
+    // leur message, donc innombrables : c'est l'agrégat qui les désigne. Les
+    // laisser en file les ferait pousser vers une dépense que le serveur ne
+    // connaîtra jamais — un 404 par geste, tous terminaux.
+    await txn.update(
+      OutboxDao.table,
+      {'status': OutboxStatus.acked.dbValue},
+      where: 'aggregate_type = ? AND aggregate_id = ? AND status <> ?',
+      whereArgs: [gestureAggregateType, expenseId, OutboxStatus.acked.dbValue],
     );
     return true;
   });

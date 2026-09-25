@@ -3,7 +3,6 @@ import 'package:school_app_flutter/features/expense/data/local/expense_local_mod
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
-import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 
 /// Passages entre couches, rangés à part pour garder les modèles plats.
@@ -42,7 +41,8 @@ extension ExpenseLocalModelX on ExpenseLocalModel {
 }
 
 extension ExpenseToDraftX on Expense {
-  /// Le brouillon d'une modification : l'identifiant est gardé.
+  /// Le brouillon d'une modification : l'identifiant est gardé, le circuit
+  /// reste dehors (D8).
   ExpenseDraft toDraft() => ExpenseDraft(
     id: id,
     typeId: typeId,
@@ -50,23 +50,6 @@ extension ExpenseToDraftX on Expense {
     description: description,
     amountInCents: amountInCents,
     currency: currency,
-    status: status,
-    expenseDate: expenseDate,
-    supplier: supplier,
-    fundingSource: fundingSource,
-    recordedByName: recordedByName,
-  );
-}
-
-extension ExpenseDraftStatusX on ExpenseDraft {
-  ExpenseDraft withStatus(ExpenseStatus value) => ExpenseDraft(
-    id: id,
-    typeId: typeId,
-    title: title,
-    description: description,
-    amountInCents: amountInCents,
-    currency: currency,
-    status: value,
     expenseDate: expenseDate,
     supplier: supplier,
     fundingSource: fundingSource,

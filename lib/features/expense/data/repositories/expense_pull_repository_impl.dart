@@ -46,8 +46,15 @@ class ExpensePullRepositoryImpl implements ExpensePullRepository {
        _requiredAuth = requiredAuth,
        _now = now;
 
-  /// Taille de page keyset (défaut serveur = 100).
-  static const int pageLimit = 100;
+  /// Taille de page keyset.
+  ///
+  /// **50, et non le défaut serveur de 100** (Q9) : depuis le circuit, chaque
+  /// demande descend avec son **fil entier** — la pagination porte sur les
+  /// demandes, jamais sur les messages, donc jamais de fil tronqué en
+  /// silence. Une page de 100 demandes bavardes pèserait le double sans rien
+  /// apporter. Le défaut serveur est partagé par tous les flux : c'est au
+  /// poste de demander plus court.
+  static const int pageLimit = 50;
 
   @override
   Future<Either<Failure, ExpensePullOutcome>> syncExpenses() async {

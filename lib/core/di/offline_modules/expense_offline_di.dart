@@ -8,12 +8,14 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/repositories/expense_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/expense/data/repositories/expense_repository_impl.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_pull_handler.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
@@ -22,9 +24,11 @@ import 'package:school_app_flutter/features/expense/domain/repositories/expense_
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
+import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_snapshot_source.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -46,6 +50,9 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerLazySingleton<ExpenseWriteDao>(
     () => ExpenseWriteDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<ExpenseMessageDao>(
+    () => ExpenseMessageDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<ExpenseSyncDao>(
     () => ExpenseSyncDao(getIt<Database>()),
   );
@@ -59,6 +66,7 @@ void registerExpenseOffline(GetIt getIt) {
       reader: getIt<ExpenseReadDao>(),
       writer: getIt<ExpenseWriteDao>(),
       types: getIt<ExpenseTypeDao>(),
+      messages: getIt<ExpenseMessageDao>(),
       currentUser: getIt<CurrentUserContext>(),
       ids: getIt<IdGenerator>(),
       rates: getIt<ExchangeRateReader>(),
@@ -73,17 +81,20 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerFactory<LoadExpenseRegisterUseCase>(
     () => LoadExpenseRegisterUseCase(getIt<ExpenseRepository>()),
   );
+  getIt.registerFactory<LoadExpenseThreadUseCase>(
+    () => LoadExpenseThreadUseCase(getIt<ExpenseRepository>()),
+  );
   getIt.registerFactory<SaveExpenseUseCase>(
     () => SaveExpenseUseCase(getIt<ExpenseRepository>()),
-  );
-  getIt.registerFactory<SetExpenseStatusUseCase>(
-    () => SetExpenseStatusUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<WithdrawExpenseUseCase>(
     () => WithdrawExpenseUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<RestoreExpenseUseCase>(
     () => RestoreExpenseUseCase(getIt<ExpenseRepository>()),
+  );
+  getIt.registerFactory<ApplyExpenseGestureUseCase>(
+    () => ApplyExpenseGestureUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<SyncExpensePullsUseCase>(
     () => SyncExpensePullsUseCase(getIt<PullCoordinator>()),
@@ -113,9 +124,17 @@ void registerExpenseOffline(GetIt getIt) {
       source: getIt<ExpenseSnapshotSource>(),
       memory: getIt<ExpensePeriodMemory>(),
       save: getIt<SaveExpenseUseCase>(),
-      setStatus: getIt<SetExpenseStatusUseCase>(),
       withdraw: getIt<WithdrawExpenseUseCase>(),
       restore: getIt<RestoreExpenseUseCase>(),
+      gesture: getIt<ApplyExpenseGestureUseCase>(),
+      thread: getIt<LoadExpenseThreadUseCase>(),
+    ),
+  );
+  getIt.registerFactory<ExpenseQueueCubit>(
+    () => ExpenseQueueCubit(
+      source: getIt<ExpenseSnapshotSource>(),
+      gesture: getIt<ApplyExpenseGestureUseCase>(),
+      thread: getIt<LoadExpenseThreadUseCase>(),
     ),
   );
   getIt.registerFactory<ExpenseDashboardCubit>(
@@ -154,6 +173,15 @@ void registerExpenseOffline(GetIt getIt) {
       reader: getIt<ExpenseReadDao>(),
       writer: getIt<ExpenseWriteDao>(),
       dao: getIt<ExpenseSyncDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt<SyncEngine>().registerHandler(
+    ExpenseGestureOutboxHandler(
+      api: getIt<ExpenseSyncApi>(),
+      dao: getIt<ExpenseSyncDao>(),
+      messages: getIt<ExpenseMessageDao>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: getIt<Map<String, dynamic>>(),
     ),

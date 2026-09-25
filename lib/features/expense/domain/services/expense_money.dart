@@ -82,7 +82,7 @@ class ExpenseTotals extends Equatable {
 
   factory ExpenseTotals.of(Iterable<Expense> rows, ExpenseUsdReader reader) {
     final list = rows.toList(growable: false);
-    final bag = MoneyBag.sumBy(list, (e) => Money(e.amountInCents, e.currency));
+    final bag = MoneyBag.sumBy(list, (e) => e.money);
     return ExpenseTotals(
       bag: bag,
       count: list.length,

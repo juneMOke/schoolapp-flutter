@@ -80,6 +80,11 @@ class MenuConstants {
   /// ailleurs, qu'une dépense se crée, se modifie ou se retire.
   static const String expenseRegisterId = 'depenses-frais-fonctionnement';
 
+  /// La file de validation : les demandes qui attendent une décision, de la
+  /// plus ancienne à la plus récente. Elle ignore la période des deux autres
+  /// écrans — une demande déposée le mois dernier attend toujours.
+  static const String expenseQueueId = 'depenses-validations';
+
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
   static const String classesListId = 'classes-list';

@@ -1,37 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_dialog_header.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_actions.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_body.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_refusal_panel.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ce que la fiche demande à l'écran de faire après sa fermeture.
-enum ExpenseDetailChoice { withdraw, duplicate, edit }
+export 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
 
-/// Ouvre la fiche d'une dépense. La bascule de statut s'y joue **sans
-/// fermer** : le badge change sous les yeux ; les trois autres gestes ferment
-/// la fiche et rendent leur choix.
-Future<ExpenseDetailChoice?> showExpenseDetailDialog(
+/// Ouvre la fiche d'une demande. Tout geste offert ferme la fiche et rend ce
+/// qu'il demande — raccourci d'écran ou geste du circuit.
+///
+/// Le fil est **déjà lu** quand la fiche s'ouvre : `null` dit qu'il n'a pas pu
+/// l'être, et une liste vide qu'il n'y a rien à lire. La fiche ne charge donc
+/// rien elle-même — une lecture locale n'a pas besoin d'un écran d'attente.
+Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   BuildContext context, {
   required Expense expense,
   required ExpenseType? type,
   required ExpenseUsdReader reader,
-  required Future<Expense?> Function(Expense expense) onToggle,
-}) => showDialog<ExpenseDetailChoice>(
+  required List<ExpenseMessage>? thread,
+  String? accountId,
+  Future<ExpenseCommentResult> Function(String body)? onComment,
+  bool startRefusing = false,
+  bool allowShortcuts = true,
+}) => showDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
     expense: expense,
     type: type,
     reader: reader,
-    onToggle: onToggle,
+    thread: thread,
+    accountId: accountId,
+    onComment: onComment,
+    startRefusing: startRefusing,
+    allowShortcuts: allowShortcuts,
   ),
 );
 
@@ -39,14 +51,31 @@ class ExpenseDetailDialog extends StatefulWidget {
   final Expense expense;
   final ExpenseType? type;
   final ExpenseUsdReader reader;
-  final Future<Expense?> Function(Expense expense) onToggle;
+  final List<ExpenseMessage>? thread;
+  final String? accountId;
+
+  /// Écrit le commentaire et rend le fil relu. `null` : fil en lecture seule.
+  final Future<ExpenseCommentResult> Function(String body)? onComment;
+
+  /// Ouvre la fiche avec le panneau de motif déjà déplié : c'est le
+  /// « Refuser » d'une ligne de file, qui amène le décideur devant ce qu'il
+  /// refuse plutôt que de lui demander un mot dans le vide.
+  final bool startRefusing;
+
+  /// Les raccourcis d'écran (supprimer, dupliquer, modifier) ouvrent une
+  /// saisie, et la saisie appartient au registre.
+  final bool allowShortcuts;
 
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
     required this.type,
     required this.reader,
-    required this.onToggle,
+    required this.thread,
+    this.accountId,
+    this.onComment,
+    this.startRefusing = false,
+    this.allowShortcuts = true,
   });
 
   @override
@@ -54,22 +83,28 @@ class ExpenseDetailDialog extends StatefulWidget {
 }
 
 class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
-  late Expense _expense = widget.expense;
-  bool _busy = false;
+  late final Expense _expense = widget.expense;
 
-  Future<void> _toggle() async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    final updated = await widget.onToggle(_expense);
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      if (updated != null) _expense = updated;
-    });
+  /// Le fil **vit** dans la fiche : commenter est le seul geste qui ne la
+  /// ferme pas, parce qu'on commente en lisant. Les autres transitionnent, et
+  /// la fiche rouvre sur un registre relu.
+  late List<ExpenseMessage>? _thread = widget.thread;
+
+  /// Le panneau de motif est ouvert : le refus attend son mot.
+  late bool _refusing = widget.startRefusing;
+
+  Future<ExpenseCommentResult> _send(String body) async {
+    final result = await widget.onComment!(body);
+    if (!mounted) return result;
+    final thread = result.thread;
+    // Une relecture manquée ne défait pas le fil affiché : le message est
+    // écrit, il apparaîtra à la prochaine ouverture.
+    if (thread != null) setState(() => _thread = thread);
+    return result;
   }
 
-  void _close([ExpenseDetailChoice? choice]) =>
-      Navigator.of(context).pop(choice);
+  void _close([ExpenseDetailOutcome? outcome]) =>
+      Navigator.of(context).pop(outcome);
 
   @override
   Widget build(BuildContext context) {
@@ -100,71 +135,38 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimensions.spacingL,
             ),
-            child: ExpenseDetailBody(
-              expense: _expense,
-              type: widget.type,
-              reader: widget.reader,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ExpenseDetailBody(
+                  expense: _expense,
+                  type: widget.type,
+                  reader: widget.reader,
+                  thread: _thread,
+                  accountId: widget.accountId,
+                  onSend: widget.onComment == null ? null : _send,
+                ),
+                // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
+                // garde sous les yeux le montant, la chaîne et l'historique —
+                // c'est ce qu'il refuse.
+                if (_refusing)
+                  ExpenseRefusalPanel(
+                    onCancel: () => setState(() => _refusing = false),
+                    onConfirm: (reason) => _close(
+                      ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
+                    ),
+                  ),
+              ],
             ),
           ),
           footer: [
-            Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacingM),
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppDimensions.spacingS,
-                runSpacing: AppDimensions.spacingS,
-                children: [
-                  // Supprimer : à gauche, en rouge, et seulement depuis la fiche
-                  // — la fiche est déjà un pas délibéré.
-                  PermissionGate.access(
-                    kExpenseWithdrawAccess,
-                    child: TextButton.icon(
-                      onPressed: () => _close(ExpenseDetailChoice.withdraw),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                      ),
-                      icon: const Icon(Icons.delete_outline),
-                      label: Text(l10n.expenseActionDelete),
-                    ),
-                  ),
-                  PermissionGate.access(
-                    kExpenseWriteAccess,
-                    child: Wrap(
-                      spacing: AppDimensions.spacingS,
-                      runSpacing: AppDimensions.spacingS,
-                      children: [
-                        EteeloButton.secondary(
-                          label: l10n.expenseActionDuplicate,
-                          icon: Icons.copy_outlined,
-                          onPressed: () =>
-                              _close(ExpenseDetailChoice.duplicate),
-                          fullWidth: false,
-                        ),
-                        EteeloButton.secondary(
-                          label: l10n.expenseActionEdit,
-                          icon: Icons.edit_outlined,
-                          onPressed: () => _close(ExpenseDetailChoice.edit),
-                          fullWidth: false,
-                        ),
-                        // La bascule en primaire : c'est le geste le plus
-                        // fréquent depuis une fiche.
-                        EteeloButton.primary(
-                          label: _expense.isPaid
-                              ? l10n.expenseActionMarkUnpaid
-                              : l10n.expenseActionMarkPaid,
-                          icon: _expense.isPaid
-                              ? Icons.undo
-                              : Icons.check_circle_outline,
-                          isLoading: _busy,
-                          onPressed: _toggle,
-                          fullWidth: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            ExpenseDetailActions(
+              expense: _expense,
+              accountId: widget.accountId,
+              onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
+              onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
+              onRefuse: () => setState(() => _refusing = true),
+              allowShortcuts: widget.allowShortcuts,
             ),
           ],
         ),

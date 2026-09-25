@@ -17,22 +17,42 @@ abstract final class ExpenseDeltaColumns {
     'description': d.description,
     'amount_in_cents': d.amountInCents,
     'currency': d.currency,
-    'status': d.status,
-    'paid_on': d.paidOn,
     'expense_date': d.expenseDate,
     'supplier': d.supplier,
     'funding_source': d.fundingSource,
     'client_updated_at': d.clientUpdatedAt,
   };
 
+  /// Le **statut et la date de règlement ont changé de famille en v2** : le
+  /// poste ne les écrit plus (D8), le serveur seul les arbitre. Les laisser
+  /// côté contenu les aurait fait retenir par une saisie locale plus récente —
+  /// une décision prise ailleurs serait restée invisible sur ce poste.
   static Map<String, Object?> server(ExpenseDeltaDto d) => {
+    'status': d.status,
+    'paid_on': d.paidOn,
     'expense_number': ?d.expenseNumber,
     'recorded_by_id': d.recordedById,
     'recorded_by_name': d.recordedByName,
     'version': d.version,
     'server_updated_at': d.serverUpdatedAt,
     'server_deleted_at': d.deletedAt,
+    // Les six colonnes de décision suivent le statut, et pour la même raison :
+    // une décision est prise AILLEURS. Les laisser côté contenu les ferait
+    // retenir par une saisie locale plus récente, et le poste afficherait une
+    // demande « en attente » que la direction a déjà tranchée.
+    'decided_by_id': d.decidedById,
+    'decided_by_name': d.decidedByName,
+    'decided_at': d.decidedAt,
+    'decision_reason': d.decisionReason,
+    'reminder_count': d.reminderCount,
   };
+
+  /// ⚠️ `last_message_at` n'est **PAS** dans [server], et ce n'est pas un
+  /// oubli : la fraîcheur du fil **ne recule jamais** (règle verrouillée à
+  /// DEP-11). Le serveur ne connaît pas encore le message qu'un geste local
+  /// vient d'écrire ; poser sa valeur telle quelle rendrait la demande plus
+  /// calme qu'elle n'est. Elle se pose donc sous condition, par
+  /// [ExpenseMessageDao.bumpLastMessageAt].
 
   /// La ligne porte désormais exactement ce que le serveur a retenu.
   static Map<String, Object?> get synced => {

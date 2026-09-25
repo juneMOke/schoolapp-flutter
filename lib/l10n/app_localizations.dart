@@ -15947,6 +15947,12 @@ abstract class AppLocalizations {
   /// **'Operating costs'**
   String get subMenuExpenseRegister;
 
+  /// No description provided for @subMenuExpenseQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get subMenuExpenseQueue;
+
   /// No description provided for @accueilModuleExpenseDescription.
   ///
   /// In en, this message translates to:
@@ -16013,17 +16019,35 @@ abstract class AppLocalizations {
   /// **'All'**
   String get expenseStatusAll;
 
+  /// No description provided for @expenseStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get expenseStatusPending;
+
+  /// No description provided for @expenseStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get expenseStatusApproved;
+
   /// No description provided for @expenseStatusPaid.
   ///
   /// In en, this message translates to:
   /// **'Paid'**
   String get expenseStatusPaid;
 
-  /// No description provided for @expenseStatusUnpaid.
+  /// No description provided for @expenseStatusRefused.
   ///
   /// In en, this message translates to:
-  /// **'Unpaid'**
-  String get expenseStatusUnpaid;
+  /// **'Refused'**
+  String get expenseStatusRefused;
+
+  /// No description provided for @expenseStatusRetracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Retracted'**
+  String get expenseStatusRetracted;
 
   /// No description provided for @expenseSyncRejected.
   ///
@@ -16205,53 +16229,11 @@ abstract class AppLocalizations {
   /// **'{granularity, select, day{the day before} week{the previous week} month{the previous month} other{the previous school year}}'**
   String expensePreviousPeriod(String granularity);
 
-  /// No description provided for @expenseKpiSelectionTotal.
+  /// No description provided for @expenseKpiApprovedCount.
   ///
   /// In en, this message translates to:
-  /// **'Selection total'**
-  String get expenseKpiSelectionTotal;
-
-  /// No description provided for @expenseKpiPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Already paid'**
-  String get expenseKpiPaid;
-
-  /// No description provided for @expenseKpiUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Unpaid'**
-  String get expenseKpiUnpaid;
-
-  /// No description provided for @expenseKpiShown.
-  ///
-  /// In en, this message translates to:
-  /// **'Expenses shown'**
-  String get expenseKpiShown;
-
-  /// No description provided for @expenseKpiShownA11y.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}'**
-  String expenseKpiShownA11y(int count);
-
-  /// No description provided for @expenseKpiPaidCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}'**
-  String expenseKpiPaidCount(int count);
-
-  /// No description provided for @expenseKpiUnpaidCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}'**
-  String expenseKpiUnpaidCount(int count);
-
-  /// No description provided for @expenseKpiNoRate.
-  ///
-  /// In en, this message translates to:
-  /// **'No daily rate published: amounts per currency'**
-  String get expenseKpiNoRate;
+  /// **'{count, plural, =0{no expense approved} =1{1 expense approved} other{{count} expenses approved}}'**
+  String expenseKpiApprovedCount(num count);
 
   /// No description provided for @expenseKpiTotalSpent.
   ///
@@ -16427,18 +16409,6 @@ abstract class AppLocalizations {
   /// **'Incident code: {code}'**
   String expenseErrorIncidentCode(String code);
 
-  /// No description provided for @expenseActionMarkPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark as paid'**
-  String get expenseActionMarkPaid;
-
-  /// No description provided for @expenseActionMarkUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark as unpaid'**
-  String get expenseActionMarkUnpaid;
-
   /// No description provided for @expenseActionDuplicate.
   ///
   /// In en, this message translates to:
@@ -16466,26 +16436,14 @@ abstract class AppLocalizations {
   /// No description provided for @expenseToastCreated.
   ///
   /// In en, this message translates to:
-  /// **'Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})'**
-  String expenseToastCreated(String amount, String status);
+  /// **'Request submitted · {amount} — awaiting a decision.'**
+  String expenseToastCreated(String amount);
 
   /// No description provided for @expenseToastUpdated.
   ///
   /// In en, this message translates to:
   /// **'Expense {name} updated.'**
   String expenseToastUpdated(String name);
-
-  /// No description provided for @expenseToastMarkedPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} · marked as paid.'**
-  String expenseToastMarkedPaid(String name);
-
-  /// No description provided for @expenseToastMarkedUnpaid.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} · marked as unpaid.'**
-  String expenseToastMarkedUnpaid(String name);
 
   /// No description provided for @expenseToastWithdrawn.
   ///
@@ -16630,6 +16588,606 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rejected by the server: {reason}. Edit the expense to fix it.'**
   String expenseDetailRejected(String reason);
+
+  /// No description provided for @expenseChainRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get expenseChainRequested;
+
+  /// No description provided for @expenseChainAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'awaiting'**
+  String get expenseChainAwaiting;
+
+  /// No description provided for @expenseChainNeverPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'will not be paid'**
+  String get expenseChainNeverPaid;
+
+  /// No description provided for @expenseSituationDecide.
+  ///
+  /// In en, this message translates to:
+  /// **'Yours to decide: approve, or refuse with a reason.'**
+  String get expenseSituationDecide;
+
+  /// No description provided for @expenseSituationAwaitingDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting a decision from the approver.'**
+  String get expenseSituationAwaitingDecision;
+
+  /// No description provided for @expenseRefusalReasonBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for refusal — {decider}'**
+  String expenseRefusalReasonBy(String decider);
+
+  /// No description provided for @expenseGestureApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get expenseGestureApprove;
+
+  /// No description provided for @expenseGestureRefuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse'**
+  String get expenseGestureRefuse;
+
+  /// No description provided for @expenseGesturePay.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get expenseGesturePay;
+
+  /// No description provided for @expenseGestureRetract.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get expenseGestureRetract;
+
+  /// No description provided for @expenseGestureResubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct and resend'**
+  String get expenseGestureResubmit;
+
+  /// No description provided for @expenseGestureReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the decision'**
+  String get expenseGestureReopen;
+
+  /// No description provided for @expenseGestureRemind.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a reminder'**
+  String get expenseGestureRemind;
+
+  /// No description provided for @expenseGestureComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get expenseGestureComment;
+
+  /// No description provided for @expenseRefusalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse the request'**
+  String get expenseRefusalTitle;
+
+  /// No description provided for @expenseRefusalReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for refusal (required)'**
+  String get expenseRefusalReasonLabel;
+
+  /// No description provided for @expenseRefusalReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the requester what is missing or blocking — they can correct it and resend.'**
+  String get expenseRefusalReasonHint;
+
+  /// No description provided for @expenseRefusalReasonMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'A refusal without a reason leaves the requester with no way out.'**
+  String get expenseRefusalReasonMissing;
+
+  /// No description provided for @expenseRefusalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the refusal'**
+  String get expenseRefusalConfirm;
+
+  /// No description provided for @expenseRefusalSuggestionQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote missing: attach at least two offers before committing the spend again.'**
+  String get expenseRefusalSuggestionQuote;
+
+  /// No description provided for @expenseRefusalSuggestionAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Too high for this budget line this month — reschedule to next term.'**
+  String get expenseRefusalSuggestionAmount;
+
+  /// No description provided for @expenseRefusalSuggestionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Already covered by an entry recorded last week.'**
+  String get expenseRefusalSuggestionDuplicate;
+
+  /// No description provided for @expenseToastApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} approved.'**
+  String expenseToastApproved(String name);
+
+  /// No description provided for @expenseToastRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} refused.'**
+  String expenseToastRefused(String name);
+
+  /// No description provided for @expenseToastPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense {name} marked as paid.'**
+  String expenseToastPaid(String name);
+
+  /// No description provided for @expenseToastRetracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} withdrawn.'**
+  String expenseToastRetracted(String name);
+
+  /// No description provided for @expenseToastResubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {name} sent back for a decision.'**
+  String expenseToastResubmitted(String name);
+
+  /// No description provided for @expenseToastReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision undone: {name} is pending again.'**
+  String expenseToastReopened(String name);
+
+  /// No description provided for @expenseToastReminded.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder sent for {name}.'**
+  String expenseToastReminded(String name);
+
+  /// No description provided for @expenseToastCommented.
+  ///
+  /// In en, this message translates to:
+  /// **'Message added to the thread for {name}.'**
+  String expenseToastCommented(String name);
+
+  /// No description provided for @expenseGestureRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'That gesture is no longer possible on this request: its state has changed.'**
+  String get expenseGestureRefused;
+
+  /// No description provided for @expenseThreadComposerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment'**
+  String get expenseThreadComposerLabel;
+
+  /// No description provided for @expenseThreadComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A detail, a question for the requester, a payment instruction…'**
+  String get expenseThreadComposerHint;
+
+  /// No description provided for @expenseThreadPending.
+  ///
+  /// In en, this message translates to:
+  /// **'not sent yet'**
+  String get expenseThreadPending;
+
+  /// No description provided for @expenseThreadSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The message could not be written on this device. Try again.'**
+  String get expenseThreadSendFailed;
+
+  /// No description provided for @expenseQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request approvals'**
+  String get expenseQueueTitle;
+
+  /// No description provided for @expenseQueueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue of pending requests, from the oldest to the most recent.'**
+  String get expenseQueueSubtitle;
+
+  /// No description provided for @expenseQueueWaitingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get expenseQueueWaitingToday;
+
+  /// No description provided for @expenseQueueWaitingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{for 1 day} other{for {count} days}}'**
+  String expenseQueueWaitingDays(int count);
+
+  /// No description provided for @expenseQueueReminderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reminder} other{{count} reminders}}'**
+  String expenseQueueReminderCount(int count);
+
+  /// No description provided for @expenseQueueDepositedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted on {date}'**
+  String expenseQueueDepositedOn(String date);
+
+  /// No description provided for @expenseQueueYou.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get expenseQueueYou;
+
+  /// No description provided for @expenseQueueMessageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 msg} other{{count} msgs}}'**
+  String expenseQueueMessageCount(int count);
+
+  /// No description provided for @expenseQueueSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get expenseQueueSelectAll;
+
+  /// No description provided for @expenseQueueSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get expenseQueueSortTitle;
+
+  /// No description provided for @expenseQueueSortAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get expenseQueueSortAge;
+
+  /// No description provided for @expenseQueueSortAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get expenseQueueSortAmount;
+
+  /// No description provided for @expenseQueueSortRequester.
+  ///
+  /// In en, this message translates to:
+  /// **'Requester'**
+  String get expenseQueueSortRequester;
+
+  /// No description provided for @expenseQueueOrderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay shows up first: the queue opens on the request that has waited longest.'**
+  String get expenseQueueOrderNote;
+
+  /// No description provided for @expenseQueueReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can see the queue but not decide. On your own requests you can still correct, withdraw or send a reminder.'**
+  String get expenseQueueReadOnlyNote;
+
+  /// No description provided for @expenseQueueStatPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting a decision'**
+  String get expenseQueueStatPending;
+
+  /// No description provided for @expenseQueueStatPendingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no request} =1{1 request — nothing is committed until something is decided} other{{count} requests — nothing is committed until something is decided}}'**
+  String expenseQueueStatPendingSub(int count);
+
+  /// No description provided for @expenseQueueStatOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting 5 days or more'**
+  String get expenseQueueStatOverdue;
+
+  /// No description provided for @expenseQueueStatOverdueSub.
+  ///
+  /// In en, this message translates to:
+  /// **'the oldest has waited {days} days'**
+  String expenseQueueStatOverdueSub(int days);
+
+  /// No description provided for @expenseQueueStatNoOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing overdue'**
+  String get expenseQueueStatNoOverdue;
+
+  /// No description provided for @expenseQueueStatReminded.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests with a reminder'**
+  String get expenseQueueStatReminded;
+
+  /// No description provided for @expenseQueueStatRemindedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'the requester is waiting for an answer'**
+  String get expenseQueueStatRemindedSub;
+
+  /// No description provided for @expenseQueueStatNoReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'no reminder'**
+  String get expenseQueueStatNoReminder;
+
+  /// No description provided for @expenseQueueStatApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved, left to pay'**
+  String get expenseQueueStatApproved;
+
+  /// No description provided for @expenseQueueStatApprovedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} already granted'**
+  String expenseQueueStatApprovedSub(String amount);
+
+  /// No description provided for @expenseQueueEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue is empty'**
+  String get expenseQueueEmptyTitle;
+
+  /// No description provided for @expenseQueueEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No request is awaiting a decision: everything submitted has been settled.'**
+  String get expenseQueueEmptyMessage;
+
+  /// No description provided for @expenseQueueEmptyWithApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'No request is awaiting a decision. {count, plural, =1{1 approved expense is} other{{count} approved expenses are}} left to pay.'**
+  String expenseQueueEmptyWithApproved(int count);
+
+  /// No description provided for @expenseQueueOpenRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the request'**
+  String get expenseQueueOpenRequest;
+
+  /// No description provided for @expenseQueueOpenRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the register'**
+  String get expenseQueueOpenRegister;
+
+  /// No description provided for @expenseQueueSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request selected} other{{count} requests selected}}'**
+  String expenseQueueSelected(int count);
+
+  /// No description provided for @expenseQueueDeselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get expenseQueueDeselect;
+
+  /// No description provided for @expenseQueueApproveBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve as a batch'**
+  String get expenseQueueApproveBatch;
+
+  /// No description provided for @expenseQueueRefuseBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse as a batch'**
+  String get expenseQueueRefuseBatch;
+
+  /// No description provided for @expenseQueueBatchReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Reason for refusal — 1 request} other{Shared reason for refusal — {count} requests}}'**
+  String expenseQueueBatchReasonLabel(int count);
+
+  /// No description provided for @expenseQueueBatchReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The same reason will be written into every thread, with your name and the date.'**
+  String get expenseQueueBatchReasonHint;
+
+  /// No description provided for @expenseQueueBatchConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Confirm the refusal} other{Confirm the refusal of {count} requests}}'**
+  String expenseQueueBatchConfirm(int count);
+
+  /// No description provided for @expenseQueueBatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request handled} other{{count} requests handled}} · {amount}'**
+  String expenseQueueBatchDone(int count, String amount);
+
+  /// No description provided for @expenseQueueBatchPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{done, plural, =1{1 request handled} other{{done} requests handled}} — {failed, plural, =1{1 could not be} other{{failed} could not be}}.'**
+  String expenseQueueBatchPartial(int done, int failed);
+
+  /// No description provided for @expenseQueueBatchNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No request could be handled: their state has changed.'**
+  String get expenseQueueBatchNone;
+
+  /// No description provided for @expenseQueueApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved, awaiting payment'**
+  String get expenseQueueApprovedTitle;
+
+  /// No description provided for @expenseQueueApprovedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 granted expense} other{{count} granted expenses}} — payment is recorded here or from the detail sheet.'**
+  String expenseQueueApprovedSubtitle(int count);
+
+  /// No description provided for @expenseQueueApprovedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'approved on {date} by {name}'**
+  String expenseQueueApprovedOn(String date, String name);
+
+  /// No description provided for @expenseQueueApprovedUndated.
+  ///
+  /// In en, this message translates to:
+  /// **'approved — this device does not know the decider yet'**
+  String get expenseQueueApprovedUndated;
+
+  /// No description provided for @expenseQueueSeeAllApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'See all {count} approved expenses in the register'**
+  String expenseQueueSeeAllApproved(int count);
+
+  /// No description provided for @expenseRejectedAlreadyDecided.
+  ///
+  /// In en, this message translates to:
+  /// **'a colleague had already settled it'**
+  String get expenseRejectedAlreadyDecided;
+
+  /// No description provided for @expenseRejectedSelfApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'one does not approve one\'s own request'**
+  String get expenseRejectedSelfApproval;
+
+  /// No description provided for @expenseRejectedNotOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'that gesture belongs to the requester'**
+  String get expenseRejectedNotOwner;
+
+  /// No description provided for @expenseRejectedReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'a refusal needs its reason'**
+  String get expenseRejectedReasonRequired;
+
+  /// No description provided for @expenseRejectedOutOfOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'an earlier gesture has not gone out yet'**
+  String get expenseRejectedOutOfOrder;
+
+  /// No description provided for @expenseDetailGestureRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Gesture refused by the server: {reason}. The request stayed as it was.'**
+  String expenseDetailGestureRejected(String reason);
+
+  /// No description provided for @expenseThreadRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'not sent'**
+  String get expenseThreadRejected;
+
+  /// No description provided for @expenseThreadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request thread'**
+  String get expenseThreadTitle;
+
+  /// No description provided for @expenseThreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no message} =1{1 message} other{{count} messages}}'**
+  String expenseThreadCount(int count);
+
+  /// No description provided for @expenseThreadEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No message yet — every decision will be written here.'**
+  String get expenseThreadEmpty;
+
+  /// No description provided for @expenseThreadUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The thread could not be read on this device.'**
+  String get expenseThreadUnreadable;
+
+  /// No description provided for @expenseActDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted'**
+  String get expenseActDeposit;
+
+  /// No description provided for @expenseActReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get expenseActReminder;
+
+  /// No description provided for @expenseActApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval'**
+  String get expenseActApproval;
+
+  /// No description provided for @expenseActRefusal.
+  ///
+  /// In en, this message translates to:
+  /// **'Refusal'**
+  String get expenseActRefusal;
+
+  /// No description provided for @expenseActPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get expenseActPayment;
+
+  /// No description provided for @expenseActRetraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Request retracted'**
+  String get expenseActRetraction;
+
+  /// No description provided for @expenseActReopening.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision cancelled'**
+  String get expenseActReopening;
+
+  /// No description provided for @expenseActCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'Request corrected and resubmitted'**
+  String get expenseActCorrection;
+
+  /// No description provided for @expenseActEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request edited'**
+  String get expenseActEdit;
 
   /// No description provided for @expenseFormCreateTitle.
   ///

@@ -6517,6 +6517,7 @@
   "feeControlEmptyBilling": "Open billing",
   "menuExpenses": "Expenses",
   "subMenuExpenseRegister": "Operating costs",
+  "subMenuExpenseQueue": "Approvals",
   "accueilModuleExpenseDescription": "What the school pays out: the operating costs register and its dashboard.",
   "expenseNewAction": "New expense",
   "expenseOpenRegister": "Open the register",
@@ -6528,8 +6529,11 @@
   "expenseNumberPending": "No. pending",
   "expenseStatusTitle": "Status",
   "expenseStatusAll": "All",
+  "expenseStatusPending": "Pending",
+  "expenseStatusApproved": "Approved",
   "expenseStatusPaid": "Paid",
-  "expenseStatusUnpaid": "Unpaid",
+  "expenseStatusRefused": "Refused",
+  "expenseStatusRetracted": "Retracted",
   "expenseSyncRejected": "Needs fixing",
   "expenseTypesTitle": "Expense types",
   "expenseTypesShowAll": "show all",
@@ -6604,35 +6608,7 @@
       }
     }
   },
-  "expenseKpiSelectionTotal": "Selection total",
-  "expenseKpiPaid": "Already paid",
-  "expenseKpiUnpaid": "Unpaid",
-  "expenseKpiShown": "Expenses shown",
-  "expenseKpiShownA11y": "{count, plural, =0{No expense shown} =1{1 expense shown} other{{count} expenses shown}}",
-  "@expenseKpiShownA11y": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiPaidCount": "{count, plural, =0{no expense settled} =1{1 expense settled} other{{count} expenses settled}}",
-  "@expenseKpiPaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiUnpaidCount": "{count, plural, =0{no expense pending} =1{1 expense pending} other{{count} expenses pending}}",
-  "@expenseKpiUnpaidCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "expenseKpiNoRate": "No daily rate published: amounts per currency",
+  "expenseKpiApprovedCount": "{count, plural, =0{no expense approved} =1{1 expense approved} other{{count} expenses approved}}",
   "expenseKpiTotalSpent": "Total spent",
   "expenseKpiRemaining": "Still to pay",
   "expenseKpiRecorded": "Expenses recorded",
@@ -6765,41 +6741,20 @@
       }
     }
   },
-  "expenseActionMarkPaid": "Mark as paid",
-  "expenseActionMarkUnpaid": "Mark as unpaid",
   "expenseActionDuplicate": "Duplicate",
   "expenseActionEdit": "Edit",
   "expenseActionDelete": "Delete",
   "expenseDialogClose": "Close",
-  "expenseToastCreated": "Expense recorded · {amount} ({status, select, PAID{paid} other{unpaid}})",
+  "expenseToastCreated": "Request submitted · {amount} — awaiting a decision.",
   "@expenseToastCreated": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      },
-      "status": {
         "type": "String"
       }
     }
   },
   "expenseToastUpdated": "Expense {name} updated.",
   "@expenseToastUpdated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedPaid": "{name} · marked as paid.",
-  "@expenseToastMarkedPaid": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseToastMarkedUnpaid": "{name} · marked as unpaid.",
-  "@expenseToastMarkedUnpaid": {
     "placeholders": {
       "name": {
         "type": "String"
@@ -6858,6 +6813,139 @@
       }
     }
   },
+  "expenseChainRequested": "Requested",
+  "expenseChainAwaiting": "awaiting",
+  "expenseChainNeverPaid": "will not be paid",
+  "expenseSituationDecide": "Yours to decide: approve, or refuse with a reason.",
+  "expenseSituationAwaitingDecision": "Awaiting a decision from the approver.",
+  "expenseRefusalReasonBy": "Reason for refusal — {decider}",
+  "@expenseRefusalReasonBy": {"placeholders": {"decider": {"type": "String"}}},
+  "expenseGestureApprove": "Approve",
+  "expenseGestureRefuse": "Refuse",
+  "expenseGesturePay": "Mark as paid",
+  "expenseGestureRetract": "Withdraw",
+  "expenseGestureResubmit": "Correct and resend",
+  "expenseGestureReopen": "Undo the decision",
+  "expenseGestureRemind": "Send a reminder",
+  "expenseGestureComment": "Send",
+  "expenseRefusalTitle": "Refuse the request",
+  "expenseRefusalReasonLabel": "Reason for refusal (required)",
+  "expenseRefusalReasonHint": "Tell the requester what is missing or blocking — they can correct it and resend.",
+  "expenseRefusalReasonMissing": "A refusal without a reason leaves the requester with no way out.",
+  "expenseRefusalConfirm": "Confirm the refusal",
+  "expenseRefusalSuggestionQuote": "Quote missing: attach at least two offers before committing the spend again.",
+  "expenseRefusalSuggestionAmount": "Too high for this budget line this month — reschedule to next term.",
+  "expenseRefusalSuggestionDuplicate": "Already covered by an entry recorded last week.",
+  "expenseToastApproved": "Request {name} approved.",
+  "@expenseToastApproved": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRefused": "Request {name} refused.",
+  "@expenseToastRefused": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastPaid": "Expense {name} marked as paid.",
+  "@expenseToastPaid": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastRetracted": "Request {name} withdrawn.",
+  "@expenseToastRetracted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastResubmitted": "Request {name} sent back for a decision.",
+  "@expenseToastResubmitted": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReopened": "Decision undone: {name} is pending again.",
+  "@expenseToastReopened": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastReminded": "Reminder sent for {name}.",
+  "@expenseToastReminded": {"placeholders": {"name": {"type": "String"}}},
+  "expenseToastCommented": "Message added to the thread for {name}.",
+  "@expenseToastCommented": {"placeholders": {"name": {"type": "String"}}},
+  "expenseGestureRefused": "That gesture is no longer possible on this request: its state has changed.",
+  "expenseThreadComposerLabel": "Add a comment",
+  "expenseThreadComposerHint": "A detail, a question for the requester, a payment instruction…",
+  "expenseThreadPending": "not sent yet",
+  "expenseThreadSendFailed": "The message could not be written on this device. Try again.",
+  "expenseQueueTitle": "Request approvals",
+  "expenseQueueSubtitle": "The queue of pending requests, from the oldest to the most recent.",
+  "expenseQueueWaitingToday": "today",
+  "expenseQueueWaitingDays": "{count, plural, =1{for 1 day} other{for {count} days}}",
+  "@expenseQueueWaitingDays": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueReminderCount": "{count, plural, =1{1 reminder} other{{count} reminders}}",
+  "@expenseQueueReminderCount": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueDepositedOn": "Submitted on {date}",
+  "@expenseQueueDepositedOn": {"placeholders": {"date": {"type": "String"}}},
+  "expenseQueueYou": "you",
+  "expenseQueueMessageCount": "{count, plural, =1{1 msg} other{{count} msgs}}",
+  "@expenseQueueMessageCount": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueSelectAll": "Select all",
+  "expenseQueueSortTitle": "Sort by",
+  "expenseQueueSortAge": "Age",
+  "expenseQueueSortAmount": "Amount",
+  "expenseQueueSortRequester": "Requester",
+  "expenseQueueOrderNote": "Delay shows up first: the queue opens on the request that has waited longest.",
+  "expenseQueueReadOnlyNote": "You can see the queue but not decide. On your own requests you can still correct, withdraw or send a reminder.",
+  "expenseQueueStatPending": "Awaiting a decision",
+  "expenseQueueStatPendingSub": "{count, plural, =0{no request} =1{1 request — nothing is committed until something is decided} other{{count} requests — nothing is committed until something is decided}}",
+  "@expenseQueueStatPendingSub": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueStatOverdue": "Waiting 5 days or more",
+  "expenseQueueStatOverdueSub": "the oldest has waited {days} days",
+  "@expenseQueueStatOverdueSub": {"placeholders": {"days": {"type": "int"}}},
+  "expenseQueueStatNoOverdue": "nothing overdue",
+  "expenseQueueStatReminded": "Requests with a reminder",
+  "expenseQueueStatRemindedSub": "the requester is waiting for an answer",
+  "expenseQueueStatNoReminder": "no reminder",
+  "expenseQueueStatApproved": "Approved, left to pay",
+  "expenseQueueStatApprovedSub": "{amount} already granted",
+  "@expenseQueueStatApprovedSub": {"placeholders": {"amount": {"type": "String"}}},
+  "expenseQueueEmptyTitle": "The queue is empty",
+  "expenseQueueEmptyMessage": "No request is awaiting a decision: everything submitted has been settled.",
+  "expenseQueueEmptyWithApproved": "No request is awaiting a decision. {count, plural, =1{1 approved expense is} other{{count} approved expenses are}} left to pay.",
+  "@expenseQueueEmptyWithApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueOpenRequest": "Open the request",
+  "expenseQueueOpenRegister": "Open the register",
+  "expenseQueueSelected": "{count, plural, =1{1 request selected} other{{count} requests selected}}",
+  "@expenseQueueSelected": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueDeselect": "Deselect",
+  "expenseQueueApproveBatch": "Approve as a batch",
+  "expenseQueueRefuseBatch": "Refuse as a batch",
+  "expenseQueueBatchReasonLabel": "{count, plural, =1{Reason for refusal — 1 request} other{Shared reason for refusal — {count} requests}}",
+  "@expenseQueueBatchReasonLabel": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueBatchReasonHint": "The same reason will be written into every thread, with your name and the date.",
+  "expenseQueueBatchConfirm": "{count, plural, =1{Confirm the refusal} other{Confirm the refusal of {count} requests}}",
+  "@expenseQueueBatchConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueBatchDone": "{count, plural, =1{1 request handled} other{{count} requests handled}} · {amount}",
+  "@expenseQueueBatchDone": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}}},
+  "expenseQueueBatchPartial": "{done, plural, =1{1 request handled} other{{done} requests handled}} — {failed, plural, =1{1 could not be} other{{failed} could not be}}.",
+  "@expenseQueueBatchPartial": {"placeholders": {"done": {"type": "int"}, "failed": {"type": "int"}}},
+  "expenseQueueBatchNone": "No request could be handled: their state has changed.",
+  "expenseQueueApprovedTitle": "Approved, awaiting payment",
+  "expenseQueueApprovedSubtitle": "{count, plural, =1{1 granted expense} other{{count} granted expenses}} — payment is recorded here or from the detail sheet.",
+  "@expenseQueueApprovedSubtitle": {"placeholders": {"count": {"type": "int"}}},
+  "expenseQueueApprovedOn": "approved on {date} by {name}",
+  "@expenseQueueApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "expenseQueueApprovedUndated": "approved — this device does not know the decider yet",
+  "expenseQueueSeeAllApproved": "See all {count} approved expenses in the register",
+  "@expenseQueueSeeAllApproved": {"placeholders": {"count": {"type": "int"}}},
+  "expenseRejectedAlreadyDecided": "a colleague had already settled it",
+  "expenseRejectedSelfApproval": "one does not approve one's own request",
+  "expenseRejectedNotOwner": "that gesture belongs to the requester",
+  "expenseRejectedReasonRequired": "a refusal needs its reason",
+  "expenseRejectedOutOfOrder": "an earlier gesture has not gone out yet",
+  "expenseDetailGestureRejected": "Gesture refused by the server: {reason}. The request stayed as it was.",
+  "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
+  "expenseThreadRejected": "not sent",
+  "expenseThreadTitle": "Request thread",
+  "expenseThreadCount": "{count, plural, =0{no message} =1{1 message} other{{count} messages}}",
+  "@expenseThreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseThreadEmpty": "No message yet — every decision will be written here.",
+  "expenseThreadUnreadable": "The thread could not be read on this device.",
+  "expenseActDeposit": "Request submitted",
+  "expenseActReminder": "Reminder",
+  "expenseActApproval": "Approval",
+  "expenseActRefusal": "Refusal",
+  "expenseActPayment": "Payment recorded",
+  "expenseActRetraction": "Request retracted",
+  "expenseActReopening": "Decision cancelled",
+  "expenseActCorrection": "Request corrected and resubmitted",
+  "expenseActEdit": "Request edited",
   "expenseFormCreateTitle": "Record an operating expense",
   "expenseFormCreateSubtitle": "What the school paid out: a title, a type, an amount, a status.",
   "expenseFormEditEyebrow": "Edit the expense",

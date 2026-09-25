@@ -33,6 +33,25 @@ class ExpenseDeltaDto {
   final int? version;
   final String? serverUpdatedAt;
 
+  // ── Le circuit de validation (v2) ───────────────────────────────────────
+
+  final String? decidedById;
+  final String? decidedByName;
+  final String? decidedAt;
+
+  /// Non nul **si et seulement si** la demande est refusée.
+  final String? decisionReason;
+
+  final int reminderCount;
+
+  /// Fraîcheur du fil — distincte de [clientUpdatedAt] : un message ne doit
+  /// jamais faire perdre une décision à l'arbitrage du contenu.
+  final String? lastMessageAt;
+
+  /// Le fil, **toujours entier** : la pagination porte sur les demandes,
+  /// jamais sur les messages (Q9) — donc jamais de fil tronqué en silence.
+  final List<ExpenseMessageDeltaDto> messages;
+
   const ExpenseDeltaDto({
     required this.id,
     this.expenseNumber,
@@ -52,6 +71,13 @@ class ExpenseDeltaDto {
     this.deletedAt,
     this.version,
     this.serverUpdatedAt,
+    this.decidedById,
+    this.decidedByName,
+    this.decidedAt,
+    this.decisionReason,
+    this.reminderCount = 0,
+    this.lastMessageAt,
+    this.messages = const [],
   });
 
   static ExpenseDeltaDto? tryParse(Object? raw) {
@@ -88,6 +114,14 @@ class ExpenseDeltaDto {
     }
     final paidOn = ExpenseDay.tryParse(text('paidOn'));
     final version = raw['version'];
+    final reminders = raw['reminderCount'];
+    // Un message illisible est ÉCARTÉ, jamais placé au hasard ni fatal à sa
+    // demande : le fil se lit dans l'ordre ou ne se lit pas.
+    final rawMessages = raw['messages'];
+    final messages = <ExpenseMessageDeltaDto>[
+      if (rawMessages is List)
+        for (final item in rawMessages) ?ExpenseMessageDeltaDto.tryParse(item),
+    ];
     return ExpenseDeltaDto(
       id: id,
       expenseNumber: text('expenseNumber'),
@@ -107,6 +141,69 @@ class ExpenseDeltaDto {
       deletedAt: instant('deletedAt'),
       version: version is num ? version.toInt() : null,
       serverUpdatedAt: text('serverUpdatedAt'),
+      decidedById: text('decidedById'),
+      decidedByName: text('decidedByName'),
+      decidedAt: instant('decidedAt'),
+      decisionReason: text('decisionReason'),
+      reminderCount: reminders is num ? reminders.toInt() : 0,
+      lastMessageAt: instant('lastMessageAt'),
+      messages: messages,
+    );
+  }
+}
+
+/// Un message du fil, tel qu'il descend (`{ id, body, act, createdAt,
+/// authorId, authorName }`).
+///
+/// [tryParse] rend `null` plutôt que de lever : une ligne de fil malformée
+/// est écartée, sa demande descend quand même. L'inverse ferait disparaître
+/// une dépense entière à cause d'un commentaire.
+class ExpenseMessageDeltaDto {
+  final String id;
+  final String body;
+
+  /// Un des neuf actes anglais, ou `null` pour un commentaire libre.
+  final String? act;
+
+  /// ISO-8601 UTC — c'est cette horloge qui ordonne le fil.
+  final String createdAt;
+  final String? authorId;
+  final String? authorName;
+
+  const ExpenseMessageDeltaDto({
+    required this.id,
+    required this.body,
+    this.act,
+    required this.createdAt,
+    this.authorId,
+    this.authorName,
+  });
+
+  static ExpenseMessageDeltaDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    String? text(String key) {
+      final value = raw[key];
+      if (value is! String) return null;
+      final trimmed = value.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
+    final id = text('id');
+    final createdAt = DateTime.tryParse(
+      text('createdAt') ?? '',
+    )?.toUtc().toIso8601String();
+    // Sans identifiant ni horloge, le message n'a ni clé ni place : l'écrire
+    // quand même le ferait tomber au hasard entre deux gestes.
+    if (id == null || createdAt == null) return null;
+    return ExpenseMessageDeltaDto(
+      id: id,
+      // Un corps vide est LÉGITIME : un geste qui se suffit n'écrit pas de
+      // mot, et sa vignette porte l'acte.
+      body: (raw['body'] as String?) ?? '',
+      act: text('act')?.toUpperCase(),
+      createdAt: createdAt,
+      authorId: text('authorId'),
+      authorName: text('authorName'),
     );
   }
 }

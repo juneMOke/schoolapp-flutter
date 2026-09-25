@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
@@ -24,7 +23,6 @@ class ExpenseRegisterRow extends StatelessWidget {
   final ExpenseType? type;
   final ExpenseUsdReader reader;
   final VoidCallback onOpen;
-  final VoidCallback onToggle;
   final VoidCallback onDuplicate;
 
   const ExpenseRegisterRow({
@@ -33,7 +31,6 @@ class ExpenseRegisterRow extends StatelessWidget {
     required this.type,
     required this.reader,
     required this.onOpen,
-    required this.onToggle,
     required this.onDuplicate,
   });
 
@@ -72,11 +69,7 @@ class ExpenseRegisterRow extends StatelessWidget {
       ),
       const SizedBox(width: AppDimensions.spacingM),
       Expanded(flex: 8, child: _Badges(expense: expense)),
-      ExpenseRowActions(
-        expense: expense,
-        onToggle: onToggle,
-        onDuplicate: onDuplicate,
-      ),
+      ExpenseRowActions(onDuplicate: onDuplicate),
     ],
   );
 
@@ -98,11 +91,7 @@ class ExpenseRegisterRow extends StatelessWidget {
           const SizedBox(width: AppDimensions.spacingS),
           Flexible(child: _Badges(expense: expense)),
           const Spacer(),
-          ExpenseRowActions(
-            expense: expense,
-            onToggle: onToggle,
-            onDuplicate: onDuplicate,
-          ),
+          ExpenseRowActions(onDuplicate: onDuplicate),
         ],
       ),
     ],
@@ -151,7 +140,7 @@ class _Amount extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final usd = ExpenseMoneyText.showsUsdEquivalent(expense.currency)
-        ? reader.usdCentsOf(Money(expense.amountInCents, expense.currency))
+        ? reader.usdCentsOf(expense.money)
         : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
