@@ -12,6 +12,10 @@ import 'package:printing/printing.dart';
 // et « le filet s'est bien déployé » ne serait pas vérifiable.
 // ignore: implementation_imports
 import 'package:printing/src/interface.dart';
+import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
@@ -50,7 +54,10 @@ void main() {
   late CurrentUserContext userContext;
   late _FakeBandLoader bandLoader;
 
+  late _FakeSchools schools;
+
   setUp(() {
+    schools = _FakeSchools();
     userContext = CurrentUserContext()..set('u-1', schoolId: 'ecole-1');
     bandLoader = _FakeBandLoader();
     printing = _FakePrinting();
@@ -73,7 +80,10 @@ void main() {
       // ici n'est pas une commodité de test — c'est ce qui rend observable le
       // fait que la bande atteint bien le renderer.
       ..registerSingleton<CurrentUserContext>(userContext)
-      ..registerSingleton<SchoolLogoBandLoader>(bandLoader);
+      ..registerSingleton<SchoolLogoBandLoader>(bandLoader)
+      ..registerFactory<ResolveTicketCopiesUseCase>(
+        () => ResolveTicketCopiesUseCase(schools),
+      );
   });
 
   tearDown(getIt.reset);
@@ -370,6 +380,27 @@ void main() {
       await run(tester, more: 2);
 
       expect(pageCount(printing.laidOut.last), 3);
+    });
+
+    testWidgets('le compteur part du défaut de l école', (tester) async {
+      schools.ticketCopies = 2;
+
+      await run(tester);
+
+      expect(port.sentCopies, equals([2]));
+    });
+
+    testWidgets('un échec AVANT le compteur : le défaut de l école', (
+      tester,
+    ) async {
+      schools.ticketCopies = 2;
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      await run(tester);
+
+      // Personne n'a vu le compteur : c'est le réglage de l'école qui décide
+      // du nombre de feuilles, pas un « 1 » par défaut.
+      expect(pageCount(printing.laidOut.last), 2);
     });
 
     testWidgets('un échec AVANT le compteur : le défaut, un exemplaire', (
@@ -680,4 +711,18 @@ class _FakeBandLoader implements SchoolLogoBandLoader {
     askedFor.add(schoolId);
     return band;
   }
+}
+
+/// L'école vue par le défaut d'exemplaires : seul [ticketCopies] compte.
+class _FakeSchools implements SchoolRepository {
+  int? ticketCopies;
+
+  @override
+  Future<Either<Failure, School?>> loadCurrentSchool() async => Right(
+    School(id: 'ecole-1', name: 'EP Kimbanguiste', ticketCopies: ticketCopies),
+  );
+
+  @override
+  Future<Either<Failure, SchoolLogo?>> loadCurrentSchoolLogo() async =>
+      const Right(null);
 }

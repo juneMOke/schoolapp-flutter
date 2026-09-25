@@ -240,6 +240,16 @@
   "@configurationSchoolPhone": {
     "description": "Champ téléphone de l'établissement"
   },
+  "configurationSchoolTicketCopies": "Exemplaires par ticket",
+  "configurationSchoolTicketCopiesHelper": "Nombre proposé d'office à l'impression d'un ticket de perception ou de vente. Le caissier peut l'ajuster à chaque ticket.",
+  "configurationSchoolTicketCopiesDefault": "{count} (par défaut)",
+  "@configurationSchoolTicketCopiesDefault": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "configurationSchoolEmail": "E-mail de l'école",
   "@configurationSchoolEmail": {
     "description": "Champ e-mail de l'établissement"

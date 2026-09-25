@@ -36,6 +36,15 @@ class SchoolIdentity extends Equatable {
   /// Pour le changer, il faut en saisir un autre.
   final String tillPhone;
 
+  /// Le nombre d'exemplaires qu'un ticket sort d'office (1 à 5). Facultatif,
+  /// hors de [missingFields] comme [tillPhone] : `null` = l'école n'a rien
+  /// fixé, les tablettes proposent un exemplaire.
+  ///
+  /// ⚠️ **Il ne se vide pas non plus**, pour la même raison : le serveur
+  /// conserve la valeur quand le `PUT` l'omet ou l'envoie à `null`. Revenir au
+  /// comportement d'avant, c'est choisir 1.
+  final int? ticketCopies;
+
   final String email;
 
   const SchoolIdentity({
@@ -48,6 +57,7 @@ class SchoolIdentity extends Equatable {
     required this.address,
     required this.phone,
     this.tillPhone = '',
+    this.ticketCopies,
     required this.email,
   });
 
@@ -80,6 +90,7 @@ class SchoolIdentity extends Equatable {
     String? address,
     String? phone,
     String? tillPhone,
+    int? ticketCopies,
     String? email,
   }) {
     return SchoolIdentity(
@@ -94,6 +105,7 @@ class SchoolIdentity extends Equatable {
       address: address ?? this.address,
       phone: phone ?? this.phone,
       tillPhone: tillPhone ?? this.tillPhone,
+      ticketCopies: ticketCopies ?? this.ticketCopies,
       email: email ?? this.email,
     );
   }
@@ -109,6 +121,7 @@ class SchoolIdentity extends Equatable {
     address,
     phone,
     tillPhone,
+    ticketCopies,
     email,
   ];
 }

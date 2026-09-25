@@ -170,6 +170,81 @@ void main() {
     });
   });
 
+  group('v53 — les exemplaires par ticket', () {
+    Future<Set<String>> colonnes() async => {
+      for (final r in await db.rawQuery('PRAGMA table_info(ref_school)'))
+        r['name']! as String,
+    };
+
+    /// Une `ref_school` d'AVANT la v53 : le schéma vivant porte déjà la
+    /// colonne, il faut donc la retirer pour exercer le palier.
+    Future<void> seedSansColonne() async {
+      await db.execute('DROP TABLE ref_school');
+      await db.execute('''
+        CREATE TABLE ref_school (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          till_phone TEXT,
+          synced_at INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.insert('ref_school', {
+        'id': 'A',
+        'name': 'EP Kimbanguiste',
+        'till_phone': '+243 811 111 111',
+      });
+    }
+
+    test('la colonne arrive, et la ligne existante survit', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 52);
+
+      expect(await colonnes(), contains('ticket_copies'));
+      final row = (await db.query('ref_school')).single;
+      expect(row['till_phone'], '+243 811 111 111');
+      // Aucune reprise : le prochain pull la remplit.
+      expect(row['ticket_copies'], isNull);
+    });
+
+    test('rejouable : la colonne déjà là ne fait pas lever', () async {
+      await seedSansColonne();
+
+      await migrateTenantDatabase(db, 52);
+      await migrateTenantDatabase(db, 52);
+
+      expect(await colonnes(), contains('ticket_copies'));
+    });
+
+    test('une base sans référentiel traverse le palier sans lever', () async {
+      await db.execute('DROP TABLE ref_school');
+
+      await expectLater(migrateTenantDatabase(db, 52), completes);
+    });
+
+    test(
+      'une base montée et une base créée à neuf ont la même table',
+      () async {
+        await seedSansColonne();
+        await migrateTenantDatabase(db, 52);
+
+        // Le schéma vivant, lui, naît avec la colonne : les deux chemins
+        // doivent aboutir au même endroit.
+        final fresh = await databaseFactoryFfi.openDatabase(
+          inMemoryDatabasePath,
+          options: OpenDatabaseOptions(singleInstance: false),
+        );
+        addTearDown(fresh.close);
+        await createOfflineSchema(fresh, buildOfflineSchema());
+        final freshColumns = {
+          for (final r in await fresh.rawQuery('PRAGMA table_info(ref_school)'))
+            r['name']! as String,
+        };
+        expect(freshColumns, contains('ticket_copies'));
+      },
+    );
+  });
+
   group('v51 — le matricule annuel', () {
     /// Une `enrollments` d'AVANT la v51 : le schéma vivant porte déjà la
     /// colonne, il faut donc la retirer pour exercer le palier.

@@ -77,6 +77,7 @@ import 'package:school_app_flutter/features/academic_year/data/repositories/acad
 import 'package:school_app_flutter/features/school/data/local/school_logo_cache_dao.dart';
 import 'package:school_app_flutter/features/school/data/repositories/school_repository_impl.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
@@ -1400,6 +1401,12 @@ Future<void> configureDependencies({
       logoCache: getIt<SchoolLogoCacheDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
+  );
+
+  // Le défaut d'exemplaires d'un ticket, lu du même `ref_school` : le
+  // réglage de l'école, ou un exemplaire.
+  getIt.registerFactory<ResolveTicketCopiesUseCase>(
+    () => ResolveTicketCopiesUseCase(getIt<SchoolRepository>()),
   );
 
   // Factory, comme tout BLoC — et comme `SyncStatusCubit`, qui tient pourtant

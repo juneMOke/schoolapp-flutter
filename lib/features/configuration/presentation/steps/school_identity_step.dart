@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/configuration/domain/entities/school_identity.dart';
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_field_grid.dart';
+import 'package:school_app_flutter/features/configuration/presentation/widgets/school_ticket_copies_select.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -236,6 +237,12 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
                         cubit.edit(identity.copyWith(email: value)),
                   ),
                 ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SchoolTicketCopiesSelect(
+                value: identity.ticketCopies,
+                onChanged: (value) =>
+                    cubit.edit(identity.copyWith(ticketCopies: value)),
               ),
             ],
           ),

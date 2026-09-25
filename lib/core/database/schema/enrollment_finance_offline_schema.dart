@@ -277,6 +277,7 @@ const TableSchema refSchoolTable = TableSchema(
       address TEXT,
       phone TEXT,
       till_phone TEXT,
+      ticket_copies INTEGER,
       email TEXT,
       logo_thermal_sha256 TEXT,
       logo_display_sha256 TEXT,

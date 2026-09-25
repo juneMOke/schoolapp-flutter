@@ -26,6 +26,10 @@ class SchoolIdentityModel {
   /// contrat ne dit pas.
   final String? tillPhone;
 
+  /// Facultatif lui aussi, et même règle que [tillPhone] : absent ou `null`,
+  /// le serveur conserve la valeur déjà enregistrée.
+  final int? ticketCopies;
+
   final String email;
 
   const SchoolIdentityModel({
@@ -38,6 +42,7 @@ class SchoolIdentityModel {
     required this.address,
     required this.phone,
     this.tillPhone,
+    this.ticketCopies,
     required this.email,
   });
 
@@ -59,6 +64,7 @@ class SchoolIdentityModel {
         tillPhone: identity.tillPhone.trim().isEmpty
             ? null
             : identity.tillPhone.trim(),
+        ticketCopies: identity.ticketCopies,
         email: identity.email.trim(),
       );
 
@@ -76,6 +82,7 @@ class SchoolIdentityModel {
     address: address,
     phone: phone,
     tillPhone: tillPhone ?? '',
+    ticketCopies: ticketCopies,
     email: email,
   );
 }

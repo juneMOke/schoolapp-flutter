@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
-import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
@@ -112,6 +112,11 @@ Future<void> printProvisionalTicketWithFallback(
     getIt<CurrentUserContext>().schoolId,
   );
 
+  // Le point de départ du compteur d'exemplaires : le réglage de l'école, ou
+  // un. Résolu avec le reste, AVANT la surface — le repli sans écran juste
+  // en dessous en a besoin autant que le sélecteur.
+  final defaultCopies = await getIt<ResolveTicketCopiesUseCase>()();
+
   // Même raison qu'au-dessus, un cran plus tôt : sans surface, on ne peut plus
   // demander l'imprimante, ni montrer quoi que ce soit — mais on peut encore
   // remettre un papier.
@@ -120,6 +125,7 @@ Future<void> printProvisionalTicketWithFallback(
       model: model,
       cutNotice: cutNotice,
       logoBand: logoBand,
+      copies: defaultCopies,
     );
     return;
   }
@@ -164,6 +170,7 @@ Future<void> printProvisionalTicketWithFallback(
       paymentId: paymentId,
       cutNotice: cutNotice,
       logoBand: logoBand,
+      defaultCopies: defaultCopies,
       messenger: messenger,
       l10n: l10n,
     ),
@@ -180,14 +187,10 @@ Future<void> _sendTicketToPrinter(
   required String paymentId,
   required String cutNotice,
   required TicketLogoBand? logoBand,
+  required int defaultCopies,
   required ScaffoldMessengerState? messenger,
   required AppLocalizations l10n,
 }) async {
-  // Le défaut du compteur d'exemplaires. Un par ticket tant que l'école ne
-  // peut pas fixer le sien — c'est ici que ce défaut se branchera
-  // (`TICKET_COPIES_PLAN.md`, lot 2).
-  const defaultCopies = TicketCopies.fallback;
-
   final outcome = await printThermalTicket(
     context,
     model: model,

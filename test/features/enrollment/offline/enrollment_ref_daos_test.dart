@@ -1735,6 +1735,51 @@ void main() {
     });
   });
 
+  group('les exemplaires par ticket (v53)', () {
+    test('descendent du référentiel et se relisent', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            ticketCopies: 2,
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.ticketCopies, 2);
+    });
+
+    /// Tant que le serveur ne le sert pas, le champ est absent : le poste
+    /// applique alors un exemplaire, comme avant.
+    test('absent du contrat servi : `null`', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      expect((await referentialDao.getSchool())!.ticketCopies, isNull);
+    });
+
+    test('le JSON du contrat porte bien `ticketCopies`', () {
+      RefSchoolDto parse(Object? value) => RefSchoolDto.fromJson({
+        'id': 'sch-1',
+        'name': 'Ecole Etoile',
+        'ticketCopies': value,
+      });
+
+      expect(parse(3).ticketCopies, 3);
+      // Un décodeur peut rendre un entier sous forme de double.
+      expect(parse(3.0).ticketCopies, 3);
+      expect(parse(null).ticketCopies, isNull);
+    });
+  });
+
   group('le matricule annuel (v51)', () {
     Future<String?> lu({String id = 'e1'}) async =>
         (await db.query(

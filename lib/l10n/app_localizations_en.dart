@@ -277,6 +277,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configurationSchoolTillPhone => 'Till phone number';
 
   @override
+  String get configurationSchoolTicketCopies => 'Copies per ticket';
+
+  @override
+  String get configurationSchoolTicketCopiesHelper =>
+      'Number offered by default when printing a collection or sale ticket. The cashier can adjust it for each ticket.';
+
+  @override
+  String configurationSchoolTicketCopiesDefault(int count) {
+    return '$count (default)';
+  }
+
+  @override
   String get configurationSchoolEmail => 'School email';
 
   @override

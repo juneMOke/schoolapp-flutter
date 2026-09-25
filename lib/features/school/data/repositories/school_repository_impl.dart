@@ -51,6 +51,7 @@ class SchoolRepositoryImpl implements SchoolRepository {
           address: row.address,
           phone: row.phone,
           email: row.email,
+          ticketCopies: row.ticketCopies,
         ),
       );
     } catch (error) {

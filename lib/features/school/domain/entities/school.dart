@@ -16,6 +16,10 @@ class School extends Equatable {
   final String? phone;
   final String? email;
 
+  /// Exemplaires qu'un ticket sort d'office dans cette école, `null` si elle
+  /// n'a rien fixé. Brut : les bornes appartiennent à qui imprime.
+  final int? ticketCopies;
+
   const School({
     required this.id,
     required this.name,
@@ -26,6 +30,7 @@ class School extends Equatable {
     this.address,
     this.phone,
     this.email,
+    this.ticketCopies,
   });
 
   /// Localité la plus parlante dont on dispose, ou `null` si le référentiel
@@ -49,5 +54,6 @@ class School extends Equatable {
     address,
     phone,
     email,
+    ticketCopies,
   ];
 }

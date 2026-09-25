@@ -590,6 +590,24 @@ abstract class AppLocalizations {
   /// **'Till phone number'**
   String get configurationSchoolTillPhone;
 
+  /// No description provided for @configurationSchoolTicketCopies.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies per ticket'**
+  String get configurationSchoolTicketCopies;
+
+  /// No description provided for @configurationSchoolTicketCopiesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Number offered by default when printing a collection or sale ticket. The cashier can adjust it for each ticket.'**
+  String get configurationSchoolTicketCopiesHelper;
+
+  /// No description provided for @configurationSchoolTicketCopiesDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} (default)'**
+  String configurationSchoolTicketCopiesDefault(int count);
+
   /// School email field
   ///
   /// In en, this message translates to:

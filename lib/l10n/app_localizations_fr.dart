@@ -278,6 +278,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get configurationSchoolTillPhone => 'Téléphone de la caisse';
 
   @override
+  String get configurationSchoolTicketCopies => 'Exemplaires par ticket';
+
+  @override
+  String get configurationSchoolTicketCopiesHelper =>
+      'Nombre proposé d\'office à l\'impression d\'un ticket de perception ou de vente. Le caissier peut l\'ajuster à chaque ticket.';
+
+  @override
+  String configurationSchoolTicketCopiesDefault(int count) {
+    return '$count (par défaut)';
+  }
+
+  @override
   String get configurationSchoolEmail => 'E-mail de l\'école';
 
   @override

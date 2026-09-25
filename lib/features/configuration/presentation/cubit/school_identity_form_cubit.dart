@@ -141,6 +141,7 @@ class SchoolIdentityFormCubit extends Cubit<SchoolIdentityFormState> {
           address: current.address,
           phone: current.phone,
           tillPhone: current.tillPhone,
+          ticketCopies: current.ticketCopies,
           email: current.email,
         ),
         justSaved: false,

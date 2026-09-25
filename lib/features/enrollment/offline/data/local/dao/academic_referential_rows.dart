@@ -16,6 +16,10 @@ class SchoolRow {
   /// Le numéro de la CAISSE (v50), distinct de [phone].
   final String? tillPhone;
 
+  /// Exemplaires imprimés d'office par ticket (v53), `null` si l'école n'a
+  /// rien fixé.
+  final int? ticketCopies;
+
   final String? email;
 
   const SchoolRow({
@@ -28,6 +32,7 @@ class SchoolRow {
     this.address,
     this.phone,
     this.tillPhone,
+    this.ticketCopies,
     this.email,
   });
 }

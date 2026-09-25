@@ -71,6 +71,18 @@ void main() {
     expect(school?.locality, 'Kinshasa');
   });
 
+  /// Le défaut d'exemplaires d'un ticket voyage avec l'identité (v53) : c'est
+  /// la garde multi-école de cette lecture qui empêche une autre école de
+  /// dicter le nombre de papiers.
+  test('porte le nombre d\'exemplaires par ticket de l\'école', () async {
+    await seedSchool(id: 'school-1');
+    await db.update('ref_school', {'ticket_copies': 2});
+
+    final school = (await repository.loadCurrentSchool()).getOrElse(() => null);
+
+    expect(school?.ticketCopies, 2);
+  });
+
   test(
     'référentiel non encore pullé → identité inconnue, pas un échec',
     () async {

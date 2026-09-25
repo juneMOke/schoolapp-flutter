@@ -3,6 +3,10 @@ import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/money/money.dart';
@@ -35,14 +39,20 @@ void main() {
   late _FakePermission permission;
   late _FakeComposer composer;
 
+  late _FakeSchools schools;
+
   setUp(() {
+    schools = _FakeSchools();
     port = _FakePort();
     permission = _FakePermission();
     composer = _FakeComposer();
     getIt
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
-      ..registerSingleton<SaleTicketComposer>(composer);
+      ..registerSingleton<SaleTicketComposer>(composer)
+      ..registerFactory<ResolveTicketCopiesUseCase>(
+        () => ResolveTicketCopiesUseCase(schools),
+      );
   });
 
   tearDown(getIt.reset);
@@ -144,6 +154,15 @@ void main() {
     expect(port.sentBytes, hasLength(1));
     expect(port.sentCopies, equals([2]));
     expect(returned, isTrue);
+  });
+
+  /// Le compteur part du réglage de l'école, comme pour la perception.
+  testWidgets('le compteur part du défaut de l école', (tester) async {
+    schools.ticketCopies = 3;
+
+    await run(tester);
+
+    expect(port.sentCopies, equals([3]));
   });
 
   /// Le contrat neuf de l'aperçu, et ce qui le rend tenable au comptoir où le
@@ -288,4 +307,18 @@ class _FakePermission implements ThermalPrinterPermission {
 
   @override
   Future<void> openSettings() async => settingsOpened++;
+}
+
+/// L'école vue par le défaut d'exemplaires : seul [ticketCopies] compte.
+class _FakeSchools implements SchoolRepository {
+  int? ticketCopies;
+
+  @override
+  Future<Either<Failure, School?>> loadCurrentSchool() async => Right(
+    School(id: 'ecole-1', name: 'EP Kimbanguiste', ticketCopies: ticketCopies),
+  );
+
+  @override
+  Future<Either<Failure, SchoolLogo?>> loadCurrentSchoolLogo() async =>
+      const Right(null);
 }

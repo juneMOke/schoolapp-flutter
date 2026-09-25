@@ -767,7 +767,10 @@ class AppConstants {
   // `decision_reason`), le compteur de relances et la fraîcheur du fil. La
   // reprise des lignes serveur est faite côté back (V139/V140) ; ici, seulement
   // le renommage défensif `UNPAID` → `APPROVED` des bases locales.
-  static const int offlineDbSchemaVersion = 52;
+  // v53 (2026-09-25) : `ref_school.ticket_copies` — le nombre d'exemplaires
+  // qu'une école imprime d'office par ticket (perception et boutique). Facultatif
+  // et `null` tant que le back ne le sert pas ⇒ un exemplaire. Palier d'école.
+  static const int offlineDbSchemaVersion = 53;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

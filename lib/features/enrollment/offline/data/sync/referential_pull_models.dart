@@ -339,6 +339,13 @@ class RefSchoolDto {
   /// tait la ligne, l'écran laisse le champ vide.
   final String? tillPhone;
 
+  /// Le nombre d'exemplaires qu'imprime d'office l'école, par ticket.
+  ///
+  /// Facultatif (contrat demandé au back le 2026-09-25) : `null` tant que le
+  /// serveur ne le sert pas, et le poste applique alors un exemplaire. Lu comme
+  /// un `num` : un décodeur JSON peut rendre `2.0` pour un entier.
+  final int? ticketCopies;
+
   final String? email;
 
   const RefSchoolDto({
@@ -351,6 +358,7 @@ class RefSchoolDto {
     this.address,
     this.phone,
     this.tillPhone,
+    this.ticketCopies,
     this.email,
   });
 
@@ -364,6 +372,7 @@ class RefSchoolDto {
     address: j['address'] as String?,
     phone: j['phone'] as String?,
     tillPhone: j['tillPhone'] as String?,
+    ticketCopies: (j['ticketCopies'] as num?)?.toInt(),
     email: j['email'] as String?,
   );
 }

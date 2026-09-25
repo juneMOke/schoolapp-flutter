@@ -95,6 +95,20 @@ void main() {
       },
     );
 
+    /// `selectDistrict` reconstruit l'identité champ par champ : un champ
+    /// oublié là disparaîtrait au premier changement de district.
+    blocTest<SchoolIdentityFormCubit, SchoolIdentityFormState>(
+      'changer de district garde les exemplaires par ticket',
+      build: build,
+      seed: () => SchoolIdentityFormState(
+        status: SchoolIdentityFormStatus.ready,
+        identity: _complete.copyWith(ticketCopies: 2),
+        saved: _complete,
+      ),
+      act: (cubit) => cubit.selectDistrict('Tshangu'),
+      verify: (cubit) => expect(cubit.state.identity!.ticketCopies, 2),
+    );
+
     blocTest<SchoolIdentityFormCubit, SchoolIdentityFormState>(
       'rechoisir le même district ne vide rien',
       build: build,

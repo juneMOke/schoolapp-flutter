@@ -39,6 +39,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(52)) {
     await _expenseValidationCircuit(db);
   }
+  if (upTo(53)) {
+    await _addTicketCopies(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -79,6 +82,24 @@ Future<void> _addAnnualMatriculationNumber(DatabaseExecutor db) async {
   await db.execute(
     'ALTER TABLE enrollments ADD COLUMN annual_matriculation_number TEXT',
   );
+}
+
+/// v53 — `ref_school.ticket_copies`, le nombre d'exemplaires d'un ticket que
+/// le sélecteur d'imprimante propose d'office (`TICKET_COPIES_PLAN.md`, lot 2).
+///
+/// Même forme que la v50 : additif, facultatif, `null` tant que le serveur ne
+/// le sert pas — le poste applique alors un exemplaire, comme avant. **Aucune
+/// reprise** : le référentiel est renvoyé en entier à chaque pull.
+///
+/// ⚠️ Garde de colonne, même raison qu'à la v50 — et garde de TABLE : une base
+/// qui n'a jamais porté le référentiel d'Inscription traverse le palier sans
+/// lever, comme la v52 le fait pour une base sans registre des dépenses. Le
+/// schéma vivant crée la colonne avec la table.
+Future<void> _addTicketCopies(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(ref_school)');
+  if (info.isEmpty) return;
+  if (info.any((row) => row['name'] == 'ticket_copies')) return;
+  await db.execute('ALTER TABLE ref_school ADD COLUMN ticket_copies INTEGER');
 }
 
 /// v50 — `ref_school.till_phone`, le numéro de la CAISSE.

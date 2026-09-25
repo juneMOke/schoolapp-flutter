@@ -240,6 +240,16 @@
   "@configurationSchoolPhone": {
     "description": "School phone field"
   },
+  "configurationSchoolTicketCopies": "Copies per ticket",
+  "configurationSchoolTicketCopiesHelper": "Number offered by default when printing a collection or sale ticket. The cashier can adjust it for each ticket.",
+  "configurationSchoolTicketCopiesDefault": "{count} (default)",
+  "@configurationSchoolTicketCopiesDefault": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "configurationSchoolEmail": "School email",
   "@configurationSchoolEmail": {
     "description": "School email field"

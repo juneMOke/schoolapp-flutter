@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/features/boutique/data/ticket/sale_ticket_composer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_text_layout.dart';
@@ -55,6 +56,10 @@ Future<bool> printSaleTicket(
   final printedNotice = l10n.boutiqueReceiptPrinted;
   final failedNotice = l10n.boutiqueReceiptPrintFailed;
 
+  // Le point de départ du compteur d'exemplaires : le réglage de l'école, ou
+  // un — le même que pour le ticket de perception.
+  final defaultCopies = await getIt<ResolveTicketCopiesUseCase>()();
+
   final model = await getIt<SaleTicketComposer>().compose(
     sale,
     labels: labels,
@@ -87,6 +92,7 @@ Future<bool> printSaleTicket(
       final outcome = await printThermalBytes(
         context,
         bytes: EscPosTicketRenderer.renderLines(lines),
+        initialCopies: defaultCopies,
       );
 
       switch (outcome) {
