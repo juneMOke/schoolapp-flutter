@@ -8169,6 +8169,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketPrinterUnnamed => 'Unnamed printer';
 
   @override
+  String get ticketCopiesLabel => 'Copies';
+
+  @override
+  String get ticketCopiesDecrease => 'One copy fewer';
+
+  @override
+  String get ticketCopiesIncrease => 'One copy more';
+
+  @override
   String get ticketPrinterProblemPermission =>
       'Nearby devices permission denied — printing as PDF instead.';
 

@@ -44,6 +44,7 @@ class _FakePort implements ThermalPrinterPort {
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   }) async {
     if (problem != null) return _fail<Unit>();
     printed.add(bytes);

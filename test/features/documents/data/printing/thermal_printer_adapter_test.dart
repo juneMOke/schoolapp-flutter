@@ -5,7 +5,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_adapter.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 
 /// Double du canal natif, réglable piège par piège.
 ///
@@ -24,6 +26,10 @@ class _FakeChannel implements ThermalPrinterChannel {
   Set<String> hangOn;
   Set<String> throwOn;
 
+  /// Une écriture LENTE qui aboutit : ce que fait un rouleau qui imprime
+  /// plusieurs exemplaires, par opposition à un canal qui pend.
+  Duration? writeDelay;
+
   final List<String> calls = [];
   final List<List<int>> written = [];
 
@@ -35,6 +41,7 @@ class _FakeChannel implements ThermalPrinterChannel {
     this.writes = true,
     this.hangOn = const {},
     this.throwOn = const {},
+    this.writeDelay,
   });
 
   Future<T> _record<T>(String name, T value) async {
@@ -62,8 +69,10 @@ class _FakeChannel implements ThermalPrinterChannel {
   }
 
   @override
-  Future<bool> writeBytes(List<int> bytes) {
+  Future<bool> writeBytes(List<int> bytes) async {
     written.add(bytes);
+    final delay = writeDelay;
+    if (delay != null) await Future<void>.delayed(delay);
     return _record('write', writes);
   }
 
@@ -264,6 +273,74 @@ void main() {
       // flux, entre une commande ESC/POS et son argument.
       expect(channel.written, hasLength(1));
       expect(channel.written.single, equals(_ticket));
+    });
+
+    group('exemplaires', () {
+      test('les exemplaires partent en UN SEUL appel, assemblés', () async {
+        final channel = _FakeChannel();
+
+        final result = await _adapter(
+          channel,
+        ).printBytes(_ticket, macAddress: mac, copies: 3);
+
+        expect(result.isRight(), isTrue);
+        // n envois feraient insérer n `LF` par le canal natif — et rouvrir n
+        // liaisons. Un seul flux, les trois exemplaires dedans.
+        expect(channel.written, hasLength(1));
+        expect(
+          channel.written.single,
+          equals(EscPosTicketRenderer.joinCopies(_ticket, 3)),
+        );
+      });
+
+      test(
+        'le nombre est borné par le port, pas seulement par le compteur',
+        () async {
+          final channel = _FakeChannel();
+
+          await _adapter(
+            channel,
+          ).printBytes(_ticket, macAddress: mac, copies: 99);
+
+          expect(
+            channel.written.single,
+            equals(EscPosTicketRenderer.joinCopies(_ticket, TicketCopies.max)),
+          );
+        },
+      );
+
+      /// Le piège du délai fixe : trois exemplaires écrivent trois fois plus
+      /// longtemps. Sous un budget d'un seul ticket, l'adaptateur déclarait
+      /// l'imprimante injoignable pendant que le papier sortait — et le PDF de
+      /// secours partait par-dessus.
+      test(
+        'le délai d\'écriture grandit avec le nombre d\'exemplaires',
+        () async {
+          ThermalPrinterAdapter slowAdapter(_FakeChannel channel) =>
+              ThermalPrinterAdapter(
+                channel,
+                _FakePermission(),
+                probeTimeout: const Duration(milliseconds: 40),
+                connectTimeout: const Duration(milliseconds: 40),
+                writeTimeout: const Duration(milliseconds: 100),
+              );
+          // Plus long qu'UN budget, bien plus court que trois.
+          const slowWrite = Duration(milliseconds: 150);
+
+          // Contre-épreuve : le même envoi lent, pour un seul exemplaire,
+          // dépasse bien le budget — sans elle, le test passerait aussi avec un
+          // délai d'écriture illimité.
+          final single = await slowAdapter(
+            _FakeChannel(writeDelay: slowWrite),
+          ).printBytes(_ticket, macAddress: mac);
+          expect(_problemOf(single), ThermalPrinterProblem.unreachable);
+
+          final triple = await slowAdapter(
+            _FakeChannel(writeDelay: slowWrite),
+          ).printBytes(_ticket, macAddress: mac, copies: 3);
+          expect(triple.isRight(), isTrue);
+        },
+      );
     });
 
     test('ferme la liaison même quand l\'écriture échoue', () async {

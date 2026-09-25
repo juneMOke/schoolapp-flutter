@@ -197,6 +197,36 @@ abstract final class EscPosTicketRenderer {
     return out.takeBytes();
   }
 
+  /// Assemble [copies] exemplaires d'un ticket **déjà rendu** en un seul flux.
+  ///
+  /// Chaque exemplaire garde son `ESC @` de tête et son avance de fin : il ne
+  /// dépend donc pas de celui d'avant, exactement comme deux tickets tirés
+  /// l'un après l'autre. Entre deux exemplaires, une ligne pointillée — posée
+  /// APRÈS l'avance, donc dans le blanc qui dépasse de la barre — montre où
+  /// séparer à la main : la NT-8003DD n'a pas de massicot, et le caissier
+  /// déchire la bande entière d'un coup avant de la partager.
+  ///
+  /// La ligne n'est que des tirets ASCII : elle se lit sous toute page de code
+  /// et n'a aucune langue. Elle n'appartient à aucun exemplaire — le critère
+  /// « même texte que le PDF » porte sur le ticket, et le ticket est intact.
+  ///
+  /// ⚠️ **Un seul flux, jamais n envois** : cf. `ThermalPrinterPort.printBytes`.
+  static Uint8List joinCopies(Uint8List ticket, int copies) {
+    if (copies <= 1) return ticket;
+    final out = BytesBuilder(copy: false);
+    for (var i = 0; i < copies; i++) {
+      if (i > 0) out.add(_tearLine);
+      out.add(ticket);
+    }
+    return out.takeBytes();
+  }
+
+  /// `- - - …` sur toute la largeur, puis `LF`.
+  static final Uint8List _tearLine = Uint8List.fromList([
+    ...('- ' * (columns ~/ 2)).codeUnits,
+    _lf,
+  ]);
+
   /// `GS v 0` — l'image raster de la bande, prête à écrire.
   ///
   /// Forme de la commande : `GS v 0 m xL xH yL yH` puis les octets de points.

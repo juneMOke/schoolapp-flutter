@@ -111,6 +111,10 @@ class AppDimensions {
   /// nouvel écran plutôt que comme un choix.
   static const ticketPrinterPickerWidth = 360.0;
 
+  /// Case du nombre d'exemplaires, entre (−) et (+) : assez large pour deux
+  /// chiffres sans que les boutons ne bougent quand la valeur change.
+  static const ticketCopiesValueWidth = 32.0;
+
   /// Icône d'une ligne de détail des modales Facturation — même chasse que les
   /// lignes clé/valeur au-dessus desquelles elle s'aligne.
   static const financeRowIconSize = 18.0;

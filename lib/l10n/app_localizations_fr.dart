@@ -8244,6 +8244,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketPrinterUnnamed => 'Imprimante sans nom';
 
   @override
+  String get ticketCopiesLabel => 'Exemplaires';
+
+  @override
+  String get ticketCopiesDecrease => 'Un exemplaire de moins';
+
+  @override
+  String get ticketCopiesIncrease => 'Un exemplaire de plus';
+
+  @override
   String get ticketPrinterProblemPermission =>
       'Permission « Appareils à proximité » refusée — impression PDF à la place.';
 

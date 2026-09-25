@@ -89,16 +89,23 @@ abstract final class PdfTicketRenderer {
   /// [logoBand] est posée en tête, avant la première ligne. Elle n'entre pas
   /// dans le gabarit — cf. `TicketLogoBand` — et le corps de texte est identique
   /// avec ou sans elle.
+  ///
+  /// [copies] répète le ticket, chaque exemplaire **sur son propre support** —
+  /// sa page de rouleau, ou sa feuille : c'est le pendant PDF de
+  /// `EscPosTicketRenderer.joinCopies`, pour que le repli sorte ce que le
+  /// caissier a demandé à la thermique. L'aperçu, lui, n'en montre qu'un.
   static Future<Uint8List> render(
     TicketReceiptModel model, {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
     TicketLogoBand? logoBand,
+    int copies = 1,
   }) => renderRichLines(
     TicketTextLayout.renderRich(model, columns: columns),
     format: format,
     cutNotice: cutNotice,
     logoBand: logoBand,
+    copies: copies,
   );
 
   /// Même rendu, à partir de lignes **déjà composées**.
@@ -137,14 +144,20 @@ abstract final class PdfTicketRenderer {
     PdfPageFormat format = pageFormat,
     String? cutNotice,
     TicketLogoBand? logoBand,
+    int copies = 1,
   }) async {
     final document = pw.Document();
     final band = (logoBand != null && logoBand.isUsable) ? logoBand : null;
 
-    if (format.height.isInfinite) {
-      _addRollPage(document, lines, format, band);
-    } else {
-      _addSheetPages(document, lines, format, cutNotice, band);
+    // Un `addPage` par exemplaire : chacun ouvre une page neuve, si bien que
+    // deux exemplaires ne partagent jamais une feuille — on ne découpe pas un
+    // ticket dans le bas d'un autre.
+    for (var i = 0; i < (copies < 1 ? 1 : copies); i++) {
+      if (format.height.isInfinite) {
+        _addRollPage(document, lines, format, band);
+      } else {
+        _addSheetPages(document, lines, format, cutNotice, band);
+      }
     }
 
     return document.save();

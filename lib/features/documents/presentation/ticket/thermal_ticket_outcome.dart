@@ -48,5 +48,13 @@ class ThermalTicketNoSurface extends ThermalTicketOutcome {
 class ThermalTicketFailed extends ThermalTicketOutcome {
   final ThermalPrinterProblem problem;
 
-  const ThermalTicketFailed(this.problem);
+  /// Le nombre d'exemplaires que le caissier avait choisi, pour que le repli
+  /// PDF sorte ce qu'il a demandé.
+  ///
+  /// `null` quand l'échec est survenu **avant** le choix — permission,
+  /// Bluetooth, aucune imprimante : personne n'a encore vu le compteur, et
+  /// c'est à l'appelant d'appliquer son défaut.
+  final int? copies;
+
+  const ThermalTicketFailed(this.problem, {this.copies});
 }

@@ -32,13 +32,18 @@ abstract class ThermalPrinterPort {
   /// Les imprimantes appairées avec la tablette. Jamais de découverte.
   Future<Either<Failure, List<ThermalPrinter>>> pairedPrinters();
 
-  /// Envoie [bytes] à l'imprimante d'adresse [macAddress].
+  /// Envoie [bytes] — **un** ticket — [copies] fois à l'imprimante d'adresse
+  /// [macAddress].
   ///
-  /// ⚠️ **Un seul appel par ticket.** Le canal natif préfixe chaque envoi d'un
-  /// saut de ligne : découper un ticket en plusieurs envois insérerait des `LF`
-  /// **au milieu** du flux, entre une commande ESC/POS et son argument.
+  /// ⚠️ **Un seul appel pour tout, exemplaires compris.** Le canal natif
+  /// préfixe chaque envoi d'un saut de ligne : découper un ticket en plusieurs
+  /// envois insérerait des `LF` **au milieu** du flux, entre une commande
+  /// ESC/POS et son argument. C'est pourquoi la répétition vit ICI, et non chez
+  /// l'appelant : c'est l'implémentation qui sait assembler les exemplaires en
+  /// un seul flux, et proportionner son délai d'écriture à ce qu'elle envoie.
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   });
 }

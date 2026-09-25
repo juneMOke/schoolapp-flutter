@@ -5,8 +5,10 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 
 /// Implémente [ThermalPrinterPort] au-dessus du canal natif, et porte **toute**
 /// la politique : ordre des vérifications, délais, interprétation des échecs.
@@ -39,8 +41,15 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
   /// plusieurs secondes.
   final Duration _connectTimeout;
 
-  /// Écriture du ticket. Généreux : un rouleau lent reste un rouleau qui
-  /// imprime, et abandonner en cours d'écriture laisserait un demi-ticket.
+  /// Écriture d'**un** exemplaire. Généreux : un rouleau lent reste un rouleau
+  /// qui imprime, et abandonner en cours d'écriture laisserait un demi-ticket.
+  ///
+  /// ⚠️ **Multiplié par le nombre d'exemplaires**, jamais appliqué tel quel à
+  /// l'envoi entier. Trois exemplaires avec logo écrivent trois fois plus
+  /// d'octets : sous un budget fixe, l'adaptateur déclarerait l'imprimante
+  /// injoignable PENDANT que le papier sort — et l'appelant lancerait le PDF de
+  /// secours par-dessus. Des tickets en double, sous un message qui accuse une
+  /// machine en train d'imprimer.
   final Duration _writeTimeout;
 
   const ThermalPrinterAdapter(
@@ -118,6 +127,7 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   }) async {
     if (macAddress.trim().isEmpty) {
       return const Left(
@@ -155,12 +165,18 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
       );
     }
 
+    // Borné ici aussi, et pas seulement dans le compteur : le port est une
+    // promesse de données, il ne fait pas confiance à l'interface.
+    final count = TicketCopies.clamp(copies);
+
     try {
-      // UN SEUL envoi : le canal natif préfixe chaque appel d'un `LF`, qui
-      // tomberait au milieu d'une séquence ESC/POS si le ticket était découpé.
+      // UN SEUL envoi, exemplaires compris : le canal natif préfixe chaque
+      // appel d'un `LF`, qui tomberait au milieu d'une séquence ESC/POS si le
+      // ticket était découpé.
       final written = await _guard(
-        () => _channel.writeBytes(bytes),
-        _writeTimeout,
+        () =>
+            _channel.writeBytes(EscPosTicketRenderer.joinCopies(bytes, count)),
+        _writeTimeout * count,
       );
       if (written != true) {
         return const Left(

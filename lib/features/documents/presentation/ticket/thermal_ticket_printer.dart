@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/documents/data/printing/thermal_prin
 import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_printer_picker.dart';
@@ -26,7 +27,8 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 /// 3. **Le choix enfin.** Il est redemandé à **chaque** ticket : sur un parc où
 ///    une tablette peut être déplacée d'un guichet à l'autre, une imprimante
 ///    mémorisée est une imprimante qui sort le reçu d'un parent dans la pièce
-///    d'à côté.
+///    d'à côté. Le même dialogue porte le **nombre d'exemplaires**, parti de
+///    [initialCopies].
 ///
 /// ⚠️ Rien ici n'est un échec d'encaissement. Le versement est **déjà écrit
 /// localement** quand cette fonction s'exécute : tout ce qui suit ne coûte que
@@ -35,9 +37,11 @@ Future<ThermalTicketOutcome> printThermalTicket(
   BuildContext context, {
   required TicketReceiptModel model,
   TicketLogoBand? logoBand,
+  int initialCopies = TicketCopies.fallback,
 }) => printThermalBytes(
   context,
   bytes: EscPosTicketRenderer.render(model, logoBand: logoBand),
+  initialCopies: initialCopies,
 );
 
 /// Le même parcours, à partir d'octets **déjà rendus**.
@@ -50,9 +54,13 @@ Future<ThermalTicketOutcome> printThermalTicket(
 /// C'est aussi ce qui garde le **choix redemandé à chaque ticket** : mémoriser
 /// l'imprimante ferait sortir le reçu d'un parent dans la pièce d'à côté, et il
 /// n'y a aucune raison que ce soit vrai pour un ticket et faux pour l'autre.
+///
+/// [bytes] est **un** exemplaire : la répétition appartient au port, qui seul
+/// sait l'assembler en un envoi unique.
 Future<ThermalTicketOutcome> printThermalBytes(
   BuildContext context, {
   required Uint8List bytes,
+  int initialCopies = TicketCopies.fallback,
 }) async {
   final port = getIt<ThermalPrinterPort>();
 
@@ -76,18 +84,28 @@ Future<ThermalTicketOutcome> printThermalBytes(
   // produire un papier, par le repli.
   if (!context.mounted) return const ThermalTicketNoSurface();
 
-  final chosen = await showThermalPrinterPicker(context, printers: printers);
+  final chosen = await showThermalPrinterPicker(
+    context,
+    printers: printers,
+    initialCopies: initialCopies,
+  );
   if (chosen == null) return const ThermalTicketCancelled();
 
-  // Un seul envoi pour tout le ticket : le canal natif préfixe chaque appel
-  // d'un LF, qui tomberait entre une commande ESC/POS et son argument.
-  final sent = await port.printBytes(bytes, macAddress: chosen.macAddress);
+  // Un seul envoi pour tout le ticket, exemplaires compris : le canal natif
+  // préfixe chaque appel d'un LF, qui tomberait entre une commande ESC/POS et
+  // son argument.
+  final sent = await port.printBytes(
+    bytes,
+    macAddress: chosen.printer.macAddress,
+    copies: chosen.copies,
+  );
 
   return sent.fold(
     (failure) => ThermalTicketFailed(
       failure is ThermalPrinterFailure
           ? failure.problem
           : ThermalPrinterProblem.unreachable,
+      copies: chosen.copies,
     ),
     (_) => const ThermalTicketPrinted(),
   );

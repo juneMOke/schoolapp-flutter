@@ -410,4 +410,56 @@ void main() {
       }
     });
   });
+
+  group('exemplaires', () {
+    final ticket = EscPosTicketRenderer.render(_model());
+    final tear = latin1.encode('${'- ' * 24}\n');
+
+    /// Positions de `needle` dans `haystack`, sans chevauchement.
+    List<int> occurrences(List<int> haystack, List<int> needle) {
+      final found = <int>[];
+      for (var i = 0; i + needle.length <= haystack.length; i++) {
+        var match = true;
+        for (var j = 0; j < needle.length; j++) {
+          if (haystack[i + j] != needle[j]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) {
+          found.add(i);
+          i += needle.length - 1;
+        }
+      }
+      return found;
+    }
+
+    test('un exemplaire rend le ticket tel quel, sans pointillés', () {
+      expect(EscPosTicketRenderer.joinCopies(ticket, 1), equals(ticket));
+      expect(EscPosTicketRenderer.joinCopies(ticket, 0), equals(ticket));
+    });
+
+    test('n exemplaires : n tickets entiers, séparés par n − 1 pointillés', () {
+      final joined = EscPosTicketRenderer.joinCopies(ticket, 3);
+
+      expect(joined.length, ticket.length * 3 + tear.length * 2);
+      // Chaque exemplaire recommence par `ESC @` : il ne dépend pas de celui
+      // d'avant, comme deux tickets tirés l'un après l'autre.
+      expect(occurrences(joined, ticket), [
+        0,
+        ticket.length + tear.length,
+        2 * (ticket.length + tear.length),
+      ]);
+      // Le pointillé suit l'avance de l'exemplaire précédent : il tombe dans le
+      // blanc, jamais dans le texte d'un ticket.
+      expect(
+        joined.sublist(ticket.length, ticket.length + tear.length),
+        equals(tear),
+      );
+    });
+
+    test('le pointillé tient dans les 48 colonnes', () {
+      expect(tear.length - 1, EscPosTicketRenderer.columns);
+    });
+  });
 }

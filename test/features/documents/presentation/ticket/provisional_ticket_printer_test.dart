@@ -79,6 +79,28 @@ void main() {
     expect(_dashPatterns(printing.laidOut.last), 2);
   });
 
+  // Le repli sort ce que le caissier a demandé à la thermique : autant de
+  // papiers, chacun sur sa feuille — jamais deux tickets sur une même page.
+  testWidgets('le repli sort autant d\'exemplaires que demandé', (
+    tester,
+  ) async {
+    printing.announce = PdfPageFormat.a4;
+
+    await _print(tester, copies: 3);
+
+    expect(_pageCount(printing.laidOut.last), 3);
+    // Chaque feuille garde son propre cadre de découpe.
+    expect(_dashPatterns(printing.laidOut.last), 6);
+  });
+
+  testWidgets('un seul exemplaire par défaut', (tester) async {
+    printing.announce = PdfPageFormat.a4;
+
+    await _print(tester);
+
+    expect(_pageCount(printing.laidOut.last), 1);
+  });
+
   // Un média que le bloc ne peut pas honorer ne doit pas emporter la tâche
   // entière : le repli est le filet, il ne casse pas à son tour.
   testWidgets('un média impossible retombe sur le rendu de référence', (
@@ -114,7 +136,7 @@ void main() {
   });
 }
 
-Future<bool> _print(WidgetTester tester) async {
+Future<bool> _print(WidgetTester tester, {int copies = 1}) async {
   late BuildContext captured;
   await tester.pumpWidget(
     MaterialApp(
@@ -141,8 +163,14 @@ Future<bool> _print(WidgetTester tester) async {
   return printProvisionalTicket(
     model: model,
     cutNotice: AppLocalizations.of(captured)!.ticketCutNotice,
+    copies: copies,
   );
 }
+
+/// Pages du document — `/Type /Page`, sans compter le nœud `/Pages`.
+int _pageCount(Uint8List bytes) => RegExp(
+  r'/Type\s*/Page(?![a-z])',
+).allMatches(String.fromCharCodes(bytes)).length;
 
 /// Occurrences du motif de pointillés — le marqueur des deux horizontales de
 /// découpe dans le flux de contenu.

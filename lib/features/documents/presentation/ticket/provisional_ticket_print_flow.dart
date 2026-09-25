@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
@@ -182,10 +183,16 @@ Future<void> _sendTicketToPrinter(
   required ScaffoldMessengerState? messenger,
   required AppLocalizations l10n,
 }) async {
+  // Le défaut du compteur d'exemplaires. Un par ticket tant que l'école ne
+  // peut pas fixer le sien — c'est ici que ce défaut se branchera
+  // (`TICKET_COPIES_PLAN.md`, lot 2).
+  const defaultCopies = TicketCopies.fallback;
+
   final outcome = await printThermalTicket(
     context,
     model: model,
     logoBand: logoBand,
+    initialCopies: defaultCopies,
   );
 
   switch (outcome) {
@@ -207,9 +214,10 @@ Future<void> _sendTicketToPrinter(
         model: model,
         cutNotice: cutNotice,
         logoBand: logoBand,
+        copies: defaultCopies,
       );
 
-    case ThermalTicketFailed(problem: final problem):
+    case ThermalTicketFailed(problem: final problem, copies: final copies):
       messenger?.showSnackBar(
         SnackBar(
           content: Text(_problemMessage(l10n, problem)),
@@ -233,10 +241,13 @@ Future<void> _sendTicketToPrinter(
       // Le messenger vient du `ScaffoldMessenger` de l'application, jamais
       // démonté : il a été capturé avant le premier await précisément pour
       // survivre à la modale. Le spouleur, lui, n'a besoin d'aucun widget.
+      // Le compteur, s'il a été vu, décide ; sinon le défaut — l'échec est
+      // alors survenu avant que le caissier ait pu dire combien.
       final printed = await printProvisionalTicket(
         model: model,
         cutNotice: cutNotice,
         logoBand: logoBand,
+        copies: copies ?? defaultCopies,
       );
       // Le filet a lâché à son tour : le dire, plutôt que laisser le caissier
       // croire le papier parti. Un appui qui ne produit rien du tout est le

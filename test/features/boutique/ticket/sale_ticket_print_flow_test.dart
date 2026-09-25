@@ -82,6 +82,7 @@ void main() {
     WidgetTester tester, {
     bool print = true,
     String? choose = 'NT-8003DD',
+    int more = 0,
   }) async {
     returned = null;
     await tester.pumpWidget(harness());
@@ -98,6 +99,10 @@ void main() {
     await tester.pumpAndSettle();
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
+      for (var i = 0; i < more; i++) {
+        await tester.tap(find.byTooltip('Un exemplaire de plus'));
+        await tester.pump();
+      }
       await tester.tap(find.text(choose ?? 'Annuler'));
       await tester.pumpAndSettle();
     }
@@ -126,6 +131,18 @@ void main() {
     expect(port.sentBytes.single, isNotEmpty);
     expect(find.text('Ticket imprimé.'), findsOne);
     // Vrai : le papier est sorti, l'appelant peut noter la trace.
+    expect(returned, isTrue);
+  });
+
+  /// La boutique emprunte le même sélecteur que la perception : le compteur
+  /// d'exemplaires y vient avec, sans rien à brancher de son côté.
+  testWidgets('le nombre d exemplaires choisi part avec le ticket', (
+    tester,
+  ) async {
+    await run(tester, more: 1);
+
+    expect(port.sentBytes, hasLength(1));
+    expect(port.sentCopies, equals([2]));
     expect(returned, isTrue);
   });
 
@@ -225,6 +242,7 @@ class _FakePort implements ThermalPrinterPort {
   ThermalPrinterProblem? sendProblem;
   List<ThermalPrinter> printers = const [_netum];
   final List<String> sentTo = [];
+  final List<int> sentCopies = [];
   final List<Uint8List> sentBytes = [];
 
   @override
@@ -247,7 +265,9 @@ class _FakePort implements ThermalPrinterPort {
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   }) async {
+    sentCopies.add(copies);
     final problem = sendProblem;
     if (problem != null) return Left(ThermalPrinterFailure(problem));
     sentTo.add(macAddress);

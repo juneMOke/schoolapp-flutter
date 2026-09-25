@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
@@ -57,10 +58,14 @@ Future<TicketReceiptModel?> buildProvisionalTicket(
 /// caissier qui referme entre-temps ne doit pas perdre le ticket d'un versement
 /// déjà encaissé. Aucun élément d'interface n'est requis ici — le spouleur est
 /// une surface système.
+///
+/// [copies] : autant d'exemplaires que le caissier en avait demandé à la
+/// thermique — le repli sort le même nombre de papiers, chacun sur sa feuille.
 Future<bool> printProvisionalTicket({
   required TicketReceiptModel model,
   required String cutNotice,
   TicketLogoBand? logoBand,
+  int copies = TicketCopies.fallback,
 }) async {
   {
     try {
@@ -72,6 +77,7 @@ Future<bool> printProvisionalTicket({
         format: _initialFormat,
         cutNotice: cutNotice,
         logoBand: logoBand,
+        copies: copies,
       );
 
       await Printing.layoutPdf(
@@ -82,6 +88,7 @@ Future<bool> printProvisionalTicket({
               format: format,
               cutNotice: cutNotice,
               logoBand: logoBand,
+              copies: copies,
             );
           } catch (_) {
             // Média annoncé trop exigu pour composer le bloc : mieux vaut le

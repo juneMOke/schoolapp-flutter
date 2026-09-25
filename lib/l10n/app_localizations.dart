@@ -13226,6 +13226,24 @@ abstract class AppLocalizations {
   /// **'Unnamed printer'**
   String get ticketPrinterUnnamed;
 
+  /// No description provided for @ticketCopiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies'**
+  String get ticketCopiesLabel;
+
+  /// No description provided for @ticketCopiesDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'One copy fewer'**
+  String get ticketCopiesDecrease;
+
+  /// No description provided for @ticketCopiesIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'One copy more'**
+  String get ticketCopiesIncrease;
+
   /// No description provided for @ticketPrinterProblemPermission.
   ///
   /// In en, this message translates to:

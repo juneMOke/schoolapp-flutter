@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
@@ -8,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
@@ -28,6 +30,7 @@ class _FakePort implements ThermalPrinterPort {
 
   int readyCalls = 0;
   final List<String> sentTo = [];
+  final List<int> sentCopies = [];
   final List<Uint8List> sent = [];
 
   @override
@@ -51,7 +54,9 @@ class _FakePort implements ThermalPrinterPort {
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   }) async {
+    sentCopies.add(copies);
     final problem = sendProblem;
     if (problem != null) return Left(ThermalPrinterFailure(problem));
     sent.add(bytes);
@@ -141,9 +146,12 @@ void main() {
   ///
   /// [choose] est joué une fois la liste ouverte : le nom de l'imprimante à
   /// taper, ou `null` pour fermer sans choisir.
+  /// [more] appuie autant de fois sur (+) avant de choisir.
   Future<ThermalTicketOutcome> print(
     WidgetTester tester, {
     String? choose = 'NT-8003DD',
+    int more = 0,
+    int initialCopies = 1,
   }) async {
     late BuildContext captured;
     await tester.pumpWidget(
@@ -160,8 +168,17 @@ void main() {
       ),
     );
 
-    final pending = printThermalTicket(captured, model: _model);
+    final pending = printThermalTicket(
+      captured,
+      model: _model,
+      initialCopies: initialCopies,
+    );
     await tester.pumpAndSettle();
+
+    for (var i = 0; i < more; i++) {
+      await tester.tap(find.byTooltip('Un exemplaire de plus'));
+      await tester.pump();
+    }
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
       await tester.tap(find.text(choose ?? 'Annuler'));
@@ -204,6 +221,101 @@ void main() {
       // le spouleur système sous les doigts de quelqu'un qui vient d'annuler.
       expect(outcome, isA<ThermalTicketCancelled>());
       expect(port.sent, isEmpty);
+    });
+  });
+
+  group('exemplaires', () {
+    String shown(WidgetTester tester) => tester
+        .widget<Text>(find.byKey(const ValueKey('ticketCopiesValue')))
+        .data!;
+
+    IconButton button(WidgetTester tester, String tooltip) =>
+        tester.widget<IconButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(IconButton),
+          ),
+        );
+
+    testWidgets('par défaut, un seul exemplaire', (tester) async {
+      await print(tester);
+
+      expect(port.sentCopies, equals([1]));
+    });
+
+    testWidgets('le compteur réglé part avec l\'imprimante choisie', (
+      tester,
+    ) async {
+      final outcome = await print(tester, more: 2);
+
+      expect(outcome, isA<ThermalTicketPrinted>());
+      // UN envoi, qui porte le nombre : c'est le port qui assemble.
+      expect(port.sent, hasLength(1));
+      expect(port.sentCopies, equals([3]));
+    });
+
+    testWidgets('le défaut de l\'appelant est le point de départ', (
+      tester,
+    ) async {
+      await print(tester, initialCopies: 2);
+
+      expect(port.sentCopies, equals([2]));
+    });
+
+    testWidgets('le compteur est borné des deux côtés', (tester) async {
+      late BuildContext captured;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              captured = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      unawaited(printThermalTicket(captured, model: _model));
+      await tester.pumpAndSettle();
+
+      expect(shown(tester), '1');
+      expect(button(tester, 'Un exemplaire de moins').onPressed, isNull);
+
+      for (var i = 0; i < 10; i++) {
+        final plus = button(tester, 'Un exemplaire de plus');
+        if (plus.onPressed == null) break;
+        plus.onPressed!();
+        await tester.pump();
+      }
+
+      // Une erreur de saisie ne doit pas pouvoir vider le rouleau.
+      expect(shown(tester), '${TicketCopies.max}');
+      expect(button(tester, 'Un exemplaire de plus').onPressed, isNull);
+      expect(button(tester, 'Un exemplaire de moins').onPressed, isNotNull);
+    });
+
+    testWidgets('un envoi raté rend le nombre choisi, pour le repli PDF', (
+      tester,
+    ) async {
+      port.sendProblem = ThermalPrinterProblem.unreachable;
+
+      final outcome = await print(tester, more: 1);
+
+      expect((outcome as ThermalTicketFailed).copies, 2);
+    });
+
+    testWidgets('un échec AVANT le choix ne prétend aucun nombre', (
+      tester,
+    ) async {
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      final outcome = await print(tester);
+
+      // Personne n'a vu le compteur : c'est au défaut de l'appelant de
+      // trancher, pas à un « 1 » inventé ici.
+      expect((outcome as ThermalTicketFailed).copies, isNull);
     });
   });
 

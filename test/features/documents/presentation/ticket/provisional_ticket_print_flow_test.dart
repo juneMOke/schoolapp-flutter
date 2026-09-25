@@ -117,6 +117,7 @@ void main() {
     WidgetTester tester, {
     String? choose = 'NT-8003DD',
     bool dismissAfterChoice = false,
+    int more = 0,
   }) async {
     if (dismissAfterChoice) port.gate = Completer<void>();
 
@@ -135,6 +136,10 @@ void main() {
     }
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
+      for (var i = 0; i < more; i++) {
+        await tester.tap(find.byTooltip('Un exemplaire de plus'));
+        await tester.pump();
+      }
       await tester.tap(find.text(choose ?? 'Annuler'));
       if (dismissAfterChoice) {
         await tester.pump(); // le picker se referme, l'envoi part
@@ -342,6 +347,42 @@ void main() {
     expect(printing.laidOut, isNotEmpty);
   });
 
+  group('exemplaires', () {
+    /// Pages du document — `/Type /Page`, sans compter le nœud `/Pages`.
+    int pageCount(Uint8List bytes) => RegExp(
+      r'/Type\s*/Page(?![a-z])',
+    ).allMatches(String.fromCharCodes(bytes)).length;
+
+    testWidgets('la thermique reçoit le nombre choisi, en un envoi', (
+      tester,
+    ) async {
+      await run(tester, more: 1);
+
+      expect(port.sentBytes, hasLength(1));
+      expect(port.sentCopies, equals([2]));
+    });
+
+    testWidgets('le repli PDF sort autant de papiers que demandé', (
+      tester,
+    ) async {
+      port.sendProblem = ThermalPrinterProblem.unreachable;
+
+      await run(tester, more: 2);
+
+      expect(pageCount(printing.laidOut.last), 3);
+    });
+
+    testWidgets('un échec AVANT le compteur : le défaut, un exemplaire', (
+      tester,
+    ) async {
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      await run(tester);
+
+      expect(pageCount(printing.laidOut.last), 1);
+    });
+  });
+
   testWidgets('les deux sorties rendent le MÊME ticket', (tester) async {
     port.sendProblem = ThermalPrinterProblem.unreachable;
 
@@ -451,6 +492,7 @@ class _FakePort implements ThermalPrinterPort {
   ThermalPrinterProblem? sendProblem;
   List<ThermalPrinter> printers = const [_netum];
   final List<String> sentTo = [];
+  final List<int> sentCopies = [];
 
   /// Les octets RÉELLEMENT envoyés. C'est le seul endroit où l'on peut voir si
   /// la bande de logo a traversé tout le chemin — chargeur, flux, renderer —
@@ -483,7 +525,9 @@ class _FakePort implements ThermalPrinterPort {
   Future<Either<Failure, Unit>> printBytes(
     Uint8List bytes, {
     required String macAddress,
+    int copies = 1,
   }) async {
+    sentCopies.add(copies);
     if (gate != null) await gate!.future;
     final problem = sendProblem;
     if (problem != null) return Left(ThermalPrinterFailure(problem));
