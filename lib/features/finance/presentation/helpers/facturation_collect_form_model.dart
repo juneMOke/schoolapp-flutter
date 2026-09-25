@@ -281,6 +281,8 @@ class FacturationCollectFormModel {
   void groupAmountEdited(FacturationChargeGroupEntry group) {
     group.amountBecomesSource();
     group.applyCascade(group.controller.text);
+    // Un champ vidé est une saisie en cours, pas un décochage.
+    group.holdOpen();
     reflectGroupTender(group);
   }
 
@@ -304,6 +306,7 @@ class FacturationCollectFormModel {
         ? group.capInCents
         : line.settledCents;
     group.applyCascadeCents(settled);
+    group.holdOpen();
     group.writeGroupAmount(settled);
   }
 

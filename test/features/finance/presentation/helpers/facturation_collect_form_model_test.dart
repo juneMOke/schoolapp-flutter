@@ -202,6 +202,49 @@ void main() {
       // Le plafond de la nature : 3 × 50,00 $.
       expect(group.allocatedCents, 15000);
     });
+
+    // Le bug du guichet : vider le champ décochait toutes les tranches, la
+    // nature se repliait et le champ emportait le clavier avec lui.
+    test('vider le montant garde la nature ouverte, sans rien imputer', () {
+      final m = modele();
+      final group = m.groups.single;
+      m.groupToggle(group, true);
+
+      group.controller.text = '';
+      m.groupAmountEdited(group);
+
+      expect(group.selected, isTrue);
+      expect(group.allocatedCents, 0);
+      expect(m.buildDraft(), isNull);
+    });
+
+    test('vider le comptoir garde la nature ouverte, sans rien imputer', () {
+      final m = modele();
+      final group = m.groups.single;
+      m.groupToggle(group, true);
+      m.groupTenderCurrencyChanged(group, 'CDF');
+
+      group.tenderController.text = '';
+      m.groupTenderEdited(group);
+
+      expect(group.selected, isTrue);
+      expect(group.allocatedCents, 0);
+      expect(m.buildDraft(), isNull);
+    });
+
+    test('retaper après avoir vidé ventile de nouveau', () {
+      final m = modele();
+      final group = m.groups.single;
+      m.groupToggle(group, true);
+      group.controller.text = '';
+      m.groupAmountEdited(group);
+
+      group.controller.text = '70';
+      m.groupAmountEdited(group);
+
+      expect(group.allocatedCents, 7000);
+      expect(m.buildDraft()!.allocations, hasLength(2));
+    });
   });
 
   group('ce qui part au serveur', () {

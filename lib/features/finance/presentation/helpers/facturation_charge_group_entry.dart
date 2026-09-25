@@ -259,6 +259,19 @@ class FacturationChargeGroupEntry {
     return allocations.fold(0, (sum, value) => sum + value);
   }
 
+  /// Garde la nature ouverte quand une frappe ne ventile plus rien.
+  ///
+  /// La sélection étant dérivée des tranches, une cascade à zéro les décoche
+  /// toutes — et la nature se replie sous le doigt du caissier qui vient
+  /// d'effacer pour retaper : le champ quitte l'arbre, le clavier se ferme. La
+  /// première tranche reste donc cochée, à vide, comme la ligne d'une tranche
+  /// seule qu'on a vidée. Une imputation vide ne part toujours pas au serveur ;
+  /// seule la case replie la nature.
+  void holdOpen() {
+    if (selected || tranches.isEmpty) return;
+    tranches.first.selected = true;
+  }
+
   /// Vide le groupe : plus rien n'est réglé sur cette nature.
   void clear() {
     controller.clear();
