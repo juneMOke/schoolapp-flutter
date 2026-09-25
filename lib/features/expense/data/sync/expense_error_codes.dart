@@ -39,8 +39,9 @@ abstract final class ExpenseErrorCodes {
   /// **422** — un refus sans motif laisse le demandeur sans issue.
   static const String reasonRequired = 'REASON_REQUIRED';
 
-  /// **422** — on n'approuve pas sa propre demande (A11, tranché par la
-  /// direction, sans réglage d'école).
+  /// **422** — on n'approuvait pas sa propre demande (A11). Abandonné le
+  /// 2026-09-25 : le serveur ne l'émet plus. Gardé en lecture, le
+  /// reconnaître ne coûte rien.
   static const String selfApprovalForbidden = 'SELF_APPROVAL_FORBIDDEN';
 
   /// **403** — le geste est réservé au demandeur (retirer, renvoyer,

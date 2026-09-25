@@ -35,7 +35,6 @@ abstract final class ExpenseGesturePolicy {
   ) => switch (gesture.ownership) {
     ExpenseGestureOwnership.anyone => true,
     ExpenseGestureOwnership.requesterOnly => expense.isRequestedBy(accountId),
-    ExpenseGestureOwnership.othersOnly => !expense.isRequestedBy(accountId),
   };
 
   /// Toute réponse vient de [ExpenseTransitions] — la table est la seule

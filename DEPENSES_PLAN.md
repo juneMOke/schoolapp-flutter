@@ -273,8 +273,8 @@ livraison**.
   **toujours entier** (la pagination porte sur les demandes, jamais sur les
   messages). Page à ramener de 100 à **50** :
   `expense_pull_repository_impl.dart:50`.
-- Refus : `422 SELF_APPROVAL_FORBIDDEN` (auto-approbation refusée par la
-  direction, sans réglage d'école), `422 REASON_REQUIRED`. **`422
+- Refus : `422 REASON_REQUIRED`. (`422 SELF_APPROVAL_FORBIDDEN` a été
+  abandonné le 2026-09-25, cf. §13.) **`422
   INVALID_TRANSITION` a disparu des routes de geste** (Q10) : le serveur ne peut
   pas distinguer un geste hors séquence d'un geste impossible — payer une demande
   en attente est absurde jusqu'à ce que l'approbation arrive.
@@ -510,24 +510,56 @@ Vérification de clôture : `flutter analyze` → **No issues found**,
 - **Pas de palier « 40 de plus » sur la file** : une file qu'il faut paginer
   est une file qu'on ne traite pas.
 
+### Tranché avec le back le 2026-09-25
+
+Réponses du back en commentaires sur la page « Dépenses v2 — ce que le front
+attend du back » (Claude Docs, artifact `4af59671-e169-4ea5-bc0b-35245434c6a1`).
+
+- **`DEPOSIT` et `EDIT` sont écrits par le serveur.** `DEPOSIT` à la création
+  seulement (corps = description, auteur = déposant, instant = le
+  `clientUpdatedAt` borné) ; `EDIT` à chaque modification `APPLIED`, jamais sur
+  un `SUPERSEDED` ni un rejeu, **corps vide**. uuid5 déterministes (dépense +
+  acte, + `clientUpdatedAt` pour un `EDIT`). Le poste ne les écrit jamais en
+  local : il les reçoit par le pull.
+- **Une seule enveloppe pour les sept routes**, celle du poste :
+  `{ action?, decidedAt, message: { id, body }, expectedClientUpdatedAt?, authorId }`.
+  `reason` sort du contrat : le serveur recopie `message.body` dans
+  `decisionReason`. `/messages` passe de `createdAt` à `decidedAt` en C2.
+  `body` peut être vide, sauf pour un refus (422) et un commentaire (400).
+- **`/resubmit` sur une copie serveur plus ancienne** → 409
+  `TRANSITION_OUT_OF_ORDER`, rejouable, jamais un 422.
+- **A11 abandonnée : `SELF_APPROVAL_FORBIDDEN` disparaît.** Seule la direction
+  décide (DIRECTOR, SUPER_ADMIN), et refuser l'auto-approbation aurait gelé
+  pour toujours les demandes du directeur. La propriété n'entre plus dans
+  décider ; le code reste reconnu en lecture.
+- **Droits (migration V140)** : `expense.decide` et `expense.reopen` →
+  DIRECTOR, SUPER_ADMIN ; `expense.pay` → ACCOUNTANT, DIRECTOR, SUPER_ADMIN
+  (**hypothèse non confirmée**) ; `expense.delete` retiré à ACCOUNTANT.
+- **Reprise des données** : la production compte 3 dépenses, toutes `PAID`.
+  V139.0.0 convertit les `UNPAID` en `APPROVED` avant toute descente ; les
+  `PAID` reçoivent une décision datée de leur saisie, V140 un message de
+  reprise. Le corollaire « `UNPAID` lu comme en attente » (§12) ne se
+  produira donc pas.
+
+Appliqué côté poste le même jour : décider offert sur sa propre demande
+(`ExpenseGestureOwnership.othersOnly` supprimé), `reason` retiré du corps de
+`/decision`, et le fil n'affiche plus de ligne vide sous un message au corps
+vide.
+
 ### Ce qui reste, et qui ne dépend plus de nous
 
 - 🔴 **La livraison back C0→C3.** Tant qu'elle n'est pas déployée, la poussée
   d'une dépense neuve sort du contrat servi (`enum [PAID, UNPAID]`) et meurt en
   400 terminal, et les sept routes de geste n'existent pas. **Rien ne fusionne
   dans `main` avant.**
-- 🔴 **Le message `DEPOSIT` n'est écrit par personne côté poste.** Les sept
-  routes de geste n'en portent pas et le contenu ne voyage plus avec ses
-  messages (Q1) : c'est au **serveur** de l'assembler à la création, et `EDIT`
-  à la modification. **À trancher avec le back avant C2** — sinon tout fil créé
-  hors ligne s'ouvre sur son premier commentaire au lieu de son dépôt.
-- ⚠️ **Le corps des six routes autres que `/decision` est une déduction.**
-  Seul celui de `/decision` est écrit dans le plan back ; les autres reprennent
-  la même enveloppe. L'`openApi.yaml` fera foi — la sérialisation tient en une
-  fonction (`ExpenseGesturePayload.toWireJson`) pour qu'un renommage soit une
-  ligne.
+- 🔴 **Release conjointe, back et front v2 ensemble, mise à jour des tablettes
+  forcée.** La V1 de `main` lit tout statut autre que `PAID` comme non payé :
+  les demandes `PENDING` et `REFUSED` y entreraient dans les totaux, et sa
+  bascule payé / non payé serait ignorée puis écrasée au pull. Aucune fenêtre
+  entre les deux déploiements.
 - ⚠️ **`user_version` à incrémenter à la release** qui sème les trois droits
   (cf. §15).
+- ⚠️ **`expense.pay` pour ACCOUNTANT** reste une hypothèse du back.
 
 ## 14. Hors périmètre v2
 

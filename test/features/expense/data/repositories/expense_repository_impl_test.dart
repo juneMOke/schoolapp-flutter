@@ -449,16 +449,19 @@ void main() {
       },
     );
 
-    test('approuver SA PROPRE demande est refusé — jamais offert, jamais '
-        'accepté', () async {
-      // A11 : l'auto-approbation est refusée par la direction, sans réglage
-      // d'école. L'écran masque les deux boutons ; le dépôt ne s'y fie pas.
+    test('approuver SA PROPRE demande est accepté, et le décideur est son '
+        'demandeur', () async {
+      // A11 abandonnée le 2026-09-25 : seule la direction décide, et un
+      // directeur doit pouvoir trancher ses propres demandes.
       final expense = await saved(_draft());
 
       final result = await gestes.applyGesture(expense, ExpenseGesture.approve);
 
-      expect(result.fold((f) => f, (_) => null), isA<ConflictFailure>());
-      expect(await fil(), isEmpty);
+      expect(result.isRight(), isTrue);
+      final ligne = await row('e-new');
+      expect(ligne['status'], ExpenseStatus.approved.wireValue);
+      expect(ligne['decided_by_id'], 'u-1');
+      expect(await fil(), hasLength(1));
     });
 
     test('payer après approbation pose la date de règlement, et garde le '

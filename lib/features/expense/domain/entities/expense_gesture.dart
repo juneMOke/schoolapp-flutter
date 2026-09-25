@@ -12,14 +12,10 @@ enum ExpenseGestureOwnership {
   /// geste n'est pas offert.
   requesterOnly,
 
-  /// Tout le monde **sauf** le demandeur — l'auto-approbation est refusée par
-  /// la direction (A11), et le serveur la sanctionne d'un
-  /// `422 SELF_APPROVAL_FORBIDDEN`. Une propriété indécidable laisse le geste
-  /// offert : le masquer bloquerait une approbation légitime sans recours,
-  /// alors qu'une approbation de trop est rattrapable par le serveur.
-  othersOnly,
-
-  /// Payer, annuler une décision, commenter : la propriété n'y entre pas.
+  /// Décider, payer, annuler une décision, commenter : la propriété n'y entre
+  /// pas. Trancher sa propre demande est permis (A11 abandonnée le
+  /// 2026-09-25) : seule la direction décide, et refuser l'auto-approbation
+  /// aurait gelé pour toujours les demandes déposées par le directeur.
   /// Commenter la demande d'un collègue est même tout l'objet de la route
   /// dédiée (Q1) — elle est sous `expense.write`, sans contrôle de propriété.
   anyone,
@@ -36,16 +32,8 @@ enum ExpenseGestureOwnership {
 /// que chaque geste vise est donc déclaré ici, une fois, plutôt que reconstruit
 /// à chaque appel.
 enum ExpenseGesture {
-  approve(
-    act: ExpenseAct.approval,
-    target: ExpenseStatus.approved,
-    ownership: ExpenseGestureOwnership.othersOnly,
-  ),
-  refuse(
-    act: ExpenseAct.refusal,
-    target: ExpenseStatus.refused,
-    ownership: ExpenseGestureOwnership.othersOnly,
-  ),
+  approve(act: ExpenseAct.approval, target: ExpenseStatus.approved),
+  refuse(act: ExpenseAct.refusal, target: ExpenseStatus.refused),
   pay(act: ExpenseAct.payment, target: ExpenseStatus.paid),
 
   /// Le demandeur reprend sa demande. Ce n'est **pas** une suppression : la

@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_payload.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 
 void main() {
   group('remontée : le round-trip de l’outbox EST le chemin du push', () {
@@ -73,6 +75,25 @@ void main() {
     );
     expect(back.expenseId, 'e-1');
     expect(back.deleted, isTrue);
+  });
+
+  test('refus : le motif voyage dans le message, et nulle part ailleurs', () {
+    // Tranché avec le back le 2026-09-25 : `reason` sort du contrat, le
+    // serveur recopie `message.body` dans `decisionReason`.
+    const payload = ExpenseGesturePayload(
+      expenseId: 'e-1',
+      gesture: ExpenseGesture.refuse,
+      messageId: 'm-1',
+      body: 'Devis non joint',
+      decidedAt: '2026-09-12T10:00:00.000Z',
+      authorId: 'u-1',
+    );
+    expect(payload.toWireJson(), {
+      'action': 'REFUSE',
+      'decidedAt': '2026-09-12T10:00:00.000Z',
+      'message': {'id': 'm-1', 'body': 'Devis non joint'},
+      'authorId': 'u-1',
+    });
   });
 
   group('descente', () {

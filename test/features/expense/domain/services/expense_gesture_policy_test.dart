@@ -83,11 +83,13 @@ void main() {
   });
 
   group('sa propre demande', () {
-    test('en attente : relancer et retirer, JAMAIS approuver ni refuser', () {
-      // A11, tranché par la direction : l'auto-approbation est refusée sans
-      // réglage d'école, et le serveur la sanctionne d'un 422. L'offrir ne
-      // ferait qu'un geste mort.
+    test('en attente : relancer, retirer, et aussi la trancher', () {
+      // A11 abandonnée le 2026-09-25 : seule la direction décide, et refuser
+      // l'auto-approbation gèlerait pour toujours les demandes du directeur.
+      // La permission `expense.decide` filtre à l'écran, pas la propriété.
       expect(offered(recordedById: moi), {
+        ExpenseGesture.approve,
+        ExpenseGesture.refuse,
         ExpenseGesture.retract,
         ExpenseGesture.remind,
         ExpenseGesture.comment,
@@ -112,9 +114,8 @@ void main() {
   });
 
   group('propriété indécidable', () {
-    // Les deux moitiés de F24, et elles ne penchent pas du même côté : ce
-    // qu'on ne sait pas prouver sien n'ouvre pas les gestes du demandeur,
-    // mais ne ferme pas une approbation légitime — le serveur, lui, sait.
+    // Ce qu'on ne sait pas prouver sien n'ouvre pas les gestes du demandeur ;
+    // décider, qui ne dépend plus de la propriété, reste offert.
     test('demandeur inconnu : décider reste offert, relancer non', () {
       final gestes = offered(recordedById: null);
       expect(gestes, contains(ExpenseGesture.approve));

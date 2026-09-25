@@ -202,13 +202,17 @@ class _Message extends StatelessWidget {
                     expenseActLabel(l10n, act),
                     style: AppTextStyles.caption.copyWith(color: visuals.ink),
                   ),
-                const SizedBox(height: AppDimensions.spacingXS / 2),
-                Text(
-                  message.body,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
+                // Un `EDIT` arrive au corps vide : le serveur ne fabrique aucun
+                // texte, le libellé de l'acte suffit.
+                if (message.body.isNotEmpty) ...[
+                  const SizedBox(height: AppDimensions.spacingXS / 2),
+                  Text(
+                    message.body,
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

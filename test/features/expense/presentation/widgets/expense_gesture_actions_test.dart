@@ -139,19 +139,20 @@ void main() {
   });
 
   group('la propriété', () {
-    testWidgets('sur SA PROPRE demande, décider est masqué même avec le '
-        'droit', (tester) async {
-      // A11 : l'auto-approbation est refusée par la direction, sans réglage
-      // d'école — l'offrir ne ferait qu'un geste mort en 422.
+    testWidgets('sur SA PROPRE demande, la direction décide aussi', (
+      tester,
+    ) async {
+      // A11 abandonnée le 2026-09-25 : un directeur tranche ses propres
+      // demandes, personne d'autre ne le pourrait.
       await pump(
         tester,
         permissions: direction,
         on: expense(recordedById: moi),
       );
 
-      expect(find.text('Approuver'), findsNothing);
-      expect(find.text('Refuser'), findsNothing);
-      // En revanche, ce qui lui revient reste offert.
+      expect(find.text('Approuver'), findsOneWidget);
+      expect(find.text('Refuser'), findsOneWidget);
+      // Et ce qui revient au demandeur reste offert.
       expect(find.text('Retirer'), findsOneWidget);
       expect(find.text('Relancer'), findsOneWidget);
     });

@@ -14,10 +14,9 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 /// route a sa propre garde côté serveur, et une route unique ferait dépendre
 /// l'autorisation d'une valeur postée.
 ///
-/// ⚠️ Seul le corps de `/decision` est écrit noir sur blanc dans le plan back ;
-/// les six autres reprennent la même enveloppe. **L'`openApi.yaml` fera foi à
-/// la livraison** — d'où une seule fonction de sérialisation, pour qu'un
-/// renommage soit une ligne.
+/// Le back a adopté cette enveloppe telle quelle pour les sept routes
+/// (2026-09-25). **L'`openApi.yaml` fera foi à la livraison** — d'où une seule
+/// fonction de sérialisation, pour qu'un renommage soit une ligne.
 class ExpenseGesturePayload {
   final String expenseId;
   final ExpenseGesture gesture;
@@ -67,15 +66,13 @@ class ExpenseGesturePayload {
 
   /// Le corps de la requête.
   ///
-  /// Le motif d'un refus est écrit **deux fois** — sur la demande et dans le
-  /// fil — et la spec l'exige (§14) : la situation courante se lit sans
-  /// dérouler l'historique, l'historique se lit sans interroger la ligne.
+  /// Le motif d'un refus voyage **une seule fois**, dans `message.body` : le
+  /// serveur le recopie lui-même dans `decisionReason` (tranché le
+  /// 2026-09-25), pour que la situation courante se lise sans dérouler
+  /// l'historique (§14).
   Map<String, dynamic> toWireJson() => {
     if (gesture == ExpenseGesture.approve) 'action': 'APPROVE',
-    if (gesture == ExpenseGesture.refuse) ...{
-      'action': 'REFUSE',
-      'reason': body,
-    },
+    if (gesture == ExpenseGesture.refuse) 'action': 'REFUSE',
     'decidedAt': decidedAt,
     'message': {'id': messageId, 'body': body},
     'expectedClientUpdatedAt': ?expectedClientUpdatedAt,
