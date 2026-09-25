@@ -320,10 +320,10 @@ La numérotation continue celle de la V1. Détail et justification dans l'artifa
 | F33 | Les actes du fil sont en **anglais** (décision utilisateur) : `DEPOSIT · REMINDER · APPROVAL · REFUSAL · PAYMENT · RETRACTION · REOPENING · CORRECTION · EDIT`, `null` = commentaire libre |
 | F34 | Un 409 ne se lit **jamais** au seul code HTTP (voir §9) |
 
-## 11. Données locales v2 — palier **50**
+## 11. Données locales v2 — palier **52**
 
 L'escalier hérité est clos à 48 : un palier neuf va dans
-`tenant_migrations.dart` (`if (upTo(50))`), **jamais** dans `app_database.dart`.
+`tenant_migrations.dart` (`if (upTo(52))`), **jamais** dans `app_database.dart`.
 DDL écrit en clair dans l'étape, jamais relu du schéma vivant, et l'étape reste
 rejouable.
 
@@ -346,12 +346,14 @@ sur un écran qui la croirait non décidée.
 
 ## 12. Lots v2 et état d'exécution
 
-Sur **`feat/expense-validation-circuit`** (base `a8ff5c7c`, le sommet de `main`
-juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
+Sur **`feat/expense-validation-circuit`**, **PR #59**. Partie de `a8ff5c7c`
+(le sommet de `main` juste après la PR #56), rebasée le 2026-09-25 sur `main`
+après les PR #57 et #58 : le palier du circuit est passé de **v50 à v52**,
+derrière `till_phone` (v50) et le matricule annuel (v51). Chaque lot compile, passe
 `flutter analyze` à zéro et sa suite ciblée ; la suite complète tourne au dernier.
 
 > Note d'historique, pour qui verrait une divergence : ces commits ont d'abord
-> atterri **dans `main`** en avance rapide (jusqu'à `e1da561a`, le 2026-09-23),
+> atterri **dans `main`** en avance rapide (jusqu'à `660cfbc5`, le 2026-09-23),
 > puis `main` a été ramené à `a8ff5c7c` — décision explicite : **`main` ne garde
 > aucune modification Dépenses tant que le circuit n'est pas fini** (l'encadré
 > ci-dessous dit pourquoi). Les commits sont les mêmes, ils vivent désormais sur
@@ -360,12 +362,12 @@ juste après la PR #56), **sans PR ouverte**. Chaque lot compile, passe
 | Lot | État | Commit |
 |---|---|---|
 | DEP-9 | ✅ ce document (partie II) | le commit qui le porte |
-| DEP-10 | ✅ **cinq statuts** : énumération + `isFirm`, six sites binaires ouverts, `paidOn` dé-dérivé, palier v50 (volet statut), bascule payée/non payée retirée, compteurs du registre supprimés, `ExpenseTransitions` + matrice de transitions testée | `d25197b6` |
-| DEP-11 | ✅ **le fil** : palier v50 (volet fil), 9 actes anglais, `ExpenseMessage`, `ExpenseMessageDao` (append atomique), `ExpenseRepository.thread()`, `ExpenseThreadPanel` dans la fiche, fiche découpée | `4d2a855c` |
-| DEP-12 | ✅ **les gestes et les droits**, en cinq commits : les trois droits (`expense.decide`/`pay`/`reopen`, hors de `kGuardedWriteActions` tant que le back ne les sème pas) · `ExpenseGesture` + `ExpenseGesturePolicy` + `appendGesture` (inerte au rejeu) · la chaîne à trois jalons et les encarts de situation · le pied de fiche, le panneau de refus et les toasts · le champ du fil | `9b6e1d17` `86c08082` `a9a9607b` `d8b5d7c4` `00dc085e` |
-| DEP-13 | ✅ **la file** : sous-menu, route et accès · `ExpenseWait` (tiède 3 j, chaud 5 j) · `ExpenseQueueOrder` (3 tris, stables) · `ExpenseQueueView` + cubit + écran · sélection et lot local · bloc « approuvées, à payer » | `fa041209` |
-| DEP-14 | ✅ **la remontée et l'ordre** : 7 routes + `ExpenseGesturePayload` · entrée d'outbox dans la transaction de `appendGesture` · garde d'ordre F31 **et** son échappatoire · les deux 409 (F34) · delta enrichi (6 colonnes + `messages[]`) · page à 50 | `9f8ac54d` |
-| DEP-15 | ✅ **revue et clôture** : 7 défauts trouvés et corrigés | `7bfdf394` `8006cfe3` |
+| DEP-10 | ✅ **cinq statuts** : énumération + `isFirm`, six sites binaires ouverts, `paidOn` dé-dérivé, palier v52 (volet statut), bascule payée/non payée retirée, compteurs du registre supprimés, `ExpenseTransitions` + matrice de transitions testée | `559e1746` |
+| DEP-11 | ✅ **le fil** : palier v52 (volet fil), 9 actes anglais, `ExpenseMessage`, `ExpenseMessageDao` (append atomique), `ExpenseRepository.thread()`, `ExpenseThreadPanel` dans la fiche, fiche découpée | `504ebbfe` |
+| DEP-12 | ✅ **les gestes et les droits**, en cinq commits : les trois droits (`expense.decide`/`pay`/`reopen`, hors de `kGuardedWriteActions` tant que le back ne les sème pas) · `ExpenseGesture` + `ExpenseGesturePolicy` + `appendGesture` (inerte au rejeu) · la chaîne à trois jalons et les encarts de situation · le pied de fiche, le panneau de refus et les toasts · le champ du fil | `5f4990ce` `29793ade` `9d0e9db7` `e5d9712d` `d7c30363` |
+| DEP-13 | ✅ **la file** : sous-menu, route et accès · `ExpenseWait` (tiède 3 j, chaud 5 j) · `ExpenseQueueOrder` (3 tris, stables) · `ExpenseQueueView` + cubit + écran · sélection et lot local · bloc « approuvées, à payer » | `2610b7fa` |
+| DEP-14 | ✅ **la remontée et l'ordre** : 7 routes + `ExpenseGesturePayload` · entrée d'outbox dans la transaction de `appendGesture` · garde d'ordre F31 **et** son échappatoire · les deux 409 (F34) · delta enrichi (6 colonnes + `messages[]`) · page à 50 | `cbfabbc5` |
+| DEP-15 | ✅ **revue et clôture** : 7 défauts trouvés et corrigés | `42e2a080` `4875da4f` |
 
 Vérifié au dernier commit : `flutter analyze` → **No issues found** ;
 `flutter test -j 4` **complet** → vert, code de sortie capturé sans pipe. La
@@ -582,7 +584,7 @@ propre lot et profiterait aussi aux paiements et aux ventes.
 - **`blocked` n'est pas un statut** : c'est un `PENDING` repoussé de 5 s, sans
   tentative consommée — il ne s'empoisonne donc jamais.
 - **Le palier va dans le bon escalier** : v49+ dans `tenant_migrations.dart`,
-  `if (upTo(50))` et non `if (oldVersion < 50)`.
+  `if (upTo(52))` et non `if (oldVersion < 52)`.
 - **Dix tests hors module cassent** dès qu'on touche au socle : table figée des
   permissions, migration du registre, ordre d'enregistrement des pulls, clés de
   plan, placement du module dans le menu.

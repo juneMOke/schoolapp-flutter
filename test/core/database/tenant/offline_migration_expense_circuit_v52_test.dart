@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_migrations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-/// Palier v50 — la dépense devient une **demande** soumise à décision.
+/// Palier v52 — la dépense devient une **demande** soumise à décision.
 ///
 /// Un palier d'ajout de colonnes : elles naissent, la ligne existante les
 /// porte, le renommage défensif des deux statuts de la V1 s'applique, et le
@@ -81,7 +81,7 @@ void main() {
   test('les six colonnes du circuit naissent, et la ligne les porte', () async {
     await seed('e-1', 'PAID', paidOn: '2026-09-04');
 
-    await migrateTenantDatabase(db, 49);
+    await migrateTenantDatabase(db, 51);
 
     expect(
       await columnsOf(db, 'expenses'),
@@ -106,7 +106,7 @@ void main() {
       await seed('e-paid', 'PAID', paidOn: '2026-09-04');
       await seed('e-unpaid', 'UNPAID');
 
-      await migrateTenantDatabase(db, 49);
+      await migrateTenantDatabase(db, 51);
 
       final byId = {
         for (final row in await db.query('expenses'))
@@ -119,11 +119,11 @@ void main() {
     },
   );
 
-  test('rejouable sur une base déjà en v50, sans rien perdre', () async {
+  test('rejouable sur une base déjà en v52, sans rien perdre', () async {
     await seed('e-1', 'UNPAID');
 
-    await migrateTenantDatabase(db, 49);
-    await migrateTenantDatabase(db, 49);
+    await migrateTenantDatabase(db, 51);
+    await migrateTenantDatabase(db, 51);
 
     expect(await db.query('expenses'), hasLength(1));
     final columns = await columnsOf(db, 'expenses');
@@ -140,12 +140,12 @@ void main() {
       final bare = await _openDb();
       addTearDown(bare.close);
 
-      await expectLater(migrateTenantDatabase(bare, 49), completes);
+      await expectLater(migrateTenantDatabase(bare, 51), completes);
     },
   );
 
   test('une base montée et une base créée à neuf ont la même table', () async {
-    await migrateTenantDatabase(db, 49);
+    await migrateTenantDatabase(db, 51);
     final migrated = await columnsOf(db, 'expenses');
 
     final fresh = await _openDb();
@@ -166,7 +166,7 @@ void main() {
     test(
       'la table du fil naît, avec son index de lecture et d’ordre',
       () async {
-        await migrateTenantDatabase(db, 49);
+        await migrateTenantDatabase(db, 51);
 
         expect(await columnsOf(db, 'expense_messages'), [
           'id',
@@ -189,7 +189,7 @@ void main() {
     test(
       'rejouable : ni table ni index en double, et le fil déjà écrit reste',
       () async {
-        await migrateTenantDatabase(db, 49);
+        await migrateTenantDatabase(db, 51);
         await db.insert('expense_messages', {
           'id': 'm-1',
           'school_id': 'school-A',
@@ -199,7 +199,7 @@ void main() {
           'created_at': '2026-09-20T08:00:00.000Z',
         });
 
-        await expectLater(migrateTenantDatabase(db, 49), completes);
+        await expectLater(migrateTenantDatabase(db, 51), completes);
 
         expect(await db.query('expense_messages'), hasLength(1));
         expect(
@@ -213,7 +213,7 @@ void main() {
     );
 
     test('une base montée et une base créée à neuf ont le même fil', () async {
-      await migrateTenantDatabase(db, 49);
+      await migrateTenantDatabase(db, 51);
       final migrated = await columnsOf(db, 'expense_messages');
 
       final fresh = await _openDb();
@@ -230,7 +230,7 @@ void main() {
       final bare = await _openDb();
       addTearDown(bare.close);
 
-      await migrateTenantDatabase(bare, 49);
+      await migrateTenantDatabase(bare, 51);
 
       // Le palier s'arrête à l'absence de `expenses` : pas de demande, donc
       // pas de fil — et le test précédent dit que le fil naît dès qu'il y en a.

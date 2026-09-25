@@ -94,7 +94,7 @@ const TableSchema expensesTable = TableSchema(
       sync_error TEXT,
       sync_error_code TEXT,
       updated_at INTEGER NOT NULL DEFAULT 0,
-      -- Colonnes du circuit (v50), EN FIN DE TABLE : `ALTER TABLE` ne sait
+      -- Colonnes du circuit (v52), EN FIN DE TABLE : `ALTER TABLE` ne sait
       -- qu'ajouter à la fin, et une base montée doit finir identique à une
       -- base créée à neuf. Les déclarer ailleurs casse cet invariant, que le
       -- test de palier vérifie colonne par colonne, dans l'ordre.

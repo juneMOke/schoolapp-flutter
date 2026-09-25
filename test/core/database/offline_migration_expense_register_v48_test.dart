@@ -91,10 +91,11 @@ void main() {
     await migrateFrom(47);
     // L'escalier hérité s'arrête à la v48, avec son DDL figé : pour comparer
     // au schéma vivant il faut monter jusqu'en haut, donc passer la main à
-    // l'escalier d'école. On y entre **en 49**, pas en 48 : le palier v49 est
-    // l'adoption par une école, qui rend à l'appareil des tables que cette
-    // base de test n'a jamais portées. Seul le v50 nous concerne ici.
-    await migrateTenantDatabase(db, 49);
+    // l'escalier d'école. On y entre **en 51**, juste sous le circuit : les
+    // paliers 49 à 51 (adoption par une école, téléphone de la caisse,
+    // matricule annuel) touchent des tables que cette base de test n'a jamais
+    // portées. Seul le v52 nous concerne ici.
+    await migrateTenantDatabase(db, 51);
     final migrated = await columnsOf('expenses');
 
     final fresh = await _openLegacyDb();
