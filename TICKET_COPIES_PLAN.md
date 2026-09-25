@@ -39,30 +39,40 @@ boutique**, qui passent par le même sélecteur d'imprimante.
   (tampon de l'imprimante), pointillé bien dans le blanc, budget de 20 s par
   exemplaire suffisant.
 
-## Lot 2 — défaut par école (attend le back)
+## Lot 2 — défaut par école ✅ front, 🔴 inerte jusqu'au back
+
+Livré côté front le 2026-09-25, **sans effet tant que le back ne sert pas le
+champ** : `null` ⇒ un exemplaire, exactement comme avant.
+
+- Palier tenant **v53** : `ref_school.ticket_copies INTEGER` (colonne gardée,
+  aucune reprise — le référentiel est renvoyé en entier à chaque pull).
+- Pull : `RefSchoolDto.ticketCopies` (lu comme `num`), `SchoolRow`, entité
+  `School`.
+- `ResolveTicketCopiesUseCase` : le réglage de l'école de la session, borné,
+  ou 1 — **ne rend jamais d'échec**, un défaut illisible ne bloque pas un
+  ticket. Branché sur les deux flux (perception et boutique), y compris le
+  repli PDF quand l'échec précède le compteur.
+- Configuration ▸ Identité de l'école : « Exemplaires par ticket », liste 1→5,
+  qui montre « 1 (par défaut) » tant que rien n'est choisi.
+- Écriture : `SchoolIdentityModel.ticketCopies`, `null` quand rien n'est choisi.
 
 ### Ce que le front attend du back
 
-Un entier facultatif `ticketCopies` (1 → 5, `null` ⇒ le client applique 1),
-sur le modèle de `tillPhone` (V137) :
+📄 Page « Tickets — nombre d'exemplaires par école » (Claude Docs,
+`https://claude.ai/artifact/LDktsqVACT1FvRUzBuQuXx`).
 
-1. **Écriture** — `SchoolDto` (`PUT /api/v1/schools/{id}`) : champ
-   **facultatif**, l'omettre conserve la valeur déjà saisie (même exception à la
-   mise à jour complète que `tillPhone`). Hors bornes ⇒ 400.
+Un entier facultatif `ticketCopies` (1 → 5), sur le modèle de `tillPhone`
+(V137) :
+
+1. **Écriture** — `SchoolDto` (`PUT /api/v1/schools/{id}`) : absent **ou
+   `null`** ⇒ le serveur conserve la valeur enregistrée (même règle que
+   `tillPhone`). Revenir au comportement d'avant = enregistrer 1. Hors
+   bornes ⇒ 400.
 2. **Lecture hors ligne** — `ReferentialBundle.school`
    (`GET /api/v1/sync/referential`) : `ticketCopies`, `nullable`.
 
-Question ouverte pour le back : un seul défaut pour les deux tickets, ou deux
-champs (perception / vente) ? Le lot 1 accepte les deux.
+Question ouverte : un seul défaut pour les deux tickets, ou deux champs ? Le
+front est parti sur **un seul** (`ticketCopies`).
 
-### Côté front, une fois le contrat livré
-
-- Migration tenant : colonne sur la table de l'école du référentiel. ⚠️ Le
-  palier v52 est **pris par `feat/expense-validation-circuit`** (PR #59, non
-  fusionnée) : prendre le prochain palier libre **au moment** du lot.
-- Lecture du pull (`referential_pull_models.dart`, à côté de `tillPhone`).
-- Saisie dans Configuration ▸ Identité de l'école (`school_identity_step.dart`).
-- Brancher le défaut : `defaultCopies` dans `_sendTicketToPrinter`
-  (`provisional_ticket_print_flow.dart`) et `initialCopies` de
-  `printThermalBytes` dans `sale_ticket_print_flow.dart`.
-- Le champ reste inerte tant que le back n'est pas déployé : `null` ⇒ 1.
+⚠️ Comme `tillPhone`, le réglage **ne se vide pas** : l'écran n'offre que 1→5,
+jamais « aucun ».
