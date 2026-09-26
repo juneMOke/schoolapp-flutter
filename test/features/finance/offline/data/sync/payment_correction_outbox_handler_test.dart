@@ -412,6 +412,25 @@ void main() {
       expect(row['cancelled_at'], isNotNull);
     });
 
+    // Un format de date inattendu ne doit jamais faire lever : l'entrée serait
+    // rejouée sans fin au lieu d'être tranchée.
+    test('un cancelledAt numérique n empêche pas le refus', () async {
+      final origin = await syncedOrigin();
+      final outcome = await correct(origin);
+      when(() => api.correctPayment(any(), any())).thenThrow(
+        _refusal(
+          422,
+          detailCode: 'PAYMENT_ALREADY_CORRECTED',
+          details: {'cancelledAt': 1790400000.5},
+        ),
+      );
+
+      final result = await handler().dispatch(await correctionEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect(await statusOf(outcome.correctionId), 'REJECTED');
+    });
+
     test('un 403 rétablit l origine', () async {
       final origin = await syncedOrigin();
       final outcome = await correct(origin);

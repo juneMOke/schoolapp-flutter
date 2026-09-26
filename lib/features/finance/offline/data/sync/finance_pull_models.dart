@@ -200,7 +200,9 @@ class PaymentDto {
     collectedByName: j['collectedByName'] as String?,
     cancelledAt: j['cancelledAt'] as String?,
     replacesPaymentId: j['replacesPaymentId'] as String?,
-    cancelledBy: j['cancelledBy'] as String?,
+    // `cancelledByName` au contrat livré (V144) ; `cancelledBy` était le nom
+    // du plan, gardé en repli le temps qu'aucun serveur ne l'envoie plus.
+    cancelledBy: j['cancelledByName'] as String? ?? j['cancelledBy'] as String?,
     cancellationReason: j['cancellationReason'] as String?,
     cancellationReasonCode: j['cancellationReasonCode'] as String?,
     cancellationCashMoved: j['cancellationCashMoved'] as bool?,

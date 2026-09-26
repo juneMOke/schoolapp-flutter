@@ -190,7 +190,9 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
       error: reason,
       serverDetail: details,
       serverCancelledAt: detailCode == FinanceErrorCodes.paymentAlreadyCorrected
-          ? EpochIsoHelper.tryToEpochMs(details?['cancelledAt'] as String?)
+          // Lu SANS cast : un format inattendu (epoch numérique) ferait lever,
+          // et l'entrée serait rejouée sans fin au lieu d'être tranchée.
+          ? EpochIsoHelper.tryToEpochMs(details?['cancelledAt'])
           : null,
       nowMs: _now(),
     );

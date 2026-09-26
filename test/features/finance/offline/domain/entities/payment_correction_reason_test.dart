@@ -63,7 +63,8 @@ void main() {
       final local = PaymentDto.fromJson({
         ...json(),
         'cancelledAt': '2026-09-26T08:14:00Z',
-        'cancelledBy': 'Moke Junior',
+        // Le nom au contrat livré (PaymentDelta, V144).
+        'cancelledByName': 'Moke Junior',
         'cancellationReason': 'Saisi 150 \$ au lieu de 50 \$',
         'cancellationReasonCode': 'WRONG_AMOUNT',
         'cancellationCashMoved': false,

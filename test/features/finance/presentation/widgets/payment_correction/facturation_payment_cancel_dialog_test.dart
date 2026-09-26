@@ -98,6 +98,21 @@ void main() {
     expect(cta(tester).onPressed, isNotNull);
   });
 
+  // La borne du serveur (500) : au-delà, le geste serait refusé après coup.
+  testWidgets('la précision est bornée à 500 caractères', (tester) async {
+    await open(tester);
+    await choose(tester, PaymentCorrectionReason.other);
+
+    final field = find.descendant(
+      of: find.byKey(const ValueKey('payment-correction-detail')),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(field, 'x' * 600);
+    await tester.pump();
+
+    expect(tester.widget<TextField>(field).controller!.text, hasLength(500));
+  });
+
   testWidgets('le geste part avec son motif, puis dit son résultat', (
     tester,
   ) async {
