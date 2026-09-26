@@ -11,6 +11,10 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ti
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_target.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/search_payment_correction_targets_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_target_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
@@ -33,13 +37,35 @@ class _MockCorrect extends Mock implements CorrectPaymentUseCase {}
 
 class _MockPrintedAt extends Mock implements TicketPrintedAtUseCase {}
 
+class _MockSearch extends Mock
+    implements SearchPaymentCorrectionTargetsUseCase {}
+
+class _MockCharges extends Mock
+    implements GetStudentChargesByAcademicYearUseCase {}
+
+const _sibling = PaymentCorrectionTarget(
+  studentId: 'stu-2',
+  lastName: 'Tshiala',
+  surname: 'Kanku',
+  firstName: 'Grâce',
+  levelName: '4e B',
+);
+
 /// « Corriger » réutilise la page d'encaissement : pré-remplie avec l'origine,
 /// tranches rouvertes, un motif obligatoire, et un seul geste.
 void main() {
   late _MockFinanceOfflineBloc offline;
   late _MockCorrect correct;
+  late _MockSearch search;
+  late _MockCharges charges;
 
   setUpAll(() {
+    registerFallbackValue(
+      const GetStudentChargesByAcademicYearParams(
+        studentId: 'x',
+        academicYearId: 'x',
+      ),
+    );
     registerFallbackValue(
       const PaymentCorrectionDraft(
         paymentId: 'x',
@@ -59,6 +85,33 @@ void main() {
           replacementPaymentId: 'p-2',
         ),
       ),
+    );
+    search = _MockSearch();
+    when(
+      () => search(
+        query: any(named: 'query'),
+        academicYearId: any(named: 'academicYearId'),
+        excludeStudentId: any(named: 'excludeStudentId'),
+      ),
+    ).thenAnswer((_) async => const Right([_sibling]));
+    charges = _MockCharges();
+    when(() => charges(any())).thenAnswer(
+      (_) async => const Right([
+        StudentCharge(
+          id: 'S1',
+          studentId: 'stu-2',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-2',
+          schoolLevelGroupId: 'grp-1',
+          feeTariffId: 'tar-2',
+          feeCode: 'SCOLARITE',
+          label: 'Scolarité S1',
+          expectedAmountInCents: 15000,
+          amountPaidInCents: 0,
+          currency: 'USD',
+          status: StudentChargeStatus.due,
+        ),
+      ]),
     );
     // Le résultat propose le ticket du remplaçant.
     final printedAt = _MockPrintedAt();
@@ -116,6 +169,9 @@ void main() {
         providers: [
           BlocProvider<FinanceOfflineBloc>.value(value: offline),
           BlocProvider(create: (_) => PaymentCorrectionCubit(correct)),
+          BlocProvider(
+            create: (_) => PaymentCorrectionTargetCubit(search, charges),
+          ),
         ],
         child: MaterialApp(
           locale: const Locale('fr'),
@@ -169,12 +225,88 @@ void main() {
     expect(cta(tester).label, 'Annuler et remplacer');
   });
 
-  testWidgets('« Mauvais élève » n est pas proposé tant que l écran ne sait '
-      'pas changer d élève', (tester) async {
+  // D1 : le frère au lieu de la sœur. Le versement part sur l'autre élève,
+  // ses créances à lui, et le motif se pose seul.
+  testWidgets('changer d élève : le remplaçant va à l élève retenu', (
+    tester,
+  ) async {
     await open(tester);
 
-    expect(find.text('Mauvais montant'), findsOneWidget);
-    expect(find.text('Mauvais élève'), findsNothing);
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-change-student')),
+    );
+    await tester.pump();
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('payment-correction-student-search')),
+        matching: find.byType(TextField),
+      ),
+      'grace',
+    );
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-target-stu-2')),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Tshiala Kanku Grâce'), findsOneWidget);
+    expect(find.textContaining('sera déplacé depuis'), findsOneWidget);
+    // Les créances de l'élève retenu, sans rien de pré-saisi.
+    expect(find.text('Scolarité S1'), findsWidgets);
+    expect(cta(tester).onPressed, isNull);
+
+    // Rien n'est coché chez lui : le caissier coche la tranche, puis saisit.
+    final coche = find
+        .descendant(
+          of: find.byType(FacturationCreatePaymentChargeAllocationLine),
+          matching: find.byType(InkWell),
+        )
+        .first;
+    await tester.ensureVisible(coche);
+    await tester.tap(coche);
+    await tester.pump();
+    await tester.enterText(amountField(), '50');
+    await tester.pump();
+    expect(cta(tester).onPressed, isNotNull);
+    await tester.tap(find.byWidget(cta(tester)));
+    await tester.pump();
+
+    final draft =
+        verify(() => correct(captureAny())).captured.single
+            as PaymentCorrectionDraft;
+    expect(draft.reason, PaymentCorrectionReason.wrongStudent);
+    expect(draft.replacement!.studentId, 'stu-2');
+    expect(draft.replacement!.allocations.single.studentChargeId, 'S1');
+  });
+
+  testWidgets('rétablir ramène l origine, montant compris', (tester) async {
+    await open(tester);
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-change-student')),
+    );
+    await tester.pump();
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('payment-correction-student-search')),
+        matching: find.byType(TextField),
+      ),
+      'grace',
+    );
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-target-stu-2')),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-restore-student')),
+    );
+    await tester.pump();
+
+    expect(find.text('Tshiala Mbuyi Gloredi'), findsWidgets);
+    expect(tester.widget<TextField>(amountField()).controller!.text, '150');
   });
 
   testWidgets('sans changement, c est Annuler le bon geste', (tester) async {

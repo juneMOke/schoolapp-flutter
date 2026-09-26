@@ -11282,4 +11282,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String paymentCancellationMotive(String motive) {
     return 'Reason: $motive';
   }
+
+  @override
+  String get paymentCorrectionStudentLabel => 'Student';
+
+  @override
+  String get paymentCorrectionChangeStudent => 'Change';
+
+  @override
+  String get paymentCorrectionRestoreStudent => 'Restore';
+
+  @override
+  String get paymentCorrectionStudentSearchLabel =>
+      'Search a student: last, middle or first name';
+
+  @override
+  String get paymentCorrectionStudentNoResult =>
+      'No student matches. Check the spelling.';
+
+  @override
+  String paymentCorrectionMovedFrom(String name) {
+    return 'The payment will be moved from $name.';
+  }
+
+  @override
+  String paymentCorrectionTargetSettled(String name) {
+    return 'All of $name\'s fees are settled. Choose another student, or use Cancel.';
+  }
+
+  @override
+  String get paymentCorrectionTargetLoadFailed =>
+      'This student\'s fees could not be read.';
 }

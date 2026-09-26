@@ -35,6 +35,10 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/loca
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_target_cubit.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_correction_context.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_correction_student_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payment_correction_reads.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_corrected_dialog.dart';
@@ -100,10 +104,14 @@ class FacturationCreatePaymentPage extends StatelessWidget {
           create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
         // Le geste de correction, seulement quand la page sert à corriger.
-        if (intent.correction != null)
+        if (intent.correction != null) ...[
           BlocProvider<PaymentCorrectionCubit>(
             create: (_) => getIt<PaymentCorrectionCubit>(),
           ),
+          BlocProvider<PaymentCorrectionTargetCubit>(
+            create: (_) => getIt<PaymentCorrectionTargetCubit>(),
+          ),
+        ],
       ],
       // La vue ne lit pas le cubit elle-même : elle reçoit la série. C'est ce
       // qui la garde montable seule — et sans taux, c'est-à-dire dans le cas
@@ -171,7 +179,10 @@ class _FacturationCreatePaymentViewState
   /// le rendu, et l'enveloppe `setState`. Tout le reste — lignes, natures, jour
   /// désigné, dérivations — vit dans [FacturationCollectFormModel], avec ses
   /// tests unitaires.
-  late final FacturationCollectFormModel _model;
+  ///
+  /// Reconstruit — et seulement alors — quand une correction change d'élève
+  /// (D1) : les lignes sont celles des créances d'un autre élève.
+  late FacturationCollectFormModel _model;
 
   /// Anti double-dialogue : un second déclencheur (retour système pendant que
   /// la flèche a déjà ouvert la confirmation) est ignoré.
@@ -222,25 +233,12 @@ class _FacturationCreatePaymentViewState
   void initState() {
     super.initState();
     _rates = FacturationRateBoard(onChanged: _onChanged);
-    _model = FacturationCollectFormModel.fromCharges(
-      charges: widget.intent.unpaidCharges,
-      rates: _rates,
-      // ⚠️ Un RAPPEL, jamais une valeur : la série de taux arrive en asynchrone,
-      // et un modèle qui l'aurait captée ici convertirait au taux d'une série
-      // périmée (piège P1).
-      settlementOf: _settlement,
-      nowOf: () => _now,
-    );
-    _model.addListener(_onChanged);
+    _model = _modelOf(widget.intent.unpaidCharges);
     _payer.addListener(_onChanged);
     _correctionDetail.addListener(_onChanged);
     final correction = widget.intent.correction;
     if (correction != null) {
-      // L'origine, posée comme saisie à la main, au jour d'origine (D2).
-      _model.prefill(
-        centsByCharge: correction.origin.centsByCharge,
-        day: SchoolTime.today(correction.originPaidAt),
-      );
+      _prefillOrigin(correction);
       _payer.applyPayer(
         LocalPayerIdentity(
           lastName: correction.origin.payerLastName ?? '',
@@ -251,6 +249,60 @@ class _FacturationCreatePaymentViewState
         ),
       );
       _applyOriginTenderCurrencies();
+    }
+  }
+
+  FacturationCollectFormModel _modelOf(Iterable<StudentCharge> charges) =>
+      FacturationCollectFormModel.fromCharges(
+        charges: charges,
+        rates: _rates,
+        // ⚠️ Un RAPPEL, jamais une valeur : la série de taux arrive en
+        // asynchrone, et un modèle qui l'aurait captée ici convertirait au taux
+        // d'une série périmée (piège P1).
+        settlementOf: _settlement,
+        nowOf: () => _now,
+      )..addListener(_onChanged);
+
+  /// L'origine, posée comme saisie à la main, au jour d'origine (D2).
+  void _prefillOrigin(FacturationPaymentCorrectionContext correction) {
+    _model.prefill(
+      centsByCharge: correction.origin.centsByCharge,
+      day: SchoolTime.today(correction.originPaidAt),
+    );
+    _originTenderCurrenciesApplied = false;
+    _applyOriginTenderCurrencies();
+  }
+
+  /// Changer d'élève (D1) : les lignes deviennent celles de [charges]. Le jour
+  /// choisi reste. Vers l'élève d'origine, l'origine est de nouveau posée.
+  void _switchStudent(Iterable<StudentCharge> charges, {required bool origin}) {
+    // Le champ qui a le curseur appartient peut-être à l'ancien modèle.
+    FocusManager.instance.primaryFocus?.unfocus();
+    final previous = _model;
+    final day = previous.paidDay;
+    _model = _modelOf(charges.where((c) => c.remainingInCents > 0));
+    final correction = widget.intent.correction;
+    if (origin && correction != null) {
+      _prefillOrigin(correction);
+    } else {
+      _model.prefill(centsByCharge: const {}, day: day);
+    }
+    // Les champs de l'ancien modèle sont encore montés jusqu'à la fin de cette
+    // image : les libérer maintenant lèverait.
+    WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    setState(() {});
+  }
+
+  void _onTargetState(PaymentCorrectionTargetState state) {
+    final charges = state.targetCharges;
+    if (state.target != null && charges != null) {
+      _correctionReason = PaymentCorrectionReason.wrongStudent;
+      _switchStudent(charges, origin: false);
+    } else if (state.target == null && !state.loadFailed) {
+      if (_correctionReason == PaymentCorrectionReason.wrongStudent) {
+        _correctionReason = null;
+      }
+      _switchStudent(widget.intent.unpaidCharges, origin: true);
     }
   }
 
@@ -586,7 +638,14 @@ class _FacturationCreatePaymentViewState
     final replacement = withOriginInstant(
       recordPaymentDraftFromRequest(
         PaymentsCreateRequested(
-          studentId: widget.intent.studentId,
+          // L'élève retenu (D1), sinon celui de l'origine.
+          studentId:
+              context
+                  .read<PaymentCorrectionTargetCubit>()
+                  .state
+                  .target
+                  ?.studentId ??
+              widget.intent.studentId,
           academicYearId: widget.intent.academicYearId,
           paidAt: draft.paidAt,
           amounts: draft.amounts,
@@ -639,8 +698,14 @@ class _FacturationCreatePaymentViewState
     // panne alors que c'est une saisie à corriger.
     final allocations = settledBagOf(settlement, _model.entries);
     final correction = widget.intent.correction;
+    final moved =
+        correction != null &&
+        context.select<PaymentCorrectionTargetCubit, bool>(
+          (cubit) => cubit.state.target != null,
+        );
     final unchanged =
         correction != null &&
+        !moved &&
         correctionUnchanged(
           correction: correction,
           replacementCentsByCharge: _replacementCentsByCharge,
@@ -714,9 +779,25 @@ class _FacturationCreatePaymentViewState
             ),
             child: correction == null
                 ? _body(l10n, settlement)
-                : BlocListener<PaymentCorrectionCubit, PaymentCorrectionState>(
-                    listenWhen: (a, b) => a.phase != b.phase,
-                    listener: (_, state) => _onCorrectionState(state),
+                : MultiBlocListener(
+                    listeners: [
+                      BlocListener<
+                        PaymentCorrectionCubit,
+                        PaymentCorrectionState
+                      >(
+                        listenWhen: (a, b) => a.phase != b.phase,
+                        listener: (_, state) => _onCorrectionState(state),
+                      ),
+                      BlocListener<
+                        PaymentCorrectionTargetCubit,
+                        PaymentCorrectionTargetState
+                      >(
+                        listenWhen: (a, b) =>
+                            a.target != b.target ||
+                            a.targetCharges != b.targetCharges,
+                        listener: (_, state) => _onTargetState(state),
+                      ),
+                    ],
                     child: _body(l10n, settlement, unchanged: unchanged),
                   ),
           ),
@@ -754,6 +835,36 @@ class _FacturationCreatePaymentViewState
             paidAt: correction.originPaidAt,
           ),
           const SizedBox(height: AppDimensions.detailSectionSpacing),
+          BlocBuilder<
+            PaymentCorrectionTargetCubit,
+            PaymentCorrectionTargetState
+          >(
+            builder: (context, target) =>
+                FacturationPaymentCorrectionStudentCard(
+                  originName: studentFullName(widget.intent, l10n),
+                  target: target.target,
+                  results: target.results,
+                  query: target.query,
+                  targetSettled:
+                      target.target != null && _model.entries.isEmpty,
+                  loadFailed: target.loadFailed,
+                  enabled: !_collectInFlight,
+                  onSearch: (query) =>
+                      context.read<PaymentCorrectionTargetCubit>().search(
+                        query: query,
+                        academicYearId: widget.intent.academicYearId,
+                        excludeStudentId: widget.intent.studentId,
+                      ),
+                  onSelect: (picked) =>
+                      context.read<PaymentCorrectionTargetCubit>().select(
+                        picked,
+                        academicYearId: widget.intent.academicYearId,
+                      ),
+                  onRestore: () =>
+                      context.read<PaymentCorrectionTargetCubit>().reset(),
+                ),
+          ),
+          const SizedBox(height: AppDimensions.detailSectionSpacing),
         ],
         FinanceSectionCard(
           backgroundColor: AppColors.surfaceRaised,
@@ -787,6 +898,9 @@ class _FacturationCreatePaymentViewState
         ),
         const SizedBox(height: AppDimensions.detailSectionSpacing),
         FacturationCreatePaymentChargesSection(
+          // Un modèle neuf (D1) reconstruit toute la section : aucune ligne ne
+          // doit garder les champs d'un modèle libéré.
+          key: ObjectKey(_model),
           groups: _model.groups,
           schoolTitleOf: widget.sectionTitles.titleOf,
           onGroupToggle: _collectInFlight

@@ -7478,5 +7478,27 @@
         "type": "String"
       }
     }
-  }
+  },
+  "paymentCorrectionStudentLabel": "Élève",
+  "paymentCorrectionChangeStudent": "Changer",
+  "paymentCorrectionRestoreStudent": "Rétablir",
+  "paymentCorrectionStudentSearchLabel": "Rechercher un élève : nom, post-nom ou prénom",
+  "paymentCorrectionStudentNoResult": "Aucun élève ne correspond. Vérifiez l'orthographe.",
+  "paymentCorrectionMovedFrom": "Le versement sera déplacé depuis {name}.",
+  "@paymentCorrectionMovedFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetSettled": "Tous les frais de {name} sont soldés. Choisissez un autre élève, ou utilisez Annuler.",
+  "@paymentCorrectionTargetSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetLoadFailed": "Les frais de cet élève n'ont pas pu être lus."
 }

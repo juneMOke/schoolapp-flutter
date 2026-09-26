@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_target.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
 /// Un geste « Annuler » ou « Corriger » sur un versement, tel que le guichet
@@ -68,4 +69,11 @@ abstract interface class PaymentCorrectionRepository {
   /// Le versement à corriger, pour pré-remplir le remplaçant.
   /// `NotFoundFailure` s'il n'existe pas en local.
   Future<Either<Failure, PaymentCorrectionOrigin>> loadOrigin(String paymentId);
+
+  /// Les élèves vers qui déplacer le versement (D1), cinq au plus.
+  Future<Either<Failure, List<PaymentCorrectionTarget>>> searchTargets({
+    required String query,
+    required String academicYearId,
+    required String excludeStudentId,
+  });
 }

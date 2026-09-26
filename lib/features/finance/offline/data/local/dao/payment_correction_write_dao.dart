@@ -7,7 +7,9 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
+import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_target.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 
 /// Agrégat d'outbox d'une correction de versement.
@@ -78,6 +80,51 @@ class PaymentCorrectionWriteDao {
   /// L'origine telle que la tablette la connaît, `null` si elle est absente.
   Future<CorrectionOrigin?> findOrigin(String paymentId) =>
       _findOrigin(_db, paymentId);
+
+  /// Les élèves vers qui un versement peut être déplacé (D1) : inscrits dans
+  /// l'année [academicYearId] par un dossier qui vit encore, [excludeStudentId]
+  /// écarté.
+  ///
+  /// La recherche est faite en Dart, accents pliés : `LOWER()` de SQLite ne
+  /// plie pas « é » sur « e », et un guichetier tape rarement les accents.
+  Future<List<PaymentCorrectionTarget>> searchTargets({
+    required String query,
+    required String academicYearId,
+    required String excludeStudentId,
+    int limit = 5,
+  }) async {
+    if (query.trim().isEmpty) return const [];
+    final rows = await _db.rawQuery(
+      '''
+      SELECT DISTINCT s.id, s.last_name, s.surname, s.first_name,
+             l.name AS level_name
+      FROM students s
+      JOIN enrollments e ON e.student_id = s.id
+      LEFT JOIN ref_school_levels l ON l.id = e.school_level_id
+      WHERE e.academic_year_id = ?
+        AND e.status <> 'CANCELLED'
+        AND s.id <> ?
+      ORDER BY s.last_name, s.surname, s.first_name, s.id
+      ''',
+      [academicYearId, excludeStudentId],
+    );
+    final found = <PaymentCorrectionTarget>[];
+    for (final r in rows) {
+      final target = PaymentCorrectionTarget(
+        studentId: r['id'] as String,
+        lastName: (r['last_name'] as String?) ?? '',
+        surname: r['surname'] as String?,
+        firstName: (r['first_name'] as String?) ?? '',
+        levelName: r['level_name'] as String?,
+      );
+      if (!SearchNormalizationHelper.contains(target.fullName, query)) {
+        continue;
+      }
+      found.add(target);
+      if (found.length >= limit) break;
+    }
+    return found;
+  }
 
   /// Le versement à corriger, avec ses imputations et la devise de son
   /// tiroir, `null` s'il est absent.

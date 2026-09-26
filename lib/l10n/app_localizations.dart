@@ -17788,6 +17788,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason: {motive}'**
   String paymentCancellationMotive(String motive);
+
+  /// No description provided for @paymentCorrectionStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get paymentCorrectionStudentLabel;
+
+  /// No description provided for @paymentCorrectionChangeStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get paymentCorrectionChangeStudent;
+
+  /// No description provided for @paymentCorrectionRestoreStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get paymentCorrectionRestoreStudent;
+
+  /// No description provided for @paymentCorrectionStudentSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student: last, middle or first name'**
+  String get paymentCorrectionStudentSearchLabel;
+
+  /// No description provided for @paymentCorrectionStudentNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches. Check the spelling.'**
+  String get paymentCorrectionStudentNoResult;
+
+  /// No description provided for @paymentCorrectionMovedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment will be moved from {name}.'**
+  String paymentCorrectionMovedFrom(String name);
+
+  /// No description provided for @paymentCorrectionTargetSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All of {name}\'s fees are settled. Choose another student, or use Cancel.'**
+  String paymentCorrectionTargetSettled(String name);
+
+  /// No description provided for @paymentCorrectionTargetLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This student\'s fees could not be read.'**
+  String get paymentCorrectionTargetLoadFailed;
 }
 
 class _AppLocalizationsDelegate

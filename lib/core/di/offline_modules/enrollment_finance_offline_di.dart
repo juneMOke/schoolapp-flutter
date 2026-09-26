@@ -129,6 +129,9 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/pa
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/correct_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/load_payment_correction_origin_use_case.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/search_payment_correction_targets_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_target_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/data/receipt/cancelled_receipt_recorder.dart';
 import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
@@ -610,6 +613,17 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<LoadPaymentCorrectionOriginUseCase>(
     () => LoadPaymentCorrectionOriginUseCase(
       getIt<PaymentCorrectionRepository>(),
+    ),
+  );
+  getIt.registerFactory<SearchPaymentCorrectionTargetsUseCase>(
+    () => SearchPaymentCorrectionTargetsUseCase(
+      getIt<PaymentCorrectionRepository>(),
+    ),
+  );
+  getIt.registerFactory<PaymentCorrectionTargetCubit>(
+    () => PaymentCorrectionTargetCubit(
+      getIt<SearchPaymentCorrectionTargetsUseCase>(),
+      getIt<GetStudentChargesByAcademicYearUseCase>(),
     ),
   );
   // Factory : le geste vit et meurt avec sa modale ou sa page.

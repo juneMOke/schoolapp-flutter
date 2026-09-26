@@ -7282,5 +7282,27 @@
         "type": "String"
       }
     }
-  }
+  },
+  "paymentCorrectionStudentLabel": "Student",
+  "paymentCorrectionChangeStudent": "Change",
+  "paymentCorrectionRestoreStudent": "Restore",
+  "paymentCorrectionStudentSearchLabel": "Search a student: last, middle or first name",
+  "paymentCorrectionStudentNoResult": "No student matches. Check the spelling.",
+  "paymentCorrectionMovedFrom": "The payment will be moved from {name}.",
+  "@paymentCorrectionMovedFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetSettled": "All of {name}'s fees are settled. Choose another student, or use Cancel.",
+  "@paymentCorrectionTargetSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetLoadFailed": "This student's fees could not be read."
 }

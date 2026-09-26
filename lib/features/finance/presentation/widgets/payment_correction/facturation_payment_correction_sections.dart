@@ -124,9 +124,6 @@ class FacturationPaymentCorrectionReasonCard extends StatelessWidget {
             cashMoved: cashMoved,
             onCashMovedChanged: onCashMovedChanged,
             enabled: enabled,
-            // Changer d'élève (D1) n'est pas encore offert par cet écran : le
-            // remplaçant reste sur l'élève de l'origine.
-            excluded: const {PaymentCorrectionReason.wrongStudent},
           ),
           if (unchanged)
             Text(

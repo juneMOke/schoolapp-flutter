@@ -277,6 +277,69 @@ void main() {
     });
   });
 
+  // D1 : vers qui déplacer un versement.
+  group('élèves cibles', () {
+    Future<void> enrolled(
+      String id,
+      String last,
+      String first, {
+      String status = 'COMPLETED',
+      String year = 'ay-1',
+    }) async {
+      await db.insert('students', {
+        'id': id,
+        'first_name': first,
+        'last_name': last,
+        'gender': 'F',
+        'date_of_birth': '2015-01-01',
+      });
+      await db.insert('enrollments', {
+        'id': 'e-$id-$year',
+        'student_id': id,
+        'enrollment_type': 'NEW',
+        'status': status,
+        'academic_year_id': year,
+        'enrollment_date': '2026-09-01',
+      });
+    }
+
+    Future<List<String>> found(String query) async => [
+      for (final t in (await corrections.searchTargets(
+        query: query,
+        academicYearId: 'ay-1',
+        excludeStudentId: 's-1',
+      )).getOrElse(() => const []))
+        t.studentId,
+    ];
+
+    test('les inscrits de l année, accents pliés', () async {
+      await enrolled('s-2', 'Tshiala', 'Grâce');
+      await enrolled('s-3', 'Mbuyi', 'Joël');
+
+      expect(await found('grace'), ['s-2']);
+      expect(await found('JOEL'), ['s-3']);
+    });
+
+    test(
+      'ni l élève d origine, ni un dossier annulé, ni une autre année',
+      () async {
+        await enrolled('s-1', 'Tshiala', 'Gloredi');
+        await enrolled('s-4', 'Tshiala', 'Annulé', status: 'CANCELLED');
+        await enrolled('s-5', 'Tshiala', 'Ancien', year: 'ay-0');
+
+        expect(await found('tshiala'), isEmpty);
+      },
+    );
+
+    test('cinq au plus', () async {
+      for (var i = 0; i < 7; i++) {
+        await enrolled('x-$i', 'Kabongo', 'Enfant $i');
+      }
+
+      expect(await found('kabongo'), hasLength(5));
+    });
+  });
+
   // R2 : une origine refusée pour de bon ne sera jamais synchronisée.
   group('origine refusée par le serveur', () {
     test('la correction reste locale, le remplaçant part seul', () async {
