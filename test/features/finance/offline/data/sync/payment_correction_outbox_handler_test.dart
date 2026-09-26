@@ -137,7 +137,7 @@ void main() {
     idGenerator: const IdGenerator(Uuid()),
     extras: const {},
     now: () => 5000,
-    receipts: CancelledReceiptRecorder(
+    receipts: () => CancelledReceiptRecorder(
       cache: EditiqueCacheDao(device),
       access: _Entitled(),
       currentUser: CurrentUserContext()..set('u-1', schoolId: 'school-1'),

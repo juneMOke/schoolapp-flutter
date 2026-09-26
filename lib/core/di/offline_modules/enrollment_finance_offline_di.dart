@@ -827,7 +827,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
           .studentEnrollmentDependency(studentId, academicYearId),
       idGenerator: getIt<IdGenerator>(),
       extras: extras,
-      receipts: CancelledReceiptRecorder(
+      receipts: () => CancelledReceiptRecorder(
         cache: getIt<EditiqueCacheDao>(),
         access: getIt<EditiqueCacheAccess>(),
         currentUser: getIt<CurrentUserContext>(),

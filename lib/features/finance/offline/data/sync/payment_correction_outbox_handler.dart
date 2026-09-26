@@ -48,7 +48,11 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
 
   /// Marque le reçu d'origine annulé dans le cache des pièces (R8). Optionnel :
   /// sans lui, le pull des pièces le fera.
-  final CancelledReceiptRecorder? _receipts;
+  ///
+  /// ⚠️ Une FABRIQUE, résolue au premier accusé et pas à l'enregistrement :
+  /// le handler s'enregistre avant que le module Documents n'ait posé le cache
+  /// des pièces dans la DI.
+  final CancelledReceiptRecorder Function()? _receipts;
 
   PaymentCorrectionOutboxHandler({
     required FinanceSyncApi api,
@@ -57,7 +61,7 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
     required IdGenerator idGenerator,
     required Map<String, dynamic> extras,
     Clock now = systemClock,
-    CancelledReceiptRecorder? receipts,
+    CancelledReceiptRecorder Function()? receipts,
   }) : _receipts = receipts,
        _api = api,
        _dao = dao,
@@ -140,12 +144,16 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
       final nowMs = _now();
       final receiptId = await _dao.applyAck(ack, nowMs: nowMs);
       // Après la transaction, jamais dedans : une autre base, best-effort.
-      await _receipts?.record(
-        documentId: receiptId,
-        documentNumber: ack.cancelledReceiptNumber,
-        cancelledAt: EpochIsoHelper.tryToEpochMs(ack.cancelledAt) ?? nowMs,
-        reason: request.reason,
-      );
+      try {
+        await _receipts?.call().record(
+          documentId: receiptId,
+          documentNumber: ack.cancelledReceiptNumber,
+          cancelledAt: EpochIsoHelper.tryToEpochMs(ack.cancelledAt) ?? nowMs,
+          reason: request.reason,
+        );
+      } catch (_) {
+        // Best-effort, comme l'enregistrement lui-même.
+      }
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
       return _onHttpError(request, e);
