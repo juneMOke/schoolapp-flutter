@@ -381,6 +381,19 @@ void main() {
       expect(facturationTicketRowOffered(cached: null), isTrue);
     });
 
+    // T0, R3 : un versement annulé par le serveur n'atteste plus rien, même
+    // quand son reçu n'est pas (encore) connu annulé.
+    test('un versement annulé ferme le ticket', () {
+      expect(
+        facturationTicketRowOffered(cached: null, paymentCancelled: true),
+        isFalse,
+      );
+      expect(
+        facturationTicketRowOffered(cached: entry(), paymentCancelled: true),
+        isFalse,
+      );
+    });
+
     /// Une pièce sans octets et sans identifiant n'est pas une pièce
     /// annulée : c'est une ligne apprise par le delta. La lire « annulée »
     /// barrerait le ticket de tout un catalogue.
@@ -445,6 +458,30 @@ void main() {
       expect(
         facturationReceiptGesture(cached: null, isPendingSync: false),
         FacturationReceiptGesture.emit,
+      );
+    });
+
+    // T0, R3 : `payments.receipt_id` désigne un reçu déjà émis. L'émettre à
+    // nouveau rescellerait peut-être une pièce annulée dont la tablette ignore
+    // encore l'annulation, faute de pull des pièces.
+    test('restitue par l identifiant du versement, sans entrée de cache', () {
+      expect(
+        facturationReceiptGesture(
+          cached: null,
+          isPendingSync: false,
+          receiptDocumentId: 'doc-1',
+        ),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    test('n émet jamais une pièce annulée connue par son seul numéro', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(documentId: null, cancelledAt: 1786013000000),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.none,
       );
     });
 

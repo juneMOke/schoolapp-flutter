@@ -1,54 +1,47 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
-import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 
-class MockGetPaymentReceiptDocumentUseCase extends Mock
-    implements GetPaymentReceiptDocumentUseCase {}
+class _MockPaymentReceiptResolver extends Mock
+    implements PaymentReceiptResolver {}
 
-LocalGeneratedDocument _document({
-  required String number,
-  required String status,
-}) => LocalGeneratedDocument(
-  id: 'doc-1',
-  docDomain: 'PAYMENT',
-  paymentId: 'pay-1',
-  docType: 'RC',
-  number: number,
-  status: status,
-);
-
-class _MockFindCachedDocumentUseCase extends Mock
-    implements FindCachedDocumentUseCase {}
+/// Un reçu appris par le pull des pièces : métadonnées seules, sans PDF.
+EditiqueCacheEntry _known({int? cancelledAt, String? reason}) =>
+    EditiqueCacheEntry(
+      id: 'c-1',
+      documentId: 'doc-1',
+      documentNumber: 'CF-RC-2627-000279',
+      docType: 'RC',
+      schoolId: 'school-1',
+      ownerUid: 'u-1',
+      sizeBytes: 0,
+      cancelledAt: cancelledAt,
+      cancellationReason: reason,
+      createdAt: 1000,
+      lastAccessedAt: 1000,
+    );
 
 void main() {
-  final cachedUseCase = _MockFindCachedDocumentUseCase();
-  setUp(() {
-    // Aucune copie locale par défaut : le cubit se comporte comme avant le
-    // cache de restitution.
-    when(
-      () => cachedUseCase(
-        documentId: any(named: 'documentId'),
-        documentNumber: any(named: 'documentNumber'),
-      ),
-    ).thenAnswer((_) async => null);
-  });
+  late _MockPaymentReceiptResolver resolver;
 
-  late MockGetPaymentReceiptDocumentUseCase useCase;
+  setUp(() => resolver = _MockPaymentReceiptResolver());
 
-  setUp(() => useCase = MockGetPaymentReceiptDocumentUseCase());
+  void answer(PaymentReceiptReference receipt) =>
+      when(() => resolver.resolve(any())).thenAnswer((_) async => receipt);
 
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
     'expose un numéro définitif tel quel',
-    setUp: () => when(() => useCase(any())).thenAnswer(
-      (_) async =>
-          _document(number: 'ETL-RC-2526-000212', status: 'DEFINITIVE'),
+    setUp: () => answer(
+      const PaymentReceiptReference(
+        number: 'ETL-RC-2526-000212',
+        status: PaymentReceiptStatus.definitive,
+      ),
     ),
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
+    build: () => PaymentReceiptCubit(resolver),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -62,10 +55,13 @@ void main() {
   // mais `hasDefinitiveNumber` interdit de l'afficher comme un numéro de pièce.
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
     'marque un numéro provisoire comme non affichable',
-    setUp: () => when(() => useCase(any())).thenAnswer(
-      (_) async => _document(number: 'PROV-ABCD1234', status: 'PROVISIONAL'),
+    setUp: () => answer(
+      const PaymentReceiptReference(
+        number: 'PROV-ABCD1234',
+        status: PaymentReceiptStatus.provisional,
+      ),
     ),
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
+    build: () => PaymentReceiptCubit(resolver),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -75,54 +71,18 @@ void main() {
     ],
   );
 
-  // Régression : le prédicat doit être une affirmation POSITIVE. Avec l'ancien
-  // `!isProvisional`, tout statut hors des deux connus rendait `true` et faisait
-  // passer un `PROV-…` pour un numéro qui fait foi.
+  // Régression : un versement encaissé sur un AUTRE poste et inconnu du cache
+  // ne doit pas être annoncé « en attente de synchronisation ».
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
-    'traite un statut inconnu comme non définitif',
-    setUp: () => when(() => useCase(any())).thenAnswer(
-      (_) async => _document(number: 'PROV-ABCD1234', status: 'REJECTED'),
-    ),
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
-    act: (cubit) => cubit.load('pay-1'),
-    expect: () => [
-      isA<PaymentReceiptState>()
-          .having((s) => s.isDefinitive, 'isDefinitive', isFalse)
-          .having((s) => s.hasProvisionalNumber, 'hasProvisionalNumber', isTrue)
-          .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isFalse),
-    ],
-  );
-
-  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
-    'reste neutre quand aucun reçu local n existe',
-    setUp: () => when(() => useCase(any())).thenAnswer((_) async => null),
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
+    'n annonce aucune attente quand aucun numéro n est connu',
+    setUp: () => answer(const PaymentReceiptReference(documentId: 'doc-1')),
+    build: () => PaymentReceiptCubit(resolver),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
           .having((s) => s.loaded, 'loaded', isTrue)
           .having((s) => s.number, 'number', isNull)
-          .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isFalse),
-    ],
-  );
-
-  test('un numéro blanc ne compte pas comme définitif', () {
-    const state = PaymentReceiptState(loaded: true, number: '   ');
-    expect(state.hasDefinitiveNumber, isFalse);
-  });
-
-  // Régression : un versement encaissé sur un AUTRE poste et descendu par pull
-  // n'a jamais eu de ligne `generated_documents` locale. Le déduire d'un
-  // `!isDefinitive` le ferait annoncer « en attente de synchronisation » alors
-  // qu'il est parfaitement synchronisé.
-  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
-    'n annonce aucune attente quand aucun reçu local n existe',
-    setUp: () => when(() => useCase(any())).thenAnswer((_) async => null),
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
-    act: (cubit) => cubit.load('pay-1'),
-    expect: () => [
-      isA<PaymentReceiptState>()
-          .having((s) => s.loaded, 'loaded', isTrue)
+          .having((s) => s.documentId, 'documentId', 'doc-1')
           .having(
             (s) => s.hasProvisionalNumber,
             'hasProvisionalNumber',
@@ -132,6 +92,11 @@ void main() {
     ],
   );
 
+  test('un numéro blanc ne compte pas comme définitif', () {
+    const state = PaymentReceiptState(loaded: true, number: '   ');
+    expect(state.hasDefinitiveNumber, isFalse);
+  });
+
   test('n annonce aucune attente avant le chargement', () {
     const state = PaymentReceiptState();
 
@@ -139,50 +104,92 @@ void main() {
     expect(state.hasDefinitiveNumber, isFalse);
   });
 
-  // Un reçu que l'établissement a retiré doit atteindre l'état : c'est lui qui
-  // porte le motif que le guichet affichera. Le filtrer en chemin rendrait le
-  // retrait invisible ici, et le numéro s'afficherait comme s'il tenait
-  // toujours.
+  // Un reçu retiré doit atteindre l'état même sans PDF sur cette tablette :
+  // c'est lui qui porte le motif que le guichet affichera.
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
-    'porte jusqu à l état le reçu que l établissement a retiré',
-    setUp: () {
-      when(() => useCase(any())).thenAnswer(
-        (_) async =>
-            _document(number: 'ETL-RC-2526-000212', status: 'DEFINITIVE'),
-      );
-      when(
-        () => cachedUseCase(
-          documentId: any(named: 'documentId'),
-          documentNumber: any(named: 'documentNumber'),
-        ),
-      ).thenAnswer(
-        (_) async => const EditiqueCacheEntry(
-          id: 'c-1',
-          documentId: 'doc-1',
-          documentNumber: 'ETL-RC-2526-000212',
-          docType: 'RC',
-          schoolId: 'school-1',
-          sizeBytes: 1024,
-          contentSha256: 'abc',
-          cancelledAt: 1786013000000,
-          cancellationReason: 'Erreur de montant',
-          createdAt: 1000,
-          lastAccessedAt: 1000,
-        ),
-      );
-    },
-    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
+    'porte jusqu à l état le reçu retiré, connu du seul pull',
+    setUp: () => answer(
+      PaymentReceiptReference(
+        number: 'CF-RC-2627-000279',
+        status: PaymentReceiptStatus.definitive,
+        documentId: 'doc-1',
+        cacheEntry: _known(cancelledAt: 1786013000000, reason: 'Erreur'),
+      ),
+    ),
+    build: () => PaymentReceiptCubit(resolver),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
           .having((s) => s.cached?.isCancelled, 'cached.isCancelled', isTrue)
           .having(
             (s) => s.cached?.cancellationReason,
-            'cached.cancellationReason',
-            'Erreur de montant',
+            'cancellationReason',
+            'Erreur',
           )
-          // Les octets restent : la copie annulée se ressort quand même.
-          .having((s) => s.cached?.hasBytes, 'cached.hasBytes', isTrue),
+          .having((s) => s.cached?.hasBytes, 'cached.hasBytes', isFalse),
     ],
   );
+
+  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+    'porte l annulation du versement par le serveur',
+    setUp: () => answer(
+      const PaymentReceiptReference(
+        documentId: 'doc-1',
+        paymentCancelledAt: 1786013000000,
+      ),
+    ),
+    build: () => PaymentReceiptCubit(resolver),
+    act: (cubit) => cubit.load('pay-1'),
+    expect: () => [
+      isA<PaymentReceiptState>().having(
+        (s) => s.paymentCancelled,
+        'paymentCancelled',
+        isTrue,
+      ),
+    ],
+  );
+
+  // R3 de T0 : un reçu connu du cache, annulé ou non, ne s'ÉMET jamais —
+  // l'émission rescellerait la pièce et consommerait un numéro.
+  group('aucune émission sur un reçu connu', () {
+    for (final cancelledAt in [null, 1786013000000]) {
+      final label = cancelledAt == null ? 'en vigueur' : 'annulé';
+      blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+        'reçu $label connu du cache : restitution',
+        setUp: () => answer(
+          PaymentReceiptReference(
+            number: 'CF-RC-2627-000279',
+            status: PaymentReceiptStatus.definitive,
+            documentId: 'doc-1',
+            cacheEntry: _known(cancelledAt: cancelledAt),
+          ),
+        ),
+        build: () => PaymentReceiptCubit(resolver),
+        act: (cubit) => cubit.load('pay-1'),
+        verify: (cubit) => expect(
+          facturationReceiptGesture(
+            cached: cubit.state.cached,
+            isPendingSync: false,
+            receiptDocumentId: cubit.state.documentId,
+          ),
+          FacturationReceiptGesture.restitute,
+        ),
+      );
+    }
+
+    blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+      'reçu inconnu du cache mais désigné par le versement : restitution',
+      setUp: () => answer(const PaymentReceiptReference(documentId: 'doc-1')),
+      build: () => PaymentReceiptCubit(resolver),
+      act: (cubit) => cubit.load('pay-1'),
+      verify: (cubit) => expect(
+        facturationReceiptGesture(
+          cached: cubit.state.cached,
+          isPendingSync: false,
+          receiptDocumentId: cubit.state.documentId,
+        ),
+        FacturationReceiptGesture.restitute,
+      ),
+    );
+  });
 }

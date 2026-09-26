@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/money.dart';
@@ -17,6 +18,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   final ProvisionalTicketDao _dao;
   final FinanceOfflineRepository _finance;
+  final PaymentReceiptResolver _receipts;
 
   // ⚠️ Plus de `DeviceIdentityService` ici. Il ne servait qu'à refuser le
   // rattrapage hors du poste d'encaissement ; la réimpression étant libre et la
@@ -26,8 +28,10 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   const ProvisionalTicketRepositoryImpl({
     required ProvisionalTicketDao dao,
     required FinanceOfflineRepository finance,
+    required PaymentReceiptResolver receipts,
   }) : _dao = dao,
-       _finance = finance;
+       _finance = finance,
+       _receipts = receipts;
 
   @override
   Future<void> markTicketPrinted(String paymentId) async {
@@ -80,9 +84,17 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       );
       final allocations = await _dao.findAllocations(paymentId);
       final tenders = await _dao.findTenders(paymentId);
-      // Le numéro DÉFINITIF s'il existe localement, le provisoire sinon.
-      final definitive = await _dao.findDefinitiveNumber(paymentId);
-      final provisional = await _dao.findProvisionalNumber(paymentId);
+      // Le numéro du reçu, d'où qu'il vienne : ligne locale, ou cache des
+      // pièces pour un versement encaissé sur une autre caisse.
+      final receipt = await _receipts.resolve(paymentId);
+      // Reçu retiré ou versement annulé : aucun papier ne doit plus attester
+      // ce versement. La fiche masque déjà la ligne ; ceci ferme les autres
+      // chemins d'impression.
+      if (receipt.isCancelled) {
+        return const Left(
+          ValidationFailure('Reçu ou versement annulé : pas de ticket.'),
+        );
+      }
       // Ce que l'élève a déjà versé cette année, AVANT ce ticket. Le bloc se
       // lit sous le solde : ce que je viens de payer, ce qu'il me reste, ce que
       // j'avais déjà versé.
@@ -126,11 +138,12 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           matriculationNumber: student?.matriculationNumber,
           annualMatriculationNumber: annualMatriculation,
           classroomName: classroomName,
-          // Sans ligne documentaire (cas anormal mais non bloquant, et cas
-          // NORMAL d'un versement encaissé sur une autre caisse), on retombe sur
-          // l'identifiant du paiement : un ticket sans aucune référence serait
-          // irrapprochable.
-          reference: definitive ?? provisional ?? paymentId,
+          // Numéro inconnu (pièces pas encore tirées par le pull) : repli
+          // court, jamais l'UUID entier. Un ticket sans aucune référence
+          // serait irrapprochable.
+          reference:
+              receipt.number ??
+              PaymentReceiptReference.shortFallback(paymentId),
           // ⚠️ Lu AFFIRMATIVEMENT sur l'absence de `receipt_id`, jamais par
           // négation d'un numéro. `definitive == null` serait vrai aussi quand
           // aucune ligne `generated_documents` locale n'existe — cas normal d'un
