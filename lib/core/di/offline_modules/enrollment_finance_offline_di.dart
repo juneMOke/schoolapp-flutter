@@ -51,7 +51,8 @@ import 'package:school_app_flutter/features/documents/domain/repositories/provis
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
-import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_reenrollment_candidate_use_case.dart';
@@ -117,7 +118,9 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_le
 import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_receipt_lookup_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
@@ -502,6 +505,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // Le solde vient du domaine Facturation, seul détenteur de la sémantique
       // money-grade du reste à payer — jamais recomposé ici.
       finance: getIt<FinanceOfflineRepository>(),
+      receipts: getIt<PaymentReceiptResolver>(),
     ),
   );
   getIt.registerFactory<TicketPrintedAtUseCase>(
@@ -659,8 +663,15 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<RefreshLedgerBeforeCollectionUseCase>(
     () => RefreshLedgerBeforeCollectionUseCase(getIt<FinanceLedgerRefresher>()),
   );
-  getIt.registerFactory<GetPaymentReceiptDocumentUseCase>(
-    () => GetPaymentReceiptDocumentUseCase(getIt<FinanceOfflineRepository>()),
+  // Reçu d'un versement : ligne locale, puis cache des pièces par
+  // `payments.receipt_id`. Deux bases, donc deux DAO — jamais une jointure.
+  getIt.registerLazySingleton<PaymentReceiptResolver>(
+    () => PaymentReceiptResolverImpl(
+      local: PaymentReceiptLookupDao(getIt<Database>()),
+      cache: getIt<EditiqueCacheDao>(),
+      access: getIt<EditiqueCacheAccess>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
 
   // ── BLoCs (registerFactory) ─────────────────────────────────────────────────
@@ -724,10 +735,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => TicketPrintStatusCubit(getIt<TicketPrintedAtUseCase>()),
   );
   getIt.registerFactory<PaymentReceiptCubit>(
-    () => PaymentReceiptCubit(
-      getIt<GetPaymentReceiptDocumentUseCase>(),
-      getIt<FindCachedDocumentUseCase>(),
-    ),
+    () => PaymentReceiptCubit(getIt<PaymentReceiptResolver>()),
   );
 
   // ── Handlers d'outbox → SyncEngine ──────────────────────────────────────────

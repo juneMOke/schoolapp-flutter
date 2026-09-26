@@ -1,8 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
-import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 
 /// Numéro de pièce du reçu d'un paiement, pour la ligne « Reçu n° » du détail.
 ///
@@ -10,37 +9,26 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 /// d'affichage. Quand elle manque, la ligne reste neutre — le reste du détail
 /// (montant, payeur, imputations) n'a pas à en souffrir.
 class PaymentReceiptCubit extends Cubit<PaymentReceiptState> {
-  final GetPaymentReceiptDocumentUseCase _getPaymentReceiptDocumentUseCase;
-  final FindCachedDocumentUseCase _findCachedDocument;
+  final PaymentReceiptResolver _resolver;
 
-  PaymentReceiptCubit(
-    this._getPaymentReceiptDocumentUseCase,
-    this._findCachedDocument,
-  ) : super(const PaymentReceiptState());
+  PaymentReceiptCubit(this._resolver) : super(const PaymentReceiptState());
 
   Future<void> load(String paymentId) async {
-    final document = await _getPaymentReceiptDocumentUseCase(paymentId);
-    if (isClosed) return;
-
-    final isDefinitive = document?.isDefinitive ?? false;
-    final number = document?.number;
-    // La copie locale ne se cherche que sous un numéro DÉFINITIF : un `PROV-…`
-    // ne désigne rien côté serveur et n'a jamais pu être mis en cache.
-    final cached = (isDefinitive && number != null)
-        ? await _findCachedDocument(documentNumber: number)
-        : null;
+    final receipt = await _resolver.resolve(paymentId);
     if (isClosed) return;
 
     emit(
       PaymentReceiptState(
         loaded: true,
-        number: number,
+        number: receipt.number,
         // Affirmation POSITIVE, jamais déduite d'une négation : le numéro ne
-        // fait foi que sur un statut `DEFINITIVE` scellé par l'ACK. Tant que
-        // l'encaissement n'est pas acquitté, `number` vaut `PROV-…` — et tout
-        // statut inconnu retombe ici du bon côté (non définitif).
-        isDefinitive: isDefinitive,
-        cached: cached,
+        // fait foi que scellé par le serveur. Tant que l'encaissement n'est pas
+        // acquitté, `number` vaut `PROV-…` — et tout statut inconnu retombe ici
+        // du bon côté (non définitif).
+        isDefinitive: receipt.isDefinitive,
+        cached: receipt.cacheEntry,
+        documentId: receipt.documentId,
+        paymentCancelled: receipt.isPaymentCancelled,
       ),
     );
   }
@@ -50,11 +38,18 @@ class PaymentReceiptState extends Equatable {
   final bool loaded;
   final String? number;
 
-  /// Copie scellée du reçu détenue par cette tablette, `null` sinon.
+  /// Ce que le cache des pièces sait du reçu, `null` s'il n'en sait rien.
   ///
-  /// C'est elle qui décide du geste : ressortir la copie — ce qui fonctionne
-  /// hors ligne — plutôt que redemander la pièce au serveur.
+  /// Trouvée par l'identifiant du reçu, elle porte son annulation même quand
+  /// le PDF n'a jamais été téléchargé sur cette tablette.
   final EditiqueCacheEntry? cached;
+
+  /// Identifiant serveur du reçu (`payments.receipt_id`). Il suffit à le
+  /// restituer : un reçu qu'il désigne ne s'émet jamais une seconde fois.
+  final String? documentId;
+
+  /// Le serveur a annulé le versement lui-même.
+  final bool paymentCancelled;
 
   /// Le numéro porté par [number] est scellé côté serveur. `false` par défaut :
   /// tant qu'on ne sait pas, on ne prétend pas.
@@ -65,6 +60,8 @@ class PaymentReceiptState extends Equatable {
     this.number,
     this.isDefinitive = false,
     this.cached,
+    this.documentId,
+    this.paymentCancelled = false,
   });
 
   /// Vrai quand un numéro **définitif** est connu et affichable tel quel.
@@ -81,5 +78,12 @@ class PaymentReceiptState extends Equatable {
       loaded && !isDefinitive && (number?.trim().isNotEmpty ?? false);
 
   @override
-  List<Object?> get props => [loaded, number, isDefinitive, cached];
+  List<Object?> get props => [
+    loaded,
+    number,
+    isDefinitive,
+    cached,
+    documentId,
+    paymentCancelled,
+  ];
 }
