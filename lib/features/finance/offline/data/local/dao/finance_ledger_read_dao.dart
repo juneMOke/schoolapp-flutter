@@ -1,5 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/generated_document_local_model.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
@@ -64,17 +65,14 @@ class FinanceLedgerReadDao {
       // un montant que la caisse ne connaît plus. La sortir de `paid_pending`
       // rend la créance à son état réel, celui que le serveur vient de
       // recalculer de son côté.
+      //
+      // Depuis la v54, la règle vit dans `PaymentInForceSql` : elle écarte
+      // aussi un versement qu'une correction locale annule, et RETRANCHE un
+      // versement synchronisé tant que son annulation n'est pas redescendue.
       '''
       SELECT sc.*,
              t.code AS t_fee_tariff_code,
-             COALESCE((
-               SELECT SUM(pa.amount_in_cents)
-               FROM payment_allocations pa
-               JOIN payments p ON p.id = pa.payment_id
-               WHERE pa.student_charge_id = sc.id
-                 AND p.cancelled_at IS NULL
-                 AND p.sync_status <> ?
-             ), 0) AS paid_pending
+             ${PaymentInForceSql.pendingPaidForCharge('sc')} AS paid_pending
       FROM student_charges sc
       LEFT JOIN ref_fee_tariffs t ON t.id = sc.fee_tariff_id
       WHERE sc.student_id = ?
@@ -83,7 +81,7 @@ class FinanceLedgerReadDao {
                (t.code IS NULL) ASC, t.code ASC,
                sc.id ASC
       ''',
-      [SyncState.synced.dbValue, studentId],
+      [studentId],
     );
     return rows
         .map(
@@ -328,14 +326,7 @@ class FinanceLedgerReadDao {
                sc.currency                      AS currency,
                SUM(sc.expected_amount_in_cents) AS expected,
                SUM(sc.amount_paid_in_cents)     AS paid_mirror,
-               SUM(COALESCE((
-                 SELECT SUM(pa.amount_in_cents)
-                 FROM payment_allocations pa
-                 JOIN payments p ON p.id = pa.payment_id
-                 WHERE pa.student_charge_id = sc.id
-                   AND p.cancelled_at IS NULL
-                   AND p.sync_status <> ?
-               ), 0))                           AS paid_pending
+               SUM(${PaymentInForceSql.pendingPaidForCharge('sc')})                           AS paid_pending
         FROM student_charges sc
         WHERE sc.fee_code = ?
           AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
@@ -343,7 +334,7 @@ class FinanceLedgerReadDao {
         GROUP BY sc.student_id, sc.currency
         ORDER BY sc.student_id, sc.currency
         ''',
-        [SyncState.synced.dbValue, feeCode, academicYearId, ...batch],
+        [feeCode, academicYearId, ...batch],
       );
 
       // Une LIGNE par (élève, devise) → une POSITION par devise, regroupées
@@ -445,12 +436,7 @@ class FinanceLedgerReadDao {
     required String feeCode,
     String? schoolLevelGroupId,
   }) async {
-    final args = <Object>[
-      SyncState.synced.dbValue,
-      feeCode,
-      academicYearId,
-      ?schoolLevelGroupId,
-    ];
+    final args = <Object>[feeCode, academicYearId, ?schoolLevelGroupId];
     final cycleClause = schoolLevelGroupId == null
         ? ''
         : 'AND sc.school_level_group_id = ?';
@@ -461,14 +447,7 @@ class FinanceLedgerReadDao {
              sc.currency                      AS currency,
              SUM(sc.expected_amount_in_cents) AS expected,
              SUM(sc.amount_paid_in_cents)     AS paid_mirror,
-             SUM(COALESCE((
-               SELECT SUM(pa.amount_in_cents)
-               FROM payment_allocations pa
-               JOIN payments p ON p.id = pa.payment_id
-               WHERE pa.student_charge_id = sc.id
-                 AND p.cancelled_at IS NULL
-                 AND p.sync_status <> ?
-             ), 0))                           AS paid_pending
+             SUM(${PaymentInForceSql.pendingPaidForCharge('sc')})                           AS paid_pending
       FROM student_charges sc
       WHERE sc.fee_code = ?
         AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
@@ -530,12 +509,7 @@ class FinanceLedgerReadDao {
     // Aucun argument nullable n'est lié : le validateur de sqflite refuse
     // `null` en `whereArgs`, et le cycle absent retire sa clause plutôt que de
     // lier un `null` qui lèverait.
-    final args = <Object>[
-      SyncState.synced.dbValue,
-      ...feeCodes,
-      academicYearId,
-      ?schoolLevelGroupId,
-    ];
+    final args = <Object>[...feeCodes, academicYearId, ?schoolLevelGroupId];
     final placeholders = List.filled(feeCodes.length, '?').join(', ');
     final cycleClause = schoolLevelGroupId == null
         ? ''
@@ -548,14 +522,7 @@ class FinanceLedgerReadDao {
              sc.currency                      AS currency,
              SUM(sc.expected_amount_in_cents) AS expected,
              SUM(sc.amount_paid_in_cents)     AS paid_mirror,
-             SUM(COALESCE((
-               SELECT SUM(pa.amount_in_cents)
-               FROM payment_allocations pa
-               JOIN payments p ON p.id = pa.payment_id
-               WHERE pa.student_charge_id = sc.id
-                 AND p.cancelled_at IS NULL
-                 AND p.sync_status <> ?
-             ), 0))                           AS paid_pending
+             SUM(${PaymentInForceSql.pendingPaidForCharge('sc')})                           AS paid_pending
       FROM student_charges sc
       WHERE sc.fee_code IN ($placeholders)
         AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
@@ -605,15 +572,15 @@ class FinanceLedgerReadDao {
   /// général de la file d'écritures ne convient pas — il agrège tous les
   /// modules, et le papier annoncerait un nombre plus grand que la vérité.
   ///
-  /// Les paiements **annulés** ne comptent pas : ils ne déplaceront aucun
-  /// solde en remontant.
+  /// Les paiements **annulés** ne comptent pas, ni ceux qu'une correction
+  /// écarte : ils ne déplaceront aucun solde en remontant.
   Future<int> countPendingPayments() async {
     final rows = await _db.rawQuery(
       '''
       SELECT COUNT(*) AS c
-      FROM payments
-      WHERE sync_status <> ?
-        AND cancelled_at IS NULL
+      FROM payments p
+      WHERE p.sync_status <> ?
+        AND ${PaymentInForceSql.inForce('p')}
       ''',
       [SyncState.synced.dbValue],
     );

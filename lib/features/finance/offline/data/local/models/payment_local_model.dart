@@ -58,6 +58,10 @@ class PaymentLocalModel {
   /// solde des créances.
   final int? cancelledAt;
 
+  /// Le versement que celui-ci REMPLACE (correction « annule et remplace »,
+  /// v54). Posé par le geste de correction, ou descendu par le pull.
+  final String? replacesPaymentId;
+
   const PaymentLocalModel({
     required this.id,
     required this.clientUuid,
@@ -82,6 +86,7 @@ class PaymentLocalModel {
     this.syncedAt,
     this.updatedAt = 0,
     this.cancelledAt,
+    this.replacesPaymentId,
   });
 
   Map<String, Object?> toMap() => {
@@ -108,6 +113,7 @@ class PaymentLocalModel {
     'synced_at': syncedAt,
     'updated_at': updatedAt,
     'cancelled_at': cancelledAt,
+    'replaces_payment_id': replacesPaymentId,
   };
 
   /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
@@ -160,6 +166,8 @@ class PaymentLocalModel {
     // avant l'évolution du contrat — remettrait sinon en vigueur un versement
     // annulé, et le ferait recompter dans la caisse.
     if (cancelledAt != null) 'cancelled_at': cancelledAt,
+    // Même règle : le lien de remplacement ne s'efface pas depuis le réseau.
+    if (replacesPaymentId != null) 'replaces_payment_id': replacesPaymentId,
     'updated_at': updatedAt,
   };
 
@@ -192,6 +200,7 @@ class PaymentLocalModel {
         syncedAt: m['synced_at'] as int?,
         updatedAt: (m['updated_at'] as int?) ?? 0,
         cancelledAt: m['cancelled_at'] as int?,
+        replacesPaymentId: m['replaces_payment_id'] as String?,
       );
 
   /// [amounts] est **dérivé des imputations**, pas relu d'une colonne : le
@@ -199,6 +208,7 @@ class PaymentLocalModel {
   /// de lecture qui fait la jointure, en un seul passage pour tout le lot.
   LocalPayment toEntity({MoneyBag amounts = MoneyBag.empty}) => LocalPayment(
     cancelledAt: cancelledAt,
+    replacesPaymentId: replacesPaymentId,
     id: id,
     clientUuid: clientUuid,
     studentId: studentId,

@@ -50,4 +50,24 @@ abstract final class PaymentInForceSql {
       'SELECT 1 FROM payment_corrections pc_psc '
       'WHERE pc_psc.payment_id = $alias.id '
       'AND pc_psc.status = $_pending))';
+
+  /// Ce que les versements **locaux** ajoutent au miroir serveur d'une
+  /// créance d'alias [chargeAlias] — le `paid_pending` des lectures de solde.
+  ///
+  /// Les versements pas encore acquittés et toujours en vigueur, MOINS les
+  /// versements synchronisés qu'une correction en attente annule. Le résultat
+  /// peut être négatif : c'est de l'argent que le miroir compte encore et que
+  /// la tablette sait déjà rendu.
+  static String pendingPaidForCharge(String chargeAlias) =>
+      '(COALESCE(('
+      'SELECT SUM(pa_pp.amount_in_cents) FROM payment_allocations pa_pp '
+      'JOIN payments p_pp ON p_pp.id = pa_pp.payment_id '
+      'WHERE pa_pp.student_charge_id = $chargeAlias.id '
+      'AND ${inForce('p_pp')} AND p_pp.sync_status <> $_synced'
+      '), 0) - COALESCE(('
+      'SELECT SUM(pa_cx.amount_in_cents) FROM payment_allocations pa_cx '
+      'JOIN payments p_cx ON p_cx.id = pa_cx.payment_id '
+      'WHERE pa_cx.student_charge_id = $chargeAlias.id '
+      'AND ${pendingServerCancellation('p_cx')}'
+      '), 0))';
 }

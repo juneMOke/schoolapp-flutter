@@ -1,4 +1,5 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
 ///
@@ -212,7 +213,8 @@ class ProvisionalTicketDao {
   /// - **[excludePaymentId]** : le versement courant occupe déjà tout le ticket
   ///   au-dessus. Le rappeler ici ferait compter deux fois le même argent au
   ///   parent qui additionne.
-  /// - **`cancelled_at IS NULL`** : une extourne ne compte plus dans les soldes
+  /// - **en vigueur** (`PaymentInForceSql.inForce`) : une extourne, ou un
+  ///   versement qu'une correction écarte, ne compte plus dans les soldes
   ///   (c'est la règle de `finance_ledger_read_dao`), et l'imprimer ferait
   ///   croire à un argent encore acquis. Elle est **omise**, pas barrée : le
   ///   papier n'a pas la typographie qui distinguerait les deux.
@@ -251,7 +253,7 @@ class ProvisionalTicketDao {
       JOIN payment_tenders t ON t.payment_id = p.id
       WHERE p.student_id = ?
         AND p.id <> ?
-        AND p.cancelled_at IS NULL
+        AND ${PaymentInForceSql.inForce('p')}
         AND (p.academic_year_id IS NULL OR p.academic_year_id = ?)
       GROUP BY p.id, t.currency
       ORDER BY p.paid_at DESC, p.id DESC, t.currency ASC

@@ -259,6 +259,10 @@ class LocalPayment extends Equatable {
   /// et elle cesse de compter dans les soldes.
   final int? cancelledAt;
 
+  /// Le versement que celui-ci remplace (« annule et remplace », v54), `null`
+  /// pour un encaissement ordinaire.
+  final String? replacesPaymentId;
+
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -278,6 +282,7 @@ class LocalPayment extends Equatable {
 
   const LocalPayment({
     this.cancelledAt,
+    this.replacesPaymentId,
     required this.id,
     required this.clientUuid,
     required this.studentId,
@@ -322,6 +327,8 @@ class LocalPayment extends Equatable {
     deviceId,
     receiptId,
     syncState,
+    cancelledAt,
+    replacesPaymentId,
   ];
 }
 

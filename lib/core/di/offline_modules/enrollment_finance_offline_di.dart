@@ -119,6 +119,12 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_r
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_receipt_lookup_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
+import 'package:school_app_flutter/features/finance/offline/data/repositories/payment_correction_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/correct_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
@@ -282,6 +288,26 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // et un taux resté local disparaîtrait au premier cycle.
       rates: getIt<ExchangeRateRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  // Correction d'un versement (Annuler / Corriger) : même composition que
+  // l'encaissement, parce que le remplaçant EST un encaissement.
+  getIt.registerLazySingleton<PaymentCorrectionRepository>(
+    () => PaymentCorrectionRepositoryImpl(
+      dao: PaymentCorrectionWriteDao(
+        getIt<Database>(),
+        FinancePaymentWriteDao(getIt<Database>()),
+      ),
+      composer: PaymentComposer(
+        idGenerator: getIt<IdGenerator>(),
+        currentUser: getIt<CurrentUserContext>(),
+        authorDirectory: getIt<AuthSessionManager>(),
+        deviceIdentity: getIt<DeviceIdentityService>(),
+      ),
+      idGenerator: getIt<IdGenerator>(),
+      syncEngine: getIt<SyncEngine>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 
@@ -571,6 +597,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<RecordPaymentUseCase>(
     () => RecordPaymentUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<CorrectPaymentUseCase>(
+    () => CorrectPaymentUseCase(getIt<PaymentCorrectionRepository>()),
   );
   getIt.registerFactory<GetPayerSuggestionsUseCase>(
     () => GetPayerSuggestionsUseCase(getIt<FinanceOfflineRepository>()),

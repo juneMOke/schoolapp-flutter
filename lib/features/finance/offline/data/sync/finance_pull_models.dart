@@ -147,6 +147,10 @@ class PaymentDto {
   /// comparer et ne peut être annoncée par aucun delta.
   final String? cancelledAt;
 
+  /// Le versement que celui-ci remplace (B5, additif). `null` tant que le
+  /// serveur ne le sert pas, ou pour un encaissement ordinaire.
+  final String? replacesPaymentId;
+
   const PaymentDto({
     required this.id,
     required this.studentId,
@@ -162,6 +166,7 @@ class PaymentDto {
     this.collectedById,
     this.collectedByName,
     this.cancelledAt,
+    this.replacesPaymentId,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -183,6 +188,7 @@ class PaymentDto {
     collectedById: j['collectedById'] as String?,
     collectedByName: j['collectedByName'] as String?,
     cancelledAt: j['cancelledAt'] as String?,
+    replacesPaymentId: j['replacesPaymentId'] as String?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -204,6 +210,7 @@ class PaymentDto {
     syncedAt: now,
     updatedAt: now,
     cancelledAt: EpochIsoHelper.tryToEpochMs(cancelledAt),
+    replacesPaymentId: replacesPaymentId,
   );
 }
 
