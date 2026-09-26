@@ -2,6 +2,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment.dart
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/payment_correction_summary.dart';
 
 /// Ponts des entités LOCALES (grand-livre offline, argent en `int` centimes,
 /// reste composé au read) vers les entités ONLINE consommées par les BLoCs et
@@ -51,6 +52,17 @@ extension LocalPaymentToOnline on LocalPayment {
     // disparaître serait retomber dans le défaut que l'extourne existe à
     // corriger — un versement qu'on ne peut plus expliquer à la famille.
     isCancelled: cancelledAt != null,
+    replacesPaymentId: replacesPaymentId,
+    correction: switch (correction) {
+      final c? => PaymentCorrectionSummary(
+        status: c.status,
+        reasonCode: c.reasonCode,
+        reason: c.reason,
+        replacementPaymentId: c.replacementPaymentId,
+        errorCode: c.errorCode,
+      ),
+      null => null,
+    },
     // Stampés à l'encaissement (v19) et jusqu'ici perdus ici même : le DAO les
     // ramène, ce mapper les laissait tomber, et l'écran de détail affichait un
     // « Encaissé par » vide sur une donnée pourtant présente en base.

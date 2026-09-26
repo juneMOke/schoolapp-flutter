@@ -17536,6 +17536,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amounts read in dollars at today\'s rate: {rate} per \$1. A reading, not an accounting conversion — each expense stays in its currency.'**
   String expenseRateNote(String rate);
+
+  /// No description provided for @paymentCorrectionEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something wrong with this payment?'**
+  String get paymentCorrectionEntryTitle;
+
+  /// No description provided for @paymentCorrectionEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment is never edited or deleted: it is cancelled, and a new one takes its place. Works offline.'**
+  String get paymentCorrectionEntryHint;
+
+  /// No description provided for @paymentCorrectionCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel payment'**
+  String get paymentCorrectionCancelAction;
+
+  /// No description provided for @paymentCorrectionCorrectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get paymentCorrectionCorrectAction;
+
+  /// No description provided for @paymentCorrectionReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get paymentCorrectionReasonLabel;
+
+  /// No description provided for @paymentCorrectionReasonRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Money returned to the payer'**
+  String get paymentCorrectionReasonRefunded;
+
+  /// No description provided for @paymentCorrectionReasonDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered twice'**
+  String get paymentCorrectionReasonDuplicate;
+
+  /// No description provided for @paymentCorrectionReasonWrongDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong tablet'**
+  String get paymentCorrectionReasonWrongDevice;
+
+  /// No description provided for @paymentCorrectionReasonWrongAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong amount'**
+  String get paymentCorrectionReasonWrongAmount;
+
+  /// No description provided for @paymentCorrectionReasonWrongAllocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong instalments'**
+  String get paymentCorrectionReasonWrongAllocation;
+
+  /// No description provided for @paymentCorrectionReasonWrongStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong student'**
+  String get paymentCorrectionReasonWrongStudent;
+
+  /// No description provided for @paymentCorrectionReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get paymentCorrectionReasonOther;
+
+  /// No description provided for @paymentCorrectionDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details (optional)'**
+  String get paymentCorrectionDetailLabel;
+
+  /// No description provided for @paymentCorrectionDetailRequiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Specify the reason'**
+  String get paymentCorrectionDetailRequiredLabel;
+
+  /// No description provided for @paymentCorrectionCashMovedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Money actually changed hands'**
+  String get paymentCorrectionCashMovedLabel;
+
+  /// No description provided for @paymentCorrectionCashMovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick only if money was returned or received. A typing mistake does not move any money.'**
+  String get paymentCorrectionCashMovedHint;
+
+  /// No description provided for @paymentCorrectionCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel a payment'**
+  String get paymentCorrectionCancelTitle;
+
+  /// No description provided for @paymentCorrectionCancelIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this when the payment should never have existed. If it exists but is wrong, use Correct instead.'**
+  String get paymentCorrectionCancelIntro;
+
+  /// No description provided for @paymentCorrectionCancelConsequence.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment leaves the balances and its instalments reopen. It stays in the list, struck through.'**
+  String get paymentCorrectionCancelConsequence;
+
+  /// No description provided for @paymentCorrectionBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get paymentCorrectionBack;
+
+  /// No description provided for @paymentCorrectionSavedOnTablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this tablet. It will be sent automatically at the next sync.'**
+  String get paymentCorrectionSavedOnTablet;
+
+  /// No description provided for @paymentCorrectionCancelledDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled'**
+  String get paymentCorrectionCancelledDone;
+
+  /// No description provided for @paymentCorrectionCorrectedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment corrected'**
+  String get paymentCorrectionCorrectedDone;
+
+  /// No description provided for @paymentCorrectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The correction was not saved: {reason}'**
+  String paymentCorrectionFailed(String reason);
+
+  /// No description provided for @paymentCorrectionCorrectEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct a payment'**
+  String get paymentCorrectionCorrectEyebrow;
+
+  /// No description provided for @paymentCorrectionOriginLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Original payment · will be cancelled'**
+  String get paymentCorrectionOriginLabel;
+
+  /// No description provided for @paymentCorrectionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel and replace'**
+  String get paymentCorrectionSubmit;
+
+  /// No description provided for @paymentCorrectionGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference with the original: {amount}'**
+  String paymentCorrectionGap(String amount);
+
+  /// No description provided for @paymentCorrectionNoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change at least one thing. Otherwise, Cancel is the right gesture.'**
+  String get paymentCorrectionNoChange;
+
+  /// No description provided for @paymentCorrectionLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment cannot be corrected from this tablet.'**
+  String get paymentCorrectionLoadFailed;
+
+  /// No description provided for @paymentCorrectionPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled · to sync'**
+  String get paymentCorrectionPendingBadge;
+
+  /// No description provided for @paymentCorrectionLocalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled on this tablet'**
+  String get paymentCorrectionLocalBadge;
+
+  /// No description provided for @paymentCorrectionRejectedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused'**
+  String get paymentCorrectionRejectedBadge;
+
+  /// No description provided for @paymentCorrectionReplacementBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces a payment'**
+  String get paymentCorrectionReplacementBadge;
+
+  /// No description provided for @paymentCorrectionPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation waiting to sync. Reason: {reason}'**
+  String paymentCorrectionPendingNotice(String reason);
+
+  /// No description provided for @paymentCorrectionLocalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled on this tablet. Reason: {reason}'**
+  String paymentCorrectionLocalNotice(String reason);
+
+  /// No description provided for @paymentCorrectionRejectedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The correction was refused ({code}). The payment counts again.'**
+  String paymentCorrectionRejectedNotice(String code);
+
+  /// No description provided for @paymentCorrectionAlreadyCorrectedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment was already corrected from another device. The replacement entered here was removed: if its ticket was handed over, it is no longer valid.'**
+  String get paymentCorrectionAlreadyCorrectedNotice;
+
+  /// No description provided for @paymentCorrectionReplacementNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment cancels and replaces a corrected payment.'**
+  String get paymentCorrectionReplacementNotice;
 }
 
 class _AppLocalizationsDelegate

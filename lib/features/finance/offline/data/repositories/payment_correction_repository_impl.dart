@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 
 /// Le geste « Annuler » / « Corriger » sur un versement (lot T2).
@@ -104,6 +105,20 @@ class PaymentCorrectionRepositoryImpl implements PaymentCorrectionRepository {
       return Left(ValidationFailure(e.message));
     } catch (e) {
       return Left(StorageFailure('Échec de la correction locale : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PaymentCorrectionOrigin>> loadOrigin(
+    String paymentId,
+  ) async {
+    try {
+      final origin = await _dao.loadOrigin(paymentId);
+      return origin == null
+          ? const Left(NotFoundFailure('Versement introuvable en local.'))
+          : Right(origin);
+    } catch (e) {
+      return Left(StorageFailure('Lecture locale impossible : $e'));
     }
   }
 }

@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/payment_c
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/payment_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -249,6 +250,30 @@ void main() {
       );
       expect(replacement['allocations'], hasLength(1));
       expect(payload['reason'], 'Saisi 150 \$ au lieu de 50 \$');
+    });
+  });
+
+  // Ce que la liste des versements lit : la dernière correction de chacun.
+  group('liste des versements', () {
+    test('l origine porte sa correction, le remplaçant son origine', () async {
+      final origin = await collect(15000);
+      final outcome = (await corrections.correctPayment(
+        PaymentCorrectionDraft(
+          paymentId: origin,
+          reason: PaymentCorrectionReason.wrongAmount,
+          replacement: draftOf(5000),
+        ),
+      )).getOrElse(() => throw StateError('refusé'));
+
+      final payments = await ledger.getPaymentsByStudent('s-1');
+      final first = payments.singleWhere((p) => p.id == origin);
+      final second = payments.singleWhere(
+        (p) => p.id == outcome.replacementPaymentId,
+      );
+      expect(first.correction?.status, PaymentCorrectionStatus.pending);
+      expect(first.correction?.replacementPaymentId, second.id);
+      expect(second.replacesPaymentId, origin);
+      expect(second.correction, isNull);
     });
   });
 

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/payment_correction_summary.dart';
 
 class Payment extends Equatable {
   final String id;
@@ -55,6 +56,13 @@ class Payment extends Equatable {
   /// soldes, que le serveur a déjà recalculés de son côté.
   final bool isCancelled;
 
+  /// Le versement que celui-ci remplace (« annule et remplace »), `null` pour
+  /// un encaissement ordinaire.
+  final String? replacesPaymentId;
+
+  /// La dernière correction qui vise ce versement, `null` s'il n'en a pas.
+  final PaymentCorrectionSummary? correction;
+
   const Payment({
     required this.id,
     required this.studentId,
@@ -67,6 +75,8 @@ class Payment extends Equatable {
     required this.paidAt,
     this.isPendingSync = false,
     this.isCancelled = false,
+    this.replacesPaymentId,
+    this.correction,
     this.cashierFirstName,
     this.cashierLastName,
     this.collectedByName,
@@ -91,6 +101,17 @@ class Payment extends Equatable {
   /// Même règle de composition que le ticket
   /// (`TicketPaymentRow.cashierFullName`) : les deux surfaces montrent le même
   /// nom pour le même versement, ou ne montrent rien.
+  /// Le versement ne compte plus : annulé par le serveur, ou par une
+  /// correction de cette tablette qui n'a pas été refusée.
+  bool get isOutOfForce => isCancelled || (correction?.removesPayment ?? false);
+
+  /// Annulé sur cette tablette, en attente de l'accusé du serveur.
+  bool get isCancellationPending =>
+      !isCancelled && (correction?.isPending ?? false);
+
+  /// Une correction peut-elle encore viser ce versement ?
+  bool get isCorrectable => !isOutOfForce;
+
   String? get cashierFullName {
     final parts = [
       cashierFirstName?.trim(),
@@ -116,5 +137,8 @@ class Payment extends Equatable {
     isPendingSync,
     cashierFirstName,
     cashierLastName,
+    isCancelled,
+    replacesPaymentId,
+    correction,
   ];
 }

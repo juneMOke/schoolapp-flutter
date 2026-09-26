@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/generated_document_local_model.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
@@ -102,15 +103,54 @@ class FinanceLedgerReadDao {
     );
     if (rows.isEmpty) return const <LocalPayment>[];
 
-    final amounts = await _amountsOfPayments([
-      for (final r in rows) r['id'] as String,
-    ]);
+    final ids = [for (final r in rows) r['id'] as String];
+    final amounts = await _amountsOfPayments(ids);
+    final corrections = await _latestCorrections(ids);
     return [
       for (final r in rows)
-        PaymentLocalModel.fromMap(
-          r,
-        ).toEntity(amounts: amounts[r['id']] ?? MoneyBag.empty),
+        PaymentLocalModel.fromMap(r)
+            .toEntity(amounts: amounts[r['id']] ?? MoneyBag.empty)
+            .withCorrection(corrections[r['id']]),
     ];
+  }
+
+  /// La DERNIÈRE correction qui vise chaque versement : c'est elle qui dit
+  /// l'état affiché (en attente, appliquée, refusée…). Une correction refusée
+  /// suivie d'une nouvelle s'efface derrière elle.
+  Future<Map<String, LocalPaymentCorrection>> _latestCorrections(
+    List<String> paymentIds,
+  ) async {
+    if (paymentIds.isEmpty) return const {};
+    final latest = <String, LocalPaymentCorrection>{};
+    for (var start = 0; start < paymentIds.length; start += _idBatchSize) {
+      final end = start + _idBatchSize < paymentIds.length
+          ? start + _idBatchSize
+          : paymentIds.length;
+      final batch = paymentIds.sublist(start, end);
+      final placeholders = List.filled(batch.length, '?').join(', ');
+      final rows = await _db.rawQuery(
+        'SELECT id, payment_id, status, reason_code, reason, '
+        'replacement_payment_id, sync_error_code '
+        'FROM payment_corrections '
+        'WHERE payment_id IN ($placeholders) '
+        'ORDER BY created_at DESC, id DESC',
+        batch,
+      );
+      for (final r in rows) {
+        latest.putIfAbsent(
+          r['payment_id'] as String,
+          () => LocalPaymentCorrection(
+            id: r['id'] as String,
+            status: PaymentCorrectionStatus.fromDbValue(r['status'] as String?),
+            reasonCode: (r['reason_code'] as String?) ?? '',
+            reason: r['reason'] as String?,
+            replacementPaymentId: r['replacement_payment_id'] as String?,
+            errorCode: r['sync_error_code'] as String?,
+          ),
+        );
+      }
+    }
+    return latest;
   }
 
   /// Ce que chaque versement a encaissé, **par devise**, dérivé de ses

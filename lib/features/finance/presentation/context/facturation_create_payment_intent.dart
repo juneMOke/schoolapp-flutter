@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_correction_context.dart';
 
 class FacturationCreatePaymentIntent extends Equatable {
   final String studentId;
@@ -11,6 +12,10 @@ class FacturationCreatePaymentIntent extends Equatable {
   final String levelGroupName;
   final List<StudentCharge> studentCharges;
 
+  /// Présent quand la page sert à CORRIGER un versement : elle annule
+  /// l'origine et encaisse son remplaçant en un seul geste.
+  final FacturationPaymentCorrectionContext? correction;
+
   const FacturationCreatePaymentIntent({
     required this.studentId,
     required this.academicYearId,
@@ -20,6 +25,7 @@ class FacturationCreatePaymentIntent extends Equatable {
     required this.levelName,
     required this.levelGroupName,
     required this.studentCharges,
+    this.correction,
   });
 
   const FacturationCreatePaymentIntent.invalid({
@@ -62,6 +68,7 @@ class FacturationCreatePaymentIntent extends Equatable {
     levelName: levelName,
     levelGroupName: levelGroupName,
     studentCharges: studentCharges,
+    correction: correction,
   );
 
   static FacturationCreatePaymentIntent fromRouteContext({
@@ -91,5 +98,6 @@ class FacturationCreatePaymentIntent extends Equatable {
     levelName,
     levelGroupName,
     studentCharges,
+    correction,
   ];
 }

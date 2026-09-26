@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
@@ -63,4 +64,8 @@ abstract interface class PaymentCorrectionRepository {
   Future<Either<Failure, PaymentCorrectionOutcome>> correctPayment(
     PaymentCorrectionDraft draft,
   );
+
+  /// Le versement à corriger, pour pré-remplir le remplaçant.
+  /// `NotFoundFailure` s'il n'existe pas en local.
+  Future<Either<Failure, PaymentCorrectionOrigin>> loadOrigin(String paymentId);
 }

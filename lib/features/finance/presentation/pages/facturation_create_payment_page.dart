@@ -31,6 +31,14 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_date_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payer_search_dialog.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_payment_correction_reads.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_corrected_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_correction_sections.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -91,6 +99,11 @@ class FacturationCreatePaymentPage extends StatelessWidget {
         BlocProvider<FeeSectionTitlesCubit>(
           create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
+        // Le geste de correction, seulement quand la page sert à corriger.
+        if (intent.correction != null)
+          BlocProvider<PaymentCorrectionCubit>(
+            create: (_) => getIt<PaymentCorrectionCubit>(),
+          ),
       ],
       // La vue ne lit pas le cubit elle-même : elle reçoit la série. C'est ce
       // qui la garde montable seule — et sans taux, c'est-à-dire dans le cas
@@ -169,6 +182,12 @@ class _FacturationCreatePaymentViewState
   /// pour un seul acte de guichet.
   bool _collectInFlight = false;
 
+  // ── La correction d'un versement (quand `intent.correction` est posé) ──
+  final _correctionDetail = TextEditingController();
+  PaymentCorrectionReason? _correctionReason;
+  bool _cashMoved = false;
+  bool _originTenderCurrenciesApplied = false;
+
   /// Les taux corrigés à la main, **par paire** (`USD>CDF`).
   ///
   /// Contrôleurs, boîtes ouvertes et amorces formaient trois champs de cette
@@ -214,10 +233,48 @@ class _FacturationCreatePaymentViewState
     );
     _model.addListener(_onChanged);
     _payer.addListener(_onChanged);
+    _correctionDetail.addListener(_onChanged);
+    final correction = widget.intent.correction;
+    if (correction != null) {
+      // L'origine, posée comme saisie à la main, au jour d'origine (D2).
+      _model.prefill(
+        centsByCharge: correction.origin.centsByCharge,
+        day: SchoolTime.today(correction.originPaidAt),
+      );
+      _payer.applyPayer(
+        LocalPayerIdentity(
+          lastName: correction.origin.payerLastName ?? '',
+          firstName: correction.origin.payerFirstName ?? '',
+          middleName: correction.origin.payerMiddleName,
+          phoneNumber: correction.origin.payerPhoneNumber,
+          origin: PayerOrigin.previousPayment,
+        ),
+      );
+      _applyOriginTenderCurrencies();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant FacturationCreatePaymentView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.rates != widget.rates) _applyOriginTenderCurrencies();
+  }
+
+  /// La devise du tiroir d'origine (D7), dès que la série de taux est là :
+  /// sans elle, le comptoir converti ne se calcule pas.
+  void _applyOriginTenderCurrencies() {
+    final correction = widget.intent.correction;
+    if (correction == null || _originTenderCurrenciesApplied) return;
+    final byChargeCurrency = correction.origin.tenderCurrencyByChargeCurrency;
+    if (byChargeCurrency.isEmpty) return;
+    if (widget.rates.isEmpty) return;
+    _originTenderCurrenciesApplied = true;
+    _model.prefillTenderCurrencies(byChargeCurrency);
   }
 
   @override
   void dispose() {
+    _correctionDetail.dispose();
     _rates.dispose();
     _payer.dispose();
     _model.dispose();
@@ -504,6 +561,75 @@ class _FacturationCreatePaymentViewState
     }
   }
 
+  /// Le remplaçant tel que la saisie le compose, par créance.
+  Map<String, int> get _replacementCentsByCharge => {
+    for (final entry in _model.entries)
+      if (entry.effectiveCents > 0) entry.charge.id: entry.effectiveCents,
+  };
+
+  bool get _correctionReasonComplete {
+    final reason = _correctionReason;
+    if (reason == null) return false;
+    return !reason.requiresDetail || _correctionDetail.text.trim().isNotEmpty;
+  }
+
+  /// « Annuler et remplacer » — un seul geste, sans popin de confirmation :
+  /// l'origine barrée et l'écart jouent ce rôle (spec §05).
+  void _onCorrect() {
+    final correction = widget.intent.correction;
+    final reason = _correctionReason;
+    if (correction == null || reason == null) return;
+    if (!_payer.isValid || _collectInFlight) return;
+    final draft = _model.buildDraft();
+    if (draft == null) return;
+
+    final replacement = withOriginInstant(
+      recordPaymentDraftFromRequest(
+        PaymentsCreateRequested(
+          studentId: widget.intent.studentId,
+          academicYearId: widget.intent.academicYearId,
+          paidAt: draft.paidAt,
+          amounts: draft.amounts,
+          tenders: draft.tenders,
+          payerFirstName: _payer.valueOf(_payer.firstName),
+          payerLastName: _payer.valueOf(_payer.lastName),
+          payerMiddleName: _payer.valueOf(_payer.middleName),
+          payerPhoneNumber: _payer.valueOf(_payer.phone),
+          allocations: draft.allocations,
+        ),
+        now: widget.now,
+      ),
+      correction,
+      _model.paidDay,
+    );
+    setState(() => _collectInFlight = true);
+    context.read<PaymentCorrectionCubit>().submit(
+      PaymentCorrectionDraft(
+        paymentId: correction.origin.paymentId,
+        reason: reason,
+        reasonDetail: _correctionDetail.text,
+        cashMoved: _cashMoved,
+        replacement: replacement,
+      ),
+    );
+  }
+
+  Future<void> _onCorrectionState(PaymentCorrectionState state) async {
+    switch (state.phase) {
+      case PaymentCorrectionPhase.succeeded:
+        await showFacturationPaymentCorrectedDialog(
+          context,
+          replacementPaymentId: state.outcome?.replacementPaymentId,
+        );
+        if (!mounted) return;
+        Navigator.of(context).pop(true);
+      case PaymentCorrectionPhase.failed:
+        setState(() => _collectInFlight = false);
+      case PaymentCorrectionPhase.idle || PaymentCorrectionPhase.submitting:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -512,11 +638,20 @@ class _FacturationCreatePaymentViewState
     // refuserait de toute façon, et un refus après le geste se lit comme une
     // panne alors que c'est une saisie à corriger.
     final allocations = settledBagOf(settlement, _model.entries);
+    final correction = widget.intent.correction;
+    final unchanged =
+        correction != null &&
+        correctionUnchanged(
+          correction: correction,
+          replacementCentsByCharge: _replacementCentsByCharge,
+          replacementDay: _model.paidDay,
+        );
     final canCollect =
         _payer.isValid &&
         !allocations.isAllZero &&
         !_collectInFlight &&
-        !tenderInvariantBroken(settlement, _model.entries);
+        !tenderInvariantBroken(settlement, _model.entries) &&
+        (correction == null || (_correctionReasonComplete && !unchanged));
     // « Converti » n'est pas « une devise a été choisie » : régler en dollars
     // des créances en dollars n'est pas une conversion. Ce qui compte est qu'un
     // taux s'applique réellement quelque part — sinon la barre annoncerait « À
@@ -556,7 +691,17 @@ class _FacturationCreatePaymentViewState
                     ? bagLabel(tenderBagOf(settlement, _model.entries))
                     : bagLabel(allocations),
                 settledLabel: converted ? bagLabel(allocations) : null,
-                onCollect: canCollect ? () => _onCollect(l10n) : null,
+                actionLabel: correction == null
+                    ? null
+                    : l10n.paymentCorrectionSubmit,
+                actionIcon: correction == null
+                    ? Icons.account_balance_wallet_outlined
+                    : Icons.repeat_rounded,
+                onCollect: !canCollect
+                    ? null
+                    : correction == null
+                    ? () => _onCollect(l10n)
+                    : _onCorrect,
               )
             : null,
         child: Align(
@@ -567,14 +712,24 @@ class _FacturationCreatePaymentViewState
             constraints: const BoxConstraints(
               maxWidth: AppDimensions.facturationContentMaxWidth,
             ),
-            child: _body(l10n, settlement),
+            child: correction == null
+                ? _body(l10n, settlement)
+                : BlocListener<PaymentCorrectionCubit, PaymentCorrectionState>(
+                    listenWhen: (a, b) => a.phase != b.phase,
+                    listener: (_, state) => _onCorrectionState(state),
+                    child: _body(l10n, settlement, unchanged: unchanged),
+                  ),
           ),
         ),
       ),
     );
   }
 
-  Widget _body(AppLocalizations l10n, TenderSettlement settlement) {
+  Widget _body(
+    AppLocalizations l10n,
+    TenderSettlement settlement, {
+    bool unchanged = false,
+  }) {
     // Lien profond ouvert sans contexte : on n'encaisse pas au nom de quelqu'un
     // qu'on ne sait pas nommer. La fiche pose la même garde sur son propre
     // contexte.
@@ -589,9 +744,17 @@ class _FacturationCreatePaymentViewState
       );
     }
 
+    final correction = widget.intent.correction;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (correction != null) ...[
+          FacturationPaymentCorrectionOriginCard(
+            amounts: correction.originAmounts,
+            paidAt: correction.originPaidAt,
+          ),
+          const SizedBox(height: AppDimensions.detailSectionSpacing),
+        ],
         FinanceSectionCard(
           backgroundColor: AppColors.surfaceRaised,
           borderColor: AppColors.border,
@@ -689,6 +852,26 @@ class _FacturationCreatePaymentViewState
           changeLabelOf: (entry) =>
               lineChangeLabel(lineOf(settlement, entry), l10n),
         ),
+        if (correction != null) ...[
+          const SizedBox(height: AppDimensions.detailSectionSpacing),
+          FacturationPaymentCorrectionReasonCard(
+            reason: _correctionReason,
+            onReasonSelected: (reason) =>
+                setState(() => _correctionReason = reason),
+            detailController: _correctionDetail,
+            cashMoved: _cashMoved,
+            onCashMovedChanged: (value) => setState(() => _cashMoved = value),
+            gapLabel: correctionGapLabel(
+              settledBagOf(settlement, _model.entries),
+              correction.originAmounts,
+            ),
+            unchanged: unchanged,
+            failure: context.select<PaymentCorrectionCubit, String?>(
+              (cubit) => cubit.state.failure?.message,
+            ),
+            enabled: !_collectInFlight,
+          ),
+        ],
       ],
     );
   }

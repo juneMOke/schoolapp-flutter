@@ -35,11 +35,18 @@ class FacturationCollectActionBar extends StatelessWidget {
   /// déjà ouverte).
   final VoidCallback? onCollect;
 
+  /// Remplace « Encaisser … » — la correction d'un versement dit « Annuler et
+  /// remplacer ».
+  final String? actionLabel;
+  final IconData actionIcon;
+
   const FacturationCollectActionBar({
     super.key,
     required this.totalLabel,
     required this.onCollect,
     this.settledLabel,
+    this.actionLabel,
+    this.actionIcon = Icons.account_balance_wallet_outlined,
   });
 
   @override
@@ -88,12 +95,14 @@ class FacturationCollectActionBar extends StatelessWidget {
                   // d'une session gelée.
                   final button = SessionWriteGate(
                     child: EteeloButton.primary(
-                      label: hasTotal
-                          ? l10n.facturationCreatePaymentCollectAmountAction(
-                              totalLabel,
-                            )
-                          : l10n.facturationDetailCollectPaymentAction,
-                      icon: Icons.account_balance_wallet_outlined,
+                      label:
+                          actionLabel ??
+                          (hasTotal
+                              ? l10n.facturationCreatePaymentCollectAmountAction(
+                                  totalLabel,
+                                )
+                              : l10n.facturationDetailCollectPaymentAction),
+                      icon: actionIcon,
                       size: EteeloButtonSize.regular,
                       fullWidth:
                           constraints.maxWidth <

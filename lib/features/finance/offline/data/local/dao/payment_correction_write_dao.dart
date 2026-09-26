@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 
 /// Agrégat d'outbox d'une correction de versement.
@@ -77,6 +78,61 @@ class PaymentCorrectionWriteDao {
   /// L'origine telle que la tablette la connaît, `null` si elle est absente.
   Future<CorrectionOrigin?> findOrigin(String paymentId) =>
       _findOrigin(_db, paymentId);
+
+  /// Le versement à corriger, avec ses imputations et la devise de son
+  /// tiroir, `null` s'il est absent.
+  Future<PaymentCorrectionOrigin?> loadOrigin(String paymentId) async {
+    final payments = await _db.query(
+      'payments',
+      where: 'id = ?',
+      whereArgs: [paymentId],
+      limit: 1,
+    );
+    if (payments.isEmpty) return null;
+    final p = payments.first;
+    final allocations = await _db.query(
+      'payment_allocations',
+      columns: const [
+        'student_charge_id',
+        'fee_code',
+        'amount_in_cents',
+        'currency',
+      ],
+      where: 'payment_id = ?',
+      whereArgs: [paymentId],
+      orderBy: 'id',
+    );
+    final tenders = await _db.query(
+      'payment_tenders',
+      columns: const ['currency', 'pivot_currency'],
+      where: 'payment_id = ?',
+      whereArgs: [paymentId],
+    );
+    return PaymentCorrectionOrigin(
+      paymentId: paymentId,
+      studentId: p['student_id'] as String,
+      academicYearId: p['academic_year_id'] as String?,
+      paidAt: p['paid_at'] as String,
+      payerFirstName: p['payer_first_name'] as String?,
+      payerLastName: p['payer_last_name'] as String?,
+      payerMiddleName: p['payer_middle_name'] as String?,
+      payerPhoneNumber: p['payer_phone_number'] as String?,
+      allocations: [
+        for (final a in allocations)
+          PaymentCorrectionOriginAllocation(
+            studentChargeId: a['student_charge_id'] as String?,
+            feeCode: a['fee_code'] as String,
+            amountInCents: a['amount_in_cents'] as int,
+            currency: a['currency'] as String,
+          ),
+      ],
+      tenderCurrencyByChargeCurrency: {
+        for (final t in tenders)
+          if (t['currency'] != t['pivot_currency'])
+            t['pivot_currency'] as String: t['currency'] as String,
+      },
+    );
+  }
 
   /// Le geste, en UNE transaction : correction inscrite, remplaçant écrit avec
   /// son reçu `PROV-…`, entrée d'outbox.

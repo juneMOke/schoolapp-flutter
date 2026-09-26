@@ -30,6 +30,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_correction_flow.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -170,9 +171,11 @@ class FacturationDetailPage extends StatelessWidget {
     );
   }
 
-  void _openPaymentDetail(BuildContext context, Payment payment) {
+  Future<void> _openPaymentDetail(BuildContext context, Payment payment) async {
+    final chargesBloc = context.read<StudentChargesBloc>();
+    final paymentsBloc = context.read<PaymentsBloc>();
     // Détail d'un paiement ouvert en popin (spec §15), au-dessus de la page.
-    showFacturationPaymentDetailDialog(
+    final action = await showFacturationPaymentDetailDialog(
       context,
       intent: FacturationPaymentDetailIntent(
         paymentId: payment.id,
@@ -193,6 +196,41 @@ class FacturationDetailPage extends StatelessWidget {
         // est inconnu du serveur et la demande de pièce répondrait 404.
         isPendingSync: payment.isPendingSync,
         cashierFullName: payment.cashierFullName,
+        isCancelled: payment.isCancelled,
+        replacesPaymentId: payment.replacesPaymentId,
+        correction: payment.correction,
+      ),
+    );
+    if (action == null || !context.mounted) return;
+
+    // Le détail se referme d'abord, puis le geste s'ouvre (spec §03) : une
+    // modale sur une modale ne laisse plus voir la fiche qu'on corrige.
+    final bool written;
+    if (action == FacturationPaymentDetailAction.cancel) {
+      written = await runFacturationPaymentCancel(context, payment: payment);
+    } else {
+      written = await runFacturationPaymentCorrection(
+        context,
+        detail: intent,
+        payment: payment,
+        charges: chargesBloc.state.studentCharges,
+      );
+    }
+
+    // Même règle que l'encaissement : on relit APRÈS le retour, et seulement
+    // si le geste a été écrit. Les BLoCs capturés avant la navigation sont
+    // fermés avec la fiche — d'où la garde.
+    if (!written || !context.mounted) return;
+    paymentsBloc.add(
+      PaymentsRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+      ),
+    );
+    chargesBloc.add(
+      StudentChargesByAcademicYearRequested(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
       ),
     );
   }

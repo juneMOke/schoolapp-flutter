@@ -7377,5 +7377,79 @@
         "type": "String"
       }
     }
-  }
+  },
+  "paymentCorrectionEntryTitle": "Une erreur sur ce versement ?",
+  "paymentCorrectionEntryHint": "Un versement n'est jamais modifié ni supprimé : il est annulé, et un nouveau prend sa place. Fonctionne hors ligne.",
+  "paymentCorrectionCancelAction": "Annuler le versement",
+  "paymentCorrectionCorrectAction": "Corriger",
+  "paymentCorrectionReasonLabel": "Motif",
+  "paymentCorrectionReasonRefunded": "Argent rendu au payeur",
+  "paymentCorrectionReasonDuplicate": "Double saisie",
+  "paymentCorrectionReasonWrongDevice": "Mauvaise tablette",
+  "paymentCorrectionReasonWrongAmount": "Mauvais montant",
+  "paymentCorrectionReasonWrongAllocation": "Mauvaises tranches",
+  "paymentCorrectionReasonWrongStudent": "Mauvais élève",
+  "paymentCorrectionReasonOther": "Autre",
+  "paymentCorrectionDetailLabel": "Précisions (facultatif)",
+  "paymentCorrectionDetailRequiredLabel": "Précisez le motif",
+  "paymentCorrectionCashMovedLabel": "De l'argent a réellement changé de main",
+  "paymentCorrectionCashMovedHint": "À cocher seulement si de l'argent a été rendu ou reçu. Une faute de frappe ne déplace pas d'argent.",
+  "paymentCorrectionCancelTitle": "Annuler un versement",
+  "paymentCorrectionCancelIntro": "À utiliser quand le versement n'aurait pas dû exister. S'il existe mais qu'il est faux, utilisez plutôt Corriger.",
+  "paymentCorrectionCancelConsequence": "Le versement sort des soldes et ses tranches sont rouvertes. Il reste visible dans la liste, barré.",
+  "paymentCorrectionBack": "Retour",
+  "paymentCorrectionSavedOnTablet": "Enregistré sur la tablette. Le geste partira seul à la prochaine synchronisation.",
+  "paymentCorrectionCancelledDone": "Versement annulé",
+  "paymentCorrectionCorrectedDone": "Versement corrigé",
+  "paymentCorrectionFailed": "La correction n'a pas été enregistrée : {reason}",
+  "@paymentCorrectionFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionCorrectEyebrow": "Corriger un versement",
+  "paymentCorrectionOriginLabel": "Versement d'origine · sera annulé",
+  "paymentCorrectionSubmit": "Annuler et remplacer",
+  "paymentCorrectionGap": "Écart avec l'origine : {amount}",
+  "@paymentCorrectionGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionNoChange": "Modifiez au moins un élément. Sinon, c'est Annuler le bon geste.",
+  "paymentCorrectionLoadFailed": "Ce versement ne peut pas être corrigé depuis cette tablette.",
+  "paymentCorrectionPendingBadge": "Annulé · à synchroniser",
+  "paymentCorrectionLocalBadge": "Annulé sur la tablette",
+  "paymentCorrectionRejectedBadge": "Correction refusée",
+  "paymentCorrectionReplacementBadge": "Remplace un versement",
+  "paymentCorrectionPendingNotice": "Annulation en attente de synchronisation. Motif : {reason}",
+  "@paymentCorrectionPendingNotice": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionLocalNotice": "Annulé sur cette tablette. Motif : {reason}",
+  "@paymentCorrectionLocalNotice": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionRejectedNotice": "La correction a été refusée ({code}). Le versement compte de nouveau.",
+  "@paymentCorrectionRejectedNotice": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionAlreadyCorrectedNotice": "Ce versement a déjà été corrigé depuis un autre poste. Le remplaçant saisi ici a été retiré : si son ticket a été remis, il n'a plus de valeur.",
+  "paymentCorrectionReplacementNotice": "Ce versement annule et remplace un versement corrigé."
 }

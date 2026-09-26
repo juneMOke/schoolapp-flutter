@@ -373,6 +373,41 @@ class FacturationCollectFormModel {
     );
   }
 
+  // ── La correction d'un versement ───────────────────────────────────────────
+
+  /// Pré-remplit la saisie avec le versement à corriger : ses tranches et ses
+  /// montants, posés COMME SAISIS À LA MAIN, et son jour (D2).
+  ///
+  /// ⚠️ Posés comme saisis, et non par la cascade d'une nature : rejouer une
+  /// cascade écraserait la ventilation d'origine (piège `tenderIsSource`). Le
+  /// montant est borné au restant — les créances reçues ici ont déjà rouvert
+  /// ce que l'origine avait soldé.
+  void prefill({required Map<String, int> centsByCharge, DateTime? day}) {
+    if (day != null) _paidDayOverride = DateTime(day.year, day.month, day.day);
+    for (final entry in entries) {
+      final cents = centsByCharge[entry.charge.id];
+      if (cents == null || cents <= 0) continue;
+      entry.selected = true;
+      final bounded = cents < entry.remainingInCents
+          ? cents
+          : entry.remainingInCents;
+      entry.writeDerived(entry.controller, formatPlainAmount(bounded));
+      allocationEdited(entry);
+    }
+  }
+
+  /// Reprend la devise que le tiroir de l'origine a reçue, par devise de
+  /// créance (D7). À appeler quand la série de taux est connue : sans elle, le
+  /// comptoir ne se calcule pas.
+  void prefillTenderCurrencies(Map<String, String> byChargeCurrency) {
+    for (final entry in entries) {
+      if (!entry.selected) continue;
+      final currency = byChargeCurrency[entry.charge.currency];
+      if (currency == null) continue;
+      tenderCurrencyChanged(entry, currency);
+    }
+  }
+
   // ── Le changement de date (A4) ─────────────────────────────────────────────
 
   /// Désigne un nouveau jour, et re-dérive ce qui en découle.
