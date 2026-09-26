@@ -23,6 +23,7 @@ void main() {
     Perm.financeChargeDelete: 'finance.charge.delete',
     Perm.financePaymentRead: 'finance.payment.read',
     Perm.financePaymentWrite: 'finance.payment.write',
+    Perm.financePaymentCancel: 'finance.payment.cancel',
     Perm.financeGridRead: 'finance.grid.read',
     Perm.financeGridWrite: 'finance.grid.write',
     Perm.financeStatsRead: 'finance.stats.read',
@@ -77,7 +78,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 61 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 62 permissions (v1.8 du catalogue serveur)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -116,7 +117,12 @@ void main() {
     // C0→C3). D'ici là aucun rôle ne les détient, décider reste inaccessible à
     // toute l'école, et c'est pourquoi les trois `ModuleAccess` correspondants
     // sont hors de `kGuardedWriteActions`.
-    expect(Perm.values, hasLength(61));
+    //
+    // 61 → 62 : `finance.payment.cancel`, qui garde l'annulation et la
+    // correction d'un versement. Le serveur la connaît DÉJÀ (elle garde sa
+    // route d'annulation en ligne) et la sème : les comptes de caisse de La
+    // Fontaine la détiennent. C'est le client qui rattrape son retard.
+    expect(Perm.values, hasLength(62));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

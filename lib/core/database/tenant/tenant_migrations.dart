@@ -2,6 +2,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -41,6 +42,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(53)) {
     await _addTicketCopies(db);
+  }
+  if (upTo(54)) {
+    await _paymentCorrections(db);
   }
 }
 
@@ -83,6 +87,39 @@ Future<void> _addAnnualMatriculationNumber(DatabaseExecutor db) async {
     'ALTER TABLE enrollments ADD COLUMN annual_matriculation_number TEXT',
   );
 }
+
+/// v54 — la correction d'un versement : la table `payment_corrections` et
+/// `payments.replaces_payment_id` (plan « Correction d'un versement hors
+/// ligne », lot T1).
+///
+/// Création pure, **aucune reprise** : aucune correction n'existe avant ce
+/// palier, et le lien de remplacement se remplit par le geste ou par le pull.
+///
+/// ⚠️ Gardes de table et de colonne, même raison qu'aux v50 et v53 : une base
+/// héritée adoptée repasse par cet escalier, et une base sans `payments` le
+/// traverse sans lever.
+Future<void> _paymentCorrections(DatabaseExecutor db) async {
+  await db.execute(
+    paymentCorrectionsTable.createTableSql.replaceFirst(
+      'CREATE TABLE payment_corrections',
+      'CREATE TABLE IF NOT EXISTS payment_corrections',
+    ),
+  );
+  for (final sql in kPaymentCorrectionsIndexSql) {
+    await db.execute(_ifNotExists(sql));
+  }
+  final info = await db.rawQuery('PRAGMA table_info(payments)');
+  if (info.isEmpty) return;
+  if (!info.any((row) => row['name'] == 'replaces_payment_id')) {
+    await db.execute(
+      'ALTER TABLE payments ADD COLUMN replaces_payment_id TEXT',
+    );
+  }
+  await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));
+}
+
+String _ifNotExists(String createIndexSql) =>
+    createIndexSql.replaceFirst('CREATE INDEX ', 'CREATE INDEX IF NOT EXISTS ');
 
 /// v53 — `ref_school.ticket_copies`, le nombre d'exemplaires d'un ticket que
 /// le sélecteur d'imprimante propose d'office (`TICKET_COPIES_PLAN.md`, lot 2).

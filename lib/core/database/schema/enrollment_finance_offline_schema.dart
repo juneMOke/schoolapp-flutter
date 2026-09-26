@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Tables sqflite de la branche offline **Inscription + Facturation**.
@@ -843,12 +844,14 @@ const TableSchema paymentsTable = TableSchema(
       synced_at INTEGER,
       updated_at INTEGER NOT NULL DEFAULT 0,
       ticket_printed_at INTEGER,
-      cancelled_at INTEGER
+      cancelled_at INTEGER,
+      replaces_payment_id TEXT
     )
   ''',
   createIndexSql: [
     'CREATE INDEX idx_payments_student ON payments(student_id)',
     'CREATE INDEX idx_payments_client_uuid ON payments(client_uuid)',
+    kPaymentsReplacesIndexSql,
   ],
 );
 
@@ -1051,5 +1054,6 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   paymentAllocationsTable,
   paymentTendersTable,
   paymentAnomaliesTable,
+  paymentCorrectionsTable,
   generatedDocumentsTable,
 ];

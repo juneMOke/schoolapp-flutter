@@ -770,7 +770,12 @@ class AppConstants {
   // v53 (2026-09-25) : `ref_school.ticket_copies` — le nombre d'exemplaires
   // qu'une école imprime d'office par ticket (perception et boutique). Facultatif
   // et `null` tant que le back ne le sert pas ⇒ un exemplaire. Palier d'école.
-  static const int offlineDbSchemaVersion = 53;
+  // v54 (2026-09-26) : la correction d'un versement — table
+  // `payment_corrections` (le geste Annuler / Corriger, poussé par l'outbox
+  // `PAYMENT_CORRECTION`) et `payments.replaces_payment_id`. L'annulation
+  // locale vit dans la correction, jamais dans `payments.cancelled_at`, que le
+  // serveur seul pose. Palier d'école.
+  static const int offlineDbSchemaVersion = 54;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
