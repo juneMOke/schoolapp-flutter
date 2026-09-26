@@ -2,6 +2,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -41,6 +42,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(53)) {
     await _addTicketCopies(db);
+  }
+  if (upTo(54)) {
+    await _paymentCorrections(db);
   }
 }
 
@@ -83,6 +87,51 @@ Future<void> _addAnnualMatriculationNumber(DatabaseExecutor db) async {
     'ALTER TABLE enrollments ADD COLUMN annual_matriculation_number TEXT',
   );
 }
+
+/// v54 — la correction d'un versement : la table `payment_corrections`,
+/// `payments.replaces_payment_id` et ce que le serveur dit d'une annulation
+/// (`cancelled_by_name`, `cancellation_reason[_code]`,
+/// `cancellation_cash_moved`) — plan « Correction d'un versement hors ligne ».
+///
+/// Création pure, **aucune reprise** : aucune correction n'existe avant ce
+/// palier, et le lien de remplacement se remplit par le geste ou par le pull.
+///
+/// ⚠️ Gardes de table et de colonne, même raison qu'aux v50 et v53 : une base
+/// héritée adoptée repasse par cet escalier, et une base sans `payments` le
+/// traverse sans lever.
+Future<void> _paymentCorrections(DatabaseExecutor db) async {
+  await db.execute(
+    paymentCorrectionsTable.createTableSql.replaceFirst(
+      'CREATE TABLE payment_corrections',
+      'CREATE TABLE IF NOT EXISTS payment_corrections',
+    ),
+  );
+  for (final sql in kPaymentCorrectionsIndexSql) {
+    await db.execute(_ifNotExists(sql));
+  }
+  final info = await db.rawQuery('PRAGMA table_info(payments)');
+  if (info.isEmpty) return;
+  const columns = {
+    'replaces_payment_id': 'TEXT',
+    // Ce que le serveur dit d'une annulation (B5) : qui, pourquoi, et si de
+    // l'argent a changé de main. Lu pour l'écran, jamais pour un solde.
+    'cancelled_by_name': 'TEXT',
+    'cancellation_reason': 'TEXT',
+    'cancellation_reason_code': 'TEXT',
+    'cancellation_cash_moved': 'INTEGER',
+  };
+  final existing = {for (final row in info) row['name'] as String};
+  for (final column in columns.entries) {
+    if (existing.contains(column.key)) continue;
+    await db.execute(
+      'ALTER TABLE payments ADD COLUMN ${column.key} ${column.value}',
+    );
+  }
+  await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));
+}
+
+String _ifNotExists(String createIndexSql) =>
+    createIndexSql.replaceFirst('CREATE INDEX ', 'CREATE INDEX IF NOT EXISTS ');
 
 /// v53 — `ref_school.ticket_copies`, le nombre d'exemplaires d'un ticket que
 /// le sélecteur d'imprimante propose d'office (`TICKET_COPIES_PLAN.md`, lot 2).

@@ -11218,4 +11218,188 @@ class AppLocalizationsFr extends AppLocalizations {
   String expenseRateNote(String rate) {
     return 'Montants lus en dollars au taux du jour : $rate pour 1 \$. Une lecture, pas une conversion comptable — chaque dépense reste dans sa devise.';
   }
+
+  @override
+  String get paymentCorrectionEntryTitle => 'Une erreur sur ce versement ?';
+
+  @override
+  String get paymentCorrectionEntryHint =>
+      'Un versement n\'est jamais modifié ni supprimé : il est annulé, et un nouveau prend sa place. Fonctionne hors ligne.';
+
+  @override
+  String get paymentCorrectionCancelAction => 'Annuler le versement';
+
+  @override
+  String get paymentCorrectionCorrectAction => 'Corriger';
+
+  @override
+  String get paymentCorrectionReasonLabel => 'Motif';
+
+  @override
+  String get paymentCorrectionReasonRefunded => 'Argent rendu au payeur';
+
+  @override
+  String get paymentCorrectionReasonDuplicate => 'Double saisie';
+
+  @override
+  String get paymentCorrectionReasonWrongDevice => 'Mauvaise tablette';
+
+  @override
+  String get paymentCorrectionReasonWrongAmount => 'Mauvais montant';
+
+  @override
+  String get paymentCorrectionReasonWrongAllocation => 'Mauvaises tranches';
+
+  @override
+  String get paymentCorrectionReasonWrongStudent => 'Mauvais élève';
+
+  @override
+  String get paymentCorrectionReasonOther => 'Autre';
+
+  @override
+  String get paymentCorrectionDetailLabel => 'Précisions (facultatif)';
+
+  @override
+  String get paymentCorrectionDetailRequiredLabel => 'Précisez le motif';
+
+  @override
+  String get paymentCorrectionCashMovedLabel =>
+      'De l\'argent a réellement changé de main';
+
+  @override
+  String get paymentCorrectionCashMovedHint =>
+      'À cocher seulement si de l\'argent a été rendu ou reçu. Une faute de frappe ne déplace pas d\'argent.';
+
+  @override
+  String get paymentCorrectionCancelTitle => 'Annuler un versement';
+
+  @override
+  String get paymentCorrectionCancelIntro =>
+      'À utiliser quand le versement n\'aurait pas dû exister. S\'il existe mais qu\'il est faux, utilisez plutôt Corriger.';
+
+  @override
+  String get paymentCorrectionCancelConsequence =>
+      'Le versement sort des soldes et ses tranches sont rouvertes. Il reste visible dans la liste, barré.';
+
+  @override
+  String get paymentCorrectionBack => 'Retour';
+
+  @override
+  String get paymentCorrectionSavedOnTablet =>
+      'Enregistré sur la tablette. Le geste partira seul à la prochaine synchronisation.';
+
+  @override
+  String get paymentCorrectionCancelledDone => 'Versement annulé';
+
+  @override
+  String get paymentCorrectionCorrectedDone => 'Versement corrigé';
+
+  @override
+  String paymentCorrectionFailed(String reason) {
+    return 'La correction n\'a pas été enregistrée : $reason';
+  }
+
+  @override
+  String get paymentCorrectionCorrectEyebrow => 'Corriger un versement';
+
+  @override
+  String get paymentCorrectionOriginLabel =>
+      'Versement d\'origine · sera annulé';
+
+  @override
+  String get paymentCorrectionSubmit => 'Annuler et remplacer';
+
+  @override
+  String paymentCorrectionGap(String amount) {
+    return 'Écart avec l\'origine : $amount';
+  }
+
+  @override
+  String get paymentCorrectionNoChange =>
+      'Modifiez au moins un élément. Sinon, c\'est Annuler le bon geste.';
+
+  @override
+  String get paymentCorrectionLoadFailed =>
+      'Ce versement ne peut pas être corrigé depuis cette tablette.';
+
+  @override
+  String get paymentCorrectionPendingBadge => 'Annulé · à synchroniser';
+
+  @override
+  String get paymentCorrectionLocalBadge => 'Annulé sur la tablette';
+
+  @override
+  String get paymentCorrectionRejectedBadge => 'Correction refusée';
+
+  @override
+  String get paymentCorrectionReplacementBadge => 'Remplace un versement';
+
+  @override
+  String paymentCorrectionPendingNotice(String reason) {
+    return 'Annulation en attente de synchronisation. Motif : $reason';
+  }
+
+  @override
+  String paymentCorrectionLocalNotice(String reason) {
+    return 'Annulé sur cette tablette. Motif : $reason';
+  }
+
+  @override
+  String paymentCorrectionRejectedNotice(String code) {
+    return 'La correction a été refusée ($code). Le versement compte de nouveau.';
+  }
+
+  @override
+  String get paymentCorrectionAlreadyCorrectedNotice =>
+      'Ce versement a déjà été corrigé depuis un autre poste. Le remplaçant saisi ici a été retiré : si son ticket a été remis, il n\'a plus de valeur.';
+
+  @override
+  String get paymentCorrectionReplacementNotice =>
+      'Ce versement annule et remplace un versement corrigé.';
+
+  @override
+  String paymentServerCancelledNotice(String date) {
+    return 'Versement annulé le $date.';
+  }
+
+  @override
+  String paymentServerCancelledByNotice(String date, String name) {
+    return 'Versement annulé le $date par $name.';
+  }
+
+  @override
+  String paymentCancellationMotive(String motive) {
+    return 'Motif : $motive';
+  }
+
+  @override
+  String get paymentCorrectionStudentLabel => 'Élève';
+
+  @override
+  String get paymentCorrectionChangeStudent => 'Changer';
+
+  @override
+  String get paymentCorrectionRestoreStudent => 'Rétablir';
+
+  @override
+  String get paymentCorrectionStudentSearchLabel =>
+      'Rechercher un élève : nom, post-nom ou prénom';
+
+  @override
+  String get paymentCorrectionStudentNoResult =>
+      'Aucun élève ne correspond. Vérifiez l\'orthographe.';
+
+  @override
+  String paymentCorrectionMovedFrom(String name) {
+    return 'Le versement sera déplacé depuis $name.';
+  }
+
+  @override
+  String paymentCorrectionTargetSettled(String name) {
+    return 'Tous les frais de $name sont soldés. Choisissez un autre élève, ou utilisez Annuler.';
+  }
+
+  @override
+  String get paymentCorrectionTargetLoadFailed =>
+      'Les frais de cet élève n\'ont pas pu être lus.';
 }

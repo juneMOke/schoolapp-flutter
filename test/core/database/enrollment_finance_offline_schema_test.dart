@@ -47,12 +47,13 @@ void main() {
         'payments',
         'payment_allocations',
         'payment_anomalies',
+        'payment_corrections',
         'generated_documents',
       ]),
     );
   });
 
-  test('la liste exportée contient exactement 24 tables', () {
+  test('la liste exportée contient exactement 25 tables', () {
     // +1 en v33 : `ref_previous_year_student_balances`, les arriérés N-1 sortis
     // de la ligne de l'élève pour porter une entrée PAR DEVISE.
     // +3 en v36 : le catalogue des réductions (`ref_reduction_types`,
@@ -67,7 +68,9 @@ void main() {
     // +1 en v47 : `school_logo_cache`, les octets du logo par variante. Voisine
     // de `ref_school`, qui porte les empreintes : la table est réécrite à chaque
     // pull, celle-ci non — sans quoi chaque cycle retélécharge le logo.
-    expect(enrollmentFinanceOfflineTables, hasLength(24));
+    // +1 en v54 : `payment_corrections`, le geste Annuler / Corriger sur un
+    // versement. L'annulation locale y vit, jamais dans `payments.cancelled_at`.
+    expect(enrollmentFinanceOfflineTables, hasLength(25));
   });
 
   test(

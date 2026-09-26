@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/payment_correction_summary.dart';
 
 class FacturationPaymentDetailIntent extends Equatable {
   final String paymentId;
@@ -43,6 +44,25 @@ class FacturationPaymentDetailIntent extends Equatable {
   /// `PaymentDelta`/`PaymentDto` ne l'auront pas descendu.
   final String? cashierFullName;
 
+  /// Le serveur a annulé ce versement.
+  final bool isCancelled;
+
+  /// Le versement que celui-ci remplace, `null` pour un encaissement ordinaire.
+  final String? replacesPaymentId;
+
+  /// La dernière correction qui vise ce versement.
+  final PaymentCorrectionSummary? correction;
+
+  /// Le récit d'une annulation serveur (B5) : quand, par qui, pourquoi.
+  final DateTime? cancelledAt;
+  final String? cancelledByName;
+  final String? cancellationReasonCode;
+  final String? cancellationReason;
+
+  /// Le versement compte-t-il encore ? Un versement annulé, ou écarté par une
+  /// correction de cette tablette, ne se corrige plus.
+  bool get isOutOfForce => isCancelled || (correction?.removesPayment ?? false);
+
   const FacturationPaymentDetailIntent({
     required this.paymentId,
     required this.studentId,
@@ -60,6 +80,13 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.paidAt,
     this.isPendingSync = false,
     this.cashierFullName,
+    this.isCancelled = false,
+    this.replacesPaymentId,
+    this.correction,
+    this.cancelledAt,
+    this.cancelledByName,
+    this.cancellationReasonCode,
+    this.cancellationReason,
   });
 
   FacturationPaymentDetailIntent.invalid({
@@ -159,5 +186,12 @@ class FacturationPaymentDetailIntent extends Equatable {
     paidAt,
     isPendingSync,
     cashierFullName,
+    isCancelled,
+    replacesPaymentId,
+    correction,
+    cancelledAt,
+    cancelledByName,
+    cancellationReasonCode,
+    cancellationReason,
   ];
 }

@@ -11129,4 +11129,188 @@ class AppLocalizationsEn extends AppLocalizations {
   String expenseRateNote(String rate) {
     return 'Amounts read in dollars at today\'s rate: $rate per \$1. A reading, not an accounting conversion — each expense stays in its currency.';
   }
+
+  @override
+  String get paymentCorrectionEntryTitle =>
+      'Something wrong with this payment?';
+
+  @override
+  String get paymentCorrectionEntryHint =>
+      'A payment is never edited or deleted: it is cancelled, and a new one takes its place. Works offline.';
+
+  @override
+  String get paymentCorrectionCancelAction => 'Cancel payment';
+
+  @override
+  String get paymentCorrectionCorrectAction => 'Correct';
+
+  @override
+  String get paymentCorrectionReasonLabel => 'Reason';
+
+  @override
+  String get paymentCorrectionReasonRefunded => 'Money returned to the payer';
+
+  @override
+  String get paymentCorrectionReasonDuplicate => 'Entered twice';
+
+  @override
+  String get paymentCorrectionReasonWrongDevice => 'Wrong tablet';
+
+  @override
+  String get paymentCorrectionReasonWrongAmount => 'Wrong amount';
+
+  @override
+  String get paymentCorrectionReasonWrongAllocation => 'Wrong instalments';
+
+  @override
+  String get paymentCorrectionReasonWrongStudent => 'Wrong student';
+
+  @override
+  String get paymentCorrectionReasonOther => 'Other';
+
+  @override
+  String get paymentCorrectionDetailLabel => 'Details (optional)';
+
+  @override
+  String get paymentCorrectionDetailRequiredLabel => 'Specify the reason';
+
+  @override
+  String get paymentCorrectionCashMovedLabel => 'Money actually changed hands';
+
+  @override
+  String get paymentCorrectionCashMovedHint =>
+      'Tick only if money was returned or received. A typing mistake does not move any money.';
+
+  @override
+  String get paymentCorrectionCancelTitle => 'Cancel a payment';
+
+  @override
+  String get paymentCorrectionCancelIntro =>
+      'Use this when the payment should never have existed. If it exists but is wrong, use Correct instead.';
+
+  @override
+  String get paymentCorrectionCancelConsequence =>
+      'The payment leaves the balances and its instalments reopen. It stays in the list, struck through.';
+
+  @override
+  String get paymentCorrectionBack => 'Back';
+
+  @override
+  String get paymentCorrectionSavedOnTablet =>
+      'Saved on this tablet. It will be sent automatically at the next sync.';
+
+  @override
+  String get paymentCorrectionCancelledDone => 'Payment cancelled';
+
+  @override
+  String get paymentCorrectionCorrectedDone => 'Payment corrected';
+
+  @override
+  String paymentCorrectionFailed(String reason) {
+    return 'The correction was not saved: $reason';
+  }
+
+  @override
+  String get paymentCorrectionCorrectEyebrow => 'Correct a payment';
+
+  @override
+  String get paymentCorrectionOriginLabel =>
+      'Original payment · will be cancelled';
+
+  @override
+  String get paymentCorrectionSubmit => 'Cancel and replace';
+
+  @override
+  String paymentCorrectionGap(String amount) {
+    return 'Difference with the original: $amount';
+  }
+
+  @override
+  String get paymentCorrectionNoChange =>
+      'Change at least one thing. Otherwise, Cancel is the right gesture.';
+
+  @override
+  String get paymentCorrectionLoadFailed =>
+      'This payment cannot be corrected from this tablet.';
+
+  @override
+  String get paymentCorrectionPendingBadge => 'Cancelled · to sync';
+
+  @override
+  String get paymentCorrectionLocalBadge => 'Cancelled on this tablet';
+
+  @override
+  String get paymentCorrectionRejectedBadge => 'Correction refused';
+
+  @override
+  String get paymentCorrectionReplacementBadge => 'Replaces a payment';
+
+  @override
+  String paymentCorrectionPendingNotice(String reason) {
+    return 'Cancellation waiting to sync. Reason: $reason';
+  }
+
+  @override
+  String paymentCorrectionLocalNotice(String reason) {
+    return 'Cancelled on this tablet. Reason: $reason';
+  }
+
+  @override
+  String paymentCorrectionRejectedNotice(String code) {
+    return 'The correction was refused ($code). The payment counts again.';
+  }
+
+  @override
+  String get paymentCorrectionAlreadyCorrectedNotice =>
+      'This payment was already corrected from another device. The replacement entered here was removed: if its ticket was handed over, it is no longer valid.';
+
+  @override
+  String get paymentCorrectionReplacementNotice =>
+      'This payment cancels and replaces a corrected payment.';
+
+  @override
+  String paymentServerCancelledNotice(String date) {
+    return 'Payment cancelled on $date.';
+  }
+
+  @override
+  String paymentServerCancelledByNotice(String date, String name) {
+    return 'Payment cancelled on $date by $name.';
+  }
+
+  @override
+  String paymentCancellationMotive(String motive) {
+    return 'Reason: $motive';
+  }
+
+  @override
+  String get paymentCorrectionStudentLabel => 'Student';
+
+  @override
+  String get paymentCorrectionChangeStudent => 'Change';
+
+  @override
+  String get paymentCorrectionRestoreStudent => 'Restore';
+
+  @override
+  String get paymentCorrectionStudentSearchLabel =>
+      'Search a student: last, middle or first name';
+
+  @override
+  String get paymentCorrectionStudentNoResult =>
+      'No student matches. Check the spelling.';
+
+  @override
+  String paymentCorrectionMovedFrom(String name) {
+    return 'The payment will be moved from $name.';
+  }
+
+  @override
+  String paymentCorrectionTargetSettled(String name) {
+    return 'All of $name\'s fees are settled. Choose another student, or use Cancel.';
+  }
+
+  @override
+  String get paymentCorrectionTargetLoadFailed =>
+      'This student\'s fees could not be read.';
 }

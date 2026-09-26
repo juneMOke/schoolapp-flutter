@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/payment_correction_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne d'un versement (spec §09).
@@ -61,7 +62,12 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
     final amount = widget.payment.amounts.entries
         .map(MoneyFormat.format)
         .join(' · ');
-    final cancelled = widget.payment.isCancelled;
+    // Annulé par le serveur, OU écarté par une correction de cette tablette :
+    // dans les deux cas le versement ne compte plus, et la ligne le montre.
+    final cancelled = widget.payment.isOutOfForce;
+    final correctionBadge = widget.payment.isCancelled
+        ? null
+        : paymentCorrectionBadge(widget.payment.correction, l10n);
 
     return Material(
       color: Colors.transparent,
@@ -128,9 +134,22 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                     ],
                     // Extourné côté serveur. La ligne RESTE : la famille garde
                     // son papier, et une ligne absente ne lui explique rien.
-                    if (cancelled) ...[
+                    if (cancelled || correctionBadge != null) ...[
                       const SizedBox(height: AppDimensions.spacingXS),
-                      const _PaymentCancelledBadge(),
+                      _PaymentCancelledBadge(
+                        label: correctionBadge,
+                        icon: widget.payment.correction?.isRejected ?? false
+                            ? Icons.error_outline_rounded
+                            : Icons.block_outlined,
+                      ),
+                    ],
+                    // Le remplaçant d'une correction : il dit d'où il vient.
+                    if (widget.payment.replacesPaymentId != null) ...[
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      _PaymentCancelledBadge(
+                        label: l10n.paymentCorrectionReplacementBadge,
+                        icon: Icons.repeat_rounded,
+                      ),
                     ],
                   ],
                 ),
@@ -225,8 +244,14 @@ class _PaymentMeta extends StatelessWidget {
 /// Même forme que la pastille de synchro, autre sens : celle-ci ne dit pas « pas
 /// encore parti » mais « ne compte plus ». Elle accompagne le barré plutôt que de
 /// le remplacer — un trait seul se lit comme un défaut d'affichage.
+///
+/// [label] remplace le libellé par défaut : « Annulé · à synchroniser »,
+/// « Correction refusée », « Remplace un versement ».
 class _PaymentCancelledBadge extends StatelessWidget {
-  const _PaymentCancelledBadge();
+  final String? label;
+  final IconData icon;
+
+  const _PaymentCancelledBadge({this.label, this.icon = Icons.block_outlined});
 
   @override
   Widget build(BuildContext context) {
@@ -244,14 +269,10 @@ class _PaymentCancelledBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.block_outlined,
-            size: 13,
-            color: AppColors.textMuted,
-          ),
+          Icon(icon, size: 13, color: AppColors.textMuted),
           const SizedBox(width: AppDimensions.spacingXS),
           Text(
-            l10n.facturationPaymentCancelledBadge,
+            label ?? l10n.facturationPaymentCancelledBadge,
             style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
           ),
         ],

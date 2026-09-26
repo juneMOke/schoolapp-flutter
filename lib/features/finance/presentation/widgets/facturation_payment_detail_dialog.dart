@@ -20,6 +20,9 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ticket_print_row.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/payment_correction_labels.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/payment_correction_entry_block.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/payment_correction_notice.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que « Télécharger le reçu » fait réellement quand on appuie dessus.
@@ -131,12 +134,48 @@ bool facturationTicketRowOffered({
   bool paymentCancelled = false,
 }) => !paymentCancelled && !(cached?.isCancelled ?? false);
 
-/// Ouvre le détail d'un paiement en popin (spec §15).
-Future<void> showFacturationPaymentDetailDialog(
+/// Ce que le caissier a demandé en quittant le détail d'un versement.
+enum FacturationPaymentDetailAction {
+  /// Le geste « Annuler » : le versement n'aurait pas dû exister.
+  cancel,
+
+  /// Le geste « Corriger » : il est annulé et remplacé.
+  correct,
+}
+
+/// Les gestes de correction offerts sur ce versement, selon ses droits.
+///
+/// Les deux exigent d'annuler un versement ET son reçu ; « Corriger » exige en
+/// plus d'encaisser et d'émettre le reçu du remplaçant. Un versement qui ne
+/// compte déjà plus ne se corrige pas.
+@visibleForTesting
+({bool cancel, bool correct}) facturationCorrectionGestures({
+  required bool outOfForce,
+  required bool canCancel,
+  required bool canWrite,
+}) {
+  if (outOfForce || !canCancel) return (cancel: false, correct: false);
+  return (cancel: true, correct: canWrite);
+}
+
+/// Ouvre le détail d'un paiement en popin (spec §15). Rend le geste de
+/// correction demandé, `null` à une simple fermeture.
+Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
   BuildContext context, {
   required FacturationPaymentDetailIntent intent,
 }) {
-  return showDialog<void>(
+  final gestures = facturationCorrectionGestures(
+    outOfForce: intent.isOutOfForce,
+    canCancel: PermissionGate.allows(context, const [
+      Perm.financePaymentCancel,
+      Perm.editiqueCancel,
+    ], requiresAll: true),
+    canWrite: PermissionGate.allows(context, const [
+      Perm.financePaymentWrite,
+      Perm.editiqueWrite,
+    ], requiresAll: true),
+  );
+  return showDialog<FacturationPaymentDetailAction>(
     context: context,
     barrierDismissible: true,
     builder: (_) => MultiBlocProvider(
@@ -228,9 +267,24 @@ Future<void> showFacturationPaymentDetailDialog(
           ticketPrint:
               facturationTicketRowOffered(
                 cached: receipt.cached,
-                paymentCancelled: receipt.paymentCancelled,
+                paymentCancelled:
+                    receipt.paymentCancelled || intent.isOutOfForce,
               )
               ? FacturationTicketPrintRow(paymentId: intent.paymentId)
+              : null,
+          // Le serveur a pu annuler le versement depuis que la liste l'a
+          // montré : le reçu résolu le dit, et le geste disparaît alors.
+          correctionEntry: gestures.cancel && !receipt.paymentCancelled
+              ? PaymentCorrectionEntryBlock(
+                  onCancel: () => Navigator.of(
+                    context,
+                  ).pop(FacturationPaymentDetailAction.cancel),
+                  onCorrect: gestures.correct
+                      ? () => Navigator.of(
+                          context,
+                        ).pop(FacturationPaymentDetailAction.correct)
+                      : null,
+                )
               : null,
         ),
       ),
@@ -272,6 +326,9 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   /// rendre impossible à manquer.
   final EditiqueCacheEntry? cancelledReceipt;
 
+  /// « Une erreur sur ce versement ? », `null` quand aucun geste n'est offert.
+  final Widget? correctionEntry;
+
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
@@ -282,6 +339,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     this.onDownloadReceipt,
     this.cancelledReceipt,
     this.ticketPrint,
+    this.correctionEntry,
   });
 
   /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
@@ -452,6 +510,41 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                     ],
                   ),
                 ),
+              if (paymentCorrectionNotice(intent.correction, l10n)
+                  case final notice?)
+                PaymentCorrectionNotice(
+                  message: notice,
+                  icon: intent.correction!.isRejected
+                      ? Icons.error_outline_rounded
+                      : Icons.block_rounded,
+                  color: intent.correction!.isRejected
+                      ? AppColors.warning
+                      : AppColors.danger,
+                ),
+              if (paymentServerCancellationNotice(
+                    date: switch (intent.cancelledAt) {
+                      final at? => MaterialLocalizations.of(
+                        context,
+                      ).formatMediumDate(at),
+                      null => null,
+                    },
+                    byName: intent.cancelledByName,
+                    reasonCode: intent.cancellationReasonCode,
+                    reason: intent.cancellationReason,
+                    l10n: l10n,
+                  )
+                  case final notice?)
+                PaymentCorrectionNotice(
+                  message: notice,
+                  icon: Icons.block_rounded,
+                  color: AppColors.danger,
+                ),
+              if (intent.replacesPaymentId != null)
+                PaymentCorrectionNotice(
+                  message: l10n.paymentCorrectionReplacementNotice,
+                  icon: Icons.repeat_rounded,
+                  color: AppColors.info,
+                ),
               const SizedBox(height: AppDimensions.spacingM),
               allocations,
               // Rattrapage d'un ticket jamais sorti. Sous la répartition
@@ -459,6 +552,10 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
               // — un bouton qui n'apparaît que parfois ne dit pas
               // pourquoi il est là.
               ?ticketPrint,
+              if (correctionEntry case final entry?) ...[
+                const SizedBox(height: AppDimensions.spacingM),
+                entry,
+              ],
             ],
           ),
           footer: [

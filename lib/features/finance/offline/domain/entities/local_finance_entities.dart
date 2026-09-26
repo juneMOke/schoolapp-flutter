@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_offline_enums.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 
 /// Tarif de la grille (référentiel gelé sur la saison). Montant en centimes.
 class LocalFeeTariff extends Equatable {
@@ -259,6 +260,18 @@ class LocalPayment extends Equatable {
   /// et elle cesse de compter dans les soldes.
   final int? cancelledAt;
 
+  /// Le versement que celui-ci remplace (« annule et remplace », v54), `null`
+  /// pour un encaissement ordinaire.
+  final String? replacesPaymentId;
+
+  /// La dernière correction qui VISE ce versement, `null` s'il n'en a pas.
+  final LocalPaymentCorrection? correction;
+
+  /// Ce que le serveur dit de son annulation (B5).
+  final String? cancelledByName;
+  final String? cancellationReason;
+  final String? cancellationReasonCode;
+
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -278,6 +291,11 @@ class LocalPayment extends Equatable {
 
   const LocalPayment({
     this.cancelledAt,
+    this.replacesPaymentId,
+    this.correction,
+    this.cancelledByName,
+    this.cancellationReason,
+    this.cancellationReasonCode,
     required this.id,
     required this.clientUuid,
     required this.studentId,
@@ -322,6 +340,77 @@ class LocalPayment extends Equatable {
     deviceId,
     receiptId,
     syncState,
+    cancelledAt,
+    replacesPaymentId,
+    correction,
+    cancelledByName,
+    cancellationReason,
+    cancellationReasonCode,
+  ];
+
+  LocalPayment withCorrection(LocalPaymentCorrection? correction) =>
+      LocalPayment(
+        cancelledAt: cancelledAt,
+        replacesPaymentId: replacesPaymentId,
+        correction: correction,
+        cancelledByName: cancelledByName,
+        cancellationReason: cancellationReason,
+        cancellationReasonCode: cancellationReasonCode,
+        id: id,
+        clientUuid: clientUuid,
+        studentId: studentId,
+        academicYearId: academicYearId,
+        amounts: amounts,
+        method: method,
+        paidAt: paidAt,
+        payerFirstName: payerFirstName,
+        payerLastName: payerLastName,
+        payerMiddleName: payerMiddleName,
+        payerPhoneNumber: payerPhoneNumber,
+        status: status,
+        cashierUid: cashierUid,
+        cashierFirstName: cashierFirstName,
+        cashierLastName: cashierLastName,
+        collectedById: collectedById,
+        collectedByName: collectedByName,
+        deviceId: deviceId,
+        receiptId: receiptId,
+        syncState: syncState,
+      );
+}
+
+/// La correction (Annuler / Corriger) qui vise un versement, telle que la
+/// tablette la connaît (v54).
+class LocalPaymentCorrection extends Equatable {
+  final String id;
+  final PaymentCorrectionStatus status;
+  final String reasonCode;
+  final String? reason;
+
+  /// Le remplaçant, `null` pour une annulation seule.
+  final String? replacementPaymentId;
+
+  /// Le code du refus, quand le serveur a refusé (`PAYMENT_ALREADY_CORRECTED`,
+  /// `HTTP_403`…).
+  final String? errorCode;
+
+  const LocalPaymentCorrection({
+    required this.id,
+    required this.status,
+    required this.reasonCode,
+    this.reason,
+    this.replacementPaymentId,
+    this.errorCode,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    status,
+    reasonCode,
+    reason,
+    replacementPaymentId,
+    errorCode,
   ];
 }
 

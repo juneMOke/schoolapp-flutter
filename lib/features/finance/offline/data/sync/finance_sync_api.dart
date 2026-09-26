@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_response.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 
 part 'finance_sync_api.g.dart';
@@ -28,5 +30,18 @@ abstract class FinanceSyncApi {
   Future<PaymentAggregateResponse> commitPayment(
     @Extras() Map<String, dynamic> extras,
     @Body() PaymentAggregateRequest request,
+  );
+
+  /// Correction d'un versement. **Idempotent sur l'`id` de la correction** :
+  /// `201` = appliquée, `200` = rejeu, mêmes valeurs canoniques.
+  ///
+  /// Refus : `422 PAYMENT_NOT_YET_SYNCED` (transitoire, l'origine n'est pas
+  /// encore connue), `422 PAYMENT_ALREADY_CORRECTED`, `422
+  /// TARGET_NOT_ENROLLED`, les codes d'encaissement du remplaçant et `403` —
+  /// terminaux, et rien n'a changé côté serveur.
+  @POST(AppConstants.syncPaymentCorrectionsEndpoint)
+  Future<PaymentCorrectionResponse> correctPayment(
+    @Extras() Map<String, dynamic> extras,
+    @Body() PaymentCorrectionRequest request,
   );
 }

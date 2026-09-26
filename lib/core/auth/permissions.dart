@@ -36,6 +36,14 @@ enum Perm {
   financeChargeDelete('finance.charge.delete'),
   financePaymentRead('finance.payment.read'),
   financePaymentWrite('finance.payment.write'),
+
+  /// Annuler un versement, seul ou en le remplaçant (« Corriger »).
+  ///
+  /// Séparée de [financePaymentWrite] : encaisser ajoute de l'argent à la
+  /// caisse, annuler en retire — y compris sur un jour déjà clos. Le serveur
+  /// exige en plus `editique.cancel`, puisque le reçu est annulé avec le
+  /// versement.
+  financePaymentCancel('finance.payment.cancel'),
   financeGridRead('finance.grid.read'),
   financeGridWrite('finance.grid.write'),
   financeStatsRead('finance.stats.read'),

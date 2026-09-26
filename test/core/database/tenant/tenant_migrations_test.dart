@@ -170,6 +170,128 @@ void main() {
     });
   });
 
+  group('v54 — la correction d un versement', () {
+    Future<Set<String>> colonnes(String table) async => {
+      for (final r in await db.rawQuery('PRAGMA table_info($table)'))
+        r['name']! as String,
+    };
+
+    /// Une base d'AVANT la v54 : sans la table des corrections, et avec des
+    /// `payments` sans le lien de remplacement.
+    Future<void> seedAvant() async {
+      await db.execute('DROP TABLE payment_corrections');
+      await db.execute('DROP TABLE payments');
+      await db.execute('''
+        CREATE TABLE payments (
+          id TEXT PRIMARY KEY,
+          client_uuid TEXT NOT NULL,
+          student_id TEXT NOT NULL,
+          paid_at TEXT NOT NULL,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+          cancelled_at INTEGER
+        )
+      ''');
+      await db.insert('payments', {
+        'id': 'p-1',
+        'client_uuid': 'p-1',
+        'student_id': 's-1',
+        'paid_at': '2026-09-25T13:11:41Z',
+        'sync_status': 'SYNCED',
+      });
+    }
+
+    test('la table et la colonne arrivent, le versement survit', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 53);
+
+      expect(await _tables(db), contains('payment_corrections'));
+      expect(
+        await colonnes('payments'),
+        containsAll([
+          'replaces_payment_id',
+          'cancelled_by_name',
+          'cancellation_reason',
+          'cancellation_reason_code',
+          'cancellation_cash_moved',
+        ]),
+      );
+      final row = (await db.query('payments')).single;
+      expect(row['id'], 'p-1');
+      // Aucune reprise : le lien se remplit par le geste ou par le pull.
+      expect(row['replaces_payment_id'], isNull);
+    });
+
+    test('rejouable sans lever', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 53);
+      await migrateTenantDatabase(db, 53);
+
+      expect(await colonnes('payments'), contains('replaces_payment_id'));
+    });
+
+    test('une base sans versements traverse le palier sans lever', () async {
+      await db.execute('DROP TABLE payment_corrections');
+      await db.execute('DROP TABLE payments');
+
+      await expectLater(migrateTenantDatabase(db, 53), completes);
+      expect(await _tables(db), contains('payment_corrections'));
+    });
+
+    test('une base montée et une base neuve ont les mêmes tables', () async {
+      await seedAvant();
+      await migrateTenantDatabase(db, 53);
+
+      final fresh = await databaseFactoryFfi.openDatabase(
+        inMemoryDatabasePath,
+        options: OpenDatabaseOptions(singleInstance: false),
+      );
+      addTearDown(fresh.close);
+      await createOfflineSchema(fresh, buildOfflineSchema());
+
+      Future<Set<String>> of(Database d, String table) async => {
+        for (final r in await d.rawQuery('PRAGMA table_info($table)'))
+          r['name']! as String,
+      };
+      expect(
+        await of(db, 'payment_corrections'),
+        await of(fresh, 'payment_corrections'),
+      );
+      // La table `payments` de départ est réduite : seules les colonnes du
+      // palier se comparent.
+      const added = {
+        'replaces_payment_id',
+        'cancelled_by_name',
+        'cancellation_reason',
+        'cancellation_reason_code',
+        'cancellation_cash_moved',
+      };
+      expect(
+        (await of(db, 'payments')).intersection(added),
+        (await of(fresh, 'payments')).intersection(added),
+      );
+      expect((await of(fresh, 'payments')).containsAll(added), isTrue);
+
+      Future<Set<String>> indexes(Database d) async => {
+        for (final r in await d.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type = 'index' "
+          "AND name LIKE 'idx_payment%'",
+        ))
+          r['name']! as String,
+      };
+      expect(
+        await indexes(db),
+        containsAll([
+          'idx_payment_corrections_payment',
+          'idx_payment_corrections_replacement',
+          'idx_payment_corrections_student',
+          'idx_payments_replaces',
+        ]),
+      );
+    });
+  });
+
   group('v53 — les exemplaires par ticket', () {
     Future<Set<String>> colonnes() async => {
       for (final r in await db.rawQuery('PRAGMA table_info(ref_school)'))

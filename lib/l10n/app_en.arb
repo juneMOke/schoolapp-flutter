@@ -7181,5 +7181,128 @@
         "type": "String"
       }
     }
-  }
+  },
+  "paymentCorrectionEntryTitle": "Something wrong with this payment?",
+  "paymentCorrectionEntryHint": "A payment is never edited or deleted: it is cancelled, and a new one takes its place. Works offline.",
+  "paymentCorrectionCancelAction": "Cancel payment",
+  "paymentCorrectionCorrectAction": "Correct",
+  "paymentCorrectionReasonLabel": "Reason",
+  "paymentCorrectionReasonRefunded": "Money returned to the payer",
+  "paymentCorrectionReasonDuplicate": "Entered twice",
+  "paymentCorrectionReasonWrongDevice": "Wrong tablet",
+  "paymentCorrectionReasonWrongAmount": "Wrong amount",
+  "paymentCorrectionReasonWrongAllocation": "Wrong instalments",
+  "paymentCorrectionReasonWrongStudent": "Wrong student",
+  "paymentCorrectionReasonOther": "Other",
+  "paymentCorrectionDetailLabel": "Details (optional)",
+  "paymentCorrectionDetailRequiredLabel": "Specify the reason",
+  "paymentCorrectionCashMovedLabel": "Money actually changed hands",
+  "paymentCorrectionCashMovedHint": "Tick only if money was returned or received. A typing mistake does not move any money.",
+  "paymentCorrectionCancelTitle": "Cancel a payment",
+  "paymentCorrectionCancelIntro": "Use this when the payment should never have existed. If it exists but is wrong, use Correct instead.",
+  "paymentCorrectionCancelConsequence": "The payment leaves the balances and its instalments reopen. It stays in the list, struck through.",
+  "paymentCorrectionBack": "Back",
+  "paymentCorrectionSavedOnTablet": "Saved on this tablet. It will be sent automatically at the next sync.",
+  "paymentCorrectionCancelledDone": "Payment cancelled",
+  "paymentCorrectionCorrectedDone": "Payment corrected",
+  "paymentCorrectionFailed": "The correction was not saved: {reason}",
+  "@paymentCorrectionFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionCorrectEyebrow": "Correct a payment",
+  "paymentCorrectionOriginLabel": "Original payment · will be cancelled",
+  "paymentCorrectionSubmit": "Cancel and replace",
+  "paymentCorrectionGap": "Difference with the original: {amount}",
+  "@paymentCorrectionGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionNoChange": "Change at least one thing. Otherwise, Cancel is the right gesture.",
+  "paymentCorrectionLoadFailed": "This payment cannot be corrected from this tablet.",
+  "paymentCorrectionPendingBadge": "Cancelled · to sync",
+  "paymentCorrectionLocalBadge": "Cancelled on this tablet",
+  "paymentCorrectionRejectedBadge": "Correction refused",
+  "paymentCorrectionReplacementBadge": "Replaces a payment",
+  "paymentCorrectionPendingNotice": "Cancellation waiting to sync. Reason: {reason}",
+  "@paymentCorrectionPendingNotice": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionLocalNotice": "Cancelled on this tablet. Reason: {reason}",
+  "@paymentCorrectionLocalNotice": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionRejectedNotice": "The correction was refused ({code}). The payment counts again.",
+  "@paymentCorrectionRejectedNotice": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionAlreadyCorrectedNotice": "This payment was already corrected from another device. The replacement entered here was removed: if its ticket was handed over, it is no longer valid.",
+  "paymentCorrectionReplacementNotice": "This payment cancels and replaces a corrected payment.",
+  "paymentServerCancelledNotice": "Payment cancelled on {date}.",
+  "@paymentServerCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentServerCancelledByNotice": "Payment cancelled on {date} by {name}.",
+  "@paymentServerCancelledByNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCancellationMotive": "Reason: {motive}",
+  "@paymentCancellationMotive": {
+    "placeholders": {
+      "motive": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionStudentLabel": "Student",
+  "paymentCorrectionChangeStudent": "Change",
+  "paymentCorrectionRestoreStudent": "Restore",
+  "paymentCorrectionStudentSearchLabel": "Search a student: last, middle or first name",
+  "paymentCorrectionStudentNoResult": "No student matches. Check the spelling.",
+  "paymentCorrectionMovedFrom": "The payment will be moved from {name}.",
+  "@paymentCorrectionMovedFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetSettled": "All of {name}'s fees are settled. Choose another student, or use Cancel.",
+  "@paymentCorrectionTargetSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionTargetLoadFailed": "This student's fees could not be read."
 }

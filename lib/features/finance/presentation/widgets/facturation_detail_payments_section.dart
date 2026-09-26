@@ -94,7 +94,14 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                     // Total PAR DEVISE : un passage au guichet peut solder une
                     // créance en dollars et une en francs, et deux versements
                     // de devises différentes ne s'additionnent pas.
-                    final totalPaid = state.payments.fold(
+                    //
+                    // Seuls les versements EN VIGUEUR comptent : un versement
+                    // annulé, ou écarté par une correction, reste dans la
+                    // liste, barré, mais plus dans le total.
+                    final inForce = state.payments
+                        .where((payment) => !payment.isOutOfForce)
+                        .toList();
+                    final totalPaid = inForce.fold(
                       MoneyBag.empty,
                       (bag, payment) => bag + payment.amounts,
                     );
@@ -104,7 +111,7 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                     } else if (state.status == PaymentsStatus.success) {
                       subtitle = l10n
                           .facturationDetailPaymentsRecordedWithTotal(
-                            state.payments.length,
+                            inForce.length,
                             // Les devises se lisent côte à côte, séparées : ce
                             // sous-titre est une ligne de texte, pas un total.
                             totalPaid.entries

@@ -33,56 +33,14 @@ class FinancePaymentWriteDao {
     required int nowMs,
   }) async {
     await _db.transaction((txn) async {
-      await txn.insert(
-        'payments',
-        payment.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
+      final request = await writePaymentRows(
+        txn,
+        payment: payment,
+        allocations: allocations,
+        tenders: tenders,
+        receipt: receipt,
+        authorId: authorId,
       );
-
-      // Re-résolues AVANT tout écrit : le local ET le payload d'outbox doivent
-      // porter le même lien — pousser un uuid de créance mort ferait diverger
-      // le diagnostic serveur du miroir local.
-      final linked = [
-        for (final alloc in allocations)
-          await _resolveChargeLink(txn, payment, alloc),
-      ];
-
-      for (final alloc in linked) {
-        await txn.insert(
-          'payment_allocations',
-          alloc.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-        // AUCUN UPDATE student_charges (FRONT §6.2/§8) : ni le miroir
-        // autoritaire, ni un compteur optimiste. Le reste se COMPOSE à la
-        // lecture (getChargesByStudent) depuis les allocations des paiements
-        // encore `sync_status <> 'SYNCED'` — auto-cicatrisant, on dérive, on
-        // n'incrémente jamais.
-      }
-
-      // Ce qui est entré dans le TIROIR, à côté de ce qui a été imputé. Aucun
-      // lien entre les deux listes, et c'est délibéré : un versement de
-      // 112 000 FC qui solde 40 $ et 50 $ n'a pas comporté un paquet de billets
-      // pour l'un et un paquet pour l'autre. La part en devise reçue de chaque
-      // poste se DÉRIVE (`allocation × taux`) — une proration se recalcule,
-      // elle ne se conserve pas.
-      for (final tender in tenders) {
-        await txn.insert(
-          'payment_tenders',
-          tender.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-
-      if (receipt != null) {
-        await txn.insert(
-          'generated_documents',
-          receipt.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-
-      final request = _paymentRequest(payment, linked, tenders, authorId);
       final entry = OutboxEntry(
         id: outboxEntryId,
         aggregateType: 'PAYMENT',
@@ -94,6 +52,73 @@ class FinancePaymentWriteDao {
       );
       await OutboxDao(txn).enqueue(entry);
     });
+  }
+
+  /// Écrit les lignes d'un versement — paiement, imputations, tiroir, reçu
+  /// provisoire — dans la transaction [txn], et rend le corps de son push.
+  ///
+  /// N'enfile RIEN : l'encaissement enfile une entrée `PAYMENT`, la correction
+  /// d'un versement fait voyager le remplaçant DANS son entrée
+  /// `PAYMENT_CORRECTION`. Deux entrées pousseraient le même versement deux
+  /// fois.
+  Future<PaymentAggregateRequest> writePaymentRows(
+    DatabaseExecutor txn, {
+    required PaymentLocalModel payment,
+    required List<PaymentAllocationLocalModel> allocations,
+    List<PaymentTenderLocalModel> tenders = const [],
+    GeneratedDocumentLocalModel? receipt,
+    String? authorId,
+  }) async {
+    await txn.insert(
+      'payments',
+      payment.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    // Re-résolues AVANT tout écrit : le local ET le payload d'outbox doivent
+    // porter le même lien — pousser un uuid de créance mort ferait diverger
+    // le diagnostic serveur du miroir local.
+    final linked = [
+      for (final alloc in allocations)
+        await _resolveChargeLink(txn, payment, alloc),
+    ];
+
+    for (final alloc in linked) {
+      await txn.insert(
+        'payment_allocations',
+        alloc.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      // AUCUN UPDATE student_charges (FRONT §6.2/§8) : ni le miroir
+      // autoritaire, ni un compteur optimiste. Le reste se COMPOSE à la
+      // lecture (getChargesByStudent) depuis les allocations des paiements
+      // encore `sync_status <> 'SYNCED'` — auto-cicatrisant, on dérive, on
+      // n'incrémente jamais.
+    }
+
+    // Ce qui est entré dans le TIROIR, à côté de ce qui a été imputé. Aucun
+    // lien entre les deux listes, et c'est délibéré : un versement de
+    // 112 000 FC qui solde 40 $ et 50 $ n'a pas comporté un paquet de billets
+    // pour l'un et un paquet pour l'autre. La part en devise reçue de chaque
+    // poste se DÉRIVE (`allocation × taux`) — une proration se recalcule,
+    // elle ne se conserve pas.
+    for (final tender in tenders) {
+      await txn.insert(
+        'payment_tenders',
+        tender.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    if (receipt != null) {
+      await txn.insert(
+        'generated_documents',
+        receipt.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    return _paymentRequest(payment, linked, tenders, authorId);
   }
 
   /// Rattache l'imputation à une créance qui EXISTE encore, au moment de
