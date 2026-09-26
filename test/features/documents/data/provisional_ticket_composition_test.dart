@@ -3,11 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_receipt_lookup_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
@@ -17,6 +23,28 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 
 class _MockFinanceOfflineRepository extends Mock
     implements FinanceOfflineRepository {}
+
+class _EntitledAccess implements EditiqueCacheAccess {
+  const _EntitledAccess();
+
+  @override
+  Future<bool> isEntitled() async => true;
+}
+
+/// Un reçu appris par le pull des pièces : métadonnées seules, sans PDF.
+EditiqueCacheEntry _knownReceipt({int? cancelledAt}) => EditiqueCacheEntry(
+  id: 'c-77',
+  documentId: 'rcpt-77',
+  documentNumber: 'CF-RC-2627-000279',
+  docType: 'RC',
+  studentId: 's-1',
+  schoolId: 'school-1',
+  ownerUid: 'u-1',
+  sizeBytes: 0,
+  cancelledAt: cancelledAt,
+  createdAt: 2000,
+  lastAccessedAt: 3000,
+);
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -76,18 +104,36 @@ void main() {
   late ProvisionalTicketDao dao;
   late _MockFinanceOfflineRepository finance;
   late ProvisionalTicketRepositoryImpl repository;
+  // Le cache des pièces vit dans `device.db`, un AUTRE fichier que la base de
+  // l'école, comme en production.
+  late Database device;
+  late EditiqueCacheDao cache;
 
   setUp(() async {
     db = await openFullOfflineDb();
+    device = await openDeviceTestDb();
+    cache = EditiqueCacheDao(device);
     dao = ProvisionalTicketDao(db);
     finance = _MockFinanceOfflineRepository();
     when(
       () => finance.getCharges(any()),
     ).thenAnswer((_) async => const Right(<LocalStudentCharge>[]));
-    repository = ProvisionalTicketRepositoryImpl(dao: dao, finance: finance);
+    repository = ProvisionalTicketRepositoryImpl(
+      dao: dao,
+      finance: finance,
+      receipts: PaymentReceiptResolverImpl(
+        local: PaymentReceiptLookupDao(db),
+        cache: cache,
+        access: const _EntitledAccess(),
+        currentUser: CurrentUserContext()..set('u-1', schoolId: 'school-1'),
+      ),
+    );
   });
 
-  tearDown(() async => db.close());
+  tearDown(() async {
+    await db.close();
+    await device.close();
+  });
 
   Future<void> seedPayment({
     String? cashierFirstName = 'Jean',
@@ -98,6 +144,9 @@ void main() {
     /// L'attribution SERVEUR, seule connue d'un versement encaissé ailleurs.
     String? collectedByName,
     String? receiptId,
+
+    /// `payments.cancelled_at` : le versement annulé par le serveur.
+    int? cancelledAt,
 
     /// La ligne `generated_documents` est POSÉE PAR LE POSTE qui encaisse : un
     /// versement descendu par pull n'en a aucune en local.
@@ -129,6 +178,7 @@ void main() {
       'cashier_last_name': cashierLastName,
       'collected_by_name': collectedByName,
       'receipt_id': receiptId,
+      'cancelled_at': cancelledAt,
       'device_id': deviceId,
       'sync_status': 'PENDING_SYNC',
       'updated_at': 0,
@@ -259,20 +309,59 @@ void main() {
       withLocalDocument: false,
     );
 
-    test(
-      'la référence retombe sur l identifiant, jamais sur du vide',
-      () async {
-        await seedForeign();
+    // Le défaut constaté le 26/09/2026 : l'UUID entier du versement
+    // s'imprimait en « Réf. », faute de ligne documentaire locale.
+    test('la référence est le numéro scellé lu dans le cache', () async {
+      await seedForeign();
+      await cache.upsert(_knownReceipt());
 
-        final model = (await repository.buildForPayment(
-          paymentId: 'p-1',
-          labels: _labels,
-        )).getOrElse(() => throw StateError('échec'));
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
 
-        expect(model.reference, 'p-1');
-        expect(model.reference, isNotEmpty);
-      },
-    );
+      expect(model.reference, 'CF-RC-2627-000279');
+    });
+
+    test('inconnue du cache, la référence est le repli court', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.reference, 'P1');
+      expect(model.reference, isNot('p-1'));
+    });
+
+    test('un reçu annulé ne compose aucun ticket', () async {
+      await seedForeign();
+      await cache.upsert(_knownReceipt(cancelledAt: 1790400000000));
+
+      final result = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
+
+    test('un versement annulé ne compose aucun ticket', () async {
+      await seedPayment(
+        deviceId: 'autre-tablette',
+        receiptId: 'rcpt-77',
+        cancelledAt: 1790400000000,
+        withLocalDocument: false,
+      );
+
+      final result = await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
 
     /// La correction la plus importante des trois : `isProvisional` se lit
     /// AFFIRMATIVEMENT sur `receipt_id`. Lu par négation du numéro, il aurait

@@ -61,6 +61,12 @@ enum FacturationReceiptGesture {
 /// [EditiqueCacheEntry.isAddressable] : le serveur n'expose aucune recherche
 /// par numéro, et la restitution rend `NotFoundFailure` sans identifiant. Un
 /// numéro seul ne désigne rien.
+/// [receiptDocumentId] est `payments.receipt_id`, descendu par le pull : il
+/// désigne la pièce même quand le cache n'en sait rien — versement encaissé
+/// sur une autre caisse, pull des pièces pas encore passé. Un reçu qu'il
+/// désigne existe déjà côté serveur : l'émettre à nouveau rescellerait peut-être
+/// une pièce annulée dont la tablette ignore encore l'annulation.
+///
 /// [canEmit] porte la permission `editique.write` (ADR-014). La RESTITUTION
 /// d'une copie déjà émise n'écrit rien, ne consomme aucun numéro et reste donc
 /// ouverte à qui a ouvert la fiche ; c'est la PRODUCTION d'une pièce neuve qui
@@ -69,12 +75,18 @@ enum FacturationReceiptGesture {
 FacturationReceiptGesture facturationReceiptGesture({
   required EditiqueCacheEntry? cached,
   required bool isPendingSync,
+  String? receiptDocumentId,
   bool canEmit = true,
 }) {
-  if (cached?.documentId?.isNotEmpty ?? false) {
+  if ((cached?.documentId?.isNotEmpty ?? false) ||
+      (receiptDocumentId?.trim().isNotEmpty ?? false)) {
     return FacturationReceiptGesture.restitute;
   }
-  if (isPendingSync || !canEmit) return FacturationReceiptGesture.none;
+  // Une pièce annulée connue par son seul numéro ne se restitue pas, et ne
+  // s'émet surtout pas.
+  if (isPendingSync || !canEmit || (cached?.isCancelled ?? false)) {
+    return FacturationReceiptGesture.none;
+  }
   return FacturationReceiptGesture.emit;
 }
 
@@ -109,9 +121,15 @@ FacturationReceiptGesture facturationReceiptGesture({
 /// raison d'être du ticket : un parent qui verse des espèces repart avec un
 /// papier, coupure réseau ou non. Le défaut inverse fermerait le geste
 /// précisément là où il est le plus nécessaire.
+///
+/// Un versement que le serveur a **annulé** ferme la ligne pour la même raison
+/// que le reçu retiré : le papier attesterait un encaissement qui n'a plus
+/// cours.
 @visibleForTesting
-bool facturationTicketRowOffered({required EditiqueCacheEntry? cached}) =>
-    !(cached?.isCancelled ?? false);
+bool facturationTicketRowOffered({
+  required EditiqueCacheEntry? cached,
+  bool paymentCancelled = false,
+}) => !paymentCancelled && !(cached?.isCancelled ?? false);
 
 /// Ouvre le détail d'un paiement en popin (spec §15).
 Future<void> showFacturationPaymentDetailDialog(
@@ -134,9 +152,10 @@ Future<void> showFacturationPaymentDetailDialog(
             return bloc;
           },
         ),
-        // Numéro de pièce lu en local (table `generated_documents`) : le
-        // serveur ne l'expose sur aucune lecture REST, seule la synchro l'a
-        // scellé. Aucun téléchargement n'est nécessaire pour l'afficher.
+        // Numéro de pièce lu en local : ligne `generated_documents` de ce
+        // poste, ou cache des pièces par `payments.receipt_id` pour un
+        // versement encaissé ailleurs. Aucun téléchargement n'est nécessaire
+        // pour l'afficher.
         BlocProvider<PaymentReceiptCubit>(
           create: (_) => getIt<PaymentReceiptCubit>()..load(intent.paymentId),
         ),
@@ -177,6 +196,7 @@ Future<void> showFacturationPaymentDetailDialog(
           onDownloadReceipt: switch (facturationReceiptGesture(
             cached: receipt.cached,
             isPendingSync: intent.isPendingSync,
+            receiptDocumentId: receipt.documentId,
             canEmit: PermissionGate.allows(context, const [Perm.editiqueWrite]),
           )) {
             FacturationReceiptGesture.restitute =>
@@ -184,8 +204,10 @@ Future<void> showFacturationPaymentDetailDialog(
                 context,
                 type: EditiqueDocumentType.paymentReceipt,
                 title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
-                documentId: receipt.cached?.documentId,
-                documentNumber: receipt.cached?.documentNumber,
+                documentId: receipt.cached?.documentId ?? receipt.documentId,
+                documentNumber:
+                    receipt.cached?.documentNumber ??
+                    (receipt.hasDefinitiveNumber ? receipt.number : null),
               ),
             FacturationReceiptGesture.emit =>
               () => showEditiquePaymentReceiptDialog(
@@ -203,7 +225,11 @@ Future<void> showFacturationPaymentDetailDialog(
           // tout l'objet du lot —, et le cubit ne sert plus qu'à choisir les
           // mots de la ligne. Le remettre en condition ressusciterait la
           // grille qu'on vient de retirer.
-          ticketPrint: facturationTicketRowOffered(cached: receipt.cached)
+          ticketPrint:
+              facturationTicketRowOffered(
+                cached: receipt.cached,
+                paymentCancelled: receipt.paymentCancelled,
+              )
               ? FacturationTicketPrintRow(paymentId: intent.paymentId)
               : null,
         ),
