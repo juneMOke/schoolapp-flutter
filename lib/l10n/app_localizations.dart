@@ -17770,6 +17770,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This payment cancels and replaces a corrected payment.'**
   String get paymentCorrectionReplacementNotice;
+
+  /// No description provided for @paymentServerCancelledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled on {date}.'**
+  String paymentServerCancelledNotice(String date);
+
+  /// No description provided for @paymentServerCancelledByNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled on {date} by {name}.'**
+  String paymentServerCancelledByNotice(String date, String name);
+
+  /// No description provided for @paymentCancellationMotive.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {motive}'**
+  String paymentCancellationMotive(String motive);
 }
 
 class _AppLocalizationsDelegate

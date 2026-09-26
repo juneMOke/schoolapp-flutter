@@ -7451,5 +7451,32 @@
     }
   },
   "paymentCorrectionAlreadyCorrectedNotice": "Ce versement a déjà été corrigé depuis un autre poste. Le remplaçant saisi ici a été retiré : si son ticket a été remis, il n'a plus de valeur.",
-  "paymentCorrectionReplacementNotice": "Ce versement annule et remplace un versement corrigé."
+  "paymentCorrectionReplacementNotice": "Ce versement annule et remplace un versement corrigé.",
+  "paymentServerCancelledNotice": "Versement annulé le {date}.",
+  "@paymentServerCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentServerCancelledByNotice": "Versement annulé le {date} par {name}.",
+  "@paymentServerCancelledByNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCancellationMotive": "Motif : {motive}",
+  "@paymentCancellationMotive": {
+    "placeholders": {
+      "motive": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -53,6 +53,13 @@ extension LocalPaymentToOnline on LocalPayment {
     // corriger — un versement qu'on ne peut plus expliquer à la famille.
     isCancelled: cancelledAt != null,
     replacesPaymentId: replacesPaymentId,
+    cancelledAt: switch (cancelledAt) {
+      final int ms => DateTime.fromMillisecondsSinceEpoch(ms),
+      null => null,
+    },
+    cancelledByName: cancelledByName,
+    cancellationReasonCode: cancellationReasonCode,
+    cancellationReason: cancellationReason,
     correction: switch (correction) {
       final c? => PaymentCorrectionSummary(
         status: c.status,

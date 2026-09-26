@@ -130,6 +130,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/repositories/
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/correct_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/load_payment_correction_origin_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/data/receipt/cancelled_receipt_recorder.dart';
 import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
@@ -812,6 +813,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
           .studentEnrollmentDependency(studentId, academicYearId),
       idGenerator: getIt<IdGenerator>(),
       extras: extras,
+      receipts: CancelledReceiptRecorder(
+        cache: getIt<EditiqueCacheDao>(),
+        access: getIt<EditiqueCacheAccess>(),
+        currentUser: getIt<CurrentUserContext>(),
+        ids: getIt<IdGenerator>(),
+      ),
     ),
   );
 

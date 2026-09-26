@@ -267,6 +267,11 @@ class LocalPayment extends Equatable {
   /// La dernière correction qui VISE ce versement, `null` s'il n'en a pas.
   final LocalPaymentCorrection? correction;
 
+  /// Ce que le serveur dit de son annulation (B5).
+  final String? cancelledByName;
+  final String? cancellationReason;
+  final String? cancellationReasonCode;
+
   final String? cashierUid;
   final String? cashierFirstName;
   final String? cashierLastName;
@@ -288,6 +293,9 @@ class LocalPayment extends Equatable {
     this.cancelledAt,
     this.replacesPaymentId,
     this.correction,
+    this.cancelledByName,
+    this.cancellationReason,
+    this.cancellationReasonCode,
     required this.id,
     required this.clientUuid,
     required this.studentId,
@@ -335,6 +343,9 @@ class LocalPayment extends Equatable {
     cancelledAt,
     replacesPaymentId,
     correction,
+    cancelledByName,
+    cancellationReason,
+    cancellationReasonCode,
   ];
 
   LocalPayment withCorrection(LocalPaymentCorrection? correction) =>
@@ -342,6 +353,9 @@ class LocalPayment extends Equatable {
         cancelledAt: cancelledAt,
         replacesPaymentId: replacesPaymentId,
         correction: correction,
+        cancelledByName: cancelledByName,
+        cancellationReason: cancellationReason,
+        cancellationReasonCode: cancellationReasonCode,
         id: id,
         clientUuid: clientUuid,
         studentId: studentId,

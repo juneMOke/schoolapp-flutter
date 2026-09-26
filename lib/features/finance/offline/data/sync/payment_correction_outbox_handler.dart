@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/payme
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
+import 'package:school_app_flutter/features/finance/offline/data/receipt/cancelled_receipt_recorder.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 
@@ -45,6 +46,10 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
   final Map<String, dynamic> _extras;
   final Clock _now;
 
+  /// Marque le reçu d'origine annulé dans le cache des pièces (R8). Optionnel :
+  /// sans lui, le pull des pièces le fera.
+  final CancelledReceiptRecorder? _receipts;
+
   PaymentCorrectionOutboxHandler({
     required FinanceSyncApi api,
     required PaymentCorrectionSyncDao dao,
@@ -52,7 +57,9 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
     required IdGenerator idGenerator,
     required Map<String, dynamic> extras,
     Clock now = systemClock,
-  }) : _api = api,
+    CancelledReceiptRecorder? receipts,
+  }) : _receipts = receipts,
+       _api = api,
        _dao = dao,
        _dependency = dependency,
        _idGenerator = idGenerator,
@@ -130,7 +137,15 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
           'ACK sans créance autoritaire (contrat : `charges` requis)',
         );
       }
-      await _dao.applyAck(ack, nowMs: _now());
+      final nowMs = _now();
+      final receiptId = await _dao.applyAck(ack, nowMs: nowMs);
+      // Après la transaction, jamais dedans : une autre base, best-effort.
+      await _receipts?.record(
+        documentId: receiptId,
+        documentNumber: ack.cancelledReceiptNumber,
+        cancelledAt: EpochIsoHelper.tryToEpochMs(ack.cancelledAt) ?? nowMs,
+        reason: request.reason,
+      );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
       return _onHttpError(request, e);

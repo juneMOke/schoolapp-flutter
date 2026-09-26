@@ -63,6 +63,13 @@ class Payment extends Equatable {
   /// La dernière correction qui vise ce versement, `null` s'il n'en a pas.
   final PaymentCorrectionSummary? correction;
 
+  /// Quand le serveur l'a annulé, qui, et pourquoi (B5) — `null` tant que le
+  /// serveur ne l'a pas dit.
+  final DateTime? cancelledAt;
+  final String? cancelledByName;
+  final String? cancellationReasonCode;
+  final String? cancellationReason;
+
   const Payment({
     required this.id,
     required this.studentId,
@@ -77,6 +84,10 @@ class Payment extends Equatable {
     this.isCancelled = false,
     this.replacesPaymentId,
     this.correction,
+    this.cancelledAt,
+    this.cancelledByName,
+    this.cancellationReasonCode,
+    this.cancellationReason,
     this.cashierFirstName,
     this.cashierLastName,
     this.collectedByName,
@@ -140,5 +151,9 @@ class Payment extends Equatable {
     isCancelled,
     replacesPaymentId,
     correction,
+    cancelledAt,
+    cancelledByName,
+    cancellationReasonCode,
+    cancellationReason,
   ];
 }

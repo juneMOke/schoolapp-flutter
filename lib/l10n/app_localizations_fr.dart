@@ -11356,4 +11356,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get paymentCorrectionReplacementNotice =>
       'Ce versement annule et remplace un versement corrigé.';
+
+  @override
+  String paymentServerCancelledNotice(String date) {
+    return 'Versement annulé le $date.';
+  }
+
+  @override
+  String paymentServerCancelledByNotice(String date, String name) {
+    return 'Versement annulé le $date par $name.';
+  }
+
+  @override
+  String paymentCancellationMotive(String motive) {
+    return 'Motif : $motive';
+  }
 }

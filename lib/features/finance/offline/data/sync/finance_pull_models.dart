@@ -151,6 +151,13 @@ class PaymentDto {
   /// serveur ne le sert pas, ou pour un encaissement ordinaire.
   final String? replacesPaymentId;
 
+  /// Le récit d'une annulation (B5, additif) : un NOM, jamais une adresse de
+  /// connexion ; le motif libre ; son code ; l'argent a-t-il bougé.
+  final String? cancelledBy;
+  final String? cancellationReason;
+  final String? cancellationReasonCode;
+  final bool? cancellationCashMoved;
+
   const PaymentDto({
     required this.id,
     required this.studentId,
@@ -167,6 +174,10 @@ class PaymentDto {
     this.collectedByName,
     this.cancelledAt,
     this.replacesPaymentId,
+    this.cancelledBy,
+    this.cancellationReason,
+    this.cancellationReasonCode,
+    this.cancellationCashMoved,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -189,6 +200,10 @@ class PaymentDto {
     collectedByName: j['collectedByName'] as String?,
     cancelledAt: j['cancelledAt'] as String?,
     replacesPaymentId: j['replacesPaymentId'] as String?,
+    cancelledBy: j['cancelledBy'] as String?,
+    cancellationReason: j['cancellationReason'] as String?,
+    cancellationReasonCode: j['cancellationReasonCode'] as String?,
+    cancellationCashMoved: j['cancellationCashMoved'] as bool?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -211,6 +226,10 @@ class PaymentDto {
     updatedAt: now,
     cancelledAt: EpochIsoHelper.tryToEpochMs(cancelledAt),
     replacesPaymentId: replacesPaymentId,
+    cancelledByName: cancelledBy,
+    cancellationReason: cancellationReason,
+    cancellationReasonCode: cancellationReasonCode,
+    cancellationCashMoved: cancellationCashMoved,
   );
 }
 

@@ -88,9 +88,10 @@ Future<void> _addAnnualMatriculationNumber(DatabaseExecutor db) async {
   );
 }
 
-/// v54 — la correction d'un versement : la table `payment_corrections` et
-/// `payments.replaces_payment_id` (plan « Correction d'un versement hors
-/// ligne », lot T1).
+/// v54 — la correction d'un versement : la table `payment_corrections`,
+/// `payments.replaces_payment_id` et ce que le serveur dit d'une annulation
+/// (`cancelled_by_name`, `cancellation_reason[_code]`,
+/// `cancellation_cash_moved`) — plan « Correction d'un versement hors ligne ».
 ///
 /// Création pure, **aucune reprise** : aucune correction n'existe avant ce
 /// palier, et le lien de remplacement se remplit par le geste ou par le pull.
@@ -110,9 +111,20 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
   }
   final info = await db.rawQuery('PRAGMA table_info(payments)');
   if (info.isEmpty) return;
-  if (!info.any((row) => row['name'] == 'replaces_payment_id')) {
+  const columns = {
+    'replaces_payment_id': 'TEXT',
+    // Ce que le serveur dit d'une annulation (B5) : qui, pourquoi, et si de
+    // l'argent a changé de main. Lu pour l'écran, jamais pour un solde.
+    'cancelled_by_name': 'TEXT',
+    'cancellation_reason': 'TEXT',
+    'cancellation_reason_code': 'TEXT',
+    'cancellation_cash_moved': 'INTEGER',
+  };
+  final existing = {for (final row in info) row['name'] as String};
+  for (final column in columns.entries) {
+    if (existing.contains(column.key)) continue;
     await db.execute(
-      'ALTER TABLE payments ADD COLUMN replaces_payment_id TEXT',
+      'ALTER TABLE payments ADD COLUMN ${column.key} ${column.value}',
     );
   }
   await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));

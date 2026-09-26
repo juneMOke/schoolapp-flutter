@@ -206,7 +206,16 @@ void main() {
       await migrateTenantDatabase(db, 53);
 
       expect(await _tables(db), contains('payment_corrections'));
-      expect(await colonnes('payments'), contains('replaces_payment_id'));
+      expect(
+        await colonnes('payments'),
+        containsAll([
+          'replaces_payment_id',
+          'cancelled_by_name',
+          'cancellation_reason',
+          'cancellation_reason_code',
+          'cancellation_cash_moved',
+        ]),
+      );
       final row = (await db.query('payments')).single;
       expect(row['id'], 'p-1');
       // Aucune reprise : le lien se remplit par le geste ou par le pull.
@@ -249,7 +258,20 @@ void main() {
         await of(db, 'payment_corrections'),
         await of(fresh, 'payment_corrections'),
       );
-      expect(await of(fresh, 'payments'), contains('replaces_payment_id'));
+      // La table `payments` de départ est réduite : seules les colonnes du
+      // palier se comparent.
+      const added = {
+        'replaces_payment_id',
+        'cancelled_by_name',
+        'cancellation_reason',
+        'cancellation_reason_code',
+        'cancellation_cash_moved',
+      };
+      expect(
+        (await of(db, 'payments')).intersection(added),
+        (await of(fresh, 'payments')).intersection(added),
+      );
+      expect((await of(fresh, 'payments')).containsAll(added), isTrue);
 
       Future<Set<String>> indexes(Database d) async => {
         for (final r in await d.rawQuery(

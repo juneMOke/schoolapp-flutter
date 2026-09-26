@@ -62,6 +62,13 @@ class PaymentLocalModel {
   /// v54). Posé par le geste de correction, ou descendu par le pull.
   final String? replacesPaymentId;
 
+  /// Ce que le serveur dit d'une annulation (B5) : le NOM de qui l'a posée,
+  /// le motif libre, le code de motif, et si de l'argent a changé de main.
+  final String? cancelledByName;
+  final String? cancellationReason;
+  final String? cancellationReasonCode;
+  final bool? cancellationCashMoved;
+
   const PaymentLocalModel({
     required this.id,
     required this.clientUuid,
@@ -87,6 +94,10 @@ class PaymentLocalModel {
     this.updatedAt = 0,
     this.cancelledAt,
     this.replacesPaymentId,
+    this.cancelledByName,
+    this.cancellationReason,
+    this.cancellationReasonCode,
+    this.cancellationCashMoved,
   });
 
   Map<String, Object?> toMap() => {
@@ -114,6 +125,14 @@ class PaymentLocalModel {
     'updated_at': updatedAt,
     'cancelled_at': cancelledAt,
     'replaces_payment_id': replacesPaymentId,
+    'cancelled_by_name': cancelledByName,
+    'cancellation_reason': cancellationReason,
+    'cancellation_reason_code': cancellationReasonCode,
+    'cancellation_cash_moved': switch (cancellationCashMoved) {
+      null => null,
+      true => 1,
+      false => 0,
+    },
   };
 
   /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
@@ -168,6 +187,13 @@ class PaymentLocalModel {
     if (cancelledAt != null) 'cancelled_at': cancelledAt,
     // Même règle : le lien de remplacement ne s'efface pas depuis le réseau.
     if (replacesPaymentId != null) 'replaces_payment_id': replacesPaymentId,
+    // Le récit d'une annulation suit l'annulation : ajouté, jamais effacé.
+    if (cancelledByName != null) 'cancelled_by_name': cancelledByName,
+    if (cancellationReason != null) 'cancellation_reason': cancellationReason,
+    if (cancellationReasonCode != null)
+      'cancellation_reason_code': cancellationReasonCode,
+    if (cancellationCashMoved != null)
+      'cancellation_cash_moved': cancellationCashMoved! ? 1 : 0,
     'updated_at': updatedAt,
   };
 
@@ -201,6 +227,13 @@ class PaymentLocalModel {
         updatedAt: (m['updated_at'] as int?) ?? 0,
         cancelledAt: m['cancelled_at'] as int?,
         replacesPaymentId: m['replaces_payment_id'] as String?,
+        cancelledByName: m['cancelled_by_name'] as String?,
+        cancellationReason: m['cancellation_reason'] as String?,
+        cancellationReasonCode: m['cancellation_reason_code'] as String?,
+        cancellationCashMoved: switch (m['cancellation_cash_moved']) {
+          final int v => v != 0,
+          _ => null,
+        },
       );
 
   /// [amounts] est **dérivé des imputations**, pas relu d'une colonne : le
@@ -209,6 +242,9 @@ class PaymentLocalModel {
   LocalPayment toEntity({MoneyBag amounts = MoneyBag.empty}) => LocalPayment(
     cancelledAt: cancelledAt,
     replacesPaymentId: replacesPaymentId,
+    cancelledByName: cancelledByName,
+    cancellationReason: cancellationReason,
+    cancellationReasonCode: cancellationReasonCode,
     id: id,
     clientUuid: clientUuid,
     studentId: studentId,

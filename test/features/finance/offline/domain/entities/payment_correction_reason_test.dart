@@ -59,6 +59,31 @@ void main() {
 
     // Un serveur d'avant B5 n'envoie pas le champ : le patch ne doit pas
     // effacer un lien posé par le geste de ce poste.
+    test('le récit de l annulation descend, et le patch le garde', () {
+      final local = PaymentDto.fromJson({
+        ...json(),
+        'cancelledAt': '2026-09-26T08:14:00Z',
+        'cancelledBy': 'Moke Junior',
+        'cancellationReason': 'Saisi 150 \$ au lieu de 50 \$',
+        'cancellationReasonCode': 'WRONG_AMOUNT',
+        'cancellationCashMoved': false,
+      }).toLocalModel(1);
+
+      final patch = local.toPullPatch();
+      expect(patch['cancelled_by_name'], 'Moke Junior');
+      expect(patch['cancellation_reason_code'], 'WRONG_AMOUNT');
+      expect(patch['cancellation_cash_moved'], 0);
+      expect(local.toEntity().cancelledByName, 'Moke Junior');
+    });
+
+    test('un serveur d avant B5 n efface pas un récit connu', () {
+      final patch = PaymentDto.fromJson(json()).toLocalModel(1).toPullPatch();
+
+      expect(patch.containsKey('cancelled_by_name'), isFalse);
+      expect(patch.containsKey('cancellation_reason'), isFalse);
+      expect(patch.containsKey('cancellation_cash_moved'), isFalse);
+    });
+
     test('absent du delta, il n efface rien', () {
       final local = PaymentDto.fromJson(json()).toLocalModel(1);
 

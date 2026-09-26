@@ -199,6 +199,10 @@ class FacturationDetailPage extends StatelessWidget {
         isCancelled: payment.isCancelled,
         replacesPaymentId: payment.replacesPaymentId,
         correction: payment.correction,
+        cancelledAt: payment.cancelledAt,
+        cancelledByName: payment.cancelledByName,
+        cancellationReasonCode: payment.cancellationReasonCode,
+        cancellationReason: payment.cancellationReason,
       ),
     );
     if (action == null || !context.mounted) return;

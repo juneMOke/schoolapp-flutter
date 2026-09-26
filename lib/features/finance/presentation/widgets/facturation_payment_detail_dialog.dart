@@ -521,6 +521,24 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                       ? AppColors.warning
                       : AppColors.danger,
                 ),
+              if (paymentServerCancellationNotice(
+                    date: switch (intent.cancelledAt) {
+                      final at? => MaterialLocalizations.of(
+                        context,
+                      ).formatMediumDate(at),
+                      null => null,
+                    },
+                    byName: intent.cancelledByName,
+                    reasonCode: intent.cancellationReasonCode,
+                    reason: intent.cancellationReason,
+                    l10n: l10n,
+                  )
+                  case final notice?)
+                PaymentCorrectionNotice(
+                  message: notice,
+                  icon: Icons.block_rounded,
+                  color: AppColors.danger,
+                ),
               if (intent.replacesPaymentId != null)
                 PaymentCorrectionNotice(
                   message: l10n.paymentCorrectionReplacementNotice,

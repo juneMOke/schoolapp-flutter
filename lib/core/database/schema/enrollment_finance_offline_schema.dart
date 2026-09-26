@@ -845,7 +845,11 @@ const TableSchema paymentsTable = TableSchema(
       updated_at INTEGER NOT NULL DEFAULT 0,
       ticket_printed_at INTEGER,
       cancelled_at INTEGER,
-      replaces_payment_id TEXT
+      replaces_payment_id TEXT,
+      cancelled_by_name TEXT,
+      cancellation_reason TEXT,
+      cancellation_reason_code TEXT,
+      cancellation_cash_moved INTEGER
     )
   ''',
   createIndexSql: [

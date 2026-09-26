@@ -7255,5 +7255,32 @@
     }
   },
   "paymentCorrectionAlreadyCorrectedNotice": "This payment was already corrected from another device. The replacement entered here was removed: if its ticket was handed over, it is no longer valid.",
-  "paymentCorrectionReplacementNotice": "This payment cancels and replaces a corrected payment."
+  "paymentCorrectionReplacementNotice": "This payment cancels and replaces a corrected payment.",
+  "paymentServerCancelledNotice": "Payment cancelled on {date}.",
+  "@paymentServerCancelledNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentServerCancelledByNotice": "Payment cancelled on {date} by {name}.",
+  "@paymentServerCancelledByNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCancellationMotive": "Reason: {motive}",
+  "@paymentCancellationMotive": {
+    "placeholders": {
+      "motive": {
+        "type": "String"
+      }
+    }
+  }
 }

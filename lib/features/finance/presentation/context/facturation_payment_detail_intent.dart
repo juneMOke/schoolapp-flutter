@@ -53,6 +53,12 @@ class FacturationPaymentDetailIntent extends Equatable {
   /// La dernière correction qui vise ce versement.
   final PaymentCorrectionSummary? correction;
 
+  /// Le récit d'une annulation serveur (B5) : quand, par qui, pourquoi.
+  final DateTime? cancelledAt;
+  final String? cancelledByName;
+  final String? cancellationReasonCode;
+  final String? cancellationReason;
+
   /// Le versement compte-t-il encore ? Un versement annulé, ou écarté par une
   /// correction de cette tablette, ne se corrige plus.
   bool get isOutOfForce => isCancelled || (correction?.removesPayment ?? false);
@@ -77,6 +83,10 @@ class FacturationPaymentDetailIntent extends Equatable {
     this.isCancelled = false,
     this.replacesPaymentId,
     this.correction,
+    this.cancelledAt,
+    this.cancelledByName,
+    this.cancellationReasonCode,
+    this.cancellationReason,
   });
 
   FacturationPaymentDetailIntent.invalid({
@@ -179,5 +189,9 @@ class FacturationPaymentDetailIntent extends Equatable {
     isCancelled,
     replacesPaymentId,
     correction,
+    cancelledAt,
+    cancelledByName,
+    cancellationReasonCode,
+    cancellationReason,
   ];
 }

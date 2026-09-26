@@ -36,6 +36,35 @@ String paymentCorrectionMotive(
   return (detail == null || detail.isEmpty) ? label : '$label — $detail';
 }
 
+/// Le récit d'une annulation posée par le SERVEUR (B5) : « Versement annulé le
+/// 26 sept. 2026 par Moke Junior. Motif : Mauvais montant — Saisi 150 \$ au
+/// lieu de 50 \$ ». `null` tant que la date n'est pas connue.
+String? paymentServerCancellationNotice({
+  required String? date,
+  required String? byName,
+  required String? reasonCode,
+  required String? reason,
+  required AppLocalizations l10n,
+}) {
+  if (date == null) return null;
+  final name = byName?.trim();
+  final head = (name == null || name.isEmpty)
+      ? l10n.paymentServerCancelledNotice(date)
+      : l10n.paymentServerCancelledByNotice(date, name);
+  final known = PaymentCorrectionReason.fromCode(reasonCode);
+  final label = known == null
+      ? reasonCode?.trim()
+      : paymentCorrectionReasonLabel(known, l10n);
+  final detail = reason?.trim();
+  final motive = [
+    if (label != null && label.isNotEmpty) label,
+    if (detail != null && detail.isNotEmpty) detail,
+  ].join(' — ');
+  return motive.isEmpty
+      ? head
+      : '$head ${l10n.paymentCancellationMotive(motive)}';
+}
+
 /// La pastille d'une ligne de versement visée par une correction, `null`
 /// quand il n'y a rien à dire.
 String? paymentCorrectionBadge(

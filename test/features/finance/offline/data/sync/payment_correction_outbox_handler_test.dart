@@ -15,6 +15,9 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/payment_correction_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
+import 'package:school_app_flutter/features/finance/offline/data/receipt/cancelled_receipt_recorder.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_outbox_handler.dart';
@@ -32,6 +35,11 @@ import '../../../../offline_full_db.dart';
 class _MockApi extends Mock implements FinanceSyncApi {}
 
 class _MockSyncEngine extends Mock implements SyncEngine {}
+
+class _Entitled implements EditiqueCacheAccess {
+  @override
+  Future<bool> isEntitled() async => true;
+}
 
 StudentChargeDto _charge(int paid) => StudentChargeDto(
   id: 'c-1',
@@ -67,6 +75,7 @@ void main() {
   late FinanceOfflineRepositoryImpl cashier;
   late PaymentCorrectionRepositoryImpl corrections;
   var enrollment = OutboxDependencyState.ready;
+  late Database device;
 
   setUpAll(() {
     registerFallbackValue(<String, dynamic>{});
@@ -82,6 +91,7 @@ void main() {
 
   setUp(() async {
     db = await openFullOfflineDb();
+    device = await openDeviceTestDb();
     api = _MockApi();
     enrollment = OutboxDependencyState.ready;
     final sync = _MockSyncEngine();
@@ -115,7 +125,10 @@ void main() {
     });
   });
 
-  tearDown(() async => db.close());
+  tearDown(() async {
+    await db.close();
+    await device.close();
+  });
 
   PaymentCorrectionOutboxHandler handler() => PaymentCorrectionOutboxHandler(
     api: api,
@@ -124,6 +137,12 @@ void main() {
     idGenerator: const IdGenerator(Uuid()),
     extras: const {},
     now: () => 5000,
+    receipts: CancelledReceiptRecorder(
+      cache: EditiqueCacheDao(device),
+      access: _Entitled(),
+      currentUser: CurrentUserContext()..set('u-1', schoolId: 'school-1'),
+      ids: const IdGenerator(Uuid()),
+    ),
   );
 
   RecordPaymentDraft draftOf(int cents) => RecordPaymentDraft(
@@ -148,7 +167,10 @@ void main() {
     final id = (await cashier.recordPayment(
       draftOf(15000),
     )).getOrElse(() => throw StateError('refusé'));
-    await db.update('payments', {'sync_status': 'SYNCED'});
+    await db.update('payments', {
+      'sync_status': 'SYNCED',
+      'receipt_id': 'doc-origin',
+    });
     await db.update('student_charges', {'amount_paid_in_cents': 15000});
     await db.delete('outbox');
     return id;
@@ -261,6 +283,37 @@ void main() {
       expect(row['cancelled_at'], isNotNull);
       // Créances du serveur, retranchement éteint : ni trou ni double compte.
       expect(await remaining(), 15000);
+    });
+
+    // R8 : la fiche ne doit plus montrer le reçu d'origine comme valide, sans
+    // attendre le pull des pièces — qui vit dans une AUTRE base.
+    test('le reçu d origine est annulé dans le cache des pièces', () async {
+      final origin = await syncedOrigin();
+      final outcome = await correct(origin);
+      when(() => api.correctPayment(any(), any())).thenAnswer(
+        (_) async => PaymentCorrectionResponse(
+          id: outcome.correctionId,
+          paymentId: origin,
+          cancelledAt: '2026-09-26T09:14:00Z',
+          cancelledReceiptNumber: 'CF-RC-2627-000263',
+          charges: [_charge(0)],
+        ),
+      );
+
+      await handler().dispatch(await correctionEntry());
+
+      final entry = await EditiqueCacheDao(
+        device,
+      ).findByDocumentId('doc-origin');
+      expect(entry?.isCancelled, isTrue);
+      expect(entry?.documentNumber, 'CF-RC-2627-000263');
+      // Et le récit de l'annulation est posé sur l'origine.
+      final row = (await db.query(
+        'payments',
+        where: 'id = ?',
+        whereArgs: [origin],
+      )).single;
+      expect(row['cancellation_reason_code'], 'DUPLICATE');
     });
 
     test(

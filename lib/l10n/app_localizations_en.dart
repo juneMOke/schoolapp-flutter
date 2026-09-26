@@ -11267,4 +11267,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paymentCorrectionReplacementNotice =>
       'This payment cancels and replaces a corrected payment.';
+
+  @override
+  String paymentServerCancelledNotice(String date) {
+    return 'Payment cancelled on $date.';
+  }
+
+  @override
+  String paymentServerCancelledByNotice(String date, String name) {
+    return 'Payment cancelled on $date by $name.';
+  }
+
+  @override
+  String paymentCancellationMotive(String motive) {
+    return 'Reason: $motive';
+  }
 }

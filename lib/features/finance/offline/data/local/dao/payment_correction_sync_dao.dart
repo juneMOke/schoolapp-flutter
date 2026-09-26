@@ -92,19 +92,47 @@ class PaymentCorrectionSyncDao {
   /// Poser `cancelled_at` ici est légitime : c'est l'heure que le serveur
   /// vient de rendre. C'est aussi ce qui éteint le terme de retranchement au
   /// moment exact où les créances recalculées le rendent inutile.
-  Future<void> applyAck(
+  ///
+  /// Rend l'identifiant serveur du reçu d'origine (`payments.receipt_id`),
+  /// pour que l'appelant marque ce reçu annulé dans le cache des pièces — qui
+  /// vit dans une autre base.
+  Future<String?> applyAck(
     PaymentCorrectionResponse ack, {
     required int nowMs,
   }) async {
-    await _db.transaction((txn) async {
+    return _db.transaction((txn) async {
+      final origin = await txn.query(
+        'payments',
+        columns: const ['receipt_id'],
+        where: 'id = ?',
+        whereArgs: [ack.paymentId],
+        limit: 1,
+      );
       final replacement = ack.replacement;
       if (replacement != null) {
         await _ack.applyPaymentAckIn(txn, replacement, nowMs: nowMs);
       }
       await _ack.applyAuthoritativeChargesIn(txn, ack.charges, nowMs: nowMs);
+      // Le récit de l'annulation est celui de CETTE correction : il est connu
+      // ici, et le pull le confirmera (B5). Le nom de l'auteur, lui, attend le
+      // pull — la tablette ne connaît que son uid.
+      final motive = await txn.query(
+        'payment_corrections',
+        columns: const ['reason_code', 'reason', 'cash_moved'],
+        where: 'id = ?',
+        whereArgs: [ack.id],
+        limit: 1,
+      );
       await txn.update(
         'payments',
-        {'cancelled_at': EpochIsoHelper.tryToEpochMs(ack.cancelledAt) ?? nowMs},
+        {
+          'cancelled_at': EpochIsoHelper.tryToEpochMs(ack.cancelledAt) ?? nowMs,
+          if (motive.isNotEmpty) ...{
+            'cancellation_reason_code': motive.first['reason_code'],
+            'cancellation_reason': motive.first['reason'],
+            'cancellation_cash_moved': motive.first['cash_moved'],
+          },
+        },
         where: 'id = ?',
         whereArgs: [ack.paymentId],
       );
@@ -119,6 +147,7 @@ class PaymentCorrectionSyncDao {
         where: 'id = ?',
         whereArgs: [ack.id],
       );
+      return origin.isEmpty ? null : origin.first['receipt_id'] as String?;
     });
   }
 
