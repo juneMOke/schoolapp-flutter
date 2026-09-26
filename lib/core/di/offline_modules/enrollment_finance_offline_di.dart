@@ -121,6 +121,9 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pu
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_receipt_lookup_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_sync_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_ack_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_outbox_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/payment_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
@@ -782,6 +785,21 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       dao: getIt<FinanceLocalDao>(),
       dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
           .studentEnrollmentDependency(studentId, academicYearId),
+      extras: extras,
+    ),
+  );
+  // Correction d'un versement : attend son origine versement par versement,
+  // et l'inscription de l'élève du remplaçant comme tout encaissement.
+  getIt<SyncEngine>().registerHandler(
+    PaymentCorrectionOutboxHandler(
+      api: getIt<FinanceSyncApi>(),
+      dao: PaymentCorrectionSyncDao(
+        getIt<Database>(),
+        FinancePaymentAckDao(getIt<Database>()),
+      ),
+      dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
+          .studentEnrollmentDependency(studentId, academicYearId),
+      idGenerator: getIt<IdGenerator>(),
       extras: extras,
     ),
   );

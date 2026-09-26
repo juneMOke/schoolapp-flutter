@@ -58,6 +58,24 @@ abstract final class FinanceErrorCodes {
   /// support » pour l'autre.
   static const String unknownStudentCharge = 'UNKNOWN_STUDENT_CHARGE';
 
+  // ── Correction d'un versement (`POST /sync/payment-corrections`) ─────────
+
+  /// Le versement visé est inconnu du serveur.
+  ///
+  /// **Transitoire** : l'attente de l'outbox aurait dû l'empêcher, mais un
+  /// versement encaissé hors ligne peut arriver juste après. La correction
+  /// repartira. Un 422 et non un 409, que le socle rejouerait sans fin.
+  static const String paymentNotYetSynced = 'PAYMENT_NOT_YET_SYNCED';
+
+  /// Le versement a déjà été annulé par un autre geste (autre tablette,
+  /// back-office). **Terminal** : la première correction a gagné (D4).
+  static const String paymentAlreadyCorrected = 'PAYMENT_ALREADY_CORRECTED';
+
+  /// L'élève du remplaçant n'est pas inscrit dans l'année du versement.
+  /// **Terminal** — à la différence de [unknownFeeCode], auquel il retombait
+  /// avant que le back ne le nomme (R4).
+  static const String targetNotEnrolled = 'TARGET_NOT_ENROLLED';
+
   /// Le perçu déclaré, une fois converti au taux fourni, n'éteint pas ce qui
   /// est dû. Vérifié **par devise pivot** et à une unité d'affichage près
   /// (1 FC, 0,01 $) : un excédent sur un pivot ne compense pas un manque sur un

@@ -915,6 +915,12 @@ class AppConstants {
   /// module Facturation (forme à plat), qui reste en service hors offline.
   static const String syncPaymentsEndpoint = '/api/v1/sync/payments';
 
+  /// Correction d'un versement (lot B4 du back) : **POST** idempotent sur
+  /// l'`id` de la correction — l'annulation, et le remplaçant s'il y en a un,
+  /// en une transaction serveur.
+  static const String syncPaymentCorrectionsEndpoint =
+      '/api/v1/sync/payment-corrections';
+
   // ── Offline sync — Boutique (caisse point-de-vente, ADR-020) ──
   /// Agrégat vente boutique :
   ///  - **POST** = push idempotent de la vente et de son panier en un appel

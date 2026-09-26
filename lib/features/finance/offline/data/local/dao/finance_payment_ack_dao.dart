@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/payme
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/provisional_charge_dissolver.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_anomaly.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 
 /// Scope de résolution d'une créance : une clé métier `fee_code` n'est unique
@@ -32,7 +33,18 @@ class FinancePaymentAckDao {
     PaymentAggregateResponse ack, {
     required int nowMs,
   }) async {
-    await _db.transaction((txn) async {
+    await _db.transaction((txn) => applyPaymentAckIn(txn, ack, nowMs: nowMs));
+  }
+
+  /// [applyPaymentAck] dans la transaction [txn] de l'appelant — celle qui
+  /// clôt une correction de versement applique ainsi l'ACK de son remplaçant
+  /// sans ouvrir de fenêtre entre les deux.
+  Future<void> applyPaymentAckIn(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack, {
+    required int nowMs,
+  }) async {
+    {
       await _applyAllocationRemaps(txn, ack);
       await _applyAuthoritativeCharges(txn, ack, nowMs);
       await _sealDocuments(txn, ack);
@@ -62,7 +74,7 @@ class FinancePaymentAckDao {
         where: 'id = ?',
         whereArgs: [ack.paymentId],
       );
-    });
+    }
   }
 
   /// Remap des allocations : le `feeCode` est porté par la réponse (plus besoin
@@ -115,8 +127,16 @@ class FinancePaymentAckDao {
     DatabaseExecutor txn,
     PaymentAggregateResponse ack,
     int nowMs,
-  ) async {
-    for (final ch in ack.charges) {
+  ) => applyAuthoritativeChargesIn(txn, ack.charges, nowMs: nowMs);
+
+  /// Upsert de créances autoritaires, jumelles PROVISIONAL dissoutes — pour
+  /// toute réponse qui en porte (ACK d'un encaissement, d'une correction).
+  Future<void> applyAuthoritativeChargesIn(
+    DatabaseExecutor txn,
+    List<StudentChargeDto> charges, {
+    required int nowMs,
+  }) async {
+    for (final ch in charges) {
       await dissolveProvisionalTwins(
         txn,
         studentId: ch.studentId,
