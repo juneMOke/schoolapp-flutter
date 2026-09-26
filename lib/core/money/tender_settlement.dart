@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/money/tender_composition.dart';
 
 /// Le règlement d'**une** ligne : ce qu'elle règle, et ce que le tiroir prend
@@ -191,10 +192,17 @@ class TenderSettlement {
 
   /// Le règlement d'une ligne, à partir de ce qui est **posé sur le comptoir**.
   ///
-  /// L'imputation se cale au centime **inférieur** et l'excédent devient de la
-  /// monnaie à rendre : 50 000 FC à 2 800 éteignent 17,85 \$ — soit 49 980 FC —
-  /// et 20 FC repartent. Arrondir au plus proche éteindrait huit centimes que
-  /// personne n'a posés, et le serveur refuserait le couple.
+  /// L'imputation se cale **vers le bas**, sur l'unité qui circule dans la
+  /// devise de la créance ([CurrencyCode.cashUnitInCents]), et l'excédent
+  /// devient de la monnaie à rendre : 12 000 FC à 2 300 éteignent 5 \$ — soit
+  /// 11 500 FC — et 500 FC repartent. Au centime, l'écran annonçait 5,21 \$ et
+  /// 17 FC : deux montants justes sur le papier, qu'aucun guichet ne manipule.
+  /// Arrondir vers le haut éteindrait ce que personne n'a posé, et le serveur
+  /// refuserait le couple.
+  ///
+  /// La monnaie, elle, s'annonce **exacte**, même quand elle ne tombe pas sur
+  /// une coupure ronde (750 FC à 2 850) : le tiroir ne garde que ce que vaut
+  /// l'imputation au taux, sans quoi le serveur refuserait l'écart.
   SettlementLine fromTender({
     required String settledCurrency,
     required String tenderCurrency,
@@ -210,8 +218,11 @@ class TenderSettlement {
         tenderCents: tenderedCents,
       );
     }
-    final allocation = ExchangeRates.settledCentsFrom(tenderedCents, rate);
-    final kept = ExchangeRates.convertCents(allocation, rate);
+    final allocation = _cashAllocation(tenderedCents, rate);
+    // Borné à ce qui est posé : l'unité supérieure admise par la tolérance vaut
+    // quelques centimes de plus que le billet, et le tiroir ne les a pas vus.
+    final converted = ExchangeRates.convertCents(allocation, rate);
+    final kept = converted > tenderedCents ? tenderedCents : converted;
     return SettlementLine(
       settledCurrency: rate.base,
       tenderCurrency: rate.quote,
@@ -220,6 +231,26 @@ class TenderSettlement {
       tenderCents: kept,
       changeCents: tenderedCents - kept,
     );
+  }
+
+  /// L'imputation de [tenderedCents], calée sur l'unité qui circule dans la
+  /// devise de la créance.
+  ///
+  /// Vers le bas, **sauf** quand l'unité supérieure ne dépasse ce qui est posé
+  /// que de l'arrondi de conversion que le serveur tolère (une unité
+  /// d'affichage de la devise reçue) : à 1 666,67, 30 \$ valent 50 000,10 FC,
+  /// et le parent qui pose 50 000 FC règle 30 \$ — pas 29 \$ avec 1 666 FC de
+  /// monnaie.
+  static int _cashAllocation(int tenderedCents, ExchangeRate rate) {
+    final exact = ExchangeRates.settledCentsFrom(tenderedCents, rate);
+    final unit = CurrencyCode.cashUnitInCents(rate.base);
+    final floor = exact - exact % unit;
+    if (floor == exact) return floor;
+    final ceil = floor + unit;
+    final overshoot = ExchangeRates.convertCents(ceil, rate) - tenderedCents;
+    return overshoot <= MoneyFormat.displayUnitInCents(rate.quote)
+        ? ceil
+        : floor;
   }
 
   /// Ce que le tiroir prend, une entrée par devise **reçue**.

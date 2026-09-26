@@ -123,19 +123,105 @@ void main() {
       expect(line.changeCents, 0);
     });
 
-    test('le montant posé sur le comptoir éteint vers le BAS, et le reste est '
-        'de la monnaie à rendre', () {
-      // 50 000 FC à 2 800 valent 17,857… $ : ni 17,85 ni 17,86 ne retombent
-      // sur 50 000. On impute 17,85 — soit 49 980 FC — et 20 FC repartent.
+    test('le montant posé sur le comptoir éteint vers le BAS, au dollar, et le '
+        'reste est de la monnaie à rendre', () {
+      // 50 000 FC à 2 800 valent 17,857… $. Le dollar ne circule pas en cents :
+      // on impute 17 $ — soit 47 600 FC — et 2 400 FC repartent.
       final line = _settlement().fromTender(
         settledCurrency: 'USD',
         tenderCurrency: 'CDF',
         tenderedCents: 5000000, // 50 000 FC
       );
 
-      expect(line.settledCents, 1785);
-      expect(line.tenderCents, 4998000);
-      expect(line.changeCents, 2000); // 20 FC
+      expect(line.settledCents, 1700);
+      expect(line.tenderCents, 4760000);
+      expect(line.changeCents, 240000); // 2 400 FC
+    });
+
+    test('le cas du guichet : 12 000 FC à 2 300 font 5 \$ et 500 FC rendus, '
+        'pas 5,21 \$ et 17 FC', () {
+      final line =
+          _settlement(
+            rates: [
+              ExchangeRate(
+                base: 'USD',
+                quote: 'CDF',
+                rateMicros: 2300000000,
+                effectiveFrom: DateTime.utc(2026, 9, 1, 6),
+              ),
+            ],
+          ).fromTender(
+            settledCurrency: 'USD',
+            tenderCurrency: 'CDF',
+            tenderedCents: 1200000,
+          );
+
+      expect(line.settledCents, 500);
+      expect(line.tenderCents, 1150000);
+      expect(line.changeCents, 50000);
+      expect(
+        TenderComposition.check(
+          allocations: [line.settled],
+          tenders: _settlement().tendersFor([line]),
+        ),
+        isNull,
+        reason: 'le tiroir garde exactement ce que valent 5 \$ au taux',
+      );
+    });
+
+    test('le dollar supérieur est retenu quand il ne dépasse le billet que de '
+        'l\'arrondi toléré', () {
+      // À 1 666,67, 30 $ valent 50 000,10 FC. Le serveur tolère un franc
+      // d'arrondi : le parent qui pose 50 000 FC règle 30 $, sans monnaie.
+      final settlement = _settlement(
+        rates: [
+          ExchangeRate(
+            base: 'USD',
+            quote: 'CDF',
+            rateMicros: 1666670000,
+            effectiveFrom: DateTime.utc(2026, 9, 1, 6),
+          ),
+        ],
+      );
+      final line = settlement.fromTender(
+        settledCurrency: 'USD',
+        tenderCurrency: 'CDF',
+        tenderedCents: 5000000,
+      );
+
+      expect(line.settledCents, 3000);
+      expect(line.tenderCents, 5000000, reason: 'jamais plus que le billet');
+      expect(line.changeCents, 0);
+      expect(
+        TenderComposition.check(
+          allocations: [line.settled],
+          tenders: settlement.tendersFor([line]),
+        ),
+        isNull,
+      );
+    });
+
+    test('la monnaie s\'annonce EXACTE, même hors coupure ronde', () {
+      // 15 000 FC à 2 850 : 5 $ valent 14 250 FC. Garder 250 FC de plus ferait
+      // refuser le versement ; on annonce 750 FC, le caissier compose.
+      final line =
+          _settlement(
+            rates: [
+              ExchangeRate(
+                base: 'USD',
+                quote: 'CDF',
+                rateMicros: 2850000000,
+                effectiveFrom: DateTime.utc(2026, 9, 1, 6),
+              ),
+            ],
+          ).fromTender(
+            settledCurrency: 'USD',
+            tenderCurrency: 'CDF',
+            tenderedCents: 1500000,
+          );
+
+      expect(line.settledCents, 500);
+      expect(line.changeCents, 75000);
     });
 
     test('arrondir au plus proche éteindrait ce que personne n’a posé — et le '
@@ -265,10 +351,10 @@ void main() {
         tenderedCents: 5000000,
       );
 
-      expect(settlement.changeBag([line]).entries.single.amountInCents, 2000);
+      expect(settlement.changeBag([line]).entries.single.amountInCents, 240000);
       expect(
         settlement.tenderBag([line]).entries.single.amountInCents,
-        4998000,
+        4760000,
       );
     });
   });

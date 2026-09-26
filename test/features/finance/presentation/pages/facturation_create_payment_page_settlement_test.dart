@@ -293,19 +293,37 @@ void main() {
   });
 
   testWidgets(
-    'taper le comptoir remplit l’imputé — vers le BAS, et la monnaie repart',
+    'taper le comptoir remplit l’imputé — au dollar INFÉRIEUR, et la monnaie '
+    'repart',
     (tester) async {
       await ouvrir(tester, [charge('1', 'USD', 6000)], rates: [_usdVersCdf]);
       await cocher(tester, 0);
       await choisirDevise(tester, 0, 'FC');
 
-      // Le parent pose 50 000 FC. À 1 666,67, cela éteint 29,99 \$ et non 30,00
-      // : imputer davantage éteindrait ce que personne n'a posé.
+      // Le parent pose 48 000 FC. À 1 666,67, cela vaut 28,79 \$ : le dollar ne
+      // circule pas en cents, on impute 28 \$ et le reste lui est rendu.
+      await tester.enterText(champsDeLigne(0).last, '48000');
+      await tester.pumpAndSettle();
+
+      expect(valeurDuChamp(tester, champsDeLigne(0).first), '28');
+      expect(find.textContaining('Monnaie à rendre'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'un billet rond qui vaut le dollar rond à l’arrondi près le règle entier',
+    (tester) async {
+      await ouvrir(tester, [charge('1', 'USD', 6000)], rates: [_usdVersCdf]);
+      await cocher(tester, 0);
+      await choisirDevise(tester, 0, 'FC');
+
+      // 30 \$ valent 50 000,10 FC : le parent qui pose 50 000 FC règle 30 \$,
+      // et on ne lui rend pas 1 666 FC pour dix centimes de franc.
       await tester.enterText(champsDeLigne(0).last, '50000');
       await tester.pumpAndSettle();
 
-      expect(valeurDuChamp(tester, champsDeLigne(0).first), '29.99');
-      expect(find.textContaining('Monnaie à rendre'), findsOneWidget);
+      expect(valeurDuChamp(tester, champsDeLigne(0).first), '30');
+      expect(find.textContaining('Monnaie à rendre'), findsNothing);
     },
   );
 

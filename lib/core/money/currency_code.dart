@@ -32,4 +32,15 @@ abstract final class CurrencyCode {
   /// réel du grand-livre local (une ligne dont la devise n'a jamais été
   /// renseignée), et la refuser ferait échouer une lecture.
   static String normalize(String raw) => raw.trim().toUpperCase();
+
+  /// La plus petite somme qui **change de main** au guichet dans cette devise,
+  /// en centimes.
+  ///
+  /// Le dollar ne circule qu'en billets : personne ne pose ni ne rend 0,21 \$.
+  /// Une conversion qui imputerait 5,21 \$ pour 12 000 FC annoncerait donc un
+  /// montant — et une monnaie de 17 FC — qui n'existent pas dans la vraie vie.
+  /// Les autres devises gardent le centime : le franc se stocke déjà en francs
+  /// entiers à l'affichage, et l'euro a ses pièces.
+  static int cashUnitInCents(String currency) =>
+      normalize(currency) == usd ? 100 : 1;
 }
