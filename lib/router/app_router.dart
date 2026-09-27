@@ -56,6 +56,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_f
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/router/router_extra_codec.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -163,6 +164,9 @@ class AppRouter {
     return GoRouter(
       initialLocation: '/splash',
       refreshListenable: notifier,
+      // Sans lui, chaque rafraîchissement du routeur reconstruit les pages
+      // empilées SANS leur `extra` (cf. [InMemoryExtraCodec]).
+      extraCodec: InMemoryExtraCodec(),
       redirect: (context, state) => resolveRedirect(
         authStatus: authBloc.state.status,
         permissions: authBloc.state.permissions,
