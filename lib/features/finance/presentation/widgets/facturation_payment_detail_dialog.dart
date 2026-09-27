@@ -178,7 +178,11 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
   return showDialog<FacturationPaymentDetailAction>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => MultiBlocProvider(
+    // ⚠️ Le contexte de la MODALE, pour la refermer. Celui de l'appelant est
+    // celui de la page : dans une `ShellRoute`, son navigateur le plus proche
+    // est celui de la coquille, et `pop` y aurait dépilé la PAGE — la fiche
+    // restait ouverte et le geste demandé n'arrivait jamais.
+    builder: (dialogContext) => MultiBlocProvider(
       providers: [
         BlocProvider<PaymentsBloc>(
           create: (_) {
@@ -277,11 +281,11 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
           correctionEntry: gestures.cancel && !receipt.paymentCancelled
               ? PaymentCorrectionEntryBlock(
                   onCancel: () => Navigator.of(
-                    context,
+                    dialogContext,
                   ).pop(FacturationPaymentDetailAction.cancel),
                   onCorrect: gestures.correct
                       ? () => Navigator.of(
-                          context,
+                          dialogContext,
                         ).pop(FacturationPaymentDetailAction.correct)
                       : null,
                 )
