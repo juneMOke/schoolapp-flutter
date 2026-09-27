@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_footer.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ticket_print_row.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/payment_correction_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/payment_correction_entry_block.dart';
@@ -214,83 +215,95 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
       // d'impression observe le cubit elle-même ; reconstruire toute la modale
       // à chaque tirage rejouerait les autres blocs pour rien.
       child: BlocBuilder<PaymentReceiptCubit, PaymentReceiptState>(
-        builder: (_, receipt) => FacturationPaymentDetailDialogView(
-          intent: intent,
-          allocations: FacturationPaymentAllocationsSection(
-            paymentId: intent.paymentId,
-          ),
-          receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
-          receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
-          receiptForbidden: !PermissionGate.allows(context, const [
-            Perm.editiqueWrite,
-          ]),
-          // Le retrait se dit toujours, quel que soit le geste offert : c'est
-          // ce que le guichet doit pouvoir expliquer à la famille qui présente
-          // le papier.
-          cancelledReceipt: receipt.cached?.isCancelled ?? false
-              ? receipt.cached
-              : null,
-          // Le geste est décidé par `facturationReceiptGesture`, qui porte la
-          // règle et son pourquoi. La copie annulée est bien servie (arbitrage
-          // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
-          // d'une famille le papier qu'elle présente pour lui expliquer
-          // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
-          // la pièce ne trompe personne.
-          onDownloadReceipt: switch (facturationReceiptGesture(
+        builder: (_, receipt) {
+          final ticketOffered = facturationTicketRowOffered(
             cached: receipt.cached,
-            isPendingSync: intent.isPendingSync,
-            receiptDocumentId: receipt.documentId,
-            canEmit: PermissionGate.allows(context, const [Perm.editiqueWrite]),
-          )) {
-            FacturationReceiptGesture.restitute =>
-              () => showEditiqueRestitutionDialog(
-                context,
-                type: EditiqueDocumentType.paymentReceipt,
-                title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
-                documentId: receipt.cached?.documentId ?? receipt.documentId,
-                documentNumber:
-                    receipt.cached?.documentNumber ??
-                    (receipt.hasDefinitiveNumber ? receipt.number : null),
-              ),
-            FacturationReceiptGesture.emit =>
-              () => showEditiquePaymentReceiptDialog(
-                context,
-                paymentId: intent.paymentId,
-              ),
-            FacturationReceiptGesture.none => null,
-          },
-          // UNE seule condition désormais, et c'est celle que seule la modale
-          // connaît : un reçu retiré ne ressort jamais sous forme de ticket.
-          // Elle vit dans une fonction pure pour être éprouvable — la même
-          // raison qui avait sorti `facturationReceiptGesture` de l'arbre.
-          //
-          // ⚠️ `wasPrinted` n'entre PAS ici. La réimpression est libre — c'est
-          // tout l'objet du lot —, et le cubit ne sert plus qu'à choisir les
-          // mots de la ligne. Le remettre en condition ressusciterait la
-          // grille qu'on vient de retirer.
-          ticketPrint:
-              facturationTicketRowOffered(
-                cached: receipt.cached,
-                paymentCancelled:
-                    receipt.paymentCancelled || intent.isOutOfForce,
-              )
-              ? FacturationTicketPrintRow(paymentId: intent.paymentId)
-              : null,
-          // Le serveur a pu annuler le versement depuis que la liste l'a
-          // montré : le reçu résolu le dit, et le geste disparaît alors.
-          correctionEntry: gestures.cancel && !receipt.paymentCancelled
-              ? PaymentCorrectionEntryBlock(
-                  onCancel: () => Navigator.of(
-                    dialogContext,
-                  ).pop(FacturationPaymentDetailAction.cancel),
-                  onCorrect: gestures.correct
-                      ? () => Navigator.of(
-                          dialogContext,
-                        ).pop(FacturationPaymentDetailAction.correct)
-                      : null,
-                )
-              : null,
-        ),
+            paymentCancelled: receipt.paymentCancelled || intent.isOutOfForce,
+          );
+          return FacturationPaymentDetailDialogView(
+            intent: intent,
+            allocations: FacturationPaymentAllocationsSection(
+              paymentId: intent.paymentId,
+            ),
+            receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
+            receiptPending:
+                intent.isPendingSync || receipt.hasProvisionalNumber,
+            receiptForbidden: !PermissionGate.allows(context, const [
+              Perm.editiqueWrite,
+            ]),
+            // Le retrait se dit toujours, quel que soit le geste offert : c'est
+            // ce que le guichet doit pouvoir expliquer à la famille qui présente
+            // le papier.
+            cancelledReceipt: receipt.cached?.isCancelled ?? false
+                ? receipt.cached
+                : null,
+            // Le geste est décidé par `facturationReceiptGesture`, qui porte la
+            // règle et son pourquoi. La copie annulée est bien servie (arbitrage
+            // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
+            // d'une famille le papier qu'elle présente pour lui expliquer
+            // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
+            // la pièce ne trompe personne.
+            onDownloadReceipt: switch (facturationReceiptGesture(
+              cached: receipt.cached,
+              isPendingSync: intent.isPendingSync,
+              receiptDocumentId: receipt.documentId,
+              canEmit: PermissionGate.allows(context, const [
+                Perm.editiqueWrite,
+              ]),
+            )) {
+              FacturationReceiptGesture.restitute =>
+                () => showEditiqueRestitutionDialog(
+                  context,
+                  type: EditiqueDocumentType.paymentReceipt,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.editiqueViewerReceiptTitle,
+                  documentId: receipt.cached?.documentId ?? receipt.documentId,
+                  documentNumber:
+                      receipt.cached?.documentNumber ??
+                      (receipt.hasDefinitiveNumber ? receipt.number : null),
+                ),
+              FacturationReceiptGesture.emit =>
+                () => showEditiquePaymentReceiptDialog(
+                  context,
+                  paymentId: intent.paymentId,
+                ),
+              FacturationReceiptGesture.none => null,
+            },
+            // UNE seule condition désormais, et c'est celle que seule la modale
+            // connaît : un reçu retiré ne ressort jamais sous forme de ticket.
+            // Elle vit dans une fonction pure pour être éprouvable — la même
+            // raison qui avait sorti `facturationReceiptGesture` de l'arbre.
+            //
+            // ⚠️ `wasPrinted` n'entre PAS ici. La réimpression est libre — c'est
+            // tout l'objet du lot —, et le cubit ne sert plus qu'à choisir les
+            // mots de la ligne. Le remettre en condition ressusciterait la
+            // grille qu'on vient de retirer.
+            // L'impression est le bouton principal du pied ; la ligne ne dit plus
+            // que l'état du papier (dernier tirage).
+            ticketPrint: ticketOffered
+                ? FacturationTicketPrintRow(
+                    paymentId: intent.paymentId,
+                    showAction: false,
+                  )
+                : null,
+            ticketPaymentId: ticketOffered ? intent.paymentId : null,
+            // Le serveur a pu annuler le versement depuis que la liste l'a
+            // montré : le reçu résolu le dit, et le geste disparaît alors.
+            correctionEntry: gestures.cancel && !receipt.paymentCancelled
+                ? PaymentCorrectionEntryBlock(
+                    onCancel: () => Navigator.of(
+                      dialogContext,
+                    ).pop(FacturationPaymentDetailAction.cancel),
+                    onCorrect: gestures.correct
+                        ? () => Navigator.of(
+                            dialogContext,
+                          ).pop(FacturationPaymentDetailAction.correct)
+                        : null,
+                  )
+                : null,
+          );
+        },
       ),
     ),
   );
@@ -333,6 +346,10 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   /// « Une erreur sur ce versement ? », `null` quand aucun geste n'est offert.
   final Widget? correctionEntry;
 
+  /// Le versement dont le ticket s'imprime depuis le pied, `null` quand aucun
+  /// ticket n'est offert : le pied redevient alors « Fermer ».
+  final String? ticketPaymentId;
+
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
@@ -344,6 +361,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     this.cancelledReceipt,
     this.ticketPrint,
     this.correctionEntry,
+    this.ticketPaymentId,
   });
 
   /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
@@ -564,22 +582,19 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
           ),
           footer: [
             const Divider(height: 1, color: AppColors.border),
-            FinanceModalFooter(
-              secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
-              secondaryIcon: Icons.download_outlined,
-              onSecondary: onDownloadReceipt,
+            FacturationPaymentDetailFooter(
+              ticketPaymentId: ticketPaymentId,
+              onDownloadReceipt: onDownloadReceipt,
               // Le motif doit correspondre au refus, et un bouton éteint sans
               // explication n'en est pas un meilleur qu'un motif faux : les
               // deux causes ont chacune leur phrase, dans l'ordre où elles se
               // lèvent (une pièce en attente le reste, droits ou pas).
-              secondaryHint: receiptPending
+              downloadHint: receiptPending
                   ? l10n.facturationPaymentReceiptPendingSyncHint
                   : receiptForbidden && onDownloadReceipt == null
                   ? l10n.facturationPaymentReceiptForbiddenHint
                   : null,
-              primaryLabel: l10n.facturationPaymentCloseLabel,
-              primaryIcon: Icons.check_rounded,
-              onPrimary: () => _close(context),
+              onClose: () => _close(context),
             ),
           ],
         ),

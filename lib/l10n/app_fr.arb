@@ -7500,5 +7500,6 @@
       }
     }
   },
-  "paymentCorrectionTargetLoadFailed": "Les frais de cet élève n'ont pas pu être lus."
+  "paymentCorrectionTargetLoadFailed": "Les frais de cet élève n'ont pas pu être lus.",
+  "facturationPaymentPrintTicketPrimary": "Imprimer le ticket"
 }

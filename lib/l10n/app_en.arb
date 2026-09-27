@@ -7304,5 +7304,6 @@
       }
     }
   },
-  "paymentCorrectionTargetLoadFailed": "This student's fees could not be read."
+  "paymentCorrectionTargetLoadFailed": "This student's fees could not be read.",
+  "facturationPaymentPrintTicketPrimary": "Print the ticket"
 }
