@@ -17836,6 +17836,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This student\'s fees could not be read.'**
   String get paymentCorrectionTargetLoadFailed;
+
+  /// No description provided for @facturationPaymentPrintTicketPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the ticket'**
+  String get facturationPaymentPrintTicketPrimary;
 }
 
 class _AppLocalizationsDelegate

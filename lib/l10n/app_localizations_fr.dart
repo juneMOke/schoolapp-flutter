@@ -11402,4 +11402,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get paymentCorrectionTargetLoadFailed =>
       'Les frais de cet élève n\'ont pas pu être lus.';
+
+  @override
+  String get facturationPaymentPrintTicketPrimary => 'Imprimer le ticket';
 }

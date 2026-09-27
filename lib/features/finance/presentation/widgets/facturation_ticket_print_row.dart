@@ -37,42 +37,56 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FacturationTicketPrintRow extends StatefulWidget {
   final String paymentId;
 
-  const FacturationTicketPrintRow({super.key, required this.paymentId});
+  /// `false` : la ligne ne dit plus que l'ÉTAT du papier. C'est le cas du
+  /// détail d'un versement, où l'impression est le bouton principal du pied —
+  /// deux boutons pour le même geste se liraient comme deux gestes.
+  final bool showAction;
+
+  const FacturationTicketPrintRow({
+    super.key,
+    required this.paymentId,
+    this.showAction = true,
+  });
 
   @override
   State<FacturationTicketPrintRow> createState() =>
       _FacturationTicketPrintRowState();
 }
 
-class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow> {
+/// Le geste « imprimer le ticket d'un versement », partagé par la ligne et
+/// par le bouton principal du détail d'un versement.
+mixin TicketPrintGesture<T extends StatefulWidget> on State<T> {
   /// Verrou « un seul geste en vol », comme la popin d'encaissement : composer
   /// puis ouvrir l'interface système ne rend pas la main tout de suite, et deux
   /// appuis produiraient deux tickets pour un versement.
-  bool _printing = false;
+  bool printing = false;
 
-  Future<void> _print() async {
-    if (_printing) return;
+  Future<void> printTicket(String paymentId) async {
+    if (printing) return;
 
     // Capturés AVANT tout await : le premier survit à la fermeture de la
     // modale, le second ne doit plus être touché après.
     final messenger = ScaffoldMessenger.maybeOf(context);
     final status = context.read<TicketPrintStatusCubit>();
 
-    setState(() => _printing = true);
+    setState(() => printing = true);
     await printProvisionalTicketWithFallback(
       context,
-      paymentId: widget.paymentId,
+      paymentId: paymentId,
       messenger: messenger,
     );
     if (!mounted) return;
 
-    setState(() => _printing = false);
+    setState(() => printing = false);
     // Le flux a marqué la trace si — et seulement si — la thermique a servi.
     // On relit plutôt que de supposer : un repli PDF ne prouve pas qu'un papier
     // soit sorti, et la ligne continue donc d'annoncer un premier tirage.
-    await status.load(widget.paymentId);
+    await status.load(paymentId);
   }
+}
 
+class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow>
+    with TicketPrintGesture {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -114,17 +128,19 @@ class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow> {
               style: AppTextStyles.body,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          // Le libellé dit LEQUEL des deux gestes on fait : sortir un papier
-          // qui n'existe pas encore, ou en refaire un.
-          TextButton(
-            onPressed: _printing ? null : _print,
-            child: Text(
-              status.wasPrinted
-                  ? l10n.facturationPaymentReprintTicketAction
-                  : l10n.facturationPaymentPrintTicketAction,
+          if (widget.showAction) ...[
+            const SizedBox(width: AppSpacing.sm),
+            // Le libellé dit LEQUEL des deux gestes on fait : sortir un papier
+            // qui n'existe pas encore, ou en refaire un.
+            TextButton(
+              onPressed: printing ? null : () => printTicket(widget.paymentId),
+              child: Text(
+                status.wasPrinted
+                    ? l10n.facturationPaymentReprintTicketAction
+                    : l10n.facturationPaymentPrintTicketAction,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
