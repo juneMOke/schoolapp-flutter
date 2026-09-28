@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_chrome_density.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_chrome_density.dart';
 
 void main() {
   group('WizardChromeDensity.forHeight', () {

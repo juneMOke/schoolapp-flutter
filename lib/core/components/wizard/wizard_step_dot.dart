@@ -6,7 +6,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Step du stepper d'inscription (PARCOURS 18) : chip numéroté centré, encadré
+/// Step d'un stepper d'assistant (né avec le parcours d'inscription,
+/// PARCOURS 18) : chip numéroté centré, encadré
 /// par des connecteurs (vert-savane si franchi, neutre sinon), avec « ÉTAPE N »
 /// (teinte neutre) au-dessus de la description (terre-cuite si courante,
 /// vert-savane si faite, neutre sinon), centrées sous le chip.

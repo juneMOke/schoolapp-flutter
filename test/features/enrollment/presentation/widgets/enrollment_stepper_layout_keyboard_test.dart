@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_step_dot.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_progress_bar.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_step_dot.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 

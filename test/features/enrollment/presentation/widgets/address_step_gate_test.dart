@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/address_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
+import 'package:school_app_flutter/core/geo/address_geo_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';

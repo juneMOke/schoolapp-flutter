@@ -2647,9 +2647,9 @@
     "description": "Billing AppBar pill when the balance is outstanding in SEVERAL currencies. No amount: two amounts do not fit in a pill, and showing only one would be false. The breakdown is in the cards."
   },
   "facturationBalanceUpToDatePill": "Up to date",
-  "financePendingSyncBadge": "Pending sync",
-  "@financePendingSyncBadge": {
-    "description": "Badge on a charge/payment whose local collection has not yet synced to the server."
+  "pendingSyncBadge": "Pending sync",
+  "@pendingSyncBadge": {
+    "description": "Badge on an item written on this device and not yet synced to the server (charge, payment, record…)."
   },
   "facturationFreshnessAt": "Ledger up to date at {time}",
   "@facturationFreshnessAt": {

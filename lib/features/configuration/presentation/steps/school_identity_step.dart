@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/configuration/domain/entities/school
 import 'package:school_app_flutter/features/configuration/presentation/cubit/school_identity_form_cubit.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_field_grid.dart';
 import 'package:school_app_flutter/features/configuration/presentation/widgets/school_ticket_copies_select.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
+import 'package:school_app_flutter/core/geo/address_geo_catalog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Étape 1 — l'identité de l'établissement.

@@ -16,6 +16,7 @@ SCOPES=(
   "lib/features/home/presentation"
   "lib/features/enrollment/presentation"
   "lib/features/finance/presentation"
+  "lib/core/components/wizard"
 )
 
 EXCLUDE_FILES=(

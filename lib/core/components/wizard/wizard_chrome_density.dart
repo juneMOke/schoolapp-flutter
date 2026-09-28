@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
-/// Densité du chrome fixe du parcours d'inscription — barre d'étapes et marges
+/// Densité du chrome fixe d'un assistant (né avec le parcours d'inscription) — barre d'étapes et marges
 /// — en fonction de la hauteur **réellement disponible**.
 ///
 /// Le clavier logiciel ne se superpose pas à l'écran : il en retire la hauteur

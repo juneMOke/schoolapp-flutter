@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/wizard/wizard_step_progression.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_step_dot.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_progress_bar.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_step_dot.dart';
 
-/// Barre du stepper d'inscription (PARCOURS 18) : bande pleine largeur collée
+/// Barre de stepper d'assistant (née avec le parcours d'inscription,
+/// PARCOURS 18) : bande pleine largeur collée
 /// sous l'AppBar — barre de progression dégradée puis la rangée de steps
 /// (chip + connecteurs + « ÉTAPE N » / description) répartis de bout en bout.
 ///

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_chrome_density.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_chrome_density.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/step_page_card.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
+import 'package:school_app_flutter/core/components/wizard/wizard_breadcrumb.dart';
 
 /// Disposition du parcours d'inscription : barre d'étapes en tête, carte
 /// d'étape défilante au centre, pied d'actions ancré en bas (PARCOURS 18/21).

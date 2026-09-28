@@ -6237,11 +6237,11 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get facturationBalanceUpToDatePill;
 
-  /// Badge on a charge/payment whose local collection has not yet synced to the server.
+  /// Badge on an item written on this device and not yet synced to the server (charge, payment, record…).
   ///
   /// In en, this message translates to:
   /// **'Pending sync'**
-  String get financePendingSyncBadge;
+  String get pendingSyncBadge;
 
   /// Freshness (ADR-002): timestamp of the last ledger refresh.
   ///

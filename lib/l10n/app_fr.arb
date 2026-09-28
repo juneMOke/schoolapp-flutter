@@ -2592,9 +2592,9 @@
     "description": "Pastille AppBar facturation quand le solde est dû dans PLUSIEURS devises. Sans montant : deux montants ne tiennent pas dans une pastille, et n'en montrer qu'un serait faux. Le détail est dans les cartes."
   },
   "facturationBalanceUpToDatePill": "À jour",
-  "financePendingSyncBadge": "En attente de synchro",
-  "@financePendingSyncBadge": {
-    "description": "Badge sur une créance/un paiement dont l'encaissement local n'est pas encore remonté au serveur."
+  "pendingSyncBadge": "En attente de synchro",
+  "@pendingSyncBadge": {
+    "description": "Pastille d'un élément écrit sur ce poste et pas encore remonté au serveur (créance, paiement, fiche…)."
   },
   "facturationFreshnessAt": "Grand-livre à jour à {time}",
   "@facturationFreshnessAt": {

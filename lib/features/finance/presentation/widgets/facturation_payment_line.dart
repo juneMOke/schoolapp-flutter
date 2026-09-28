@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
+import 'package:school_app_flutter/core/components/status/pending_sync_badge.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/payment_correction_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -130,7 +130,7 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                     // Versement de ce poste pas encore remonté (FRONT §3).
                     if (widget.payment.isPendingSync) ...[
                       const SizedBox(height: AppDimensions.spacingXS),
-                      const FinancePendingSyncBadge(),
+                      const PendingSyncBadge(),
                     ],
                     // Extourné côté serveur. La ligne RESTE : la famille garde
                     // son papier, et une ligne absente ne lui explique rien.

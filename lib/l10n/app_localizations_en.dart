@@ -3815,7 +3815,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationBalanceUpToDatePill => 'Up to date';
 
   @override
-  String get financePendingSyncBadge => 'Pending sync';
+  String get pendingSyncBadge => 'Pending sync';
 
   @override
   String facturationFreshnessAt(String time) {

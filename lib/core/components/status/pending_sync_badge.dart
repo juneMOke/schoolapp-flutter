@@ -5,11 +5,15 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Pastille discrète « en attente de synchro » — posée sur une créance dont le
-/// reste inclut un encaissement de ce poste non remonté, ou sur un paiement
-/// `PENDING_SYNC` (FRONT §3/§5). Purement informatif (non bloquant).
-class FinancePendingSyncBadge extends StatelessWidget {
-  const FinancePendingSyncBadge({super.key});
+/// Pastille discrète « en attente de synchro » : l'élément a été écrit sur ce
+/// poste et n'est pas encore remonté au serveur. Purement informatif (non
+/// bloquant).
+///
+/// Née en Finance (créance dont le reste inclut un encaissement local, paiement
+/// `PENDING_SYNC`, FRONT §3/§5), elle sert à tout module hors ligne qui doit
+/// dire « sur la tablette » sans alarmer.
+class PendingSyncBadge extends StatelessWidget {
+  const PendingSyncBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,7 @@ class FinancePendingSyncBadge extends StatelessWidget {
           const Icon(Icons.sync_outlined, size: 13, color: AppColors.textMuted),
           const SizedBox(width: AppDimensions.spacingXS),
           Text(
-            l10n.financePendingSyncBadge,
+            l10n.pendingSyncBadge,
             style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
           ),
         ],
