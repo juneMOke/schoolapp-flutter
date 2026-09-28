@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -9,12 +10,12 @@ import 'package:school_app_flutter/core/offline/device_sync_meta_dao.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
@@ -40,13 +41,6 @@ import 'package:school_app_flutter/features/documents/domain/usecases/list_cache
 /// une clé de cache.
 void registerDocumentsOffline(GetIt getIt) {
   final requiredAuth = getIt<Map<String, dynamic>>();
-
-  // ── Clé du magasin ──
-  // Distincte de celle de SQLCipher : la détruire rend les pièces illisibles
-  // sans rien toucher de la base, ce qui est la primitive d'effacement de D-7.
-  getIt.registerLazySingleton<EditiqueCacheKeyService>(
-    () => EditiqueCacheKeyService(getIt<FlutterSecureStorage>()),
-  );
 
   // ── Index (lecture/mesure d'un côté, retrait de l'autre) ──
   // Au niveau de l'APPAREIL (MULTI_ECOLE_PLAN.md §10.1) : le magasin d'octets
@@ -76,9 +70,19 @@ void registerDocumentsOffline(GetIt getIt) {
   // l'index sans rembobiner le delta laisserait un curseur en avance sur une
   // base vide, et le catalogue ne se repeuplerait plus jamais de ce qui a été
   // scellé avant.
-  getIt.registerLazySingleton<EditiqueBlobStore>(
-    () => EditiqueBlobStore(
-      keyService: getIt<EditiqueCacheKeyService>(),
+  //
+  // Sa clé est distincte de celle de SQLCipher : la détruire rend les pièces
+  // illisibles sans rien toucher de la base, ce qui est la primitive
+  // d'effacement de D-7. Enregistré sous le nom de son répertoire, parce que
+  // d'autres modules tiennent leur propre magasin, avec leur propre clé.
+  getIt.registerLazySingleton<EncryptedBlobStore>(
+    instanceName: AppConstants.editiqueCacheDirectoryName,
+    () => EncryptedBlobStore(
+      directoryName: AppConstants.editiqueCacheDirectoryName,
+      keyService: BlobKeyService(
+        getIt<FlutterSecureStorage>(),
+        storageKey: AppConstants.editiqueCacheKeyStorageKey,
+      ),
       onKeyRotated: () async {
         await getIt<EditiqueCacheMaintenanceDao>().purgeAll();
         await getIt<DeviceSyncMetaDao>().deleteCursorsOf(
@@ -121,7 +125,9 @@ void registerDocumentsOffline(GetIt getIt) {
     () => EditiqueDocumentCache(
       index: getIt<EditiqueCacheDao>(),
       maintenance: getIt<EditiqueCacheMaintenanceDao>(),
-      store: getIt<EditiqueBlobStore>(),
+      store: getIt<EncryptedBlobStore>(
+        instanceName: AppConstants.editiqueCacheDirectoryName,
+      ),
       ids: getIt<IdGenerator>(),
       access: getIt<EditiqueCacheAccess>(),
     ),

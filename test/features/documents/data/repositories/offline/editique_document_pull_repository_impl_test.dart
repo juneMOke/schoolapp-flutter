@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -12,10 +13,10 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_cipher.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/features/documents/data/models/editique_document_pull_models.dart';
@@ -37,9 +38,12 @@ class _FakeAccess implements EditiqueCacheAccess {
   Future<bool> isEntitled() async => entitled;
 }
 
-class _FakeKeyService implements EditiqueCacheKeyService {
+class _FakeKeyService implements BlobKeyService {
   @override
-  Future<EditiqueCacheKey> getOrCreate() async => EditiqueCacheKey(
+  String get storageKey => AppConstants.editiqueCacheKeyStorageKey;
+
+  @override
+  Future<BlobKey> getOrCreate() async => BlobKey(
     bytes: Uint8List.fromList(List<int>.generate(32, (i) => i & 0xFF)),
     createdNow: false,
   );
@@ -124,9 +128,10 @@ void main() {
       cache: EditiqueDocumentCache(
         index: index,
         maintenance: EditiqueCacheMaintenanceDao(db),
-        store: EditiqueBlobStore(
+        store: EncryptedBlobStore(
+          directoryName: AppConstants.editiqueCacheDirectoryName,
           keyService: _FakeKeyService(),
-          cipher: runEditiqueCipherTask,
+          cipher: runBlobCipherTask,
           baseDirectory: () async => base,
         ),
         ids: _FakeIds(),

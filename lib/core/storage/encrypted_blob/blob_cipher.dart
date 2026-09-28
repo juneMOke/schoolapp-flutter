@@ -11,8 +11,8 @@
 /// le thread d'interface, ouvrir une pièce en cache figerait le guichet
 /// plusieurs dizaines d'images.
 ///
-/// D'où [EditiqueCipherOffloader] : la traversée d'isolat est le comportement
-/// **par défaut** ([offloadEditiqueCipher]), et non une optimisation qu'un
+/// D'où [BlobCipherOffloader] : la traversée d'isolat est le comportement
+/// **par défaut** ([offloadBlobCipher]), et non une optimisation qu'un
 /// appelant penserait à demander. Le patron est celui de
 /// `PasswordVerifierService`, qui sort Argon2id du thread d'interface pour la
 /// même raison.
@@ -43,7 +43,7 @@ import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 import 'package:flutter/foundation.dart';
 
 /// Sens du calcul demandé.
-enum EditiqueCipherMode {
+enum BlobCipherMode {
   /// Clair → fichier scellé.
   seal,
 
@@ -55,21 +55,21 @@ enum EditiqueCipherMode {
 /// type de résultat pour les deux sens : la traversée d'isolat n'a ainsi qu'un
 /// point d'entrée à connaître, donc une seule fonction de premier niveau.
 @immutable
-class EditiqueCipherRequest {
-  final EditiqueCipherMode mode;
+class BlobCipherRequest {
+  final BlobCipherMode mode;
 
   /// Clé AES-256 brute (32 octets).
   final Uint8List keyBytes;
 
-  /// Octets en clair ([EditiqueCipherMode.seal]) ou fichier complet, en-tête
-  /// compris ([EditiqueCipherMode.open]).
+  /// Octets en clair ([BlobCipherMode.seal]) ou fichier complet, en-tête
+  /// compris ([BlobCipherMode.open]).
   final Uint8List payload;
 
   /// Identifiant local de l'entrée d'index, lié cryptographiquement au
   /// contenu (AAD).
   final String entryId;
 
-  const EditiqueCipherRequest({
+  const BlobCipherRequest({
     required this.mode,
     required this.keyBytes,
     required this.payload,
@@ -79,7 +79,7 @@ class EditiqueCipherRequest {
 
 /// Résultat d'un calcul : les octets produits, et l'empreinte du **clair**.
 @immutable
-class EditiqueCipherResult {
+class BlobCipherResult {
   /// Fichier scellé (scellement) ou octets du PDF (ouverture).
   final Uint8List bytes;
 
@@ -89,7 +89,7 @@ class EditiqueCipherResult {
   /// Taille du clair, en octets — l'unité de la comptabilité de budget.
   final int clearSizeBytes;
 
-  const EditiqueCipherResult({
+  const BlobCipherResult({
     required this.bytes,
     required this.sha256Hex,
     required this.clearSizeBytes,
@@ -102,42 +102,39 @@ class EditiqueCipherResult {
 /// et en-tête inconnu : l'appelant n'a rien à en faire de différent — une pièce
 /// illisible est un défaut de cache, et elle se retélécharge. Ne transporte
 /// qu'un message, parce qu'elle traverse une frontière d'isolat.
-class EditiqueCipherException implements Exception {
+class BlobCipherException implements Exception {
   final String message;
 
-  const EditiqueCipherException(this.message);
+  const BlobCipherException(this.message);
 
   @override
-  String toString() => 'EditiqueCipherException: $message';
+  String toString() => 'BlobCipherException: $message';
 }
 
 /// Exécute un calcul du cache éditique. Injectable pour que les tests restent
-/// synchrones et déterministes ; [offloadEditiqueCipher] en est la valeur par
+/// synchrones et déterministes ; [offloadBlobCipher] en est la valeur par
 /// défaut en production.
-typedef EditiqueCipherOffloader =
-    Future<EditiqueCipherResult> Function(EditiqueCipherRequest request);
+typedef BlobCipherOffloader =
+    Future<BlobCipherResult> Function(BlobCipherRequest request);
 
 /// Marque d'en-tête (`ETLQ`) — reconnaît un fichier du cache éditique et
 /// écarte tout ce qui aurait atterri dans le répertoire par accident.
-const List<int> kEditiqueBlobMagic = [0x45, 0x54, 0x4C, 0x51];
+const List<int> kBlobMagic = [0x45, 0x54, 0x4C, 0x51];
 
 /// Version du format de fichier. À incrémenter à tout changement d'algorithme,
 /// de longueur de nonce ou de dérivation de clé.
-const int kEditiqueBlobFormatVersion = 1;
+const int kBlobFormatVersion = 1;
 
 /// Longueur de l'en-tête : marque + version.
-const int kEditiqueBlobHeaderLength = 5;
+const int kBlobHeaderLength = 5;
 
 /// Traverse un isolat. Défaut de production.
-Future<EditiqueCipherResult> offloadEditiqueCipher(
-  EditiqueCipherRequest request,
-) => compute(runEditiqueCipherTask, request, debugLabel: 'editique-cipher');
+Future<BlobCipherResult> offloadBlobCipher(BlobCipherRequest request) =>
+    compute(runBlobCipherTask, request, debugLabel: 'editique-cipher');
 
 /// Corps du calcul, **de premier niveau** : c'est ce qui le rend exécutable
 /// dans un isolat (une fermeture capturant son contexte ne l'est pas).
-Future<EditiqueCipherResult> runEditiqueCipherTask(
-  EditiqueCipherRequest request,
-) async {
+Future<BlobCipherResult> runBlobCipherTask(BlobCipherRequest request) async {
   final algorithm = AesGcm.with256bits();
   // `newSecretKeyFromBytes` refuse une clé de mauvaise longueur ici et
   // maintenant ; le constructeur `SecretKey` l'accepterait pour ne se plaindre
@@ -146,12 +143,12 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
   try {
     secretKey = await algorithm.newSecretKeyFromBytes(request.keyBytes);
   } on ArgumentError {
-    throw const EditiqueCipherException('clé de longueur inattendue');
+    throw const BlobCipherException('clé de longueur inattendue');
   }
   final aad = utf8.encode(request.entryId);
 
   switch (request.mode) {
-    case EditiqueCipherMode.seal:
+    case BlobCipherMode.seal:
       final box = await algorithm.encrypt(
         request.payload,
         secretKey: secretKey,
@@ -162,17 +159,17 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
         aad: aad,
       );
       final body = box.concatenation();
-      final sealed = Uint8List(kEditiqueBlobHeaderLength + body.length)
-        ..setAll(0, kEditiqueBlobMagic)
-        ..[kEditiqueBlobMagic.length] = kEditiqueBlobFormatVersion
-        ..setAll(kEditiqueBlobHeaderLength, body);
-      return EditiqueCipherResult(
+      final sealed = Uint8List(kBlobHeaderLength + body.length)
+        ..setAll(0, kBlobMagic)
+        ..[kBlobMagic.length] = kBlobFormatVersion
+        ..setAll(kBlobHeaderLength, body);
+      return BlobCipherResult(
         bytes: sealed,
         sha256Hex: await sha256Hex(request.payload),
         clearSizeBytes: request.payload.length,
       );
 
-    case EditiqueCipherMode.open:
+    case BlobCipherMode.open:
       final nonceLength = algorithm.nonceLength;
       final macLength = algorithm.macAlgorithm.macLength;
       final body = _bodyOf(request.payload, nonceLength + macLength);
@@ -197,13 +194,13 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
       } on SecretBoxAuthenticationError {
         // Clé étrangère, octets altérés, ou fichier posé sous le nom d'une
         // autre entrée : indistinguables, et sans conséquence différente.
-        throw const EditiqueCipherException('authentification refusée');
+        throw const BlobCipherException('authentification refusée');
       } on ArgumentError {
         // `fromConcatenation` refuse en dessous de nonce + MAC : fichier
         // tronqué par un arrêt en cours d'écriture.
-        throw const EditiqueCipherException('fichier tronqué');
+        throw const BlobCipherException('fichier tronqué');
       }
-      return EditiqueCipherResult(
+      return BlobCipherResult(
         bytes: clear,
         sha256Hex: await sha256Hex(clear),
         clearSizeBytes: clear.length,
@@ -213,16 +210,16 @@ Future<EditiqueCipherResult> runEditiqueCipherTask(
 
 /// Retire l'en-tête après l'avoir vérifié.
 Uint8List _bodyOf(Uint8List file, int minimumBodyLength) {
-  if (file.length < kEditiqueBlobHeaderLength + minimumBodyLength) {
-    throw const EditiqueCipherException('fichier tronqué');
+  if (file.length < kBlobHeaderLength + minimumBodyLength) {
+    throw const BlobCipherException('fichier tronqué');
   }
-  for (var i = 0; i < kEditiqueBlobMagic.length; i++) {
-    if (file[i] != kEditiqueBlobMagic[i]) {
-      throw const EditiqueCipherException('fichier étranger au cache');
+  for (var i = 0; i < kBlobMagic.length; i++) {
+    if (file[i] != kBlobMagic[i]) {
+      throw const BlobCipherException('fichier étranger au cache');
     }
   }
-  if (file[kEditiqueBlobMagic.length] != kEditiqueBlobFormatVersion) {
-    throw const EditiqueCipherException('version de format inconnue');
+  if (file[kBlobMagic.length] != kBlobFormatVersion) {
+    throw const BlobCipherException('version de format inconnue');
   }
-  return Uint8List.sublistView(file, kEditiqueBlobHeaderLength);
+  return Uint8List.sublistView(file, kBlobHeaderLength);
 }

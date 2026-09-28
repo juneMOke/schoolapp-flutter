@@ -803,12 +803,17 @@ class AppConstants {
   static const String deviceIdStorageKey = 'device_installation_id';
 
   /// Clé du secure storage hébergeant la clé AES-256 du cache de restitution
-  /// éditique (cf. EditiqueCacheKeyService).
+  /// éditique (cf. BlobKeyService).
   ///
   /// **Distincte de [sqlCipherKeyStorageKey]** : les pièces scellées vivent
   /// hors de la base, et l'effacement physique de D-7 doit pouvoir les rendre
   /// illisibles — en supprimant cette clé — sans rien détruire de la base.
   static const String editiqueCacheKeyStorageKey = 'editique_cache_key';
+
+  /// Sous-répertoire (du répertoire de support) où le cache éditique scelle
+  /// ses pièces. **Ne se renomme pas** : les tablettes du parc y ont déjà
+  /// leurs fichiers, qu'un autre nom rendrait orphelins.
+  static const String editiqueCacheDirectoryName = 'editique_cache';
 
   // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
   /// Budget disque du cache éditique, en octets (2 Gio).

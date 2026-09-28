@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 
 /// La clé du magasin d'octets, exercée sur le faux en mémoire du paquet
 /// `flutter_secure_storage` — donc sur le vrai service, pas sur un double.
@@ -11,14 +11,17 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Map<String, String> stored;
-  late EditiqueCacheKeyService service;
+  late BlobKeyService service;
 
   setUp(() {
     stored = <String, String>{};
     // Le faux est un singleton statique de plateforme : il faut le réarmer à
     // chaque test, sinon les clés fuient de l'un à l'autre.
     FlutterSecureStorage.setMockInitialValues(stored);
-    service = const EditiqueCacheKeyService(FlutterSecureStorage());
+    service = const BlobKeyService(
+      FlutterSecureStorage(),
+      storageKey: AppConstants.editiqueCacheKeyStorageKey,
+    );
   });
 
   test('génère une clé de 256 bits au premier besoin', () async {
@@ -95,11 +98,32 @@ void main() {
   // l'application, retrouve la clé du premier.
   test('la clé survit à la reconstruction du service', () async {
     final first = await service.getOrCreate();
-    const other = EditiqueCacheKeyService(FlutterSecureStorage());
+    const other = BlobKeyService(
+      FlutterSecureStorage(),
+      storageKey: AppConstants.editiqueCacheKeyStorageKey,
+    );
 
     final second = await other.getOrCreate();
 
     expect(second.bytes, equals(first.bytes));
     expect(second.createdNow, isFalse);
+  });
+
+  // Chaque magasin a sa clé : détruire celle de l'un ne doit rien rendre
+  // illisible chez l'autre.
+  test('deux noms de stockage, deux clés indépendantes', () async {
+    const other = BlobKeyService(
+      FlutterSecureStorage(),
+      storageKey: 'autre_magasin_key',
+    );
+
+    final first = await service.getOrCreate();
+    final second = await other.getOrCreate();
+    await other.destroy();
+
+    expect(second.bytes, isNot(equals(first.bytes)));
+    expect(stored.keys, contains(AppConstants.editiqueCacheKeyStorageKey));
+    expect(stored.keys, isNot(contains('autre_magasin_key')));
+    expect((await service.getOrCreate()).createdNow, isFalse);
   });
 }

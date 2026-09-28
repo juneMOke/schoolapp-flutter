@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_cipher.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
 
 /// Le calcul seul : ce que le sceau garantit, et ce qu'il refuse.
 void main() {
@@ -16,26 +16,26 @@ void main() {
     ...List<int>.generate(300, (i) => i & 0xFF),
   ]);
 
-  Future<EditiqueCipherResult> seal({
+  Future<BlobCipherResult> seal({
     Uint8List? bytes,
     Uint8List? secret,
     String entryId = 'c-1',
-  }) => runEditiqueCipherTask(
-    EditiqueCipherRequest(
-      mode: EditiqueCipherMode.seal,
+  }) => runBlobCipherTask(
+    BlobCipherRequest(
+      mode: BlobCipherMode.seal,
       keyBytes: secret ?? key(0),
       payload: bytes ?? pdf,
       entryId: entryId,
     ),
   );
 
-  Future<EditiqueCipherResult> open(
+  Future<BlobCipherResult> open(
     Uint8List file, {
     Uint8List? secret,
     String entryId = 'c-1',
-  }) => runEditiqueCipherTask(
-    EditiqueCipherRequest(
-      mode: EditiqueCipherMode.open,
+  }) => runBlobCipherTask(
+    BlobCipherRequest(
+      mode: BlobCipherMode.open,
       keyBytes: secret ?? key(0),
       payload: file,
       entryId: entryId,
@@ -111,7 +111,7 @@ void main() {
 
       expect(
         () => open(sealed.bytes, secret: key(1)),
-        throwsA(isA<EditiqueCipherException>()),
+        throwsA(isA<BlobCipherException>()),
       );
     });
 
@@ -123,7 +123,7 @@ void main() {
 
       expect(
         () => open(sealed.bytes, entryId: 'c-2'),
-        throwsA(isA<EditiqueCipherException>()),
+        throwsA(isA<BlobCipherException>()),
       );
     });
 
@@ -131,18 +131,18 @@ void main() {
       final sealed = await seal();
       final altered = Uint8List.fromList(sealed.bytes)..[40] ^= 0xFF;
 
-      expect(() => open(altered), throwsA(isA<EditiqueCipherException>()));
+      expect(() => open(altered), throwsA(isA<BlobCipherException>()));
     });
 
     test('un fichier tronqué', () async {
       final sealed = await seal();
       final tronque = Uint8List.sublistView(sealed.bytes, 0, 20);
 
-      expect(() => open(tronque), throwsA(isA<EditiqueCipherException>()));
+      expect(() => open(tronque), throwsA(isA<BlobCipherException>()));
     });
 
     test('un fichier vide', () async {
-      expect(() => open(Uint8List(0)), throwsA(isA<EditiqueCipherException>()));
+      expect(() => open(Uint8List(0)), throwsA(isA<BlobCipherException>()));
     });
 
     // Un fichier étranger déposé dans le répertoire ne doit pas être pris pour
@@ -153,7 +153,7 @@ void main() {
         ...List<int>.filled(100, 0),
       ]);
 
-      expect(() => open(etranger), throwsA(isA<EditiqueCipherException>()));
+      expect(() => open(etranger), throwsA(isA<BlobCipherException>()));
     });
 
     // L'octet de version est ce qui permettra de changer d'algorithme ou de
@@ -163,13 +163,13 @@ void main() {
       final sealed = await seal();
       final futur = Uint8List.fromList(sealed.bytes)..[4] = 99;
 
-      expect(() => open(futur), throwsA(isA<EditiqueCipherException>()));
+      expect(() => open(futur), throwsA(isA<BlobCipherException>()));
     });
 
     test('une clé qui n a pas la bonne longueur', () async {
       expect(
         () => seal(secret: Uint8List(16)),
-        throwsA(isA<EditiqueCipherException>()),
+        throwsA(isA<BlobCipherException>()),
       );
     });
   });
@@ -179,8 +179,8 @@ void main() {
       final sealed = await seal();
 
       expect(
-        sealed.bytes.sublist(0, kEditiqueBlobHeaderLength),
-        equals([...kEditiqueBlobMagic, kEditiqueBlobFormatVersion]),
+        sealed.bytes.sublist(0, kBlobHeaderLength),
+        equals([...kBlobMagic, kBlobFormatVersion]),
       );
     });
 
@@ -188,7 +188,7 @@ void main() {
     test('ne laisse pas transparaître le clair', () async {
       final sealed = await seal();
       final entete = String.fromCharCodes(
-        sealed.bytes.sublist(kEditiqueBlobHeaderLength, 60),
+        sealed.bytes.sublist(kBlobHeaderLength, 60),
       );
 
       expect(entete.contains('%PDF'), isFalse);
@@ -200,17 +200,17 @@ void main() {
   // fonction appelée en direct.
   group('traversée d isolat', () {
     test('scelle et rouvre à travers compute()', () async {
-      final sealed = await offloadEditiqueCipher(
-        EditiqueCipherRequest(
-          mode: EditiqueCipherMode.seal,
+      final sealed = await offloadBlobCipher(
+        BlobCipherRequest(
+          mode: BlobCipherMode.seal,
           keyBytes: key(0),
           payload: pdf,
           entryId: 'c-1',
         ),
       );
-      final opened = await offloadEditiqueCipher(
-        EditiqueCipherRequest(
-          mode: EditiqueCipherMode.open,
+      final opened = await offloadBlobCipher(
+        BlobCipherRequest(
+          mode: BlobCipherMode.open,
           keyBytes: key(0),
           payload: sealed.bytes,
           entryId: 'c-1',
@@ -222,9 +222,9 @@ void main() {
     });
 
     test('remonte l échec d authentification depuis l isolat', () async {
-      final sealed = await offloadEditiqueCipher(
-        EditiqueCipherRequest(
-          mode: EditiqueCipherMode.seal,
+      final sealed = await offloadBlobCipher(
+        BlobCipherRequest(
+          mode: BlobCipherMode.seal,
           keyBytes: key(0),
           payload: pdf,
           entryId: 'c-1',
@@ -232,15 +232,15 @@ void main() {
       );
 
       expect(
-        () => offloadEditiqueCipher(
-          EditiqueCipherRequest(
-            mode: EditiqueCipherMode.open,
+        () => offloadBlobCipher(
+          BlobCipherRequest(
+            mode: BlobCipherMode.open,
             keyBytes: key(2),
             payload: sealed.bytes,
             entryId: 'c-1',
           ),
         ),
-        throwsA(isA<EditiqueCipherException>()),
+        throwsA(isA<BlobCipherException>()),
       );
     });
   });

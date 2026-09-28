@@ -2,14 +2,18 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:path/path.dart' as p;
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_cipher.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 
 /// Clé de magasin pilotée par le test : sa nouveauté, le nombre de fois qu'on
 /// la demande et sa capacité à échouer sont eux-mêmes des faits à vérifier.
-class _FakeKeyService implements EditiqueCacheKeyService {
+class _FakeKeyService implements BlobKeyService {
+  @override
+  String get storageKey => AppConstants.editiqueCacheKeyStorageKey;
+
   _FakeKeyService({int seed = 0, this.createdNow = false})
     : bytes = Uint8List.fromList(
         List<int>.generate(32, (i) => (i + seed) & 0xFF),
@@ -28,14 +32,14 @@ class _FakeKeyService implements EditiqueCacheKeyService {
   Duration delay = Duration.zero;
 
   @override
-  Future<EditiqueCacheKey> getOrCreate() async {
+  Future<BlobKey> getOrCreate() async {
     reads++;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     if (failures > 0) {
       failures--;
       throw const FileSystemException('secure storage indisponible');
     }
-    return EditiqueCacheKey(bytes: bytes, createdNow: createdNow);
+    return BlobKey(bytes: bytes, createdNow: createdNow);
   }
 
   @override
@@ -62,22 +66,23 @@ void main() {
     if (await base.exists()) await base.delete(recursive: true);
   });
 
-  EditiqueBlobStore storeWith({
+  EncryptedBlobStore storeWith({
     _FakeKeyService? keyService,
-    EditiqueCipherOffloader? cipher,
+    BlobCipherOffloader? cipher,
     Future<void> Function()? onKeyRotated,
-  }) => EditiqueBlobStore(
+  }) => EncryptedBlobStore(
+    directoryName: AppConstants.editiqueCacheDirectoryName,
     keyService: keyService ?? keys,
     // Le chemin d'isolat est exercé par le test du chiffrement lui-même ;
     // ici on veut des écritures déterministes et rapides.
-    cipher: cipher ?? runEditiqueCipherTask,
+    cipher: cipher ?? runBlobCipherTask,
     baseDirectory: () async => base,
     onKeyRotated: onKeyRotated,
   );
 
   /// Le geste complet — sceller puis publier — que le coordinateur découpe.
-  Future<EditiqueStoredBlob?> save(
-    EditiqueBlobStore store, {
+  Future<StoredBlob?> save(
+    EncryptedBlobStore store, {
     required String id,
     required Uint8List bytes,
   }) async {
@@ -86,9 +91,9 @@ void main() {
     return await store.commit(id) ? staged : null;
   }
 
-  Future<Uint8List?> bytesOf(EditiqueBlobStore store, String id) async {
+  Future<Uint8List?> bytesOf(EncryptedBlobStore store, String id) async {
     final read = await store.read(id);
-    return read is EditiqueBlobFound ? read.blob.bytes : null;
+    return read is BlobFound ? read.blob.bytes : null;
   }
 
   List<String> filesOnDisk() => cacheDir.existsSync()
@@ -152,7 +157,7 @@ void main() {
 
       await store.stage(id: 'c-1', bytes: pdf);
 
-      expect(await store.read('c-1'), isA<EditiqueBlobGone>());
+      expect(await store.read('c-1'), isA<BlobGone>());
       expect(filesOnDisk(), ['c-1.part']);
     });
 
@@ -190,7 +195,7 @@ void main() {
 
   group('lecture d une pièce qui ne répond pas', () {
     test('une pièce absente est perdue, pas indisponible', () async {
-      expect(await storeWith().read('jamais-vue'), isA<EditiqueBlobGone>());
+      expect(await storeWith().read('jamais-vue'), isA<BlobGone>());
     });
 
     // La DI offline est câblée AVANT l'authentification : constater un cache
@@ -209,14 +214,14 @@ void main() {
       final file = File(p.join(cacheDir.path, 'c-1.enc'));
       file.writeAsBytesSync(file.readAsBytesSync()..[30] ^= 0xFF);
 
-      expect(await store.read('c-1'), isA<EditiqueBlobGone>());
+      expect(await store.read('c-1'), isA<BlobGone>());
     });
 
     test('une pièce scellée par une autre clé est perdue', () async {
       await save(storeWith(), id: 'c-1', bytes: pdf);
 
       final autre = storeWith(keyService: _FakeKeyService(seed: 9));
-      expect(await autre.read('c-1'), isA<EditiqueBlobGone>());
+      expect(await autre.read('c-1'), isA<BlobGone>());
     });
 
     // Un fichier déplacé sur le nom d'une autre entrée : le sceau le refuse,
@@ -228,14 +233,11 @@ void main() {
         p.join(cacheDir.path, 'c-1.enc'),
       ).renameSync(p.join(cacheDir.path, 'c-2.enc'));
 
-      expect(await store.read('c-2'), isA<EditiqueBlobGone>());
+      expect(await store.read('c-2'), isA<BlobGone>());
     });
 
     test('un identifiant impropre est perdu, pas levé', () async {
-      expect(
-        await storeWith().read('../../etc/passwd'),
-        isA<EditiqueBlobGone>(),
-      );
+      expect(await storeWith().read('../../etc/passwd'), isA<BlobGone>());
     });
   });
 
@@ -247,7 +249,7 @@ void main() {
       await save(store, id: 'c-1', bytes: pdf);
 
       final apresPanne = storeWith(keyService: _FakeKeyService()..failures = 1);
-      expect(await apresPanne.read('c-1'), isA<EditiqueBlobUnavailable>());
+      expect(await apresPanne.read('c-1'), isA<BlobUnavailable>());
     });
 
     test('un calcul qui n aboutit pas rend indisponible', () async {
@@ -256,17 +258,18 @@ void main() {
       final store = storeWith(
         cipher: (_) async => throw StateError('isolat impossible'),
       );
-      expect(await store.read('c-1'), isA<EditiqueBlobUnavailable>());
+      expect(await store.read('c-1'), isA<BlobUnavailable>());
     });
 
     test('un répertoire de base introuvable rend indisponible', () async {
-      final store = EditiqueBlobStore(
+      final store = EncryptedBlobStore(
+        directoryName: AppConstants.editiqueCacheDirectoryName,
         keyService: keys,
-        cipher: runEditiqueCipherTask,
+        cipher: runBlobCipherTask,
         baseDirectory: () async => throw const FileSystemException('absent'),
       );
 
-      expect(await store.read('c-1'), isA<EditiqueBlobUnavailable>());
+      expect(await store.read('c-1'), isA<BlobUnavailable>());
     });
 
     // Un échec de résolution mémoïsé condamnerait le cache pour toute la durée
@@ -278,7 +281,7 @@ void main() {
       // disponible au démarrage.
       final store = storeWith(keyService: _FakeKeyService()..failures = 1);
 
-      expect(await store.read('c-1'), isA<EditiqueBlobUnavailable>());
+      expect(await store.read('c-1'), isA<BlobUnavailable>());
       expect(await bytesOf(store, 'c-1'), equals(pdf));
     });
   });
@@ -312,7 +315,7 @@ void main() {
       await save(store, id: 'c-1', bytes: pdf);
 
       expect(await store.delete('c-1'), isTrue);
-      expect(await store.read('c-1'), isA<EditiqueBlobGone>());
+      expect(await store.read('c-1'), isA<BlobGone>());
       expect(filesOnDisk(), isEmpty);
     });
 
@@ -355,7 +358,7 @@ void main() {
 
       expect(removed, 1);
       expect(await bytesOf(store, 'c-1'), equals(pdf));
-      expect(await store.read('c-2'), isA<EditiqueBlobGone>());
+      expect(await store.read('c-2'), isA<BlobGone>());
     });
 
     // Une écriture interrompue laisse un fichier d'attente ; hors écriture en
@@ -400,7 +403,7 @@ void main() {
       );
       final relu = await apresRestauration.read('c-1');
 
-      expect(relu, isA<EditiqueBlobUnavailable>());
+      expect(relu, isA<BlobUnavailable>());
       expect(await cacheDir.exists(), isFalse);
     });
 
@@ -452,7 +455,7 @@ void main() {
   group('pannes', () {
     test('un scellement qui échoue ne laisse aucun fichier', () async {
       final store = storeWith(
-        cipher: (_) async => throw const EditiqueCipherException('panne'),
+        cipher: (_) async => throw const BlobCipherException('panne'),
       );
 
       expect(await store.stage(id: 'c-1', bytes: pdf), isNull);
@@ -460,9 +463,10 @@ void main() {
     });
 
     test('un répertoire de base introuvable ne fait pas lever', () async {
-      final store = EditiqueBlobStore(
+      final store = EncryptedBlobStore(
+        directoryName: AppConstants.editiqueCacheDirectoryName,
         keyService: keys,
-        cipher: runEditiqueCipherTask,
+        cipher: runBlobCipherTask,
         baseDirectory: () async => throw const FileSystemException('absent'),
       );
 

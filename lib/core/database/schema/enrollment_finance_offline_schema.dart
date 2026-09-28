@@ -314,7 +314,7 @@ const TableSchema refSchoolTable = TableSchema(
 /// et fausse.
 ///
 /// Aucune éviction, aucun budget, aucune croissance. Réutiliser
-/// `EditiqueBlobStore` aurait au contraire coûté le logo : son
+/// `EncryptedBlobStore` aurait au contraire coûté le logo : son
 /// `reclaimOrphans()`, appelé au démarrage depuis `main.dart`, supprime tout
 /// fichier dont l'id n'est pas dans l'index `editique_cache_entries` — index
 /// dont le `doc_type` est contraint à `{AI, NP, RC, BU}`, où un logo n'entre
