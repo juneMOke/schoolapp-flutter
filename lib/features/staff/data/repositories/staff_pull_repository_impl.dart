@@ -2,10 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_pull_repository.dart';
 
 /// Clé `sync_meta` d'un flux, **scopée par école** : sur une tablette
@@ -14,14 +18,17 @@ import 'package:school_app_flutter/features/staff/domain/repositories/staff_pull
 String staffCursorKey(String resource, String schoolId) =>
     '$resource@$schoolId';
 
-/// Les trois descentes du fichier du personnel, sur le squelette partagé
-/// [KeysetPullRunner].
+/// Les descentes du module RH — les trois du fichier du personnel, les deux
+/// du Pointage —, sur le squelette partagé [KeysetPullRunner].
 class StaffPullRepositoryImpl implements StaffPullRepository {
   final StaffSyncApi _api;
   final KeysetPullRunner _runner;
   final StaffMemberDao _members;
   final StaffContractDao _contracts;
   final StaffDocumentDao _documents;
+  final StaffAttendanceSyncApi _attendanceApi;
+  final StaffAttendanceDao _attendance;
+  final StaffAttendanceLockDao _locks;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _requiredAuth;
 
@@ -33,7 +40,13 @@ class StaffPullRepositoryImpl implements StaffPullRepository {
     required StaffDocumentDao documents,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> requiredAuth,
+    required StaffAttendanceSyncApi attendanceApi,
+    required StaffAttendanceDao attendance,
+    required StaffAttendanceLockDao locks,
   }) : _api = api,
+       _attendanceApi = attendanceApi,
+       _attendance = attendance,
+       _locks = locks,
        _runner = runner,
        _members = members,
        _contracts = contracts,
@@ -70,6 +83,27 @@ class StaffPullRepositoryImpl implements StaffPullRepository {
         (await _api.pullStaffDocuments(_requiredAuth, cursor, pageLimit)).data,
     apply: (items, schoolId, nowMs) =>
         _documents.applyPulled(items, schoolId: schoolId, nowMs: nowMs),
+  );
+
+  @override
+  Future<Either<Failure, KeysetPullResult>> syncAttendance() => _run(
+    kStaffAttendanceResource,
+    fetch: (cursor) async => (await _attendanceApi.pullAttendance(
+      _requiredAuth,
+      cursor,
+      pageLimit,
+    )).data,
+    apply: (items, schoolId, nowMs) =>
+        _attendance.applyPulled(items, schoolId: schoolId, nowMs: nowMs),
+  );
+
+  @override
+  Future<Either<Failure, KeysetPullResult>> syncAttendanceLocks() => _run(
+    kStaffAttendanceLocksResource,
+    fetch: (cursor) async =>
+        (await _attendanceApi.pullLocks(_requiredAuth, cursor, pageLimit)).data,
+    apply: (items, schoolId, nowMs) =>
+        _locks.applyServer(items, schoolId: schoolId, nowMs: nowMs),
   );
 
   Future<Either<Failure, KeysetPullResult>> _run<I>(

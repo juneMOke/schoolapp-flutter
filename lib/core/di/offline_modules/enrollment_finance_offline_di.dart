@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:dio/dio.dart';
@@ -475,6 +476,13 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
           getIt<StaffDocumentTypeDao>().replaceForSchool(
             types,
             schoolId: schoolId,
+          ),
+      // Septième seam, scopé ÉCOLE : les réglages du Pointage RH.
+      applyStaffAttendanceSettings: (settings, schoolId) =>
+          getIt<StaffAttendanceSettingsDao>().applySeed(
+            settings,
+            schoolId: schoolId,
+            nowMs: DateTime.now().millisecondsSinceEpoch,
           ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),

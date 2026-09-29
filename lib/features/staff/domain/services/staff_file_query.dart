@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 
 /// Le filtre « contrat » de la liste : un statut, ou les agents sans contrat.
 enum StaffContractFilter {
@@ -61,28 +61,7 @@ class StaffFileQuery extends Equatable {
     if (category != null && row.member.category != category) return false;
     if (contract != null && !contract!.matches(row.kind)) return false;
     if (incompleteOnly && !row.isIncomplete) return false;
-    return _matchesText(row);
-  }
-
-  /// Chaque mot tapé doit se trouver quelque part — nom, post-nom, prénom,
-  /// matricule, fonction ou matières —, sans égard à la casse ni aux accents.
-  bool _matchesText(StaffFileRow row) {
-    final words = SearchNormalizationHelper.normalize(
-      text,
-    ).split(RegExp(r'\s+')).where((word) => word.isNotEmpty);
-    if (words.isEmpty) return true;
-    final member = row.member;
-    final haystack = SearchNormalizationHelper.normalize(
-      [
-        member.lastName,
-        member.middleName,
-        member.firstName,
-        member.staffNumber,
-        member.jobTitle,
-        ...member.branches,
-      ].whereType<String>().join(' '),
-    );
-    return words.every(haystack.contains);
+    return StaffMemberSearch.matches(row.member, text);
   }
 
   StaffFileQuery _copy({

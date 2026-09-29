@@ -1,5 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -43,6 +47,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 /// arrivent par le référentiel, qui écrit `ref_staff_document_types` par un
 /// seam résolvant [StaffDocumentTypeDao] paresseusement.
 void registerStaffOffline(GetIt getIt) {
+  registerStaffAttendanceStorage(getIt);
   getIt.registerLazySingleton<StaffMemberDao>(
     () => StaffMemberDao(getIt<Database>()),
   );
@@ -144,6 +149,9 @@ void registerStaffOffline(GetIt getIt) {
       members: getIt<StaffMemberDao>(),
       contracts: getIt<StaffContractDao>(),
       documents: getIt<StaffDocumentDao>(),
+      attendanceApi: getIt<StaffAttendanceSyncApi>(),
+      attendance: getIt<StaffAttendanceDao>(),
+      locks: getIt<StaffAttendanceLockDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
@@ -153,6 +161,8 @@ void registerStaffOffline(GetIt getIt) {
   coordinator.registerHandler(StaffPullHandler.members(pulls));
   coordinator.registerHandler(StaffPullHandler.contracts(pulls));
   coordinator.registerHandler(StaffPullHandler.documents(pulls));
+  coordinator.registerHandler(StaffPullHandler.attendance(pulls));
+  coordinator.registerHandler(StaffPullHandler.attendanceLocks(pulls));
 
   // ── Remontée → SyncEngine ───────────────────────────────────────────────
   // Trois gestes, trois entrées : la pose d'un contrat attend l'accusé de sa
@@ -185,4 +195,5 @@ void registerStaffOffline(GetIt getIt) {
   );
 
   registerStaffDocuments(getIt);
+  registerStaffAttendance(getIt);
 }

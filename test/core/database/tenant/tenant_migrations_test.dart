@@ -225,12 +225,67 @@ void main() {
       Future<Set<String>> indexes(Database d) async => {
         for (final r in await d.rawQuery(
           "SELECT name FROM sqlite_master WHERE type = 'index' "
-          "AND name LIKE 'idx_staff%'",
+          "AND name LIKE 'idx_staff%' AND name NOT LIKE 'idx_staff_attendance%'",
         ))
           r['name']! as String,
       };
       expect(await indexes(db), await indexes(fresh));
       expect(await indexes(db), hasLength(4));
+    });
+  });
+
+  group('v56 — le Pointage du personnel', () {
+    const tables = [
+      'staff_attendance_records',
+      'staff_attendance_locks',
+      'staff_attendance_gestures',
+      'ref_staff_attendance_settings',
+    ];
+
+    Future<void> seedAvant() async {
+      for (final table in tables) {
+        await db.execute('DROP TABLE $table');
+      }
+    }
+
+    test('les quatre tables et leurs index arrivent, vides', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 55);
+
+      expect(await _tables(db), containsAll(tables));
+      for (final table in tables) {
+        expect(await db.query(table), isEmpty, reason: table);
+      }
+      final indexes = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'index' "
+        "AND name LIKE 'idx_staff_attendance%'",
+      );
+      expect(indexes, hasLength(3));
+    });
+
+    test('rejouable sans lever, index unique compris', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 55);
+      await expectLater(migrateTenantDatabase(db, 55), completes);
+    });
+
+    test('un agent n a qu un pointage par jour', () async {
+      Map<String, Object?> row(String id) => {
+        'id': id,
+        'school_id': 's-1',
+        'staff_member_id': 'm-1',
+        'work_date': '2026-09-29',
+        'status': 'PRESENT',
+        'client_updated_at': '2026-09-29T08:00:00Z',
+      };
+      await db.insert('staff_attendance_records', row('r-1'));
+
+      await expectLater(
+        db.insert('staff_attendance_records', row('r-2')),
+        throwsA(isA<DatabaseException>()),
+      );
     });
   });
 

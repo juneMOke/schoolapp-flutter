@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
@@ -12,6 +10,7 @@ import 'package:school_app_flutter/features/staff/data/local/staff_document_type
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_mapping.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
+import 'package:school_app_flutter/features/staff/data/repositories/staff_local_writer.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_member_input_mapper.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
@@ -34,13 +33,10 @@ class StaffRepositoryImpl implements StaffRepository {
   final StaffDocumentTypeDao _types;
   final SyncMetaDao _syncMeta;
   final CurrentUserContext _currentUser;
-
-  /// Relance le flush après une écriture ; `null` dans les tests qui n'en
-  /// ont pas besoin.
-  final SyncEngine? _syncEngine;
+  final StaffLocalWriter _local;
   final DateTime Function() _now;
 
-  const StaffRepositoryImpl({
+  StaffRepositoryImpl({
     required StaffMemberDao members,
     required StaffContractDao contracts,
     required StaffMemberWriteDao writer,
@@ -57,7 +53,10 @@ class StaffRepositoryImpl implements StaffRepository {
        _types = types,
        _syncMeta = syncMeta,
        _currentUser = currentUser,
-       _syncEngine = syncEngine,
+       _local = StaffLocalWriter(
+         currentUser: currentUser,
+         syncEngine: syncEngine,
+       ),
        _now = now;
 
   /// Nom → Post-nom → Prénom, accents et casse repliés : `COLLATE NOCASE`
@@ -127,11 +126,8 @@ class StaffRepositoryImpl implements StaffRepository {
 
   @override
   Future<Either<Failure, Unit>> saveMember(StaffMemberDraft draft) async {
-    final schoolId = _currentUser.schoolId ?? '';
-    final authorId = _currentUser.uid;
-    if (schoolId.isEmpty || authorId == null) {
-      return const Left(AuthFailure('Aucune session pour enregistrer'));
-    }
+    final session = _local.session();
+    if (session == null) return const Left(StaffLocalWriter.noSession);
     final now = _now();
     final input = StaffMemberInputMapper.of(
       draft,
@@ -140,21 +136,17 @@ class StaffRepositoryImpl implements StaffRepository {
     if (input == null) {
       return const Left(ValidationFailure('Fiche incomplète'));
     }
-    try {
-      await _writer.save(
+    return _local.run(
+      'Écriture de la fiche',
+      () => _writer.save(
         request: StaffMemberSyncRequestDto(
           staffMember: input,
-          authorId: authorId,
+          authorId: session.authorId,
         ),
-        schoolId: schoolId,
+        schoolId: session.schoolId,
         nowMs: now.millisecondsSinceEpoch,
-      );
-    } catch (e) {
-      return Left(StorageFailure('Écriture de la fiche : $e'));
-    }
-    final engine = _syncEngine;
-    if (engine != null) unawaited(engine.flush());
-    return const Right(unit);
+      ),
+    );
   }
 
   /// La frise de la fiche complétée par les périodes que le poste connaît

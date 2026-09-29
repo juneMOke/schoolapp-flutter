@@ -779,7 +779,11 @@ class AppConstants {
   // `ref_staff_document_types`, `staff_members`, `staff_contracts`,
   // `staff_documents`. Création pure, aucune reprise : le fichier naît vide et
   // se remplit au premier pull des flux `hr.*`. Palier d'école.
-  static const int offlineDbSchemaVersion = 55;
+  // v56 (2026-09-29) : le Pointage du personnel (RH, sous-module B) —
+  // `staff_attendance_records`, `staff_attendance_locks`,
+  // `staff_attendance_gestures`, `ref_staff_attendance_settings`. Création
+  // pure. Palier d'école.
+  static const int offlineDbSchemaVersion = 56;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1037,6 +1041,21 @@ class AppConstants {
   /// Descente des métadonnées des pièces (flux `hr.staff-documents`).
   static const String syncStaffDocumentsEndpoint =
       '/api/v1/sync/staff-documents';
+
+  /// Pointage du personnel : remontée d'**un** pointage par requête (POST,
+  /// `hr.attendance.write`) et descente (GET, flux `hr.staff-attendance`).
+  static const String syncStaffAttendanceEndpoint =
+      '/api/v1/sync/staff-attendance';
+
+  /// Gestes de verrou (POST, un par requête : `VALIDATE_DAY`, `REOPEN_DAY`,
+  /// `CLOSE_MONTH`) et descente des jours validés et mois clos (GET, flux
+  /// `hr.staff-attendance-locks`).
+  static const String syncStaffAttendanceLocksEndpoint =
+      '/api/v1/sync/staff-attendance-locks';
+
+  /// Réglages du Pointage (PUT, `hr.attendance.manage`, dernier écrit gagne).
+  static const String syncStaffAttendanceSettingsEndpoint =
+      '/api/v1/sync/staff-attendance-settings';
 
   /// Octets d'une pièce, à la demande (`ETag` = empreinte SHA-256).
   static const String staffDocumentContentEndpoint =

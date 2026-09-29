@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_seed.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/ref_staff_document_type_dto.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
 
@@ -81,6 +82,10 @@ class ReferentialBundleDto {
   /// le cache reste tel quel.
   final List<RefStaffDocumentTypeDto>? staffDocumentTypes;
 
+  /// Début des cours et tolérance du Pointage RH. À la racine ; `null` =
+  /// serveur d'avant le module ou section illisible, le cache reste.
+  final StaffAttendanceSettingsSeed? staffAttendanceSettings;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -92,6 +97,7 @@ class ReferentialBundleDto {
     this.feeCodeSections,
     this.expenseTypes,
     this.staffDocumentTypes,
+    this.staffAttendanceSettings,
     required this.serverTime,
   });
 
@@ -122,6 +128,9 @@ class ReferentialBundleDto {
     expenseTypes: RefExpenseTypeDto.listOrNull(j['expenseTypes']),
     staffDocumentTypes: RefStaffDocumentTypeDto.listOrNull(
       j['staffDocumentTypes'],
+    ),
+    staffAttendanceSettings: StaffAttendanceSettingsSeed.tryParse(
+      j['staffAttendanceSettings'],
     ),
     serverTime: j['serverTime'] as String,
   );

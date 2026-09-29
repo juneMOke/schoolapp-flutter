@@ -122,6 +122,14 @@ enum Perm {
   hrPayWrite('hr.pay.write'),
   hrDocumentRead('hr.document.read'),
   hrDocumentWrite('hr.document.write'),
+  // Le Pointage du personnel (sous-module B), arrêté avec le back le
+  // 2026-09-29 : `read` voit le registre, `write` pointe, justifie, efface,
+  // valide et rouvre le jour ; `manage` règle l'heure de début et la
+  // tolérance, et clôt le mois. DIRECTOR et SUPER_ADMIN les trois,
+  // ACADEMIC_ADMIN read et write.
+  hrAttendanceRead('hr.attendance.read'),
+  hrAttendanceWrite('hr.attendance.write'),
+  hrAttendanceManage('hr.attendance.manage'),
 
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),
