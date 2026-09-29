@@ -1,4 +1,7 @@
+import 'package:school_app_flutter/features/enrollment/offline/data/sync/ref_staff_document_type_dto.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
+
+export 'package:school_app_flutter/features/enrollment/offline/data/sync/ref_staff_document_type_dto.dart';
 
 // Pull du socle référentiel — `GET /api/v1/sync/referential`
 // (miroir `openApi.yaml`, amendé par `PLAN_referential_current_previous_FRONT.md`).
@@ -73,6 +76,11 @@ class ReferentialBundleDto {
   /// lecture que [feeCodeSections].
   final List<RefExpenseTypeDto>? expenseTypes;
 
+  /// Les pièces du dossier d'un agent RH et les contrats qui les exigent. À la
+  /// racine, comme les types de dépense ; `null` = serveur d'avant le module,
+  /// le cache reste tel quel.
+  final List<RefStaffDocumentTypeDto>? staffDocumentTypes;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -83,6 +91,7 @@ class ReferentialBundleDto {
     this.logoRefs,
     this.feeCodeSections,
     this.expenseTypes,
+    this.staffDocumentTypes,
     required this.serverTime,
   });
 
@@ -111,6 +120,9 @@ class ReferentialBundleDto {
     // Hors de `pullList` lui aussi : `null` doit rester `null`.
     feeCodeSections: RefFeeCodeSectionDto.listOrNull(j['feeCodeSections']),
     expenseTypes: RefExpenseTypeDto.listOrNull(j['expenseTypes']),
+    staffDocumentTypes: RefStaffDocumentTypeDto.listOrNull(
+      j['staffDocumentTypes'],
+    ),
     serverTime: j['serverTime'] as String,
   );
 }

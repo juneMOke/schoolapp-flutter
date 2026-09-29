@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
 import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
@@ -127,6 +128,15 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   )
   replaceExpenseTypes;
 
+  /// Seam vers le module RH pour les **pièces du dossier** d'un agent, scopé
+  /// ÉCOLE comme les types de dépense : la section `staffDocumentTypes`
+  /// descend à la racine du bundle, et `enrollment` n'importe pas le module RH.
+  final Future<void> Function(
+    List<StaffDocumentTypeLocalModel> types,
+    String schoolId,
+  )
+  replaceStaffDocumentTypes;
+
   /// Seam vers l'identité de l'école pour le **logo**, même raison que
   /// [replaceTariffs] : le bundle porte les empreintes, mais `enrollment` n'a
   /// rien à savoir d'un cache d'images ni d'une route d'octets. L'isolation du
@@ -173,6 +183,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceReductionCatalog,
     required this.replaceFeeCodeSections,
     required this.replaceExpenseTypes,
+    required this.replaceStaffDocumentTypes,
     required this.syncSchoolLogo,
     required this.syncMetaDao,
     required this.requiredAuth,
@@ -503,12 +514,17 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     final reductionsApplied = await _applyReductionCatalog(body, syncedAt);
     final sectionsApplied = await _applyFeeCodeSections(body, syncedAt);
     final expenseTypesApplied = await _applyExpenseTypes(body, syncedAt);
+    final staffDocumentTypesApplied = await _applyStaffDocumentTypes(
+      body,
+      syncedAt,
+    );
     if (tariffBundles.isEmpty) {
       return upserted +
           boutiqueApplied +
           reductionsApplied +
           sectionsApplied +
-          expenseTypesApplied;
+          expenseTypesApplied +
+          staffDocumentTypesApplied;
     }
 
     final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
@@ -547,7 +563,37 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         boutiqueApplied +
         reductionsApplied +
         sectionsApplied +
-        expenseTypesApplied;
+        expenseTypesApplied +
+        staffDocumentTypesApplied;
+  }
+
+  /// Pièces du dossier RH du bundle → `ref_staff_document_types`, par le seam
+  /// [replaceStaffDocumentTypes]. Même lecture que [_applyExpenseTypes] :
+  /// `null` = section non communiquée, le cache reste ; l'ordre de la liste
+  /// fait foi ; `schoolId` vient de [currentUser], jamais du payload.
+  Future<int> _applyStaffDocumentTypes(
+    ReferentialBundleDto body,
+    int syncedAt,
+  ) async {
+    final types = body.staffDocumentTypes;
+    if (types == null) return 0;
+
+    final schoolId = currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return 0;
+
+    await replaceStaffDocumentTypes([
+      for (final (index, type) in types.indexed)
+        StaffDocumentTypeLocalModel(
+          schoolId: schoolId,
+          code: type.code,
+          label: type.label,
+          alwaysRequired: type.alwaysRequired,
+          requiredFor: type.requiredFor,
+          sortOrder: index,
+          syncedAt: syncedAt,
+        ),
+    ], schoolId);
+    return types.length;
   }
 
   /// Types de dépense du bundle → `ref_expense_types`, par le seam

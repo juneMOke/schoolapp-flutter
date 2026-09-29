@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/database/schema/configuration_offline_sc
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/expense_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Table `outbox` — file d'écriture différée idempotente (socle).
@@ -110,4 +111,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...configurationOfflineTables, // Configuration — brouillon de mise en service
   ...boutiqueOfflineTables, // Boutique — caisse point-de-vente (ADR-020)
   ...expenseOfflineTables, // Dépenses — registre des frais de fonctionnement
+  ...staffOfflineTables, // RH — fichier du personnel
 ];

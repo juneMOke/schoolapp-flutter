@@ -775,7 +775,11 @@ class AppConstants {
   // `PAYMENT_CORRECTION`) et `payments.replaces_payment_id`. L'annulation
   // locale vit dans la correction, jamais dans `payments.cancelled_at`, que le
   // serveur seul pose. Palier d'école.
-  static const int offlineDbSchemaVersion = 54;
+  // v55 (2026-09-29) : le fichier du personnel (RH, sous-module A) —
+  // `ref_staff_document_types`, `staff_members`, `staff_contracts`,
+  // `staff_documents`. Création pure, aucune reprise : le fichier naît vide et
+  // se remplit au premier pull des flux `hr.*`. Palier d'école.
+  static const int offlineDbSchemaVersion = 55;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -998,6 +1002,36 @@ class AppConstants {
   /// c'est ce qui permet au validateur d'écrire dans le fil d'un collègue.
   static const String syncExpenseMessagesEndpoint =
       '/api/v1/sync/expenses/{expenseId}/messages';
+
+  // ── Offline sync — Fichier du personnel (RH) ──
+  /// Fiche d'un agent : remontée (POST, idempotente, dernier écrit gagne) et
+  /// descente (GET, flux `hr.staff-members`, frise des contrats sans montants).
+  static const String syncStaffMembersEndpoint = '/api/v1/sync/staff-members';
+
+  /// Pose d'une période de contrat datée (ajout seul, `hr.pay.write`).
+  static const String syncStaffContractsOfMemberEndpoint =
+      '/api/v1/sync/staff-members/{staffMemberId}/contracts';
+
+  /// Correction d'une période saisie par erreur (remplaçant atomique).
+  static const String syncStaffContractCorrectionsEndpoint =
+      '/api/v1/sync/staff-contract-corrections';
+
+  /// Descente des contrats **avec** montants (flux `hr.staff-contracts`,
+  /// `hr.pay.read`).
+  static const String syncStaffContractsEndpoint =
+      '/api/v1/sync/staff-contracts';
+
+  /// Versement d'une pièce (multipart `metadata` + `file`, `hr.document.write`).
+  static const String syncStaffDocumentsOfMemberEndpoint =
+      '/api/v1/sync/staff-members/{staffMemberId}/documents';
+
+  /// Descente des métadonnées des pièces (flux `hr.staff-documents`).
+  static const String syncStaffDocumentsEndpoint =
+      '/api/v1/sync/staff-documents';
+
+  /// Octets d'une pièce, à la demande (`ETag` = empreinte SHA-256).
+  static const String staffDocumentContentEndpoint =
+      '/api/v1/hr/staff-documents/{documentId}/content';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

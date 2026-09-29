@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
+import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -45,6 +46,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(54)) {
     await _paymentCorrections(db);
+  }
+  if (upTo(55)) {
+    await _staffFile(db);
   }
 }
 
@@ -128,6 +132,24 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
     );
   }
   await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));
+}
+
+/// v55 — le fichier du personnel : quatre tables neuves, création pure.
+///
+/// ⚠️ Gardes `IF NOT EXISTS`, même raison qu'à la v54 : une base héritée
+/// adoptée repasse par cet escalier.
+Future<void> _staffFile(DatabaseExecutor db) async {
+  for (final table in staffOfflineTables) {
+    await db.execute(
+      table.createTableSql.replaceFirst(
+        'CREATE TABLE ${table.name}',
+        'CREATE TABLE IF NOT EXISTS ${table.name}',
+      ),
+    );
+    for (final sql in table.createIndexSql) {
+      await db.execute(_ifNotExists(sql));
+    }
+  }
 }
 
 String _ifNotExists(String createIndexSql) =>

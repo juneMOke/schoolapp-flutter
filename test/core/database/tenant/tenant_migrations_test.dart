@@ -170,6 +170,70 @@ void main() {
     });
   });
 
+  group('v55 — le fichier du personnel', () {
+    const tables = [
+      'ref_staff_document_types',
+      'staff_members',
+      'staff_contracts',
+      'staff_documents',
+    ];
+
+    Future<void> seedAvant() async {
+      for (final table in tables) {
+        await db.execute('DROP TABLE $table');
+      }
+    }
+
+    test('les quatre tables arrivent, vides', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 54);
+
+      expect(await _tables(db), containsAll(tables));
+      for (final table in tables) {
+        expect(await db.query(table), isEmpty, reason: table);
+      }
+    });
+
+    test('rejouable sans lever', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 54);
+      await expectLater(migrateTenantDatabase(db, 54), completes);
+    });
+
+    test('une base montée et une base neuve ont les mêmes colonnes, '
+        'dans le même ordre, et les mêmes index', () async {
+      await seedAvant();
+      await migrateTenantDatabase(db, 54);
+
+      final fresh = await databaseFactoryFfi.openDatabase(
+        inMemoryDatabasePath,
+        options: OpenDatabaseOptions(singleInstance: false),
+      );
+      addTearDown(fresh.close);
+      await createOfflineSchema(fresh, buildOfflineSchema());
+
+      Future<List<String>> of(Database d, String table) async => [
+        for (final r in await d.rawQuery('PRAGMA table_info($table)'))
+          r['name']! as String,
+      ];
+      for (final table in tables) {
+        expect(await of(db, table), await of(fresh, table), reason: table);
+      }
+
+      Future<Set<String>> indexes(Database d) async => {
+        for (final r in await d.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type = 'index' "
+          "AND name LIKE 'idx_staff%'",
+        ))
+          r['name']! as String,
+      };
+      expect(await indexes(db), await indexes(fresh));
+      expect(await indexes(db), hasLength(4));
+    });
+  });
+
   group('v54 — la correction d un versement', () {
     Future<Set<String>> colonnes(String table) async => {
       for (final r in await db.rawQuery('PRAGMA table_info($table)'))
