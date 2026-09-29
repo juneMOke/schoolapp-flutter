@@ -561,4 +561,8 @@ class AppDimensions {
 
   /// Hauteur plancher d'une ligne du tableau.
   static const staffTableRowMinHeight = 60.0;
+
+  /// Largeur plafond du formulaire de la page agent : au-delà, les lignes de
+  /// champs s'étirent sans rien apporter.
+  static const staffAgentBodyMaxWidth = 960.0;
 }

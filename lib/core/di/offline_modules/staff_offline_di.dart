@@ -1,5 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_member_sync_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_outbox_handler.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_repository_impl.dart';
@@ -32,6 +36,12 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerLazySingleton<StaffMemberDao>(
     () => StaffMemberDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<StaffMemberWriteDao>(
+    () => StaffMemberWriteDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<StaffMemberSyncDao>(
+    () => StaffMemberSyncDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<StaffContractDao>(
     () => StaffContractDao(getIt<Database>()),
   );
@@ -47,14 +57,22 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerLazySingleton<StaffRepository>(
     () => StaffRepositoryImpl(
       members: getIt<StaffMemberDao>(),
+      writer: getIt<StaffMemberWriteDao>(),
       documents: getIt<StaffDocumentDao>(),
       types: getIt<StaffDocumentTypeDao>(),
       syncMeta: getIt<SyncMetaDao>(),
       currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
   getIt.registerFactory<LoadStaffFileUseCase>(
     () => LoadStaffFileUseCase(getIt<StaffRepository>()),
+  );
+  getIt.registerFactory<SaveStaffMemberUseCase>(
+    () => SaveStaffMemberUseCase(getIt<StaffRepository>()),
+  );
+  getIt.registerFactory<LoadStaffMemberUseCase>(
+    () => LoadStaffMemberUseCase(getIt<StaffRepository>()),
   );
   getIt.registerFactory<SyncStaffPullsUseCase>(
     () => SyncStaffPullsUseCase(getIt<PullCoordinator>()),
@@ -93,4 +111,14 @@ void registerStaffOffline(GetIt getIt) {
   coordinator.registerHandler(StaffPullHandler.members(pulls));
   coordinator.registerHandler(StaffPullHandler.contracts(pulls));
   coordinator.registerHandler(StaffPullHandler.documents(pulls));
+
+  // ── Remontée → SyncEngine ───────────────────────────────────────────────
+  getIt<SyncEngine>().registerHandler(
+    StaffMemberOutboxHandler(
+      api: getIt<StaffSyncApi>(),
+      dao: getIt<StaffMemberSyncDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
 }

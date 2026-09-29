@@ -140,6 +140,10 @@ const ModuleAccess kAttendanceAmendAccess = ModuleAccess([
 /// silence, sur une saisie que l'économe croit enregistrée.
 const ModuleAccess kExpenseWriteAccess = ModuleAccess([Perm.expenseWrite]);
 
+/// Créer ou modifier la fiche d'un agent (`POST /sync/staff-members`). Poser
+/// un contrat et verser une pièce ont leurs propres droits.
+const ModuleAccess kStaffWriteAccess = ModuleAccess([Perm.hrStaffWrite]);
+
 /// Retirer une dépense du registre, ou la restaurer
 /// (`POST /sync/expenses/{id}/deletion`). Retirer n'est pas saisir : une école
 /// peut confier l'un sans l'autre.

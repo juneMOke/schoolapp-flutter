@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_push_dto.dart';
 
 part 'staff_sync_api.g.dart';
 
@@ -16,6 +17,14 @@ part 'staff_sync_api.g.dart';
 @RestApi()
 abstract class StaffSyncApi {
   factory StaffSyncApi(Dio dio, {String baseUrl}) = _StaffSyncApi;
+
+  /// Remontée d'une fiche entière (idempotente, dernier écrit gagne). Le
+  /// corps est le payload figé de l'outbox, relu tel quel.
+  @POST(AppConstants.syncStaffMembersEndpoint)
+  Future<StaffMemberSyncResponseDto> submitStaffMember(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
 
   @GET(AppConstants.syncStaffMembersEndpoint)
   Future<HttpResponse<StaffMemberPageDto>> pullStaffMembers(

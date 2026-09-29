@@ -466,4 +466,9 @@ class AppColors {
   /// l'ocre `#A66A00` de la maquette n'y tient que 4,48:1 — sous le seuil.
   /// 5,7:1 sur blanc, 5,4:1 sur le fond de page, 4,9:1 sur papier.
   static const staffPartialInk = Color(0xFF8F5C00);
+
+  /// Couleur de l'étape « Diplômes & pièces » de la page agent : filet et
+  /// médaillon seulement, jamais une encre de texte. Absente des jetons de la
+  /// maquette, créée ici (amendement A10 du back).
+  static const staffStepDocuments = Color(0xFF9D174D);
 }

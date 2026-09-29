@@ -11639,4 +11639,261 @@ class AppLocalizationsFr extends AppLocalizations {
   String staffErrorIncidentCode(String code) {
     return 'Code incident : $code';
   }
+
+  @override
+  String get staffAgentNew => 'Nouvel agent';
+
+  @override
+  String staffAgentStepEyebrow(int step, int total) {
+    return 'Nouvel agent · étape $step sur $total';
+  }
+
+  @override
+  String get staffAgentEditEyebrow => 'Modification du profil';
+
+  @override
+  String get staffStepIdentity => 'Identité & contacts';
+
+  @override
+  String get staffStepAddress => 'Adresse';
+
+  @override
+  String get staffStepJob => 'Poste & contrat';
+
+  @override
+  String get staffStepDocuments => 'Diplômes & pièces';
+
+  @override
+  String get staffBlockIdentification => 'Identification';
+
+  @override
+  String get staffBlockIdentificationHint =>
+      'Tels qu\'écrits sur la pièce d\'identité';
+
+  @override
+  String get staffBlockContacts => 'Contacts';
+
+  @override
+  String get staffFieldLastName => 'Nom';
+
+  @override
+  String get staffFieldMiddleName => 'Post-nom';
+
+  @override
+  String get staffFieldFirstName => 'Prénom';
+
+  @override
+  String get staffFieldSex => 'Sexe';
+
+  @override
+  String get staffSexMale => 'Masculin';
+
+  @override
+  String get staffSexFemale => 'Féminin';
+
+  @override
+  String get staffFieldBirthDate => 'Date de naissance';
+
+  @override
+  String get staffFieldPhone => 'Téléphone';
+
+  @override
+  String get staffFieldEmail => 'E-mail';
+
+  @override
+  String get staffFieldStaffNumber => 'Matricule';
+
+  @override
+  String get staffBlockAddress => 'Adresse de résidence';
+
+  @override
+  String get staffBlockAddressHint =>
+      'District, commune puis quartier — le code postal est déduit';
+
+  @override
+  String get staffFieldCity => 'Ville';
+
+  @override
+  String get staffFieldDistrict => 'District';
+
+  @override
+  String get staffFieldMunicipality => 'Commune';
+
+  @override
+  String get staffFieldNeighborhood => 'Quartier';
+
+  @override
+  String get staffFieldAddress => 'Complément';
+
+  @override
+  String get staffFieldAddressPlaceholder => 'N° et avenue, repère…';
+
+  @override
+  String get staffPickDistrictFirst => 'Choisissez d\'abord un district';
+
+  @override
+  String get staffPickMunicipalityFirst => 'Choisissez d\'abord une commune';
+
+  @override
+  String get staffBlockJob => 'Poste';
+
+  @override
+  String get staffBlockJobHint => 'Ce que l\'agent fait à l\'école';
+
+  @override
+  String get staffFieldCategory => 'Catégorie';
+
+  @override
+  String get staffFieldJob => 'Fonction';
+
+  @override
+  String get staffPickCategoryFirst => 'Choisissez d\'abord une catégorie';
+
+  @override
+  String get staffFieldEntryDate => 'Date d\'entrée';
+
+  @override
+  String staffSeniority(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years ans d\'ancienneté',
+      one: '1 an d\'ancienneté',
+      zero: 'Moins d\'un an d\'ancienneté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffFieldBranches => 'Matières';
+
+  @override
+  String get staffBranchAdd => 'Ajouter une matière';
+
+  @override
+  String get staffBranchPlaceholder => 'Ex. Mathématiques';
+
+  @override
+  String get staffBranchAddAction => 'Ajouter';
+
+  @override
+  String get staffValueNotSet => 'Non renseigné';
+
+  @override
+  String get staffBlockDiplomas => 'Diplômes';
+
+  @override
+  String get staffBlockDiplomasHint => 'Du plus élevé au plus ancien';
+
+  @override
+  String get staffBlockDiplomasCreateHint =>
+      'Facultatif maintenant — le dossier peut être complété plus tard';
+
+  @override
+  String get staffFieldDiplomaLevel => 'Niveau';
+
+  @override
+  String get staffFieldDiplomaTitle => 'Intitulé';
+
+  @override
+  String get staffFieldDiplomaInstitution => 'Établissement';
+
+  @override
+  String get staffFieldDiplomaYear => 'Année';
+
+  @override
+  String get staffDiplomaAdd => 'Ajouter un diplôme';
+
+  @override
+  String get staffDiplomaRemove => 'Retirer ce diplôme';
+
+  @override
+  String get staffDiplomasNone => 'Aucun diplôme déclaré';
+
+  @override
+  String get staffFieldRequired => 'Champ requis';
+
+  @override
+  String get staffFieldPhoneIncomplete =>
+      'Numéro incomplet (+243 et 9 chiffres)';
+
+  @override
+  String get staffFieldEmailInvalid => 'Adresse e-mail invalide';
+
+  @override
+  String get staffFieldDateInFuture => 'La date ne peut pas être dans le futur';
+
+  @override
+  String get staffFieldDiplomaIncomplete =>
+      'Un diplôme doit avoir un niveau et un intitulé';
+
+  @override
+  String get staffDuplicateWarning =>
+      'Un agent porte déjà ce nom complet — vérifiez qu\'il ne s\'agit pas d\'un doublon.';
+
+  @override
+  String staffErrorsToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count champs à corriger',
+      one: '1 champ à corriger',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffActionPrevious => 'Précédent';
+
+  @override
+  String get staffActionNext => 'Suivant';
+
+  @override
+  String get staffActionCreate => 'Enregistrer l\'agent';
+
+  @override
+  String get staffActionCancel => 'Annuler';
+
+  @override
+  String get staffActionSave => 'Enregistrer';
+
+  @override
+  String get staffActionEdit => 'Modifier le profil';
+
+  @override
+  String get staffActionBack => 'Retour';
+
+  @override
+  String get staffActionNewAgent => 'Nouvel agent';
+
+  @override
+  String get staffActionAddFirst => 'Ajouter le premier agent';
+
+  @override
+  String get staffActionCreateFromSearch => 'Créer cet agent';
+
+  @override
+  String staffSavedCreated(String name) {
+    return '$name ajouté au fichier';
+  }
+
+  @override
+  String get staffSavedUpdated => 'Fiche mise à jour';
+
+  @override
+  String get staffSaveError =>
+      'La fiche n\'a pas pu être enregistrée sur la tablette. Réessayez.';
+
+  @override
+  String get staffDiscardTitle => 'Abandonner les modifications ?';
+
+  @override
+  String get staffDiscardMessage =>
+      'Les changements apportés à la fiche seront perdus.';
+
+  @override
+  String get staffDiscardConfirm => 'Abandonner';
+
+  @override
+  String get staffDiscardKeep => 'Continuer la saisie';
 }

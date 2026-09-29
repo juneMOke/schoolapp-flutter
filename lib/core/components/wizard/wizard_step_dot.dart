@@ -26,6 +26,11 @@ class WizardStepDot extends StatelessWidget {
   final bool leftConnectorActive;
   final bool rightConnectorActive;
 
+  /// L'étape porte des erreurs **déjà montrées** (après une tentative) : elle
+  /// rougit, sauf quand c'est l'étape courante — celle-ci garde sa couleur, et
+  /// ses erreurs s'affichent sous les champs.
+  final bool hasError;
+
   const WizardStepDot({
     super.key,
     required this.index,
@@ -39,7 +44,10 @@ class WizardStepDot extends StatelessWidget {
     required this.isLast,
     required this.leftConnectorActive,
     required this.rightConnectorActive,
+    this.hasError = false,
   });
+
+  bool get _showsError => hasError && !isCurrent;
 
   static const double diameter = 34;
 
@@ -158,7 +166,13 @@ class WizardStepDot extends StatelessWidget {
         border: Border.all(color: _borderColor, width: 2),
         boxShadow: _shadow,
       ),
-      child: isDone
+      child: _showsError
+          ? const Icon(
+              Icons.priority_high_rounded,
+              size: 18,
+              color: AppColors.textOnDark,
+            )
+          : isDone
           ? const Icon(
               Icons.check_rounded,
               size: 18,
@@ -187,18 +201,24 @@ class WizardStepDot extends StatelessWidget {
 
   Color get _descriptionColor => isCurrent
       ? AppColors.terreCuite
+      : _showsError
+      ? AppColors.error
       : isDone
       ? AppColors.vertSavane
       : AppColors.textMuted;
 
   Color get _circleColor => isCurrent
       ? AppColors.terreCuite
+      : _showsError
+      ? AppColors.error
       : isDone
       ? AppColors.vertSavane
       : AppColors.surfaceAlt;
 
   Color get _borderColor => isCurrent
       ? AppColors.terreCuite
+      : _showsError
+      ? AppColors.error
       : isDone
       ? AppColors.vertSavane
       : AppColors.border;

@@ -7802,5 +7802,332 @@
         "type": "String"
       }
     }
+  },
+  "staffAgentNew": "Nouvel agent",
+  "@staffAgentNew": {
+    "description": "Titre de la page agent en création, avant saisie du nom."
+  },
+  "staffAgentStepEyebrow": "Nouvel agent · étape {step} sur {total}",
+  "@staffAgentStepEyebrow": {
+    "description": "Surtitre de la page agent en création.",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "staffAgentEditEyebrow": "Modification du profil",
+  "@staffAgentEditEyebrow": {
+    "description": "Surtitre de la page agent en modification."
+  },
+  "staffStepIdentity": "Identité & contacts",
+  "@staffStepIdentity": {
+    "description": "Étape 1 de la page agent."
+  },
+  "staffStepAddress": "Adresse",
+  "@staffStepAddress": {
+    "description": "Étape 2 de la page agent."
+  },
+  "staffStepJob": "Poste & contrat",
+  "@staffStepJob": {
+    "description": "Étape 3 de la page agent."
+  },
+  "staffStepDocuments": "Diplômes & pièces",
+  "@staffStepDocuments": {
+    "description": "Étape 4 de la page agent."
+  },
+  "staffBlockIdentification": "Identification",
+  "@staffBlockIdentification": {
+    "description": "Bloc de l'étape 1."
+  },
+  "staffBlockIdentificationHint": "Tels qu'écrits sur la pièce d'identité",
+  "@staffBlockIdentificationHint": {
+    "description": "Sous-titre du bloc Identification."
+  },
+  "staffBlockContacts": "Contacts",
+  "@staffBlockContacts": {
+    "description": "Bloc de l'étape 1."
+  },
+  "staffFieldLastName": "Nom",
+  "@staffFieldLastName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldMiddleName": "Post-nom",
+  "@staffFieldMiddleName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldFirstName": "Prénom",
+  "@staffFieldFirstName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldSex": "Sexe",
+  "@staffFieldSex": {
+    "description": "Champ de la fiche."
+  },
+  "staffSexMale": "Masculin",
+  "@staffSexMale": {
+    "description": "Valeur du champ Sexe."
+  },
+  "staffSexFemale": "Féminin",
+  "@staffSexFemale": {
+    "description": "Valeur du champ Sexe."
+  },
+  "staffFieldBirthDate": "Date de naissance",
+  "@staffFieldBirthDate": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldPhone": "Téléphone",
+  "@staffFieldPhone": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldEmail": "E-mail",
+  "@staffFieldEmail": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldStaffNumber": "Matricule",
+  "@staffFieldStaffNumber": {
+    "description": "Champ de la fiche, en consultation."
+  },
+  "staffBlockAddress": "Adresse de résidence",
+  "@staffBlockAddress": {
+    "description": "Bloc de l'étape 2."
+  },
+  "staffBlockAddressHint": "District, commune puis quartier — le code postal est déduit",
+  "@staffBlockAddressHint": {
+    "description": "Sous-titre du bloc Adresse."
+  },
+  "staffFieldCity": "Ville",
+  "@staffFieldCity": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldDistrict": "District",
+  "@staffFieldDistrict": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldMunicipality": "Commune",
+  "@staffFieldMunicipality": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldNeighborhood": "Quartier",
+  "@staffFieldNeighborhood": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldAddress": "Complément",
+  "@staffFieldAddress": {
+    "description": "Champ libre de l'adresse."
+  },
+  "staffFieldAddressPlaceholder": "N° et avenue, repère…",
+  "@staffFieldAddressPlaceholder": {
+    "description": "Indice du complément d'adresse."
+  },
+  "staffPickDistrictFirst": "Choisissez d'abord un district",
+  "@staffPickDistrictFirst": {
+    "description": "Commune désactivée tant que le district est vide."
+  },
+  "staffPickMunicipalityFirst": "Choisissez d'abord une commune",
+  "@staffPickMunicipalityFirst": {
+    "description": "Quartier désactivé tant que la commune est vide."
+  },
+  "staffBlockJob": "Poste",
+  "@staffBlockJob": {
+    "description": "Bloc de l'étape 3."
+  },
+  "staffBlockJobHint": "Ce que l'agent fait à l'école",
+  "@staffBlockJobHint": {
+    "description": "Sous-titre du bloc Poste."
+  },
+  "staffFieldCategory": "Catégorie",
+  "@staffFieldCategory": {
+    "description": "Champ du poste."
+  },
+  "staffFieldJob": "Fonction",
+  "@staffFieldJob": {
+    "description": "Champ du poste."
+  },
+  "staffPickCategoryFirst": "Choisissez d'abord une catégorie",
+  "@staffPickCategoryFirst": {
+    "description": "Fonction désactivée tant que la catégorie est vide."
+  },
+  "staffFieldEntryDate": "Date d'entrée",
+  "@staffFieldEntryDate": {
+    "description": "Champ du poste."
+  },
+  "staffSeniority": "{years, plural, =0{Moins d'un an d'ancienneté} =1{1 an d'ancienneté} other{{years} ans d'ancienneté}}",
+  "@staffSeniority": {
+    "description": "Ancienneté calculée depuis la date d'entrée.",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "staffFieldBranches": "Matières",
+  "@staffFieldBranches": {
+    "description": "Matières qu'un enseignant déclare."
+  },
+  "staffBranchAdd": "Ajouter une matière",
+  "@staffBranchAdd": {
+    "description": "Champ d'ajout d'une matière."
+  },
+  "staffBranchPlaceholder": "Ex. Mathématiques",
+  "@staffBranchPlaceholder": {
+    "description": "Indice du champ matière."
+  },
+  "staffBranchAddAction": "Ajouter",
+  "@staffBranchAddAction": {
+    "description": "Bouton d'ajout d'une matière."
+  },
+  "staffValueNotSet": "Non renseigné",
+  "@staffValueNotSet": {
+    "description": "Valeur absente en consultation."
+  },
+  "staffBlockDiplomas": "Diplômes",
+  "@staffBlockDiplomas": {
+    "description": "Bloc de l'étape 4."
+  },
+  "staffBlockDiplomasHint": "Du plus élevé au plus ancien",
+  "@staffBlockDiplomasHint": {
+    "description": "Sous-titre du bloc Diplômes."
+  },
+  "staffBlockDiplomasCreateHint": "Facultatif maintenant — le dossier peut être complété plus tard",
+  "@staffBlockDiplomasCreateHint": {
+    "description": "Sous-titre du bloc Diplômes en création."
+  },
+  "staffFieldDiplomaLevel": "Niveau",
+  "@staffFieldDiplomaLevel": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaTitle": "Intitulé",
+  "@staffFieldDiplomaTitle": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaInstitution": "Établissement",
+  "@staffFieldDiplomaInstitution": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaYear": "Année",
+  "@staffFieldDiplomaYear": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffDiplomaAdd": "Ajouter un diplôme",
+  "@staffDiplomaAdd": {
+    "description": "Action du bloc Diplômes."
+  },
+  "staffDiplomaRemove": "Retirer ce diplôme",
+  "@staffDiplomaRemove": {
+    "description": "Info-bulle de la corbeille d'un diplôme."
+  },
+  "staffDiplomasNone": "Aucun diplôme déclaré",
+  "@staffDiplomasNone": {
+    "description": "Consultation sans diplôme."
+  },
+  "staffFieldRequired": "Champ requis",
+  "@staffFieldRequired": {
+    "description": "Erreur de champ."
+  },
+  "staffFieldPhoneIncomplete": "Numéro incomplet (+243 et 9 chiffres)",
+  "@staffFieldPhoneIncomplete": {
+    "description": "Erreur du champ téléphone."
+  },
+  "staffFieldEmailInvalid": "Adresse e-mail invalide",
+  "@staffFieldEmailInvalid": {
+    "description": "Erreur du champ e-mail."
+  },
+  "staffFieldDateInFuture": "La date ne peut pas être dans le futur",
+  "@staffFieldDateInFuture": {
+    "description": "Erreur d'une date."
+  },
+  "staffFieldDiplomaIncomplete": "Un diplôme doit avoir un niveau et un intitulé",
+  "@staffFieldDiplomaIncomplete": {
+    "description": "Erreur d'un diplôme à moitié rempli."
+  },
+  "staffDuplicateWarning": "Un agent porte déjà ce nom complet — vérifiez qu'il ne s'agit pas d'un doublon.",
+  "@staffDuplicateWarning": {
+    "description": "Avertissement non bloquant d'homonymie."
+  },
+  "staffErrorsToFix": "{count, plural, =1{1 champ à corriger} other{{count} champs à corriger}}",
+  "@staffErrorsToFix": {
+    "description": "Bandeau d'erreurs d'une étape.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffActionPrevious": "Précédent",
+  "@staffActionPrevious": {
+    "description": "Pied de la page agent."
+  },
+  "staffActionNext": "Suivant",
+  "@staffActionNext": {
+    "description": "Pied de la page agent."
+  },
+  "staffActionCreate": "Enregistrer l'agent",
+  "@staffActionCreate": {
+    "description": "Pied de la page agent, dernière étape de création."
+  },
+  "staffActionCancel": "Annuler",
+  "@staffActionCancel": {
+    "description": "Pied de la page agent en modification."
+  },
+  "staffActionSave": "Enregistrer",
+  "@staffActionSave": {
+    "description": "Pied de la page agent en modification."
+  },
+  "staffActionEdit": "Modifier le profil",
+  "@staffActionEdit": {
+    "description": "Bandeau de la page agent en consultation."
+  },
+  "staffActionBack": "Retour",
+  "@staffActionBack": {
+    "description": "Info-bulle du bouton retour."
+  },
+  "staffActionNewAgent": "Nouvel agent",
+  "@staffActionNewAgent": {
+    "description": "Bouton de création d'un agent."
+  },
+  "staffActionAddFirst": "Ajouter le premier agent",
+  "@staffActionAddFirst": {
+    "description": "Action du fichier vide."
+  },
+  "staffActionCreateFromSearch": "Créer cet agent",
+  "@staffActionCreateFromSearch": {
+    "description": "Action du vide de recherche : crée un agent au nom cherché."
+  },
+  "staffSavedCreated": "{name} ajouté au fichier",
+  "@staffSavedCreated": {
+    "description": "Toast après création.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "staffSavedUpdated": "Fiche mise à jour",
+  "@staffSavedUpdated": {
+    "description": "Toast après modification."
+  },
+  "staffSaveError": "La fiche n'a pas pu être enregistrée sur la tablette. Réessayez.",
+  "@staffSaveError": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffDiscardTitle": "Abandonner les modifications ?",
+  "@staffDiscardTitle": {
+    "description": "Titre de la confirmation d'abandon."
+  },
+  "staffDiscardMessage": "Les changements apportés à la fiche seront perdus.",
+  "@staffDiscardMessage": {
+    "description": "Message de la confirmation d'abandon."
+  },
+  "staffDiscardConfirm": "Abandonner",
+  "@staffDiscardConfirm": {
+    "description": "Confirmer l'abandon."
+  },
+  "staffDiscardKeep": "Continuer la saisie",
+  "@staffDiscardKeep": {
+    "description": "Revenir à la saisie."
   }
 }

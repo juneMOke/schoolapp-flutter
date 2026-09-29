@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/staff/local/staff_document_type_local_mo
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_repository_impl.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
@@ -13,6 +15,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_file_sna
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
+import '../../staff_builders.dart' show completeDraft;
 import '../../staff_fixtures.dart';
 
 void main() {
@@ -27,10 +30,12 @@ void main() {
     user = CurrentUserContext()..set('u-1', schoolId: 'school-1');
     repo = StaffRepositoryImpl(
       members: StaffMemberDao(db),
+      writer: StaffMemberWriteDao(db),
       documents: StaffDocumentDao(db),
       types: StaffDocumentTypeDao(db),
       syncMeta: meta,
       currentUser: user,
+      now: () => DateTime.utc(2026, 9, 29, 8),
     );
   });
   tearDown(() async => db.close());
@@ -111,5 +116,28 @@ void main() {
     user.set('u-1', schoolId: null);
 
     expect(await load(), StaffFileSnapshot.empty);
+  });
+
+  test('enregistrer écrit la fiche, en attente, avec son auteur', () async {
+    final saved = await repo.saveMember(completeDraft());
+
+    expect(saved.isRight(), isTrue);
+    final found = (await repo.findMember(
+      'new',
+    )).fold((f) => fail('$f'), (m) => m);
+    expect(found.syncState.name, 'pending');
+    final entry = (await db.query('outbox')).single;
+    expect(entry['payload'] as String, contains('"authorId":"u-1"'));
+    expect(entry['school_id'], 'school-1');
+  });
+
+  test('sans session, ou fiche incomplète : rien n est écrit', () async {
+    expect(
+      (await repo.saveMember(const StaffMemberDraft(id: 'x'))).isLeft(),
+      isTrue,
+    );
+    user.set(null, schoolId: 'school-1');
+    expect((await repo.saveMember(completeDraft())).isLeft(), isTrue);
+    expect(await db.query('outbox'), isEmpty);
   });
 }

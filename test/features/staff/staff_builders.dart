@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_document
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 
 StaffMember member(
   String id, {
@@ -90,3 +91,19 @@ const List<StaffDocumentType> documentTypes = [
     requiredFor: {StaffContractKind.vacataire},
   ),
 ];
+
+/// Une fiche en saisie qui passe toutes les règles.
+StaffMemberDraft completeDraft() => const StaffMemberDraft(
+  id: 'new',
+  lastName: 'Kalala',
+  middleName: 'Mutombo',
+  firstName: 'Didier',
+  sex: StaffSex.male,
+  phone: '+243824401276',
+  district: 'Funa',
+  municipality: 'Kalamu',
+  neighborhood: 'Matonge',
+  category: StaffCategory.teacher,
+  jobTitle: 'Enseignant de cours',
+  entryDate: '2023-09-15',
+);

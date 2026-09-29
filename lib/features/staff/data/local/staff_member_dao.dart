@@ -26,6 +26,17 @@ class StaffMemberDao {
     return rows.map(StaffMemberLocalModel.new).toList(growable: false);
   }
 
+  /// Une fiche, ou `null`.
+  Future<StaffMemberLocalModel?> find(String staffMemberId) async {
+    final rows = await _db.query(
+      table,
+      where: 'id = ?',
+      whereArgs: [staffMemberId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : StaffMemberLocalModel(rows.single);
+  }
+
   /// Applique une page descendue. Rend le nombre de fiches écrites.
   ///
   /// Une fiche portant une saisie locale **pas encore remontée** ne perd que

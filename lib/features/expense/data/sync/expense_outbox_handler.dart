@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_push_failure.dart';
-import 'package:school_app_flutter/features/expense/data/sync/expense_school_guard.dart';
+import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 
@@ -23,7 +23,7 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_sync_model
 ///    plus récente l'a remplacée pendant le vol, auquel cas l'entrée repart
 ///    avec elle au lieu d'être gelée en `SYNC_ERROR`.
 /// 4. **École** : une dépense d'une autre école du poste attend la session de
-///    la sienne ([expenseForeignSchoolHold]).
+///    la sienne ([outboxForeignSchoolHold]).
 class ExpenseOutboxHandler implements OutboxSyncHandler {
   final ExpenseSyncApi _api;
   final ExpenseSyncDao _dao;
@@ -57,7 +57,7 @@ class ExpenseOutboxHandler implements OutboxSyncHandler {
       // Un payload illisible ne se répare pas en le rejouant.
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
-    final hold = expenseForeignSchoolHold(entry, _currentUser.schoolId);
+    final hold = outboxForeignSchoolHold(entry, _currentUser.schoolId);
     if (hold != null) return hold;
     final sent = request.expense;
 

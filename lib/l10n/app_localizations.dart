@@ -18244,6 +18244,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incident code: {code}'**
   String staffErrorIncidentCode(String code);
+
+  /// Titre de la page agent en création, avant saisie du nom.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member'**
+  String get staffAgentNew;
+
+  /// Surtitre de la page agent en création.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member · step {step} of {total}'**
+  String staffAgentStepEyebrow(int step, int total);
+
+  /// Surtitre de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing the profile'**
+  String get staffAgentEditEyebrow;
+
+  /// Étape 1 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity & contacts'**
+  String get staffStepIdentity;
+
+  /// Étape 2 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get staffStepAddress;
+
+  /// Étape 3 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Job & contract'**
+  String get staffStepJob;
+
+  /// Étape 4 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Diplomas & documents'**
+  String get staffStepDocuments;
+
+  /// Bloc de l'étape 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification'**
+  String get staffBlockIdentification;
+
+  /// Sous-titre du bloc Identification.
+  ///
+  /// In en, this message translates to:
+  /// **'As written on the identity document'**
+  String get staffBlockIdentificationHint;
+
+  /// Bloc de l'étape 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts'**
+  String get staffBlockContacts;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get staffFieldLastName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get staffFieldMiddleName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get staffFieldFirstName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Sex'**
+  String get staffFieldSex;
+
+  /// Valeur du champ Sexe.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get staffSexMale;
+
+  /// Valeur du champ Sexe.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get staffSexFemale;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get staffFieldBirthDate;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get staffFieldPhone;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get staffFieldEmail;
+
+  /// Champ de la fiche, en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff number'**
+  String get staffFieldStaffNumber;
+
+  /// Bloc de l'étape 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Home address'**
+  String get staffBlockAddress;
+
+  /// Sous-titre du bloc Adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'District, municipality then neighbourhood — the postcode follows'**
+  String get staffBlockAddressHint;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get staffFieldCity;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get staffFieldDistrict;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Municipality'**
+  String get staffFieldMunicipality;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighbourhood'**
+  String get staffFieldNeighborhood;
+
+  /// Champ libre de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Address details'**
+  String get staffFieldAddress;
+
+  /// Indice du complément d'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Number and street, landmark…'**
+  String get staffFieldAddressPlaceholder;
+
+  /// Commune désactivée tant que le district est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a district first'**
+  String get staffPickDistrictFirst;
+
+  /// Quartier désactivé tant que la commune est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a municipality first'**
+  String get staffPickMunicipalityFirst;
+
+  /// Bloc de l'étape 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffBlockJob;
+
+  /// Sous-titre du bloc Poste.
+  ///
+  /// In en, this message translates to:
+  /// **'What the staff member does at the school'**
+  String get staffBlockJobHint;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get staffFieldCategory;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffFieldJob;
+
+  /// Fonction désactivée tant que la catégorie est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category first'**
+  String get staffPickCategoryFirst;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get staffFieldEntryDate;
+
+  /// Ancienneté calculée depuis la date d'entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'{years, plural, =0{Less than a year of service} =1{1 year of service} other{{years} years of service}}'**
+  String staffSeniority(int years);
+
+  /// Matières qu'un enseignant déclare.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get staffFieldBranches;
+
+  /// Champ d'ajout d'une matière.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a subject'**
+  String get staffBranchAdd;
+
+  /// Indice du champ matière.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Mathematics'**
+  String get staffBranchPlaceholder;
+
+  /// Bouton d'ajout d'une matière.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get staffBranchAddAction;
+
+  /// Valeur absente en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get staffValueNotSet;
+
+  /// Bloc de l'étape 4.
+  ///
+  /// In en, this message translates to:
+  /// **'Diplomas'**
+  String get staffBlockDiplomas;
+
+  /// Sous-titre du bloc Diplômes.
+  ///
+  /// In en, this message translates to:
+  /// **'From the highest to the oldest'**
+  String get staffBlockDiplomasHint;
+
+  /// Sous-titre du bloc Diplômes en création.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional now — the file can be completed later'**
+  String get staffBlockDiplomasCreateHint;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get staffFieldDiplomaLevel;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get staffFieldDiplomaTitle;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution'**
+  String get staffFieldDiplomaInstitution;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get staffFieldDiplomaYear;
+
+  /// Action du bloc Diplômes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a diploma'**
+  String get staffDiplomaAdd;
+
+  /// Info-bulle de la corbeille d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this diploma'**
+  String get staffDiplomaRemove;
+
+  /// Consultation sans diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'No diploma recorded'**
+  String get staffDiplomasNone;
+
+  /// Erreur de champ.
+  ///
+  /// In en, this message translates to:
+  /// **'Required field'**
+  String get staffFieldRequired;
+
+  /// Erreur du champ téléphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete number (+243 and 9 digits)'**
+  String get staffFieldPhoneIncomplete;
+
+  /// Erreur du champ e-mail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get staffFieldEmailInvalid;
+
+  /// Erreur d'une date.
+  ///
+  /// In en, this message translates to:
+  /// **'The date cannot be in the future'**
+  String get staffFieldDateInFuture;
+
+  /// Erreur d'un diplôme à moitié rempli.
+  ///
+  /// In en, this message translates to:
+  /// **'A diploma needs a level and a title'**
+  String get staffFieldDiplomaIncomplete;
+
+  /// Avertissement non bloquant d'homonymie.
+  ///
+  /// In en, this message translates to:
+  /// **'A staff member already has this full name — check it is not a duplicate.'**
+  String get staffDuplicateWarning;
+
+  /// Bandeau d'erreurs d'une étape.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field to fix} other{{count} fields to fix}}'**
+  String staffErrorsToFix(int count);
+
+  /// Pied de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get staffActionPrevious;
+
+  /// Pied de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get staffActionNext;
+
+  /// Pied de la page agent, dernière étape de création.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the staff member'**
+  String get staffActionCreate;
+
+  /// Pied de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get staffActionCancel;
+
+  /// Pied de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get staffActionSave;
+
+  /// Bandeau de la page agent en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get staffActionEdit;
+
+  /// Info-bulle du bouton retour.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get staffActionBack;
+
+  /// Bouton de création d'un agent.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member'**
+  String get staffActionNewAgent;
+
+  /// Action du fichier vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first staff member'**
+  String get staffActionAddFirst;
+
+  /// Action du vide de recherche : crée un agent au nom cherché.
+  ///
+  /// In en, this message translates to:
+  /// **'Create this staff member'**
+  String get staffActionCreateFromSearch;
+
+  /// Toast après création.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to the file'**
+  String staffSavedCreated(String name);
+
+  /// Toast après modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Record updated'**
+  String get staffSavedUpdated;
+
+  /// Échec d'écriture locale.
+  ///
+  /// In en, this message translates to:
+  /// **'The record could not be saved on this tablet. Try again.'**
+  String get staffSaveError;
+
+  /// Titre de la confirmation d'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your changes?'**
+  String get staffDiscardTitle;
+
+  /// Message de la confirmation d'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'The changes to this record will be lost.'**
+  String get staffDiscardMessage;
+
+  /// Confirmer l'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get staffDiscardConfirm;
+
+  /// Revenir à la saisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get staffDiscardKeep;
 }
 
 class _AppLocalizationsDelegate

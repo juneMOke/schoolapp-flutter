@@ -11551,4 +11551,260 @@ class AppLocalizationsEn extends AppLocalizations {
   String staffErrorIncidentCode(String code) {
     return 'Incident code: $code';
   }
+
+  @override
+  String get staffAgentNew => 'New staff member';
+
+  @override
+  String staffAgentStepEyebrow(int step, int total) {
+    return 'New staff member · step $step of $total';
+  }
+
+  @override
+  String get staffAgentEditEyebrow => 'Editing the profile';
+
+  @override
+  String get staffStepIdentity => 'Identity & contacts';
+
+  @override
+  String get staffStepAddress => 'Address';
+
+  @override
+  String get staffStepJob => 'Job & contract';
+
+  @override
+  String get staffStepDocuments => 'Diplomas & documents';
+
+  @override
+  String get staffBlockIdentification => 'Identification';
+
+  @override
+  String get staffBlockIdentificationHint =>
+      'As written on the identity document';
+
+  @override
+  String get staffBlockContacts => 'Contacts';
+
+  @override
+  String get staffFieldLastName => 'Last name';
+
+  @override
+  String get staffFieldMiddleName => 'Middle name';
+
+  @override
+  String get staffFieldFirstName => 'First name';
+
+  @override
+  String get staffFieldSex => 'Sex';
+
+  @override
+  String get staffSexMale => 'Male';
+
+  @override
+  String get staffSexFemale => 'Female';
+
+  @override
+  String get staffFieldBirthDate => 'Date of birth';
+
+  @override
+  String get staffFieldPhone => 'Phone';
+
+  @override
+  String get staffFieldEmail => 'Email';
+
+  @override
+  String get staffFieldStaffNumber => 'Staff number';
+
+  @override
+  String get staffBlockAddress => 'Home address';
+
+  @override
+  String get staffBlockAddressHint =>
+      'District, municipality then neighbourhood — the postcode follows';
+
+  @override
+  String get staffFieldCity => 'City';
+
+  @override
+  String get staffFieldDistrict => 'District';
+
+  @override
+  String get staffFieldMunicipality => 'Municipality';
+
+  @override
+  String get staffFieldNeighborhood => 'Neighbourhood';
+
+  @override
+  String get staffFieldAddress => 'Address details';
+
+  @override
+  String get staffFieldAddressPlaceholder => 'Number and street, landmark…';
+
+  @override
+  String get staffPickDistrictFirst => 'Choose a district first';
+
+  @override
+  String get staffPickMunicipalityFirst => 'Choose a municipality first';
+
+  @override
+  String get staffBlockJob => 'Job';
+
+  @override
+  String get staffBlockJobHint => 'What the staff member does at the school';
+
+  @override
+  String get staffFieldCategory => 'Category';
+
+  @override
+  String get staffFieldJob => 'Job';
+
+  @override
+  String get staffPickCategoryFirst => 'Choose a category first';
+
+  @override
+  String get staffFieldEntryDate => 'Start date';
+
+  @override
+  String staffSeniority(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years years of service',
+      one: '1 year of service',
+      zero: 'Less than a year of service',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffFieldBranches => 'Subjects';
+
+  @override
+  String get staffBranchAdd => 'Add a subject';
+
+  @override
+  String get staffBranchPlaceholder => 'E.g. Mathematics';
+
+  @override
+  String get staffBranchAddAction => 'Add';
+
+  @override
+  String get staffValueNotSet => 'Not provided';
+
+  @override
+  String get staffBlockDiplomas => 'Diplomas';
+
+  @override
+  String get staffBlockDiplomasHint => 'From the highest to the oldest';
+
+  @override
+  String get staffBlockDiplomasCreateHint =>
+      'Optional now — the file can be completed later';
+
+  @override
+  String get staffFieldDiplomaLevel => 'Level';
+
+  @override
+  String get staffFieldDiplomaTitle => 'Title';
+
+  @override
+  String get staffFieldDiplomaInstitution => 'Institution';
+
+  @override
+  String get staffFieldDiplomaYear => 'Year';
+
+  @override
+  String get staffDiplomaAdd => 'Add a diploma';
+
+  @override
+  String get staffDiplomaRemove => 'Remove this diploma';
+
+  @override
+  String get staffDiplomasNone => 'No diploma recorded';
+
+  @override
+  String get staffFieldRequired => 'Required field';
+
+  @override
+  String get staffFieldPhoneIncomplete =>
+      'Incomplete number (+243 and 9 digits)';
+
+  @override
+  String get staffFieldEmailInvalid => 'Invalid email address';
+
+  @override
+  String get staffFieldDateInFuture => 'The date cannot be in the future';
+
+  @override
+  String get staffFieldDiplomaIncomplete =>
+      'A diploma needs a level and a title';
+
+  @override
+  String get staffDuplicateWarning =>
+      'A staff member already has this full name — check it is not a duplicate.';
+
+  @override
+  String staffErrorsToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fields to fix',
+      one: '1 field to fix',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffActionPrevious => 'Previous';
+
+  @override
+  String get staffActionNext => 'Next';
+
+  @override
+  String get staffActionCreate => 'Save the staff member';
+
+  @override
+  String get staffActionCancel => 'Cancel';
+
+  @override
+  String get staffActionSave => 'Save';
+
+  @override
+  String get staffActionEdit => 'Edit profile';
+
+  @override
+  String get staffActionBack => 'Back';
+
+  @override
+  String get staffActionNewAgent => 'New staff member';
+
+  @override
+  String get staffActionAddFirst => 'Add the first staff member';
+
+  @override
+  String get staffActionCreateFromSearch => 'Create this staff member';
+
+  @override
+  String staffSavedCreated(String name) {
+    return '$name added to the file';
+  }
+
+  @override
+  String get staffSavedUpdated => 'Record updated';
+
+  @override
+  String get staffSaveError =>
+      'The record could not be saved on this tablet. Try again.';
+
+  @override
+  String get staffDiscardTitle => 'Discard your changes?';
+
+  @override
+  String get staffDiscardMessage => 'The changes to this record will be lost.';
+
+  @override
+  String get staffDiscardConfirm => 'Discard';
+
+  @override
+  String get staffDiscardKeep => 'Keep editing';
 }

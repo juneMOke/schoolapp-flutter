@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_push_failure.dart';
-import 'package:school_app_flutter/features/expense/data/sync/expense_school_guard.dart';
+import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
@@ -75,7 +75,7 @@ class ExpenseWithdrawalOutboxHandler implements OutboxSyncHandler {
     } catch (e) {
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
-    final hold = expenseForeignSchoolHold(entry, _currentUser.schoolId);
+    final hold = outboxForeignSchoolHold(entry, _currentUser.schoolId);
     if (hold != null) return hold;
 
     final row = await _reader.find(payload.expenseId);

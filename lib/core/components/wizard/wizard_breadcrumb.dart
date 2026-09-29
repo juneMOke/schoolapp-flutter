@@ -23,6 +23,15 @@ class WizardBreadcrumb extends StatelessWidget {
   /// d'afficher les steps sans manger le champ en cours de saisie.
   final bool compact;
 
+  /// Qui est franchi et atteignable. `null` : le régime linéaire du parcours
+  /// d'inscription (retour libre, saut avant interdit), calculé depuis
+  /// [currentStep]. Un assistant qui rouvre ses étapes en consultation passe
+  /// sa propre progression.
+  final WizardStepProgression? progression;
+
+  /// Étapes à montrer en erreur (après une tentative).
+  final Set<int> errorSteps;
+
   const WizardBreadcrumb({
     super.key,
     required this.titles,
@@ -30,6 +39,8 @@ class WizardBreadcrumb extends StatelessWidget {
     required this.progress,
     required this.onStepTap,
     this.compact = false,
+    this.progression,
+    this.errorSteps = const <int>{},
   });
 
   @override
@@ -60,7 +71,13 @@ class WizardBreadcrumb extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 _StepRow(
                   titles: titles,
-                  currentStep: currentStep,
+                  progression:
+                      progression ??
+                      WizardStepProgression.linear(
+                        stepCount: titles.length,
+                        currentStep: currentStep,
+                      ),
+                  errorSteps: errorSteps,
                   reduceMotion: reduceMotion,
                   onStepTap: onStepTap,
                 ),
@@ -72,13 +89,15 @@ class WizardBreadcrumb extends StatelessWidget {
 
 class _StepRow extends StatelessWidget {
   final List<String> titles;
-  final int currentStep;
+  final WizardStepProgression progression;
+  final Set<int> errorSteps;
   final bool reduceMotion;
   final ValueChanged<int> onStepTap;
 
   const _StepRow({
     required this.titles,
-    required this.currentStep,
+    required this.progression,
+    required this.errorSteps,
     required this.reduceMotion,
     required this.onStepTap,
   });
@@ -86,13 +105,7 @@ class _StepRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = titles.length;
-    // Mécanique commune aux assistants (`WizardStepProgression`), plutôt que
-    // recalculée ici : ce parcours est linéaire — retour libre, saut avant
-    // interdit — et c'est exactement ce que le régime `linear` exprime.
-    final progression = WizardStepProgression.linear(
-      stepCount: count,
-      currentStep: currentStep,
-    );
+    final currentStep = progression.currentStep;
 
     // Steps répartis à parts égales (Expanded) pour occuper toute la largeur ;
     // les connecteurs relient les chips de bout en bout.
@@ -114,6 +127,7 @@ class _StepRow extends StatelessWidget {
             isLast: index == count - 1,
             leftConnectorActive: index <= currentStep,
             rightConnectorActive: index < currentStep,
+            hasError: errorSteps.contains(index),
           ),
         );
       }),
