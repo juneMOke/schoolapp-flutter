@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_document_session_guard.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -227,6 +228,9 @@ class _MyAppState extends State<MyApp> {
                 // crochet ait à être déplacé. Ni clé ni répertoire ne sont
                 // touchés par ce balayage.
                 unawaited(_reclaimEditiqueCacheOrphans());
+                // Pièces du personnel : un compte sans `hr.document.read` ne
+                // retrouve pas les copies qu'un autre a ouvertes.
+                unawaited(getIt<StaffDocumentSessionGuard>().onSessionOpened());
                 // Nom et ville de l'école : le référentiel local peut déjà les
                 // porter (session rouverte hors ligne) ou être pullé dans la
                 // foulée par le contexte académique — d'où la relecture au

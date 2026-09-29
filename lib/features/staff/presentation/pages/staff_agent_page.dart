@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_member_d
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_view.dart';
 
 /// La page d'un agent, plein écran par-dessus la liste : créer, consulter,
@@ -81,6 +82,13 @@ class StaffAgentPage extends StatelessWidget {
         BlocProvider<StaffContractsCubit>(
           create: (_) {
             final cubit = getIt<StaffContractsCubit>();
+            if (existing != null) unawaited(cubit.load(existing.id));
+            return cubit;
+          },
+        ),
+        BlocProvider<StaffDossierCubit>(
+          create: (_) {
+            final cubit = getIt<StaffDossierCubit>();
             if (existing != null) unawaited(cubit.load(existing.id));
             return cubit;
           },

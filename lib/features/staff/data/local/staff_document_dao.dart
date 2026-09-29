@@ -22,6 +22,17 @@ class StaffDocumentDao {
     return rows.map(StaffDocumentLocalModel.new).toList(growable: false);
   }
 
+  /// Les pièces d'un agent, la plus récente d'abord.
+  Future<List<StaffDocumentLocalModel>> forMember(String staffMemberId) async {
+    final rows = await _db.query(
+      table,
+      where: 'staff_member_id = ?',
+      whereArgs: [staffMemberId],
+      orderBy: 'captured_at DESC',
+    );
+    return rows.map(StaffDocumentLocalModel.new).toList(growable: false);
+  }
+
   /// Applique une page descendue. Une pièce est un fait figé : la version du
   /// serveur remplace la ligne locale de même `id`, accusé compris.
   Future<int> applyPulled(

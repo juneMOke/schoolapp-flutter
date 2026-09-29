@@ -12042,4 +12042,68 @@ class AppLocalizationsFr extends AppLocalizations {
   String staffPayBonus(String amount) {
     return 'Prime : $amount';
   }
+
+  @override
+  String get staffBlockDossier => 'Pièces du dossier';
+
+  @override
+  String get staffBlockDossierHint =>
+      'Celles que le contrat exige, puis les autres';
+
+  @override
+  String get staffDossierUnknown =>
+      'Le référentiel des pièces n\'est pas encore arrivé sur la tablette.';
+
+  @override
+  String get staffDocumentRequired => 'Exigée';
+
+  @override
+  String get staffDocumentOptional => 'Facultative';
+
+  @override
+  String get staffDocumentMissing => 'À verser';
+
+  @override
+  String staffDocumentFiled(String date) {
+    return 'Versée le $date';
+  }
+
+  @override
+  String staffDocumentRejected(String reason) {
+    return 'Refusée : $reason';
+  }
+
+  @override
+  String get staffDocumentWaitingMember => 'Attend l\'envoi de la fiche';
+
+  @override
+  String get staffDocumentPending => 'En attente d\'envoi';
+
+  @override
+  String get staffDocumentView => 'Voir';
+
+  @override
+  String get staffDocumentAdd => 'Verser';
+
+  @override
+  String get staffDocumentReplace => 'Remplacer';
+
+  @override
+  String staffDocumentCaptureTitle(String label) {
+    return 'Verser : $label';
+  }
+
+  @override
+  String get staffDocumentSaved => 'Pièce enregistrée sur la tablette.';
+
+  @override
+  String get staffDocumentSaveFailed =>
+      'La pièce n\'a pas pu être enregistrée.';
+
+  @override
+  String get staffDocumentOpenFailed =>
+      'Pièce indisponible : elle n\'est pas sur la tablette et le serveur ne l\'a pas rendue.';
+
+  @override
+  String get staffDocumentClose => 'Fermer';
 }

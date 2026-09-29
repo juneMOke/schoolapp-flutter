@@ -819,6 +819,15 @@ class AppConstants {
   /// leurs fichiers, qu'un autre nom rendrait orphelins.
   static const String editiqueCacheDirectoryName = 'editique_cache';
 
+  /// Clé du magasin des pièces du personnel (RH), distincte de celle de
+  /// l'éditique : effacer l'une ne rend pas l'autre illisible.
+  static const String staffDocumentsKeyStorageKey = 'staff_documents_key';
+
+  /// Sous-répertoire où les pièces du personnel sont scellées. **Ne se
+  /// renomme pas** : un autre nom rendrait orphelines les pièces en attente
+  /// d'envoi.
+  static const String staffDocumentsDirectoryName = 'staff_documents';
+
   // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
   /// Budget disque du cache éditique, en octets (2 Gio).
   ///

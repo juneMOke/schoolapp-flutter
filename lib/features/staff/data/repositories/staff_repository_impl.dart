@@ -6,18 +6,16 @@ import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_document_type_mapping.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_member_input_mapper.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_push_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
@@ -99,7 +97,8 @@ class StaffRepositoryImpl implements StaffRepository {
           members: members,
           documentsByMember: documents,
           documentTypes: [
-            for (final type in await _types.forSchool(schoolId)) _typeOf(type),
+            for (final type in await _types.forSchool(schoolId))
+              type.toEntity(),
           ],
           hasEverSynced: syncedAt != null,
         ),
@@ -167,16 +166,4 @@ class StaffRepositoryImpl implements StaffRepository {
   ) => local.isEmpty
       ? member
       : member.withContracts(StaffTimelineMerge.merge(member.contracts, local));
-
-  static StaffDocumentType _typeOf(StaffDocumentTypeLocalModel model) =>
-      StaffDocumentType(
-        code: StaffDocumentCode.fromWire(model.code),
-        rawCode: model.code,
-        label: model.label,
-        alwaysRequired: model.alwaysRequired,
-        requiredFor: {
-          for (final kind in model.requiredFor)
-            ?StaffContractKind.fromWire(kind),
-        },
-      );
 }

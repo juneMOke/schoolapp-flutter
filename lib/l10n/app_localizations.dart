@@ -18946,6 +18946,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bonus: {amount}'**
   String staffPayBonus(String amount);
+
+  /// No description provided for @staffBlockDossier.
+  ///
+  /// In en, this message translates to:
+  /// **'File documents'**
+  String get staffBlockDossier;
+
+  /// No description provided for @staffBlockDossierHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Those the contract requires, then the others'**
+  String get staffBlockDossierHint;
+
+  /// No description provided for @staffDossierUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The document list has not reached this tablet yet.'**
+  String get staffDossierUnknown;
+
+  /// No description provided for @staffDocumentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get staffDocumentRequired;
+
+  /// No description provided for @staffDocumentOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get staffDocumentOptional;
+
+  /// No description provided for @staffDocumentMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'To be filed'**
+  String get staffDocumentMissing;
+
+  /// No description provided for @staffDocumentFiled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed on {date}'**
+  String staffDocumentFiled(String date);
+
+  /// No description provided for @staffDocumentRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: {reason}'**
+  String staffDocumentRejected(String reason);
+
+  /// No description provided for @staffDocumentWaitingMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the staff record to be sent'**
+  String get staffDocumentWaitingMember;
+
+  /// No description provided for @staffDocumentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get staffDocumentPending;
+
+  /// No description provided for @staffDocumentView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get staffDocumentView;
+
+  /// No description provided for @staffDocumentAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get staffDocumentAdd;
+
+  /// No description provided for @staffDocumentReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get staffDocumentReplace;
+
+  /// No description provided for @staffDocumentCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {label}'**
+  String staffDocumentCaptureTitle(String label);
+
+  /// No description provided for @staffDocumentSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Document saved on the tablet.'**
+  String get staffDocumentSaved;
+
+  /// No description provided for @staffDocumentSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be saved.'**
+  String get staffDocumentSaveFailed;
+
+  /// No description provided for @staffDocumentOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Document unavailable: it is not on this tablet and the server did not return it.'**
+  String get staffDocumentOpenFailed;
+
+  /// No description provided for @staffDocumentClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get staffDocumentClose;
 }
 
 class _AppLocalizationsDelegate

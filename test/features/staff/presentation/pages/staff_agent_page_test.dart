@@ -14,6 +14,11 @@ import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_dossier_snapshot.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_document_repository.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_document_use_cases.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,11 +32,17 @@ class _MockLoadContracts extends Mock implements LoadStaffContractsUseCase {}
 
 class _MockAddContract extends Mock implements AddStaffContractUseCase {}
 
+class _MockLoadDossier extends Mock implements LoadStaffDossierUseCase {}
+
+class _MockOpenDocument extends Mock implements OpenStaffDocumentUseCase {}
+
 void main() {
   final getIt = GetIt.instance;
   late _MockSave save;
   late _MockLoad load;
   late _MockAddContract addContract;
+  late _MockLoadDossier loadDossier;
+  late _MockOpenDocument openDocument;
 
   setUpAll(() {
     registerFallbackValue(const StaffMemberDraft(id: 'x'));
@@ -42,12 +53,24 @@ void main() {
     save = _MockSave();
     load = _MockLoad();
     addContract = _MockAddContract();
+    loadDossier = _MockLoadDossier();
+    openDocument = _MockOpenDocument();
+    when(
+      () => loadDossier(any()),
+    ).thenAnswer((_) async => const Right(StaffDossierSnapshot.empty));
     final loadContracts = _MockLoadContracts();
     when(() => loadContracts(any())).thenAnswer((_) async => const Right([]));
     getIt
       ..registerSingleton<SaveStaffMemberUseCase>(save)
       ..registerSingleton<LoadStaffMemberUseCase>(load)
       ..registerSingleton<IdGenerator>(const IdGenerator(Uuid()))
+      ..registerFactory<StaffDossierCubit>(
+        () => StaffDossierCubit(
+          load: loadDossier,
+          add: AddStaffDocumentUseCase(_NoDocuments()),
+          open: openDocument,
+        ),
+      )
       ..registerFactory<StaffContractsCubit>(
         () => StaffContractsCubit(
           load: loadContracts,
@@ -178,6 +201,45 @@ void main() {
     verifyNever(() => save(any()));
   });
 
+  testWidgets('les pièces exigées par le contrat, versées ou à verser', (
+    tester,
+  ) async {
+    final agent = member(
+      'm-1',
+      contracts: [period(StaffContractKind.permanent, from: '2025-09-01')],
+    );
+    final identity = document('m-1', 'ID');
+    when(() => loadDossier('m-1')).thenAnswer(
+      (_) async => Right(
+        StaffDossierSnapshot(types: documentTypes, documents: [identity]),
+      ),
+    );
+    when(
+      () => openDocument(identity),
+    ).thenAnswer((_) async => const Left(NetworkFailure()));
+    await pumpPage(tester, member: agent);
+
+    await tester.tap(find.text('Diplômes & pièces'));
+    // Le cubit du dossier naît à la première lecture de l'étape : sa relecture
+    // se dénoue, puis se peint, aux tours suivants.
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Pièces du dossier'), findsOneWidget);
+    expect(find.text('1/3 pièces'), findsOneWidget);
+    expect(find.text('Lettre de désignation'), findsOneWidget);
+    expect(find.text('Contrat de prestation'), findsNothing);
+    expect(find.text('À verser'), findsNWidgets(2));
+    expect(find.text('Remplacer'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Voir'));
+    await tester.tap(find.text('Voir'));
+    await tester.pump();
+    expect(find.textContaining('Pièce indisponible'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('abandonner une modification demande confirmation', (
     tester,
   ) async {
@@ -209,3 +271,5 @@ void main() {
 }
 
 class _NoRepository extends Mock implements StaffContractRepository {}
+
+class _NoDocuments extends Mock implements StaffDocumentRepository {}

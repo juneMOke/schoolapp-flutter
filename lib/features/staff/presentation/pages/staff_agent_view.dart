@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_footer.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_header.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_panel.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_dossier_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le corps de la page agent : en-tête, fil d'étapes, étape courante et pied.
@@ -152,10 +153,18 @@ class _StaffAgentViewState extends State<StaffAgentView> {
                     catalog: _catalog,
                     today: widget.today,
                     onChanged: cubit.updateDraft,
-                    jobAppendix: switch (state.member) {
-                      final member? when state.mode == StaffAgentMode.view =>
-                        StaffContractPanel(member: member, today: widget.today),
-                      _ => null,
+                    appendices: switch (state.member) {
+                      final member? when state.mode == StaffAgentMode.view => {
+                        2: StaffContractPanel(
+                          member: member,
+                          today: widget.today,
+                        ),
+                        3: StaffDossierPanel(
+                          member: member,
+                          today: widget.today,
+                        ),
+                      },
+                      _ => const {},
                     },
                   ),
                 ),

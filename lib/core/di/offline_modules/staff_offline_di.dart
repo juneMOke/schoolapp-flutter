@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_write_dao.dart';
@@ -26,8 +29,6 @@ import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
-import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
-import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_pull_handlers.dart';
@@ -182,4 +183,6 @@ void registerStaffOffline(GetIt getIt) {
       extras: getIt<Map<String, dynamic>>(),
     ),
   );
+
+  registerStaffDocuments(getIt);
 }

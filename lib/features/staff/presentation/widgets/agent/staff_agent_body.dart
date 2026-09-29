@@ -19,9 +19,10 @@ class StaffAgentBody extends StatelessWidget {
   final String today;
   final ValueChanged<StaffMemberDraft Function(StaffMemberDraft)> onChanged;
 
-  /// Ce qui suit l'étape « Poste » hors saisie : les contrats, qui sont des
-  /// gestes à part et non des champs de la fiche.
-  final Widget? jobAppendix;
+  /// Ce qui suit une étape hors saisie, par étape : les contrats sous
+  /// « Poste », les pièces sous « Diplômes » — des gestes à part, pas des
+  /// champs de la fiche.
+  final Map<int, Widget> appendices;
 
   const StaffAgentBody({
     super.key,
@@ -29,7 +30,7 @@ class StaffAgentBody extends StatelessWidget {
     required this.catalog,
     required this.today,
     required this.onChanged,
-    this.jobAppendix,
+    this.appendices = const {},
   });
 
   @override
@@ -64,9 +65,9 @@ class StaffAgentBody extends StatelessWidget {
                 key: ValueKey('staff-step-${state.step}'),
                 child: step,
               ),
-              if (state.step == 2 && jobAppendix != null) ...[
+              if (appendices[state.step] case final appendix?) ...[
                 const SizedBox(height: AppSpacing.lg),
-                jobAppendix!,
+                appendix,
               ],
             ],
           ),

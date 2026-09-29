@@ -20,6 +20,9 @@ class StaffDocument extends Equatable {
   final int sizeBytes;
   final StaffSyncState syncState;
 
+  /// Pourquoi le serveur a refusé le versement.
+  final String? syncError;
+
   const StaffDocument({
     required this.id,
     required this.staffMemberId,
@@ -31,6 +34,7 @@ class StaffDocument extends Equatable {
     required this.sizeBytes,
     required this.syncState,
     this.fileName,
+    this.syncError,
   });
 
   bool get isImage => mimeType.startsWith('image/');
@@ -46,5 +50,6 @@ class StaffDocument extends Equatable {
     mimeType,
     sizeBytes,
     syncState,
+    syncError,
   ];
 }

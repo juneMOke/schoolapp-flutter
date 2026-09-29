@@ -8336,5 +8336,92 @@
         "type": "String"
       }
     }
+  },
+  "staffBlockDossier": "Pièces du dossier",
+  "@staffBlockDossier": {
+    "description": "Bloc des pièces de la page agent."
+  },
+  "staffBlockDossierHint": "Celles que le contrat exige, puis les autres",
+  "@staffBlockDossierHint": {
+    "description": "Sous-titre du bloc des pièces."
+  },
+  "staffDossierUnknown": "Le référentiel des pièces n'est pas encore arrivé sur la tablette.",
+  "@staffDossierUnknown": {
+    "description": "Référentiel absent."
+  },
+  "staffDocumentRequired": "Exigée",
+  "@staffDocumentRequired": {
+    "description": "Pièce exigée par le contrat."
+  },
+  "staffDocumentOptional": "Facultative",
+  "@staffDocumentOptional": {
+    "description": "Pièce non exigée."
+  },
+  "staffDocumentMissing": "À verser",
+  "@staffDocumentMissing": {
+    "description": "Pièce manquante."
+  },
+  "staffDocumentFiled": "Versée le {date}",
+  "@staffDocumentFiled": {
+    "description": "Pièce versée et accusée.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentRejected": "Refusée : {reason}",
+  "@staffDocumentRejected": {
+    "description": "Versement refusé par le serveur.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentWaitingMember": "Attend l'envoi de la fiche",
+  "@staffDocumentWaitingMember": {
+    "description": "Pièce bloquée par une fiche pas encore accusée."
+  },
+  "staffDocumentPending": "En attente d'envoi",
+  "@staffDocumentPending": {
+    "description": "Pièce versée sur la tablette, pas encore envoyée."
+  },
+  "staffDocumentView": "Voir",
+  "@staffDocumentView": {
+    "description": "Ouvrir une pièce."
+  },
+  "staffDocumentAdd": "Verser",
+  "@staffDocumentAdd": {
+    "description": "Verser une pièce manquante."
+  },
+  "staffDocumentReplace": "Remplacer",
+  "@staffDocumentReplace": {
+    "description": "Verser une nouvelle version d'une pièce."
+  },
+  "staffDocumentCaptureTitle": "Verser : {label}",
+  "@staffDocumentCaptureTitle": {
+    "description": "Titre de la feuille de capture.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentSaved": "Pièce enregistrée sur la tablette.",
+  "@staffDocumentSaved": {
+    "description": "Confirmation d'un versement."
+  },
+  "staffDocumentSaveFailed": "La pièce n'a pas pu être enregistrée.",
+  "@staffDocumentSaveFailed": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffDocumentOpenFailed": "Pièce indisponible : elle n'est pas sur la tablette et le serveur ne l'a pas rendue.",
+  "@staffDocumentOpenFailed": {
+    "description": "Échec d'ouverture."
+  },
+  "staffDocumentClose": "Fermer",
+  "@staffDocumentClose": {
+    "description": "Fermer la visionneuse."
   }
 }

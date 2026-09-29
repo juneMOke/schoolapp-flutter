@@ -11952,4 +11952,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String staffPayBonus(String amount) {
     return 'Bonus: $amount';
   }
+
+  @override
+  String get staffBlockDossier => 'File documents';
+
+  @override
+  String get staffBlockDossierHint =>
+      'Those the contract requires, then the others';
+
+  @override
+  String get staffDossierUnknown =>
+      'The document list has not reached this tablet yet.';
+
+  @override
+  String get staffDocumentRequired => 'Required';
+
+  @override
+  String get staffDocumentOptional => 'Optional';
+
+  @override
+  String get staffDocumentMissing => 'To be filed';
+
+  @override
+  String staffDocumentFiled(String date) {
+    return 'Filed on $date';
+  }
+
+  @override
+  String staffDocumentRejected(String reason) {
+    return 'Rejected: $reason';
+  }
+
+  @override
+  String get staffDocumentWaitingMember =>
+      'Waiting for the staff record to be sent';
+
+  @override
+  String get staffDocumentPending => 'Waiting to be sent';
+
+  @override
+  String get staffDocumentView => 'View';
+
+  @override
+  String get staffDocumentAdd => 'File';
+
+  @override
+  String get staffDocumentReplace => 'Replace';
+
+  @override
+  String staffDocumentCaptureTitle(String label) {
+    return 'File: $label';
+  }
+
+  @override
+  String get staffDocumentSaved => 'Document saved on the tablet.';
+
+  @override
+  String get staffDocumentSaveFailed => 'The document could not be saved.';
+
+  @override
+  String get staffDocumentOpenFailed =>
+      'Document unavailable: it is not on this tablet and the server did not return it.';
+
+  @override
+  String get staffDocumentClose => 'Close';
 }
