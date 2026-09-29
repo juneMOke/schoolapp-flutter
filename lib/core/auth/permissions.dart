@@ -100,6 +100,29 @@ enum Perm {
   expensePay('expense.pay'),
   expenseReopen('expense.reopen'),
 
+  // ── Ressources humaines ────────────────────────────────────────────────────
+  // Le fichier du personnel. Trois autorités, arrêtées avec le back le
+  // 2026-09-29 : tenir les fiches (`staff`), voir et poser les contrats et leurs
+  // montants (`pay`), voir et verser les pièces du dossier (`document`). La
+  // scission est ce qui permet au secrétariat de tenir les dossiers sans voir
+  // les salaires, et au Pointage de connaître le type de contrat d'un agent
+  // sans en voir le montant.
+  //
+  // Le serveur n'annonce les flux `STAFF_CONTRACTS` et `STAFF_DOCUMENTS` qu'à
+  // qui détient `hr.pay.read` et `hr.document.read` : sans elles, la tablette
+  // ne reçoit ni montant ni pièce, et « masqué » se lit dans le plan de
+  // synchro, pas dans un champ vide.
+  //
+  // ⚠️ **Déclarées AVANT que le serveur ne les sème** (lot back H0), comme
+  // `expense.decide`. Aucun écran ne les consulte encore : le module RH n'a pas
+  // de route, et aucune n'est donc dans `kGuardedWriteActions`.
+  hrStaffRead('hr.staff.read'),
+  hrStaffWrite('hr.staff.write'),
+  hrPayRead('hr.pay.read'),
+  hrPayWrite('hr.pay.write'),
+  hrDocumentRead('hr.document.read'),
+  hrDocumentWrite('hr.document.write'),
+
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),
   classroomWrite('classroom.write'),

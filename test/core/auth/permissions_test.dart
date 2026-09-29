@@ -38,6 +38,12 @@ void main() {
     Perm.expenseDecide: 'expense.decide',
     Perm.expensePay: 'expense.pay',
     Perm.expenseReopen: 'expense.reopen',
+    Perm.hrStaffRead: 'hr.staff.read',
+    Perm.hrStaffWrite: 'hr.staff.write',
+    Perm.hrPayRead: 'hr.pay.read',
+    Perm.hrPayWrite: 'hr.pay.write',
+    Perm.hrDocumentRead: 'hr.document.read',
+    Perm.hrDocumentWrite: 'hr.document.write',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -78,7 +84,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 62 permissions (v1.8 du catalogue serveur)', () {
+  test('le catalogue compte 68 permissions (v1.8 du catalogue serveur + RH)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -122,7 +128,12 @@ void main() {
     // correction d'un versement. Le serveur la connaît DÉJÀ (elle garde sa
     // route d'annulation en ligne) et la sème : les comptes de caisse de La
     // Fontaine la détiennent. C'est le client qui rattrape son retard.
-    expect(Perm.values, hasLength(62));
+    //
+    // 62 → 68 : les six droits du fichier du personnel (`hr.staff.*`,
+    // `hr.pay.*`, `hr.document.*`), arrêtés avec le back le 2026-09-29.
+    // ⚠️ **Déclarés avant que le serveur ne les sème** (lot back H0), comme les
+    // gestes du circuit des dépenses : aucun écran ne les consulte encore.
+    expect(Perm.values, hasLength(68));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule
