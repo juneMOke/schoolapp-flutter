@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
@@ -116,6 +117,22 @@ void main() {
 
     expect(cubit.state.notice, isNot(first));
     expect(cubit.state.notice?.kind, StaffAttendanceNoticeKind.dayFrozen);
+  });
+
+  test('clore : pas avant le dernier jour du mois (contrat v3, C2)', () async {
+    StaffAttendanceState at(DateTime now) => cubitAt(now).state.copyWith(
+      snapshot: StaffAttendanceSnapshot(
+        members: const [],
+        records: const {},
+        locks: const {},
+        settings: StaffAttendanceSettings.defaults,
+        schoolYear: const StaffSchoolYear(start: '2026-09-01'),
+        hasEverSynced: true,
+      ),
+    );
+
+    expect(at(DateTime(2026, 9, 29, 9)).canCloseMonth, isFalse);
+    expect(at(DateTime(2026, 9, 30, 9)).canCloseMonth, isTrue);
   });
 
   test('ouvrir un agent bascule sur sa fiche mensuelle', () {

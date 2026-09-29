@@ -71,12 +71,17 @@ class StaffAttendanceGestureRequestDto {
 
   /// Le jour, ou le 1er du mois.
   final String date;
+
+  /// Quand le geste a été posé sur la tablette (instant UTC ISO-8601), exigé
+  /// par le serveur.
+  final String clientRecordedAt;
   final String authorId;
 
   const StaffAttendanceGestureRequestDto({
     required this.gestureId,
     required this.gesture,
     required this.date,
+    required this.clientRecordedAt,
     required this.authorId,
   });
 
@@ -84,6 +89,7 @@ class StaffAttendanceGestureRequestDto {
     'gestureId': gestureId,
     'gesture': gesture,
     'date': date,
+    'clientRecordedAt': clientRecordedAt,
     kOutboxAuthorIdKey: authorId,
   };
 
@@ -92,10 +98,12 @@ class StaffAttendanceGestureRequestDto {
     final gestureId = raw.text('gestureId');
     final gesture = raw.text('gesture');
     final date = raw.day('date');
+    final clientRecordedAt = raw.instant('clientRecordedAt');
     final authorId = raw.text(kOutboxAuthorIdKey);
     if (gestureId == null ||
         gesture == null ||
         date == null ||
+        clientRecordedAt == null ||
         authorId == null) {
       return null;
     }
@@ -103,6 +111,7 @@ class StaffAttendanceGestureRequestDto {
       gestureId: gestureId,
       gesture: gesture,
       date: date,
+      clientRecordedAt: clientRecordedAt,
       authorId: authorId,
     );
   }

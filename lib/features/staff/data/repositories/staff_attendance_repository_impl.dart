@@ -150,6 +150,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     final session = _local.session();
     if (session == null) return const Left(StaffLocalWriter.noSession);
     final now = _now();
+    final recordedAt = now.toUtc().toIso8601String();
     return _local.run(
       'Écriture du rapport',
       () => _gestures.add(
@@ -157,11 +158,12 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
           gestureId: _ids.newId(),
           gesture: gesture.wire,
           date: periodStart,
+          clientRecordedAt: recordedAt,
           authorId: session.authorId,
         ),
         kind: gesture.kind,
         authorName: null,
-        recordedAt: now.toUtc().toIso8601String(),
+        recordedAt: recordedAt,
         schoolId: session.schoolId,
         nowMs: now.millisecondsSinceEpoch,
       ),

@@ -94,13 +94,13 @@ class StaffAttendanceState extends Equatable {
     return first == null || month.compareTo(first.substring(0, 7)) > 0;
   }
 
-  /// Le mois affiché peut-il être clos ? Seulement un mois **révolu** : clore
-  /// le mois en cours figerait ses jours restants, sans retour possible — et
-  /// seulement quand l'année scolaire est connue (sans elle, les vacances se
-  /// liraient comme des jours ouvrés).
+  /// Le mois affiché peut-il être clos ? Seulement un mois **fini**, au plus
+  /// tôt le jour de sa fin (contrat v3, C2) : clore plus tôt figerait ses jours
+  /// restants, sans retour possible. Et seulement quand l'année scolaire est
+  /// connue (sans elle, les vacances se liraient comme des jours ouvrés).
   bool get canCloseMonth =>
       snapshot.schoolYear != null &&
-      month.compareTo(today.substring(0, 7)) < 0 &&
+      StaffWorkCalendar.daysOf(month).last.compareTo(today) <= 0 &&
       !snapshot.isMonthClosed(month);
 
   StaffDayRegister get register =>

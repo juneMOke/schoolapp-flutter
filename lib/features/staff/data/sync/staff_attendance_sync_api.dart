@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_dto.dart';
 
 part 'staff_attendance_sync_api.g.dart';
 
@@ -31,9 +32,10 @@ abstract class StaffAttendanceSyncApi {
     @Body() Map<String, dynamic> body,
   );
 
-  /// Les réglages de l'école, dernier écrit gagne.
+  /// Les réglages de l'école, dernier écrit gagne. Rend ceux que le serveur
+  /// a retenus.
   @PUT(AppConstants.syncStaffAttendanceSettingsEndpoint)
-  Future<void> putSettings(
+  Future<StaffAttendanceSettingsResponseDto> putSettings(
     @Extras() Map<String, dynamic> extras,
     @Body() Map<String, dynamic> body,
   );

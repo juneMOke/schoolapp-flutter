@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_seed.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -43,12 +44,26 @@ class StaffAttendanceSettingsOutboxHandler implements OutboxSyncHandler {
 
     return StaffOutboxDispatch.push(
       send: () async {
-        await _api.putSettings(_extras, request.toJson());
+        final ack = await _api.putSettings(_extras, request.toJson());
         await _dao.settle(
           schoolId,
           sentClientUpdatedAt: request.clientUpdatedAt,
           failed: false,
         );
+        // Une écriture plus récente d'une autre tablette l'a emporté : la
+        // tablette classe désormais avec les réglages retenus.
+        final start = ack.startTime;
+        final tolerance = ack.toleranceMinutes;
+        if (ack.superseded && start != null && tolerance != null) {
+          await _dao.applySeed(
+            StaffAttendanceSettingsSeed(
+              startTime: start,
+              toleranceMinutes: tolerance,
+            ),
+            schoolId: schoolId,
+            nowMs: DateTime.now().millisecondsSinceEpoch,
+          );
+        }
       },
       reject: (failure) => _dao.settle(
         schoolId,

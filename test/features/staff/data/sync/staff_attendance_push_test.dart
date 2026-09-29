@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,6 +10,7 @@ import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
@@ -15,6 +18,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_gesture_outbox_handler.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_outbox_handler.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_dto.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_outbox_handler.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
@@ -123,6 +128,7 @@ void main() {
       gestureId: id,
       gesture: gesture.wire,
       date: date,
+      clientRecordedAt: '2026-09-29T16:00:00.000Z',
       authorId: 'u-1',
     ),
     kind: gesture.kind,
@@ -220,6 +226,79 @@ void main() {
 
       expect(result.outcome, OutboxDispatchOutcome.retry);
       expect((await recordRow('r-1'))['sync_status'], 'PENDING_SYNC');
+    });
+  });
+
+  group('contrat v3', () {
+    test('un geste porte clientRecordedAt, exigé par le serveur', () async {
+      await addGesture('g-1', StaffAttendanceGesture.validateDay);
+
+      final payload =
+          jsonDecode(
+                (await entry(StaffAttendanceGestureDao.entryId('g-1'))).payload,
+              )
+              as Map<String, dynamic>;
+
+      expect(payload['clientRecordedAt'], '2026-09-29T16:00:00.000Z');
+      expect(payload.keys, containsAll(['gestureId', 'gesture', 'date']));
+    });
+
+    test('les réglages partent sous `settings`, l\'ancienne clé se relit', () {
+      const request = StaffAttendanceSettingsRequestDto(
+        startTime: '07:30',
+        toleranceMinutes: 10,
+        clientUpdatedAt: '2026-09-29T08:00:00.000Z',
+        authorId: 'u-1',
+      );
+
+      expect(request.toJson().keys, containsAll(['settings', 'authorId']));
+      expect(
+        StaffAttendanceSettingsRequestDto.tryParse({
+          'staffAttendanceSettings': {
+            'startTime': '07:45',
+            'toleranceMinutes': 5,
+            'clientUpdatedAt': '2026-09-29T08:00:00.000Z',
+          },
+          'authorId': 'u-1',
+        })?.startTime,
+        '07:45',
+      );
+    });
+
+    test('un réglage SUPERSEDED cède la place à celui du serveur', () async {
+      final dao = StaffAttendanceSettingsDao(db);
+      await dao.save(
+        const StaffAttendanceSettingsRequestDto(
+          startTime: '07:30',
+          toleranceMinutes: 10,
+          clientUpdatedAt: '2026-09-29T08:00:00.000Z',
+          authorId: 'u-1',
+        ),
+        schoolId: 's-1',
+        nowMs: 1,
+      );
+      when(() => api.putSettings(any(), any())).thenAnswer(
+        (_) async => const StaffAttendanceSettingsResponseDto(
+          startTime: '08:00',
+          toleranceMinutes: 15,
+          lwwOutcome: 'SUPERSEDED',
+        ),
+      );
+      final handler = StaffAttendanceSettingsOutboxHandler(
+        api: api,
+        dao: dao,
+        currentUser: user,
+        extras: const {},
+      );
+
+      final result = await handler.dispatch(
+        await entry(StaffAttendanceSettingsDao.entryId('s-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      final settings = await dao.read('s-1');
+      expect(settings.start.wire, '08:00');
+      expect(settings.toleranceMinutes, 15);
     });
   });
 
