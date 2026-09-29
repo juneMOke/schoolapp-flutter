@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_load_status.dart';
@@ -124,7 +124,7 @@ class RecouvrementCallListCubit extends Cubit<RecouvrementCallListState> {
           // opaque casserait l'ordre alphabétique qu'on vient chercher.
           // `comparePart` porte cette règle, et replie au passage la casse et
           // les accents — cette liste comparait sans même minusculer.
-          final byName = StudentNameComparator.comparePart(
+          final byName = PersonNameComparator.comparePart(
             a.displayName,
             b.displayName,
           );

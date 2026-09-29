@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 
 /// Une identité minimale : ce que toute liste d'élèves porte, quel que soit le
 /// module (le post-nom s'appelle `surname` côté inscription, `middleName` côté
@@ -13,7 +13,7 @@ class _Person {
   const _Person(this.lastName, this.surname, this.firstName, {this.id = ''});
 }
 
-Comparator<_Person> get _comparator => StudentNameComparator.by<_Person>(
+Comparator<_Person> get _comparator => PersonNameComparator.by<_Person>(
   lastName: (p) => p.lastName,
   surname: (p) => p.surname,
   firstName: (p) => p.firstName,
@@ -24,7 +24,7 @@ List<String> _sortedLastNames(List<_Person> people) =>
     ([...people]..sort(_comparator)).map((p) => p.lastName).toList();
 
 void main() {
-  group('StudentNameComparator — cascade Nom → Post-nom → Prénom', () {
+  group('PersonNameComparator — cascade Nom → Post-nom → Prénom', () {
     test('trie par nom en premier', () {
       expect(
         _sortedLastNames(const [
@@ -57,7 +57,7 @@ void main() {
     });
   });
 
-  group('StudentNameComparator — accents et casse', () {
+  group('PersonNameComparator — accents et casse', () {
     test('un nom accentué se range à sa lettre, pas après Z', () {
       expect(
         _sortedLastNames(const [
@@ -105,7 +105,7 @@ void main() {
     });
   });
 
-  group('StudentNameComparator — parties absentes', () {
+  group('PersonNameComparator — parties absentes', () {
     test('un nom vide ferme la marche', () {
       expect(
         _sortedLastNames(const [
@@ -144,7 +144,7 @@ void main() {
     );
   });
 
-  group('StudentNameComparator — stabilité', () {
+  group('PersonNameComparator — stabilité', () {
     test('deux homonymes complets sont départagés par identifiant', () {
       final sorted = [
         ...const [
@@ -164,7 +164,7 @@ void main() {
     test(
       'le post-nom est facultatif : une forme sans post-nom saute ce rang',
       () {
-        final comparator = StudentNameComparator.by<_Person>(
+        final comparator = PersonNameComparator.by<_Person>(
           lastName: (p) => p.lastName,
           firstName: (p) => p.firstName,
         );

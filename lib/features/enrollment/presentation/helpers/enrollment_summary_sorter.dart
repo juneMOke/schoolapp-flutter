@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 
 /// Ce sur quoi une table de résumés se trie.
@@ -23,7 +23,7 @@ enum EnrollmentSummarySortField {
 /// minusculait, l'autre non, aucun ne repliait les accents, et la clé de tri
 /// des Inscriptions (`Nom|Prénom|Post-nom`) divergeait de ce que la colonne
 /// affiche. La règle d'ordre ne vit plus qu'ici, adossée à
-/// [StudentNameComparator].
+/// [PersonNameComparator].
 abstract final class EnrollmentSummarySorter {
   /// Ordonne [summaries] sans le muter.
   ///
@@ -79,7 +79,7 @@ abstract final class EnrollmentSummarySorter {
   };
 
   static final Comparator<EnrollmentSummary> _identity =
-      StudentNameComparator.by<EnrollmentSummary>(
+      PersonNameComparator.by<EnrollmentSummary>(
         lastName: (s) => s.student.lastName,
         surname: (s) => s.student.surname,
         firstName: (s) => s.student.firstName,
@@ -91,7 +91,7 @@ abstract final class EnrollmentSummarySorter {
     String? Function(EnrollmentSummary summary) leading,
   ) {
     return (a, b) {
-      final byLeading = StudentNameComparator.comparePart(
+      final byLeading = PersonNameComparator.comparePart(
         leading(a),
         leading(b),
       );

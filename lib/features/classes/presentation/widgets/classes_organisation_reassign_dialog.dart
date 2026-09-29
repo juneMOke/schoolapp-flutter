@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -203,10 +203,10 @@ class _ReassignDialogState extends State<_ReassignDialog> {
           const SizedBox(height: AppDimensions.spacingS),
           Row(
             children: [
-              StudentAvatar(
+              PersonAvatar(
                 firstName: widget.intent.studentFirstName,
                 lastName: widget.intent.studentLastName,
-                studentId: widget.intent.studentId,
+                personId: widget.intent.studentId,
                 size: AvatarSize.lg,
               ),
               const SizedBox(width: AppDimensions.spacingM),

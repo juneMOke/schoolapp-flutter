@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 
-/// Ordre d'affichage des listes d'élèves : **Nom → Post-nom → Prénom**.
+/// Ordre d'affichage des listes de personnes (élèves, agents) : **Nom →
+/// Post-nom → Prénom**.
 ///
 /// C'est l'ordre que les tables affichent et celui du roster SQL
 /// (`classroom_local_data_source.dart`, `_rosterOrderBy`). Trier sur une autre
@@ -24,7 +25,7 @@ import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart
 /// et les formes divergent d'un module à l'autre (`surname` côté inscription,
 /// `middleName` côté classe et discipline). Chaque appelant dit où lire ses
 /// parties, la règle d'ordre ne se réécrit qu'ici.
-abstract final class StudentNameComparator {
+abstract final class PersonNameComparator {
   /// Comparateur par Nom → Post-nom → Prénom, casse et accents repliés.
   ///
   /// [surname] est optionnel : une forme qui n'a pas de post-nom saute ce rang

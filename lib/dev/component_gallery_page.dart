@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
@@ -111,9 +111,9 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
           const SizedBox(height: AppSpacing.xl),
 
           // ----------------------------------------------------------------
-          // StudentAvatar
+          // PersonAvatar
           // ----------------------------------------------------------------
-          const _SectionHeader(title: 'StudentAvatar'),
+          const _SectionHeader(title: 'PersonAvatar'),
           const SizedBox(height: AppSpacing.sm),
           const Wrap(
             spacing: AppSpacing.lg,
@@ -121,46 +121,46 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _AvatarLabel(
-                avatar: StudentAvatar(
+                avatar: PersonAvatar(
                   firstName: 'Jean',
                   lastName: 'Kabila',
-                  studentId: 'demo-kabila',
+                  personId: 'demo-kabila',
                   size: AvatarSize.sm,
                 ),
                 label: 'sm (28) solid',
               ),
               _AvatarLabel(
-                avatar: StudentAvatar(
+                avatar: PersonAvatar(
                   firstName: 'Marie',
                   lastName: 'N\'Sumbu',
-                  studentId: 'demo-nsumbu',
+                  personId: 'demo-nsumbu',
                   size: AvatarSize.md,
                 ),
                 label: 'md (32) — apostrophe',
               ),
               _AvatarLabel(
-                avatar: StudentAvatar(
+                avatar: PersonAvatar(
                   firstName: 'Pierre',
                   lastName: 'Ndombo-Kabongo',
-                  studentId: 'demo-ndombo',
+                  personId: 'demo-ndombo',
                   size: AvatarSize.lg,
                 ),
                 label: 'lg (48) — tiret',
               ),
               _AvatarLabel(
-                avatar: StudentAvatar(
+                avatar: PersonAvatar(
                   firstName: 'Élodie',
                   lastName: '',
-                  studentId: 'demo-elodie',
+                  personId: 'demo-elodie',
                   size: AvatarSize.lg,
                 ),
                 label: 'lg (48) — lastName vide',
               ),
               _AvatarLabel(
-                avatar: StudentAvatar(
+                avatar: PersonAvatar(
                   firstName: 'Aline',
                   lastName: 'Bondo',
-                  studentId: 'demo-bondo',
+                  personId: 'demo-bondo',
                   size: AvatarSize.xl,
                   variant: AvatarVariant.outlined,
                 ),
@@ -296,7 +296,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _AvatarLabel extends StatelessWidget {
-  final StudentAvatar avatar;
+  final PersonAvatar avatar;
   final String label;
 
   const _AvatarLabel({required this.avatar, required this.label});

@@ -1,7 +1,7 @@
 /// Helper pur pour le calcul des initiales d'un élève.
 ///
 /// Deux entrées publiques :
-/// - [InitialsHelper.initialsFrom]     : cas standard StudentAvatar (firstName + lastName)
+/// - [InitialsHelper.initialsFrom]     : cas standard PersonAvatar (firstName + lastName)
 /// - [InitialsHelper.initialsFromName] : cas d'un nom composé unique (apostrophe / tiret)
 class InitialsHelper {
   InitialsHelper._();

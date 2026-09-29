@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -193,10 +193,10 @@ class _Identity extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        StudentAvatar(
+        PersonAvatar(
           firstName: student.firstName,
           lastName: student.lastName,
-          studentId: student.studentId,
+          personId: student.studentId,
           size: 30,
         ),
         const SizedBox(width: AppSpacing.sm),

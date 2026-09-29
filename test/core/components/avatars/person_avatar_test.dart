@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/helpers/avatar_palette.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 
@@ -8,14 +8,14 @@ void main() {
   BoxDecoration decorationOf(WidgetTester tester) {
     final container = tester.widget<Container>(
       find.descendant(
-        of: find.byType(StudentAvatar),
+        of: find.byType(PersonAvatar),
         matching: find.byType(Container),
       ),
     );
     return container.decoration! as BoxDecoration;
   }
 
-  Future<void> pumpAvatar(WidgetTester tester, StudentAvatar avatar) {
+  Future<void> pumpAvatar(WidgetTester tester, PersonAvatar avatar) {
     return tester.pumpWidget(
       MaterialApp(
         home: Scaffold(body: Center(child: avatar)),
@@ -23,16 +23,16 @@ void main() {
     );
   }
 
-  group('StudentAvatar — variante solid', () {
+  group('PersonAvatar — variante solid', () {
     testWidgets('fond = teinte d\'identité, initiales blancCasse', (
       tester,
     ) async {
       await pumpAvatar(
         tester,
-        const StudentAvatar(
+        const PersonAvatar(
           firstName: 'Jean',
           lastName: 'Kabila',
-          studentId: 's-1',
+          personId: 's-1',
         ),
       );
 
@@ -45,16 +45,16 @@ void main() {
     });
   });
 
-  group('StudentAvatar — variante outlined', () {
+  group('PersonAvatar — variante outlined', () {
     testWidgets('fond surfaceAlt, bordure + initiales = teinte', (
       tester,
     ) async {
       await pumpAvatar(
         tester,
-        const StudentAvatar(
+        const PersonAvatar(
           firstName: 'Jean',
           lastName: 'Kabila',
-          studentId: 's-1',
+          personId: 's-1',
           variant: AvatarVariant.outlined,
         ),
       );
@@ -69,7 +69,7 @@ void main() {
     });
   });
 
-  group('StudentAvatar — identité déterministe', () {
+  group('PersonAvatar — identité déterministe', () {
     testWidgets('même studentId → même teinte sur deux instances', (
       tester,
     ) async {
@@ -78,15 +78,15 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                StudentAvatar(
+                PersonAvatar(
                   firstName: 'Jean',
                   lastName: 'Kabila',
-                  studentId: 'shared',
+                  personId: 'shared',
                 ),
-                StudentAvatar(
+                PersonAvatar(
                   firstName: 'Marie',
                   lastName: 'Mbandu',
-                  studentId: 'shared',
+                  personId: 'shared',
                 ),
               ],
             ),
@@ -106,16 +106,16 @@ void main() {
     });
   });
 
-  group('StudentAvatar — accessibilité', () {
+  group('PersonAvatar — accessibilité', () {
     testWidgets('semanticLabel fourni → annoncé par le lecteur d\'écran', (
       tester,
     ) async {
       await pumpAvatar(
         tester,
-        const StudentAvatar(
+        const PersonAvatar(
           firstName: 'Jean',
           lastName: 'Kabila',
-          studentId: 's-1',
+          personId: 's-1',
           semanticLabel: 'Kabila Jean',
         ),
       );
@@ -128,10 +128,10 @@ void main() {
       (tester) async {
         await pumpAvatar(
           tester,
-          const StudentAvatar(
+          const PersonAvatar(
             firstName: 'Jean',
             lastName: 'Kabila',
-            studentId: 's-1',
+            personId: 's-1',
           ),
         );
 
@@ -141,7 +141,7 @@ void main() {
         expect(find.bySemanticsLabel('KJ'), findsNothing);
         expect(
           find.descendant(
-            of: find.byType(StudentAvatar),
+            of: find.byType(PersonAvatar),
             matching: find.byType(ExcludeSemantics),
           ),
           findsOneWidget,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/components/status/sync_state_icon.dart';
@@ -175,10 +175,10 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           (enrollment) => DataTableRowSpec(
             id: enrollment.enrollmentId,
             displayName: _studentFullName(enrollment),
-            leading: core_avatar.StudentAvatar(
+            leading: core_avatar.PersonAvatar(
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
-              studentId: enrollment.student.id,
+              personId: enrollment.student.id,
               size: core_avatar.AvatarSize.sm,
               variant: _avatarVariantForStatus(
                 EnrollmentStatus.fromString(enrollment.status),

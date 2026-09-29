@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/resultat_eleve_ligne.dart';
 
 /// Champ de tri de la table de la vue classe.
@@ -75,11 +75,11 @@ List<ResultatEleveLigne> applyResultatsSort(
 /// après « Zacharie ». L'ordre par défaut de la table, lui, ne change pas —
 /// c'est toujours le rang du backend (tri `null`).
 int _compareNames(ResultatEleveLigne a, ResultatEleveLigne b) {
-  final byName = StudentNameComparator.comparePart(a.nom, b.nom);
+  final byName = PersonNameComparator.comparePart(a.nom, b.nom);
   if (byName != 0) return byName;
-  final bySurname = StudentNameComparator.comparePart(a.postnom, b.postnom);
+  final bySurname = PersonNameComparator.comparePart(a.postnom, b.postnom);
   if (bySurname != 0) return bySurname;
-  final byFirst = StudentNameComparator.comparePart(a.prenom, b.prenom);
+  final byFirst = PersonNameComparator.comparePart(a.prenom, b.prenom);
   return byFirst != 0 ? byFirst : a.studentId.compareTo(b.studentId);
 }
 

@@ -84,10 +84,10 @@ class _Identity extends StatelessWidget {
     ].where((s) => s.trim().isNotEmpty).join(' ');
     return Row(
       children: [
-        StudentAvatar(
+        PersonAvatar(
           firstName: student.firstName,
           lastName: student.lastName,
-          studentId: student.studentId,
+          personId: student.studentId,
           size: 40,
         ),
         const SizedBox(width: AppSpacing.sm),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats.dart';
@@ -47,10 +47,10 @@ abstract final class EnrollmentEntryRow {
     return DataTableRowSpec(
       id: entry.enrollmentId,
       displayName: entry.displayName,
-      leading: StudentAvatar(
+      leading: PersonAvatar(
         firstName: entry.firstName,
         lastName: entry.lastName,
-        studentId: entry.studentId,
+        personId: entry.studentId,
         size: AppDimensions.enrollmentDashboardDayAvatarSize,
       ),
       onTap: onTap == null ? null : () => onTap(entry),

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -229,17 +229,17 @@ class FeeControlProjector {
     // Seul le départage change : cascade complète Nom → Post-nom → Prénom,
     // accents repliés, là où deux fiches de même nom se classaient sans
     // post-nom et où « Émile » passait après « Zacharie ».
-    final byName = StudentNameComparator.comparePart(
+    final byName = PersonNameComparator.comparePart(
       a.summary.student.lastName,
       b.summary.student.lastName,
     );
     if (byName != 0) return byName;
-    final bySurname = StudentNameComparator.comparePart(
+    final bySurname = PersonNameComparator.comparePart(
       a.summary.student.surname,
       b.summary.student.surname,
     );
     if (bySurname != 0) return bySurname;
-    final byFirst = StudentNameComparator.comparePart(
+    final byFirst = PersonNameComparator.comparePart(
       a.summary.student.firstName,
       b.summary.student.firstName,
     );

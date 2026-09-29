@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
@@ -150,10 +150,10 @@ class _DocumentsDataTableState extends State<DocumentsDataTable> {
           id: summary.enrollmentId,
           displayName:
               '${summary.student.lastName} ${summary.student.firstName}',
-          leading: core_avatar.StudentAvatar(
+          leading: core_avatar.PersonAvatar(
             firstName: summary.student.firstName,
             lastName: summary.student.lastName,
-            studentId: summary.student.id,
+            personId: summary.student.id,
             size: core_avatar.AvatarSize.sm,
           ),
           cells: [

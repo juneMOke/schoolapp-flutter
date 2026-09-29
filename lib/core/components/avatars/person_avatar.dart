@@ -14,10 +14,10 @@ abstract final class AvatarSize {
   static const double xl = 64;
 }
 
-/// Variante visuelle de l'avatar élève.
+/// Variante visuelle de l'avatar d'une personne.
 ///
 /// La variante porte le **statut** ; la teinte de fond porte l'**identité** de
-/// l'élève (deux axes orthogonaux).
+/// la personne (deux axes orthogonaux).
 enum AvatarVariant {
   /// Fond = teinte d'identité, initiales Blanc Cassé. Variante par défaut
   /// (élève inscrit, 95 % des cas).
@@ -28,26 +28,27 @@ enum AvatarVariant {
   outlined,
 }
 
-/// Avatar circulaire d'un élève affichant ses initiales.
+/// Avatar circulaire d'une personne — élève, parent, agent — affichant ses
+/// initiales.
 ///
 /// - Ordre NOM-Prénom (convention RDC), initiales via [InitialsHelper].
-/// - Teinte d'identité déterministe par élève via [AvatarPalette] (palette
+/// - Teinte d'identité déterministe par personne via [AvatarPalette] (palette
 ///   tournante auditée WCAG AA, voir [AppColors]).
 /// - Taille de police = [size] × 0.36 pour garantir la lisibilité.
 /// - La teinte et les initiales ne portent aucune information : elles sont
 ///   exclues du lecteur d'écran sauf si [semanticLabel] est fourni (cas d'un
 ///   avatar isolé sans nom affiché à côté).
-class StudentAvatar extends StatelessWidget {
+class PersonAvatar extends StatelessWidget {
   /// Ratio police / diamètre — lisible à toutes les échelles.
   static const double _initialsRatio = 0.36;
 
   final String firstName;
   final String lastName;
 
-  /// Identifiant **stable** de l'élève (id), clé de la teinte d'identité.
+  /// Identifiant **stable** de la personne (id), clé de la teinte d'identité.
   /// On utilise l'id et non le nom pour que la couleur ne change pas si le
   /// nom est corrigé.
-  final String studentId;
+  final String personId;
 
   /// Diamètre en dp. Tailles standard : [AvatarSize.sm] / md / lg / xl.
   final double size;
@@ -59,11 +60,11 @@ class StudentAvatar extends StatelessWidget {
   /// affiché à côté → évite la redite).
   final String? semanticLabel;
 
-  const StudentAvatar({
+  const PersonAvatar({
     super.key,
     required this.firstName,
     required this.lastName,
-    required this.studentId,
+    required this.personId,
     this.size = AvatarSize.md,
     this.variant = AvatarVariant.solid,
     this.semanticLabel,
@@ -72,7 +73,7 @@ class StudentAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = InitialsHelper.initialsFrom(firstName, lastName);
-    final tint = AvatarPalette.colorFor(studentId);
+    final tint = AvatarPalette.colorFor(personId);
     final isSolid = variant == AvatarVariant.solid;
 
     final avatar = Container(
