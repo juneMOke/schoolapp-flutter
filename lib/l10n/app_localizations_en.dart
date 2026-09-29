@@ -11514,11 +11514,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffResetFilters => 'Reset filters';
 
   @override
-  String get staffErrorNeverSyncedTitle => 'No connection';
+  String get staffErrorNetworkTitle => 'No connection';
 
   @override
-  String get staffErrorNeverSynced =>
-      'The staff file has never been downloaded to this tablet yet.';
+  String get staffErrorNetwork =>
+      'The network is unavailable. Try again once connected.';
 
   @override
   String get staffErrorStorageTitle => 'Cannot read the file';
@@ -12044,4 +12044,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffContractCancelConfirmKeep => 'Go back';
+
+  @override
+  String get staffFileNotYetSynced =>
+      'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.';
 }

@@ -7,19 +7,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Erreur de la zone de résultats du fichier (règle n°10) : une anatomie,
 /// quatre tonalités. Le 403 ne propose jamais « Réessayer » : le refus est
 /// volontaire sur des dossiers sensibles.
-///
-/// [neverSynced] : le fichier n'a jamais été téléchargé et le réseau manque —
-/// la tonalité réseau, avec « Réessayer ».
 class StaffResultsErrorState extends StatelessWidget {
   final Failure? failure;
-  final bool neverSynced;
   final VoidCallback? onRetry;
   final VoidCallback? onReconnect;
 
   const StaffResultsErrorState({
     super.key,
     this.failure,
-    this.neverSynced = false,
     this.onRetry,
     this.onReconnect,
   });
@@ -27,20 +22,20 @@ class StaffResultsErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final type = neverSynced ? EteeloErrorType.network : typeOf(failure);
+    final type = typeOf(failure);
     final incident = failure is ApiErrorDetails
         ? (failure! as ApiErrorDetails).incidentId
         : null;
     return EteeloErrorResult(
       type: type,
       title: switch (type) {
-        EteeloErrorType.network => l10n.staffErrorNeverSyncedTitle,
+        EteeloErrorType.network => l10n.staffErrorNetworkTitle,
         EteeloErrorType.unauthorized => l10n.staffErrorUnauthorizedTitle,
         EteeloErrorType.forbidden => l10n.staffErrorForbiddenTitle,
         _ => l10n.staffErrorStorageTitle,
       },
       message: switch (type) {
-        EteeloErrorType.network => l10n.staffErrorNeverSynced,
+        EteeloErrorType.network => l10n.staffErrorNetwork,
         EteeloErrorType.unauthorized => l10n.staffErrorUnauthorized,
         EteeloErrorType.forbidden => l10n.staffErrorForbidden,
         _ => l10n.staffErrorStorage,

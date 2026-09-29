@@ -11602,11 +11602,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffResetFilters => 'Réinitialiser les filtres';
 
   @override
-  String get staffErrorNeverSyncedTitle => 'Pas de connexion';
+  String get staffErrorNetworkTitle => 'Pas de connexion';
 
   @override
-  String get staffErrorNeverSynced =>
-      'Le fichier du personnel n\'a encore jamais été téléchargé sur cette tablette.';
+  String get staffErrorNetwork =>
+      'Le réseau manque. Réessayez une fois la connexion revenue.';
 
   @override
   String get staffErrorStorageTitle => 'Lecture impossible';
@@ -12135,4 +12135,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffContractCancelConfirmKeep => 'Revenir';
+
+  @override
+  String get staffFileNotYetSynced =>
+      'Le fichier du personnel n\'a pas encore été reçu sur cette tablette. Vous pouvez déjà créer des agents : les autres apparaîtront à la prochaine connexion.';
 }

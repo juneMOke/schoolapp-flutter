@@ -64,14 +64,17 @@ void main() {
     expect(cubit.state.status, StaffFileStatus.ready);
   });
 
-  test('jamais descendu et le tirage échoue : « jamais téléchargé »', () async {
+  test('jamais descendu et le tirage échoue : prêt quand même', () async {
     when(
       () => source.read(),
     ).thenAnswer((_) async => Right(_snapshot(synced: false)));
 
     await cubit.load();
 
-    expect(cubit.state.status, StaffFileStatus.neverSynced);
+    // Hors ligne dès la première ouverture : le fichier local, même vide,
+    // se lit et s'enrichit.
+    expect(cubit.state.status, StaffFileStatus.ready);
+    expect(cubit.state.snapshot.hasEverSynced, isFalse);
   });
 
   test('une base illisible est une panne, et on ne tire pas', () async {

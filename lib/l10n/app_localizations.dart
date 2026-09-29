@@ -18183,13 +18183,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'No connection'**
-  String get staffErrorNeverSyncedTitle;
+  String get staffErrorNetworkTitle;
 
   /// Explication : sans premier téléchargement, rien à montrer hors ligne.
   ///
   /// In en, this message translates to:
-  /// **'The staff file has never been downloaded to this tablet yet.'**
-  String get staffErrorNeverSynced;
+  /// **'The network is unavailable. Try again once connected.'**
+  String get staffErrorNetwork;
 
   /// Erreur : base locale illisible.
   ///
@@ -19102,6 +19102,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go back'**
   String get staffContractCancelConfirmKeep;
+
+  /// No description provided for @staffFileNotYetSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.'**
+  String get staffFileNotYetSynced;
 }
 
 class _AppLocalizationsDelegate

@@ -7558,12 +7558,12 @@
   "@staffResetFilters": {
     "description": "Action : retirer tous les filtres."
   },
-  "staffErrorNeverSyncedTitle": "No connection",
-  "@staffErrorNeverSyncedTitle": {
+  "staffErrorNetworkTitle": "No connection",
+  "@staffErrorNetworkTitle": {
     "description": "Erreur : fichier jamais téléchargé et réseau absent."
   },
-  "staffErrorNeverSynced": "The staff file has never been downloaded to this tablet yet.",
-  "@staffErrorNeverSynced": {
+  "staffErrorNetwork": "The network is unavailable. Try again once connected.",
+  "@staffErrorNetwork": {
     "description": "Explication : sans premier téléchargement, rien à montrer hors ligne."
   },
   "staffErrorStorageTitle": "Cannot read the file",
@@ -8011,5 +8011,6 @@
   "staffDossierLoading": "Loading file documents",
   "staffContractCancelConfirmTitle": "Cancel this period?",
   "staffContractCancelConfirmMessage": "It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.",
-  "staffContractCancelConfirmKeep": "Go back"
+  "staffContractCancelConfirmKeep": "Go back",
+  "staffFileNotYetSynced": "The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection."
 }

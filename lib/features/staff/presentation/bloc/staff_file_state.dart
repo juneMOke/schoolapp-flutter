@@ -6,18 +6,13 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_que
 /// Cartes ou tableau.
 enum StaffViewMode { grid, list }
 
-/// Automate de l'écran : premier chargement, prêt, jamais téléchargé, ou
-/// panne de lecture.
-enum StaffFileStatus {
-  loading,
-  ready,
-
-  /// Le fichier n'a encore jamais été descendu sur cette tablette, et le
-  /// réseau manque : il n'y a rien à montrer. Une fois en cache, une coupure
-  /// n'est plus une erreur.
-  neverSynced,
-  failure,
-}
+/// Automate de l'écran : premier chargement, prêt, ou panne de lecture.
+///
+/// Un fichier jamais téléchargé n'est **pas** un état à part : l'écran s'ouvre
+/// sur ce que la tablette connaît — rien, ou les agents créés ici — et le dit
+/// par un bandeau. Comme partout ailleurs, on travaille hors ligne dès la
+/// première ouverture ; seule la lecture des autres agents attend le réseau.
+enum StaffFileStatus { loading, ready, failure }
 
 class StaffFileState extends Equatable {
   final StaffFileStatus status;

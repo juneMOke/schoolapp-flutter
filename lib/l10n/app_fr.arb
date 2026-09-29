@@ -7754,12 +7754,12 @@
   "@staffResetFilters": {
     "description": "Action : retirer tous les filtres."
   },
-  "staffErrorNeverSyncedTitle": "Pas de connexion",
-  "@staffErrorNeverSyncedTitle": {
+  "staffErrorNetworkTitle": "Pas de connexion",
+  "@staffErrorNetworkTitle": {
     "description": "Erreur : fichier jamais téléchargé et réseau absent."
   },
-  "staffErrorNeverSynced": "Le fichier du personnel n'a encore jamais été téléchargé sur cette tablette.",
-  "@staffErrorNeverSynced": {
+  "staffErrorNetwork": "Le réseau manque. Réessayez une fois la connexion revenue.",
+  "@staffErrorNetwork": {
     "description": "Explication : sans premier téléchargement, rien à montrer hors ligne."
   },
   "staffErrorStorageTitle": "Lecture impossible",
@@ -8455,5 +8455,9 @@
   "staffContractCancelConfirmKeep": "Revenir",
   "@staffContractCancelConfirmKeep": {
     "description": "Renoncer à annuler la période."
+  },
+  "staffFileNotYetSynced": "Le fichier du personnel n'a pas encore été reçu sur cette tablette. Vous pouvez déjà créer des agents : les autres apparaîtront à la prochaine connexion.",
+  "@staffFileNotYetSynced": {
+    "description": "Bandeau : fichier jamais reçu, la saisie reste possible."
   }
 }

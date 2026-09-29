@@ -134,16 +134,32 @@ void main() {
     expect(find.text('Aucun agent dans le fichier'), findsOneWidget);
   });
 
-  testWidgets('jamais téléchargé et hors ligne : Réessayer', (tester) async {
+  testWidgets('jamais reçu et hors ligne : on travaille quand même', (
+    tester,
+  ) async {
     await pumpScreen(tester, StaffFileSnapshot.empty);
 
-    expect(
-      find.text(
-        "Le fichier du personnel n'a encore jamais été téléchargé sur cette tablette.",
+    expect(find.textContaining("n'a pas encore été reçu"), findsOneWidget);
+    expect(find.text('Réessayer'), findsNothing);
+    expect(find.text('Aucun agent dans le fichier'), findsOneWidget);
+  });
+
+  testWidgets('jamais reçu : les agents créés ici se listent sous le bandeau', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      StaffFileSnapshot(
+        members: [member('m-1', syncState: StaffSyncState.pending)],
+        documentsByMember: const {},
+        documentTypes: const [],
+        hasEverSynced: false,
       ),
-      findsOneWidget,
     );
-    expect(find.text('Réessayer'), findsOneWidget);
+
+    expect(find.textContaining("n'a pas encore été reçu"), findsOneWidget);
+    expect(find.byType(StaffAgentCard), findsOneWidget);
+    expect(find.text('Nouvel agent'), findsOneWidget);
   });
 
   testWidgets('à 360 dp, ni la grille ni le tableau ne débordent', (

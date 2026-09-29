@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_vie
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filters_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/grid/staff_agent_grid.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/list/staff_agent_table.dart';
@@ -58,8 +59,6 @@ class StaffFileScreen extends StatelessWidget {
           failure: state.failure,
           onRetry: cubit.load,
         );
-      case StaffFileStatus.neverSynced:
-        return StaffResultsErrorState(neverSynced: true, onRetry: cubit.load);
       case StaffFileStatus.loading:
         return StaffFileSkeleton(viewMode: state.viewMode);
       case StaffFileStatus.ready:
@@ -86,16 +85,28 @@ class StaffFileScreen extends StatelessWidget {
       if (context.mounted) await cubit.refresh();
     }
 
+    final notSynced = state.snapshot.hasEverSynced
+        ? null
+        : StaffNotice.warning(
+            AppLocalizations.of(context)!.staffFileNotYetSynced,
+          );
     if (view.isFileEmpty) {
-      return StaffEmptyState(
-        filtered: false,
-        onResetFilters: cubit.resetFilters,
-        onCreate: () => unawaited(open()),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ?notSynced,
+          StaffEmptyState(
+            filtered: false,
+            onResetFilters: cubit.resetFilters,
+            onCreate: () => unawaited(open()),
+          ),
+        ],
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        ?notSynced,
         Align(
           alignment: Alignment.centerRight,
           child: PermissionGate.access(

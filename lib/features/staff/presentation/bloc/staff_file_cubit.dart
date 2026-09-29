@@ -53,9 +53,9 @@ class StaffFileCubit extends Cubit<StaffFileState> {
       (failure) => emit(
         state.copyWith(status: StaffFileStatus.failure, failure: failure),
       ),
-      (snapshot) => snapshot.hasEverSynced
-          ? _emitReady(snapshot)
-          : emit(state.copyWith(status: StaffFileStatus.neverSynced)),
+      // Toujours prêt : hors ligne, le fichier local — même vide — se lit et
+      // s'enrichit ; l'écran dit seulement qu'il n'a pas encore été reçu.
+      _emitReady,
     );
   }
 
@@ -66,9 +66,7 @@ class StaffFileCubit extends Cubit<StaffFileState> {
     final result = await _source.read();
     if (isClosed) return;
     result.fold((_) {}, (snapshot) {
-      if (snapshot.hasEverSynced || state.status == StaffFileStatus.ready) {
-        _emitReady(snapshot);
-      }
+      if (state.status == StaffFileStatus.ready) _emitReady(snapshot);
     });
   }
 
