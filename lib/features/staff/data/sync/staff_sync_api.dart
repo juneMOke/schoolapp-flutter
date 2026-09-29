@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_dto.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_contract_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_push_dto.dart';
@@ -22,6 +23,21 @@ abstract class StaffSyncApi {
   /// corps est le payload figé de l'outbox, relu tel quel.
   @POST(AppConstants.syncStaffMembersEndpoint)
   Future<StaffMemberSyncResponseDto> submitStaffMember(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
+  /// Pose d'une période datée (ajout seul, `hr.pay.write`).
+  @POST(AppConstants.syncStaffContractsOfMemberEndpoint)
+  Future<StaffContractSyncResponseDto> submitStaffContract(
+    @Extras() Map<String, dynamic> extras,
+    @Path('staffMemberId') String staffMemberId,
+    @Body() Map<String, dynamic> body,
+  );
+
+  /// Correction d'une période saisie par erreur.
+  @POST(AppConstants.syncStaffContractCorrectionsEndpoint)
+  Future<StaffContractCorrectionResponseDto> correctStaffContract(
     @Extras() Map<String, dynamic> extras,
     @Body() Map<String, dynamic> body,
   );

@@ -90,6 +90,10 @@ const TableSchema staffMembersTable = TableSchema(
 /// marquée corrigée (`corrected_at`) et reste pour l'historique.
 ///
 /// Montants en centimes dans leur devise, jamais convertis.
+///
+/// `correction_pending_id` est **local** : l'identifiant d'une correction
+/// écrite sur le poste et pas encore accusée. `corrected_at` appartient au
+/// serveur, qui le pose à l'accusé — le poste ne l'écrit jamais.
 const TableSchema staffContractsTable = TableSchema(
   name: 'staff_contracts',
   createTableSql: '''
@@ -116,7 +120,8 @@ const TableSchema staffContractsTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      correction_pending_id TEXT
     )
   ''',
   createIndexSql: [

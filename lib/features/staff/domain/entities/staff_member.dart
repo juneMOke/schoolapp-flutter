@@ -73,6 +73,32 @@ class StaffMember extends Equatable {
     this.contracts = const [],
   });
 
+  /// La même fiche, portant [periods] pour frise — celle du serveur, complétée
+  /// à la lecture par les gestes de contrat encore en attente sur le poste.
+  StaffMember withContracts(List<StaffContractPeriod> periods) => StaffMember(
+    id: id,
+    staffNumber: staffNumber,
+    lastName: lastName,
+    middleName: middleName,
+    firstName: firstName,
+    sex: sex,
+    birthDate: birthDate,
+    entryDate: entryDate,
+    phoneNumber: phoneNumber,
+    email: email,
+    city: city,
+    district: district,
+    municipality: municipality,
+    neighborhood: neighborhood,
+    address: address,
+    category: category,
+    jobTitle: jobTitle,
+    branches: branches,
+    diplomas: diplomas,
+    contracts: periods,
+    syncState: syncState,
+  );
+
   /// « Nom Post-nom Prénom », l'ordre de l'état civil congolais.
   String get fullName => [
     lastName,

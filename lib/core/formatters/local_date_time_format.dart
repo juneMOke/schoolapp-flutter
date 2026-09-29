@@ -19,3 +19,11 @@ String formatLocalDateTime(DateTime instant) {
   return '${two(local.day)}/${two(local.month)}/${local.year} '
       '${two(local.hour)}:${two(local.minute)}';
 }
+
+/// Un jour `YYYY-MM-DD` (sans fuseau) écrit `jj/mm/aaaa`. Rendu tel quel s'il
+/// ne se lit pas : une date abîmée reste visible plutôt que de disparaître.
+String formatIsoDay(String day) {
+  final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(day);
+  if (match == null) return day;
+  return '${match.group(3)}/${match.group(2)}/${match.group(1)}';
+}

@@ -8,6 +8,12 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_member.d
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_contract_repository.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract_use_cases.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -17,18 +23,38 @@ class _MockSave extends Mock implements SaveStaffMemberUseCase {}
 
 class _MockLoad extends Mock implements LoadStaffMemberUseCase {}
 
+class _MockLoadContracts extends Mock implements LoadStaffContractsUseCase {}
+
+class _MockAddContract extends Mock implements AddStaffContractUseCase {}
+
 void main() {
   final getIt = GetIt.instance;
   late _MockSave save;
+  late _MockLoad load;
+  late _MockAddContract addContract;
 
-  setUpAll(() => registerFallbackValue(const StaffMemberDraft(id: 'x')));
+  setUpAll(() {
+    registerFallbackValue(const StaffMemberDraft(id: 'x'));
+    registerFallbackValue(const StaffContractDraft());
+  });
 
   setUp(() {
     save = _MockSave();
+    load = _MockLoad();
+    addContract = _MockAddContract();
+    final loadContracts = _MockLoadContracts();
+    when(() => loadContracts(any())).thenAnswer((_) async => const Right([]));
     getIt
       ..registerSingleton<SaveStaffMemberUseCase>(save)
-      ..registerSingleton<LoadStaffMemberUseCase>(_MockLoad())
-      ..registerSingleton<IdGenerator>(const IdGenerator(Uuid()));
+      ..registerSingleton<LoadStaffMemberUseCase>(load)
+      ..registerSingleton<IdGenerator>(const IdGenerator(Uuid()))
+      ..registerFactory<StaffContractsCubit>(
+        () => StaffContractsCubit(
+          load: loadContracts,
+          add: addContract,
+          correct: CorrectStaffContractUseCase(_NoRepository()),
+        ),
+      );
   });
   tearDown(() async => getIt.reset());
 
@@ -101,6 +127,57 @@ void main() {
     expect(find.text('Enseignant titulaire'), findsWidgets);
   });
 
+  testWidgets('les contrats se posent à part, sans modifier la fiche', (
+    tester,
+  ) async {
+    final agent = member(
+      'm-1',
+      contracts: [period(StaffContractKind.permanent, from: '2025-09-01')],
+    );
+    when(() => load(any())).thenAnswer((_) async => Right(agent));
+    when(
+      () => addContract(any(), any()),
+    ).thenAnswer((_) async => const Right(unit));
+    await pumpPage(tester, member: agent);
+
+    await tester.tap(find.text('Poste & contrat'));
+    await tester.pump();
+    expect(find.text('Depuis le 01/09/2025'), findsOneWidget);
+    expect(find.text('En vigueur'), findsOneWidget);
+
+    await tester.tap(find.text('Nouveau contrat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Poser le contrat'));
+    await tester.pump();
+    expect(find.text('Champ requis'), findsOneWidget);
+    verifyNever(() => addContract(any(), any()));
+
+    await tester.tap(find.text('Conventionné'));
+    await tester.pump();
+    await tester.enterText(
+      find.descendant(
+        of: find.ancestor(
+          of: find.textContaining('Matricule SECOPE'),
+          matching: find.byType(EteeloTextInput),
+        ),
+        matching: find.byType(EditableText),
+      ),
+      'S-42',
+    );
+    await tester.tap(find.text('Poser le contrat'));
+    await tester.pumpAndSettle();
+
+    final draft =
+        verify(() => addContract('m-1', captureAny())).captured.single
+            as StaffContractDraft;
+    expect(draft.kind, StaffContractKind.conventionne);
+    expect(draft.secopeNumber, 'S-42');
+    expect(draft.effectiveFrom, '2026-09-29');
+    expect(find.text('Contrat enregistré sur la tablette.'), findsOneWidget);
+    verify(() => load('m-1')).called(1);
+    verifyNever(() => save(any()));
+  });
+
   testWidgets('abandonner une modification demande confirmation', (
     tester,
   ) async {
@@ -130,3 +207,5 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 }
+
+class _NoRepository extends Mock implements StaffContractRepository {}

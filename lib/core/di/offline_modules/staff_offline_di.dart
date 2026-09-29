@@ -1,4 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_contract_sync_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_contract_write_dao.dart';
+import 'package:school_app_flutter/features/staff/data/repositories/staff_contract_repository_impl.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_contract_correction_outbox_handler.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_contract_outbox_handler.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_contract_repository.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract_use_cases.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
@@ -45,6 +54,12 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerLazySingleton<StaffContractDao>(
     () => StaffContractDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<StaffContractWriteDao>(
+    () => StaffContractWriteDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<StaffContractSyncDao>(
+    () => StaffContractSyncDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<StaffDocumentDao>(
     () => StaffDocumentDao(getIt<Database>()),
   );
@@ -57,6 +72,7 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerLazySingleton<StaffRepository>(
     () => StaffRepositoryImpl(
       members: getIt<StaffMemberDao>(),
+      contracts: getIt<StaffContractDao>(),
       writer: getIt<StaffMemberWriteDao>(),
       documents: getIt<StaffDocumentDao>(),
       types: getIt<StaffDocumentTypeDao>(),
@@ -74,6 +90,24 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerFactory<LoadStaffMemberUseCase>(
     () => LoadStaffMemberUseCase(getIt<StaffRepository>()),
   );
+  getIt.registerLazySingleton<StaffContractRepository>(
+    () => StaffContractRepositoryImpl(
+      contracts: getIt<StaffContractDao>(),
+      writer: getIt<StaffContractWriteDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      ids: getIt<IdGenerator>(),
+      syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+  getIt.registerFactory<LoadStaffContractsUseCase>(
+    () => LoadStaffContractsUseCase(getIt<StaffContractRepository>()),
+  );
+  getIt.registerFactory<AddStaffContractUseCase>(
+    () => AddStaffContractUseCase(getIt<StaffContractRepository>()),
+  );
+  getIt.registerFactory<CorrectStaffContractUseCase>(
+    () => CorrectStaffContractUseCase(getIt<StaffContractRepository>()),
+  );
   getIt.registerFactory<SyncStaffPullsUseCase>(
     () => SyncStaffPullsUseCase(getIt<PullCoordinator>()),
   );
@@ -89,6 +123,13 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<StaffFileCubit>(
     () => StaffFileCubit(source: getIt<StaffSnapshotSource>()),
+  );
+  getIt.registerFactory<StaffContractsCubit>(
+    () => StaffContractsCubit(
+      load: getIt<LoadStaffContractsUseCase>(),
+      add: getIt<AddStaffContractUseCase>(),
+      correct: getIt<CorrectStaffContractUseCase>(),
+    ),
   );
 
   // ── Descente ────────────────────────────────────────────────────────────
@@ -113,10 +154,30 @@ void registerStaffOffline(GetIt getIt) {
   coordinator.registerHandler(StaffPullHandler.documents(pulls));
 
   // ── Remontée → SyncEngine ───────────────────────────────────────────────
-  getIt<SyncEngine>().registerHandler(
+  // Trois gestes, trois entrées : la pose d'un contrat attend l'accusé de sa
+  // fiche, la correction celui de la période corrigée (`blocked`).
+  final engine = getIt<SyncEngine>();
+  engine.registerHandler(
     StaffMemberOutboxHandler(
       api: getIt<StaffSyncApi>(),
       dao: getIt<StaffMemberSyncDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  engine.registerHandler(
+    StaffContractOutboxHandler(
+      api: getIt<StaffSyncApi>(),
+      dao: getIt<StaffContractSyncDao>(),
+      members: getIt<StaffMemberDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  engine.registerHandler(
+    StaffContractCorrectionOutboxHandler(
+      api: getIt<StaffSyncApi>(),
+      dao: getIt<StaffContractSyncDao>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: getIt<Map<String, dynamic>>(),
     ),

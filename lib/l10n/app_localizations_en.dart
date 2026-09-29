@@ -11807,4 +11807,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffDiscardKeep => 'Keep editing';
+
+  @override
+  String get staffBlockContract => 'Contract';
+
+  @override
+  String get staffBlockContractHint =>
+      'Dated periods: a new contract takes effect on a date, without rewriting the previous one.';
+
+  @override
+  String get staffContractAdd => 'New contract';
+
+  @override
+  String get staffContractAddTitle => 'New contract';
+
+  @override
+  String get staffContractAddSubmit => 'Record the contract';
+
+  @override
+  String get staffContractCorrect => 'Correct';
+
+  @override
+  String get staffContractCorrectTitle => 'Correct a period';
+
+  @override
+  String get staffContractCorrectSubmit => 'Replace the period';
+
+  @override
+  String get staffContractCancelOnly => 'Cancel only';
+
+  @override
+  String get staffContractNoneYet =>
+      'No contract: this staff member has no contract yet.';
+
+  @override
+  String get staffContractCurrent => 'Current';
+
+  @override
+  String staffContractFrom(String from) {
+    return 'Since $from';
+  }
+
+  @override
+  String staffContractBetween(String from, String to) {
+    return 'From $from to $to';
+  }
+
+  @override
+  String staffContractRejected(String reason) {
+    return 'Rejected by the server: $reason';
+  }
+
+  @override
+  String get staffContractAmountRequired =>
+      'An amount is required for this contract.';
+
+  @override
+  String get staffContractAmountInvalid => 'Invalid amount.';
+
+  @override
+  String get staffContractSecopeRequired => 'The SECOPE number is required.';
+
+  @override
+  String get staffContractEndBeforeStart =>
+      'The end date is before the start date.';
+
+  @override
+  String get staffContractReasonRequired => 'Say what was wrong.';
+
+  @override
+  String get staffContractPermanentHint => 'School employee, paid monthly.';
+
+  @override
+  String get staffContractVacataireHint =>
+      'Paid by the hour or a monthly flat fee.';
+
+  @override
+  String get staffContractConventionneHint =>
+      'Paid by the State (SECOPE), with an optional local bonus.';
+
+  @override
+  String get staffContractSaved => 'Contract saved on the tablet.';
+
+  @override
+  String get staffContractSaveFailed => 'The contract could not be saved.';
+
+  @override
+  String get staffFieldPayMode => 'Pay mode';
+
+  @override
+  String get staffPayModeHourly => 'Hourly';
+
+  @override
+  String get staffPayModeFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldEffectiveFrom => 'Effective from';
+
+  @override
+  String get staffFieldEndsOn => 'Ends on (optional)';
+
+  @override
+  String get staffFieldSalary => 'Monthly salary';
+
+  @override
+  String get staffFieldHourlyRate => 'Hourly rate';
+
+  @override
+  String get staffFieldMonthlyFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldCurrency => 'Currency';
+
+  @override
+  String get staffFieldSecope => 'SECOPE number';
+
+  @override
+  String get staffFieldBonus => 'Local bonus (optional)';
+
+  @override
+  String get staffFieldCorrectionReason => 'Reason for the correction';
+
+  @override
+  String staffPaySalary(String amount) {
+    return 'Salary: $amount';
+  }
+
+  @override
+  String staffPayHourlyRate(String amount) {
+    return 'Hourly rate: $amount';
+  }
+
+  @override
+  String staffPayMonthlyFlat(String amount) {
+    return 'Flat fee: $amount';
+  }
+
+  @override
+  String staffPaySecope(String number) {
+    return 'SECOPE: $number';
+  }
+
+  @override
+  String staffPayBonus(String amount) {
+    return 'Bonus: $amount';
+  }
 }

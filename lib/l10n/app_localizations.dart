@@ -18700,6 +18700,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep editing'**
   String get staffDiscardKeep;
+
+  /// No description provided for @staffBlockContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get staffBlockContract;
+
+  /// No description provided for @staffBlockContractHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated periods: a new contract takes effect on a date, without rewriting the previous one.'**
+  String get staffBlockContractHint;
+
+  /// No description provided for @staffContractAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'New contract'**
+  String get staffContractAdd;
+
+  /// No description provided for @staffContractAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New contract'**
+  String get staffContractAddTitle;
+
+  /// No description provided for @staffContractAddSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the contract'**
+  String get staffContractAddSubmit;
+
+  /// No description provided for @staffContractCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get staffContractCorrect;
+
+  /// No description provided for @staffContractCorrectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct a period'**
+  String get staffContractCorrectTitle;
+
+  /// No description provided for @staffContractCorrectSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the period'**
+  String get staffContractCorrectSubmit;
+
+  /// No description provided for @staffContractCancelOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel only'**
+  String get staffContractCancelOnly;
+
+  /// No description provided for @staffContractNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No contract: this staff member has no contract yet.'**
+  String get staffContractNoneYet;
+
+  /// No description provided for @staffContractCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get staffContractCurrent;
+
+  /// No description provided for @staffContractFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {from}'**
+  String staffContractFrom(String from);
+
+  /// No description provided for @staffContractBetween.
+  ///
+  /// In en, this message translates to:
+  /// **'From {from} to {to}'**
+  String staffContractBetween(String from, String to);
+
+  /// No description provided for @staffContractRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server: {reason}'**
+  String staffContractRejected(String reason);
+
+  /// No description provided for @staffContractAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'An amount is required for this contract.'**
+  String get staffContractAmountRequired;
+
+  /// No description provided for @staffContractAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount.'**
+  String get staffContractAmountInvalid;
+
+  /// No description provided for @staffContractSecopeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The SECOPE number is required.'**
+  String get staffContractSecopeRequired;
+
+  /// No description provided for @staffContractEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The end date is before the start date.'**
+  String get staffContractEndBeforeStart;
+
+  /// No description provided for @staffContractReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what was wrong.'**
+  String get staffContractReasonRequired;
+
+  /// No description provided for @staffContractPermanentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'School employee, paid monthly.'**
+  String get staffContractPermanentHint;
+
+  /// No description provided for @staffContractVacataireHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by the hour or a monthly flat fee.'**
+  String get staffContractVacataireHint;
+
+  /// No description provided for @staffContractConventionneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by the State (SECOPE), with an optional local bonus.'**
+  String get staffContractConventionneHint;
+
+  /// No description provided for @staffContractSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract saved on the tablet.'**
+  String get staffContractSaved;
+
+  /// No description provided for @staffContractSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The contract could not be saved.'**
+  String get staffContractSaveFailed;
+
+  /// No description provided for @staffFieldPayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay mode'**
+  String get staffFieldPayMode;
+
+  /// No description provided for @staffPayModeHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get staffPayModeHourly;
+
+  /// No description provided for @staffPayModeFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly flat fee'**
+  String get staffPayModeFlat;
+
+  /// No description provided for @staffFieldEffectiveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective from'**
+  String get staffFieldEffectiveFrom;
+
+  /// No description provided for @staffFieldEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on (optional)'**
+  String get staffFieldEndsOn;
+
+  /// No description provided for @staffFieldSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly salary'**
+  String get staffFieldSalary;
+
+  /// No description provided for @staffFieldHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get staffFieldHourlyRate;
+
+  /// No description provided for @staffFieldMonthlyFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly flat fee'**
+  String get staffFieldMonthlyFlat;
+
+  /// No description provided for @staffFieldCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get staffFieldCurrency;
+
+  /// No description provided for @staffFieldSecope.
+  ///
+  /// In en, this message translates to:
+  /// **'SECOPE number'**
+  String get staffFieldSecope;
+
+  /// No description provided for @staffFieldBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Local bonus (optional)'**
+  String get staffFieldBonus;
+
+  /// No description provided for @staffFieldCorrectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for the correction'**
+  String get staffFieldCorrectionReason;
+
+  /// No description provided for @staffPaySalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary: {amount}'**
+  String staffPaySalary(String amount);
+
+  /// No description provided for @staffPayHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate: {amount}'**
+  String staffPayHourlyRate(String amount);
+
+  /// No description provided for @staffPayMonthlyFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat fee: {amount}'**
+  String staffPayMonthlyFlat(String amount);
+
+  /// No description provided for @staffPaySecope.
+  ///
+  /// In en, this message translates to:
+  /// **'SECOPE: {number}'**
+  String staffPaySecope(String number);
+
+  /// No description provided for @staffPayBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus: {amount}'**
+  String staffPayBonus(String amount);
 }
 
 class _AppLocalizationsDelegate

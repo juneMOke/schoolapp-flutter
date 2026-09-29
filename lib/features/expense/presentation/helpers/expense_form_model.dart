@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
-import 'package:school_app_flutter/features/expense/presentation/helpers/expense_amount_input.dart';
+import 'package:school_app_flutter/core/money/amount_input.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 
 /// L'état du formulaire, hors rendu : ce que l'agent a saisi et les règles
@@ -34,7 +34,7 @@ class ExpenseFormModel {
       date = seed.expenseDate,
       funding = seed.fundingSource;
 
-  int? get cents => ExpenseAmountInput.toCents(amount.text);
+  int? get cents => AmountInput.toCents(amount.text);
 
   bool get hasTitle => title.text.trim().isNotEmpty;
 

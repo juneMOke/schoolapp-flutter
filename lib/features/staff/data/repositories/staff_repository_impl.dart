@@ -7,12 +7,14 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_member_input_mapper.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -22,11 +24,13 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_member.d
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_pull_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_timeline_merge.dart';
 
 /// Le fichier du personnel lu sur la tablette, modèles convertis en entités
 /// ici et nulle part ailleurs (règle n°3).
 class StaffRepositoryImpl implements StaffRepository {
   final StaffMemberDao _members;
+  final StaffContractDao _contracts;
   final StaffMemberWriteDao _writer;
   final StaffDocumentDao _documents;
   final StaffDocumentTypeDao _types;
@@ -40,6 +44,7 @@ class StaffRepositoryImpl implements StaffRepository {
 
   const StaffRepositoryImpl({
     required StaffMemberDao members,
+    required StaffContractDao contracts,
     required StaffMemberWriteDao writer,
     required StaffDocumentDao documents,
     required StaffDocumentTypeDao types,
@@ -48,6 +53,7 @@ class StaffRepositoryImpl implements StaffRepository {
     SyncEngine? syncEngine,
     DateTime Function() now = DateTime.now,
   }) : _members = members,
+       _contracts = contracts,
        _writer = writer,
        _documents = documents,
        _types = types,
@@ -70,9 +76,15 @@ class StaffRepositoryImpl implements StaffRepository {
     final schoolId = _currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return const Right(StaffFileSnapshot.empty);
     try {
+      final local = <String, List<StaffContract>>{};
+      for (final row in await _contracts.forSchool(schoolId)) {
+        final contract = row.toEntity();
+        local.putIfAbsent(contract.staffMemberId, () => []).add(contract);
+      }
       final members = [
         for (final row in await _members.listForSchool(schoolId))
-          row.toEntity(),
+          if (row.toEntity() case final member)
+            _withLocalContracts(member, local[member.id] ?? const []),
       ]..sort(_byName);
       final documents = <String, List<StaffDocument>>{};
       for (final row in await _documents.listForSchool(schoolId)) {
@@ -104,7 +116,11 @@ class StaffRepositoryImpl implements StaffRepository {
       if (row == null) {
         return const Left(NotFoundFailure('Agent inconnu sur la tablette'));
       }
-      return Right(row.toEntity());
+      final local = [
+        for (final contract in await _contracts.forMember(staffMemberId))
+          contract.toEntity(),
+      ];
+      return Right(_withLocalContracts(row.toEntity(), local));
     } catch (e) {
       return Left(StorageFailure('Lecture de la fiche : $e'));
     }
@@ -141,6 +157,16 @@ class StaffRepositoryImpl implements StaffRepository {
     if (engine != null) unawaited(engine.flush());
     return const Right(unit);
   }
+
+  /// La frise de la fiche complétée par les périodes que le poste connaît
+  /// mieux qu'elle — sans quoi un contrat posé hors ligne n'apparaîtrait
+  /// nulle part.
+  static StaffMember _withLocalContracts(
+    StaffMember member,
+    List<StaffContract> local,
+  ) => local.isEmpty
+      ? member
+      : member.withContracts(StaffTimelineMerge.merge(member.contracts, local));
 
   static StaffDocumentType _typeOf(StaffDocumentTypeLocalModel model) =>
       StaffDocumentType(

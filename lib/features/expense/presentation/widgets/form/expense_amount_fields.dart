@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
-import 'package:school_app_flutter/features/expense/presentation/helpers/expense_amount_input.dart';
+import 'package:school_app_flutter/core/money/amount_input.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -43,7 +43,7 @@ class ExpenseAmountFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cents = ExpenseAmountInput.toCents(controller.text);
+    final cents = AmountInput.toCents(controller.text);
     final rate = this.rate;
     final usd = currency == CurrencyCode.cdf && cents != null && rate != null
         ? ExpenseUsdReader(rate).usdCentsOf(Money(cents, CurrencyCode.cdf))

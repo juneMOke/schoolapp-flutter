@@ -153,6 +153,22 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
     return true;
   }
 
+  /// Relit la fiche après un geste qui ne passe pas par elle — un contrat :
+  /// sa frise a changé. Sans effet en saisie, pour ne pas écraser un
+  /// brouillon.
+  Future<void> refreshMember() async {
+    final member = state.member;
+    if (member == null || state.mode != StaffAgentMode.view) return;
+    final reloaded = await _load(member.id);
+    if (isClosed || state.mode != StaffAgentMode.view) return;
+    reloaded.fold(
+      (_) {},
+      (fresh) => emit(
+        state.copyWith(member: fresh, draft: StaffMemberDraft.of(fresh)),
+      ),
+    );
+  }
+
   StaffDraftValidation _validate(StaffMemberDraft draft) =>
       StaffDraftValidator.validate(draft, today: _today, others: _others);
 }

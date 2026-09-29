@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
@@ -30,6 +31,7 @@ void main() {
     user = CurrentUserContext()..set('u-1', schoolId: 'school-1');
     repo = StaffRepositoryImpl(
       members: StaffMemberDao(db),
+      contracts: StaffContractDao(db),
       writer: StaffMemberWriteDao(db),
       documents: StaffDocumentDao(db),
       types: StaffDocumentTypeDao(db),

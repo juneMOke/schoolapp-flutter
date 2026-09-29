@@ -1,4 +1,4 @@
-/// Lecture du montant saisi (spec §7) — saisie libre, espaces et séparateurs
+/// Lecture d'un montant saisi — saisie libre, espaces et séparateurs
 /// de milliers tolérés.
 ///
 /// Règles, dans l'ordre :
@@ -10,7 +10,7 @@
 /// 4. suivie de trois chiffres, c'est un groupement (« 385.000 », « 1,200 ») :
 ///    un centime n'a jamais trois chiffres ;
 /// 5. plus de trois chiffres après la dernière marque : illisible.
-abstract final class ExpenseAmountInput {
+abstract final class AmountInput {
   /// Centimes lus, ou `null` si rien de lisible ou si le montant n'est pas
   /// strictement positif (« Indiquez le montant réellement décaissé. »).
   static int? toCents(String raw) {

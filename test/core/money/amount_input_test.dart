@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/expense/presentation/helpers/expense_amount_input.dart';
+import 'package:school_app_flutter/core/money/amount_input.dart';
 
 void main() {
   group('toCents', () {
@@ -26,21 +26,21 @@ void main() {
     };
     cases.forEach((raw, expected) {
       test('« $raw » → $expected', () {
-        expect(ExpenseAmountInput.toCents(raw), expected);
+        expect(AmountInput.toCents(raw), expected);
       });
     });
   });
 
   test('fromCents : sans groupement, virgule décimale seulement si utile', () {
-    expect(ExpenseAmountInput.fromCents(38500000), '385000');
-    expect(ExpenseAmountInput.fromCents(12050), '120,50');
-    expect(ExpenseAmountInput.fromCents(12005), '120,05');
+    expect(AmountInput.fromCents(38500000), '385000');
+    expect(AmountInput.fromCents(12050), '120,50');
+    expect(AmountInput.fromCents(12005), '120,05');
   });
 
   test('aller-retour : ce qui est réécrit se relit à l’identique', () {
     for (final cents in [1, 99, 100, 12050, 38500000]) {
       expect(
-        ExpenseAmountInput.toCents(ExpenseAmountInput.fromCents(cents)),
+        AmountInput.toCents(AmountInput.fromCents(cents)),
         cents,
       );
     }

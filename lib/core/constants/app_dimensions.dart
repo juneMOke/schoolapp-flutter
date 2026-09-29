@@ -565,4 +565,8 @@ class AppDimensions {
   /// Largeur plafond du formulaire de la page agent : au-delà, les lignes de
   /// champs s'étirent sans rien apporter.
   static const staffAgentBodyMaxWidth = 960.0;
+
+  /// Largeur d'une tuile de statut dans le choix du contrat : trois tiennent
+  /// sur une ligne de tablette, elles passent à la ligne en portrait.
+  static const staffContractTileWidth = 240.0;
 }

@@ -8129,5 +8129,212 @@
   "staffDiscardKeep": "Continuer la saisie",
   "@staffDiscardKeep": {
     "description": "Revenir à la saisie."
+  },
+  "staffBlockContract": "Contrat",
+  "@staffBlockContract": {
+    "description": "Bloc des contrats de la fiche agent."
+  },
+  "staffBlockContractHint": "Des périodes datées : un nouveau contrat prend effet à une date, sans réécrire l'ancien.",
+  "@staffBlockContractHint": {
+    "description": "Sous-titre du bloc des contrats."
+  },
+  "staffContractAdd": "Nouveau contrat",
+  "@staffContractAdd": {
+    "description": "Bouton : poser un contrat à compter d'une date."
+  },
+  "staffContractAddTitle": "Nouveau contrat",
+  "@staffContractAddTitle": {
+    "description": "Titre de la page de pose d'un contrat."
+  },
+  "staffContractAddSubmit": "Poser le contrat",
+  "@staffContractAddSubmit": {
+    "description": "Valider la pose d'un contrat."
+  },
+  "staffContractCorrect": "Corriger",
+  "@staffContractCorrect": {
+    "description": "Corriger une période de contrat saisie par erreur."
+  },
+  "staffContractCorrectTitle": "Corriger une période",
+  "@staffContractCorrectTitle": {
+    "description": "Titre de la page de correction."
+  },
+  "staffContractCorrectSubmit": "Remplacer la période",
+  "@staffContractCorrectSubmit": {
+    "description": "Valider la correction avec un remplaçant."
+  },
+  "staffContractCancelOnly": "Annuler seulement",
+  "@staffContractCancelOnly": {
+    "description": "Corriger sans remplaçant : la période était un doublon."
+  },
+  "staffContractNoneYet": "Aucun contrat : l'agent est « contrat à poser ».",
+  "@staffContractNoneYet": {
+    "description": "Frise vide."
+  },
+  "staffContractCurrent": "En vigueur",
+  "@staffContractCurrent": {
+    "description": "Marque de la période en vigueur aujourd'hui."
+  },
+  "staffContractFrom": "Depuis le {from}",
+  "@staffContractFrom": {
+    "description": "Période ouverte.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractBetween": "Du {from} au {to}",
+  "@staffContractBetween": {
+    "description": "Période bornée.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractRejected": "Refusé par le serveur : {reason}",
+  "@staffContractRejected": {
+    "description": "Pose ou correction refusée.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractAmountRequired": "Le montant est obligatoire pour ce contrat.",
+  "@staffContractAmountRequired": {
+    "description": "Montant manquant."
+  },
+  "staffContractAmountInvalid": "Montant invalide.",
+  "@staffContractAmountInvalid": {
+    "description": "Montant illisible."
+  },
+  "staffContractSecopeRequired": "Le matricule SECOPE est obligatoire.",
+  "@staffContractSecopeRequired": {
+    "description": "Matricule manquant."
+  },
+  "staffContractEndBeforeStart": "La fin précède le début.",
+  "@staffContractEndBeforeStart": {
+    "description": "Fin avant début."
+  },
+  "staffContractReasonRequired": "Dites ce qui était faux.",
+  "@staffContractReasonRequired": {
+    "description": "Motif de correction manquant."
+  },
+  "staffContractPermanentHint": "Salarié de l'école, payé au mois.",
+  "@staffContractPermanentHint": {
+    "description": "Aide du statut permanent."
+  },
+  "staffContractVacataireHint": "Payé aux heures ou au forfait mensuel.",
+  "@staffContractVacataireHint": {
+    "description": "Aide du statut vacataire."
+  },
+  "staffContractConventionneHint": "Pris en charge par l'État (SECOPE), prime locale possible.",
+  "@staffContractConventionneHint": {
+    "description": "Aide du statut conventionné."
+  },
+  "staffContractSaved": "Contrat enregistré sur la tablette.",
+  "@staffContractSaved": {
+    "description": "Confirmation d'une pose ou d'une correction."
+  },
+  "staffContractSaveFailed": "Le contrat n'a pas pu être enregistré.",
+  "@staffContractSaveFailed": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffFieldPayMode": "Mode de paiement",
+  "@staffFieldPayMode": {
+    "description": "Champ du mode de paiement d'un vacataire."
+  },
+  "staffPayModeHourly": "À l'heure",
+  "@staffPayModeHourly": {
+    "description": "Vacataire payé à l'heure."
+  },
+  "staffPayModeFlat": "Forfait mensuel",
+  "@staffPayModeFlat": {
+    "description": "Vacataire payé au forfait."
+  },
+  "staffFieldEffectiveFrom": "Prend effet le",
+  "@staffFieldEffectiveFrom": {
+    "description": "Date d'effet."
+  },
+  "staffFieldEndsOn": "Se termine le (facultatif)",
+  "@staffFieldEndsOn": {
+    "description": "Date de fin."
+  },
+  "staffFieldSalary": "Salaire mensuel",
+  "@staffFieldSalary": {
+    "description": "Montant d'un permanent."
+  },
+  "staffFieldHourlyRate": "Taux horaire",
+  "@staffFieldHourlyRate": {
+    "description": "Montant d'un vacataire à l'heure."
+  },
+  "staffFieldMonthlyFlat": "Forfait mensuel",
+  "@staffFieldMonthlyFlat": {
+    "description": "Montant d'un vacataire au forfait."
+  },
+  "staffFieldCurrency": "Devise",
+  "@staffFieldCurrency": {
+    "description": "Devise du montant."
+  },
+  "staffFieldSecope": "Matricule SECOPE",
+  "@staffFieldSecope": {
+    "description": "Matricule d'un conventionné."
+  },
+  "staffFieldBonus": "Prime locale (facultative)",
+  "@staffFieldBonus": {
+    "description": "Prime d'un conventionné."
+  },
+  "staffFieldCorrectionReason": "Motif de la correction",
+  "@staffFieldCorrectionReason": {
+    "description": "Ce qui était faux."
+  },
+  "staffPaySalary": "Salaire : {amount}",
+  "@staffPaySalary": {
+    "description": "Montant affiché d'un permanent.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayHourlyRate": "Taux horaire : {amount}",
+  "@staffPayHourlyRate": {
+    "description": "Montant affiché d'un vacataire à l'heure.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayMonthlyFlat": "Forfait : {amount}",
+  "@staffPayMonthlyFlat": {
+    "description": "Montant affiché d'un vacataire au forfait.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPaySecope": "SECOPE : {number}",
+  "@staffPaySecope": {
+    "description": "Matricule affiché.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayBonus": "Prime : {amount}",
+  "@staffPayBonus": {
+    "description": "Prime affichée.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }
