@@ -80,6 +80,19 @@ void main() {
     expect(cubit.state.month, '2026-09');
   });
 
+  test('« Aujourd\'hui » ramène au vendredi le week-end', () async {
+    final cubit = cubitAt(DateTime(2026, 10, 4, 9)); // dimanche
+    addTearDown(cubit.close);
+    await cubit.load();
+
+    await cubit.stepDay(-1);
+    expect(cubit.state.day, '2026-10-01');
+    await cubit.goToday();
+
+    expect(cubit.state.day, '2026-10-02');
+    expect(cubit.state.isToday, isTrue);
+  });
+
   test('changer de mois relit une plage de deux mois', () async {
     final cubit = cubitAt(DateTime(2026, 10, 1, 9));
     addTearDown(cubit.close);

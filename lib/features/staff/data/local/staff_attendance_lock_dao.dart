@@ -151,16 +151,24 @@ class StaffAttendanceLockDao {
     [schoolId, gestureId, StaffSyncState.pending.dbValue, createdAt, from, to],
   );
 
-  /// Une réouverture de [day] attend-elle encore son accusé ? Un pointage du
-  /// jour attend alors derrière elle, sinon il reviendrait `DAY_LOCKED`.
-  Future<bool> hasPendingReopen(String schoolId, String day) => _exists(
+  /// Une réouverture de [day], posée au plus tard à [queuedBefore], attend-
+  /// elle encore son accusé ? Un pointage du jour attend alors derrière elle,
+  /// sinon il reviendrait `DAY_LOCKED`. Jamais une réouverture posée après
+  /// lui : elle attend peut-être elle-même une validation qui l'attend.
+  Future<bool> hasPendingReopen(
+    String schoolId,
+    String day, {
+    required int queuedBefore,
+  }) => _exists(
     gesturesTable,
-    'school_id = ? AND period_start = ? AND gesture = ? AND sync_status = ?',
+    'school_id = ? AND period_start = ? AND gesture = ? AND sync_status = ? '
+    'AND created_at <= ?',
     [
       schoolId,
       day,
       StaffAttendanceGesture.reopenDay.wire,
       StaffSyncState.pending.dbValue,
+      queuedBefore,
     ],
   );
 

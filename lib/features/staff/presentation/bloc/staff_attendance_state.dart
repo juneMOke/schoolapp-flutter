@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
 
@@ -68,7 +69,13 @@ class StaffAttendanceState extends Equatable {
     recapQuery: StaffRecapQuery.none,
   );
 
-  bool get isToday => day == today;
+  /// Le dernier jour ouvré jusqu'à aujourd'hui : aujourd'hui en semaine, le
+  /// vendredi le week-end. C'est là que ramène « Aujourd'hui ».
+  String get lastWorkDay => StaffWorkCalendar.isWeekday(today)
+      ? today
+      : StaffWorkCalendar.stepWorkDay(today, -1);
+
+  bool get isToday => day == lastWorkDay;
 
   StaffDayRegister get register =>
       StaffDayRegister.build(snapshot, day: day, query: dayQuery);

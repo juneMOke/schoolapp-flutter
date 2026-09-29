@@ -81,7 +81,8 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     )) {
       return const OutboxDispatchResult.blocked('Un geste plus ancien attend');
     }
-    if (gesture.locks && await _hasRecordsToWaitFor(schoolId, from, to)) {
+    if (gesture.locks &&
+        await _hasRecordsToWaitFor(schoolId, from, to, entry.createdAt)) {
       return const OutboxDispatchResult.blocked(
         'Pointages de la période en vol',
       );
@@ -129,8 +130,14 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     String schoolId,
     String from,
     String to,
+    int queuedBefore,
   ) async {
-    final pending = await _records.pendingIn(schoolId, from: from, to: to);
+    final pending = await _records.pendingIn(
+      schoolId,
+      from: from,
+      to: to,
+      queuedBefore: queuedBefore,
+    );
     final byMember = <String, bool>{};
     for (final record in pending) {
       final memberId = record.row['staff_member_id']! as String;

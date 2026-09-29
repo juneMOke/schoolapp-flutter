@@ -101,10 +101,14 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   Future<void> stepDay(int direction) =>
       _moveDay(StaffWorkCalendar.stepWorkDay(state.day, direction));
 
-  Future<void> goToday() => _moveDay(state.today);
+  Future<void> goToday() => _moveDay(state.lastWorkDay);
 
+  /// Jamais au-delà d'aujourd'hui, ni avant le début de l'année scolaire :
+  /// le serveur refuserait tout pointage hors de l'année courante.
   Future<void> _moveDay(String day) async {
+    final start = state.snapshot.schoolYear?.start;
     if (day.compareTo(state.today) > 0 || day == state.day) return;
+    if (start != null && day.compareTo(start) < 0) return;
     final reload = _range(day, state.month) != _range(state.day, state.month);
     emit(state.copyWith(day: day));
     if (reload) await refresh();

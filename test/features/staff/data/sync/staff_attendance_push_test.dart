@@ -301,6 +301,45 @@ void main() {
       );
     });
 
+    test(
+      'valider, rouvrir, corriger : aucun interblocage, dans l\'ordre',
+      () async {
+        await seedMember('m-1');
+        await addGesture('v', StaffAttendanceGesture.validateDay, nowMs: 20);
+        await addGesture('r', StaffAttendanceGesture.reopenDay, nowMs: 30);
+        await writeRecord(_record('r-1'), nowMs: 40);
+
+        // La correction attend la réouverture, qui attend la validation…
+        expect(
+          (await records.dispatch(
+            await entry(StaffAttendanceWriteDao.entryId('r-1')),
+          )).outcome,
+          OutboxDispatchOutcome.blocked,
+        );
+        expect(
+          (await gestures.dispatch(
+            await entry(StaffAttendanceLockDao.gestureEntryId('r')),
+          )).outcome,
+          OutboxDispatchOutcome.blocked,
+        );
+        // … mais la validation, antérieure à la correction, ne l'attend pas.
+        answerLocked('LOCKED');
+        expect(
+          (await gestures.dispatch(
+            await entry(StaffAttendanceLockDao.gestureEntryId('v')),
+          )).outcome,
+          OutboxDispatchOutcome.acked,
+        );
+        answerLocked('OPEN');
+        expect(
+          (await gestures.dispatch(
+            await entry(StaffAttendanceLockDao.gestureEntryId('r')),
+          )).outcome,
+          OutboxDispatchOutcome.acked,
+        );
+      },
+    );
+
     test('un refus laisse l\'état du serveur, marqué en échec', () async {
       await addGesture('g-1', StaffAttendanceGesture.validateDay);
       when(

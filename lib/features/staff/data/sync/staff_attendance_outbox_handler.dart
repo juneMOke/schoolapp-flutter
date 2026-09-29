@@ -81,7 +81,11 @@ class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
     if (member.row['version'] == null) {
       return const OutboxDispatchResult.blocked('Fiche pas encore accusée');
     }
-    if (await _locks.hasPendingReopen(schoolId, sent.workDate)) {
+    if (await _locks.hasPendingReopen(
+      schoolId,
+      sent.workDate,
+      queuedBefore: entry.createdAt,
+    )) {
       return const OutboxDispatchResult.blocked('Réouverture du jour en vol');
     }
 

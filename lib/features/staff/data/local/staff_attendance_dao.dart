@@ -1,4 +1,7 @@
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_local_model.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -36,20 +39,35 @@ class StaffAttendanceDao {
     return rows.isEmpty ? null : StaffAttendanceLocalModel(rows.single);
   }
 
-  /// Les pointages de l'école encore **en attente d'envoi** sur les jours
-  /// [from] → [to] : c'est ce qu'une validation ou une clôture doit laisser
-  /// partir avant elle.
+  /// Les pointages de l'école encore **en file** sur les jours [from] →
+  /// [to], mis en file au plus tard à [queuedBefore] : c'est ce qu'une
+  /// validation ou une clôture doit laisser partir avant elle.
+  ///
+  /// ⚠️ Jamais ceux mis en file **après** le geste : « valider, rouvrir,
+  /// corriger » ferait sinon attendre la validation derrière la correction,
+  /// la correction derrière la réouverture, et la réouverture derrière la
+  /// validation — un interblocage. L'heure de mise en file est celle de
+  /// l'entrée d'outbox, que chaque retouche rajeunit.
   Future<List<StaffAttendanceLocalModel>> pendingIn(
     String schoolId, {
     required String from,
     required String to,
+    required int queuedBefore,
   }) async {
-    final rows = await _db.query(
-      table,
-      where:
-          'school_id = ? AND work_date >= ? AND work_date <= ? '
-          'AND sync_status = ?',
-      whereArgs: [schoolId, from, to, StaffSyncState.pending.dbValue],
+    final rows = await _db.rawQuery(
+      'SELECT r.* FROM $table r '
+      'JOIN ${OutboxDao.table} o '
+      "ON o.id = '${StaffAttendanceWriteDao.aggregateType}:' || r.id "
+      'WHERE r.school_id = ? AND r.work_date >= ? AND r.work_date <= ? '
+      'AND r.sync_status = ? AND o.status = ? AND o.created_at <= ?',
+      [
+        schoolId,
+        from,
+        to,
+        StaffSyncState.pending.dbValue,
+        OutboxStatus.pending.dbValue,
+        queuedBefore,
+      ],
     );
     return rows.map(StaffAttendanceLocalModel.new).toList(growable: false);
   }
