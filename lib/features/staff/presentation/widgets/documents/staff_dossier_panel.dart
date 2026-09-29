@@ -18,7 +18,9 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_contract
 import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_state.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_failure_messages.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_step_style.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_form_block.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_document_tile.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_document_viewer.dart';
@@ -71,6 +73,10 @@ class StaffDossierPanel extends StatelessWidget {
     ]);
     if (!canRead && !canWrite) return const SizedBox.shrink();
     return BlocConsumer<StaffDossierCubit, StaffDossierState>(
+      buildWhen: (previous, current) =>
+          previous.dossier != current.dossier ||
+          previous.loaded != current.loaded ||
+          previous.busy != current.busy,
       listenWhen: (previous, current) =>
           current.outcomeSeq != previous.outcomeSeq,
       listener: (context, state) {
@@ -78,9 +84,19 @@ class StaffDossierPanel extends StatelessWidget {
           case StaffDocumentOutcome.saved:
             AppSnackBar.showSuccess(context, l10n.staffDocumentSaved);
           case StaffDocumentOutcome.saveFailed:
-            AppSnackBar.showError(context, l10n.staffDocumentSaveFailed);
+            AppSnackBar.showError(
+              context,
+              StaffFailureMessages.save(
+                l10n,
+                state.failure,
+                fallback: l10n.staffDocumentSaveFailed,
+              ),
+            );
           case StaffDocumentOutcome.openFailed:
-            AppSnackBar.showError(context, l10n.staffDocumentOpenFailed);
+            AppSnackBar.showError(
+              context,
+              StaffFailureMessages.open(l10n, state.failure),
+            );
           case null:
             break;
         }
@@ -112,28 +128,47 @@ class StaffDossierPanel extends StatelessWidget {
           icon: Icons.folder_open_outlined,
           color: StaffStepStyle.of(3).color,
           children: [
-            if (types.isEmpty)
+            // Un versement ou un téléchargement peut prendre du temps : les
+            // boutons se taisent, la barre dit que quelque chose se passe.
+            if (state.busy)
+              const Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                child: LinearProgressIndicator(),
+              ),
+            if (!state.loaded)
+              EteeloListSkeleton(
+                rowCount: 3,
+                pillCount: 1,
+                showAvatar: false,
+                semanticsLabel: l10n.staffDossierLoading,
+              )
+            else if (types.isEmpty)
               Text(
                 l10n.staffDossierUnknown,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
-            for (final type in types)
-              StaffDocumentTile(
-                type: type,
-                document: snapshot.currentOf(type.rawCode),
-                required: required.contains(type.rawCode),
-                memberPending: member.syncState != StaffSyncState.synced,
-                onAdd: canWrite && !state.busy
-                    ? () => unawaited(_add(context, type))
-                    : null,
-                onView: canRead && !state.busy
-                    ? () => unawaited(
-                        _view(context, type, snapshot.currentOf(type.rawCode)!),
-                      )
-                    : null,
-              ),
+            if (state.loaded)
+              for (final type in types)
+                StaffDocumentTile(
+                  type: type,
+                  document: snapshot.currentOf(type.rawCode),
+                  required: required.contains(type.rawCode),
+                  memberPending: member.syncState != StaffSyncState.synced,
+                  onAdd: canWrite && !state.busy
+                      ? () => unawaited(_add(context, type))
+                      : null,
+                  onView: canRead && !state.busy
+                      ? () => unawaited(
+                          _view(
+                            context,
+                            type,
+                            snapshot.currentOf(type.rawCode)!,
+                          ),
+                        )
+                      : null,
+                ),
             const SizedBox(height: AppSpacing.xs),
           ],
         );

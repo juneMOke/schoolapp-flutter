@@ -12106,4 +12106,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffDocumentClose => 'Fermer';
+
+  @override
+  String get staffDocumentOpenOffline =>
+      'Hors ligne : cette pièce n\'est pas encore sur la tablette.';
+
+  @override
+  String get staffDocumentOpenForbidden =>
+      'Ce compte n\'a pas le droit de lire cette pièce.';
+
+  @override
+  String get staffDocumentOpenCorrupt =>
+      'La pièce reçue ne correspond pas à son empreinte : elle n\'est ni montrée ni gardée.';
+
+  @override
+  String get staffSaveNoSession =>
+      'Aucune session ouverte : reconnectez-vous pour enregistrer.';
+
+  @override
+  String get staffDossierLoading => 'Chargement des pièces du dossier';
+
+  @override
+  String get staffContractCancelConfirmTitle => 'Annuler cette période ?';
+
+  @override
+  String get staffContractCancelConfirmMessage =>
+      'Elle sortira du calcul, sans remplaçant. Le geste part au serveur et ne se défait pas depuis la tablette.';
+
+  @override
+  String get staffContractCancelConfirmKeep => 'Revenir';
 }

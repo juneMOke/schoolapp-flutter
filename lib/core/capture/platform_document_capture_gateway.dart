@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -74,7 +76,11 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
       rethrow;
     }
     if (file == null) return null;
-    return RawCapture(bytes: await file.readAsBytes(), fileName: file.name);
+    try {
+      return RawCapture(bytes: await file.readAsBytes(), fileName: file.name);
+    } finally {
+      await _forget(file.path);
+    }
   }
 
   Future<RawCapture?> _pickPdf() async {
@@ -85,12 +91,33 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
       // chemin ; ailleurs, la taille est jugée avant toute lecture.
       withData: kIsWeb,
     );
-    final file = result?.files.singleOrNull;
-    if (file == null) return null;
-    if (file.size > DocumentCapturePolicy.maxBytes) {
-      throw DocumentTooLargeException(file.size);
+    try {
+      final file = result?.files.singleOrNull;
+      if (file == null) return null;
+      if (file.size > DocumentCapturePolicy.maxBytes) {
+        throw DocumentTooLargeException(file.size);
+      }
+      final bytes = file.bytes ?? await file.xFile.readAsBytes();
+      return RawCapture(bytes: bytes, fileName: file.name);
+    } finally {
+      // Le sélecteur copie le PDF dans le cache de l'application, même quand
+      // il est refusé pour sa taille : une copie en clair qui survivrait.
+      if (!kIsWeb) await _quietly(FilePicker.clearTemporaryFiles);
     }
-    final bytes = file.bytes ?? await file.xFile.readAsBytes();
-    return RawCapture(bytes: bytes, fileName: file.name);
+  }
+
+  /// Efface la copie que le sélecteur d'images laisse dans le cache de
+  /// l'application — en clair, métadonnées GPS comprises : seuls les octets
+  /// relus en mémoire sont nettoyés et scellés.
+  static Future<void> _forget(String path) async {
+    if (kIsWeb || path.isEmpty) return;
+    await _quietly(() => File(path).delete());
+  }
+
+  /// Un ménage raté ne fait pas échouer une capture réussie.
+  static Future<void> _quietly(Future<Object?> Function() action) async {
+    try {
+      await action();
+    } catch (_) {}
   }
 }

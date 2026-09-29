@@ -9,6 +9,9 @@ enum StaffDocumentOutcome { saved, saveFailed, openFailed }
 class StaffDossierState extends Equatable {
   final StaffDossierSnapshot dossier;
 
+  /// Une première lecture a abouti : avant, un dossier vide ne veut rien dire.
+  final bool loaded;
+
   /// Un versement ou une ouverture est en cours : les boutons se taisent.
   final bool busy;
 
@@ -20,6 +23,7 @@ class StaffDossierState extends Equatable {
 
   const StaffDossierState({
     this.dossier = StaffDossierSnapshot.empty,
+    this.loaded = false,
     this.busy = false,
     this.outcome,
     this.outcomeSeq = 0,
@@ -28,11 +32,13 @@ class StaffDossierState extends Equatable {
 
   StaffDossierState copyWith({
     StaffDossierSnapshot? dossier,
+    bool? loaded,
     bool? busy,
     StaffDocumentOutcome? outcome,
     Failure? failure,
   }) => StaffDossierState(
     dossier: dossier ?? this.dossier,
+    loaded: loaded ?? this.loaded,
     busy: busy ?? this.busy,
     outcome: outcome ?? this.outcome,
     outcomeSeq: outcome == null ? outcomeSeq : outcomeSeq + 1,
@@ -40,5 +46,12 @@ class StaffDossierState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [dossier, busy, outcome, outcomeSeq, failure];
+  List<Object?> get props => [
+    dossier,
+    loaded,
+    busy,
+    outcome,
+    outcomeSeq,
+    failure,
+  ];
 }

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -86,7 +89,9 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
 
   /// Sans remplaçant, seul le motif est jugé : les champs de la période
   /// n'ont plus d'objet.
-  void _cancelOnly() {
+  ///
+  /// Le geste ne se défait pas depuis la tablette : il se confirme.
+  Future<void> _cancelOnly() async {
     final errors = StaffContractValidator.reasonErrors(
       _draft,
       correcting: true,
@@ -95,6 +100,16 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
       setState(() => _tried = true);
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: l10n.staffContractCancelConfirmTitle,
+      message: l10n.staffContractCancelConfirmMessage,
+      confirmLabel: l10n.staffContractCancelOnly,
+      cancelLabel: l10n.staffContractCancelConfirmKeep,
+      isDestructive: true,
+    );
+    if (!mounted || !confirmed) return;
     Navigator.of(context).pop(StaffContractCancelledOnly(_draft.reason));
   }
 
@@ -134,9 +149,14 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
               children: [
                 StaffContractKindPicker(
                   selected: _draft.kind,
-                  onChanged: (kind) => _change(
-                    (d) => d.copyWith(kind: () => kind, payMode: () => null),
-                  ),
+                  // Re-toucher le statut choisi ne doit pas effacer le mode de
+                  // paiement déjà saisi.
+                  onChanged: (kind) {
+                    if (kind == _draft.kind) return;
+                    _change(
+                      (d) => d.copyWith(kind: () => kind, payMode: () => null),
+                    );
+                  },
                 ),
                 if (errors[StaffContractField.kind] case final error?)
                   Padding(
@@ -171,15 +191,19 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
+          // Un `Wrap` et non une rangée : à 360 dp, les deux libellés de la
+          // correction ne tiennent pas côte à côte.
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.sm,
             children: [
               if (widget.correcting)
                 EteeloButton.secondary(
                   label: l10n.staffContractCancelOnly,
-                  onPressed: _cancelOnly,
+                  onPressed: () => unawaited(_cancelOnly()),
                   fullWidth: false,
                 ),
-              const Spacer(),
               EteeloButton.primary(
                 label: widget.correcting
                     ? l10n.staffContractCorrectSubmit

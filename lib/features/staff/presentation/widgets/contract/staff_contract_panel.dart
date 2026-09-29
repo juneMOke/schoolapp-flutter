@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_contract
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_state.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_failure_messages.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_contract_form_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -95,6 +96,9 @@ class StaffContractPanel extends StatelessWidget {
     final canRead = PermissionGate.allows(context, const [Perm.hrPayRead]);
     final canWrite = PermissionGate.allows(context, const [Perm.hrPayWrite]);
     return BlocConsumer<StaffContractsCubit, StaffContractsState>(
+      buildWhen: (previous, current) =>
+          previous.contracts != current.contracts ||
+          previous.writing != current.writing,
       listenWhen: (previous, current) =>
           current.outcomeSeq != previous.outcomeSeq,
       listener: (context, state) {
@@ -102,7 +106,14 @@ class StaffContractPanel extends StatelessWidget {
           case StaffContractOutcome.saved:
             AppSnackBar.showSuccess(context, l10n.staffContractSaved);
           case StaffContractOutcome.failed:
-            AppSnackBar.showError(context, l10n.staffContractSaveFailed);
+            AppSnackBar.showError(
+              context,
+              StaffFailureMessages.save(
+                l10n,
+                state.failure,
+                fallback: l10n.staffContractSaveFailed,
+              ),
+            );
           case null:
             break;
         }

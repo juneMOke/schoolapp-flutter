@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_directory.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_sync_dao.dart';
@@ -99,7 +100,10 @@ class StaffDocumentRepositoryImpl implements StaffDocumentRepository {
     final id = _ids.newId();
     // Les octets d'abord, scellés et promus : la ligne ne doit jamais désigner
     // une pièce absente. Une panne entre les deux laisse un fichier orphelin,
-    // que le balayage reprend — jamais une ligne sans octets.
+    // chiffré — jamais une ligne sans octets. Aucun balayage ne le reprend
+    // encore : le magasin est partagé par les écoles du poste, et un balayage
+    // qui ne verrait que la base ouverte effacerait les pièces en attente des
+    // autres.
     final stored = await _store.stage(id: id, bytes: document.bytes);
     if (stored == null || !await _store.commit(id)) {
       await _store.discard(id);
@@ -139,6 +143,21 @@ class StaffDocumentRepositoryImpl implements StaffDocumentRepository {
   Future<Either<Failure, StaffDocumentContent>> open(
     StaffDocument document,
   ) async {
+    // Un identifiant venu du serveur qui ne ferait pas un nom de fichier sûr
+    // ne touche ni au magasin ni à la route.
+    if (!BlobDirectory.isSafeId(document.id)) {
+      return const Left(NotFoundFailure('Pièce inconnue'));
+    }
+    try {
+      return await _open(document);
+    } catch (e) {
+      return Left(StorageFailure('Ouverture de la pièce : $e'));
+    }
+  }
+
+  Future<Either<Failure, StaffDocumentContent>> _open(
+    StaffDocument document,
+  ) async {
     final row = await _sync.find(document.id);
     if (row == null) return const Left(NotFoundFailure('Pièce inconnue'));
     StaffDocumentContent content(Uint8List bytes) => StaffDocumentContent(
@@ -154,7 +173,7 @@ class StaffDocumentRepositoryImpl implements StaffDocumentRepository {
       // L'empreinte rangée fait foi : des octets qui ne la portent pas ne
       // sont ni montrés ni gardés.
       if (await sha256Hex(bytes) != row.sha256) {
-        return const Left(ServerFailure('Empreinte de la pièce différente'));
+        return const Left(IntegrityFailure());
       }
       if (await _store.stage(id: document.id, bytes: bytes) != null) {
         await _store.commit(document.id);

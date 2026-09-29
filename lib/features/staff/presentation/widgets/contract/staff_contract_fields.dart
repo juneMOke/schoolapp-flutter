@@ -50,6 +50,9 @@ class StaffContractFields extends StatelessWidget {
           Text(l10n.staffFieldPayMode, style: AppTypography.labelMedium),
           const SizedBox(height: AppSpacing.xs),
           SegmentedTabFilter<String>(
+            // Sur une ligne, « À l'heure » et « Forfait mensuel » débordent
+            // un téléphone de 360 dp.
+            wrap: true,
             semanticsLabel: l10n.staffFieldPayMode,
             selected: draft.payMode?.wire ?? '',
             onSelected: (wire) => onChanged(

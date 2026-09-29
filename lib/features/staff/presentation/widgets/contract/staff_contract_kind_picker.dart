@@ -74,7 +74,7 @@ class _Tile extends StatelessWidget {
         borderRadius: AppRadius.brMd,
         side: BorderSide(
           color: selected ? tone.color : AppColors.border,
-          width: 1.5,
+          width: AppDimensions.staffContractTileBorderWidth,
         ),
       ),
       child: InkWell(
@@ -89,7 +89,11 @@ class _Tile extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(tone.icon, size: 18, color: tone.ink),
+                  Icon(
+                    tone.icon,
+                    size: AppDimensions.staffContractTileIconSize,
+                    color: tone.ink,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     title,

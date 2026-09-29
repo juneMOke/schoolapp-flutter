@@ -52,6 +52,12 @@ class UncertainOutcomeFailure extends Failure {
   const UncertainOutcomeFailure([super.message = 'Request outcome is unknown']);
 }
 
+/// Des octets reçus ne portent pas l'empreinte attendue : corrompus en
+/// chemin, ou pas ceux qu'on croyait. Ils ne sont ni montrés ni gardés.
+class IntegrityFailure extends Failure {
+  const IntegrityFailure([super.message = 'Content does not match its digest']);
+}
+
 class StorageFailure extends Failure {
   const StorageFailure([super.message = 'Storage error occurred']);
 }

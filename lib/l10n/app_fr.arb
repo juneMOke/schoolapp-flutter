@@ -8423,5 +8423,37 @@
   "staffDocumentClose": "Fermer",
   "@staffDocumentClose": {
     "description": "Fermer la visionneuse."
+  },
+  "staffDocumentOpenOffline": "Hors ligne : cette pièce n'est pas encore sur la tablette.",
+  "@staffDocumentOpenOffline": {
+    "description": "Ouverture impossible hors ligne."
+  },
+  "staffDocumentOpenForbidden": "Ce compte n'a pas le droit de lire cette pièce.",
+  "@staffDocumentOpenForbidden": {
+    "description": "Ouverture refusée (401/403)."
+  },
+  "staffDocumentOpenCorrupt": "La pièce reçue ne correspond pas à son empreinte : elle n'est ni montrée ni gardée.",
+  "@staffDocumentOpenCorrupt": {
+    "description": "Empreinte différente."
+  },
+  "staffSaveNoSession": "Aucune session ouverte : reconnectez-vous pour enregistrer.",
+  "@staffSaveNoSession": {
+    "description": "Écriture impossible sans session."
+  },
+  "staffDossierLoading": "Chargement des pièces du dossier",
+  "@staffDossierLoading": {
+    "description": "Libellé d'accessibilité du chargement des pièces."
+  },
+  "staffContractCancelConfirmTitle": "Annuler cette période ?",
+  "@staffContractCancelConfirmTitle": {
+    "description": "Titre de la confirmation d'une correction sans remplaçant."
+  },
+  "staffContractCancelConfirmMessage": "Elle sortira du calcul, sans remplaçant. Le geste part au serveur et ne se défait pas depuis la tablette.",
+  "@staffContractCancelConfirmMessage": {
+    "description": "Message de la confirmation."
+  },
+  "staffContractCancelConfirmKeep": "Revenir",
+  "@staffContractCancelConfirmKeep": {
+    "description": "Renoncer à annuler la période."
   }
 }

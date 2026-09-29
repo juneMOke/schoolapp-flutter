@@ -12016,4 +12016,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffDocumentClose => 'Close';
+
+  @override
+  String get staffDocumentOpenOffline =>
+      'Offline: this document is not on the tablet yet.';
+
+  @override
+  String get staffDocumentOpenForbidden =>
+      'This account is not allowed to read this document.';
+
+  @override
+  String get staffDocumentOpenCorrupt =>
+      'The document received does not match its fingerprint: it is neither shown nor kept.';
+
+  @override
+  String get staffSaveNoSession => 'No open session: sign in again to save.';
+
+  @override
+  String get staffDossierLoading => 'Loading file documents';
+
+  @override
+  String get staffContractCancelConfirmTitle => 'Cancel this period?';
+
+  @override
+  String get staffContractCancelConfirmMessage =>
+      'It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.';
+
+  @override
+  String get staffContractCancelConfirmKeep => 'Go back';
 }

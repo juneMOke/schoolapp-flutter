@@ -250,6 +250,38 @@ void main() {
       expect(await store.read(id), isA<BlobGone>());
     });
 
+    test('déjà accusée par la descente : rien ne repart', () async {
+      await seedAckedMember();
+      final id = (await row())['id']! as String;
+      await StaffDocumentDao(db).applyPulled(
+        [StaffDocumentDeltaDto.tryParse(staffDocumentJson(id))!],
+        schoolId: 's-1',
+        nowMs: 2,
+      );
+      await store.delete(id);
+
+      expect(
+        (await handler.dispatch(await entry())).outcome,
+        OutboxDispatchOutcome.acked,
+      );
+      expect((await row())['sync_status'], 'SYNCED');
+      verifyNever(() => api.upload(any(), any(), any()));
+    });
+
+    test('fiche purgée : la pièce le dit et ses octets partent', () async {
+      final id = (await row())['id']! as String;
+
+      expect(
+        (await handler.dispatch(await entry())).outcome,
+        OutboxDispatchOutcome.failed,
+      );
+      expect(
+        (await row())['sync_error_code'],
+        StaffDocumentOutboxHandler.memberGoneCode,
+      );
+      expect(await store.read(id), isA<BlobGone>());
+    });
+
     test('octets perdus : refusée sans appel, et dit pourquoi', () async {
       await seedAckedMember();
       await store.delete((await row())['id']! as String);
@@ -301,7 +333,7 @@ void main() {
         await seedPulled('00' * 32);
         when(() => api.download(any(), any())).thenAnswer((_) async => _bytes);
 
-        expect(await open(), isA<ServerFailure>());
+        expect(await open(), isA<IntegrityFailure>());
         expect(await store.read('d-1'), isA<BlobGone>());
       },
     );
@@ -338,6 +370,19 @@ void main() {
       await store.stage(id: 'd-1', bytes: _bytes);
       await store.commit('d-1');
       await repo.addDocument('m-1', 'ID', await captured());
+    });
+
+    test('les copies refusées partent aussi', () async {
+      when(() => account.permissions).thenReturn(const ['hr.staff.read']);
+      await db.update(
+        'staff_documents',
+        {'sync_status': 'SYNC_ERROR'},
+        where: 'id = ?',
+        whereArgs: ['d-1'],
+      );
+
+      expect(await guard.onSessionOpened(), 1);
+      expect(await store.read('d-1'), isA<BlobGone>());
     });
 
     test('un compte sans le droit efface les copies accusées seules', () async {

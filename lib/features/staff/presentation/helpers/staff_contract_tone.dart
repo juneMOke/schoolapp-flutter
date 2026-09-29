@@ -19,6 +19,12 @@ class StaffContractTone {
 
   const StaffContractTone._(this.color, this.soft, this.ink, this.icon);
 
+  /// Opacité du filet d'une période en vigueur : la teinte, adoucie.
+  static const double _outlineAlpha = 0.4;
+
+  /// Le filet d'une surface teintée par ce statut (période en vigueur).
+  Color get outline => color.withValues(alpha: _outlineAlpha);
+
   static const StaffContractTone _permanent = StaffContractTone._(
     AppColors.staffPermanent,
     AppColors.staffPermanentSoft,

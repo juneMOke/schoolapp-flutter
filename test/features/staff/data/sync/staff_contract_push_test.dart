@@ -252,7 +252,12 @@ void main() {
     test(
       'attend la fiche tant qu elle n est pas accusée, sans appel',
       () async {
+        // Sans fiche du tout (purgée), la pose le dit au lieu d'attendre.
         expect((await dispatch()).outcome, OutboxDispatchOutcome.failed);
+        expect(
+          (await row('c-1'))!['sync_error_code'],
+          StaffContractOutboxHandler.memberGoneCode,
+        );
         await db.insert('staff_members', {
           'id': 'm-1',
           'school_id': 's-1',
@@ -369,6 +374,39 @@ void main() {
         expect((await row('c-2'))!['sync_status'], 'SYNCED');
       },
     );
+
+    test('refus après accusé perdu : le remplaçant descendu reste', () async {
+      await seedSyncedContract('c-1');
+      await correct();
+      // La réponse s'est perdue ; la descente a rangé le remplaçant réel et
+      // daté la correction.
+      await StaffContractDao(db).applyPulled(
+        [
+          StaffContractDeltaDto.tryParse({
+            ...staffContractJson('c-1'),
+            'correctedAt': '2026-09-29T09:00:01Z',
+          })!,
+          StaffContractDeltaDto.tryParse(staffContractJson('c-2'))!,
+        ],
+        schoolId: 's-1',
+        nowMs: 3,
+      );
+      when(() => api.correctStaffContract(any(), any())).thenThrow(_http(403));
+
+      expect((await dispatch()).outcome, OutboxDispatchOutcome.failed);
+      expect((await row('c-2'))!['sync_status'], 'SYNCED');
+      expect((await row('c-1'))!['sync_error'], isNull);
+    });
+
+    test('410 : la période purgée quitte le poste', () async {
+      await seedSyncedContract('c-1');
+      await correct();
+      when(() => api.correctStaffContract(any(), any())).thenThrow(_http(410));
+
+      expect((await dispatch()).outcome, OutboxDispatchOutcome.acked);
+      expect(await row('c-1'), isNull);
+      expect(await row('c-2'), isNull);
+    });
 
     test('refus : l original revient, le remplaçant s efface', () async {
       await seedSyncedContract('c-1');

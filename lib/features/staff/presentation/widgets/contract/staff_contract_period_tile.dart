@@ -48,11 +48,7 @@ class StaffContractPeriodTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: isCurrent ? tone.soft : AppColors.surfaceRaised,
         borderRadius: AppRadius.brMd,
-        border: Border.all(
-          color: isCurrent
-              ? tone.color.withValues(alpha: 0.4)
-              : AppColors.border,
-        ),
+        border: Border.all(color: isCurrent ? tone.outline : AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

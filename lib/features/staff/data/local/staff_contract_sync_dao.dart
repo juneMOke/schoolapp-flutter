@@ -92,17 +92,26 @@ class StaffContractSyncDao {
   }) => _db.transaction((txn) async {
     await txn.update(
       table,
-      {
-        'correction_pending_id': null,
-        'sync_error': reason,
-        'sync_error_code': code,
-        'updated_at': nowMs,
-      },
+      {'correction_pending_id': null, 'updated_at': nowMs},
       where: 'id = ?',
       whereArgs: [contractId],
     );
+    // Une période que la descente dit déjà corrigée l'a été (accusé perdu) :
+    // elle ne porte pas de faux refus.
+    await txn.update(
+      table,
+      {'sync_error': reason, 'sync_error_code': code},
+      where: 'id = ? AND corrected_at IS NULL',
+      whereArgs: [contractId],
+    );
+    // Un remplaçant déjà descendu est réel côté serveur (accusé perdu) : il
+    // reste. Seul celui qui n'existe que sur le poste s'efface.
     if (replacementId != null) {
-      await txn.delete(table, where: 'id = ?', whereArgs: [replacementId]);
+      await txn.delete(
+        table,
+        where: 'id = ? AND sync_status = ?',
+        whereArgs: [replacementId, StaffSyncState.pending.dbValue],
+      );
     }
   });
 

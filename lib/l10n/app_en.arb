@@ -8003,5 +8003,13 @@
   "staffDocumentSaved": "Document saved on the tablet.",
   "staffDocumentSaveFailed": "The document could not be saved.",
   "staffDocumentOpenFailed": "Document unavailable: it is not on this tablet and the server did not return it.",
-  "staffDocumentClose": "Close"
+  "staffDocumentClose": "Close",
+  "staffDocumentOpenOffline": "Offline: this document is not on the tablet yet.",
+  "staffDocumentOpenForbidden": "This account is not allowed to read this document.",
+  "staffDocumentOpenCorrupt": "The document received does not match its fingerprint: it is neither shown nor kept.",
+  "staffSaveNoSession": "No open session: sign in again to save.",
+  "staffDossierLoading": "Loading file documents",
+  "staffContractCancelConfirmTitle": "Cancel this period?",
+  "staffContractCancelConfirmMessage": "It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.",
+  "staffContractCancelConfirmKeep": "Go back"
 }

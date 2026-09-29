@@ -56,6 +56,8 @@ class StaffDocumentLocalModel {
     'updated_at': nowMs,
   };
 
+  bool get isSynced => row['sync_status'] == StaffSyncState.synced.dbValue;
+
   /// Empreinte SHA-256 des octets, en hexadécimal minuscule.
   String get sha256 => row['sha256'] as String? ?? '';
 

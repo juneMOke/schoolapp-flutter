@@ -3,7 +3,10 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_dossier_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_validator.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_timeline_merge.dart';
 
 import '../staff_builders.dart';
@@ -164,6 +167,46 @@ void main() {
         contract('c-1', syncState: StaffSyncState.synced),
       ]);
       expect(merged, server);
+    });
+  });
+
+  group('StaffDossier et pièces refusées', () {
+    test('une pièce refusée n est ni comptée ni préférée', () {
+      final kept = document('m-1', 'ID');
+      const rejected = StaffDocument(
+        id: 'm-1-ID-2',
+        staffMemberId: 'm-1',
+        code: StaffDocumentCode.identity,
+        rawCode: 'ID',
+        source: StaffDocumentSource.scan,
+        capturedAt: '2026-09-01T10:00:00.000Z',
+        mimeType: 'image/jpeg',
+        sizeBytes: 1,
+        syncState: StaffSyncState.failed,
+      );
+
+      expect(
+        StaffDossierSnapshot(
+          types: documentTypes,
+          documents: [rejected, kept],
+        ).currentOf('ID'),
+        kept,
+      );
+      expect(
+        const StaffDossierSnapshot(
+          types: documentTypes,
+          documents: [rejected],
+        ).currentOf('ID'),
+        rejected,
+      );
+      expect(
+        StaffDossier.of(
+          kind: null,
+          types: documentTypes,
+          documents: const [rejected],
+        ).done,
+        0,
+      );
     });
   });
 }

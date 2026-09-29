@@ -80,8 +80,19 @@ class StaffContractCorrectionOutboxHandler implements OutboxSyncHandler {
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);
       }
-      // 410 compris : la période purgée ne se corrige plus, le remplaçant
-      // tombe avec elle.
+      if (failure.isTombstoned) {
+        // La période purgée ne se corrige plus : elle quitte le poste, et le
+        // remplaçant jamais accepté avec elle.
+        await _dao.rejectCorrection(
+          contractId: request.contractId,
+          replacementId: request.replacement?.id,
+          code: failure.storedCode,
+          reason: failure.reason,
+          nowMs: _now(),
+        );
+        await _dao.delete(request.contractId);
+        return const OutboxDispatchResult.acked();
+      }
       await _dao.rejectCorrection(
         contractId: request.contractId,
         replacementId: request.replacement?.id,
@@ -89,9 +100,7 @@ class StaffContractCorrectionOutboxHandler implements OutboxSyncHandler {
         reason: failure.reason,
         nowMs: _now(),
       );
-      return failure.isTombstoned
-          ? const OutboxDispatchResult.acked()
-          : OutboxDispatchResult.failed(failure.reason);
+      return OutboxDispatchResult.failed(failure.reason);
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());
     }

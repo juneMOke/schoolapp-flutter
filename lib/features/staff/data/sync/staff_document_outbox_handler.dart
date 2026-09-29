@@ -50,6 +50,9 @@ class StaffDocumentOutboxHandler implements OutboxSyncHandler {
   /// Le refus rangé quand les octets ne sont plus sur le poste.
   static const String bytesLostCode = 'LOCAL_BYTES_LOST';
 
+  /// Le refus rangé quand la fiche de l'agent a disparu du poste.
+  static const String memberGoneCode = 'STAFF_MEMBER_GONE';
+
   @override
   String get aggregateType => StaffDocumentWriteDao.aggregateType;
 
@@ -67,9 +70,25 @@ class StaffDocumentOutboxHandler implements OutboxSyncHandler {
     final hold = outboxForeignSchoolHold(entry, _currentUser.schoolId);
     if (hold != null) return hold;
 
+    // Déjà accusée (réponse perdue, puis la descente l'a rangée) : le serveur
+    // l'a. Renvoyer ne ferait que risquer un faux « octets perdus ».
+    final row = await _dao.find(request.id);
+    if (row == null) return const OutboxDispatchResult.acked();
+    if (row.isSynced) return const OutboxDispatchResult.acked();
+
     final member = await _members.find(request.staffMemberId);
     if (member == null) {
-      return const OutboxDispatchResult.failed('Agent inconnu sur le poste');
+      // Fiche purgée : la pièce n'a plus d'agent. Elle le dit, et ses octets
+      // — une pièce d'identité — ne restent pas sur le poste.
+      const reason = 'Agent inconnu sur le poste';
+      await _dao.markRejected(
+        request.id,
+        code: memberGoneCode,
+        reason: reason,
+        nowMs: _now(),
+      );
+      await _store.delete(request.id);
+      return const OutboxDispatchResult.failed(reason);
     }
     if (member.row['version'] == null) {
       return const OutboxDispatchResult.blocked('Fiche pas encore accusée');

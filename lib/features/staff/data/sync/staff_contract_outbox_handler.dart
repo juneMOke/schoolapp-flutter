@@ -42,6 +42,9 @@ class StaffContractOutboxHandler implements OutboxSyncHandler {
        _extras = extras,
        _now = now;
 
+  /// Le refus rangé quand la fiche de l'agent a disparu du poste.
+  static const String memberGoneCode = 'STAFF_MEMBER_GONE';
+
   @override
   String get aggregateType => StaffContractWriteDao.contractAggregateType;
 
@@ -61,7 +64,16 @@ class StaffContractOutboxHandler implements OutboxSyncHandler {
 
     final member = await _members.find(request.staffMemberId);
     if (member == null) {
-      return const OutboxDispatchResult.failed('Agent inconnu sur le poste');
+      // Fiche purgée : la pose n'a plus d'agent, et le dit au lieu de rester
+      // « en attente » pour toujours.
+      const reason = 'Agent inconnu sur le poste';
+      await _dao.markRejected(
+        request.contract.id,
+        code: memberGoneCode,
+        reason: reason,
+        nowMs: _now(),
+      );
+      return const OutboxDispatchResult.failed(reason);
     }
     if (member.row['version'] == null) {
       return const OutboxDispatchResult.blocked('Fiche pas encore accusée');

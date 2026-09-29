@@ -28,7 +28,11 @@ class StaffDossier extends Equatable {
       for (final type in types)
         if (type.isRequiredFor(kind)) type,
     ];
-    final present = {for (final document in documents) document.rawCode};
+    // Une pièce refusée n'est pas au dossier : le serveur ne l'a pas.
+    final present = {
+      for (final document in documents)
+        if (document.syncState != StaffSyncState.failed) document.rawCode,
+    };
     return StaffDossier(
       required: required,
       filled: {

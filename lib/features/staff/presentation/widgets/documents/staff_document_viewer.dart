@@ -10,8 +10,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Montre une pièce du dossier : un PDF dans la visionneuse partagée, une
 /// photo en plein écran, zoomable.
 ///
-/// Jamais de partage : une pièce d'identité ou un diplôme ne quitte pas la
-/// tablette par ce geste.
+/// Ni partage ni impression : une pièce d'identité ou un diplôme ne quitte
+/// pas la tablette par ce geste — le spouleur offre « Enregistrer en PDF ».
 Future<void> showStaffDocumentViewer(
   BuildContext context, {
   required String title,
@@ -26,6 +26,7 @@ Future<void> showStaffDocumentViewer(
         fileName: content.fileName,
       ),
       canShare: false,
+      canPrint: false,
     );
   }
   return showDialog<void>(

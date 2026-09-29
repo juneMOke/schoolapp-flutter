@@ -20,12 +20,15 @@ class StaffDossierCubit extends Cubit<StaffDossierState> {
        _open = open,
        super(const StaffDossierState());
 
-  /// Relit le dossier. Une lecture ratée le laisse tel quel : rien n'est
-  /// perdu, il se relira au prochain geste.
+  /// Relit le dossier. Une lecture ratée le laisse tel quel — rien n'est
+  /// perdu, il se relira au prochain geste — mais met fin au chargement.
   Future<void> load(String staffMemberId) async {
     final result = await _load(staffMemberId);
     if (isClosed) return;
-    result.fold((_) {}, (dossier) => emit(state.copyWith(dossier: dossier)));
+    result.fold(
+      (_) => emit(state.copyWith(loaded: true)),
+      (dossier) => emit(state.copyWith(dossier: dossier, loaded: true)),
+    );
   }
 
   /// Verse [document] sous [rawCode] ; rend `true` s'il est écrit.

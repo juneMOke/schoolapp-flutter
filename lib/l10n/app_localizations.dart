@@ -19054,6 +19054,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get staffDocumentClose;
+
+  /// No description provided for @staffDocumentOpenOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: this document is not on the tablet yet.'**
+  String get staffDocumentOpenOffline;
+
+  /// No description provided for @staffDocumentOpenForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not allowed to read this document.'**
+  String get staffDocumentOpenForbidden;
+
+  /// No description provided for @staffDocumentOpenCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The document received does not match its fingerprint: it is neither shown nor kept.'**
+  String get staffDocumentOpenCorrupt;
+
+  /// No description provided for @staffSaveNoSession.
+  ///
+  /// In en, this message translates to:
+  /// **'No open session: sign in again to save.'**
+  String get staffSaveNoSession;
+
+  /// No description provided for @staffDossierLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading file documents'**
+  String get staffDossierLoading;
+
+  /// No description provided for @staffContractCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this period?'**
+  String get staffContractCancelConfirmTitle;
+
+  /// No description provided for @staffContractCancelConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.'**
+  String get staffContractCancelConfirmMessage;
+
+  /// No description provided for @staffContractCancelConfirmKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get staffContractCancelConfirmKeep;
 }
 
 class _AppLocalizationsDelegate

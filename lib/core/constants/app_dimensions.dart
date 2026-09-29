@@ -569,4 +569,9 @@ class AppDimensions {
   /// Largeur d'une tuile de statut dans le choix du contrat : trois tiennent
   /// sur une ligne de tablette, elles passent à la ligne en portrait.
   static const staffContractTileWidth = 240.0;
+
+  /// Filet d'une tuile de statut : plus épais que le filet courant, pour que
+  /// la tuile choisie se lise sans compter sur la couleur seule.
+  static const staffContractTileBorderWidth = 1.5;
+  static const staffContractTileIconSize = 18.0;
 }

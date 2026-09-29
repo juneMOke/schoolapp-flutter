@@ -1,113 +1,29 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/offline/id_generator.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
-import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
-import 'package:school_app_flutter/features/staff/domain/repositories/staff_contract_repository.dart';
-import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract_use_cases.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_dossier_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/repositories/staff_document_repository.dart';
-import 'package:school_app_flutter/features/staff/domain/usecases/staff_document_use_cases.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_cubit.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:uuid/uuid.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 import '../../staff_builders.dart';
-
-class _MockSave extends Mock implements SaveStaffMemberUseCase {}
-
-class _MockLoad extends Mock implements LoadStaffMemberUseCase {}
-
-class _MockLoadContracts extends Mock implements LoadStaffContractsUseCase {}
-
-class _MockAddContract extends Mock implements AddStaffContractUseCase {}
-
-class _MockLoadDossier extends Mock implements LoadStaffDossierUseCase {}
-
-class _MockOpenDocument extends Mock implements OpenStaffDocumentUseCase {}
+import 'staff_agent_harness.dart';
 
 void main() {
   final getIt = GetIt.instance;
-  late _MockSave save;
-  late _MockLoad load;
-  late _MockAddContract addContract;
-  late _MockLoadDossier loadDossier;
-  late _MockOpenDocument openDocument;
+  late StaffAgentHarness h;
 
-  setUpAll(() {
-    registerFallbackValue(const StaffMemberDraft(id: 'x'));
-    registerFallbackValue(const StaffContractDraft());
-  });
-
-  setUp(() {
-    save = _MockSave();
-    load = _MockLoad();
-    addContract = _MockAddContract();
-    loadDossier = _MockLoadDossier();
-    openDocument = _MockOpenDocument();
-    when(
-      () => loadDossier(any()),
-    ).thenAnswer((_) async => const Right(StaffDossierSnapshot.empty));
-    final loadContracts = _MockLoadContracts();
-    when(() => loadContracts(any())).thenAnswer((_) async => const Right([]));
-    getIt
-      ..registerSingleton<SaveStaffMemberUseCase>(save)
-      ..registerSingleton<LoadStaffMemberUseCase>(load)
-      ..registerSingleton<IdGenerator>(const IdGenerator(Uuid()))
-      ..registerFactory<StaffDossierCubit>(
-        () => StaffDossierCubit(
-          load: loadDossier,
-          add: AddStaffDocumentUseCase(_NoDocuments()),
-          open: openDocument,
-        ),
-      )
-      ..registerFactory<StaffContractsCubit>(
-        () => StaffContractsCubit(
-          load: loadContracts,
-          add: addContract,
-          correct: CorrectStaffContractUseCase(_NoRepository()),
-        ),
-      );
-  });
+  setUpAll(StaffAgentHarness.registerFallbacks);
+  setUp(() => (h = StaffAgentHarness()).register(getIt));
   tearDown(() async => getIt.reset());
-
-  Future<void> pumpPage(
-    WidgetTester tester, {
-    StaffMember? member,
-    Size size = const Size(1280, 900),
-  }) async {
-    await tester.binding.setSurfaceSize(size);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('fr'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: StaffAgentPage(
-          member: member,
-          kind: member == null ? null : StaffContractKind.permanent,
-          others: const [],
-          today: '2026-09-29',
-        ),
-      ),
-    );
-    await tester.pump();
-  }
 
   testWidgets('création : pas d erreur au premier regard, puis après Suivant', (
     tester,
   ) async {
-    await pumpPage(tester);
+    await h.pump(tester);
 
     expect(find.text('Nouvel agent'), findsOneWidget);
     expect(find.text('NOUVEL AGENT · ÉTAPE 1 SUR 4'), findsOneWidget);
@@ -119,13 +35,13 @@ void main() {
     expect(find.text('5 champs à corriger'), findsOneWidget);
     expect(find.text('Champ requis'), findsWidgets);
     expect(tester.takeException(), isNull);
-    verifyNever(() => save(any()));
+    verifyNever(() => h.save(any()));
   });
 
   testWidgets('consultation : lecture seule, et Modifier le profil', (
     tester,
   ) async {
-    await pumpPage(tester, member: member('m-1', firstName: 'Jean'));
+    await h.pump(tester, member: member('m-1', firstName: 'Jean'));
 
     expect(find.text('Jean Kalala'), findsOneWidget);
     expect(find.text('Modifier le profil'), findsOneWidget);
@@ -141,7 +57,7 @@ void main() {
   });
 
   testWidgets('en modification, les étapes sont libres', (tester) async {
-    await pumpPage(tester, member: member('m-1'));
+    await h.pump(tester, member: member('m-1'));
 
     await tester.tap(find.text('Poste & contrat'));
     await tester.pump();
@@ -157,11 +73,11 @@ void main() {
       'm-1',
       contracts: [period(StaffContractKind.permanent, from: '2025-09-01')],
     );
-    when(() => load(any())).thenAnswer((_) async => Right(agent));
+    when(() => h.load(any())).thenAnswer((_) async => Right(agent));
     when(
-      () => addContract(any(), any()),
+      () => h.addContract(any(), any()),
     ).thenAnswer((_) async => const Right(unit));
-    await pumpPage(tester, member: agent);
+    await h.pump(tester, member: agent);
 
     await tester.tap(find.text('Poste & contrat'));
     await tester.pump();
@@ -173,7 +89,7 @@ void main() {
     await tester.tap(find.text('Poser le contrat'));
     await tester.pump();
     expect(find.text('Champ requis'), findsOneWidget);
-    verifyNever(() => addContract(any(), any()));
+    verifyNever(() => h.addContract(any(), any()));
 
     await tester.tap(find.text('Conventionné'));
     await tester.pump();
@@ -191,14 +107,14 @@ void main() {
     await tester.pumpAndSettle();
 
     final draft =
-        verify(() => addContract('m-1', captureAny())).captured.single
+        verify(() => h.addContract('m-1', captureAny())).captured.single
             as StaffContractDraft;
     expect(draft.kind, StaffContractKind.conventionne);
     expect(draft.secopeNumber, 'S-42');
     expect(draft.effectiveFrom, '2026-09-29');
     expect(find.text('Contrat enregistré sur la tablette.'), findsOneWidget);
-    verify(() => load('m-1')).called(1);
-    verifyNever(() => save(any()));
+    verify(() => h.load('m-1')).called(1);
+    verifyNever(() => h.save(any()));
   });
 
   testWidgets('les pièces exigées par le contrat, versées ou à verser', (
@@ -209,15 +125,15 @@ void main() {
       contracts: [period(StaffContractKind.permanent, from: '2025-09-01')],
     );
     final identity = document('m-1', 'ID');
-    when(() => loadDossier('m-1')).thenAnswer(
+    when(() => h.loadDossier('m-1')).thenAnswer(
       (_) async => Right(
         StaffDossierSnapshot(types: documentTypes, documents: [identity]),
       ),
     );
     when(
-      () => openDocument(identity),
+      () => h.openDocument(identity),
     ).thenAnswer((_) async => const Left(NetworkFailure()));
-    await pumpPage(tester, member: agent);
+    await h.pump(tester, member: agent);
 
     await tester.tap(find.text('Diplômes & pièces'));
     // Le cubit du dossier naît à la première lecture de l'étape : sa relecture
@@ -236,14 +152,14 @@ void main() {
     await tester.ensureVisible(find.text('Voir'));
     await tester.tap(find.text('Voir'));
     await tester.pump();
-    expect(find.textContaining('Pièce indisponible'), findsOneWidget);
+    expect(find.textContaining('Hors ligne'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('abandonner une modification demande confirmation', (
     tester,
   ) async {
-    await pumpPage(tester, member: member('m-1', firstName: 'Jean'));
+    await h.pump(tester, member: member('m-1', firstName: 'Jean'));
     await tester.tap(find.text('Modifier le profil'));
     await tester.pump();
 
@@ -261,7 +177,7 @@ void main() {
   });
 
   testWidgets('téléphone en paysage : rien ne déborde', (tester) async {
-    await pumpPage(tester, size: const Size(640, 360));
+    await h.pump(tester, size: const Size(640, 360));
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Suivant'));
@@ -269,7 +185,3 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 }
-
-class _NoRepository extends Mock implements StaffContractRepository {}
-
-class _NoDocuments extends Mock implements StaffDocumentRepository {}

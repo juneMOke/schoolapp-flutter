@@ -7,9 +7,10 @@ import 'package:school_app_flutter/features/staff/data/local/staff_document_sync
 ///
 /// Un compte sans `hr.document.read` ne doit pas trouver sur la tablette les
 /// pièces d'identité et les diplômes qu'un autre y a ouverts : leurs copies
-/// sont effacées. Seules celles **accusées** partent — le serveur les garde et
-/// les rendra à qui a le droit. Une pièce encore en attente d'envoi n'existe
-/// que là : l'effacer la perdrait, elle reste chiffrée jusqu'à son envoi.
+/// sont effacées : celles **accusées** — le serveur les garde et les rendra à
+/// qui a le droit — et celles **refusées**, qui ne partiront jamais. Une pièce
+/// encore en attente d'envoi n'existe que là : l'effacer la perdrait, elle
+/// reste chiffrée jusqu'à son envoi.
 ///
 /// Des permissions inconnues (compte jamais revu par le serveur) n'effacent
 /// rien : on ne sait pas.
@@ -28,7 +29,7 @@ class StaffDocumentSessionGuard {
        _documents = documents,
        _authLocalDao = authLocalDao;
 
-  /// Rend le nombre de pièces accusées dont il ne reste plus de copie.
+  /// Rend le nombre de pièces réglées dont il ne reste plus de copie.
   Future<int> onSessionOpened() async {
     try {
       final user = await _authLocalDao.getSessionUser();
@@ -36,7 +37,7 @@ class StaffDocumentSessionGuard {
       if (permissions == null) return 0;
       if (permissions.contains(Perm.hrDocumentRead.wire)) return 0;
       var removed = 0;
-      for (final id in await _documents.syncedIds()) {
+      for (final id in await _documents.settledIds()) {
         if (await _store.delete(id)) removed++;
       }
       return removed;

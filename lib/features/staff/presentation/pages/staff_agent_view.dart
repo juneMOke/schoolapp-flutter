@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_state.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossier_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_body.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_footer.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_header.dart';
@@ -84,6 +86,13 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     StaffAgentState state,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    // Une création enregistrée devient un agent : ses contrats et ses pièces
+    // se lisent désormais, que la page n'a pas pu charger à l'ouverture.
+    final created = state.member;
+    if (state.justSaved && previous.member == null && created != null) {
+      unawaited(context.read<StaffContractsCubit>().load(created.id));
+      unawaited(context.read<StaffDossierCubit>().load(created.id));
+    }
     if (state.justSaved) {
       AppSnackBar.showSuccess(
         context,

@@ -22,14 +22,15 @@ class StaffDocumentSyncDao {
     return rows.isEmpty ? null : StaffDocumentLocalModel(rows.single);
   }
 
-  /// Les pièces accusées de la base ouverte — celles dont les octets peuvent
-  /// être redemandés au serveur.
-  Future<List<String>> syncedIds() async {
+  /// Les pièces qui ne partiront plus d'ici : accusées (le serveur les garde
+  /// et les rendra à qui a le droit) ou refusées (elles ne partiront jamais).
+  /// Seules celles en attente d'envoi n'existent que sur le poste.
+  Future<List<String>> settledIds() async {
     final rows = await _db.query(
       table,
       columns: ['id'],
-      where: 'sync_status = ?',
-      whereArgs: [StaffSyncState.synced.dbValue],
+      where: 'sync_status != ?',
+      whereArgs: [StaffSyncState.pending.dbValue],
     );
     return [for (final row in rows) row['id']! as String];
   }
