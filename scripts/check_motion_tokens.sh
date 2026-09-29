@@ -2,7 +2,7 @@
 # check_motion_tokens.sh
 #
 # Garde-fou Motion : vérifie l'absence de Duration(...) hardcodées
-# dans les répertoires UI scopés (Home, Enrollment, Finance).
+# dans les répertoires UI scopés (Home, Enrollment, Finance, stepper du socle).
 #
 # La source autorisée est lib/core/theme/app_motion.dart.
 # finance_motion.dart est également exclu car il délègue vers AppMotion.

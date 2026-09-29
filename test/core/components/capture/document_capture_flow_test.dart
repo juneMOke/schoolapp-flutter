@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/capture/document_capture_gateway.dart';
+import 'package:school_app_flutter/core/capture/document_digest.dart';
 import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 import 'package:school_app_flutter/core/capture/document_capture_service.dart';
 import 'package:school_app_flutter/core/components/capture/document_capture_flow.dart';
@@ -36,7 +37,7 @@ void main() {
   Future<void> runFlow(WidgetTester tester, _ScriptedSheet sheet) async {
     captured = null;
     final flow = DocumentCaptureFlow(
-      DocumentCaptureService(gateway),
+      DocumentCaptureService(gateway, digest: digestDocument),
       openSheet: sheet.open,
     );
     await tester.pumpWidget(

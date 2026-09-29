@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/capture/document_capture_failure.dart';
+import 'package:school_app_flutter/core/capture/document_digest.dart';
 import 'package:school_app_flutter/core/capture/document_capture_gateway.dart';
 import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 import 'package:school_app_flutter/core/capture/document_capture_service.dart';
@@ -18,7 +19,11 @@ void main() {
 
   setUp(() {
     gateway = FakeDocumentCaptureGateway();
-    service = DocumentCaptureService(gateway, now: () => now);
+    service = DocumentCaptureService(
+      gateway,
+      digest: digestDocument,
+      now: () => now,
+    );
   });
 
   Future<Object> captureOutcome(DocumentCaptureMode mode) async {
@@ -116,6 +121,47 @@ void main() {
     gateway.error = StateError('greffon en échec');
     expect(
       await captureOutcome(DocumentCaptureMode.scan),
+      isA<DocumentReadFailure>(),
+    );
+  });
+
+  test('un PDF annoncé trop lourd est refusé sans être lu', () async {
+    gateway.error = const DocumentTooLargeException(200 * 1024 * 1024);
+
+    expect(
+      await captureOutcome(DocumentCaptureMode.importPdf),
+      const DocumentTooLargeFailure(200 * 1024 * 1024),
+    );
+  });
+
+  test(
+    "l'empreinte porte sur les octets nettoyés, ceux qui partiront",
+    () async {
+      final cleaned = Uint8List.fromList([...jpegBytes, 0xAA]);
+      gateway.next = RawCapture(bytes: jpegBytes);
+      service = DocumentCaptureService(
+        gateway,
+        digest: (bytes, type) async =>
+            DocumentDigest(bytes: cleaned, sha256Hex: await sha256Hex(cleaned)),
+      );
+
+      final document =
+          await captureOutcome(DocumentCaptureMode.scan) as CapturedDocument;
+
+      expect(document.bytes, cleaned);
+      expect(document.sha256Hex, await sha256Hex(cleaned));
+    },
+  );
+
+  test('un calcul en échec est une lecture ratée', () async {
+    gateway.next = RawCapture(bytes: pdfBytes);
+    service = DocumentCaptureService(
+      gateway,
+      digest: (_, _) async => throw StateError('isolat mort-né'),
+    );
+
+    expect(
+      await captureOutcome(DocumentCaptureMode.importPdf),
       isA<DocumentReadFailure>(),
     );
   });

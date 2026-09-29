@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
@@ -16,11 +17,21 @@ import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 /// La caméra est celle du système : le cadre guide au format A4 de la
 /// maquette demanderait le greffon `camera` et un écran de prise de vue à
 /// nous, hors de ce socle.
+///
+/// ⚠️ Sur iOS, un appareil **sans caméra** ne lève rien : le greffon affiche
+/// sa propre alerte puis rend `null`, que rien ne distingue d'un renoncement.
+/// L'utilisateur est prévenu par le système et rouvre la feuille pour importer.
+///
+/// ⚠️ Sur Android, `requestFullMetadata: false` est **ignoré** : l'EXIF de
+/// l'appareil photo, GPS compris, est recopiée dans l'image réduite. Le
+/// service la retire ensuite (`JpegMetadataSanitizer`).
 class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
-  /// Codes d'erreur par lesquels `image_picker` signale une caméra refusée ou
-  /// absente (Android et iOS).
+  /// Codes d'erreur par lesquels `image_picker` signale une caméra refusée,
+  /// bloquée par la gestion de flotte (MDM, fréquent en établissement) ou
+  /// absente.
   static const Set<String> _cameraErrorCodes = {
     'camera_access_denied',
+    'camera_access_restricted',
     'no_available_camera',
   };
 
@@ -39,6 +50,12 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
   }
 
   Future<RawCapture?> _pickImage(ImageSource source) async {
+    // Plateforme sans prise de vue (bureau) : l'appel lèverait une erreur
+    // générique, qui se lirait comme une lecture ratée.
+    if (source == ImageSource.camera &&
+        !_imagePicker.supportsImageSource(ImageSource.camera)) {
+      throw const CameraUnavailableException();
+    }
     final XFile? file;
     try {
       file = await _imagePicker.pickImage(
@@ -46,8 +63,7 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
         maxWidth: DocumentCapturePolicy.maxImageDimension,
         maxHeight: DocumentCapturePolicy.maxImageDimension,
         imageQuality: DocumentCapturePolicy.jpegQuality,
-        // Ni géolocalisation ni date de prise de vue : une pièce d'identité n'a
-        // pas à emporter l'endroit où elle a été photographiée.
+        // Respecté sur iOS seulement ; voir la note sur Android plus haut.
         requestFullMetadata: false,
       );
     } on PlatformException catch (error) {
@@ -65,11 +81,16 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf'],
-      withData: true,
+      // Les octets ne sont chargés d'office que sur le web, qui n'a pas de
+      // chemin ; ailleurs, la taille est jugée avant toute lecture.
+      withData: kIsWeb,
     );
     final file = result?.files.singleOrNull;
-    final bytes = file?.bytes;
-    if (file == null || bytes == null) return null;
+    if (file == null) return null;
+    if (file.size > DocumentCapturePolicy.maxBytes) {
+      throw DocumentTooLargeException(file.size);
+    }
+    final bytes = file.bytes ?? await file.xFile.readAsBytes();
     return RawCapture(bytes: bytes, fileName: file.name);
   }
 }

@@ -130,7 +130,7 @@ const int kBlobHeaderLength = 5;
 
 /// Traverse un isolat. Défaut de production.
 Future<BlobCipherResult> offloadBlobCipher(BlobCipherRequest request) =>
-    compute(runBlobCipherTask, request, debugLabel: 'editique-cipher');
+    compute(runBlobCipherTask, request, debugLabel: 'blob-cipher');
 
 /// Corps du calcul, **de premier niveau** : c'est ce qui le rend exécutable
 /// dans un isolat (une fermeture capturant son contexte ne l'est pas).

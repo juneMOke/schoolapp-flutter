@@ -113,7 +113,7 @@ CFG-6, et sur un commit, pas sur un arbre de travail.
 
 | Besoin de la spec | Existe déjà | Où |
 |---|---|---|
-| Cascade district → commune (Kinshasa) | ✅ | `assets/catalogs/address_geo_catalog.json` + `AddressGeoCatalog` (444 lignes) |
+| Cascade district → commune (Kinshasa) | ✅ | `assets/catalogs/address_geo_catalog.json` + `AddressGeoCatalog` (444 lignes ; depuis dans `core/geo/`, découpé en trois) |
 | Champs de saisie (texte, e-mail, téléphone E.164, date, select) | ✅ | `core/widgets/eteelo_*_input.dart` |
 | Champs lecture seule (Pays / Ville) | ✅ | `core/components/fields/read_only_field.dart` — règle « readOnly = pleine couleur » |
 | Squelettes de chargement | ✅ | `EteeloListSkeleton` / `EteeloSkeletonBox` (reduced-motion géré) |
@@ -122,7 +122,7 @@ CFG-6, et sur un commit, pas sur un arbre de travail.
 | Bascule segmentée (assiette du frais) | ✅ | `core/components/controls/segmented_tab_filter.dart` |
 | Largeur max 1180 dp centrée | ✅ | `AppPageBackground` — **plafonne déjà à 1180** |
 | Texture kuba de la barre de titre | ✅ | `core/widgets/kuba_pattern_layer.dart` |
-| Stepper visuel (pastilles + traits) | ⚠ partiel | `enrollment/presentation/widgets/breadcrumb/` — `WizardBreadcrumb`, `WizardStepDot`, `WizardProgressBar` |
+| Stepper visuel (pastilles + traits) | ⚠ partiel | `enrollment/presentation/widgets/breadcrumb/` (depuis `core/components/wizard/`) — `WizardBreadcrumb`, `WizardStepDot`, `WizardProgressBar` |
 | Saisie de montant + devise | ✅ | `core/widgets/currency_field.dart` |
 
 Le stepper est le seul cas ambigu : `WizardBreadcrumb` est une bande pleine
