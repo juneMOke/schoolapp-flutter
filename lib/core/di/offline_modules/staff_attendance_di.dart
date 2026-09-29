@@ -22,6 +22,8 @@ import 'package:school_app_flutter/features/staff/domain/repositories/staff_atte
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/sync_staff_pulls_use_case.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -89,6 +91,22 @@ void registerStaffAttendance(GetIt getIt) {
       ),
       bus: getIt<PullCompletionBus>(),
       engine: getIt<SyncEngine>(),
+    ),
+  );
+
+  // ── Présentation ────────────────────────────────────────────────────────
+  getIt.registerFactory<StaffAttendanceCommands>(
+    () => StaffAttendanceCommands(
+      save: getIt<SaveStaffAttendanceUseCase>(),
+      gesture: getIt<RecordStaffAttendanceGestureUseCase>(),
+      settings: getIt<SaveStaffAttendanceSettingsUseCase>(),
+    ),
+  );
+  getIt.registerFactory<StaffAttendanceCubit>(
+    () => StaffAttendanceCubit(
+      load: getIt<LoadStaffAttendanceUseCase>(),
+      signals: getIt<StaffSyncSignals>(),
+      commands: getIt<StaffAttendanceCommands>(),
     ),
   );
 

@@ -30,9 +30,6 @@ class StaffSyncSignals {
   /// Tire les flux de l'écran par le coordinateur (le plan décide lesquels).
   Future<void> pull() => _pulls();
 
-  /// Relance l'envoi, sans l'attendre : un geste vient d'être mis en file.
-  void flush() => unawaited(_engine.flush());
-
   /// Appelle [onChanged] à chaque signal ; rend la fonction qui désabonne.
   void Function() watch(void Function() onChanged) {
     final watched = watchedResources;

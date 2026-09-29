@@ -12048,4 +12048,584 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get staffFileNotYetSynced =>
       'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.';
+
+  @override
+  String get subMenuStaffAttendance => 'Attendance';
+
+  @override
+  String get accueilStaffAttendanceShort => 'Attendance';
+
+  @override
+  String get staffAttendanceTabRegister => 'Daily register';
+
+  @override
+  String staffAttendanceTabRegisterSubtitle(int marked, int total) {
+    return '$marked / $total marked';
+  }
+
+  @override
+  String get staffAttendanceTabAgent => 'Monthly sheet';
+
+  @override
+  String staffAttendanceTabAgentSubtitle(String month) {
+    return 'By staff member · $month';
+  }
+
+  @override
+  String get staffAttendanceTabRecap => 'Monthly summary';
+
+  @override
+  String get staffAttendanceTabRecapSubtitle => 'Totals → Payroll';
+
+  @override
+  String staffAttendanceBadgeToMark(int count) {
+    return '$count to mark';
+  }
+
+  @override
+  String get staffAttendanceBadgeValidated => 'Validated';
+
+  @override
+  String get staffAttendanceBadgeToClose => 'To close';
+
+  @override
+  String get staffAttendanceBadgeClosed => 'Closed';
+
+  @override
+  String get staffAttendanceEyebrowToday => 'Daily register';
+
+  @override
+  String get staffAttendanceEyebrowPast => 'Register — past day';
+
+  @override
+  String get staffAttendanceGoToday => 'Today';
+
+  @override
+  String get staffAttendancePreviousDay => 'Previous day';
+
+  @override
+  String get staffAttendanceNextDay => 'Next day';
+
+  @override
+  String staffAttendanceSettingsPill(String start, int tolerance) {
+    return 'Start $start · tolerance $tolerance min';
+  }
+
+  @override
+  String staffAttendanceProgress(int marked, int total) {
+    return '$marked / $total';
+  }
+
+  @override
+  String staffAttendanceOnTablet(int count) {
+    return '$count on the tablet';
+  }
+
+  @override
+  String get staffAttendanceMarkRemaining =>
+      'Mark everyone still to mark as present at the start time';
+
+  @override
+  String get staffAttendanceValidateReport => 'Validate the report';
+
+  @override
+  String get staffAttendanceFilterAll => 'All';
+
+  @override
+  String get staffAttendanceFilterPresent => 'Present';
+
+  @override
+  String get staffAttendanceFilterLate => 'Late';
+
+  @override
+  String get staffAttendanceFilterAbsent => 'Absent';
+
+  @override
+  String get staffAttendanceStatusNone => 'To mark';
+
+  @override
+  String get staffAttendanceStatusPresent => 'Present';
+
+  @override
+  String get staffAttendanceStatusLate => 'Late';
+
+  @override
+  String get staffAttendanceStatusAbsent => 'Absent';
+
+  @override
+  String get staffAttendanceSearchLabel => 'Search a staff member';
+
+  @override
+  String get staffAttendanceSearchPlaceholder =>
+      'Name, middle name, first name, job';
+
+  @override
+  String get staffAttendanceLegendGrid => 'Tap a card: Present › Late › Absent';
+
+  @override
+  String get staffAttendanceLegendList =>
+      'Tap a status (tap it again to clear it)';
+
+  @override
+  String staffAttendanceToJustify(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count incidents to justify',
+      one: '1 incident to justify',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceLateDetail(int minutes, String start) {
+    return '+$minutes min after $start';
+  }
+
+  @override
+  String get staffAttendanceAbsenceJustified => 'Justified absence';
+
+  @override
+  String get staffAttendanceAbsenceUnjustified => 'Unjustified absence';
+
+  @override
+  String get staffAttendanceOnTime => 'On time';
+
+  @override
+  String get staffAttendanceOnTimeShort => 'On time';
+
+  @override
+  String get staffAttendanceNotMarked => 'Not marked';
+
+  @override
+  String get staffAttendanceDeparture => 'Departure';
+
+  @override
+  String get staffAttendanceArrival => 'Arrival';
+
+  @override
+  String get staffAttendanceJustify => 'Justify';
+
+  @override
+  String get staffAttendanceRetry => 'Retry';
+
+  @override
+  String get staffAttendanceClearTooltip => 'Clear the status (back to mark)';
+
+  @override
+  String get staffAttendanceClearHint => 'Tap again to clear the status';
+
+  @override
+  String get staffAttendanceHourlyBadge => 'HOURLY';
+
+  @override
+  String staffAttendanceHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get staffAttendanceHoursLess => 'One hour less';
+
+  @override
+  String get staffAttendanceHoursMore => 'One hour more';
+
+  @override
+  String get staffAttendanceColAgent => 'Staff member';
+
+  @override
+  String get staffAttendanceColStatus => 'Status';
+
+  @override
+  String get staffAttendanceColTimes => 'Arrival · departure';
+
+  @override
+  String get staffAttendanceColHours => 'Hours';
+
+  @override
+  String get staffAttendanceColLate => 'Lateness · justification';
+
+  @override
+  String staffAttendanceTimeArrivalTitle(String name) {
+    return 'Arrival time — $name';
+  }
+
+  @override
+  String staffAttendanceTimeDepartureTitle(String name) {
+    return 'Departure time — $name';
+  }
+
+  @override
+  String get staffAttendanceTimeField => 'Time (HH:MM)';
+
+  @override
+  String get staffAttendanceTimeInvalid =>
+      'Enter a time between 00:00 and 23:59.';
+
+  @override
+  String get staffAttendanceTimeNow => 'Now';
+
+  @override
+  String get staffAttendanceTimeStart => 'Start of classes';
+
+  @override
+  String staffAttendanceTimePlus(int minutes) {
+    return '+$minutes min';
+  }
+
+  @override
+  String get staffAttendanceTimeClear => 'Clear the departure';
+
+  @override
+  String staffAttendancePreviewLate(int minutes, String start, int tolerance) {
+    return 'Marked late by $minutes min (start $start, tolerance $tolerance min)';
+  }
+
+  @override
+  String staffAttendancePreviewOnTime(String until) {
+    return 'Marked present on time (until $until)';
+  }
+
+  @override
+  String get staffAttendanceCancel => 'Cancel';
+
+  @override
+  String get staffAttendanceSave => 'Save';
+
+  @override
+  String staffAttendanceJustifyTitle(String name) {
+    return 'Justify — $name';
+  }
+
+  @override
+  String get staffAttendanceReasonLabel => 'Reason';
+
+  @override
+  String get staffAttendanceReasonIllness => 'Illness';
+
+  @override
+  String get staffAttendanceReasonTransport => 'Transport / traffic';
+
+  @override
+  String get staffAttendanceReasonBereavement => 'Bereavement';
+
+  @override
+  String get staffAttendanceReasonFamily => 'Family reason';
+
+  @override
+  String get staffAttendanceReasonMission => 'Work assignment';
+
+  @override
+  String get staffAttendanceReasonTraining => 'Training';
+
+  @override
+  String get staffAttendanceReasonOther => 'Other';
+
+  @override
+  String get staffAttendanceNoteLabel => 'Details';
+
+  @override
+  String get staffAttendanceNotePlaceholder =>
+      'e.g. medical certificate handed in tomorrow';
+
+  @override
+  String get staffAttendanceRemoveJustification => 'Remove the justification';
+
+  @override
+  String get staffAttendanceSettingsTitle => 'Attendance settings';
+
+  @override
+  String get staffAttendanceSettingsStart => 'Start of classes';
+
+  @override
+  String get staffAttendanceSettingsTolerance => 'Tolerance';
+
+  @override
+  String staffAttendanceMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String staffAttendanceSettingsRule(String until, String start) {
+    return 'An arrival after $until is late, counted from $start.';
+  }
+
+  @override
+  String get staffAttendanceSettingsComing => 'Applies to future marks.';
+
+  @override
+  String get staffAttendanceReportTitle => 'Validate the daily report';
+
+  @override
+  String staffAttendanceReportMarkRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members not marked — mark them present on time',
+      one: '1 staff member not marked — mark present on time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffAttendanceReportUnmarkedReminder =>
+      'Otherwise they will be counted present by default when the month is closed.';
+
+  @override
+  String staffAttendanceReportUnjustified(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count latenesses or absences without justification',
+      one: '1 lateness or absence without justification',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffAttendanceReportLock =>
+      'Validating locks the day: the report must be reopened to correct a mark.';
+
+  @override
+  String get staffAttendanceReportConfirm => 'Validate';
+
+  @override
+  String get staffAttendanceValidatedTitle =>
+      'Daily report validated — marks locked';
+
+  @override
+  String staffAttendanceValidatedBy(String name, String when) {
+    return 'By $name · $when';
+  }
+
+  @override
+  String staffAttendanceValidatedCounts(int present, int late, int absent) {
+    return '$present present, $late late, $absent absent';
+  }
+
+  @override
+  String get staffAttendanceReopen => 'Reopen';
+
+  @override
+  String get staffAttendanceMonthClosedBanner => 'Month closed — marks locked';
+
+  @override
+  String get staffAttendanceAgentPicker => 'Search · First name Last name';
+
+  @override
+  String get staffAttendancePreviousMonth => 'Previous month';
+
+  @override
+  String get staffAttendanceNextMonth => 'Next month';
+
+  @override
+  String get staffAttendanceCurrentMonth => 'Back to the current month';
+
+  @override
+  String get staffAttendanceKpiPresences => 'Attendance';
+
+  @override
+  String get staffAttendanceKpiDaysWorked => 'Days worked';
+
+  @override
+  String staffAttendanceKpiRatio(int value, int days) {
+    return '$value / $days';
+  }
+
+  @override
+  String get staffAttendanceKpiLates => 'Late arrivals';
+
+  @override
+  String staffAttendanceKpiLatesDetail(int minutes, int unjustified) {
+    return '$minutes min · $unjustified unjustified';
+  }
+
+  @override
+  String get staffAttendanceKpiAbsences => 'Absences';
+
+  @override
+  String staffAttendanceKpiAbsencesDetail(int justified, int unjustified) {
+    return '$justified J · $unjustified U';
+  }
+
+  @override
+  String get staffAttendanceKpiNotMarked => 'Not marked';
+
+  @override
+  String get staffAttendanceKpiHours => 'Hours worked';
+
+  @override
+  String get staffAttendanceIncidentsTitle =>
+      'Late arrivals and absences this month';
+
+  @override
+  String get staffAttendanceNoIncidents =>
+      'No late arrival or absence this month.';
+
+  @override
+  String get staffAttendanceUnjustified => 'Unjustified';
+
+  @override
+  String staffAttendanceHolidayTitle(String month) {
+    return 'Holidays — $month';
+  }
+
+  @override
+  String get staffAttendanceHolidayMessage => 'No school day this month.';
+
+  @override
+  String get staffAttendanceRecapColContract => 'Contract';
+
+  @override
+  String get staffAttendanceRecapColHours => 'Hourly';
+
+  @override
+  String get staffAttendanceRecapColSync => 'Sync';
+
+  @override
+  String get staffAttendanceTotalRate => 'Attendance rate';
+
+  @override
+  String get staffAttendanceTotalHours => 'Hourly work';
+
+  @override
+  String get staffAttendanceTotalLateMinutes => 'Minutes late';
+
+  @override
+  String get staffAttendanceTotalUnjustified => 'Unjustified absences';
+
+  @override
+  String get staffAttendanceTotalNotMarked => 'Days not marked';
+
+  @override
+  String get staffAttendanceRecapLegend =>
+      'U = unjustified · J = justified · tap a row to open the monthly sheet';
+
+  @override
+  String get staffAttendanceClose => 'Close and send to Payroll';
+
+  @override
+  String staffAttendanceCloseTitle(String month) {
+    return 'Send $month to Payroll?';
+  }
+
+  @override
+  String staffAttendanceCloseHours(String hours) {
+    return '$hours of hourly work, added to hourly staff pay';
+  }
+
+  @override
+  String staffAttendanceCloseAbsences(int count) {
+    return '$count unjustified absences, flagged in the payroll book, without deduction';
+  }
+
+  @override
+  String staffAttendanceCloseLates(int minutes) {
+    return '$minutes min late, for information';
+  }
+
+  @override
+  String staffAttendanceCloseNotMarked(int count) {
+    return '$count staff-days without marks will be treated as present by default';
+  }
+
+  @override
+  String get staffAttendanceCloseIrreversible =>
+      'Closing locks the month: it cannot be reopened from the tablet.';
+
+  @override
+  String get staffAttendanceCloseConfirm => 'Close';
+
+  @override
+  String get staffAttendanceEmptyTitle => 'No staff member to mark';
+
+  @override
+  String get staffAttendanceEmptyMessage =>
+      'The staff file is empty on this tablet.';
+
+  @override
+  String get staffAttendanceOpenStaffFile => 'Open the staff file';
+
+  @override
+  String get staffAttendanceEmptyFilterTitle =>
+      'No staff member in this filter';
+
+  @override
+  String get staffAttendanceAllMarked => 'Everyone is marked';
+
+  @override
+  String get staffAttendanceShowAll => 'Show all';
+
+  @override
+  String get staffAttendanceRecapEmptyFilter => 'No staff member found';
+
+  @override
+  String staffAttendanceToastRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members marked present',
+      one: '1 staff member marked present',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastCleared(String name) {
+    return '$name back to mark';
+  }
+
+  @override
+  String staffAttendanceToastJustified(String name) {
+    return 'Justification saved — $name';
+  }
+
+  @override
+  String staffAttendanceToastJustificationRemoved(String name) {
+    return 'Justification removed — $name';
+  }
+
+  @override
+  String get staffAttendanceToastSettings => 'Settings saved';
+
+  @override
+  String get staffAttendanceToastValidated => 'Daily report validated';
+
+  @override
+  String get staffAttendanceToastReopened =>
+      'Report reopened: the day can be edited again';
+
+  @override
+  String get staffAttendanceToastDayFrozen =>
+      'Daily report validated — reopen it to change a mark';
+
+  @override
+  String get staffAttendanceToastMonthFrozen =>
+      'Month closed: its marks can no longer change';
+
+  @override
+  String staffAttendanceToastClosed(String month) {
+    return '$month closed';
+  }
+
+  @override
+  String get staffAttendanceToastWriteFailed =>
+      'The mark could not be saved on the tablet.';
+
+  @override
+  String get staffAttendanceRefusedDayLocked =>
+      'Refused: day already validated';
+
+  @override
+  String get staffAttendanceRefusedMonthClosed => 'Refused: month closed';
+
+  @override
+  String get staffAttendanceRefused => 'Sending refused';
+
+  @override
+  String get staffAttendanceForbidden =>
+      'Only the head and the deputy head mark staff attendance.';
+
+  @override
+  String get staffAttendanceValidationRefused =>
+      'The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.';
 }

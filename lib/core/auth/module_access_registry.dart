@@ -144,6 +144,21 @@ const ModuleAccess kExpenseWriteAccess = ModuleAccess([Perm.expenseWrite]);
 /// un contrat et verser une pièce ont leurs propres droits.
 const ModuleAccess kStaffWriteAccess = ModuleAccess([Perm.hrStaffWrite]);
 
+/// Pointer, justifier, effacer, valider et rouvrir le rapport du jour
+/// (`POST /sync/staff-attendance`, gestes de jour).
+///
+/// ⚠️ Masquer n'est pas cosmétique : ces écritures partent par l'outbox, où
+/// un 403 est terminal.
+const ModuleAccess kStaffAttendanceWriteAccess = ModuleAccess([
+  Perm.hrAttendanceWrite,
+]);
+
+/// Régler l'heure de début et la tolérance, clore le mois — le directeur, pas
+/// le censeur.
+const ModuleAccess kStaffAttendanceManageAccess = ModuleAccess([
+  Perm.hrAttendanceManage,
+]);
+
 /// Retirer une dépense du registre, ou la restaurer
 /// (`POST /sync/expenses/{id}/deletion`). Retirer n'est pas saisir : une école
 /// peut confier l'un sans l'autre.
@@ -280,6 +295,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // pour toute l'école.
   MenuConstants.hrMenuId: {
     MenuConstants.hrStaffFileId: ModuleAccess([Perm.hrStaffRead]),
+    // Le Pointage se lit sous `hr.attendance.read` ; pointer et clore sont
+    // gardés geste par geste.
+    MenuConstants.hrStaffAttendanceId: ModuleAccess([Perm.hrAttendanceRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

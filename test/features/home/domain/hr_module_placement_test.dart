@@ -7,25 +7,32 @@ import 'package:school_app_flutter/features/home/domain/factories/menu_factory.d
 import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
-/// Les ressources humaines ont leur PROPRE menu, câblé avant l'écran et gardé
-/// par `hr.staff.read` : tant que le serveur ne sème pas ce droit, personne ne
-/// le voit. Ces tests tiennent la place et la garde.
+/// Les ressources humaines ont leur PROPRE menu : le fichier du personnel,
+/// gardé par `hr.staff.read`, puis le Pointage, gardé par `hr.attendance.read`.
+/// Chaque sous-menu disparaît sans son droit ; le menu entier, sans aucun des
+/// deux. Ces tests tiennent la place et les gardes.
 void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
 
-  test('un menu propre, qui ouvre le fichier du personnel', () {
+  test('un menu propre : le fichier du personnel, puis le Pointage', () {
     final menus = MenuFactory.createMenuItems(l10n, permissions: tousDroits);
     final rh = menus.firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
 
     expect(rh.title, 'Ressources humaines');
-    expect(rh.subMenus.map((sub) => sub.id), [MenuConstants.hrStaffFileId]);
-    expect(rh.subMenus.single.title, 'Fichier du personnel');
-    expect(rh.subMenus.single.route, AppRoutesNames.hrStaffFile);
+    expect(rh.subMenus.map((sub) => sub.id), [
+      MenuConstants.hrStaffFileId,
+      MenuConstants.hrStaffAttendanceId,
+    ]);
+    expect(rh.subMenus.first.title, 'Fichier du personnel');
+    expect(rh.subMenus.first.route, AppRoutesNames.hrStaffFile);
+    expect(rh.subMenus.last.title, 'Pointage & présences');
+    expect(rh.subMenus.last.route, AppRoutesNames.hrStaffAttendance);
     expect(
       AppRoutesNames.hrStaffFile,
       '/ressources-humaines/fichier-du-personnel',
     );
+    expect(AppRoutesNames.hrStaffAttendance, '/ressources-humaines/pointage');
   });
 
   test('il suit les Dépenses dans la barre', () {
@@ -40,9 +47,14 @@ void main() {
     );
   });
 
-  test('sans `hr.staff.read`, le menu ENTIER disparaît', () {
+  test('sans `hr.staff.read` ni `hr.attendance.read`, le menu ENTIER '
+      'disparaît', () {
     final sansLecture = tousDroits
-        .where((wire) => wire != Perm.hrStaffRead.wire)
+        .where(
+          (wire) =>
+              wire != Perm.hrStaffRead.wire &&
+              wire != Perm.hrAttendanceRead.wire,
+        )
         .toList();
 
     expect(
@@ -70,6 +82,20 @@ void main() {
     expect(menus.map((menu) => menu.id), contains(MenuConstants.hrMenuId));
   });
 
+  test('`hr.attendance.read` seul ouvre le Pointage, pas le fichier', () {
+    final rh = MenuFactory.createMenuItems(
+      l10n,
+      permissions: [Perm.hrAttendanceRead.wire],
+    ).firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
+
+    expect(rh.subMenus.map((sub) => sub.id), [
+      MenuConstants.hrStaffAttendanceId,
+    ]);
+    final route = Uri.parse(AppRoutesNames.hrStaffAttendance);
+    expect(canAccessLocation(route, [Perm.hrStaffRead.wire]), isFalse);
+    expect(canAccessLocation(route, [Perm.hrAttendanceRead.wire]), isTrue);
+  });
+
   test('la route refuse qui ne lit pas le fichier', () {
     final route = Uri.parse(AppRoutesNames.hrStaffFile);
 
@@ -86,6 +112,7 @@ void main() {
 
     expect(rh.subModules.map((sub) => sub.target.subMenuId), [
       MenuConstants.hrStaffFileId,
+      MenuConstants.hrStaffAttendanceId,
     ]);
   });
 }

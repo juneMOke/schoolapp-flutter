@@ -11,11 +11,15 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_member_s
 /// est vacataire payé à l'heure ce jour-là.
 class StaffDayRow extends Equatable {
   final StaffMember member;
+
+  /// Le jour du registre, `YYYY-MM-DD`.
+  final String day;
   final StaffAttendanceRecord? record;
   final bool isHourly;
 
   const StaffDayRow({
     required this.member,
+    required this.day,
     required this.record,
     required this.isHourly,
   });
@@ -27,7 +31,7 @@ class StaffDayRow extends Equatable {
   StaffSyncState get sync => record?.syncState ?? StaffSyncState.synced;
 
   @override
-  List<Object?> get props => [member, record, isHourly];
+  List<Object?> get props => [member, day, record, isHourly];
 }
 
 /// Les critères du registre : un statut (ou tous), une catégorie, un texte.
@@ -100,6 +104,7 @@ class StaffDayRegister extends Equatable {
       for (final member in snapshot.members)
         StaffDayRow(
           member: member,
+          day: day,
           record: snapshot.recordOf(member.id, day),
           isHourly:
               StaffContractTimeline.currentAt(

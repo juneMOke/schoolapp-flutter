@@ -248,6 +248,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.hrStaffFileId,
           title: l10n.subMenuStaffFile,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrStaffAttendanceId,
+          title: l10n.subMenuStaffAttendance,
+        ),
       ],
     );
   }

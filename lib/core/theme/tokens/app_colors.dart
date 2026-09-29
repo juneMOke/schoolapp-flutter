@@ -471,4 +471,35 @@ class AppColors {
   /// médaillon seulement, jamais une encre de texte. Absente des jetons de la
   /// maquette, créée ici (amendement A10 du back).
   static const staffStepDocuments = Color(0xFF9D174D);
+
+  // ---- Ressources humaines — le Pointage (spec B, tokens) ----
+  //
+  // Une teinte par statut, **fond et encre séparés** comme pour les contrats :
+  // l'ambre du retard fonde un médaillon mais ne s'écrit pas sur son voile, et
+  // le gris « à pointer » non plus.
+  static const staffAttendancePresent = vertSavane;
+  static const staffAttendancePresentSoft = Color(0xFFEDF5EF);
+  static const staffAttendancePresentBorder = Color(0xFFBFDAC6);
+  static const staffAttendancePresentInk = vertSavane; // 5,6:1 sur son voile
+  static const staffAttendanceLate = Color(0xFFC27A0E);
+  static const staffAttendanceLateSoft = Color(0xFFFBF1DF);
+  static const staffAttendanceLateBorder = Color(0xFFEAD3A0);
+  static const staffAttendanceLateInk = staffPartialInk; // 5,3:1 sur son voile
+  static const staffAttendanceAbsent = Color(0xFFC0392B);
+  static const staffAttendanceAbsentSoft = Color(0xFFFBEAE7);
+  static const staffAttendanceAbsentBorder = Color(0xFFF0C6BF);
+  static const staffAttendanceAbsentInk = Color(0xFFA32E22); // 5,9:1
+  static const staffAttendanceNone = Color(0xFF8C8478);
+  static const staffAttendanceNoneSoft = Color(0xFFF6F4EF);
+  static const staffAttendanceNoneBorder = Color(0xFFD9D3C7);
+  static const staffAttendanceNoneInk = textMutedAa;
+
+  /// Le bandeau du jour : un dégradé d'ardoise profonde, et son filet
+  /// terre cuite → or → vert.
+  static const staffAttendanceBannerStart = Color(0xFF0E2D42);
+  static const staffAttendanceBannerMid = bleuArdoise;
+  static const staffAttendanceBannerEnd = Color(0xFF24597A);
+  static const staffAttendanceOnBanner = Color(0xFFFFFFFF);
+  static const staffAttendanceOnBannerMuted = Color(0xCCFFFFFF);
+  static const staffAttendanceOnBannerFaint = Color(0x33FFFFFF);
 }

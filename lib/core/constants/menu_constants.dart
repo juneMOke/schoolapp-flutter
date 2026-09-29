@@ -42,7 +42,7 @@ class MenuConstants {
   static const String expenseMenuId = 'depenses';
 
   /// Les ressources humaines — le fichier central des agents de l'école, puis
-  /// (plus tard) le Pointage et la Paie, qui le lisent. Un menu propre : un
+  /// le Pointage, et plus tard la Paie, qui le lisent. Un menu propre : un
   /// agent n'est ni un élève ni une écriture de caisse.
   static const String hrMenuId = 'ressources-humaines';
 
@@ -93,6 +93,10 @@ class MenuConstants {
   /// Le fichier du personnel : tous les agents de l'école, leur contrat et
   /// leur dossier administratif.
   static const String hrStaffFileId = 'fichier-du-personnel';
+
+  /// Le Pointage du personnel : le registre du jour, la fiche mensuelle d'un
+  /// agent et le récapitulatif du mois.
+  static const String hrStaffAttendanceId = 'pointage';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';

@@ -12139,4 +12139,587 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get staffFileNotYetSynced =>
       'Le fichier du personnel n\'a pas encore été reçu sur cette tablette. Vous pouvez déjà créer des agents : les autres apparaîtront à la prochaine connexion.';
+
+  @override
+  String get subMenuStaffAttendance => 'Pointage & présences';
+
+  @override
+  String get accueilStaffAttendanceShort => 'Pointage';
+
+  @override
+  String get staffAttendanceTabRegister => 'Registre du jour';
+
+  @override
+  String staffAttendanceTabRegisterSubtitle(int marked, int total) {
+    return '$marked / $total pointés';
+  }
+
+  @override
+  String get staffAttendanceTabAgent => 'Fiche mensuelle';
+
+  @override
+  String staffAttendanceTabAgentSubtitle(String month) {
+    return 'Par agent · $month';
+  }
+
+  @override
+  String get staffAttendanceTabRecap => 'Récapitulatif du mois';
+
+  @override
+  String get staffAttendanceTabRecapSubtitle => 'Totaux → Paie';
+
+  @override
+  String staffAttendanceBadgeToMark(int count) {
+    return '$count à pointer';
+  }
+
+  @override
+  String get staffAttendanceBadgeValidated => 'Validé';
+
+  @override
+  String get staffAttendanceBadgeToClose => 'À clôturer';
+
+  @override
+  String get staffAttendanceBadgeClosed => 'Clôturé';
+
+  @override
+  String get staffAttendanceEyebrowToday => 'Registre du jour';
+
+  @override
+  String get staffAttendanceEyebrowPast => 'Registre — jour passé';
+
+  @override
+  String get staffAttendanceGoToday => 'Aujourd\'hui';
+
+  @override
+  String get staffAttendancePreviousDay => 'Jour précédent';
+
+  @override
+  String get staffAttendanceNextDay => 'Jour suivant';
+
+  @override
+  String staffAttendanceSettingsPill(String start, int tolerance) {
+    return 'Début $start · tolérance $tolerance min';
+  }
+
+  @override
+  String staffAttendanceProgress(int marked, int total) {
+    return '$marked / $total';
+  }
+
+  @override
+  String staffAttendanceOnTablet(int count) {
+    return '$count sur la tablette';
+  }
+
+  @override
+  String get staffAttendanceMarkRemaining =>
+      'Marquer tous les « À pointer » présents à l’heure de début';
+
+  @override
+  String get staffAttendanceValidateReport => 'Valider le rapport';
+
+  @override
+  String get staffAttendanceFilterAll => 'Tous';
+
+  @override
+  String get staffAttendanceFilterPresent => 'Présents';
+
+  @override
+  String get staffAttendanceFilterLate => 'Retards';
+
+  @override
+  String get staffAttendanceFilterAbsent => 'Absents';
+
+  @override
+  String get staffAttendanceStatusNone => 'À pointer';
+
+  @override
+  String get staffAttendanceStatusPresent => 'Présent';
+
+  @override
+  String get staffAttendanceStatusLate => 'En retard';
+
+  @override
+  String get staffAttendanceStatusAbsent => 'Absent';
+
+  @override
+  String get staffAttendanceSearchLabel => 'Rechercher un agent';
+
+  @override
+  String get staffAttendanceSearchPlaceholder =>
+      'Nom, post-nom, prénom, fonction';
+
+  @override
+  String get staffAttendanceLegendGrid =>
+      'Touchez une carte : Présent › En retard › Absent';
+
+  @override
+  String get staffAttendanceLegendList =>
+      'Touchez un statut (retouchez-le pour l’effacer)';
+
+  @override
+  String staffAttendanceToJustify(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count incidents à justifier',
+      one: '1 incident à justifier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceLateDetail(int minutes, String start) {
+    return '+$minutes min après $start';
+  }
+
+  @override
+  String get staffAttendanceAbsenceJustified => 'Absence justifiée';
+
+  @override
+  String get staffAttendanceAbsenceUnjustified => 'Absence non justifiée';
+
+  @override
+  String get staffAttendanceOnTime => 'Arrivé(e) à l’heure';
+
+  @override
+  String get staffAttendanceOnTimeShort => 'À l’heure';
+
+  @override
+  String get staffAttendanceNotMarked => 'Non pointé';
+
+  @override
+  String get staffAttendanceDeparture => 'Départ';
+
+  @override
+  String get staffAttendanceArrival => 'Arrivée';
+
+  @override
+  String get staffAttendanceJustify => 'Justifier';
+
+  @override
+  String get staffAttendanceRetry => 'Réessayer';
+
+  @override
+  String get staffAttendanceClearTooltip =>
+      'Effacer le statut (remettre à pointer)';
+
+  @override
+  String get staffAttendanceClearHint =>
+      'Toucher de nouveau pour effacer le statut';
+
+  @override
+  String get staffAttendanceHourlyBadge => 'VAC · H';
+
+  @override
+  String staffAttendanceHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get staffAttendanceHoursLess => 'Une heure de moins';
+
+  @override
+  String get staffAttendanceHoursMore => 'Une heure de plus';
+
+  @override
+  String get staffAttendanceColAgent => 'Agent';
+
+  @override
+  String get staffAttendanceColStatus => 'Statut';
+
+  @override
+  String get staffAttendanceColTimes => 'Arrivée · départ';
+
+  @override
+  String get staffAttendanceColHours => 'Heures';
+
+  @override
+  String get staffAttendanceColLate => 'Retard · justification';
+
+  @override
+  String staffAttendanceTimeArrivalTitle(String name) {
+    return 'Heure d’arrivée — $name';
+  }
+
+  @override
+  String staffAttendanceTimeDepartureTitle(String name) {
+    return 'Heure de départ — $name';
+  }
+
+  @override
+  String get staffAttendanceTimeField => 'Heure (HH:MM)';
+
+  @override
+  String get staffAttendanceTimeInvalid =>
+      'Saisissez une heure entre 00:00 et 23:59.';
+
+  @override
+  String get staffAttendanceTimeNow => 'Maintenant';
+
+  @override
+  String get staffAttendanceTimeStart => 'Début des cours';
+
+  @override
+  String staffAttendanceTimePlus(int minutes) {
+    return '+$minutes min';
+  }
+
+  @override
+  String get staffAttendanceTimeClear => 'Effacer le départ';
+
+  @override
+  String staffAttendancePreviewLate(int minutes, String start, int tolerance) {
+    return 'Classé en retard de $minutes min (début $start, tolérance $tolerance min)';
+  }
+
+  @override
+  String staffAttendancePreviewOnTime(String until) {
+    return 'Classé présent à l’heure (jusqu’à $until)';
+  }
+
+  @override
+  String get staffAttendanceCancel => 'Annuler';
+
+  @override
+  String get staffAttendanceSave => 'Enregistrer';
+
+  @override
+  String staffAttendanceJustifyTitle(String name) {
+    return 'Justifier — $name';
+  }
+
+  @override
+  String get staffAttendanceReasonLabel => 'Motif';
+
+  @override
+  String get staffAttendanceReasonIllness => 'Maladie';
+
+  @override
+  String get staffAttendanceReasonTransport => 'Transport / embouteillage';
+
+  @override
+  String get staffAttendanceReasonBereavement => 'Deuil';
+
+  @override
+  String get staffAttendanceReasonFamily => 'Raison familiale';
+
+  @override
+  String get staffAttendanceReasonMission => 'Mission de service';
+
+  @override
+  String get staffAttendanceReasonTraining => 'Formation';
+
+  @override
+  String get staffAttendanceReasonOther => 'Autre';
+
+  @override
+  String get staffAttendanceNoteLabel => 'Précision';
+
+  @override
+  String get staffAttendanceNotePlaceholder =>
+      'ex. certificat médical remis demain';
+
+  @override
+  String get staffAttendanceRemoveJustification => 'Retirer la justification';
+
+  @override
+  String get staffAttendanceSettingsTitle => 'Réglages du pointage';
+
+  @override
+  String get staffAttendanceSettingsStart => 'Heure de début des cours';
+
+  @override
+  String get staffAttendanceSettingsTolerance => 'Tolérance';
+
+  @override
+  String staffAttendanceMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String staffAttendanceSettingsRule(String until, String start) {
+    return 'Une arrivée après $until est un retard, compté depuis $start.';
+  }
+
+  @override
+  String get staffAttendanceSettingsComing =>
+      'S’applique aux pointages à venir.';
+
+  @override
+  String get staffAttendanceReportTitle => 'Valider le rapport du jour';
+
+  @override
+  String staffAttendanceReportMarkRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents non pointés — les marquer présents à l’heure',
+      one: '1 agent non pointé — le marquer présent à l’heure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffAttendanceReportUnmarkedReminder =>
+      'Sans cette case, ils seront comptés présents par défaut à la clôture du mois.';
+
+  @override
+  String staffAttendanceReportUnjustified(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards ou absences sans justification',
+      one: '1 retard ou absence sans justification',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffAttendanceReportLock =>
+      'La validation verrouille la journée : il faudra rouvrir le rapport pour corriger un pointage.';
+
+  @override
+  String get staffAttendanceReportConfirm => 'Valider';
+
+  @override
+  String get staffAttendanceValidatedTitle =>
+      'Rapport journalier validé — pointages verrouillés';
+
+  @override
+  String staffAttendanceValidatedBy(String name, String when) {
+    return 'Par $name · $when';
+  }
+
+  @override
+  String staffAttendanceValidatedCounts(int present, int late, int absent) {
+    return '$present présents, $late retards, $absent absents';
+  }
+
+  @override
+  String get staffAttendanceReopen => 'Rouvrir';
+
+  @override
+  String get staffAttendanceMonthClosedBanner =>
+      'Mois clôturé — pointages verrouillés';
+
+  @override
+  String get staffAttendanceAgentPicker => 'Rechercher · Prénom Nom';
+
+  @override
+  String get staffAttendancePreviousMonth => 'Mois précédent';
+
+  @override
+  String get staffAttendanceNextMonth => 'Mois suivant';
+
+  @override
+  String get staffAttendanceCurrentMonth => 'Revenir au mois en cours';
+
+  @override
+  String get staffAttendanceKpiPresences => 'Présences';
+
+  @override
+  String get staffAttendanceKpiDaysWorked => 'Jours prestés';
+
+  @override
+  String staffAttendanceKpiRatio(int value, int days) {
+    return '$value / $days';
+  }
+
+  @override
+  String get staffAttendanceKpiLates => 'Retards';
+
+  @override
+  String staffAttendanceKpiLatesDetail(int minutes, int unjustified) {
+    return '$minutes min · $unjustified non justifiés';
+  }
+
+  @override
+  String get staffAttendanceKpiAbsences => 'Absences';
+
+  @override
+  String staffAttendanceKpiAbsencesDetail(int justified, int unjustified) {
+    return '$justified J · $unjustified NJ';
+  }
+
+  @override
+  String get staffAttendanceKpiNotMarked => 'Non pointés';
+
+  @override
+  String get staffAttendanceKpiHours => 'Heures prestées';
+
+  @override
+  String get staffAttendanceIncidentsTitle => 'Retards et absences du mois';
+
+  @override
+  String get staffAttendanceNoIncidents =>
+      'Aucun retard ni absence ce mois-ci.';
+
+  @override
+  String get staffAttendanceUnjustified => 'Non justifié';
+
+  @override
+  String staffAttendanceHolidayTitle(String month) {
+    return 'Vacances — $month';
+  }
+
+  @override
+  String get staffAttendanceHolidayMessage =>
+      'Aucun jour de classe ce mois-ci.';
+
+  @override
+  String get staffAttendanceRecapColContract => 'Contrat';
+
+  @override
+  String get staffAttendanceRecapColHours => 'Heures vac.';
+
+  @override
+  String get staffAttendanceRecapColSync => 'Synchro';
+
+  @override
+  String get staffAttendanceTotalRate => 'Taux de présence';
+
+  @override
+  String get staffAttendanceTotalHours => 'Heures de vacation';
+
+  @override
+  String get staffAttendanceTotalLateMinutes => 'Minutes de retard';
+
+  @override
+  String get staffAttendanceTotalUnjustified => 'Absences non justifiées';
+
+  @override
+  String get staffAttendanceTotalNotMarked => 'Jours non pointés';
+
+  @override
+  String get staffAttendanceRecapLegend =>
+      'NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche mensuelle';
+
+  @override
+  String get staffAttendanceClose => 'Clôturer et transmettre à la Paie';
+
+  @override
+  String staffAttendanceCloseTitle(String month) {
+    return 'Transmettre $month à la Paie ?';
+  }
+
+  @override
+  String staffAttendanceCloseHours(String hours) {
+    return '$hours de vacation, ajoutées au salaire des vacataires';
+  }
+
+  @override
+  String staffAttendanceCloseAbsences(int count) {
+    return '$count absences non justifiées, signalées dans le livre de paie, sans retenue';
+  }
+
+  @override
+  String staffAttendanceCloseLates(int minutes) {
+    return '$minutes min de retard, à titre indicatif';
+  }
+
+  @override
+  String staffAttendanceCloseNotMarked(int count) {
+    return '$count jours-agent sans pointage seront traités comme présents par défaut';
+  }
+
+  @override
+  String get staffAttendanceCloseIrreversible =>
+      'La clôture verrouille le mois : elle ne se rouvre pas depuis la tablette.';
+
+  @override
+  String get staffAttendanceCloseConfirm => 'Clôturer';
+
+  @override
+  String get staffAttendanceEmptyTitle => 'Aucun agent à pointer';
+
+  @override
+  String get staffAttendanceEmptyMessage =>
+      'Le fichier du personnel est vide sur cette tablette.';
+
+  @override
+  String get staffAttendanceOpenStaffFile => 'Ouvrir le fichier du personnel';
+
+  @override
+  String get staffAttendanceEmptyFilterTitle => 'Aucun agent dans ce filtre';
+
+  @override
+  String get staffAttendanceAllMarked => 'Tout le monde est pointé';
+
+  @override
+  String get staffAttendanceShowAll => 'Tout afficher';
+
+  @override
+  String get staffAttendanceRecapEmptyFilter => 'Aucun agent trouvé';
+
+  @override
+  String staffAttendanceToastRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents marqués présents',
+      one: '1 agent marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastCleared(String name) {
+    return '$name remis à pointer';
+  }
+
+  @override
+  String staffAttendanceToastJustified(String name) {
+    return 'Justification enregistrée — $name';
+  }
+
+  @override
+  String staffAttendanceToastJustificationRemoved(String name) {
+    return 'Justification retirée — $name';
+  }
+
+  @override
+  String get staffAttendanceToastSettings => 'Réglages enregistrés';
+
+  @override
+  String get staffAttendanceToastValidated => 'Rapport journalier validé';
+
+  @override
+  String get staffAttendanceToastReopened =>
+      'Rapport rouvert : la journée se modifie à nouveau';
+
+  @override
+  String get staffAttendanceToastDayFrozen =>
+      'Rapport du jour validé — rouvrez-le pour modifier un pointage';
+
+  @override
+  String get staffAttendanceToastMonthFrozen =>
+      'Mois clôturé : ses pointages ne se modifient plus';
+
+  @override
+  String staffAttendanceToastClosed(String month) {
+    return '$month clôturé';
+  }
+
+  @override
+  String get staffAttendanceToastWriteFailed =>
+      'Le pointage n’a pas pu être enregistré sur la tablette.';
+
+  @override
+  String get staffAttendanceRefusedDayLocked => 'Refusé : jour déjà validé';
+
+  @override
+  String get staffAttendanceRefusedMonthClosed => 'Refusé : mois clos';
+
+  @override
+  String get staffAttendanceRefused => 'Envoi refusé';
+
+  @override
+  String get staffAttendanceForbidden =>
+      'Seuls le directeur et le censeur pointent le personnel.';
+
+  @override
+  String get staffAttendanceValidationRefused =>
+      'La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée.';
 }
