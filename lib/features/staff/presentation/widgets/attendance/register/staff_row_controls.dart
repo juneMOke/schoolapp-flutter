@@ -8,11 +8,13 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+export 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
 
 // Les contrôles d'une ligne du registre, partagés par la carte de la grille et
 // la ligne de la liste : une heure, le compteur d'heures, le bouton de
@@ -115,7 +117,7 @@ class StaffHoursStepper extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Text(
-            StaffAttendanceLabels.hours(value),
+            StaffAttendanceLabels.hours(l10n, value),
             style: AppTypography.labelLarge,
           ),
         ),
@@ -141,39 +143,6 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StaffSquareIconButton(icon: icon, tooltip: tooltip, onPressed: onTap);
-}
-
-/// Un bouton d'icône carré de 36 dp (effacer, réessayer, ± heure).
-class StaffSquareIconButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final Color? color;
-
-  const StaffSquareIconButton({
-    super.key,
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: AppDimensions.staffAttendanceIconButtonSize,
-    child: IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      iconSize: AppSpacing.lg + AppSpacing.xs,
-      color: color ?? AppColors.textSecondary,
-      icon: Icon(icon),
-      style: IconButton.styleFrom(
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-        side: const BorderSide(color: AppColors.border),
-      ),
-    ),
-  );
 }
 
 /// « Justifier », ou le motif posé, en vert.
@@ -228,34 +197,6 @@ class StaffJustifyButton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Un pointage refusé : son motif, et de quoi le renvoyer.
-class StaffRetryButton extends StatelessWidget {
-  final StaffAttendanceRecord record;
-  final VoidCallback onRetry;
-
-  const StaffRetryButton({
-    super.key,
-    required this.record,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (record.syncState != StaffSyncState.failed) {
-      return const SizedBox.shrink();
-    }
-    final l10n = AppLocalizations.of(context)!;
-    return StaffSquareIconButton(
-      icon: Icons.refresh,
-      color: AppColors.staffAttendanceAbsentInk,
-      tooltip:
-          '${StaffAttendanceLabels.refusal(l10n, record)} — '
-          '${l10n.staffAttendanceRetry}',
-      onPressed: onRetry,
     );
   }
 }

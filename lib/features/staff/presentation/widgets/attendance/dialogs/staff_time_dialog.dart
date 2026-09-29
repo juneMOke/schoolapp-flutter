@@ -80,7 +80,9 @@ class _StaffTimeDialogState extends State<StaffTimeDialog> {
           EteeloTextInput(
             controller: _field,
             label: l10n.staffAttendanceTimeField,
-            placeholder: '07:30',
+            placeholder: widget.shortcuts.isEmpty
+                ? null
+                : widget.shortcuts.first.time.wire,
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
             inputFormatters: const [StaffClockInputFormatter()],

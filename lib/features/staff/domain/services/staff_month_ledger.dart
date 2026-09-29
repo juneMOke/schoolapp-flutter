@@ -57,7 +57,9 @@ class StaffMonthLedger {
   StaffMonthStats statsOf(StaffMember member) => StaffMonthStats.of(
     records: snapshot.records[member.id] ?? const {},
     workDays: workDays,
+    periodOn: (day) => StaffContractTimeline.currentAt(member.contracts, day),
     isHourly: periodOf(member)?.isHourlyVacataire ?? false,
-    hourlyRate: snapshot.hourlyRates[member.id],
+    closed: isClosed,
+    contractRates: snapshot.contractRates,
   );
 }

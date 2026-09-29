@@ -32,6 +32,11 @@ class StaffAttendanceSettings extends Equatable {
     toleranceMinutes: 10,
   );
 
+  /// L'heure de début la plus tardive qu'on puisse régler : au-delà, la fin
+  /// de la tolérance et une arrivée « en retard » ne tiendraient plus dans la
+  /// journée, et le serveur refuserait un retard de 0 minute.
+  static final StaffClockTime latestStart = StaffClockTime.fromMinutes(18 * 60);
+
   /// La dernière heure encore « à l'heure ».
   StaffClockTime get lastOnTime => start.plus(toleranceMinutes);
 

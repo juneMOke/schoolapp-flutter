@@ -40,7 +40,8 @@ class _StaffDayReportDialogState extends State<StaffDayReportDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final register = widget.register;
-    final unmarked = register.count(StaffAttendanceStatus.none);
+    // Seuls ceux qu'un contrat couvre ce jour-là sont marqués d'office.
+    final unmarked = register.unmarked.length;
     final present =
         register.count(StaffAttendanceStatus.present) +
         (_markRemaining ? unmarked : 0);

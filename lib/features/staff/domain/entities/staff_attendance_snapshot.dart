@@ -25,9 +25,9 @@ class StaffAttendanceSnapshot extends Equatable {
   /// L'année scolaire courante ; `null` tant que le socle n'est pas descendu.
   final StaffSchoolYear? schoolYear;
 
-  /// Taux horaire des vacataires payés à l'heure, par agent. Vide sans
-  /// `hr.pay.read` : on n'affiche pas un montant qu'on ne peut pas voir.
-  final Map<String, Money> hourlyRates;
+  /// Taux horaire des contrats « heures prestées », par `contractId`. Vide
+  /// sans `hr.pay.read` : on n'affiche pas un montant qu'on ne peut pas voir.
+  final Map<String, Money> contractRates;
 
   /// Le fichier des agents a-t-il déjà été reçu une fois ?
   final bool hasEverSynced;
@@ -39,7 +39,7 @@ class StaffAttendanceSnapshot extends Equatable {
     required this.settings,
     required this.hasEverSynced,
     this.schoolYear,
-    this.hourlyRates = const {},
+    this.contractRates = const {},
   });
 
   static final StaffAttendanceSnapshot empty = StaffAttendanceSnapshot(
@@ -81,7 +81,7 @@ class StaffAttendanceSnapshot extends Equatable {
     locks,
     settings,
     schoolYear,
-    hourlyRates,
+    contractRates,
     hasEverSynced,
   ];
 }

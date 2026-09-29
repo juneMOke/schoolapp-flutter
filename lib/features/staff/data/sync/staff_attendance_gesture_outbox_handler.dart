@@ -5,8 +5,8 @@ import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
-import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
@@ -29,8 +29,8 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_work_cal
 class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
   final StaffAttendanceSyncApi _api;
   final StaffAttendanceLockDao _locks;
+  final StaffAttendanceGestureDao _gestures;
   final StaffAttendanceDao _records;
-  final StaffAttendanceSyncDao _recordSync;
   final StaffMemberDao _members;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _extras;
@@ -39,23 +39,23 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
   const StaffAttendanceGestureOutboxHandler({
     required StaffAttendanceSyncApi api,
     required StaffAttendanceLockDao locks,
+    required StaffAttendanceGestureDao gestures,
     required StaffAttendanceDao records,
-    required StaffAttendanceSyncDao recordSync,
     required StaffMemberDao members,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> extras,
     Clock now = systemClock,
   }) : _api = api,
        _locks = locks,
+       _gestures = gestures,
        _records = records,
-       _recordSync = recordSync,
        _members = members,
        _currentUser = currentUser,
        _extras = extras,
        _now = now;
 
   @override
-  String get aggregateType => StaffAttendanceLockDao.gestureAggregateType;
+  String get aggregateType => StaffAttendanceGestureDao.aggregateType;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -72,10 +72,9 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     final schoolId = entry.schoolId ?? '';
     final (from, to) = _periodOf(gesture, request.date);
 
-    if (await _locks.hasOlderPendingGesture(
+    if (await _gestures.hasOlderQueued(
       schoolId,
       gestureId: request.gestureId,
-      createdAt: entry.createdAt,
       from: from,
       to: to,
     )) {
@@ -92,17 +91,16 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
       send: () async {
         final state = await _api.submitGesture(_extras, request.toJson());
         await _locks.applyServer([state], schoolId: schoolId, nowMs: _now());
-        await _locks.markGesture(request.gestureId, StaffSyncState.synced);
+        await _gestures.mark(request.gestureId, StaffSyncState.synced);
+        // La réouverture remet en file les pointages refusés `DAY_LOCKED`,
+        // même quand la tablette n'avait jamais reçu le jour validé (la
+        // descente, elle, ne le fait qu'en voyant passer validé → rouvert).
         if (gesture == StaffAttendanceGesture.reopenDay) {
-          await _recordSync.requeueDayLocked(
-            schoolId,
-            request.date,
-            nowMs: _now(),
-          );
+          await _locks.requeueDayLocked(schoolId, request.date, nowMs: _now());
         }
       },
       reject: (failure) async {
-        await _locks.markGesture(
+        await _gestures.mark(
           request.gestureId,
           StaffSyncState.failed,
           code: failure.storedCode,
@@ -147,8 +145,14 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     return false;
   }
 
+  /// Même critère que [StaffAttendanceOutboxHandler] : un pointage n'attend
+  /// sa fiche que tant qu'elle n'a jamais été accusée. Il ne partira jamais
+  /// si la fiche a disparu, ou si elle n'a jamais été accusée et que son envoi
+  /// a été refusé.
   Future<bool> _memberCanSync(String memberId) async {
     final member = await _members.find(memberId);
-    return member != null && member.syncStatus != StaffSyncState.failed.dbValue;
+    if (member == null) return false;
+    return member.row['version'] != null ||
+        member.syncStatus != StaffSyncState.failed.dbValue;
   }
 }

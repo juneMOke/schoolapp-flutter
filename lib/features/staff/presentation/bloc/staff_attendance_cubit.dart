@@ -116,6 +116,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   /// Le mois précédent ou suivant ; jamais au-delà du mois en cours.
   Future<void> stepMonth(int direction) async {
+    if (direction < 0 && !state.canStepMonthBack) return;
     final month = StaffWorkCalendar.addMonths(state.month, direction);
     if (month.compareTo(state.today.substring(0, 7)) > 0) return;
     emit(state.copyWith(month: month));

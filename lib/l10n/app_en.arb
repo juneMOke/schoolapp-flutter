@@ -8202,5 +8202,11 @@
   "staffAttendanceRefusedMonthClosed": "Refused: month closed",
   "staffAttendanceRefused": "Sending refused",
   "staffAttendanceForbidden": "Only the head and the deputy head mark staff attendance.",
-  "staffAttendanceValidationRefused": "The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed."
+  "staffAttendanceValidationRefused": "The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.",
+  "staffAttendanceHoursMinutes": "{hours} h {minutes}",
+  "@staffAttendanceHoursMinutes": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "String"}}},
+  "staffAttendanceReasonRequired": "Reason *",
+  "staffAttendanceDismiss": "Close",
+  "staffAttendanceStartTooLate": "Classes start at {latest} at the latest.",
+  "@staffAttendanceStartTooLate": {"placeholders": {"latest": {"type": "String"}}}
 }

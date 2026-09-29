@@ -99,13 +99,14 @@ class StaffAttendanceSyncDao {
     return true;
   });
 
-  /// Après la réouverture accusée d'un jour, ses pointages refusés parce que
-  /// le jour était validé repartent d'eux-mêmes. Rend combien.
-  Future<int> requeueDayLocked(
+  /// Après la réouverture d'un jour, ses pointages refusés parce que le jour
+  /// était validé repartent d'eux-mêmes. Rend combien.
+  static Future<int> requeueDayLockedIn(
+    DatabaseExecutor txn,
     String schoolId,
     String day, {
     required int nowMs,
-  }) => _db.transaction((txn) async {
+  }) async {
     final rows = await txn.query(
       table,
       columns: ['id'],
@@ -136,5 +137,5 @@ class StaffAttendanceSyncDao {
       await outbox.requeue(StaffAttendanceWriteDao.entryId(id));
     }
     return rows.length;
-  });
+  }
 }

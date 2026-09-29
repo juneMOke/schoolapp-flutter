@@ -25,6 +25,10 @@ enum StaffAttendanceNoticeKind {
 
   /// L'écriture locale a échoué (base, session).
   writeFailed,
+
+  /// Un geste d'écriture sans `hr.attendance.write` : jamais mis en file (un
+  /// 403 y serait terminal).
+  forbidden,
 }
 
 /// Un toast à montrer. [seq] distingue deux annonces identiques successives.

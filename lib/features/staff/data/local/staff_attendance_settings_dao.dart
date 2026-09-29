@@ -46,8 +46,10 @@ class StaffAttendanceSettingsDao {
     );
   }
 
-  /// La section du socle. Un réglage modifié sur la tablette et pas encore
-  /// accusé n'est pas écrasé : il partira, et gagnera au dernier écrit.
+  /// La section du socle. Un réglage modifié sur la tablette et encore en
+  /// file n'est pas écrasé : il partira, et gagnera au dernier écrit. Un
+  /// réglage **refusé** cède, lui : il ne partira plus, et continuer de classer
+  /// les retards avec lui serait faux.
   Future<void> applySeed(
     StaffAttendanceSettingsSeed seed, {
     required String schoolId,
@@ -56,8 +58,8 @@ class StaffAttendanceSettingsDao {
     final pending = await txn.query(
       table,
       columns: ['1'],
-      where: 'school_id = ? AND sync_status != ?',
-      whereArgs: [schoolId, StaffSyncState.synced.dbValue],
+      where: 'school_id = ? AND sync_status = ?',
+      whereArgs: [schoolId, StaffSyncState.pending.dbValue],
     );
     if (pending.isNotEmpty) return;
     await txn.insert(table, {
@@ -98,8 +100,9 @@ class StaffAttendanceSettingsDao {
   });
 
   /// L'issue d'un envoi : accusé ([failed] `false`) ou refusé. Sans effet
-  /// si les réglages ont été retouchés pendant le vol.
-  Future<void> settle(
+  /// si les réglages ont été retouchés pendant le vol — rend alors `false` :
+  /// la saisie plus récente partira avec sa propre entrée.
+  Future<bool> settle(
     String schoolId, {
     required String sentClientUpdatedAt,
     required bool failed,
@@ -117,7 +120,7 @@ class StaffAttendanceSettingsDao {
           rows.single['client_updated_at'] as String?,
           sentClientUpdatedAt,
         )) {
-      return;
+      return false;
     }
     await txn.update(
       table,
@@ -130,6 +133,7 @@ class StaffAttendanceSettingsDao {
       where: 'school_id = ?',
       whereArgs: [schoolId],
     );
+    return true;
   });
 
   /// L'année scolaire courante de l'école, lue du socle d'Inscription ;

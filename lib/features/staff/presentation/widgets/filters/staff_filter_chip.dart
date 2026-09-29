@@ -16,7 +16,9 @@ class StaffFilterChip extends StatelessWidget {
   final Color soft;
   final Color ink;
   final IconData? icon;
-  final VoidCallback onTap;
+
+  /// `null` : la puce se lit sans se toucher (réglages en lecture seule).
+  final VoidCallback? onTap;
 
   const StaffFilterChip({
     super.key,

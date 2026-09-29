@@ -83,10 +83,14 @@ class _DayCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final tone = StaffAttendanceTone.of(day.status);
     final marked = day.status != StaffAttendanceStatus.none;
+    final date = StaffAttendanceLabels.longDay(
+      MaterialLocalizations.of(context),
+      day.day,
+    );
     return Tooltip(
       message: day.upcoming
-          ? day.day
-          : '${day.day} · ${StaffAttendanceLabels.status(l10n, day.status)}',
+          ? date
+          : '$date · ${StaffAttendanceLabels.status(l10n, day.status)}',
       child: Opacity(
         opacity: day.upcoming
             ? AppDimensions.staffAttendanceUpcomingOpacity

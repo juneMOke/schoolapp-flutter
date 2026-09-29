@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sync_dao.dart';
@@ -42,6 +43,9 @@ void registerStaffAttendanceStorage(GetIt getIt) {
   getIt.registerLazySingleton<StaffAttendanceLockDao>(
     () => StaffAttendanceLockDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<StaffAttendanceGestureDao>(
+    () => StaffAttendanceGestureDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<StaffAttendanceSettingsDao>(
     () => StaffAttendanceSettingsDao(getIt<Database>()),
   );
@@ -60,6 +64,7 @@ void registerStaffAttendance(GetIt getIt) {
       records: getIt<StaffAttendanceDao>(),
       writer: getIt<StaffAttendanceWriteDao>(),
       locks: getIt<StaffAttendanceLockDao>(),
+      gestures: getIt<StaffAttendanceGestureDao>(),
       settings: getIt<StaffAttendanceSettingsDao>(),
       contracts: getIt<StaffContractDao>(),
       local: StaffLocalWriter(
@@ -120,7 +125,7 @@ void registerStaffAttendance(GetIt getIt) {
     StaffAttendanceOutboxHandler(
       api: getIt<StaffAttendanceSyncApi>(),
       dao: getIt<StaffAttendanceSyncDao>(),
-      locks: getIt<StaffAttendanceLockDao>(),
+      gestures: getIt<StaffAttendanceGestureDao>(),
       members: getIt<StaffMemberDao>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: extras,
@@ -130,8 +135,8 @@ void registerStaffAttendance(GetIt getIt) {
     StaffAttendanceGestureOutboxHandler(
       api: getIt<StaffAttendanceSyncApi>(),
       locks: getIt<StaffAttendanceLockDao>(),
+      gestures: getIt<StaffAttendanceGestureDao>(),
       records: getIt<StaffAttendanceDao>(),
-      recordSync: getIt<StaffAttendanceSyncDao>(),
       members: getIt<StaffMemberDao>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: extras,

@@ -12,7 +12,9 @@ class StaffMonthNav extends StatelessWidget {
   /// `YYYY-MM`.
   final String month;
   final bool isCurrent;
-  final VoidCallback onPrevious;
+
+  /// `null` : début de l'année scolaire.
+  final VoidCallback? onPrevious;
   final VoidCallback onNext;
   final VoidCallback onCurrent;
 

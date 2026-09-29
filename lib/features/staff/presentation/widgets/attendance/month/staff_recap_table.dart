@@ -125,7 +125,7 @@ class _RecapRow extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    StaffAttendanceLabels.callName(row.member),
+                    row.member.fullName,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.labelLarge,
                   ),
@@ -152,7 +152,7 @@ class _RecapRow extends StatelessWidget {
             ),
             Text(
               stats.isHourly
-                  ? StaffAttendanceLabels.hours(stats.workedMinutes)
+                  ? StaffAttendanceLabels.hours(l10n, stats.workedMinutes)
                   : '—',
               style: style,
             ),

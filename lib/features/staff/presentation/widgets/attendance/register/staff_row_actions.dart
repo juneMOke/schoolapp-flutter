@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
@@ -18,8 +20,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// de la grille et la ligne de la liste : ouvrir une modale, puis confier le
 /// geste au cubit.
 ///
-/// Un jour figé intercepte tout, avant même d'ouvrir une modale : l'écran dit
-/// « rouvrez le rapport » au lieu d'offrir une saisie vouée au refus.
+/// Un compte sans `hr.attendance.write`, ou un jour figé, intercepte tout,
+/// avant même d'ouvrir une modale : l'écran dit pourquoi au lieu d'offrir une
+/// saisie vouée au refus (un 403 en file d'envoi est terminal).
+///
+/// Chaque geste relit la ligne **au moment où il part** ([_row]) : la ligne
+/// affichée a pu changer entre-temps (double toucher, pull pendant une
+/// modale), et partir de l'ancienne écraserait la plus récente.
 class StaffRowActions {
   final BuildContext context;
   final StaffDayRow row;
@@ -29,7 +36,21 @@ class StaffRowActions {
 
   const StaffRowActions(this.context, this.row, {required this.frozen});
 
+  /// Le compte détient-il `hr.attendance.write` ?
+  bool get canWrite =>
+      PermissionGate.allows(context, kStaffAttendanceWriteAccess.requires);
+
   StaffAttendanceCubit get _cubit => context.read<StaffAttendanceCubit>();
+
+  /// La ligne de cet agent dans l'état courant du cubit.
+  StaffDayRow get _row {
+    for (final current in _cubit.state.register.all) {
+      if (current.member.id == row.member.id && current.day == row.day) {
+        return current;
+      }
+    }
+    return row;
+  }
 
   /// Heures de départ proposées d'office.
   static final List<StaffClockTime> departureShortcuts = [
@@ -39,44 +60,51 @@ class StaffRowActions {
   ];
 
   bool _intercept() {
-    if (!frozen) return false;
-    _cubit.announce(
-      const StaffAttendanceNotice(StaffAttendanceNoticeKind.dayFrozen),
-    );
+    final kind = !canWrite
+        ? StaffAttendanceNoticeKind.forbidden
+        : frozen
+        ? StaffAttendanceNoticeKind.dayFrozen
+        : null;
+    if (kind == null) return false;
+    _cubit.announce(StaffAttendanceNotice(kind));
     return true;
   }
 
   void cycle() {
     if (_intercept()) return;
-    unawaited(_cubit.perform((c) => c.cycle(_cubit.state.snapshot, row)));
+    unawaited(_cubit.perform((c) => c.cycle(_cubit.state.snapshot, _row)));
   }
 
   void choose(StaffAttendanceStatus status) {
     if (_intercept()) return;
     unawaited(
-      _cubit.perform((c) => c.choose(_cubit.state.snapshot, row, status)),
+      _cubit.perform((c) => c.choose(_cubit.state.snapshot, _row, status)),
     );
   }
 
   void clear() {
     if (_intercept()) return;
-    unawaited(_cubit.perform((c) => c.clear(_cubit.state.snapshot, row)));
+    unawaited(_cubit.perform((c) => c.clear(_cubit.state.snapshot, _row)));
   }
 
   void retry() {
     if (_intercept()) return;
-    unawaited(_cubit.perform((c) => c.retry(_cubit.state.snapshot, row)));
+    unawaited(_cubit.perform((c) => c.retry(_cubit.state.snapshot, _row)));
   }
 
   /// Une heure de plus ou de moins pour un vacataire à l'heure.
   void adjustHours(int deltaHours) {
     if (_intercept()) return;
-    final current = row.record?.workedMinutes ?? 0;
     unawaited(
-      _cubit.perform(
-        (c) =>
-            c.setWorked(_cubit.state.snapshot, row, current + deltaHours * 60),
-      ),
+      _cubit.perform((c) {
+        final fresh = _row;
+        final current = fresh.record?.workedMinutes ?? 0;
+        return c.setWorked(
+          _cubit.state.snapshot,
+          fresh,
+          current + deltaHours * 60,
+        );
+      }),
     );
   }
 
@@ -107,7 +135,9 @@ class StaffRowActions {
     );
     final time = choice?.time;
     if (time == null || !context.mounted) return;
-    await _cubit.perform((c) => c.setArrival(_cubit.state.snapshot, row, time));
+    await _cubit.perform(
+      (c) => c.setArrival(_cubit.state.snapshot, _row, time),
+    );
   }
 
   Future<void> editDeparture() async {
@@ -132,13 +162,13 @@ class StaffRowActions {
     );
     if (choice == null || !context.mounted) return;
     await _cubit.perform(
-      (c) => c.setDeparture(_cubit.state.snapshot, row, choice.time),
+      (c) => c.setDeparture(_cubit.state.snapshot, _row, choice.time),
     );
   }
 
   Future<void> justify() async {
     if (_intercept()) return;
-    final StaffAttendanceRecord? record = row.record;
+    final StaffAttendanceRecord? record = _row.record;
     if (record == null || !record.status.isIncident) return;
     final choice = await StaffAttendanceDialog.show<StaffJustificationChoice>(
       context,
@@ -153,9 +183,9 @@ class StaffRowActions {
     );
     if (choice == null || !context.mounted) return;
     await _cubit.perform(
-      (c) => c.justify(_cubit.state.snapshot, row, choice.justification),
+      (c) => c.justify(_cubit.state.snapshot, _row, choice.justification),
     );
   }
 
-  String get _name => StaffAttendanceLabels.callName(row.member);
+  String get _name => row.member.fullName;
 }

@@ -1,17 +1,15 @@
-import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_editor.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_command_outcome.dart';
 
 /// Les gestes du Pointage, sans état : chacun construit la ligne cohérente
 /// (l'éditeur du domaine), l'enregistre, et rend ce que l'écran annonce —
@@ -64,9 +62,9 @@ class StaffAttendanceCommands {
   ) async {
     final record = row.record;
     if (record == null) return null;
-    final frozen = _frozen(snapshot, row.day);
+    final frozen = StaffCommandOutcome.frozen(snapshot, row.day);
     if (frozen != null) return frozen;
-    return _notice(await _save([record]), null);
+    return StaffCommandOutcome.of(await _save([record]), null);
   }
 
   /// Remet « à pointer ».
@@ -79,7 +77,7 @@ class StaffAttendanceCommands {
     (editor, record) => editor.clear(record),
     done: StaffAttendanceNotice(
       StaffAttendanceNoticeKind.cleared,
-      name: '${row.member.firstName} ${row.member.lastName}',
+      name: row.member.fullName,
     ),
   );
 
@@ -126,7 +124,7 @@ class StaffAttendanceCommands {
       justification == null
           ? StaffAttendanceNoticeKind.justificationRemoved
           : StaffAttendanceNoticeKind.justified,
-      name: '${row.member.firstName} ${row.member.lastName}',
+      name: row.member.fullName,
     ),
   );
 
@@ -135,11 +133,11 @@ class StaffAttendanceCommands {
     StaffAttendanceSnapshot snapshot,
     StaffDayRegister register,
   ) async {
-    final frozen = _frozen(snapshot, register.day);
+    final frozen = StaffCommandOutcome.frozen(snapshot, register.day);
     if (frozen != null) return frozen;
     final records = _remaining(snapshot, register);
     if (records.isEmpty) return null;
-    return _notice(
+    return StaffCommandOutcome.of(
       await _save(records),
       StaffAttendanceNotice(
         StaffAttendanceNoticeKind.remainingMarked,
@@ -155,16 +153,16 @@ class StaffAttendanceCommands {
     StaffDayRegister register, {
     required bool markRemaining,
   }) async {
-    final frozen = _frozen(snapshot, register.day);
+    final frozen = StaffCommandOutcome.frozen(snapshot, register.day);
     if (frozen != null) return frozen;
     if (markRemaining) {
       final records = _remaining(snapshot, register);
       if (records.isNotEmpty) {
         final saved = await _save(records);
-        if (saved.isLeft()) return _notice(saved, null);
+        if (saved.isLeft()) return StaffCommandOutcome.of(saved, null);
       }
     }
-    return _notice(
+    return StaffCommandOutcome.of(
       await _gesture(StaffAttendanceGesture.validateDay, register.day),
       const StaffAttendanceNotice(StaffAttendanceNoticeKind.reportValidated),
     );
@@ -178,24 +176,28 @@ class StaffAttendanceCommands {
     if (snapshot.isMonthClosed(StaffWorkCalendar.monthOf(day))) {
       return const StaffAttendanceNotice(StaffAttendanceNoticeKind.monthFrozen);
     }
-    return _notice(
+    return StaffCommandOutcome.of(
       await _gesture(StaffAttendanceGesture.reopenDay, day),
       const StaffAttendanceNotice(StaffAttendanceNoticeKind.reportReopened),
     );
   }
 
   /// Clôt le mois `YYYY-MM` — irréversible depuis la tablette.
-  Future<StaffAttendanceNotice?> closeMonth(String month) async => _notice(
-    await _gesture(
-      StaffAttendanceGesture.closeMonth,
-      StaffWorkCalendar.firstOf(month),
-    ),
-    StaffAttendanceNotice(StaffAttendanceNoticeKind.monthClosed, month: month),
-  );
+  Future<StaffAttendanceNotice?> closeMonth(String month) async =>
+      StaffCommandOutcome.of(
+        await _gesture(
+          StaffAttendanceGesture.closeMonth,
+          StaffWorkCalendar.firstOf(month),
+        ),
+        StaffAttendanceNotice(
+          StaffAttendanceNoticeKind.monthClosed,
+          month: month,
+        ),
+      );
 
   Future<StaffAttendanceNotice?> saveSettings(
     StaffAttendanceSettings settings,
-  ) async => _notice(
+  ) async => StaffCommandOutcome.of(
     await _settings(settings),
     const StaffAttendanceNotice(StaffAttendanceNoticeKind.settingsSaved),
   );
@@ -210,7 +212,7 @@ class StaffAttendanceCommands {
     change, {
     StaffAttendanceNotice? done,
   }) async {
-    final frozen = _frozen(snapshot, row.day);
+    final frozen = StaffCommandOutcome.frozen(snapshot, row.day);
     if (frozen != null) return frozen;
     final record = _recordOf(row);
     final editor = StaffAttendanceEditor(
@@ -218,7 +220,7 @@ class StaffAttendanceCommands {
     );
     final changed = change(editor, record);
     if (changed == record) return null;
-    return _notice(await _save([changed]), done);
+    return StaffCommandOutcome.of(await _save([changed]), done);
   }
 
   /// La ligne d'un agent pour le jour du registre, vierge s'il n'a pas de
@@ -243,34 +245,4 @@ class StaffAttendanceCommands {
         editor.setArrival(_recordOf(row), start),
     ];
   }
-
-  static StaffAttendanceNotice? _frozen(
-    StaffAttendanceSnapshot snapshot,
-    String day,
-  ) {
-    if (snapshot.isMonthClosed(StaffWorkCalendar.monthOf(day))) {
-      return const StaffAttendanceNotice(StaffAttendanceNoticeKind.monthFrozen);
-    }
-    if (snapshot.isDayValidated(day)) {
-      return const StaffAttendanceNotice(StaffAttendanceNoticeKind.dayFrozen);
-    }
-    return null;
-  }
-
-  /// Un refus local du dépôt se lit comme l'annonce correspondante.
-  static StaffAttendanceNotice? _notice(
-    Either<Failure, Unit> result,
-    StaffAttendanceNotice? done,
-  ) => result.fold(
-    (failure) => switch (failure.message) {
-      kStaffDayLockedCode => const StaffAttendanceNotice(
-        StaffAttendanceNoticeKind.dayFrozen,
-      ),
-      kStaffMonthClosedCode => const StaffAttendanceNotice(
-        StaffAttendanceNoticeKind.monthFrozen,
-      ),
-      _ => const StaffAttendanceNotice(StaffAttendanceNoticeKind.writeFailed),
-    },
-    (_) => done,
-  );
 }

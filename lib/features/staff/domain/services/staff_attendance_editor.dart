@@ -88,12 +88,15 @@ class StaffAttendanceEditor {
   ) {
     final arrival = record.arrival;
     if (!record.status.hasArrival || arrival == null) return record;
+    // Un départ antérieur à l'arrivée est une saisie fausse : rien ne change,
+    // plutôt que d'effacer en silence le départ existant.
+    if (departure != null && departure.compareTo(arrival) < 0) return record;
     // Construit, pas copié : effacer le départ doit rendre `null`.
     return _build(
       record,
       record.status,
       arrival: arrival,
-      departure: departure == null ? null : _departureAfter(departure, arrival),
+      departure: departure,
       lateMinutes: record.lateMinutes,
       workedMinutes: record.workedMinutes,
       justification: record.justification,

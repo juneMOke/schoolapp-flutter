@@ -21,7 +21,9 @@ class StaffDayBanner extends StatelessWidget {
   final StaffDayRegister register;
   final StaffAttendanceSettings settings;
   final bool isToday;
-  final VoidCallback onPrevious;
+
+  /// `null` : début de l'année scolaire, pas de jour précédent.
+  final VoidCallback? onPrevious;
 
   /// `null` : aujourd'hui, pas de jour suivant.
   final VoidCallback? onNext;
@@ -154,7 +156,9 @@ class StaffDayBanner extends StatelessWidget {
                       _NavButton(
                         icon: Icons.checklist,
                         tooltip: l10n.staffAttendanceMarkRemaining,
-                        onPressed: unmarked == 0 ? null : onMarkRemaining,
+                        onPressed: register.unmarked.isEmpty
+                            ? null
+                            : onMarkRemaining,
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       EteeloButton.primary(

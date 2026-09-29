@@ -44,10 +44,6 @@ abstract final class StaffAttendanceLabels {
         _ => l10n.staffAttendanceRefused,
       };
 
-  /// « Prénom Nom », l'ordre de l'appel.
-  static String callName(StaffMember member) =>
-      '${member.firstName} ${member.lastName}';
-
   /// « Nom Post-nom », la ligne de tête d'une carte.
   static String familyName(StaffMember member) => [
     member.lastName,
@@ -74,10 +70,12 @@ abstract final class StaffAttendanceLabels {
         '${two(instant.hour)}:${two(instant.minute)}';
   }
 
-  /// « 3 h 30 » depuis des minutes.
-  static String hours(int minutes) {
+  /// « 3 h » ou « 3 h 30 » depuis des minutes.
+  static String hours(AppLocalizations l10n, int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    return m == 0 ? '$h h' : '$h h ${m.toString().padLeft(2, '0')}';
+    return m == 0
+        ? l10n.staffAttendanceHours(h)
+        : l10n.staffAttendanceHoursMinutes(h, m.toString().padLeft(2, '0'));
   }
 }

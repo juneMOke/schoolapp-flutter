@@ -588,7 +588,6 @@ class AppDimensions {
 
   /// Cible tactile standard du module : puces, flèches, segments.
   static const staffAttendanceTapTarget = 44.0;
-  static const staffAttendanceActionHeight = 48.0;
   static const staffAttendanceSegmentHeight = 40.0;
   static const staffAttendanceRingSize = 64.0;
   static const staffAttendanceRingStroke = 7.0;
@@ -597,18 +596,14 @@ class AppDimensions {
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes.
   static const staffAttendanceListMinWidth = 900.0;
-  static const staffAttendanceColAgentMin = 160.0;
   static const staffAttendanceColStatus = 262.0;
   static const staffAttendanceColTimes = 168.0;
   static const staffAttendanceColHours = 96.0;
-  static const staffAttendanceColLateMin = 130.0;
   static const staffAttendanceColAction = 40.0;
 
   /// Les modales du pointage.
   static const staffAttendanceDialogMaxWidth = 480.0;
   static const staffAttendanceDialogMaxHeight = 640.0;
-  static const staffAttendanceTimeFieldHeight = 72.0;
-  static const staffAttendanceTimeFieldFontSize = 36.0;
 
   /// Fiche mensuelle : sélecteur d'agent et calendrier.
   static const staffAttendancePickerWidth = 340.0;
@@ -626,6 +621,9 @@ class AppDimensions {
 
   /// Au-delà, les quatre indicateurs de la fiche tiennent sur une ligne.
   static const staffAttendanceKpiWideBreakpoint = 720.0;
+
+  /// Part de la ligne du registre couverte par le voile de son statut.
+  static const staffAttendanceRowTintStop = 0.3;
 
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
   static const staffAttendanceUpcomingOpacity = 0.4;

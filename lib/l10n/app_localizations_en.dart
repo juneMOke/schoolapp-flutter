@@ -12628,4 +12628,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get staffAttendanceValidationRefused =>
       'The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.';
+
+  @override
+  String staffAttendanceHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get staffAttendanceReasonRequired => 'Reason *';
+
+  @override
+  String get staffAttendanceDismiss => 'Close';
+
+  @override
+  String staffAttendanceStartTooLate(String latest) {
+    return 'Classes start at $latest at the latest.';
+  }
 }

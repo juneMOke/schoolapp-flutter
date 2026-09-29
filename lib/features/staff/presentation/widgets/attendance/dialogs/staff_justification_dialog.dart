@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -104,6 +105,13 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
             keyboardType: EteeloTextInputType.multiline,
             minLines: 2,
             maxLines: 4,
+            // Coupé à la frappe, en caractères entiers : jamais de
+            // troncature silencieuse au milieu d'un emoji.
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(
+                StaffAttendanceJustification.maxNoteLength,
+              ),
+            ],
           ),
         ],
       ),
@@ -139,15 +147,7 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
       StaffJustificationChoice(
         StaffAttendanceJustification(
           reason: reason,
-          note: note.isEmpty
-              ? null
-              : note.substring(
-                  0,
-                  note.length.clamp(
-                    0,
-                    StaffAttendanceJustification.maxNoteLength,
-                  ),
-                ),
+          note: note.isEmpty ? null : note,
         ),
       ),
     );

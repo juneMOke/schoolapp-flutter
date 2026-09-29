@@ -20,7 +20,7 @@ class StaffRecapTotals extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final rate = recap.presenceRate;
     final hours = [
-      StaffAttendanceLabels.hours(recap.workedMinutes),
+      StaffAttendanceLabels.hours(l10n, recap.workedMinutes),
       for (final entry in recap.amountByCurrency.entries)
         MoneyFormat.format(Money(entry.value, entry.key)),
     ].join(' · ');

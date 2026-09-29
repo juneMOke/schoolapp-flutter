@@ -150,7 +150,7 @@ void main() {
     },
     settings: StaffAttendanceSettings.defaults,
     hasEverSynced: true,
-    hourlyRates: const {'v': Money(500, 'USD')},
+    contractRates: const {'c-v': Money(500, 'USD')},
   );
 
   group('StaffMonthRecap — une seule façon de compter', () {
@@ -202,6 +202,79 @@ void main() {
       );
       expect(filtered.rows.map((row) => row.member.id), ['v']);
     });
+  });
+
+  group('clôture et contrats, jour par jour', () {
+    test('un mois clos compte ses non-pointés comme présents', () {
+      final closed = StaffAttendanceSnapshot(
+        members: snapshot.members,
+        records: snapshot.records,
+        locks: {
+          StaffAttendanceSnapshot.lockKey(
+            StaffAttendanceLockKind.month,
+            '2026-09-01',
+          ): const StaffAttendanceLock(
+            kind: StaffAttendanceLockKind.month,
+            periodStart: '2026-09-01',
+            locked: true,
+          ),
+        },
+        settings: StaffAttendanceSettings.defaults,
+        hasEverSynced: true,
+      );
+      final row = StaffMonthRecap.build(
+        closed,
+        month: '2026-09',
+        today: '2026-09-07',
+        query: StaffRecapQuery.none,
+      ).all.firstWhere((r) => r.member.id == 'a');
+
+      expect(row.stats.notMarked, 0);
+      expect(row.stats.present, 3);
+    });
+
+    test(
+      'un jour sans contrat ne compte pas, et n\'est pas marqué d\'office',
+      () {
+        const newcomer = StaffMember(
+          id: 'n',
+          lastName: 'Nouveau',
+          firstName: 'Prénom',
+          category: StaffCategory.teacher,
+          syncState: StaffSyncState.synced,
+          contracts: [
+            StaffContractPeriod(
+              contractId: 'c-n',
+              kind: StaffContractKind.permanent,
+              effectiveFrom: '2026-09-07',
+            ),
+          ],
+        );
+        final withNewcomer = StaffAttendanceSnapshot(
+          members: const [newcomer],
+          records: const {},
+          locks: const {},
+          settings: StaffAttendanceSettings.defaults,
+          hasEverSynced: true,
+        );
+
+        final stats = StaffMonthRecap.build(
+          withNewcomer,
+          month: '2026-09',
+          today: '2026-09-08',
+          query: StaffRecapQuery.none,
+        ).all.single.stats;
+        final before = StaffDayRegister.build(
+          withNewcomer,
+          day: '2026-09-04',
+          query: StaffDayQuery.none,
+        );
+
+        expect(stats.workDays, 2);
+        expect(stats.notMarked, 2);
+        expect(before.unmarked, isEmpty);
+      },
+    );
   });
 
   group('StaffDayRegister', () {

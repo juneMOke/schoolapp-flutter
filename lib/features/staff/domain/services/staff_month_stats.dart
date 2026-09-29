@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
 
 /// La synthèse d'un agent sur un mois — calculée, **jamais stockée** ni
 /// envoyée : le livre de paie prendra sa propre photo.
@@ -26,7 +27,7 @@ class StaffMonthStats extends Equatable {
   final int workedMinutes;
   final bool isHourly;
 
-  /// Heures × taux, pour un vacataire à l'heure dont le taux est visible.
+  /// Heures × taux, pour les jours à l'heure dont le taux est visible.
   final Money? amount;
 
   const StaffMonthStats({
@@ -50,12 +51,22 @@ class StaffMonthStats extends Equatable {
 
   /// Le calcul (`ptMonthStats`) : [records] = les pointages de l'agent sur le
   /// mois, par jour ; [workDays] = les jours ouvrés retenus.
+  ///
+  /// Le contrat se lit **jour par jour** ([periodOn]) : un jour sans contrat
+  /// ne compte pas (avant l'embauche, après la sortie) ; un jour à l'heure ne
+  /// compte jamais comme « non pointé », et ses heures se valorisent au taux
+  /// de son propre contrat ([contractRates], par `contractId`). Un mois
+  /// [closed] compte ses non-pointés comme présents, comme la clôture l'a
+  /// annoncé. [isHourly] dit seulement comment afficher l'agent.
   factory StaffMonthStats.of({
     required Map<String, StaffAttendanceRecord> records,
     required List<String> workDays,
+    required StaffContractPeriod? Function(String day) periodOn,
     required bool isHourly,
-    Money? hourlyRate,
+    bool closed = false,
+    Map<String, Money> contractRates = const {},
   }) {
+    var days = 0;
     var present = 0;
     var late = 0;
     var lateMinutes = 0;
@@ -64,11 +75,21 @@ class StaffMonthStats extends Equatable {
     var absentUnjustified = 0;
     var notMarked = 0;
     var worked = 0;
+    final amounts = <String, double>{};
     for (final day in workDays) {
+      final period = periodOn(day);
+      if (period == null) continue;
+      days++;
+      final hourly = period.isHourlyVacataire;
       final record = records[day];
       switch (record?.status ?? StaffAttendanceStatus.none) {
         case StaffAttendanceStatus.none:
-          if (!isHourly) notMarked++;
+          if (hourly) break;
+          if (closed) {
+            present++;
+          } else {
+            notMarked++;
+          }
         case StaffAttendanceStatus.present:
           present++;
         case StaffAttendanceStatus.late:
@@ -83,10 +104,16 @@ class StaffMonthStats extends Equatable {
             absentUnjustified++;
           }
       }
-      worked += record?.workedMinutes ?? 0;
+      final minutes = hourly ? record?.workedMinutes ?? 0 : 0;
+      worked += minutes;
+      final rate = contractRates[period.contractId];
+      if (minutes > 0 && rate != null) {
+        amounts[rate.currency] =
+            (amounts[rate.currency] ?? 0) + rate.amountInCents * minutes / 60;
+      }
     }
     return StaffMonthStats(
-      workDays: workDays.length,
+      workDays: days,
       present: present,
       late: late,
       lateMinutes: lateMinutes,
@@ -96,11 +123,10 @@ class StaffMonthStats extends Equatable {
       notMarked: notMarked,
       workedMinutes: worked,
       isHourly: isHourly,
-      amount: isHourly && hourlyRate != null
-          ? Money(
-              (hourlyRate.amountInCents * worked / 60).round(),
-              hourlyRate.currency,
-            )
+      // Deux devises dans un même mois ne s'additionnent pas : pas de
+      // montant plutôt qu'un montant faux.
+      amount: amounts.length == 1
+          ? Money(amounts.values.single.round(), amounts.keys.single)
           : null,
     );
   }

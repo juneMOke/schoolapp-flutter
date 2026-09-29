@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
-import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
@@ -24,7 +24,7 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatc
 class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
   final StaffAttendanceSyncApi _api;
   final StaffAttendanceSyncDao _dao;
-  final StaffAttendanceLockDao _locks;
+  final StaffAttendanceGestureDao _gestures;
   final StaffMemberDao _members;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _extras;
@@ -33,14 +33,14 @@ class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
   const StaffAttendanceOutboxHandler({
     required StaffAttendanceSyncApi api,
     required StaffAttendanceSyncDao dao,
-    required StaffAttendanceLockDao locks,
+    required StaffAttendanceGestureDao gestures,
     required StaffMemberDao members,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> extras,
     Clock now = systemClock,
   }) : _api = api,
        _dao = dao,
-       _locks = locks,
+       _gestures = gestures,
        _members = members,
        _currentUser = currentUser,
        _extras = extras,
@@ -81,7 +81,7 @@ class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
     if (member.row['version'] == null) {
       return const OutboxDispatchResult.blocked('Fiche pas encore accusée');
     }
-    if (await _locks.hasPendingReopen(
+    if (await _gestures.hasQueuedReopen(
       schoolId,
       sent.workDate,
       queuedBefore: entry.createdAt,

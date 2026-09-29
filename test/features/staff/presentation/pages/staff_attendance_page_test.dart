@@ -1,8 +1,13 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
@@ -10,6 +15,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
@@ -24,6 +30,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import '../../staff_builders.dart';
 
 class _MockLoad extends Mock implements LoadStaffAttendanceUseCase {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
 
 class _MockSignals extends Mock implements StaffSyncSignals {}
 
@@ -81,6 +90,7 @@ void main() {
             ),
         },
         settings: StaffAttendanceSettings.defaults,
+        schoolYear: const StaffSchoolYear(start: '2026-09-01'),
         hasEverSynced: true,
       );
 
@@ -88,6 +98,8 @@ void main() {
     WidgetTester tester, {
     bool validated = false,
     Size size = const Size(1280, 1000),
+    List<String>? permissions,
+    DateTime? now,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -112,20 +124,29 @@ void main() {
         settings: _MockSettings(),
         now: () => DateTime(2026, 9, 29, 7, 35),
       ),
-      now: () => DateTime(2026, 9, 29, 7, 35),
+      now: () => now ?? DateTime(2026, 9, 29, 7, 35),
     );
+    Widget screen = BlocProvider.value(
+      value: cubit..load(),
+      child: const StaffAttendanceScreen(),
+    );
+    if (permissions != null) {
+      final auth = _MockAuthBloc();
+      final state = AuthState(
+        status: AuthStatus.authenticated,
+        permissions: permissions,
+      );
+      when(() => auth.state).thenReturn(state);
+      whenListen(auth, const Stream<AuthState>.empty(), initialState: state);
+      screen = BlocProvider<AuthBloc>.value(value: auth, child: screen);
+    }
     addTearDown(cubit.close);
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: BlocProvider.value(
-            value: cubit..load(),
-            child: const StaffAttendanceScreen(),
-          ),
-        ),
+        home: Scaffold(body: screen),
       ),
     );
     await tester.pump();
@@ -194,11 +215,55 @@ void main() {
 
     await tester.tap(find.text('Récapitulatif du mois'));
     await tester.pump();
-    await tester.tap(find.text('Ruth Mayala'));
+    await tester.tap(find.text('Mayala Mutombo Ruth'));
     await tester.pump();
 
     expect(cubit.state.agentId, 'm-2');
     expect(find.text('Retards et absences du mois'), findsOneWidget);
+  });
+
+  testWidgets('en lecture seule, toucher une carte ne met rien en file', (
+    tester,
+  ) async {
+    await pump(tester, permissions: [Perm.hrAttendanceRead.wire]);
+
+    await tester.tap(find.text('Kalala Mutombo'));
+    await tester.pump();
+
+    verifyNever(() => save(any()));
+    expect(
+      find.text('Seuls le directeur et le censeur pointent le personnel.'),
+      findsOneWidget,
+    );
+    expect(find.text('Valider le rapport'), findsNothing);
+  });
+
+  testWidgets('clore : un mois révolu, et seulement avec `manage`', (
+    tester,
+  ) async {
+    Future<void> openPreviousRecap(List<String> permissions) async {
+      final cubit = await pump(
+        tester,
+        permissions: permissions,
+        now: DateTime(2026, 10, 1, 9),
+      );
+      await tester.tap(find.text('Récapitulatif du mois'));
+      await tester.pump();
+      await cubit.stepMonth(-1);
+      await tester.pump();
+    }
+
+    await openPreviousRecap([
+      Perm.hrAttendanceRead.wire,
+      Perm.hrAttendanceWrite.wire,
+    ]);
+    expect(find.text('Clôturer et transmettre à la Paie'), findsNothing);
+
+    await openPreviousRecap([
+      Perm.hrAttendanceRead.wire,
+      Perm.hrAttendanceManage.wire,
+    ]);
+    expect(find.text('Clôturer et transmettre à la Paie'), findsOneWidget);
   });
 
   testWidgets('la modale d\'heure tient en paysage, clavier ouvert', (

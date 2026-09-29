@@ -17,11 +17,16 @@ class StaffDayRow extends Equatable {
   final StaffAttendanceRecord? record;
   final bool isHourly;
 
+  /// Un contrat couvre-t-il ce jour ? Sans contrat (avant l'embauche, après la
+  /// sortie, contrat à poser), l'agent se pointe à la main, jamais d'office.
+  final bool hasContract;
+
   const StaffDayRow({
     required this.member,
     required this.day,
     required this.record,
     required this.isHourly,
+    this.hasContract = true,
   });
 
   StaffAttendanceStatus get status =>
@@ -31,7 +36,7 @@ class StaffDayRow extends Equatable {
   StaffSyncState get sync => record?.syncState ?? StaffSyncState.synced;
 
   @override
-  List<Object?> get props => [member, day, record, isHourly];
+  List<Object?> get props => [member, day, record, isHourly, hasContract];
 }
 
 /// Les critères du registre : un statut (ou tous), une catégorie, un texte.
@@ -102,17 +107,15 @@ class StaffDayRegister extends Equatable {
   }) {
     final all = [
       for (final member in snapshot.members)
-        StaffDayRow(
-          member: member,
-          day: day,
-          record: snapshot.recordOf(member.id, day),
-          isHourly:
-              StaffContractTimeline.currentAt(
-                member.contracts,
-                day,
-              )?.isHourlyVacataire ??
-              false,
-        ),
+        if (StaffContractTimeline.currentAt(member.contracts, day)
+            case final period)
+          StaffDayRow(
+            member: member,
+            day: day,
+            record: snapshot.recordOf(member.id, day),
+            isHourly: period?.isHourlyVacataire ?? false,
+            hasContract: period != null,
+          ),
     ];
     return StaffDayRegister(
       day: day,
@@ -137,10 +140,11 @@ class StaffDayRegister extends Equatable {
 
   int get marked => all.length - count(StaffAttendanceStatus.none);
 
-  /// Les agents encore « à pointer ».
+  /// Les agents encore « à pointer » qu'un contrat couvre ce jour-là : ceux
+  /// que « Restants présents » et la validation marquent d'office.
   List<StaffDayRow> get unmarked => [
     for (final row in all)
-      if (row.status == StaffAttendanceStatus.none) row,
+      if (row.status == StaffAttendanceStatus.none && row.hasContract) row,
   ];
 
   /// La liste filtrée contient-elle un vacataire à l'heure ? La colonne des

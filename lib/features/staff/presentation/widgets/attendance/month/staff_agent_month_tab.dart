@@ -61,7 +61,9 @@ class StaffAgentMonthTab extends StatelessWidget {
             StaffMonthNav(
               month: state.month,
               isCurrent: state.month == state.today.substring(0, 7),
-              onPrevious: () => unawaited(cubit.stepMonth(-1)),
+              onPrevious: state.canStepMonthBack
+                  ? () => unawaited(cubit.stepMonth(-1))
+                  : null,
               onNext: () => unawaited(cubit.stepMonth(1)),
               onCurrent: () => unawaited(cubit.goCurrentMonth()),
             ),
@@ -77,7 +79,7 @@ class StaffAgentMonthTab extends StatelessWidget {
           _Kpis(stats: month.stats),
           const SizedBox(height: AppSpacing.lg),
           StaffAttendanceCardFrame(
-            title: StaffAttendanceLabels.callName(member),
+            title: member.fullName,
             child: StaffMonthCalendar(days: month.calendar),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -132,7 +134,7 @@ class _Kpis extends StatelessWidget {
         StaffCountTile(
           tone: StaffAttendanceStatus.none,
           label: l10n.staffAttendanceKpiHours,
-          value: StaffAttendanceLabels.hours(stats.workedMinutes),
+          value: StaffAttendanceLabels.hours(l10n, stats.workedMinutes),
           detail: amount == null ? null : MoneyFormat.format(amount),
         )
       else

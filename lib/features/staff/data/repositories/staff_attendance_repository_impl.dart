@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_local_model.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
@@ -17,10 +18,8 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
 
 /// Le Pointage sur la tablette : lecture locale, écriture en outbox, modèles
@@ -33,6 +32,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
   final StaffAttendanceDao _records;
   final StaffAttendanceWriteDao _writer;
   final StaffAttendanceLockDao _locks;
+  final StaffAttendanceGestureDao _gestures;
   final StaffAttendanceSettingsDao _settings;
   final StaffContractDao _contracts;
   final StaffLocalWriter _local;
@@ -44,6 +44,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     required StaffAttendanceDao records,
     required StaffAttendanceWriteDao writer,
     required StaffAttendanceLockDao locks,
+    required StaffAttendanceGestureDao gestures,
     required StaffAttendanceSettingsDao settings,
     required StaffContractDao contracts,
     required StaffLocalWriter local,
@@ -53,6 +54,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
        _records = records,
        _writer = writer,
        _locks = locks,
+       _gestures = gestures,
        _settings = settings,
        _contracts = contracts,
        _local = local,
@@ -104,7 +106,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
       },
       settings: await _settings.read(schoolId),
       schoolYear: await _settings.currentSchoolYear(schoolId),
-      hourlyRates: await _hourlyRates(schoolId, file.members, to),
+      contractRates: await _contractRates(schoolId),
       hasEverSynced: file.hasEverSynced,
     );
   }
@@ -150,7 +152,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     final now = _now();
     return _local.run(
       'Écriture du rapport',
-      () => _locks.addGesture(
+      () => _gestures.add(
         StaffAttendanceGestureRequestDto(
           gestureId: _ids.newId(),
           gesture: gesture.wire,
@@ -213,27 +215,13 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     return null;
   }
 
-  /// Le taux horaire des vacataires à l'heure, lu sur leur contrat du jour
-  /// [day] — vide quand le compte ne voit pas les montants.
-  Future<Map<String, Money>> _hourlyRates(
-    String schoolId,
-    List<StaffMember> members,
-    String day,
-  ) async {
-    final amounts = {
-      for (final row in await _contracts.forSchool(schoolId))
-        if (row.toEntity() case final contract when contract.amount != null)
-          contract.id: contract.amount!,
-    };
-    if (amounts.isEmpty) return const {};
-    final rates = <String, Money>{};
-    for (final member in members) {
-      final period = StaffContractTimeline.currentAt(member.contracts, day);
-      final amount = amounts[period?.contractId];
-      if (period != null && period.isHourlyVacataire && amount != null) {
-        rates[member.id] = amount;
-      }
-    }
-    return rates;
-  }
+  /// Le taux des contrats « heures prestées », par contrat — vide quand le
+  /// compte ne voit pas les montants. Chaque jour se valorise au taux du
+  /// contrat qui le couvre.
+  Future<Map<String, Money>> _contractRates(String schoolId) async => {
+    for (final row in await _contracts.forSchool(schoolId))
+      if (row.toEntity() case final contract
+          when contract.amount != null && contract.asPeriod.isHourlyVacataire)
+        contract.id: contract.amount!,
+  };
 }

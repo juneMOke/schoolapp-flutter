@@ -30,7 +30,7 @@ class StaffMonthCloseDialog extends StatelessWidget {
         MoneyFormat.format(Money(entry.value, entry.key)),
     ];
     final hours = [
-      StaffAttendanceLabels.hours(recap.workedMinutes),
+      StaffAttendanceLabels.hours(l10n, recap.workedMinutes),
       ...amounts,
     ].join(' · ');
     Widget line(String text, IconData icon) => Padding(

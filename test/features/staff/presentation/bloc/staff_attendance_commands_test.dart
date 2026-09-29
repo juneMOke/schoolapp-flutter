@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
@@ -31,8 +32,12 @@ StaffAttendanceSnapshot _snapshot({
   bool validated = false,
 }) => StaffAttendanceSnapshot(
   members: [
-    member('m-1'),
-    member('m-2', firstName: 'Élodie'),
+    member('m-1', contracts: [period(StaffContractKind.permanent)]),
+    member(
+      'm-2',
+      firstName: 'Élodie',
+      contracts: [period(StaffContractKind.permanent)],
+    ),
   ],
   records: records,
   locks: {

@@ -8614,5 +8614,9 @@
   "staffAttendanceRefusedMonthClosed": "Refusé : mois clos",
   "staffAttendanceRefused": "Envoi refusé",
   "staffAttendanceForbidden": "Seuls le directeur et le censeur pointent le personnel.",
-  "staffAttendanceValidationRefused": "La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée."
+  "staffAttendanceValidationRefused": "La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée.",
+  "staffAttendanceHoursMinutes": "{hours} h {minutes}",
+  "staffAttendanceReasonRequired": "Motif *",
+  "staffAttendanceDismiss": "Fermer",
+  "staffAttendanceStartTooLate": "Les cours commencent au plus tard à {latest}."
 }

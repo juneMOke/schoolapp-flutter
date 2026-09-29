@@ -77,6 +77,32 @@ class StaffAttendanceState extends Equatable {
 
   bool get isToday => day == lastWorkDay;
 
+  /// Le premier jour que le registre peut montrer : le début de l'année
+  /// scolaire, quand il est connu.
+  String? get firstDay => snapshot.schoolYear?.start;
+
+  /// Le registre peut-il reculer d'un jour ouvré ?
+  bool get canStepBack {
+    final first = firstDay;
+    return first == null ||
+        StaffWorkCalendar.stepWorkDay(day, -1).compareTo(first) >= 0;
+  }
+
+  /// La fiche et le récapitulatif peuvent-ils reculer d'un mois ?
+  bool get canStepMonthBack {
+    final first = firstDay;
+    return first == null || month.compareTo(first.substring(0, 7)) > 0;
+  }
+
+  /// Le mois affiché peut-il être clos ? Seulement un mois **révolu** : clore
+  /// le mois en cours figerait ses jours restants, sans retour possible — et
+  /// seulement quand l'année scolaire est connue (sans elle, les vacances se
+  /// liraient comme des jours ouvrés).
+  bool get canCloseMonth =>
+      snapshot.schoolYear != null &&
+      month.compareTo(today.substring(0, 7)) < 0 &&
+      !snapshot.isMonthClosed(month);
+
   StaffDayRegister get register =>
       StaffDayRegister.build(snapshot, day: day, query: dayQuery);
 

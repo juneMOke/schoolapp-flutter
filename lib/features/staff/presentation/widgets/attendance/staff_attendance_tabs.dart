@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -68,7 +70,13 @@ class StaffAttendanceTabs extends StatelessWidget {
         l10n.staffAttendanceTabRecapSubtitle,
         closed
             ? (l10n.staffAttendanceBadgeClosed, StaffAttendanceStatus.present)
-            : (l10n.staffAttendanceBadgeToClose, StaffAttendanceStatus.none),
+            : state.canCloseMonth &&
+                  PermissionGate.allows(
+                    context,
+                    kStaffAttendanceManageAccess.requires,
+                  )
+            ? (l10n.staffAttendanceBadgeToClose, StaffAttendanceStatus.none)
+            : null,
       ),
     ];
     return LayoutBuilder(

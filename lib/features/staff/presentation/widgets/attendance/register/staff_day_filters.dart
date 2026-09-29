@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -74,12 +76,16 @@ class StaffDayFilters extends StatelessWidget {
           alignment: WrapAlignment.spaceBetween,
           spacing: AppSpacing.md,
           children: [
-            Text(
-              viewMode == StaffViewMode.grid
-                  ? l10n.staffAttendanceLegendGrid
-                  : l10n.staffAttendanceLegendList,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMutedAa,
+            // La légende décrit un geste d'écriture : rien à dire sans lui.
+            PermissionGate.access(
+              kStaffAttendanceWriteAccess,
+              child: Text(
+                viewMode == StaffViewMode.grid
+                    ? l10n.staffAttendanceLegendGrid
+                    : l10n.staffAttendanceLegendList,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMutedAa,
+                ),
               ),
             ),
             if (register.toJustify > 0)

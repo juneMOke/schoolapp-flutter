@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
@@ -52,6 +53,7 @@ void main() {
   late _MockApi api;
   late OutboxDao outbox;
   late StaffAttendanceLockDao locks;
+  late StaffAttendanceGestureDao gestureDao;
   late StaffAttendanceGestureOutboxHandler gestures;
   late StaffAttendanceOutboxHandler records;
   final user = CurrentUserContext()..set('u-1', schoolId: 's-1');
@@ -63,10 +65,11 @@ void main() {
     api = _MockApi();
     outbox = OutboxDao(db);
     locks = StaffAttendanceLockDao(db);
+    gestureDao = StaffAttendanceGestureDao(db);
     records = StaffAttendanceOutboxHandler(
       api: api,
       dao: StaffAttendanceSyncDao(db),
-      locks: locks,
+      gestures: gestureDao,
       members: StaffMemberDao(db),
       currentUser: user,
       extras: const {},
@@ -75,8 +78,8 @@ void main() {
     gestures = StaffAttendanceGestureOutboxHandler(
       api: api,
       locks: locks,
+      gestures: gestureDao,
       records: StaffAttendanceDao(db),
-      recordSync: StaffAttendanceSyncDao(db),
       members: StaffMemberDao(db),
       currentUser: user,
       extras: const {},
@@ -115,7 +118,7 @@ void main() {
     StaffAttendanceGesture gesture, {
     String date = '2026-09-29',
     int nowMs = 20,
-  }) => locks.addGesture(
+  }) => gestureDao.add(
     StaffAttendanceGestureRequestDto(
       gestureId: id,
       gesture: gesture.wire,
@@ -236,7 +239,7 @@ void main() {
       await addGesture('g-1', StaffAttendanceGesture.validateDay);
 
       final result = await gestures.dispatch(
-        await entry(StaffAttendanceLockDao.gestureEntryId('g-1')),
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
       );
 
       expect(result.outcome, OutboxDispatchOutcome.blocked);
@@ -251,7 +254,7 @@ void main() {
       answerLocked('LOCKED');
 
       final result = await gestures.dispatch(
-        await entry(StaffAttendanceLockDao.gestureEntryId('g-1')),
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
       );
 
       expect(result.outcome, OutboxDispatchOutcome.acked);
@@ -268,7 +271,7 @@ void main() {
       await addGesture('g-2', StaffAttendanceGesture.reopenDay, nowMs: 30);
 
       final result = await gestures.dispatch(
-        await entry(StaffAttendanceLockDao.gestureEntryId('g-2')),
+        await entry(StaffAttendanceGestureDao.entryId('g-2')),
       );
 
       expect(result.outcome, OutboxDispatchOutcome.blocked);
@@ -290,7 +293,7 @@ void main() {
       answerLocked('OPEN');
 
       final result = await gestures.dispatch(
-        await entry(StaffAttendanceLockDao.gestureEntryId('g-1')),
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
       );
 
       expect(result.outcome, OutboxDispatchOutcome.acked);
@@ -318,7 +321,7 @@ void main() {
         );
         expect(
           (await gestures.dispatch(
-            await entry(StaffAttendanceLockDao.gestureEntryId('r')),
+            await entry(StaffAttendanceGestureDao.entryId('r')),
           )).outcome,
           OutboxDispatchOutcome.blocked,
         );
@@ -326,19 +329,108 @@ void main() {
         answerLocked('LOCKED');
         expect(
           (await gestures.dispatch(
-            await entry(StaffAttendanceLockDao.gestureEntryId('v')),
+            await entry(StaffAttendanceGestureDao.entryId('v')),
           )).outcome,
           OutboxDispatchOutcome.acked,
         );
         answerLocked('OPEN');
         expect(
           (await gestures.dispatch(
-            await entry(StaffAttendanceLockDao.gestureEntryId('r')),
+            await entry(StaffAttendanceGestureDao.entryId('r')),
           )).outcome,
           OutboxDispatchOutcome.acked,
         );
       },
     );
+
+    test('une fiche accusée puis refusée ne dispense pas la validation '
+        'd\'attendre ses pointages', () async {
+      await seedMember('m-1');
+      await db.update(
+        'staff_members',
+        {'sync_status': 'SYNC_ERROR'},
+        where: 'id = ?',
+        whereArgs: ['m-1'],
+      );
+      await writeRecord(_record('r-1'));
+      await addGesture('g-1', StaffAttendanceGesture.validateDay);
+
+      final result = await gestures.dispatch(
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test('deux gestes de la même milliseconde ne s\'attendent pas l\'un '
+        'l\'autre', () async {
+      await addGesture('g-1', StaffAttendanceGesture.validateDay, nowMs: 20);
+      await addGesture('g-2', StaffAttendanceGesture.reopenDay, nowMs: 20);
+      answerLocked('LOCKED');
+
+      final first = await gestures.dispatch(
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
+      );
+
+      expect(first.outcome, OutboxDispatchOutcome.acked);
+    });
+
+    test('un aîné sorti de la file (empoisonné) ne gèle pas les suivants, '
+        'et se lit en échec', () async {
+      await addGesture('g-1', StaffAttendanceGesture.validateDay, nowMs: 20);
+      await addGesture('g-2', StaffAttendanceGesture.reopenDay, nowMs: 30);
+      await outbox.markSyncError(StaffAttendanceGestureDao.entryId('g-1'), 'x');
+      answerLocked('OPEN');
+
+      final result = await gestures.dispatch(
+        await entry(StaffAttendanceGestureDao.entryId('g-2')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+    });
+
+    test('une réouverture venue d\'une autre tablette remet en file les '
+        'pointages DAY_LOCKED', () async {
+      await seedMember('m-1');
+      await locks.applyServer(
+        [
+          const StaffAttendanceLockDto(
+            kind: 'DAY',
+            periodStart: '2026-09-29',
+            state: 'LOCKED',
+          ),
+        ],
+        schoolId: 's-1',
+        nowMs: 1,
+      );
+      await writeRecord(_record('r-1'));
+      await StaffAttendanceSyncDao(db).markRejected(
+        'r-1',
+        sentClientUpdatedAt: '2026-09-29T08:00:00.000Z',
+        code: 'DAY_LOCKED',
+        reason: 'DAY_LOCKED',
+        nowMs: 12,
+      );
+      await outbox.markSyncError(StaffAttendanceWriteDao.entryId('r-1'), 'x');
+
+      await locks.applyServer(
+        [
+          const StaffAttendanceLockDto(
+            kind: 'DAY',
+            periodStart: '2026-09-29',
+            state: 'OPEN',
+          ),
+        ],
+        schoolId: 's-1',
+        nowMs: 13,
+      );
+
+      expect((await recordRow('r-1'))['sync_status'], 'PENDING_SYNC');
+      expect(
+        (await outbox.pendingAll()).map((e) => e.id),
+        contains(StaffAttendanceWriteDao.entryId('r-1')),
+      );
+    });
 
     test('un refus laisse l\'état du serveur, marqué en échec', () async {
       await addGesture('g-1', StaffAttendanceGesture.validateDay);
@@ -347,7 +439,7 @@ void main() {
       ).thenThrow(_http(422, detailCode: 'MONTH_CLOSED'));
 
       final result = await gestures.dispatch(
-        await entry(StaffAttendanceLockDao.gestureEntryId('g-1')),
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
       );
 
       expect(result.outcome, OutboxDispatchOutcome.failed);

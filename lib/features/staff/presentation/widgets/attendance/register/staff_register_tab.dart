@@ -44,7 +44,9 @@ class StaffRegisterTab extends StatelessWidget {
           register: register,
           settings: snapshot.settings,
           isToday: state.isToday,
-          onPrevious: () => unawaited(cubit.stepDay(-1)),
+          onPrevious: state.canStepBack
+              ? () => unawaited(cubit.stepDay(-1))
+              : null,
           onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
           onToday: () => unawaited(cubit.goToday()),
           onSettings: () => unawaited(actions.openSettings()),

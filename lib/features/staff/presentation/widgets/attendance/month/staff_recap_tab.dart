@@ -54,11 +54,13 @@ class StaffRecapTab extends StatelessWidget {
             StaffMonthNav(
               month: state.month,
               isCurrent: state.month == state.today.substring(0, 7),
-              onPrevious: () => unawaited(cubit.stepMonth(-1)),
+              onPrevious: state.canStepMonthBack
+                  ? () => unawaited(cubit.stepMonth(-1))
+                  : null,
               onNext: () => unawaited(cubit.stepMonth(1)),
               onCurrent: () => unawaited(cubit.goCurrentMonth()),
             ),
-            if (!closed && !recap.ledger.isHoliday)
+            if (state.canCloseMonth && !recap.ledger.isHoliday)
               PermissionGate.access(
                 kStaffAttendanceManageAccess,
                 child: EteeloButton.primary(

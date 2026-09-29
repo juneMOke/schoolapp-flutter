@@ -46,7 +46,10 @@ class _StaffAttendanceSettingsDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final start = StaffClockTime.tryParse(_start.text);
+    final parsed = StaffClockTime.tryParse(_start.text);
+    final tooLate =
+        parsed != null && parsed.isAfter(StaffAttendanceSettings.latestStart);
+    final start = tooLate ? null : parsed;
     final draft = start == null
         ? null
         : StaffAttendanceSettings(start: start, toleranceMinutes: _tolerance);
@@ -63,7 +66,11 @@ class _StaffAttendanceSettingsDialogState
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
             inputFormatters: const [StaffClockInputFormatter()],
-            errorText: _start.text.length == 5 && start == null
+            errorText: tooLate
+                ? l10n.staffAttendanceStartTooLate(
+                    StaffAttendanceSettings.latestStart.wire,
+                  )
+                : _start.text.length == 5 && start == null
                 ? l10n.staffAttendanceTimeInvalid
                 : null,
             onChanged: (_) => setState(() {}),
@@ -87,7 +94,7 @@ class _StaffAttendanceSettingsDialogState
                   ink: AppColors.bleuArdoise,
                   onTap: widget.editable
                       ? () => setState(() => _tolerance = minutes)
-                      : () {},
+                      : null,
                 ),
             ],
           ),
@@ -112,7 +119,9 @@ class _StaffAttendanceSettingsDialogState
       ),
       actions: [
         EteeloButton.ghost(
-          label: l10n.staffAttendanceCancel,
+          label: widget.editable
+              ? l10n.staffAttendanceCancel
+              : l10n.staffAttendanceDismiss,
           onPressed: () => Navigator.of(context).pop(),
           fullWidth: false,
         ),

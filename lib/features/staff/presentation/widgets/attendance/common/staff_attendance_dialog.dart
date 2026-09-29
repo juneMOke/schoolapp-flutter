@@ -59,7 +59,6 @@ class StaffAttendanceDialog extends StatelessWidget {
                       eyebrow.toUpperCase(),
                       style: AppTypography.labelSmall.copyWith(
                         color: AppColors.textMutedAa,
-                        letterSpacing: 0.8,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

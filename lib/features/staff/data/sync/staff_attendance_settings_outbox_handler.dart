@@ -50,16 +50,13 @@ class StaffAttendanceSettingsOutboxHandler implements OutboxSyncHandler {
           failed: false,
         );
       },
-      reject: (failure) async {
-        await _dao.settle(
-          schoolId,
-          sentClientUpdatedAt: request.clientUpdatedAt,
-          failed: true,
-          code: failure.storedCode,
-          reason: failure.reason,
-        );
-        return true;
-      },
+      reject: (failure) => _dao.settle(
+        schoolId,
+        sentClientUpdatedAt: request.clientUpdatedAt,
+        failed: true,
+        code: failure.storedCode,
+        reason: failure.reason,
+      ),
     );
   }
 }

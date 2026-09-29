@@ -20038,6 +20038,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.'**
   String get staffAttendanceValidationRefused;
+
+  /// No description provided for @staffAttendanceHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String staffAttendanceHoursMinutes(int hours, String minutes);
+
+  /// No description provided for @staffAttendanceReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason *'**
+  String get staffAttendanceReasonRequired;
+
+  /// No description provided for @staffAttendanceDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get staffAttendanceDismiss;
+
+  /// No description provided for @staffAttendanceStartTooLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes start at {latest} at the latest.'**
+  String staffAttendanceStartTooLate(String latest);
 }
 
 class _AppLocalizationsDelegate

@@ -23,6 +23,8 @@ void showStaffAttendanceNotice(
       AppSnackBar.showWarning(context, l10n.staffAttendanceToastDayFrozen);
     case StaffAttendanceNoticeKind.monthFrozen:
       AppSnackBar.showWarning(context, l10n.staffAttendanceToastMonthFrozen);
+    case StaffAttendanceNoticeKind.forbidden:
+      AppSnackBar.showWarning(context, l10n.staffAttendanceForbidden);
     case StaffAttendanceNoticeKind.writeFailed:
       AppSnackBar.showError(context, l10n.staffAttendanceToastWriteFailed);
     case StaffAttendanceNoticeKind.remainingMarked:

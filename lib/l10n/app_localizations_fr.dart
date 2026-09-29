@@ -12722,4 +12722,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get staffAttendanceValidationRefused =>
       'La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée.';
+
+  @override
+  String staffAttendanceHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get staffAttendanceReasonRequired => 'Motif *';
+
+  @override
+  String get staffAttendanceDismiss => 'Fermer';
+
+  @override
+  String staffAttendanceStartTooLate(String latest) {
+    return 'Les cours commencent au plus tard à $latest.';
+  }
 }

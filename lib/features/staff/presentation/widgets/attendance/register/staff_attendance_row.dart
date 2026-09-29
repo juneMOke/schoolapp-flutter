@@ -93,7 +93,7 @@ class StaffAttendanceRow extends StatelessWidget {
         ),
         gradient: LinearGradient(
           colors: [tone.soft, AppColors.surfaceRaised],
-          stops: const [0, 0.3],
+          stops: const [0, AppDimensions.staffAttendanceRowTintStop],
         ),
       ),
       child: StaffAttendanceRowLayout(
