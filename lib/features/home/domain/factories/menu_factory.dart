@@ -29,6 +29,7 @@ class MenuFactory {
       _createFeeControlMenu(l10n),
       _createBoutiqueMenu(l10n),
       _createExpenseMenu(l10n),
+      _createHrMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -240,6 +241,23 @@ class MenuFactory {
           id: MenuConstants.expenseQueueId,
           title: l10n.subMenuExpenseQueue,
           route: AppRoutesNames.expenseQueue,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Ressources humaines. Le fichier du personnel d'abord ; le Pointage
+  /// et la Paie s'ajouteront à sa suite, puisqu'ils le lisent.
+  static MenuItem _createHrMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.hrMenuId,
+      title: l10n.menuHumanResources,
+      icon: Icons.badge_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrStaffFileId,
+          title: l10n.subMenuStaffFile,
+          route: AppRoutesNames.hrStaffFile,
         ),
       ],
     );

@@ -17908,6 +17908,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The file could not be read. Try again.'**
   String get documentCaptureReadError;
+
+  /// Menu of the Human resources module.
+  ///
+  /// In en, this message translates to:
+  /// **'Human resources'**
+  String get menuHumanResources;
+
+  /// Sub-menu: the school's central staff file.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff file'**
+  String get subMenuStaffFile;
+
+  /// Description of the Human resources card on the home page.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file: the school\'s staff, their contract and their records.'**
+  String get accueilModuleHumanResourcesDescription;
+
+  /// Title of the staff file waiting page.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file is not available yet'**
+  String get staffFileUnavailableTitle;
+
+  /// Explanation on the staff file waiting page.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff records will appear here as soon as the server sends them to this tablet.'**
+  String get staffFileUnavailableDescription;
 }
 
 class _AppLocalizationsDelegate

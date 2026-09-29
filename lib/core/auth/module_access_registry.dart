@@ -270,6 +270,13 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // demande attendre, et pouvoir la relancer ou la retirer.
     MenuConstants.expenseQueueId: ModuleAccess([Perm.expenseRead]),
   },
+  // Le fichier se LIT sous `hr.staff.read` ; créer ou modifier une fiche,
+  // poser un contrat, verser une pièce seront gardés geste par geste. Tant que
+  // le serveur ne sème pas `hr.staff.read` (lot back H0), le menu reste masqué
+  // pour toute l'école.
+  MenuConstants.hrMenuId: {
+    MenuConstants.hrStaffFileId: ModuleAccess([Perm.hrStaffRead]),
+  },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),
     MenuConstants.organisationId: ModuleAccess([Perm.classroomRead]),

@@ -7359,5 +7359,25 @@
   "documentCaptureReadError": "The file could not be read. Try again.",
   "@documentCaptureReadError": {
     "description": "The platform did not return the file."
+  },
+  "menuHumanResources": "Human resources",
+  "@menuHumanResources": {
+    "description": "Menu of the Human resources module."
+  },
+  "subMenuStaffFile": "Staff file",
+  "@subMenuStaffFile": {
+    "description": "Sub-menu: the school's central staff file."
+  },
+  "accueilModuleHumanResourcesDescription": "The staff file: the school's staff, their contract and their records.",
+  "@accueilModuleHumanResourcesDescription": {
+    "description": "Description of the Human resources card on the home page."
+  },
+  "staffFileUnavailableTitle": "The staff file is not available yet",
+  "@staffFileUnavailableTitle": {
+    "description": "Title of the staff file waiting page."
+  },
+  "staffFileUnavailableDescription": "Staff records will appear here as soon as the server sends them to this tablet.",
+  "@staffFileUnavailableDescription": {
+    "description": "Explanation on the staff file waiting page."
   }
 }

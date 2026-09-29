@@ -72,6 +72,8 @@ class AccueilModuleTones {
     MenuConstants.recouvrementMenuId: _bleuArdoise,
     MenuConstants.boutiqueMenuId: _terreFoncee,
     MenuConstants.expenseMenuId: _terreFoncee,
+    // Des personnes, pas de l'argent : la famille bleue, comme Inscriptions.
+    MenuConstants.hrMenuId: _bleuProfond,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,
     MenuConstants.resultatsMenuId: _terreFoncee,

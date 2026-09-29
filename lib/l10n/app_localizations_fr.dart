@@ -11447,4 +11447,22 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentCaptureReadError =>
       'Le fichier n\'a pas pu être lu. Réessayez.';
+
+  @override
+  String get menuHumanResources => 'Ressources humaines';
+
+  @override
+  String get subMenuStaffFile => 'Fichier du personnel';
+
+  @override
+  String get accueilModuleHumanResourcesDescription =>
+      'Le fichier du personnel : les agents de l\'école, leur contrat et leur dossier.';
+
+  @override
+  String get staffFileUnavailableTitle =>
+      'Le fichier du personnel n\'est pas encore disponible';
+
+  @override
+  String get staffFileUnavailableDescription =>
+      'Les fiches des agents apparaîtront ici dès que le serveur les enverra à cette tablette.';
 }

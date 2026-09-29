@@ -11359,4 +11359,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentCaptureReadError =>
       'The file could not be read. Try again.';
+
+  @override
+  String get menuHumanResources => 'Human resources';
+
+  @override
+  String get subMenuStaffFile => 'Staff file';
+
+  @override
+  String get accueilModuleHumanResourcesDescription =>
+      'The staff file: the school\'s staff, their contract and their records.';
+
+  @override
+  String get staffFileUnavailableTitle => 'The staff file is not available yet';
+
+  @override
+  String get staffFileUnavailableDescription =>
+      'Staff records will appear here as soon as the server sends them to this tablet.';
 }

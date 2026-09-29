@@ -7555,5 +7555,25 @@
   "documentCaptureReadError": "Le fichier n'a pas pu être lu. Réessayez.",
   "@documentCaptureReadError": {
     "description": "La plateforme n'a pas rendu le fichier."
+  },
+  "menuHumanResources": "Ressources humaines",
+  "@menuHumanResources": {
+    "description": "Menu du module Ressources humaines."
+  },
+  "subMenuStaffFile": "Fichier du personnel",
+  "@subMenuStaffFile": {
+    "description": "Sous-menu : le fichier central des agents de l'école."
+  },
+  "accueilModuleHumanResourcesDescription": "Le fichier du personnel : les agents de l'école, leur contrat et leur dossier.",
+  "@accueilModuleHumanResourcesDescription": {
+    "description": "Description de la carte Ressources humaines sur l'accueil."
+  },
+  "staffFileUnavailableTitle": "Le fichier du personnel n'est pas encore disponible",
+  "@staffFileUnavailableTitle": {
+    "description": "Titre de la page d'attente du fichier du personnel."
+  },
+  "staffFileUnavailableDescription": "Les fiches des agents apparaîtront ici dès que le serveur les enverra à cette tablette.",
+  "@staffFileUnavailableDescription": {
+    "description": "Explication de la page d'attente du fichier du personnel."
   }
 }

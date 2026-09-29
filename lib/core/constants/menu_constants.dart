@@ -41,6 +41,11 @@ class MenuConstants {
   /// en V1, et le ranger sous Finances laisserait croire le contraire.
   static const String expenseMenuId = 'depenses';
 
+  /// Les ressources humaines — le fichier central des agents de l'école, puis
+  /// (plus tard) le Pointage et la Paie, qui le lisent. Un menu propre : un
+  /// agent n'est ni un élève ni une écriture de caisse.
+  static const String hrMenuId = 'ressources-humaines';
+
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
   // il précède la coquille, qui n'a rien à afficher sans année académique.
@@ -84,6 +89,10 @@ class MenuConstants {
   /// plus ancienne à la plus récente. Elle ignore la période des deux autres
   /// écrans — une demande déposée le mois dernier attend toujours.
   static const String expenseQueueId = 'depenses-validations';
+
+  /// Le fichier du personnel : tous les agents de l'école, leur contrat et
+  /// leur dossier administratif.
+  static const String hrStaffFileId = 'fichier-du-personnel';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
