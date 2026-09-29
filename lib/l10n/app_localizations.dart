@@ -17927,17 +17927,323 @@ abstract class AppLocalizations {
   /// **'The staff file: the school\'s staff, their contract and their records.'**
   String get accueilModuleHumanResourcesDescription;
 
-  /// Title of the staff file waiting page.
+  /// Surtitre de la liste du personnel.
   ///
   /// In en, this message translates to:
-  /// **'The staff file is not available yet'**
-  String get staffFileUnavailableTitle;
+  /// **'Human resources'**
+  String get staffFileEyebrow;
 
-  /// Explanation on the staff file waiting page.
+  /// Titre de la liste du personnel.
   ///
   /// In en, this message translates to:
-  /// **'Staff records will appear here as soon as the server sends them to this tablet.'**
-  String get staffFileUnavailableDescription;
+  /// **'Staff file'**
+  String get staffFileTitle;
+
+  /// Sous-titre de la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who works at the school: teachers, administrative and support staff.'**
+  String get staffFileSubtitle;
+
+  /// Carte de synthèse : nombre d'agents au fichier.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get staffStatHeadcount;
+
+  /// Sous-ligne de l'effectif : agents « contrat à poser ».
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without a current contract'**
+  String staffStatHeadcountNoContract(int count);
+
+  /// Carte de synthèse : agents à qui manquent des pièces exigées.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete files'**
+  String get staffStatIncomplete;
+
+  /// Sous-ligne des dossiers incomplets.
+  ///
+  /// In en, this message translates to:
+  /// **'Required documents missing'**
+  String get staffStatIncompleteSub;
+
+  /// Carte de synthèse : fiches et pièces pas encore envoyées.
+  ///
+  /// In en, this message translates to:
+  /// **'On this tablet'**
+  String get staffStatPending;
+
+  /// Sous-ligne de la carte « Sur la tablette ».
+  ///
+  /// In en, this message translates to:
+  /// **'Will be sent when the network is back'**
+  String get staffStatPendingSub;
+
+  /// Libellé du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get staffSearchLabel;
+
+  /// Indice du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, middle name, first name, staff number or job'**
+  String get staffSearchPlaceholder;
+
+  /// Libellé du filtre de catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get staffCategoryLabel;
+
+  /// Filtre de catégorie : aucune restriction.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get staffCategoryAll;
+
+  /// Catégorie d'agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get staffCategoryTeacher;
+
+  /// Catégorie d'agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get staffCategoryAdministrative;
+
+  /// Catégorie d'agent : personnel d'appui.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get staffCategorySupport;
+
+  /// Libellé de la bascule cartes/liste.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get staffViewLabel;
+
+  /// Affichage en grille de cartes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get staffViewGrid;
+
+  /// Affichage en tableau.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get staffViewList;
+
+  /// Libellé des filtres et de la colonne de contrat.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get staffContractLabel;
+
+  /// Filtre de contrat : aucune restriction.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get staffContractAll;
+
+  /// Statut de contrat : salarié de l'école.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent'**
+  String get staffContractPermanent;
+
+  /// Statut de contrat : payé aux heures ou au forfait.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time'**
+  String get staffContractVacataire;
+
+  /// Statut de contrat : pris en charge par l'État (SECOPE).
+  ///
+  /// In en, this message translates to:
+  /// **'State-paid'**
+  String get staffContractConventionne;
+
+  /// Agent sans contrat en vigueur.
+  ///
+  /// In en, this message translates to:
+  /// **'No contract yet'**
+  String get staffContractNone;
+
+  /// Filtre : agents dont le dossier est incomplet.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete file'**
+  String get staffIncompleteFilter;
+
+  /// Jauge du dossier : toutes les pièces exigées sont versées.
+  ///
+  /// In en, this message translates to:
+  /// **'File complete'**
+  String get staffDossierComplete;
+
+  /// Jauge du dossier : pièces versées sur pièces exigées.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} documents'**
+  String staffDossierProgress(int done, int total);
+
+  /// Matricule pas encore attribué par le serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff number pending'**
+  String get staffNumberPending;
+
+  /// État de synchronisation : au serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get staffSyncSynced;
+
+  /// État de synchronisation : pas encore envoyé.
+  ///
+  /// In en, this message translates to:
+  /// **'On this tablet'**
+  String get staffSyncPending;
+
+  /// État de synchronisation : refusé par le serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent'**
+  String get staffSyncFailed;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member'**
+  String get staffTableAgent;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffTableJob;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get staffTableDossier;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get staffTableSync;
+
+  /// Pied de la liste : effectif total du fichier.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No staff in the file} =1{1 staff member in the file} other{{count} staff members in the file}}'**
+  String staffFooterCount(int count);
+
+  /// Vide : le fichier ne compte aucun agent.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff in the file'**
+  String get staffEmptyFileTitle;
+
+  /// Explication du fichier vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff will appear here as soon as they are recorded.'**
+  String get staffEmptyFileMessage;
+
+  /// Vide : aucun agent ne passe les filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff member found'**
+  String get staffEmptySearchTitle;
+
+  /// Explication du vide de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff member matches these filters.'**
+  String get staffEmptySearchMessage;
+
+  /// Action : retirer tous les filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get staffResetFilters;
+
+  /// Erreur : fichier jamais téléchargé et réseau absent.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get staffErrorNeverSyncedTitle;
+
+  /// Explication : sans premier téléchargement, rien à montrer hors ligne.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file has never been downloaded to this tablet yet.'**
+  String get staffErrorNeverSynced;
+
+  /// Erreur : base locale illisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read the file'**
+  String get staffErrorStorageTitle;
+
+  /// Explication de l'erreur de lecture locale.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file could not be read on this tablet. Try again; if it keeps failing, contact support.'**
+  String get staffErrorStorage;
+
+  /// Erreur 403.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get staffErrorForbiddenTitle;
+
+  /// Explication de l'erreur 403.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile does not allow you to view staff records.'**
+  String get staffErrorForbidden;
+
+  /// Erreur 401.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get staffErrorUnauthorizedTitle;
+
+  /// Explication de l'erreur 401.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline entries stay on this tablet; sign in again to send them.'**
+  String get staffErrorUnauthorized;
+
+  /// Action : relancer le téléchargement ou la lecture.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get staffErrorRetry;
+
+  /// Action : retour à la connexion.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get staffErrorReconnect;
+
+  /// Code à transmettre au support.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String staffErrorIncidentCode(String code);
 }
 
 class _AppLocalizationsDelegate

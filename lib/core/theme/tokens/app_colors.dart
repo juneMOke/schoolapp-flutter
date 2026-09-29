@@ -440,4 +440,30 @@ class AppColors {
   /// le gris porte du texte ; la substitution générale dans l'application est
   /// un chantier à part, hors du périmètre de ce lot.
   static const textMutedAa = Color(0xFF6F685C);
+
+  // ---- Ressources humaines — les trois contrats ----
+  //
+  // Une couleur par statut, réutilisée partout (puce, filtre, carte, bloc de
+  // rémunération). **Fond et encre séparés** : la terre cuite fonde une
+  // pastille mais ne s'écrit pas assez contrastée sur son propre voile — son
+  // encre est donc la terre cuite assombrie.
+  static const staffPermanent = bleuArdoise;
+  static const staffPermanentSoft = bleuArdoiseSoft;
+  static const staffPermanentInk = bleuArdoise; // 8,0:1 sur son voile
+  static const staffVacataire = terreCuite;
+  static const staffVacataireSoft = terreCuiteSoft;
+  static const staffVacataireInk = terreCuiteDark; // 5,3:1 (brute : 3,9)
+  static const staffConventionne = vertSavane;
+  static const staffConventionneSoft = Color(0xFFEDF5EF);
+  static const staffConventionneInk = vertSavane; // 5,6:1 sur son voile
+
+  /// Agent sans contrat en vigueur — « contrat à poser ».
+  static const staffNoContract = textMutedAa;
+  static const staffNoContractSoft = surfaceAlt;
+
+  /// Encre ambre d'un dossier partiel ou d'un matricule en attente : le
+  /// [warning] fonde une pastille mais ne s'écrit pas sur blanc (2,8:1), et
+  /// l'ocre `#A66A00` de la maquette n'y tient que 4,48:1 — sous le seuil.
+  /// 5,7:1 sur blanc, 5,4:1 sur le fond de page, 4,9:1 sur papier.
+  static const staffPartialInk = Color(0xFF8F5C00);
 }

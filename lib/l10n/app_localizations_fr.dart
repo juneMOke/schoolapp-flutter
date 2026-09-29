@@ -11459,10 +11459,184 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le fichier du personnel : les agents de l\'école, leur contrat et leur dossier.';
 
   @override
-  String get staffFileUnavailableTitle =>
-      'Le fichier du personnel n\'est pas encore disponible';
+  String get staffFileEyebrow => 'Ressources humaines';
 
   @override
-  String get staffFileUnavailableDescription =>
-      'Les fiches des agents apparaîtront ici dès que le serveur les enverra à cette tablette.';
+  String get staffFileTitle => 'Fichier du personnel';
+
+  @override
+  String get staffFileSubtitle =>
+      'Tous les agents de l\'école : enseignants, administratifs et personnel d\'appui.';
+
+  @override
+  String get staffStatHeadcount => 'Effectif';
+
+  @override
+  String staffStatHeadcountNoContract(int count) {
+    return '$count sans contrat en vigueur';
+  }
+
+  @override
+  String get staffStatIncomplete => 'Dossiers incomplets';
+
+  @override
+  String get staffStatIncompleteSub => 'Pièces exigées manquantes';
+
+  @override
+  String get staffStatPending => 'Sur la tablette';
+
+  @override
+  String get staffStatPendingSub => 'Partiront au retour du réseau';
+
+  @override
+  String get staffSearchLabel => 'Rechercher';
+
+  @override
+  String get staffSearchPlaceholder =>
+      'Nom, post-nom, prénom, matricule ou fonction';
+
+  @override
+  String get staffCategoryLabel => 'Catégorie';
+
+  @override
+  String get staffCategoryAll => 'Toutes catégories';
+
+  @override
+  String get staffCategoryTeacher => 'Enseignant';
+
+  @override
+  String get staffCategoryAdministrative => 'Administratif';
+
+  @override
+  String get staffCategorySupport => 'Appui';
+
+  @override
+  String get staffViewLabel => 'Affichage';
+
+  @override
+  String get staffViewGrid => 'Cartes';
+
+  @override
+  String get staffViewList => 'Liste';
+
+  @override
+  String get staffContractLabel => 'Contrat';
+
+  @override
+  String get staffContractAll => 'Tous';
+
+  @override
+  String get staffContractPermanent => 'Permanent';
+
+  @override
+  String get staffContractVacataire => 'Vacataire';
+
+  @override
+  String get staffContractConventionne => 'Conventionné';
+
+  @override
+  String get staffContractNone => 'Contrat à poser';
+
+  @override
+  String get staffIncompleteFilter => 'Dossier incomplet';
+
+  @override
+  String get staffDossierComplete => 'Dossier complet';
+
+  @override
+  String staffDossierProgress(int done, int total) {
+    return '$done/$total pièces';
+  }
+
+  @override
+  String get staffNumberPending => 'Matricule en attente';
+
+  @override
+  String get staffSyncSynced => 'Synchronisé';
+
+  @override
+  String get staffSyncPending => 'Sur la tablette';
+
+  @override
+  String get staffSyncFailed => 'Échec d\'envoi';
+
+  @override
+  String get staffTableAgent => 'Agent';
+
+  @override
+  String get staffTableJob => 'Fonction';
+
+  @override
+  String get staffTableDossier => 'Dossier';
+
+  @override
+  String get staffTableSync => 'Synchro';
+
+  @override
+  String staffFooterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents au fichier',
+      one: '1 agent au fichier',
+      zero: 'Aucun agent au fichier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffEmptyFileTitle => 'Aucun agent dans le fichier';
+
+  @override
+  String get staffEmptyFileMessage =>
+      'Les agents apparaîtront ici dès qu\'ils seront enregistrés.';
+
+  @override
+  String get staffEmptySearchTitle => 'Aucun agent trouvé';
+
+  @override
+  String get staffEmptySearchMessage =>
+      'Aucun agent ne correspond à ces critères.';
+
+  @override
+  String get staffResetFilters => 'Réinitialiser les filtres';
+
+  @override
+  String get staffErrorNeverSyncedTitle => 'Pas de connexion';
+
+  @override
+  String get staffErrorNeverSynced =>
+      'Le fichier du personnel n\'a encore jamais été téléchargé sur cette tablette.';
+
+  @override
+  String get staffErrorStorageTitle => 'Lecture impossible';
+
+  @override
+  String get staffErrorStorage =>
+      'Le fichier du personnel n\'a pas pu être lu sur cette tablette. Réessayez ; si le problème persiste, contactez le support.';
+
+  @override
+  String get staffErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get staffErrorForbidden =>
+      'Votre profil ne permet pas de consulter les dossiers du personnel.';
+
+  @override
+  String get staffErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get staffErrorUnauthorized =>
+      'Les saisies hors ligne restent sur la tablette ; reconnectez-vous pour les envoyer.';
+
+  @override
+  String get staffErrorRetry => 'Réessayer';
+
+  @override
+  String get staffErrorReconnect => 'Se reconnecter';
+
+  @override
+  String staffErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
 }

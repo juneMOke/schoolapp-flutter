@@ -546,4 +546,19 @@ class AppDimensions {
   static const expenseFormAmountMaxWidth = 240.0;
   static const expenseFormFundingMinWidth = 200.0;
   static const expenseFormFundingMaxWidth = 280.0;
+
+  // ── Ressources humaines — fichier du personnel ──
+  /// Champ de recherche : il prend la place qui reste, jamais moins.
+  static const staffSearchMinWidth = 280.0;
+  static const staffSearchMaxWidth = 460.0;
+  static const staffCategoryWidth = 220.0;
+
+  /// Largeur plancher d'une carte d'agent dans la grille.
+  static const staffCardMinWidth = 290.0;
+
+  /// Hauteur d'une puce de filtre (zone de tap étendue à 44 par le padding).
+  static const staffFilterChipHeight = 40.0;
+
+  /// Hauteur plancher d'une ligne du tableau.
+  static const staffTableRowMinHeight = 60.0;
 }

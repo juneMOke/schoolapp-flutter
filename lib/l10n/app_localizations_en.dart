@@ -11371,9 +11371,184 @@ class AppLocalizationsEn extends AppLocalizations {
       'The staff file: the school\'s staff, their contract and their records.';
 
   @override
-  String get staffFileUnavailableTitle => 'The staff file is not available yet';
+  String get staffFileEyebrow => 'Human resources';
 
   @override
-  String get staffFileUnavailableDescription =>
-      'Staff records will appear here as soon as the server sends them to this tablet.';
+  String get staffFileTitle => 'Staff file';
+
+  @override
+  String get staffFileSubtitle =>
+      'Everyone who works at the school: teachers, administrative and support staff.';
+
+  @override
+  String get staffStatHeadcount => 'Headcount';
+
+  @override
+  String staffStatHeadcountNoContract(int count) {
+    return '$count without a current contract';
+  }
+
+  @override
+  String get staffStatIncomplete => 'Incomplete files';
+
+  @override
+  String get staffStatIncompleteSub => 'Required documents missing';
+
+  @override
+  String get staffStatPending => 'On this tablet';
+
+  @override
+  String get staffStatPendingSub => 'Will be sent when the network is back';
+
+  @override
+  String get staffSearchLabel => 'Search';
+
+  @override
+  String get staffSearchPlaceholder =>
+      'Name, middle name, first name, staff number or job';
+
+  @override
+  String get staffCategoryLabel => 'Category';
+
+  @override
+  String get staffCategoryAll => 'All categories';
+
+  @override
+  String get staffCategoryTeacher => 'Teacher';
+
+  @override
+  String get staffCategoryAdministrative => 'Administrative';
+
+  @override
+  String get staffCategorySupport => 'Support';
+
+  @override
+  String get staffViewLabel => 'View';
+
+  @override
+  String get staffViewGrid => 'Cards';
+
+  @override
+  String get staffViewList => 'List';
+
+  @override
+  String get staffContractLabel => 'Contract';
+
+  @override
+  String get staffContractAll => 'All';
+
+  @override
+  String get staffContractPermanent => 'Permanent';
+
+  @override
+  String get staffContractVacataire => 'Part-time';
+
+  @override
+  String get staffContractConventionne => 'State-paid';
+
+  @override
+  String get staffContractNone => 'No contract yet';
+
+  @override
+  String get staffIncompleteFilter => 'Incomplete file';
+
+  @override
+  String get staffDossierComplete => 'File complete';
+
+  @override
+  String staffDossierProgress(int done, int total) {
+    return '$done/$total documents';
+  }
+
+  @override
+  String get staffNumberPending => 'Staff number pending';
+
+  @override
+  String get staffSyncSynced => 'Synced';
+
+  @override
+  String get staffSyncPending => 'On this tablet';
+
+  @override
+  String get staffSyncFailed => 'Not sent';
+
+  @override
+  String get staffTableAgent => 'Staff member';
+
+  @override
+  String get staffTableJob => 'Job';
+
+  @override
+  String get staffTableDossier => 'File';
+
+  @override
+  String get staffTableSync => 'Sync';
+
+  @override
+  String staffFooterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members in the file',
+      one: '1 staff member in the file',
+      zero: 'No staff in the file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffEmptyFileTitle => 'No staff in the file';
+
+  @override
+  String get staffEmptyFileMessage =>
+      'Staff will appear here as soon as they are recorded.';
+
+  @override
+  String get staffEmptySearchTitle => 'No staff member found';
+
+  @override
+  String get staffEmptySearchMessage =>
+      'No staff member matches these filters.';
+
+  @override
+  String get staffResetFilters => 'Reset filters';
+
+  @override
+  String get staffErrorNeverSyncedTitle => 'No connection';
+
+  @override
+  String get staffErrorNeverSynced =>
+      'The staff file has never been downloaded to this tablet yet.';
+
+  @override
+  String get staffErrorStorageTitle => 'Cannot read the file';
+
+  @override
+  String get staffErrorStorage =>
+      'The staff file could not be read on this tablet. Try again; if it keeps failing, contact support.';
+
+  @override
+  String get staffErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get staffErrorForbidden =>
+      'Your profile does not allow you to view staff records.';
+
+  @override
+  String get staffErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get staffErrorUnauthorized =>
+      'Offline entries stay on this tablet; sign in again to send them.';
+
+  @override
+  String get staffErrorRetry => 'Try again';
+
+  @override
+  String get staffErrorReconnect => 'Sign in again';
+
+  @override
+  String staffErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
 }

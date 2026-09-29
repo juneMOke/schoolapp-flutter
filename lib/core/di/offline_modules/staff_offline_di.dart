@@ -1,5 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/staff/data/repositories/staff_repository_impl.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/load_staff_file_use_case.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/sync_staff_pulls_use_case.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -34,6 +42,36 @@ void registerStaffOffline(GetIt getIt) {
     () => StaffDocumentTypeDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<StaffSyncApi>(() => StaffSyncApi(getIt<Dio>()));
+
+  // ── Lecture locale ──────────────────────────────────────────────────────
+  getIt.registerLazySingleton<StaffRepository>(
+    () => StaffRepositoryImpl(
+      members: getIt<StaffMemberDao>(),
+      documents: getIt<StaffDocumentDao>(),
+      types: getIt<StaffDocumentTypeDao>(),
+      syncMeta: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt.registerFactory<LoadStaffFileUseCase>(
+    () => LoadStaffFileUseCase(getIt<StaffRepository>()),
+  );
+  getIt.registerFactory<SyncStaffPullsUseCase>(
+    () => SyncStaffPullsUseCase(getIt<PullCoordinator>()),
+  );
+
+  // ── Présentation ────────────────────────────────────────────────────────
+  getIt.registerFactory<StaffSnapshotSource>(
+    () => StaffSnapshotSource(
+      load: getIt<LoadStaffFileUseCase>(),
+      pulls: getIt<SyncStaffPullsUseCase>(),
+      bus: getIt<PullCompletionBus>(),
+      engine: getIt<SyncEngine>(),
+    ),
+  );
+  getIt.registerFactory<StaffFileCubit>(
+    () => StaffFileCubit(source: getIt<StaffSnapshotSource>()),
+  );
 
   // ── Descente ────────────────────────────────────────────────────────────
   // Trois flux, trois droits : le plan n'annonce à une tablette que ce que son

@@ -7372,12 +7372,239 @@
   "@accueilModuleHumanResourcesDescription": {
     "description": "Description of the Human resources card on the home page."
   },
-  "staffFileUnavailableTitle": "The staff file is not available yet",
-  "@staffFileUnavailableTitle": {
-    "description": "Title of the staff file waiting page."
+  "staffFileEyebrow": "Human resources",
+  "@staffFileEyebrow": {
+    "description": "Surtitre de la liste du personnel."
   },
-  "staffFileUnavailableDescription": "Staff records will appear here as soon as the server sends them to this tablet.",
-  "@staffFileUnavailableDescription": {
-    "description": "Explanation on the staff file waiting page."
+  "staffFileTitle": "Staff file",
+  "@staffFileTitle": {
+    "description": "Titre de la liste du personnel."
+  },
+  "staffFileSubtitle": "Everyone who works at the school: teachers, administrative and support staff.",
+  "@staffFileSubtitle": {
+    "description": "Sous-titre de la liste du personnel."
+  },
+  "staffStatHeadcount": "Headcount",
+  "@staffStatHeadcount": {
+    "description": "Carte de synthèse : nombre d'agents au fichier."
+  },
+  "staffStatHeadcountNoContract": "{count} without a current contract",
+  "@staffStatHeadcountNoContract": {
+    "description": "Sous-ligne de l'effectif : agents « contrat à poser ».",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffStatIncomplete": "Incomplete files",
+  "@staffStatIncomplete": {
+    "description": "Carte de synthèse : agents à qui manquent des pièces exigées."
+  },
+  "staffStatIncompleteSub": "Required documents missing",
+  "@staffStatIncompleteSub": {
+    "description": "Sous-ligne des dossiers incomplets."
+  },
+  "staffStatPending": "On this tablet",
+  "@staffStatPending": {
+    "description": "Carte de synthèse : fiches et pièces pas encore envoyées."
+  },
+  "staffStatPendingSub": "Will be sent when the network is back",
+  "@staffStatPendingSub": {
+    "description": "Sous-ligne de la carte « Sur la tablette »."
+  },
+  "staffSearchLabel": "Search",
+  "@staffSearchLabel": {
+    "description": "Libellé du champ de recherche."
+  },
+  "staffSearchPlaceholder": "Name, middle name, first name, staff number or job",
+  "@staffSearchPlaceholder": {
+    "description": "Indice du champ de recherche."
+  },
+  "staffCategoryLabel": "Category",
+  "@staffCategoryLabel": {
+    "description": "Libellé du filtre de catégorie."
+  },
+  "staffCategoryAll": "All categories",
+  "@staffCategoryAll": {
+    "description": "Filtre de catégorie : aucune restriction."
+  },
+  "staffCategoryTeacher": "Teacher",
+  "@staffCategoryTeacher": {
+    "description": "Catégorie d'agent."
+  },
+  "staffCategoryAdministrative": "Administrative",
+  "@staffCategoryAdministrative": {
+    "description": "Catégorie d'agent."
+  },
+  "staffCategorySupport": "Support",
+  "@staffCategorySupport": {
+    "description": "Catégorie d'agent : personnel d'appui."
+  },
+  "staffViewLabel": "View",
+  "@staffViewLabel": {
+    "description": "Libellé de la bascule cartes/liste."
+  },
+  "staffViewGrid": "Cards",
+  "@staffViewGrid": {
+    "description": "Affichage en grille de cartes."
+  },
+  "staffViewList": "List",
+  "@staffViewList": {
+    "description": "Affichage en tableau."
+  },
+  "staffContractLabel": "Contract",
+  "@staffContractLabel": {
+    "description": "Libellé des filtres et de la colonne de contrat."
+  },
+  "staffContractAll": "All",
+  "@staffContractAll": {
+    "description": "Filtre de contrat : aucune restriction."
+  },
+  "staffContractPermanent": "Permanent",
+  "@staffContractPermanent": {
+    "description": "Statut de contrat : salarié de l'école."
+  },
+  "staffContractVacataire": "Part-time",
+  "@staffContractVacataire": {
+    "description": "Statut de contrat : payé aux heures ou au forfait."
+  },
+  "staffContractConventionne": "State-paid",
+  "@staffContractConventionne": {
+    "description": "Statut de contrat : pris en charge par l'État (SECOPE)."
+  },
+  "staffContractNone": "No contract yet",
+  "@staffContractNone": {
+    "description": "Agent sans contrat en vigueur."
+  },
+  "staffIncompleteFilter": "Incomplete file",
+  "@staffIncompleteFilter": {
+    "description": "Filtre : agents dont le dossier est incomplet."
+  },
+  "staffDossierComplete": "File complete",
+  "@staffDossierComplete": {
+    "description": "Jauge du dossier : toutes les pièces exigées sont versées."
+  },
+  "staffDossierProgress": "{done}/{total} documents",
+  "@staffDossierProgress": {
+    "description": "Jauge du dossier : pièces versées sur pièces exigées.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "staffNumberPending": "Staff number pending",
+  "@staffNumberPending": {
+    "description": "Matricule pas encore attribué par le serveur."
+  },
+  "staffSyncSynced": "Synced",
+  "@staffSyncSynced": {
+    "description": "État de synchronisation : au serveur."
+  },
+  "staffSyncPending": "On this tablet",
+  "@staffSyncPending": {
+    "description": "État de synchronisation : pas encore envoyé."
+  },
+  "staffSyncFailed": "Not sent",
+  "@staffSyncFailed": {
+    "description": "État de synchronisation : refusé par le serveur."
+  },
+  "staffTableAgent": "Staff member",
+  "@staffTableAgent": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableJob": "Job",
+  "@staffTableJob": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableDossier": "File",
+  "@staffTableDossier": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableSync": "Sync",
+  "@staffTableSync": {
+    "description": "En-tête de colonne."
+  },
+  "staffFooterCount": "{count, plural, =0{No staff in the file} =1{1 staff member in the file} other{{count} staff members in the file}}",
+  "@staffFooterCount": {
+    "description": "Pied de la liste : effectif total du fichier.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffEmptyFileTitle": "No staff in the file",
+  "@staffEmptyFileTitle": {
+    "description": "Vide : le fichier ne compte aucun agent."
+  },
+  "staffEmptyFileMessage": "Staff will appear here as soon as they are recorded.",
+  "@staffEmptyFileMessage": {
+    "description": "Explication du fichier vide."
+  },
+  "staffEmptySearchTitle": "No staff member found",
+  "@staffEmptySearchTitle": {
+    "description": "Vide : aucun agent ne passe les filtres."
+  },
+  "staffEmptySearchMessage": "No staff member matches these filters.",
+  "@staffEmptySearchMessage": {
+    "description": "Explication du vide de recherche."
+  },
+  "staffResetFilters": "Reset filters",
+  "@staffResetFilters": {
+    "description": "Action : retirer tous les filtres."
+  },
+  "staffErrorNeverSyncedTitle": "No connection",
+  "@staffErrorNeverSyncedTitle": {
+    "description": "Erreur : fichier jamais téléchargé et réseau absent."
+  },
+  "staffErrorNeverSynced": "The staff file has never been downloaded to this tablet yet.",
+  "@staffErrorNeverSynced": {
+    "description": "Explication : sans premier téléchargement, rien à montrer hors ligne."
+  },
+  "staffErrorStorageTitle": "Cannot read the file",
+  "@staffErrorStorageTitle": {
+    "description": "Erreur : base locale illisible."
+  },
+  "staffErrorStorage": "The staff file could not be read on this tablet. Try again; if it keeps failing, contact support.",
+  "@staffErrorStorage": {
+    "description": "Explication de l'erreur de lecture locale."
+  },
+  "staffErrorForbiddenTitle": "Access denied",
+  "@staffErrorForbiddenTitle": {
+    "description": "Erreur 403."
+  },
+  "staffErrorForbidden": "Your profile does not allow you to view staff records.",
+  "@staffErrorForbidden": {
+    "description": "Explication de l'erreur 403."
+  },
+  "staffErrorUnauthorizedTitle": "Session expired",
+  "@staffErrorUnauthorizedTitle": {
+    "description": "Erreur 401."
+  },
+  "staffErrorUnauthorized": "Offline entries stay on this tablet; sign in again to send them.",
+  "@staffErrorUnauthorized": {
+    "description": "Explication de l'erreur 401."
+  },
+  "staffErrorRetry": "Try again",
+  "@staffErrorRetry": {
+    "description": "Action : relancer le téléchargement ou la lecture."
+  },
+  "staffErrorReconnect": "Sign in again",
+  "@staffErrorReconnect": {
+    "description": "Action : retour à la connexion."
+  },
+  "staffErrorIncidentCode": "Incident code: {code}",
+  "@staffErrorIncidentCode": {
+    "description": "Code à transmettre au support.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   }
 }
