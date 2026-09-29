@@ -5,7 +5,7 @@
 
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   final out = <T>[];

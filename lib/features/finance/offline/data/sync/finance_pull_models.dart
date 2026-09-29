@@ -3,7 +3,7 @@
 
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 
 /// Mappe une liste serveur en **tolérant les lignes malformées** : une ligne

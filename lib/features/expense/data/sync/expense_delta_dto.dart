@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 
 /// L'état canonique d'une dépense (`ExpenseDelta`) — la même forme dans le

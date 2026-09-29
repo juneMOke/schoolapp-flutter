@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_comment_row.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/offline_disciplinary_case_row.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Mappe une liste serveur en **tolérant les lignes malformées** : une ligne
 /// dont le `fromJson` lève est ignorée au lieu de figer le curseur (anti

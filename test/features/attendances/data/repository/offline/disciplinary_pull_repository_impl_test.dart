@@ -13,7 +13,7 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/disc
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_pull_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_pull_outcome.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 

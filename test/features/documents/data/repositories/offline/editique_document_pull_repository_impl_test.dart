@@ -22,7 +22,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_docume
 import 'package:school_app_flutter/features/documents/data/models/editique_document_pull_models.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../../offline_full_db.dart';

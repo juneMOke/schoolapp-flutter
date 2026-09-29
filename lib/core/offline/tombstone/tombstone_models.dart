@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Pourquoi la ligne ne descendra plus. Les deux cas n'appellent pas la même
 /// conduite, et c'est toute la raison de les distinguer d'un identifiant nu.

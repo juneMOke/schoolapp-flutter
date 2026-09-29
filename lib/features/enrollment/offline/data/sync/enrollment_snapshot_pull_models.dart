@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
 
 // Pull HYDRATANT des inscriptions — `GET /api/v1/sync/enrollments/snapshots`
