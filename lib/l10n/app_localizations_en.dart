@@ -11316,4 +11316,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPaymentPrintTicketPrimary => 'Print the ticket';
+
+  @override
+  String get documentCaptureScan => 'Scan';
+
+  @override
+  String get documentCaptureScanHint =>
+      'Photograph the document with the camera';
+
+  @override
+  String get documentCaptureImportImage => 'Import a photo';
+
+  @override
+  String get documentCaptureImportImageHint =>
+      'Choose an image already on the tablet';
+
+  @override
+  String get documentCaptureImportPdf => 'Import a PDF';
+
+  @override
+  String get documentCaptureImportPdfHint =>
+      'Choose a PDF already on the tablet';
+
+  @override
+  String documentCaptureLimits(int maxMegabytes) {
+    return 'JPEG, PNG or PDF · $maxMegabytes MB max';
+  }
+
+  @override
+  String get documentCaptureCameraUnavailable =>
+      'The camera is not available on this tablet. Import a file instead.';
+
+  @override
+  String documentCaptureTooLarge(int maxMegabytes) {
+    return 'This file is larger than $maxMegabytes MB. Choose a lighter one.';
+  }
+
+  @override
+  String get documentCaptureUnsupported =>
+      'Only JPEG, PNG and PDF files are accepted.';
+
+  @override
+  String get documentCaptureReadError =>
+      'The file could not be read. Try again.';
 }

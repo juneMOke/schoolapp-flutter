@@ -11405,4 +11405,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationPaymentPrintTicketPrimary => 'Imprimer le ticket';
+
+  @override
+  String get documentCaptureScan => 'Numériser';
+
+  @override
+  String get documentCaptureScanHint => 'Photographier la pièce avec la caméra';
+
+  @override
+  String get documentCaptureImportImage => 'Importer une photo';
+
+  @override
+  String get documentCaptureImportImageHint =>
+      'Choisir une image déjà sur la tablette';
+
+  @override
+  String get documentCaptureImportPdf => 'Importer un PDF';
+
+  @override
+  String get documentCaptureImportPdfHint =>
+      'Choisir un PDF déjà sur la tablette';
+
+  @override
+  String documentCaptureLimits(int maxMegabytes) {
+    return 'JPEG, PNG ou PDF · $maxMegabytes Mo au plus';
+  }
+
+  @override
+  String get documentCaptureCameraUnavailable =>
+      'La caméra n\'est pas disponible sur cette tablette. Importez un fichier à la place.';
+
+  @override
+  String documentCaptureTooLarge(int maxMegabytes) {
+    return 'Ce fichier dépasse $maxMegabytes Mo. Choisissez-en un plus léger.';
+  }
+
+  @override
+  String get documentCaptureUnsupported =>
+      'Seuls les fichiers JPEG, PNG et PDF sont acceptés.';
+
+  @override
+  String get documentCaptureReadError =>
+      'Le fichier n\'a pas pu être lu. Réessayez.';
 }

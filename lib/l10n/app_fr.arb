@@ -7501,5 +7501,59 @@
     }
   },
   "paymentCorrectionTargetLoadFailed": "Les frais de cet élève n'ont pas pu être lus.",
-  "facturationPaymentPrintTicketPrimary": "Imprimer le ticket"
+  "facturationPaymentPrintTicketPrimary": "Imprimer le ticket",
+  "documentCaptureScan": "Numériser",
+  "@documentCaptureScan": {
+    "description": "Action : photographier la pièce avec la caméra."
+  },
+  "documentCaptureScanHint": "Photographier la pièce avec la caméra",
+  "@documentCaptureScanHint": {
+    "description": "Sous-titre de l'action Numériser."
+  },
+  "documentCaptureImportImage": "Importer une photo",
+  "@documentCaptureImportImage": {
+    "description": "Action : choisir une image déjà présente sur la tablette."
+  },
+  "documentCaptureImportImageHint": "Choisir une image déjà sur la tablette",
+  "@documentCaptureImportImageHint": {
+    "description": "Sous-titre de l'action Importer une photo."
+  },
+  "documentCaptureImportPdf": "Importer un PDF",
+  "@documentCaptureImportPdf": {
+    "description": "Action : choisir un PDF déjà présent sur la tablette."
+  },
+  "documentCaptureImportPdfHint": "Choisir un PDF déjà sur la tablette",
+  "@documentCaptureImportPdfHint": {
+    "description": "Sous-titre de l'action Importer un PDF."
+  },
+  "documentCaptureLimits": "JPEG, PNG ou PDF · {maxMegabytes} Mo au plus",
+  "@documentCaptureLimits": {
+    "description": "Rappel des types acceptés et du poids maximal, affiché au moment de choisir une pièce.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureCameraUnavailable": "La caméra n'est pas disponible sur cette tablette. Importez un fichier à la place.",
+  "@documentCaptureCameraUnavailable": {
+    "description": "Caméra refusée ou absente : seules les actions d'import restent proposées."
+  },
+  "documentCaptureTooLarge": "Ce fichier dépasse {maxMegabytes} Mo. Choisissez-en un plus léger.",
+  "@documentCaptureTooLarge": {
+    "description": "Pièce refusée : trop volumineuse.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureUnsupported": "Seuls les fichiers JPEG, PNG et PDF sont acceptés.",
+  "@documentCaptureUnsupported": {
+    "description": "Pièce refusée : type non accepté."
+  },
+  "documentCaptureReadError": "Le fichier n'a pas pu être lu. Réessayez.",
+  "@documentCaptureReadError": {
+    "description": "La plateforme n'a pas rendu le fichier."
+  }
 }

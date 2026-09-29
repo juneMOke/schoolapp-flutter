@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/di/document_capture_di.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
@@ -1062,6 +1063,9 @@ Future<void> configureDependencies({
       () => TicketBenchPrinterStore(getIt<FlutterSecureStorage>()),
     );
   }
+
+  // ── Capture de pièces (caméra, photo ou PDF importés) ──────────────────────
+  registerDocumentCapture(getIt);
 
   // ── Attendance ────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AttendanceRemoteDataSource>(

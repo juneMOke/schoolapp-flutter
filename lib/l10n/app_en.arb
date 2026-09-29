@@ -7305,5 +7305,59 @@
     }
   },
   "paymentCorrectionTargetLoadFailed": "This student's fees could not be read.",
-  "facturationPaymentPrintTicketPrimary": "Print the ticket"
+  "facturationPaymentPrintTicketPrimary": "Print the ticket",
+  "documentCaptureScan": "Scan",
+  "@documentCaptureScan": {
+    "description": "Action: photograph the document with the camera."
+  },
+  "documentCaptureScanHint": "Photograph the document with the camera",
+  "@documentCaptureScanHint": {
+    "description": "Subtitle of the Scan action."
+  },
+  "documentCaptureImportImage": "Import a photo",
+  "@documentCaptureImportImage": {
+    "description": "Action: choose an image already on the tablet."
+  },
+  "documentCaptureImportImageHint": "Choose an image already on the tablet",
+  "@documentCaptureImportImageHint": {
+    "description": "Subtitle of the Import a photo action."
+  },
+  "documentCaptureImportPdf": "Import a PDF",
+  "@documentCaptureImportPdf": {
+    "description": "Action: choose a PDF already on the tablet."
+  },
+  "documentCaptureImportPdfHint": "Choose a PDF already on the tablet",
+  "@documentCaptureImportPdfHint": {
+    "description": "Subtitle of the Import a PDF action."
+  },
+  "documentCaptureLimits": "JPEG, PNG or PDF · {maxMegabytes} MB max",
+  "@documentCaptureLimits": {
+    "description": "Accepted types and maximum size, shown when choosing a document.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureCameraUnavailable": "The camera is not available on this tablet. Import a file instead.",
+  "@documentCaptureCameraUnavailable": {
+    "description": "Camera denied or missing: only the import actions remain."
+  },
+  "documentCaptureTooLarge": "This file is larger than {maxMegabytes} MB. Choose a lighter one.",
+  "@documentCaptureTooLarge": {
+    "description": "Document rejected: too large.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureUnsupported": "Only JPEG, PNG and PDF files are accepted.",
+  "@documentCaptureUnsupported": {
+    "description": "Document rejected: type not accepted."
+  },
+  "documentCaptureReadError": "The file could not be read. Try again.",
+  "@documentCaptureReadError": {
+    "description": "The platform did not return the file."
+  }
 }

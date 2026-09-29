@@ -17842,6 +17842,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Print the ticket'**
   String get facturationPaymentPrintTicketPrimary;
+
+  /// Action: photograph the document with the camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get documentCaptureScan;
+
+  /// Subtitle of the Scan action.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the document with the camera'**
+  String get documentCaptureScanHint;
+
+  /// Action: choose an image already on the tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a photo'**
+  String get documentCaptureImportImage;
+
+  /// Subtitle of the Import a photo action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an image already on the tablet'**
+  String get documentCaptureImportImageHint;
+
+  /// Action: choose a PDF already on the tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a PDF'**
+  String get documentCaptureImportPdf;
+
+  /// Subtitle of the Import a PDF action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PDF already on the tablet'**
+  String get documentCaptureImportPdfHint;
+
+  /// Accepted types and maximum size, shown when choosing a document.
+  ///
+  /// In en, this message translates to:
+  /// **'JPEG, PNG or PDF · {maxMegabytes} MB max'**
+  String documentCaptureLimits(int maxMegabytes);
+
+  /// Camera denied or missing: only the import actions remain.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera is not available on this tablet. Import a file instead.'**
+  String get documentCaptureCameraUnavailable;
+
+  /// Document rejected: too large.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is larger than {maxMegabytes} MB. Choose a lighter one.'**
+  String documentCaptureTooLarge(int maxMegabytes);
+
+  /// Document rejected: type not accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Only JPEG, PNG and PDF files are accepted.'**
+  String get documentCaptureUnsupported;
+
+  /// The platform did not return the file.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read. Try again.'**
+  String get documentCaptureReadError;
 }
 
 class _AppLocalizationsDelegate
