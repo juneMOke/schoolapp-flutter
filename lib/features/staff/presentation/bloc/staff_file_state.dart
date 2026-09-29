@@ -2,9 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
 
-/// Cartes ou tableau.
-enum StaffViewMode { grid, list }
+export 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
 
 /// Automate de l'écran : premier chargement, prêt, ou panne de lecture.
 ///
