@@ -1302,6 +1302,32 @@ void main() {
       },
     );
 
+    /// Un tuteur sans prénom (facultatif au serveur) ne doit pas empêcher le
+    /// dossier d'atterrir : il entre avec un prénom vide, et le dossier est lu.
+    test(
+      'hydratation : un tuteur sans prénom entre vide, le dossier atterrit',
+      () async {
+        await reconciliationDao.upsertEnrollmentSnapshots([
+          aggregate(
+            parents: const [
+              ParentSnapshotDto(
+                id: 'par-snap-1',
+                lastName: 'Ilunga',
+                phoneNumber: '+243900000001',
+                relationshipType: 'OTHER',
+              ),
+            ],
+          ),
+        ], syncedAt: 1000);
+
+        expect(await db.query('enrollments'), hasLength(1));
+        final parent = (await db.query('parents')).single;
+        expect(parent['first_name'], '');
+        expect(parent['last_name'], 'Ilunga');
+        expect(await db.query('student_parent'), hasLength(1));
+      },
+    );
+
     /// Une tablette neuve reconstitue le dossier à partir de ce seul agrégat.
     /// Deux colonnes manquantes y seraient invisibles : « ancien élève »
     /// tomberait à faux et la fiche santé à vide — indiscernables d'une

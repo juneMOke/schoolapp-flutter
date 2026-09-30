@@ -733,5 +733,55 @@ void main() {
 
       expect(dto.items.single.parents.single.emergencyContact, isNull);
     });
+
+    /// Le prénom du tuteur est facultatif au serveur (V109). Un tuteur sans
+    /// prénom levait au parse et emportait TOUTE la page : aucun dossier de
+    /// l'école n'atterrissait plus, et la page se rejouait à l'infini.
+    test('tuteur sans prénom → parse, firstName null', () {
+      final dto = EnrollmentSnapshotPageDto.fromJson({
+        'items': [
+          {
+            'enrollment': {
+              'id': 'enr-5',
+              'studentId': 'stu-5',
+              'academicYearId': 'ay-1',
+              'status': 'COMPLETED',
+              'enrollmentType': 'NEW_ENROLLMENT',
+              'enrollmentCode': 'CPL-2026-0005',
+              'enrollmentDate': '2026-09-30',
+              'firstName': 'Elisa',
+              'lastName': 'KALOMBO',
+              'surname': 'Yale',
+              'dateOfBirth': '2021-01-01',
+              'gender': 'FEMALE',
+            },
+            'student': {
+              'id': 'stu-5',
+              'firstName': 'Elisa',
+              'lastName': 'KALOMBO',
+              'surname': 'Yale',
+              'gender': 'FEMALE',
+              'dateOfBirth': '2021-01-01',
+            },
+            'parents': [
+              {
+                'id': 'par-5',
+                'firstName': null,
+                'lastName': 'KALOMBO',
+                'phoneNumber': '+243812235955',
+                'relationshipType': 'OTHER',
+              },
+            ],
+            'serverUpdatedAt': '2026-09-30T10:00:00Z',
+          },
+        ],
+        'hasMore': false,
+        'serverTime': '2026-09-30T10:00:01Z',
+      });
+
+      final parent = dto.items.single.parents.single;
+      expect(parent.firstName, isNull);
+      expect(parent.lastName, 'KALOMBO');
+    });
   });
 }
