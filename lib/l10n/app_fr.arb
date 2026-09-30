@@ -8900,5 +8900,12 @@
   "payrollAdvanceNeedAgent": "Choisissez l'agent.",
   "payrollAdvanceNeedReason": "Choisissez le motif.",
   "payrollAdvanceAmountIn": "Montant * ({symbol})",
-  "payrollTotalIn": "Total · {currency}"
+  "payrollTotalIn": "Total · {currency}",
+  "payrollRuleLaterLocked": "Un mois plus récent est déjà soumis ou validé.",
+  "payrollRuleMonthOutOfRange": "Ce mois est hors de la période de paie de l'école.",
+  "payrollRuleInvalidData": "Saisie refusée par le serveur : vérifiez-la.",
+  "payrollRuleAlreadyCancelled": "Déjà annulé.",
+  "payrollRuleForbidden": "Votre compte n'a pas le droit de faire ce geste.",
+  "payrollRuleParentRefused": "La fiche de l'agent a été refusée : elle n'arrivera jamais au serveur.",
+  "payrollAdvanceStatusCarried": "Reportée"
 }

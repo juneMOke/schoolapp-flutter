@@ -20,10 +20,11 @@ class StaffPayProfileDao {
   };
 
   Future<Map<String, StaffPayProfile>> forSchool(String schoolId) async {
-    final rows = await _store.db.query(
-      table,
-      where: 'school_id = ?',
-      whereArgs: [schoolId],
+    final rows = await _store.db.rawQuery(
+      'SELECT *, '
+      '${PayrollStore.lwwEffectiveStatusColumn(PayrollOutbox.profile, 'staff_member_id')} '
+      'FROM $table WHERE school_id = ?',
+      [schoolId],
     );
     return {
       for (final row in rows) row['staff_member_id']! as String: _toEntity(row),
@@ -41,7 +42,15 @@ class StaffPayProfileDao {
     await _store.transaction((txn) async {
       for (final item in items) {
         final key = _key(item.staffMemberId);
-        if (await PayrollStore.isPending(txn, table, key)) continue;
+        if (await PayrollStore.isPending(
+          txn,
+          table,
+          key,
+          saisieType: PayrollOutbox.profile,
+          saisieKey: item.staffMemberId,
+        )) {
+          continue;
+        }
         await PayrollStore.upsert(txn, table, key, {
           'school_id': schoolId,
           ..._columns(item),
@@ -120,7 +129,7 @@ class StaffPayProfileDao {
     payoutPhone: row['payout_phone'] as String?,
     bankName: row['bank_name'] as String?,
     bankAccount: row['bank_account'] as String?,
-    syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
+    syncState: PayrollStore.effectiveState(row),
     syncError: row['sync_error'] as String?,
   );
 }

@@ -101,6 +101,13 @@ abstract final class PayrollLabels {
     PayrollRule.mobileDetailsRequired => l10n.payrollRuleMobileDetails,
     PayrollRule.invalidReference => l10n.payrollRuleInvalidReference,
     PayrollRule.bankDetailsRequired => l10n.payrollRuleBankDetails,
+    PayrollRule.laterPayrollLocked => l10n.payrollRuleLaterLocked,
+    PayrollRule.monthOutOfRange => l10n.payrollRuleMonthOutOfRange,
+    PayrollRule.invalidData => l10n.payrollRuleInvalidData,
+    PayrollRule.alreadyCancelled => l10n.payrollRuleAlreadyCancelled,
+    PayrollRule.forbidden => l10n.payrollRuleForbidden,
+    PayrollRule.parentRefused => l10n.payrollRuleParentRefused,
+    PayrollRule.stale => l10n.payrollStaleBanner,
   };
 
   /// Un refus du serveur en mots : la règle qu'il dit quand on la connaît,

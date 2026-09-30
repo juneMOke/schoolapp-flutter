@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/attendance_s
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -30,8 +31,11 @@ void main() {
     variables: variables,
     profiles: profiles,
     attendance: attendance,
-    advances: advances.cast(),
-    priorLines: priorLines.cast(),
+    advances: PayrollAdvanceSchedule.statesOf(
+      advances.cast(),
+      month,
+      priorLines.cast(),
+    ),
   );
 
   group('roundDiv', () {

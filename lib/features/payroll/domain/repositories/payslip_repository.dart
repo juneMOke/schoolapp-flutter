@@ -10,7 +10,4 @@ abstract class PayslipRepository {
     String month,
     String staffMemberId,
   );
-
-  /// Tous les bulletins du mois, une page par agent.
-  Future<Either<Failure, Uint8List>> payslips(String month);
 }

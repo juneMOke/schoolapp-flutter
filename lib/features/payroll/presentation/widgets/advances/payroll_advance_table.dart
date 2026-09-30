@@ -71,7 +71,7 @@ class PayrollAdvanceTable extends StatelessWidget {
     String money(int cents) => PayrollLabels.money(cents, currency);
     final amount = advance.amount.amountInCents;
     final deducted = amount - advance.remainingInCents;
-    final status = PayrollAdvanceRules.statusOf(advance, view);
+    final status = PayrollAdvanceRules.statusOf(advance, view, snapshot);
     final cancellable =
         onCancel != null &&
         advance.isLive &&
@@ -215,6 +215,10 @@ class _StatusPill extends StatelessWidget {
       SalaryAdvancePhase.upcoming => (
         l10n.payrollAdvanceStatusUpcoming,
         PayrollTone.validated,
+      ),
+      SalaryAdvancePhase.carried => (
+        l10n.payrollAdvanceStatusCarried,
+        PayrollTone.alert,
       ),
       SalaryAdvancePhase.running => (
         l10n.payrollAdvanceStatusInstallment(status.rank, advance.installments),

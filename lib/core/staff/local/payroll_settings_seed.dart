@@ -7,7 +7,8 @@ typedef PayrollCurrencySeed = ({
 });
 
 /// Les réglages de paie d'une école tels que le socle les sert (section
-/// `payrollSettings`) : diviseur mensuel, majoration en ‰, statuts ouvrant les
+/// `payrollSettings`, `PayrollSettingsDto` du serveur — la liste des devises
+/// s'y nomme `currencyRules`, comme dans le PUT et les vecteurs) : diviseur mensuel, majoration en ‰, statuts ouvrant les
 /// allocations, et par devise l'allocation par enfant, le taux d'heure sup.
 /// par défaut et son pas.
 ///
@@ -38,7 +39,7 @@ class PayrollSettingsSeed {
     final divisor = raw['monthlyHoursDivisor'];
     final permille = raw['overtimeMultiplierPermille'];
     final kinds = raw['allowanceEligibleKinds'];
-    final currencies = raw['byCurrency'];
+    final currencies = raw['currencyRules'];
     if (divisor is! num ||
         divisor <= 0 ||
         permille is! num ||
@@ -86,7 +87,7 @@ class PayrollSettingsSeed {
     'monthlyHoursDivisor': monthlyHoursDivisor,
     'overtimeMultiplierPermille': overtimeMultiplierPermille,
     'allowanceEligibleKinds': allowanceEligibleKinds,
-    'byCurrency': [
+    'currencyRules': [
       for (final seed in byCurrency)
         {
           'currency': seed.currency,

@@ -20,9 +20,14 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_gesture_ou
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_sync_api.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_lww_outbox_handlers.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_gate.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import '../../staff/staff_fixtures.dart';
 
 class _MockApi extends Mock implements PayrollSyncApi {}
 
@@ -138,26 +143,28 @@ void main() {
           422,
           body: {
             'detailCode': 'PAYROLL_STALE',
-            'server': {
-              'lineCount': 1,
-              'totals': [
-                {
-                  'currency': 'USD',
-                  'grossInCents': 100,
-                  'advanceInCents': 0,
-                  'netInCents': 100,
-                },
-              ],
-              'linesDigest': 'abc',
-              'lines': [
-                {
-                  'staffMemberId': 'M-1',
-                  'currency': 'USD',
-                  'grossInCents': 100,
-                  'advanceInCents': 0,
-                  'netInCents': 100,
-                },
-              ],
+            'details': {
+              'server': {
+                'lineCount': 1,
+                'totals': [
+                  {
+                    'currency': 'USD',
+                    'grossInCents': 100,
+                    'advanceInCents': 0,
+                    'netInCents': 100,
+                  },
+                ],
+                'linesDigest': 'abc',
+                'lines': [
+                  {
+                    'staffMemberId': 'M-1',
+                    'currency': 'USD',
+                    'grossInCents': 100,
+                    'advanceInCents': 0,
+                    'netInCents': 100,
+                  },
+                ],
+              },
             },
           },
         ),
@@ -267,7 +274,7 @@ void main() {
       await disbursements.mark('d-1', StaffSyncState.failed, code: 'X');
       await disbursements.cancel(
         const PayrollCancellationRequestDto(
-          targetKey: PayrollCancellationRequestDto.disbursementKey,
+          clientRecordedAt: '2026-10-29T08:00:00Z',
           cancellationId: 'k-1',
           targetId: 'd-1',
           reason: 'Erreur de saisie',
@@ -304,7 +311,7 @@ void main() {
       await disbursements.add(request(), schoolId: _school, nowMs: 10);
       await disbursements.cancel(
         const PayrollCancellationRequestDto(
-          targetKey: PayrollCancellationRequestDto.disbursementKey,
+          clientRecordedAt: '2026-10-29T08:00:00Z',
           cancellationId: 'k-1',
           targetId: 'd-1',
           reason: 'Erreur',
@@ -396,7 +403,7 @@ void main() {
       );
       await disbursements.cancel(
         const PayrollCancellationRequestDto(
-          targetKey: PayrollCancellationRequestDto.disbursementKey,
+          clientRecordedAt: '2026-10-29T08:00:00Z',
           cancellationId: 'k-1',
           targetId: 'd-1',
           reason: 'Erreur',
@@ -419,6 +426,111 @@ void main() {
       expect(result.outcome, OutboxDispatchOutcome.acked);
       verifyNever(() => api.submitDisbursement(any(), any()));
       expect(await disbursements.hasLive('2026-10', 'm-1'), isFalse);
+    });
+  });
+
+  group('retour du back', () {
+    Future<void> seedMember({required bool refused}) async {
+      await StaffMemberDao(db).applyPulled(
+        [StaffMemberDeltaDto.tryParse(staffMemberJson('m-1'))!],
+        schoolId: _school,
+        nowMs: 1,
+      );
+      await db.update(
+        'staff_members',
+        {
+          'version': null,
+          'sync_status': refused ? 'SYNC_ERROR' : 'PENDING_SYNC',
+        },
+        where: 'id = ?',
+        whereArgs: ['m-1'],
+      );
+    }
+
+    PayrollVariablesOutboxHandler variablesHandler() =>
+        PayrollVariablesOutboxHandler(
+          api: api,
+          dao: PayrollVariablesDao(db),
+          outbox: outbox,
+          currentUser: user,
+          extras: const {},
+          members: StaffMemberGate(StaffMemberDao(db)),
+        );
+
+    Future<OutboxEntry> variablesEntry() async => (await outbox.pendingAll())
+        .firstWhere((e) => e.aggregateType == 'PAYROLL_VARIABLES');
+
+    test('fiche parente pas encore accusée : l envoi attend', () async {
+      await seedMember(refused: false);
+      await writeVariables();
+
+      final result = await variablesHandler().dispatch(await variablesEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test('fiche parente refusée : l envoi échoue en la nommant', () async {
+      await seedMember(refused: true);
+      await writeVariables();
+
+      final result = await variablesHandler().dispatch(await variablesEntry());
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(result.error, contains('refusée'));
+      final variables = (await PayrollVariablesDao(
+        db,
+      ).forSchool(_school))['2026-10']!['m-1']!;
+      expect(variables.syncState, StaffSyncState.failed);
+      verifyNever(() => api.submitVariables(any(), any()));
+    });
+
+    test('une saisie abandonnée par le moteur rend la ligne au pull', () async {
+      await writeVariables();
+      final entry = await variablesEntry();
+      await outbox.markSyncError(entry.id, 'poison');
+
+      await PayrollDao(db).apply(
+        [
+          PayrollDto.tryParse({
+            'id': 'p-10',
+            'month': '2026-10',
+            'status': 'DRAFT',
+            'variables': [
+              {
+                'staffMemberId': 'm-1',
+                'overtimeMinutes': 30,
+                'clientUpdatedAt': '2026-10-19T09:00:00Z',
+              },
+            ],
+          })!,
+        ],
+        schoolId: _school,
+        nowMs: 2,
+      );
+
+      final variables = (await PayrollVariablesDao(
+        db,
+      ).forSchool(_school))['2026-10']!['m-1']!;
+      expect(variables.overtimeMinutes, 30);
+      expect(variables.syncState, StaffSyncState.synced);
+    });
+
+    test('l annulation part sous la forme FactCancellationRequest', () {
+      const request = PayrollCancellationRequestDto(
+        cancellationId: 'k-1',
+        targetId: 'd-1',
+        reason: 'Erreur',
+        clientRecordedAt: '2026-10-29T08:00:00Z',
+        authorId: 'u-1',
+      );
+
+      expect(request.toJson(), {
+        'cancellationId': 'k-1',
+        'targetId': 'd-1',
+        'reason': 'Erreur',
+        'clientRecordedAt': '2026-10-29T08:00:00Z',
+        'authorId': 'u-1',
+      });
     });
   });
 }

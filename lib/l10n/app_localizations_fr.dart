@@ -13793,4 +13793,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollTotalIn(String currency) {
     return 'Total · $currency';
   }
+
+  @override
+  String get payrollRuleLaterLocked =>
+      'Un mois plus récent est déjà soumis ou validé.';
+
+  @override
+  String get payrollRuleMonthOutOfRange =>
+      'Ce mois est hors de la période de paie de l\'école.';
+
+  @override
+  String get payrollRuleInvalidData =>
+      'Saisie refusée par le serveur : vérifiez-la.';
+
+  @override
+  String get payrollRuleAlreadyCancelled => 'Déjà annulé.';
+
+  @override
+  String get payrollRuleForbidden =>
+      'Votre compte n\'a pas le droit de faire ce geste.';
+
+  @override
+  String get payrollRuleParentRefused =>
+      'La fiche de l\'agent a été refusée : elle n\'arrivera jamais au serveur.';
+
+  @override
+  String get payrollAdvanceStatusCarried => 'Reportée';
 }

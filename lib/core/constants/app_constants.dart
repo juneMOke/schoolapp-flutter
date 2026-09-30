@@ -1113,10 +1113,6 @@ class AppConstants {
   static const String payrollPayslipEndpoint =
       '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
 
-  /// Tous les bulletins scellés d'un mois, une page par agent.
-  static const String payrollPayslipsEndpoint =
-      '/api/v1/hr/payrolls/{month}/payslips.pdf';
-
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
   ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé

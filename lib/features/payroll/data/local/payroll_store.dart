@@ -138,20 +138,50 @@ class PayrollStore {
           as String?;
 
   /// La ligne [key] attend-elle encore son envoi ? Le pull ne l'écrase pas.
+  ///
+  /// Une saisie « dernier écrit gagne » ([saisieType], [saisieKey]) n'attend
+  /// vraiment que si l'une de ses entrées est **encore en file** : une saisie
+  /// que le moteur a abandonnée rend la ligne, et la descente suivante
+  /// l'écrase — sinon la tablette garderait pour toujours une valeur que le
+  /// serveur n'a jamais acceptée.
   static Future<bool> isPending(
     DatabaseExecutor txn,
     String table,
-    PayrollRowKey key,
-  ) async {
+    PayrollRowKey key, {
+    required String saisieType,
+    required String saisieKey,
+  }) async {
     final rows = await txn.query(
       table,
       columns: ['sync_status'],
       where: where(key),
       whereArgs: args(key),
     );
-    return rows.isNotEmpty &&
-        rows.single['sync_status'] == StaffSyncState.pending.dbValue;
+    if (rows.isEmpty ||
+        rows.single['sync_status'] != StaffSyncState.pending.dbValue) {
+      return false;
+    }
+    final queued = await txn.rawQuery(
+      'SELECT 1 FROM ${OutboxDao.table} WHERE status = ? AND id LIKE ? '
+      'LIMIT 1',
+      [OutboxStatus.pending.dbValue, '$saisieType:$saisieKey@%'],
+    );
+    return queued.isNotEmpty;
   }
+
+  /// La colonne `effective_status` d'une saisie « dernier écrit gagne » :
+  /// « en attente » sans aucune entrée encore en file se lit **refusée**.
+  /// [keyExpression] est l'expression SQL de la clé de saisie.
+  static String lwwEffectiveStatusColumn(
+    String saisieType,
+    String keyExpression,
+  ) =>
+      "CASE WHEN sync_status = '${StaffSyncState.pending.dbValue}' "
+      'AND NOT EXISTS (SELECT 1 FROM ${OutboxDao.table} o '
+      "WHERE o.status = '${OutboxStatus.pending.dbValue}' "
+      "AND o.id LIKE '$saisieType:' || $keyExpression || '@%') "
+      "THEN '${StaffSyncState.failed.dbValue}' "
+      'ELSE sync_status END AS effective_status';
 
   /// L'issue d'un envoi « dernier écrit gagne » : accusé ou refusé. Sans
   /// effet si la ligne a été retouchée pendant le vol — rend alors `false` :

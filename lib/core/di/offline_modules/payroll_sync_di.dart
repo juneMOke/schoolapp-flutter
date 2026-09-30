@@ -25,6 +25,8 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_gesture_ou
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_lww_outbox_handlers.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_sync_api.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_gate.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_pull_handlers.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -90,6 +92,7 @@ void _registerPushes(GetIt getIt) {
   final outbox = OutboxDao(getIt<Database>());
   final currentUser = getIt<CurrentUserContext>();
   final extras = getIt<Map<String, dynamic>>();
+  final members = StaffMemberGate(getIt<StaffMemberDao>());
   engine
     ..registerHandler(
       PayrollSettingsOutboxHandler(
@@ -107,6 +110,7 @@ void _registerPushes(GetIt getIt) {
         outbox: outbox,
         currentUser: currentUser,
         extras: extras,
+        members: members,
       ),
     )
     ..registerHandler(
@@ -116,6 +120,7 @@ void _registerPushes(GetIt getIt) {
         outbox: outbox,
         currentUser: currentUser,
         extras: extras,
+        members: members,
       ),
     )
     ..registerHandler(
@@ -135,6 +140,7 @@ void _registerPushes(GetIt getIt) {
         outbox: outbox,
         currentUser: currentUser,
         extras: extras,
+        members: members,
       ),
     )
     ..registerHandler(
@@ -153,6 +159,7 @@ void _registerPushes(GetIt getIt) {
         outbox: outbox,
         currentUser: currentUser,
         extras: extras,
+        members: members,
       ),
     )
     ..registerHandler(

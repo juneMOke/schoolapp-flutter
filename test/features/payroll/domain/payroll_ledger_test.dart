@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_rules.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -228,5 +229,41 @@ void main() {
 
       expect(view.phase, PayrollPhase.validated);
     });
+  });
+
+  test('une avance dont la retenue n atteint pas le dû est reportée', () {
+    final snap = snapshot(
+      headers: {'2026-10': header(PayrollStatus.validated)},
+      frozen: {
+        '2026-10': [
+          const PayrollLine(
+            month: '2026-10',
+            staffMemberId: 'm-1',
+            currency: 'USD',
+            baseInCents: 0,
+            grossInCents: 0,
+            netInCents: 0,
+            frozen: true,
+            advances: [
+              PayrollLineAdvance(
+                advanceId: 'a-1',
+                rank: 1,
+                installments: 0,
+                dueInCents: 3000,
+                takenInCents: 0,
+                carriedInCents: 3000,
+              ),
+            ],
+          ),
+        ],
+      },
+    );
+    final status = PayrollAdvanceRules.statusOf(
+      advance('m-1', amount: 3000, installments: 3),
+      PayrollLedger.monthView(snap, '2026-10'),
+      snap,
+    );
+
+    expect(status.phase, SalaryAdvancePhase.carried);
   });
 }

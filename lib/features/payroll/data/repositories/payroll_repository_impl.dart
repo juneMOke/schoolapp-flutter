@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_local.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_request_factory.dart';
-import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellation_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
@@ -140,11 +139,7 @@ class PayrollRepositoryImpl implements PayrollRepository {
   ) => _write(
     "Annulation de l'avance",
     (requests, nowMs) => _local.advances.cancel(
-      requests.cancellation(
-        PayrollCancellationRequestDto.advanceKey,
-        advanceId,
-        reason,
-      ),
+      requests.cancellation(advanceId, reason),
       schoolId: requests.schoolId,
       nowMs: nowMs,
     ),
@@ -172,11 +167,7 @@ class PayrollRepositoryImpl implements PayrollRepository {
   ) => _write(
     'Annulation du versement',
     (requests, nowMs) => _local.disbursements.cancel(
-      requests.cancellation(
-        PayrollCancellationRequestDto.disbursementKey,
-        disbursement.id,
-        reason,
-      ),
+      requests.cancellation(disbursement.id, reason),
       month: disbursement.month,
       staffMemberId: disbursement.staffMemberId,
       schoolId: requests.schoolId,

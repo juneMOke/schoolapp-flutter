@@ -34,6 +34,25 @@ enum PayrollRule {
   mobileDetailsRequired,
   invalidReference,
   bankDetailsRequired,
+
+  /// Un mois plus récent est déjà soumis ou validé.
+  laterPayrollLocked,
+
+  /// Hors de la période de paie de l'école.
+  monthOutOfRange,
+
+  /// Une saisie que le serveur juge invalide.
+  invalidData,
+  alreadyCancelled,
+
+  /// Le compte n'a pas le droit du geste (403).
+  forbidden,
+
+  /// La fiche de l'agent a été refusée : ce qui en dépend échoue avec elle.
+  parentRefused,
+
+  /// Les chiffres du serveur diffèrent de ceux vus (`PAYROLL_STALE`).
+  stale,
 }
 
 class PayrollRuleFailure extends ValidationFailure {
@@ -71,6 +90,18 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'ALREADY_DISBURSED' => PayrollRule.alreadyDisbursed,
   'NOTHING_TO_DISBURSE' => PayrollRule.nothingToDisburse,
   'SIGNATURE_REQUIRED' => PayrollRule.signatureRequired,
-  'INVALID_MOBILE_REFERENCE' => PayrollRule.invalidReference,
+  'PAYROLL_NOT_VALIDATED' => PayrollRule.notValidated,
+  'LATER_PAYROLL_LOCKED' => PayrollRule.laterPayrollLocked,
+  'PAYROLL_MONTH_OUT_OF_RANGE' => PayrollRule.monthOutOfRange,
+  'ALREADY_CANCELLED' => PayrollRule.alreadyCancelled,
+  'PAYROLL_GESTURE_FORBIDDEN' || 'HTTP_403' => PayrollRule.forbidden,
+  'PAYROLL_STALE' => PayrollRule.stale,
+  'STAFF_MEMBER_REFUSED' => PayrollRule.parentRefused,
+  'FINGERPRINT_REQUIRED' ||
+  'INVALID_ADVANCE' ||
+  'INVALID_DISBURSEMENT' ||
+  'INVALID_PAY_PROFILE' ||
+  'INVALID_PAYROLL_SETTINGS' => PayrollRule.invalidData,
+  final code? when code.endsWith('_ID_CONFLICT') => PayrollRule.invalidData,
   _ => null,
 };

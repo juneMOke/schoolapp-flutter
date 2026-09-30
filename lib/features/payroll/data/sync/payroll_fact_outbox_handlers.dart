@@ -32,11 +32,16 @@ class SalaryAdvanceOutboxHandler
     required super.outbox,
     required super.currentUser,
     required super.extras,
+    super.members,
   }) : _api = api,
        _dao = dao;
 
   @override
   String get aggregateType => PayrollOutbox.advance;
+
+  @override
+  String? staffMemberOf(SalaryAdvanceRequestDto request) =>
+      request.advance.staffMemberId;
 
   @override
   Set<String> get waitsFor => const {PayrollOutbox.gesture};
@@ -95,11 +100,16 @@ class PayrollDisbursementOutboxHandler
     required super.outbox,
     required super.currentUser,
     required super.extras,
+    super.members,
   }) : _api = api,
        _dao = dao;
 
   @override
   String get aggregateType => PayrollOutbox.disbursement;
+
+  @override
+  String? staffMemberOf(PayrollDisbursementRequestDto request) =>
+      request.disbursement.staffMemberId;
 
   @override
   Set<String> get waitsFor => const {

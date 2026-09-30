@@ -21771,6 +21771,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total · {currency}'**
   String payrollTotalIn(String currency);
+
+  /// No description provided for @payrollRuleLaterLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'A later month is already submitted or validated.'**
+  String get payrollRuleLaterLocked;
+
+  /// No description provided for @payrollRuleMonthOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'This month is outside the school\'s payroll period.'**
+  String get payrollRuleMonthOutOfRange;
+
+  /// No description provided for @payrollRuleInvalidData.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry refused by the server: check it.'**
+  String get payrollRuleInvalidData;
+
+  /// No description provided for @payrollRuleAlreadyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Already cancelled.'**
+  String get payrollRuleAlreadyCancelled;
+
+  /// No description provided for @payrollRuleForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to do this.'**
+  String get payrollRuleForbidden;
+
+  /// No description provided for @payrollRuleParentRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff record was refused: it will never reach the server.'**
+  String get payrollRuleParentRefused;
+
+  /// No description provided for @payrollAdvanceStatusCarried.
+  ///
+  /// In en, this message translates to:
+  /// **'Carried over'**
+  String get payrollAdvanceStatusCarried;
 }
 
 class _AppLocalizationsDelegate

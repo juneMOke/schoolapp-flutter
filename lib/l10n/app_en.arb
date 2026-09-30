@@ -8546,5 +8546,12 @@
   "payrollAdvanceAmountIn": "Amount * ({symbol})",
   "@payrollAdvanceAmountIn": {"placeholders": {"symbol": {"type": "String"}}},
   "payrollTotalIn": "Total · {currency}",
-  "@payrollTotalIn": {"placeholders": {"currency": {"type": "String"}}}
+  "@payrollTotalIn": {"placeholders": {"currency": {"type": "String"}}},
+  "payrollRuleLaterLocked": "A later month is already submitted or validated.",
+  "payrollRuleMonthOutOfRange": "This month is outside the school's payroll period.",
+  "payrollRuleInvalidData": "Entry refused by the server: check it.",
+  "payrollRuleAlreadyCancelled": "Already cancelled.",
+  "payrollRuleForbidden": "Your account is not allowed to do this.",
+  "payrollRuleParentRefused": "The staff record was refused: it will never reach the server.",
+  "payrollAdvanceStatusCarried": "Carried over"
 }

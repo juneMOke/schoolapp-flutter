@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
@@ -89,13 +90,11 @@ abstract final class PayrollLedger {
         variables: snapshot.variables[month] ?? const {},
         profiles: snapshot.profiles,
         attendance: snapshot.summaries[PayrollMonth.previous(month)],
-        advances: snapshot.advances,
-        priorLines: [
-          for (final entry in snapshot.frozenLines.entries)
-            if (entry.key.compareTo(month) < 0 &&
-                snapshot.headers[entry.key]?.status == PayrollStatus.validated)
-              ...entry.value,
-        ],
+        advances: PayrollAdvanceSchedule.statesOf(
+          snapshot.advances,
+          month,
+          priorLinesOf(snapshot, month),
+        ),
       );
 
   /// La ligne qu'aurait [variables] — l'aperçu en direct des éléments
@@ -118,11 +117,21 @@ abstract final class PayrollLedger {
         profiles: input.profiles,
         attendance: input.attendance,
         advances: input.advances,
-        priorLines: input.priorLines,
       ),
     ).lines;
     return lines.isEmpty ? null : lines.single;
   }
+
+  /// Les lignes figées des paies validées antérieures à [month].
+  static List<PayrollLine> priorLinesOf(
+    PayrollSnapshot snapshot,
+    String month,
+  ) => [
+    for (final entry in snapshot.frozenLines.entries)
+      if (entry.key.compareTo(month) < 0 &&
+          snapshot.headers[entry.key]?.status == PayrollStatus.validated)
+        ...entry.value,
+  ];
 
   static List<PayrollGesture> gesturesOf(
     PayrollSnapshot snapshot,

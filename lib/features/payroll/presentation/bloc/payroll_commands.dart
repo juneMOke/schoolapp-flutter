@@ -132,11 +132,11 @@ class PayrollCommands {
     PayrollShareChannel channel,
   ) => _share(month, staffMemberId, channel);
 
-  /// Le bulletin scellé d'un agent, ou ceux du mois — en ligne seulement.
+  /// Le bulletin scellé d'un agent — en ligne seulement.
   Future<Either<Failure, Uint8List>> payslip(
-    String month, {
-    String? staffMemberId,
-  }) => _payslip(month, staffMemberId: staffMemberId);
+    String month,
+    String staffMemberId,
+  ) => _payslip(month, staffMemberId);
 
   static PayrollNotice _notice(
     Either<Failure, Unit> result,

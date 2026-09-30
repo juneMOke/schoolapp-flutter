@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
@@ -10,7 +11,16 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_mont
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 
 /// Où en est une avance, pour le registre.
-enum SalaryAdvancePhase { refused, cancelled, settled, upcoming, running }
+enum SalaryAdvancePhase {
+  refused,
+  cancelled,
+  settled,
+  upcoming,
+  running,
+
+  /// Une échéance n'a pas pu être retenue en entier : le reste a glissé.
+  carried,
+}
 
 /// Le statut d'une avance et, en cours, le rang de sa dernière échéance.
 typedef SalaryAdvanceStatus = ({SalaryAdvancePhase phase, int rank});
@@ -53,7 +63,11 @@ abstract final class PayrollAdvanceRules {
       draft.firstMonth,
     );
     if (contract == null) return PayrollRule.noContract;
-    if (PayrollEngine.currencyOf(contract) != draft.amount.currency) {
+    final currency = PayrollEngine.currencyOf(
+      contract,
+      fallback: snapshot.settings.firstCurrency,
+    );
+    if (currency != draft.amount.currency) {
       return PayrollRule.invalidAmount;
     }
     final view = PayrollLedger.monthView(snapshot, draft.firstMonth);
@@ -62,28 +76,64 @@ abstract final class PayrollAdvanceRules {
   }
 
   /// Le statut d'[advance] au mois de [view] : refusée, annulée, soldée, à
-  /// venir, ou en cours — avec le rang de l'échéance que le livre porte.
+  /// venir, reportée ou en cours (avec le rang de son échéance).
+  ///
+  /// **Reportée** quand sa dernière retenue figée a laissé un report, ou,
+  /// sur le livre du mois, quand son rang dépasse le nombre d'échéances ou
+  /// que la retenue n'atteint pas le dû. Une avance commencée sans aucune
+  /// retenue possible (pas de ligne dans sa devise) glisse de même.
   static SalaryAdvanceStatus statusOf(
     SalaryAdvance advance,
     PayrollMonthView view,
+    PayrollSnapshot snapshot,
   ) {
-    final month = view.month;
     if (advance.isRefused) return (phase: SalaryAdvancePhase.refused, rank: 0);
     if (advance.isCancelled) {
       return (phase: SalaryAdvancePhase.cancelled, rank: 0);
     }
     if (advance.isSettled) return (phase: SalaryAdvancePhase.settled, rank: 0);
-    if (advance.firstMonth.compareTo(month) > 0) {
+    if (advance.firstMonth.compareTo(view.month) > 0) {
       return (phase: SalaryAdvancePhase.upcoming, rank: 0);
     }
-    for (final line in view.lines) {
-      for (final deduction in line.advances) {
-        if (deduction.advanceId == advance.id) {
-          return (phase: SalaryAdvancePhase.running, rank: deduction.rank);
-        }
+    final current = _deductionIn(view.lines, advance.id);
+    if (current != null) {
+      final carried =
+          // Le nombre d'échéances vient de l'avance : une ligne figée ne le
+          // porte pas.
+          current.rank > advance.installments ||
+          current.takenInCents < current.dueInCents;
+      return (
+        phase: carried
+            ? SalaryAdvancePhase.carried
+            : SalaryAdvancePhase.running,
+        rank: current.rank,
+      );
+    }
+    final frozenMonths = snapshot.frozenLines.keys.toList()..sort();
+    for (final month in frozenMonths.reversed) {
+      final last = _deductionIn(snapshot.frozenLines[month]!, advance.id);
+      if (last != null) {
+        return (
+          phase: last.carriedInCents > 0
+              ? SalaryAdvancePhase.carried
+              : SalaryAdvancePhase.running,
+          rank: last.rank,
+        );
       }
     }
-    return (phase: SalaryAdvancePhase.running, rank: advance.installments);
+    return (phase: SalaryAdvancePhase.carried, rank: 0);
+  }
+
+  static PayrollLineAdvance? _deductionIn(
+    List<PayrollLine> lines,
+    String advanceId,
+  ) {
+    for (final line in lines) {
+      for (final deduction in line.advances) {
+        if (deduction.advanceId == advanceId) return deduction;
+      }
+    }
+    return null;
   }
 
   /// Une retenue de cette avance est-elle déjà figée ?

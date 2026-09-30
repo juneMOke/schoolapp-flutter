@@ -93,14 +93,19 @@ class PayrollGestureOutboxHandler
     StaffPushFailure failure,
     String schoolId,
   ) async {
-    final body = failure.body;
+    // Les chiffres du serveur sont rangés sous `details.server`
+    // (`ApiErrorResponse.details`).
+    final details = failure.body is Map
+        ? (failure.body! as Map)['details']
+        : null;
     await _gestures.mark(
       request.gestureId,
       StaffSyncState.failed,
       code: failure.storedCode,
       reason: failure.reason,
-      serverState: failure.detailCode == PayrollGesture.staleCode && body is Map
-          ? PayrollFingerprintJson.tryParse(body['server'])
+      serverState:
+          failure.detailCode == PayrollGesture.staleCode && details is Map
+          ? PayrollFingerprintJson.tryParse(details['server'])
           : null,
     );
     return true;

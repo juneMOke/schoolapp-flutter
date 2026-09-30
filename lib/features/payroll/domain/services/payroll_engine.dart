@@ -3,7 +3,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/attendance_s
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_state.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_contract_picker.dart';
@@ -25,10 +25,10 @@ class PayrollEngineInput {
 
   /// Le résumé du Pointage de M−1 ; `null` = mois hors année, vide (R1).
   final AttendanceSummary? attendance;
-  final List<SalaryAdvance> advances;
 
-  /// Les lignes figées des paies validées **antérieures** à [month].
-  final List<PayrollLine> priorLines;
+  /// Par agent : l'état de ses avances pour [month]
+  /// (`PayrollAdvanceSchedule.statesOf`).
+  final Map<String, List<PayrollAdvanceState>> advances;
 
   const PayrollEngineInput({
     required this.month,
@@ -37,8 +37,7 @@ class PayrollEngineInput {
     this.variables = const {},
     this.profiles = const {},
     this.attendance,
-    this.advances = const [],
-    this.priorLines = const [],
+    this.advances = const {},
   });
 }
 
@@ -95,7 +94,7 @@ abstract final class PayrollEngine {
     final hourly =
         kind == StaffContractKind.vacataire &&
         contract.payMode == StaffPayMode.hourly;
-    final currency = currencyOf(contract);
+    final currency = currencyOf(contract, fallback: settings.firstCurrency);
     final amount = contract.amount?.amountInCents ?? 0;
     final perCurrency = settings.of(currency);
     final hoursMonth = PayrollMonth.previous(input.month);
@@ -135,16 +134,7 @@ abstract final class PayrollEngine {
       month: input.month,
       currency: currency,
       grossInCents: gross,
-      advances: [
-        for (final advance in input.advances)
-          if (advance.staffMemberId == memberId) advance,
-      ],
-      priorLines: [
-        for (final line in input.priorLines)
-          if (line.staffMemberId == memberId &&
-              line.month.compareTo(input.month) < 0)
-            line,
-      ],
+      states: input.advances[memberId] ?? const [],
     );
     final taken = advances.fold(0, (sum, a) => sum + a.takenInCents);
 
@@ -161,7 +151,7 @@ abstract final class PayrollEngine {
       baseRateInCents: hourly ? amount : null,
       hoursMonth: hourly ? hoursMonth : null,
       overtimeMinutes: overtimeMinutes,
-      overtimeRateInCents: overtimeMinutes > 0 ? rate : 0,
+      overtimeRateInCents: rate,
       overtimeInCents: overtime,
       children: children,
       allowanceInCents: allowance,
@@ -175,8 +165,12 @@ abstract final class PayrollEngine {
 
   /// La devise de la ligne : celle de la prime pour un conventionné (son
   /// salaire est versé par l'État), celle du montant sinon. Une devise vide
-  /// compte comme absente ; sans rien, le dollar.
-  static String currencyOf(StaffContract contract) {
+  /// compte comme absente ; sans rien, [fallback] — la première devise que
+  /// l'école a réglée.
+  static String currencyOf(
+    StaffContract contract, {
+    String fallback = CurrencyCode.usd,
+  }) {
     final candidates = contract.kind == StaffContractKind.conventionne
         ? [contract.bonus?.currency, contract.amount?.currency]
         : [contract.amount?.currency, contract.bonus?.currency];
@@ -184,7 +178,7 @@ abstract final class PayrollEngine {
       final code = CurrencyCode.normalize(candidate ?? '');
       if (code.isNotEmpty) return code;
     }
-    return CurrencyCode.usd;
+    return fallback;
   }
 
   /// Le taux horaire d'un permanent : salaire ÷ diviseur × majoration, arrondi

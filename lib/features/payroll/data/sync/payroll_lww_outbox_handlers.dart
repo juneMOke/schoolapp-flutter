@@ -73,11 +73,16 @@ class StaffPayProfileOutboxHandler
     required super.outbox,
     required super.currentUser,
     required super.extras,
+    super.members,
   }) : _api = api,
        _dao = dao;
 
   @override
   String get aggregateType => PayrollOutbox.profile;
+
+  @override
+  String? staffMemberOf(StaffPayProfileRequestDto request) =>
+      request.profile.staffMemberId;
 
   @override
   StaffPayProfileRequestDto? parse(Object? raw) =>
@@ -122,11 +127,16 @@ class PayrollVariablesOutboxHandler
     required super.outbox,
     required super.currentUser,
     required super.extras,
+    super.members,
   }) : _api = api,
        _dao = dao;
 
   @override
   String get aggregateType => PayrollOutbox.variables;
+
+  @override
+  String? staffMemberOf(PayrollVariablesRequestDto request) =>
+      request.staffMemberId;
 
   @override
   Set<String> get waitsFor => const {PayrollOutbox.gesture};

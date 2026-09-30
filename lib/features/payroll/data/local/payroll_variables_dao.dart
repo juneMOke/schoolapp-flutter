@@ -25,10 +25,11 @@ class PayrollVariablesDao {
   Future<Map<String, Map<String, PayrollVariables>>> forSchool(
     String schoolId,
   ) async {
-    final rows = await _store.db.query(
-      table,
-      where: 'school_id = ?',
-      whereArgs: [schoolId],
+    final rows = await _store.db.rawQuery(
+      'SELECT *, '
+      "${PayrollStore.lwwEffectiveStatusColumn(PayrollOutbox.variables, "month || ':' || staff_member_id")} "
+      'FROM $table WHERE school_id = ?',
+      [schoolId],
     );
     final result = <String, Map<String, PayrollVariables>>{};
     for (final row in rows) {
@@ -37,7 +38,7 @@ class PayrollVariablesDao {
         overtimeMinutes: row['overtime_minutes'] as int?,
         overtimeRateInCents: row['overtime_rate_in_cents'] as int?,
         dependentChildren: row['dependent_children'] as int?,
-        syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
+        syncState: PayrollStore.effectiveState(row),
         syncError: row['sync_error'] as String?,
       );
       (result[row['month']! as String] ??= {})[variables.staffMemberId] =
@@ -57,7 +58,15 @@ class PayrollVariablesDao {
   }) async {
     for (final item in items) {
       final key = _key(schoolId, month, item.staffMemberId);
-      if (await PayrollStore.isPending(txn, table, key)) continue;
+      if (await PayrollStore.isPending(
+        txn,
+        table,
+        key,
+        saisieType: PayrollOutbox.variables,
+        saisieKey: '$month:${item.staffMemberId}',
+      )) {
+        continue;
+      }
       await PayrollStore.upsert(txn, table, key, {
         'overtime_minutes': item.overtimeMinutes,
         'overtime_rate_in_cents': item.overtimeRateInCents,

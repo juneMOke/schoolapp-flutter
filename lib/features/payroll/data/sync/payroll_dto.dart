@@ -80,7 +80,8 @@ class PayrollDto {
   final List<PayrollVariablesDto> variables;
   final List<PayrollGestureDto> gestures;
 
-  /// `null` : l'accusé d'un geste ne les porte pas — ne rien effacer.
+  /// Liste vide hors `VALIDATED` ; `null` si le champ manque (ne rien
+  /// effacer d'une paie validée).
   final List<Map<dynamic, dynamic>>? lines;
   final String? serverUpdatedAt;
 

@@ -72,7 +72,12 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
       memberId,
       _firstMonth,
     );
-    return contract == null ? null : PayrollEngine.currencyOf(contract);
+    return contract == null
+        ? null
+        : PayrollEngine.currencyOf(
+            contract,
+            fallback: widget.snapshot.settings.firstCurrency,
+          );
   }
 
   SalaryAdvanceDraft? get _draft {

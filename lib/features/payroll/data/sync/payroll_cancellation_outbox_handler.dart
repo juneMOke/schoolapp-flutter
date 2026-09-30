@@ -26,22 +26,19 @@ class PayrollCancellationOutboxHandler
     extends PayrollOutboxHandler<PayrollCancellationRequestDto> {
   @override
   final String aggregateType;
-  final String _targetKey;
   final PayrollCancellationStore _store;
   final PayrollCancellationSender _sendCancellation;
   final String Function() _nowIso;
 
   PayrollCancellationOutboxHandler._({
     required this.aggregateType,
-    required String targetKey,
     required PayrollCancellationStore store,
     required PayrollCancellationSender sender,
     required super.outbox,
     required super.currentUser,
     required super.extras,
     String Function()? nowIso,
-  }) : _targetKey = targetKey,
-       _store = store,
+  }) : _store = store,
        _sendCancellation = sender,
        _nowIso = nowIso ?? (() => DateTime.now().toUtc().toIso8601String());
 
@@ -55,7 +52,6 @@ class PayrollCancellationOutboxHandler
     String Function()? nowIso,
   }) => PayrollCancellationOutboxHandler._(
     aggregateType: PayrollOutbox.advanceCancellation,
-    targetKey: PayrollCancellationRequestDto.advanceKey,
     store: store,
     sender: sender,
     outbox: outbox,
@@ -75,7 +71,6 @@ class PayrollCancellationOutboxHandler
     String Function()? nowIso,
   }) => PayrollCancellationOutboxHandler._(
     aggregateType: PayrollOutbox.disbursementCancellation,
-    targetKey: PayrollCancellationRequestDto.disbursementKey,
     store: store,
     sender: sender,
     outbox: outbox,
@@ -95,7 +90,7 @@ class PayrollCancellationOutboxHandler
 
   @override
   PayrollCancellationRequestDto? parse(Object? raw) =>
-      PayrollCancellationRequestDto.tryParse(raw, targetKey: _targetKey);
+      PayrollCancellationRequestDto.tryParse(raw);
 
   @override
   Future<OutboxDispatchResult?> hold(

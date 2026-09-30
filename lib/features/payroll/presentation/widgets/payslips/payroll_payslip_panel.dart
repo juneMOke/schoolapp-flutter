@@ -100,11 +100,12 @@ class PayrollPayslipPanel extends StatelessWidget {
             ),
           ],
           const Divider(height: AppSpacing.xl),
-          EteeloButton.ghost(
-            label: l10n.payrollPayslipAll,
-            icon: Icons.library_books_outlined,
-            onPressed: () => actions.openPdf(null),
-          ),
+          if (!locked)
+            EteeloButton.ghost(
+              label: l10n.payrollPayslipAll,
+              icon: Icons.library_books_outlined,
+              onPressed: () => actions.openPdf(null),
+            ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [

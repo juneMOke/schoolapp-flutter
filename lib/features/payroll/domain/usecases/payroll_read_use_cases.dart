@@ -16,18 +16,15 @@ class LoadPayrollUseCase {
   Future<Either<Failure, PayrollSnapshot>> call() => _repository.load();
 }
 
-/// Télécharge un bulletin scellé, ou ceux de tout le mois.
+/// Télécharge le bulletin scellé d'un agent — le serveur n'en sert pas de
+/// recueil : « tous les bulletins » n'existe qu'en provisoire, sur la tablette.
 class FetchPayslipUseCase {
   final PayslipRepository _repository;
 
   const FetchPayslipUseCase(this._repository);
 
-  Future<Either<Failure, Uint8List>> call(
-    String month, {
-    String? staffMemberId,
-  }) => staffMemberId == null
-      ? _repository.payslips(month)
-      : _repository.payslip(month, staffMemberId);
+  Future<Either<Failure, Uint8List>> call(String month, String staffMemberId) =>
+      _repository.payslip(month, staffMemberId);
 }
 
 /// Note sur la tablette qu'un bulletin l'a quittée (WhatsApp ouvert, PDF).

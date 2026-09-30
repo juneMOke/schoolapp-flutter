@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_member_gate.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatch.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 
@@ -13,6 +14,9 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
   final OutboxDao _outbox;
   final CurrentUserContext _currentUser;
 
+  /// La fiche d'agent dont dépend l'envoi ; `null` : aucune garde.
+  final StaffMemberGate? _members;
+
   /// Les options Dio de la requête (auth exigée).
   final Map<String, dynamic> extras;
 
@@ -20,8 +24,14 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
     required OutboxDao outbox,
     required CurrentUserContext currentUser,
     required this.extras,
+    StaffMemberGate? members,
   }) : _outbox = outbox,
-       _currentUser = currentUser;
+       _currentUser = currentUser,
+       _members = members;
+
+  /// L'agent dont la fiche doit être au serveur avant cet envoi ; `null` :
+  /// l'envoi ne dépend d'aucune fiche.
+  String? staffMemberOf(R request) => null;
 
   /// La requête figée, ou `null` : illisible, elle ne se répare pas en la
   /// rejouant.
@@ -44,6 +54,32 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
   /// (l'entrée repart alors avec elle).
   Future<bool> reject(R request, StaffPushFailure failure, String schoolId);
 
+  /// Une fiche parente jamais accusée : l'envoi attend ; refusée, il échoue à
+  /// son tour, en la nommant — un fait d'argent part alors « à régulariser ».
+  Future<OutboxDispatchResult?> _parentHold(R request, String schoolId) async {
+    final memberId = staffMemberOf(request);
+    final members = _members;
+    if (memberId == null || members == null) return null;
+    final parent = await members.of(memberId);
+    switch (parent.state) {
+      case StaffParentState.unsent:
+        return const OutboxDispatchResult.blocked('Fiche pas encore accusée');
+      case StaffParentState.refused:
+        final reason =
+            'Fiche de ${parent.name ?? memberId} refusée : '
+            'elle n\'arrivera jamais au serveur';
+        await reject(
+          request,
+          StaffPushFailure.local(StaffMemberGate.parentRefusedCode, reason),
+          schoolId,
+        );
+        return OutboxDispatchResult.failed(reason);
+      case StaffParentState.missing:
+      case StaffParentState.acknowledged:
+        return null;
+    }
+  }
+
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
     final request = StaffOutboxDispatch.decode(entry.payload, parse);
@@ -53,6 +89,8 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
     final foreign = outboxForeignSchoolHold(entry, _currentUser.schoolId);
     if (foreign != null) return foreign;
     final schoolId = entry.schoolId ?? _currentUser.schoolId ?? '';
+    final parent = await _parentHold(request, schoolId);
+    if (parent != null) return parent;
     if (waitsFor.isNotEmpty &&
         await _outbox.hasOlderPending(
           entryId: entry.id,

@@ -1,8 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 import '../payroll_builders.dart';
+
+List<PayrollLineAdvance> deduct({
+  required String month,
+  required String currency,
+  required int grossInCents,
+  required List<SalaryAdvance> advances,
+  required List<PayrollLine> priorLines,
+}) => PayrollAdvanceSchedule.deduct(
+  month: month,
+  currency: currency,
+  grossInCents: grossInCents,
+  states: [
+    for (final states in PayrollAdvanceSchedule.statesOf(
+      advances,
+      month,
+      priorLines,
+    ).values)
+      ...states,
+  ],
+);
 
 void main() {
   test('100 USD sur 3 mois : 33,33 · 33,33 · 33,34', () {
@@ -12,21 +34,21 @@ void main() {
       installments: 3,
       firstMonth: '2026-10',
     );
-    final first = PayrollAdvanceSchedule.deduct(
+    final first = deduct(
       month: '2026-10',
       currency: 'USD',
       grossInCents: 50000,
       advances: [plan],
       priorLines: const [],
     ).single;
-    final second = PayrollAdvanceSchedule.deduct(
+    final second = deduct(
       month: '2026-11',
       currency: 'USD',
       grossInCents: 50000,
       advances: [plan],
       priorLines: [frozenLine('m-1', '2026-10', advanceId: 'a-1', taken: 3333)],
     ).single;
-    final third = PayrollAdvanceSchedule.deduct(
+    final third = deduct(
       month: '2026-12',
       currency: 'USD',
       grossInCents: 50000,
@@ -46,14 +68,14 @@ void main() {
 
   test('un brut nul reporte l échéance, le mois suivant rattrape', () {
     final plan = advance('m-1', amount: 6000, installments: 3);
-    final empty = PayrollAdvanceSchedule.deduct(
+    final empty = deduct(
       month: '2026-10',
       currency: 'USD',
       grossInCents: 0,
       advances: [plan],
       priorLines: const [],
     ).single;
-    final next = PayrollAdvanceSchedule.deduct(
+    final next = deduct(
       month: '2026-11',
       currency: 'USD',
       grossInCents: 22800,
@@ -75,7 +97,7 @@ void main() {
       installments: 3,
       firstMonth: '2026-06',
     );
-    final september = PayrollAdvanceSchedule.deduct(
+    final september = deduct(
       month: '2026-09',
       currency: 'USD',
       grossInCents: 35000,
@@ -95,7 +117,7 @@ void main() {
       firstMonth: '2026-09',
     );
     final newer = advance('m-1', id: 'a-new', amount: 3000);
-    final result = PayrollAdvanceSchedule.deduct(
+    final result = deduct(
       month: '2026-10',
       currency: 'USD',
       grossInCents: 4000,
@@ -109,7 +131,7 @@ void main() {
   });
 
   test('ni autre devise, ni refusée, ni soldée, ni pas encore commencée', () {
-    final result = PayrollAdvanceSchedule.deduct(
+    final result = deduct(
       month: '2026-10',
       currency: 'USD',
       grossInCents: 35000,

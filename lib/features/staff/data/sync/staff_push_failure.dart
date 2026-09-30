@@ -14,6 +14,8 @@ import 'package:school_app_flutter/core/network/api_error_parser.dart';
 ///   de dépendance**, à rejouer sans consommer de tentative ([isDependencyWait]) ;
 /// - `PAYROLL_NOT_YET_VALIDATED` : un versement nomme une validation de paie
 ///   pas encore arrivée au serveur — même attente ;
+/// - `ADVANCE_NOT_YET_SYNCED` / `DISBURSEMENT_NOT_YET_SYNCED` : une
+///   annulation arrive avant le fait qu'elle annule — même attente ;
 /// - sans code : le même identifiant est encore en vol — un rejeu ordinaire.
 class StaffPushFailure {
   final int? status;
@@ -36,13 +38,24 @@ class StaffPushFailure {
   static const String memberNotYetSynced = 'STAFF_MEMBER_NOT_YET_SYNCED';
   static const String contractNotYetSynced = 'STAFF_CONTRACT_NOT_YET_SYNCED';
   static const String payrollNotYetValidated = 'PAYROLL_NOT_YET_VALIDATED';
+  static const String advanceNotYetSynced = 'ADVANCE_NOT_YET_SYNCED';
+  static const String disbursementNotYetSynced = 'DISBURSEMENT_NOT_YET_SYNCED';
 
   /// Les 409 d'attente du module RH : rejoués sans consommer de tentative.
   static const Set<String> dependencyWaitCodes = {
     memberNotYetSynced,
     contractNotYetSynced,
     payrollNotYetValidated,
+    advanceNotYetSynced,
+    disbursementNotYetSynced,
   };
+
+  /// Un refus décidé sur la tablette, sans réponse du serveur (une fiche
+  /// parente refusée) : rangé comme un refus du serveur.
+  const StaffPushFailure.local(String code, this.reason)
+    : status = null,
+      detailCode = code,
+      body = null;
 
   factory StaffPushFailure.of(DioException e) {
     final status = e.response?.statusCode;

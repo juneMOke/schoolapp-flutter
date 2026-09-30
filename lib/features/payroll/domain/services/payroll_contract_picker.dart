@@ -8,32 +8,25 @@ abstract final class PayrollContractPicker {
   static bool isLive(StaffContract contract) =>
       !contract.isCorrected && contract.syncState != StaffSyncState.failed;
 
-  /// Le contrat en vigueur au **dernier jour** de [month] (A2, sans prorata).
-  ///
-  /// Un agent figure au livre dès qu'une période vivante recoupe le mois
-  /// (E5) : si aucune n'est encore en vigueur au dernier jour — un CDD fini le
-  /// 15 —, c'est la dernière période commencée dans le mois qui paie.
+  /// Le contrat qui paie [month] (A2, sans prorata) : parmi les périodes
+  /// vivantes qui recoupent le mois, **la dernière commencée** — celle qui est
+  /// en vigueur au dernier jour qu'elle couvre. Un agent passé permanent le 15
+  /// est payé en permanent tout le mois ; un CDD fini le 15 est payé sur ce
+  /// contrat. Le même choix que `ContractInForce` du serveur.
   /// `null` : aucune période ne recoupe le mois.
   static StaffContract? pick(Iterable<StaffContract> contracts, String month) {
-    final lastDay = PayrollMonth.lastDay(month);
-    StaffContract? inForce;
-    StaffContract? overlapping;
+    StaffContract? latest;
     for (final contract in contracts.where(isLive)) {
-      if (!PayrollMonth.overlaps(
-        month,
-        contract.effectiveFrom,
-        contract.endsOn,
-      )) {
-        continue;
+      if (PayrollMonth.overlaps(
+            month,
+            contract.effectiveFrom,
+            contract.endsOn,
+          ) &&
+          _later(contract, latest)) {
+        latest = contract;
       }
-      if (_later(contract, overlapping)) overlapping = contract;
-      final endsOn = contract.endsOn;
-      final coversLastDay =
-          contract.effectiveFrom.compareTo(lastDay) <= 0 &&
-          (endsOn == null || endsOn.compareTo(lastDay) >= 0);
-      if (coversLastDay && _later(contract, inForce)) inForce = contract;
     }
-    return inForce ?? overlapping;
+    return latest;
   }
 
   /// La plus récente ; à date d'effet égale, départagée par l'identifiant —

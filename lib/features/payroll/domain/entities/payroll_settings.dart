@@ -77,6 +77,11 @@ class PayrollSettings extends Equatable {
     },
   );
 
+  /// La première devise réglée : celle d'une ligne qui n'en porte aucune
+  /// (conventionné sans prime).
+  String get firstCurrency =>
+      byCurrency.isEmpty ? CurrencyCode.usd : byCurrency.keys.first;
+
   PayrollCurrencySettings of(String currency) =>
       byCurrency[CurrencyCode.normalize(currency)] ??
       PayrollCurrencySettings.none;

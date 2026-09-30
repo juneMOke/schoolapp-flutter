@@ -33,7 +33,7 @@ class PayrollSettingsDao {
       'monthlyHoursDivisor': row['monthly_hours_divisor'],
       'overtimeMultiplierPermille': row['overtime_multiplier_permille'],
       'allowanceEligibleKinds': _decode(row['allowance_eligible_kinds']),
-      'byCurrency': _decode(row['by_currency']),
+      'currencyRules': _decode(row['by_currency']),
     });
     if (seed == null) return PayrollSettings.defaults;
     return toEntity(
@@ -49,7 +49,15 @@ class PayrollSettingsDao {
     required String schoolId,
     required int nowMs,
   }) => _store.transaction((txn) async {
-    if (await PayrollStore.isPending(txn, table, _key(schoolId))) return;
+    if (await PayrollStore.isPending(
+      txn,
+      table,
+      _key(schoolId),
+      saisieType: PayrollOutbox.settings,
+      saisieKey: schoolId,
+    )) {
+      return;
+    }
     await PayrollStore.upsert(txn, table, _key(schoolId), {
       ..._columns(seed),
       'sync_status': StaffSyncState.synced.dbValue,
@@ -109,7 +117,7 @@ class PayrollSettingsDao {
       'monthly_hours_divisor': seed.monthlyHoursDivisor,
       'overtime_multiplier_permille': seed.overtimeMultiplierPermille,
       'allowance_eligible_kinds': jsonEncode(json['allowanceEligibleKinds']),
-      'by_currency': jsonEncode(json['byCurrency']),
+      'by_currency': jsonEncode(json['currencyRules']),
     };
   }
 

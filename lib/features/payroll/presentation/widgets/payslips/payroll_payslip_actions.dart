@@ -29,7 +29,8 @@ class PayrollPayslipActions {
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
-  /// Un agent, ou tout le livre quand [line] est `null`.
+  /// Un agent, ou tout le livre quand [line] est `null` — ce recueil-là
+  /// n'existe qu'en provisoire : le serveur ne scelle les bulletins qu'un à un.
   Future<void> openPdf(PayrollLine? line) async {
     // Le cubit est pris avant le premier `await` : la page peut se fermer
     // pendant le téléchargement ou l'aperçu.
@@ -59,10 +60,8 @@ class PayrollPayslipActions {
       );
       return;
     }
-    final result = await cubit.commands.payslip(
-      view.month,
-      staffMemberId: line?.staffMemberId,
-    );
+    if (line == null) return;
+    final result = await cubit.commands.payslip(view.month, line.staffMemberId);
     if (!context.mounted || cubit.isClosed) return;
     await result.fold(
       (failure) async => cubit.announce(
@@ -73,13 +72,11 @@ class PayrollPayslipActions {
         ),
       ),
       (bytes) async {
-        if (line != null) {
-          await cubit.commands.recordShare(
-            view.month,
-            line.staffMemberId,
-            PayrollShareChannel.pdf,
-          );
-        }
+        await cubit.commands.recordShare(
+          view.month,
+          line.staffMemberId,
+          PayrollShareChannel.pdf,
+        );
         if (!context.mounted) return;
         await showEteeloDocumentViewer(
           context,

@@ -1,0 +1,828 @@
+{
+  "description": "Vecteurs de référence du moteur de paie (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; mois yyyy-MM ; settings absent = défauts de la spec.",
+  "defaultSettings": {
+    "monthlyHoursDivisor": 173,
+    "overtimeMultiplierPermille": 1300,
+    "allowanceEligibleKinds": [
+      "PERMANENT",
+      "VACATAIRE",
+      "CONVENTIONNE"
+    ],
+    "currencyRules": [
+      {
+        "currency": "USD",
+        "childAllowanceInCents": 500,
+        "defaultOvertimeRateInCents": 300,
+        "overtimeRateStepInCents": 50
+      },
+      {
+        "currency": "CDF",
+        "childAllowanceInCents": 1400000,
+        "defaultOvertimeRateInCents": 850000,
+        "overtimeRateStepInCents": 50000
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "permanent en dollars : taux dérivé du salaire arrondi au pas, heures sup. et allocations du profil",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000001",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000901",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 35000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "variables": {
+            "overtimeMinutes": 240
+          },
+          "profileChildren": 3,
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 1,
+            "justifiedAbsences": 0,
+            "lates": 2,
+            "lateMinutes": 35
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000001",
+            "contractId": "00000000-0000-4000-8000-000000000901",
+            "currency": "USD",
+            "baseInCents": 35000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 240,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 1000,
+            "dependentChildren": 3,
+            "allowanceInCents": 1500,
+            "grossInCents": 37500,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 37500,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 37500,
+            "advanceInCents": 0,
+            "netInCents": 37500
+          }
+        ],
+        "linesDigest": "b605c0f40e967681887277ec371d5dc2c697da0738bf19d801f8496195355e36"
+      }
+    },
+    {
+      "name": "vacataire à l'heure : les minutes du mois précédent, pas d'heures sup. même saisies, enfants du mois",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000002",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000902",
+              "kind": "VACATAIRE",
+              "payMode": "HEURES_PRESTEES",
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 600,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "variables": {
+            "overtimeMinutes": 120,
+            "dependentChildren": 2
+          },
+          "profileChildren": 5,
+          "attendance": {
+            "workedMinutes": 2280,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000002",
+            "contractId": "00000000-0000-4000-8000-000000000902",
+            "currency": "USD",
+            "baseInCents": 22800,
+            "baseMinutes": 2280,
+            "hoursMonth": "2026-09",
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 2,
+            "allowanceInCents": 1000,
+            "grossInCents": 23800,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 23800,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 23800,
+            "advanceInCents": 0,
+            "netInCents": 23800
+          }
+        ],
+        "linesDigest": "6175f75870944badac8c81474dadac7e3223de743ab0aa2e6da536b35eb7cdcf"
+      }
+    },
+    {
+      "name": "vacataire sans heure : brut nul, l'échéance glisse entière",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000003",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000903",
+              "kind": "VACATAIRE",
+              "payMode": "HEURES_PRESTEES",
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 600,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "advances": [
+            {
+              "advanceId": "00000000-0000-4000-8000-000000000801",
+              "amountInCents": 3000,
+              "currency": "USD",
+              "installments": 1,
+              "firstMonth": "2026-10",
+              "maturedMonths": 0,
+              "alreadyTaken": 0
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000003",
+            "contractId": "00000000-0000-4000-8000-000000000903",
+            "currency": "USD",
+            "baseInCents": 0,
+            "baseMinutes": 0,
+            "hoursMonth": "2026-09",
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 0,
+            "advances": [
+              {
+                "advanceId": "00000000-0000-4000-8000-000000000801",
+                "rank": 1,
+                "due": 3000,
+                "taken": 0,
+                "carried": 3000
+              }
+            ],
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 0,
+            "advanceInCents": 0,
+            "netInCents": 0
+          }
+        ],
+        "linesDigest": "11feb032a15f0bff1e11ec4f3fb529a85f8186c3f356135fa450ef412cfb1474"
+      }
+    },
+    {
+      "name": "conventionné en francs : prime, taux par défaut de la devise, allocation en francs",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000004",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000904",
+              "kind": "CONVENTIONNE",
+              "payMode": null,
+              "effectiveFrom": "2024-09-01",
+              "endsOn": null,
+              "amountInCents": null,
+              "currency": null,
+              "bonusInCents": 5000000,
+              "bonusCurrency": "CDF"
+            }
+          ],
+          "variables": {
+            "overtimeMinutes": 120,
+            "dependentChildren": 1
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000004",
+            "contractId": "00000000-0000-4000-8000-000000000904",
+            "currency": "CDF",
+            "baseInCents": 5000000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 120,
+            "overtimeRateInCents": 850000,
+            "overtimeInCents": 1700000,
+            "dependentChildren": 1,
+            "allowanceInCents": 1400000,
+            "grossInCents": 8100000,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 8100000,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "CDF",
+            "grossInCents": 8100000,
+            "advanceInCents": 0,
+            "netInCents": 8100000
+          }
+        ],
+        "linesDigest": "121f3279be4fa2723eb855bd26775c8a8a6d530232a3a6156e8bdf0599e01a22"
+      }
+    },
+    {
+      "name": "conventionné sans prime : la première devise réglée, base nulle, allocations seules",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000005",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000905",
+              "kind": "CONVENTIONNE",
+              "payMode": null,
+              "effectiveFrom": "2024-09-01",
+              "endsOn": null,
+              "amountInCents": null,
+              "currency": null,
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "profileChildren": 2
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000005",
+            "contractId": "00000000-0000-4000-8000-000000000905",
+            "currency": "USD",
+            "baseInCents": 0,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 2,
+            "allowanceInCents": 1000,
+            "grossInCents": 1000,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 1000,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 1000,
+            "advanceInCents": 0,
+            "netInCents": 1000
+          }
+        ],
+        "linesDigest": "ec76bd3499a8510ac6deee5403a24968c4d7fe66cc83a1950dd24cd3ef5f776f"
+      }
+    },
+    {
+      "name": "changement de contrat en cours de mois : la dernière période commencée paie, sans prorata",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000006",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000906",
+              "kind": "VACATAIRE",
+              "payMode": "FORFAIT_MENSUEL",
+              "effectiveFrom": "2025-01-01",
+              "endsOn": null,
+              "amountInCents": 20000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000916",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-10-15",
+              "endsOn": null,
+              "amountInCents": 40000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000006",
+            "contractId": "00000000-0000-4000-8000-000000000916",
+            "currency": "USD",
+            "baseInCents": 40000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 40000,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 40000,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 40000,
+            "advanceInCents": 0,
+            "netInCents": 40000
+          }
+        ],
+        "linesDigest": "286039e78df6f5dccc8a568bae38de7f7a80c2b7c0e77f9cfc680c0eaa1d5a2c"
+      }
+    },
+    {
+      "name": "contrat fini avant le mois : hors du livre, sans être « contrat à poser » ; agent sans contrat : à poser",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000007",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000907",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": "2026-09-30",
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000008",
+          "contracts": []
+        }
+      ],
+      "expected": {
+        "lines": [],
+        "withoutContract": [
+          "00000000-0000-4000-8000-000000000008"
+        ],
+        "lineCount": 0,
+        "totals": [],
+        "linesDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "avances : reportée trois fois puis soldée, la suivante prend le reste du brut ; une avance en francs ne touche pas une ligne en dollars",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000009",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000909",
+              "kind": "VACATAIRE",
+              "payMode": "HEURES_PRESTEES",
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 500,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 1200,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "advances": [
+            {
+              "advanceId": "00000000-0000-4000-8000-000000000803",
+              "amountInCents": 5000,
+              "currency": "USD",
+              "installments": 1,
+              "firstMonth": "2026-09",
+              "maturedMonths": 0,
+              "alreadyTaken": 0
+            },
+            {
+              "advanceId": "00000000-0000-4000-8000-000000000802",
+              "amountInCents": 6000,
+              "currency": "USD",
+              "installments": 2,
+              "firstMonth": "2026-07",
+              "maturedMonths": 3,
+              "alreadyTaken": 0
+            },
+            {
+              "advanceId": "00000000-0000-4000-8000-000000000804",
+              "amountInCents": 100000,
+              "currency": "CDF",
+              "installments": 1,
+              "firstMonth": "2026-08",
+              "maturedMonths": 0,
+              "alreadyTaken": 0
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000009",
+            "contractId": "00000000-0000-4000-8000-000000000909",
+            "currency": "USD",
+            "baseInCents": 10000,
+            "baseMinutes": 1200,
+            "hoursMonth": "2026-09",
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 10000,
+            "advances": [
+              {
+                "advanceId": "00000000-0000-4000-8000-000000000802",
+                "rank": 4,
+                "due": 6000,
+                "taken": 6000,
+                "carried": 0
+              },
+              {
+                "advanceId": "00000000-0000-4000-8000-000000000803",
+                "rank": 1,
+                "due": 5000,
+                "taken": 4000,
+                "carried": 1000
+              }
+            ],
+            "advanceInCents": 10000,
+            "netInCents": 0,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 10000,
+            "advanceInCents": 10000,
+            "netInCents": 0
+          }
+        ],
+        "linesDigest": "d0b3d88ad8ac6bcb67a60a21ad7331456f4d1344cd126bbdf93b5e6b51b7bab4"
+      }
+    },
+    {
+      "name": "avance sur trois mois : 33,33 puis 33,33 puis 33,34 — la dernière prend le reste",
+      "month": "2026-12",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000010",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000910",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 50000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "advances": [
+            {
+              "advanceId": "00000000-0000-4000-8000-000000000805",
+              "amountInCents": 10000,
+              "currency": "USD",
+              "installments": 3,
+              "firstMonth": "2026-10",
+              "maturedMonths": 2,
+              "alreadyTaken": 6666
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000010",
+            "contractId": "00000000-0000-4000-8000-000000000910",
+            "currency": "USD",
+            "baseInCents": 50000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 400,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 50000,
+            "advances": [
+              {
+                "advanceId": "00000000-0000-4000-8000-000000000805",
+                "rank": 3,
+                "due": 3334,
+                "taken": 3334,
+                "carried": 0
+              }
+            ],
+            "advanceInCents": 3334,
+            "netInCents": 46666,
+            "attendanceMonth": "2026-11"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 50000,
+            "advanceInCents": 3334,
+            "netInCents": 46666
+          }
+        ],
+        "linesDigest": "1260b630653eb5301b84b6c58eb27a6e421e4ba5016514c2719cb5e1f8b6edba"
+      }
+    },
+    {
+      "name": "arrondi demi vers le haut : 90 minutes à 1 centime valent 2 centimes",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000011",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000911",
+              "kind": "VACATAIRE",
+              "payMode": "HEURES_PRESTEES",
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 1,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 90,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000011",
+            "contractId": "00000000-0000-4000-8000-000000000911",
+            "currency": "USD",
+            "baseInCents": 2,
+            "baseMinutes": 90,
+            "hoursMonth": "2026-09",
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 2,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 2,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 2,
+            "advanceInCents": 0,
+            "netInCents": 2
+          }
+        ],
+        "linesDigest": "f098ab155e93929c97e907f77f3475b89cfe7acfd60e5ff71d0d133b721e50aa"
+      }
+    },
+    {
+      "name": "allocations réservées aux permanents : le vacataire au forfait n'en a pas",
+      "month": "2026-10",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000
+          }
+        ]
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000012",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000912",
+              "kind": "VACATAIRE",
+              "payMode": "FORFAIT_MENSUEL",
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 20000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "profileChildren": 4
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000013",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000913",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 35000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "variables": {
+            "overtimeMinutes": 60,
+            "overtimeRateInCents": 400
+          },
+          "profileChildren": 4
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000012",
+            "contractId": "00000000-0000-4000-8000-000000000912",
+            "currency": "USD",
+            "baseInCents": 20000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 4,
+            "allowanceInCents": 0,
+            "grossInCents": 20000,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 20000,
+            "attendanceMonth": "2026-09"
+          },
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000013",
+            "contractId": "00000000-0000-4000-8000-000000000913",
+            "currency": "USD",
+            "baseInCents": 35000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 60,
+            "overtimeRateInCents": 400,
+            "overtimeInCents": 400,
+            "dependentChildren": 4,
+            "allowanceInCents": 2000,
+            "grossInCents": 37400,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 37400,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 57400,
+            "advanceInCents": 0,
+            "netInCents": 57400
+          }
+        ],
+        "linesDigest": "d401d84ff4e03c89cfe0c58f829eafc96867f8c01a01ea7a55b7407e55b6c772"
+      }
+    },
+    {
+      "name": "livre vide : empreinte de la chaîne vide",
+      "month": "2026-10",
+      "staff": [],
+      "expected": {
+        "lines": [],
+        "withoutContract": [],
+        "lineCount": 0,
+        "totals": [],
+        "linesDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

@@ -180,7 +180,7 @@ void main() {
         'monthlyHoursDivisor': 195,
         'overtimeMultiplierPermille': 1500,
         'allowanceEligibleKinds': ['PERMANENT'],
-        'byCurrency': [
+        'currencyRules': [
           {
             'currency': 'usd',
             'childAllowanceInCents': 700,

@@ -61,7 +61,8 @@ class PayrollRequestFactory {
         profile: StaffPayProfileDto(
           staffMemberId: profile.staffMemberId,
           dependentChildren: profile.dependentChildren,
-          preferredMode: profile.preferredMode?.wire,
+          // Exigé par le serveur : sans choix, les espèces.
+          preferredMode: (profile.preferredMode ?? PayoutMode.cash).wire,
           operator: profile.operator?.wire,
           payoutPhone: _blankToNull(profile.payoutPhone),
           bankName: _blankToNull(profile.bankName),
@@ -117,17 +118,14 @@ class PayrollRequestFactory {
     );
   }
 
-  PayrollCancellationRequestDto cancellation(
-    String targetKey,
-    String targetId,
-    String reason,
-  ) => PayrollCancellationRequestDto(
-    targetKey: targetKey,
-    cancellationId: _ids.newId(),
-    targetId: targetId,
-    reason: reason,
-    authorId: authorId,
-  );
+  PayrollCancellationRequestDto cancellation(String targetId, String reason) =>
+      PayrollCancellationRequestDto(
+        clientRecordedAt: stamp,
+        cancellationId: _ids.newId(),
+        targetId: targetId,
+        reason: reason,
+        authorId: authorId,
+      );
 
   static String? _blankToNull(String? value) {
     final trimmed = value?.trim();
