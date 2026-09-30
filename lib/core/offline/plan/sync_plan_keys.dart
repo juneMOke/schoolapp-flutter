@@ -153,6 +153,17 @@ abstract final class SyncPlanKeys {
 
   /// Les jours validés et les mois clos du Pointage (`hr.attendance.read`).
   static const String hrStaffAttendanceLocks = 'hr.staff-attendance-locks';
+
+  /// La Paie (`hr.pay.read`), cinq flux **jamais entraînés** — un montant ne
+  /// descend qu'à qui a le droit de le lire en propre : les paies (lignes
+  /// figées comprises), les profils de paie, les résumés des mois clos du
+  /// Pointage, les avances et les versements.
+  static const String hrPayrolls = 'hr.payrolls';
+  static const String hrStaffPayProfiles = 'hr.staff-pay-profiles';
+  static const String hrStaffAttendanceSummaries =
+      'hr.staff-attendance-summaries';
+  static const String hrSalaryAdvances = 'hr.salary-advances';
+  static const String hrPayrollDisbursements = 'hr.payroll-disbursements';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -190,6 +201,11 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.hrStaffDocuments: ['staff_documents'],
   SyncPlanKeys.hrStaffAttendance: ['staff_attendance'],
   SyncPlanKeys.hrStaffAttendanceLocks: ['staff_attendance_locks'],
+  SyncPlanKeys.hrPayrolls: ['payrolls'],
+  SyncPlanKeys.hrStaffPayProfiles: ['staff_pay_profiles'],
+  SyncPlanKeys.hrStaffAttendanceSummaries: ['staff_attendance_summaries'],
+  SyncPlanKeys.hrSalaryAdvances: ['salary_advances'],
+  SyncPlanKeys.hrPayrollDisbursements: ['payroll_disbursements'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -292,5 +308,11 @@ const Set<String> _kCursorKeyPrefixes = {
   // Les deux flux du Pointage, cadrés eux aussi par l'école du jeton.
   'staff_attendance',
   'staff_attendance_locks',
+  // Les cinq flux de la Paie, cadrés par l'école du jeton.
+  'payrolls',
+  'staff_pay_profiles',
+  'staff_attendance_summaries',
+  'salary_advances',
+  'payroll_disbursements',
   'enrollment_reenrollment_cohort',
 };

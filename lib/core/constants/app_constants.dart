@@ -1065,6 +1065,55 @@ class AppConstants {
   static const String staffDocumentContentEndpoint =
       '/api/v1/hr/staff-documents/{documentId}/content';
 
+  // ── Offline sync — Paie du personnel (RH) ──
+  /// Réglages de paie (PUT, `hr.pay.manage`, dernier écrit gagne) ; ils
+  /// descendent avec le socle (section `payrollSettings`).
+  static const String syncPayrollSettingsEndpoint =
+      '/api/v1/sync/payroll-settings';
+
+  /// Profil de paie d'un agent (POST, `hr.pay.write`, dernier écrit gagne) et
+  /// descente (GET, flux `hr.staff-pay-profiles`).
+  static const String syncStaffPayProfilesEndpoint =
+      '/api/v1/sync/staff-pay-profiles';
+
+  /// Éléments variables d'un agent pour un mois (POST, brouillon seulement).
+  static const String syncPayrollVariablesEndpoint =
+      '/api/v1/sync/payroll-variables';
+
+  /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
+  /// `REOPEN`), idempotents par `gestureId`.
+  static const String syncPayrollGesturesEndpoint =
+      '/api/v1/sync/payroll-gestures';
+
+  /// Descente des paies, lignes figées comprises (flux `hr.payrolls`).
+  static const String syncPayrollsEndpoint = '/api/v1/sync/payrolls';
+
+  /// Descente des résumés des mois clos du Pointage, sous `hr.pay.read`.
+  static const String syncStaffAttendanceSummariesEndpoint =
+      '/api/v1/sync/staff-attendance-summaries';
+
+  /// Avances : octroi (POST) et descente (GET, flux `hr.salary-advances`).
+  static const String syncSalaryAdvancesEndpoint =
+      '/api/v1/sync/salary-advances';
+  static const String syncSalaryAdvanceCancellationsEndpoint =
+      '/api/v1/sync/salary-advance-cancellations';
+
+  /// Versements : un par requête (POST) et descente (GET, flux
+  /// `hr.payroll-disbursements`).
+  static const String syncPayrollDisbursementsEndpoint =
+      '/api/v1/sync/payroll-disbursements';
+  static const String syncPayrollDisbursementCancellationsEndpoint =
+      '/api/v1/sync/payroll-disbursement-cancellations';
+
+  /// Bulletin de paie scellé (BP) d'un agent, octets PDF ; scellé au premier
+  /// appel, après validation seulement.
+  static const String payrollPayslipEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
+
+  /// Tous les bulletins scellés d'un mois, une page par agent.
+  static const String payrollPayslipsEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips.pdf';
+
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
   ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé

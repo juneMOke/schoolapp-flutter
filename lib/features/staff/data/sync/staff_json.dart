@@ -22,6 +22,18 @@ extension StaffJsonFields on Map<dynamic, dynamic> {
     return value;
   }
 
+  /// Mois `YYYY-MM` ; un jour `YYYY-MM-DD` se ramène à son mois.
+  String? yearMonth(String key) {
+    final value = text(key);
+    if (value == null || !_yearMonth.hasMatch(value)) return null;
+    return value.substring(0, 7);
+  }
+
+  bool? flag(String key) {
+    final value = this[key];
+    return value is bool ? value : null;
+  }
+
   int? integer(String key) {
     final value = this[key];
     return value is num ? value.toInt() : null;
@@ -39,3 +51,4 @@ extension StaffJsonFields on Map<dynamic, dynamic> {
 }
 
 final RegExp _day = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+final RegExp _yearMonth = RegExp(r'^\d{4}-\d{2}(-\d{2})?$');
