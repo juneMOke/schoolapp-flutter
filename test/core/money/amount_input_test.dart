@@ -39,10 +39,7 @@ void main() {
 
   test('aller-retour : ce qui est réécrit se relit à l’identique', () {
     for (final cents in [1, 99, 100, 12050, 38500000]) {
-      expect(
-        AmountInput.toCents(AmountInput.fromCents(cents)),
-        cents,
-      );
+      expect(AmountInput.toCents(AmountInput.fromCents(cents)), cents);
     }
   });
 }
