@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gest
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
@@ -84,6 +85,32 @@ abstract final class PayrollLedger {
               ...entry.value,
         ],
       );
+
+  /// La ligne qu'aurait [variables] — l'aperçu en direct des éléments
+  /// variables, par le même moteur.
+  static PayrollLine? previewLine(
+    PayrollSnapshot snapshot,
+    String month,
+    PayrollVariables variables,
+  ) {
+    final input = inputOf(snapshot, month);
+    final lines = PayrollEngine.compute(
+      PayrollEngineInput(
+        month: month,
+        settings: input.settings,
+        contractsByMember: {
+          variables.staffMemberId:
+              input.contractsByMember[variables.staffMemberId] ?? const [],
+        },
+        variables: {variables.staffMemberId: variables},
+        profiles: input.profiles,
+        attendance: input.attendance,
+        advances: input.advances,
+        priorLines: input.priorLines,
+      ),
+    ).lines;
+    return lines.isEmpty ? null : lines.single;
+  }
 
   static List<PayrollGesture> gesturesOf(
     PayrollSnapshot snapshot,

@@ -98,6 +98,10 @@ class MenuConstants {
   /// agent et le récapitulatif du mois.
   static const String hrStaffAttendanceId = 'pointage';
 
+  /// La Paie du personnel : le livre du mois, les bulletins, les avances et
+  /// l'historique.
+  static const String hrPayrollId = 'paie';
+
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
   static const String classesListId = 'classes-list';

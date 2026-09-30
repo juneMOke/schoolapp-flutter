@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_attendance_settings_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_day_report_dialog.dart';
 
@@ -26,7 +26,7 @@ class StaffRegisterActions {
       context,
       kStaffAttendanceManageAccess.requires,
     );
-    final settings = await StaffAttendanceDialog.show<StaffAttendanceSettings>(
+    final settings = await StaffDialog.show<StaffAttendanceSettings>(
       context,
       StaffAttendanceSettingsDialog(
         settings: _cubit.state.snapshot.settings,
@@ -45,7 +45,7 @@ class StaffRegisterActions {
   );
 
   Future<void> validate(StaffDayRegister register) async {
-    final choice = await StaffAttendanceDialog.show<StaffReportChoice>(
+    final choice = await StaffDialog.show<StaffReportChoice>(
       context,
       StaffDayReportDialog(
         register: register,

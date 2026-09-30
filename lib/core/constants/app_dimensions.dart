@@ -627,4 +627,34 @@ class AppDimensions {
 
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
   static const staffAttendanceUpcomingOpacity = 0.4;
+
+  // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
+  // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
+  // alignées à droite, en chiffres tabulaires.
+  static const payrollLedgerMinWidth = 920.0;
+  static const payrollColAmount = 100.0;
+  static const payrollColSmallAmount = 80.0;
+  static const payrollColAttendance = 88.0;
+  static const payrollColPayout = 136.0;
+  static const payrollAdvancesMinWidth = 880.0;
+  static const payrollColDate = 104.0;
+  static const payrollColSchedule = 150.0;
+  static const payrollColStatus = 120.0;
+  static const payrollHistoryMinWidth = 820.0;
+  static const payrollColMonth = 150.0;
+  static const payrollColCount = 72.0;
+
+  /// La feuille du bulletin et son panneau latéral.
+  static const payrollPayslipMaxWidth = 720.0;
+  static const payrollPayslipPanelWidth = 270.0;
+  static const payrollPayslipWideBreakpoint = 1000.0;
+
+  /// Le filet or sous l'en-tête du bulletin.
+  static const payrollPayslipRule = 3.0;
+  static const payrollStepperButton = 40.0;
+  static const payrollStepperValueWidth = 56.0;
+  static const payrollCircuitDot = 30.0;
+  static const payrollCircuitLink = 14.0;
+  static const payrollModeTileHeight = 52.0;
+  static const payrollProgressHeight = 8.0;
 }

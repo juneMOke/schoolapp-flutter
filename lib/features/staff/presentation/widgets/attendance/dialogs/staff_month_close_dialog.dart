@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -41,7 +41,7 @@ class StaffMonthCloseDialog extends StatelessWidget {
         tone: StaffAttendanceStatus.none,
       ),
     );
-    return StaffAttendanceDialog(
+    return StaffDialog(
       title: l10n.staffAttendanceCloseTitle(monthLabel),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

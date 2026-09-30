@@ -310,6 +310,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // Le Pointage se lit sous `hr.attendance.read` ; pointer et clore sont
     // gardés geste par geste.
     MenuConstants.hrStaffAttendanceId: ModuleAccess([Perm.hrAttendanceRead]),
+    // La Paie se lit sous `hr.pay.read` ; préparer et verser, valider et
+    // régler sont gardés geste par geste.
+    MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

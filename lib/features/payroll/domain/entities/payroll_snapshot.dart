@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_vari
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 
@@ -38,6 +39,10 @@ class PayrollSnapshot {
   /// Le fichier du personnel est-il déjà descendu une fois ?
   final bool hasEverSynced;
 
+  /// L'établissement, pour l'en-tête des bulletins ; `null` tant que le
+  /// référentiel n'est pas descendu.
+  final School? school;
+
   const PayrollSnapshot({
     required this.members,
     required this.contractsByMember,
@@ -53,6 +58,7 @@ class PayrollSnapshot {
     required this.schoolYears,
     required this.shareTraces,
     required this.hasEverSynced,
+    this.school,
   });
 
   static const PayrollSnapshot empty = PayrollSnapshot(

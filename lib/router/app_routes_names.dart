@@ -70,6 +70,8 @@ class AppRoutesNames {
       '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffFileId}';
   static const String hrStaffAttendance =
       '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffAttendanceId}';
+  static const String hrPayroll =
+      '/${MenuConstants.hrMenuId}/${MenuConstants.hrPayrollId}';
 
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';

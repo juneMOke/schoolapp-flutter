@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_local.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
@@ -17,13 +18,18 @@ class PayrollSnapshotReader {
   final StaffContractDao _contracts;
   final PayrollLocal _local;
 
+  /// L'établissement, pour l'en-tête des bulletins ; facultatif.
+  final SchoolRepository? _school;
+
   const PayrollSnapshotReader({
     required StaffRepository staff,
     required StaffContractDao contracts,
     required PayrollLocal local,
+    SchoolRepository? school,
   }) : _staff = staff,
        _contracts = contracts,
-       _local = local;
+       _local = local,
+       _school = school;
 
   Future<Either<Failure, PayrollSnapshot>> read(String schoolId) async =>
       (await _staff.loadFile()).fold<Future<Either<Failure, PayrollSnapshot>>>(
@@ -61,6 +67,10 @@ class PayrollSnapshotReader {
                 schoolYears: await _local.calendar.schoolYears(schoolId),
                 shareTraces: await _local.shares.forSchool(schoolId),
                 hasEverSynced: file.hasEverSynced,
+                school: (await _school?.loadCurrentSchool())?.fold(
+                  (_) => null,
+                  (school) => school,
+                ),
               ),
             );
           } catch (e) {

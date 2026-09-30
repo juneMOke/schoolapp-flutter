@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_count_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -52,7 +52,7 @@ class _StaffDayReportDialogState extends State<StaffDayReportDialog> {
         value: '$value',
       ),
     );
-    return StaffAttendanceDialog(
+    return StaffDialog(
       eyebrow: widget.dayLabel,
       title: l10n.staffAttendanceReportTitle,
       body: Column(

@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_clock_input_formatter.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_arrival_preview.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -71,7 +71,7 @@ class _StaffTimeDialogState extends State<StaffTimeDialog> {
     final l10n = AppLocalizations.of(context)!;
     final time = _time;
     final settings = widget.settings;
-    return StaffAttendanceDialog(
+    return StaffDialog(
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -247,7 +247,7 @@ class MenuFactory {
   }
 
   /// Menu Ressources humaines. Le fichier du personnel d'abord, puis le
-  /// Pointage qui le lit ; la Paie s'ajoutera à leur suite.
+  /// Pointage qui le lit, puis la Paie qui lit les deux.
   static MenuItem _createHrMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.hrMenuId,
@@ -263,6 +263,11 @@ class MenuFactory {
           id: MenuConstants.hrStaffAttendanceId,
           title: l10n.subMenuStaffAttendance,
           route: AppRoutesNames.hrStaffAttendance,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPayrollId,
+          title: l10n.subMenuPayroll,
+          route: AppRoutesNames.hrPayroll,
         ),
       ],
     );

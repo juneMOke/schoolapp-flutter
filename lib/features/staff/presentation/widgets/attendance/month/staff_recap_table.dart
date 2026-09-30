@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
@@ -9,6 +7,7 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_att
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le tableau du récapitulatif : une ligne par agent ; toucher une ligne
@@ -18,57 +17,6 @@ class StaffRecapTable extends StatelessWidget {
   final ValueChanged<StaffRecapRow> onOpen;
 
   const StaffRecapTable({super.key, required this.rows, required this.onOpen});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    Widget head(String text) => Text(
-      text.toUpperCase(),
-      overflow: TextOverflow.ellipsis,
-      style: AppTypography.labelSmall.copyWith(color: AppColors.textMutedAa),
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width:
-              constraints.maxWidth < AppDimensions.staffAttendanceRecapMinWidth
-              ? AppDimensions.staffAttendanceRecapMinWidth
-              : constraints.maxWidth,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: const BoxDecoration(
-                  color: AppColors.surfaceAlt,
-                  borderRadius: AppRadius.brSm,
-                ),
-                child: _RecapLayout(
-                  cells: [
-                    head(l10n.staffAttendanceColAgent),
-                    head(l10n.staffAttendanceRecapColContract),
-                    head(l10n.staffAttendanceKpiPresences),
-                    head(l10n.staffAttendanceKpiLates),
-                    head(l10n.staffAttendanceKpiAbsences),
-                    head(l10n.staffAttendanceRecapColHours),
-                    head(l10n.staffAttendanceRecapColSync),
-                  ],
-                ),
-              ),
-              for (final row in rows) _RecapRow(row: row, onOpen: onOpen),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Les colonnes, partagées par l'en-tête et les lignes.
-class _RecapLayout extends StatelessWidget {
-  final List<Widget> cells;
-
-  const _RecapLayout({required this.cells});
 
   static const List<double?> _widths = [
     null,
@@ -81,15 +29,24 @@ class _RecapLayout extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (final (index, cell) in cells.indexed)
-        if (_widths[index] == null)
-          Expanded(child: cell)
-        else
-          SizedBox(width: _widths[index], child: cell),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return StaffTable(
+      minWidth: AppDimensions.staffAttendanceRecapMinWidth,
+      widths: _widths,
+      headers: [
+        l10n.staffAttendanceColAgent,
+        l10n.staffAttendanceRecapColContract,
+        l10n.staffAttendanceKpiPresences,
+        l10n.staffAttendanceKpiLates,
+        l10n.staffAttendanceKpiAbsences,
+        l10n.staffAttendanceRecapColHours,
+        l10n.staffAttendanceRecapColSync,
+      ],
+      rowCount: rows.length,
+      row: (context, index) => _RecapRow(row: rows[index], onOpen: onOpen),
+    );
+  }
 }
 
 class _RecapRow extends StatelessWidget {
@@ -102,67 +59,57 @@ class _RecapRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final stats = row.stats;
-    final style = AppTypography.bodyMedium.copyWith(
-      color: AppColors.textPrimary,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
-    return InkWell(
+    final style = StaffTableRow.figures();
+    return StaffTableRow(
       onTap: () => onOpen(row),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: AppColors.border)),
-        ),
-        child: _RecapLayout(
-          cells: [
-            Row(
-              children: [
-                StaffAvatar(
-                  member: row.member,
-                  sync: row.sync,
-                  size: AppDimensions.staffAttendanceIconButtonSize,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    row.member.fullName,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelLarge,
-                  ),
-                ),
-              ],
+      widths: StaffRecapTable._widths,
+      cells: [
+        Row(
+          children: [
+            StaffAvatar(
+              member: row.member,
+              sync: row.sync,
+              size: AppDimensions.staffAttendanceIconButtonSize,
             ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: StaffContractBadge(kind: row.kind),
-            ),
-            Text(
-              stats.isHourly
-                  ? '${stats.present}'
-                  : l10n.staffAttendanceKpiRatio(stats.present, stats.workDays),
-              style: style,
-            ),
-            Text('${stats.late}', style: style),
-            Text(
-              l10n.staffAttendanceKpiAbsencesDetail(
-                stats.absentJustified,
-                stats.absentUnjustified,
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                row.member.fullName,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.labelLarge,
               ),
-              style: style,
-            ),
-            Text(
-              stats.isHourly
-                  ? StaffAttendanceLabels.hours(l10n, stats.workedMinutes)
-                  : '—',
-              style: style,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: StaffSyncPill(state: row.sync),
             ),
           ],
         ),
-      ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: StaffContractBadge(kind: row.kind),
+        ),
+        Text(
+          stats.isHourly
+              ? '${stats.present}'
+              : l10n.staffAttendanceKpiRatio(stats.present, stats.workDays),
+          style: style,
+        ),
+        Text('${stats.late}', style: style),
+        Text(
+          l10n.staffAttendanceKpiAbsencesDetail(
+            stats.absentJustified,
+            stats.absentUnjustified,
+          ),
+          style: style,
+        ),
+        Text(
+          stats.isHourly
+              ? StaffAttendanceLabels.hours(l10n, stats.workedMinutes)
+              : '—',
+          style: style,
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: StaffSyncPill(state: row.sync),
+        ),
+      ],
     );
   }
 }

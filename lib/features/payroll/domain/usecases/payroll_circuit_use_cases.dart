@@ -17,8 +17,9 @@ class SavePayrollVariablesUseCase {
     PayrollMonthView view,
     PayrollVariables variables,
   ) async {
-    if (!view.isEditable)
+    if (!view.isEditable) {
       return Left(PayrollRuleFailure(PayrollRule.notEditable));
+    }
     final line = view.line(variables.staffMemberId);
     if (line == null) return Left(PayrollRuleFailure(PayrollRule.noContract));
     if (!line.overtimeAllowed && (variables.overtimeMinutes ?? 0) > 0) {
