@@ -40,10 +40,15 @@ class StaffFileRow extends Equatable {
   ) {
     var worst = member;
     for (final document in documents) {
-      if (_rank(document.syncState) > _rank(worst)) worst = document.syncState;
+      worst = worse(worst, document.syncState);
     }
     return worst;
   }
+
+  /// Le pire de deux états : échec, puis en attente, puis synchronisé.
+  /// Partagé par tout ce qui agrège des lignes (pièces, pointages).
+  static StaffSyncState worse(StaffSyncState a, StaffSyncState b) =>
+      _rank(b) > _rank(a) ? b : a;
 
   static int _rank(StaffSyncState state) => switch (state) {
     StaffSyncState.failed => 2,

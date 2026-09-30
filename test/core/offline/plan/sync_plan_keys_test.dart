@@ -52,7 +52,7 @@ class _RecordingPullCoordinator extends PullCoordinator {
   }
 }
 
-/// Les vingt-cinq constantes de [SyncPlanKeys], référencées **par leur symbole**.
+/// Les vingt-sept constantes de [SyncPlanKeys], référencées **par leur symbole**.
 ///
 /// Une liste de chaînes recopiées ne prouverait rien ; ces références-là ne
 /// compilent que tant que les constantes existent, et la comparaison
@@ -84,6 +84,8 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.hrStaffMembers,
   SyncPlanKeys.hrStaffContracts,
   SyncPlanKeys.hrStaffDocuments,
+  SyncPlanKeys.hrStaffAttendance,
+  SyncPlanKeys.hrStaffAttendanceLocks,
 ];
 
 /// Les douze ressources dont la clé de curseur réelle porte un suffixe.
@@ -113,6 +115,9 @@ const Set<String> _kSuffixedCursorResources = {
   'staff_members',
   'staff_contracts',
   'staff_documents',
+  // Les deux flux du Pointage, cadrés de même.
+  'staff_attendance',
+  'staff_attendance_locks',
   'enrollment_reenrollment_cohort',
 };
 
@@ -240,18 +245,19 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('vingt-cinq clés de plan pour vingt-six ressources de handler', () {
+  test('vingt-sept clés de plan pour vingt-huit ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
     // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
-    // Vingt-cinq avec les trois flux du fichier du personnel (`hr.*`).
-    expect(kSyncPlanAliases.length, 25);
-    expect(registeredResources.length, 26);
+    // Vingt-cinq avec les trois flux du fichier du personnel (`hr.*`),
+    // vingt-sept avec les deux du Pointage.
+    expect(kSyncPlanAliases.length, 27);
+    expect(registeredResources.length, 28);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 26);
+    expect(aliased.length, 28);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -269,12 +275,12 @@ void main() {
   });
 
   test(
-    'les vingt-cinq constantes déclarées sont exactement les clés de la table',
+    'les vingt-sept constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 25);
+      expect(_kDeclaredPlanKeys.length, 27);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        25,
+        27,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -347,7 +353,7 @@ void main() {
     expect(resourcesOf(SyncPlanKeys.expenseExpenses), ['expenses']);
   });
 
-  test('et ce sont les neuf SEULES que la règle mécanique manque', () {
+  test('et ce sont les onze SEULES que la règle mécanique manque', () {
     // La démonstration que la table doit exister, et qu'elle n'en fait pas
     // trop : sur les vingt couples (clé, ressource), `.`/`-` → `_` en donne
     // quatorze et manque exactement ces cinq-là. Si un jour la liste des
@@ -374,6 +380,8 @@ void main() {
       'staff_members',
       'staff_contracts',
       'staff_documents',
+      'staff_attendance',
+      'staff_attendance_locks',
     ]);
   });
 

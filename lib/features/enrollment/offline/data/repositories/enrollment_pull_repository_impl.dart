@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_seed.dart';
 import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
@@ -137,6 +138,15 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   )
   replaceStaffDocumentTypes;
 
+  /// Seam vers le module RH pour les **réglages du Pointage** (début des
+  /// cours, tolérance), scopé ÉCOLE. Facultatif : sans lui, la section est
+  /// ignorée — le Pointage retombe sur ses défauts.
+  final Future<void> Function(
+    StaffAttendanceSettingsSeed settings,
+    String schoolId,
+  )?
+  applyStaffAttendanceSettings;
+
   /// Seam vers l'identité de l'école pour le **logo**, même raison que
   /// [replaceTariffs] : le bundle porte les empreintes, mais `enrollment` n'a
   /// rien à savoir d'un cache d'images ni d'une route d'octets. L'isolation du
@@ -184,6 +194,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceFeeCodeSections,
     required this.replaceExpenseTypes,
     required this.replaceStaffDocumentTypes,
+    this.applyStaffAttendanceSettings,
     required this.syncSchoolLogo,
     required this.syncMetaDao,
     required this.requiredAuth,
@@ -514,17 +525,16 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     final reductionsApplied = await _applyReductionCatalog(body, syncedAt);
     final sectionsApplied = await _applyFeeCodeSections(body, syncedAt);
     final expenseTypesApplied = await _applyExpenseTypes(body, syncedAt);
-    final staffDocumentTypesApplied = await _applyStaffDocumentTypes(
-      body,
-      syncedAt,
-    );
+    final staffSectionsApplied =
+        await _applyStaffDocumentTypes(body, syncedAt) +
+        await _applyStaffAttendanceSettings(body);
     if (tariffBundles.isEmpty) {
       return upserted +
           boutiqueApplied +
           reductionsApplied +
           sectionsApplied +
           expenseTypesApplied +
-          staffDocumentTypesApplied;
+          staffSectionsApplied;
     }
 
     final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
@@ -564,7 +574,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         reductionsApplied +
         sectionsApplied +
         expenseTypesApplied +
-        staffDocumentTypesApplied;
+        staffSectionsApplied;
   }
 
   /// Pièces du dossier RH du bundle → `ref_staff_document_types`, par le seam
@@ -594,6 +604,18 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         ),
     ], schoolId);
     return types.length;
+  }
+
+  /// Réglages du Pointage du bundle, par le seam
+  /// [applyStaffAttendanceSettings]. `null` = section non communiquée : le
+  /// cache reste. Rend 1 quand une ligne est rangée.
+  Future<int> _applyStaffAttendanceSettings(ReferentialBundleDto body) async {
+    final settings = body.staffAttendanceSettings;
+    final apply = applyStaffAttendanceSettings;
+    final schoolId = currentUser.schoolId ?? '';
+    if (settings == null || apply == null || schoolId.isEmpty) return 0;
+    await apply(settings, schoolId);
+    return 1;
   }
 
   /// Types de dépense du bundle → `ref_expense_types`, par le seam

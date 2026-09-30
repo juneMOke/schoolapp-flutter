@@ -146,6 +146,13 @@ abstract final class SyncPlanKeys {
   /// Les métadonnées des pièces des dossiers (`hr.document.read`). **Jamais
   /// entraîné**, pour la même raison que les montants.
   static const String hrStaffDocuments = 'hr.staff-documents';
+
+  /// Les pointages du personnel (`hr.attendance.read`), bornés au début de
+  /// l'année scolaire courante.
+  static const String hrStaffAttendance = 'hr.staff-attendance';
+
+  /// Les jours validés et les mois clos du Pointage (`hr.attendance.read`).
+  static const String hrStaffAttendanceLocks = 'hr.staff-attendance-locks';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -181,6 +188,8 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.hrStaffMembers: ['staff_members'],
   SyncPlanKeys.hrStaffContracts: ['staff_contracts'],
   SyncPlanKeys.hrStaffDocuments: ['staff_documents'],
+  SyncPlanKeys.hrStaffAttendance: ['staff_attendance'],
+  SyncPlanKeys.hrStaffAttendanceLocks: ['staff_attendance_locks'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -280,5 +289,8 @@ const Set<String> _kCursorKeyPrefixes = {
   'staff_members',
   'staff_contracts',
   'staff_documents',
+  // Les deux flux du Pointage, cadrés eux aussi par l'école du jeton.
+  'staff_attendance',
+  'staff_attendance_locks',
   'enrollment_reenrollment_cohort',
 };

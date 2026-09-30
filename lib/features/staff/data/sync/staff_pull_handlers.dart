@@ -3,9 +3,10 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_pull_repository.dart';
 
-/// Un [PullHandler] par flux du fichier du personnel, enregistrés sur le
+/// Un [PullHandler] par flux du module RH (fichier et Pointage), enregistrés sur le
 /// `PullCoordinator`. Ne lèvent pas : un `Left` devient un
 /// [PullOutcome.error].
 ///
@@ -35,6 +36,16 @@ class StaffPullHandler implements PullHandler {
       StaffPullHandler._(kStaffDocumentsResource, const [
         Perm.hrDocumentRead,
       ], repository.syncDocuments);
+
+  factory StaffPullHandler.attendance(StaffPullRepository repository) =>
+      StaffPullHandler._(kStaffAttendanceResource, const [
+        Perm.hrAttendanceRead,
+      ], repository.syncAttendance);
+
+  factory StaffPullHandler.attendanceLocks(StaffPullRepository repository) =>
+      StaffPullHandler._(kStaffAttendanceLocksResource, const [
+        Perm.hrAttendanceRead,
+      ], repository.syncAttendanceLocks);
 
   @override
   bool get isBaseline => false;

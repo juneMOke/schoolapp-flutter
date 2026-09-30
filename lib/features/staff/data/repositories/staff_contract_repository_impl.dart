@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -8,6 +6,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_contract_input_mapper.dart';
+import 'package:school_app_flutter/features/staff/data/repositories/staff_local_writer.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_push_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
@@ -17,15 +16,11 @@ import 'package:school_app_flutter/features/staff/domain/repositories/staff_cont
 class StaffContractRepositoryImpl implements StaffContractRepository {
   final StaffContractDao _contracts;
   final StaffContractWriteDao _writer;
-  final CurrentUserContext _currentUser;
+  final StaffLocalWriter _local;
   final IdGenerator _ids;
-
-  /// Relance le flush après un geste ; `null` dans les tests qui n'en ont pas
-  /// besoin.
-  final SyncEngine? _syncEngine;
   final DateTime Function() _now;
 
-  const StaffContractRepositoryImpl({
+  StaffContractRepositoryImpl({
     required StaffContractDao contracts,
     required StaffContractWriteDao writer,
     required CurrentUserContext currentUser,
@@ -34,9 +29,11 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
     DateTime Function() now = DateTime.now,
   }) : _contracts = contracts,
        _writer = writer,
-       _currentUser = currentUser,
+       _local = StaffLocalWriter(
+         currentUser: currentUser,
+         syncEngine: syncEngine,
+       ),
        _ids = ids,
-       _syncEngine = syncEngine,
        _now = now;
 
   @override
@@ -58,8 +55,8 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
     String staffMemberId,
     StaffContractDraft draft,
   ) async {
-    final session = _session();
-    if (session == null) return const Left(_noSession);
+    final session = _local.session();
+    if (session == null) return const Left(StaffLocalWriter.noSession);
     final now = _now();
     final input = StaffContractInputMapper.of(
       draft,
@@ -67,7 +64,8 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
       recordedAt: now.toUtc().toIso8601String(),
     );
     if (input == null) return const Left(_incomplete);
-    return _write(
+    return _local.run(
+      'Écriture du contrat',
       () => _writer.addContract(
         request: StaffContractSyncRequestDto(
           staffMemberId: staffMemberId,
@@ -86,8 +84,8 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
     required String reason,
     StaffContractDraft? replacement,
   }) async {
-    final session = _session();
-    if (session == null) return const Left(_noSession);
+    final session = _local.session();
+    if (session == null) return const Left(StaffLocalWriter.noSession);
     if (original.isCorrected) {
       return const Left(ValidationFailure('Période déjà corrigée'));
     }
@@ -103,7 +101,8 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
       if (input == null) return const Left(_incomplete);
     }
     final trimmed = reason.trim();
-    return _write(
+    return _local.run(
+      'Écriture du contrat',
       () => _writer.correct(
         request: StaffContractCorrectionRequestDto(
           correctionId: _ids.newId(),
@@ -120,26 +119,5 @@ class StaffContractRepositoryImpl implements StaffContractRepository {
     );
   }
 
-  static const Failure _noSession = AuthFailure(
-    'Aucune session pour enregistrer',
-  );
   static const Failure _incomplete = ValidationFailure('Contrat incomplet');
-
-  ({String schoolId, String authorId})? _session() {
-    final schoolId = _currentUser.schoolId ?? '';
-    final authorId = _currentUser.uid;
-    if (schoolId.isEmpty || authorId == null) return null;
-    return (schoolId: schoolId, authorId: authorId);
-  }
-
-  Future<Either<Failure, Unit>> _write(Future<void> Function() write) async {
-    try {
-      await write();
-    } catch (e) {
-      return Left(StorageFailure('Écriture du contrat : $e'));
-    }
-    final engine = _syncEngine;
-    if (engine != null) unawaited(engine.flush());
-    return const Right(unit);
-  }
 }

@@ -11,8 +11,24 @@ class StaffNotice extends StatelessWidget {
   final IconData icon;
   final Color ink;
   final Color background;
+  final Color? border;
+  final EdgeInsetsGeometry margin;
 
-  const StaffNotice._(this.message, this.icon, this.ink, this.background);
+  const StaffNotice._(this.message, this.icon, this.ink, this.background)
+    : border = null,
+      margin = const EdgeInsets.only(bottom: AppSpacing.md);
+
+  /// Un bandeau dans une teinte donnée (celle d'un statut de pointage), sans
+  /// marge : c'est son conteneur qui l'espace.
+  const StaffNotice.tinted({
+    super.key,
+    required this.message,
+    required this.icon,
+    required this.ink,
+    required this.background,
+    this.border,
+    this.margin = EdgeInsets.zero,
+  });
 
   factory StaffNotice.warning(String message) => StaffNotice._(
     message,
@@ -30,12 +46,16 @@ class StaffNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: AppSpacing.md),
+    margin: margin,
     padding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.md,
       vertical: AppSpacing.sm,
     ),
-    decoration: BoxDecoration(color: background, borderRadius: AppRadius.brMd),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: AppRadius.brMd,
+      border: border == null ? null : Border.all(color: border!),
+    ),
     child: Row(
       children: [
         Icon(icon, size: 18, color: ink),

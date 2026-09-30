@@ -3,7 +3,9 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
+import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
+import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -48,7 +50,10 @@ Future<void> migrateTenantDatabase(
     await _paymentCorrections(db);
   }
   if (upTo(55)) {
-    await _staffFile(db);
+    await _createTables(db, staffOfflineTables);
+  }
+  if (upTo(56)) {
+    await _createTables(db, staffAttendanceTables);
   }
 }
 
@@ -134,12 +139,16 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
   await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));
 }
 
-/// v55 — le fichier du personnel : quatre tables neuves, création pure.
+/// v55 — le fichier du personnel ; v56 — le Pointage du personnel. Tables
+/// neuves, création pure.
 ///
 /// ⚠️ Gardes `IF NOT EXISTS`, même raison qu'à la v54 : une base héritée
 /// adoptée repasse par cet escalier.
-Future<void> _staffFile(DatabaseExecutor db) async {
-  for (final table in staffOfflineTables) {
+Future<void> _createTables(
+  DatabaseExecutor db,
+  List<TableSchema> tables,
+) async {
+  for (final table in tables) {
     await db.execute(
       table.createTableSql.replaceFirst(
         'CREATE TABLE ${table.name}',
@@ -152,8 +161,10 @@ Future<void> _staffFile(DatabaseExecutor db) async {
   }
 }
 
-String _ifNotExists(String createIndexSql) =>
-    createIndexSql.replaceFirst('CREATE INDEX ', 'CREATE INDEX IF NOT EXISTS ');
+String _ifNotExists(String createIndexSql) => createIndexSql.replaceFirstMapped(
+  RegExp('^CREATE (UNIQUE )?INDEX '),
+  (m) => 'CREATE ${m[1] ?? ''}INDEX IF NOT EXISTS ',
+);
 
 /// v53 — `ref_school.ticket_copies`, le nombre d'exemplaires d'un ticket que
 /// le sélecteur d'imprimante propose d'office (`TICKET_COPIES_PLAN.md`, lot 2).

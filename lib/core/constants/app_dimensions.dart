@@ -574,4 +574,57 @@ class AppDimensions {
   /// la tuile choisie se lise sans compter sur la couleur seule.
   static const staffContractTileBorderWidth = 1.5;
   static const staffContractTileIconSize = 18.0;
+
+  // ── Ressources humaines — pointage du personnel (spec B, redlines) ──
+  /// Largeur plancher d'une carte de la grille : autant de colonnes que
+  /// possible, pour des cartes d'environ 220 à 262 dp, entièrement tactiles.
+  static const staffAttendanceCardMinWidth = 220.0;
+  static const staffAttendanceAvatarSize = 44.0;
+  static const staffAttendanceMedallionSize = 46.0;
+  static const staffAttendanceMedallionIconSize = 24.0;
+
+  /// Bouton d'icône d'un pied de carte (effacer, réessayer).
+  static const staffAttendanceIconButtonSize = 36.0;
+
+  /// Cible tactile standard du module : puces, flèches, segments.
+  static const staffAttendanceTapTarget = 44.0;
+  static const staffAttendanceSegmentHeight = 40.0;
+  static const staffAttendanceRingSize = 64.0;
+  static const staffAttendanceRingStroke = 7.0;
+  static const staffAttendanceBorderWidth = 2.0;
+  static const staffAttendanceAccentWidth = 4.0;
+
+  /// La vue liste : largeur plancher avant défilement, et ses colonnes.
+  static const staffAttendanceListMinWidth = 900.0;
+  static const staffAttendanceColStatus = 262.0;
+  static const staffAttendanceColTimes = 168.0;
+  static const staffAttendanceColHours = 96.0;
+  static const staffAttendanceColAction = 40.0;
+
+  /// Les modales du pointage.
+  static const staffAttendanceDialogMaxWidth = 480.0;
+  static const staffAttendanceDialogMaxHeight = 640.0;
+
+  /// Fiche mensuelle : sélecteur d'agent et calendrier.
+  static const staffAttendancePickerWidth = 340.0;
+  static const staffAttendancePickerMaxHeight = 360.0;
+  static const staffAttendanceCalendarCellHeight = 56.0;
+
+  /// Le récapitulatif : ses colonnes.
+  static const staffAttendanceRecapColContract = 112.0;
+  static const staffAttendanceRecapColCount = 96.0;
+  static const staffAttendanceRecapColSync = 104.0;
+  static const staffAttendanceRecapMinWidth = 820.0;
+
+  /// Opacité de la grille d'un jour validé : lisible, visiblement figée.
+  static const staffAttendanceFrozenOpacity = 0.78;
+
+  /// Au-delà, les quatre indicateurs de la fiche tiennent sur une ligne.
+  static const staffAttendanceKpiWideBreakpoint = 720.0;
+
+  /// Part de la ligne du registre couverte par le voile de son statut.
+  static const staffAttendanceRowTintStop = 0.3;
+
+  /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
+  static const staffAttendanceUpcomingOpacity = 0.4;
 }

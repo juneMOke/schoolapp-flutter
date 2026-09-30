@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -100,13 +101,6 @@ class StaffMemberSyncDao {
   Future<void> delete(String staffMemberId) =>
       _db.delete(table, where: 'id = ?', whereArgs: [staffMemberId]);
 
-  /// Deux écritures d'un même instant : comparées en instants, jamais en
-  /// chaînes — le serveur tronque à la microseconde et peut réécrire la forme.
-  static bool sameInstant(String? a, String? b) {
-    if (a == null || b == null) return a == b;
-    final left = DateTime.tryParse(a);
-    final right = DateTime.tryParse(b);
-    if (left == null || right == null) return a == b;
-    return left.isAtSameMomentAs(right);
-  }
+  /// Voir [StaffLww.sameInstant].
+  static bool sameInstant(String? a, String? b) => StaffLww.sameInstant(a, b);
 }
