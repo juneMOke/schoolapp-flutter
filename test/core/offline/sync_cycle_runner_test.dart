@@ -125,6 +125,7 @@ void main() {
       expect(outcome.pullDegraded, isTrue);
       expect(outcome.pullRetriable, isTrue, reason: 'un échec se réessaie');
       expect(outcome.latestServerTimeMs, 777);
+      expect(outcome.pullDiagnostics, isEmpty);
       expect(
         r.isFullCycleDue(),
         isFalse,

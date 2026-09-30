@@ -21,10 +21,15 @@ class SyncCycleOutcome {
   /// Horloge **serveur** la plus récente observée, pour le badge de fraîcheur.
   final int? latestServerTimeMs;
 
+  /// Les flux en défaut, et pourquoi. Porté avec [pullDegraded], et nul dans
+  /// les mêmes cas : un cycle qui n'a rien vu n'efface pas le dernier constat.
+  final List<PullDiagnostic>? pullDiagnostics;
+
   const SyncCycleOutcome({
     this.pullDegraded,
     this.pullRetriable,
     this.latestServerTimeMs,
+    this.pullDiagnostics,
   });
 
   /// Rien n'a été observé : garde fermée, ou cycle sans rapport exploitable.
@@ -283,6 +288,7 @@ class SyncCycleRunner {
         pullDegraded: report.isDegraded,
         pullRetriable: report.failed > 0,
         latestServerTimeMs: report.latestServerTimeMs,
+        pullDiagnostics: report.diagnostics,
       );
     } catch (_) {
       // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.

@@ -2926,4 +2926,83 @@ void main() {
       expect(repo.refreshCalls, 1);
     });
   });
+
+  // La pastille dit « partiel » ; ce groupe prouve que le rapport dit aussi
+  // QUEL flux, et pourquoi — sans quoi le support cherche à l'aveugle.
+  group('diagnostics : chaque flux en défaut est nommé avec sa cause', () {
+    test('un cycle sain n\'en porte aucun', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(FakePullHandler('a', const PullOutcome.updated()));
+      final report = await coord.pullAll();
+      expect(report.diagnostics, isEmpty);
+    });
+
+    test('un échec porte le message du handler', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler('ok', const PullOutcome.notModified()),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'classrooms',
+            const PullOutcome.error('timeout 12 s'),
+          ),
+        );
+      final report = await coord.pullAll();
+      expect(report.diagnostics, const [
+        PullDiagnostic(
+          'classrooms',
+          PullDiagnosticKind.failed,
+          detail: 'timeout 12 s',
+        ),
+      ]);
+    });
+
+    test(
+      'un handler qui lève est nommé, avec le texte de l\'exception',
+      () async {
+        goOnline();
+        final coord = build()
+          ..registerHandler(ThrowingPullHandler('staff_members'));
+        final report = await coord.pullAll();
+        final diagnostic = report.diagnostics.single;
+        expect(diagnostic.resource, 'staff_members');
+        expect(diagnostic.kind, PullDiagnosticKind.failed);
+        expect(diagnostic.detail, isNotEmpty);
+      },
+    );
+
+    test(
+      'les paiements bloqués par des créances en échec sont nommés',
+      () async {
+        goOnline();
+        final coord = build()
+          ..registerHandler(
+            FakePullHandler(
+              'finance_student_charges',
+              const PullOutcome.error('KO'),
+            ),
+          )
+          ..registerHandler(
+            FakePullHandler('finance_payments', const PullOutcome.updated()),
+          );
+        final report = await coord.pullAll();
+        expect(report.diagnostics.map((d) => (d.resource, d.kind)), [
+          ('finance_student_charges', PullDiagnosticKind.failed),
+          ('finance_payments', PullDiagnosticKind.blocked),
+        ]);
+      },
+    );
+
+    test('un flux au plan sans handler est nommé par sa clé', () async {
+      goOnline();
+      final coord = plannedCoordinator(planKnown(const ['hr.payrolls']));
+      final report = await coord.pullAll();
+      expect(report.diagnostics, const [
+        PullDiagnostic('hr.payrolls', PullDiagnosticKind.notPulled),
+      ]);
+    });
+  });
 }

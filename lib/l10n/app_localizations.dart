@@ -12497,6 +12497,58 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get syncIncompleteReadRetry;
 
+  /// No description provided for @syncReadDiagnosticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing flows'**
+  String get syncReadDiagnosticsTitle;
+
+  /// No description provided for @syncReadDiagnosticsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to super administrators only. Pass these lines on to support.'**
+  String get syncReadDiagnosticsHint;
+
+  /// No description provided for @syncReadDiagnosticFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get syncReadDiagnosticFailed;
+
+  /// No description provided for @syncReadDiagnosticBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by a failing flow'**
+  String get syncReadDiagnosticBlocked;
+
+  /// No description provided for @syncReadDiagnosticForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing right'**
+  String get syncReadDiagnosticForbidden;
+
+  /// No description provided for @syncReadDiagnosticNotPulled.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced by the server, not pulled by this version'**
+  String get syncReadDiagnosticNotPulled;
+
+  /// One line of the read diagnostics (super admin): the technical flow and the cause
+  ///
+  /// In en, this message translates to:
+  /// **'{resource} — {cause}'**
+  String syncReadDiagnosticLine(String resource, String cause);
+
+  /// One line of the read diagnostics (super admin) with the error message
+  ///
+  /// In en, this message translates to:
+  /// **'{resource} — {cause}: {detail}'**
+  String syncReadDiagnosticLineWithDetail(
+    String resource,
+    String cause,
+    String detail,
+  );
+
   /// No description provided for @syncErrorsHeldTitle.
   ///
   /// In en, this message translates to:

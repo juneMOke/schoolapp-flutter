@@ -354,6 +354,29 @@ void main() {
       await cubit.close();
     });
 
+    test('pull dégradé → l\'état porte QUELS flux, et pourquoi', () async {
+      const diagnostic = PullDiagnostic(
+        'finance_payments',
+        PullDiagnosticKind.failed,
+        detail: 'timeout',
+      );
+      when(() => pull.pullAll()).thenAnswer(
+        (_) async => const PullRunReport(
+          updated: 2,
+          failed: 1,
+          diagnostics: [diagnostic],
+        ),
+      );
+
+      final cubit = buildWithPull();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      expect(cubit.state.readDiagnostics, const [diagnostic]);
+      await cubit.close();
+    });
+
     // B-2 — ce cubit vit aussi longtemps que l'application, et ces drapeaux ne
     // sont réécrits que par un cycle qui a réellement observé quelque chose. Le
     // compte A pose « partiellement à jour », A se déconnecte, B se connecte —

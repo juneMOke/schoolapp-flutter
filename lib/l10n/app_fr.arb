@@ -5121,6 +5121,22 @@
   "syncIncompleteReadDescription": "La dernière mise à jour n'a pas tout ramené. Des écrans peuvent donc paraître vides sans l'être vraiment. Rien de ce que vous avez saisi n'est perdu. Si cela dure, votre administrateur peut vérifier les accès de votre compte.",
   "syncIncompleteReadRetriableDescription": "La dernière mise à jour s'est interrompue avant d'avoir tout ramené. Des écrans peuvent donc paraître vides sans l'être vraiment. Rien de ce que vous avez saisi n'est perdu.",
   "syncIncompleteReadRetry": "Réessayer",
+  "syncReadDiagnosticsTitle": "Flux en défaut",
+  "syncReadDiagnosticsHint": "Visible des super-administrateurs seulement. Transmettez ces lignes au support.",
+  "syncReadDiagnosticFailed": "Échec",
+  "syncReadDiagnosticBlocked": "Bloqué par un flux en échec",
+  "syncReadDiagnosticForbidden": "Droit manquant",
+  "syncReadDiagnosticNotPulled": "Annoncé par le serveur, non tiré par cette version",
+  "syncReadDiagnosticLine": "{resource} — {cause}",
+  "@syncReadDiagnosticLine": {
+    "description": "Une ligne du diagnostic de lecture (super-admin) : le flux technique et la cause",
+    "placeholders": {"resource": {"type": "String"}, "cause": {"type": "String"}}
+  },
+  "syncReadDiagnosticLineWithDetail": "{resource} — {cause} : {detail}",
+  "@syncReadDiagnosticLineWithDetail": {
+    "description": "Une ligne du diagnostic de lecture (super-admin) avec le message d'erreur",
+    "placeholders": {"resource": {"type": "String"}, "cause": {"type": "String"}, "detail": {"type": "String"}}
+  },
   "syncErrorsHeldTitle": "En attente",
   "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
   "documentViewerPrintLabel": "Imprimer",

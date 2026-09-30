@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/offline/pull_diagnostic.dart';
 
 /// État complet piloté par [SyncStatusCubit] : le [status] affiché par
 /// [SyncIndicator] + la date de dernière synchro réussie.
@@ -39,12 +40,18 @@ class SyncStatusState extends Equatable {
   /// qui ne lève rien.
   final bool hasRetriableRead;
 
+  /// Les flux que le dernier cycle de lecture n'a pas ramenés, et pourquoi —
+  /// le détail derrière [hasIncompleteRead]. La feuille ne le montre qu'aux
+  /// super-administrateurs : c'est un outil de diagnostic, pas un message.
+  final List<PullDiagnostic> readDiagnostics;
+
   const SyncStatusState({
     required this.status,
     this.lastSyncAtMs,
     this.hasHeldWork = false,
     this.hasIncompleteRead = false,
     this.hasRetriableRead = false,
+    this.readDiagnostics = const <PullDiagnostic>[],
   });
 
   SyncStatusState copyWith({
@@ -53,12 +60,14 @@ class SyncStatusState extends Equatable {
     bool? hasHeldWork,
     bool? hasIncompleteRead,
     bool? hasRetriableRead,
+    List<PullDiagnostic>? readDiagnostics,
   }) => SyncStatusState(
     status: status ?? this.status,
     lastSyncAtMs: lastSyncAtMs ?? this.lastSyncAtMs,
     hasHeldWork: hasHeldWork ?? this.hasHeldWork,
     hasIncompleteRead: hasIncompleteRead ?? this.hasIncompleteRead,
     hasRetriableRead: hasRetriableRead ?? this.hasRetriableRead,
+    readDiagnostics: readDiagnostics ?? this.readDiagnostics,
   );
 
   @override
@@ -68,5 +77,6 @@ class SyncStatusState extends Equatable {
     hasHeldWork,
     hasIncompleteRead,
     hasRetriableRead,
+    readDiagnostics,
   ];
 }
