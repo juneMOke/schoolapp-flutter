@@ -120,6 +120,11 @@ enum Perm {
   hrStaffWrite('hr.staff.write'),
   hrPayRead('hr.pay.read'),
   hrPayWrite('hr.pay.write'),
+  // La Paie (sous-module C) : `read` voit le livre, `write` prépare, soumet,
+  // verse et accorde une avance ; `manage` valide, renvoie, rouvre et règle.
+  // DIRECTOR et SUPER_ADMIN seuls. Déclaré avant que le serveur ne le sème
+  // (lot back P0) : sans lui, les gestes de la direction restent masqués.
+  hrPayManage('hr.pay.manage'),
   hrDocumentRead('hr.document.read'),
   hrDocumentWrite('hr.document.write'),
   // Le Pointage du personnel (sous-module B), arrêté avec le back le

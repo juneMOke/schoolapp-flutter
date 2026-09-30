@@ -12,18 +12,37 @@ import 'package:school_app_flutter/core/network/api_error_parser.dart';
 /// - `STAFF_MEMBER_NOT_YET_SYNCED` / `STAFF_CONTRACT_NOT_YET_SYNCED` : ce qui
 ///   dépend d'une fiche (contrat, pièce) est arrivé avant elle — une **attente
 ///   de dépendance**, à rejouer sans consommer de tentative ([isDependencyWait]) ;
+/// - `PAYROLL_NOT_YET_VALIDATED` : un versement nomme une validation de paie
+///   pas encore arrivée au serveur — même attente ;
 /// - sans code : le même identifiant est encore en vol — un rejeu ordinaire.
 class StaffPushFailure {
   final int? status;
   final String? detailCode;
 
+  /// Le corps de la réponse, tel quel : certains refus portent l'état du
+  /// serveur (`PAYROLL_STALE` rend ses chiffres).
+  final Object? body;
+
   /// Cause lisible : le code machine d'abord, la phrase du serveur ensuite.
   final String reason;
 
-  const StaffPushFailure._(this.status, this.detailCode, this.reason);
+  const StaffPushFailure._(
+    this.status,
+    this.detailCode,
+    this.reason, [
+    this.body,
+  ]);
 
   static const String memberNotYetSynced = 'STAFF_MEMBER_NOT_YET_SYNCED';
   static const String contractNotYetSynced = 'STAFF_CONTRACT_NOT_YET_SYNCED';
+  static const String payrollNotYetValidated = 'PAYROLL_NOT_YET_VALIDATED';
+
+  /// Les 409 d'attente du module RH : rejoués sans consommer de tentative.
+  static const Set<String> dependencyWaitCodes = {
+    memberNotYetSynced,
+    contractNotYetSynced,
+    payrollNotYetValidated,
+  };
 
   factory StaffPushFailure.of(DioException e) {
     final status = e.response?.statusCode;
@@ -39,7 +58,7 @@ class StaffPushFailure {
       final detail = serverMessage ?? e.message ?? e.error?.toString();
       reason = detail == null || detail.isEmpty ? where : '$where — $detail';
     }
-    return StaffPushFailure._(status, detailCode, reason);
+    return StaffPushFailure._(status, detailCode, reason, e.response?.data);
   }
 
   /// Statuts transitoires hormis les 5xx : jeton expiré (l'intercepteur
@@ -47,8 +66,7 @@ class StaffPushFailure {
   static const Set<int> transientStatuses = {401, 408, 429};
 
   bool get isDependencyWait =>
-      status == 409 &&
-      (detailCode == memberNotYetSynced || detailCode == contractNotYetSynced);
+      status == 409 && dependencyWaitCodes.contains(detailCode);
 
   bool get isTransient =>
       status == null ||

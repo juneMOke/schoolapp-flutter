@@ -36,6 +36,35 @@ class OutboxDao {
     return rows.map(OutboxEntry.fromMap).toList();
   }
 
+  /// Une entrée **encore en attente**, d'un des [types] et du même
+  /// [aggregateId], posée strictement avant l'entrée [entryId] ?
+  ///
+  /// C'est l'ordre par agrégat que le moteur ne tient pas (il poursuit après
+  /// un `retry`, et le backoff fait doubler une entrée ancienne par une
+  /// récente) : un handler qui en a besoin rend `blocked` tant que c'est vrai.
+  /// On n'attend jamais qu'une entrée **plus ancienne** — deux entrées ne
+  /// peuvent donc pas s'attendre l'une l'autre —, et une entrée refusée
+  /// (`SYNC_ERROR`) ne retient plus personne. L'ordre est strict
+  /// `(created_at, rowid)`, sinon deux entrées d'une même milliseconde
+  /// s'attendraient à jamais.
+  Future<bool> hasOlderPending({
+    required String entryId,
+    required String aggregateId,
+    required Set<String> types,
+  }) async {
+    if (types.isEmpty) return false;
+    final marks = List.filled(types.length, '?').join(', ');
+    final rows = await _db.rawQuery(
+      'SELECT 1 FROM $table o JOIN $table me ON me.id = ? '
+      'WHERE o.id != me.id AND o.status = ? AND o.aggregate_id = ? '
+      'AND o.aggregate_type IN ($marks) '
+      'AND (o.created_at < me.created_at '
+      'OR (o.created_at = me.created_at AND o.rowid < me.rowid)) LIMIT 1',
+      [entryId, OutboxStatus.pending.dbValue, aggregateId, ...types],
+    );
+    return rows.isNotEmpty;
+  }
+
   /// Marque une entrée comme acquittée (ACK serveur reçu).
   ///
   /// [expectedCreatedAt] : garde anti-TOCTOU. Si fourni, on n'acquitte QUE si

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_card_tabs.dart';
 
 /// La teinte d'un statut de pointage, réutilisée partout où il s'affiche :
 /// carte, ligne, puce de filtre, calendrier, pastille.
@@ -52,6 +53,9 @@ class StaffAttendanceTone {
     AppColors.staffAttendanceAbsentInk,
     Icons.cancel_outlined,
   );
+
+  /// Un badge d'onglet à cette teinte.
+  StaffTabBadge badge(String label) => (label: label, soft: soft, ink: ink);
 
   static StaffAttendanceTone of(StaffAttendanceStatus status) =>
       switch (status) {

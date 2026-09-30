@@ -234,6 +234,54 @@ void main() {
     });
   });
 
+  group('v57 — la Paie du personnel', () {
+    const tables = [
+      'ref_payroll_settings',
+      'staff_pay_profiles',
+      'payrolls',
+      'payroll_variables',
+      'payroll_gestures',
+      'payroll_lines',
+      'staff_attendance_summaries',
+      'salary_advances',
+      'payroll_disbursements',
+      'payroll_share_traces',
+    ];
+
+    Future<void> seedAvant() async {
+      for (final table in tables) {
+        await db.execute('DROP TABLE $table');
+      }
+    }
+
+    test('les dix tables arrivent, vides, et le palier se rejoue', () async {
+      await seedAvant();
+
+      await migrateTenantDatabase(db, 56);
+      await expectLater(migrateTenantDatabase(db, 56), completes);
+
+      expect(await _tables(db), containsAll(tables));
+      for (final table in tables) {
+        expect(await db.query(table), isEmpty, reason: table);
+      }
+    });
+
+    test('une école n a qu une paie par mois', () async {
+      Map<String, Object?> row(String id) => {
+        'id': id,
+        'school_id': 's-1',
+        'month': '2026-10',
+        'status': 'DRAFT',
+      };
+      await db.insert('payrolls', row('p-1'));
+
+      await expectLater(
+        db.insert('payrolls', row('p-2')),
+        throwsA(isA<DatabaseException>()),
+      );
+    });
+  });
+
   group('v56 — le Pointage du personnel', () {
     const tables = [
       'staff_attendance_records',

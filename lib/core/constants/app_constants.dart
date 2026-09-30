@@ -783,7 +783,11 @@ class AppConstants {
   // `staff_attendance_records`, `staff_attendance_locks`,
   // `staff_attendance_gestures`, `ref_staff_attendance_settings`. Création
   // pure. Palier d'école.
-  static const int offlineDbSchemaVersion = 56;
+  // v57 (2026-09-30) : la Paie du personnel (RH, sous-module C) — réglages,
+  // profils de paie, paies, éléments variables, gestes, lignes figées, résumés
+  // du Pointage, avances, versements, traces de diffusion. Création pure.
+  // Palier d'école.
+  static const int offlineDbSchemaVersion = 57;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

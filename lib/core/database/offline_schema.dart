@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/database/schema/configuration_offline_sc
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/expense_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
@@ -114,4 +115,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...expenseOfflineTables, // Dépenses — registre des frais de fonctionnement
   ...staffOfflineTables, // RH — fichier du personnel
   ...staffAttendanceTables, // RH — pointage du personnel
+  ...payrollTables, // RH — paie du personnel
 ];
