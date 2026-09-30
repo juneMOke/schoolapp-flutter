@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_draf
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_rules.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
@@ -71,7 +72,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
       memberId,
       _firstMonth,
     );
-    return contract?.amount?.currency ?? contract?.bonus?.currency;
+    return contract == null ? null : PayrollEngine.currencyOf(contract);
   }
 
   SalaryAdvanceDraft? get _draft {
@@ -146,7 +147,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
             controller: _amount,
             label: _currency == null
                 ? l10n.payrollAdvanceAmount
-                : '${l10n.payrollAdvanceAmount} (${MoneyFormat.symbolOf(_currency!)})',
+                : l10n.payrollAdvanceAmountIn(MoneyFormat.symbolOf(_currency!)),
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
             required: true,
@@ -213,9 +214,13 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           if (_tried && (draft == null || refusal != null)) ...[
             const SizedBox(height: AppSpacing.md),
             PayrollTone.alert.notice(
-              refusal == null
-                  ? l10n.payrollRuleInvalidAmount
-                  : PayrollLabels.rule(l10n, refusal),
+              refusal != null
+                  ? PayrollLabels.rule(l10n, refusal)
+                  : _memberId == null
+                  ? l10n.payrollAdvanceNeedAgent
+                  : _reason == null
+                  ? l10n.payrollAdvanceNeedReason
+                  : l10n.payrollRuleInvalidAmount,
               icon: Icons.error_outline,
             ),
           ],

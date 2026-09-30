@@ -20,6 +20,14 @@ abstract final class PayrollOutbox {
 
   static String entryId(String type, String id) => '$type:$id';
 
+  /// L'entrée d'une saisie « dernier écrit gagne » : **une par saisie**, jamais
+  /// repliée. Un id fixe remplacerait l'entrée et la rajeunirait — elle
+  /// passerait alors derrière un geste posé entre-temps, qui partirait avec
+  /// une empreinte calculée sur une saisie que le serveur n'aurait pas.
+  /// Le serveur arbitre les saisies par leur horloge.
+  static String saisieId(String type, String key, String clientUpdatedAt) =>
+      '$type:$key@$clientUpdatedAt';
+
   static String monthKey(String month) => 'payroll:$month';
 
   static String lineKey(String month, String staffMemberId) =>

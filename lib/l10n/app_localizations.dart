@@ -20291,12 +20291,6 @@ abstract class AppLocalizations {
   /// **'Close the {month} attendance first.'**
   String payrollBlockerAttendance(String month);
 
-  /// No description provided for @payrollBlockerEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No staff member to pay this month.'**
-  String get payrollBlockerEmpty;
-
   /// No description provided for @payrollBlockerDisbursed.
   ///
   /// In en, this message translates to:
@@ -21747,6 +21741,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sealed payslip'**
   String get payrollPayslipSealed;
+
+  /// No description provided for @payrollAwaitingFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll validated: its frozen amounts arrive at the next sync. No payment before that.'**
+  String get payrollAwaitingFrozen;
+
+  /// No description provided for @payrollAdvanceNeedAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the staff member.'**
+  String get payrollAdvanceNeedAgent;
+
+  /// No description provided for @payrollAdvanceNeedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the reason.'**
+  String get payrollAdvanceNeedReason;
+
+  /// No description provided for @payrollAdvanceAmountIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount * ({symbol})'**
+  String payrollAdvanceAmountIn(String symbol);
+
+  /// No description provided for @payrollTotalIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · {currency}'**
+  String payrollTotalIn(String currency);
 }
 
 class _AppLocalizationsDelegate

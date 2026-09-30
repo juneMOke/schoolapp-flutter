@@ -38,9 +38,6 @@ enum PayrollBlocker {
   /// Le Pointage de M−1 n'est pas clos (A1, A9).
   attendanceOpen,
 
-  /// Aucun agent au livre.
-  emptyLedger,
-
   /// Un versement vivant existe : la paie ne se rouvre plus (A4).
   hasDisbursements,
 }
@@ -66,6 +63,11 @@ class PayrollMonthView {
   final List<String> zeroHourMembers;
   final PayrollAttendanceState attendance;
 
+  /// Validée au serveur, mais ses lignes figées ne sont pas encore descendues
+  /// (l'accusé d'un geste ne les porte pas) : le livre affiché est un calcul,
+  /// rien ne se verse avant la descente.
+  final bool awaitingFrozenLines;
+
   /// Le dernier geste du mois, s'il a été refusé (confrontation, motif).
   final PayrollGesture? lastRefusal;
   final PayrollBlocker? submitBlocker;
@@ -82,6 +84,7 @@ class PayrollMonthView {
     required this.withoutContract,
     required this.zeroHourMembers,
     required this.attendance,
+    this.awaitingFrozenLines = false,
     this.lastRefusal,
     this.submitBlocker,
     this.validateBlocker,
@@ -92,7 +95,8 @@ class PayrollMonthView {
 
   bool get canPay =>
       (phase == PayrollPhase.validated || phase == PayrollPhase.paid) &&
-      header?.validationGestureId != null;
+      header?.validationGestureId != null &&
+      !awaitingFrozenLines;
 
   /// Les lignes qui ont un net à verser.
   Iterable<PayrollLine> get payable =>

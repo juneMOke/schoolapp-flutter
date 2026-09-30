@@ -1065,6 +1065,9 @@ class AppConstants {
   static const String staffDocumentContentEndpoint =
       '/api/v1/hr/staff-documents/{documentId}/content';
 
+  /// L'hôte des liens de conversation WhatsApp (`https://wa.me/<numéro>`).
+  static const String whatsappHost = 'wa.me';
+
   // ── Offline sync — Paie du personnel (RH) ──
   /// Réglages de paie (PUT, `hr.pay.manage`, dernier écrit gagne) ; ils
   /// descendent avec le socle (section `payrollSettings`).

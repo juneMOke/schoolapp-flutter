@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_contract_picker.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
@@ -52,9 +53,7 @@ abstract final class PayrollAdvanceRules {
       draft.firstMonth,
     );
     if (contract == null) return PayrollRule.noContract;
-    final currency =
-        contract.amount?.currency ?? contract.bonus?.currency ?? '';
-    if (currency.isNotEmpty && currency != draft.amount.currency) {
+    if (PayrollEngine.currencyOf(contract) != draft.amount.currency) {
       return PayrollRule.invalidAmount;
     }
     final view = PayrollLedger.monthView(snapshot, draft.firstMonth);

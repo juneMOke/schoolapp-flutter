@@ -12889,9 +12889,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get payrollBlockerEmpty => 'Aucun agent à payer ce mois-ci.';
-
-  @override
   String get payrollBlockerDisbursed =>
       'Un salaire a déjà été versé : la paie ne se rouvre plus.';
 
@@ -13776,4 +13773,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollPayslipSealed => 'Bulletin scellé';
+
+  @override
+  String get payrollAwaitingFrozen =>
+      'Paie validée : ses montants figés arrivent à la prochaine synchronisation. Aucun versement avant.';
+
+  @override
+  String get payrollAdvanceNeedAgent => 'Choisissez l\'agent.';
+
+  @override
+  String get payrollAdvanceNeedReason => 'Choisissez le motif.';
+
+  @override
+  String payrollAdvanceAmountIn(String symbol) {
+    return 'Montant * ($symbol)';
+  }
+
+  @override
+  String payrollTotalIn(String currency) {
+    return 'Total · $currency';
+  }
 }

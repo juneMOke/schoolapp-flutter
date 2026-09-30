@@ -37,7 +37,8 @@ class OutboxDao {
   }
 
   /// Une entrée **encore en attente**, d'un des [types] et du même
-  /// [aggregateId], posée strictement avant l'entrée [entryId] ?
+  /// [aggregateId] (`null` : de n'importe quel agrégat), posée strictement
+  /// avant l'entrée [entryId] ?
   ///
   /// C'est l'ordre par agrégat que le moteur ne tient pas (il poursuit après
   /// un `retry`, et le backoff fait doubler une entrée ancienne par une
@@ -49,18 +50,19 @@ class OutboxDao {
   /// s'attendraient à jamais.
   Future<bool> hasOlderPending({
     required String entryId,
-    required String aggregateId,
+    required String? aggregateId,
     required Set<String> types,
   }) async {
     if (types.isEmpty) return false;
     final marks = List.filled(types.length, '?').join(', ');
     final rows = await _db.rawQuery(
       'SELECT 1 FROM $table o JOIN $table me ON me.id = ? '
-      'WHERE o.id != me.id AND o.status = ? AND o.aggregate_id = ? '
+      'WHERE o.id != me.id AND o.status = ? '
+      '${aggregateId == null ? '' : 'AND o.aggregate_id = ? '}'
       'AND o.aggregate_type IN ($marks) '
       'AND (o.created_at < me.created_at '
       'OR (o.created_at = me.created_at AND o.rowid < me.rowid)) LIMIT 1',
-      [entryId, OutboxStatus.pending.dbValue, aggregateId, ...types],
+      [entryId, OutboxStatus.pending.dbValue, ?aggregateId, ...types],
     );
     return rows.isNotEmpty;
   }

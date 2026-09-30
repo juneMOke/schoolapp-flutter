@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -30,7 +31,10 @@ class PayrollPayslipActions {
 
   /// Un agent, ou tout le livre quand [line] est `null`.
   Future<void> openPdf(PayrollLine? line) async {
-    final view = _state.view;
+    // Le cubit est pris avant le premier `await` : la page peut se fermer
+    // pendant le téléchargement ou l'aperçu.
+    final cubit = _cubit;
+    final view = cubit.state.view;
     if (view == null || view.lines.isEmpty) return;
     final sealed = view.phase.isLocked;
     final name = line == null
@@ -55,13 +59,13 @@ class PayrollPayslipActions {
       );
       return;
     }
-    final result = await _cubit.commands.payslip(
+    final result = await cubit.commands.payslip(
       view.month,
       staffMemberId: line?.staffMemberId,
     );
-    if (!context.mounted) return;
+    if (!context.mounted || cubit.isClosed) return;
     await result.fold(
-      (failure) async => _cubit.announce(
+      (failure) async => cubit.announce(
         PayrollNotice(
           failure is NetworkFailure
               ? PayrollNoticeKind.offline
@@ -70,7 +74,7 @@ class PayrollPayslipActions {
       ),
       (bytes) async {
         if (line != null) {
-          await _cubit.commands.recordShare(
+          await cubit.commands.recordShare(
             view.month,
             line.staffMemberId,
             PayrollShareChannel.pdf,
@@ -82,7 +86,7 @@ class PayrollPayslipActions {
           title: _l10n.payrollPayslipSealed,
           document: PrintableDocument(bytes: bytes, fileName: '$name.pdf'),
         );
-        await _cubit.refresh();
+        if (!cubit.isClosed) await cubit.refresh();
       },
     );
   }
@@ -98,7 +102,8 @@ class PayrollPayslipActions {
   /// Ouvre WhatsApp sur le message prérempli ; la trace reste sur la tablette
   /// (A6) — ouvrir n'est pas envoyer.
   Future<void> whatsapp(PayrollLine line) async {
-    final view = _state.view;
+    final cubit = _cubit;
+    final view = cubit.state.view;
     final phone = phoneOf(line.staffMemberId);
     if (view == null || phone == null) return;
     final member = _state.snapshot.member(line.staffMemberId);
@@ -116,14 +121,17 @@ class PayrollPayslipActions {
       content.payment,
     );
     final digits = PhoneNumberFormat.canonicalE164(phone).replaceAll('+', '');
-    final uri = Uri.https('wa.me', '/$digits', {'text': message});
+    final uri = Uri.https(AppConstants.whatsappHost, '/$digits', {
+      'text': message,
+    });
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-    await _cubit.commands.recordShare(
+    await cubit.commands.recordShare(
       view.month,
       line.staffMemberId,
       PayrollShareChannel.whatsapp,
     );
-    _cubit.announce(const PayrollNotice(PayrollNoticeKind.shared));
-    await _cubit.refresh();
+    if (cubit.isClosed) return;
+    cubit.announce(const PayrollNotice(PayrollNoticeKind.shared));
+    await cubit.refresh();
   }
 }

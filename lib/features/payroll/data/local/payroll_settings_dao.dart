@@ -73,7 +73,11 @@ class PayrollSettingsDao {
       'updated_at': nowMs,
     },
     PayrollQueued(
-      entryId: PayrollOutbox.entryId(PayrollOutbox.settings, schoolId),
+      entryId: PayrollOutbox.saisieId(
+        PayrollOutbox.settings,
+        schoolId,
+        request.clientUpdatedAt,
+      ),
       aggregateType: PayrollOutbox.settings,
       aggregateId: schoolId,
       payload: request.toJson(),

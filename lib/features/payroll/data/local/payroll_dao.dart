@@ -20,7 +20,7 @@ class PayrollDao {
   static const String table = 'payrolls';
   static const String linesTable = 'payroll_lines';
 
-  /// Une page du flux, ou l'accusé d'un geste. Rend le nombre de paies.
+  /// Une page du flux. Rend le nombre de paies.
   Future<int> apply(
     List<PayrollDto> payrolls, {
     required String schoolId,
@@ -35,12 +35,41 @@ class PayrollDao {
     return payrolls.length;
   }
 
+  /// L'accusé d'un geste parti de [from]. Un accusé arrive parfois **après**
+  /// un pull plus récent (un autre poste a déjà fait avancer la paie) : il ne
+  /// doit pas la faire reculer. Il ne s'applique donc que si la paie est
+  /// encore, sur la tablette, dans l'état d'où le geste est parti.
+  Future<void> applyAck(
+    PayrollDto payroll, {
+    required String from,
+    required String schoolId,
+    required int nowMs,
+  }) => _store.transaction((txn) async {
+    final rows = await txn.query(
+      table,
+      columns: ['status'],
+      where: 'school_id = ? AND month = ?',
+      whereArgs: [schoolId, payroll.month],
+    );
+    if (rows.isNotEmpty && rows.single['status'] != from) {
+      await PayrollGestureDao.applyServer(
+        txn,
+        payroll.month,
+        payroll.gestures,
+        schoolId: schoolId,
+      );
+      return;
+    }
+    await _applyOne(txn, payroll, schoolId: schoolId, nowMs: nowMs);
+  });
+
   static Future<void> _applyOne(
     DatabaseExecutor txn,
     PayrollDto payroll, {
     required String schoolId,
     required int nowMs,
   }) async {
+    if (await _isOlder(txn, payroll, schoolId)) return;
     await txn.delete(
       table,
       where: 'school_id = ? AND month = ? AND id != ?',
@@ -75,17 +104,22 @@ class PayrollDao {
         whereArgs: [schoolId, payroll.month],
       );
     }
-    if (validated && lines != null) {
-      for (final line in lines) {
-        final parsed = PayrollLineJson.tryParse(line, month: payroll.month);
-        if (parsed == null) continue;
+    // Une ligne illisible et tout le mois reste non figé : un livre figé à
+    // N−1 agents perdrait des retenues d'avance, qui seraient reprises le
+    // mois suivant.
+    final parsed = [
+      for (final line in lines ?? const <Map<dynamic, dynamic>>[])
+        (line, PayrollLineJson.tryParse(line, month: payroll.month)),
+    ];
+    if (validated && lines != null && parsed.every((p) => p.$2 != null)) {
+      for (final (raw, line) in parsed) {
         await txn.insert(linesTable, {
           'school_id': schoolId,
           'month': payroll.month,
-          'staff_member_id': parsed.staffMemberId,
-          'currency': parsed.currency,
-          'net_in_cents': parsed.netInCents,
-          'line': jsonEncode(line),
+          'staff_member_id': line!.staffMemberId,
+          'currency': line.currency,
+          'net_in_cents': line.netInCents,
+          'line': jsonEncode(raw),
           'updated_at': nowMs,
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
@@ -103,6 +137,28 @@ class PayrollDao {
       payroll.gestures,
       schoolId: schoolId,
     );
+  }
+
+  /// Une page qui porte une paie **plus ancienne** que celle de la tablette
+  /// (rejeu, pages croisées) ne l'écrase pas.
+  static Future<bool> _isOlder(
+    DatabaseExecutor txn,
+    PayrollDto payroll,
+    String schoolId,
+  ) async {
+    final incoming = DateTime.tryParse(payroll.serverUpdatedAt ?? '');
+    if (incoming == null) return false;
+    final rows = await txn.query(
+      table,
+      columns: ['server_updated_at'],
+      where: 'school_id = ? AND month = ?',
+      whereArgs: [schoolId, payroll.month],
+    );
+    if (rows.isEmpty) return false;
+    final current = DateTime.tryParse(
+      rows.single['server_updated_at'] as String? ?? '',
+    );
+    return current != null && incoming.isBefore(current);
   }
 
   Future<Map<String, PayrollHeader>> headers(String schoolId) async {

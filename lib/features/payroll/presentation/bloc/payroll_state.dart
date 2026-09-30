@@ -31,6 +31,9 @@ class PayrollState extends Equatable {
 
   /// Le livre de [month], recomposé quand la tablette ou le mois change.
   final PayrollMonthView? view;
+
+  /// Les livres de l'historique, recomposés à chaque lecture de la tablette.
+  final List<PayrollMonthView> history;
   final StaffContractKind? contractFilter;
   final PayrollPayFilter payFilter;
   final String search;
@@ -48,6 +51,7 @@ class PayrollState extends Equatable {
     this.failure,
     this.tab = PayrollTab.ledger,
     this.view,
+    this.history = const [],
     this.contractFilter,
     this.payFilter = PayrollPayFilter.all,
     this.search = '',
@@ -83,17 +87,34 @@ class PayrollState extends Equatable {
     final view = this.view;
     if (view == null) return const [];
     final needle = search.trim();
+    final order = {
+      for (final (index, member) in snapshot.members.indexed) member.id: index,
+    };
+    // Les lignes du livre, et non les fiches : la ligne figée d'un agent
+    // retiré depuis la validation reste au livre.
     return [
-      for (final member in snapshot.members)
-        if (view.line(member.id) case final line?)
-          if ((contractFilter == null || line.contractKind == contractFilter) &&
-              _matchesPay(view, line) &&
-              (needle.isEmpty || StaffMemberSearch.matches(member, needle)))
-            line,
-    ];
+      for (final line in view.lines)
+        if ((contractFilter == null || line.contractKind == contractFilter) &&
+            _matchesPay(view, line) &&
+            _matchesSearch(line, needle))
+          line,
+    ]..sort(
+      (a, b) => (order[a.staffMemberId] ?? order.length).compareTo(
+        order[b.staffMemberId] ?? order.length,
+      ),
+    );
   }
 
+  bool _matchesSearch(PayrollLine line, String needle) {
+    if (needle.isEmpty) return true;
+    final member = snapshot.member(line.staffMemberId);
+    return member != null && StaffMemberSearch.matches(member, needle);
+  }
+
+  /// Le filtre de versement ne vaut que sur une paie verrouillée — ses puces
+  /// ne s'affichent pas ailleurs.
   bool _matchesPay(PayrollMonthView view, PayrollLine line) {
+    if (!view.phase.isLocked) return true;
     final paid = view.disbursements.containsKey(line.staffMemberId);
     return switch (payFilter) {
       PayrollPayFilter.all => true,
@@ -111,6 +132,7 @@ class PayrollState extends Equatable {
     String? month,
     PayrollTab? tab,
     PayrollMonthView? view,
+    List<PayrollMonthView>? history,
     StaffContractKind? Function()? contractFilter,
     PayrollPayFilter? payFilter,
     String? search,
@@ -125,6 +147,7 @@ class PayrollState extends Equatable {
     month: month ?? this.month,
     tab: tab ?? this.tab,
     view: view ?? this.view,
+    history: history ?? this.history,
     contractFilter: contractFilter == null
         ? this.contractFilter
         : contractFilter(),
@@ -146,6 +169,7 @@ class PayrollState extends Equatable {
     month,
     tab,
     view,
+    history,
     contractFilter,
     payFilter,
     search,

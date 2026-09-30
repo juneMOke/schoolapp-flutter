@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disb
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
@@ -150,15 +151,19 @@ class PayrollRepositoryImpl implements PayrollRepository {
   );
 
   @override
-  Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft) =>
-      _write(
-        'Écriture du versement',
-        (requests, nowMs) => _local.disbursements.add(
-          requests.disbursement(draft),
-          schoolId: requests.schoolId,
-          nowMs: nowMs,
-        ),
-      );
+  Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft) async {
+    if (await _local.disbursements.hasLive(draft.month, draft.staffMemberId)) {
+      return Left(PayrollRuleFailure(PayrollRule.alreadyDisbursed));
+    }
+    return _write(
+      'Écriture du versement',
+      (requests, nowMs) => _local.disbursements.add(
+        requests.disbursement(draft),
+        schoolId: requests.schoolId,
+        nowMs: nowMs,
+      ),
+    );
+  }
 
   @override
   Future<Either<Failure, Unit>> cancelDisbursement(

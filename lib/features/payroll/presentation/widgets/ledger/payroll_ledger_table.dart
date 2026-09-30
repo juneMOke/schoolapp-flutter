@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_cell.dart';
@@ -115,7 +116,10 @@ class PayrollLedgerTable extends StatelessWidget {
               Text(
                 l10n.payrollHoursOf(
                   PayrollLabels.hours(l10n, line.baseMinutes ?? 0),
-                  PayrollLabels.month(context, line.hoursMonth ?? ''),
+                  PayrollLabels.month(
+                    context,
+                    line.hoursMonth ?? PayrollMonth.previous(line.month),
+                  ),
                 ),
                 textAlign: TextAlign.end,
                 style: AppTypography.bodySmall.copyWith(
@@ -178,7 +182,7 @@ class PayrollLedgerTable extends StatelessWidget {
             background: AppColors.surfaceAlt,
             cells: [
               Text(
-                '${l10n.payrollTotal} · $currency',
+                l10n.payrollTotalIn(currency),
                 style: AppTypography.labelLarge,
               ),
               for (final amountOf in <int Function(PayrollLine)>[

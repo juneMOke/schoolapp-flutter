@@ -22,7 +22,7 @@ class PayrollTabs extends StatelessWidget {
         (total.netInCents, total.currency),
     ]).join(' · ');
     final ongoing = state.snapshot.advances
-        .where((advance) => advance.isLive && !advance.isSettled)
+        .where((advance) => advance.isOngoing)
         .length;
     final months = state.snapshot.headers.length;
     return StaffCardTabs<PayrollTab>(

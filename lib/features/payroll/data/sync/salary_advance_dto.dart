@@ -93,7 +93,9 @@ class SalaryAdvanceDto {
       mode: mode,
       grantedOn: grantedOn,
       clientRecordedAt:
-          raw.instant('clientRecordedAt') ?? raw.instant('recordedAt') ?? '',
+          raw.instant('clientRecordedAt') ??
+          raw.instant('recordedAt') ??
+          '${grantedOn}T00:00:00.000Z',
       deductedInCents: raw.integer('deductedInCents'),
       balanceInCents: raw.integer('balanceInCents'),
       cancelledAt: raw.instant('cancelledAt'),

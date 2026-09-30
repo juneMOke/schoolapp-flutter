@@ -31,6 +31,10 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
   /// laisser partir d'abord. Vide : aucune.
   Set<String> get waitsFor => const {};
 
+  /// Les types d'entrées plus anciennes, **de tout agrégat**, que [request]
+  /// doit laisser partir d'abord. Vide : aucune.
+  Set<String> waitsForAnyOf(R request) => const {};
+
   /// Une garde propre au handler, après celle de l'ordre ; `null` = partir.
   Future<OutboxDispatchResult?> hold(R request, String schoolId) async => null;
 
@@ -57,6 +61,15 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
         )) {
       return const OutboxDispatchResult.blocked(
         'Une écriture plus ancienne de la paie attend',
+      );
+    }
+    if (await _outbox.hasOlderPending(
+      entryId: entry.id,
+      aggregateId: null,
+      types: waitsForAnyOf(request),
+    )) {
+      return const OutboxDispatchResult.blocked(
+        'Une écriture dont dépend le calcul attend',
       );
     }
     final held = await hold(request, schoolId);

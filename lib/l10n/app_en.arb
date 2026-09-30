@@ -8253,7 +8253,6 @@
   "payrollBlockerPrevious": "The previous month's payroll must be validated first.",
   "payrollBlockerAttendance": "Close the {month} attendance first.",
   "@payrollBlockerAttendance": {"placeholders": {"month": {"type": "String"}}},
-  "payrollBlockerEmpty": "No staff member to pay this month.",
   "payrollBlockerDisbursed": "A salary has been paid: the payroll can no longer be reopened.",
   "payrollAttendanceUnverifiable": "The {month} attendance closing cannot be checked offline: the server will decide.",
   "@payrollAttendanceUnverifiable": {"placeholders": {"month": {"type": "String"}}},
@@ -8540,5 +8539,12 @@
   "@payrollPayslipFileName": {"placeholders": {"month": {"type": "String"}}},
   "payrollPayslipsFileName": "payslips-{month}",
   "@payrollPayslipsFileName": {"placeholders": {"month": {"type": "String"}}},
-  "payrollPayslipSealed": "Sealed payslip"
+  "payrollPayslipSealed": "Sealed payslip",
+  "payrollAwaitingFrozen": "Payroll validated: its frozen amounts arrive at the next sync. No payment before that.",
+  "payrollAdvanceNeedAgent": "Choose the staff member.",
+  "payrollAdvanceNeedReason": "Choose the reason.",
+  "payrollAdvanceAmountIn": "Amount * ({symbol})",
+  "@payrollAdvanceAmountIn": {"placeholders": {"symbol": {"type": "String"}}},
+  "payrollTotalIn": "Total · {currency}",
+  "@payrollTotalIn": {"placeholders": {"currency": {"type": "String"}}}
 }

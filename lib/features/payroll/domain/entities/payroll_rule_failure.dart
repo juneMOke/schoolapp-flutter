@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 
 /// Une règle de la paie que le geste ne respecte pas — refusée **avant** la
 /// file d'envoi, où le même refus serait devenu terminal.
@@ -10,7 +11,6 @@ enum PayrollRule {
   wrongPhase,
   previousNotValidated,
   attendanceOpen,
-  emptyLedger,
   hasDisbursements,
   reasonRequired,
 
@@ -44,3 +44,33 @@ class PayrollRuleFailure extends ValidationFailure {
   @override
   List<Object?> get props => [...super.props, rule];
 }
+
+/// La règle que dit un blocage du livre.
+extension PayrollBlockerRule on PayrollBlocker {
+  PayrollRule get rule => switch (this) {
+    PayrollBlocker.previousNotValidated => PayrollRule.previousNotValidated,
+    PayrollBlocker.attendanceOpen => PayrollRule.attendanceOpen,
+    PayrollBlocker.hasDisbursements => PayrollRule.hasDisbursements,
+  };
+}
+
+/// La règle que dit un refus du serveur, quand elle a son libellé ; `null`
+/// pour un code inconnu (il s'affiche alors tel quel).
+PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
+  'PREVIOUS_PAYROLL_NOT_VALIDATED' => PayrollRule.previousNotValidated,
+  'ATTENDANCE_MONTH_NOT_CLOSED' => PayrollRule.attendanceOpen,
+  'PAYROLL_HAS_DISBURSEMENTS' => PayrollRule.hasDisbursements,
+  'GESTURE_NOT_APPLICABLE' => PayrollRule.wrongPhase,
+  'REASON_REQUIRED' => PayrollRule.reasonRequired,
+  'PAYROLL_NOT_DRAFT' => PayrollRule.notEditable,
+  'OVERTIME_NOT_ALLOWED' => PayrollRule.overtimeNotAllowed,
+  'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
+  'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
+  'ADVANCE_CURRENCY_MISMATCH' || 'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
+  'ADVANCE_ALREADY_DEDUCTED' => PayrollRule.alreadyDeducted,
+  'ALREADY_DISBURSED' => PayrollRule.alreadyDisbursed,
+  'NOTHING_TO_DISBURSE' => PayrollRule.nothingToDisburse,
+  'SIGNATURE_REQUIRED' => PayrollRule.signatureRequired,
+  'INVALID_MOBILE_REFERENCE' => PayrollRule.invalidReference,
+  _ => null,
+};

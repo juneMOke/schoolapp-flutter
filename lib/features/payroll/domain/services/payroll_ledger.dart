@@ -24,9 +24,10 @@ abstract final class PayrollLedger {
         : PayrollEngine.compute(inputOf(snapshot, month));
     final lines = frozen ?? computation?.lines ?? const <PayrollLine>[];
     final disbursements = liveDisbursements(snapshot, month);
-    final allPaid = lines
-        .where((line) => line.netInCents > 0)
-        .every((line) => disbursements.containsKey(line.staffMemberId));
+    final payable = lines.where((line) => line.netInCents > 0);
+    final allPaid =
+        payable.isNotEmpty &&
+        payable.every((line) => disbursements.containsKey(line.staffMemberId));
     final phase = PayrollPhaseResolver.resolve(
       server: server,
       monthGestures: gestures,
@@ -38,7 +39,6 @@ abstract final class PayrollLedger {
       hasSummary: snapshot.summaries.containsKey(attendanceMonth),
       years: snapshot.schoolYears,
     );
-    final last = gestures.isEmpty ? null : gestures.last;
     return PayrollMonthView(
       month: month,
       header: header,
@@ -54,8 +54,9 @@ abstract final class PayrollLedger {
           if (line.isHourly && (line.baseMinutes ?? 0) == 0) line.staffMemberId,
       ],
       attendance: attendance,
-      lastRefusal: last != null && last.isRefused ? last : null,
-      submitBlocker: _submitBlocker(snapshot, month, lines),
+      awaitingFrozenLines: server == PayrollStatus.validated && frozen == null,
+      lastRefusal: _lastRefusal(gestures),
+      submitBlocker: _submitBlocker(snapshot, month),
       validateBlocker: attendance == PayrollAttendanceState.open
           ? PayrollBlocker.attendanceOpen
           : null,
@@ -63,6 +64,17 @@ abstract final class PayrollLedger {
           ? PayrollBlocker.hasDisbursements
           : null,
     );
+  }
+
+  /// L'historique : les mois tenus et le mois en cours, du plus récent au
+  /// plus ancien — composé une fois par lecture, pas à chaque rendu.
+  static List<PayrollMonthView> history(
+    PayrollSnapshot snapshot,
+    String currentMonth,
+  ) {
+    final months = {...snapshot.headers.keys, currentMonth}.toList()
+      ..sort((a, b) => b.compareTo(a));
+    return [for (final month in months) monthView(snapshot, month)];
   }
 
   /// Ce que le moteur lit pour [month].
@@ -138,17 +150,40 @@ abstract final class PayrollLedger {
         disbursement,
   ];
 
+  /// La paie précédente, si elle existe, doit être validée, **figée** sur la
+  /// tablette (ses retenues comptent dans ce mois-ci), et sans geste en vol
+  /// (une réouverture partie d'ailleurs la rendrait brouillon).
   static PayrollBlocker? _submitBlocker(
     PayrollSnapshot snapshot,
     String month,
-    List<PayrollLine> lines,
   ) {
-    final previous = snapshot.headers[PayrollMonth.previous(month)];
-    if (previous != null && previous.status != PayrollStatus.validated) {
-      return PayrollBlocker.previousNotValidated;
+    final previousMonth = PayrollMonth.previous(month);
+    final previous = snapshot.headers[previousMonth];
+    if (previous == null) return null;
+    final settled =
+        previous.status == PayrollStatus.validated &&
+        snapshot.frozenLines.containsKey(previousMonth) &&
+        !gesturesOf(snapshot, previousMonth).any((g) => g.isInFlight);
+    return settled ? null : PayrollBlocker.previousNotValidated;
+  }
+
+  /// Le dernier refus du mois — sauf si le serveur a enregistré depuis un
+  /// geste plus récent (fait sur un autre poste) : le refus est alors dépassé.
+  /// Comparé en instants, jamais sur l'ordre local, que l'horloge de la
+  /// tablette fausserait.
+  static PayrollGesture? _lastRefusal(List<PayrollGesture> gestures) {
+    PayrollGesture? refusal;
+    for (final gesture in gestures) {
+      if (gesture.isRefused) refusal = gesture;
     }
-    if (lines.isEmpty) return PayrollBlocker.emptyLedger;
-    return null;
+    if (refusal == null) return null;
+    final refusedAt = DateTime.tryParse(refusal.recordedAt);
+    final overtaken = gestures.any((gesture) {
+      if (gesture.isRefused || gesture.isInFlight) return false;
+      final at = DateTime.tryParse(gesture.recordedAt);
+      return at != null && refusedAt != null && at.isAfter(refusedAt);
+    });
+    return overtaken ? null : refusal;
   }
 
   static bool _hasAnyDisbursement(PayrollSnapshot snapshot, String month) =>

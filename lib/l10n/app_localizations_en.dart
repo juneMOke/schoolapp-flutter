@@ -12794,9 +12794,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get payrollBlockerEmpty => 'No staff member to pay this month.';
-
-  @override
   String get payrollBlockerDisbursed =>
       'A salary has been paid: the payroll can no longer be reopened.';
 
@@ -13677,4 +13674,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollPayslipSealed => 'Sealed payslip';
+
+  @override
+  String get payrollAwaitingFrozen =>
+      'Payroll validated: its frozen amounts arrive at the next sync. No payment before that.';
+
+  @override
+  String get payrollAdvanceNeedAgent => 'Choose the staff member.';
+
+  @override
+  String get payrollAdvanceNeedReason => 'Choose the reason.';
+
+  @override
+  String payrollAdvanceAmountIn(String symbol) {
+    return 'Amount * ($symbol)';
+  }
+
+  @override
+  String payrollTotalIn(String currency) {
+    return 'Total · $currency';
+  }
 }

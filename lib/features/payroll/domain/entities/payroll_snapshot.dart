@@ -81,9 +81,12 @@ class PayrollSnapshot {
   static String traceKey(String month, String staffMemberId) =>
       '$month|$staffMemberId';
 
+  /// La fiche d'un agent — sans égard à la casse : les lignes réduites d'un
+  /// refus portent l'identifiant en minuscules.
   StaffMember? member(String id) {
+    final wanted = id.toLowerCase();
     for (final member in members) {
-      if (member.id == id) return member;
+      if (member.id.toLowerCase() == wanted) return member;
     }
     return null;
   }

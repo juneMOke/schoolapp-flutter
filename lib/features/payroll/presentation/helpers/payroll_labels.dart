@@ -86,7 +86,6 @@ abstract final class PayrollLabels {
     PayrollRule.wrongPhase => l10n.payrollRuleWrongPhase,
     PayrollRule.previousNotValidated => l10n.payrollBlockerPrevious,
     PayrollRule.attendanceOpen => l10n.payrollBlockerAttendance(month ?? ''),
-    PayrollRule.emptyLedger => l10n.payrollBlockerEmpty,
     PayrollRule.hasDisbursements => l10n.payrollBlockerDisbursed,
     PayrollRule.reasonRequired => l10n.payrollRuleReasonRequired,
     PayrollRule.overtimeNotAllowed => l10n.payrollRuleOvertimeNotAllowed,
@@ -104,10 +103,23 @@ abstract final class PayrollLabels {
     PayrollRule.bankDetailsRequired => l10n.payrollRuleBankDetails,
   };
 
+  /// Un refus du serveur en mots : la règle qu'il dit quand on la connaît,
+  /// sinon son code tel quel.
+  static String serverRefusal(
+    AppLocalizations l10n,
+    String? code, {
+    String? month,
+  }) {
+    final rule = payrollRuleOfServerCode(code);
+    return rule == null
+        ? l10n.payrollRefusedOther(code ?? '—')
+        : PayrollLabels.rule(l10n, rule, month: month);
+  }
+
   /// Pourquoi un versement attend d'être régularisé.
   static String refusal(AppLocalizations l10n, String? code) => switch (code) {
     'PAYROLL_REOPENED_SINCE' => l10n.payrollRefusedReopened,
     'ALREADY_DISBURSED' => l10n.payrollRefusedDouble,
-    _ => l10n.payrollRefusedOther(code ?? '—'),
+    _ => serverRefusal(l10n, code),
   };
 }

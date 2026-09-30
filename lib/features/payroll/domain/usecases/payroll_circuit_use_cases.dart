@@ -82,12 +82,6 @@ class RecordPayrollGestureUseCase {
       PayrollGestureKind.reopen => view.reopenBlocker,
       PayrollGestureKind.returnToDraft => null,
     };
-    return switch (blocker) {
-      null => null,
-      PayrollBlocker.previousNotValidated => PayrollRule.previousNotValidated,
-      PayrollBlocker.attendanceOpen => PayrollRule.attendanceOpen,
-      PayrollBlocker.emptyLedger => PayrollRule.emptyLedger,
-      PayrollBlocker.hasDisbursements => PayrollRule.hasDisbursements,
-    };
+    return blocker?.rule;
   }
 }

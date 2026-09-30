@@ -36,7 +36,11 @@ abstract final class PayrollContractPicker {
     return inForce ?? overlapping;
   }
 
-  static bool _later(StaffContract contract, StaffContract? current) =>
-      current == null ||
-      contract.effectiveFrom.compareTo(current.effectiveFrom) > 0;
+  /// La plus récente ; à date d'effet égale, départagée par l'identifiant —
+  /// jamais par l'ordre de lecture, que le serveur ne partage pas.
+  static bool _later(StaffContract contract, StaffContract? current) {
+    if (current == null) return true;
+    final byDate = contract.effectiveFrom.compareTo(current.effectiveFrom);
+    return byDate > 0 || (byDate == 0 && contract.id.compareTo(current.id) > 0);
+  }
 }

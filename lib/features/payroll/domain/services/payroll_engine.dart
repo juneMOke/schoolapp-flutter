@@ -95,9 +95,7 @@ abstract final class PayrollEngine {
     final hourly =
         kind == StaffContractKind.vacataire &&
         contract.payMode == StaffPayMode.hourly;
-    final currency = CurrencyCode.normalize(
-      contract.amount?.currency ?? contract.bonus?.currency ?? CurrencyCode.usd,
-    );
+    final currency = currencyOf(contract);
     final amount = contract.amount?.amountInCents ?? 0;
     final perCurrency = settings.of(currency);
     final hoursMonth = PayrollMonth.previous(input.month);
@@ -173,6 +171,20 @@ abstract final class PayrollEngine {
       attendanceMonth: hoursMonth,
       attendance: summary,
     );
+  }
+
+  /// La devise de la ligne : celle de la prime pour un conventionné (son
+  /// salaire est versé par l'État), celle du montant sinon. Une devise vide
+  /// compte comme absente ; sans rien, le dollar.
+  static String currencyOf(StaffContract contract) {
+    final candidates = contract.kind == StaffContractKind.conventionne
+        ? [contract.bonus?.currency, contract.amount?.currency]
+        : [contract.amount?.currency, contract.bonus?.currency];
+    for (final candidate in candidates) {
+      final code = CurrencyCode.normalize(candidate ?? '');
+      if (code.isNotEmpty) return code;
+    }
+    return CurrencyCode.usd;
   }
 
   /// Le taux horaire d'un permanent : salaire ÷ diviseur × majoration, arrondi

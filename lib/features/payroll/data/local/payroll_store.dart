@@ -104,6 +104,39 @@ class PayrollStore {
     ),
   );
 
+  /// La colonne `effective_status` d'une ligne de fait ou de geste : une
+  /// ligne encore « en attente » dont l'entrée d'outbox (`<type>:<id>`) a été
+  /// abandonnée par le moteur (`SYNC_ERROR`, poison) se lit **refusée** —
+  /// sinon elle resterait « en vol » à jamais, et tout ce qui l'attend avec
+  /// elle. `outbox_error` porte alors la dernière erreur du moteur.
+  static String effectiveStatusColumns(String alias, String type) {
+    final entry =
+        '(SELECT o.status FROM ${OutboxDao.table} o '
+        "WHERE o.id = '$type:' || $alias.id)";
+    final error =
+        '(SELECT o.last_error FROM ${OutboxDao.table} o '
+        "WHERE o.id = '$type:' || $alias.id)";
+    return "CASE WHEN $alias.sync_status = '${StaffSyncState.pending.dbValue}' "
+        "AND $entry = '${OutboxStatus.syncError.dbValue}' "
+        "THEN '${StaffSyncState.failed.dbValue}' "
+        'ELSE $alias.sync_status END AS effective_status, '
+        '$error AS outbox_error';
+  }
+
+  /// L'état effectif lu par [effectiveStatusColumns].
+  static StaffSyncState effectiveState(Map<String, Object?> row) =>
+      StaffSyncState.fromDb(
+        (row['effective_status'] ?? row['sync_status']) as String?,
+      );
+
+  /// L'erreur effective : celle rangée par le handler, sinon celle du moteur.
+  static String? effectiveError(Map<String, Object?> row) =>
+      (row['sync_error'] ??
+              (effectiveState(row) == StaffSyncState.failed
+                  ? row['outbox_error']
+                  : null))
+          as String?;
+
   /// La ligne [key] attend-elle encore son envoi ? Le pull ne l'écrase pas.
   static Future<bool> isPending(
     DatabaseExecutor txn,

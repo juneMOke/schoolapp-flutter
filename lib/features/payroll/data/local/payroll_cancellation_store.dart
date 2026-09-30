@@ -8,7 +8,10 @@ class PayrollCancellationStore {
   final PayrollStore _store;
   final String _table;
 
-  const PayrollCancellationStore(this._store, this._table);
+  /// L'agrégat d'outbox du fait (`SALARY_ADVANCE`, `PAYROLL_DISBURSEMENT`).
+  final String _factType;
+
+  const PayrollCancellationStore(this._store, this._table, this._factType);
 
   /// Pose l'annulation de [id] et la met en file, dans une transaction.
   Future<void> request(
@@ -52,21 +55,35 @@ class PayrollCancellationStore {
     whereArgs: [cancellationId],
   );
 
+  /// Le fait [factId] porte-t-il une annulation qui n'a pas été refusée ?
+  /// Alors il ne doit plus partir : la tablette l'a annulé avant que le
+  /// serveur ne le connaisse.
+  Future<bool> isCancelled(String factId) async {
+    final rows = await _store.db.query(
+      _table,
+      columns: ['cancellation_id', 'cancellation_status', 'cancelled_at'],
+      where: 'id = ?',
+      whereArgs: [factId],
+    );
+    if (rows.isEmpty) return false;
+    final cancellation = fromRow(rows.single);
+    return cancellation != null && !cancellation.isRefused;
+  }
+
   /// Le fait lié à [cancellationId] : `(id, sync_status)`, ou `null`.
   Future<({String id, StaffSyncState state})?> targetOf(
     String cancellationId,
   ) async {
-    final rows = await _store.db.query(
-      _table,
-      columns: ['id', 'sync_status'],
-      where: 'cancellation_id = ?',
-      whereArgs: [cancellationId],
-      limit: 1,
+    final rows = await _store.db.rawQuery(
+      'SELECT f.id, f.sync_status, '
+      '${PayrollStore.effectiveStatusColumns('f', _factType)} '
+      'FROM $_table f WHERE f.cancellation_id = ? LIMIT 1',
+      [cancellationId],
     );
     if (rows.isEmpty) return null;
     return (
       id: rows.single['id']! as String,
-      state: StaffSyncState.fromDb(rows.single['sync_status'] as String?),
+      state: PayrollStore.effectiveState(rows.single),
     );
   }
 

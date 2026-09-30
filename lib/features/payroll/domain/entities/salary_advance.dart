@@ -67,6 +67,9 @@ class SalaryAdvance extends Equatable {
 
   bool get isSettled => isLive && remainingInCents <= 0;
 
+  /// Vivante et pas encore soldée : ce que le registre dit « en cours ».
+  bool get isOngoing => isLive && !isSettled;
+
   @override
   List<Object?> get props => [
     id,

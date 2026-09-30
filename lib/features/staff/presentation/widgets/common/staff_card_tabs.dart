@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -42,9 +43,16 @@ class StaffCardTabs<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
+      // Autant de colonnes que la largeur en tient à la largeur plancher
+      // d'une carte : quatre onglets passent en 2 × 2 sur un écran étroit,
+      // plutôt que de casser leur titre lettre par lettre.
+      final fit =
+          ((constraints.maxWidth + AppSpacing.sm) /
+                  (AppDimensions.staffAttendanceCardMinWidth + AppSpacing.sm))
+              .floor();
+      final columns = fit.clamp(1, tabs.length);
       final width =
-          (constraints.maxWidth - AppSpacing.sm * (tabs.length - 1)) /
-          tabs.length;
+          (constraints.maxWidth - AppSpacing.sm * (columns - 1)) / columns;
       return Wrap(
         spacing: AppSpacing.sm,
         runSpacing: AppSpacing.sm,

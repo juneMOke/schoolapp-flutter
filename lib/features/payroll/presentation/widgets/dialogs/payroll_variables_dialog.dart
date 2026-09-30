@@ -209,10 +209,14 @@ class _Row extends StatelessWidget {
             ),
           ),
         ),
-        Text(
-          value,
-          style: AppTypography.labelLarge.copyWith(
-            fontFeatures: const [FontFeature.tabularFigures()],
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: AppTypography.labelLarge.copyWith(
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
@@ -250,7 +251,7 @@ void main() {
           payrolls: PayrollDao(db),
           disbursements: disbursements,
           now: () => 30,
-        ).run(_school, authorId: 'u-1');
+        ).run(_school);
 
         expect(requeued, 1);
         final disbursement = (await disbursements.forSchool(_school)).single;
@@ -327,6 +328,97 @@ void main() {
           );
 
       expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+  });
+
+  group('revue adversariale', () {
+    test(
+      'un geste qui porte une empreinte attend un contrat en file',
+      () async {
+        await OutboxDao(db).enqueue(
+          const OutboxEntry(
+            id: 'STAFF_CONTRACT:c-9',
+            aggregateType: 'STAFF_CONTRACT',
+            aggregateId: 'm-9',
+            operation: OutboxOperation.create,
+            payload: '{}',
+            schoolId: _school,
+            createdAt: 5,
+          ),
+        );
+        await submit(nowMs: 20);
+
+        final result = await gestureHandler().dispatch(
+          await entry(PayrollGestureDao.entryId('g-1')),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.blocked);
+      },
+    );
+
+    test('un accusé périmé ne fait pas reculer la paie', () async {
+      await PayrollDao(db).apply(
+        [_payroll('VALIDATED', validation: 'g-v', lines: const [])],
+        schoolId: _school,
+        nowMs: 1,
+      );
+      await submit();
+      when(
+        () => api.submitGesture(any(), any()),
+      ).thenAnswer((_) async => _payroll('SUBMITTED'));
+
+      await gestureHandler().dispatch(
+        await entry(PayrollGestureDao.entryId('g-1')),
+      );
+
+      final header = (await PayrollDao(db).headers(_school))['2026-10']!;
+      expect(header.status.wire, 'VALIDATED');
+    });
+
+    test('un versement annulé sur la tablette ne part jamais', () async {
+      await disbursements.add(
+        const PayrollDisbursementRequestDto(
+          disbursement: PayrollDisbursementDto(
+            id: 'd-1',
+            month: '2026-10',
+            staffMemberId: 'm-1',
+            validationGestureId: 'g-v',
+            amountInCents: 27500,
+            currency: 'USD',
+            mode: 'CASH',
+            signedRegister: true,
+            paidAt: '2026-10-28T11:40:00Z',
+          ),
+          authorId: 'u-1',
+        ),
+        schoolId: _school,
+        nowMs: 10,
+      );
+      await disbursements.cancel(
+        const PayrollCancellationRequestDto(
+          targetKey: PayrollCancellationRequestDto.disbursementKey,
+          cancellationId: 'k-1',
+          targetId: 'd-1',
+          reason: 'Erreur',
+          authorId: 'u-1',
+        ),
+        month: '2026-10',
+        staffMemberId: 'm-1',
+        schoolId: _school,
+        nowMs: 20,
+      );
+
+      final result = await PayrollDisbursementOutboxHandler(
+        api: api,
+        dao: disbursements,
+        outbox: outbox,
+        currentUser: user,
+        extras: const {},
+      ).dispatch(await entry(PayrollDisbursementDao.entryId('d-1')));
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      verifyNever(() => api.submitDisbursement(any(), any()));
+      expect(await disbursements.hasLive('2026-10', 'm-1'), isFalse);
     });
   });
 }

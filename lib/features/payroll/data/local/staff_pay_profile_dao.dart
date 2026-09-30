@@ -65,9 +65,10 @@ class StaffPayProfileDao {
     _key(request.profile.staffMemberId),
     {'school_id': schoolId, ..._columns(request.profile), 'updated_at': nowMs},
     PayrollQueued(
-      entryId: PayrollOutbox.entryId(
+      entryId: PayrollOutbox.saisieId(
         PayrollOutbox.profile,
         request.profile.staffMemberId,
+        request.profile.clientUpdatedAt,
       ),
       aggregateType: PayrollOutbox.profile,
       aggregateId: request.profile.staffMemberId,

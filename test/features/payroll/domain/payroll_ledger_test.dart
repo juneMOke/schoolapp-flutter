@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disb
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
@@ -17,6 +18,7 @@ import '../payroll_builders.dart';
 void main() {
   PayrollSnapshot snapshot({
     Map<String, PayrollHeader> headers = const {},
+    Map<String, List<PayrollLine>> frozen = const {},
     List<PayrollGesture> gestures = const [],
     List<PayrollDisbursement> disbursements = const [],
     List<PayrollSchoolYear> years = const [
@@ -32,7 +34,7 @@ void main() {
     profiles: const {},
     headers: headers,
     variables: const {},
-    frozenLines: const {},
+    frozenLines: frozen,
     summaries: const {},
     gestures: gestures,
     advances: const [],
@@ -158,6 +160,73 @@ void main() {
 
       expect(view.attendance, PayrollAttendanceState.unverifiable);
       expect(view.validateBlocker, isNull);
+    });
+  });
+
+  group('revue adversariale', () {
+    test('validée sans lignes figées : rien ne se verse avant la descente', () {
+      final view = PayrollLedger.monthView(
+        snapshot(headers: {'2026-10': header(PayrollStatus.validated)}),
+        '2026-10',
+      );
+
+      expect(view.awaitingFrozenLines, isTrue);
+      expect(view.canPay, isFalse);
+    });
+
+    test('la paie précédente validée mais pas figée bloque la soumission', () {
+      final view = PayrollLedger.monthView(
+        snapshot(
+          headers: {
+            '2026-09': header(PayrollStatus.validated, month: '2026-09'),
+          },
+        ),
+        '2026-10',
+      );
+
+      expect(view.submitBlocker, PayrollBlocker.previousNotValidated);
+    });
+
+    test('un refus dépassé par un geste serveur plus récent se tait', () {
+      final view = PayrollLedger.monthView(
+        snapshot(
+          headers: {'2026-10': header(PayrollStatus.validated)},
+          frozen: {
+            '2026-10': [frozenLine('m-1', '2026-10')],
+          },
+          gestures: [
+            gesture(
+              PayrollGestureKind.validate,
+              state: StaffSyncState.failed,
+              code: PayrollGesture.staleCode,
+            ),
+            const PayrollGesture(
+              id: 'g-other',
+              month: '2026-10',
+              kind: PayrollGestureKind.validate,
+              recordedAt: '2026-10-27T08:00:00Z',
+              syncState: StaffSyncState.synced,
+            ),
+          ],
+        ),
+        '2026-10',
+      );
+
+      expect(view.lastRefusal, isNull);
+    });
+
+    test('un livre sans net positif n est pas « versé »', () {
+      final view = PayrollLedger.monthView(
+        snapshot(
+          headers: {'2026-10': header(PayrollStatus.validated)},
+          frozen: {
+            '2026-10': [frozenLine('m-1', '2026-10', gross: 0)],
+          },
+        ),
+        '2026-10',
+      );
+
+      expect(view.phase, PayrollPhase.validated);
     });
   });
 }

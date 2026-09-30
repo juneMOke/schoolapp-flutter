@@ -25,8 +25,10 @@ class PayrollDisbursementRegularizer {
 
   static const String reopenedSinceCode = 'PAYROLL_REOPENED_SINCE';
 
-  /// Rend le nombre de versements remis en file.
-  Future<int> run(String schoolId, {required String authorId}) async {
+  /// Rend le nombre de versements remis en file. Chacun repart signé par son
+  /// auteur d'origine ; un versement dont l'auteur est illisible reste à
+  /// régulariser à la main.
+  Future<int> run(String schoolId) async {
     final refused = [
       for (final disbursement in await _disbursements.forSchool(schoolId))
         if (disbursement.needsRegularization &&
@@ -54,7 +56,9 @@ class PayrollDisbursementRegularizer {
           line.currency != disbursement.amount.currency) {
         continue;
       }
-      await _disbursements.reattach(
+      final authorId = await _disbursements.authorOf(disbursement.id);
+      if (authorId == null) continue;
+      final sent = await _disbursements.reattach(
         PayrollDisbursementRequestDto(
           disbursement: PayrollDisbursementDao.toWire(
             disbursement,
@@ -64,7 +68,7 @@ class PayrollDisbursementRegularizer {
         schoolId: schoolId,
         nowMs: _now(),
       );
-      requeued++;
+      if (sent) requeued++;
     }
     return requeued;
   }

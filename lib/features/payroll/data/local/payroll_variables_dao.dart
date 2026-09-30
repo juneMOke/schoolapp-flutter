@@ -21,9 +21,6 @@ class PayrollVariablesDao {
     'staff_member_id': memberId,
   };
 
-  static String entryId(String month, String memberId) =>
-      PayrollOutbox.entryId(PayrollOutbox.variables, '$month:$memberId');
-
   /// Mois → agent → éléments.
   Future<Map<String, Map<String, PayrollVariables>>> forSchool(
     String schoolId,
@@ -89,7 +86,11 @@ class PayrollVariablesDao {
       'updated_at': nowMs,
     },
     PayrollQueued(
-      entryId: entryId(request.month, request.staffMemberId),
+      entryId: PayrollOutbox.saisieId(
+        PayrollOutbox.variables,
+        '${request.month}:${request.staffMemberId}',
+        request.clientUpdatedAt,
+      ),
       aggregateType: PayrollOutbox.variables,
       aggregateId: PayrollOutbox.monthKey(request.month),
       payload: request.toJson(),

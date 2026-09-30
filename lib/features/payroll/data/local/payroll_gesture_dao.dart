@@ -116,11 +116,12 @@ class PayrollGestureDao {
 
   /// Dans l'ordre de pose.
   Future<List<PayrollGesture>> forSchool(String schoolId) async {
-    final rows = await _store.db.query(
-      table,
-      where: 'school_id = ?',
-      whereArgs: [schoolId],
-      orderBy: 'created_at ASC, rowid ASC',
+    final rows = await _store.db.rawQuery(
+      'SELECT g.*, '
+      '${PayrollStore.effectiveStatusColumns('g', PayrollOutbox.gesture)} '
+      'FROM $table g WHERE g.school_id = ? '
+      'ORDER BY g.created_at ASC, g.rowid ASC',
+      [schoolId],
     );
     return [
       for (final row in rows)
@@ -135,8 +136,8 @@ class PayrollGestureDao {
             authorName: row['author_name'] as String?,
             expected: _fingerprint(row['expected']),
             serverState: _fingerprint(row['server_state']),
-            syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
-            syncError: row['sync_error'] as String?,
+            syncState: PayrollStore.effectiveState(row),
+            syncError: PayrollStore.effectiveError(row),
             syncErrorCode: row['sync_error_code'] as String?,
           ),
     ];

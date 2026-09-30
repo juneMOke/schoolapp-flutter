@@ -64,10 +64,7 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
         schoolId: schoolId,
         nowMs: nowMs,
       );
-      final authorId = _currentUser.uid;
-      if (authorId != null) {
-        await _regularizer?.run(schoolId, authorId: authorId);
-      }
+      await _regularizer?.run(schoolId);
       return applied;
     },
   );

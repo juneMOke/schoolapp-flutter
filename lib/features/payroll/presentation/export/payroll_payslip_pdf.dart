@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/export/enrollment_pdf_kit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_content.dart';
 
@@ -12,8 +13,13 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/payslip
 /// Les polices intégrées au format ne portent pas le signe moins
 /// typographique : il s'écrit « - » ici.
 abstract final class PayrollPayslipPdf {
-  static const PdfColor _gold = PdfColor.fromInt(0xFFC9A227);
-  static const PdfColor _alert = PdfColor.fromInt(0xFFB03A2E);
+  static final PdfColor _gold = PdfColor.fromInt(AppColors.orDoux.toARGB32());
+  static final PdfColor _alert = PdfColor.fromInt(
+    AppColors.staffAttendanceAbsentInk.toARGB32(),
+  );
+  static final PdfColor _banner = PdfColor.fromInt(
+    AppColors.staffAttendanceLateSoft.toARGB32(),
+  );
 
   static Future<Uint8List> build(List<PayrollPayslipContent> payslips) {
     final document = pw.Document();
@@ -89,7 +95,7 @@ abstract final class PayrollPayslipPdf {
           pw.SizedBox(height: 8),
           pw.Container(
             padding: const pw.EdgeInsets.all(6),
-            color: const PdfColor.fromInt(0xFFFBF1DF),
+            color: _banner,
             child: pw.Text(_pdf(banner), style: _style(bold: true)),
           ),
         ],

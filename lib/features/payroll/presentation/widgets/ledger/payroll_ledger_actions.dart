@@ -31,13 +31,8 @@ class PayrollLedgerActions {
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
-  String nameOf(String staffMemberId) {
-    final id = staffMemberId.toLowerCase();
-    for (final member in _state.snapshot.members) {
-      if (member.id.toLowerCase() == id) return member.fullName;
-    }
-    return staffMemberId;
-  }
+  String nameOf(String staffMemberId) =>
+      _state.snapshot.member(staffMemberId)?.fullName ?? staffMemberId;
 
   Future<void> editVariables(PayrollLine line) async {
     final state = _state;
@@ -188,9 +183,12 @@ class PayrollLedgerActions {
       ),
     );
     if (draft == null || !context.mounted) return;
+    // Le livre a pu changer pendant la saisie (un pull, un autre poste) :
+    // le geste se juge sur le livre du moment, pas sur celui de l'ouverture.
+    final fresh = _state.view ?? view;
     await _cubit.perform(
       (commands) => commands.disburse(
-        view,
+        fresh,
         draft,
         name: name,
         amount: MoneyFormat.format(draft.amount),

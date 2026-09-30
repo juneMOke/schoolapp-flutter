@@ -30,7 +30,7 @@ class PayrollAdvancesTab extends StatelessWidget {
   List<SalaryAdvance> get _visible => [
     for (final advance in state.snapshot.advances)
       if (switch (state.advanceFilter) {
-        PayrollAdvanceFilter.ongoing => advance.isLive && !advance.isSettled,
+        PayrollAdvanceFilter.ongoing => advance.isOngoing,
         PayrollAdvanceFilter.settled => advance.isSettled,
         PayrollAdvanceFilter.all => true,
       })
@@ -46,7 +46,7 @@ class PayrollAdvancesTab extends StatelessWidget {
       kPayrollWriteAccess.requires,
     );
     final advances = state.snapshot.advances;
-    final ongoing = advances.where((a) => a.isLive && !a.isSettled);
+    final ongoing = advances.where((a) => a.isOngoing);
     final settled = advances.where((a) => a.isSettled).length;
     final outstanding = PayrollLabels.perCurrency(
       ongoing.map((a) => (a.remainingInCents, a.amount.currency)),

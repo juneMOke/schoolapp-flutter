@@ -32,13 +32,18 @@ class PayrollActionBar extends StatelessWidget {
       kPayrollManageAccess.requires,
     );
     final actions = PayrollLedgerActions(context);
-    Widget primary(String label, IconData icon, Future<void> Function() on) =>
-        EteeloButton.primary(
-          label: label,
-          icon: icon,
-          onPressed: on,
-          fullWidth: false,
-        );
+    // Un geste bloqué reste visible mais inactif : le bandeau dit pourquoi.
+    Widget primary(
+      String label,
+      IconData icon,
+      Future<void> Function() on, {
+      bool blocked = false,
+    }) => EteeloButton.primary(
+      label: label,
+      icon: icon,
+      onPressed: blocked ? null : on,
+      fullWidth: false,
+    );
     Widget secondary(String label, IconData icon, Future<void> Function() on) =>
         EteeloButton.secondary(
           label: label,
@@ -54,6 +59,7 @@ class PayrollActionBar extends StatelessWidget {
             l10n.payrollActionSubmit,
             Icons.send_outlined,
             actions.submit,
+            blocked: view.submitBlocker != null,
           ),
         ],
       ),
@@ -66,6 +72,7 @@ class PayrollActionBar extends StatelessWidget {
             l10n.payrollActionValidate,
             Icons.lock_outline,
             actions.validate,
+            blocked: view.validateBlocker != null,
           ),
         ],
       ),

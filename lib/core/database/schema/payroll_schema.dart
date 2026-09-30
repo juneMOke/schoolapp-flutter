@@ -232,6 +232,8 @@ const TableSchema salaryAdvancesTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_salary_advances_member '
         'ON salary_advances(school_id, staff_member_id)',
+    'CREATE INDEX idx_salary_advances_cancellation '
+        'ON salary_advances(cancellation_id)',
   ],
 );
 
@@ -276,6 +278,8 @@ const TableSchema payrollDisbursementsTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_payroll_disbursements_month '
         'ON payroll_disbursements(school_id, month)',
+    'CREATE INDEX idx_payroll_disbursements_cancellation '
+        'ON payroll_disbursements(cancellation_id)',
   ],
 );
 

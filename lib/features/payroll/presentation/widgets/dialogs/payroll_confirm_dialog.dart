@@ -120,13 +120,18 @@ class _Line extends StatelessWidget {
             ),
           ),
         ),
-        Text(
-          value,
-          style: (strong ? AppTypography.titleMedium : AppTypography.bodyMedium)
-              .copyWith(
-                color: AppColors.textPrimary,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style:
+                (strong ? AppTypography.titleMedium : AppTypography.bodyMedium)
+                    .copyWith(
+                      color: AppColors.textPrimary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+          ),
         ),
       ],
     ),

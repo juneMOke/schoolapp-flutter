@@ -22,6 +22,10 @@ class PayrollCubit extends Cubit<PayrollState> {
   void Function()? _unwatch;
   int _seq = 0;
 
+  /// Une paie validée sans ses lignes figées se redescend — une fois par
+  /// mois, pas à chaque relecture.
+  final Set<String> _frozenPulls = {};
+
   PayrollCubit({
     required LoadPayrollUseCase load,
     required StaffSyncSignals signals,
@@ -59,15 +63,23 @@ class PayrollCubit extends Cubit<PayrollState> {
           emit(state.copyWith(load: PayrollLoad.failure, failure: failure));
         }
       },
-      (snapshot) => emit(
-        state.copyWith(
-          load: PayrollLoad.ready,
-          snapshot: snapshot,
-          today: StaffWorkCalendar.dayOf(_now()),
-          view: PayrollLedger.monthView(snapshot, state.month),
-          clearFailure: true,
-        ),
-      ),
+      (snapshot) {
+        final view = PayrollLedger.monthView(snapshot, state.month);
+        final today = StaffWorkCalendar.dayOf(_now());
+        emit(
+          state.copyWith(
+            load: PayrollLoad.ready,
+            snapshot: snapshot,
+            today: today,
+            view: view,
+            history: PayrollLedger.history(snapshot, today.substring(0, 7)),
+            clearFailure: true,
+          ),
+        );
+        if (view.awaitingFrozenLines && _frozenPulls.add(view.month)) {
+          unawaited(_signals.pull());
+        }
+      },
     );
   }
 
@@ -101,6 +113,7 @@ class PayrollCubit extends Cubit<PayrollState> {
         month: month,
         view: PayrollLedger.monthView(state.snapshot, month),
         payslipMemberId: () => null,
+        payFilter: PayrollPayFilter.all,
       ),
     );
   }

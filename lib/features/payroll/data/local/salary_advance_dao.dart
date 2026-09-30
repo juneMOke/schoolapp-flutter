@@ -16,7 +16,11 @@ class SalaryAdvanceDao {
   final PayrollCancellationStore cancellations;
 
   SalaryAdvanceDao._(this._store)
-    : cancellations = PayrollCancellationStore(_store, table);
+    : cancellations = PayrollCancellationStore(
+        _store,
+        table,
+        PayrollOutbox.advance,
+      );
 
   factory SalaryAdvanceDao(DatabaseExecutor db) =>
       SalaryAdvanceDao._(PayrollStore(db));
@@ -125,11 +129,12 @@ class SalaryAdvanceDao {
   }
 
   Future<List<SalaryAdvance>> forSchool(String schoolId) async {
-    final rows = await _store.db.query(
-      table,
-      where: 'school_id = ?',
-      whereArgs: [schoolId],
-      orderBy: 'granted_on DESC, created_at DESC',
+    final rows = await _store.db.rawQuery(
+      'SELECT f.*, '
+      '${PayrollStore.effectiveStatusColumns('f', PayrollOutbox.advance)} '
+      'FROM $table f WHERE f.school_id = ? '
+      'ORDER BY f.granted_on DESC, f.created_at DESC',
+      [schoolId],
     );
     return [
       for (final row in rows)
@@ -151,8 +156,8 @@ class SalaryAdvanceDao {
           deductedInCents: row['deducted_in_cents'] as int? ?? 0,
           balanceInCents: row['balance_in_cents'] as int?,
           cancellation: PayrollCancellationStore.fromRow(row),
-          syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
-          syncError: row['sync_error'] as String?,
+          syncState: PayrollStore.effectiveState(row),
+          syncError: PayrollStore.effectiveError(row),
           syncErrorCode: row['sync_error_code'] as String?,
         ),
     ];

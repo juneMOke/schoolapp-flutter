@@ -302,4 +302,26 @@ void main() {
       expect(result.withoutContract, ['m-6', 'm-7']);
     });
   });
+
+  test('une devise vide compte comme absente', () {
+    final result = PayrollEngine.compute(
+      input(
+        contracts: {
+          'm-1': [contract('m-1', currency: '')],
+          'm-2': [
+            contract(
+              'm-2',
+              kind: StaffContractKind.conventionne,
+              amount: 1000000,
+              currency: 'CDF',
+              bonus: 10000,
+            ),
+          ],
+        },
+      ),
+    );
+
+    expect(result.lines.first.currency, 'USD');
+    expect(result.lines.last.baseInCents, 10000);
+  });
 }

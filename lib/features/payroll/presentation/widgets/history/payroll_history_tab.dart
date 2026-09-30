@@ -10,7 +10,6 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -40,11 +39,7 @@ class PayrollHistoryTab extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PayrollCubit>();
     final snapshot = state.snapshot;
-    final months = {...snapshot.headers.keys, state.currentMonth}.toList()
-      ..sort((a, b) => b.compareTo(a));
-    final views = [
-      for (final month in months) PayrollLedger.monthView(snapshot, month),
-    ];
+    final views = state.history;
     final paid = PayrollLabels.perCurrency([
       for (final d in snapshot.disbursements)
         if (d.isLive) (d.amount.amountInCents, d.amount.currency),
