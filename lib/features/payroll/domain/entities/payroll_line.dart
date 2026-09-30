@@ -92,6 +92,37 @@ class PayrollLine extends Equatable {
     this.frozen = false,
   });
 
+  /// La même ligne, complétée de ce que le contrat retenu dit d'elle quand le
+  /// serveur ne l'a pas redit.
+  PayrollLine withContract({
+    StaffContractKind? kind,
+    StaffPayMode? payMode,
+    String? from,
+  }) => PayrollLine(
+    month: month,
+    staffMemberId: staffMemberId,
+    contractId: contractId,
+    contractKind: contractKind ?? kind,
+    payMode: this.payMode ?? payMode,
+    contractFrom: contractFrom ?? from,
+    currency: currency,
+    baseInCents: baseInCents,
+    baseMinutes: baseMinutes,
+    baseRateInCents: baseRateInCents,
+    hoursMonth: hoursMonth,
+    overtimeMinutes: overtimeMinutes,
+    overtimeRateInCents: overtimeRateInCents,
+    overtimeInCents: overtimeInCents,
+    children: children,
+    allowanceInCents: allowanceInCents,
+    grossInCents: grossInCents,
+    advances: advances,
+    netInCents: netInCents,
+    attendanceMonth: attendanceMonth,
+    attendance: attendance,
+    frozen: frozen,
+  );
+
   int get advanceInCents =>
       advances.fold(0, (sum, advance) => sum + advance.takenInCents);
 
