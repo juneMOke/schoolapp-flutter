@@ -1,0 +1,134 @@
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_phase_resolver.dart';
+
+/// Compose le livre d'un mois à partir de ce que la tablette sait : les lignes
+/// figées d'une paie validée, sinon le calcul du moteur.
+abstract final class PayrollLedger {
+  static PayrollMonthView monthView(PayrollSnapshot snapshot, String month) {
+    final header = snapshot.headers[month];
+    final server = header?.status ?? PayrollStatus.draft;
+    final gestures = gesturesOf(snapshot, month);
+    final frozen = snapshot.frozenLines[month];
+    final computation = server == PayrollStatus.validated && frozen != null
+        ? null
+        : PayrollEngine.compute(inputOf(snapshot, month));
+    final lines = frozen ?? computation?.lines ?? const <PayrollLine>[];
+    final disbursements = liveDisbursements(snapshot, month);
+    final allPaid = lines
+        .where((line) => line.netInCents > 0)
+        .every((line) => disbursements.containsKey(line.staffMemberId));
+    final phase = PayrollPhaseResolver.resolve(
+      server: server,
+      monthGestures: gestures,
+      allPaid: allPaid,
+    );
+    final attendanceMonth = PayrollMonth.previous(month);
+    final attendance = PayrollAttendanceRule.stateOf(
+      month: attendanceMonth,
+      hasSummary: snapshot.summaries.containsKey(attendanceMonth),
+      years: snapshot.schoolYears,
+    );
+    final last = gestures.isEmpty ? null : gestures.last;
+    return PayrollMonthView(
+      month: month,
+      header: header,
+      phase: phase,
+      lines: lines,
+      totals: PayrollFingerprinter.totalsOf(
+        PayrollFingerprinter.digestLines(lines),
+      ),
+      disbursements: disbursements,
+      withoutContract: computation?.withoutContract ?? const [],
+      zeroHourMembers: [
+        for (final line in lines)
+          if (line.isHourly && (line.baseMinutes ?? 0) == 0) line.staffMemberId,
+      ],
+      attendance: attendance,
+      lastRefusal: last != null && last.isRefused ? last : null,
+      submitBlocker: _submitBlocker(snapshot, month, lines),
+      validateBlocker: attendance == PayrollAttendanceState.open
+          ? PayrollBlocker.attendanceOpen
+          : null,
+      reopenBlocker: _hasAnyDisbursement(snapshot, month)
+          ? PayrollBlocker.hasDisbursements
+          : null,
+    );
+  }
+
+  /// Ce que le moteur lit pour [month].
+  static PayrollEngineInput inputOf(PayrollSnapshot snapshot, String month) =>
+      PayrollEngineInput(
+        month: month,
+        settings: snapshot.settings,
+        contractsByMember: {
+          for (final member in snapshot.members)
+            member.id: snapshot.contractsByMember[member.id] ?? const [],
+        },
+        variables: snapshot.variables[month] ?? const {},
+        profiles: snapshot.profiles,
+        attendance: snapshot.summaries[PayrollMonth.previous(month)],
+        advances: snapshot.advances,
+        priorLines: [
+          for (final entry in snapshot.frozenLines.entries)
+            if (entry.key.compareTo(month) < 0 &&
+                snapshot.headers[entry.key]?.status == PayrollStatus.validated)
+              ...entry.value,
+        ],
+      );
+
+  static List<PayrollGesture> gesturesOf(
+    PayrollSnapshot snapshot,
+    String month,
+  ) => [
+    for (final gesture in snapshot.gestures)
+      if (gesture.month == month) gesture,
+  ];
+
+  /// Le versement vivant — ou encore en file — de chaque agent pour [month].
+  /// Un versement refusé n'en est pas un : il va « à régulariser ».
+  static Map<String, PayrollDisbursement> liveDisbursements(
+    PayrollSnapshot snapshot,
+    String month,
+  ) => {
+    for (final disbursement in snapshot.disbursements)
+      if (disbursement.month == month && disbursement.isLive)
+        disbursement.staffMemberId: disbursement,
+  };
+
+  /// Les versements refusés, tous mois confondus : l'argent est parti.
+  static List<PayrollDisbursement> toRegularize(PayrollSnapshot snapshot) => [
+    for (final disbursement in snapshot.disbursements)
+      if (disbursement.needsRegularization && !disbursement.isCancelled)
+        disbursement,
+  ];
+
+  static PayrollBlocker? _submitBlocker(
+    PayrollSnapshot snapshot,
+    String month,
+    List<PayrollLine> lines,
+  ) {
+    final previous = snapshot.headers[PayrollMonth.previous(month)];
+    if (previous != null && previous.status != PayrollStatus.validated) {
+      return PayrollBlocker.previousNotValidated;
+    }
+    if (lines.isEmpty) return PayrollBlocker.emptyLedger;
+    return null;
+  }
+
+  static bool _hasAnyDisbursement(PayrollSnapshot snapshot, String month) =>
+      snapshot.disbursements.any(
+        (disbursement) =>
+            disbursement.month == month &&
+            !disbursement.isCancelled &&
+            !disbursement.needsRegularization,
+      );
+}
