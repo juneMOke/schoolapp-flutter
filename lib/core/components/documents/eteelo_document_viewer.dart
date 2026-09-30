@@ -40,6 +40,7 @@ Future<void> showEteeloDocumentViewer(
   required PrintableDocument document,
   Future<void> Function()? onPrint,
   bool canShare = true,
+  bool canPrint = true,
   bool closeAfterPrint = false,
   Widget Function(BuildContext context, PrintableDocument document)?
   previewBuilder,
@@ -53,6 +54,7 @@ Future<void> showEteeloDocumentViewer(
       document: document,
       onPrint: onPrint,
       canShare: canShare,
+      canPrint: canPrint,
       closeAfterPrint: closeAfterPrint,
       previewBuilder: previewBuilder,
     ),
@@ -73,6 +75,11 @@ class EteeloDocumentViewerView extends StatelessWidget {
   /// l'application ; seule la fin de session l'efface (`SharedDocumentCache`).
   /// Le drapeau existe pour qu'un appelant puisse refuser ce dépôt.
   final bool canShare;
+
+  /// Le spouleur système offre « Enregistrer en PDF » et, sur iOS, le
+  /// partage : pour une pièce qui ne doit pas quitter la tablette (pièce
+  /// d'identité, diplôme), imprimer est une sortie comme une autre.
+  final bool canPrint;
 
   /// Referme la visionneuse une fois l'impression rendue.
   ///
@@ -96,6 +103,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
     required this.document,
     this.onPrint,
     this.canShare = true,
+    this.canPrint = true,
     this.closeAfterPrint = false,
     this.previewBuilder,
   });
@@ -195,6 +203,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
             const Divider(height: 1, color: AppColors.border),
             DocumentViewerFooter(
               canShare: canShare,
+              canPrint: canPrint,
               onPrint: () => _print(context),
               onShare: () => _share(context),
               onClose: () => _close(context),
@@ -261,9 +270,10 @@ class DocumentViewerHeader extends StatelessWidget {
   }
 }
 
-/// Imprimer · Partager · Fermer.
+/// Imprimer · Partager · Fermer — les deux premiers selon l'appelant.
 class DocumentViewerFooter extends StatelessWidget {
   final bool canShare;
+  final bool canPrint;
 
   /// `null` **désarme** le bouton : c'est ce dont l'éditique a besoin tant que
   /// le serveur n'a pas rendu la pièce — imprimer ce qui n'est pas arrivé n'a
@@ -275,6 +285,7 @@ class DocumentViewerFooter extends StatelessWidget {
   const DocumentViewerFooter({
     super.key,
     this.canShare = true,
+    this.canPrint = true,
     required this.onPrint,
     required this.onShare,
     required this.onClose,
@@ -293,12 +304,13 @@ class DocumentViewerFooter extends StatelessWidget {
         children: [
           // `fullWidth: false` obligatoire hors colonne : le thème rend les
           // boutons pleine largeur, ce qui casse une disposition en ligne.
-          EteeloButton.secondary(
-            label: l10n.documentViewerPrintLabel,
-            icon: Icons.print_outlined,
-            onPressed: onPrint,
-            fullWidth: false,
-          ),
+          if (canPrint)
+            EteeloButton.secondary(
+              label: l10n.documentViewerPrintLabel,
+              icon: Icons.print_outlined,
+              onPressed: onPrint,
+              fullWidth: false,
+            ),
           if (canShare)
             EteeloButton.secondary(
               label: l10n.documentViewerShareLabel,

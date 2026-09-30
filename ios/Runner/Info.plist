@@ -22,6 +22,10 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>NSCameraUsageDescription</key>
+		<string>La caméra sert à numériser les pièces justificatives.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>La photothèque sert à importer une pièce déjà photographiée.</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>

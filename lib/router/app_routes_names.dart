@@ -66,6 +66,8 @@ class AppRoutesNames {
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseRegisterId}';
   static const String expenseQueue =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseQueueId}';
+  static const String hrStaffFile =
+      '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffFileId}';
 
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';

@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_pu
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_pull_models.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sync_api.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';

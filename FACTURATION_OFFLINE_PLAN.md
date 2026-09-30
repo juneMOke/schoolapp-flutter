@@ -12,7 +12,7 @@
 >
 > **Avancement Phase 2e + Phase 3** : fraîcheur `sync_meta.synced_at` affichée sous les totaux (ADR-002,
 > `FacturationLedgerFreshnessCaption` + `LedgerFreshnessCubit` + `GetLedgerFreshnessUseCase`) + badge « en attente de
-> synchro » (`FinancePendingSyncBadge`) sur créances (pending>0) et paiements (`isPendingSync`), l10n FR+EN. **Bug #2
+> synchro » (`FinancePendingSyncBadge`, devenu `PendingSyncBadge` dans `core/components/status/`) sur créances (pending>0) et paiements (`isPendingSync`), l10n FR+EN. **Bug #2
 corrigé** : issue socle **`OutboxDispatchOutcome.blocked`** (+ `OutboxDao.defer`, délai fixe 5 s) → le gate FIFO
 > d'attente d'inscription ne consomme plus tentative/backoff/poison (plus de faux `SYNC_ERROR` sur l'argent).
 > **Fail-fast** `total == Σ allocations` dans `recordPayment` (évite un 422 qui immobilise l'argent). **Bornage** de la

@@ -2592,9 +2592,9 @@
     "description": "Pastille AppBar facturation quand le solde est dû dans PLUSIEURS devises. Sans montant : deux montants ne tiennent pas dans une pastille, et n'en montrer qu'un serait faux. Le détail est dans les cartes."
   },
   "facturationBalanceUpToDatePill": "À jour",
-  "financePendingSyncBadge": "En attente de synchro",
-  "@financePendingSyncBadge": {
-    "description": "Badge sur une créance/un paiement dont l'encaissement local n'est pas encore remonté au serveur."
+  "pendingSyncBadge": "En attente de synchro",
+  "@pendingSyncBadge": {
+    "description": "Pastille d'un élément écrit sur ce poste et pas encore remonté au serveur (créance, paiement, fiche…)."
   },
   "facturationFreshnessAt": "Grand-livre à jour à {time}",
   "@facturationFreshnessAt": {
@@ -7501,5 +7501,963 @@
     }
   },
   "paymentCorrectionTargetLoadFailed": "Les frais de cet élève n'ont pas pu être lus.",
-  "facturationPaymentPrintTicketPrimary": "Imprimer le ticket"
+  "facturationPaymentPrintTicketPrimary": "Imprimer le ticket",
+  "documentCaptureScan": "Numériser",
+  "@documentCaptureScan": {
+    "description": "Action : photographier la pièce avec la caméra."
+  },
+  "documentCaptureScanHint": "Photographier la pièce avec la caméra",
+  "@documentCaptureScanHint": {
+    "description": "Sous-titre de l'action Numériser."
+  },
+  "documentCaptureImportImage": "Importer une photo",
+  "@documentCaptureImportImage": {
+    "description": "Action : choisir une image déjà présente sur la tablette."
+  },
+  "documentCaptureImportImageHint": "Choisir une image déjà sur la tablette",
+  "@documentCaptureImportImageHint": {
+    "description": "Sous-titre de l'action Importer une photo."
+  },
+  "documentCaptureImportPdf": "Importer un PDF",
+  "@documentCaptureImportPdf": {
+    "description": "Action : choisir un PDF déjà présent sur la tablette."
+  },
+  "documentCaptureImportPdfHint": "Choisir un PDF déjà sur la tablette",
+  "@documentCaptureImportPdfHint": {
+    "description": "Sous-titre de l'action Importer un PDF."
+  },
+  "documentCaptureLimits": "JPEG, PNG ou PDF · {maxMegabytes} Mo au plus",
+  "@documentCaptureLimits": {
+    "description": "Rappel des types acceptés et du poids maximal, affiché au moment de choisir une pièce.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureCameraUnavailable": "La caméra n'est pas disponible sur cette tablette. Importez un fichier à la place.",
+  "@documentCaptureCameraUnavailable": {
+    "description": "Caméra refusée ou absente : seules les actions d'import restent proposées."
+  },
+  "documentCaptureTooLarge": "Ce fichier dépasse {maxMegabytes} Mo. Choisissez-en un plus léger.",
+  "@documentCaptureTooLarge": {
+    "description": "Pièce refusée : trop volumineuse.",
+    "placeholders": {
+      "maxMegabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentCaptureUnsupported": "Seuls les fichiers JPEG, PNG et PDF sont acceptés.",
+  "@documentCaptureUnsupported": {
+    "description": "Pièce refusée : type non accepté."
+  },
+  "documentCaptureReadError": "Le fichier n'a pas pu être lu. Réessayez.",
+  "@documentCaptureReadError": {
+    "description": "La plateforme n'a pas rendu le fichier."
+  },
+  "menuHumanResources": "Ressources humaines",
+  "@menuHumanResources": {
+    "description": "Menu du module Ressources humaines."
+  },
+  "subMenuStaffFile": "Fichier du personnel",
+  "@subMenuStaffFile": {
+    "description": "Sous-menu : le fichier central des agents de l'école."
+  },
+  "accueilModuleHumanResourcesDescription": "Le fichier du personnel : les agents de l'école, leur contrat et leur dossier.",
+  "@accueilModuleHumanResourcesDescription": {
+    "description": "Description de la carte Ressources humaines sur l'accueil."
+  },
+  "staffFileEyebrow": "Ressources humaines",
+  "@staffFileEyebrow": {
+    "description": "Surtitre de la liste du personnel."
+  },
+  "staffFileTitle": "Fichier du personnel",
+  "@staffFileTitle": {
+    "description": "Titre de la liste du personnel."
+  },
+  "staffFileSubtitle": "Tous les agents de l'école : enseignants, administratifs et personnel d'appui.",
+  "@staffFileSubtitle": {
+    "description": "Sous-titre de la liste du personnel."
+  },
+  "staffStatHeadcount": "Effectif",
+  "@staffStatHeadcount": {
+    "description": "Carte de synthèse : nombre d'agents au fichier."
+  },
+  "staffStatHeadcountNoContract": "{count} sans contrat en vigueur",
+  "@staffStatHeadcountNoContract": {
+    "description": "Sous-ligne de l'effectif : agents « contrat à poser ».",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffStatIncomplete": "Dossiers incomplets",
+  "@staffStatIncomplete": {
+    "description": "Carte de synthèse : agents à qui manquent des pièces exigées."
+  },
+  "staffStatIncompleteSub": "Pièces exigées manquantes",
+  "@staffStatIncompleteSub": {
+    "description": "Sous-ligne des dossiers incomplets."
+  },
+  "staffStatPending": "Sur la tablette",
+  "@staffStatPending": {
+    "description": "Carte de synthèse : fiches et pièces pas encore envoyées."
+  },
+  "staffStatPendingSub": "Partiront au retour du réseau",
+  "@staffStatPendingSub": {
+    "description": "Sous-ligne de la carte « Sur la tablette »."
+  },
+  "staffSearchLabel": "Rechercher",
+  "@staffSearchLabel": {
+    "description": "Libellé du champ de recherche."
+  },
+  "staffSearchPlaceholder": "Nom, post-nom, prénom, matricule ou fonction",
+  "@staffSearchPlaceholder": {
+    "description": "Indice du champ de recherche."
+  },
+  "staffCategoryLabel": "Catégorie",
+  "@staffCategoryLabel": {
+    "description": "Libellé du filtre de catégorie."
+  },
+  "staffCategoryAll": "Toutes catégories",
+  "@staffCategoryAll": {
+    "description": "Filtre de catégorie : aucune restriction."
+  },
+  "staffCategoryTeacher": "Enseignant",
+  "@staffCategoryTeacher": {
+    "description": "Catégorie d'agent."
+  },
+  "staffCategoryAdministrative": "Administratif",
+  "@staffCategoryAdministrative": {
+    "description": "Catégorie d'agent."
+  },
+  "staffCategorySupport": "Appui",
+  "@staffCategorySupport": {
+    "description": "Catégorie d'agent : personnel d'appui."
+  },
+  "staffViewLabel": "Affichage",
+  "@staffViewLabel": {
+    "description": "Libellé de la bascule cartes/liste."
+  },
+  "staffViewGrid": "Cartes",
+  "@staffViewGrid": {
+    "description": "Affichage en grille de cartes."
+  },
+  "staffViewList": "Liste",
+  "@staffViewList": {
+    "description": "Affichage en tableau."
+  },
+  "staffContractLabel": "Contrat",
+  "@staffContractLabel": {
+    "description": "Libellé des filtres et de la colonne de contrat."
+  },
+  "staffContractAll": "Tous",
+  "@staffContractAll": {
+    "description": "Filtre de contrat : aucune restriction."
+  },
+  "staffContractPermanent": "Permanent",
+  "@staffContractPermanent": {
+    "description": "Statut de contrat : salarié de l'école."
+  },
+  "staffContractVacataire": "Vacataire",
+  "@staffContractVacataire": {
+    "description": "Statut de contrat : payé aux heures ou au forfait."
+  },
+  "staffContractConventionne": "Conventionné",
+  "@staffContractConventionne": {
+    "description": "Statut de contrat : pris en charge par l'État (SECOPE)."
+  },
+  "staffContractNone": "Contrat à poser",
+  "@staffContractNone": {
+    "description": "Agent sans contrat en vigueur."
+  },
+  "staffIncompleteFilter": "Dossier incomplet",
+  "@staffIncompleteFilter": {
+    "description": "Filtre : agents dont le dossier est incomplet."
+  },
+  "staffDossierComplete": "Dossier complet",
+  "@staffDossierComplete": {
+    "description": "Jauge du dossier : toutes les pièces exigées sont versées."
+  },
+  "staffDossierProgress": "{done}/{total} pièces",
+  "@staffDossierProgress": {
+    "description": "Jauge du dossier : pièces versées sur pièces exigées.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "staffNumberPending": "Matricule en attente",
+  "@staffNumberPending": {
+    "description": "Matricule pas encore attribué par le serveur."
+  },
+  "staffSyncSynced": "Synchronisé",
+  "@staffSyncSynced": {
+    "description": "État de synchronisation : au serveur."
+  },
+  "staffSyncPending": "Sur la tablette",
+  "@staffSyncPending": {
+    "description": "État de synchronisation : pas encore envoyé."
+  },
+  "staffSyncFailed": "Échec d'envoi",
+  "@staffSyncFailed": {
+    "description": "État de synchronisation : refusé par le serveur."
+  },
+  "staffTableAgent": "Agent",
+  "@staffTableAgent": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableJob": "Fonction",
+  "@staffTableJob": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableDossier": "Dossier",
+  "@staffTableDossier": {
+    "description": "En-tête de colonne."
+  },
+  "staffTableSync": "Synchro",
+  "@staffTableSync": {
+    "description": "En-tête de colonne."
+  },
+  "staffFooterCount": "{count, plural, =0{Aucun agent au fichier} =1{1 agent au fichier} other{{count} agents au fichier}}",
+  "@staffFooterCount": {
+    "description": "Pied de la liste : effectif total du fichier.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffEmptyFileTitle": "Aucun agent dans le fichier",
+  "@staffEmptyFileTitle": {
+    "description": "Vide : le fichier ne compte aucun agent."
+  },
+  "staffEmptyFileMessage": "Les agents apparaîtront ici dès qu'ils seront enregistrés.",
+  "@staffEmptyFileMessage": {
+    "description": "Explication du fichier vide."
+  },
+  "staffEmptySearchTitle": "Aucun agent trouvé",
+  "@staffEmptySearchTitle": {
+    "description": "Vide : aucun agent ne passe les filtres."
+  },
+  "staffEmptySearchMessage": "Aucun agent ne correspond à ces critères.",
+  "@staffEmptySearchMessage": {
+    "description": "Explication du vide de recherche."
+  },
+  "staffResetFilters": "Réinitialiser les filtres",
+  "@staffResetFilters": {
+    "description": "Action : retirer tous les filtres."
+  },
+  "staffErrorNetworkTitle": "Pas de connexion",
+  "@staffErrorNetworkTitle": {
+    "description": "Erreur : fichier jamais téléchargé et réseau absent."
+  },
+  "staffErrorNetwork": "Le réseau manque. Réessayez une fois la connexion revenue.",
+  "@staffErrorNetwork": {
+    "description": "Explication : sans premier téléchargement, rien à montrer hors ligne."
+  },
+  "staffErrorStorageTitle": "Lecture impossible",
+  "@staffErrorStorageTitle": {
+    "description": "Erreur : base locale illisible."
+  },
+  "staffErrorStorage": "Le fichier du personnel n'a pas pu être lu sur cette tablette. Réessayez ; si le problème persiste, contactez le support.",
+  "@staffErrorStorage": {
+    "description": "Explication de l'erreur de lecture locale."
+  },
+  "staffErrorForbiddenTitle": "Accès refusé",
+  "@staffErrorForbiddenTitle": {
+    "description": "Erreur 403."
+  },
+  "staffErrorForbidden": "Votre profil ne permet pas de consulter les dossiers du personnel.",
+  "@staffErrorForbidden": {
+    "description": "Explication de l'erreur 403."
+  },
+  "staffErrorUnauthorizedTitle": "Session expirée",
+  "@staffErrorUnauthorizedTitle": {
+    "description": "Erreur 401."
+  },
+  "staffErrorUnauthorized": "Les saisies hors ligne restent sur la tablette ; reconnectez-vous pour les envoyer.",
+  "@staffErrorUnauthorized": {
+    "description": "Explication de l'erreur 401."
+  },
+  "staffErrorRetry": "Réessayer",
+  "@staffErrorRetry": {
+    "description": "Action : relancer le téléchargement ou la lecture."
+  },
+  "staffErrorReconnect": "Se reconnecter",
+  "@staffErrorReconnect": {
+    "description": "Action : retour à la connexion."
+  },
+  "staffErrorIncidentCode": "Code incident : {code}",
+  "@staffErrorIncidentCode": {
+    "description": "Code à transmettre au support.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "staffAgentNew": "Nouvel agent",
+  "@staffAgentNew": {
+    "description": "Titre de la page agent en création, avant saisie du nom."
+  },
+  "staffAgentStepEyebrow": "Nouvel agent · étape {step} sur {total}",
+  "@staffAgentStepEyebrow": {
+    "description": "Surtitre de la page agent en création.",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "staffAgentEditEyebrow": "Modification du profil",
+  "@staffAgentEditEyebrow": {
+    "description": "Surtitre de la page agent en modification."
+  },
+  "staffStepIdentity": "Identité & contacts",
+  "@staffStepIdentity": {
+    "description": "Étape 1 de la page agent."
+  },
+  "staffStepAddress": "Adresse",
+  "@staffStepAddress": {
+    "description": "Étape 2 de la page agent."
+  },
+  "staffStepJob": "Poste & contrat",
+  "@staffStepJob": {
+    "description": "Étape 3 de la page agent."
+  },
+  "staffStepDocuments": "Diplômes & pièces",
+  "@staffStepDocuments": {
+    "description": "Étape 4 de la page agent."
+  },
+  "staffBlockIdentification": "Identification",
+  "@staffBlockIdentification": {
+    "description": "Bloc de l'étape 1."
+  },
+  "staffBlockIdentificationHint": "Tels qu'écrits sur la pièce d'identité",
+  "@staffBlockIdentificationHint": {
+    "description": "Sous-titre du bloc Identification."
+  },
+  "staffBlockContacts": "Contacts",
+  "@staffBlockContacts": {
+    "description": "Bloc de l'étape 1."
+  },
+  "staffFieldLastName": "Nom",
+  "@staffFieldLastName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldMiddleName": "Post-nom",
+  "@staffFieldMiddleName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldFirstName": "Prénom",
+  "@staffFieldFirstName": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldSex": "Sexe",
+  "@staffFieldSex": {
+    "description": "Champ de la fiche."
+  },
+  "staffSexMale": "Masculin",
+  "@staffSexMale": {
+    "description": "Valeur du champ Sexe."
+  },
+  "staffSexFemale": "Féminin",
+  "@staffSexFemale": {
+    "description": "Valeur du champ Sexe."
+  },
+  "staffFieldBirthDate": "Date de naissance",
+  "@staffFieldBirthDate": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldPhone": "Téléphone",
+  "@staffFieldPhone": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldEmail": "E-mail",
+  "@staffFieldEmail": {
+    "description": "Champ de la fiche."
+  },
+  "staffFieldStaffNumber": "Matricule",
+  "@staffFieldStaffNumber": {
+    "description": "Champ de la fiche, en consultation."
+  },
+  "staffBlockAddress": "Adresse de résidence",
+  "@staffBlockAddress": {
+    "description": "Bloc de l'étape 2."
+  },
+  "staffBlockAddressHint": "District, commune puis quartier — le code postal est déduit",
+  "@staffBlockAddressHint": {
+    "description": "Sous-titre du bloc Adresse."
+  },
+  "staffFieldCity": "Ville",
+  "@staffFieldCity": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldDistrict": "District",
+  "@staffFieldDistrict": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldMunicipality": "Commune",
+  "@staffFieldMunicipality": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldNeighborhood": "Quartier",
+  "@staffFieldNeighborhood": {
+    "description": "Champ de l'adresse."
+  },
+  "staffFieldAddress": "Complément",
+  "@staffFieldAddress": {
+    "description": "Champ libre de l'adresse."
+  },
+  "staffFieldAddressPlaceholder": "N° et avenue, repère…",
+  "@staffFieldAddressPlaceholder": {
+    "description": "Indice du complément d'adresse."
+  },
+  "staffPickDistrictFirst": "Choisissez d'abord un district",
+  "@staffPickDistrictFirst": {
+    "description": "Commune désactivée tant que le district est vide."
+  },
+  "staffPickMunicipalityFirst": "Choisissez d'abord une commune",
+  "@staffPickMunicipalityFirst": {
+    "description": "Quartier désactivé tant que la commune est vide."
+  },
+  "staffBlockJob": "Poste",
+  "@staffBlockJob": {
+    "description": "Bloc de l'étape 3."
+  },
+  "staffBlockJobHint": "Ce que l'agent fait à l'école",
+  "@staffBlockJobHint": {
+    "description": "Sous-titre du bloc Poste."
+  },
+  "staffFieldCategory": "Catégorie",
+  "@staffFieldCategory": {
+    "description": "Champ du poste."
+  },
+  "staffFieldJob": "Fonction",
+  "@staffFieldJob": {
+    "description": "Champ du poste."
+  },
+  "staffPickCategoryFirst": "Choisissez d'abord une catégorie",
+  "@staffPickCategoryFirst": {
+    "description": "Fonction désactivée tant que la catégorie est vide."
+  },
+  "staffFieldEntryDate": "Date d'entrée",
+  "@staffFieldEntryDate": {
+    "description": "Champ du poste."
+  },
+  "staffSeniority": "{years, plural, =0{Moins d'un an d'ancienneté} =1{1 an d'ancienneté} other{{years} ans d'ancienneté}}",
+  "@staffSeniority": {
+    "description": "Ancienneté calculée depuis la date d'entrée.",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "staffFieldBranches": "Matières",
+  "@staffFieldBranches": {
+    "description": "Matières qu'un enseignant déclare."
+  },
+  "staffBranchAdd": "Ajouter une matière",
+  "@staffBranchAdd": {
+    "description": "Champ d'ajout d'une matière."
+  },
+  "staffBranchPlaceholder": "Ex. Mathématiques",
+  "@staffBranchPlaceholder": {
+    "description": "Indice du champ matière."
+  },
+  "staffBranchAddAction": "Ajouter",
+  "@staffBranchAddAction": {
+    "description": "Bouton d'ajout d'une matière."
+  },
+  "staffValueNotSet": "Non renseigné",
+  "@staffValueNotSet": {
+    "description": "Valeur absente en consultation."
+  },
+  "staffBlockDiplomas": "Diplômes",
+  "@staffBlockDiplomas": {
+    "description": "Bloc de l'étape 4."
+  },
+  "staffBlockDiplomasHint": "Du plus élevé au plus ancien",
+  "@staffBlockDiplomasHint": {
+    "description": "Sous-titre du bloc Diplômes."
+  },
+  "staffBlockDiplomasCreateHint": "Facultatif maintenant — le dossier peut être complété plus tard",
+  "@staffBlockDiplomasCreateHint": {
+    "description": "Sous-titre du bloc Diplômes en création."
+  },
+  "staffFieldDiplomaLevel": "Niveau",
+  "@staffFieldDiplomaLevel": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaTitle": "Intitulé",
+  "@staffFieldDiplomaTitle": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaInstitution": "Établissement",
+  "@staffFieldDiplomaInstitution": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffFieldDiplomaYear": "Année",
+  "@staffFieldDiplomaYear": {
+    "description": "Champ d'un diplôme."
+  },
+  "staffDiplomaAdd": "Ajouter un diplôme",
+  "@staffDiplomaAdd": {
+    "description": "Action du bloc Diplômes."
+  },
+  "staffDiplomaRemove": "Retirer ce diplôme",
+  "@staffDiplomaRemove": {
+    "description": "Info-bulle de la corbeille d'un diplôme."
+  },
+  "staffDiplomasNone": "Aucun diplôme déclaré",
+  "@staffDiplomasNone": {
+    "description": "Consultation sans diplôme."
+  },
+  "staffFieldRequired": "Champ requis",
+  "@staffFieldRequired": {
+    "description": "Erreur de champ."
+  },
+  "staffFieldPhoneIncomplete": "Numéro incomplet (+243 et 9 chiffres)",
+  "@staffFieldPhoneIncomplete": {
+    "description": "Erreur du champ téléphone."
+  },
+  "staffFieldEmailInvalid": "Adresse e-mail invalide",
+  "@staffFieldEmailInvalid": {
+    "description": "Erreur du champ e-mail."
+  },
+  "staffFieldDateInFuture": "La date ne peut pas être dans le futur",
+  "@staffFieldDateInFuture": {
+    "description": "Erreur d'une date."
+  },
+  "staffFieldDiplomaIncomplete": "Un diplôme doit avoir un niveau et un intitulé",
+  "@staffFieldDiplomaIncomplete": {
+    "description": "Erreur d'un diplôme à moitié rempli."
+  },
+  "staffDuplicateWarning": "Un agent porte déjà ce nom complet — vérifiez qu'il ne s'agit pas d'un doublon.",
+  "@staffDuplicateWarning": {
+    "description": "Avertissement non bloquant d'homonymie."
+  },
+  "staffErrorsToFix": "{count, plural, =1{1 champ à corriger} other{{count} champs à corriger}}",
+  "@staffErrorsToFix": {
+    "description": "Bandeau d'erreurs d'une étape.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffActionPrevious": "Précédent",
+  "@staffActionPrevious": {
+    "description": "Pied de la page agent."
+  },
+  "staffActionNext": "Suivant",
+  "@staffActionNext": {
+    "description": "Pied de la page agent."
+  },
+  "staffActionCreate": "Enregistrer l'agent",
+  "@staffActionCreate": {
+    "description": "Pied de la page agent, dernière étape de création."
+  },
+  "staffActionCancel": "Annuler",
+  "@staffActionCancel": {
+    "description": "Pied de la page agent en modification."
+  },
+  "staffActionSave": "Enregistrer",
+  "@staffActionSave": {
+    "description": "Pied de la page agent en modification."
+  },
+  "staffActionEdit": "Modifier le profil",
+  "@staffActionEdit": {
+    "description": "Bandeau de la page agent en consultation."
+  },
+  "staffActionBack": "Retour",
+  "@staffActionBack": {
+    "description": "Info-bulle du bouton retour."
+  },
+  "staffActionNewAgent": "Nouvel agent",
+  "@staffActionNewAgent": {
+    "description": "Bouton de création d'un agent."
+  },
+  "staffActionAddFirst": "Ajouter le premier agent",
+  "@staffActionAddFirst": {
+    "description": "Action du fichier vide."
+  },
+  "staffActionCreateFromSearch": "Créer cet agent",
+  "@staffActionCreateFromSearch": {
+    "description": "Action du vide de recherche : crée un agent au nom cherché."
+  },
+  "staffSavedCreated": "{name} ajouté au fichier",
+  "@staffSavedCreated": {
+    "description": "Toast après création.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "staffSavedUpdated": "Fiche mise à jour",
+  "@staffSavedUpdated": {
+    "description": "Toast après modification."
+  },
+  "staffSaveError": "La fiche n'a pas pu être enregistrée sur la tablette. Réessayez.",
+  "@staffSaveError": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffDiscardTitle": "Abandonner les modifications ?",
+  "@staffDiscardTitle": {
+    "description": "Titre de la confirmation d'abandon."
+  },
+  "staffDiscardMessage": "Les changements apportés à la fiche seront perdus.",
+  "@staffDiscardMessage": {
+    "description": "Message de la confirmation d'abandon."
+  },
+  "staffDiscardConfirm": "Abandonner",
+  "@staffDiscardConfirm": {
+    "description": "Confirmer l'abandon."
+  },
+  "staffDiscardKeep": "Continuer la saisie",
+  "@staffDiscardKeep": {
+    "description": "Revenir à la saisie."
+  },
+  "staffBlockContract": "Contrat",
+  "@staffBlockContract": {
+    "description": "Bloc des contrats de la fiche agent."
+  },
+  "staffBlockContractHint": "Des périodes datées : un nouveau contrat prend effet à une date, sans réécrire l'ancien.",
+  "@staffBlockContractHint": {
+    "description": "Sous-titre du bloc des contrats."
+  },
+  "staffContractAdd": "Nouveau contrat",
+  "@staffContractAdd": {
+    "description": "Bouton : poser un contrat à compter d'une date."
+  },
+  "staffContractAddTitle": "Nouveau contrat",
+  "@staffContractAddTitle": {
+    "description": "Titre de la page de pose d'un contrat."
+  },
+  "staffContractAddSubmit": "Poser le contrat",
+  "@staffContractAddSubmit": {
+    "description": "Valider la pose d'un contrat."
+  },
+  "staffContractCorrect": "Corriger",
+  "@staffContractCorrect": {
+    "description": "Corriger une période de contrat saisie par erreur."
+  },
+  "staffContractCorrectTitle": "Corriger une période",
+  "@staffContractCorrectTitle": {
+    "description": "Titre de la page de correction."
+  },
+  "staffContractCorrectSubmit": "Remplacer la période",
+  "@staffContractCorrectSubmit": {
+    "description": "Valider la correction avec un remplaçant."
+  },
+  "staffContractCancelOnly": "Annuler seulement",
+  "@staffContractCancelOnly": {
+    "description": "Corriger sans remplaçant : la période était un doublon."
+  },
+  "staffContractNoneYet": "Aucun contrat : l'agent est « contrat à poser ».",
+  "@staffContractNoneYet": {
+    "description": "Frise vide."
+  },
+  "staffContractCurrent": "En vigueur",
+  "@staffContractCurrent": {
+    "description": "Marque de la période en vigueur aujourd'hui."
+  },
+  "staffContractFrom": "Depuis le {from}",
+  "@staffContractFrom": {
+    "description": "Période ouverte.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractBetween": "Du {from} au {to}",
+  "@staffContractBetween": {
+    "description": "Période bornée.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractRejected": "Refusé par le serveur : {reason}",
+  "@staffContractRejected": {
+    "description": "Pose ou correction refusée.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "staffContractAmountRequired": "Le montant est obligatoire pour ce contrat.",
+  "@staffContractAmountRequired": {
+    "description": "Montant manquant."
+  },
+  "staffContractAmountInvalid": "Montant invalide.",
+  "@staffContractAmountInvalid": {
+    "description": "Montant illisible."
+  },
+  "staffContractSecopeRequired": "Le matricule SECOPE est obligatoire.",
+  "@staffContractSecopeRequired": {
+    "description": "Matricule manquant."
+  },
+  "staffContractEndBeforeStart": "La fin précède le début.",
+  "@staffContractEndBeforeStart": {
+    "description": "Fin avant début."
+  },
+  "staffContractReasonRequired": "Dites ce qui était faux.",
+  "@staffContractReasonRequired": {
+    "description": "Motif de correction manquant."
+  },
+  "staffContractPermanentHint": "Salarié de l'école, payé au mois.",
+  "@staffContractPermanentHint": {
+    "description": "Aide du statut permanent."
+  },
+  "staffContractVacataireHint": "Payé aux heures ou au forfait mensuel.",
+  "@staffContractVacataireHint": {
+    "description": "Aide du statut vacataire."
+  },
+  "staffContractConventionneHint": "Pris en charge par l'État (SECOPE), prime locale possible.",
+  "@staffContractConventionneHint": {
+    "description": "Aide du statut conventionné."
+  },
+  "staffContractSaved": "Contrat enregistré sur la tablette.",
+  "@staffContractSaved": {
+    "description": "Confirmation d'une pose ou d'une correction."
+  },
+  "staffContractSaveFailed": "Le contrat n'a pas pu être enregistré.",
+  "@staffContractSaveFailed": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffFieldPayMode": "Mode de paiement",
+  "@staffFieldPayMode": {
+    "description": "Champ du mode de paiement d'un vacataire."
+  },
+  "staffPayModeHourly": "À l'heure",
+  "@staffPayModeHourly": {
+    "description": "Vacataire payé à l'heure."
+  },
+  "staffPayModeFlat": "Forfait mensuel",
+  "@staffPayModeFlat": {
+    "description": "Vacataire payé au forfait."
+  },
+  "staffFieldEffectiveFrom": "Prend effet le",
+  "@staffFieldEffectiveFrom": {
+    "description": "Date d'effet."
+  },
+  "staffFieldEndsOn": "Se termine le (facultatif)",
+  "@staffFieldEndsOn": {
+    "description": "Date de fin."
+  },
+  "staffFieldSalary": "Salaire mensuel",
+  "@staffFieldSalary": {
+    "description": "Montant d'un permanent."
+  },
+  "staffFieldHourlyRate": "Taux horaire",
+  "@staffFieldHourlyRate": {
+    "description": "Montant d'un vacataire à l'heure."
+  },
+  "staffFieldMonthlyFlat": "Forfait mensuel",
+  "@staffFieldMonthlyFlat": {
+    "description": "Montant d'un vacataire au forfait."
+  },
+  "staffFieldCurrency": "Devise",
+  "@staffFieldCurrency": {
+    "description": "Devise du montant."
+  },
+  "staffFieldSecope": "Matricule SECOPE",
+  "@staffFieldSecope": {
+    "description": "Matricule d'un conventionné."
+  },
+  "staffFieldBonus": "Prime locale (facultative)",
+  "@staffFieldBonus": {
+    "description": "Prime d'un conventionné."
+  },
+  "staffFieldCorrectionReason": "Motif de la correction",
+  "@staffFieldCorrectionReason": {
+    "description": "Ce qui était faux."
+  },
+  "staffPaySalary": "Salaire : {amount}",
+  "@staffPaySalary": {
+    "description": "Montant affiché d'un permanent.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayHourlyRate": "Taux horaire : {amount}",
+  "@staffPayHourlyRate": {
+    "description": "Montant affiché d'un vacataire à l'heure.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayMonthlyFlat": "Forfait : {amount}",
+  "@staffPayMonthlyFlat": {
+    "description": "Montant affiché d'un vacataire au forfait.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPaySecope": "SECOPE : {number}",
+  "@staffPaySecope": {
+    "description": "Matricule affiché.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPayBonus": "Prime : {amount}",
+  "@staffPayBonus": {
+    "description": "Prime affichée.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffBlockDossier": "Pièces du dossier",
+  "@staffBlockDossier": {
+    "description": "Bloc des pièces de la page agent."
+  },
+  "staffBlockDossierHint": "Celles que le contrat exige, puis les autres",
+  "@staffBlockDossierHint": {
+    "description": "Sous-titre du bloc des pièces."
+  },
+  "staffDossierUnknown": "Le référentiel des pièces n'est pas encore arrivé sur la tablette.",
+  "@staffDossierUnknown": {
+    "description": "Référentiel absent."
+  },
+  "staffDocumentRequired": "Exigée",
+  "@staffDocumentRequired": {
+    "description": "Pièce exigée par le contrat."
+  },
+  "staffDocumentOptional": "Facultative",
+  "@staffDocumentOptional": {
+    "description": "Pièce non exigée."
+  },
+  "staffDocumentMissing": "À verser",
+  "@staffDocumentMissing": {
+    "description": "Pièce manquante."
+  },
+  "staffDocumentFiled": "Versée le {date}",
+  "@staffDocumentFiled": {
+    "description": "Pièce versée et accusée.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentRejected": "Refusée : {reason}",
+  "@staffDocumentRejected": {
+    "description": "Versement refusé par le serveur.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentWaitingMember": "Attend l'envoi de la fiche",
+  "@staffDocumentWaitingMember": {
+    "description": "Pièce bloquée par une fiche pas encore accusée."
+  },
+  "staffDocumentPending": "En attente d'envoi",
+  "@staffDocumentPending": {
+    "description": "Pièce versée sur la tablette, pas encore envoyée."
+  },
+  "staffDocumentView": "Voir",
+  "@staffDocumentView": {
+    "description": "Ouvrir une pièce."
+  },
+  "staffDocumentAdd": "Verser",
+  "@staffDocumentAdd": {
+    "description": "Verser une pièce manquante."
+  },
+  "staffDocumentReplace": "Remplacer",
+  "@staffDocumentReplace": {
+    "description": "Verser une nouvelle version d'une pièce."
+  },
+  "staffDocumentCaptureTitle": "Verser : {label}",
+  "@staffDocumentCaptureTitle": {
+    "description": "Titre de la feuille de capture.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDocumentSaved": "Pièce enregistrée sur la tablette.",
+  "@staffDocumentSaved": {
+    "description": "Confirmation d'un versement."
+  },
+  "staffDocumentSaveFailed": "La pièce n'a pas pu être enregistrée.",
+  "@staffDocumentSaveFailed": {
+    "description": "Échec d'écriture locale."
+  },
+  "staffDocumentOpenFailed": "Pièce indisponible : elle n'est pas sur la tablette et le serveur ne l'a pas rendue.",
+  "@staffDocumentOpenFailed": {
+    "description": "Échec d'ouverture."
+  },
+  "staffDocumentClose": "Fermer",
+  "@staffDocumentClose": {
+    "description": "Fermer la visionneuse."
+  },
+  "staffDocumentOpenOffline": "Hors ligne : cette pièce n'est pas encore sur la tablette.",
+  "@staffDocumentOpenOffline": {
+    "description": "Ouverture impossible hors ligne."
+  },
+  "staffDocumentOpenForbidden": "Ce compte n'a pas le droit de lire cette pièce.",
+  "@staffDocumentOpenForbidden": {
+    "description": "Ouverture refusée (401/403)."
+  },
+  "staffDocumentOpenCorrupt": "La pièce reçue ne correspond pas à son empreinte : elle n'est ni montrée ni gardée.",
+  "@staffDocumentOpenCorrupt": {
+    "description": "Empreinte différente."
+  },
+  "staffSaveNoSession": "Aucune session ouverte : reconnectez-vous pour enregistrer.",
+  "@staffSaveNoSession": {
+    "description": "Écriture impossible sans session."
+  },
+  "staffDossierLoading": "Chargement des pièces du dossier",
+  "@staffDossierLoading": {
+    "description": "Libellé d'accessibilité du chargement des pièces."
+  },
+  "staffContractCancelConfirmTitle": "Annuler cette période ?",
+  "@staffContractCancelConfirmTitle": {
+    "description": "Titre de la confirmation d'une correction sans remplaçant."
+  },
+  "staffContractCancelConfirmMessage": "Elle sortira du calcul, sans remplaçant. Le geste part au serveur et ne se défait pas depuis la tablette.",
+  "@staffContractCancelConfirmMessage": {
+    "description": "Message de la confirmation."
+  },
+  "staffContractCancelConfirmKeep": "Revenir",
+  "@staffContractCancelConfirmKeep": {
+    "description": "Renoncer à annuler la période."
+  },
+  "staffFileNotYetSynced": "Le fichier du personnel n'a pas encore été reçu sur cette tablette. Vous pouvez déjà créer des agents : les autres apparaîtront à la prochaine connexion.",
+  "@staffFileNotYetSynced": {
+    "description": "Bandeau : fichier jamais reçu, la saisie reste possible."
+  }
 }

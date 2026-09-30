@@ -36,6 +36,7 @@ import 'package:school_app_flutter/features/expense/presentation/pages/expense_d
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
+import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
@@ -383,6 +384,8 @@ class _HomePageView extends StatelessWidget {
           key: ValueKey(MenuConstants.expenseQueueId),
           child: ExpenseQueuePage(),
         );
+      case MenuConstants.hrStaffFileId:
+        return const StaffFilePage();
       // Scope PROPRE depuis que le contrôle est un module à part : plus rien
       // ne le partage avec la Facturation, donc plus de `ValueKey` à poser
       // pour empêcher Flutter de recycler l'`Element` de l'autre écran — les

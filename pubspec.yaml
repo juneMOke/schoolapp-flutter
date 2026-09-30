@@ -131,6 +131,23 @@ dependencies:
   # pas déduit d'un journal des modifications.
   permission_handler: ^12.0.1
 
+  # ── Capture de pièces (core/capture) ─────────────────────────────────────
+  # Numériser ou importer un justificatif gardé sur la tablette (dossier d'un
+  # agent RH, puis justificatifs du Pointage). `image_picker` pour la caméra et
+  # la photothèque, parce qu'il RÉDUIT l'image nativement (grand côté 2 000 px,
+  # JPEG 82) : une photo de 12 Mpx dépasserait sinon les 5 Mo du serveur.
+  # `file_picker` pour les PDF seuls, qui ne se réduisent pas.
+  #
+  # Aucune permission ajoutée au manifeste Android : la caméra passe par
+  # l'application photo du système (intent), qui n'en demande pas à la nôtre.
+  # iOS exige en revanche `NSCameraUsageDescription` et
+  # `NSPhotoLibraryUsageDescription` (ios/Runner/Info.plist).
+  #
+  # ⚠️ Ne JAMAIS les importer hors de `PlatformDocumentCaptureGateway` : tout le
+  # reste de la capture se teste sans appareil.
+  image_picker: ^1.2.3
+  file_picker: ^11.0.3
+
 
 dev_dependencies:
   flutter_test:

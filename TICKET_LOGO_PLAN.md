@@ -383,7 +383,7 @@ la **volumétrie** — des centaines de pièces de plusieurs Mo, avec éviction 
 budget. Un logo, c'est **~14 ko par école**, deux lignes, mesurés. Aucune
 éviction, aucun budget, aucune croissance.
 
-Réutiliser `EditiqueBlobStore` aurait au contraire **coûté le logo** : son
+Réutiliser `EditiqueBlobStore` (devenu `EncryptedBlobStore`, `core/storage/encrypted_blob/`) aurait au contraire **coûté le logo** : son
 `reclaimOrphans()`, appelé au démarrage depuis `main.dart`, supprime tout fichier
 dont l'id n'est pas dans l'index `editique_cache_entries` — index dont le
 `doc_type` est contraint à `{AI, NP, RC, BU}`.

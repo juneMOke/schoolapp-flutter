@@ -3815,7 +3815,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationBalanceUpToDatePill => 'Up to date';
 
   @override
-  String get financePendingSyncBadge => 'Pending sync';
+  String get pendingSyncBadge => 'Pending sync';
 
   @override
   String facturationFreshnessAt(String time) {
@@ -11316,4 +11316,736 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPaymentPrintTicketPrimary => 'Print the ticket';
+
+  @override
+  String get documentCaptureScan => 'Scan';
+
+  @override
+  String get documentCaptureScanHint =>
+      'Photograph the document with the camera';
+
+  @override
+  String get documentCaptureImportImage => 'Import a photo';
+
+  @override
+  String get documentCaptureImportImageHint =>
+      'Choose an image already on the tablet';
+
+  @override
+  String get documentCaptureImportPdf => 'Import a PDF';
+
+  @override
+  String get documentCaptureImportPdfHint =>
+      'Choose a PDF already on the tablet';
+
+  @override
+  String documentCaptureLimits(int maxMegabytes) {
+    return 'JPEG, PNG or PDF · $maxMegabytes MB max';
+  }
+
+  @override
+  String get documentCaptureCameraUnavailable =>
+      'The camera is not available on this tablet. Import a file instead.';
+
+  @override
+  String documentCaptureTooLarge(int maxMegabytes) {
+    return 'This file is larger than $maxMegabytes MB. Choose a lighter one.';
+  }
+
+  @override
+  String get documentCaptureUnsupported =>
+      'Only JPEG, PNG and PDF files are accepted.';
+
+  @override
+  String get documentCaptureReadError =>
+      'The file could not be read. Try again.';
+
+  @override
+  String get menuHumanResources => 'Human resources';
+
+  @override
+  String get subMenuStaffFile => 'Staff file';
+
+  @override
+  String get accueilModuleHumanResourcesDescription =>
+      'The staff file: the school\'s staff, their contract and their records.';
+
+  @override
+  String get staffFileEyebrow => 'Human resources';
+
+  @override
+  String get staffFileTitle => 'Staff file';
+
+  @override
+  String get staffFileSubtitle =>
+      'Everyone who works at the school: teachers, administrative and support staff.';
+
+  @override
+  String get staffStatHeadcount => 'Headcount';
+
+  @override
+  String staffStatHeadcountNoContract(int count) {
+    return '$count without a current contract';
+  }
+
+  @override
+  String get staffStatIncomplete => 'Incomplete files';
+
+  @override
+  String get staffStatIncompleteSub => 'Required documents missing';
+
+  @override
+  String get staffStatPending => 'On this tablet';
+
+  @override
+  String get staffStatPendingSub => 'Will be sent when the network is back';
+
+  @override
+  String get staffSearchLabel => 'Search';
+
+  @override
+  String get staffSearchPlaceholder =>
+      'Name, middle name, first name, staff number or job';
+
+  @override
+  String get staffCategoryLabel => 'Category';
+
+  @override
+  String get staffCategoryAll => 'All categories';
+
+  @override
+  String get staffCategoryTeacher => 'Teacher';
+
+  @override
+  String get staffCategoryAdministrative => 'Administrative';
+
+  @override
+  String get staffCategorySupport => 'Support';
+
+  @override
+  String get staffViewLabel => 'View';
+
+  @override
+  String get staffViewGrid => 'Cards';
+
+  @override
+  String get staffViewList => 'List';
+
+  @override
+  String get staffContractLabel => 'Contract';
+
+  @override
+  String get staffContractAll => 'All';
+
+  @override
+  String get staffContractPermanent => 'Permanent';
+
+  @override
+  String get staffContractVacataire => 'Part-time';
+
+  @override
+  String get staffContractConventionne => 'State-paid';
+
+  @override
+  String get staffContractNone => 'No contract yet';
+
+  @override
+  String get staffIncompleteFilter => 'Incomplete file';
+
+  @override
+  String get staffDossierComplete => 'File complete';
+
+  @override
+  String staffDossierProgress(int done, int total) {
+    return '$done/$total documents';
+  }
+
+  @override
+  String get staffNumberPending => 'Staff number pending';
+
+  @override
+  String get staffSyncSynced => 'Synced';
+
+  @override
+  String get staffSyncPending => 'On this tablet';
+
+  @override
+  String get staffSyncFailed => 'Not sent';
+
+  @override
+  String get staffTableAgent => 'Staff member';
+
+  @override
+  String get staffTableJob => 'Job';
+
+  @override
+  String get staffTableDossier => 'File';
+
+  @override
+  String get staffTableSync => 'Sync';
+
+  @override
+  String staffFooterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members in the file',
+      one: '1 staff member in the file',
+      zero: 'No staff in the file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffEmptyFileTitle => 'No staff in the file';
+
+  @override
+  String get staffEmptyFileMessage =>
+      'Staff will appear here as soon as they are recorded.';
+
+  @override
+  String get staffEmptySearchTitle => 'No staff member found';
+
+  @override
+  String get staffEmptySearchMessage =>
+      'No staff member matches these filters.';
+
+  @override
+  String get staffResetFilters => 'Reset filters';
+
+  @override
+  String get staffErrorNetworkTitle => 'No connection';
+
+  @override
+  String get staffErrorNetwork =>
+      'The network is unavailable. Try again once connected.';
+
+  @override
+  String get staffErrorStorageTitle => 'Cannot read the file';
+
+  @override
+  String get staffErrorStorage =>
+      'The staff file could not be read on this tablet. Try again; if it keeps failing, contact support.';
+
+  @override
+  String get staffErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get staffErrorForbidden =>
+      'Your profile does not allow you to view staff records.';
+
+  @override
+  String get staffErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get staffErrorUnauthorized =>
+      'Offline entries stay on this tablet; sign in again to send them.';
+
+  @override
+  String get staffErrorRetry => 'Try again';
+
+  @override
+  String get staffErrorReconnect => 'Sign in again';
+
+  @override
+  String staffErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get staffAgentNew => 'New staff member';
+
+  @override
+  String staffAgentStepEyebrow(int step, int total) {
+    return 'New staff member · step $step of $total';
+  }
+
+  @override
+  String get staffAgentEditEyebrow => 'Editing the profile';
+
+  @override
+  String get staffStepIdentity => 'Identity & contacts';
+
+  @override
+  String get staffStepAddress => 'Address';
+
+  @override
+  String get staffStepJob => 'Job & contract';
+
+  @override
+  String get staffStepDocuments => 'Diplomas & documents';
+
+  @override
+  String get staffBlockIdentification => 'Identification';
+
+  @override
+  String get staffBlockIdentificationHint =>
+      'As written on the identity document';
+
+  @override
+  String get staffBlockContacts => 'Contacts';
+
+  @override
+  String get staffFieldLastName => 'Last name';
+
+  @override
+  String get staffFieldMiddleName => 'Middle name';
+
+  @override
+  String get staffFieldFirstName => 'First name';
+
+  @override
+  String get staffFieldSex => 'Sex';
+
+  @override
+  String get staffSexMale => 'Male';
+
+  @override
+  String get staffSexFemale => 'Female';
+
+  @override
+  String get staffFieldBirthDate => 'Date of birth';
+
+  @override
+  String get staffFieldPhone => 'Phone';
+
+  @override
+  String get staffFieldEmail => 'Email';
+
+  @override
+  String get staffFieldStaffNumber => 'Staff number';
+
+  @override
+  String get staffBlockAddress => 'Home address';
+
+  @override
+  String get staffBlockAddressHint =>
+      'District, municipality then neighbourhood — the postcode follows';
+
+  @override
+  String get staffFieldCity => 'City';
+
+  @override
+  String get staffFieldDistrict => 'District';
+
+  @override
+  String get staffFieldMunicipality => 'Municipality';
+
+  @override
+  String get staffFieldNeighborhood => 'Neighbourhood';
+
+  @override
+  String get staffFieldAddress => 'Address details';
+
+  @override
+  String get staffFieldAddressPlaceholder => 'Number and street, landmark…';
+
+  @override
+  String get staffPickDistrictFirst => 'Choose a district first';
+
+  @override
+  String get staffPickMunicipalityFirst => 'Choose a municipality first';
+
+  @override
+  String get staffBlockJob => 'Job';
+
+  @override
+  String get staffBlockJobHint => 'What the staff member does at the school';
+
+  @override
+  String get staffFieldCategory => 'Category';
+
+  @override
+  String get staffFieldJob => 'Job';
+
+  @override
+  String get staffPickCategoryFirst => 'Choose a category first';
+
+  @override
+  String get staffFieldEntryDate => 'Start date';
+
+  @override
+  String staffSeniority(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years years of service',
+      one: '1 year of service',
+      zero: 'Less than a year of service',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffFieldBranches => 'Subjects';
+
+  @override
+  String get staffBranchAdd => 'Add a subject';
+
+  @override
+  String get staffBranchPlaceholder => 'E.g. Mathematics';
+
+  @override
+  String get staffBranchAddAction => 'Add';
+
+  @override
+  String get staffValueNotSet => 'Not provided';
+
+  @override
+  String get staffBlockDiplomas => 'Diplomas';
+
+  @override
+  String get staffBlockDiplomasHint => 'From the highest to the oldest';
+
+  @override
+  String get staffBlockDiplomasCreateHint =>
+      'Optional now — the file can be completed later';
+
+  @override
+  String get staffFieldDiplomaLevel => 'Level';
+
+  @override
+  String get staffFieldDiplomaTitle => 'Title';
+
+  @override
+  String get staffFieldDiplomaInstitution => 'Institution';
+
+  @override
+  String get staffFieldDiplomaYear => 'Year';
+
+  @override
+  String get staffDiplomaAdd => 'Add a diploma';
+
+  @override
+  String get staffDiplomaRemove => 'Remove this diploma';
+
+  @override
+  String get staffDiplomasNone => 'No diploma recorded';
+
+  @override
+  String get staffFieldRequired => 'Required field';
+
+  @override
+  String get staffFieldPhoneIncomplete =>
+      'Incomplete number (+243 and 9 digits)';
+
+  @override
+  String get staffFieldEmailInvalid => 'Invalid email address';
+
+  @override
+  String get staffFieldDateInFuture => 'The date cannot be in the future';
+
+  @override
+  String get staffFieldDiplomaIncomplete =>
+      'A diploma needs a level and a title';
+
+  @override
+  String get staffDuplicateWarning =>
+      'A staff member already has this full name — check it is not a duplicate.';
+
+  @override
+  String staffErrorsToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fields to fix',
+      one: '1 field to fix',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staffActionPrevious => 'Previous';
+
+  @override
+  String get staffActionNext => 'Next';
+
+  @override
+  String get staffActionCreate => 'Save the staff member';
+
+  @override
+  String get staffActionCancel => 'Cancel';
+
+  @override
+  String get staffActionSave => 'Save';
+
+  @override
+  String get staffActionEdit => 'Edit profile';
+
+  @override
+  String get staffActionBack => 'Back';
+
+  @override
+  String get staffActionNewAgent => 'New staff member';
+
+  @override
+  String get staffActionAddFirst => 'Add the first staff member';
+
+  @override
+  String get staffActionCreateFromSearch => 'Create this staff member';
+
+  @override
+  String staffSavedCreated(String name) {
+    return '$name added to the file';
+  }
+
+  @override
+  String get staffSavedUpdated => 'Record updated';
+
+  @override
+  String get staffSaveError =>
+      'The record could not be saved on this tablet. Try again.';
+
+  @override
+  String get staffDiscardTitle => 'Discard your changes?';
+
+  @override
+  String get staffDiscardMessage => 'The changes to this record will be lost.';
+
+  @override
+  String get staffDiscardConfirm => 'Discard';
+
+  @override
+  String get staffDiscardKeep => 'Keep editing';
+
+  @override
+  String get staffBlockContract => 'Contract';
+
+  @override
+  String get staffBlockContractHint =>
+      'Dated periods: a new contract takes effect on a date, without rewriting the previous one.';
+
+  @override
+  String get staffContractAdd => 'New contract';
+
+  @override
+  String get staffContractAddTitle => 'New contract';
+
+  @override
+  String get staffContractAddSubmit => 'Record the contract';
+
+  @override
+  String get staffContractCorrect => 'Correct';
+
+  @override
+  String get staffContractCorrectTitle => 'Correct a period';
+
+  @override
+  String get staffContractCorrectSubmit => 'Replace the period';
+
+  @override
+  String get staffContractCancelOnly => 'Cancel only';
+
+  @override
+  String get staffContractNoneYet =>
+      'No contract: this staff member has no contract yet.';
+
+  @override
+  String get staffContractCurrent => 'Current';
+
+  @override
+  String staffContractFrom(String from) {
+    return 'Since $from';
+  }
+
+  @override
+  String staffContractBetween(String from, String to) {
+    return 'From $from to $to';
+  }
+
+  @override
+  String staffContractRejected(String reason) {
+    return 'Rejected by the server: $reason';
+  }
+
+  @override
+  String get staffContractAmountRequired =>
+      'An amount is required for this contract.';
+
+  @override
+  String get staffContractAmountInvalid => 'Invalid amount.';
+
+  @override
+  String get staffContractSecopeRequired => 'The SECOPE number is required.';
+
+  @override
+  String get staffContractEndBeforeStart =>
+      'The end date is before the start date.';
+
+  @override
+  String get staffContractReasonRequired => 'Say what was wrong.';
+
+  @override
+  String get staffContractPermanentHint => 'School employee, paid monthly.';
+
+  @override
+  String get staffContractVacataireHint =>
+      'Paid by the hour or a monthly flat fee.';
+
+  @override
+  String get staffContractConventionneHint =>
+      'Paid by the State (SECOPE), with an optional local bonus.';
+
+  @override
+  String get staffContractSaved => 'Contract saved on the tablet.';
+
+  @override
+  String get staffContractSaveFailed => 'The contract could not be saved.';
+
+  @override
+  String get staffFieldPayMode => 'Pay mode';
+
+  @override
+  String get staffPayModeHourly => 'Hourly';
+
+  @override
+  String get staffPayModeFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldEffectiveFrom => 'Effective from';
+
+  @override
+  String get staffFieldEndsOn => 'Ends on (optional)';
+
+  @override
+  String get staffFieldSalary => 'Monthly salary';
+
+  @override
+  String get staffFieldHourlyRate => 'Hourly rate';
+
+  @override
+  String get staffFieldMonthlyFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldCurrency => 'Currency';
+
+  @override
+  String get staffFieldSecope => 'SECOPE number';
+
+  @override
+  String get staffFieldBonus => 'Local bonus (optional)';
+
+  @override
+  String get staffFieldCorrectionReason => 'Reason for the correction';
+
+  @override
+  String staffPaySalary(String amount) {
+    return 'Salary: $amount';
+  }
+
+  @override
+  String staffPayHourlyRate(String amount) {
+    return 'Hourly rate: $amount';
+  }
+
+  @override
+  String staffPayMonthlyFlat(String amount) {
+    return 'Flat fee: $amount';
+  }
+
+  @override
+  String staffPaySecope(String number) {
+    return 'SECOPE: $number';
+  }
+
+  @override
+  String staffPayBonus(String amount) {
+    return 'Bonus: $amount';
+  }
+
+  @override
+  String get staffBlockDossier => 'File documents';
+
+  @override
+  String get staffBlockDossierHint =>
+      'Those the contract requires, then the others';
+
+  @override
+  String get staffDossierUnknown =>
+      'The document list has not reached this tablet yet.';
+
+  @override
+  String get staffDocumentRequired => 'Required';
+
+  @override
+  String get staffDocumentOptional => 'Optional';
+
+  @override
+  String get staffDocumentMissing => 'To be filed';
+
+  @override
+  String staffDocumentFiled(String date) {
+    return 'Filed on $date';
+  }
+
+  @override
+  String staffDocumentRejected(String reason) {
+    return 'Rejected: $reason';
+  }
+
+  @override
+  String get staffDocumentWaitingMember =>
+      'Waiting for the staff record to be sent';
+
+  @override
+  String get staffDocumentPending => 'Waiting to be sent';
+
+  @override
+  String get staffDocumentView => 'View';
+
+  @override
+  String get staffDocumentAdd => 'File';
+
+  @override
+  String get staffDocumentReplace => 'Replace';
+
+  @override
+  String staffDocumentCaptureTitle(String label) {
+    return 'File: $label';
+  }
+
+  @override
+  String get staffDocumentSaved => 'Document saved on the tablet.';
+
+  @override
+  String get staffDocumentSaveFailed => 'The document could not be saved.';
+
+  @override
+  String get staffDocumentOpenFailed =>
+      'Document unavailable: it is not on this tablet and the server did not return it.';
+
+  @override
+  String get staffDocumentClose => 'Close';
+
+  @override
+  String get staffDocumentOpenOffline =>
+      'Offline: this document is not on the tablet yet.';
+
+  @override
+  String get staffDocumentOpenForbidden =>
+      'This account is not allowed to read this document.';
+
+  @override
+  String get staffDocumentOpenCorrupt =>
+      'The document received does not match its fingerprint: it is neither shown nor kept.';
+
+  @override
+  String get staffSaveNoSession => 'No open session: sign in again to save.';
+
+  @override
+  String get staffDossierLoading => 'Loading file documents';
+
+  @override
+  String get staffContractCancelConfirmTitle => 'Cancel this period?';
+
+  @override
+  String get staffContractCancelConfirmMessage =>
+      'It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.';
+
+  @override
+  String get staffContractCancelConfirmKeep => 'Go back';
+
+  @override
+  String get staffFileNotYetSynced =>
+      'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.';
 }

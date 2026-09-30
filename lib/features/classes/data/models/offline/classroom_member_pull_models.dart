@@ -4,7 +4,7 @@
 // change. Ressource **indépendante** du flux `classrooms` (curseur séparé).
 
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Mappe une liste serveur en **tolérant les lignes malformées** : une ligne
 /// dont le `fromJson` lève est ignorée au lieu de figer le curseur (anti

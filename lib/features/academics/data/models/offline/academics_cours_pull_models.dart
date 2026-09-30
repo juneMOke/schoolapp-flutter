@@ -3,7 +3,7 @@
 // Référence read-only : aucun régime d'écriture.
 
 import 'package:school_app_flutter/features/academics/data/models/offline/ref_cours_row.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Mappe une liste serveur en **tolérant les lignes malformées** (anti
 /// poison-page) : une ligne dont le `fromJson` lève est ignorée, le curseur

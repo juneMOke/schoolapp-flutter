@@ -2,12 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:path/path.dart' as p;
 import 'package:school_app_flutter/core/offline/id_generator.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_cipher.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
@@ -17,14 +18,17 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 
-class _FakeKeyService implements EditiqueCacheKeyService {
+class _FakeKeyService implements BlobKeyService {
+  @override
+  String get storageKey => AppConstants.editiqueCacheKeyStorageKey;
+
   final Uint8List bytes = Uint8List.fromList(
     List<int>.generate(32, (i) => i & 0xFF),
   );
 
   @override
-  Future<EditiqueCacheKey> getOrCreate() async =>
-      EditiqueCacheKey(bytes: bytes, createdNow: false);
+  Future<BlobKey> getOrCreate() async =>
+      BlobKey(bytes: bytes, createdNow: false);
 
   @override
   Future<void> destroy() async {}
@@ -70,9 +74,10 @@ void main() {
     cache = EditiqueDocumentCache(
       index: index,
       maintenance: EditiqueCacheMaintenanceDao(db),
-      store: EditiqueBlobStore(
+      store: EncryptedBlobStore(
+        directoryName: AppConstants.editiqueCacheDirectoryName,
         keyService: _FakeKeyService(),
-        cipher: runEditiqueCipherTask,
+        cipher: runBlobCipherTask,
         baseDirectory: () async => base,
       ),
       ids: _FakeIds(),
@@ -194,9 +199,10 @@ void main() {
       final serre = EditiqueDocumentCache(
         index: index,
         maintenance: EditiqueCacheMaintenanceDao(db),
-        store: EditiqueBlobStore(
+        store: EncryptedBlobStore(
+          directoryName: AppConstants.editiqueCacheDirectoryName,
           keyService: _FakeKeyService(),
-          cipher: runEditiqueCipherTask,
+          cipher: runBlobCipherTask,
           baseDirectory: () async => base,
         ),
         ids: _FakeIds(),
@@ -225,9 +231,10 @@ void main() {
       final serre = EditiqueDocumentCache(
         index: index,
         maintenance: EditiqueCacheMaintenanceDao(db),
-        store: EditiqueBlobStore(
+        store: EncryptedBlobStore(
+          directoryName: AppConstants.editiqueCacheDirectoryName,
           keyService: _FakeKeyService(),
-          cipher: runEditiqueCipherTask,
+          cipher: runBlobCipherTask,
           baseDirectory: () async => base,
         ),
         ids: _FakeIds(),

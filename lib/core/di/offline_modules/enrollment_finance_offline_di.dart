@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -468,6 +469,13 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // racine du bundle, et `enrollment` n'importe pas le module Dépenses.
       replaceExpenseTypes: (types, schoolId) =>
           getIt<ExpenseTypeDao>().replaceForSchool(types, schoolId: schoolId),
+      // Sixième seam, scopé ÉCOLE : les pièces du dossier RH descendent à la
+      // racine du bundle, et `enrollment` n'importe pas le module RH.
+      replaceStaffDocumentTypes: (types, schoolId) =>
+          getIt<StaffDocumentTypeDao>().replaceForSchool(
+            types,
+            schoolId: schoolId,
+          ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

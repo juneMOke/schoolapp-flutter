@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_chip.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_result_card.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -62,10 +62,10 @@ class EnrollmentResultCard extends StatelessWidget {
           ? AppColors.enrollmentStatsRe
           : _statusColor(status),
       semanticLabel: l10n.enrollmentResultCardOpenLabel(fullName, pillLabel),
-      avatar: core_avatar.StudentAvatar(
+      avatar: core_avatar.PersonAvatar(
         firstName: enrollment.student.firstName,
         lastName: enrollment.student.lastName,
-        studentId: enrollment.student.id,
+        personId: enrollment.student.id,
         size: core_avatar.AvatarSize.lg,
         variant: _avatarVariantForStatus(status),
       ),

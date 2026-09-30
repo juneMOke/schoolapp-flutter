@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_form_content.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
+import 'package:school_app_flutter/core/geo/address_geo_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/student_address_parts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';

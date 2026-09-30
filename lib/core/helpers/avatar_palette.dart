@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 ///
 /// La teinte sert d'identité visuelle ; elle ne porte aucune information
 /// fonctionnelle (WCAG 1.4.1). Le statut reste véhiculé par la variante de
-/// [StudentAvatar] (solid / outlined).
+/// [PersonAvatar] (solid / outlined).
 ///
 /// La teinte est **générée par hue** sur tout le cercle chromatique (variation
 /// maximale → très peu de collisions, contrairement à une petite palette fixe),

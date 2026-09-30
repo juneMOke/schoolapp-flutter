@@ -546,4 +546,32 @@ class AppDimensions {
   static const expenseFormAmountMaxWidth = 240.0;
   static const expenseFormFundingMinWidth = 200.0;
   static const expenseFormFundingMaxWidth = 280.0;
+
+  // ── Ressources humaines — fichier du personnel ──
+  /// Champ de recherche : il prend la place qui reste, jamais moins.
+  static const staffSearchMinWidth = 280.0;
+  static const staffSearchMaxWidth = 460.0;
+  static const staffCategoryWidth = 220.0;
+
+  /// Largeur plancher d'une carte d'agent dans la grille.
+  static const staffCardMinWidth = 290.0;
+
+  /// Hauteur d'une puce de filtre (zone de tap étendue à 44 par le padding).
+  static const staffFilterChipHeight = 40.0;
+
+  /// Hauteur plancher d'une ligne du tableau.
+  static const staffTableRowMinHeight = 60.0;
+
+  /// Largeur plafond du formulaire de la page agent : au-delà, les lignes de
+  /// champs s'étirent sans rien apporter.
+  static const staffAgentBodyMaxWidth = 960.0;
+
+  /// Largeur d'une tuile de statut dans le choix du contrat : trois tiennent
+  /// sur une ligne de tablette, elles passent à la ligne en portrait.
+  static const staffContractTileWidth = 240.0;
+
+  /// Filet d'une tuile de statut : plus épais que le filet courant, pour que
+  /// la tuile choisie se lise sans compter sur la couleur seule.
+  static const staffContractTileBorderWidth = 1.5;
+  static const staffContractTileIconSize = 18.0;
 }

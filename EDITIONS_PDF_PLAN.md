@@ -220,7 +220,7 @@ donc pas d'`AppLocalizations`.
 * `ReportPdfRenderer` : A4, en-tête répété sur chaque page, « page n / N »,
   pied **« État de gestion — ne fait pas foi · édité le {date} par {agent} »**.
 * Rendu **en isolate** : fonction top-level + `compute`, sur le modèle exact de
-  `editique_blob_cipher.dart:133`. Le modèle passé doit être plat — aucune
+  `editique_blob_cipher.dart:133` (devenu `core/storage/encrypted_blob/blob_cipher.dart`). Le modèle passé doit être plat — aucune
   poignée sqflite, aucun `BuildContext`.
 * Tests : le modèle, le découpage en sections, la présence du pied. Pas la
   rastérisation (canal de plateforme, invisible en test widget).

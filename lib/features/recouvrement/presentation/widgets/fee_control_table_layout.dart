@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -115,10 +115,10 @@ class FeeControlTableLayout {
             // un `enrollmentId` vide, qui ferait collisionner plusieurs lignes.
             id: student.id,
             displayName: '${student.lastName} ${student.firstName}',
-            leading: core_avatar.StudentAvatar(
+            leading: core_avatar.PersonAvatar(
               firstName: student.firstName,
               lastName: student.lastName,
-              studentId: student.id,
+              personId: student.id,
               size: core_avatar.AvatarSize.sm,
             ),
             onTap: () => onRowTapped(row),

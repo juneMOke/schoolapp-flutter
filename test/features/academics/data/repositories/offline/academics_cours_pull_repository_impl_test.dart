@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/models/offline/academics_cours_pull_models.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/offline/cours_pull_outcome.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 

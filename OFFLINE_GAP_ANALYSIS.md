@@ -373,7 +373,7 @@ pas comme quick-fix Phase 0.**
   bascule juste en lecture seule, sans badge) ; Finance fusionne
   **volontairement** les deux dans un badge neutre gris « En attente de
   synchro » (`local_finance_online_mappers.dart:44-45`,
-  `finance_pending_sync_badge.dart`) ; Classes et Attendances/Discipline
+  `finance_pending_sync_badge.dart`, devenu `core/components/status/pending_sync_badge.dart`) ; Classes et Attendances/Discipline
   n'ont **aucune** UI touchant `syncState` (grep vide). Aucune clé l10n type
   « échec de synchronisation » n'existe dans `app_fr.arb`. **Conclusion** : pas
   un blocage structurel absolu (le moteur n'interdit rien en soi), mais

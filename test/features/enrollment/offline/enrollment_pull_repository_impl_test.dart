@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/expense/local/expense_type_local_model.dart';
 import 'package:school_app_flutter/core/fees/local/fee_code_section_local_model.dart';
@@ -37,6 +38,8 @@ void main() {
   late List<String> capturedSectionSchoolIds;
   late List<ExpenseTypeLocalModel> capturedExpenseTypes;
   late List<String> capturedExpenseTypeSchoolIds;
+  late List<StaffDocumentTypeLocalModel> capturedStaffDocumentTypes;
+  late List<String> capturedStaffDocumentTypeSchoolIds;
 
   /// Les empreintes de logo passées au seam, cycle par cycle. Sert à prouver
   /// que le tirage est **appelé** — un lot entier peut être vert et inerte.
@@ -62,6 +65,8 @@ void main() {
     capturedSectionSchoolIds = [];
     capturedExpenseTypes = [];
     capturedExpenseTypeSchoolIds = [];
+    capturedStaffDocumentTypes = [];
+    capturedStaffDocumentTypeSchoolIds = [];
     syncedLogoRefs = [];
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
@@ -94,6 +99,10 @@ void main() {
       replaceExpenseTypes: (types, schoolId) async {
         capturedExpenseTypes.addAll(types);
         capturedExpenseTypeSchoolIds.add(schoolId);
+      },
+      replaceStaffDocumentTypes: (types, schoolId) async {
+        capturedStaffDocumentTypes.addAll(types);
+        capturedStaffDocumentTypeSchoolIds.add(schoolId);
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
@@ -151,6 +160,7 @@ void main() {
     RefLogoRefsDto? logoRefs,
     List<RefFeeCodeSectionDto>? feeCodeSections,
     List<RefExpenseTypeDto>? expenseTypes,
+    List<RefStaffDocumentTypeDto>? staffDocumentTypes,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     logoRefs: logoRefs,
@@ -186,6 +196,7 @@ void main() {
     reductions: reductions,
     feeCodeSections: feeCodeSections,
     expenseTypes: expenseTypes,
+    staffDocumentTypes: staffDocumentTypes,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -487,6 +498,59 @@ void main() {
     );
   });
 
+  group('les pièces du dossier RH (section `staffDocumentTypes`)', () {
+    test('section absente → le seam n\'est jamais appelé', () async {
+      when(
+        () => api.pullReferential(any()),
+      ).thenAnswer((_) async => httpOk(bundle()));
+
+      await repo.syncReferential();
+
+      expect(capturedStaffDocumentTypeSchoolIds, isEmpty);
+    });
+
+    test('pièces descendues → école de la SESSION, rang = POSITION', () async {
+      when(() => api.pullReferential(any())).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            staffDocumentTypes: const [
+              RefStaffDocumentTypeDto(
+                code: 'ID',
+                label: "Pièce d'identité",
+                alwaysRequired: true,
+                requiredFor: [],
+              ),
+              RefStaffDocumentTypeDto(
+                code: 'CT',
+                label: 'Contrat de travail',
+                alwaysRequired: false,
+                requiredFor: ['PERMANENT'],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await repo.syncReferential();
+
+      expect(capturedStaffDocumentTypeSchoolIds, ['school-1']);
+      expect(capturedStaffDocumentTypes.map((t) => t.code), ['ID', 'CT']);
+      expect(capturedStaffDocumentTypes.map((t) => t.sortOrder), [0, 1]);
+      expect(capturedStaffDocumentTypes.last.requiredFor, ['PERMANENT']);
+    });
+
+    test('une pièce sans code ni libellé est écartée, pas fatale', () {
+      final parsed = RefStaffDocumentTypeDto.listOrNull([
+        {'code': 'dp', 'label': 'Diplôme', 'alwaysRequired': true},
+        {'code': '', 'label': 'Sans code'},
+        'illisible',
+      ]);
+
+      expect(parsed?.map((t) => t.code), ['DP']);
+      expect(parsed?.single.requiredFor, isEmpty);
+    });
+  });
+
   group('le logo de l\'école', () {
     /// ⚠️ **La preuve que le fil EXISTE.** Le cache, le tirage, le décodeur et
     /// le renderer peuvent tous être verts sans que rien ne les appelle — c'est
@@ -541,6 +605,7 @@ void main() {
         replaceReductionCatalog: (_, _, _) async {},
         replaceFeeCodeSections: (_, _) async {},
         replaceExpenseTypes: (_, _) async {},
+        replaceStaffDocumentTypes: (_, _) async {},
         syncSchoolLogo: (_, _) async => throw StateError('route en panne'),
         syncMetaDao: syncMeta,
         requiredAuth: const {},
@@ -953,6 +1018,7 @@ void main() {
         replaceReductionCatalog: (_, _, _) async {},
         replaceFeeCodeSections: (_, _) async {},
         replaceExpenseTypes: (_, _) async {},
+        replaceStaffDocumentTypes: (_, _) async {},
         syncSchoolLogo: (_, _) async {},
         syncMetaDao: syncMeta,
         requiredAuth: auth,
@@ -1385,6 +1451,7 @@ void main() {
           replaceReductionCatalog: (_, _, _) async {},
           replaceFeeCodeSections: (_, _) async {},
           replaceExpenseTypes: (_, _) async {},
+          replaceStaffDocumentTypes: (_, _) async {},
           syncSchoolLogo: (_, _) async {},
           syncMetaDao: syncMeta,
           requiredAuth: auth,

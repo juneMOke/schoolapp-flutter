@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/core/helpers/client_side_paginator.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_summary_mapper.dart';
@@ -192,7 +192,7 @@ class EnrollmentLocalListProjector {
   /// de l'ordre `updated_at DESC` du DAO. Seule la **sortie** s'ordonne.
   static List<EnrollmentSummary> sortByName(List<EnrollmentSummary> summaries) {
     return [...summaries]..sort(
-      StudentNameComparator.by<EnrollmentSummary>(
+      PersonNameComparator.by<EnrollmentSummary>(
         lastName: (s) => s.student.lastName,
         surname: (s) => s.student.surname,
         firstName: (s) => s.student.firstName,

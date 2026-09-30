@@ -7,7 +7,7 @@
 library;
 
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Une pièce scellée telle que le serveur la décrit — métadonnées seules.
 class PulledEditiqueDocument {

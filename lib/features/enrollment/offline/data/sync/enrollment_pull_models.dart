@@ -3,7 +3,7 @@
 // réinscription / préinscriptions / delta / snapshots hydratants) + l'enveloppe
 // keyset partagée (ADR-008/009).
 export 'enrollment_delta_pull_models.dart';
-export 'keyset_page.dart';
+export 'package:school_app_flutter/core/offline/keyset_page.dart';
 export 'enrollment_snapshot_pull_models.dart';
 export 'pre_enrollment_pull_models.dart';
 export 'reenrollment_cohort_pull_models.dart';

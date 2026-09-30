@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/academics_metier_pull_models.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/offline/academics_delta_pull_outcome.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Préfixes `sync_meta` (curseur + bootstrap) **par cours** des deux ressources
 /// métier — clés effectives `academics_evaluations:{coursId}` et

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -124,10 +124,10 @@ class _ClassesOrganisationMemberTileState
           opacity: dimmed ? 0.65 : 1,
           child: Row(
             children: [
-              StudentAvatar(
+              PersonAvatar(
                 firstName: widget.member.studentFirstName,
                 lastName: widget.member.studentLastName,
-                studentId: widget.member.studentId,
+                personId: widget.member.studentId,
                 size: AvatarSize.md,
               ),
               const SizedBox(width: AppDimensions.spacingS),

@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/offline/owner_scope.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/models/offline/schedule_pull_models.dart';

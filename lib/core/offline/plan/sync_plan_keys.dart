@@ -133,6 +133,19 @@ abstract final class SyncPlanKeys {
   /// finance.exchange-rates`) : sans taux, les totaux se replient sur les
   /// montants par devise.
   static const String expenseExpenses = 'expense.expenses';
+
+  /// Le fichier du personnel : les fiches et la frise des contrats **sans
+  /// montants** (`hr.staff.read`). Entraînable — le Pointage le lira.
+  static const String hrStaffMembers = 'hr.staff-members';
+
+  /// Les contrats **avec** leurs montants (`hr.pay.read`). **Jamais
+  /// entraîné** : un montant ne descend qu'à qui a le droit de le lire en
+  /// propre.
+  static const String hrStaffContracts = 'hr.staff-contracts';
+
+  /// Les métadonnées des pièces des dossiers (`hr.document.read`). **Jamais
+  /// entraîné**, pour la même raison que les montants.
+  static const String hrStaffDocuments = 'hr.staff-documents';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -165,6 +178,9 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.editiqueDocuments: ['editique_documents'],
   SyncPlanKeys.boutiqueSales: ['boutique_sales'],
   SyncPlanKeys.expenseExpenses: ['expenses'],
+  SyncPlanKeys.hrStaffMembers: ['staff_members'],
+  SyncPlanKeys.hrStaffContracts: ['staff_contracts'],
+  SyncPlanKeys.hrStaffDocuments: ['staff_documents'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -260,5 +276,9 @@ const Set<String> _kCursorKeyPrefixes = {
   'boutique_sales',
   // Même raison : le registre est cadré par l'école du jeton.
   'expenses',
+  // Les trois flux du fichier du personnel, cadrés par l'école du jeton.
+  'staff_members',
+  'staff_contracts',
+  'staff_documents',
   'enrollment_reenrollment_cohort',
 };

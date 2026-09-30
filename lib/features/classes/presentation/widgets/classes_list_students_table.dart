@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
-import 'package:school_app_flutter/core/helpers/student_name_comparator.dart';
+import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -219,10 +219,10 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
           (row) => DataTableRowSpec(
             id: row.id,
             displayName: '${row.lastName} ${row.firstName}',
-            leading: core_avatar.StudentAvatar(
+            leading: core_avatar.PersonAvatar(
               firstName: row.firstName,
               lastName: row.lastName,
-              studentId: row.studentId,
+              personId: row.studentId,
               size: core_avatar.AvatarSize.sm,
             ),
             cells: [
@@ -282,7 +282,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
   Comparator<ClassesListStudentRow> _comparatorFor(
     _ClassesListSortColumn column,
   ) {
-    final identity = StudentNameComparator.by<ClassesListStudentRow>(
+    final identity = PersonNameComparator.by<ClassesListStudentRow>(
       lastName: (row) => row.lastName,
       surname: (row) => row.surname,
       firstName: (row) => row.firstName,
@@ -292,7 +292,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
       return identity;
     }
     return (left, right) {
-      final byLeading = StudentNameComparator.comparePart(
+      final byLeading = PersonNameComparator.comparePart(
         _leadingValue(left, column),
         _leadingValue(right, column),
       );

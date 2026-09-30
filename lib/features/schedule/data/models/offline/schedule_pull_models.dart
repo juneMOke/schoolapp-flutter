@@ -3,7 +3,7 @@
 // keyset (ADR-008/009). Réponses serveur (fromJson) → lignes locales SYNCED à
 // l'application. Référence read-only : aucun régime d'écriture.
 
-import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/schedule/data/models/offline/ref_recurring_session_row.dart';
 import 'package:school_app_flutter/features/schedule/data/models/offline/ref_time_slot_row.dart';
 

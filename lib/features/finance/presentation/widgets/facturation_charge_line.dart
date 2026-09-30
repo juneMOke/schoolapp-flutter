@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/finance/presentation/helpers/student
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_progress_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
+import 'package:school_app_flutter/core/components/status/pending_sync_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne de frais de l'élève (spec §11).
@@ -111,7 +111,7 @@ class FacturationChargeLine extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacingS),
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: FinancePendingSyncBadge(),
+                  child: PendingSyncBadge(),
                 ),
               ],
             ],

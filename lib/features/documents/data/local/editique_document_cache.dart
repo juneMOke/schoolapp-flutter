@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 ///
 /// Les briques qu'il assemble savent chacune une chose et l'ignorent des
 /// autres : [EditiqueCacheDao] retrouve et mesure, [EditiqueCacheMaintenanceDao]
-/// retire, [EditiqueBlobStore] scelle et relit, [EditiqueCacheEvictionPolicy]
+/// retire, [EncryptedBlobStore] scelle et relit, [EditiqueCacheEvictionPolicy]
 /// décide. Ce que personne d'autre ne peut tenir, et qui est donc ici :
 ///
 ///  - **l'ordre d'effacement** — le fichier d'abord, la ligne ensuite. Une
@@ -61,7 +61,7 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 class EditiqueDocumentCache {
   final EditiqueCacheDao _index;
   final EditiqueCacheMaintenanceDao _maintenance;
-  final EditiqueBlobStore _store;
+  final EncryptedBlobStore _store;
   final EditiqueCacheEvictionPolicy _policy;
   final IdGenerator _ids;
   final EditiqueCacheAccess _access;
@@ -73,7 +73,7 @@ class EditiqueDocumentCache {
   EditiqueDocumentCache({
     required EditiqueCacheDao index,
     required EditiqueCacheMaintenanceDao maintenance,
-    required EditiqueBlobStore store,
+    required EncryptedBlobStore store,
     required IdGenerator ids,
     required EditiqueCacheAccess access,
     EditiqueCacheEvictionPolicy policy = const EditiqueCacheEvictionPolicy(),
@@ -324,13 +324,13 @@ class EditiqueDocumentCache {
         // Panne passagère : on n'a rien appris sur la pièce, donc on ne touche
         // à rien. Retomber en ligne est le bon comportement ; détruire ne
         // l'est pas.
-        case EditiqueBlobUnavailable():
+        case BlobUnavailable():
           return null;
 
-        case EditiqueBlobGone():
+        case BlobGone():
           return _forgetIfStillStale(locate);
 
-        case EditiqueBlobFound(:final blob):
+        case BlobFound(:final blob):
           // L'empreinte est la seule chose qui distingue « les octets décrits
           // par cette ligne » de « des octets valides écrits sous ce nom » —
           // le cas d'une écriture concurrente qui a remplacé le fichier avant
@@ -365,16 +365,15 @@ class EditiqueDocumentCache {
 
       final read = await _store.read(entry.id);
       switch (read) {
-        case EditiqueBlobUnavailable():
+        case BlobUnavailable():
           return null;
-        case EditiqueBlobFound(:final blob)
-            when blob.sha256Hex == entry.contentSha256:
+        case BlobFound(:final blob) when blob.sha256Hex == entry.contentSha256:
           // L'écriture concurrente est terminée et tout concorde : il n'y a
           // rien à oublier, et la pièce est due à l'appelant.
           await _touchQuietly(entry.id);
           return blob.bytes;
-        case EditiqueBlobFound():
-        case EditiqueBlobGone():
+        case BlobFound():
+        case BlobGone():
           // Fichier d'abord, octets de l'index ensuite : une ligne sans
           // fichier se retélécharge, un fichier sans ligne n'est réclamé par
           // personne. Et si le fichier résiste, l'index garde ses octets — ils

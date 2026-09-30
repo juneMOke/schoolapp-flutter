@@ -36,6 +36,7 @@ class AccueilModulesFactory {
       _feeControl(l10n),
       _boutique(l10n),
       _expenses(l10n),
+      _humanResources(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
@@ -227,6 +228,25 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.expenseQueueId,
           title: l10n.subMenuExpenseQueue,
+        ),
+      ],
+    );
+  }
+
+  /// Les ressources humaines — une carte propre, comme le menu.
+  static AccueilModule _humanResources(AppLocalizations l10n) {
+    const menuId = MenuConstants.hrMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuHumanResources,
+      description: l10n.accueilModuleHumanResourcesDescription,
+      icon: Icons.badge_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrStaffFileId,
+          title: l10n.subMenuStaffFile,
         ),
       ],
     );

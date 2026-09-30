@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -263,10 +263,10 @@ class _Identity extends StatelessWidget {
 
     return Row(
       children: [
-        StudentAvatar(
+        PersonAvatar(
           firstName: row.studentFirstName,
           lastName: row.studentLastName,
-          studentId: row.studentId,
+          personId: row.studentId,
         ),
         const SizedBox(width: AppDimensions.spacingM),
         Expanded(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -404,10 +404,10 @@ class _ReleveRow extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
           ],
-          StudentAvatar(
+          PersonAvatar(
             firstName: eleve.firstName,
             lastName: eleve.lastName,
-            studentId: eleve.studentId,
+            personId: eleve.studentId,
             size: 30,
           ),
           const SizedBox(width: AppSpacing.sm),

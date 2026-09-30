@@ -3,7 +3,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
-import 'package:school_app_flutter/features/expense/presentation/helpers/expense_amount_input.dart';
+import 'package:school_app_flutter/core/money/amount_input.dart';
 
 /// Les trois cas du formulaire (spec §7), distingués par la présence d'un id.
 enum ExpenseFormMode { create, edit, duplicate }
@@ -67,7 +67,7 @@ class ExpenseFormSeed {
     typeId: expense.typeId,
     title: expense.title,
     description: expense.description ?? '',
-    amountText: ExpenseAmountInput.fromCents(expense.amountInCents),
+    amountText: AmountInput.fromCents(expense.amountInCents),
     currency: expense.currency,
     expenseDate: expense.expenseDate,
     supplier: expense.supplier ?? '',
@@ -87,7 +87,7 @@ class ExpenseFormSeed {
     typeId: expense.typeId,
     title: expense.title,
     description: expense.description ?? '',
-    amountText: ExpenseAmountInput.fromCents(expense.amountInCents),
+    amountText: AmountInput.fromCents(expense.amountInCents),
     currency: expense.currency,
     expenseDate: ExpenseDay.of(today),
     supplier: expense.supplier ?? '',

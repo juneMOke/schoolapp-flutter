@@ -3,12 +3,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:path/path.dart' as p;
 import 'package:school_app_flutter/core/offline/id_generator.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_cipher.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
-import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
@@ -18,7 +19,10 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 
-class _FakeKeyService implements EditiqueCacheKeyService {
+class _FakeKeyService implements BlobKeyService {
+  @override
+  String get storageKey => AppConstants.editiqueCacheKeyStorageKey;
+
   final Uint8List bytes = Uint8List.fromList(
     List<int>.generate(32, (i) => i & 0xFF),
   );
@@ -26,9 +30,9 @@ class _FakeKeyService implements EditiqueCacheKeyService {
   int reads = 0;
 
   @override
-  Future<EditiqueCacheKey> getOrCreate() async {
+  Future<BlobKey> getOrCreate() async {
     reads++;
-    return EditiqueCacheKey(bytes: bytes, createdNow: false);
+    return BlobKey(bytes: bytes, createdNow: false);
   }
 
   @override
@@ -88,9 +92,10 @@ class _DaoALaTraine extends EditiqueCacheDao {
 
 /// Magasin dont on choisit les réponses : une panne passagère et un fichier qui
 /// refuse de partir ne se provoquent pas autrement.
-class _MagasinRetif extends EditiqueBlobStore {
+class _MagasinRetif extends EncryptedBlobStore {
   _MagasinRetif({
     required super.keyService,
+    super.directoryName = AppConstants.editiqueCacheDirectoryName,
     required super.cipher,
     required super.baseDirectory,
     this.lectureIndisponible = false,
@@ -105,9 +110,9 @@ class _MagasinRetif extends EditiqueBlobStore {
   final Completer<void> premiereLecture = Completer<void>();
 
   @override
-  Future<EditiqueBlobRead> read(String id) async {
+  Future<BlobRead> read(String id) async {
     final result = lectureIndisponible
-        ? const EditiqueBlobUnavailable()
+        ? const BlobUnavailable()
         : await super.read(id);
     if (!premiereLecture.isCompleted) premiereLecture.complete();
     return result;
@@ -149,17 +154,18 @@ void main() {
 
   EditiqueDocumentCache cacheWith({
     EditiqueCacheEvictionPolicy? policy,
-    EditiqueCipherOffloader? cipher,
+    BlobCipherOffloader? cipher,
     EditiqueCacheDao? index,
-    EditiqueBlobStore? store,
+    EncryptedBlobStore? store,
   }) => EditiqueDocumentCache(
     index: index ?? EditiqueCacheDao(db),
     maintenance: EditiqueCacheMaintenanceDao(db),
     store:
         store ??
-        EditiqueBlobStore(
+        EncryptedBlobStore(
+          directoryName: AppConstants.editiqueCacheDirectoryName,
           keyService: keys,
-          cipher: cipher ?? runEditiqueCipherTask,
+          cipher: cipher ?? runBlobCipherTask,
           baseDirectory: () async => base,
         ),
     ids: ids,
@@ -173,7 +179,7 @@ void main() {
     bool effacementImpossible = false,
   }) => _MagasinRetif(
     keyService: keys,
-    cipher: runEditiqueCipherTask,
+    cipher: runBlobCipherTask,
     baseDirectory: () async => base,
     lectureIndisponible: lectureIndisponible,
     effacementImpossible: effacementImpossible,
@@ -259,7 +265,7 @@ void main() {
         final cache = cacheWith(
           cipher: (request) {
             scellements++;
-            return runEditiqueCipherTask(request);
+            return runBlobCipherTask(request);
           },
         );
 
@@ -288,7 +294,7 @@ void main() {
       final cache = cacheWith(
         cipher: (request) {
           scellements++;
-          return runEditiqueCipherTask(request);
+          return runBlobCipherTask(request);
         },
       );
 
@@ -374,7 +380,7 @@ void main() {
 
     test('un magasin en panne ne fait pas échouer l appelant', () async {
       final cache = cacheWith(
-        cipher: (_) async => throw const EditiqueCipherException('disque'),
+        cipher: (_) async => throw const BlobCipherException('disque'),
       );
 
       expect(await putReceipt(cache), isNull);
@@ -818,7 +824,7 @@ void main() {
           maximum = enCours > maximum ? enCours : maximum;
           await Future<void>.delayed(const Duration(milliseconds: 5));
           enCours--;
-          return runEditiqueCipherTask(request);
+          return runBlobCipherTask(request);
         },
       );
 
@@ -914,9 +920,9 @@ void main() {
         cipher: (request) async {
           if (premiere) {
             premiere = false;
-            throw const EditiqueCipherException('panne');
+            throw const BlobCipherException('panne');
           }
-          return runEditiqueCipherTask(request);
+          return runBlobCipherTask(request);
         },
       );
 

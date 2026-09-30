@@ -6237,11 +6237,11 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get facturationBalanceUpToDatePill;
 
-  /// Badge on a charge/payment whose local collection has not yet synced to the server.
+  /// Badge on an item written on this device and not yet synced to the server (charge, payment, record…).
   ///
   /// In en, this message translates to:
   /// **'Pending sync'**
-  String get financePendingSyncBadge;
+  String get pendingSyncBadge;
 
   /// Freshness (ADR-002): timestamp of the last ledger refresh.
   ///
@@ -17842,6 +17842,1272 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Print the ticket'**
   String get facturationPaymentPrintTicketPrimary;
+
+  /// Action: photograph the document with the camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get documentCaptureScan;
+
+  /// Subtitle of the Scan action.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the document with the camera'**
+  String get documentCaptureScanHint;
+
+  /// Action: choose an image already on the tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a photo'**
+  String get documentCaptureImportImage;
+
+  /// Subtitle of the Import a photo action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an image already on the tablet'**
+  String get documentCaptureImportImageHint;
+
+  /// Action: choose a PDF already on the tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a PDF'**
+  String get documentCaptureImportPdf;
+
+  /// Subtitle of the Import a PDF action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PDF already on the tablet'**
+  String get documentCaptureImportPdfHint;
+
+  /// Accepted types and maximum size, shown when choosing a document.
+  ///
+  /// In en, this message translates to:
+  /// **'JPEG, PNG or PDF · {maxMegabytes} MB max'**
+  String documentCaptureLimits(int maxMegabytes);
+
+  /// Camera denied or missing: only the import actions remain.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera is not available on this tablet. Import a file instead.'**
+  String get documentCaptureCameraUnavailable;
+
+  /// Document rejected: too large.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is larger than {maxMegabytes} MB. Choose a lighter one.'**
+  String documentCaptureTooLarge(int maxMegabytes);
+
+  /// Document rejected: type not accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Only JPEG, PNG and PDF files are accepted.'**
+  String get documentCaptureUnsupported;
+
+  /// The platform did not return the file.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read. Try again.'**
+  String get documentCaptureReadError;
+
+  /// Menu of the Human resources module.
+  ///
+  /// In en, this message translates to:
+  /// **'Human resources'**
+  String get menuHumanResources;
+
+  /// Sub-menu: the school's central staff file.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff file'**
+  String get subMenuStaffFile;
+
+  /// Description of the Human resources card on the home page.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file: the school\'s staff, their contract and their records.'**
+  String get accueilModuleHumanResourcesDescription;
+
+  /// Surtitre de la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Human resources'**
+  String get staffFileEyebrow;
+
+  /// Titre de la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff file'**
+  String get staffFileTitle;
+
+  /// Sous-titre de la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who works at the school: teachers, administrative and support staff.'**
+  String get staffFileSubtitle;
+
+  /// Carte de synthèse : nombre d'agents au fichier.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get staffStatHeadcount;
+
+  /// Sous-ligne de l'effectif : agents « contrat à poser ».
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without a current contract'**
+  String staffStatHeadcountNoContract(int count);
+
+  /// Carte de synthèse : agents à qui manquent des pièces exigées.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete files'**
+  String get staffStatIncomplete;
+
+  /// Sous-ligne des dossiers incomplets.
+  ///
+  /// In en, this message translates to:
+  /// **'Required documents missing'**
+  String get staffStatIncompleteSub;
+
+  /// Carte de synthèse : fiches et pièces pas encore envoyées.
+  ///
+  /// In en, this message translates to:
+  /// **'On this tablet'**
+  String get staffStatPending;
+
+  /// Sous-ligne de la carte « Sur la tablette ».
+  ///
+  /// In en, this message translates to:
+  /// **'Will be sent when the network is back'**
+  String get staffStatPendingSub;
+
+  /// Libellé du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get staffSearchLabel;
+
+  /// Indice du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, middle name, first name, staff number or job'**
+  String get staffSearchPlaceholder;
+
+  /// Libellé du filtre de catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get staffCategoryLabel;
+
+  /// Filtre de catégorie : aucune restriction.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get staffCategoryAll;
+
+  /// Catégorie d'agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get staffCategoryTeacher;
+
+  /// Catégorie d'agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get staffCategoryAdministrative;
+
+  /// Catégorie d'agent : personnel d'appui.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get staffCategorySupport;
+
+  /// Libellé de la bascule cartes/liste.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get staffViewLabel;
+
+  /// Affichage en grille de cartes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get staffViewGrid;
+
+  /// Affichage en tableau.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get staffViewList;
+
+  /// Libellé des filtres et de la colonne de contrat.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get staffContractLabel;
+
+  /// Filtre de contrat : aucune restriction.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get staffContractAll;
+
+  /// Statut de contrat : salarié de l'école.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent'**
+  String get staffContractPermanent;
+
+  /// Statut de contrat : payé aux heures ou au forfait.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time'**
+  String get staffContractVacataire;
+
+  /// Statut de contrat : pris en charge par l'État (SECOPE).
+  ///
+  /// In en, this message translates to:
+  /// **'State-paid'**
+  String get staffContractConventionne;
+
+  /// Agent sans contrat en vigueur.
+  ///
+  /// In en, this message translates to:
+  /// **'No contract yet'**
+  String get staffContractNone;
+
+  /// Filtre : agents dont le dossier est incomplet.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete file'**
+  String get staffIncompleteFilter;
+
+  /// Jauge du dossier : toutes les pièces exigées sont versées.
+  ///
+  /// In en, this message translates to:
+  /// **'File complete'**
+  String get staffDossierComplete;
+
+  /// Jauge du dossier : pièces versées sur pièces exigées.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} documents'**
+  String staffDossierProgress(int done, int total);
+
+  /// Matricule pas encore attribué par le serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff number pending'**
+  String get staffNumberPending;
+
+  /// État de synchronisation : au serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get staffSyncSynced;
+
+  /// État de synchronisation : pas encore envoyé.
+  ///
+  /// In en, this message translates to:
+  /// **'On this tablet'**
+  String get staffSyncPending;
+
+  /// État de synchronisation : refusé par le serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent'**
+  String get staffSyncFailed;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member'**
+  String get staffTableAgent;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffTableJob;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get staffTableDossier;
+
+  /// En-tête de colonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get staffTableSync;
+
+  /// Pied de la liste : effectif total du fichier.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No staff in the file} =1{1 staff member in the file} other{{count} staff members in the file}}'**
+  String staffFooterCount(int count);
+
+  /// Vide : le fichier ne compte aucun agent.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff in the file'**
+  String get staffEmptyFileTitle;
+
+  /// Explication du fichier vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff will appear here as soon as they are recorded.'**
+  String get staffEmptyFileMessage;
+
+  /// Vide : aucun agent ne passe les filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff member found'**
+  String get staffEmptySearchTitle;
+
+  /// Explication du vide de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff member matches these filters.'**
+  String get staffEmptySearchMessage;
+
+  /// Action : retirer tous les filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get staffResetFilters;
+
+  /// Erreur : fichier jamais téléchargé et réseau absent.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get staffErrorNetworkTitle;
+
+  /// Explication : sans premier téléchargement, rien à montrer hors ligne.
+  ///
+  /// In en, this message translates to:
+  /// **'The network is unavailable. Try again once connected.'**
+  String get staffErrorNetwork;
+
+  /// Erreur : base locale illisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read the file'**
+  String get staffErrorStorageTitle;
+
+  /// Explication de l'erreur de lecture locale.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file could not be read on this tablet. Try again; if it keeps failing, contact support.'**
+  String get staffErrorStorage;
+
+  /// Erreur 403.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get staffErrorForbiddenTitle;
+
+  /// Explication de l'erreur 403.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile does not allow you to view staff records.'**
+  String get staffErrorForbidden;
+
+  /// Erreur 401.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get staffErrorUnauthorizedTitle;
+
+  /// Explication de l'erreur 401.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline entries stay on this tablet; sign in again to send them.'**
+  String get staffErrorUnauthorized;
+
+  /// Action : relancer le téléchargement ou la lecture.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get staffErrorRetry;
+
+  /// Action : retour à la connexion.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get staffErrorReconnect;
+
+  /// Code à transmettre au support.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String staffErrorIncidentCode(String code);
+
+  /// Titre de la page agent en création, avant saisie du nom.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member'**
+  String get staffAgentNew;
+
+  /// Surtitre de la page agent en création.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member · step {step} of {total}'**
+  String staffAgentStepEyebrow(int step, int total);
+
+  /// Surtitre de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing the profile'**
+  String get staffAgentEditEyebrow;
+
+  /// Étape 1 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity & contacts'**
+  String get staffStepIdentity;
+
+  /// Étape 2 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get staffStepAddress;
+
+  /// Étape 3 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Job & contract'**
+  String get staffStepJob;
+
+  /// Étape 4 de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Diplomas & documents'**
+  String get staffStepDocuments;
+
+  /// Bloc de l'étape 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification'**
+  String get staffBlockIdentification;
+
+  /// Sous-titre du bloc Identification.
+  ///
+  /// In en, this message translates to:
+  /// **'As written on the identity document'**
+  String get staffBlockIdentificationHint;
+
+  /// Bloc de l'étape 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts'**
+  String get staffBlockContacts;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get staffFieldLastName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get staffFieldMiddleName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get staffFieldFirstName;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Sex'**
+  String get staffFieldSex;
+
+  /// Valeur du champ Sexe.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get staffSexMale;
+
+  /// Valeur du champ Sexe.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get staffSexFemale;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get staffFieldBirthDate;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get staffFieldPhone;
+
+  /// Champ de la fiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get staffFieldEmail;
+
+  /// Champ de la fiche, en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff number'**
+  String get staffFieldStaffNumber;
+
+  /// Bloc de l'étape 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Home address'**
+  String get staffBlockAddress;
+
+  /// Sous-titre du bloc Adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'District, municipality then neighbourhood — the postcode follows'**
+  String get staffBlockAddressHint;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get staffFieldCity;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get staffFieldDistrict;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Municipality'**
+  String get staffFieldMunicipality;
+
+  /// Champ de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighbourhood'**
+  String get staffFieldNeighborhood;
+
+  /// Champ libre de l'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Address details'**
+  String get staffFieldAddress;
+
+  /// Indice du complément d'adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Number and street, landmark…'**
+  String get staffFieldAddressPlaceholder;
+
+  /// Commune désactivée tant que le district est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a district first'**
+  String get staffPickDistrictFirst;
+
+  /// Quartier désactivé tant que la commune est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a municipality first'**
+  String get staffPickMunicipalityFirst;
+
+  /// Bloc de l'étape 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffBlockJob;
+
+  /// Sous-titre du bloc Poste.
+  ///
+  /// In en, this message translates to:
+  /// **'What the staff member does at the school'**
+  String get staffBlockJobHint;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get staffFieldCategory;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get staffFieldJob;
+
+  /// Fonction désactivée tant que la catégorie est vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category first'**
+  String get staffPickCategoryFirst;
+
+  /// Champ du poste.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get staffFieldEntryDate;
+
+  /// Ancienneté calculée depuis la date d'entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'{years, plural, =0{Less than a year of service} =1{1 year of service} other{{years} years of service}}'**
+  String staffSeniority(int years);
+
+  /// Matières qu'un enseignant déclare.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get staffFieldBranches;
+
+  /// Champ d'ajout d'une matière.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a subject'**
+  String get staffBranchAdd;
+
+  /// Indice du champ matière.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Mathematics'**
+  String get staffBranchPlaceholder;
+
+  /// Bouton d'ajout d'une matière.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get staffBranchAddAction;
+
+  /// Valeur absente en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get staffValueNotSet;
+
+  /// Bloc de l'étape 4.
+  ///
+  /// In en, this message translates to:
+  /// **'Diplomas'**
+  String get staffBlockDiplomas;
+
+  /// Sous-titre du bloc Diplômes.
+  ///
+  /// In en, this message translates to:
+  /// **'From the highest to the oldest'**
+  String get staffBlockDiplomasHint;
+
+  /// Sous-titre du bloc Diplômes en création.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional now — the file can be completed later'**
+  String get staffBlockDiplomasCreateHint;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get staffFieldDiplomaLevel;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get staffFieldDiplomaTitle;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution'**
+  String get staffFieldDiplomaInstitution;
+
+  /// Champ d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get staffFieldDiplomaYear;
+
+  /// Action du bloc Diplômes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a diploma'**
+  String get staffDiplomaAdd;
+
+  /// Info-bulle de la corbeille d'un diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this diploma'**
+  String get staffDiplomaRemove;
+
+  /// Consultation sans diplôme.
+  ///
+  /// In en, this message translates to:
+  /// **'No diploma recorded'**
+  String get staffDiplomasNone;
+
+  /// Erreur de champ.
+  ///
+  /// In en, this message translates to:
+  /// **'Required field'**
+  String get staffFieldRequired;
+
+  /// Erreur du champ téléphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete number (+243 and 9 digits)'**
+  String get staffFieldPhoneIncomplete;
+
+  /// Erreur du champ e-mail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get staffFieldEmailInvalid;
+
+  /// Erreur d'une date.
+  ///
+  /// In en, this message translates to:
+  /// **'The date cannot be in the future'**
+  String get staffFieldDateInFuture;
+
+  /// Erreur d'un diplôme à moitié rempli.
+  ///
+  /// In en, this message translates to:
+  /// **'A diploma needs a level and a title'**
+  String get staffFieldDiplomaIncomplete;
+
+  /// Avertissement non bloquant d'homonymie.
+  ///
+  /// In en, this message translates to:
+  /// **'A staff member already has this full name — check it is not a duplicate.'**
+  String get staffDuplicateWarning;
+
+  /// Bandeau d'erreurs d'une étape.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field to fix} other{{count} fields to fix}}'**
+  String staffErrorsToFix(int count);
+
+  /// Pied de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get staffActionPrevious;
+
+  /// Pied de la page agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get staffActionNext;
+
+  /// Pied de la page agent, dernière étape de création.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the staff member'**
+  String get staffActionCreate;
+
+  /// Pied de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get staffActionCancel;
+
+  /// Pied de la page agent en modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get staffActionSave;
+
+  /// Bandeau de la page agent en consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get staffActionEdit;
+
+  /// Info-bulle du bouton retour.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get staffActionBack;
+
+  /// Bouton de création d'un agent.
+  ///
+  /// In en, this message translates to:
+  /// **'New staff member'**
+  String get staffActionNewAgent;
+
+  /// Action du fichier vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first staff member'**
+  String get staffActionAddFirst;
+
+  /// Action du vide de recherche : crée un agent au nom cherché.
+  ///
+  /// In en, this message translates to:
+  /// **'Create this staff member'**
+  String get staffActionCreateFromSearch;
+
+  /// Toast après création.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to the file'**
+  String staffSavedCreated(String name);
+
+  /// Toast après modification.
+  ///
+  /// In en, this message translates to:
+  /// **'Record updated'**
+  String get staffSavedUpdated;
+
+  /// Échec d'écriture locale.
+  ///
+  /// In en, this message translates to:
+  /// **'The record could not be saved on this tablet. Try again.'**
+  String get staffSaveError;
+
+  /// Titre de la confirmation d'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your changes?'**
+  String get staffDiscardTitle;
+
+  /// Message de la confirmation d'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'The changes to this record will be lost.'**
+  String get staffDiscardMessage;
+
+  /// Confirmer l'abandon.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get staffDiscardConfirm;
+
+  /// Revenir à la saisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get staffDiscardKeep;
+
+  /// No description provided for @staffBlockContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get staffBlockContract;
+
+  /// No description provided for @staffBlockContractHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated periods: a new contract takes effect on a date, without rewriting the previous one.'**
+  String get staffBlockContractHint;
+
+  /// No description provided for @staffContractAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'New contract'**
+  String get staffContractAdd;
+
+  /// No description provided for @staffContractAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New contract'**
+  String get staffContractAddTitle;
+
+  /// No description provided for @staffContractAddSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the contract'**
+  String get staffContractAddSubmit;
+
+  /// No description provided for @staffContractCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get staffContractCorrect;
+
+  /// No description provided for @staffContractCorrectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct a period'**
+  String get staffContractCorrectTitle;
+
+  /// No description provided for @staffContractCorrectSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the period'**
+  String get staffContractCorrectSubmit;
+
+  /// No description provided for @staffContractCancelOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel only'**
+  String get staffContractCancelOnly;
+
+  /// No description provided for @staffContractNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No contract: this staff member has no contract yet.'**
+  String get staffContractNoneYet;
+
+  /// No description provided for @staffContractCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get staffContractCurrent;
+
+  /// No description provided for @staffContractFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {from}'**
+  String staffContractFrom(String from);
+
+  /// No description provided for @staffContractBetween.
+  ///
+  /// In en, this message translates to:
+  /// **'From {from} to {to}'**
+  String staffContractBetween(String from, String to);
+
+  /// No description provided for @staffContractRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server: {reason}'**
+  String staffContractRejected(String reason);
+
+  /// No description provided for @staffContractAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'An amount is required for this contract.'**
+  String get staffContractAmountRequired;
+
+  /// No description provided for @staffContractAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount.'**
+  String get staffContractAmountInvalid;
+
+  /// No description provided for @staffContractSecopeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The SECOPE number is required.'**
+  String get staffContractSecopeRequired;
+
+  /// No description provided for @staffContractEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The end date is before the start date.'**
+  String get staffContractEndBeforeStart;
+
+  /// No description provided for @staffContractReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what was wrong.'**
+  String get staffContractReasonRequired;
+
+  /// No description provided for @staffContractPermanentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'School employee, paid monthly.'**
+  String get staffContractPermanentHint;
+
+  /// No description provided for @staffContractVacataireHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by the hour or a monthly flat fee.'**
+  String get staffContractVacataireHint;
+
+  /// No description provided for @staffContractConventionneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by the State (SECOPE), with an optional local bonus.'**
+  String get staffContractConventionneHint;
+
+  /// No description provided for @staffContractSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract saved on the tablet.'**
+  String get staffContractSaved;
+
+  /// No description provided for @staffContractSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The contract could not be saved.'**
+  String get staffContractSaveFailed;
+
+  /// No description provided for @staffFieldPayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay mode'**
+  String get staffFieldPayMode;
+
+  /// No description provided for @staffPayModeHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get staffPayModeHourly;
+
+  /// No description provided for @staffPayModeFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly flat fee'**
+  String get staffPayModeFlat;
+
+  /// No description provided for @staffFieldEffectiveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective from'**
+  String get staffFieldEffectiveFrom;
+
+  /// No description provided for @staffFieldEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on (optional)'**
+  String get staffFieldEndsOn;
+
+  /// No description provided for @staffFieldSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly salary'**
+  String get staffFieldSalary;
+
+  /// No description provided for @staffFieldHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate'**
+  String get staffFieldHourlyRate;
+
+  /// No description provided for @staffFieldMonthlyFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly flat fee'**
+  String get staffFieldMonthlyFlat;
+
+  /// No description provided for @staffFieldCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get staffFieldCurrency;
+
+  /// No description provided for @staffFieldSecope.
+  ///
+  /// In en, this message translates to:
+  /// **'SECOPE number'**
+  String get staffFieldSecope;
+
+  /// No description provided for @staffFieldBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Local bonus (optional)'**
+  String get staffFieldBonus;
+
+  /// No description provided for @staffFieldCorrectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for the correction'**
+  String get staffFieldCorrectionReason;
+
+  /// No description provided for @staffPaySalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary: {amount}'**
+  String staffPaySalary(String amount);
+
+  /// No description provided for @staffPayHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly rate: {amount}'**
+  String staffPayHourlyRate(String amount);
+
+  /// No description provided for @staffPayMonthlyFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat fee: {amount}'**
+  String staffPayMonthlyFlat(String amount);
+
+  /// No description provided for @staffPaySecope.
+  ///
+  /// In en, this message translates to:
+  /// **'SECOPE: {number}'**
+  String staffPaySecope(String number);
+
+  /// No description provided for @staffPayBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus: {amount}'**
+  String staffPayBonus(String amount);
+
+  /// No description provided for @staffBlockDossier.
+  ///
+  /// In en, this message translates to:
+  /// **'File documents'**
+  String get staffBlockDossier;
+
+  /// No description provided for @staffBlockDossierHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Those the contract requires, then the others'**
+  String get staffBlockDossierHint;
+
+  /// No description provided for @staffDossierUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The document list has not reached this tablet yet.'**
+  String get staffDossierUnknown;
+
+  /// No description provided for @staffDocumentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get staffDocumentRequired;
+
+  /// No description provided for @staffDocumentOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get staffDocumentOptional;
+
+  /// No description provided for @staffDocumentMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'To be filed'**
+  String get staffDocumentMissing;
+
+  /// No description provided for @staffDocumentFiled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed on {date}'**
+  String staffDocumentFiled(String date);
+
+  /// No description provided for @staffDocumentRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: {reason}'**
+  String staffDocumentRejected(String reason);
+
+  /// No description provided for @staffDocumentWaitingMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the staff record to be sent'**
+  String get staffDocumentWaitingMember;
+
+  /// No description provided for @staffDocumentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get staffDocumentPending;
+
+  /// No description provided for @staffDocumentView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get staffDocumentView;
+
+  /// No description provided for @staffDocumentAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get staffDocumentAdd;
+
+  /// No description provided for @staffDocumentReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get staffDocumentReplace;
+
+  /// No description provided for @staffDocumentCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {label}'**
+  String staffDocumentCaptureTitle(String label);
+
+  /// No description provided for @staffDocumentSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Document saved on the tablet.'**
+  String get staffDocumentSaved;
+
+  /// No description provided for @staffDocumentSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be saved.'**
+  String get staffDocumentSaveFailed;
+
+  /// No description provided for @staffDocumentOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Document unavailable: it is not on this tablet and the server did not return it.'**
+  String get staffDocumentOpenFailed;
+
+  /// No description provided for @staffDocumentClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get staffDocumentClose;
+
+  /// No description provided for @staffDocumentOpenOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: this document is not on the tablet yet.'**
+  String get staffDocumentOpenOffline;
+
+  /// No description provided for @staffDocumentOpenForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not allowed to read this document.'**
+  String get staffDocumentOpenForbidden;
+
+  /// No description provided for @staffDocumentOpenCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The document received does not match its fingerprint: it is neither shown nor kept.'**
+  String get staffDocumentOpenCorrupt;
+
+  /// No description provided for @staffSaveNoSession.
+  ///
+  /// In en, this message translates to:
+  /// **'No open session: sign in again to save.'**
+  String get staffSaveNoSession;
+
+  /// No description provided for @staffDossierLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading file documents'**
+  String get staffDossierLoading;
+
+  /// No description provided for @staffContractCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this period?'**
+  String get staffContractCancelConfirmTitle;
+
+  /// No description provided for @staffContractCancelConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.'**
+  String get staffContractCancelConfirmMessage;
+
+  /// No description provided for @staffContractCancelConfirmKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get staffContractCancelConfirmKeep;
+
+  /// No description provided for @staffFileNotYetSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.'**
+  String get staffFileNotYetSynced;
 }
 
 class _AppLocalizationsDelegate
