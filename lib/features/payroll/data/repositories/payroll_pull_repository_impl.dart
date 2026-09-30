@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart'
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/staff_pay_profile_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/repositories/payroll_disbursement_regularizer.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_sync_api.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_pull_repository_impl.dart';
@@ -24,6 +25,9 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _requiredAuth;
 
+  /// Après chaque descente des paies : la régularisation automatique (N2).
+  final PayrollDisbursementRegularizer? _regularizer;
+
   const PayrollPullRepositoryImpl({
     required PayrollSyncApi api,
     required KeysetPullRunner runner,
@@ -34,7 +38,9 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
     required PayrollDisbursementDao disbursements,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> requiredAuth,
+    PayrollDisbursementRegularizer? regularizer,
   }) : _api = api,
+       _regularizer = regularizer,
        _runner = runner,
        _payrolls = payrolls,
        _profiles = profiles,
@@ -52,8 +58,18 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
     kPayrollsResource,
     fetch: (cursor) async =>
         (await _api.pullPayrolls(_requiredAuth, cursor, pageLimit)).data,
-    apply: (items, schoolId, nowMs) =>
-        _payrolls.apply(items, schoolId: schoolId, nowMs: nowMs),
+    apply: (items, schoolId, nowMs) async {
+      final applied = await _payrolls.apply(
+        items,
+        schoolId: schoolId,
+        nowMs: nowMs,
+      );
+      final authorId = _currentUser.uid;
+      if (authorId != null) {
+        await _regularizer?.run(schoolId, authorId: authorId);
+      }
+      return applied;
+    },
   );
 
   @override
