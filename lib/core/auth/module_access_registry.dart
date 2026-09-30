@@ -159,6 +159,18 @@ const ModuleAccess kStaffAttendanceManageAccess = ModuleAccess([
   Perm.hrAttendanceManage,
 ]);
 
+/// Préparer la paie, la soumettre, verser un salaire, accorder une avance,
+/// tenir le profil de paie d'un agent (`hr.pay.write`).
+///
+/// ⚠️ Masquer n'est pas cosmétique : ces écritures partent par l'outbox, où
+/// un 403 est terminal.
+const ModuleAccess kPayrollWriteAccess = ModuleAccess([Perm.hrPayWrite]);
+
+/// Valider, renvoyer ou rouvrir la paie, et régler ses paramètres — la
+/// direction (`hr.pay.manage`). Ni conjonction avec [kPayrollWriteAccess], ni
+/// repli sur elle : valider n'est pas préparer.
+const ModuleAccess kPayrollManageAccess = ModuleAccess([Perm.hrPayManage]);
+
 /// Retirer une dépense du registre, ou la restaurer
 /// (`POST /sync/expenses/{id}/deletion`). Retirer n'est pas saisir : une école
 /// peut confier l'un sans l'autre.
@@ -298,6 +310,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // Le Pointage se lit sous `hr.attendance.read` ; pointer et clore sont
     // gardés geste par geste.
     MenuConstants.hrStaffAttendanceId: ModuleAccess([Perm.hrAttendanceRead]),
+    // La Paie se lit sous `hr.pay.read` ; préparer et verser, valider et
+    // régler sont gardés geste par geste.
+    MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),

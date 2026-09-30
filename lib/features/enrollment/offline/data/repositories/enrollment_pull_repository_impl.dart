@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_seed.dart';
 import 'package:school_app_flutter/core/staff/local/staff_document_type_local_model.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -147,6 +148,11 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   )?
   applyStaffAttendanceSettings;
 
+  /// Seam vers le module Paie pour ses **réglages**, scopé ÉCOLE. Facultatif :
+  /// sans lui, la section est ignorée — la paie retombe sur ses défauts.
+  final Future<void> Function(PayrollSettingsSeed settings, String schoolId)?
+  applyPayrollSettings;
+
   /// Seam vers l'identité de l'école pour le **logo**, même raison que
   /// [replaceTariffs] : le bundle porte les empreintes, mais `enrollment` n'a
   /// rien à savoir d'un cache d'images ni d'une route d'octets. L'isolation du
@@ -195,6 +201,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceExpenseTypes,
     required this.replaceStaffDocumentTypes,
     this.applyStaffAttendanceSettings,
+    this.applyPayrollSettings,
     required this.syncSchoolLogo,
     required this.syncMetaDao,
     required this.requiredAuth,
@@ -527,7 +534,8 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     final expenseTypesApplied = await _applyExpenseTypes(body, syncedAt);
     final staffSectionsApplied =
         await _applyStaffDocumentTypes(body, syncedAt) +
-        await _applyStaffAttendanceSettings(body);
+        await _applyStaffAttendanceSettings(body) +
+        await _applyPayrollSettings(body);
     if (tariffBundles.isEmpty) {
       return upserted +
           boutiqueApplied +
@@ -612,6 +620,18 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   Future<int> _applyStaffAttendanceSettings(ReferentialBundleDto body) async {
     final settings = body.staffAttendanceSettings;
     final apply = applyStaffAttendanceSettings;
+    final schoolId = currentUser.schoolId ?? '';
+    if (settings == null || apply == null || schoolId.isEmpty) return 0;
+    await apply(settings, schoolId);
+    return 1;
+  }
+
+  /// Réglages de paie du bundle, par le seam [applyPayrollSettings]. `null` =
+  /// section non communiquée : le cache reste. Rend 1 quand une ligne est
+  /// rangée.
+  Future<int> _applyPayrollSettings(ReferentialBundleDto body) async {
+    final settings = body.payrollSettings;
+    final apply = applyPayrollSettings;
     final schoolId = currentUser.schoolId ?? '';
     if (settings == null || apply == null || schoolId.isEmpty) return 0;
     await apply(settings, schoolId);

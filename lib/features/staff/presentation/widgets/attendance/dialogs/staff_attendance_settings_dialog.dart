@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_clock_input_formatter.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -53,7 +53,7 @@ class _StaffAttendanceSettingsDialogState
     final draft = start == null
         ? null
         : StaffAttendanceSettings(start: start, toleranceMinutes: _tolerance);
-    return StaffAttendanceDialog(
+    return StaffDialog(
       title: l10n.staffAttendanceSettingsTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

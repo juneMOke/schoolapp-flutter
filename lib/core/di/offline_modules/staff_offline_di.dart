@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/staff/domain/repositories/staff_cont
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/di/offline_modules/payroll_di.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_sync_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_outbox_handler.dart';
@@ -196,4 +197,5 @@ void registerStaffOffline(GetIt getIt) {
 
   registerStaffDocuments(getIt);
   registerStaffAttendance(getIt);
+  registerPayroll(getIt);
 }

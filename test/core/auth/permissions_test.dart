@@ -42,6 +42,7 @@ void main() {
     Perm.hrStaffWrite: 'hr.staff.write',
     Perm.hrPayRead: 'hr.pay.read',
     Perm.hrPayWrite: 'hr.pay.write',
+    Perm.hrPayManage: 'hr.pay.manage',
     Perm.hrDocumentRead: 'hr.document.read',
     Perm.hrDocumentWrite: 'hr.document.write',
     Perm.hrAttendanceRead: 'hr.attendance.read',
@@ -87,7 +88,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 71 permissions (v1.8 du catalogue serveur + RH)', () {
+  test('le catalogue compte 72 permissions (v1.8 du catalogue serveur + RH)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -139,7 +140,11 @@ void main() {
     //
     // 68 → 71 : les trois droits du Pointage (`hr.attendance.read`, `.write`,
     // `.manage`), arrêtés avec le back le 2026-09-29.
-    expect(Perm.values, hasLength(71));
+    //
+    // 71 → 72 : `hr.pay.manage`, qui garde valider, renvoyer et rouvrir la
+    // paie, et ses réglages (DIRECTOR, SUPER_ADMIN). ⚠️ Déclaré avant que le
+    // serveur ne le sème (lot back P0).
+    expect(Perm.values, hasLength(72));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

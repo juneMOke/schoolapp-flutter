@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_day_regi
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_justification_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_time_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -113,7 +113,7 @@ class StaffRowActions {
     final l10n = AppLocalizations.of(context)!;
     final settings = _cubit.state.snapshot.settings;
     final now = StaffClockTime.of(DateTime.now());
-    final choice = await StaffAttendanceDialog.show<StaffTimeChoice>(
+    final choice = await StaffDialog.show<StaffTimeChoice>(
       context,
       StaffTimeDialog(
         title: l10n.staffAttendanceTimeArrivalTitle(_name),
@@ -144,7 +144,7 @@ class StaffRowActions {
     if (_intercept()) return;
     final l10n = AppLocalizations.of(context)!;
     final current = row.record?.departure;
-    final choice = await StaffAttendanceDialog.show<StaffTimeChoice>(
+    final choice = await StaffDialog.show<StaffTimeChoice>(
       context,
       StaffTimeDialog(
         title: l10n.staffAttendanceTimeDepartureTitle(_name),
@@ -170,7 +170,7 @@ class StaffRowActions {
     if (_intercept()) return;
     final StaffAttendanceRecord? record = _row.record;
     if (record == null || !record.status.isIncident) return;
-    final choice = await StaffAttendanceDialog.show<StaffJustificationChoice>(
+    final choice = await StaffDialog.show<StaffJustificationChoice>(
       context,
       StaffJustificationDialog(
         name: _name,

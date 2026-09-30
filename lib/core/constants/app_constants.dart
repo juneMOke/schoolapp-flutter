@@ -783,7 +783,11 @@ class AppConstants {
   // `staff_attendance_records`, `staff_attendance_locks`,
   // `staff_attendance_gestures`, `ref_staff_attendance_settings`. Création
   // pure. Palier d'école.
-  static const int offlineDbSchemaVersion = 56;
+  // v57 (2026-09-30) : la Paie du personnel (RH, sous-module C) — réglages,
+  // profils de paie, paies, éléments variables, gestes, lignes figées, résumés
+  // du Pointage, avances, versements, traces de diffusion. Création pure.
+  // Palier d'école.
+  static const int offlineDbSchemaVersion = 57;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1060,6 +1064,54 @@ class AppConstants {
   /// Octets d'une pièce, à la demande (`ETag` = empreinte SHA-256).
   static const String staffDocumentContentEndpoint =
       '/api/v1/hr/staff-documents/{documentId}/content';
+
+  /// L'hôte des liens de conversation WhatsApp (`https://wa.me/<numéro>`).
+  static const String whatsappHost = 'wa.me';
+
+  // ── Offline sync — Paie du personnel (RH) ──
+  /// Réglages de paie (PUT, `hr.pay.manage`, dernier écrit gagne) ; ils
+  /// descendent avec le socle (section `payrollSettings`).
+  static const String syncPayrollSettingsEndpoint =
+      '/api/v1/sync/payroll-settings';
+
+  /// Profil de paie d'un agent (POST, `hr.pay.write`, dernier écrit gagne) et
+  /// descente (GET, flux `hr.staff-pay-profiles`).
+  static const String syncStaffPayProfilesEndpoint =
+      '/api/v1/sync/staff-pay-profiles';
+
+  /// Éléments variables d'un agent pour un mois (POST, brouillon seulement).
+  static const String syncPayrollVariablesEndpoint =
+      '/api/v1/sync/payroll-variables';
+
+  /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
+  /// `REOPEN`), idempotents par `gestureId`.
+  static const String syncPayrollGesturesEndpoint =
+      '/api/v1/sync/payroll-gestures';
+
+  /// Descente des paies, lignes figées comprises (flux `hr.payrolls`).
+  static const String syncPayrollsEndpoint = '/api/v1/sync/payrolls';
+
+  /// Descente des résumés des mois clos du Pointage, sous `hr.pay.read`.
+  static const String syncStaffAttendanceSummariesEndpoint =
+      '/api/v1/sync/staff-attendance-summaries';
+
+  /// Avances : octroi (POST) et descente (GET, flux `hr.salary-advances`).
+  static const String syncSalaryAdvancesEndpoint =
+      '/api/v1/sync/salary-advances';
+  static const String syncSalaryAdvanceCancellationsEndpoint =
+      '/api/v1/sync/salary-advance-cancellations';
+
+  /// Versements : un par requête (POST) et descente (GET, flux
+  /// `hr.payroll-disbursements`).
+  static const String syncPayrollDisbursementsEndpoint =
+      '/api/v1/sync/payroll-disbursements';
+  static const String syncPayrollDisbursementCancellationsEndpoint =
+      '/api/v1/sync/payroll-disbursement-cancellations';
+
+  /// Bulletin de paie scellé (BP) d'un agent, octets PDF ; scellé au premier
+  /// appel, après validation seulement.
+  static const String payrollPayslipEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

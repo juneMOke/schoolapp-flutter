@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_seed.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/ref_staff_document_type_dto.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
@@ -86,6 +87,10 @@ class ReferentialBundleDto {
   /// serveur d'avant le module ou section illisible, le cache reste.
   final StaffAttendanceSettingsSeed? staffAttendanceSettings;
 
+  /// Les réglages de la Paie RH. À la racine ; `null` = serveur d'avant le
+  /// module ou section illisible, le cache reste.
+  final PayrollSettingsSeed? payrollSettings;
+
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
@@ -98,6 +103,7 @@ class ReferentialBundleDto {
     this.expenseTypes,
     this.staffDocumentTypes,
     this.staffAttendanceSettings,
+    this.payrollSettings,
     required this.serverTime,
   });
 
@@ -132,6 +138,7 @@ class ReferentialBundleDto {
     staffAttendanceSettings: StaffAttendanceSettingsSeed.tryParse(
       j['staffAttendanceSettings'],
     ),
+    payrollSettings: PayrollSettingsSeed.tryParse(j['payrollSettings']),
     serverTime: j['serverTime'] as String,
   );
 }

@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -70,7 +70,7 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
     final l10n = AppLocalizations.of(context)!;
     final tone = StaffAttendanceTone.of(widget.record.status);
     final reason = _reason;
-    return StaffAttendanceDialog(
+    return StaffDialog(
       eyebrow: _eyebrow(l10n),
       title: l10n.staffAttendanceJustifyTitle(widget.name),
       body: Column(

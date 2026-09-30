@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/expense/presentation/pages/expense_d
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
@@ -455,8 +456,8 @@ class AppRouter {
         ),
       ],
     ),
-    // Ressources humaines : le fichier du personnel et le Pointage, chacun
-    // son cubit, monté par sa page.
+    // Ressources humaines : le fichier du personnel, le Pointage et la Paie,
+    // chacun son cubit, monté par sa page.
     GoRoute(
       path: AppRoutesNames.hrStaffFile,
       builder: (context, state) => const StaffFilePage(),
@@ -464,6 +465,10 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.hrStaffAttendance,
       builder: (context, state) => const StaffAttendancePage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.hrPayroll,
+      builder: (context, state) => const PayrollPage(),
     ),
     ShellRoute(
       builder: (context, state, child) => ClassesFeatureScope(child: child),

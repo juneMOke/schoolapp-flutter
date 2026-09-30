@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
+import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
@@ -54,6 +55,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(56)) {
     await _createTables(db, staffAttendanceTables);
+  }
+  if (upTo(57)) {
+    await _createTables(db, payrollTables);
   }
 }
 
@@ -139,7 +143,8 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
   await db.execute(_ifNotExists(kPaymentsReplacesIndexSql));
 }
 
-/// v55 — le fichier du personnel ; v56 — le Pointage du personnel. Tables
+/// v55 — le fichier du personnel ; v56 — le Pointage du personnel ; v57 — la
+/// Paie du personnel. Tables
 /// neuves, création pure.
 ///
 /// ⚠️ Gardes `IF NOT EXISTS`, même raison qu'à la v54 : une base héritée

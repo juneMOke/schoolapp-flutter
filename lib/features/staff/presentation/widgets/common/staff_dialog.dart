@@ -6,11 +6,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// L'enveloppe commune des modales du Pointage (heure, justification,
-/// réglages, rapport, clôture) : un surtitre, un titre, un corps défilant et
-/// des actions ancrées. Toutes ont une saisie ou une case : elles passent par
+/// L'enveloppe commune des modales RH — Pointage (heure, justification,
+/// réglages, rapport, clôture) et Paie : un surtitre, un titre, un corps
+/// défilant et des actions ancrées. Toutes ont une saisie ou une case : elles passent par
 /// [EteeloDialogBody], qui tient au clavier ouvert en paysage.
-class StaffAttendanceDialog extends StatelessWidget {
+class StaffDialog extends StatelessWidget {
   final String? eyebrow;
   final String title;
   final Widget body;
@@ -19,7 +19,7 @@ class StaffAttendanceDialog extends StatelessWidget {
   /// Action placée à gauche, séparée des autres (retirer, effacer).
   final Widget? leading;
 
-  const StaffAttendanceDialog({
+  const StaffDialog({
     super.key,
     required this.title,
     required this.body,

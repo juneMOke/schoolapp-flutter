@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_att
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_card_frame.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_dialog.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_month_close_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_holiday_state.dart';
@@ -131,7 +131,7 @@ class StaffRecapTab extends StatelessWidget {
 
   Future<void> _close(BuildContext context, StaffMonthRecap recap) async {
     final cubit = context.read<StaffAttendanceCubit>();
-    final confirmed = await StaffAttendanceDialog.show<bool>(
+    final confirmed = await StaffDialog.show<bool>(
       context,
       StaffMonthCloseDialog(
         recap: recap,

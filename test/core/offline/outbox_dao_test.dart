@@ -266,4 +266,94 @@ void main() {
       expect(await dao.errorCount(), 1);
     });
   });
+
+  group('hasOlderPending — l ordre par agrégat', () {
+    Future<bool> older(String id) => dao.hasOlderPending(
+      entryId: id,
+      aggregateId: 'payroll:2026-10',
+      types: {'PAYROLL_VARIABLES', 'PAYROLL_GESTURE'},
+    );
+
+    test(
+      'attend une aînée en file du même agrégat et des types nommés',
+      () async {
+        await dao.enqueue(
+          entry(
+            id: 'vars',
+            type: 'PAYROLL_VARIABLES',
+            aggregateId: 'payroll:2026-10',
+          ),
+        );
+        await dao.enqueue(
+          entry(
+            id: 'submit',
+            type: 'PAYROLL_GESTURE',
+            aggregateId: 'payroll:2026-10',
+            createdAt: 2000,
+          ),
+        );
+
+        expect(await older('submit'), isTrue);
+        expect(await older('vars'), isFalse, reason: 'jamais une cadette');
+      },
+    );
+
+    test(
+      'ni un autre agrégat, ni un autre type, ni une entrée refusée',
+      () async {
+        await dao.enqueue(
+          entry(
+            id: 'other-month',
+            type: 'PAYROLL_VARIABLES',
+            aggregateId: 'payroll:2026-09',
+          ),
+        );
+        await dao.enqueue(
+          entry(
+            id: 'other-type',
+            type: 'SALARY_ADVANCE',
+            aggregateId: 'payroll:2026-10',
+          ),
+        );
+        await dao.enqueue(
+          entry(
+            id: 'refused',
+            type: 'PAYROLL_VARIABLES',
+            aggregateId: 'payroll:2026-10',
+            status: OutboxStatus.syncError,
+          ),
+        );
+        await dao.enqueue(
+          entry(
+            id: 'submit',
+            type: 'PAYROLL_GESTURE',
+            aggregateId: 'payroll:2026-10',
+            createdAt: 2000,
+          ),
+        );
+
+        expect(await older('submit'), isFalse);
+      },
+    );
+
+    test('même milliseconde : départagées par l ordre d insertion', () async {
+      await dao.enqueue(
+        entry(
+          id: 'first',
+          type: 'PAYROLL_GESTURE',
+          aggregateId: 'payroll:2026-10',
+        ),
+      );
+      await dao.enqueue(
+        entry(
+          id: 'second',
+          type: 'PAYROLL_GESTURE',
+          aggregateId: 'payroll:2026-10',
+        ),
+      );
+
+      expect(await older('second'), isTrue);
+      expect(await older('first'), isFalse);
+    });
+  });
 }

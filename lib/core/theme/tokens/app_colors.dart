@@ -502,4 +502,17 @@ class AppColors {
   static const staffAttendanceOnBanner = Color(0xFFFFFFFF);
   static const staffAttendanceOnBannerMuted = Color(0xCCFFFFFF);
   static const staffAttendanceOnBannerFaint = Color(0x33FFFFFF);
+
+  // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
+  // Validée (bleu profond de la spec) : l'encre #1B4D6B tient 7,7:1 sur son
+  // voile. Les trois autres statuts reprennent les teintes du Pointage
+  // (brouillon gris, soumise ambre, versée vert).
+  static const payrollValidated = Color(0xFF1B4D6B);
+  static const payrollValidatedSoft = Color(0xFFE6EEF4);
+  static const payrollValidatedBorder = Color(0xFFB9CEDD);
+  static const payrollValidatedInk = Color(0xFF1B4D6B);
+
+  /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
+  /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
+  static const payrollWhatsapp = Color(0xFF1B7A4A);
 }

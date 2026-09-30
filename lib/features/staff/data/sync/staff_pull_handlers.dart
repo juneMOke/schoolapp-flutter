@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_pull_repository.dart';
 
-/// Un [PullHandler] par flux du module RH (fichier et Pointage), enregistrés sur le
+/// Un [PullHandler] par flux du module RH (fichier, Pointage, Paie), enregistrés sur le
 /// `PullCoordinator`. Ne lèvent pas : un `Left` devient un
 /// [PullOutcome.error].
 ///
@@ -21,6 +21,14 @@ class StaffPullHandler implements PullHandler {
   final Future<Either<Failure, KeysetPullResult>> Function() _pull;
 
   const StaffPullHandler._(this.resource, this.requiredPermissions, this._pull);
+
+  /// Un flux RH d'un autre sous-module (la Paie) : même squelette, même
+  /// lecture de l'issue.
+  const StaffPullHandler.of(
+    String resource,
+    List<Perm> requiredPermissions,
+    Future<Either<Failure, KeysetPullResult>> Function() pull,
+  ) : this._(resource, requiredPermissions, pull);
 
   factory StaffPullHandler.members(StaffPullRepository repository) =>
       StaffPullHandler._(kStaffMembersResource, const [
