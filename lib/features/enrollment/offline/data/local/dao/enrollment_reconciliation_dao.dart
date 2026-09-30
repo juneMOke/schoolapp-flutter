@@ -445,7 +445,11 @@ class EnrollmentReconciliationDao {
     int syncedAt,
   ) async {
     final fields = <String, Object?>{
-      'first_name': p.firstName,
+      // `parents.first_name` est NOT NULL en local : un tuteur descendu sans
+      // prénom y entre vide, comme le relisent déjà l'annuaire des payeurs et
+      // le ticket provisoire. Le prénom n'est pas une clé de rapprochement —
+      // contrairement au téléphone, la chaîne vide n'y fusionne personne.
+      'first_name': p.firstName ?? '',
       'last_name': p.lastName,
       'surname': p.surname,
       'phone_number': p.phoneNumber,

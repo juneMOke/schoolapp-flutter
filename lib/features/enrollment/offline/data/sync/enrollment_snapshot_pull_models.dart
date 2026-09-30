@@ -265,7 +265,12 @@ class StudentSnapshotDto {
 /// porté par le lien `student_parent`, pas par la table `parents`.
 class ParentSnapshotDto {
   final String id;
-  final String firstName;
+
+  /// `null` sur un tuteur SANS PRÉNOM : le serveur le rend facultatif depuis
+  /// V109. Le cast dur (`as String`) faisait lever toute la page du pull au
+  /// premier tuteur sans prénom ; la page n'était ni appliquée ni avancée, et
+  /// se rejouait à l'infini — plus aucun dossier de l'école n'atterrissait.
+  final String? firstName;
   final String lastName;
   final String? surname;
   final String? identificationNumber;
@@ -286,7 +291,7 @@ class ParentSnapshotDto {
 
   const ParentSnapshotDto({
     required this.id,
-    required this.firstName,
+    this.firstName,
     required this.lastName,
     this.surname,
     this.identificationNumber,
@@ -299,7 +304,7 @@ class ParentSnapshotDto {
   factory ParentSnapshotDto.fromJson(Map<String, dynamic> j) =>
       ParentSnapshotDto(
         id: j['id'] as String,
-        firstName: j['firstName'] as String,
+        firstName: j['firstName'] as String?,
         lastName: j['lastName'] as String,
         surname: j['surname'] as String?,
         identificationNumber: j['identificationNumber'] as String?,
