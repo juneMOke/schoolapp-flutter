@@ -4,12 +4,12 @@ import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_draft_mark_row.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_record_row.dart';
-import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_student.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_line.dart';
 
 /// Les passages entre les lignes de la base (roster, appel, brouillon) et le
 /// registre du domaine. Calcul pur.
@@ -92,16 +92,19 @@ abstract final class ClassPresenceMapper {
     );
   }
 
-  /// La ligne de brouillon d'une marque ; `null` pour « à pointer ».
+  /// La ligne de brouillon d'une marque ; `null` pour « à pointer », sauf
+  /// sur un appel rouvert ([keepNone]) où « à pointer » doit masquer la
+  /// ligne de l'appel en base.
   static AttendanceDraftMarkRow? draftRow(
     ClassPresenceLine line, {
     required String classroomId,
     required String dateStr,
     required String academicYearId,
     required int updatedAt,
+    bool keepNone = false,
   }) {
     final mark = line.mark;
-    if (mark.status == PresenceStatus.none) return null;
+    if (mark.status == PresenceStatus.none && !keepNone) return null;
     final (reason, note) = line.wireReason;
     return AttendanceDraftMarkRow(
       classroomId: classroomId,

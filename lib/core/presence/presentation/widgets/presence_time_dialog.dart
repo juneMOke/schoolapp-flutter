@@ -23,6 +23,23 @@ class PresenceTimeShortcut {
   final ClockTime time;
 
   const PresenceTimeShortcut(this.label, this.time);
+
+  /// Les raccourcis d'une arrivée, communs à l'appel et au pointage :
+  /// [now] (l'heure du geste, ou le début des cours pour un autre jour), le
+  /// début des cours, puis +15 et +30 minutes.
+  static List<PresenceTimeShortcut> arrivals(
+    AppLocalizations l10n,
+    PresenceSchedule schedule,
+    ClockTime now,
+  ) => [
+    PresenceTimeShortcut(l10n.presenceMarkTimeNow, now),
+    PresenceTimeShortcut(l10n.presenceMarkTimeStart, schedule.start),
+    for (final minutes in const [15, 30])
+      PresenceTimeShortcut(
+        l10n.presenceMarkTimePlus(minutes),
+        schedule.start.plus(minutes),
+      ),
+  ];
 }
 
 /// Saisie de l'heure d'arrivée ou de départ. Pour l'arrivée, [schedule]

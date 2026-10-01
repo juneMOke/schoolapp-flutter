@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
 
 /// Ce qu'un geste de l'appel annonce à l'écran (un toast), sans texte : les
 /// libellés sont l'affaire de la vue.
@@ -38,6 +39,17 @@ enum ClassPresenceNoticeKind {
 
   /// L'écriture locale a échoué.
   writeFailed,
+
+  /// Une écriture concurrente a pris la main : la journée a été relue.
+  raced;
+
+  /// L'annonce d'un verrou de journée.
+  static ClassPresenceNoticeKind ofLock(ClassDayLock lock) => switch (lock) {
+    ClassDayLock.forbidden => forbidden,
+    ClassDayLock.monthClosed => monthFrozen,
+    ClassDayLock.validated => dayFrozen,
+    ClassDayLock.needsAmend => dayFrozenNoAmend,
+  };
 }
 
 /// Un toast à montrer. [seq] distingue deux annonces identiques successives.

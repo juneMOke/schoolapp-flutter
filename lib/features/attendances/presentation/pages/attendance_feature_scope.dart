@@ -35,7 +35,7 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
     _disciplinaryCaseOfflineBloc =
         GetIt.instance<DisciplinaryCaseOfflineBloc>();
     _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
-    // Classes/effectifs pour le dropdown de recherche (CF3, lecture locale) —
+    // Classes/effectifs pour le sélecteur de classe de l'appel (lecture locale) —
     // instance dédiée à cette feature scope, indépendante de celle de Classe.
     _classroomOfflineBloc = GetIt.instance<ClassroomOfflineBloc>();
 

@@ -46,7 +46,9 @@ class PresenceIncident<R extends Object> extends Equatable {
 
 /// Les jours d'un mois en semaines complètes du lundi au vendredi : `null`
 /// pour une case avant le 1er. [upcoming] dit d'un jour de semaine s'il est
-/// à venir ou hors de l'année scolaire ; [statusOf] donne son statut.
+/// à venir ou hors de l'année scolaire (estompé) ; [statusOf] donne son
+/// statut, qu'il soit à venir ou non (une ligne reçue hors des bornes garde
+/// sa couleur).
 List<PresenceCalendarDay?> presenceCalendar({
   required List<String> weekdays,
   required int firstWeekday,
@@ -58,6 +60,6 @@ List<PresenceCalendarDay?> presenceCalendar({
     PresenceCalendarDay(
       day: day,
       upcoming: upcoming(day),
-      status: upcoming(day) ? PresenceStatus.none : statusOf(day),
+      status: statusOf(day),
     ),
 ];

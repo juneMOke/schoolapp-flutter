@@ -51,6 +51,8 @@ void showClassPresenceNotice(BuildContext context, ClassPresenceNotice notice) {
       AppSnackBar.showWarning(context, l10n.classPresenceToastForbidden);
     case ClassPresenceNoticeKind.unsupportedReason:
       AppSnackBar.showWarning(context, l10n.classPresenceToastUnsupported);
+    case ClassPresenceNoticeKind.raced:
+      AppSnackBar.showWarning(context, l10n.classPresenceToastRaced);
     case ClassPresenceNoticeKind.writeFailed:
       AppSnackBar.showError(context, l10n.presenceMarkToastWriteFailed);
   }

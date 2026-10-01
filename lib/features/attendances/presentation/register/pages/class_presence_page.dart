@@ -102,7 +102,9 @@ class _ClassPresenceScreenState extends State<ClassPresenceScreen> {
     child: BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
       // Transition de statut : un contexte qui se résout à l'identique doit
       // quand même relire les classes.
-      listenWhen: (previous, current) => previous.status != current.status,
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.context?.academicYear.id != current.context?.academicYear.id,
       listener: (context, state) => _onAcademicYear(state),
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (previous, current) =>
@@ -123,7 +125,9 @@ class _ClassPresenceScreenState extends State<ClassPresenceScreen> {
           }
           final cycles = buildClassPickerCycles(
             yearContext.schoolLevelGroups,
-            context.watch<ClassroomOfflineBloc>().state.classrooms,
+            context.select(
+              (ClassroomOfflineBloc bloc) => bloc.state.classrooms,
+            ),
           );
           return _Body(cycles: cycles, onPick: () => _pickClass(cycles));
         },

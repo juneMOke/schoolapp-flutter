@@ -49,6 +49,7 @@ ClassPresenceLine line(
 ClassPresenceDay presenceDay({
   String day = '2026-10-01',
   bool validated = false,
+  bool reopened = false,
   bool monthClosed = false,
   List<ClassPresenceLine>? lines,
 }) => ClassPresenceDay(
@@ -62,8 +63,8 @@ ClassPresenceDay presenceDay({
         line(jean, PresenceStatus.absent),
         line(esther, validated ? PresenceStatus.present : PresenceStatus.none),
       ],
-  hasSession: validated,
-  reopened: false,
+  hasSession: validated || reopened,
+  reopened: reopened,
   schedule: PresenceSchedule.defaults,
   monthClosed: monthClosed,
 );

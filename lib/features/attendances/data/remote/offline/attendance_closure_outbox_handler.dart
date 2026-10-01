@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
@@ -105,14 +106,11 @@ class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
 
   /// La raison du refus, dite en clair pour les codes du contrat.
   static String? _reason(DioException e) {
-    final data = e.response?.data;
-    if (data is! Map) return null;
-    final code = data['detailCode'] ?? data['code'];
-    return switch (code) {
+    return switch (ApiErrorParser.detailCodeOf(e.response)) {
       'MONTH_NOT_ENDED' =>
         'Le mois n\'est pas terminé : il se clôture une fois fini.',
       'MONTH_OUTSIDE_ACADEMIC_YEAR' => 'Ce mois est hors de l\'année scolaire.',
-      _ => data['message'] is String ? data['message'] as String : null,
+      _ => ApiErrorParser.serverMessageOf(e.response),
     };
   }
 }

@@ -1,14 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_ack_reading.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart'
+    show kAttendanceResource;
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_aggregate_request_model.dart';
-import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_aggregate_response_model.dart';
-import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_line_wire.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart'
@@ -54,6 +56,10 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
   final Map<String, dynamic> requiredAuth;
   final ClassroomTransferGate pendingTransfers;
   final CurrentUserContext? currentUser;
+
+  /// Pour reprendre la descente des appels depuis le début après un refus
+  /// `MONTH_CLOSED` (cf. [dispatch]).
+  final SyncMetaDao? syncMeta;
   final Clock now;
 
   const AttendanceOutboxHandler({
@@ -62,24 +68,9 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
     required this.requiredAuth,
     required this.pendingTransfers,
     this.currentUser,
+    this.syncMeta,
     this.now = systemClock,
   });
-
-  /// Indexe l'état canonique du gagnant par élève. Sans identité : l'ACK ne
-  /// transporte pas les libellés, et les fabriquer serait inventer de la donnée.
-  Map<String, CanonicalAbsence> _canonicalAbsences(
-    AttendanceAggregateResponseModel response,
-  ) => {
-    for (final ack in response.absences)
-      ack.studentId: CanonicalAbsence(
-        status: ack.status ?? AttendanceLineWire.absent,
-        arrivalTime: ack.arrivalTime,
-        lateMinutes: ack.lateMinutes,
-        absenceReason: ack.absenceReason,
-        absenceReasonNote: ack.absenceReasonNote,
-        updatedAt: EpochIsoHelper.tryToEpochMs(ack.updatedAt) ?? now(),
-      ),
-  };
 
   @override
   String get aggregateType => kAttendanceAggregateType;
@@ -166,8 +157,8 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
           classroomId: session.classroomId,
           dateStr: session.attendanceDate,
           academicYearId: session.academicYearId,
-          canonicalAbsences: _canonicalAbsences(response),
-          updatedAt: _adoptedLwwToken(response),
+          canonicalAbsences: response.canonicalAbsences(now),
+          updatedAt: response.adoptedLwwToken(now),
           syncedAt: now(),
           serverUpdatedAt: response.serverUpdatedAt,
           expectedCount: response.expectedCount,
@@ -195,13 +186,30 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
       // ne s'en sert que sur les issues TERMINALES, les seules qu'il doive
       // lire ; un transitoire garde le message réseau, plus utile. Même lecture
       // que les handlers inscription et évaluation.
-      final serverMessage = _serverMessage(e);
+      final serverMessage = ApiErrorParser.serverMessageOf(e.response);
       // Un mois clôturé ne reçoit plus d'appel : refus terminal, dit en clair
       // (le serveur l'évalue APRÈS l'arbitrage LWW — un renvoi périmé reçoit
       // `SUPERSEDED`, jamais ce refus).
-      if (_serverCode(e) == kAttendanceMonthClosedCode) {
+      if (ApiErrorParser.detailCodeOf(e.response) ==
+          kAttendanceMonthClosedCode) {
+        // La journée locale ne sera jamais acceptée, et, restée en attente,
+        // le pull la sauterait : elle afficherait pour toujours ce que le
+        // serveur a refusé. On l'oublie et on reprend la descente depuis le
+        // début pour qu'elle revienne telle que le serveur la tient.
+        final session = aggregate.session;
+        await localDataSource.discardDay(
+          classroomId: session.classroomId,
+          dateStr: session.attendanceDate,
+          academicYearId: session.academicYearId,
+        );
+        await syncMeta?.setCursor(
+          kAttendanceResource,
+          cursor: null,
+          syncedAt: now(),
+        );
         return const OutboxDispatchResult.failed(
-          'Mois clôturé : cet appel ne peut plus être modifié.',
+          'Mois clôturé : cet appel ne peut plus être modifié. La journée '
+          'reprend l\'appel tel que le serveur le tient.',
         );
       }
       if (failure is ValidationFailure || failure is NotFoundFailure) {
@@ -243,67 +251,5 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());
     }
-  }
-
-  /// La raison du refus telle que le SERVEUR l'a écrite
-  /// (`ApiErrorResponse {timestamp, status, error, message, code}`), ou `null`
-  /// si le corps n'en porte pas.
-  String? _serverMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is Map && data['message'] is String) {
-      final message = (data['message'] as String).trim();
-      if (message.isNotEmpty) return message;
-    }
-    return null;
-  }
-
-  /// Le code machine du refus (`code` ou `detailCode` du corps d'erreur).
-  String? _serverCode(DioException e) {
-    final data = e.response?.data;
-    if (data is! Map) return null;
-    final code = data['detailCode'] ?? data['code'];
-    return code is String ? code : null;
-  }
-
-  /// Le jeton LWW sur lequel se réancrer après avoir PERDU l'arbitrage.
-  ///
-  /// `response.updatedAt` est la bonne réponse et passe donc en premier : le
-  /// serveur porte désormais le jeton de l'état retenu sur le fil
-  /// (`AttendanceAggregateResponse.session.updatedAt`).
-  ///
-  /// ⚠️ **Le repli reste, et il n'est pas décoratif.** Ce champ n'a pas toujours
-  /// existé : `SessionRef` n'exposait que `id`, `serverUpdatedAt` et
-  /// `expectedCount`, et un serveur pas encore monté de version répond toujours
-  /// sans. Le parc ne bascule pas d'un bloc, la tablette parle à celui qu'elle
-  /// trouve.
-  ///
-  /// Le repli d'origine était `now()` — l'horloge de la tablette, précisément
-  /// celle qui retarde quand un `SUPERSEDED` survient. On se réancrait sur un
-  /// jeton encore perdant, la correction suivante reperdait, et la journée ne
-  /// pouvait plus jamais atterrir : la boucle que ce chemin existe pour fermer.
-  ///
-  /// À défaut du bon jeton, on prend donc le plus tardif de ce que la réponse
-  /// porte encore : le commit Postgres du gagnant (`serverUpdatedAt`) et les
-  /// `updatedAt` de ses absences, qui sont, eux, de vrais jetons client. Ce
-  /// n'est pas exact — un gagnant dont l'horloge avançait a pu poser un jeton
-  /// jusqu'à `ClientClockGuard.DEFAULT_TOLERANCE` (5 min) au-dessus de son
-  /// commit — mais l'écart résiduel devient BORNÉ par cette tolérance, au lieu
-  /// d'être celui, non borné, d'une tablette qui retarde.
-  int _adoptedLwwToken(AttendanceAggregateResponseModel response) {
-    var latest = EpochIsoHelper.tryToEpochMs(response.updatedAt);
-
-    void keepLater(String? iso) {
-      final candidate = EpochIsoHelper.tryToEpochMs(iso);
-      if (candidate != null && (latest == null || candidate > latest!)) {
-        latest = candidate;
-      }
-    }
-
-    keepLater(response.serverUpdatedAt);
-    for (final ack in response.absences) {
-      keepLater(ack.updatedAt);
-    }
-
-    return latest ?? now();
   }
 }

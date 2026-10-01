@@ -124,6 +124,20 @@ void main() {
     });
   });
 
+  test('le jour même ne compte qu une fois son appel validé', () {
+    final open = month();
+    expect(open.schoolDays(today: today), days.take(3).toList());
+    final called = ClassPresenceMonth(
+      classroomId: 'c1',
+      academicYearId: 'y1',
+      month: '2026-09',
+      students: [c],
+      calledDays: {...open.calledDays, today},
+      incidents: const {},
+    );
+    expect(called.schoolDays(today: today), days);
+  });
+
   group('ClassMonthRecap', () {
     test('filtres, totaux et jours-élève non pointés', () {
       final recap = ClassMonthRecap.build(
@@ -131,9 +145,10 @@ void main() {
         today: today,
         query: ClassRecapQuery.none,
       );
-      expect(recap.schoolDays, 4);
-      expect(recap.count(ClassRecapFilter.toWatch), 3);
-      expect(recap.notMarked, 3);
+      // Aujourd'hui (le 4) n'a pas encore d'appel : il ne compte pas.
+      expect(recap.schoolDays, 3);
+      expect(recap.count(ClassRecapFilter.toWatch), 1);
+      expect(recap.notMarked, 0);
       expect(recap.late, 1);
       expect(recap.absentUnjustified, 2);
 
@@ -159,8 +174,9 @@ void main() {
       // Le mois commence un mardi : une case vide avant.
       expect(sheet.calendar.first, isNull);
       expect(sheet.calendar[1]!.status, PresenceStatus.absent);
-      // Le 4 n'a pas d'appel : à pointer.
+      // Le 4 (aujourd'hui) n'a pas encore d'appel : pas encore dû.
       expect(sheet.calendar[4]!.status, PresenceStatus.none);
+      expect(sheet.calendar[4]!.upcoming, isTrue);
       // Le 7 est à venir.
       expect(sheet.calendar[5]!.upcoming, isTrue);
       expect(sheet.incidents.map((i) => i.day), [

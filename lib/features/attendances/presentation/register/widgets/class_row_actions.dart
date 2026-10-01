@@ -6,13 +6,13 @@ import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_justification_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
+import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -37,12 +37,6 @@ class ClassRowActions implements PresenceRowActions {
 
   ClassPresenceDay? get _day => _cubit.state.presenceDay;
 
-  bool get _canWrite =>
-      PermissionGate.allowsAccess(context, kAttendanceRecordAccess);
-
-  bool get _canAmend =>
-      PermissionGate.allowsAccess(context, kAttendanceAmendAccess);
-
   /// La ligne de cet élève dans l'état courant.
   ClassPresenceLine get _line {
     for (final current in _day?.lines ?? const <ClassPresenceLine>[]) {
@@ -52,21 +46,19 @@ class ClassRowActions implements PresenceRowActions {
   }
 
   /// Un geste refusé s'annonce au lieu d'écrire. [justifying] laisse passer
-  /// la justification d'un appel validé.
+  /// la justification d'un appel validé (décision 9).
   bool _intercept({bool justifying = false}) {
     final day = _day;
     if (day == null) return true;
-    final kind = !_canWrite
-        ? ClassPresenceNoticeKind.forbidden
-        : day.monthClosed
-        ? ClassPresenceNoticeKind.monthFrozen
-        : day.validated && !justifying
-        ? (day.day.compareTo(_cubit.state.today) < 0 && !_canAmend
-              ? ClassPresenceNoticeKind.dayFrozenNoAmend
-              : ClassPresenceNoticeKind.dayFrozen)
-        : null;
-    if (kind == null) return false;
-    _cubit.announce(ClassPresenceNotice(kind));
+    final lock = classDayLock(
+      day,
+      today: _cubit.state.today,
+      canWrite: PermissionGate.allowsAccess(context, kAttendanceRecordAccess),
+      canAmend: PermissionGate.allowsAccess(context, kAttendanceAmendAccess),
+      justifying: justifying,
+    );
+    if (lock == null) return false;
+    _cubit.announce(ClassPresenceNotice(ClassPresenceNoticeKind.ofLock(lock)));
     return true;
   }
 
@@ -104,18 +96,7 @@ class ClassRowActions implements PresenceRowActions {
         title: l10n.presenceMarkTimeArrivalTitle(line.student.fullName),
         initial: _line.mark.arrival,
         schedule: schedule,
-        shortcuts: [
-          PresenceTimeShortcut(l10n.presenceMarkTimeNow, now),
-          PresenceTimeShortcut(l10n.presenceMarkTimeStart, schedule.start),
-          PresenceTimeShortcut(
-            l10n.presenceMarkTimePlus(15),
-            schedule.start.plus(15),
-          ),
-          PresenceTimeShortcut(
-            l10n.presenceMarkTimePlus(30),
-            schedule.start.plus(30),
-          ),
-        ],
+        shortcuts: PresenceTimeShortcut.arrivals(l10n, schedule, now),
       ),
     );
     final time = choice?.time;
@@ -129,22 +110,16 @@ class ClassRowActions implements PresenceRowActions {
     final current = _line;
     if (!current.status.isIncident) return;
     final l10n = AppLocalizations.of(context)!;
-    final choice =
-        await EteeloFormDialog.show<PresenceJustificationChoice<AbsenceReason>>(
-          context,
-          PresenceJustificationDialog<AbsenceReason>(
-            name: current.student.fullName,
-            status: current.status,
-            lateMinutes: current.mark.lateMinutes,
-            initial: current.mark.justification,
-            reasons: kSelectableAbsenceReasons,
-            reasonLabel: (reason) => reason.getDisplayName(l10n),
-            dayLabel: PresenceLabels.longDay(
-              MaterialLocalizations.of(context),
-              _day!.day,
-            ),
-          ),
-        );
+    final choice = await PresenceJustificationDialog.show<AbsenceReason>(
+      context,
+      name: current.student.fullName,
+      status: current.status,
+      lateMinutes: current.mark.lateMinutes,
+      day: _day!.day,
+      initial: current.mark.justification,
+      reasons: kSelectableAbsenceReasons,
+      reasonLabel: (reason) => reason.getDisplayName(l10n),
+    );
     if (choice == null || !context.mounted) return;
     await _cubit.perform(
       (c, day) => c.justify(day, _line, choice.justification),

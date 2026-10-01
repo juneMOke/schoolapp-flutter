@@ -21,7 +21,9 @@ class StaffAttendanceTabs extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final register = state.register;
     final validated = state.snapshot.isDayValidated(state.day);

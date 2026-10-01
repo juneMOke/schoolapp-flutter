@@ -8,13 +8,11 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_closure_models.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_outbox_handler.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/presence/data/presence_schedule_reader.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
-import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_session_row.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_draft_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
@@ -28,6 +26,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/register
 import 'package:school_app_flutter/features/attendances/domain/repository/register/class_presence_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_month_reader.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_day_reader.dart';
 
 /// Le registre d'appel d'une classe, lu et écrit sur la tablette.
 ///
@@ -64,79 +63,27 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
     this.now = systemClock,
   });
 
-  @override
-  Future<Either<Failure, ClassPresenceDay>> loadDay(ClassDayKey key) => _guard(
-    'Local attendance read failed',
-    () async {
-      final students = ClassPresenceMapper.students(
-        await roster.getRoster(key.classroomId),
-      );
-      final session = await sessions.getSession(
-        classroomId: key.classroomId,
-        dateStr: key.day,
-        academicYearId: key.academicYearId,
-      );
-      final editing = session == null || session.reopenedAt != null;
-      final (sync, refusal) = await _sendState(key, session);
-      final List<ClassPresenceLine> lines;
-      if (editing) {
-        final marks = {
-          for (final row in await drafts.marksOf(
-            classroomId: key.classroomId,
-            dateStr: key.day,
-            academicYearId: key.academicYearId,
-          ))
-            row.studentId: row,
-        };
-        lines = [
-          for (final student in students)
-            ClassPresenceMapper.fromDraft(student, marks[student.id]),
-        ];
-      } else {
-        final records = {
-          for (final row in await sessions.getDayRecords(
-            classroomId: key.classroomId,
-            dateStr: key.day,
-            academicYearId: key.academicYearId,
-          ))
-            row.studentId: row,
-        };
-        lines = [
-          for (final student in students)
-            ClassPresenceMapper.fromSession(student, records[student.id], sync),
-        ];
-      }
-      return ClassPresenceDay(
-        classroomId: key.classroomId,
-        academicYearId: key.academicYearId,
-        day: key.day,
-        lines: lines,
-        hasSession: session != null,
-        reopened: session?.reopenedAt != null,
-        takenBy: session?.takenBy,
-        lastSentAt: session?.updatedAt,
-        sync: sync,
-        refusal: refusal,
-        monthClosed: await closures.isClosed(
-          classroomId: key.classroomId,
-          academicYearId: key.academicYearId,
-          month: key.day.substring(0, 7),
-        ),
-        schedule: await scheduleReader.read(currentUser?.schoolId),
-      );
-    },
+  ClassPresenceDayReader get _days => ClassPresenceDayReader(
+    sessions: sessions,
+    drafts: drafts,
+    closures: closures,
+    roster: roster,
+    scheduleReader: scheduleReader,
+    outbox: outbox,
+    currentUser: currentUser,
   );
+
+  @override
+  Future<Either<Failure, ClassPresenceDay>> loadDay(ClassDayKey key) =>
+      _guard('Local attendance read failed', () => _days.read(key));
 
   @override
   Future<Either<Failure, Unit>> saveMarks(
     ClassDayKey key,
     Map<String, PresenceMark<AbsenceReason>> marks,
   ) => _guard('Local attendance draft write failed', () async {
-    final day = await loadDay(key);
-    final current = {
-      for (final line in day.fold((_) => <ClassPresenceLine>[], (d) => d.lines))
-        line.student.id: line,
-    };
+    final day = await _days.read(key);
+    final current = {for (final line in day.lines) line.student.id: line};
     final nowMs = now();
     final rows = [
       for (final entry in marks.entries)
@@ -147,6 +94,8 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
             dateStr: key.day,
             academicYearId: key.academicYearId,
             updatedAt: nowMs,
+            // Sur un appel rouvert, « à pointer » masque la ligne en base.
+            keepNone: day.reopened,
           ),
     ];
     await drafts.putMarks(
@@ -155,8 +104,9 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
       academicYearId: key.academicYearId,
       marks: rows.nonNulls.toList(growable: false),
       removed: [
-        for (final entry in marks.entries)
-          if (!entry.value.status.isMarked) entry.key,
+        if (!day.reopened)
+          for (final entry in marks.entries)
+            if (!entry.value.status.isMarked) entry.key,
       ],
     );
     return unit;
@@ -168,19 +118,20 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
     List<ClassPresenceLine> lines,
   ) async {
     try {
+      final sent = await _freshUntouched(key, lines);
       final written = await writer.write(
         classroomId: key.classroomId,
         dateStr: key.day,
         academicYearId: key.academicYearId,
-        covered: {for (final line in lines) line.student.id},
-        lines: lines
+        covered: {for (final line in sent) line.student.id},
+        lines: sent
             .map(ClassPresenceMapper.exception)
             .nonNulls
             .toList(growable: false),
       );
       if (written == AttendanceDayWrite.raced) {
         return const Left(
-          StorageFailure(
+          ConflictFailure(
             'Cet appel vient d\'être modifié ailleurs — rouvrez la journée '
             'pour repartir de l\'état à jour.',
           ),
@@ -192,37 +143,47 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Unit>> reopenDay(
+  /// Sur un appel rouvert, un élève que personne n'a touché depuis la
+  /// réouverture part tel qu'il est **en base maintenant** — une correction
+  /// reçue entre-temps n'est jamais écrasée par la photo de l'écran.
+  Future<List<ClassPresenceLine>> _freshUntouched(
     ClassDayKey key,
     List<ClassPresenceLine> lines,
-  ) => _guard('Local attendance reopen failed', () async {
-    final nowMs = now();
-    await drafts.reopen(
-      classroomId: key.classroomId,
-      dateStr: key.day,
-      academicYearId: key.academicYearId,
-      reopenedAt: nowMs,
-      marks: lines
-          .map(
-            (line) => ClassPresenceMapper.draftRow(
-              line,
-              classroomId: key.classroomId,
-              dateStr: key.day,
-              academicYearId: key.academicYearId,
-              updatedAt: nowMs,
-            ),
-          )
-          .nonNulls
-          .toList(growable: false),
-    );
-    return unit;
-  });
+  ) async {
+    final fresh = await _days.read(key);
+    if (!fresh.reopened) return lines;
+    final touched = (await _days.draftMarks(key)).keys.toSet();
+    final current = {for (final line in fresh.lines) line.student.id: line};
+    return [
+      for (final line in lines)
+        touched.contains(line.student.id)
+            ? line
+            : current[line.student.id] ?? line,
+    ];
+  }
+
+  @override
+  Future<Either<Failure, Unit>> reopenDay(ClassDayKey key) =>
+      _guard('Local attendance reopen failed', () async {
+        await drafts.reopen(
+          classroomId: key.classroomId,
+          dateStr: key.day,
+          academicYearId: key.academicYearId,
+          reopenedAt: now(),
+        );
+        return unit;
+      });
 
   @override
   Future<Either<Failure, Unit>> retryDay(ClassDayKey key) =>
       _guard('Local attendance retry failed', () async {
-        await outbox.requeue(_entryId(key));
+        await outbox.requeue(
+          AttendanceDayWriter.outboxEntryId(
+            key.classroomId,
+            key.day,
+            key.academicYearId,
+          ),
+        );
         final engine = syncEngine;
         if (engine != null) unawaited(engine.flush());
         return unit;
@@ -236,6 +197,7 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
           roster: roster,
           history: history,
           closures: closures,
+          drafts: drafts,
         ).read(key),
       );
 
@@ -278,28 +240,6 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
       if (engine != null) unawaited(engine.flush());
       return unit;
     },
-  );
-
-  /// Où en est l'envoi de l'appel : au serveur, en file, ou refusé (avec la
-  /// raison écrite par le serveur).
-  Future<(RecordSyncState, String?)> _sendState(
-    ClassDayKey key,
-    AttendanceSessionRow? session,
-  ) async {
-    if (session == null || session.isSynced) {
-      return (RecordSyncState.synced, null);
-    }
-    final entry = await outbox.byId(_entryId(key));
-    if (entry != null && entry.status == OutboxStatus.syncError) {
-      return (RecordSyncState.failed, entry.lastError);
-    }
-    return (RecordSyncState.pending, null);
-  }
-
-  static String _entryId(ClassDayKey key) => AttendanceDayWriter.outboxEntryId(
-    key.classroomId,
-    key.day,
-    key.academicYearId,
   );
 
   static Future<Either<Failure, T>> _guard<T>(

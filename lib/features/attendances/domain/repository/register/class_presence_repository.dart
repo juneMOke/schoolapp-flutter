@@ -37,12 +37,10 @@ abstract class ClassPresenceRepository {
     List<ClassPresenceLine> lines,
   );
 
-  /// Rouvre un appel validé : ses marques reviennent au brouillon. Rien ne
-  /// part avant la revalidation.
-  Future<Either<Failure, Unit>> reopenDay(
-    ClassDayKey key,
-    List<ClassPresenceLine> lines,
-  );
+  /// Rouvre un appel validé : les marques posées ensuite vont au brouillon,
+  /// les autres se lisent dans l'appel en base. Rien ne part avant la
+  /// revalidation.
+  Future<Either<Failure, Unit>> reopenDay(ClassDayKey key);
 
   /// Remet en file l'envoi refusé d'un appel validé.
   Future<Either<Failure, Unit>> retryDay(ClassDayKey key);

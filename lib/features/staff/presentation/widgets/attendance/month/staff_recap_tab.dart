@@ -53,7 +53,7 @@ class StaffRecapTab extends StatelessWidget {
           children: [
             PresenceMonthNav(
               month: state.month,
-              isCurrent: state.month == state.today.substring(0, 7),
+              isCurrent: state.isCurrentMonth,
               onPrevious: state.canStepMonthBack
                   ? () => unawaited(cubit.stepMonth(-1))
                   : null,

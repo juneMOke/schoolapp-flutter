@@ -5691,10 +5691,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enrollment saved — pending synchronization';
 
   @override
-  String get offlineAttendanceQueued =>
-      'Attendance saved — pending synchronization';
-
-  @override
   String get offlineDisciplinaryCaseQueued =>
       'Disciplinary case saved — pending synchronization';
 
@@ -13688,9 +13684,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get classPresenceRecapToDate => 'to date';
-
-  @override
   String classPresenceRecapStudents(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -13792,5 +13785,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String classPresenceToastClosed(String month, String classroom) {
     return '$month closed · $classroom';
+  }
+
+  @override
+  String classPresenceCloseOpenDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count days are being taken or were reopened: validate them before closing the month.',
+      one:
+          '1 day is being taken or was reopened: validate it before closing the month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceToastRaced =>
+      'This call was just changed elsewhere: the day was reloaded, please redo your change.';
+
+  @override
+  String presenceMarkRetryTooltip(String reason) {
+    return '$reason — Retry';
+  }
+
+  @override
+  String classPresenceRecapDaysToDate(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days school days to date',
+      one: '1 school day to date',
+      zero: 'No school day to date',
+    );
+    return '$_temp0';
   }
 }

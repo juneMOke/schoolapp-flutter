@@ -84,7 +84,7 @@ void main() {
     when(
       () => validate(any(), any()),
     ).thenAnswer((_) async => const Right(unit));
-    when(() => reopen(any(), any())).thenAnswer((_) async => const Right(unit));
+    when(() => reopen(any())).thenAnswer((_) async => const Right(unit));
     final signals = _Signals();
     when(() => signals.watch(any())).thenReturn(() {});
     when(signals.pull).thenAnswer((_) async {});
@@ -106,6 +106,12 @@ void main() {
     addTearDown(cubit.close);
     cubit.setAcademicYear('y1', const SchoolYearBounds(start: '2026-09-01'));
     await cubit.selectClassroom(kClassroom);
+    // Le cubit se place sur le jour de l'appel lu : un geste ne vise que le
+    // jour affiché.
+    for (var i = 0; i < 7 && cubit.state.day != day.day; i++) {
+      await cubit.stepDay(-1);
+    }
+    expect(cubit.state.day, day.day);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -219,7 +225,7 @@ void main() {
     await tester.tap(find.text('Rouvrir'));
     await tester.pumpAndSettle();
 
-    verify(() => reopen(any(), any())).called(1);
+    verify(() => reopen(any())).called(1);
   });
 
   testWidgets('appel validé : « Justifier » reste ouvert (décision 9)', (
@@ -237,6 +243,6 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => validate(any(), any())).called(1);
-    verifyNever(() => reopen(any(), any()));
+    verifyNever(() => reopen(any()));
   });
 }

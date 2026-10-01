@@ -52,7 +52,7 @@ void main() {
     when(
       () => validate(any(), any()),
     ).thenAnswer((_) async => const Right(unit));
-    when(() => reopen(any(), any())).thenAnswer((_) async => const Right(unit));
+    when(() => reopen(any())).thenAnswer((_) async => const Right(unit));
     commands = ClassPresenceCommands(
       save: save,
       validate: validate,
@@ -113,7 +113,7 @@ void main() {
       expect(lines, hasLength(3));
       expect(lines[1].mark.justification?.reason, AbsenceReason.sickness);
       expect(lines[0], day.lines[0]);
-      verifyNever(() => reopen(any(), any()));
+      verifyNever(() => reopen(any()));
       verifyNever(() => save(any(), any()));
     },
   );
@@ -155,7 +155,7 @@ void main() {
         ClassPresenceNoticeKind.unsupportedReason,
       );
       verifyNever(() => validate(any(), any()));
-      verifyNever(() => reopen(any(), any()));
+      verifyNever(() => reopen(any()));
     },
   );
 

@@ -22,7 +22,9 @@ class StaffDayBanner extends StatelessWidget {
   const StaffDayBanner({super.key, required this.state});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<StaffAttendanceCubit>();
     final actions = StaffRegisterActions(context);
@@ -73,7 +75,9 @@ class StaffValidatedBanner extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final register = state.register;
     final when = PresenceLabels.moment(

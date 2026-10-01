@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_close.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les trois onglets de l'appel : le registre du jour, la fiche d'un élève
@@ -24,6 +25,7 @@ class ClassPresenceTabs extends StatelessWidget {
     final register = state.register;
     final day = state.presenceDay;
     final closed = state.monthData?.closed ?? false;
+    final toClose = canCloseClassMonth(state);
     final unmarked = register?.count(PresenceStatus.none) ?? 0;
     EteeloTabBadge tone(PresenceStatus status, String label) =>
         PresenceTone.of(status).badge(label);
@@ -66,9 +68,12 @@ class ClassPresenceTabs extends StatelessWidget {
           subtitle: closed
               ? l10n.classPresenceTabRecapSubtitleClosed
               : l10n.classPresenceTabRecapSubtitle,
+          // Seulement ce que la tablette sait : sans mois lu, pas de badge.
           badge: closed
               ? tone(PresenceStatus.present, l10n.presenceMarkBadgeClosed)
-              : tone(PresenceStatus.none, l10n.presenceMarkBadgeToClose),
+              : toClose
+              ? tone(PresenceStatus.none, l10n.presenceMarkBadgeToClose)
+              : null,
         ),
       ],
     );

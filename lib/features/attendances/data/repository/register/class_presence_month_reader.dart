@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_draft_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_mapper.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
@@ -15,11 +16,13 @@ class ClassPresenceMonthReader {
   final ClassroomLocalDataSource roster;
   final AttendanceHistoryLocalDataSource history;
   final AttendanceClosureLocalDataSource closures;
+  final AttendanceDraftLocalDataSource drafts;
 
   const ClassPresenceMonthReader({
     required this.roster,
     required this.history,
     required this.closures,
+    required this.drafts,
   });
 
   Future<ClassPresenceMonth> read(ClassMonthKey key) async {
@@ -67,6 +70,18 @@ class ClassPresenceMonthReader {
         academicYearId: key.academicYearId,
         month: key.month,
       ),
+      // Jours en cours de saisie (brouillon) ou rouverts : la clôture les
+      // attend, sinon elle figerait un appel que personne n'a validé.
+      openDays: {
+        ...await drafts.daysWithMarks(
+          classroomId: key.classroomId,
+          academicYearId: key.academicYearId,
+          from: from,
+          to: to,
+        ),
+        for (final session in monthSessions)
+          if (session.reopenedAt != null) session.attendanceDate,
+      },
       sync: syncOf.values.contains(RecordSyncState.pending)
           ? RecordSyncState.pending
           : RecordSyncState.synced,

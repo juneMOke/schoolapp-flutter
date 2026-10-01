@@ -47,12 +47,17 @@ class StaffAttendanceEditor {
     ClockTime arrival,
   ) => _apply(record, _marks.setArrival(record.mark, arrival));
 
+  /// Saisit ou efface le départ. Sans arrivée, ou avant l'arrivée, rien ne
+  /// change ; sinon la ligne repart, même au même départ — ressaisir le
+  /// départ d'une ligne refusée la renvoie, comme avant le socle commun.
   StaffAttendanceRecord setDeparture(
     StaffAttendanceRecord record,
     ClockTime? departure,
   ) {
-    final changed = _marks.setDeparture(record.mark, departure);
-    return changed == record.mark ? record : _apply(record, changed);
+    final arrival = record.arrival;
+    if (!record.status.hasArrival || arrival == null) return record;
+    if (departure != null && departure.compareTo(arrival) < 0) return record;
+    return _apply(record, _marks.setDeparture(record.mark, departure));
   }
 
   /// Heures prestées d'un vacataire payé à l'heure, bornées à 0–10 h.

@@ -131,3 +131,26 @@ class PermissionGate extends StatelessWidget {
     }
   }
 }
+
+/// Reconstruit [builder] quand les droits de la session changent : pour un
+/// rendu qui dépend de plusieurs exigences à la fois (un bandeau dont les
+/// actions et la réouverture ont chacune la leur), et qui lit donc
+/// [PermissionGate.allowsAccess] dans son builder. Sans [AuthBloc] dans
+/// l'arbre, rend simplement [builder].
+class PermissionAware extends StatelessWidget {
+  final WidgetBuilder builder;
+
+  const PermissionAware({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = PermissionGate.maybeBlocOf(context);
+    if (bloc == null) return builder(context);
+    return BlocBuilder<AuthBloc, AuthState>(
+      bloc: bloc,
+      buildWhen: (previous, current) =>
+          !PermissionGate._sameSet(previous.permissions, current.permissions),
+      builder: (context, _) => builder(context),
+    );
+  }
+}

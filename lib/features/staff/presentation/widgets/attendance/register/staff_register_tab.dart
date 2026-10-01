@@ -27,7 +27,9 @@ class StaffRegisterTab extends StatelessWidget {
   const StaffRegisterTab({super.key, required this.state});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<StaffAttendanceCubit>();
     final register = state.register;

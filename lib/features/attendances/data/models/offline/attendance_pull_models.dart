@@ -104,7 +104,7 @@ class AbsenceDeltaDto {
     academicYearId: academicYearId,
     present: status == AttendanceLineWire.late,
     status: status ?? AttendanceLineWire.absent,
-    arrivalTime: arrivalTime,
+    arrivalTime: AttendanceLineWire.arrival(arrivalTime),
     lateMinutes: lateMinutes,
     absenceReason: absenceReason,
     absenceReasonNote: absenceReasonNote,

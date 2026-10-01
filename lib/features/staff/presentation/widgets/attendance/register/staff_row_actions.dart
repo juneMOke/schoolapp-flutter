@@ -9,7 +9,6 @@ import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_justification_dialog.dart';
@@ -127,18 +126,7 @@ class StaffRowActions implements PresenceRowActions {
         title: l10n.presenceMarkTimeArrivalTitle(_name),
         initial: row.record?.arrival,
         schedule: settings,
-        shortcuts: [
-          PresenceTimeShortcut(l10n.presenceMarkTimeNow, now),
-          PresenceTimeShortcut(l10n.presenceMarkTimeStart, settings.start),
-          PresenceTimeShortcut(
-            l10n.presenceMarkTimePlus(15),
-            settings.start.plus(15),
-          ),
-          PresenceTimeShortcut(
-            l10n.presenceMarkTimePlus(30),
-            settings.start.plus(30),
-          ),
-        ],
+        shortcuts: PresenceTimeShortcut.arrivals(l10n, settings, now),
       ),
     );
     final time = choice?.time;
@@ -180,24 +168,16 @@ class StaffRowActions implements PresenceRowActions {
     final StaffAttendanceRecord? record = _row.record;
     if (record == null || !record.status.isIncident) return;
     final l10n = AppLocalizations.of(context)!;
-    final choice =
-        await EteeloFormDialog.show<
-          PresenceJustificationChoice<StaffAbsenceReason>
-        >(
-          context,
-          PresenceJustificationDialog<StaffAbsenceReason>(
-            name: _name,
-            status: record.status,
-            lateMinutes: record.lateMinutes,
-            initial: record.justification,
-            reasons: StaffAbsenceReason.values,
-            reasonLabel: (reason) => StaffAttendanceLabels.reason(l10n, reason),
-            dayLabel: PresenceLabels.longDay(
-              MaterialLocalizations.of(context),
-              row.day,
-            ),
-          ),
-        );
+    final choice = await PresenceJustificationDialog.show<StaffAbsenceReason>(
+      context,
+      name: _name,
+      status: record.status,
+      lateMinutes: record.lateMinutes,
+      day: row.day,
+      initial: record.justification,
+      reasons: StaffAbsenceReason.values,
+      reasonLabel: (reason) => StaffAttendanceLabels.reason(l10n, reason),
+    );
     if (choice == null || !context.mounted) return;
     await _cubit.perform(
       (c) => c.justify(_cubit.state.snapshot, _row, choice.justification),

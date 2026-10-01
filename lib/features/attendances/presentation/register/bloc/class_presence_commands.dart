@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_mark_editor.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_rules.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
@@ -61,7 +63,7 @@ class ClassPresenceCommands {
     return _edit(
       day,
       line,
-      (editor) => editor.mark(line.mark, status, ClockTime.of(_now())),
+      (editor) => editor.mark(line.mark, status, _clockFor(day)),
     );
   }
 
@@ -97,13 +99,19 @@ class ClassPresenceCommands {
           : ClassPresenceNoticeKind.justified,
       name: line.student.fullName,
     );
-    if (day.monthClosed) {
-      return const ClassPresenceNotice(ClassPresenceNoticeKind.monthFrozen);
-    }
+    final frozen = _frozen(day, justifying: true);
+    if (frozen != null) return frozen;
     final changed = _editor(day).justify(line.mark, justification);
     if (changed == line.mark) return null;
     if (!day.validated) {
       return _outcome(await _saveMark(day, line, changed), done);
+    }
+    if (day.lines.any(
+      (other) => other.student.id != line.student.id && other.blocksResend,
+    )) {
+      return const ClassPresenceNotice(
+        ClassPresenceNoticeKind.unsupportedReason,
+      );
     }
     final lines = [
       for (final current in day.lines)
@@ -172,7 +180,7 @@ class ClassPresenceCommands {
       );
     }
     return _outcome(
-      await _reopen(_key(day), day.lines),
+      await _reopen(_key(day)),
       const ClassPresenceNotice(ClassPresenceNoticeKind.reopened),
     );
   }
@@ -237,15 +245,31 @@ class ClassPresenceCommands {
   static PresenceMarkEditor _editor(ClassPresenceDay day) =>
       PresenceMarkEditor(PresenceRules(day.schedule));
 
-  static ClassPresenceNotice? _frozen(ClassPresenceDay day) {
-    if (day.monthClosed) {
-      return const ClassPresenceNotice(ClassPresenceNoticeKind.monthFrozen);
-    }
-    if (day.validated) {
-      return const ClassPresenceNotice(ClassPresenceNoticeKind.dayFrozen);
-    }
-    return null;
+  /// Le verrou de la journée côté données (mois clos, appel validé). Les
+  /// droits se tranchent à l'écran, avant d'ouvrir une modale.
+  ClassPresenceNotice? _frozen(
+    ClassPresenceDay day, {
+    bool justifying = false,
+  }) {
+    final lock = classDayLock(
+      day,
+      today: SchoolDayCalendar.dayOf(_now()),
+      canWrite: true,
+      canAmend: true,
+      justifying: justifying,
+    );
+    return lock == null
+        ? null
+        : ClassPresenceNotice(ClassPresenceNoticeKind.ofLock(lock));
   }
+
+  /// L'heure qui sert à proposer une arrivée : maintenant pour l'appel du
+  /// jour, le début des cours pour un autre jour — rattraper l'appel d'hier à
+  /// 16 h ne doit pas poser 16 h comme heure d'arrivée.
+  ClockTime _clockFor(ClassPresenceDay day) =>
+      day.day == SchoolDayCalendar.dayOf(_now())
+      ? ClockTime.of(_now())
+      : day.schedule.start;
 
   static ClassDayKey _key(ClassPresenceDay day) => (
     classroomId: day.classroomId,
@@ -257,7 +281,11 @@ class ClassPresenceCommands {
     Either<Failure, Unit> result,
     ClassPresenceNotice? done,
   ) => result.fold(
-    (_) => const ClassPresenceNotice(ClassPresenceNoticeKind.writeFailed),
+    (failure) => ClassPresenceNotice(
+      failure is ConflictFailure
+          ? ClassPresenceNoticeKind.raced
+          : ClassPresenceNoticeKind.writeFailed,
+    ),
     (_) => done,
   );
 }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.dart';
-import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_rate_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
@@ -20,6 +19,7 @@ import 'package:school_app_flutter/features/attendances/domain/services/class_mo
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_close.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_placeholder.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_recap_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -57,9 +57,9 @@ class ClassRecapTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        if (recap == null)
-          const EteeloListSkeleton(rowCount: 6)
-        else if (recap.isHoliday)
+        if (classMonthPlaceholder(context, state) case final placeholder?)
+          placeholder
+        else if (recap!.isHoliday)
           PresenceHolidayState(
             month: state.month,
             onCurrent: () => unawaited(cubit.goCurrentMonth()),
@@ -108,10 +108,9 @@ class _Totals extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final rate = recap.rate;
-    final days = [
-      l10n.classPresenceRecapDays(recap.schoolDays),
-      if (state.isCurrentMonth) l10n.classPresenceRecapToDate,
-    ].join(' ');
+    final days = state.isCurrentMonth
+        ? l10n.classPresenceRecapDaysToDate(recap.schoolDays)
+        : l10n.classPresenceRecapDays(recap.schoolDays);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

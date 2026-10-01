@@ -185,14 +185,8 @@ void main() {
     await repo.validateDay(key, (await load()).lines);
     final history = AttendanceHistoryLocalDataSource(db);
 
-    expect(
-      await history.countAbsences(
-        classroomId: key.classroomId,
-        dateStr: key.day,
-        academicYearId: key.academicYearId,
-      ),
-      1,
-    );
+    final absences = await db.query('attendance_records', where: 'present = 0');
+    expect(absences.map((row) => row['student_id']), ['s2']);
     expect(
       await history.getStudentAbsenceRecords(
         studentId: 's1',
@@ -246,9 +240,8 @@ void main() {
     () async {
       await repo.saveMarks(key, {'s1': late});
       await repo.validateDay(key, (await load()).lines);
-      final validated = await load();
 
-      await repo.reopenDay(key, validated.lines);
+      await repo.reopenDay(key);
       final reopened = await load();
       expect(reopened.reopened, isTrue);
       expect(reopened.validated, isFalse);
@@ -356,4 +349,54 @@ void main() {
       expect(month.closed, isFalse);
     },
   );
+
+  test(
+    'rouvert : une correction reçue entre-temps n est pas écrasée',
+    () async {
+      await repo.saveMarks(key, {'s2': absent});
+      await repo.validateDay(key, (await load()).lines);
+      await repo.reopenDay(key);
+      clock = 2000;
+
+      // Une autre tablette passe Jean (s2) en retard ; le pull l'applique.
+      await db.update('attendance_sessions', {'sync_status': 'SYNCED'});
+      await db.update(
+        'attendance_records',
+        {
+          'status': 'LATE',
+          'present': 1,
+          'arrival_time': '07:50',
+          'late_minutes': 20,
+          'updated_at': 1500,
+          'sync_status': 'SYNCED',
+        },
+        where: 'student_id = ?',
+        whereArgs: ['s2'],
+      );
+
+      // L'écran rouvert montre la correction ; on ne touche que Grâce (s1).
+      final reopened = await load();
+      expect(lineOf(reopened, 's2').status, PresenceStatus.late);
+      await repo.saveMarks(key, {'s1': absent});
+      await repo.validateDay(key, (await load()).lines);
+
+      final jean = (await db.query(
+        'attendance_records',
+        where: 'student_id = ?',
+        whereArgs: ['s2'],
+      )).single;
+      expect(jean['status'], 'LATE');
+      expect(jean['updated_at'], 1500);
+    },
+  );
+
+  test('rouvert : remettre « à pointer » masque la ligne en base', () async {
+    await repo.saveMarks(key, {'s2': absent});
+    await repo.validateDay(key, (await load()).lines);
+    await repo.reopenDay(key);
+
+    await repo.saveMarks(key, {'s2': const PresenceMark.none()});
+
+    expect(lineOf(await load(), 's2').status, PresenceStatus.none);
+  });
 }

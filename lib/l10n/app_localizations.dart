@@ -9241,12 +9241,6 @@ abstract class AppLocalizations {
   /// **'Enrollment saved — pending synchronization'**
   String get offlineEnrollmentQueued;
 
-  /// No description provided for @offlineAttendanceQueued.
-  ///
-  /// In en, this message translates to:
-  /// **'Attendance saved — pending synchronization'**
-  String get offlineAttendanceQueued;
-
   /// No description provided for @offlineDisciplinaryCaseQueued.
   ///
   /// In en, this message translates to:
@@ -21656,12 +21650,6 @@ abstract class AppLocalizations {
   /// **'{days, plural, =0{No school day} =1{1 school day} other{{days} school days}}'**
   String classPresenceRecapDays(int days);
 
-  /// No description provided for @classPresenceRecapToDate.
-  ///
-  /// In en, this message translates to:
-  /// **'to date'**
-  String get classPresenceRecapToDate;
-
   /// No description provided for @classPresenceRecapStudents.
   ///
   /// In en, this message translates to:
@@ -21787,6 +21775,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month} closed · {classroom}'**
   String classPresenceToastClosed(String month, String classroom);
+
+  /// No description provided for @classPresenceCloseOpenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day is being taken or was reopened: validate it before closing the month.} other{{count} days are being taken or were reopened: validate them before closing the month.}}'**
+  String classPresenceCloseOpenDays(int count);
+
+  /// No description provided for @classPresenceToastRaced.
+  ///
+  /// In en, this message translates to:
+  /// **'This call was just changed elsewhere: the day was reloaded, please redo your change.'**
+  String get classPresenceToastRaced;
+
+  /// No description provided for @presenceMarkRetryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} — Retry'**
+  String presenceMarkRetryTooltip(String reason);
+
+  /// No description provided for @classPresenceRecapDaysToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{No school day to date} =1{1 school day to date} other{{days} school days to date}}'**
+  String classPresenceRecapDaysToDate(int days);
 }
 
 class _AppLocalizationsDelegate

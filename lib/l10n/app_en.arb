@@ -3606,7 +3606,6 @@
   "offlineQueuedGeneric": "Saved — pending synchronization",
   "offlinePaymentQueued": "Payment saved — pending synchronization",
   "offlineEnrollmentQueued": "Enrollment saved — pending synchronization",
-  "offlineAttendanceQueued": "Attendance saved — pending synchronization",
   "offlineDisciplinaryCaseQueued": "Disciplinary case saved — pending synchronization",
   "offlineDisciplinaryCaseUpdatedQueued": "Case updated — pending synchronization",
   "offlineWriteError": "Local save failed",
@@ -8515,7 +8514,6 @@
   "@classPresenceRecapEyebrow": {"placeholders": {"classroom": {"type": "String"}}},
   "classPresenceRecapDays": "{days, plural, =0{No school day} =1{1 school day} other{{days} school days}}",
   "@classPresenceRecapDays": {"placeholders": {"days": {"type": "int"}}},
-  "classPresenceRecapToDate": "to date",
   "classPresenceRecapStudents": "{count, plural, =1{1 student} other{{count} students}}",
   "@classPresenceRecapStudents": {"placeholders": {"count": {"type": "int"}}},
   "classPresenceTotalLates": "Late arrivals",
@@ -8546,5 +8544,12 @@
   "classPresenceCloseRefused": "The closing was refused: {reason}",
   "@classPresenceCloseRefused": {"placeholders": {"reason": {"type": "String"}}},
   "classPresenceToastClosed": "{month} closed · {classroom}",
-  "@classPresenceToastClosed": {"placeholders": {"month": {"type": "String"}, "classroom": {"type": "String"}}}
+  "@classPresenceToastClosed": {"placeholders": {"month": {"type": "String"}, "classroom": {"type": "String"}}},
+  "classPresenceCloseOpenDays": "{count, plural, =1{1 day is being taken or was reopened: validate it before closing the month.} other{{count} days are being taken or were reopened: validate them before closing the month.}}",
+  "@classPresenceCloseOpenDays": {"placeholders": {"count": {"type": "int"}}},
+  "classPresenceToastRaced": "This call was just changed elsewhere: the day was reloaded, please redo your change.",
+  "presenceMarkRetryTooltip": "{reason} — Retry",
+  "@presenceMarkRetryTooltip": {"placeholders": {"reason": {"type": "String"}}},
+  "classPresenceRecapDaysToDate": "{days, plural, =0{No school day to date} =1{1 school day to date} other{{days} school days to date}}",
+  "@classPresenceRecapDaysToDate": {"placeholders": {"days": {"type": "int"}}}
 }

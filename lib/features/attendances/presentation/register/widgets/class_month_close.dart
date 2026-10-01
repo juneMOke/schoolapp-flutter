@@ -24,7 +24,12 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// en cours, lu sur son horloge), une année scolaire connue, pas encore clos.
 bool canCloseClassMonth(ClassPresenceState state) {
   final data = state.monthData;
-  if (data == null || data.closed || state.schoolYear == null) return false;
+  if (data == null ||
+      data.closed ||
+      data.openDays.isNotEmpty ||
+      state.schoolYear == null) {
+    return false;
+  }
   return SchoolDayCalendar.daysOf(state.month).last.compareTo(state.today) < 0;
 }
 
@@ -41,7 +46,9 @@ class ClassMonthCloseButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     if (!canCloseClassMonth(state) ||
         recap.isHoliday ||
         !PermissionGate.allowsAccess(context, kAttendanceAmendAccess)) {
@@ -117,9 +124,15 @@ class ClassMonthCloseState extends StatelessWidget {
     final closure = this.closure;
     if (closure == null || !closure.closes) {
       final refusal = closure?.refusal;
+      final openDays = state.monthData?.openDays.length ?? 0;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (openDays > 0)
+            PresenceWarning(
+              icon: Icons.edit_calendar_outlined,
+              message: l10n.classPresenceCloseOpenDays(openDays),
+            ),
           if (refusal != null)
             PresenceWarning(
               icon: Icons.sync_problem,

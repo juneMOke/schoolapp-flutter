@@ -77,7 +77,7 @@ class StaffAgentMonthTab extends StatelessWidget {
             ),
             PresenceMonthNav(
               month: state.month,
-              isCurrent: state.month == state.today.substring(0, 7),
+              isCurrent: state.isCurrentMonth,
               onPrevious: state.canStepMonthBack
                   ? () => unawaited(cubit.stepMonth(-1))
                   : null,
@@ -142,23 +142,17 @@ class _Kpis extends StatelessWidget {
             ? '${stats.present}'
             : l10n.presenceMarkKpiRatio(stats.present, stats.workDays),
       ),
-      PresenceCountTile(
-        tone: PresenceStatus.late,
-        label: l10n.presenceMarkKpiLates,
-        value: '${stats.late}',
-        detail: l10n.presenceMarkKpiLatesDetail(
-          stats.lateMinutes,
-          stats.lateUnjustified,
-        ),
+      PresenceCountTile.lates(
+        l10n,
+        count: stats.late,
+        minutes: stats.lateMinutes,
+        unjustified: stats.lateUnjustified,
       ),
-      PresenceCountTile(
-        tone: PresenceStatus.absent,
-        label: l10n.presenceMarkKpiAbsences,
-        value: '${stats.absent}',
-        detail: l10n.presenceMarkKpiAbsencesDetail(
-          stats.absentJustified,
-          stats.absentUnjustified,
-        ),
+      PresenceCountTile.absences(
+        l10n,
+        count: stats.absent,
+        justified: stats.absentJustified,
+        unjustified: stats.absentUnjustified,
       ),
       if (stats.isHourly)
         PresenceCountTile(

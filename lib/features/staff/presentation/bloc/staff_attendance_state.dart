@@ -142,6 +142,9 @@ class StaffAttendanceState extends Equatable {
     failure: clearFailure ? null : failure ?? this.failure,
   );
 
+  /// Le mois affiché est le mois en cours (bornes « à ce jour »).
+  bool get isCurrentMonth => month == today.substring(0, 7);
+
   @override
   List<Object?> get props => [
     load,

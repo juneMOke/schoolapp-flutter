@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Un compteur dans la teinte d'un statut : le résumé du rapport journalier,
 /// et les indicateurs de la fiche mensuelle.
@@ -20,6 +21,30 @@ class PresenceCountTile extends StatelessWidget {
     required this.value,
     this.detail,
   });
+
+  /// Les retards d'un mois : nombre, minutes cumulées, non justifiés.
+  PresenceCountTile.lates(
+    AppLocalizations l10n, {
+    super.key,
+    required int count,
+    required int minutes,
+    required int unjustified,
+  }) : tone = PresenceStatus.late,
+       label = l10n.presenceMarkKpiLates,
+       value = '$count',
+       detail = l10n.presenceMarkKpiLatesDetail(minutes, unjustified);
+
+  /// Les absences d'un mois : nombre, justifiées et non justifiées.
+  PresenceCountTile.absences(
+    AppLocalizations l10n, {
+    super.key,
+    required int count,
+    required int justified,
+    required int unjustified,
+  }) : tone = PresenceStatus.absent,
+       label = l10n.presenceMarkKpiAbsences,
+       value = '$count',
+       detail = l10n.presenceMarkKpiAbsencesDetail(justified, unjustified);
 
   @override
   Widget build(BuildContext context) {

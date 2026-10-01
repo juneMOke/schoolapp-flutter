@@ -11,7 +11,8 @@ class AttendanceDraftMarkRow extends Equatable {
   final String academicYearId;
   final String studentId;
 
-  /// `PRESENT`, `LATE` ou `ABSENT` ([statusWire]).
+  /// `PRESENT`, `LATE`, `ABSENT` ou — sur un appel rouvert seulement —
+  /// `NONE`, un élève remis « à pointer » ([statusWire]).
   final String status;
 
   /// `HH:mm` (présent ou retard).
@@ -38,9 +39,7 @@ class AttendanceDraftMarkRow extends Equatable {
     PresenceStatus.present => 'PRESENT',
     PresenceStatus.late => 'LATE',
     PresenceStatus.absent => 'ABSENT',
-    PresenceStatus.none => throw ArgumentError(
-      '« À pointer » n\'a pas de ligne de brouillon.',
-    ),
+    PresenceStatus.none => 'NONE',
   };
 
   /// Une valeur inconnue se lit « à pointer » : le brouillon est local, rien

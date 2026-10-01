@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// La forme sur le fil (et en base) du statut d'une ligne d'appel, contrat
@@ -18,6 +19,12 @@ abstract final class AttendanceLineWire {
         absent => PresenceStatus.absent,
         _ => present ? PresenceStatus.present : PresenceStatus.absent,
       };
+
+  /// Une heure reçue, ramenée à `HH:mm` (le serveur peut écrire des
+  /// secondes) : sans cela, une ligne inchangée se lirait « modifiée » et
+  /// regagnerait à tort un arbitrage LWW au prochain renvoi.
+  static String? arrival(String? value) =>
+      ClockTime.tryParse(value)?.wire ?? value;
 
   /// `ABSENT` ou `LATE` ; une présence ou « à pointer » n'a pas de ligne.
   static String write(PresenceStatus status) => switch (status) {

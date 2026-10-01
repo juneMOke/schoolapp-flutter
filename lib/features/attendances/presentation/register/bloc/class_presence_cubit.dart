@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
-import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_classroom.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
@@ -11,6 +9,7 @@ import 'package:school_app_flutter/features/attendances/domain/services/class_da
 import 'package:school_app_flutter/features/attendances/domain/services/class_month_recap.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/register/class_presence_use_cases.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_commands.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_filters.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
 
@@ -19,7 +18,8 @@ import 'package:school_app_flutter/features/attendances/presentation/register/bl
 ///
 /// La tablette relit le jour affiché à chaque changement (classe, jour,
 /// geste) et quand un pull ou un flush le périme.
-class ClassPresenceCubit extends Cubit<ClassPresenceState> {
+class ClassPresenceCubit extends Cubit<ClassPresenceState>
+    with ClassPresenceFilters {
   final LoadClassPresenceDayUseCase _load;
   final LoadClassPresenceMonthUseCase _loadMonth;
   final ResourceSyncSignals _signals;
@@ -31,6 +31,13 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
   /// Numéro de la dernière lecture lancée : une lecture plus ancienne qui
   /// répond après ne doit pas écraser la plus récente (double toucher).
   int _read = 0;
+
+  /// Même garde pour les lectures du mois.
+  int _monthRead = 0;
+
+  /// Un geste est en cours : un second toucher attend qu'il soit relu, sinon
+  /// il partirait de la même ligne et n'avancerait le cycle que d'un cran.
+  bool _busy = false;
 
   ClassPresenceCubit({
     required LoadClassPresenceDayUseCase load,
@@ -60,9 +67,11 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
   void setAcademicYear(String academicYearId, SchoolYearBounds schoolYear) {
     _unwatch ??= _signals.watch(() => unawaited(refresh()));
     if (academicYearId == state.academicYearId) return;
-    emit(
-      state.copyWith(academicYearId: academicYearId, schoolYear: schoolYear),
-    );
+    // Une autre année : la classe choisie n'en fait plus partie.
+    final base = state.academicYearId == null
+        ? state
+        : _initial(_now()).copyWith(viewMode: state.viewMode);
+    emit(base.copyWith(academicYearId: academicYearId, schoolYear: schoolYear));
     unawaited(_signals.pull());
   }
 
@@ -101,16 +110,17 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
         state.tab == ClassPresenceTab.register) {
       return;
     }
-    final month = state.month;
+    final ticket = ++_monthRead;
     final result = await _loadMonth((
       classroomId: classroom.id,
       academicYearId: yearId,
-      month: month,
+      month: state.month,
     ));
-    if (isClosed || month != state.month || classroom != state.classroom) {
-      return;
-    }
-    result.fold((_) {}, (data) => emit(state.copyWith(monthData: () => data)));
+    if (isClosed || ticket != _monthRead) return;
+    result.fold(
+      (_) => emit(state.copyWith(monthFailed: true)),
+      (data) => emit(state.copyWith(monthData: () => data, monthFailed: false)),
+    );
   }
 
   Future<void> _readDay({required bool loading}) async {
@@ -158,8 +168,17 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
     final start = state.schoolYear?.start;
     if (day.compareTo(state.today) > 0 || day == state.day) return;
     if (start != null && day.compareTo(start) < 0) return;
-    emit(state.copyWith(day: day));
-    await refresh();
+    // Les lignes affichées sont celles du jour quitté : les retirer avant la
+    // lecture, sinon un toucher entre-temps écrirait sur l'ancien jour.
+    emit(
+      state.copyWith(
+        day: day,
+        presenceDay: () => null,
+        load: ClassPresenceLoad.loading,
+        today: SchoolDayCalendar.dayOf(_now()),
+      ),
+    );
+    await _readDay(loading: true);
   }
 
   void setTab(ClassPresenceTab tab) {
@@ -195,35 +214,6 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
     unawaited(_readMonth());
   }
 
-  void setRecapFilter(ClassRecapFilter filter) =>
-      emit(state.copyWith(recapQuery: state.recapQuery.withFilter(filter)));
-
-  void setRecapText(String text) {
-    if (text != state.recapQuery.text) {
-      emit(state.copyWith(recapQuery: state.recapQuery.withText(text)));
-    }
-  }
-
-  void resetRecapFilters() =>
-      emit(state.copyWith(recapQuery: ClassRecapQuery.none));
-
-  // ── Filtres ───────────────────────────────────────────────────────────
-
-  void setDayStatus(PresenceStatus? status) =>
-      emit(state.copyWith(dayQuery: state.dayQuery.withStatus(status)));
-
-  void setDayText(String text) {
-    if (text != state.dayQuery.text) {
-      emit(state.copyWith(dayQuery: state.dayQuery.withText(text)));
-    }
-  }
-
-  void resetDayFilters() => emit(state.copyWith(dayQuery: ClassDayQuery.none));
-
-  void setViewMode(CollectionViewMode mode) {
-    if (mode != state.viewMode) emit(state.copyWith(viewMode: mode));
-  }
-
   // ── Gestes ────────────────────────────────────────────────────────────
 
   /// Annonce sans rien écrire (un geste intercepté).
@@ -240,27 +230,37 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
     gesture,
   ) async {
     final day = state.presenceDay;
-    if (day == null) return;
-    final notice = await gesture(commands, day);
-    if (isClosed) return;
-    await refresh();
-    if (isClosed || notice == null) return;
-    emit(state.copyWith(notice: notice.withSeq(++_seq)));
+    if (day == null || day.day != state.day || _busy) return;
+    _busy = true;
+    try {
+      final notice = await gesture(commands, day);
+      if (isClosed) return;
+      await refresh();
+      if (isClosed || notice == null) return;
+      emit(state.copyWith(notice: notice.withSeq(++_seq)));
+    } finally {
+      _busy = false;
+    }
   }
 
   /// Clôt le mois affiché, relit et annonce.
   Future<void> closeMonth() async {
     final month = state.monthData;
     final classroom = state.classroom;
-    if (month == null || classroom == null) return;
-    final notice = await commands.closeMonth(
-      month,
-      classroomName: classroom.name,
-    );
-    if (isClosed) return;
-    await refresh();
-    if (isClosed || notice == null) return;
-    emit(state.copyWith(notice: notice.withSeq(++_seq)));
+    if (month == null || classroom == null || _busy) return;
+    _busy = true;
+    try {
+      final notice = await commands.closeMonth(
+        month,
+        classroomName: classroom.name,
+      );
+      if (isClosed) return;
+      await refresh();
+      if (isClosed || notice == null) return;
+      emit(state.copyWith(notice: notice.withSeq(++_seq)));
+    } finally {
+      _busy = false;
+    }
   }
 
   @override

@@ -99,17 +99,20 @@ void main() {
   });
 
   group('presenceCalendar', () {
-    test('cases vides avant le premier jour, statut seulement hors avenir', () {
-      final days = presenceCalendar(
-        weekdays: const ['2026-09-02', '2026-09-03'],
-        firstWeekday: DateTime.wednesday,
-        upcoming: (day) => day == '2026-09-03',
-        statusOf: (_) => PresenceStatus.absent,
-      );
-      expect(days.take(2), [null, null]);
-      expect(days[2]!.status, PresenceStatus.absent);
-      expect(days[3]!.status, PresenceStatus.none);
-      expect(days[3]!.upcoming, isTrue);
-    });
+    test(
+      'cases vides avant le premier jour, un jour estompé garde son statut',
+      () {
+        final days = presenceCalendar(
+          weekdays: const ['2026-09-02', '2026-09-03'],
+          firstWeekday: DateTime.wednesday,
+          upcoming: (day) => day == '2026-09-03',
+          statusOf: (_) => PresenceStatus.absent,
+        );
+        expect(days.take(2), [null, null]);
+        expect(days[2]!.status, PresenceStatus.absent);
+        expect(days[3]!.status, PresenceStatus.absent);
+        expect(days[3]!.upcoming, isTrue);
+      },
+    );
   });
 }

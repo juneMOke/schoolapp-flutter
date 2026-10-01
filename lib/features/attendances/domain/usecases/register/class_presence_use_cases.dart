@@ -47,10 +47,8 @@ class ReopenClassPresenceDayUseCase {
 
   const ReopenClassPresenceDayUseCase(this._repository);
 
-  Future<Either<Failure, Unit>> call(
-    ClassDayKey key,
-    List<ClassPresenceLine> lines,
-  ) => _repository.reopenDay(key, lines);
+  Future<Either<Failure, Unit>> call(ClassDayKey key) =>
+      _repository.reopenDay(key);
 }
 
 class RetryClassPresenceDayUseCase {

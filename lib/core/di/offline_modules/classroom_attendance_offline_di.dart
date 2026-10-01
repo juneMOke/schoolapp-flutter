@@ -345,6 +345,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       // Pré-garde d'attribution : distingue un 403 « pas mon jeton » (blocked,
       // repart à la reconnexion de l'auteur) d'un 403 réellement terminal.
       currentUser: getIt<CurrentUserContext>(),
+      syncMeta: getIt<SyncMetaDao>(),
     ),
   );
   getIt<SyncEngine>().registerHandler(

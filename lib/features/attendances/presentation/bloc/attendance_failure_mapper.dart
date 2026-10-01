@@ -4,7 +4,8 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 /// Mappe une [Failure] vers le type d'erreur d'affichage [AttendanceErrorType].
 ///
 /// Factorise ici pour etre partage par les BLoCs du module qui utilisent ce
-/// type ([AttendanceBloc], [AttendanceOverviewBloc]) et garantir une
+/// type (`AttendanceOverviewBloc`, les états d'erreur de l'appel de classe)
+/// et garantir une
 /// convention unique — evitant que le bug du 403 ne se reintroduise.
 ///
 /// Convention (cf. interceptor Dio) : HTTP 401 -> [InvalidCredentialsFailure]

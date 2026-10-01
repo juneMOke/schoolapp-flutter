@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_d
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
@@ -31,7 +32,9 @@ class ClassDayBanner extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<ClassPresenceCubit>();
     final actions = ClassRegisterActions(context);
@@ -53,8 +56,19 @@ class ClassDayBanner extends StatelessWidget {
         if (register.pending > 0) l10n.presenceMarkOnTablet(register.pending),
       ].join(' · '),
       showActions:
-          !register.frozen &&
-          PermissionGate.allowsAccess(context, kAttendanceRecordAccess),
+          classDayLock(
+            register.day,
+            today: state.today,
+            canWrite: PermissionGate.allowsAccess(
+              context,
+              kAttendanceRecordAccess,
+            ),
+            canAmend: PermissionGate.allowsAccess(
+              context,
+              kAttendanceAmendAccess,
+            ),
+          ) ==
+          null,
       validateLabel: l10n.classPresenceValidate,
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
@@ -81,7 +95,9 @@ class ClassValidatedBanner extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PermissionAware(builder: _build);
+
+  Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final day = register.day;
     final actions = ClassRegisterActions(context);
@@ -119,7 +135,7 @@ class ClassValidatedBanner extends StatelessWidget {
           absent: register.count(PresenceStatus.absent),
           sync: day.sync,
           onReopen: canReopen ? actions.reopen : null,
-          onRetry: canWrite ? actions.retry : null,
+          onRetry: canWrite && !day.monthClosed ? actions.retry : null,
         ),
         if (day.sync == RecordSyncState.failed && refusal != null) ...[
           const SizedBox(height: AppSpacing.sm),

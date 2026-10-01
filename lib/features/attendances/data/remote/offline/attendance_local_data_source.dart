@@ -351,6 +351,19 @@ class AttendanceLocalDataSource {
           final row = item.session.copyWithId(sessionId);
           if (existing == null) {
             await txn.insert(sessionsTable, row.toMap());
+            // L'appel de ce jour a été fait ailleurs : un brouillon commencé
+            // ici n'a plus d'objet (il ne serait plus jamais lu).
+            await txn.delete(
+              draftMarksTable,
+              where:
+                  'classroom_id = ? AND attendance_date = ? '
+                  'AND academic_year_id = ?',
+              whereArgs: [
+                row.classroomId,
+                row.attendanceDate,
+                row.academicYearId,
+              ],
+            );
           } else {
             await txn.update(
               sessionsTable,
@@ -379,6 +392,22 @@ class AttendanceLocalDataSource {
     );
     return applied;
   }
+
+  /// Oublie l'appel d'un jour (session, lignes, brouillon) : l'état local ne
+  /// vaut plus rien et seul le serveur le connaît — un appel refusé dans un
+  /// mois clos. Le pull suivant le rapporte tel que le serveur le tient.
+  Future<void> discardDay({
+    required String classroomId,
+    required String dateStr,
+    required String academicYearId,
+  }) => _db.transaction((txn) async {
+    const where =
+        'classroom_id = ? AND attendance_date = ? AND academic_year_id = ?';
+    final args = [classroomId, dateStr, academicYearId];
+    await txn.delete(recordsTable, where: where, whereArgs: args);
+    await txn.delete(sessionsTable, where: where, whereArgs: args);
+    await txn.delete(draftMarksTable, where: where, whereArgs: args);
+  });
 
   Future<AttendanceSessionRow?> _sessionByKey(
     DatabaseExecutor db, {

@@ -3,7 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/offline/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -12,6 +16,7 @@ import 'package:school_app_flutter/features/attendances/data/models/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_api.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_outbox_handler.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_pull_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
@@ -187,4 +192,54 @@ void main() {
     ]);
     expect(await closed(), isTrue);
   });
+
+  test(
+    'pull : la page est appliquée et la descente reprend au curseur',
+    () async {
+      final syncMeta = SyncMetaDao(db);
+      final cursors = <String?>[];
+      when(() => api.pullClosures(any(), any(), any())).thenAnswer((
+        call,
+      ) async {
+        cursors.add(call.positionalArguments[1] as String?);
+        return HttpResponse(
+          const AttendanceClosurePageDto(
+            items: [
+              AttendanceClosureDto(
+                id: 'srv-1',
+                classroomId: 'c1',
+                academicYearId: 'y1',
+                month: '2026-09',
+                closedAt: '2026-10-01T09:00:00Z',
+              ),
+            ],
+            page: KeysetPageEnvelope(
+              nextCursor: 'k-1',
+              nextWatermark: 'w-1',
+              hasMore: false,
+              serverTime: '2026-10-01T09:00:00Z',
+            ),
+          ),
+          Response<dynamic>(
+            requestOptions: RequestOptions(path: '/sync/attendance-closures'),
+            statusCode: 200,
+          ),
+        );
+      });
+      final puller = AttendanceClosurePullHandler(
+        api: api,
+        closures: closures,
+        runner: KeysetPullRunner(syncMeta, now: () => 5000),
+        requiredAuth: const {},
+      );
+
+      final first = await puller.pull();
+      await puller.pull();
+
+      expect(first.upserted, 1);
+      expect(await closed(), isTrue);
+      expect(cursors.first, isNull);
+      expect(cursors.last, isNotNull);
+    },
+  );
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
@@ -15,6 +14,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/absence_
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_student.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_placeholder.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/student_month_header.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/student_month_kpis.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -74,9 +74,9 @@ class StudentMonthTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        if (data == null || sheet == null)
-          const EteeloListSkeleton(rowCount: 4)
-        else if (sheet.isHoliday)
+        if (classMonthPlaceholder(context, state) case final placeholder?)
+          placeholder
+        else if (sheet!.isHoliday)
           PresenceHolidayState(
             month: state.month,
             onCurrent: () => unawaited(cubit.goCurrentMonth()),

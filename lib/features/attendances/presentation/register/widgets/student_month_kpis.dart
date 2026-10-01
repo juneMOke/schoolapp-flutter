@@ -23,23 +23,17 @@ class StudentMonthKpis extends StatelessWidget {
         value: l10n.presenceMarkKpiRatio(stats.presences, stats.schoolDays),
         detail: l10n.classPresenceKpiRate(PresenceRateTone.percent(stats.rate)),
       ),
-      PresenceCountTile(
-        tone: PresenceStatus.late,
-        label: l10n.presenceMarkKpiLates,
-        value: '${stats.late}',
-        detail: l10n.presenceMarkKpiLatesDetail(
-          stats.lateMinutes,
-          stats.lateUnjustified,
-        ),
+      PresenceCountTile.lates(
+        l10n,
+        count: stats.late,
+        minutes: stats.lateMinutes,
+        unjustified: stats.lateUnjustified,
       ),
-      PresenceCountTile(
-        tone: PresenceStatus.absent,
-        label: l10n.presenceMarkKpiAbsences,
-        value: '${stats.absent}',
-        detail: l10n.presenceMarkKpiAbsencesDetail(
-          stats.absentJustified,
-          stats.absentUnjustified,
-        ),
+      PresenceCountTile.absences(
+        l10n,
+        count: stats.absent,
+        justified: stats.absentJustified,
+        unjustified: stats.absentUnjustified,
       ),
       PresenceCountTile(
         tone: PresenceStatus.none,

@@ -3572,7 +3572,6 @@
   "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",
   "offlinePaymentQueued": "Paiement enregistré — en attente de synchronisation",
   "offlineEnrollmentQueued": "Inscription enregistrée — en attente de synchronisation",
-  "offlineAttendanceQueued": "Appel enregistré — en attente de synchronisation",
   "offlineDisciplinaryCaseQueued": "Cas disciplinaire enregistré — en attente de synchronisation",
   "offlineDisciplinaryCaseUpdatedQueued": "Cas mis à jour — en attente de synchronisation",
   "offlineWriteError": "Échec de l'enregistrement local",
@@ -8852,7 +8851,6 @@
   "classPresenceRegisterComplete": "Registre complet",
   "classPresenceRecapEyebrow": "Récapitulatif · {classroom}",
   "classPresenceRecapDays": "{days, plural, =0{Aucun jour de classe} =1{1 jour de classe} other{{days} jours de classe}}",
-  "classPresenceRecapToDate": "à ce jour",
   "classPresenceRecapStudents": "{count, plural, =1{1 élève} other{{count} élèves}}",
   "classPresenceTotalLates": "Retards",
   "classPresenceLatesValue": "{count} · {minutes} min",
@@ -8873,5 +8871,9 @@
   "classPresenceCloseNotEnded": "Le mois en cours se clôture une fois terminé.",
   "classPresenceClosedOn": "Mois clôturé le {when} — présences verrouillées",
   "classPresenceCloseRefused": "La clôture a été refusée : {reason}",
-  "classPresenceToastClosed": "{month} clôturé · {classroom}"
+  "classPresenceToastClosed": "{month} clôturé · {classroom}",
+  "classPresenceCloseOpenDays": "{count, plural, =1{1 journée est en cours de saisie ou rouverte : validez-la avant de clôturer le mois.} other{{count} journées sont en cours de saisie ou rouvertes : validez-les avant de clôturer le mois.}}",
+  "classPresenceToastRaced": "Cet appel vient d'être modifié ailleurs : la journée a été relue, refaites votre geste.",
+  "presenceMarkRetryTooltip": "{reason} — Réessayer",
+  "classPresenceRecapDaysToDate": "{days, plural, =0{Aucun jour de classe à ce jour} =1{1 jour de classe à ce jour} other{{days} jours de classe à ce jour}}"
 }

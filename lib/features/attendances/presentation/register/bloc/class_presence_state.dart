@@ -42,6 +42,10 @@ class ClassPresenceState extends Equatable {
   /// Les appels du mois ; `null` tant qu'ils ne sont pas lus.
   final ClassPresenceMonth? monthData;
 
+  /// La dernière lecture du mois a échoué (la fiche et le récapitulatif
+  /// l'affichent au lieu d'attendre).
+  final bool monthFailed;
+
   /// L'élève de la fiche mensuelle ; `null` = le premier de la classe.
   final String? studentId;
   final ClassRecapQuery recapQuery;
@@ -61,6 +65,7 @@ class ClassPresenceState extends Equatable {
     this.viewMode = CollectionViewMode.grid,
     this.tab = ClassPresenceTab.register,
     this.monthData,
+    this.monthFailed = false,
     this.studentId,
     this.recapQuery = ClassRecapQuery.none,
     this.notice,
@@ -143,6 +148,7 @@ class ClassPresenceState extends Equatable {
     ClassPresenceTab? tab,
     String? month,
     ClassPresenceMonth? Function()? monthData,
+    bool? monthFailed,
     String? Function()? studentId,
     ClassRecapQuery? recapQuery,
     ClassPresenceNotice? notice,
@@ -161,6 +167,7 @@ class ClassPresenceState extends Equatable {
     tab: tab ?? this.tab,
     month: month ?? this.month,
     monthData: monthData == null ? this.monthData : monthData(),
+    monthFailed: monthFailed ?? this.monthFailed,
     studentId: studentId == null ? this.studentId : studentId(),
     recapQuery: recapQuery ?? this.recapQuery,
     notice: notice ?? this.notice,
@@ -181,6 +188,7 @@ class ClassPresenceState extends Equatable {
     tab,
     month,
     monthData,
+    monthFailed,
     studentId,
     recapQuery,
     notice,

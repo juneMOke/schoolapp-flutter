@@ -45,6 +45,30 @@ class PresenceJustificationDialog<R extends Object> extends StatefulWidget {
     required this.reasonLabel,
   });
 
+  /// Ouvre la modale pour une ligne : le jour se lit en toutes lettres.
+  /// `null` = annulée.
+  static Future<PresenceJustificationChoice<R>?> show<R extends Object>(
+    BuildContext context, {
+    required String name,
+    required PresenceStatus status,
+    required int lateMinutes,
+    required String day,
+    required PresenceJustification<R>? initial,
+    required List<R> reasons,
+    required String Function(R reason) reasonLabel,
+  }) => EteeloFormDialog.show<PresenceJustificationChoice<R>>(
+    context,
+    PresenceJustificationDialog<R>(
+      name: name,
+      status: status,
+      lateMinutes: lateMinutes,
+      initial: initial,
+      reasons: reasons,
+      reasonLabel: reasonLabel,
+      dayLabel: PresenceLabels.longDay(MaterialLocalizations.of(context), day),
+    ),
+  );
+
   @override
   State<PresenceJustificationDialog<R>> createState() =>
       _PresenceJustificationDialogState<R>();
@@ -83,7 +107,7 @@ class _PresenceJustificationDialogState<R extends Object>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${l10n.presenceMarkReasonLabel} *',
+            l10n.presenceMarkReasonRequired,
             style: AppTypography.labelLarge,
           ),
           const SizedBox(height: AppSpacing.sm),

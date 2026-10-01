@@ -29,6 +29,9 @@ class ClassPresenceMonth extends Equatable {
   /// La clôture du mois, refusée comprise ; `null` sans clôture.
   final ClassPresenceClosure? closure;
 
+  /// Les jours en cours de saisie ou rouverts : à valider avant de clôturer.
+  final Set<String> openDays;
+
   /// L'envoi le moins avancé des appels du mois.
   final RecordSyncState sync;
 
@@ -40,13 +43,24 @@ class ClassPresenceMonth extends Equatable {
     required this.calledDays,
     required this.incidents,
     this.closure,
+    this.openDays = const {},
     this.sync = RecordSyncState.synced,
   });
 
   /// Les jours de classe du mois (lundi → vendredi), jusqu'à [today] et dans
   /// l'année scolaire [year]. Vide = vacances.
-  List<String> schoolDays({required String today, SchoolYearBounds? year}) =>
-      SchoolDayCalendar.workDaysOf(month, today: today, year: year);
+  ///
+  /// Aujourd'hui ne compte qu'une fois son appel validé : avant, il n'est pas
+  /// « non pointé » mais pas encore dû — sinon chaque matin, faute de l'appel
+  /// du jour, le taux de toute la classe chuterait sous le seuil.
+  List<String> schoolDays({required String today, SchoolYearBounds? year}) => [
+    for (final day in SchoolDayCalendar.workDaysOf(
+      month,
+      today: today,
+      year: year,
+    ))
+      if (day != today || calledDays.contains(day)) day,
+  ];
 
   /// Le mois est clôturé (ou en passe de l'être) : ses jours sans appel
   /// comptent présents. Une clôture refusée ne clôt rien.
@@ -64,6 +78,7 @@ class ClassPresenceMonth extends Equatable {
     calledDays,
     incidents,
     closure,
+    openDays,
     sync,
   ];
 }
