@@ -8,10 +8,14 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_aggregate_request_model.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_aggregate_response_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_line_wire.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
-import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_offline_repository_impl.dart'
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart'
     show kAttendanceAggregateType;
+
+/// Le refus d'un appel dans un mois clôturé (contrat v2).
+const String kAttendanceMonthClosedCode = 'MONTH_CLOSED';
 
 /// Sonde « ces élèves ont-ils un transfert de classe pas encore synchronisé ? »
 ///
@@ -68,6 +72,9 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
   ) => {
     for (final ack in response.absences)
       ack.studentId: CanonicalAbsence(
+        status: ack.status ?? AttendanceLineWire.absent,
+        arrivalTime: ack.arrivalTime,
+        lateMinutes: ack.lateMinutes,
         absenceReason: ack.absenceReason,
         absenceReasonNote: ack.absenceReasonNote,
         updatedAt: EpochIsoHelper.tryToEpochMs(ack.updatedAt) ?? now(),
@@ -127,7 +134,7 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
       if (blockedBy.isNotEmpty) {
         return OutboxDispatchResult.blocked(
           'Transfert de classe non synchronisé pour '
-          '${blockedBy.length} élève(s) absent(s) — l\'appel repartira '
+          '${blockedBy.length} élève(s) absent(s) ou en retard — l\'appel repartira '
           'dès que le transfert sera passé.',
         );
       }
@@ -189,6 +196,14 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
       // lire ; un transitoire garde le message réseau, plus utile. Même lecture
       // que les handlers inscription et évaluation.
       final serverMessage = _serverMessage(e);
+      // Un mois clôturé ne reçoit plus d'appel : refus terminal, dit en clair
+      // (le serveur l'évalue APRÈS l'arbitrage LWW — un renvoi périmé reçoit
+      // `SUPERSEDED`, jamais ce refus).
+      if (_serverCode(e) == kAttendanceMonthClosedCode) {
+        return const OutboxDispatchResult.failed(
+          'Mois clôturé : cet appel ne peut plus être modifié.',
+        );
+      }
       if (failure is ValidationFailure || failure is NotFoundFailure) {
         return OutboxDispatchResult.failed(
           serverMessage ?? (failure is Failure ? failure.message : 'Rejected'),
@@ -240,6 +255,14 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
       if (message.isNotEmpty) return message;
     }
     return null;
+  }
+
+  /// Le code machine du refus (`code` ou `detailCode` du corps d'erreur).
+  String? _serverCode(DioException e) {
+    final data = e.response?.data;
+    if (data is! Map) return null;
+    final code = data['detailCode'] ?? data['code'];
+    return code is String ? code : null;
   }
 
   /// Le jeton LWW sur lequel se réancrer après avoir PERDU l'arbitrage.

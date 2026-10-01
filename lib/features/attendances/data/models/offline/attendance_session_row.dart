@@ -34,6 +34,11 @@ class AttendanceSessionRow extends Equatable {
   final String syncStatus;
   final int? syncedAt;
 
+  /// L'appel validé a été rouvert sur cette tablette (epoch ms) ; `null`
+  /// sinon. Local seulement : absent de [toMap], donc jamais écrasé par un
+  /// pull ni effacé par une écriture qui ne le vise pas.
+  final int? reopenedAt;
+
   const AttendanceSessionRow({
     required this.id,
     required this.classroomId,
@@ -47,6 +52,7 @@ class AttendanceSessionRow extends Equatable {
     this.version,
     this.syncStatus = 'PENDING_SYNC',
     this.syncedAt,
+    this.reopenedAt,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -70,6 +76,7 @@ class AttendanceSessionRow extends Equatable {
         version: _asIntOrNull(map['version']),
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         syncedAt: _asIntOrNull(map['synced_at']),
+        reopenedAt: _asIntOrNull(map['reopened_at']),
       );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -104,6 +111,7 @@ class AttendanceSessionRow extends Equatable {
     version: version,
     syncStatus: syncStatus,
     syncedAt: syncedAt,
+    reopenedAt: reopenedAt,
   );
 
   @override
@@ -120,5 +128,6 @@ class AttendanceSessionRow extends Equatable {
     version,
     syncStatus,
     syncedAt,
+    reopenedAt,
   ];
 }

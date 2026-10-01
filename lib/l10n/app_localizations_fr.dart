@@ -5330,7 +5330,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get absenceReasonSickness => 'Maladie';
 
   @override
-  String get absenceReasonFamilyEmergency => 'Urgence familiale';
+  String get absenceReasonFamilyEmergency => 'Raison familiale';
 
   @override
   String get absenceReasonPersonal => 'Personnel';
@@ -13850,4 +13850,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollAdvanceStatusCarried => 'Reportée';
+
+  @override
+  String get absenceReasonMedicalAppointment => 'Rendez-vous médical';
+
+  @override
+  String get absenceReasonTransport => 'Problème de transport';
+
+  @override
+  String get absenceReasonBereavement => 'Deuil';
+
+  @override
+  String get absenceReasonBadWeather => 'Intempéries';
 }

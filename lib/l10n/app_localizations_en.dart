@@ -5288,7 +5288,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absenceReasonSickness => 'Sickness';
 
   @override
-  String get absenceReasonFamilyEmergency => 'Family emergency';
+  String get absenceReasonFamilyEmergency => 'Family reason';
 
   @override
   String get absenceReasonPersonal => 'Personal';
@@ -13751,4 +13751,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollAdvanceStatusCarried => 'Carried over';
+
+  @override
+  String get absenceReasonMedicalAppointment => 'Medical appointment';
+
+  @override
+  String get absenceReasonTransport => 'Transport problem';
+
+  @override
+  String get absenceReasonBereavement => 'Bereavement';
+
+  @override
+  String get absenceReasonBadWeather => 'Bad weather';
 }

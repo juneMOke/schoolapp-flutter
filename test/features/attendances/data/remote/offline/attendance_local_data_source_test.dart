@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/attendances/data/models/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Verrouille la sémantique SESSION du DAO d'appel (contrat 1.2.0) : les 3 états,
 /// la réconciliation par différence, le bump d'`updated_at` de la session et le LWW.
@@ -372,6 +373,36 @@ void main() {
         expect(s.syncStatus, SyncState.synced.dbValue);
       },
     );
+
+    test('un retard gagnant s adopte en retard, pas en absence', () async {
+      await dao.confirmDailyAttendance(
+        session: session(updatedAt: 100),
+        absentRows: [absent('s1', updatedAt: 100)],
+        outboxEntry: outbox(),
+      );
+
+      await dao.adoptCanonicalDay(
+        classroomId: classroomId,
+        dateStr: dateStr,
+        academicYearId: yearId,
+        canonicalAbsences: const {
+          's1': CanonicalAbsence(
+            updatedAt: 900,
+            status: 'LATE',
+            arrivalTime: '07:48',
+            lateMinutes: 18,
+          ),
+        },
+        updatedAt: 900,
+        syncedAt: 9999,
+      );
+
+      final row = (await dayRecords()).single;
+      expect(row.present, isTrue);
+      expect(row.presenceStatus, PresenceStatus.late);
+      expect(row.arrivalTime, '07:48');
+      expect(row.lateMinutes, 18);
+    });
 
     test(
       'la journee redevient PULLABLE (c est tout l enjeu du reancrage)',

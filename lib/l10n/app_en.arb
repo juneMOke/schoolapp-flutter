@@ -3399,7 +3399,7 @@
   "attendanceSaveRetryAction": "Retry",
   "attendanceSaveCloseAction": "Done",
   "absenceReasonSickness": "Sickness",
-  "absenceReasonFamilyEmergency": "Family emergency",
+  "absenceReasonFamilyEmergency": "Family reason",
   "absenceReasonPersonal": "Personal",
   "absenceReasonUnknown": "Not justified",
   "absenceReasonVacation": "Vacation",
@@ -8569,5 +8569,9 @@
   "payrollRuleAlreadyCancelled": "Already cancelled.",
   "payrollRuleForbidden": "Your account is not allowed to do this.",
   "payrollRuleParentRefused": "The staff record was refused: it will never reach the server.",
-  "payrollAdvanceStatusCarried": "Carried over"
+  "payrollAdvanceStatusCarried": "Carried over",
+  "absenceReasonMedicalAppointment": "Medical appointment",
+  "absenceReasonTransport": "Transport problem",
+  "absenceReasonBereavement": "Bereavement",
+  "absenceReasonBadWeather": "Bad weather"
 }

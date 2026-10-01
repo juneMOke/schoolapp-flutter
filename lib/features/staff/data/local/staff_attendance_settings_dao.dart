@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_se
 import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
+import 'package:school_app_flutter/core/presence/data/presence_schedule_reader.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
@@ -32,24 +32,17 @@ class StaffAttendanceSettingsDao {
       whereArgs: [schoolId],
       limit: 1,
     );
-    if (rows.isEmpty) return StaffAttendanceSettings.defaults;
-    final row = rows.single;
-    final start = ClockTime.tryParse(row['start_time'] as String?);
-    final tolerance = row['tolerance_minutes'] as int?;
-    if (start == null || tolerance == null) {
-      return StaffAttendanceSettings.defaults;
-    }
+    final schedule = rows.isEmpty
+        ? null
+        : PresenceScheduleReader.fromRow(rows.single);
+    if (schedule == null) return StaffAttendanceSettings.defaults;
     return StaffAttendanceSettings(
-      start: start,
-      toleranceMinutes: tolerance,
-      syncState: RecordSyncState.fromDb(row['sync_status'] as String?),
+      start: schedule.start,
+      toleranceMinutes: schedule.toleranceMinutes,
+      syncState: RecordSyncState.fromDb(rows.single['sync_status'] as String?),
     );
   }
 
-  /// La section du socle. Un réglage modifié sur la tablette et encore en
-  /// file n'est pas écrasé : il partira, et gagnera au dernier écrit. Un
-  /// réglage **refusé** cède, lui : il ne partira plus, et continuer de classer
-  /// les retards avec lui serait faux.
   Future<void> applySeed(
     StaffAttendanceSettingsSeed seed, {
     required String schoolId,

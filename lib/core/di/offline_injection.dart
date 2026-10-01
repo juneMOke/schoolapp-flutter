@@ -47,6 +47,7 @@ import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/features/configuration/data/local/provisioning_draft_dao.dart';
 import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_draft_repository_impl.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
+import 'package:school_app_flutter/core/di/offline_modules/class_presence_di.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
 ///
@@ -306,6 +307,7 @@ void registerOfflineModules(GetIt getIt) {
   registerStaffOffline(getIt); // RH — fichier du personnel
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
+  registerClassPresence(getIt); // Présences des élèves v2 — registre d'appel
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
 }

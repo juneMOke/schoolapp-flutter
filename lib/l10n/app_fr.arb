@@ -3356,7 +3356,7 @@
   "attendanceSaveRetryAction": "Réessayer",
   "attendanceSaveCloseAction": "Terminer",
   "absenceReasonSickness": "Maladie",
-  "absenceReasonFamilyEmergency": "Urgence familiale",
+  "absenceReasonFamilyEmergency": "Raison familiale",
   "absenceReasonPersonal": "Personnel",
   "absenceReasonUnknown": "Non justifiée",
   "absenceReasonVacation": "Vacances",
@@ -8923,5 +8923,9 @@
   "payrollRuleAlreadyCancelled": "Déjà annulé.",
   "payrollRuleForbidden": "Votre compte n'a pas le droit de faire ce geste.",
   "payrollRuleParentRefused": "La fiche de l'agent a été refusée : elle n'arrivera jamais au serveur.",
-  "payrollAdvanceStatusCarried": "Reportée"
+  "payrollAdvanceStatusCarried": "Reportée",
+  "absenceReasonMedicalAppointment": "Rendez-vous médical",
+  "absenceReasonTransport": "Problème de transport",
+  "absenceReasonBereavement": "Deuil",
+  "absenceReasonBadWeather": "Intempéries"
 }

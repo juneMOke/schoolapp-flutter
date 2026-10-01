@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 
 /// Statistiques d'assiduité par élève (AF-3, §5) : dénominateur = COUNT(sessions),
 /// numérateur = absences ; gate bootstrapComplete (invariant #7) ; hebdo MON→SAT.
@@ -34,6 +35,7 @@ void main() {
     syncMeta = SyncMetaDao(db);
     repo = AttendanceOfflineRepositoryImpl(
       localDataSource: local,
+      historyDataSource: AttendanceHistoryLocalDataSource(db),
       rosterDataSource: roster,
       syncMetaDao: syncMeta,
       idGenerator: const IdGenerator(Uuid()),

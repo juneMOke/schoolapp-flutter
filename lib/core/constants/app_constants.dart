@@ -787,7 +787,12 @@ class AppConstants {
   // profils de paie, paies, éléments variables, gestes, lignes figées, résumés
   // du Pointage, avances, versements, traces de diffusion. Création pure.
   // Palier d'école.
-  static const int offlineDbSchemaVersion = 57;
+  // v58 (2026-10-01) : les présences des élèves v2 — le retard sur une ligne
+  // d'appel (`attendance_records.status`/`arrival_time`/`late_minutes`), la
+  // réouverture locale (`attendance_sessions.reopened_at`), le brouillon de
+  // l'appel (`attendance_draft_marks`) et les clôtures de mois
+  // (`attendance_month_closures`). Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 58;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

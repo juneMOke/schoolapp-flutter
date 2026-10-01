@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
     show kClassroomMembersResource;
 
 import '../../../../../core/offline/offline_full_test_db.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 
 class MockIdGenerator extends Mock implements IdGenerator {}
 
@@ -67,6 +68,7 @@ void main() {
 
     repo = AttendanceOfflineRepositoryImpl(
       localDataSource: local,
+      historyDataSource: AttendanceHistoryLocalDataSource(db),
       rosterDataSource: roster,
       syncMetaDao: syncMeta,
       idGenerator: idGen,

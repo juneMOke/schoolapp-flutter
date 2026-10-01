@@ -234,6 +234,99 @@ void main() {
     });
   });
 
+  group('v58 — présences des élèves v2', () {
+    Future<Set<String>> columns(String table) async => {
+      for (final row in await db.rawQuery('PRAGMA table_info($table)'))
+        row['name']! as String,
+    };
+
+    Future<void> seedAvant() async {
+      for (final table in [
+        'attendance_records',
+        'attendance_sessions',
+        'attendance_draft_marks',
+        'attendance_month_closures',
+      ]) {
+        await db.execute('DROP TABLE $table');
+      }
+      // La forme d'avant la v58 : ni retard, ni réouverture.
+      await db.execute('''
+        CREATE TABLE attendance_sessions (
+          id TEXT PRIMARY KEY, classroom_id TEXT NOT NULL,
+          attendance_date TEXT NOT NULL, academic_year_id TEXT NOT NULL,
+          expected_count INTEGER, taken_at INTEGER, taken_by TEXT,
+          updated_at INTEGER NOT NULL, server_updated_at TEXT, version INTEGER,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC', synced_at INTEGER,
+          UNIQUE (classroom_id, attendance_date, academic_year_id))
+      ''');
+      await db.execute('''
+        CREATE TABLE attendance_records (
+          id TEXT PRIMARY KEY, session_id TEXT, student_id TEXT NOT NULL,
+          student_first_name TEXT NOT NULL, student_last_name TEXT NOT NULL,
+          student_middle_name TEXT,
+          student_gender TEXT NOT NULL DEFAULT 'OTHER',
+          classroom_id TEXT NOT NULL, attendance_date TEXT NOT NULL,
+          academic_year_id TEXT NOT NULL,
+          present INTEGER NOT NULL DEFAULT 1, absence_reason TEXT,
+          absence_reason_note TEXT, version INTEGER,
+          updated_at INTEGER NOT NULL,
+          sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC', synced_at INTEGER,
+          UNIQUE (student_id, attendance_date, academic_year_id))
+      ''');
+      await db.insert('attendance_records', {
+        'id': 'r-1',
+        'student_id': 'st-1',
+        'student_first_name': 'Grâce',
+        'student_last_name': 'Mbuyi',
+        'classroom_id': 'c-1',
+        'attendance_date': '2026-09-29',
+        'academic_year_id': 'y-1',
+        'present': 0,
+        'absence_reason': 'SICKNESS',
+        'updated_at': 1,
+      });
+    }
+
+    test(
+      'les colonnes et les deux tables arrivent, sans toucher aux lignes',
+      () async {
+        await seedAvant();
+
+        await migrateTenantDatabase(db, 57);
+        await expectLater(migrateTenantDatabase(db, 57), completes);
+
+        expect(
+          await columns('attendance_records'),
+          containsAll(['status', 'arrival_time', 'late_minutes']),
+        );
+        expect(await columns('attendance_sessions'), contains('reopened_at'));
+        expect(
+          await _tables(db),
+          containsAll(['attendance_draft_marks', 'attendance_month_closures']),
+        );
+        final row = (await db.query('attendance_records')).single;
+        expect(row['present'], 0);
+        expect(row['status'], isNull);
+        expect(row['absence_reason'], 'SICKNESS');
+      },
+    );
+
+    test('une classe n a qu une clôture par mois', () async {
+      Map<String, Object?> row(String id) => {
+        'gesture_id': id,
+        'classroom_id': 'c-1',
+        'academic_year_id': 'y-1',
+        'month': '2026-09',
+      };
+      await db.insert('attendance_month_closures', row('g-1'));
+
+      await expectLater(
+        db.insert('attendance_month_closures', row('g-2')),
+        throwsA(isA<DatabaseException>()),
+      );
+    });
+  });
+
   group('v57 — la Paie du personnel', () {
     const tables = [
       'ref_payroll_settings',

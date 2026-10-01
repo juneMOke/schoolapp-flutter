@@ -8638,7 +8638,7 @@ abstract class AppLocalizations {
   /// No description provided for @absenceReasonFamilyEmergency.
   ///
   /// In en, this message translates to:
-  /// **'Family emergency'**
+  /// **'Family reason'**
   String get absenceReasonFamilyEmergency;
 
   /// No description provided for @absenceReasonPersonal.
@@ -21865,6 +21865,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Carried over'**
   String get payrollAdvanceStatusCarried;
+
+  /// No description provided for @absenceReasonMedicalAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical appointment'**
+  String get absenceReasonMedicalAppointment;
+
+  /// No description provided for @absenceReasonTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport problem'**
+  String get absenceReasonTransport;
+
+  /// No description provided for @absenceReasonBereavement.
+  ///
+  /// In en, this message translates to:
+  /// **'Bereavement'**
+  String get absenceReasonBereavement;
+
+  /// No description provided for @absenceReasonBadWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad weather'**
+  String get absenceReasonBadWeather;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_line_wire.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
@@ -6,7 +8,8 @@ import 'package:school_app_flutter/features/attendances/domain/entities/attendan
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 /// Ligne sqflite `attendance_records` (AF-1). Stockage par exception : ne
-/// matérialise que les absents (present=0) et les retards corrigés (present=1).
+/// matérialise que les absents (`present` = 0) et, depuis la v2, les retards
+/// (`present` = 1, `status` = `LATE`, heure d'arrivée et minutes).
 /// `updatedAt` (epoch ms, horloge client) arbitre le last-write-wins.
 class AttendanceRecordRow extends Equatable {
   final String id;
@@ -25,6 +28,16 @@ class AttendanceRecordRow extends Equatable {
   final String attendanceDate;
   final String academicYearId;
   final bool present;
+
+  /// `ABSENT` ou `LATE` ([AttendanceLineWire]) ; `null` sur une ligne d'avant
+  /// la v2, qui se lit d'après [present].
+  final String? status;
+
+  /// `HH:mm`, retard seulement.
+  final String? arrivalTime;
+
+  /// Minutes depuis le début des cours, retard seulement.
+  final int? lateMinutes;
   final String? absenceReason;
   final String? absenceReasonNote;
   final int? version;
@@ -44,6 +57,9 @@ class AttendanceRecordRow extends Equatable {
     required this.attendanceDate,
     required this.academicYearId,
     required this.present,
+    this.status,
+    this.arrivalTime,
+    this.lateMinutes,
     this.absenceReason,
     this.absenceReasonNote,
     this.version,
@@ -72,6 +88,9 @@ class AttendanceRecordRow extends Equatable {
         attendanceDate: map['attendance_date'] as String,
         academicYearId: map['academic_year_id'] as String,
         present: ((map['present'] as int?) ?? 1) == 1,
+        status: map['status'] as String?,
+        arrivalTime: map['arrival_time'] as String?,
+        lateMinutes: _asIntOrNull(map['late_minutes']),
         absenceReason: map['absence_reason'] as String?,
         absenceReasonNote: map['absence_reason_note'] as String?,
         version: _asIntOrNull(map['version']),
@@ -92,6 +111,9 @@ class AttendanceRecordRow extends Equatable {
     'attendance_date': attendanceDate,
     'academic_year_id': academicYearId,
     'present': present ? 1 : 0,
+    'status': status,
+    'arrival_time': arrivalTime,
+    'late_minutes': lateMinutes,
     'absence_reason': absenceReason,
     'absence_reason_note': absenceReasonNote,
     'version': version,
@@ -117,6 +139,10 @@ class AttendanceRecordRow extends Equatable {
 
   bool get isSynced => SyncState.fromDbValue(syncStatus).isSynced;
 
+  /// Retard ou absence (une présence n'a pas de ligne).
+  PresenceStatus get presenceStatus =>
+      AttendanceLineWire.read(status, present: present);
+
   /// Rattache la ligne à sa session (id de racine d'agrégat).
   AttendanceRecordRow copyWithSessionId(String sessionId) =>
       AttendanceRecordRow(
@@ -131,6 +157,9 @@ class AttendanceRecordRow extends Equatable {
         attendanceDate: attendanceDate,
         academicYearId: academicYearId,
         present: present,
+        status: status,
+        arrivalTime: arrivalTime,
+        lateMinutes: lateMinutes,
         absenceReason: absenceReason,
         absenceReasonNote: absenceReasonNote,
         version: version,
@@ -152,6 +181,9 @@ class AttendanceRecordRow extends Equatable {
     attendanceDate,
     academicYearId,
     present,
+    status,
+    arrivalTime,
+    lateMinutes,
     absenceReason,
     absenceReasonNote,
     version,

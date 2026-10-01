@@ -3,6 +3,7 @@
 // Réponses serveur (fromJson) → converties en lignes locales à l'application.
 
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_line_wire.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_record_row.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_session_row.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
@@ -47,6 +48,11 @@ class AbsenceDeltaDto {
   final String? studentLastName;
   final String? studentMiddleName;
   final String? studentGender;
+
+  /// `ABSENT` ou `LATE` ; `null` d'un serveur d'avant la v2 (= absence).
+  final String? status;
+  final String? arrivalTime;
+  final int? lateMinutes;
   final String? absenceReason;
   final String? absenceReasonNote;
   final String? updatedAt;
@@ -58,6 +64,9 @@ class AbsenceDeltaDto {
     this.studentLastName,
     this.studentMiddleName,
     this.studentGender,
+    this.status,
+    this.arrivalTime,
+    this.lateMinutes,
     this.absenceReason,
     this.absenceReasonNote,
     this.updatedAt,
@@ -70,6 +79,9 @@ class AbsenceDeltaDto {
     studentLastName: j['studentLastName'] as String?,
     studentMiddleName: j['studentMiddleName'] as String?,
     studentGender: j['studentGender'] as String?,
+    status: j['status'] as String?,
+    arrivalTime: j['arrivalTime'] as String?,
+    lateMinutes: (j['lateMinutes'] as num?)?.toInt(),
     absenceReason: j['absenceReason'] as String?,
     absenceReasonNote: j['absenceReasonNote'] as String?,
     updatedAt: j['updatedAt'] as String?,
@@ -90,7 +102,10 @@ class AbsenceDeltaDto {
     classroomId: classroomId,
     attendanceDate: attendanceDate,
     academicYearId: academicYearId,
-    present: false,
+    present: status == AttendanceLineWire.late,
+    status: status ?? AttendanceLineWire.absent,
+    arrivalTime: arrivalTime,
+    lateMinutes: lateMinutes,
     absenceReason: absenceReason,
     absenceReasonNote: absenceReasonNote,
     updatedAt: _isoToMs(updatedAt) ?? syncedAt,

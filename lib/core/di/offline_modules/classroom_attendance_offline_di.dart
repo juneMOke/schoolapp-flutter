@@ -77,6 +77,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/offlin
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 
 /// Registrar DI de la branche offline **Classe + Présence/Discipline**.
 ///
@@ -112,6 +113,9 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<AttendanceLocalDataSource>(
     () => AttendanceLocalDataSource(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<AttendanceHistoryLocalDataSource>(
+    () => AttendanceHistoryLocalDataSource(getIt<Database>()),
   );
   getIt.registerLazySingleton<DisciplinarySyncApi>(
     () => DisciplinarySyncApi(getIt<Dio>()),
@@ -163,6 +167,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<AttendanceOfflineRepository>(
     () => AttendanceOfflineRepositoryImpl(
       localDataSource: getIt<AttendanceLocalDataSource>(),
+      historyDataSource: getIt<AttendanceHistoryLocalDataSource>(),
       rosterDataSource: getIt<ClassroomLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       idGenerator: getIt<IdGenerator>(),
