@@ -100,6 +100,10 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// [_pullDegraded], et pour la même raison.
   bool _pullRetriable = false;
 
+  /// Le détail de [_pullDegraded] : quels flux, et pourquoi. Mémorisé avec lui,
+  /// et pour la même raison.
+  List<PullDiagnostic> _pullDiagnostics = const [];
+
   StreamSubscription<bool>? _connectivitySub;
 
   /// Cadence du battement — le timer et ses conditions d'armement vivent là
@@ -244,6 +248,8 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   Future<void> _applyOutcome(SyncCycleOutcome outcome) async {
     if (outcome.pullDegraded != null) _pullDegraded = outcome.pullDegraded!;
     if (outcome.pullRetriable != null) _pullRetriable = outcome.pullRetriable!;
+    final diagnostics = outcome.pullDiagnostics;
+    if (diagnostics != null) _pullDiagnostics = diagnostics;
     final observed = outcome.latestServerTimeMs;
     if (observed != null) await _advanceLastSync(observed);
   }
@@ -366,6 +372,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     // `_hasHeldWork`, lui, est relu de la file à chaque `refresh()`.
     _pullDegraded = false;
     _pullRetriable = false;
+    _pullDiagnostics = const [];
     _lastSyncAtMs = null;
     _safeEmit(state.status);
   }
@@ -538,6 +545,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       hasHeldWork: _hasHeldWork,
       hasIncompleteRead: _pullDegraded,
       hasRetriableRead: _pullDegraded && _pullRetriable,
+      readDiagnostics: _pullDegraded ? _pullDiagnostics : const [],
     );
     if (state != next) emit(next);
   }

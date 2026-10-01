@@ -173,6 +173,7 @@ class PullCoordinator {
     var forbidden = 0, blocked = 0, outOfPlan = 0;
     int? latestServerTimeMs;
     final outcomes = <String, PullResult>{};
+    final diagnostics = <PullDiagnostic>[];
 
     // Les clés que l'ANALYSE a écartées, faute d'en connaître le `mode` ou le
     // `scope` (ADR-015 N-2). Le parser les retire de `plan.streams` et les nomme
@@ -319,6 +320,9 @@ class PullCoordinator {
             if (!_isReadable(handler)) {
               forbidden++;
               unusableResources.add(handler.resource);
+              diagnostics.add(
+                PullDiagnostic(handler.resource, PullDiagnosticKind.forbidden),
+              );
               skip = true;
             }
         }
@@ -326,6 +330,9 @@ class PullCoordinator {
       }
       if (_isBlockedBy(handler, unusableResources)) {
         blocked++;
+        diagnostics.add(
+          PullDiagnostic(handler.resource, PullDiagnosticKind.blocked),
+        );
         continue;
       }
       try {
@@ -354,16 +361,30 @@ class PullCoordinator {
           case PullResult.error:
             failed++;
             unusableResources.add(handler.resource);
+            diagnostics.add(
+              PullDiagnostic(
+                handler.resource,
+                PullDiagnosticKind.failed,
+                detail: outcome.error,
+              ),
+            );
         }
         final observed = outcome.serverTimeMs;
         if (observed != null &&
             (latestServerTimeMs == null || observed > latestServerTimeMs)) {
           latestServerTimeMs = observed;
         }
-      } catch (_) {
+      } catch (error) {
         // Un handler qui lève (malgré son contrat) est isolé en échec.
         failed++;
         unusableResources.add(handler.resource);
+        diagnostics.add(
+          PullDiagnostic(
+            handler.resource,
+            PullDiagnosticKind.failed,
+            detail: error.toString(),
+          ),
+        );
         outcomes[handler.resource] = PullResult.error;
       }
     }
@@ -377,6 +398,11 @@ class PullCoordinator {
       outOfPlan: outOfPlan,
       plannedNotPulled: plannedNotPulledKeys.length,
       plannedNotPulledKeys: plannedNotPulledKeys,
+      diagnostics: List.unmodifiable([
+        ...diagnostics,
+        for (final key in plannedNotPulledKeys)
+          PullDiagnostic(key, PullDiagnosticKind.notPulled),
+      ]),
       planEmpty: planState is SyncPlanEmpty,
       // Le repli sur le registre n'est pas muet : la cause voyage jusqu'à la
       // pastille, qui ne s'alarme que d'`unsupportedStreams` (cf. `isDegraded`).

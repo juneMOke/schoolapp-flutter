@@ -7828,6 +7828,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncIncompleteReadRetry => 'Réessayer';
 
   @override
+  String get syncReadDiagnosticsTitle => 'Flux en défaut';
+
+  @override
+  String get syncReadDiagnosticsHint =>
+      'Visible des super-administrateurs seulement. Transmettez ces lignes au support.';
+
+  @override
+  String get syncReadDiagnosticFailed => 'Échec';
+
+  @override
+  String get syncReadDiagnosticBlocked => 'Bloqué par un flux en échec';
+
+  @override
+  String get syncReadDiagnosticForbidden => 'Droit manquant';
+
+  @override
+  String get syncReadDiagnosticNotPulled =>
+      'Annoncé par le serveur, non tiré par cette version';
+
+  @override
+  String syncReadDiagnosticLine(String resource, String cause) {
+    return '$resource — $cause';
+  }
+
+  @override
+  String syncReadDiagnosticLineWithDetail(
+    String resource,
+    String cause,
+    String detail,
+  ) {
+    return '$resource — $cause : $detail';
+  }
+
+  @override
   String get syncErrorsHeldTitle => 'En attente';
 
   @override

@@ -7753,6 +7753,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncIncompleteReadRetry => 'Try again';
 
   @override
+  String get syncReadDiagnosticsTitle => 'Failing flows';
+
+  @override
+  String get syncReadDiagnosticsHint =>
+      'Visible to super administrators only. Pass these lines on to support.';
+
+  @override
+  String get syncReadDiagnosticFailed => 'Failed';
+
+  @override
+  String get syncReadDiagnosticBlocked => 'Blocked by a failing flow';
+
+  @override
+  String get syncReadDiagnosticForbidden => 'Missing right';
+
+  @override
+  String get syncReadDiagnosticNotPulled =>
+      'Announced by the server, not pulled by this version';
+
+  @override
+  String syncReadDiagnosticLine(String resource, String cause) {
+    return '$resource — $cause';
+  }
+
+  @override
+  String syncReadDiagnosticLineWithDetail(
+    String resource,
+    String cause,
+    String detail,
+  ) {
+    return '$resource — $cause: $detail';
+  }
+
+  @override
   String get syncErrorsHeldTitle => 'Waiting';
 
   @override

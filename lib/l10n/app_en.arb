@@ -5053,6 +5053,22 @@
   "syncIncompleteReadDescription": "The last update did not bring everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost. If this persists, your administrator can check your account's access rights.",
   "syncIncompleteReadRetriableDescription": "The last update stopped before bringing everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost.",
   "syncIncompleteReadRetry": "Try again",
+  "syncReadDiagnosticsTitle": "Failing flows",
+  "syncReadDiagnosticsHint": "Visible to super administrators only. Pass these lines on to support.",
+  "syncReadDiagnosticFailed": "Failed",
+  "syncReadDiagnosticBlocked": "Blocked by a failing flow",
+  "syncReadDiagnosticForbidden": "Missing right",
+  "syncReadDiagnosticNotPulled": "Announced by the server, not pulled by this version",
+  "syncReadDiagnosticLine": "{resource} — {cause}",
+  "@syncReadDiagnosticLine": {
+    "description": "One line of the read diagnostics (super admin): the technical flow and the cause",
+    "placeholders": {"resource": {"type": "String"}, "cause": {"type": "String"}}
+  },
+  "syncReadDiagnosticLineWithDetail": "{resource} — {cause}: {detail}",
+  "@syncReadDiagnosticLineWithDetail": {
+    "description": "One line of the read diagnostics (super admin) with the error message",
+    "placeholders": {"resource": {"type": "String"}, "cause": {"type": "String"}, "detail": {"type": "String"}}
+  },
   "syncErrorsHeldTitle": "Waiting",
   "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears.",
   "documentViewerPrintLabel": "Print",

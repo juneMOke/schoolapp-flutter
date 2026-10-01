@@ -1,5 +1,8 @@
 import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
+import 'package:school_app_flutter/core/offline/pull_diagnostic.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+
+export 'package:school_app_flutter/core/offline/pull_diagnostic.dart';
 
 /// Bilan d'un cycle de pull (diagnostic / UI).
 class PullRunReport {
@@ -108,6 +111,10 @@ class PullRunReport {
   /// dont le contrat n'expose pas encore ce champ).
   final int? latestServerTimeMs;
 
+  /// Les flux en défaut de ce cycle, et leur cause : ce que [isDegraded]
+  /// résume en un booléen. Vide sur un cycle sain, [skipped] ou [offline].
+  final List<PullDiagnostic> diagnostics;
+
   const PullRunReport({
     this.skipped = false,
     this.offline = false,
@@ -123,6 +130,7 @@ class PullRunReport {
     this.planUnknownCause,
     this.outcomes = const <String, PullResult>{},
     this.latestServerTimeMs,
+    this.diagnostics = const <PullDiagnostic>[],
   });
 
   const PullRunReport.skipped() : this(skipped: true);

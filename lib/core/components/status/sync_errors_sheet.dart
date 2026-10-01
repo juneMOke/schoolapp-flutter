@@ -5,13 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_errors_body.dart';
 import 'package:school_app_flutter/core/components/status/sync_incomplete_read_band.dart';
+import 'package:school_app_flutter/core/components/status/sync_read_diagnostics_list.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/offline/pull_diagnostic.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ouvre la feuille de reprise des écritures en échec.
@@ -31,6 +34,11 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
   // alors un cycle de dix-neuf ressources pour rien — ou l'introduire alors que
   // la feuille n'offre plus ni bandeau ni geste.
   final syncStatusCubit = context.read<SyncStatusCubit>();
+  // Le détail des flux en défaut est un outil de support, pas un message :
+  // réservé au super-administrateur. Rôle relu dans la session locale, qui
+  // existe aussi hors connexion.
+  final showDiagnostics = await _isSuperAdmin();
+  if (!context.mounted) return;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -48,6 +56,7 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
         ),
       ],
       child: _SyncErrorsSheet(
+        showDiagnostics: showDiagnostics,
         // Ferme la feuille PUIS relance : le cycle dure, et le laisser tourner
         // derrière une modale ouverte n'y afficherait rien de plus. La pastille
         // passe à « Synchro… », et le `refresh()` de fermeture ci-dessous
@@ -62,10 +71,25 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
   await syncStatusCubit.refresh();
 }
 
+Future<bool> _isSuperAdmin() async {
+  try {
+    final user = await getIt<AuthLocalDao>().getSessionUser();
+    return user?.role.trim().toUpperCase() == 'SUPER_ADMIN';
+  } catch (_) {
+    return false;
+  }
+}
+
 class _SyncErrorsSheet extends StatelessWidget {
   final VoidCallback onRetry;
 
-  const _SyncErrorsSheet({required this.onRetry});
+  /// Montrer, sous le bandeau, quels flux n'ont pas été ramenés et pourquoi.
+  final bool showDiagnostics;
+
+  const _SyncErrorsSheet({
+    required this.onRetry,
+    required this.showDiagnostics,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +100,13 @@ class _SyncErrorsSheet extends StatelessWidget {
     return BlocBuilder<SyncStatusCubit, SyncStatusState>(
       buildWhen: (previous, current) =>
           previous.hasIncompleteRead != current.hasIncompleteRead ||
-          previous.hasRetriableRead != current.hasRetriableRead,
+          previous.hasRetriableRead != current.hasRetriableRead ||
+          previous.readDiagnostics != current.readDiagnostics,
       builder: (context, status) => _buildSheet(
         context,
         status.hasIncompleteRead,
         status.hasRetriableRead,
+        showDiagnostics ? status.readDiagnostics : const [],
       ),
     );
   }
@@ -89,6 +115,7 @@ class _SyncErrorsSheet extends StatelessWidget {
     BuildContext context,
     bool hasIncompleteRead,
     bool retriable,
+    List<PullDiagnostic> diagnostics,
   ) {
     final l10n = AppLocalizations.of(context)!;
     return FractionallySizedBox(
@@ -136,6 +163,12 @@ class _SyncErrorsSheet extends StatelessWidget {
             // incomplète.
             if (hasIncompleteRead)
               SyncIncompleteReadBand(retriable: retriable, onRetry: onRetry),
+            if (hasIncompleteRead && diagnostics.isNotEmpty)
+              Flexible(
+                child: SingleChildScrollView(
+                  child: SyncReadDiagnosticsList(diagnostics: diagnostics),
+                ),
+              ),
             const Expanded(child: SyncErrorsBody()),
           ],
         ),
