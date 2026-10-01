@@ -17,20 +17,6 @@ class AttendanceHistoryLocalDataSource {
   static const String sessionsTable = AttendanceLocalDataSource.sessionsTable;
   static const String recordsTable = AttendanceLocalDataSource.recordsTable;
 
-  /// Nombre d'absences locales d'un jour (present=0) — numérateur du taux AF-3.
-  Future<int> countAbsences({
-    required String classroomId,
-    required String dateStr,
-    required String academicYearId,
-  }) async {
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM $recordsTable WHERE classroom_id = ? '
-      'AND attendance_date = ? AND academic_year_id = ? AND present = 0',
-      [classroomId, dateStr, academicYearId],
-    );
-    return (rows.first['c'] as int?) ?? 0;
-  }
-
   /// **Jours appelés** d'une classe sur une période (dénominateur des stats
   /// AF-3, §5) : nombre de sessions. [fromStr]/[toStr] nuls = année entière
   /// (les sessions sont déjà cadrées par `academic_year_id`).

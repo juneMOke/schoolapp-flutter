@@ -134,11 +134,6 @@ class AppDimensions {
   static const loginFormPanelRatio = 0.38;
   static const loginFormStackedMax = 400.0;
 
-  // Attendance page tokens
-  static const attendanceStudentAvatarSize = 30.0;
-  static const attendanceResultsPanelMinHeight = 360.0;
-  static const attendanceResultsPanelMaxHeight = 620.0;
-
   // Onglet Discipline — carte de cas & frise de statut
   static const disciplinaryCardAccentWidth = 4.0;
   static const disciplinaryStepperDotSize = 22.0;
@@ -169,12 +164,6 @@ class AppDimensions {
   static const presenceRowAccentBarHeight = 30.0;
   static const presencePerfectMedallionSize = 64.0;
   static const presencePerfectIconSize = 30.0;
-  static const attendanceCounterValueFontSize = 16.0;
-  static const attendanceCycleFieldWidth = 170.0;
-  static const attendanceLevelFieldWidth = 170.0;
-  static const attendanceClassFieldWidth = 210.0;
-  static const attendanceDateFieldWidth = 190.0;
-  static const attendanceCounterColumnWidth = 72.0;
 
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;

@@ -8,14 +8,13 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart'
     show kClassroomMembersResource;
 
 import '../../../../../core/offline/offline_full_test_db.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_line.dart';
 
 class MockIdGenerator extends Mock implements IdGenerator {}
 
@@ -43,37 +42,29 @@ void main() {
         studentGender: gender,
       );
 
-  AttendanceUpdate update(String sid, {required bool present}) =>
-      AttendanceUpdate(
-        studentId: sid,
-        studentFirstName: 'First$sid',
-        studentLastName: 'Last$sid',
-        studentGender: StudentGender.male,
-        present: present,
-        absenceReason: present ? null : AbsenceReason.sickness,
-      );
+  _Update update(String sid, {required bool present}) =>
+      (studentId: sid, present: present);
 
   /// Écrit l'appel du 15/06 comme le faisait l'écran d'avant la v2 : les
   /// élèves affichés ([updates]) et, parmi eux, les absents.
-  Future<AttendanceDayWrite> record(List<AttendanceUpdate> updates) =>
-      writer.write(
-        classroomId: classroomId,
-        dateStr: '2026-06-15',
-        academicYearId: yearId,
-        covered: {for (final u in updates) u.studentId},
-        lines: [
-          for (final u in updates)
-            if (!u.present)
-              AttendanceDayLine(
-                studentId: u.studentId,
-                studentFirstName: u.studentFirstName,
-                studentLastName: u.studentLastName,
-                studentGender: 'MALE',
-                status: PresenceStatus.absent,
-                absenceReason: u.absenceReason?.toApiValue(),
-              ),
-        ],
-      );
+  Future<AttendanceDayWrite> record(List<_Update> updates) => writer.write(
+    classroomId: classroomId,
+    dateStr: '2026-06-15',
+    academicYearId: yearId,
+    covered: {for (final u in updates) u.studentId},
+    lines: [
+      for (final u in updates)
+        if (!u.present)
+          AttendanceDayLine(
+            studentId: u.studentId,
+            studentFirstName: 'First${u.studentId}',
+            studentLastName: 'Last${u.studentId}',
+            studentGender: 'MALE',
+            status: PresenceStatus.absent,
+            absenceReason: AbsenceReason.sickness.toApiValue(),
+          ),
+    ],
+  );
 
   setUp(() async {
     db = await openFullOfflineDb();
@@ -106,32 +97,29 @@ void main() {
 
   tearDown(() async => db.close());
 
-  test(
-    'recordDailyAttendance : seul l\'absent est matérialisé (par exception)',
-    () async {
-      await record([
-        update('s1', present: false),
-        update('s2', present: true),
-        update('s3', present: true),
-      ]);
+  test('seul l\'absent est matérialisé (par exception)', () async {
+    await record([
+      update('s1', present: false),
+      update('s2', present: true),
+      update('s3', present: true),
+    ]);
 
-      final rows = await local.getDayRecords(
-        classroomId: classroomId,
-        dateStr: '2026-06-15',
-        academicYearId: yearId,
-      );
-      expect(rows, hasLength(1));
-      expect(rows.first.studentId, 's1');
-      expect(rows.first.present, isFalse);
-      expect(rows.first.absenceReason, 'SICKNESS');
+    final rows = await local.getDayRecords(
+      classroomId: classroomId,
+      dateStr: '2026-06-15',
+      academicYearId: yearId,
+    );
+    expect(rows, hasLength(1));
+    expect(rows.first.studentId, 's1');
+    expect(rows.first.present, isFalse);
+    expect(rows.first.absenceReason, 'SICKNESS');
 
-      // 1 entrée outbox ATTENDANCE (full-write).
-      expect(await outbox.pendingCount(), 1);
-      final entries = await outbox.pendingReady(clock + 1);
-      expect(entries.first.aggregateType, 'ATTENDANCE');
-      expect(entries.first.aggregateId, 'c1|2026-06-15|year-1');
-    },
-  );
+    // 1 entrée outbox ATTENDANCE (full-write).
+    expect(await outbox.pendingCount(), 1);
+    final entries = await outbox.pendingReady(clock + 1);
+    expect(entries.first.aggregateType, 'ATTENDANCE');
+    expect(entries.first.aggregateId, 'c1|2026-06-15|year-1');
+  });
 
   test(
     'correction : l\'élève redevenu présent sort des exceptions (non-ligne)',
@@ -276,3 +264,5 @@ void main() {
     );
   });
 }
+
+typedef _Update = ({String studentId, bool present});

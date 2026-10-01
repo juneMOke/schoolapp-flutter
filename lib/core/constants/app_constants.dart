@@ -426,7 +426,6 @@ class AppConstants {
   static const String supportEmail = 'support@school.local';
 
   // ─── Attendance ────────────────────────────────────────────────────────────
-  static const String attendanceEndpoint = '/api/v1/attendances';
   static const String attendanceByClassroomEndpoint =
       '/api/v1/attendances/classes/{classroomId}';
   static const String attendanceOverviewEndpoint =
@@ -1125,8 +1124,8 @@ class AppConstants {
   ///  - **GET** = pull KEYSET des sessions (absences imbriquées), cadré année,
   ///    jeton `cursor` opaque, 304 applicatif.
   ///
-  /// Remplace l'ancien push record-level [attendanceEndpoint] côté offline
-  /// (celui-ci reste en service pour les lectures online hors offline).
+  /// Remplace l'ancien push record-level `POST /api/v1/attendances` (retiré
+  /// avec l'écran Présences d'avant la v2).
   static const String syncAttendanceEndpoint = '/api/v1/sync/attendance';
 
   /// Clôtures de mois de l'appel, par classe (présences des élèves v2) :
