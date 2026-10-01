@@ -27,12 +27,10 @@ class PresenceScheduleDialog extends StatefulWidget {
   });
 
   @override
-  State<PresenceScheduleDialog> createState() =>
-      _PresenceScheduleDialogState();
+  State<PresenceScheduleDialog> createState() => _PresenceScheduleDialogState();
 }
 
-class _PresenceScheduleDialogState
-    extends State<PresenceScheduleDialog> {
+class _PresenceScheduleDialogState extends State<PresenceScheduleDialog> {
   late final TextEditingController _start = TextEditingController(
     text: widget.schedule.start.wire,
   );

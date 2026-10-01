@@ -24,7 +24,7 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_atten
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_validated_banner.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../staff_builders.dart';

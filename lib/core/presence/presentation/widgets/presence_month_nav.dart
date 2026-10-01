@@ -46,11 +46,7 @@ class PresenceMonthNav extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: AppSpacing.sm,
       children: [
-        arrow(
-          Icons.chevron_left,
-          l10n.presenceMarkPreviousMonth,
-          onPrevious,
-        ),
+        arrow(Icons.chevron_left, l10n.presenceMarkPreviousMonth, onPrevious),
         Text(
           PresenceLabels.month(MaterialLocalizations.of(context), month),
           style: AppTypography.titleMedium.copyWith(

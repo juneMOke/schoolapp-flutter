@@ -10,7 +10,9 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_day_report_dialog.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
 
 /// Les gestes du jour entier : réglages, restants présents, valider, rouvrir.
@@ -53,14 +55,25 @@ class StaffRegisterActions {
   );
 
   Future<void> validate(StaffDayRegister register) async {
-    final choice = await EteeloFormDialog.show<StaffReportChoice>(
+    final l10n = AppLocalizations.of(context)!;
+    final unmarked = register.unmarked.length;
+    final choice = await EteeloFormDialog.show<PresenceReportChoice>(
       context,
-      StaffDayReportDialog(
-        register: register,
-        dayLabel: PresenceLabels.longDay(
+      PresenceReportDialog(
+        eyebrow: PresenceLabels.longDay(
           MaterialLocalizations.of(context),
           register.day,
         ),
+        title: l10n.staffAttendanceReportTitle,
+        present: register.count(PresenceStatus.present),
+        late: register.count(PresenceStatus.late),
+        absent: register.count(PresenceStatus.absent),
+        // Seuls ceux qu'un contrat couvre ce jour-là sont marqués d'office.
+        unmarked: unmarked,
+        unjustified: register.toJustify,
+        unmarkedLabel: l10n.staffAttendanceReportMarkRemaining(unmarked),
+        lockMessage: l10n.staffAttendanceReportLock,
+        confirmLabel: l10n.staffAttendanceReportConfirm,
       ),
     );
     if (choice == null || !context.mounted) return;

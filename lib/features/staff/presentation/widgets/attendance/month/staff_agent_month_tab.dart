@@ -12,12 +12,17 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_agent_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_incident_list.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_month_calendar.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_month_views.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_incident_list.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_picker.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
@@ -29,11 +34,10 @@ class StaffAgentMonthTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<StaffAttendanceCubit>();
     final members = state.snapshot.members;
-    if (members.isEmpty) {
-      return const StaffRegisterEmpty(filtered: false);
-    }
+    if (members.isEmpty) return const StaffRegisterEmpty();
     final member = members.firstWhere(
       (m) => m.id == state.agentId,
       orElse: () => members.first,
@@ -53,9 +57,22 @@ class StaffAgentMonthTab extends StatelessWidget {
           spacing: AppSpacing.lg,
           runSpacing: AppSpacing.md,
           children: [
-            StaffAgentPicker(
-              members: members,
-              selected: member,
+            PresencePersonPicker<StaffMember>(
+              entries: [
+                for (final m in members)
+                  PresencePickerEntry(
+                    value: m,
+                    id: m.id,
+                    firstName: m.firstName,
+                    lastName: m.lastName,
+                    fullName: m.fullName,
+                    detail: m.jobTitle,
+                  ),
+              ],
+              selectedId: member.id,
+              label: l10n.staffAttendanceTabAgent,
+              placeholder: l10n.staffAttendanceAgentPicker,
+              matches: StaffMemberSearch.matches,
               onSelected: (picked) => cubit.openAgent(picked.id),
             ),
             PresenceMonthNav(
@@ -80,12 +97,25 @@ class StaffAgentMonthTab extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           PresenceCardFrame(
             title: member.fullName,
-            child: StaffMonthCalendar(days: month.calendar),
+            child: PresenceMonthCalendar(days: month.calendar),
           ),
           const SizedBox(height: AppSpacing.lg),
           PresenceCardFrame(
-            title: AppLocalizations.of(context)!.presenceMarkIncidentsTitle,
-            child: StaffIncidentList(incidents: month.incidents),
+            title: l10n.presenceMarkIncidentsTitle,
+            child: PresenceIncidentList<StaffAbsenceReason>(
+              incidents: [
+                for (final record in month.incidents)
+                  PresenceIncident(
+                    day: record.workDate,
+                    status: record.status,
+                    arrival: record.arrival,
+                    lateMinutes: record.lateMinutes,
+                    reason: record.justification?.reason,
+                  ),
+              ],
+              reasonLabel: (reason) =>
+                  StaffAttendanceLabels.reason(l10n, reason),
+            ),
           ),
         ],
       ],

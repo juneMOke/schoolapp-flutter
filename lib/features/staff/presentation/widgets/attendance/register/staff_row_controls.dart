@@ -1,95 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row_controls.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
-export 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
+// Les contrôles propres au Pointage, ajoutés à ceux du registre commun : le
+// départ et les heures prestées d'un vacataire à l'heure.
 
-// Les contrôles d'une ligne du registre, partagés par la carte de la grille et
-// la ligne de la liste : une heure, le compteur d'heures, le bouton de
-// justification, la reprise d'un envoi refusé.
-
-/// Le détail d'un statut : « +22 min après 07:30 », « Absence justifiée »…
-String staffStatusDetail(
-  AppLocalizations l10n,
-  StaffDayRow row,
-  StaffAttendanceSettings settings,
-) {
-  final record = row.record;
-  return switch (row.status) {
-    PresenceStatus.none => l10n.presenceMarkNotMarked,
-    PresenceStatus.present => l10n.presenceMarkOnTime,
-    PresenceStatus.late => l10n.presenceMarkLateDetail(
-      record!.lateMinutes,
-      settings.start.wire,
-    ),
-    PresenceStatus.absent =>
-      record!.isJustified
-          ? l10n.presenceMarkAbsenceJustified
-          : l10n.presenceMarkAbsenceUnjustified,
-  };
-}
-
-/// Une heure (arrivée, départ) : en chiffres quand elle est posée, en pointillé
-/// sinon. Toucher ouvre la saisie.
-class StaffTimeButton extends StatelessWidget {
-  final String label;
-  final ClockTime? time;
+/// Le bouton du départ d'un agent.
+class StaffDepartureButton extends StatelessWidget {
+  final PresenceRowView row;
   final VoidCallback onTap;
 
-  const StaffTimeButton({
+  const StaffDepartureButton({
     super.key,
-    required this.label,
-    required this.time,
+    required this.row,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final time = this.time;
-    return Semantics(
-      button: true,
-      label: '$label ${time?.wire ?? ''}',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.brSm,
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.presenceMarkIconButtonSize,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.brSm,
-            border: Border.all(
-              color: time == null ? AppColors.borderStrong : AppColors.border,
-            ),
-            color: time == null ? null : AppColors.surface,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            time?.wire ?? label,
-            style: time == null
-                ? AppTypography.labelMedium.copyWith(
-                    color: AppColors.textMutedAa,
-                  )
-                : AppTypography.money.copyWith(color: AppColors.textPrimary),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => PresenceTimeButton(
+    label: AppLocalizations.of(context)!.presenceMarkDeparture,
+    time: row.departure,
+    onTap: onTap,
+  );
 }
 
 /// Les heures prestées d'un vacataire à l'heure : − 3 h +, de 0 à 10 h.
@@ -110,10 +47,10 @@ class StaffHoursStepper extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _StepButton(
+        PresenceSquareIconButton(
           icon: Icons.remove,
           tooltip: l10n.staffAttendanceHoursLess,
-          onTap: value <= 0 ? null : () => onStep(-1),
+          onPressed: value <= 0 ? null : () => onStep(-1),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
@@ -122,82 +59,14 @@ class StaffHoursStepper extends StatelessWidget {
             style: AppTypography.labelLarge,
           ),
         ),
-        _StepButton(
+        PresenceSquareIconButton(
           icon: Icons.add,
           tooltip: l10n.staffAttendanceHoursMore,
-          onTap: value >= StaffAttendanceRecord.maxWorkedMinutes
+          onPressed: value >= StaffAttendanceRecord.maxWorkedMinutes
               ? null
               : () => onStep(1),
         ),
       ],
-    );
-  }
-}
-
-class _StepButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onTap;
-
-  const _StepButton({required this.icon, required this.tooltip, this.onTap});
-
-  @override
-  Widget build(BuildContext context) =>
-      StaffSquareIconButton(icon: icon, tooltip: tooltip, onPressed: onTap);
-}
-
-/// « Justifier », ou le motif posé, en vert.
-class StaffJustifyButton extends StatelessWidget {
-  final StaffAttendanceRecord record;
-  final VoidCallback onTap;
-
-  const StaffJustifyButton({
-    super.key,
-    required this.record,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final justification = record.justification;
-    final tone = PresenceTone.of(
-      justification == null ? record.status : PresenceStatus.present,
-    );
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.brPill,
-      child: Container(
-        constraints: const BoxConstraints(
-          minHeight: AppDimensions.presenceMarkIconButtonSize,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: tone.soft,
-          borderRadius: AppRadius.brPill,
-          border: Border.all(color: tone.border),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              justification == null ? Icons.edit_note : Icons.task_alt,
-              size: AppSpacing.lg,
-              color: tone.ink,
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Flexible(
-              child: Text(
-                justification == null
-                    ? l10n.presenceMarkJustify
-                    : StaffAttendanceLabels.reason(l10n, justification.reason),
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.labelMedium.copyWith(color: tone.ink),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

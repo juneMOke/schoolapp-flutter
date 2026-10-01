@@ -1,26 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_progress_ring.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_progress_ring.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
-/// Le bandeau du registre : navigation de jour, réglages, progression et
-/// actions (restants présents, valider). Les actions disparaissent une fois
-/// le rapport validé — le bandeau vert prend le relais.
-class StaffDayBanner extends StatelessWidget {
-  final StaffDayRegister register;
-  final StaffAttendanceSettings settings;
+/// Le bandeau d'un registre du jour : navigation de jour, horaire, progression
+/// et actions (restants présents, valider). Les actions disparaissent quand
+/// [showActions] est faux — jour validé, ou compte sans droit d'écriture.
+class PresenceDayBanner extends StatelessWidget {
+  /// « Registre du jour », « Appel du jour · 6e A »…
+  final String eyebrow;
+
+  /// `YYYY-MM-DD`.
+  final String day;
   final bool isToday;
+  final PresenceSchedule schedule;
+  final int marked;
+  final int total;
+
+  /// La ligne sous la progression (« 12 à pointer · 3 sur la tablette »).
+  final String detail;
+
+  final bool showActions;
+  final String validateLabel;
 
   /// `null` : début de l'année scolaire, pas de jour précédent.
   final VoidCallback? onPrevious;
@@ -29,14 +37,24 @@ class StaffDayBanner extends StatelessWidget {
   final VoidCallback? onNext;
   final VoidCallback onToday;
   final VoidCallback onSettings;
-  final VoidCallback onMarkRemaining;
-  final VoidCallback onValidate;
 
-  const StaffDayBanner({
+  /// `null` : personne à marquer.
+  final VoidCallback? onMarkRemaining;
+
+  /// `null` : rien à valider.
+  final VoidCallback? onValidate;
+
+  const PresenceDayBanner({
     super.key,
-    required this.register,
-    required this.settings,
+    required this.eyebrow,
+    required this.day,
     required this.isToday,
+    required this.schedule,
+    required this.marked,
+    required this.total,
+    required this.detail,
+    required this.showActions,
+    required this.validateLabel,
     required this.onPrevious,
     required this.onNext,
     required this.onToday,
@@ -49,7 +67,6 @@ class StaffDayBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     const onBanner = AppColors.presenceMarkOnBanner;
-    final unmarked = register.count(PresenceStatus.none);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: const BoxDecoration(
@@ -71,7 +88,7 @@ class StaffDayBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _NavButton(
+              PresenceBannerButton(
                 icon: Icons.chevron_left,
                 tooltip: l10n.presenceMarkPreviousDay,
                 onPressed: onPrevious,
@@ -81,10 +98,7 @@ class StaffDayBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (isToday
-                            ? l10n.staffAttendanceEyebrowToday
-                            : l10n.staffAttendanceEyebrowPast)
-                        .toUpperCase(),
+                    eyebrow.toUpperCase(),
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.presenceMarkOnBannerMuted,
                     ),
@@ -92,16 +106,16 @@ class StaffDayBanner extends StatelessWidget {
                   Text(
                     PresenceLabels.longDay(
                       MaterialLocalizations.of(context),
-                      register.day,
+                      day,
                     ),
                     style: AppTypography.titleLarge.copyWith(color: onBanner),
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  _SettingsPill(settings: settings, onTap: onSettings),
+                  _SchedulePill(schedule: schedule, onTap: onSettings),
                 ],
               ),
               const SizedBox(width: AppSpacing.sm),
-              _NavButton(
+              PresenceBannerButton(
                 icon: Icons.chevron_right,
                 tooltip: l10n.presenceMarkNextDay,
                 onPressed: onNext,
@@ -119,57 +133,38 @@ class StaffDayBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PresenceProgressRing(
-                marked: register.marked,
-                total: register.all.length,
-              ),
+              PresenceProgressRing(marked: marked, total: total),
               const SizedBox(width: AppSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.presenceMarkProgress(
-                      register.marked,
-                      register.all.length,
-                    ),
+                    l10n.presenceMarkProgress(marked, total),
                     style: AppTypography.titleMedium.copyWith(color: onBanner),
                   ),
                   Text(
-                    [
-                      l10n.presenceMarkBadgeToMark(unmarked),
-                      if (register.pending > 0)
-                        l10n.presenceMarkOnTablet(register.pending),
-                    ].join(' · '),
+                    detail,
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.presenceMarkOnBannerMuted,
                     ),
                   ),
                 ],
               ),
-              if (!register.frozen)
-                PermissionGate.access(
-                  kStaffAttendanceWriteAccess,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(width: AppSpacing.md),
-                      _NavButton(
-                        icon: Icons.checklist,
-                        tooltip: l10n.presenceMarkMarkRemaining,
-                        onPressed: register.unmarked.isEmpty
-                            ? null
-                            : onMarkRemaining,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      EteeloButton.primary(
-                        label: l10n.staffAttendanceValidateReport,
-                        icon: Icons.task_alt,
-                        onPressed: register.isEmpty ? null : onValidate,
-                        fullWidth: false,
-                      ),
-                    ],
-                  ),
+              if (showActions) ...[
+                const SizedBox(width: AppSpacing.md),
+                PresenceBannerButton(
+                  icon: Icons.checklist,
+                  tooltip: l10n.presenceMarkMarkRemaining,
+                  onPressed: onMarkRemaining,
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                EteeloButton.primary(
+                  label: validateLabel,
+                  icon: Icons.task_alt,
+                  onPressed: onValidate,
+                  fullWidth: false,
+                ),
+              ],
             ],
           ),
         ],
@@ -178,12 +173,19 @@ class StaffDayBanner extends StatelessWidget {
   }
 }
 
-class _NavButton extends StatelessWidget {
+/// Un bouton d'icône posé sur le bandeau sombre (jour précédent, restants
+/// présents).
+class PresenceBannerButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
 
-  const _NavButton({required this.icon, required this.tooltip, this.onPressed});
+  const PresenceBannerButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
@@ -201,11 +203,11 @@ class _NavButton extends StatelessWidget {
   );
 }
 
-class _SettingsPill extends StatelessWidget {
-  final StaffAttendanceSettings settings;
+class _SchedulePill extends StatelessWidget {
+  final PresenceSchedule schedule;
   final VoidCallback onTap;
 
-  const _SettingsPill({required this.settings, required this.onTap});
+  const _SchedulePill({required this.schedule, required this.onTap});
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -231,8 +233,8 @@ class _SettingsPill extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             AppLocalizations.of(context)!.presenceMarkSettingsPill(
-              settings.start.wire,
-              settings.toleranceMinutes,
+              schedule.start.wire,
+              schedule.toleranceMinutes,
             ),
             style: AppTypography.labelMedium.copyWith(
               color: AppColors.presenceMarkOnBanner,

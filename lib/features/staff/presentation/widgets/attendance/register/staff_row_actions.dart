@@ -11,7 +11,10 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_justification_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_justification_dialog.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
@@ -27,7 +30,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 /// Chaque geste relit la ligne **au moment où il part** ([_row]) : la ligne
 /// affichée a pu changer entre-temps (double toucher, pull pendant une
 /// modale), et partir de l'ancienne écraserait la plus récente.
-class StaffRowActions {
+class StaffRowActions implements PresenceRowActions {
   final BuildContext context;
   final StaffDayRow row;
 
@@ -70,11 +73,13 @@ class StaffRowActions {
     return true;
   }
 
+  @override
   void cycle() {
     if (_intercept()) return;
     unawaited(_cubit.perform((c) => c.cycle(_cubit.state.snapshot, _row)));
   }
 
+  @override
   void choose(PresenceStatus status) {
     if (_intercept()) return;
     unawaited(
@@ -82,11 +87,13 @@ class StaffRowActions {
     );
   }
 
+  @override
   void clear() {
     if (_intercept()) return;
     unawaited(_cubit.perform((c) => c.clear(_cubit.state.snapshot, _row)));
   }
 
+  @override
   void retry() {
     if (_intercept()) return;
     unawaited(_cubit.perform((c) => c.retry(_cubit.state.snapshot, _row)));
@@ -108,6 +115,7 @@ class StaffRowActions {
     );
   }
 
+  @override
   Future<void> editArrival() async {
     if (_intercept()) return;
     final l10n = AppLocalizations.of(context)!;
@@ -166,21 +174,30 @@ class StaffRowActions {
     );
   }
 
+  @override
   Future<void> justify() async {
     if (_intercept()) return;
     final StaffAttendanceRecord? record = _row.record;
     if (record == null || !record.status.isIncident) return;
-    final choice = await EteeloFormDialog.show<StaffJustificationChoice>(
-      context,
-      StaffJustificationDialog(
-        name: _name,
-        record: record,
-        dayLabel: PresenceLabels.longDay(
-          MaterialLocalizations.of(context),
-          row.day,
-        ),
-      ),
-    );
+    final l10n = AppLocalizations.of(context)!;
+    final choice =
+        await EteeloFormDialog.show<
+          PresenceJustificationChoice<StaffAbsenceReason>
+        >(
+          context,
+          PresenceJustificationDialog<StaffAbsenceReason>(
+            name: _name,
+            status: record.status,
+            lateMinutes: record.lateMinutes,
+            initial: record.justification,
+            reasons: StaffAbsenceReason.values,
+            reasonLabel: (reason) => StaffAttendanceLabels.reason(l10n, reason),
+            dayLabel: PresenceLabels.longDay(
+              MaterialLocalizations.of(context),
+              row.day,
+            ),
+          ),
+        );
     if (choice == null || !context.mounted) return;
     await _cubit.perform(
       (c) => c.justify(_cubit.state.snapshot, _row, choice.justification),

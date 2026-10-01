@@ -4,18 +4,18 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_agent_month.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_month_views.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
-/// Le mois d'un agent, lundi → vendredi : une case par jour, dans la teinte
+/// Le mois d'une personne, lundi → vendredi : une case par jour, dans la teinte
 /// de son statut ; jours à venir estompés, non pointés en pointillé.
-class StaffMonthCalendar extends StatelessWidget {
-  final List<StaffCalendarDay?> days;
+class PresenceMonthCalendar extends StatelessWidget {
+  final List<PresenceCalendarDay?> days;
 
-  const StaffMonthCalendar({super.key, required this.days});
+  const PresenceMonthCalendar({super.key, required this.days});
 
   static const int _columns = 5;
 
@@ -74,7 +74,7 @@ class StaffMonthCalendar extends StatelessWidget {
 }
 
 class _DayCell extends StatelessWidget {
-  final StaffCalendarDay day;
+  final PresenceCalendarDay day;
 
   const _DayCell({required this.day});
 
