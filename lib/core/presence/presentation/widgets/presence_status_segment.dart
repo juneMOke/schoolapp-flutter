@@ -4,27 +4,27 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le choix direct du statut dans la liste : Présent · Retard · Absent. Pas
 /// de cycle ; retoucher le statut actif l'efface.
-class StaffStatusSegment extends StatelessWidget {
-  final StaffAttendanceStatus status;
-  final ValueChanged<StaffAttendanceStatus> onChoose;
+class PresenceStatusSegment extends StatelessWidget {
+  final PresenceStatus status;
+  final ValueChanged<PresenceStatus> onChoose;
 
-  const StaffStatusSegment({
+  const PresenceStatusSegment({
     super.key,
     required this.status,
     required this.onChoose,
   });
 
-  static const List<StaffAttendanceStatus> choices = [
-    StaffAttendanceStatus.present,
-    StaffAttendanceStatus.late,
-    StaffAttendanceStatus.absent,
+  static const List<PresenceStatus> choices = [
+    PresenceStatus.present,
+    PresenceStatus.late,
+    PresenceStatus.absent,
   ];
 
   @override
@@ -37,10 +37,10 @@ class StaffStatusSegment extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: AppSpacing.xs),
               child: _Choice(
-                label: StaffAttendanceLabels.status(l10n, choice),
-                tone: StaffAttendanceTone.of(choice),
+                label: PresenceLabels.status(l10n, choice),
+                tone: PresenceTone.of(choice),
                 selected: choice == status,
-                hint: choice == status ? l10n.staffAttendanceClearHint : null,
+                hint: choice == status ? l10n.presenceMarkClearHint : null,
                 onTap: () => onChoose(choice),
               ),
             ),
@@ -52,7 +52,7 @@ class StaffStatusSegment extends StatelessWidget {
 
 class _Choice extends StatelessWidget {
   final String label;
-  final StaffAttendanceTone tone;
+  final PresenceTone tone;
   final bool selected;
   final String? hint;
   final VoidCallback onTap;
@@ -81,7 +81,7 @@ class _Choice extends StatelessWidget {
           onTap: onTap,
           borderRadius: AppRadius.brSm,
           child: SizedBox(
-            height: AppDimensions.staffAttendanceSegmentHeight,
+            height: AppDimensions.presenceMarkSegmentHeight,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

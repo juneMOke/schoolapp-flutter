@@ -1,8 +1,9 @@
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne de `staff_attendance_records`, et ses passages vers l'entité et
 /// le fil.
@@ -41,7 +42,7 @@ class StaffAttendanceLocalModel {
     id: record.id,
     staffMemberId: record.staffMemberId,
     workDate: record.workDate,
-    status: record.status.wire,
+    status: record.status.staffWire,
     arrivalTime: record.arrival?.wire,
     departureTime: record.departure?.wire,
     lateMinutes: record.lateMinutes,
@@ -54,8 +55,8 @@ class StaffAttendanceLocalModel {
   String get id => (row['id'] as String?) ?? '';
   String get workDate => (row['work_date'] as String?) ?? '';
   String? get clientUpdatedAt => row['client_updated_at'] as String?;
-  StaffSyncState get syncState =>
-      StaffSyncState.fromDb(row['sync_status'] as String?);
+  RecordSyncState get syncState =>
+      RecordSyncState.fromDb(row['sync_status'] as String?);
 
   StaffAttendanceRecord toEntity() {
     String? text(String key) => row[key] as String?;
@@ -67,10 +68,10 @@ class StaffAttendanceLocalModel {
       // Un statut que ce poste ne connaît pas se lit « à pointer » : c'est
       // l'état qui n'affirme rien de faux.
       status:
-          StaffAttendanceStatus.fromWire(text('status')) ??
-          StaffAttendanceStatus.none,
-      arrival: StaffClockTime.tryParse(text('arrival_time')),
-      departure: StaffClockTime.tryParse(text('departure_time')),
+          StaffPresenceWire.fromStaffWire(text('status')) ??
+          PresenceStatus.none,
+      arrival: ClockTime.tryParse(text('arrival_time')),
+      departure: ClockTime.tryParse(text('departure_time')),
       lateMinutes: (row['late_minutes'] as int?) ?? 0,
       workedMinutes: row['worked_minutes'] as int?,
       justification: reason == null

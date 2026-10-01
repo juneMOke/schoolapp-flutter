@@ -2,8 +2,8 @@ import 'package:flutter/services.dart';
 
 /// Saisie d'une heure `HH:MM` : chiffres seulement, deux-points posés d'office
 /// après l'heure, quatre chiffres au plus.
-class StaffClockInputFormatter extends TextInputFormatter {
-  const StaffClockInputFormatter();
+class ClockInputFormatter extends TextInputFormatter {
+  const ClockInputFormatter();
 
   @override
   TextEditingValue formatEditUpdate(

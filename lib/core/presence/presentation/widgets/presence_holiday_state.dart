@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Un mois sans jour de classe : « Vacances — août 2027 ».
-class StaffHolidayState extends StatelessWidget {
+class PresenceHolidayState extends StatelessWidget {
   final String month;
   final VoidCallback onCurrent;
 
-  const StaffHolidayState({
+  const PresenceHolidayState({
     super.key,
     required this.month,
     required this.onCurrent,
@@ -19,14 +19,14 @@ class StaffHolidayState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EteeloEmptyResult(
-      label: l10n.staffAttendanceHolidayTitle(
-        StaffAttendanceLabels.month(MaterialLocalizations.of(context), month),
+      label: l10n.presenceMarkHolidayTitle(
+        PresenceLabels.month(MaterialLocalizations.of(context), month),
       ),
-      description: l10n.staffAttendanceHolidayMessage,
+      description: l10n.presenceMarkHolidayMessage,
       medallionIcon: Icons.beach_access_outlined,
       fullWidthCard: true,
       primaryAction: EteeloButton.primary(
-        label: l10n.staffAttendanceCurrentMonth,
+        label: l10n.presenceMarkCurrentMonth,
         icon: Icons.today,
         onPressed: onCurrent,
         fullWidth: false,

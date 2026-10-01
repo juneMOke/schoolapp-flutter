@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_fing
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les vecteurs de référence du moteur de paie, **le même fichier que le
 /// serveur** (`src/test/resources/payroll/engine-vectors.json`), copié tel
@@ -182,6 +183,6 @@ StaffContract _contract(String memberId, Map raw) {
         ? null
         : Money.parse(bonus, raw['bonusCurrency'] as String),
     recordedAt: '2025-01-01T00:00:00Z',
-    syncState: StaffSyncState.synced,
+    syncState: RecordSyncState.synced,
   );
 }

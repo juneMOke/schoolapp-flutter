@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_grid.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_list.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_day_banner.dart';
@@ -19,6 +17,8 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_validated_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// L'onglet « Registre du jour ».
 class StaffRegisterTab extends StatelessWidget {
@@ -35,7 +35,7 @@ class StaffRegisterTab extends StatelessWidget {
     final snapshot = state.snapshot;
     final lock = snapshot.dayLock(state.day);
     final monthClosed = snapshot.isMonthClosed(
-      StaffWorkCalendar.monthOf(state.day),
+      SchoolDayCalendar.monthOf(state.day),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,17 +60,17 @@ class StaffRegisterTab extends StatelessWidget {
             register: register,
             onReopen: monthClosed ? null : actions.reopen,
           )
-        else if (lock != null && lock.syncState == StaffSyncState.failed)
-          StaffAttendanceWarning(
+        else if (lock != null && lock.syncState == RecordSyncState.failed)
+          PresenceWarning(
             icon: Icons.sync_problem,
-            tone: StaffAttendanceStatus.absent,
+            tone: PresenceStatus.absent,
             message: l10n.staffAttendanceValidationRefused,
           ),
         if (monthClosed) ...[
           const SizedBox(height: AppSpacing.sm),
-          StaffAttendanceWarning(
+          PresenceWarning(
             icon: Icons.lock_outline,
-            tone: StaffAttendanceStatus.none,
+            tone: PresenceStatus.none,
             message: l10n.staffAttendanceMonthClosedBanner,
           ),
         ],
@@ -97,9 +97,9 @@ class StaffRegisterTab extends StatelessWidget {
           else
             Opacity(
               opacity: register.frozen
-                  ? AppDimensions.staffAttendanceFrozenOpacity
+                  ? AppDimensions.presenceMarkFrozenOpacity
                   : 1,
-              child: state.viewMode == StaffViewMode.grid
+              child: state.viewMode == CollectionViewMode.grid
                   ? StaffAttendanceGrid(
                       register: register,
                       settings: snapshot.settings,

@@ -4,15 +4,15 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_agent_heading.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_actions.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_controls.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_status_segment.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_segment.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Les colonnes d'une ligne du registre, partagées par l'en-tête et les
 /// lignes pour qu'elles s'alignent au pixel.
@@ -41,16 +41,16 @@ class StaffAttendanceRowLayout extends StatelessWidget {
       children: [
         Expanded(flex: 6, child: agent),
         const SizedBox(width: AppSpacing.sm),
-        SizedBox(width: AppDimensions.staffAttendanceColStatus, child: status),
+        SizedBox(width: AppDimensions.presenceMarkColStatus, child: status),
         const SizedBox(width: AppSpacing.sm),
-        SizedBox(width: AppDimensions.staffAttendanceColTimes, child: times),
+        SizedBox(width: AppDimensions.presenceMarkColTimes, child: times),
         if (hours != null) ...[
           const SizedBox(width: AppSpacing.sm),
-          SizedBox(width: AppDimensions.staffAttendanceColHours, child: hours),
+          SizedBox(width: AppDimensions.presenceMarkColHours, child: hours),
         ],
         const SizedBox(width: AppSpacing.sm),
         Expanded(flex: 5, child: late),
-        SizedBox(width: AppDimensions.staffAttendanceColAction, child: action),
+        SizedBox(width: AppDimensions.presenceMarkColAction, child: action),
       ],
     );
   }
@@ -74,7 +74,7 @@ class StaffAttendanceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(row.status);
+    final tone = PresenceTone.of(row.status);
     final actions = StaffRowActions(context, row, frozen: frozen);
     final record = row.record;
     final status = row.status;
@@ -88,23 +88,23 @@ class StaffAttendanceRow extends StatelessWidget {
         border: Border(
           left: BorderSide(
             color: tone.color,
-            width: AppDimensions.staffAttendanceAccentWidth,
+            width: AppDimensions.presenceMarkAccentWidth,
           ),
         ),
         gradient: LinearGradient(
           colors: [tone.soft, AppColors.surfaceRaised],
-          stops: const [0, AppDimensions.staffAttendanceRowTintStop],
+          stops: const [0, AppDimensions.presenceMarkRowTintStop],
         ),
       ),
       child: StaffAttendanceRowLayout(
         agent: StaffAgentHeading(row: row),
-        status: StaffStatusSegment(status: status, onChoose: actions.choose),
+        status: PresenceStatusSegment(status: status, onChoose: actions.choose),
         times: status.hasArrival
             ? Row(
                 children: [
                   Expanded(
                     child: StaffTimeButton(
-                      label: l10n.staffAttendanceArrival,
+                      label: l10n.presenceMarkArrival,
                       time: record?.arrival,
                       onTap: actions.editArrival,
                     ),
@@ -112,7 +112,7 @@ class StaffAttendanceRow extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: StaffTimeButton(
-                      label: l10n.staffAttendanceDeparture,
+                      label: l10n.presenceMarkDeparture,
                       time: record?.departure,
                       onTap: actions.editDeparture,
                     ),
@@ -147,13 +147,13 @@ class _LateCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final record = row.record;
-    final tone = StaffAttendanceTone.of(row.status);
+    final tone = PresenceTone.of(row.status);
     final text = switch (row.status) {
-      StaffAttendanceStatus.none => l10n.staffAttendanceNotMarked,
-      StaffAttendanceStatus.present => l10n.staffAttendanceOnTimeShort,
-      StaffAttendanceStatus.late =>
-        '+${l10n.staffAttendanceMinutes(record!.lateMinutes)}',
-      StaffAttendanceStatus.absent => null,
+      PresenceStatus.none => l10n.presenceMarkNotMarked,
+      PresenceStatus.present => l10n.presenceMarkOnTimeShort,
+      PresenceStatus.late =>
+        '+${l10n.presenceMarkMinutes(record!.lateMinutes)}',
+      PresenceStatus.absent => null,
     };
     return Wrap(
       spacing: AppSpacing.sm,

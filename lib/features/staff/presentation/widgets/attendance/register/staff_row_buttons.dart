@@ -4,9 +4,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
 // Les boutons d'icône d'une ligne du registre : effacer, ± heure, renvoyer.
 
@@ -27,7 +27,7 @@ class StaffSquareIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: AppDimensions.staffAttendanceIconButtonSize,
+    dimension: AppDimensions.presenceMarkIconButtonSize,
     child: IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
@@ -56,16 +56,16 @@ class StaffRetryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (record.syncState != StaffSyncState.failed) {
+    if (record.syncState != RecordSyncState.failed) {
       return const SizedBox.shrink();
     }
     final l10n = AppLocalizations.of(context)!;
     return StaffSquareIconButton(
       icon: Icons.refresh,
-      color: AppColors.staffAttendanceAbsentInk,
+      color: AppColors.presenceMarkAbsentInk,
       tooltip:
           '${StaffAttendanceLabels.refusal(l10n, record)} — '
-          '${l10n.staffAttendanceRetry}',
+          '${l10n.presenceMarkRetry}',
       onPressed: onRetry,
     );
   }

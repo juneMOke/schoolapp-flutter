@@ -11,10 +11,10 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_rules.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 void main() {
   PayrollSnapshot snapshot({
@@ -47,7 +47,7 @@ void main() {
 
   PayrollGesture gesture(
     PayrollGestureKind kind, {
-    StaffSyncState state = StaffSyncState.pending,
+    RecordSyncState state = RecordSyncState.pending,
     String? code,
   }) => PayrollGesture(
     id: 'g-${kind.wire}',
@@ -90,7 +90,7 @@ void main() {
           gestures: [
             gesture(
               PayrollGestureKind.validate,
-              state: StaffSyncState.failed,
+              state: RecordSyncState.failed,
               code: PayrollGesture.staleCode,
             ),
           ],
@@ -198,7 +198,7 @@ void main() {
           gestures: [
             gesture(
               PayrollGestureKind.validate,
-              state: StaffSyncState.failed,
+              state: RecordSyncState.failed,
               code: PayrollGesture.staleCode,
             ),
             const PayrollGesture(
@@ -206,7 +206,7 @@ void main() {
               month: '2026-10',
               kind: PayrollGestureKind.validate,
               recordedAt: '2026-10-27T08:00:00Z',
-              syncState: StaffSyncState.synced,
+              syncState: RecordSyncState.synced,
             ),
           ],
         ),

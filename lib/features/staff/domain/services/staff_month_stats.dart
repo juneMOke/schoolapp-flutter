@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// La synthèse d'un agent sur un mois — calculée, **jamais stockée** ni
 /// envoyée : le livre de paie prendra sa propre photo.
@@ -82,22 +82,22 @@ class StaffMonthStats extends Equatable {
       days++;
       final hourly = period.isHourlyVacataire;
       final record = records[day];
-      switch (record?.status ?? StaffAttendanceStatus.none) {
-        case StaffAttendanceStatus.none:
+      switch (record?.status ?? PresenceStatus.none) {
+        case PresenceStatus.none:
           if (hourly) break;
           if (closed) {
             present++;
           } else {
             notMarked++;
           }
-        case StaffAttendanceStatus.present:
+        case PresenceStatus.present:
           present++;
-        case StaffAttendanceStatus.late:
+        case PresenceStatus.late:
           present++;
           late++;
           lateMinutes += record!.lateMinutes;
           if (!record.isJustified) lateUnjustified++;
-        case StaffAttendanceStatus.absent:
+        case PresenceStatus.absent:
           if (record!.isJustified) {
             absentJustified++;
           } else {

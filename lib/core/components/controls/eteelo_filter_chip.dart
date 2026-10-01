@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// Une puce de filtre à compteur : pleine de sa couleur quand elle est active.
 /// Sans compteur ([count] `null`), c'est une puce de choix — motif d'une
 /// justification, tolérance d'un réglage.
-class StaffFilterChip extends StatelessWidget {
+class EteeloFilterChip extends StatelessWidget {
   final String label;
   final int? count;
   final bool selected;
@@ -20,7 +20,7 @@ class StaffFilterChip extends StatelessWidget {
   /// `null` : la puce se lit sans se toucher (réglages en lecture seule).
   final VoidCallback? onTap;
 
-  const StaffFilterChip({
+  const EteeloFilterChip({
     super.key,
     required this.label,
     required this.selected,
@@ -51,7 +51,7 @@ class StaffFilterChip extends StatelessWidget {
           onTap: onTap,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: AppDimensions.staffFilterChipHeight,
+              minHeight: AppDimensions.filterChipHeight,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),

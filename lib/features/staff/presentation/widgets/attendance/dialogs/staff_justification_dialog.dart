@@ -6,11 +6,14 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_justification.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
 /// Ce que rend la modale de justification : une justification, ou son
 /// retrait ([justification] `null`).
@@ -58,9 +61,9 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
   String _eyebrow(AppLocalizations l10n) {
     final record = widget.record;
     return [
-      StaffAttendanceLabels.status(l10n, record.status),
-      if (record.status == StaffAttendanceStatus.late)
-        '+${l10n.staffAttendanceMinutes(record.lateMinutes)}',
+      PresenceLabels.status(l10n, record.status),
+      if (record.status == PresenceStatus.late)
+        '+${l10n.presenceMarkMinutes(record.lateMinutes)}',
       widget.dayLabel,
     ].join(' · ');
   }
@@ -68,17 +71,17 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(widget.record.status);
+    final tone = PresenceTone.of(widget.record.status);
     final reason = _reason;
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: _eyebrow(l10n),
-      title: l10n.staffAttendanceJustifyTitle(widget.name),
+      title: l10n.presenceMarkJustifyTitle(widget.name),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${l10n.staffAttendanceReasonLabel} *',
+            '${l10n.presenceMarkReasonLabel} *',
             style: AppTypography.labelLarge,
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -87,7 +90,7 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
             runSpacing: AppSpacing.sm,
             children: [
               for (final value in StaffAbsenceReason.values)
-                StaffFilterChip(
+                EteeloFilterChip(
                   label: StaffAttendanceLabels.reason(l10n, value),
                   selected: value == reason,
                   color: tone.color,
@@ -100,8 +103,8 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
           const SizedBox(height: AppSpacing.lg),
           EteeloTextInput(
             controller: _note,
-            label: l10n.staffAttendanceNoteLabel,
-            placeholder: l10n.staffAttendanceNotePlaceholder,
+            label: l10n.presenceMarkNoteLabel,
+            placeholder: l10n.presenceMarkNotePlaceholder,
             keyboardType: EteeloTextInputType.multiline,
             minLines: 2,
             maxLines: 4,
@@ -109,7 +112,7 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
             // troncature silencieuse au milieu d'un emoji.
             inputFormatters: [
               LengthLimitingTextInputFormatter(
-                StaffAttendanceJustification.maxNoteLength,
+                PresenceJustification.maxNoteLength,
               ),
             ],
           ),
@@ -117,7 +120,7 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
       ),
       leading: widget.record.isJustified
           ? EteeloButton.ghost(
-              label: l10n.staffAttendanceRemoveJustification,
+              label: l10n.presenceMarkRemoveJustification,
               icon: Icons.delete_outline,
               onPressed: () => Navigator.of(
                 context,
@@ -127,12 +130,12 @@ class _StaffJustificationDialogState extends State<StaffJustificationDialog> {
           : null,
       actions: [
         EteeloButton.ghost(
-          label: l10n.staffAttendanceCancel,
+          label: l10n.presenceMarkCancel,
           onPressed: () => Navigator.of(context).pop(),
           fullWidth: false,
         ),
         EteeloButton.primary(
-          label: l10n.staffAttendanceSave,
+          label: l10n.presenceMarkSave,
           icon: Icons.check,
           onPressed: reason == null ? null : () => _save(reason),
           fullWidth: false,

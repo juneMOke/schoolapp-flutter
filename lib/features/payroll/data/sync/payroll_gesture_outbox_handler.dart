@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// `PAYROLL_GESTURE` — soumettre, renvoyer, valider, rouvrir.
 ///
@@ -84,7 +84,7 @@ class PayrollGestureOutboxHandler
         nowMs: _now(),
       );
     }
-    await _gestures.mark(request.gestureId, StaffSyncState.synced);
+    await _gestures.mark(request.gestureId, RecordSyncState.synced);
   }
 
   @override
@@ -100,7 +100,7 @@ class PayrollGestureOutboxHandler
         : null;
     await _gestures.mark(
       request.gestureId,
-      StaffSyncState.failed,
+      RecordSyncState.failed,
       code: failure.storedCode,
       reason: failure.reason,
       serverState:

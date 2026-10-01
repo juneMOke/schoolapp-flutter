@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne du registre du jour : l'agent, son pointage (ou aucun) et s'il
 /// est vacataire payé à l'heure ce jour-là.
@@ -29,11 +30,10 @@ class StaffDayRow extends Equatable {
     this.hasContract = true,
   });
 
-  StaffAttendanceStatus get status =>
-      record?.status ?? StaffAttendanceStatus.none;
+  PresenceStatus get status => record?.status ?? PresenceStatus.none;
 
   /// Où en est le pointage ; « au serveur » quand il n'y en a pas.
-  StaffSyncState get sync => record?.syncState ?? StaffSyncState.synced;
+  RecordSyncState get sync => record?.syncState ?? RecordSyncState.synced;
 
   @override
   List<Object?> get props => [member, day, record, isHourly, hasContract];
@@ -42,7 +42,7 @@ class StaffDayRow extends Equatable {
 /// Les critères du registre : un statut (ou tous), une catégorie, un texte.
 class StaffDayQuery extends Equatable {
   /// `null` = tous les statuts.
-  final StaffAttendanceStatus? status;
+  final PresenceStatus? status;
   final StaffCategory? category;
   final String text;
 
@@ -50,7 +50,7 @@ class StaffDayQuery extends Equatable {
 
   static const StaffDayQuery none = StaffDayQuery();
 
-  StaffDayQuery withStatus(StaffAttendanceStatus? value) =>
+  StaffDayQuery withStatus(PresenceStatus? value) =>
       StaffDayQuery(status: value, category: category, text: text);
 
   StaffDayQuery withCategory(StaffCategory? value) =>
@@ -79,7 +79,7 @@ class StaffDayRegister extends Equatable {
   final List<StaffDayRow> rows;
 
   /// Effectif par statut, sur tout le registre.
-  final Map<StaffAttendanceStatus, int> byStatus;
+  final Map<PresenceStatus, int> byStatus;
 
   /// Pointages écrits sur la tablette, pas encore au serveur.
   final int pending;
@@ -125,10 +125,10 @@ class StaffDayRegister extends Equatable {
           if (query.accepts(row)) row,
       ],
       byStatus: {
-        for (final status in StaffAttendanceStatus.values)
+        for (final status in PresenceStatus.values)
           status: all.where((row) => row.status == status).length,
       },
-      pending: all.where((row) => row.sync != StaffSyncState.synced).length,
+      pending: all.where((row) => row.sync != RecordSyncState.synced).length,
       toJustify: all
           .where((row) => row.record?.needsJustification ?? false)
           .length,
@@ -136,15 +136,15 @@ class StaffDayRegister extends Equatable {
     );
   }
 
-  int count(StaffAttendanceStatus status) => byStatus[status] ?? 0;
+  int count(PresenceStatus status) => byStatus[status] ?? 0;
 
-  int get marked => all.length - count(StaffAttendanceStatus.none);
+  int get marked => all.length - count(PresenceStatus.none);
 
   /// Les agents encore « à pointer » qu'un contrat couvre ce jour-là : ceux
   /// que « Restants présents » et la validation marquent d'office.
   List<StaffDayRow> get unmarked => [
     for (final row in all)
-      if (row.status == StaffAttendanceStatus.none && row.hasContract) row,
+      if (row.status == PresenceStatus.none && row.hasContract) row,
   ];
 
   /// La liste filtrée contient-elle un vacataire à l'heure ? La colonne des

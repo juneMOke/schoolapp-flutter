@@ -10,6 +10,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 void main() {
   late Database db;
@@ -32,7 +33,7 @@ void main() {
 
     final document = (await dao.listForSchool('school-1')).single.toEntity();
     expect(document.code, StaffDocumentCode.diploma);
-    expect(document.syncState, StaffSyncState.synced);
+    expect(document.syncState, RecordSyncState.synced);
     expect(document.isImage, isTrue);
   });
 

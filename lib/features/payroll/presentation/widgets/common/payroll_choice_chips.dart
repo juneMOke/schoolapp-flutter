@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 
 /// Un choix parmi quelques valeurs, en puces : mode de versement, opérateur,
 /// motif, nombre d'échéances. Les puces de choix du module RH.
@@ -27,7 +27,7 @@ class PayrollChoiceChips<T> extends StatelessWidget {
     runSpacing: AppSpacing.sm,
     children: [
       for (final value in values)
-        StaffFilterChip(
+        EteeloFilterChip(
           label: label(value),
           icon: icon?.call(value),
           selected: value == selected,

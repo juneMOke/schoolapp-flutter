@@ -6,8 +6,8 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Les deux vides du registre : aucun agent (renvoi vers le fichier du
 /// personnel), ou des filtres trop étroits (« Tout afficher »).
@@ -15,7 +15,7 @@ class StaffRegisterEmpty extends StatelessWidget {
   final bool filtered;
 
   /// Le statut filtré, pour dire « Tout le monde est pointé » sur « À pointer ».
-  final StaffAttendanceStatus? status;
+  final PresenceStatus? status;
 
   /// Retire les filtres ; requis quand [filtered].
   final VoidCallback? onShowAll;
@@ -56,15 +56,15 @@ class StaffRegisterEmpty extends StatelessWidget {
       );
     }
     return EteeloEmptyResult(
-      label: status == StaffAttendanceStatus.none
-          ? l10n.staffAttendanceAllMarked
+      label: status == PresenceStatus.none
+          ? l10n.presenceMarkAllMarked
           : l10n.staffAttendanceEmptyFilterTitle,
-      medallionIcon: status == StaffAttendanceStatus.none
+      medallionIcon: status == PresenceStatus.none
           ? Icons.task_alt
           : Icons.search_rounded,
       fullWidthCard: true,
       primaryAction: EteeloButton.primary(
-        label: l10n.staffAttendanceShowAll,
+        label: l10n.presenceMarkShowAll,
         icon: Icons.restart_alt,
         onPressed: onShowAll,
         fullWidth: false,

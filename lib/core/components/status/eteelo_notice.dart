@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Un bandeau d'une ligne dans un formulaire : avertissement non bloquant
 /// (ambre) ou erreurs à corriger (rouge).
-class StaffNotice extends StatelessWidget {
+class EteeloNotice extends StatelessWidget {
   final String message;
   final IconData icon;
   final Color ink;
@@ -14,13 +14,13 @@ class StaffNotice extends StatelessWidget {
   final Color? border;
   final EdgeInsetsGeometry margin;
 
-  const StaffNotice._(this.message, this.icon, this.ink, this.background)
+  const EteeloNotice._(this.message, this.icon, this.ink, this.background)
     : border = null,
       margin = const EdgeInsets.only(bottom: AppSpacing.md);
 
-  /// Un bandeau dans une teinte donnée (celle d'un statut de pointage), sans
+  /// Un bandeau dans une teinte donnée (celle d'un statut de présence), sans
   /// marge : c'est son conteneur qui l'espace.
-  const StaffNotice.tinted({
+  const EteeloNotice.tinted({
     super.key,
     required this.message,
     required this.icon,
@@ -30,14 +30,14 @@ class StaffNotice extends StatelessWidget {
     this.margin = EdgeInsets.zero,
   });
 
-  factory StaffNotice.warning(String message) => StaffNotice._(
+  factory EteeloNotice.warning(String message) => EteeloNotice._(
     message,
     Icons.info_outline,
     AppColors.staffPartialInk,
     AppColors.feeStatusPartialSoft,
   );
 
-  factory StaffNotice.error(String message) => StaffNotice._(
+  factory EteeloNotice.error(String message) => EteeloNotice._(
     message,
     Icons.error_outline,
     AppColors.error,

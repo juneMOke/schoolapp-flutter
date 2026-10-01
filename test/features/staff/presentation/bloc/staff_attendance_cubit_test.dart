@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
@@ -126,7 +126,7 @@ void main() {
         records: const {},
         locks: const {},
         settings: StaffAttendanceSettings.defaults,
-        schoolYear: const StaffSchoolYear(start: '2026-09-01'),
+        schoolYear: const SchoolYearBounds(start: '2026-09-01'),
         hasEverSynced: true,
       ),
     );

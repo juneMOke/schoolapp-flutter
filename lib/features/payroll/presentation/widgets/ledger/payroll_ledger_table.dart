@@ -90,7 +90,7 @@ class PayrollLedgerTable extends StatelessWidget {
               StaffAvatar(
                 member: member,
                 sync: member.syncState,
-                size: AppDimensions.staffAttendanceIconButtonSize,
+                size: AppDimensions.presenceMarkIconButtonSize,
               ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(

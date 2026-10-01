@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_que
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
 
 import '../staff_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 void main() {
   group('StaffContractTimeline', () {
@@ -90,7 +91,7 @@ void main() {
           lastName: 'Mbuyi',
           firstName: 'Élodie',
           contracts: [period(StaffContractKind.vacataire)],
-          syncState: StaffSyncState.pending,
+          syncState: RecordSyncState.pending,
           staffNumber: null,
         ),
         member(
@@ -107,7 +108,7 @@ void main() {
           document('m-1', 'DP'),
           document('m-1', 'LD'),
         ],
-        'm-2': [document('m-2', 'ID', syncState: StaffSyncState.failed)],
+        'm-2': [document('m-2', 'ID', syncState: RecordSyncState.failed)],
       },
       documentTypes: documentTypes,
       hasEverSynced: true,
@@ -132,7 +133,7 @@ void main() {
       expect(v.incomplete, 2);
       // La fiche de m-2 et sa pièce refusée.
       expect(v.pending, 2);
-      expect(v.all[1].sync, StaffSyncState.failed);
+      expect(v.all[1].sync, RecordSyncState.failed);
     });
 
     test('la recherche plie accents et casse, sur tous les champs', () {

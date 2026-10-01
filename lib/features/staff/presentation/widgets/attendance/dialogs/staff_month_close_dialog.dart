@@ -3,12 +3,12 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Confirmer la clôture d'un mois : ce qui part vers la Paie, et ce que la
 /// clôture fige. Rend `true` pour clôturer.
@@ -30,18 +30,18 @@ class StaffMonthCloseDialog extends StatelessWidget {
         MoneyFormat.format(Money(entry.value, entry.key)),
     ];
     final hours = [
-      StaffAttendanceLabels.hours(l10n, recap.workedMinutes),
+      PresenceLabels.hours(l10n, recap.workedMinutes),
       ...amounts,
     ].join(' · ');
     Widget line(String text, IconData icon) => Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: StaffAttendanceWarning(
+      child: PresenceWarning(
         message: text,
         icon: icon,
-        tone: StaffAttendanceStatus.none,
+        tone: PresenceStatus.none,
       ),
     );
-    return StaffDialog(
+    return EteeloFormDialog(
       title: l10n.staffAttendanceCloseTitle(monthLabel),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,21 +59,21 @@ class StaffMonthCloseDialog extends StatelessWidget {
           if (recap.notMarked > 0)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: StaffAttendanceWarning(
+              child: PresenceWarning(
                 icon: Icons.back_hand_outlined,
                 message: l10n.staffAttendanceCloseNotMarked(recap.notMarked),
               ),
             ),
-          StaffAttendanceWarning(
+          PresenceWarning(
             icon: Icons.lock_outline,
-            tone: StaffAttendanceStatus.absent,
-            message: l10n.staffAttendanceCloseIrreversible,
+            tone: PresenceStatus.absent,
+            message: l10n.presenceMarkCloseIrreversible,
           ),
         ],
       ),
       actions: [
         EteeloButton.ghost(
-          label: l10n.staffAttendanceCancel,
+          label: l10n.presenceMarkCancel,
           onPressed: () => Navigator.of(context).pop(false),
           fullWidth: false,
         ),

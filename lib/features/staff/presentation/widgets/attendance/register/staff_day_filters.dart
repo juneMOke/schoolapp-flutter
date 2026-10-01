@@ -4,15 +4,15 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Les filtres du registre : puces de statut à compteur, puis la barre
 /// partagée (recherche, catégorie, cartes/liste), puis la légende du geste et
@@ -20,11 +20,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class StaffDayFilters extends StatelessWidget {
   final StaffDayRegister register;
   final StaffDayQuery query;
-  final StaffViewMode viewMode;
-  final ValueChanged<StaffAttendanceStatus?> onStatus;
+  final CollectionViewMode viewMode;
+  final ValueChanged<PresenceStatus?> onStatus;
   final ValueChanged<StaffCategory?> onCategory;
   final ValueChanged<String> onText;
-  final ValueChanged<StaffViewMode> onViewMode;
+  final ValueChanged<CollectionViewMode> onViewMode;
 
   const StaffDayFilters({
     super.key,
@@ -47,8 +47,8 @@ class StaffDayFilters extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            StaffFilterChip(
-              label: l10n.staffAttendanceFilterAll,
+            EteeloFilterChip(
+              label: l10n.presenceMarkFilterAll,
               count: register.all.length,
               selected: query.status == null,
               color: AppColors.bleuArdoise,
@@ -56,7 +56,7 @@ class StaffDayFilters extends StatelessWidget {
               ink: AppColors.bleuArdoise,
               onTap: () => onStatus(null),
             ),
-            for (final status in StaffAttendanceStatus.values)
+            for (final status in PresenceStatus.values)
               _statusChip(l10n, status),
           ],
         ),
@@ -80,9 +80,9 @@ class StaffDayFilters extends StatelessWidget {
             PermissionGate.access(
               kStaffAttendanceWriteAccess,
               child: Text(
-                viewMode == StaffViewMode.grid
-                    ? l10n.staffAttendanceLegendGrid
-                    : l10n.staffAttendanceLegendList,
+                viewMode == CollectionViewMode.grid
+                    ? l10n.presenceMarkLegendGrid
+                    : l10n.presenceMarkLegendList,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMutedAa,
                 ),
@@ -90,9 +90,9 @@ class StaffDayFilters extends StatelessWidget {
             ),
             if (register.toJustify > 0)
               Text(
-                l10n.staffAttendanceToJustify(register.toJustify),
+                l10n.presenceMarkToJustify(register.toJustify),
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.staffAttendanceLateInk,
+                  color: AppColors.presenceMarkLateInk,
                 ),
               ),
           ],
@@ -101,10 +101,10 @@ class StaffDayFilters extends StatelessWidget {
     );
   }
 
-  Widget _statusChip(AppLocalizations l10n, StaffAttendanceStatus status) {
-    final tone = StaffAttendanceTone.of(status);
-    return StaffFilterChip(
-      label: StaffAttendanceLabels.filter(l10n, status),
+  Widget _statusChip(AppLocalizations l10n, PresenceStatus status) {
+    final tone = PresenceTone.of(status);
+    return EteeloFilterChip(
+      label: PresenceLabels.filter(l10n, status),
       count: register.count(status),
       selected: query.status == status,
       color: tone.color,

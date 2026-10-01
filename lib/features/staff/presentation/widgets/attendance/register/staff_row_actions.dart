@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_justification_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_time_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Les gestes sur l'agent d'une ligne du registre, **partagés** par la carte
 /// de la grille et la ligne de la liste : ouvrir une modale, puis confier le
@@ -53,10 +53,10 @@ class StaffRowActions {
   }
 
   /// Heures de départ proposées d'office.
-  static final List<StaffClockTime> departureShortcuts = [
-    StaffClockTime.fromMinutes(12 * 60 + 30),
-    StaffClockTime.fromMinutes(14 * 60),
-    StaffClockTime.fromMinutes(15 * 60 + 30),
+  static final List<ClockTime> departureShortcuts = [
+    ClockTime.fromMinutes(12 * 60 + 30),
+    ClockTime.fromMinutes(14 * 60),
+    ClockTime.fromMinutes(15 * 60 + 30),
   ];
 
   bool _intercept() {
@@ -75,7 +75,7 @@ class StaffRowActions {
     unawaited(_cubit.perform((c) => c.cycle(_cubit.state.snapshot, _row)));
   }
 
-  void choose(StaffAttendanceStatus status) {
+  void choose(PresenceStatus status) {
     if (_intercept()) return;
     unawaited(
       _cubit.perform((c) => c.choose(_cubit.state.snapshot, _row, status)),
@@ -112,22 +112,22 @@ class StaffRowActions {
     if (_intercept()) return;
     final l10n = AppLocalizations.of(context)!;
     final settings = _cubit.state.snapshot.settings;
-    final now = StaffClockTime.of(DateTime.now());
-    final choice = await StaffDialog.show<StaffTimeChoice>(
+    final now = ClockTime.of(DateTime.now());
+    final choice = await EteeloFormDialog.show<PresenceTimeChoice>(
       context,
-      StaffTimeDialog(
-        title: l10n.staffAttendanceTimeArrivalTitle(_name),
+      PresenceTimeDialog(
+        title: l10n.presenceMarkTimeArrivalTitle(_name),
         initial: row.record?.arrival,
-        settings: settings,
+        schedule: settings,
         shortcuts: [
-          StaffTimeShortcut(l10n.staffAttendanceTimeNow, now),
-          StaffTimeShortcut(l10n.staffAttendanceTimeStart, settings.start),
-          StaffTimeShortcut(
-            l10n.staffAttendanceTimePlus(15),
+          PresenceTimeShortcut(l10n.presenceMarkTimeNow, now),
+          PresenceTimeShortcut(l10n.presenceMarkTimeStart, settings.start),
+          PresenceTimeShortcut(
+            l10n.presenceMarkTimePlus(15),
             settings.start.plus(15),
           ),
-          StaffTimeShortcut(
-            l10n.staffAttendanceTimePlus(30),
+          PresenceTimeShortcut(
+            l10n.presenceMarkTimePlus(30),
             settings.start.plus(30),
           ),
         ],
@@ -144,19 +144,19 @@ class StaffRowActions {
     if (_intercept()) return;
     final l10n = AppLocalizations.of(context)!;
     final current = row.record?.departure;
-    final choice = await StaffDialog.show<StaffTimeChoice>(
+    final choice = await EteeloFormDialog.show<PresenceTimeChoice>(
       context,
-      StaffTimeDialog(
-        title: l10n.staffAttendanceTimeDepartureTitle(_name),
+      PresenceTimeDialog(
+        title: l10n.presenceMarkTimeDepartureTitle(_name),
         initial: current,
         canClear: current != null,
         shortcuts: [
-          StaffTimeShortcut(
-            l10n.staffAttendanceTimeNow,
-            StaffClockTime.of(DateTime.now()),
+          PresenceTimeShortcut(
+            l10n.presenceMarkTimeNow,
+            ClockTime.of(DateTime.now()),
           ),
           for (final time in departureShortcuts)
-            StaffTimeShortcut(time.wire, time),
+            PresenceTimeShortcut(time.wire, time),
         ],
       ),
     );
@@ -170,12 +170,12 @@ class StaffRowActions {
     if (_intercept()) return;
     final StaffAttendanceRecord? record = _row.record;
     if (record == null || !record.status.isIncident) return;
-    final choice = await StaffDialog.show<StaffJustificationChoice>(
+    final choice = await EteeloFormDialog.show<StaffJustificationChoice>(
       context,
       StaffJustificationDialog(
         name: _name,
         record: record,
-        dayLabel: StaffAttendanceLabels.longDay(
+        dayLabel: PresenceLabels.longDay(
           MaterialLocalizations.of(context),
           row.day,
         ),

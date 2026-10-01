@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/common/st
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dossier_meter.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_identity_lines.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les agents en tableau : Agent · Fonction · Contrat · Dossier · Synchro.
@@ -89,7 +89,7 @@ class StaffAgentTable extends StatelessWidget {
                       dossier: row.dossier == null
                           ? const SizedBox.shrink()
                           : StaffDossierMeter(dossier: row.dossier!),
-                      sync: StaffSyncPill(state: row.sync),
+                      sync: RecordSyncPill(state: row.sync),
                       trailing: onOpen == null
                           ? null
                           : const Icon(

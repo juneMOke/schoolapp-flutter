@@ -29,11 +29,4 @@ abstract final class StaffLabels {
     StaffContractFilter.conventionne => l10n.staffContractConventionne,
     StaffContractFilter.none => l10n.staffContractNone,
   };
-
-  static String sync(AppLocalizations l10n, StaffSyncState state) =>
-      switch (state) {
-        StaffSyncState.synced => l10n.staffSyncSynced,
-        StaffSyncState.pending => l10n.staffSyncPending,
-        StaffSyncState.failed => l10n.staffSyncFailed,
-      };
 }

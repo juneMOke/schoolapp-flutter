@@ -10,8 +10,9 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.da
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une période de la frise : statut, dates, et — pour qui les voit — ce
 /// qu'elle paie.
@@ -39,7 +40,7 @@ class StaffContractPeriodTile extends StatelessWidget {
     final canCorrect =
         correct != null &&
         detail != null &&
-        detail.syncState == StaffSyncState.synced &&
+        detail.syncState == RecordSyncState.synced &&
         !detail.isCorrected;
 
     return Container(
@@ -76,8 +77,8 @@ class StaffContractPeriodTile extends StatelessWidget {
                         ),
                       ),
                     if (detail != null &&
-                        detail.syncState != StaffSyncState.synced)
-                      StaffSyncPill(state: detail.syncState),
+                        detail.syncState != RecordSyncState.synced)
+                      RecordSyncPill(state: detail.syncState),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xs),

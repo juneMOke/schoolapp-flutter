@@ -11,8 +11,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_sett
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les réglages de paie de l'école : heures d'un mois, majoration, et par
@@ -26,7 +26,7 @@ class PayrollSettingsDialog extends StatefulWidget {
   static Future<PayrollSettings?> show(
     BuildContext context,
     PayrollSettings settings,
-  ) => StaffDialog.show<PayrollSettings>(
+  ) => EteeloFormDialog.show<PayrollSettings>(
     context,
     PayrollSettingsDialog(settings: settings),
   );
@@ -106,7 +106,7 @@ class _PayrollSettingsDialogState extends State<PayrollSettingsDialog> {
         capitalization: EteeloTextCapitalization.none,
       ),
     );
-    return StaffDialog(
+    return EteeloFormDialog(
       title: l10n.payrollSettingsTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -133,7 +133,7 @@ class _PayrollSettingsDialogState extends State<PayrollSettingsDialog> {
             runSpacing: AppSpacing.sm,
             children: [
               for (final kind in StaffContractKind.values)
-                StaffFilterChip(
+                EteeloFilterChip(
                   label: StaffLabels.contract(l10n, kind),
                   selected: _eligible.contains(kind),
                   color: StaffContractTone.of(kind).color,

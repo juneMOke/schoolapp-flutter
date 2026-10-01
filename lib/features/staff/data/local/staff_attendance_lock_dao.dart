@@ -3,8 +3,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_attendance_sy
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les verrous du Pointage : l'état du serveur (`staff_attendance_locks`), et
 /// ce que l'écran en montre une fois les gestes de la tablette pris en compte
@@ -102,24 +102,24 @@ class StaffAttendanceLockDao {
     final gestures = await _gestures.inRange(schoolId, from: from, to: to);
     final byKey = <String, StaffAttendanceLock>{
       for (final row in server)
-        _key(row): _fromServer(row, StaffSyncState.synced),
+        _key(row): _fromServer(row, RecordSyncState.synced),
     };
     final latest = <String, Map<String, Object?>>{
       for (final gesture in gestures) _key(gesture): gesture,
     };
     for (final MapEntry(key: key, value: gesture) in latest.entries) {
       final state = _stateOf(gesture);
-      if (state == StaffSyncState.synced) continue;
-      if (state == StaffSyncState.failed) {
+      if (state == RecordSyncState.synced) continue;
+      if (state == RecordSyncState.failed) {
         final current = byKey[key];
         byKey[key] = current == null
             ? StaffAttendanceLock(
                 kind: _kind(gesture),
                 periodStart: gesture['period_start']! as String,
                 locked: false,
-                syncState: StaffSyncState.failed,
+                syncState: RecordSyncState.failed,
               )
-            : _withState(current, StaffSyncState.failed);
+            : _withState(current, RecordSyncState.failed);
         continue;
       }
       byKey[key] = StaffAttendanceLock(
@@ -132,7 +132,7 @@ class StaffAttendanceLockDao {
             false,
         lockedAt: gesture['recorded_at'] as String?,
         lockedByName: gesture['author_name'] as String?,
-        syncState: StaffSyncState.pending,
+        syncState: RecordSyncState.pending,
       );
     }
     return byKey.values.toList(growable: false);
@@ -140,10 +140,10 @@ class StaffAttendanceLockDao {
 
   /// En attente seulement si l'entrée d'outbox est encore en file ; sinon le
   /// geste ne partira plus, et se lit comme refusé.
-  static StaffSyncState _stateOf(Map<String, Object?> gesture) {
-    final state = StaffSyncState.fromDb(gesture['sync_status'] as String?);
-    if (state != StaffSyncState.pending) return state;
-    return gesture['queued'] == 1 ? state : StaffSyncState.failed;
+  static RecordSyncState _stateOf(Map<String, Object?> gesture) {
+    final state = RecordSyncState.fromDb(gesture['sync_status'] as String?);
+    if (state != RecordSyncState.pending) return state;
+    return gesture['queued'] == 1 ? state : RecordSyncState.failed;
   }
 
   static String _key(Map<String, Object?> row) =>
@@ -155,7 +155,7 @@ class StaffAttendanceLockDao {
 
   static StaffAttendanceLock _fromServer(
     Map<String, Object?> row,
-    StaffSyncState state,
+    RecordSyncState state,
   ) => StaffAttendanceLock(
     kind: _kind(row),
     periodStart: row['period_start']! as String,
@@ -167,7 +167,7 @@ class StaffAttendanceLockDao {
 
   static StaffAttendanceLock _withState(
     StaffAttendanceLock lock,
-    StaffSyncState state,
+    RecordSyncState state,
   ) => StaffAttendanceLock(
     kind: lock.kind,
     periodStart: lock.periodStart,

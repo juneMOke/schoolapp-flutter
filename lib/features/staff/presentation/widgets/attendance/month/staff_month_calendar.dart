@@ -4,11 +4,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_agent_month.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Le mois d'un agent, lundi → vendredi : une case par jour, dans la teinte
 /// de son statut ; jours à venir estompés, non pointés en pointillé.
@@ -59,8 +59,8 @@ class StaffMonthCalendar extends StatelessWidget {
                       ),
                       child: cell == null
                           ? const SizedBox(
-                              height: AppDimensions
-                                  .staffAttendanceCalendarCellHeight,
+                              height:
+                                  AppDimensions.presenceMarkCalendarCellHeight,
                             )
                           : _DayCell(day: cell),
                     ),
@@ -81,22 +81,20 @@ class _DayCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(day.status);
-    final marked = day.status != StaffAttendanceStatus.none;
-    final date = StaffAttendanceLabels.longDay(
+    final tone = PresenceTone.of(day.status);
+    final marked = day.status != PresenceStatus.none;
+    final date = PresenceLabels.longDay(
       MaterialLocalizations.of(context),
       day.day,
     );
     return Tooltip(
       message: day.upcoming
           ? date
-          : '$date · ${StaffAttendanceLabels.status(l10n, day.status)}',
+          : '$date · ${PresenceLabels.status(l10n, day.status)}',
       child: Opacity(
-        opacity: day.upcoming
-            ? AppDimensions.staffAttendanceUpcomingOpacity
-            : 1,
+        opacity: day.upcoming ? AppDimensions.presenceMarkUpcomingOpacity : 1,
         child: Container(
-          height: AppDimensions.staffAttendanceCalendarCellHeight,
+          height: AppDimensions.presenceMarkCalendarCellHeight,
           decoration: BoxDecoration(
             color: marked ? tone.soft : AppColors.surfaceRaised,
             borderRadius: AppRadius.brSm,

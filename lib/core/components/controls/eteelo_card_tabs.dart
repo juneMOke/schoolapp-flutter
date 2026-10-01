@@ -6,18 +6,18 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Le badge d'un onglet : un libellé court sur une pastille teintée.
-typedef StaffTabBadge = ({String label, Color soft, Color ink});
+typedef EteeloTabBadge = ({String label, Color soft, Color ink});
 
 /// Un onglet en carte : icône, titre jamais tronqué, sous-titre court et
 /// badge d'état facultatif.
-class StaffCardTab<T> {
+class EteeloCardTab<T> {
   final T id;
   final IconData icon;
   final String title;
   final String subtitle;
-  final StaffTabBadge? badge;
+  final EteeloTabBadge? badge;
 
-  const StaffCardTab({
+  const EteeloCardTab({
     required this.id,
     required this.icon,
     required this.title,
@@ -26,14 +26,14 @@ class StaffCardTab<T> {
   });
 }
 
-/// Les onglets en cartes des écrans RH (Pointage, Paie) : une rangée de cartes
-/// de même largeur, l'active sur le bandeau sombre.
-class StaffCardTabs<T> extends StatelessWidget {
-  final List<StaffCardTab<T>> tabs;
+/// Les onglets en cartes (Pointage, appel des élèves, Paie) : une rangée de
+/// cartes de même largeur, l'active sur le bandeau sombre.
+class EteeloCardTabs<T> extends StatelessWidget {
+  final List<EteeloCardTab<T>> tabs;
   final T active;
   final ValueChanged<T> onSelect;
 
-  const StaffCardTabs({
+  const EteeloCardTabs({
     super.key,
     required this.tabs,
     required this.active,
@@ -48,7 +48,7 @@ class StaffCardTabs<T> extends StatelessWidget {
       // plutôt que de casser leur titre lettre par lettre.
       final fit =
           ((constraints.maxWidth + AppSpacing.sm) /
-                  (AppDimensions.staffAttendanceCardMinWidth + AppSpacing.sm))
+                  (AppDimensions.presenceMarkCardMinWidth + AppSpacing.sm))
               .floor();
       final columns = fit.clamp(1, tabs.length);
       final width =
@@ -73,7 +73,7 @@ class StaffCardTabs<T> extends StatelessWidget {
 }
 
 class _TabCard extends StatelessWidget {
-  final StaffCardTab<Object?> data;
+  final EteeloCardTab<Object?> data;
   final bool active;
   final VoidCallback onTap;
 
@@ -86,10 +86,10 @@ class _TabCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = active
-        ? AppColors.staffAttendanceOnBanner
+        ? AppColors.presenceMarkOnBanner
         : AppColors.textPrimary;
     final muted = active
-        ? AppColors.staffAttendanceOnBannerMuted
+        ? AppColors.presenceMarkOnBannerMuted
         : AppColors.textSecondary;
     final badge = data.badge;
     return Semantics(
@@ -108,8 +108,8 @@ class _TabCard extends StatelessWidget {
               gradient: active
                   ? const LinearGradient(
                       colors: [
-                        AppColors.staffAttendanceBannerStart,
-                        AppColors.staffAttendanceBannerMid,
+                        AppColors.presenceMarkBannerStart,
+                        AppColors.presenceMarkBannerMid,
                       ],
                     )
                   : null,
@@ -130,7 +130,7 @@ class _TabCard extends StatelessWidget {
                   child: Icon(
                     data.icon,
                     color: active
-                        ? AppColors.staffAttendanceOnBanner
+                        ? AppColors.presenceMarkOnBanner
                         : AppColors.bleuArdoise,
                   ),
                 ),
@@ -169,7 +169,7 @@ class _TabCard extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  final StaffTabBadge badge;
+  final EteeloTabBadge badge;
 
   const _Badge(this.badge);
 

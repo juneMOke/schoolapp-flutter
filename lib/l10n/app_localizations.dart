@@ -18079,19 +18079,19 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'View'**
-  String get staffViewLabel;
+  String get collectionViewLabel;
 
   /// Affichage en grille de cartes.
   ///
   /// In en, this message translates to:
   /// **'Cards'**
-  String get staffViewGrid;
+  String get collectionViewGrid;
 
   /// Affichage en tableau.
   ///
   /// In en, this message translates to:
   /// **'List'**
-  String get staffViewList;
+  String get collectionViewList;
 
   /// Libellé des filtres et de la colonne de contrat.
   ///
@@ -18157,19 +18157,19 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Synced'**
-  String get staffSyncSynced;
+  String get recordSyncSynced;
 
   /// État de synchronisation : pas encore envoyé.
   ///
   /// In en, this message translates to:
   /// **'On this tablet'**
-  String get staffSyncPending;
+  String get recordSyncPending;
 
   /// État de synchronisation : refusé par le serveur.
   ///
   /// In en, this message translates to:
   /// **'Not sent'**
-  String get staffSyncFailed;
+  String get recordSyncFailed;
 
   /// En-tête de colonne.
   ///
@@ -19209,29 +19209,29 @@ abstract class AppLocalizations {
   /// **'Totals → Payroll'**
   String get staffAttendanceTabRecapSubtitle;
 
-  /// No description provided for @staffAttendanceBadgeToMark.
+  /// No description provided for @presenceMarkBadgeToMark.
   ///
   /// In en, this message translates to:
   /// **'{count} to mark'**
-  String staffAttendanceBadgeToMark(int count);
+  String presenceMarkBadgeToMark(int count);
 
-  /// No description provided for @staffAttendanceBadgeValidated.
+  /// No description provided for @presenceMarkBadgeValidated.
   ///
   /// In en, this message translates to:
   /// **'Validated'**
-  String get staffAttendanceBadgeValidated;
+  String get presenceMarkBadgeValidated;
 
-  /// No description provided for @staffAttendanceBadgeToClose.
+  /// No description provided for @presenceMarkBadgeToClose.
   ///
   /// In en, this message translates to:
   /// **'To close'**
-  String get staffAttendanceBadgeToClose;
+  String get presenceMarkBadgeToClose;
 
-  /// No description provided for @staffAttendanceBadgeClosed.
+  /// No description provided for @presenceMarkBadgeClosed.
   ///
   /// In en, this message translates to:
   /// **'Closed'**
-  String get staffAttendanceBadgeClosed;
+  String get presenceMarkBadgeClosed;
 
   /// No description provided for @staffAttendanceEyebrowToday.
   ///
@@ -19245,47 +19245,47 @@ abstract class AppLocalizations {
   /// **'Register — past day'**
   String get staffAttendanceEyebrowPast;
 
-  /// No description provided for @staffAttendanceGoToday.
+  /// No description provided for @presenceMarkGoToday.
   ///
   /// In en, this message translates to:
   /// **'Today'**
-  String get staffAttendanceGoToday;
+  String get presenceMarkGoToday;
 
-  /// No description provided for @staffAttendancePreviousDay.
+  /// No description provided for @presenceMarkPreviousDay.
   ///
   /// In en, this message translates to:
   /// **'Previous day'**
-  String get staffAttendancePreviousDay;
+  String get presenceMarkPreviousDay;
 
-  /// No description provided for @staffAttendanceNextDay.
+  /// No description provided for @presenceMarkNextDay.
   ///
   /// In en, this message translates to:
   /// **'Next day'**
-  String get staffAttendanceNextDay;
+  String get presenceMarkNextDay;
 
-  /// No description provided for @staffAttendanceSettingsPill.
+  /// No description provided for @presenceMarkSettingsPill.
   ///
   /// In en, this message translates to:
   /// **'Start {start} · tolerance {tolerance} min'**
-  String staffAttendanceSettingsPill(String start, int tolerance);
+  String presenceMarkSettingsPill(String start, int tolerance);
 
-  /// No description provided for @staffAttendanceProgress.
+  /// No description provided for @presenceMarkProgress.
   ///
   /// In en, this message translates to:
   /// **'{marked} / {total}'**
-  String staffAttendanceProgress(int marked, int total);
+  String presenceMarkProgress(int marked, int total);
 
-  /// No description provided for @staffAttendanceOnTablet.
+  /// No description provided for @presenceMarkOnTablet.
   ///
   /// In en, this message translates to:
   /// **'{count} on the tablet'**
-  String staffAttendanceOnTablet(int count);
+  String presenceMarkOnTablet(int count);
 
-  /// No description provided for @staffAttendanceMarkRemaining.
+  /// No description provided for @presenceMarkMarkRemaining.
   ///
   /// In en, this message translates to:
   /// **'Mark everyone still to mark as present at the start time'**
-  String get staffAttendanceMarkRemaining;
+  String get presenceMarkMarkRemaining;
 
   /// No description provided for @staffAttendanceValidateReport.
   ///
@@ -19293,53 +19293,53 @@ abstract class AppLocalizations {
   /// **'Validate the report'**
   String get staffAttendanceValidateReport;
 
-  /// No description provided for @staffAttendanceFilterAll.
+  /// No description provided for @presenceMarkFilterAll.
   ///
   /// In en, this message translates to:
   /// **'All'**
-  String get staffAttendanceFilterAll;
+  String get presenceMarkFilterAll;
 
-  /// No description provided for @staffAttendanceFilterPresent.
+  /// No description provided for @presenceMarkFilterPresent.
   ///
   /// In en, this message translates to:
   /// **'Present'**
-  String get staffAttendanceFilterPresent;
+  String get presenceMarkFilterPresent;
 
-  /// No description provided for @staffAttendanceFilterLate.
+  /// No description provided for @presenceMarkFilterLate.
   ///
   /// In en, this message translates to:
   /// **'Late'**
-  String get staffAttendanceFilterLate;
+  String get presenceMarkFilterLate;
 
-  /// No description provided for @staffAttendanceFilterAbsent.
+  /// No description provided for @presenceMarkFilterAbsent.
   ///
   /// In en, this message translates to:
   /// **'Absent'**
-  String get staffAttendanceFilterAbsent;
+  String get presenceMarkFilterAbsent;
 
-  /// No description provided for @staffAttendanceStatusNone.
+  /// No description provided for @presenceMarkStatusNone.
   ///
   /// In en, this message translates to:
   /// **'To mark'**
-  String get staffAttendanceStatusNone;
+  String get presenceMarkStatusNone;
 
-  /// No description provided for @staffAttendanceStatusPresent.
+  /// No description provided for @presenceMarkStatusPresent.
   ///
   /// In en, this message translates to:
   /// **'Present'**
-  String get staffAttendanceStatusPresent;
+  String get presenceMarkStatusPresent;
 
-  /// No description provided for @staffAttendanceStatusLate.
+  /// No description provided for @presenceMarkStatusLate.
   ///
   /// In en, this message translates to:
   /// **'Late'**
-  String get staffAttendanceStatusLate;
+  String get presenceMarkStatusLate;
 
-  /// No description provided for @staffAttendanceStatusAbsent.
+  /// No description provided for @presenceMarkStatusAbsent.
   ///
   /// In en, this message translates to:
   /// **'Absent'**
-  String get staffAttendanceStatusAbsent;
+  String get presenceMarkStatusAbsent;
 
   /// No description provided for @staffAttendanceSearchLabel.
   ///
@@ -19353,95 +19353,95 @@ abstract class AppLocalizations {
   /// **'Name, middle name, first name, job'**
   String get staffAttendanceSearchPlaceholder;
 
-  /// No description provided for @staffAttendanceLegendGrid.
+  /// No description provided for @presenceMarkLegendGrid.
   ///
   /// In en, this message translates to:
   /// **'Tap a card: Present › Late › Absent'**
-  String get staffAttendanceLegendGrid;
+  String get presenceMarkLegendGrid;
 
-  /// No description provided for @staffAttendanceLegendList.
+  /// No description provided for @presenceMarkLegendList.
   ///
   /// In en, this message translates to:
   /// **'Tap a status (tap it again to clear it)'**
-  String get staffAttendanceLegendList;
+  String get presenceMarkLegendList;
 
-  /// No description provided for @staffAttendanceToJustify.
+  /// No description provided for @presenceMarkToJustify.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 incident to justify} other{{count} incidents to justify}}'**
-  String staffAttendanceToJustify(int count);
+  String presenceMarkToJustify(int count);
 
-  /// No description provided for @staffAttendanceLateDetail.
+  /// No description provided for @presenceMarkLateDetail.
   ///
   /// In en, this message translates to:
   /// **'+{minutes} min after {start}'**
-  String staffAttendanceLateDetail(int minutes, String start);
+  String presenceMarkLateDetail(int minutes, String start);
 
-  /// No description provided for @staffAttendanceAbsenceJustified.
+  /// No description provided for @presenceMarkAbsenceJustified.
   ///
   /// In en, this message translates to:
   /// **'Justified absence'**
-  String get staffAttendanceAbsenceJustified;
+  String get presenceMarkAbsenceJustified;
 
-  /// No description provided for @staffAttendanceAbsenceUnjustified.
+  /// No description provided for @presenceMarkAbsenceUnjustified.
   ///
   /// In en, this message translates to:
   /// **'Unjustified absence'**
-  String get staffAttendanceAbsenceUnjustified;
+  String get presenceMarkAbsenceUnjustified;
 
-  /// No description provided for @staffAttendanceOnTime.
+  /// No description provided for @presenceMarkOnTime.
   ///
   /// In en, this message translates to:
   /// **'On time'**
-  String get staffAttendanceOnTime;
+  String get presenceMarkOnTime;
 
-  /// No description provided for @staffAttendanceOnTimeShort.
+  /// No description provided for @presenceMarkOnTimeShort.
   ///
   /// In en, this message translates to:
   /// **'On time'**
-  String get staffAttendanceOnTimeShort;
+  String get presenceMarkOnTimeShort;
 
-  /// No description provided for @staffAttendanceNotMarked.
+  /// No description provided for @presenceMarkNotMarked.
   ///
   /// In en, this message translates to:
   /// **'Not marked'**
-  String get staffAttendanceNotMarked;
+  String get presenceMarkNotMarked;
 
-  /// No description provided for @staffAttendanceDeparture.
+  /// No description provided for @presenceMarkDeparture.
   ///
   /// In en, this message translates to:
   /// **'Departure'**
-  String get staffAttendanceDeparture;
+  String get presenceMarkDeparture;
 
-  /// No description provided for @staffAttendanceArrival.
+  /// No description provided for @presenceMarkArrival.
   ///
   /// In en, this message translates to:
   /// **'Arrival'**
-  String get staffAttendanceArrival;
+  String get presenceMarkArrival;
 
-  /// No description provided for @staffAttendanceJustify.
+  /// No description provided for @presenceMarkJustify.
   ///
   /// In en, this message translates to:
   /// **'Justify'**
-  String get staffAttendanceJustify;
+  String get presenceMarkJustify;
 
-  /// No description provided for @staffAttendanceRetry.
+  /// No description provided for @presenceMarkRetry.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
-  String get staffAttendanceRetry;
+  String get presenceMarkRetry;
 
-  /// No description provided for @staffAttendanceClearTooltip.
+  /// No description provided for @presenceMarkClearTooltip.
   ///
   /// In en, this message translates to:
   /// **'Clear the status (back to mark)'**
-  String get staffAttendanceClearTooltip;
+  String get presenceMarkClearTooltip;
 
-  /// No description provided for @staffAttendanceClearHint.
+  /// No description provided for @presenceMarkClearHint.
   ///
   /// In en, this message translates to:
   /// **'Tap again to clear the status'**
-  String get staffAttendanceClearHint;
+  String get presenceMarkClearHint;
 
   /// No description provided for @staffAttendanceHourlyBadge.
   ///
@@ -19449,11 +19449,11 @@ abstract class AppLocalizations {
   /// **'HOURLY'**
   String get staffAttendanceHourlyBadge;
 
-  /// No description provided for @staffAttendanceHours.
+  /// No description provided for @presenceMarkHours.
   ///
   /// In en, this message translates to:
   /// **'{hours} h'**
-  String staffAttendanceHours(int hours);
+  String presenceMarkHours(int hours);
 
   /// No description provided for @staffAttendanceHoursLess.
   ///
@@ -19473,11 +19473,11 @@ abstract class AppLocalizations {
   /// **'Staff member'**
   String get staffAttendanceColAgent;
 
-  /// No description provided for @staffAttendanceColStatus.
+  /// No description provided for @presenceMarkColStatus.
   ///
   /// In en, this message translates to:
   /// **'Status'**
-  String get staffAttendanceColStatus;
+  String get presenceMarkColStatus;
 
   /// No description provided for @staffAttendanceColTimes.
   ///
@@ -19491,95 +19491,95 @@ abstract class AppLocalizations {
   /// **'Hours'**
   String get staffAttendanceColHours;
 
-  /// No description provided for @staffAttendanceColLate.
+  /// No description provided for @presenceMarkColLate.
   ///
   /// In en, this message translates to:
   /// **'Lateness · justification'**
-  String get staffAttendanceColLate;
+  String get presenceMarkColLate;
 
-  /// No description provided for @staffAttendanceTimeArrivalTitle.
+  /// No description provided for @presenceMarkTimeArrivalTitle.
   ///
   /// In en, this message translates to:
   /// **'Arrival time — {name}'**
-  String staffAttendanceTimeArrivalTitle(String name);
+  String presenceMarkTimeArrivalTitle(String name);
 
-  /// No description provided for @staffAttendanceTimeDepartureTitle.
+  /// No description provided for @presenceMarkTimeDepartureTitle.
   ///
   /// In en, this message translates to:
   /// **'Departure time — {name}'**
-  String staffAttendanceTimeDepartureTitle(String name);
+  String presenceMarkTimeDepartureTitle(String name);
 
-  /// No description provided for @staffAttendanceTimeField.
+  /// No description provided for @presenceMarkTimeField.
   ///
   /// In en, this message translates to:
   /// **'Time (HH:MM)'**
-  String get staffAttendanceTimeField;
+  String get presenceMarkTimeField;
 
-  /// No description provided for @staffAttendanceTimeInvalid.
+  /// No description provided for @presenceMarkTimeInvalid.
   ///
   /// In en, this message translates to:
   /// **'Enter a time between 00:00 and 23:59.'**
-  String get staffAttendanceTimeInvalid;
+  String get presenceMarkTimeInvalid;
 
-  /// No description provided for @staffAttendanceTimeNow.
+  /// No description provided for @presenceMarkTimeNow.
   ///
   /// In en, this message translates to:
   /// **'Now'**
-  String get staffAttendanceTimeNow;
+  String get presenceMarkTimeNow;
 
-  /// No description provided for @staffAttendanceTimeStart.
+  /// No description provided for @presenceMarkTimeStart.
   ///
   /// In en, this message translates to:
   /// **'Start of classes'**
-  String get staffAttendanceTimeStart;
+  String get presenceMarkTimeStart;
 
-  /// No description provided for @staffAttendanceTimePlus.
+  /// No description provided for @presenceMarkTimePlus.
   ///
   /// In en, this message translates to:
   /// **'+{minutes} min'**
-  String staffAttendanceTimePlus(int minutes);
+  String presenceMarkTimePlus(int minutes);
 
-  /// No description provided for @staffAttendanceTimeClear.
+  /// No description provided for @presenceMarkTimeClear.
   ///
   /// In en, this message translates to:
   /// **'Clear the departure'**
-  String get staffAttendanceTimeClear;
+  String get presenceMarkTimeClear;
 
-  /// No description provided for @staffAttendancePreviewLate.
+  /// No description provided for @presenceMarkPreviewLate.
   ///
   /// In en, this message translates to:
   /// **'Marked late by {minutes} min (start {start}, tolerance {tolerance} min)'**
-  String staffAttendancePreviewLate(int minutes, String start, int tolerance);
+  String presenceMarkPreviewLate(int minutes, String start, int tolerance);
 
-  /// No description provided for @staffAttendancePreviewOnTime.
+  /// No description provided for @presenceMarkPreviewOnTime.
   ///
   /// In en, this message translates to:
   /// **'Marked present on time (until {until})'**
-  String staffAttendancePreviewOnTime(String until);
+  String presenceMarkPreviewOnTime(String until);
 
-  /// No description provided for @staffAttendanceCancel.
+  /// No description provided for @presenceMarkCancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
-  String get staffAttendanceCancel;
+  String get presenceMarkCancel;
 
-  /// No description provided for @staffAttendanceSave.
+  /// No description provided for @presenceMarkSave.
   ///
   /// In en, this message translates to:
   /// **'Save'**
-  String get staffAttendanceSave;
+  String get presenceMarkSave;
 
-  /// No description provided for @staffAttendanceJustifyTitle.
+  /// No description provided for @presenceMarkJustifyTitle.
   ///
   /// In en, this message translates to:
   /// **'Justify — {name}'**
-  String staffAttendanceJustifyTitle(String name);
+  String presenceMarkJustifyTitle(String name);
 
-  /// No description provided for @staffAttendanceReasonLabel.
+  /// No description provided for @presenceMarkReasonLabel.
   ///
   /// In en, this message translates to:
   /// **'Reason'**
-  String get staffAttendanceReasonLabel;
+  String get presenceMarkReasonLabel;
 
   /// No description provided for @staffAttendanceReasonIllness.
   ///
@@ -19623,59 +19623,59 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get staffAttendanceReasonOther;
 
-  /// No description provided for @staffAttendanceNoteLabel.
+  /// No description provided for @presenceMarkNoteLabel.
   ///
   /// In en, this message translates to:
   /// **'Details'**
-  String get staffAttendanceNoteLabel;
+  String get presenceMarkNoteLabel;
 
-  /// No description provided for @staffAttendanceNotePlaceholder.
+  /// No description provided for @presenceMarkNotePlaceholder.
   ///
   /// In en, this message translates to:
   /// **'e.g. medical certificate handed in tomorrow'**
-  String get staffAttendanceNotePlaceholder;
+  String get presenceMarkNotePlaceholder;
 
-  /// No description provided for @staffAttendanceRemoveJustification.
+  /// No description provided for @presenceMarkRemoveJustification.
   ///
   /// In en, this message translates to:
   /// **'Remove the justification'**
-  String get staffAttendanceRemoveJustification;
+  String get presenceMarkRemoveJustification;
 
-  /// No description provided for @staffAttendanceSettingsTitle.
+  /// No description provided for @presenceMarkSettingsTitle.
   ///
   /// In en, this message translates to:
   /// **'Attendance settings'**
-  String get staffAttendanceSettingsTitle;
+  String get presenceMarkSettingsTitle;
 
-  /// No description provided for @staffAttendanceSettingsStart.
+  /// No description provided for @presenceMarkSettingsStart.
   ///
   /// In en, this message translates to:
   /// **'Start of classes'**
-  String get staffAttendanceSettingsStart;
+  String get presenceMarkSettingsStart;
 
-  /// No description provided for @staffAttendanceSettingsTolerance.
+  /// No description provided for @presenceMarkSettingsTolerance.
   ///
   /// In en, this message translates to:
   /// **'Tolerance'**
-  String get staffAttendanceSettingsTolerance;
+  String get presenceMarkSettingsTolerance;
 
-  /// No description provided for @staffAttendanceMinutes.
+  /// No description provided for @presenceMarkMinutes.
   ///
   /// In en, this message translates to:
   /// **'{minutes} min'**
-  String staffAttendanceMinutes(int minutes);
+  String presenceMarkMinutes(int minutes);
 
-  /// No description provided for @staffAttendanceSettingsRule.
+  /// No description provided for @presenceMarkSettingsRule.
   ///
   /// In en, this message translates to:
   /// **'An arrival after {until} is late, counted from {start}.'**
-  String staffAttendanceSettingsRule(String until, String start);
+  String presenceMarkSettingsRule(String until, String start);
 
-  /// No description provided for @staffAttendanceSettingsComing.
+  /// No description provided for @presenceMarkSettingsComing.
   ///
   /// In en, this message translates to:
   /// **'Applies to future marks.'**
-  String get staffAttendanceSettingsComing;
+  String get presenceMarkSettingsComing;
 
   /// No description provided for @staffAttendanceReportTitle.
   ///
@@ -19689,17 +19689,17 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 staff member not marked — mark present on time} other{{count} staff members not marked — mark them present on time}}'**
   String staffAttendanceReportMarkRemaining(int count);
 
-  /// No description provided for @staffAttendanceReportUnmarkedReminder.
+  /// No description provided for @presenceMarkReportUnmarkedReminder.
   ///
   /// In en, this message translates to:
   /// **'Otherwise they will be counted present by default when the month is closed.'**
-  String get staffAttendanceReportUnmarkedReminder;
+  String get presenceMarkReportUnmarkedReminder;
 
-  /// No description provided for @staffAttendanceReportUnjustified.
+  /// No description provided for @presenceMarkReportUnjustified.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 lateness or absence without justification} other{{count} latenesses or absences without justification}}'**
-  String staffAttendanceReportUnjustified(int count);
+  String presenceMarkReportUnjustified(int count);
 
   /// No description provided for @staffAttendanceReportLock.
   ///
@@ -19719,23 +19719,23 @@ abstract class AppLocalizations {
   /// **'Daily report validated — marks locked'**
   String get staffAttendanceValidatedTitle;
 
-  /// No description provided for @staffAttendanceValidatedBy.
+  /// No description provided for @presenceMarkValidatedBy.
   ///
   /// In en, this message translates to:
   /// **'By {name} · {when}'**
-  String staffAttendanceValidatedBy(String name, String when);
+  String presenceMarkValidatedBy(String name, String when);
 
-  /// No description provided for @staffAttendanceValidatedCounts.
+  /// No description provided for @presenceMarkValidatedCounts.
   ///
   /// In en, this message translates to:
   /// **'{present} present, {late} late, {absent} absent'**
-  String staffAttendanceValidatedCounts(int present, int late, int absent);
+  String presenceMarkValidatedCounts(int present, int late, int absent);
 
-  /// No description provided for @staffAttendanceReopen.
+  /// No description provided for @presenceMarkReopen.
   ///
   /// In en, this message translates to:
   /// **'Reopen'**
-  String get staffAttendanceReopen;
+  String get presenceMarkReopen;
 
   /// No description provided for @staffAttendanceMonthClosedBanner.
   ///
@@ -19749,29 +19749,29 @@ abstract class AppLocalizations {
   /// **'Search · First name Last name'**
   String get staffAttendanceAgentPicker;
 
-  /// No description provided for @staffAttendancePreviousMonth.
+  /// No description provided for @presenceMarkPreviousMonth.
   ///
   /// In en, this message translates to:
   /// **'Previous month'**
-  String get staffAttendancePreviousMonth;
+  String get presenceMarkPreviousMonth;
 
-  /// No description provided for @staffAttendanceNextMonth.
+  /// No description provided for @presenceMarkNextMonth.
   ///
   /// In en, this message translates to:
   /// **'Next month'**
-  String get staffAttendanceNextMonth;
+  String get presenceMarkNextMonth;
 
-  /// No description provided for @staffAttendanceCurrentMonth.
+  /// No description provided for @presenceMarkCurrentMonth.
   ///
   /// In en, this message translates to:
   /// **'Back to the current month'**
-  String get staffAttendanceCurrentMonth;
+  String get presenceMarkCurrentMonth;
 
-  /// No description provided for @staffAttendanceKpiPresences.
+  /// No description provided for @presenceMarkKpiPresences.
   ///
   /// In en, this message translates to:
   /// **'Attendance'**
-  String get staffAttendanceKpiPresences;
+  String get presenceMarkKpiPresences;
 
   /// No description provided for @staffAttendanceKpiDaysWorked.
   ///
@@ -19779,41 +19779,41 @@ abstract class AppLocalizations {
   /// **'Days worked'**
   String get staffAttendanceKpiDaysWorked;
 
-  /// No description provided for @staffAttendanceKpiRatio.
+  /// No description provided for @presenceMarkKpiRatio.
   ///
   /// In en, this message translates to:
   /// **'{value} / {days}'**
-  String staffAttendanceKpiRatio(int value, int days);
+  String presenceMarkKpiRatio(int value, int days);
 
-  /// No description provided for @staffAttendanceKpiLates.
+  /// No description provided for @presenceMarkKpiLates.
   ///
   /// In en, this message translates to:
   /// **'Late arrivals'**
-  String get staffAttendanceKpiLates;
+  String get presenceMarkKpiLates;
 
-  /// No description provided for @staffAttendanceKpiLatesDetail.
+  /// No description provided for @presenceMarkKpiLatesDetail.
   ///
   /// In en, this message translates to:
   /// **'{minutes} min · {unjustified} unjustified'**
-  String staffAttendanceKpiLatesDetail(int minutes, int unjustified);
+  String presenceMarkKpiLatesDetail(int minutes, int unjustified);
 
-  /// No description provided for @staffAttendanceKpiAbsences.
+  /// No description provided for @presenceMarkKpiAbsences.
   ///
   /// In en, this message translates to:
   /// **'Absences'**
-  String get staffAttendanceKpiAbsences;
+  String get presenceMarkKpiAbsences;
 
-  /// No description provided for @staffAttendanceKpiAbsencesDetail.
+  /// No description provided for @presenceMarkKpiAbsencesDetail.
   ///
   /// In en, this message translates to:
   /// **'{justified} J · {unjustified} U'**
-  String staffAttendanceKpiAbsencesDetail(int justified, int unjustified);
+  String presenceMarkKpiAbsencesDetail(int justified, int unjustified);
 
-  /// No description provided for @staffAttendanceKpiNotMarked.
+  /// No description provided for @presenceMarkKpiNotMarked.
   ///
   /// In en, this message translates to:
   /// **'Not marked'**
-  String get staffAttendanceKpiNotMarked;
+  String get presenceMarkKpiNotMarked;
 
   /// No description provided for @staffAttendanceKpiHours.
   ///
@@ -19821,35 +19821,35 @@ abstract class AppLocalizations {
   /// **'Hours worked'**
   String get staffAttendanceKpiHours;
 
-  /// No description provided for @staffAttendanceIncidentsTitle.
+  /// No description provided for @presenceMarkIncidentsTitle.
   ///
   /// In en, this message translates to:
   /// **'Late arrivals and absences this month'**
-  String get staffAttendanceIncidentsTitle;
+  String get presenceMarkIncidentsTitle;
 
-  /// No description provided for @staffAttendanceNoIncidents.
+  /// No description provided for @presenceMarkNoIncidents.
   ///
   /// In en, this message translates to:
   /// **'No late arrival or absence this month.'**
-  String get staffAttendanceNoIncidents;
+  String get presenceMarkNoIncidents;
 
-  /// No description provided for @staffAttendanceUnjustified.
+  /// No description provided for @presenceMarkUnjustified.
   ///
   /// In en, this message translates to:
   /// **'Unjustified'**
-  String get staffAttendanceUnjustified;
+  String get presenceMarkUnjustified;
 
-  /// No description provided for @staffAttendanceHolidayTitle.
+  /// No description provided for @presenceMarkHolidayTitle.
   ///
   /// In en, this message translates to:
   /// **'Holidays — {month}'**
-  String staffAttendanceHolidayTitle(String month);
+  String presenceMarkHolidayTitle(String month);
 
-  /// No description provided for @staffAttendanceHolidayMessage.
+  /// No description provided for @presenceMarkHolidayMessage.
   ///
   /// In en, this message translates to:
   /// **'No school day this month.'**
-  String get staffAttendanceHolidayMessage;
+  String get presenceMarkHolidayMessage;
 
   /// No description provided for @staffAttendanceRecapColContract.
   ///
@@ -19869,11 +19869,11 @@ abstract class AppLocalizations {
   /// **'Sync'**
   String get staffAttendanceRecapColSync;
 
-  /// No description provided for @staffAttendanceTotalRate.
+  /// No description provided for @presenceMarkTotalRate.
   ///
   /// In en, this message translates to:
   /// **'Attendance rate'**
-  String get staffAttendanceTotalRate;
+  String get presenceMarkTotalRate;
 
   /// No description provided for @staffAttendanceTotalHours.
   ///
@@ -19881,23 +19881,23 @@ abstract class AppLocalizations {
   /// **'Hourly work'**
   String get staffAttendanceTotalHours;
 
-  /// No description provided for @staffAttendanceTotalLateMinutes.
+  /// No description provided for @presenceMarkTotalLateMinutes.
   ///
   /// In en, this message translates to:
   /// **'Minutes late'**
-  String get staffAttendanceTotalLateMinutes;
+  String get presenceMarkTotalLateMinutes;
 
-  /// No description provided for @staffAttendanceTotalUnjustified.
+  /// No description provided for @presenceMarkTotalUnjustified.
   ///
   /// In en, this message translates to:
   /// **'Unjustified absences'**
-  String get staffAttendanceTotalUnjustified;
+  String get presenceMarkTotalUnjustified;
 
-  /// No description provided for @staffAttendanceTotalNotMarked.
+  /// No description provided for @presenceMarkTotalNotMarked.
   ///
   /// In en, this message translates to:
   /// **'Days not marked'**
-  String get staffAttendanceTotalNotMarked;
+  String get presenceMarkTotalNotMarked;
 
   /// No description provided for @staffAttendanceRecapLegend.
   ///
@@ -19941,11 +19941,11 @@ abstract class AppLocalizations {
   /// **'{count} staff-days without marks will be treated as present by default'**
   String staffAttendanceCloseNotMarked(int count);
 
-  /// No description provided for @staffAttendanceCloseIrreversible.
+  /// No description provided for @presenceMarkCloseIrreversible.
   ///
   /// In en, this message translates to:
   /// **'Closing locks the month: it cannot be reopened from the tablet.'**
-  String get staffAttendanceCloseIrreversible;
+  String get presenceMarkCloseIrreversible;
 
   /// No description provided for @staffAttendanceCloseConfirm.
   ///
@@ -19977,17 +19977,17 @@ abstract class AppLocalizations {
   /// **'No staff member in this filter'**
   String get staffAttendanceEmptyFilterTitle;
 
-  /// No description provided for @staffAttendanceAllMarked.
+  /// No description provided for @presenceMarkAllMarked.
   ///
   /// In en, this message translates to:
   /// **'Everyone is marked'**
-  String get staffAttendanceAllMarked;
+  String get presenceMarkAllMarked;
 
-  /// No description provided for @staffAttendanceShowAll.
+  /// No description provided for @presenceMarkShowAll.
   ///
   /// In en, this message translates to:
   /// **'Show all'**
-  String get staffAttendanceShowAll;
+  String get presenceMarkShowAll;
 
   /// No description provided for @staffAttendanceRecapEmptyFilter.
   ///
@@ -20001,23 +20001,23 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 staff member marked present} other{{count} staff members marked present}}'**
   String staffAttendanceToastRemaining(int count);
 
-  /// No description provided for @staffAttendanceToastCleared.
+  /// No description provided for @presenceMarkToastCleared.
   ///
   /// In en, this message translates to:
   /// **'{name} back to mark'**
-  String staffAttendanceToastCleared(String name);
+  String presenceMarkToastCleared(String name);
 
-  /// No description provided for @staffAttendanceToastJustified.
+  /// No description provided for @presenceMarkToastJustified.
   ///
   /// In en, this message translates to:
   /// **'Justification saved — {name}'**
-  String staffAttendanceToastJustified(String name);
+  String presenceMarkToastJustified(String name);
 
-  /// No description provided for @staffAttendanceToastJustificationRemoved.
+  /// No description provided for @presenceMarkToastJustificationRemoved.
   ///
   /// In en, this message translates to:
   /// **'Justification removed — {name}'**
-  String staffAttendanceToastJustificationRemoved(String name);
+  String presenceMarkToastJustificationRemoved(String name);
 
   /// No description provided for @staffAttendanceToastSettings.
   ///
@@ -20055,11 +20055,11 @@ abstract class AppLocalizations {
   /// **'{month} closed'**
   String staffAttendanceToastClosed(String month);
 
-  /// No description provided for @staffAttendanceToastWriteFailed.
+  /// No description provided for @presenceMarkToastWriteFailed.
   ///
   /// In en, this message translates to:
   /// **'The mark could not be saved on the tablet.'**
-  String get staffAttendanceToastWriteFailed;
+  String get presenceMarkToastWriteFailed;
 
   /// No description provided for @staffAttendanceRefusedDayLocked.
   ///
@@ -20091,29 +20091,29 @@ abstract class AppLocalizations {
   /// **'The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.'**
   String get staffAttendanceValidationRefused;
 
-  /// No description provided for @staffAttendanceHoursMinutes.
+  /// No description provided for @presenceMarkHoursMinutes.
   ///
   /// In en, this message translates to:
   /// **'{hours} h {minutes}'**
-  String staffAttendanceHoursMinutes(int hours, String minutes);
+  String presenceMarkHoursMinutes(int hours, String minutes);
 
-  /// No description provided for @staffAttendanceReasonRequired.
+  /// No description provided for @presenceMarkReasonRequired.
   ///
   /// In en, this message translates to:
   /// **'Reason *'**
-  String get staffAttendanceReasonRequired;
+  String get presenceMarkReasonRequired;
 
-  /// No description provided for @staffAttendanceDismiss.
+  /// No description provided for @presenceMarkDismiss.
   ///
   /// In en, this message translates to:
   /// **'Close'**
-  String get staffAttendanceDismiss;
+  String get presenceMarkDismiss;
 
-  /// No description provided for @staffAttendanceStartTooLate.
+  /// No description provided for @presenceMarkStartTooLate.
   ///
   /// In en, this message translates to:
   /// **'Classes start at {latest} at the latest.'**
-  String staffAttendanceStartTooLate(String latest);
+  String presenceMarkStartTooLate(String latest);
 
   /// No description provided for @subMenuPayroll.
   ///

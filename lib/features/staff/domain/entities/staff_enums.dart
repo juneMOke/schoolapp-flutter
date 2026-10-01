@@ -89,25 +89,6 @@ enum StaffDocumentSource implements StaffWired {
       staffByWire(values, value);
 }
 
-/// Où en est une ligne : sur la tablette seulement, refusée, ou au serveur.
-enum StaffSyncState {
-  synced('SYNCED'),
-  pending('PENDING_SYNC'),
-  failed('SYNC_ERROR');
-
-  const StaffSyncState(this.dbValue);
-  final String dbValue;
-
-  /// Une valeur inconnue se lit comme « sur la tablette » : c'est l'état qui
-  /// n'affirme rien de faux sur le serveur.
-  static StaffSyncState fromDb(String? value) {
-    for (final state in values) {
-      if (state.dbValue == value) return state;
-    }
-    return StaffSyncState.pending;
-  }
-}
-
 /// Une valeur fermée et sa forme sur le fil. Publique pour que les autres
 /// valeurs fermées du module RH (le Pointage) se lisent de la même façon.
 abstract interface class StaffWired {

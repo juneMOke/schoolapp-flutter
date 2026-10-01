@@ -3,9 +3,9 @@ import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lo
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Ce que l'accusé d'un pointage fait à la ligne locale.
 ///
@@ -39,7 +39,7 @@ class StaffAttendanceSyncDao {
         'school_id': schoolId,
         ...StaffAttendanceLocalModel.contentColumns(canonical),
         ...StaffAttendanceLocalModel.serverColumns(canonical),
-        'sync_status': StaffSyncState.synced.dbValue,
+        'sync_status': RecordSyncState.synced.dbValue,
         'updated_at': nowMs,
       });
       return;
@@ -53,7 +53,7 @@ class StaffAttendanceSyncDao {
       {
         ...StaffAttendanceLocalModel.serverColumns(canonical),
         if (latest) ...StaffAttendanceLocalModel.contentColumns(canonical),
-        if (latest) 'sync_status': StaffSyncState.synced.dbValue,
+        if (latest) 'sync_status': RecordSyncState.synced.dbValue,
         if (latest) 'sync_error': null,
         if (latest) 'sync_error_code': null,
         'updated_at': nowMs,
@@ -88,7 +88,7 @@ class StaffAttendanceSyncDao {
     await txn.update(
       table,
       {
-        'sync_status': StaffSyncState.failed.dbValue,
+        'sync_status': RecordSyncState.failed.dbValue,
         'sync_error': reason,
         'sync_error_code': code,
         'updated_at': nowMs,
@@ -116,7 +116,7 @@ class StaffAttendanceSyncDao {
       whereArgs: [
         schoolId,
         day,
-        StaffSyncState.failed.dbValue,
+        RecordSyncState.failed.dbValue,
         kStaffDayLockedCode,
       ],
     );
@@ -126,7 +126,7 @@ class StaffAttendanceSyncDao {
       await txn.update(
         table,
         {
-          'sync_status': StaffSyncState.pending.dbValue,
+          'sync_status': RecordSyncState.pending.dbValue,
           'sync_error': null,
           'sync_error_code': null,
           'updated_at': nowMs,

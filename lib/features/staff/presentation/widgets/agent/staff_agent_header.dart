@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau de tête de la page agent : retour, avatar dans l'anneau de son
@@ -129,7 +129,7 @@ class StaffAgentHeader extends StatelessWidget {
                   color: AppColors.surfaceRaised,
                   borderRadius: AppRadius.brPill,
                 ),
-                child: StaffSyncPill(state: member.syncState),
+                child: RecordSyncPill(state: member.syncState),
               ),
             if (onEdit != null) ...[
               const SizedBox(width: AppSpacing.sm),

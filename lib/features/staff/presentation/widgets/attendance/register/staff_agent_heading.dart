@@ -5,9 +5,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
 /// L'agent d'une ligne du registre : initiales et pastille de synchro,
 /// « Nom Post-nom », « Prénom · Fonction », et le badge VAC · H d'un
@@ -26,7 +26,7 @@ class StaffAgentHeading extends StatelessWidget {
         StaffAvatar(
           member: member,
           sync: row.sync,
-          size: AppDimensions.staffAttendanceAvatarSize,
+          size: AppDimensions.presenceMarkAvatarSize,
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

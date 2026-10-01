@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_row
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_ledger.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_stats.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne du récapitulatif : l'agent, son contrat du mois, sa synthèse et
 /// où en est la synchronisation de ses pointages.
@@ -14,7 +15,7 @@ class StaffRecapRow extends Equatable {
   final StaffMember member;
   final StaffContractKind? kind;
   final StaffMonthStats stats;
-  final StaffSyncState sync;
+  final RecordSyncState sync;
 
   const StaffRecapRow({
     required this.member,
@@ -128,17 +129,17 @@ class StaffMonthRecap extends Equatable {
 
   /// Pointages du mois pas encore au serveur.
   int get pending =>
-      all.where((row) => row.sync != StaffSyncState.synced).length;
+      all.where((row) => row.sync != RecordSyncState.synced).length;
 
   int _sum(int Function(StaffMonthStats stats) pick) =>
       all.fold<int>(0, (sum, row) => sum + pick(row.stats));
 
-  static StaffSyncState _worstSync(
+  static RecordSyncState _worstSync(
     StaffAttendanceSnapshot snapshot,
     String memberId,
     String month,
   ) {
-    var worst = StaffSyncState.synced;
+    var worst = RecordSyncState.synced;
     for (final entry in (snapshot.records[memberId] ?? const {}).entries) {
       if (!entry.key.startsWith(month)) continue;
       worst = StaffFileRow.worse(worst, entry.value.syncState);

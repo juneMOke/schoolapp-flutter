@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_ledger.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_stats.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Une case du calendrier de la fiche mensuelle (lundi → vendredi).
 class StaffCalendarDay extends Equatable {
@@ -22,8 +22,7 @@ class StaffCalendarDay extends Equatable {
     this.record,
   });
 
-  StaffAttendanceStatus get status =>
-      record?.status ?? StaffAttendanceStatus.none;
+  PresenceStatus get status => record?.status ?? PresenceStatus.none;
 
   @override
   List<Object?> get props => [day, upcoming, record];
@@ -61,12 +60,12 @@ class StaffAgentMonth extends Equatable {
     final records = snapshot.records[member.id] ?? const {};
     final worked = ledger.workDays.toSet();
     final weekdays = [
-      for (final day in StaffWorkCalendar.daysOf(month))
-        if (StaffWorkCalendar.isWeekday(day)) day,
+      for (final day in SchoolDayCalendar.daysOf(month))
+        if (SchoolDayCalendar.isWeekday(day)) day,
     ];
     final lead = weekdays.isEmpty
         ? 0
-        : StaffWorkCalendar.weekdayOf(weekdays.first) - 1;
+        : SchoolDayCalendar.weekdayOf(weekdays.first) - 1;
     return StaffAgentMonth(
       member: member,
       stats: ledger.statsOf(member),

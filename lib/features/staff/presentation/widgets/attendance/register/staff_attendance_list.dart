@@ -26,8 +26,8 @@ class StaffAttendanceList extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final width =
-          constraints.maxWidth < AppDimensions.staffAttendanceListMinWidth
-          ? AppDimensions.staffAttendanceListMinWidth
+          constraints.maxWidth < AppDimensions.presenceMarkListMinWidth
+          ? AppDimensions.presenceMarkListMinWidth
           : constraints.maxWidth;
       final showHours = register.showsHours;
       return SingleChildScrollView(
@@ -79,10 +79,10 @@ class _Header extends StatelessWidget {
       ),
       child: StaffAttendanceRowLayout(
         agent: cell(l10n.staffAttendanceColAgent),
-        status: cell(l10n.staffAttendanceColStatus),
+        status: cell(l10n.presenceMarkColStatus),
         times: cell(l10n.staffAttendanceColTimes),
         hours: showHours ? cell(l10n.staffAttendanceColHours) : null,
-        late: cell(l10n.staffAttendanceColLate),
+        late: cell(l10n.presenceMarkColLate),
         action: const SizedBox.shrink(),
       ),
     );

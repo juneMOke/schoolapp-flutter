@@ -1,12 +1,12 @@
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Quel contrat paie un agent pour un mois.
 abstract final class PayrollContractPicker {
   /// Une période qui compte : ni corrigée, ni refusée par le serveur.
   static bool isLive(StaffContract contract) =>
-      !contract.isCorrected && contract.syncState != StaffSyncState.failed;
+      !contract.isCorrected && contract.syncState != RecordSyncState.failed;
 
   /// Le contrat qui paie [month] (A2, sans prorata) : parmi les périodes
   /// vivantes qui recoupent le mois, **la dernière commencée** — celle qui est

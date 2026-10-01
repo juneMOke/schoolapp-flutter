@@ -9,7 +9,6 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_cubit.dart';
@@ -19,6 +18,7 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_fai
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_contract_form_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les contrats d'un agent enregistré, sous l'étape « Poste » : la frise, les
 /// montants pour qui les lit, et les gestes pour qui peut les faire.
@@ -83,7 +83,7 @@ class StaffContractPanel extends StatelessWidget {
       ...[...member.contracts]
         ..sort((a, b) => b.effectiveFrom.compareTo(a.effectiveFrom)),
       for (final contract in details)
-        if (contract.syncState == StaffSyncState.failed &&
+        if (contract.syncState == RecordSyncState.failed &&
             !contract.isCorrected &&
             !known.contains(contract.id))
           contract.asPeriod,

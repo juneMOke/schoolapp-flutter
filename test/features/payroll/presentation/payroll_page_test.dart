@@ -24,12 +24,12 @@ import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_sett
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockRepository extends Mock implements PayrollRepository {}
 
@@ -265,7 +265,7 @@ void main() {
             month: '2026-10',
             kind: PayrollGestureKind.validate,
             recordedAt: '2026-10-26T10:00:00Z',
-            syncState: StaffSyncState.failed,
+            syncState: RecordSyncState.failed,
             syncErrorCode: PayrollGesture.staleCode,
           ),
         ],

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_document
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 StaffMember member(
   String id, {
@@ -15,7 +16,7 @@ StaffMember member(
   List<String> branches = const [],
   List<StaffContractPeriod> contracts = const [],
   String? staffNumber = 'CF-AG-0001',
-  StaffSyncState syncState = StaffSyncState.synced,
+  RecordSyncState syncState = RecordSyncState.synced,
 }) => StaffMember(
   id: id,
   lastName: lastName,
@@ -46,7 +47,7 @@ StaffContractPeriod period(
 StaffDocument document(
   String memberId,
   String code, {
-  StaffSyncState syncState = StaffSyncState.synced,
+  RecordSyncState syncState = RecordSyncState.synced,
 }) => StaffDocument(
   id: '$memberId-$code',
   staffMemberId: memberId,

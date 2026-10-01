@@ -2,9 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 
-export 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
+export 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 
 /// Automate de l'écran : premier chargement, prêt, ou panne de lecture.
 ///
@@ -18,7 +18,7 @@ class StaffFileState extends Equatable {
   final StaffFileStatus status;
   final StaffFileSnapshot snapshot;
   final StaffFileQuery query;
-  final StaffViewMode viewMode;
+  final CollectionViewMode viewMode;
 
   /// Le jour, `YYYY-MM-DD` : c'est lui qui dit quel contrat est en vigueur.
   final String today;
@@ -37,7 +37,7 @@ class StaffFileState extends Equatable {
     status: StaffFileStatus.loading,
     snapshot: StaffFileSnapshot.empty,
     query: StaffFileQuery.none,
-    viewMode: StaffViewMode.grid,
+    viewMode: CollectionViewMode.grid,
     today: today,
   );
 
@@ -45,7 +45,7 @@ class StaffFileState extends Equatable {
     StaffFileStatus? status,
     StaffFileSnapshot? snapshot,
     StaffFileQuery? query,
-    StaffViewMode? viewMode,
+    CollectionViewMode? viewMode,
     String? today,
     Failure? failure,
     bool clearFailure = false,

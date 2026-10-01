@@ -97,7 +97,7 @@ class StaffFileCubit extends Cubit<StaffFileState> {
 
   void resetFilters() => emit(state.copyWith(query: StaffFileQuery.none));
 
-  void setViewMode(StaffViewMode mode) {
+  void setViewMode(CollectionViewMode mode) {
     if (mode == state.viewMode) return;
     emit(state.copyWith(viewMode: mode));
   }

@@ -3,8 +3,8 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Lecture de `staff_attendance_records`, et application du flux descendu.
 class StaffAttendanceDao {
@@ -64,7 +64,7 @@ class StaffAttendanceDao {
         schoolId,
         from,
         to,
-        StaffSyncState.pending.dbValue,
+        RecordSyncState.pending.dbValue,
         OutboxStatus.pending.dbValue,
         queuedBefore,
       ],
@@ -97,13 +97,13 @@ class StaffAttendanceDao {
             'school_id': schoolId,
             ...StaffAttendanceLocalModel.contentColumns(delta),
             ...StaffAttendanceLocalModel.serverColumns(delta),
-            'sync_status': StaffSyncState.synced.dbValue,
+            'sync_status': RecordSyncState.synced.dbValue,
             'updated_at': nowMs,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
           continue;
         }
         final synced =
-            existing.single['sync_status'] == StaffSyncState.synced.dbValue;
+            existing.single['sync_status'] == RecordSyncState.synced.dbValue;
         await txn.update(
           table,
           {

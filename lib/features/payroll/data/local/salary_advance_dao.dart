@@ -6,8 +6,8 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellati
 import 'package:school_app_flutter/features/payroll/data/sync/salary_advance_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les avances sur salaire (`salary_advances`) : des faits, octroyés sur la
 /// tablette et annulés par un geste, jamais effacés.
@@ -99,7 +99,7 @@ class SalaryAdvanceDao {
               reason: item.cancellationReason,
             ),
             'server_updated_at': item.serverUpdatedAt,
-            'sync_status': StaffSyncState.synced.dbValue,
+            'sync_status': RecordSyncState.synced.dbValue,
             'sync_error': null,
             'sync_error_code': null,
           },
@@ -111,12 +111,12 @@ class SalaryAdvanceDao {
 
   Future<void> mark(
     String id,
-    StaffSyncState state, {
+    RecordSyncState state, {
     String? code,
     String? reason,
   }) => _store.mark(table, {'id': id}, state, code: code, reason: reason);
 
-  Future<StaffSyncState?> stateOf(String id) async {
+  Future<RecordSyncState?> stateOf(String id) async {
     final rows = await _store.db.query(
       table,
       columns: ['sync_status'],
@@ -125,7 +125,7 @@ class SalaryAdvanceDao {
     );
     return rows.isEmpty
         ? null
-        : StaffSyncState.fromDb(rows.single['sync_status'] as String?);
+        : RecordSyncState.fromDb(rows.single['sync_status'] as String?);
   }
 
   Future<List<SalaryAdvance>> forSchool(String schoolId) async {

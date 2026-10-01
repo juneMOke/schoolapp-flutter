@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gest
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'écran de confrontation d'un refus `PAYROLL_STALE` : ce que la tablette a
@@ -37,7 +37,7 @@ class PayrollStaleDialog extends StatelessWidget {
     required List<PayrollLine> current,
     required String Function(String staffMemberId) nameOf,
   }) async =>
-      await StaffDialog.show<bool>(
+      await EteeloFormDialog.show<bool>(
         context,
         PayrollStaleDialog(gesture: gesture, current: current, nameOf: nameOf),
       ) ??
@@ -54,7 +54,7 @@ class PayrollStaleDialog extends StatelessWidget {
             PayrollFingerprinter.digestLines(current),
             server.lines,
           );
-    return StaffDialog(
+    return EteeloFormDialog(
       title: l10n.payrollStaleTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -94,13 +94,13 @@ void main() {
       ..setCategory(StaffCategory.teacher)
       ..toggleContract(StaffContractFilter.vacataire)
       ..toggleIncomplete()
-      ..setViewMode(StaffViewMode.list);
+      ..setViewMode(CollectionViewMode.list);
 
     expect(cubit.state.query.isActive, isTrue);
-    expect(cubit.state.viewMode, StaffViewMode.list);
+    expect(cubit.state.viewMode, CollectionViewMode.list);
 
     cubit.resetFilters();
     expect(cubit.state.query, StaffFileQuery.none);
-    expect(cubit.state.viewMode, StaffViewMode.list);
+    expect(cubit.state.viewMode, CollectionViewMode.list);
   });
 }

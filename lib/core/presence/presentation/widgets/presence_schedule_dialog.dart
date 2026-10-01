@@ -4,38 +4,39 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_clock_input_formatter.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
+import 'package:school_app_flutter/core/presence/presentation/clock_input_formatter.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les réglages du Pointage : début des cours et tolérance, avec la phrase de
-/// règle recalculée. Rend les nouveaux réglages, ou `null`.
-class StaffAttendanceSettingsDialog extends StatefulWidget {
-  final StaffAttendanceSettings settings;
+/// L'horaire du pointage et de l'appel : début des cours et tolérance, avec
+/// la phrase de règle recalculée. Rend le nouvel horaire, ou `null`.
+class PresenceScheduleDialog extends StatefulWidget {
+  final PresenceSchedule schedule;
 
-  /// Sans `hr.attendance.manage`, les réglages se lisent sans se modifier.
+  /// Sans le droit de régler (`hr.attendance.manage`), l'horaire se lit sans
+  /// se modifier.
   final bool editable;
 
-  const StaffAttendanceSettingsDialog({
+  const PresenceScheduleDialog({
     super.key,
-    required this.settings,
+    required this.schedule,
     required this.editable,
   });
 
   @override
-  State<StaffAttendanceSettingsDialog> createState() =>
-      _StaffAttendanceSettingsDialogState();
+  State<PresenceScheduleDialog> createState() =>
+      _PresenceScheduleDialogState();
 }
 
-class _StaffAttendanceSettingsDialogState
-    extends State<StaffAttendanceSettingsDialog> {
+class _PresenceScheduleDialogState
+    extends State<PresenceScheduleDialog> {
   late final TextEditingController _start = TextEditingController(
-    text: widget.settings.start.wire,
+    text: widget.schedule.start.wire,
   );
-  late int _tolerance = widget.settings.toleranceMinutes;
+  late int _tolerance = widget.schedule.toleranceMinutes;
 
   @override
   void dispose() {
@@ -46,38 +47,38 @@ class _StaffAttendanceSettingsDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final parsed = StaffClockTime.tryParse(_start.text);
+    final parsed = ClockTime.tryParse(_start.text);
     final tooLate =
-        parsed != null && parsed.isAfter(StaffAttendanceSettings.latestStart);
+        parsed != null && parsed.isAfter(PresenceSchedule.latestStart);
     final start = tooLate ? null : parsed;
     final draft = start == null
         ? null
-        : StaffAttendanceSettings(start: start, toleranceMinutes: _tolerance);
-    return StaffDialog(
-      title: l10n.staffAttendanceSettingsTitle,
+        : PresenceSchedule(start: start, toleranceMinutes: _tolerance);
+    return EteeloFormDialog(
+      title: l10n.presenceMarkSettingsTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           EteeloTextInput(
             controller: _start,
-            label: l10n.staffAttendanceSettingsStart,
+            label: l10n.presenceMarkSettingsStart,
             readOnly: !widget.editable,
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
-            inputFormatters: const [StaffClockInputFormatter()],
+            inputFormatters: const [ClockInputFormatter()],
             errorText: tooLate
-                ? l10n.staffAttendanceStartTooLate(
-                    StaffAttendanceSettings.latestStart.wire,
+                ? l10n.presenceMarkStartTooLate(
+                    PresenceSchedule.latestStart.wire,
                   )
                 : _start.text.length == 5 && start == null
-                ? l10n.staffAttendanceTimeInvalid
+                ? l10n.presenceMarkTimeInvalid
                 : null,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            l10n.staffAttendanceSettingsTolerance,
+            l10n.presenceMarkSettingsTolerance,
             style: AppTypography.labelLarge,
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -85,9 +86,9 @@ class _StaffAttendanceSettingsDialogState
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
             children: [
-              for (final minutes in StaffAttendanceSettings.tolerances)
-                StaffFilterChip(
-                  label: l10n.staffAttendanceMinutes(minutes),
+              for (final minutes in PresenceSchedule.tolerances)
+                EteeloFilterChip(
+                  label: l10n.presenceMarkMinutes(minutes),
                   selected: minutes == _tolerance,
                   color: AppColors.bleuArdoise,
                   soft: AppColors.bleuArdoiseSoft,
@@ -101,7 +102,7 @@ class _StaffAttendanceSettingsDialogState
           if (draft != null) ...[
             const SizedBox(height: AppSpacing.lg),
             Text(
-              l10n.staffAttendanceSettingsRule(
+              l10n.presenceMarkSettingsRule(
                 draft.lastOnTime.wire,
                 draft.start.wire,
               ),
@@ -109,7 +110,7 @@ class _StaffAttendanceSettingsDialogState
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              l10n.staffAttendanceSettingsComing,
+              l10n.presenceMarkSettingsComing,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textMutedAa,
               ),
@@ -120,16 +121,16 @@ class _StaffAttendanceSettingsDialogState
       actions: [
         EteeloButton.ghost(
           label: widget.editable
-              ? l10n.staffAttendanceCancel
-              : l10n.staffAttendanceDismiss,
+              ? l10n.presenceMarkCancel
+              : l10n.presenceMarkDismiss,
           onPressed: () => Navigator.of(context).pop(),
           fullWidth: false,
         ),
         if (widget.editable)
           EteeloButton.primary(
-            label: l10n.staffAttendanceSave,
+            label: l10n.presenceMarkSave,
             icon: Icons.check,
-            onPressed: draft == null || draft == widget.settings
+            onPressed: draft == null || _unchanged(draft)
                 ? null
                 : () => Navigator.of(context).pop(draft),
             fullWidth: false,
@@ -137,4 +138,8 @@ class _StaffAttendanceSettingsDialogState
       ],
     );
   }
+
+  bool _unchanged(PresenceSchedule draft) =>
+      draft.start == widget.schedule.start &&
+      draft.toleranceMinutes == widget.schedule.toleranceMinutes;
 }

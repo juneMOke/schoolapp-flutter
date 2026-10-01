@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_cancellation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Un salaire versé. Le montant est le net figé ; [validationGestureId] nomme
 /// la validation sous laquelle l'argent est sorti.
@@ -27,7 +27,7 @@ class PayrollDisbursement extends Equatable {
   final String paidAt;
   final String? authorName;
   final PayrollCancellation? cancellation;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
 
@@ -47,14 +47,14 @@ class PayrollDisbursement extends Equatable {
     this.signedRegister = false,
     this.authorName,
     this.cancellation,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
     this.syncError,
     this.syncErrorCode,
   });
 
   /// Refusé : l'argent est parti, le serveur ne l'a pas enregistré. À
   /// régulariser, jamais effacé.
-  bool get needsRegularization => syncState == StaffSyncState.failed;
+  bool get needsRegularization => syncState == RecordSyncState.failed;
 
   bool get isCancelled {
     final cancellation = this.cancellation;

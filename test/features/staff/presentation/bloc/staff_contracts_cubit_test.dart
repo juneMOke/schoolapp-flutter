@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/staff/domain/repositories/staff_cont
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_contract_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_contracts_state.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockRepository extends Mock implements StaffContractRepository {}
 
@@ -20,7 +21,7 @@ const _contract = StaffContract(
   kind: StaffContractKind.permanent,
   effectiveFrom: '2025-09-01',
   recordedAt: '2025-09-01T08:00:00Z',
-  syncState: StaffSyncState.synced,
+  syncState: RecordSyncState.synced,
 );
 
 void main() {

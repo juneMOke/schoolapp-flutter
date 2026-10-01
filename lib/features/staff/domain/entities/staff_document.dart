@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une pièce versée au dossier d'un agent — ses métadonnées. Les octets vivent
 /// chiffrés hors de la base.
@@ -18,7 +19,7 @@ class StaffDocument extends Equatable {
   final String? fileName;
   final String mimeType;
   final int sizeBytes;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
 
   /// Pourquoi le serveur a refusé le versement.
   final String? syncError;

@@ -5,11 +5,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Un bloc titré des onglets du mois (calendrier, incidents, tableau).
-class StaffAttendanceCardFrame extends StatelessWidget {
+class PresenceCardFrame extends StatelessWidget {
   final String? title;
   final Widget child;
 
-  const StaffAttendanceCardFrame({super.key, required this.child, this.title});
+  const PresenceCardFrame({super.key, required this.child, this.title});
 
   @override
   Widget build(BuildContext context) {

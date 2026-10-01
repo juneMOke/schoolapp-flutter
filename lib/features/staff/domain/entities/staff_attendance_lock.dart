@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Un jour validé (rapport journalier) ou un mois clos, **tel que la tablette
 /// le montre** : le dernier geste posé sur la tablette l'emporte sur l'état du
@@ -19,8 +19,8 @@ class StaffAttendanceLock extends Equatable {
   final String? lockedByName;
 
   /// Où en est le dernier geste de la tablette sur cette période ;
-  /// [StaffSyncState.synced] quand il n'y en a pas.
-  final StaffSyncState syncState;
+  /// [RecordSyncState.synced] quand il n'y en a pas.
+  final RecordSyncState syncState;
 
   const StaffAttendanceLock({
     required this.kind,
@@ -28,7 +28,7 @@ class StaffAttendanceLock extends Equatable {
     required this.locked,
     this.lockedAt,
     this.lockedByName,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
   });
 
   @override

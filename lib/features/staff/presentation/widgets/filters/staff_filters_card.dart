@@ -8,9 +8,10 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_vie
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 
 /// La carte de filtres : recherche, catégorie et affichage sur une ligne, puis
 /// les puces de contrat et « Dossier incomplet ». Tous les filtres se
@@ -18,12 +19,12 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class StaffFiltersCard extends StatelessWidget {
   final StaffFileQuery query;
   final StaffFileView view;
-  final StaffViewMode viewMode;
+  final CollectionViewMode viewMode;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<StaffCategory?> onCategoryChanged;
   final ValueChanged<StaffContractFilter?> onContractToggled;
   final VoidCallback onIncompleteToggled;
-  final ValueChanged<StaffViewMode> onViewModeChanged;
+  final ValueChanged<CollectionViewMode> onViewModeChanged;
 
   const StaffFiltersCard({
     super.key,
@@ -93,7 +94,7 @@ class _ContractChips extends StatelessWidget {
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        StaffFilterChip(
+        EteeloFilterChip(
           label: l10n.staffContractAll,
           count: view.all.length,
           selected: query.contract == null,
@@ -107,7 +108,7 @@ class _ContractChips extends StatelessWidget {
               (view.byContract[filter] ?? 0) > 0)
             _contractChip(context, filter),
         if (view.documentsVisible)
-          StaffFilterChip(
+          EteeloFilterChip(
             label: l10n.staffIncompleteFilter,
             count: view.incomplete,
             selected: query.incompleteOnly,
@@ -123,7 +124,7 @@ class _ContractChips extends StatelessWidget {
 
   Widget _contractChip(BuildContext context, StaffContractFilter filter) {
     final tone = StaffContractTone.ofFilter(filter);
-    return StaffFilterChip(
+    return EteeloFilterChip(
       label: StaffLabels.contractFilter(AppLocalizations.of(context)!, filter),
       count: view.byContract[filter] ?? 0,
       selected: query.contract == filter,

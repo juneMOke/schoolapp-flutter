@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 
 import '../../staff_builders.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 class _MockSave extends Mock implements SaveStaffAttendanceUseCase {}
 
@@ -93,8 +94,8 @@ void main() {
       await commands.cycle(snapshot, registerOf(snapshot).all.first);
 
       final record = saved().single;
-      expect(record.status, StaffAttendanceStatus.present);
-      expect(record.arrival, StaffClockTime.tryParse('07:30'));
+      expect(record.status, PresenceStatus.present);
+      expect(record.arrival, ClockTime.tryParse('07:30'));
       expect(record.staffMemberId, 'm-1');
       expect(record.workDate, _day);
     },
@@ -105,8 +106,8 @@ void main() {
       id: 'r-1',
       staffMemberId: 'm-1',
       workDate: _day,
-      status: StaffAttendanceStatus.present,
-      arrival: StaffClockTime.tryParse('07:30'),
+      status: PresenceStatus.present,
+      arrival: ClockTime.tryParse('07:30'),
     );
     final snapshot = _snapshot(
       records: {
@@ -117,10 +118,10 @@ void main() {
     final notice = await commands.choose(
       snapshot,
       registerOf(snapshot).all.first,
-      StaffAttendanceStatus.present,
+      PresenceStatus.present,
     );
 
-    expect(saved().single.status, StaffAttendanceStatus.none);
+    expect(saved().single.status, PresenceStatus.none);
     expect(notice?.kind, StaffAttendanceNoticeKind.cleared);
   });
 

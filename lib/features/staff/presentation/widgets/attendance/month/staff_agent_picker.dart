@@ -4,11 +4,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Choisir l'agent de la fiche mensuelle : une recherche à suggestions
 /// (l'[Autocomplete] du framework — Entrée prend le premier résultat, Échap
@@ -29,7 +29,7 @@ class StaffAgentPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
-      width: AppDimensions.staffSearchMinWidth,
+      width: AppDimensions.searchToolbarMinWidth,
       child: Autocomplete<StaffMember>(
         // Une clé par agent : ouvert depuis le récapitulatif, le champ montre
         // l'agent choisi plutôt que la dernière recherche.
@@ -58,8 +58,8 @@ class StaffAgentPicker extends StatelessWidget {
             color: AppColors.surfaceRaised,
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: AppDimensions.staffAttendancePickerWidth,
-                maxHeight: AppDimensions.staffAttendancePickerMaxHeight,
+                maxWidth: AppDimensions.presenceMarkPickerWidth,
+                maxHeight: AppDimensions.presenceMarkPickerMaxHeight,
               ),
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -70,8 +70,8 @@ class StaffAgentPicker extends StatelessWidget {
                       dense: true,
                       leading: StaffAvatar(
                         member: member,
-                        sync: StaffSyncState.synced,
-                        size: AppDimensions.staffAttendanceIconButtonSize,
+                        sync: RecordSyncState.synced,
+                        size: AppDimensions.presenceMarkIconButtonSize,
                       ),
                       title: Text(member.fullName),
                       subtitle: member.jobTitle == null
@@ -80,7 +80,7 @@ class StaffAgentPicker extends StatelessWidget {
                       trailing: member.id == selected?.id
                           ? const Icon(
                               Icons.check,
-                              color: AppColors.staffAttendancePresentInk,
+                              color: AppColors.presenceMarkPresentInk,
                             )
                           : null,
                       onTap: () => onPick(member),

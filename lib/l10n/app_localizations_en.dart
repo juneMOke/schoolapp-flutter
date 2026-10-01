@@ -11457,13 +11457,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffCategorySupport => 'Support';
 
   @override
-  String get staffViewLabel => 'View';
+  String get collectionViewLabel => 'View';
 
   @override
-  String get staffViewGrid => 'Cards';
+  String get collectionViewGrid => 'Cards';
 
   @override
-  String get staffViewList => 'List';
+  String get collectionViewList => 'List';
 
   @override
   String get staffContractLabel => 'Contract';
@@ -11498,13 +11498,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffNumberPending => 'Staff number pending';
 
   @override
-  String get staffSyncSynced => 'Synced';
+  String get recordSyncSynced => 'Synced';
 
   @override
-  String get staffSyncPending => 'On this tablet';
+  String get recordSyncPending => 'On this tablet';
 
   @override
-  String get staffSyncFailed => 'Not sent';
+  String get recordSyncFailed => 'Not sent';
 
   @override
   String get staffTableAgent => 'Staff member';
@@ -12112,18 +12112,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceTabRecapSubtitle => 'Totals → Payroll';
 
   @override
-  String staffAttendanceBadgeToMark(int count) {
+  String presenceMarkBadgeToMark(int count) {
     return '$count to mark';
   }
 
   @override
-  String get staffAttendanceBadgeValidated => 'Validated';
+  String get presenceMarkBadgeValidated => 'Validated';
 
   @override
-  String get staffAttendanceBadgeToClose => 'To close';
+  String get presenceMarkBadgeToClose => 'To close';
 
   @override
-  String get staffAttendanceBadgeClosed => 'Closed';
+  String get presenceMarkBadgeClosed => 'Closed';
 
   @override
   String get staffAttendanceEyebrowToday => 'Daily register';
@@ -12132,59 +12132,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceEyebrowPast => 'Register — past day';
 
   @override
-  String get staffAttendanceGoToday => 'Today';
+  String get presenceMarkGoToday => 'Today';
 
   @override
-  String get staffAttendancePreviousDay => 'Previous day';
+  String get presenceMarkPreviousDay => 'Previous day';
 
   @override
-  String get staffAttendanceNextDay => 'Next day';
+  String get presenceMarkNextDay => 'Next day';
 
   @override
-  String staffAttendanceSettingsPill(String start, int tolerance) {
+  String presenceMarkSettingsPill(String start, int tolerance) {
     return 'Start $start · tolerance $tolerance min';
   }
 
   @override
-  String staffAttendanceProgress(int marked, int total) {
+  String presenceMarkProgress(int marked, int total) {
     return '$marked / $total';
   }
 
   @override
-  String staffAttendanceOnTablet(int count) {
+  String presenceMarkOnTablet(int count) {
     return '$count on the tablet';
   }
 
   @override
-  String get staffAttendanceMarkRemaining =>
+  String get presenceMarkMarkRemaining =>
       'Mark everyone still to mark as present at the start time';
 
   @override
   String get staffAttendanceValidateReport => 'Validate the report';
 
   @override
-  String get staffAttendanceFilterAll => 'All';
+  String get presenceMarkFilterAll => 'All';
 
   @override
-  String get staffAttendanceFilterPresent => 'Present';
+  String get presenceMarkFilterPresent => 'Present';
 
   @override
-  String get staffAttendanceFilterLate => 'Late';
+  String get presenceMarkFilterLate => 'Late';
 
   @override
-  String get staffAttendanceFilterAbsent => 'Absent';
+  String get presenceMarkFilterAbsent => 'Absent';
 
   @override
-  String get staffAttendanceStatusNone => 'To mark';
+  String get presenceMarkStatusNone => 'To mark';
 
   @override
-  String get staffAttendanceStatusPresent => 'Present';
+  String get presenceMarkStatusPresent => 'Present';
 
   @override
-  String get staffAttendanceStatusLate => 'Late';
+  String get presenceMarkStatusLate => 'Late';
 
   @override
-  String get staffAttendanceStatusAbsent => 'Absent';
+  String get presenceMarkStatusAbsent => 'Absent';
 
   @override
   String get staffAttendanceSearchLabel => 'Search a staff member';
@@ -12194,14 +12194,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Name, middle name, first name, job';
 
   @override
-  String get staffAttendanceLegendGrid => 'Tap a card: Present › Late › Absent';
+  String get presenceMarkLegendGrid => 'Tap a card: Present › Late › Absent';
 
   @override
-  String get staffAttendanceLegendList =>
+  String get presenceMarkLegendList =>
       'Tap a status (tap it again to clear it)';
 
   @override
-  String staffAttendanceToJustify(int count) {
+  String presenceMarkToJustify(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -12212,48 +12212,48 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String staffAttendanceLateDetail(int minutes, String start) {
+  String presenceMarkLateDetail(int minutes, String start) {
     return '+$minutes min after $start';
   }
 
   @override
-  String get staffAttendanceAbsenceJustified => 'Justified absence';
+  String get presenceMarkAbsenceJustified => 'Justified absence';
 
   @override
-  String get staffAttendanceAbsenceUnjustified => 'Unjustified absence';
+  String get presenceMarkAbsenceUnjustified => 'Unjustified absence';
 
   @override
-  String get staffAttendanceOnTime => 'On time';
+  String get presenceMarkOnTime => 'On time';
 
   @override
-  String get staffAttendanceOnTimeShort => 'On time';
+  String get presenceMarkOnTimeShort => 'On time';
 
   @override
-  String get staffAttendanceNotMarked => 'Not marked';
+  String get presenceMarkNotMarked => 'Not marked';
 
   @override
-  String get staffAttendanceDeparture => 'Departure';
+  String get presenceMarkDeparture => 'Departure';
 
   @override
-  String get staffAttendanceArrival => 'Arrival';
+  String get presenceMarkArrival => 'Arrival';
 
   @override
-  String get staffAttendanceJustify => 'Justify';
+  String get presenceMarkJustify => 'Justify';
 
   @override
-  String get staffAttendanceRetry => 'Retry';
+  String get presenceMarkRetry => 'Retry';
 
   @override
-  String get staffAttendanceClearTooltip => 'Clear the status (back to mark)';
+  String get presenceMarkClearTooltip => 'Clear the status (back to mark)';
 
   @override
-  String get staffAttendanceClearHint => 'Tap again to clear the status';
+  String get presenceMarkClearHint => 'Tap again to clear the status';
 
   @override
   String get staffAttendanceHourlyBadge => 'HOURLY';
 
   @override
-  String staffAttendanceHours(int hours) {
+  String presenceMarkHours(int hours) {
     return '$hours h';
   }
 
@@ -12267,7 +12267,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceColAgent => 'Staff member';
 
   @override
-  String get staffAttendanceColStatus => 'Status';
+  String get presenceMarkColStatus => 'Status';
 
   @override
   String get staffAttendanceColTimes => 'Arrival · departure';
@@ -12276,62 +12276,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceColHours => 'Hours';
 
   @override
-  String get staffAttendanceColLate => 'Lateness · justification';
+  String get presenceMarkColLate => 'Lateness · justification';
 
   @override
-  String staffAttendanceTimeArrivalTitle(String name) {
+  String presenceMarkTimeArrivalTitle(String name) {
     return 'Arrival time — $name';
   }
 
   @override
-  String staffAttendanceTimeDepartureTitle(String name) {
+  String presenceMarkTimeDepartureTitle(String name) {
     return 'Departure time — $name';
   }
 
   @override
-  String get staffAttendanceTimeField => 'Time (HH:MM)';
+  String get presenceMarkTimeField => 'Time (HH:MM)';
 
   @override
-  String get staffAttendanceTimeInvalid =>
-      'Enter a time between 00:00 and 23:59.';
+  String get presenceMarkTimeInvalid => 'Enter a time between 00:00 and 23:59.';
 
   @override
-  String get staffAttendanceTimeNow => 'Now';
+  String get presenceMarkTimeNow => 'Now';
 
   @override
-  String get staffAttendanceTimeStart => 'Start of classes';
+  String get presenceMarkTimeStart => 'Start of classes';
 
   @override
-  String staffAttendanceTimePlus(int minutes) {
+  String presenceMarkTimePlus(int minutes) {
     return '+$minutes min';
   }
 
   @override
-  String get staffAttendanceTimeClear => 'Clear the departure';
+  String get presenceMarkTimeClear => 'Clear the departure';
 
   @override
-  String staffAttendancePreviewLate(int minutes, String start, int tolerance) {
+  String presenceMarkPreviewLate(int minutes, String start, int tolerance) {
     return 'Marked late by $minutes min (start $start, tolerance $tolerance min)';
   }
 
   @override
-  String staffAttendancePreviewOnTime(String until) {
+  String presenceMarkPreviewOnTime(String until) {
     return 'Marked present on time (until $until)';
   }
 
   @override
-  String get staffAttendanceCancel => 'Cancel';
+  String get presenceMarkCancel => 'Cancel';
 
   @override
-  String get staffAttendanceSave => 'Save';
+  String get presenceMarkSave => 'Save';
 
   @override
-  String staffAttendanceJustifyTitle(String name) {
+  String presenceMarkJustifyTitle(String name) {
     return 'Justify — $name';
   }
 
   @override
-  String get staffAttendanceReasonLabel => 'Reason';
+  String get presenceMarkReasonLabel => 'Reason';
 
   @override
   String get staffAttendanceReasonIllness => 'Illness';
@@ -12355,36 +12354,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceReasonOther => 'Other';
 
   @override
-  String get staffAttendanceNoteLabel => 'Details';
+  String get presenceMarkNoteLabel => 'Details';
 
   @override
-  String get staffAttendanceNotePlaceholder =>
+  String get presenceMarkNotePlaceholder =>
       'e.g. medical certificate handed in tomorrow';
 
   @override
-  String get staffAttendanceRemoveJustification => 'Remove the justification';
+  String get presenceMarkRemoveJustification => 'Remove the justification';
 
   @override
-  String get staffAttendanceSettingsTitle => 'Attendance settings';
+  String get presenceMarkSettingsTitle => 'Attendance settings';
 
   @override
-  String get staffAttendanceSettingsStart => 'Start of classes';
+  String get presenceMarkSettingsStart => 'Start of classes';
 
   @override
-  String get staffAttendanceSettingsTolerance => 'Tolerance';
+  String get presenceMarkSettingsTolerance => 'Tolerance';
 
   @override
-  String staffAttendanceMinutes(int minutes) {
+  String presenceMarkMinutes(int minutes) {
     return '$minutes min';
   }
 
   @override
-  String staffAttendanceSettingsRule(String until, String start) {
+  String presenceMarkSettingsRule(String until, String start) {
     return 'An arrival after $until is late, counted from $start.';
   }
 
   @override
-  String get staffAttendanceSettingsComing => 'Applies to future marks.';
+  String get presenceMarkSettingsComing => 'Applies to future marks.';
 
   @override
   String get staffAttendanceReportTitle => 'Validate the daily report';
@@ -12401,11 +12400,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceReportUnmarkedReminder =>
+  String get presenceMarkReportUnmarkedReminder =>
       'Otherwise they will be counted present by default when the month is closed.';
 
   @override
-  String staffAttendanceReportUnjustified(int count) {
+  String presenceMarkReportUnjustified(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -12427,17 +12426,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily report validated — marks locked';
 
   @override
-  String staffAttendanceValidatedBy(String name, String when) {
+  String presenceMarkValidatedBy(String name, String when) {
     return 'By $name · $when';
   }
 
   @override
-  String staffAttendanceValidatedCounts(int present, int late, int absent) {
+  String presenceMarkValidatedCounts(int present, int late, int absent) {
     return '$present present, $late late, $absent absent';
   }
 
   @override
-  String get staffAttendanceReopen => 'Reopen';
+  String get presenceMarkReopen => 'Reopen';
 
   @override
   String get staffAttendanceMonthClosedBanner => 'Month closed — marks locked';
@@ -12446,65 +12445,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceAgentPicker => 'Search · First name Last name';
 
   @override
-  String get staffAttendancePreviousMonth => 'Previous month';
+  String get presenceMarkPreviousMonth => 'Previous month';
 
   @override
-  String get staffAttendanceNextMonth => 'Next month';
+  String get presenceMarkNextMonth => 'Next month';
 
   @override
-  String get staffAttendanceCurrentMonth => 'Back to the current month';
+  String get presenceMarkCurrentMonth => 'Back to the current month';
 
   @override
-  String get staffAttendanceKpiPresences => 'Attendance';
+  String get presenceMarkKpiPresences => 'Attendance';
 
   @override
   String get staffAttendanceKpiDaysWorked => 'Days worked';
 
   @override
-  String staffAttendanceKpiRatio(int value, int days) {
+  String presenceMarkKpiRatio(int value, int days) {
     return '$value / $days';
   }
 
   @override
-  String get staffAttendanceKpiLates => 'Late arrivals';
+  String get presenceMarkKpiLates => 'Late arrivals';
 
   @override
-  String staffAttendanceKpiLatesDetail(int minutes, int unjustified) {
+  String presenceMarkKpiLatesDetail(int minutes, int unjustified) {
     return '$minutes min · $unjustified unjustified';
   }
 
   @override
-  String get staffAttendanceKpiAbsences => 'Absences';
+  String get presenceMarkKpiAbsences => 'Absences';
 
   @override
-  String staffAttendanceKpiAbsencesDetail(int justified, int unjustified) {
+  String presenceMarkKpiAbsencesDetail(int justified, int unjustified) {
     return '$justified J · $unjustified U';
   }
 
   @override
-  String get staffAttendanceKpiNotMarked => 'Not marked';
+  String get presenceMarkKpiNotMarked => 'Not marked';
 
   @override
   String get staffAttendanceKpiHours => 'Hours worked';
 
   @override
-  String get staffAttendanceIncidentsTitle =>
+  String get presenceMarkIncidentsTitle =>
       'Late arrivals and absences this month';
 
   @override
-  String get staffAttendanceNoIncidents =>
+  String get presenceMarkNoIncidents =>
       'No late arrival or absence this month.';
 
   @override
-  String get staffAttendanceUnjustified => 'Unjustified';
+  String get presenceMarkUnjustified => 'Unjustified';
 
   @override
-  String staffAttendanceHolidayTitle(String month) {
+  String presenceMarkHolidayTitle(String month) {
     return 'Holidays — $month';
   }
 
   @override
-  String get staffAttendanceHolidayMessage => 'No school day this month.';
+  String get presenceMarkHolidayMessage => 'No school day this month.';
 
   @override
   String get staffAttendanceRecapColContract => 'Contract';
@@ -12516,19 +12515,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffAttendanceRecapColSync => 'Sync';
 
   @override
-  String get staffAttendanceTotalRate => 'Attendance rate';
+  String get presenceMarkTotalRate => 'Attendance rate';
 
   @override
   String get staffAttendanceTotalHours => 'Hourly work';
 
   @override
-  String get staffAttendanceTotalLateMinutes => 'Minutes late';
+  String get presenceMarkTotalLateMinutes => 'Minutes late';
 
   @override
-  String get staffAttendanceTotalUnjustified => 'Unjustified absences';
+  String get presenceMarkTotalUnjustified => 'Unjustified absences';
 
   @override
-  String get staffAttendanceTotalNotMarked => 'Days not marked';
+  String get presenceMarkTotalNotMarked => 'Days not marked';
 
   @override
   String get staffAttendanceRecapLegend =>
@@ -12563,7 +12562,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceCloseIrreversible =>
+  String get presenceMarkCloseIrreversible =>
       'Closing locks the month: it cannot be reopened from the tablet.';
 
   @override
@@ -12584,10 +12583,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No staff member in this filter';
 
   @override
-  String get staffAttendanceAllMarked => 'Everyone is marked';
+  String get presenceMarkAllMarked => 'Everyone is marked';
 
   @override
-  String get staffAttendanceShowAll => 'Show all';
+  String get presenceMarkShowAll => 'Show all';
 
   @override
   String get staffAttendanceRecapEmptyFilter => 'No staff member found';
@@ -12604,17 +12603,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String staffAttendanceToastCleared(String name) {
+  String presenceMarkToastCleared(String name) {
     return '$name back to mark';
   }
 
   @override
-  String staffAttendanceToastJustified(String name) {
+  String presenceMarkToastJustified(String name) {
     return 'Justification saved — $name';
   }
 
   @override
-  String staffAttendanceToastJustificationRemoved(String name) {
+  String presenceMarkToastJustificationRemoved(String name) {
     return 'Justification removed — $name';
   }
 
@@ -12642,7 +12641,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceToastWriteFailed =>
+  String get presenceMarkToastWriteFailed =>
       'The mark could not be saved on the tablet.';
 
   @override
@@ -12664,18 +12663,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.';
 
   @override
-  String staffAttendanceHoursMinutes(int hours, String minutes) {
+  String presenceMarkHoursMinutes(int hours, String minutes) {
     return '$hours h $minutes';
   }
 
   @override
-  String get staffAttendanceReasonRequired => 'Reason *';
+  String get presenceMarkReasonRequired => 'Reason *';
 
   @override
-  String get staffAttendanceDismiss => 'Close';
+  String get presenceMarkDismiss => 'Close';
 
   @override
-  String staffAttendanceStartTooLate(String latest) {
+  String presenceMarkStartTooLate(String latest) {
     return 'Classes start at $latest at the latest.';
   }
 

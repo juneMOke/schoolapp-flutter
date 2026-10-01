@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requ
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les réglages de paie d'une école (`ref_payroll_settings`) : semés par le
 /// socle, modifiables sur la tablette (dernier écrit gagne).
@@ -38,7 +39,7 @@ class PayrollSettingsDao {
     if (seed == null) return PayrollSettings.defaults;
     return toEntity(
       seed,
-      syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
+      syncState: RecordSyncState.fromDb(row['sync_status'] as String?),
     );
   }
 
@@ -60,7 +61,7 @@ class PayrollSettingsDao {
     }
     await PayrollStore.upsert(txn, table, _key(schoolId), {
       ..._columns(seed),
-      'sync_status': StaffSyncState.synced.dbValue,
+      'sync_status': RecordSyncState.synced.dbValue,
       'sync_error': null,
       'sync_error_code': null,
       'updated_at': nowMs,
@@ -132,7 +133,7 @@ class PayrollSettingsDao {
 
   static PayrollSettings toEntity(
     PayrollSettingsSeed seed, {
-    StaffSyncState syncState = StaffSyncState.synced,
+    RecordSyncState syncState = RecordSyncState.synced,
   }) => PayrollSettings(
     monthlyHoursDivisor: seed.monthlyHoursDivisor,
     overtimeMultiplierPermille: seed.overtimeMultiplierPermille,

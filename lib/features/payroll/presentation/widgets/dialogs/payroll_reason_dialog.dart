@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Un geste qui exige un motif : renvoyer, rouvrir, annuler un versement ou
@@ -29,7 +29,7 @@ class PayrollReasonDialog extends StatefulWidget {
     required String confirmLabel,
     String? hint,
     bool destructive = false,
-  }) => StaffDialog.show<String>(
+  }) => EteeloFormDialog.show<String>(
     context,
     PayrollReasonDialog(
       title: title,
@@ -66,7 +66,7 @@ class _PayrollReasonDialogState extends State<PayrollReasonDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hint = widget.hint;
-    return StaffDialog(
+    return EteeloFormDialog(
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

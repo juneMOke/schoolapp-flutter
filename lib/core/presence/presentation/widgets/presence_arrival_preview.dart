@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_rules.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'encart qui dit, avant d'enregistrer, comment une arrivée sera classée.
-class StaffArrivalPreview extends StatelessWidget {
-  final StaffArrivalClass result;
-  final StaffAttendanceSettings settings;
+class PresenceArrivalPreview extends StatelessWidget {
+  final ArrivalClass result;
+  final PresenceSchedule schedule;
 
-  const StaffArrivalPreview({
+  const PresenceArrivalPreview({
     super.key,
     required this.result,
-    required this.settings,
+    required this.schedule,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(result.status);
-    final late = result.status == StaffAttendanceStatus.late;
+    final tone = PresenceTone.of(result.status);
+    final late = result.status == PresenceStatus.late;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -38,12 +38,12 @@ class StaffArrivalPreview extends StatelessWidget {
           Expanded(
             child: Text(
               late
-                  ? l10n.staffAttendancePreviewLate(
+                  ? l10n.presenceMarkPreviewLate(
                       result.lateMinutes,
-                      settings.start.wire,
-                      settings.toleranceMinutes,
+                      schedule.start.wire,
+                      schedule.toleranceMinutes,
                     )
-                  : l10n.staffAttendancePreviewOnTime(settings.lastOnTime.wire),
+                  : l10n.presenceMarkPreviewOnTime(schedule.lastOnTime.wire),
               style: AppTypography.bodyMedium.copyWith(color: tone.ink),
             ),
           ),

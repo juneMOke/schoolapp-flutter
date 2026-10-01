@@ -5,15 +5,15 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_agent_heading.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_actions.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_controls.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// La carte d'un agent dans la grille du registre. **Toute** la carte fait
 /// avancer le cycle (présent › en retard › absent) ; les boutons du pied ont
@@ -33,16 +33,16 @@ class StaffAttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(row.status);
+    final tone = PresenceTone.of(row.status);
     final actions = StaffRowActions(context, row, frozen: frozen);
-    final unmarked = row.status == StaffAttendanceStatus.none;
+    final unmarked = row.status == PresenceStatus.none;
     return Material(
       color: AppColors.surfaceRaised,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.brLg,
         side: BorderSide(
           color: unmarked ? tone.border : tone.color,
-          width: AppDimensions.staffAttendanceBorderWidth,
+          width: AppDimensions.presenceMarkBorderWidth,
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -84,7 +84,7 @@ class _StatusBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = StaffAttendanceTone.of(row.status);
+    final tone = PresenceTone.of(row.status);
     return Row(
       children: [
         AnimatedContainer(
@@ -94,13 +94,13 @@ class _StatusBlock extends StatelessWidget {
               ? Duration.zero
               : AppMotion.pop,
           curve: AppMotion.outCurve,
-          width: AppDimensions.staffAttendanceMedallionSize,
-          height: AppDimensions.staffAttendanceMedallionSize,
+          width: AppDimensions.presenceMarkMedallionSize,
+          height: AppDimensions.presenceMarkMedallionSize,
           decoration: BoxDecoration(color: tone.color, shape: BoxShape.circle),
           child: Icon(
             tone.icon,
             color: AppColors.textOnDark,
-            size: AppDimensions.staffAttendanceMedallionIconSize,
+            size: AppDimensions.presenceMarkMedallionIconSize,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -109,7 +109,7 @@ class _StatusBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                StaffAttendanceLabels.status(l10n, row.status),
+                PresenceLabels.status(l10n, row.status),
                 style: AppTypography.titleMedium.copyWith(color: tone.ink),
               ),
               Text(
@@ -144,12 +144,12 @@ class _Footer extends StatelessWidget {
       children: [
         if (status.hasArrival) ...[
           StaffTimeButton(
-            label: l10n.staffAttendanceArrival,
+            label: l10n.presenceMarkArrival,
             time: record?.arrival,
             onTap: actions.editArrival,
           ),
           StaffTimeButton(
-            label: l10n.staffAttendanceDeparture,
+            label: l10n.presenceMarkDeparture,
             time: record?.departure,
             onTap: actions.editDeparture,
           ),
@@ -166,7 +166,7 @@ class _Footer extends StatelessWidget {
         if (status.isMarked)
           StaffSquareIconButton(
             icon: Icons.rotate_left,
-            tooltip: l10n.staffAttendanceClearTooltip,
+            tooltip: l10n.presenceMarkClearTooltip,
             onPressed: actions.clear,
           ),
       ],

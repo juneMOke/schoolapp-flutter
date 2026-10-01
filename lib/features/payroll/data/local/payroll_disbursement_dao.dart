@@ -10,8 +10,8 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellati
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_disbursement_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les versements de salaire (`payroll_disbursements`) : des faits. Un
 /// versement refusé n'est **jamais effacé** — l'argent est parti ; il reste
@@ -90,12 +90,12 @@ class PayrollDisbursementDao {
       table,
       {
         'validation_gesture_id': request.disbursement.validationGestureId,
-        'sync_status': StaffSyncState.pending.dbValue,
+        'sync_status': RecordSyncState.pending.dbValue,
         'sync_error': null,
         'sync_error_code': null,
       },
       where: 'id = ? AND sync_status = ? AND cancellation_id IS NULL',
-      whereArgs: [request.disbursement.id, StaffSyncState.failed.dbValue],
+      whereArgs: [request.disbursement.id, RecordSyncState.failed.dbValue],
     );
     if (updated != 1) return false;
     await PayrollStore.enqueue(
@@ -169,7 +169,7 @@ class PayrollDisbursementDao {
               reason: item.cancellationReason,
             ),
             'server_updated_at': item.serverUpdatedAt,
-            'sync_status': StaffSyncState.synced.dbValue,
+            'sync_status': RecordSyncState.synced.dbValue,
             'sync_error': null,
             'sync_error_code': null,
           },
@@ -181,7 +181,7 @@ class PayrollDisbursementDao {
 
   Future<void> mark(
     String id,
-    StaffSyncState state, {
+    RecordSyncState state, {
     String? code,
     String? reason,
   }) => _store.mark(table, {'id': id}, state, code: code, reason: reason);
@@ -192,16 +192,16 @@ class PayrollDisbursementDao {
   Future<bool> hasLive(String month, String staffMemberId) async {
     final rows = await _store.db.rawQuery(
       'SELECT 1 FROM $table WHERE month = ? AND staff_member_id = ? '
-      "AND sync_status != '${StaffSyncState.failed.dbValue}' "
+      "AND sync_status != '${RecordSyncState.failed.dbValue}' "
       'AND (cancellation_id IS NULL '
-      "OR cancellation_status = '${StaffSyncState.failed.dbValue}') "
+      "OR cancellation_status = '${RecordSyncState.failed.dbValue}') "
       'AND cancelled_at IS NULL LIMIT 1',
       [month, staffMemberId],
     );
     return rows.isNotEmpty;
   }
 
-  Future<StaffSyncState?> stateOf(String id) async {
+  Future<RecordSyncState?> stateOf(String id) async {
     final rows = await _store.db.query(
       table,
       columns: ['sync_status'],
@@ -210,7 +210,7 @@ class PayrollDisbursementDao {
     );
     return rows.isEmpty
         ? null
-        : StaffSyncState.fromDb(rows.single['sync_status'] as String?);
+        : RecordSyncState.fromDb(rows.single['sync_status'] as String?);
   }
 
   Future<List<PayrollDisbursement>> forSchool(String schoolId) async {

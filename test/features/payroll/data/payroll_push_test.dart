@@ -19,7 +19,6 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_fact_outbo
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_gesture_outbox_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_sync_api.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_lww_outbox_handlers.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
@@ -28,6 +27,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
 import '../../staff/staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockApi extends Mock implements PayrollSyncApi {}
 
@@ -263,7 +263,7 @@ void main() {
         expect(requeued, 1);
         final disbursement = (await disbursements.forSchool(_school)).single;
         expect(disbursement.validationGestureId, 'g-v2');
-        expect(disbursement.syncState, StaffSyncState.pending);
+        expect(disbursement.syncState, RecordSyncState.pending);
         final queued = await entry(PayrollDisbursementDao.entryId('d-1'));
         expect(queued.payload, contains('"validationGestureId":"g-v2"'));
       },
@@ -271,7 +271,7 @@ void main() {
 
     test('annuler un versement refusé se clôt sans rien envoyer', () async {
       await disbursements.add(request(), schoolId: _school, nowMs: 10);
-      await disbursements.mark('d-1', StaffSyncState.failed, code: 'X');
+      await disbursements.mark('d-1', RecordSyncState.failed, code: 'X');
       await disbursements.cancel(
         const PayrollCancellationRequestDto(
           clientRecordedAt: '2026-10-29T08:00:00Z',
@@ -480,7 +480,7 @@ void main() {
       final variables = (await PayrollVariablesDao(
         db,
       ).forSchool(_school))['2026-10']!['m-1']!;
-      expect(variables.syncState, StaffSyncState.failed);
+      expect(variables.syncState, RecordSyncState.failed);
       verifyNever(() => api.submitVariables(any(), any()));
     });
 
@@ -512,7 +512,7 @@ void main() {
         db,
       ).forSchool(_school))['2026-10']!['m-1']!;
       expect(variables.overtimeMinutes, 30);
-      expect(variables.syncState, StaffSyncState.synced);
+      expect(variables.syncState, RecordSyncState.synced);
     });
 
     test('l annulation part sous la forme FactCancellationRequest', () {

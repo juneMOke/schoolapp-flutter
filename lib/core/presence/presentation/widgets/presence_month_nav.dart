@@ -3,12 +3,12 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// ‹ septembre 2026 › — partagé par la fiche mensuelle et le récapitulatif ;
 /// jamais au-delà du mois en cours.
-class StaffMonthNav extends StatelessWidget {
+class PresenceMonthNav extends StatelessWidget {
   /// `YYYY-MM`.
   final String month;
   final bool isCurrent;
@@ -18,7 +18,7 @@ class StaffMonthNav extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onCurrent;
 
-  const StaffMonthNav({
+  const PresenceMonthNav({
     super.key,
     required this.month,
     required this.isCurrent,
@@ -32,7 +32,7 @@ class StaffMonthNav extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Widget arrow(IconData icon, String tooltip, VoidCallback? onPressed) =>
         SizedBox.square(
-          dimension: AppDimensions.staffAttendanceTapTarget,
+          dimension: AppDimensions.presenceMarkTapTarget,
           child: IconButton(
             tooltip: tooltip,
             onPressed: onPressed,
@@ -48,24 +48,24 @@ class StaffMonthNav extends StatelessWidget {
       children: [
         arrow(
           Icons.chevron_left,
-          l10n.staffAttendancePreviousMonth,
+          l10n.presenceMarkPreviousMonth,
           onPrevious,
         ),
         Text(
-          StaffAttendanceLabels.month(MaterialLocalizations.of(context), month),
+          PresenceLabels.month(MaterialLocalizations.of(context), month),
           style: AppTypography.titleMedium.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         arrow(
           Icons.chevron_right,
-          l10n.staffAttendanceNextMonth,
+          l10n.presenceMarkNextMonth,
           isCurrent ? null : onNext,
         ),
         if (!isCurrent)
           TextButton(
             onPressed: onCurrent,
-            child: Text(l10n.staffAttendanceCurrentMonth),
+            child: Text(l10n.presenceMarkCurrentMonth),
           ),
       ],
     );

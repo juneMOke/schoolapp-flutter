@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_field_messages.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_step_style.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_form_block.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_synced_text_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -58,7 +58,7 @@ class StaffDiplomasStep extends StatelessWidget {
       icon: Icons.school_outlined,
       color: StaffStepStyle.of(3).color,
       children: [
-        if (error != null) StaffNotice.error(error),
+        if (error != null) EteeloNotice.error(error),
         if (rows.isEmpty)
           Text(
             l10n.staffDiplomasNone,

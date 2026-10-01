@@ -6,11 +6,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// L'enveloppe commune des modales RH — Pointage (heure, justification,
-/// réglages, rapport, clôture) et Paie : un surtitre, un titre, un corps
-/// défilant et des actions ancrées. Toutes ont une saisie ou une case : elles passent par
+/// L'enveloppe commune des modales de saisie courtes — Pointage, appel des
+/// élèves, Paie : un surtitre, un titre, un corps défilant et des actions
+/// ancrées. Toutes ont une saisie ou une case : elles passent par
 /// [EteeloDialogBody], qui tient au clavier ouvert en paysage.
-class StaffDialog extends StatelessWidget {
+class EteeloFormDialog extends StatelessWidget {
   final String? eyebrow;
   final String title;
   final Widget body;
@@ -19,7 +19,7 @@ class StaffDialog extends StatelessWidget {
   /// Action placée à gauche, séparée des autres (retirer, effacer).
   final Widget? leading;
 
-  const StaffDialog({
+  const EteeloFormDialog({
     super.key,
     required this.title,
     required this.body,
@@ -41,13 +41,13 @@ class StaffDialog extends StatelessWidget {
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          maxWidth: AppDimensions.staffAttendanceDialogMaxWidth,
-          maxHeight: AppDimensions.staffAttendanceDialogMaxHeight,
+          maxWidth: AppDimensions.formDialogMaxWidth,
+          maxHeight: AppDimensions.formDialogMaxHeight,
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: EteeloDialogBody(
-            minPinnedHeight: AppDimensions.staffAttendanceDialogMaxHeight / 2,
+            minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
             header: Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.lg),
               child: Column(

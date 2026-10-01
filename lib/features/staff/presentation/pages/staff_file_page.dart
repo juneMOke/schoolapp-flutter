@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_vie
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filters_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/grid/staff_agent_grid.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/list/staff_agent_table.dart';
@@ -87,7 +87,7 @@ class StaffFileScreen extends StatelessWidget {
 
     final notSynced = state.snapshot.hasEverSynced
         ? null
-        : StaffNotice.warning(
+        : EteeloNotice.warning(
             AppLocalizations.of(context)!.staffFileNotYetSynced,
           );
     if (view.isFileEmpty) {
@@ -141,7 +141,7 @@ class StaffFileScreen extends StatelessWidget {
                 ? null
                 : () => unawaited(open(prefill: state.query.text)),
           )
-        else if (state.viewMode == StaffViewMode.grid)
+        else if (state.viewMode == CollectionViewMode.grid)
           StaffAgentGrid(
             rows: view.rows,
             onOpen: (row) => unawaited(open(row: row)),

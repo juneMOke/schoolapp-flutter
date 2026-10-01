@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 
 /// Un compteur dans la teinte d'un statut : le résumé du rapport journalier,
 /// et les indicateurs de la fiche mensuelle.
-class StaffCountTile extends StatelessWidget {
-  final StaffAttendanceStatus tone;
+class PresenceCountTile extends StatelessWidget {
+  final PresenceStatus tone;
   final String label;
   final String value;
   final String? detail;
 
-  const StaffCountTile({
+  const PresenceCountTile({
     super.key,
     required this.tone,
     required this.label,
@@ -23,7 +23,7 @@ class StaffCountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = StaffAttendanceTone.of(tone);
+    final colors = PresenceTone.of(tone);
     final detail = this.detail;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),

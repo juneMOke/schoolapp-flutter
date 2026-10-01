@@ -4,7 +4,7 @@
 ///
 /// Jours ouvrés : lundi → vendredi, bornés par l'année scolaire. Jours fériés
 /// et samedis ne sont pas connus (dette commune avec le serveur).
-abstract final class StaffWorkCalendar {
+abstract final class SchoolDayCalendar {
   /// `YYYY-MM-DD` d'un instant, dans le fuseau de la tablette.
   static String dayOf(DateTime moment) => _format(moment.toLocal());
 
@@ -43,7 +43,7 @@ abstract final class StaffWorkCalendar {
   static List<String> workDaysOf(
     String month, {
     required String today,
-    StaffSchoolYear? year,
+    SchoolYearBounds? year,
   }) => [
     for (final day in daysOf(month))
       if (isWeekday(day) &&
@@ -73,11 +73,11 @@ abstract final class StaffWorkCalendar {
 
 /// Les bornes de l'année scolaire courante, `YYYY-MM-DD`. Une borne inconnue
 /// n'exclut rien.
-class StaffSchoolYear {
+class SchoolYearBounds {
   final String? start;
   final String? end;
 
-  const StaffSchoolYear({this.start, this.end});
+  const SchoolYearBounds({this.start, this.end});
 
   bool contains(String day) =>
       (start == null || day.compareTo(start!) >= 0) &&

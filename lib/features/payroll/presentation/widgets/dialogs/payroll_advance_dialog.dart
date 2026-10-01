@@ -17,7 +17,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_advance_preview.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Accorder une avance : l'agent, le montant dans la devise de son contrat,
@@ -36,7 +36,7 @@ class PayrollAdvanceDialog extends StatefulWidget {
   static Future<SalaryAdvanceDraft?> show(
     BuildContext context,
     PayrollAdvanceDialog dialog,
-  ) => StaffDialog.show<SalaryAdvanceDraft>(context, dialog);
+  ) => EteeloFormDialog.show<SalaryAdvanceDraft>(context, dialog);
 
   @override
   State<PayrollAdvanceDialog> createState() => _PayrollAdvanceDialogState();
@@ -131,7 +131,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
             null)
           member,
     ];
-    return StaffDialog(
+    return EteeloFormDialog(
       title: l10n.payrollAdvanceTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

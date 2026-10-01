@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une période de contrat **avec** ses montants — lisible seulement sous
 /// `hr.pay.read`. Fait figé : jamais réécrite ; une période fausse est
@@ -33,7 +34,7 @@ class StaffContract extends Equatable {
   /// Une correction de cette période est écrite sur la tablette et pas encore
   /// accusée.
   final bool correctionPending;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
 
   /// Pourquoi le serveur a refusé la pose, ou la dernière correction.
   final String? syncError;

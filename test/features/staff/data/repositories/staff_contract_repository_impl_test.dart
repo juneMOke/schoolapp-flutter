@@ -22,6 +22,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 const _draft = StaffContractDraft(
   kind: StaffContractKind.vacataire,
@@ -79,7 +80,7 @@ void main() {
     final posed = (await contracts()).single;
     expect(posed.amount!.amountInCents, 550);
     expect(posed.payMode, StaffPayMode.hourly);
-    expect(posed.syncState, StaffSyncState.pending);
+    expect(posed.syncState, RecordSyncState.pending);
     expect(await OutboxDao(db).pendingAll(), hasLength(1));
 
     final member = (await file.findMember(

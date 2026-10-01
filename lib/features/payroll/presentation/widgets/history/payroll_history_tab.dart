@@ -62,8 +62,8 @@ class PayrollHistoryTab extends StatelessWidget {
             EteeloKpiCardData(
               label: l10n.payrollHistoryPaid,
               valueLines: paid,
-              accent: AppColors.staffAttendancePresentInk,
-              accentSoft: AppColors.staffAttendancePresentSoft,
+              accent: AppColors.presenceMarkPresentInk,
+              accentSoft: AppColors.presenceMarkPresentSoft,
               icon: Icons.payments_outlined,
             ),
             EteeloKpiCardData(
@@ -164,7 +164,7 @@ class PayrollHistoryTab extends StatelessWidget {
               Text(
                 l10n.payrollHistoryRemaining(remaining.join(' · ')),
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.staffAttendanceLateInk,
+                  color: AppColors.presenceMarkLateInk,
                 ),
               ),
           ],

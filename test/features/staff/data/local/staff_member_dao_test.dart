@@ -6,6 +6,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 void main() {
   late Database db;
@@ -49,7 +50,7 @@ void main() {
       expect(member.sex, StaffSex.male);
       expect(member.diplomas.single.title, 'Licence en mathématiques');
       expect(member.contracts.single.isHourlyVacataire, isTrue);
-      expect(member.syncState, StaffSyncState.synced);
+      expect(member.syncState, RecordSyncState.synced);
     },
   );
 
@@ -133,7 +134,7 @@ void main() {
     expect(member.firstName, 'Saisi-sur-la-tablette');
     expect(member.staffNumber, 'CF-AG-0048');
     expect(member.contracts.single.kind, StaffContractKind.permanent);
-    expect(member.syncState, StaffSyncState.pending);
+    expect(member.syncState, RecordSyncState.pending);
   });
 
   test('sans école, rien ne s écrit', () async {

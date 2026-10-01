@@ -4,15 +4,16 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
 export 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_row_buttons.dart';
 
@@ -28,16 +29,16 @@ String staffStatusDetail(
 ) {
   final record = row.record;
   return switch (row.status) {
-    StaffAttendanceStatus.none => l10n.staffAttendanceNotMarked,
-    StaffAttendanceStatus.present => l10n.staffAttendanceOnTime,
-    StaffAttendanceStatus.late => l10n.staffAttendanceLateDetail(
+    PresenceStatus.none => l10n.presenceMarkNotMarked,
+    PresenceStatus.present => l10n.presenceMarkOnTime,
+    PresenceStatus.late => l10n.presenceMarkLateDetail(
       record!.lateMinutes,
       settings.start.wire,
     ),
-    StaffAttendanceStatus.absent =>
+    PresenceStatus.absent =>
       record!.isJustified
-          ? l10n.staffAttendanceAbsenceJustified
-          : l10n.staffAttendanceAbsenceUnjustified,
+          ? l10n.presenceMarkAbsenceJustified
+          : l10n.presenceMarkAbsenceUnjustified,
   };
 }
 
@@ -45,7 +46,7 @@ String staffStatusDetail(
 /// sinon. Toucher ouvre la saisie.
 class StaffTimeButton extends StatelessWidget {
   final String label;
-  final StaffClockTime? time;
+  final ClockTime? time;
   final VoidCallback onTap;
 
   const StaffTimeButton({
@@ -66,7 +67,7 @@ class StaffTimeButton extends StatelessWidget {
         borderRadius: AppRadius.brSm,
         child: Container(
           constraints: const BoxConstraints(
-            minHeight: AppDimensions.staffAttendanceIconButtonSize,
+            minHeight: AppDimensions.presenceMarkIconButtonSize,
           ),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           decoration: BoxDecoration(
@@ -117,7 +118,7 @@ class StaffHoursStepper extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Text(
-            StaffAttendanceLabels.hours(l10n, value),
+            PresenceLabels.hours(l10n, value),
             style: AppTypography.labelLarge,
           ),
         ),
@@ -160,15 +161,15 @@ class StaffJustifyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final justification = record.justification;
-    final tone = StaffAttendanceTone.of(
-      justification == null ? record.status : StaffAttendanceStatus.present,
+    final tone = PresenceTone.of(
+      justification == null ? record.status : PresenceStatus.present,
     );
     return InkWell(
       onTap: onTap,
       borderRadius: AppRadius.brPill,
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: AppDimensions.staffAttendanceIconButtonSize,
+          minHeight: AppDimensions.presenceMarkIconButtonSize,
         ),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: BoxDecoration(
@@ -188,7 +189,7 @@ class StaffJustifyButton extends StatelessWidget {
             Flexible(
               child: Text(
                 justification == null
-                    ? l10n.staffAttendanceJustify
+                    ? l10n.presenceMarkJustify
                     : StaffAttendanceLabels.reason(l10n, justification.reason),
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.labelMedium.copyWith(color: tone.ink),

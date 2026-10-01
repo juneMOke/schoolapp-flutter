@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_count_tile.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Ce que rend la modale du rapport : valider, en marquant ou non les agents
 /// encore « à pointer ».
@@ -43,16 +43,16 @@ class _StaffDayReportDialogState extends State<StaffDayReportDialog> {
     // Seuls ceux qu'un contrat couvre ce jour-là sont marqués d'office.
     final unmarked = register.unmarked.length;
     final present =
-        register.count(StaffAttendanceStatus.present) +
+        register.count(PresenceStatus.present) +
         (_markRemaining ? unmarked : 0);
-    Widget tile(StaffAttendanceStatus status, int value) => Expanded(
-      child: StaffCountTile(
+    Widget tile(PresenceStatus status, int value) => Expanded(
+      child: PresenceCountTile(
         tone: status,
-        label: StaffAttendanceLabels.filter(l10n, status),
+        label: PresenceLabels.filter(l10n, status),
         value: '$value',
       ),
     );
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: widget.dayLabel,
       title: l10n.staffAttendanceReportTitle,
       body: Column(
@@ -61,16 +61,13 @@ class _StaffDayReportDialogState extends State<StaffDayReportDialog> {
         children: [
           Row(
             children: [
-              tile(StaffAttendanceStatus.present, present),
+              tile(PresenceStatus.present, present),
+              const SizedBox(width: AppSpacing.sm),
+              tile(PresenceStatus.late, register.count(PresenceStatus.late)),
               const SizedBox(width: AppSpacing.sm),
               tile(
-                StaffAttendanceStatus.late,
-                register.count(StaffAttendanceStatus.late),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              tile(
-                StaffAttendanceStatus.absent,
-                register.count(StaffAttendanceStatus.absent),
+                PresenceStatus.absent,
+                register.count(PresenceStatus.absent),
               ),
             ],
           ),
@@ -85,29 +82,27 @@ class _StaffDayReportDialogState extends State<StaffDayReportDialog> {
               title: Text(l10n.staffAttendanceReportMarkRemaining(unmarked)),
               subtitle: _markRemaining
                   ? null
-                  : Text(l10n.staffAttendanceReportUnmarkedReminder),
+                  : Text(l10n.presenceMarkReportUnmarkedReminder),
             ),
           ],
           if (register.toJustify > 0) ...[
             const SizedBox(height: AppSpacing.sm),
-            StaffAttendanceWarning(
+            PresenceWarning(
               icon: Icons.warning_amber_rounded,
-              message: l10n.staffAttendanceReportUnjustified(
-                register.toJustify,
-              ),
+              message: l10n.presenceMarkReportUnjustified(register.toJustify),
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
-          StaffAttendanceWarning(
+          PresenceWarning(
             icon: Icons.lock_outline,
-            tone: StaffAttendanceStatus.none,
+            tone: PresenceStatus.none,
             message: l10n.staffAttendanceReportLock,
           ),
         ],
       ),
       actions: [
         EteeloButton.ghost(
-          label: l10n.staffAttendanceCancel,
+          label: l10n.presenceMarkCancel,
           onPressed: () => Navigator.of(context).pop(),
           fullWidth: false,
         ),

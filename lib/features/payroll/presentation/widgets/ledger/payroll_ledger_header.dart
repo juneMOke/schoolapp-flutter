@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cu
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_circuit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_month_nav.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
 
 /// ‹ octobre 2026 › · statut · circuit — le mois affiché une seule fois,
 /// partagé par le livre et les bulletins.
@@ -33,7 +33,7 @@ class PayrollLedgerHeader extends StatelessWidget {
           spacing: AppSpacing.md,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            StaffMonthNav(
+            PresenceMonthNav(
               month: state.month,
               isCurrent: state.isCurrentMonth,
               onPrevious: state.canStepBack ? () => cubit.stepMonth(-1) : null,

@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_draft_validator.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
@@ -10,6 +9,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_state.dart';
 
 import '../../staff_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockSave extends Mock implements SaveStaffMemberUseCase {}
 
@@ -91,7 +91,7 @@ void main() {
           'new',
           lastName: 'Kalala',
           staffNumber: null,
-          syncState: StaffSyncState.pending,
+          syncState: RecordSyncState.pending,
         ),
       ),
     );
@@ -100,7 +100,7 @@ void main() {
     expect(await cubit.save(), isTrue);
     expect(cubit.state.mode, StaffAgentMode.view);
     expect(cubit.state.justSaved, isTrue);
-    expect(cubit.state.member?.syncState, StaffSyncState.pending);
+    expect(cubit.state.member?.syncState, RecordSyncState.pending);
   });
 
   test('un échec d écriture reste en saisie, sans rien perdre', () async {

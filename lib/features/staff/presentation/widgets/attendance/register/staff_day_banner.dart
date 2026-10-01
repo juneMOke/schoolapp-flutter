@@ -7,12 +7,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_day_progress_ring.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_progress_ring.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Le bandeau du registre : navigation de jour, réglages, progression et
 /// actions (restants présents, valider). Les actions disparaissent une fois
@@ -48,17 +48,17 @@ class StaffDayBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const onBanner = AppColors.staffAttendanceOnBanner;
-    final unmarked = register.count(StaffAttendanceStatus.none);
+    const onBanner = AppColors.presenceMarkOnBanner;
+    final unmarked = register.count(PresenceStatus.none);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: const BoxDecoration(
         borderRadius: AppRadius.brCard,
         gradient: LinearGradient(
           colors: [
-            AppColors.staffAttendanceBannerStart,
-            AppColors.staffAttendanceBannerMid,
-            AppColors.staffAttendanceBannerEnd,
+            AppColors.presenceMarkBannerStart,
+            AppColors.presenceMarkBannerMid,
+            AppColors.presenceMarkBannerEnd,
           ],
         ),
       ),
@@ -73,7 +73,7 @@ class StaffDayBanner extends StatelessWidget {
             children: [
               _NavButton(
                 icon: Icons.chevron_left,
-                tooltip: l10n.staffAttendancePreviousDay,
+                tooltip: l10n.presenceMarkPreviousDay,
                 onPressed: onPrevious,
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -86,11 +86,11 @@ class StaffDayBanner extends StatelessWidget {
                             : l10n.staffAttendanceEyebrowPast)
                         .toUpperCase(),
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.staffAttendanceOnBannerMuted,
+                      color: AppColors.presenceMarkOnBannerMuted,
                     ),
                   ),
                   Text(
-                    StaffAttendanceLabels.longDay(
+                    PresenceLabels.longDay(
                       MaterialLocalizations.of(context),
                       register.day,
                     ),
@@ -103,7 +103,7 @@ class StaffDayBanner extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               _NavButton(
                 icon: Icons.chevron_right,
-                tooltip: l10n.staffAttendanceNextDay,
+                tooltip: l10n.presenceMarkNextDay,
                 onPressed: onNext,
               ),
               if (!isToday) ...[
@@ -111,7 +111,7 @@ class StaffDayBanner extends StatelessWidget {
                 TextButton(
                   onPressed: onToday,
                   style: TextButton.styleFrom(foregroundColor: onBanner),
-                  child: Text(l10n.staffAttendanceGoToday),
+                  child: Text(l10n.presenceMarkGoToday),
                 ),
               ],
             ],
@@ -119,7 +119,7 @@ class StaffDayBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StaffDayProgressRing(
+              PresenceProgressRing(
                 marked: register.marked,
                 total: register.all.length,
               ),
@@ -128,7 +128,7 @@ class StaffDayBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.staffAttendanceProgress(
+                    l10n.presenceMarkProgress(
                       register.marked,
                       register.all.length,
                     ),
@@ -136,12 +136,12 @@ class StaffDayBanner extends StatelessWidget {
                   ),
                   Text(
                     [
-                      l10n.staffAttendanceBadgeToMark(unmarked),
+                      l10n.presenceMarkBadgeToMark(unmarked),
                       if (register.pending > 0)
-                        l10n.staffAttendanceOnTablet(register.pending),
+                        l10n.presenceMarkOnTablet(register.pending),
                     ].join(' · '),
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.staffAttendanceOnBannerMuted,
+                      color: AppColors.presenceMarkOnBannerMuted,
                     ),
                   ),
                 ],
@@ -155,7 +155,7 @@ class StaffDayBanner extends StatelessWidget {
                       const SizedBox(width: AppSpacing.md),
                       _NavButton(
                         icon: Icons.checklist,
-                        tooltip: l10n.staffAttendanceMarkRemaining,
+                        tooltip: l10n.presenceMarkMarkRemaining,
                         onPressed: register.unmarked.isEmpty
                             ? null
                             : onMarkRemaining,
@@ -187,15 +187,15 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: AppDimensions.staffAttendanceTapTarget,
+    dimension: AppDimensions.presenceMarkTapTarget,
     child: IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      color: AppColors.staffAttendanceOnBanner,
-      disabledColor: AppColors.staffAttendanceOnBannerFaint,
+      color: AppColors.presenceMarkOnBanner,
+      disabledColor: AppColors.presenceMarkOnBannerFaint,
       icon: Icon(icon),
       style: IconButton.styleFrom(
-        side: const BorderSide(color: AppColors.staffAttendanceOnBannerMuted),
+        side: const BorderSide(color: AppColors.presenceMarkOnBannerMuted),
       ),
     ),
   );
@@ -218,7 +218,7 @@ class _SettingsPill extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: AppRadius.brPill,
-        border: Border.all(color: AppColors.staffAttendanceOnBannerMuted),
+        border: Border.all(color: AppColors.presenceMarkOnBannerMuted),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -226,16 +226,16 @@ class _SettingsPill extends StatelessWidget {
           const Icon(
             Icons.tune,
             size: AppSpacing.lg,
-            color: AppColors.staffAttendanceOnBanner,
+            color: AppColors.presenceMarkOnBanner,
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
-            AppLocalizations.of(context)!.staffAttendanceSettingsPill(
+            AppLocalizations.of(context)!.presenceMarkSettingsPill(
               settings.start.wire,
               settings.toleranceMinutes,
             ),
             style: AppTypography.labelMedium.copyWith(
-              color: AppColors.staffAttendanceOnBanner,
+              color: AppColors.presenceMarkOnBanner,
             ),
           ),
         ],

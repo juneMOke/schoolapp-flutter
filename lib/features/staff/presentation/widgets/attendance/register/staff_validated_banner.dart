@@ -6,12 +6,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Le rapport du jour validé : qui, quand, combien, où en est l'envoi — et
 /// Rouvrir. Une réouverture refusée laisse le jour validé, pastille en échec :
@@ -33,7 +33,7 @@ class StaffValidatedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final when = StaffAttendanceLabels.moment(
+    final when = PresenceLabels.moment(
       MaterialLocalizations.of(context),
       lock.lockedAt,
     );
@@ -42,9 +42,9 @@ class StaffValidatedBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.staffAttendancePresentSoft,
+        color: AppColors.presenceMarkPresentSoft,
         borderRadius: AppRadius.brLg,
-        border: Border.all(color: AppColors.staffAttendancePresentBorder),
+        border: Border.all(color: AppColors.presenceMarkPresentBorder),
       ),
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
@@ -57,7 +57,7 @@ class StaffValidatedBanner extends StatelessWidget {
             children: [
               const Icon(
                 Icons.verified_outlined,
-                color: AppColors.staffAttendancePresentInk,
+                color: AppColors.presenceMarkPresentInk,
               ),
               const SizedBox(width: AppSpacing.sm),
               Column(
@@ -66,20 +66,20 @@ class StaffValidatedBanner extends StatelessWidget {
                   Text(
                     l10n.staffAttendanceValidatedTitle,
                     style: AppTypography.titleSmall.copyWith(
-                      color: AppColors.staffAttendancePresentInk,
+                      color: AppColors.presenceMarkPresentInk,
                     ),
                   ),
                   Text(
                     [
                       if (by != null && when != null)
-                        l10n.staffAttendanceValidatedBy(by, when)
+                        l10n.presenceMarkValidatedBy(by, when)
                       else
                         ?when,
-                      l10n.staffAttendanceValidatedCounts(
-                        register.count(StaffAttendanceStatus.present) +
-                            register.count(StaffAttendanceStatus.none),
-                        register.count(StaffAttendanceStatus.late),
-                        register.count(StaffAttendanceStatus.absent),
+                      l10n.presenceMarkValidatedCounts(
+                        register.count(PresenceStatus.present) +
+                            register.count(PresenceStatus.none),
+                        register.count(PresenceStatus.late),
+                        register.count(PresenceStatus.absent),
                       ),
                     ].join(' · '),
                     style: AppTypography.bodySmall.copyWith(
@@ -93,14 +93,14 @@ class StaffValidatedBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StaffSyncPill(state: lock.syncState),
+              RecordSyncPill(state: lock.syncState),
               if (onReopen != null)
                 PermissionGate.access(
                   kStaffAttendanceWriteAccess,
                   child: Padding(
                     padding: const EdgeInsets.only(left: AppSpacing.sm),
                     child: EteeloButton.secondary(
-                      label: l10n.staffAttendanceReopen,
+                      label: l10n.presenceMarkReopen,
                       icon: Icons.lock_open,
                       onPressed: onReopen,
                       fullWidth: false,

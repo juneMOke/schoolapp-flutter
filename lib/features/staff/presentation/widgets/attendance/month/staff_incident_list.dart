@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_status_pill.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 
 /// Les retards et absences d'un agent sur le mois : le jour, le statut,
 /// l'heure et les minutes, et la justification (vert) ou « Non justifié »
@@ -22,7 +23,7 @@ class StaffIncidentList extends StatelessWidget {
     final dates = MaterialLocalizations.of(context);
     if (incidents.isEmpty) {
       return Text(
-        l10n.staffAttendanceNoIncidents,
+        l10n.presenceMarkNoIncidents,
         style: AppTypography.bodyMedium.copyWith(color: AppColors.textMutedAa),
       );
     }
@@ -36,18 +37,18 @@ class StaffIncidentList extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    StaffAttendanceLabels.longDay(dates, record.workDate),
+                    PresenceLabels.longDay(dates, record.workDate),
                     style: AppTypography.bodyMedium,
                   ),
                 ),
-                StaffAttendanceStatusPill(status: record.status),
+                PresenceStatusPill(status: record.status),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   flex: 2,
                   child: Text(
-                    record.status == StaffAttendanceStatus.late
+                    record.status == PresenceStatus.late
                         ? '${record.arrival?.wire ?? ''} · '
-                              '+${l10n.staffAttendanceMinutes(record.lateMinutes)}'
+                              '+${l10n.presenceMarkMinutes(record.lateMinutes)}'
                         : '',
                     style: AppTypography.bodySmall,
                   ),
@@ -56,15 +57,15 @@ class StaffIncidentList extends StatelessWidget {
                   flex: 3,
                   child: Text(
                     record.justification == null
-                        ? l10n.staffAttendanceUnjustified
+                        ? l10n.presenceMarkUnjustified
                         : StaffAttendanceLabels.reason(
                             l10n,
                             record.justification!.reason,
                           ),
                     style: AppTypography.labelMedium.copyWith(
                       color: record.isJustified
-                          ? AppColors.staffAttendancePresentInk
-                          : AppColors.staffAttendanceAbsentInk,
+                          ? AppColors.presenceMarkPresentInk
+                          : AppColors.presenceMarkAbsentInk,
                     ),
                   ),
                 ),

@@ -8,8 +8,8 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requ
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les gestes du circuit (`payroll_gestures`) : ceux de la tablette, avec
 /// leur entrée d'outbox, et ceux que le serveur a enregistrés.
@@ -43,7 +43,7 @@ class PayrollGestureDao {
           : jsonEncode(PayrollFingerprintJson.encode(request.expected!)),
       'recorded_at': request.clientRecordedAt,
       'author_name': authorName,
-      'sync_status': StaffSyncState.pending.dbValue,
+      'sync_status': RecordSyncState.pending.dbValue,
       'created_at': nowMs,
     });
     await PayrollStore.enqueue(
@@ -71,7 +71,7 @@ class PayrollGestureDao {
       final updated = await txn.update(
         table,
         {
-          'sync_status': StaffSyncState.synced.dbValue,
+          'sync_status': RecordSyncState.synced.dbValue,
           'sync_error': null,
           'sync_error_code': null,
           'author_name': gesture.by,
@@ -88,7 +88,7 @@ class PayrollGestureDao {
         'reason': gesture.reason,
         'recorded_at': gesture.at,
         'author_name': gesture.by,
-        'sync_status': StaffSyncState.synced.dbValue,
+        'sync_status': RecordSyncState.synced.dbValue,
         'created_at':
             DateTime.tryParse(gesture.at)?.millisecondsSinceEpoch ?? 0,
       });
@@ -97,7 +97,7 @@ class PayrollGestureDao {
 
   Future<void> mark(
     String gestureId,
-    StaffSyncState state, {
+    RecordSyncState state, {
     String? code,
     String? reason,
     PayrollFingerprint? serverState,

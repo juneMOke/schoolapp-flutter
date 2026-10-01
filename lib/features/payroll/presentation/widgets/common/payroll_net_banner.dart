@@ -25,8 +25,8 @@ class PayrollNetBanner extends StatelessWidget {
       borderRadius: AppRadius.brMd,
       gradient: LinearGradient(
         colors: [
-          AppColors.staffAttendanceBannerStart,
-          AppColors.staffAttendanceBannerMid,
+          AppColors.presenceMarkBannerStart,
+          AppColors.presenceMarkBannerMid,
         ],
       ),
     ),
@@ -36,14 +36,14 @@ class PayrollNetBanner extends StatelessWidget {
           child: Text(
             label,
             style: AppTypography.labelLarge.copyWith(
-              color: AppColors.staffAttendanceOnBannerMuted,
+              color: AppColors.presenceMarkOnBannerMuted,
             ),
           ),
         ),
         Text(
           amount,
           style: AppTypography.headlineMedium.copyWith(
-            color: AppColors.staffAttendanceOnBanner,
+            color: AppColors.presenceMarkOnBanner,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),

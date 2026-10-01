@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Ce que l'écran liste montre : les lignes filtrées et les compteurs de la
 /// synthèse. Calcul pur, refait à chaque changement de filtre — jamais de
@@ -61,9 +61,9 @@ class StaffFileView extends Equatable {
         sync: StaffFileRow.worstOf(member.syncState, documents),
       );
       all.add(row);
-      if (member.syncState != StaffSyncState.synced) pending++;
+      if (member.syncState != RecordSyncState.synced) pending++;
       pending += documents
-          .where((d) => d.syncState != StaffSyncState.synced)
+          .where((d) => d.syncState != RecordSyncState.synced)
           .length;
     }
     return StaffFileView(

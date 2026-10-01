@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_tabs.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslips_tab.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -72,7 +72,7 @@ class PayrollScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!state.snapshot.hasEverSynced)
-          StaffNotice.warning(
+          EteeloNotice.warning(
             AppLocalizations.of(context)!.payrollNotYetSynced,
           ),
         PayrollTabs(state: state, onSelect: cubit.setTab),

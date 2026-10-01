@@ -1,8 +1,8 @@
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Ce que les accusés des gestes de contrat font aux périodes locales.
 class StaffContractSyncDao {
@@ -21,7 +21,7 @@ class StaffContractSyncDao {
       whereArgs: [contractId],
     );
     return rows.isNotEmpty &&
-        rows.single['sync_status'] == StaffSyncState.synced.dbValue;
+        rows.single['sync_status'] == RecordSyncState.synced.dbValue;
   }
 
   /// Accusé d'une pose : la période devient celle du serveur.
@@ -71,7 +71,7 @@ class StaffContractSyncDao {
   }) => _db.update(
     table,
     {
-      'sync_status': StaffSyncState.failed.dbValue,
+      'sync_status': RecordSyncState.failed.dbValue,
       'sync_error': reason,
       'sync_error_code': code,
       'updated_at': nowMs,
@@ -110,7 +110,7 @@ class StaffContractSyncDao {
       await txn.delete(
         table,
         where: 'id = ? AND sync_status = ?',
-        whereArgs: [replacementId, StaffSyncState.pending.dbValue],
+        whereArgs: [replacementId, RecordSyncState.pending.dbValue],
       );
     }
   });

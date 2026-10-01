@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_fie
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_step_style.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_day_field.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_form_block.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_phone_field.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_synced_text_input.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_identity_lines.dart';
@@ -78,7 +78,7 @@ class StaffIdentityStep extends StatelessWidget {
             ),
             if (state.mode == StaffAgentMode.create &&
                 state.validation.possibleDuplicate)
-              StaffNotice.warning(l10n.staffDuplicateWarning),
+              EteeloNotice.warning(l10n.staffDuplicateWarning),
             StaffFieldRow(
               children: [
                 _SexField(

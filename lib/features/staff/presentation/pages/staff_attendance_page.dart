@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_agent_month_tab.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_recap_tab.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_tab.dart';
@@ -64,7 +64,7 @@ class StaffAttendanceScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!state.snapshot.hasEverSynced)
-          StaffNotice.warning(
+          EteeloNotice.warning(
             AppLocalizations.of(context)!.staffFileNotYetSynced,
           ),
         StaffAttendanceTabs(state: state, onSelect: cubit.setTab),

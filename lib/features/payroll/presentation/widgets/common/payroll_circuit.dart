@@ -43,7 +43,7 @@ class PayrollCircuit extends StatelessWidget {
           if (index > 0)
             Container(
               width: AppDimensions.payrollCircuitLink,
-              height: AppDimensions.staffAttendanceBorderWidth,
+              height: AppDimensions.presenceMarkBorderWidth,
               margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               color: index <= step ? AppColors.vertSavane : AppColors.border,
             ),

@@ -1,21 +1,21 @@
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 
 /// Les mois de paie, `YYYY-MM` : s'ordonnent comme des chaînes.
 abstract final class PayrollMonth {
   static String of(DateTime date) =>
-      StaffWorkCalendar.monthOf(StaffWorkCalendar.dayOf(date));
+      SchoolDayCalendar.monthOf(SchoolDayCalendar.dayOf(date));
 
   static String previous(String month) =>
-      StaffWorkCalendar.addMonths(month, -1);
+      SchoolDayCalendar.addMonths(month, -1);
 
-  static String next(String month) => StaffWorkCalendar.addMonths(month, 1);
+  static String next(String month) => SchoolDayCalendar.addMonths(month, 1);
 
   static String add(String month, int delta) =>
-      StaffWorkCalendar.addMonths(month, delta);
+      SchoolDayCalendar.addMonths(month, delta);
 
-  static String firstDay(String month) => StaffWorkCalendar.firstOf(month);
+  static String firstDay(String month) => SchoolDayCalendar.firstOf(month);
 
-  static String lastDay(String month) => StaffWorkCalendar.daysOf(month).last;
+  static String lastDay(String month) => SchoolDayCalendar.daysOf(month).last;
 
   /// La période `[from, to]` (jours, `to` facultatif) recoupe-t-elle [month] ?
   static bool overlaps(String month, String from, String? to) =>

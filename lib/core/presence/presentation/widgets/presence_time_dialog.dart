@@ -2,61 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_clock_input_formatter.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_arrival_preview.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_rules.dart';
+import 'package:school_app_flutter/core/presence/presentation/clock_input_formatter.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_arrival_preview.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que rend la modale d'heure : une heure, ou l'effacement du départ.
-class StaffTimeChoice {
-  final StaffClockTime? time;
+class PresenceTimeChoice {
+  final ClockTime? time;
 
-  const StaffTimeChoice(this.time);
+  const PresenceTimeChoice(this.time);
 }
 
 /// Un raccourci d'heure : un libellé et l'heure qu'il pose.
-class StaffTimeShortcut {
+class PresenceTimeShortcut {
   final String label;
-  final StaffClockTime time;
+  final ClockTime time;
 
-  const StaffTimeShortcut(this.label, this.time);
+  const PresenceTimeShortcut(this.label, this.time);
 }
 
-/// Saisie de l'heure d'arrivée ou de départ. Pour l'arrivée, [settings]
+/// Saisie de l'heure d'arrivée ou de départ. Pour l'arrivée, [schedule]
 /// donne l'aperçu du classement (présent ou en retard) avant d'enregistrer.
-class StaffTimeDialog extends StatefulWidget {
+class PresenceTimeDialog extends StatefulWidget {
   final String title;
-  final StaffClockTime? initial;
-  final List<StaffTimeShortcut> shortcuts;
+  final ClockTime? initial;
+  final List<PresenceTimeShortcut> shortcuts;
 
   /// Réglages du classement : aperçu seulement pour l'arrivée.
-  final StaffAttendanceSettings? settings;
+  final PresenceSchedule? schedule;
 
   /// Propose « Effacer » (un départ existant).
   final bool canClear;
 
-  const StaffTimeDialog({
+  const PresenceTimeDialog({
     super.key,
     required this.title,
     required this.shortcuts,
     this.initial,
-    this.settings,
+    this.schedule,
     this.canClear = false,
   });
 
   @override
-  State<StaffTimeDialog> createState() => _StaffTimeDialogState();
+  State<PresenceTimeDialog> createState() => _PresenceTimeDialogState();
 }
 
-class _StaffTimeDialogState extends State<StaffTimeDialog> {
+class _PresenceTimeDialogState extends State<PresenceTimeDialog> {
   late final TextEditingController _field = TextEditingController(
     text: widget.initial?.wire ?? '',
   );
 
-  StaffClockTime? get _time => StaffClockTime.tryParse(_field.text);
+  ClockTime? get _time => ClockTime.tryParse(_field.text);
 
   @override
   void dispose() {
@@ -64,14 +64,14 @@ class _StaffTimeDialogState extends State<StaffTimeDialog> {
     super.dispose();
   }
 
-  void _pick(StaffClockTime time) => setState(() => _field.text = time.wire);
+  void _pick(ClockTime time) => setState(() => _field.text = time.wire);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final time = _time;
-    final settings = widget.settings;
-    return StaffDialog(
+    final schedule = widget.schedule;
+    return EteeloFormDialog(
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,15 +79,15 @@ class _StaffTimeDialogState extends State<StaffTimeDialog> {
         children: [
           EteeloTextInput(
             controller: _field,
-            label: l10n.staffAttendanceTimeField,
+            label: l10n.presenceMarkTimeField,
             placeholder: widget.shortcuts.isEmpty
                 ? null
                 : widget.shortcuts.first.time.wire,
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
-            inputFormatters: const [StaffClockInputFormatter()],
+            inputFormatters: const [ClockInputFormatter()],
             errorText: _field.text.length == 5 && time == null
-                ? l10n.staffAttendanceTimeInvalid
+                ? l10n.presenceMarkTimeInvalid
                 : null,
             onChanged: (_) => setState(() {}),
           ),
@@ -104,36 +104,36 @@ class _StaffTimeDialogState extends State<StaffTimeDialog> {
                 ),
             ],
           ),
-          if (settings != null && time != null) ...[
+          if (schedule != null && time != null) ...[
             const SizedBox(height: AppSpacing.lg),
-            StaffArrivalPreview(
-              result: StaffAttendanceRules(settings).classify(time),
-              settings: settings,
+            PresenceArrivalPreview(
+              result: PresenceRules(schedule).classify(time),
+              schedule: schedule,
             ),
           ],
         ],
       ),
       leading: widget.canClear
           ? EteeloButton.ghost(
-              label: l10n.staffAttendanceTimeClear,
+              label: l10n.presenceMarkTimeClear,
               icon: Icons.backspace_outlined,
               onPressed: () =>
-                  Navigator.of(context).pop(const StaffTimeChoice(null)),
+                  Navigator.of(context).pop(const PresenceTimeChoice(null)),
               fullWidth: false,
             )
           : null,
       actions: [
         EteeloButton.ghost(
-          label: l10n.staffAttendanceCancel,
+          label: l10n.presenceMarkCancel,
           onPressed: () => Navigator.of(context).pop(),
           fullWidth: false,
         ),
         EteeloButton.primary(
-          label: l10n.staffAttendanceSave,
+          label: l10n.presenceMarkSave,
           icon: Icons.check,
           onPressed: time == null
               ? null
-              : () => Navigator.of(context).pop(StaffTimeChoice(time)),
+              : () => Navigator.of(context).pop(PresenceTimeChoice(time)),
           fullWidth: false,
         ),
       ],
